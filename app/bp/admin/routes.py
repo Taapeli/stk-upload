@@ -45,7 +45,7 @@ from models import syslog
 @roles_accepted('admin', 'master')
 def admin():
     """ Home page for administrator """    
-    print("-> bp.start.routes.admin")
+    logger.info("-> bp.admin.routes.admin")
     return render_template('/admin/admin.html')
 
 
@@ -57,6 +57,7 @@ def clear_db(opt):
     try:
         updater = DataAdmin(current_user)
         msg =  updater.db_reset(opt) # dbutil.alusta_kanta()
+        logger.info(f"-> bp.admin.routes.admin {opt}")
         return render_template("/admin/talletettu.html", text=msg)
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -69,6 +70,7 @@ def clear_my_db():
     try:
         updater = DataAdmin(current_user)
         msg =  updater.db_reset('my_own') # dbutil.alusta_kanta()
+        logger.info(f"-> bp.admin.routes.clear_my_db")
         return render_template("/admin/talletettu.html", text=msg)
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -91,6 +93,7 @@ def clear_empty_batches():
                 if cnt == 0:
                     flash(_('No empty batches removed'), 'warning')
                 pass
+        logger.info(f"-> bp.admin.routes.clear_empty_batches {cnt}")
         batches = Batch.list_empty_batches()
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -107,6 +110,7 @@ def clear_empty_batches():
 @roles_required('admin')
 def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
+    logger.warning(f"OBSOLETE? -> bp.admin.routes.estimate_dates sel={uid}")
     if uid:
         uids=list(uid)
     else:
@@ -115,7 +119,7 @@ def estimate_dates(uid=None):
     ext = _("estimated lifetime")
     return render_template("/admin/talletettu.html", text=message, info=ext)
 
-# Refnames homa page
+# Refnames home page
 @bp.route('/admin/refnames')
 @login_required
 @roles_required('admin')
@@ -130,6 +134,7 @@ def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
     message = dataupdater.set_person_name_properties(ops=['refname']) or _('Done')
+    logger.info(f"-> bp.admin.routes.set_all_person_refnames {message}")
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 @bp.route('/admin/upload_csv', methods=['POST'])
@@ -141,11 +146,11 @@ def upload_csv():
     try:
         infile = request.files['filenm']
         material = request.form['material']
-        logging.debug("Got a {} file '{}'".format(material, infile.filename))
+        logging.info(f"-> bp.admin.routes.upload_csv sel={material} f='{infile.filename}'")
 
         loadfile.upload_file(infile)
         if 'destroy' in request.form and request.form['destroy'] == 'all':
-            logger.info("*** About deleting all previous Refnames ***")
+            logger.warning("-> bp.admin.routes.upload_csv deleting all previous Refnames")
             datareader.recreate_refnames()
 
     except Exception as e:
@@ -160,6 +165,7 @@ def save_loaded_csv(filename, subj):
     """ Save loaded cvs data to the database """
     pathname = loadfile.fullname(filename)
     dburi = dbutil.get_server_location()
+    logging.info(f"-> bp.admin.routes.save_loaded_csv sel={subj} f='{filename}'")
     try:
         if subj == 'refnames':    # Stores Refname objects
             status = load_refnames(pathname)
@@ -188,6 +194,7 @@ def list_allowed_emails():
     form = AllowedEmailForm()
 #    if request.method == 'POST':
     lista = UserAdmin.get_allowed_emails()
+    logging.info(f"-> bp.admin.routes.list_allowed_emails n={len(lista)}")
     if form.validate_on_submit(): 
 # Register a new email
         UserAdmin.register_allowed_email(form.allowed_email.data,
@@ -212,6 +219,7 @@ def update_allowed_email(email):
 #                 created_at = form.created.data,
 #                 confirmed_at = form.confirmed_at.data) 
         _updated_allowed_email = UserAdmin.update_allowed_email(allowed_email)
+        logging.info(f"-> bp.admin.routes.list_allowed_emails u={email}")
         flash(_("Allowed email updated"))
         return redirect(url_for("admin.update_allowed_email", email=form.email.data))
 
@@ -229,6 +237,7 @@ def update_allowed_email(email):
 @roles_accepted('admin', 'audit', 'master')
 def list_users():
     lista = shareds.user_datastore.get_users()
+    logging.info(f"-> bp.admin.routes.list_users n={len(lista)}")
     return render_template("/admin/list_users.html", users=lista)  
 
 
@@ -252,6 +261,7 @@ def list_all_users():
 
 
     list_users = shareds.user_datastore.get_users()
+    logging.info(f"-> bp.admin.routes.list_all_users n={len(list_users)}")
     return render_template("/admin/list_users_mails.html", 
                            users=list_users, emails=list_emails)  
 
@@ -279,6 +289,7 @@ def update_user(username):
         updated_user = UserAdmin.update_user(user)
         if updated_user.username == current_user.username:
             session['lang'] = form.language.data
+        logging.info(f"-> bp.admin.routes.update_user u={form.email.data}")
         flash(_("User updated"))
         return redirect(url_for("admin.update_user", username=updated_user.username))
 
@@ -305,7 +316,7 @@ def update_user(username):
 def list_uploads(username):
     # List uploads; also from '/audit/list_uploads' page
     upload_list = uploads.list_uploads(username) 
-    logger.info(f"-> bp.admin.routes.list_uploads user={username}")
+    logger.info(f"-> bp.admin.routes.list_uploads u={username}")
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
 
 @bp.route('/admin/list_uploads_all', methods=['POST'])
@@ -318,9 +329,8 @@ def list_uploads_for_users():
     else:
         users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     upload_list = list(uploads.list_uploads_all(users))
-    logger.info(f"-> bp.admin.routes.list_uploads_for_users")
-    return render_template("/admin/uploads.html", uploads=upload_list,  
-                           users=users, num_requested_users=len(requested_users))
+    logger.info(f"-> bp.admin.routes.list_uploads_for_users n={len(upload_list)}")
+    return render_template("/admin/uploads.html", uploads=upload_list, users=users)
 
 @bp.route('/admin/list_uploads_all', methods=['GET'])
 @login_required
@@ -328,7 +338,7 @@ def list_uploads_for_users():
 def list_uploads_all():
     users = shareds.user_datastore.get_users()
     upload_list = list(uploads.list_uploads_all(users))
-    logger.info(f"-> bp.admin.routes.list_uploads_all (no user)")
+    logger.info(f"-> bp.admin.routes.list_uploads_all n={len(upload_list)}")
     return render_template("/admin/uploads.html", uploads=upload_list )
 
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
@@ -336,6 +346,7 @@ def list_uploads_all():
 @roles_accepted('admin', 'audit')
 def start_load_to_neo4j(username,xmlname):
     uploads.initiate_background_load_to_neo4j(username,xmlname)
+    logger.info(f"-> bp.admin.routes.start_load_to_neo4j u={username} f={xmlname}")
     flash(_('Data import from %(i)s to database has been started.', i=xmlname), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 
@@ -360,8 +371,8 @@ def list_threads():
 def xml_download(username,xmlfile):
     xml_folder = uploads.get_upload_folder(username)
     xml_folder = os.path.abspath(xml_folder)
-    logging.info(xml_folder)
-    logging.info(xmlfile)
+    logger.info(f"-> bp.admin.routes.xml_download f={xmlfile}")
+    logging.debug(xml_folder)
     return send_from_directory(directory=xml_folder, filename=xmlfile, 
                                mimetype="application/gzip",
                                as_attachment=True)
@@ -373,9 +384,8 @@ def xml_download(username,xmlfile):
 def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
-    #result_list = Unpickler(open(fname,"rb")).load()
     msg = open(fname, encoding="utf-8").read()
-    #return render_template("/admin/load_result.html", batch_events=result_list)
+    logger.info(f"-> bp.admin.routes.show_upload_log f={xmlfile}")
     return render_template("/admin/load_result.html", msg=msg)
 
 
@@ -385,7 +395,7 @@ def show_upload_log(username,xmlfile):
 def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
-    logger.info(f"-> bp.admin.routes.xml_delete")
+    logger.info(f"-> bp.admin.routes.xml_delete f={xmlfile}")
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------
@@ -400,6 +410,7 @@ def list_gedcoms(users):
 @roles_accepted('admin', 'audit')
 def list_user_gedcoms(user):
     session["gedcom_user"] = user
+    logger.info(f"-> bp.admin.routes.list_user_gedcoms u={user}")
     return gedcom.routes.gedcom_list()
 
 @bp.route('/admin/list_user_gedcom/<user>/<gedcomname>', methods=['GET'])
@@ -407,6 +418,7 @@ def list_user_gedcoms(user):
 @roles_accepted('admin', 'audit')
 def list_user_gedcom(user,gedcomname):
     session["gedcom_user"] = user
+    logger.info(f"-> bp.admin.routes.list_user_gedcom u={user} f={gedcomname}")
     return gedcom.routes.gedcom_info(gedcomname)
 
 @bp.route('/admin/list_gedcoms_for_users', methods=['POST'])
@@ -419,6 +431,7 @@ def list_gedcoms_for_users():
     else:
         users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     gedcom_list = list(list_gedcoms(users))
+    logger.info(f"-> bp.admin.routes.list_gedcoms_for_users n={len(users)}")
     return render_template("/admin/gedcoms.html", gedcom_list=gedcom_list, 
                            num_requested_users=len(requested_users),
                            users=users,
@@ -431,6 +444,7 @@ def list_gedcoms_for_users():
 def send_email():
     requested_users = request.form.getlist('select_user')
     emails = [user.email for user in shareds.user_datastore.get_users() if user.username in requested_users]
+    logger.info(f"-> bp.admin.routes.send_email n={len(requested_users)}")
     return render_template("/admin/message.html", 
                            users=", ".join(requested_users),emails=emails)
     
@@ -441,6 +455,7 @@ def send_emails():
     subject = request.form["subject"]
     body = request.form["message"]
     receivers = request.form.getlist("email")
+    logger.info(f"-> bp.admin.routes.send_emails n={len(receivers)}")
     for receiver in receivers:
         email.email_from_admin(subject,body,receiver)
     return "ok"
@@ -472,6 +487,7 @@ def site_map():
     links = []
     
     endpoints = util.scan_endpoints()
+    logger.info(f"-> bp.admin.routes.site_map n={len(endpoints)}")
     for rule in shareds.app.url_map.iter_rules():
         #if not rule.endpoint.startswith("admin.clear"): continue
         #print(dir(rule.methods))
@@ -515,6 +531,7 @@ def readlog():
     else:
         startid = None
     recs = syslog.readlog(direction,startid)
+    logger.info(f"-> bp.admin.routes.readlog")  # n={len(recs)}")
     return render_template("/admin/syslog.html", recs=recs)
     
 
