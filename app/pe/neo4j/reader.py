@@ -8,7 +8,8 @@ from models.gen.family_combo import Family_combo
 logger = logging.getLogger('stkserver')
 
 from bl.place import PlaceBl, PlaceName
-from pe.neo4j.neo_source import SourceDb
+from bl.source import SourceBl
+#from pe.neo4j.neo_source import SourceDb
 #from bl.place_coordinates import Point
 from .cypher_place import CypherPlace
 from .cypher_source import CypherSource
@@ -350,10 +351,10 @@ class Neo4jReadDriver:
                 #                'change': 1585409708}>]]
                 # >
                 source_node = record['source']
-                source = SourceDb.from_node(source_node)
+                source = SourceBl.from_node(source_node)
                 notes = record['notes']
-                for note in notes:
-                    n = Note.from_node(note)
+                for note_node in notes:
+                    n = Note.from_node(note_node)
                     source.notes.append(n)
                 repositories = record['reps']
                 for medium, repo_node in repositories:

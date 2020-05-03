@@ -11,22 +11,22 @@ class NodeObject():
     '''
 
 
-    def __init__(self, oid=None):
+    def __init__(self, uniq_id=None):
         '''
         Constructor. 
         
-        Optional oid may be uuid identifier (str) or database key (int).
+        Optional uniq_id may be uuid identifier (str) or database key (int).
         '''
         self.uuid = None        # UUID
         self.uniq_id = None     # Neo4j object id
         self.change = 0         # Object change time
         self.id = ''            # Gedcom object id like "I1234"
         self.handle = ''       # Gramps handle (?)
-        if oid:
-            if isinstance(oid, int):
-                self.uniq_id = oid
+        if uniq_id:
+            if isinstance(uniq_id, int):
+                self.uniq_id = uniq_id
             else:
-                self.uuid = oid
+                self.uuid = uniq_id
 
     def __str__(self):
         uuid = self.uuid if self.uuid else '-'

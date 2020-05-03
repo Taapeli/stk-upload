@@ -16,7 +16,7 @@ from .repository import Repository
 from .note import Note
 
 
-class Source(NodeObject):
+class Source(NodeObject): # -> bl.source.Source, bl.source.SourceBl
     """ Lähde
             
         Properties:

@@ -3,7 +3,7 @@ Created on 17.3.2020
 
 @author: jm
 '''
-import traceback
+#import traceback
 from models.gen.person_combo import Person_combo
 
 class DBreader:
@@ -52,53 +52,11 @@ class DBreader:
         return person_result
 
 
-    def get_place_list(self):
-        """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
-        
-            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
-"""
+#     def get_place_list(self): # --> bl.place.PlaceReader.get_list()
+#         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
 
-        context = self.user_context
-        fw = context.next_name_fw()
-        places = self.dbdriver.dr_get_place_list_fw(self.use_user, fw, context.count, 
-                                                 lang=context.lang)
-
-        # Update the page scope according to items really found 
-        if places:
-            context.update_session_scope('place_scope', 
-                                          places[0].pname, places[-1].pname, 
-                                          context.count, len(places))
-        place_result = PlaceResult(places)
-        return place_result
-
-
-    def get_place_with_events(self, uuid):
-        """ Read the place hierarchy and events connected to this place.
-        
-            Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
-            Palauttaa paikkahierarkian ja (henkilö)tapahtumat.
-    
-        """
-        place = self.dbdriver.dr_get_place_w_na_no_me(self.use_user, uuid, 
-                                                      self.user_context.lang)
-        place_result = PlaceResult(place)
-        if not place:
-            place_result.error = f"DBreader.get_place_with_events: {self.use_user} - no Place with uuid={uuid}"
-            return place_result
-        try:
-            place_result.hierarchy = \
-                self.dbdriver.dr_get_place_tree(place.uniq_id, lang=self.user_context.lang)
-
-        except AttributeError as e:
-            traceback.print_exc()
-            place_result.error = f"Place tree for {place.uniq_id}: {e}"
-            return place_result
-        except ValueError as e:
-            place_result.error = f"Place tree for {place.uniq_id}: {e}"
-            traceback.print_exc()
-                
-        place_result.events = self.dbdriver.dr_get_place_events(place.uniq_id)
-        return place_result
+#     def get_place_with_events(self, uuid): # --> bl.place.PlaceReader.get_with_events()
+#         """ Read the place hierarchy and events connected to this place.
 
 
     def get_source_with_references(self, uuid, u_context):
@@ -138,30 +96,44 @@ class DBreader:
 
 # ------------------------------ Result sets ----------------------------------
 
-class SourceResult:
+class BaseResult:
+    ''' Result objects common operations
+    '''
+    def __init__(self, items=[], num_hidden=0):
+        self.error = 0  
+        self.num_hidden = num_hidden
+        self.items = items
+
+class SourceResult(BaseResult):
     ''' Source's result object.
     '''
     def __init__(self, items=[]):
-        self.error = 0  
-        self.num_hidden = 0
-        self.items = items
+        BaseResult.__init__(self, items)
         self.citations = []    # Events etc referencing the selected source
 
-class PlaceResult:
+class PlaceResult(BaseResult):
     ''' Place's result object.
     '''
     def __init__(self, items=[]):
-        self.error = 0  
-        self.num_hidden = 0
-        self.items = items
+        BaseResult.__init__(self, items)
         self.hierarchy = []    # Hirearchy tree
         self.events = []       # Events for selected place
 
-class PersonResult:
+    def __str__(self):
+        if self.error:
+            return f"ERROR {self.error}"
+        if isinstance(self.items, list):
+            n = len(self.items)
+        else:
+            n = 1
+        return f"n={n} events={len(self.events)} hidden={self.num_hidden}"
+
+class PersonResult(BaseResult):
     ''' Person's result object.
     '''
-    def __init__(self, items, num_hidden):
-        self.error = 0  
-        self.num_hidden = num_hidden
-        self.items = items  
+    def __init__(self, items=[], num_hidden=0):
+        BaseResult.__init__(self, items, num_hidden)
+#         self.error = 0  
+#         self.num_hidden = num_hidden
+#         self.items = items  
 
