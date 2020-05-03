@@ -1,10 +1,16 @@
 '''
-Created on 11.3.2020
+    Placeclasses: Place, PlaceBl, SPlaceReader and PlaceName.
 
+    - Place        represents Place Node in database
+    - PlaceBl      represents Place and connected data (was Place_combo)
+    - PlaceReader  has methods for reading Place and connected data
+                   called from ui routes.py
+
+Created on 11.3.2020 in bl.place
 @author: jm
-'''
-'''
+
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
+@author: jm
 
 Todo:
     Miten paikkakuntiin saisi kokoluokituksen? Voisi näyttää sopivan zoomauksen karttaan
@@ -13,7 +19,6 @@ Todo:
     3. _Suuria_ maa, osavaltio, lääni
     - Loput näyttäisi keskikokoisina
 
-@author: jm
 '''
 import traceback
 import logging 

@@ -1,7 +1,17 @@
 '''
-Created on 3.5.2020
+    Source classes: Source, SourceBl and SourceReader.
 
+    - Source       represents Source Node in database
+    - SourceBl     represents Source and connected data (was Source_combo)
+    - SourceReader has methods for reading Source and connected data
+                   called from ui routes.py
+
+Created on 3.5.2020
 @author: jm
+
+Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
+@author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
+
 '''
 import logging 
 logger = logging.getLogger('stkserver')
@@ -9,12 +19,12 @@ logger = logging.getLogger('stkserver')
 from .base import NodeObject
 from pe.db_reader import DBreader, SourceResult
 
-# Obsolete
+#Todo: move gen.Person_combo to bi.PersonBl
 from models.gen.person_combo import Person_combo
 
 
 class Source(NodeObject):
-    """ Lähde
+    """ Source
             
         Properties:
                 handle          
@@ -25,23 +35,15 @@ class Source(NodeObject):
         See also: bp.gramps.models.source_gramps.Source_gramps
      """
 
-    def __init__(self):
+    def __init__(self, uniq_id=None):
         """ Luo uuden source-instanssin """
-        NodeObject.__init__(self)
+        NodeObject.__init__(self, uniq_id=uniq_id)
         self.stitle = ''
         self.sauthor = ''
         self.spubinfo = ''
-        self.note_ref = []      # uniq_ids (previously note[])
-
-        # For display combo
-        #Todo: onko repositories, citations käytössä?
-        self.repositories = []
-        self.citations = []
-        self.notes = []
 
     def __str__(self):
         return "{} '{}' '{}' '{}'".format(self.id, self.stitle, self.sauthor, self.spubinfo)
-
 
     @classmethod
     def from_node(cls, node):
@@ -65,6 +67,29 @@ class Source(NodeObject):
         return s
 
 
+class SourceBl(Source):
+    """ Source with optional referenced data.
+    
+        Arrays repositories, citations, notes may contain business objects
+        Array note_ref may contain database keys (uniq_ids)
+    """
+
+    def __init__(self, uniq_id=None):
+        """ Creates a new PlaceBl instance.
+
+            You may also give for printout eventuell hierarhy level
+        """
+        Source.__init__(self, uniq_id)
+
+        # For display combo
+        #Todo: onko repositories, citations käytössä?
+        self.repositories = []
+        self.citations = []
+        self.notes = []
+        self.note_ref = []
+
+
+
 class SourceReader(DBreader):
     '''
         Data reading class for Source objects with associated data.
@@ -78,7 +103,7 @@ class SourceReader(DBreader):
     def get_source_with_references(self, uuid, u_context):
         """ Read the source, repository and events etc referencing this source.
         
-            Returns a SourceResult object, where items = SourceDb object.
+            Returns a SourceResult object, where items = Source object.
             - item.notes[]      Notes connected to Source
             - item.repositories Repositories for Source
             - item.citations    Citating Persons, Events, Families and Medias
