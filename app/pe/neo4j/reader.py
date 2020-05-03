@@ -352,8 +352,8 @@ class Neo4jReadDriver:
                 source_node = record['source']
                 source = SourceDb.from_node(source_node)
                 notes = record['notes']
-                for note in notes:
-                    n = Note.from_node(note)
+                for note_node in notes:
+                    n = Note.from_node(note_node)
                     source.notes.append(n)
                 repositories = record['reps']
                 for medium, repo_node in repositories:

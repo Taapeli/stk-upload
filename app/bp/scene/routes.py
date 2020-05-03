@@ -19,15 +19,12 @@ from flask_security import current_user, login_required, roles_accepted
 
 from ui.user_context import UserContext
 from bl.place import PlaceReader
-#from bl.place import PlaceBl
+from bl.source import SourceReader
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
 from bp.scene.models import media
-#from bp.scene.scene_reader import get_a_person_for_display_apoc
-#from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
-#from models.gen.place_combo import Place_combo
 from models.gen.source import Source
 from models.gen.media import Media
 
@@ -378,12 +375,12 @@ def show_places():
     u_context.count = request.args.get('c', 100, type=int)
 
     dbdriver = Neo4jReadDriver(shareds.driver)
-    rd = PlaceReader(dbdriver, u_context) 
+    reader = PlaceReader(dbdriver, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
 
-    results = rd.get_list()
+    results = reader.get_list()
     #results = db.get_place_list()
 
 #     for p in result.items:
@@ -401,9 +398,9 @@ def show_place(locid):
     try:
         u_context = UserContext(user_session, current_user, request)
         dbdriver = Neo4jReadDriver(shareds.driver)
-        rd = PlaceReader(dbdriver, u_context) 
+        reader = PlaceReader(dbdriver, u_context) 
     
-        results = rd.get_with_events(locid)
+        results = reader.get_with_events(locid)
         #results = db.get_place_with_events(locid)
         #place, place_list, events = get_place_with_events(locid)
 
@@ -465,13 +462,14 @@ def show_source_page(sourceid=None):
     u_context = UserContext(user_session, current_user, request)
     try:
         dbdriver = Neo4jReadDriver(shareds.driver)
-        db = DBreader(dbdriver, u_context) 
+        reader = SourceReader(dbdriver, u_context) 
     
-        results = db.get_source_with_references(uuid, u_context)
+        results = reader.get_source_with_references(uuid, u_context)
+        #results = db.get_source_with_references(uuid, u_context)
         #source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info("-> bp.scene.routes.show_source_page")
+    logger.info(f"-> bp.scene.routes.show_source_page n={len(results.citations)}")
 #     for c in results.citations:
 #         for i in c.citators:
 #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
