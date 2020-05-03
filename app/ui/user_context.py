@@ -239,12 +239,21 @@ class UserContext():
         except:
             return ''
 
+    def owner_or_common(self):
+        ''' Tells, if you should select object by data owner.
+
+            Always when others but self.ChoicesOfView.OWN only are required
+        '''
+        if (self.context & 2) > 0:
+            return 'user'
+        else:
+            return 'common'
+    
     def use_owner_filter(self):
         ''' Tells, if you should select object by data owner.
 
             Always when others but self.ChoicesOfView.OWN only are required
         '''
-        
         return (self.context & 2) > 0
     
     def use_common(self):
