@@ -96,22 +96,26 @@ class DBreader:
 
 # ------------------------------ Result sets ----------------------------------
 
-class SourceResult:
+class BaseResult:
+    ''' Result objects common operations
+    '''
+    def __init__(self, items=[], num_hidden=0):
+        self.error = 0  
+        self.num_hidden = num_hidden
+        self.items = items
+
+class SourceResult(BaseResult):
     ''' Source's result object.
     '''
     def __init__(self, items=[]):
-        self.error = 0  
-        self.num_hidden = 0
-        self.items = items
+        BaseResult.__init__(self, items)
         self.citations = []    # Events etc referencing the selected source
 
-class PlaceResult:
+class PlaceResult(BaseResult):
     ''' Place's result object.
     '''
     def __init__(self, items=[]):
-        self.error = 0  
-        self.num_hidden = 0
-        self.items = items
+        BaseResult.__init__(self, items)
         self.hierarchy = []    # Hirearchy tree
         self.events = []       # Events for selected place
 
@@ -124,11 +128,12 @@ class PlaceResult:
             n = 1
         return f"n={n} events={len(self.events)} hidden={self.num_hidden}"
 
-class PersonResult:
+class PersonResult(BaseResult):
     ''' Person's result object.
     '''
-    def __init__(self, items, num_hidden):
-        self.error = 0  
-        self.num_hidden = num_hidden
-        self.items = items  
+    def __init__(self, items=[], num_hidden=0):
+        BaseResult.__init__(self, items, num_hidden)
+#         self.error = 0  
+#         self.num_hidden = num_hidden
+#         self.items = items  
 
