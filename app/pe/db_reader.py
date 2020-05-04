@@ -58,6 +58,8 @@ class DBreader:
 #     def get_place_with_events(self, uuid): # --> bl.place.PlaceReader.get_with_events()
 #         """ Read the place hierarchy and events connected to this place.
 
+#     def get_source_list(self): # -> bl.source.SourceReader.get_source_list()
+
 
     def get_source_with_references(self, uuid, u_context):
         """ Read the source, repository and events etc referencing this source.
