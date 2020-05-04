@@ -325,6 +325,101 @@ class Neo4jReadDriver:
         return ret
 
 
+    def dr_get_source_list_fw(self, **kwargs):
+        """ Read all sources with notes and repositories, optionally limited by keywords.
+         
+            used arguments:
+            - user        Username to select data
+            - theme1      A keyword (fi) for selecting source titles
+            - theme2      Another keyword (sv) for selecting source titles
+            - fw          Read sources starting from this keyword
+            - count       How many sources to read
+
+            Todo: Valinta vuosien mukaan
+            Todo: tuloksen sivuttaminen esim. 100 kpl / sivu
+        """
+        sources = []
+        user = kwargs.get('user')
+
+        with self.driver.session() as session:
+            if kwargs.get('theme1'):
+                # Filter sources by searching keywords in fi and sv langiage
+                key1 = kwargs.get('theme1')
+                key2 = kwargs.get('theme2')
+                if user: 
+                    # Show my researcher data
+                    print("dr_get_source_list_fw: my researcher data")
+                    result = session.run(CypherSource.get_own_set_selections,
+                                         key1=key1, key2=key2)
+                else:
+                    print("dr_get_source_list_fw: approved common only")
+                    result = session.run(CypherSource.get_auditted_set_selections,
+                                         key1=key1, key2=key2)
+            else:
+                # Show all themes
+                if user: 
+                    # Show my researcher data
+                    print("dr_get_source_list_fw: my researcher data")
+                    result = session.run(CypherSource.get_own_sets)
+                else:
+                    print("dr_get_source_list_fw: approved common only")
+                    result = session.run(CypherSource.get_auditted_sets)
+ 
+        for record in result:
+            # <Record 
+            #    owner_type='PASSED' 
+            #    source=<Node id=333338 labels={'Source'}
+            #        properties={'id': 'S0029', 'stitle': 'Lapinjärvi vihityt 1788-1803 vol  es346', 
+            #            'uuid': '4637e07dcc7f42c09236a8482fb01b7c', 'spubinfo': '', 'sauthor': '', 
+            #            'change': 1532807569}>
+            #    notes=[
+            #        <Node id=445002 labels={'Note'} 
+            #            properties={'id': 'N2207', 'text': '', 'type': 'Source Note', 
+            #                'uuid': 'e6efcc1fbcad4dcd85352fd95cd5bf35', 'url': 'http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=3788',
+            #                'change': 1532807569}>] 
+            #    repositories=[
+            #        [   'Book', 
+            #            <Node id=393661 labels={'Repository'} 
+            #                properties={'id': 'R0003', 'rname': 'Lapinjärven seurakunnan arkisto',
+            #                    'type': 'Archive', 'uuid': 'b6171feb05bc47de87ee509a79821d8f',
+            #                    'change': 1577815469}>]] cit_cnt=0 ref_cnt=0>
+             
+            # <Record
+            # 0  uniq_id=242567 
+            # 1  source=<Node id=242567 labels={'Source'} 
+            #        properties={'handle': '_dcb5682a0f47b7de686b3251557', 'id': 'S0334', 
+            #            'stitle': 'Åbo stifts herdaminne 1554-1640', 'change': '1516698633'}> 
+            # 2  notes=[<Node id=238491 labels={'Note'} 
+            #        properties={'handle': '_e07cd6210c57e0d53393a62fa7a', 'id': 'N3952', 
+            #        'text': '', 'type': 'Source Note', 'url': 'http://www.narc.fi:8080/...', 
+            #        'change': 1542667331}>] 
+            # 3  repositories=[
+            #        ['Book', <Node id=238996 labels={'Repository'} 
+            #            properties={'handle': '_db51a3f358e67ac82ade828edd1', 'id': 'R0057', 
+            #            'rname': 'Painoteokset', 'type': 'Collection', 'change': '1541350910'}>]]
+            # 4  cit_cnt=1 
+            # 5  ref_cnt=1
+            # >
+            source = record['source']
+            s = SourceBl.from_node(source)
+            notes = record['notes']
+            for note in notes:
+                n = Note.from_node(note)
+                s.notes.append(n)
+            repositories = record['repositories']
+            for repo in repositories:
+                # [medium, repo_node]
+                if repo[1] != None:
+                    rep = Repository.from_node(repo[1])
+                    rep.medium = repo[0]
+                    s.repositories.append(rep)
+            s.cit_cnt = record['cit_cnt']
+            s.ref_cnt = record['ref_cnt']
+            sources.append(s)
+ 
+        return sources
+
+
     def dr_get_source_w_repository(self, user, uuid): 
         """ Returns the PlaceBl with Notes and PlaceNames included.
         """

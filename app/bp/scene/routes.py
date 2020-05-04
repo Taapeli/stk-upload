@@ -25,7 +25,7 @@ from . import bp
 from bp.scene.scene_reader import get_person_full_data
 from bp.scene.models import media
 from models.gen.family_combo import Family_combo
-from models.gen.source import Source
+#from models.gen.source import Source
 from models.gen.media import Media
 
 from models.datareader import read_persons_with_events
@@ -433,22 +433,22 @@ def show_sources(series=None):
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set context by owner and the data selections
-    my_context = UserContext(user_session, current_user, request)
-#Todo: show by page
-#     # Which range of data is shown
-#     my_context.set_scope_from_request(request, 'source_scope')
-#     # How many objects are shown?
-#     count = int(request.args.get('c', 100))
+    u_context = UserContext(user_session, current_user, request)
+    # Which range of data is shown
+    u_context.set_scope_from_request(request, 'source_scope')
+    u_context.count = request.args.get('c', 100, type=int)
 
+    dbdriver = Neo4jReadDriver(shareds.driver)
+    reader = SourceReader(dbdriver, u_context) 
     if series:
-        my_context.series = series
+        u_context.series = series
     try:
-        sources, title = Source.get_source_list(my_context)
+        results = reader.get_source_list()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info("-> bp.scene.routes.show_sources")
-    return render_template("/scene/sources.html", sources=sources, title=title,
-                           user_context=my_context)
+    logger.info(f"-> bp.scene.routes.show_sources series={u_context.series} c={len(results.items)}")
+    return render_template("/scene/sources.html", sources=results.items, 
+                           user_context=u_context)
 
 
 @bp.route('/scene/source', methods=['GET'])

@@ -100,6 +100,36 @@ class SourceReader(DBreader):
         - Returns a Result object which includes the tems and eventuel error object.
     '''
 
+    def get_source_list(self):
+        context = self.user_context
+        fw = context.next_name_fw()
+        kwargs = {"user": self.use_user, "fw": fw,  "count": context.count}
+        if context.series:
+            # Filtering by series (Lähdesarja)
+            THEMES = {"birth": ('syntyneet','födda'),
+                      "babtism": ('kastetut','döpta'),
+                      "wedding": ('vihityt','vigda'),
+                      "death": ('kuolleet','döda'),
+                      "move": ('muuttaneet','flyttade')
+                      }
+            theme_fi, theme_sv = THEMES[context.series]
+            kwargs["theme1"] = theme_fi 
+            kwargs["theme2"] = theme_sv
+        try:
+            source_result = SourceResult()
+            sources = self.dbdriver.dr_get_source_list_fw(**kwargs)
+    
+            # Update the page scope according to items really found 
+            if sources:
+                context.update_session_scope('source_scope', 
+                                              sources[0].stitle, sources[-1].stitle, 
+                                              context.count, len(sources))
+            source_result.items = sources
+        except Exception as e:
+            source_result.error = f"Source list: {e}"
+        return source_result
+
+
     def get_source_with_references(self, uuid, u_context):
         """ Read the source, repository and events etc referencing this source.
         
@@ -108,7 +138,6 @@ class SourceReader(DBreader):
             - item.repositories Repositories for Source
             - item.citations    Citating Persons, Events, Families and Medias
                                 as [label, object] tuples(?)
-                                
         """
         source = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
         source_result = SourceResult(source)
