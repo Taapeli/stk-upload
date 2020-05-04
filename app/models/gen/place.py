@@ -17,8 +17,8 @@ from bl.place import PlaceName
 
 #from .dates import DateRange
 from .cypher import Cypher_place
-from .event_combo import Event_combo
-from .person_name import Name
+#from .event_combo import Event_combo
+#from .person_name import Name
 
 
 class Place(NodeObject):
@@ -72,7 +72,7 @@ class Place(NodeObject):
     def from_node(cls, node):
         ''' Creates a node object of type Place from a Neo4j node.
         
-        models.gen.place.Place.from_node. 
+        OBSOLETE models.gen.place.Place.from_node. 
         
         Example node:
         <Node id=78279 labels={'Place'} 
