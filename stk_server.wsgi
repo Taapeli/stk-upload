@@ -25,9 +25,9 @@ class ContextFilter(logging.Filter):
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(user)s %(message)s')
 
 # Are we running on production/test server or developer enviroment?
-running_on_server = os.path.isdir('/var/www/webroot/stk-logs')
+running_on_server = os.path.isdir('/var/log/httpd/stkserver')
 if running_on_server:
-    fh = logging.FileHandler('/var/www/webroot/stk-logs/stkserver.log')
+    fh = logging.FileHandler('/var/log/httpd/stkserver/stkserver.log')
 else:
     fh = logging.FileHandler('/tmp/stkserver.log')
     neo4j_log = logging.getLogger("neo4j.bolt")
