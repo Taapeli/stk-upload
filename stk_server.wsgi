@@ -42,6 +42,7 @@ logger.addFilter(ContextFilter())
 logger.addHandler(fh)
 
 if running_on_server:
+    sys.path.insert(0, os.path.join(os.getcwd(),"app"))
     from app import app as application
     application.secret_key = "You don't know OUR secret key"
 else:
