@@ -77,7 +77,7 @@ def clear_my_db():
 
 @bp.route('/admin/clear_batches', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('research', 'admin')
+@roles_accepted('research', 'admin', 'audit')
 def clear_empty_batches():
     """ Show or clear unused batches. """
     from models.gen.batch_audit import Batch
