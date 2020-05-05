@@ -122,7 +122,7 @@ def estimate_dates(uid=None):
 # Refnames home page
 @bp.route('/admin/refnames')
 @login_required
-@roles_required('admin')
+@roles_required('audit')
 def refnames():
     """ Operations for reference names """
     return render_template("/admin/reference.html")
