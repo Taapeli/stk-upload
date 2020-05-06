@@ -25,11 +25,13 @@ class ContextFilter(logging.Filter):
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(user)s %(message)s')
 
 # Are we running on production/test server or developer enviroment?
-running_on_server = os.path.isdir('/var/log/httpd/stkserver')
+serverlog_dir = '/var/log/httpd/stkserver'
+running_on_server = os.path.isdir(serverlog_dir)
 if running_on_server:
-    fh = logging.FileHandler('/var/log/httpd/stkserver/stkserver.log')
+    fh = logging.FileHandler(serverlog_dir + '/stkserver.log')
 else:
     fh = logging.FileHandler('/tmp/stkserver.log')
+    # fh = logging.FileHandler(os.getcwd() + "/../stk-serverlogs/stkserver.log")
     neo4j_log = logging.getLogger("neo4j.bolt")
     neo4j_log.setLevel(logging.WARNING)
 
@@ -48,5 +50,5 @@ if running_on_server:
 else:
     if __name__ == '__main__':
         from app import app
-        print('Käynnistys: %(app)s logging %(logger)')
+        print('Käynnistys: {} logging {} file {}'.format(app, logger, fh.stream.name))
         app.run()

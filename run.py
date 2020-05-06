@@ -1,7 +1,10 @@
+#!/usr/bin/python
 # coding=UTF-8
 
+
+import sys
+import os
 import logging
-from os import path
 
 class ContextFilter(logging.Filter):
     """
@@ -19,51 +22,38 @@ class ContextFilter(logging.Filter):
             print("# setups.ContextFilter.filter: 'user' not defined")
         return True
 
-"""
-    Logger configuration
-"""
-print("Config Stk logger here")
-logging.basicConfig(level=logging.INFO, format=('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-logger = logging.getLogger('')
-logger.addFilter(ContextFilter())
-logger = logging.getLogger('stkserver')
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(user)s %(message)s')
 
-formatter = logging.Formatter('%(asctime)s %(name)s %(user)-7s %(levelname)-5s %(message)s')
-if path.isdir('/var/log/stkserver'):
-    fh = logging.FileHandler('/var/log/stkserver/stkserver.log')
+# Be clever about log file location:
+# Are we running on production/test server or developer enviroment?
+server_logdir = '/var/log/httpd/stkserver'
+running_on_server = os.path.isdir(server_logdir)
+if running_on_server:
+    fh = logging.FileHandler(server_logdir + '/stkserver.log')
 else:
-    fh = logging.FileHandler('/tmp/stkserver.log')
+    # Developer enviroment, use env var STK_LOGDIR or /tmp
+    dev_logdir = os.environ.get("STK_LOGDIR")
+    if dev_logdir is not None:
+        fh = logging.FileHandler(dev_logdir + '/stkserver.log')
+    else:
+        fh = logging.FileHandler('/tmp/stkserver.log')
+    neo4j_log = logging.getLogger("neo4j.bolt")
+    neo4j_log.setLevel(logging.WARNING)
+
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
+
+logger = logging.getLogger('stkserver')
+logger.setLevel(logging.DEBUG)
 logger.addFilter(ContextFilter())
 logger.addHandler(fh)
 
-# logger.basicConfig(level=logging.DEBUG,
-#                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-#                     datefmt='%m-%d %H:%M',
-#                     filename='stkserver.log',
-#                     filemode='w')
-#logger.setLevel(logging.DEBUG)
-
-# Do not log neo4j.bolt INFO messages
-neo4j_log = logging.getLogger("neo4j.bolt")
-neo4j_log.setLevel(logging.WARNING)
-
-"""
- ----------------------------- Käynnistys -------------------------------
- ----------------------------- URL http://127.0.0.1:5000/ --------------
-"""
-
-if __name__ == '__main__':
-    from app import app
-    print(f'Käynnistys: {app}, logging {logger}')
-    app.run()
-
-#     if True:
-#         loglevel = 'DEBUG'
-#         # Ajo paikallisesti
-#         print ("Stk server ajetaan {}-lokitasolla".format(loglevel))
-#         app.run(debug=loglevel)
-#     else:
-#         # Julkinen sovellus
-#         app.run(host='0.0.0.0', port=8000)
+if running_on_server:
+    sys.path.insert(0, os.path.join(os.getcwd(),"app"))
+    from app import app as application
+    application.secret_key = "You don't know OUR secret key"
+else:
+    if __name__ == '__main__':
+        from app import app
+        print('Käynnistys: {} logging {} file {}'.format(app, logger, fh.stream.name))
+        app.run()
