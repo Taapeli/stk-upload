@@ -661,6 +661,13 @@ class DOM_handler():
                     else:
                         self.blog.log_event({'title':"This place has an empty name",
                                              'level':"WARNING", 'count':pl.id})
+                        
+                try:
+                    # Returns Gramps_DateRange or None
+                    placename.dates = self._extract_daterange(placeobj_pname)
+                    #TODO: val="1700-luvulla" muunnettava Noteksi
+                except:
+                    placename.dates = None
 
             for placeobj_coord in placeobj.getElementsByTagName('coord'):
                 if placeobj_coord.hasAttribute("lat") \

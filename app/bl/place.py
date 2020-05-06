@@ -69,8 +69,6 @@ class Place(NodeObject):
     def from_node(cls, node):
         ''' Creates a node object of type Place from a Neo4j node.
         
-        models.gen.place.Place.from_node. 
-        
         Example node:
         <Node id=78279 labels={'Place'} 
             properties={'handle': '_da68e12a415d936f1f6722d57a', 'id': 'P0002', 
@@ -299,8 +297,7 @@ class PlaceName():
 
     @classmethod
     def from_node(cls, node):
-        ''' models.gen.place.Place_name.from_node
-        Transforms a db node to an object of type Place_name.
+        ''' Transforms a db node to an object of type Place_name.
         
         <Node id=78278 labels={'Place_name'} 
             properties={'lang': '', 'name': 'Kangasalan srk'}>

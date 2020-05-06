@@ -77,7 +77,7 @@ def clear_my_db():
 
 @bp.route('/admin/clear_batches', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('research', 'admin')
+@roles_accepted('research', 'admin', 'audit')
 def clear_empty_batches():
     """ Show or clear unused batches. """
     from models.gen.batch_audit import Batch
@@ -122,7 +122,7 @@ def estimate_dates(uid=None):
 # Refnames home page
 @bp.route('/admin/refnames')
 @login_required
-@roles_required('admin')
+@roles_required('audit')
 def refnames():
     """ Operations for reference names """
     return render_template("/admin/reference.html")
