@@ -50,7 +50,7 @@ def setup_logging():
     loglevel = need('STK_LOGLEVEL')
 
     # Hard coded or not:
-    loggername = 'stkserver'
+    loggername = 'stkserver'    # this name is hardcoded in other places
     # loggername = need('STK_LOGGER')
     logformat = '%(asctime)s %(name)s %(levelname)s %(user)s %(message)s'
     # logformat = need('STK_LOGFORMAT')
@@ -69,7 +69,7 @@ def setup_logging():
         exit(1)
 
     formatter = logging.Formatter(logformat)
-    logger = logging.getLogger(loggername) # this name is hardcoded in other places
+    logger = logging.getLogger(loggername)
 
     fh = logging.FileHandler(logdir + '/' + logfile)
     fh.setLevel(loglevel)       # use same logging level for handler ...
@@ -78,6 +78,7 @@ def setup_logging():
     logger.setLevel(loglevel)   # ... and logger
     logger.addFilter(ContextFilter())
     logger.addHandler(fh)
+    logger.info("Starting...")
     print('Käynnistys: {} logging {} file {}'.format(app, logger, fh.stream.name))
     return
 
