@@ -47,9 +47,14 @@ def setup_logging():
 
     logdir = need('STK_LOGDIR')
     logfile = need('STK_LOGFILE')
-    loggername = need('STK_LOGGER')
-    logformat = need('STK_LOGFORMAT')
     loglevel = need('STK_LOGLEVEL')
+
+    # Hard coded or not:
+    loggername = 'stkserver.log'
+    # loggername = need('STK_LOGGER')
+    logformat = '%(asctime)s %(name)s %(levelname)s %(user)s %(message)s'
+    # logformat = need('STK_LOGFORMAT')
+
     if loglevel in loglevels:
         loglevel = loglevels[loglevel]
     else:
