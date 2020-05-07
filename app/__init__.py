@@ -32,23 +32,45 @@ class ContextFilter(logging.Filter):
         return True
 
 def setup_logging():
+    def need(key):
+        if key in shareds.app.config:
+            return shareds.app.config[key]
+        print("Config param '{}' not found, exiting".format(key))
+        exit(1)
+
+    loglevels = { "NOTSET": logging.NOTSET,
+                  "DEBUG": logging.DEBUG,
+                  "INFO": logging.INFO,
+                  "WARNING": logging.WARNING,
+                  "ERROR": logging.ERROR,
+                  "CRITICAL": logging.CRITICAL, }
+
+    logdir = need('STK_LOGDIR')
+    logfile = need('STK_LOGFILE')
+    loggername = need('STK_LOGGER')
+    logformat = need('STK_LOGFORMAT')
+    loglevel = need('STK_LOGLEVEL')
+    if loglevel in loglevels:
+        loglevel = loglevels[loglevel]
+    else:
+        print("Unknown loglevel '{}', using default level WARNING".format(loglevel))
+        loglevel = logging.WARNING
+
     try:
-        logdir = shareds.app.config['STK_LOGDIR']
-        logfile = shareds.app.config['STK_LOGFILE']
         if not os.path.isdir(logdir):
             os.makedirs(logdir)
     except Exception as e:
-        print("Can't create logging directory: {}".format(logdir, e))
+        print("Can't create logging directory: {}: {}".format(logdir, e))
         exit(1)
 
-    formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(user)s %(message)s')
+    formatter = logging.Formatter(logformat)
+    logger = logging.getLogger(loggername) # this name is hardcoded in other places
 
     fh = logging.FileHandler(logdir + '/' + logfile)
-    fh.setLevel(logging.DEBUG)
+    fh.setLevel(loglevel)       # use same logging level for handler ...
     fh.setFormatter(formatter)
 
-    logger = logging.getLogger('stkserver') # this name is hardcoded in other places also
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(loglevel)   # ... and logger
     logger.addFilter(ContextFilter())
     logger.addHandler(fh)
     print('Käynnistys: {} logging {} file {}'.format(app, logger, fh.stream.name))
