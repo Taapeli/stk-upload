@@ -1,0 +1,24 @@
+{# templates/gedcoms.html_ #}
+{% extends "g_layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _('Logged on user') }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+<script>
+var maxsize = {{ maxsize }};  // to be used in gedcom_scripts.js
+</script>
+
+<script src="/static/js/gedcom_scripts.js?37"></script>
+
+<script>
+var gedcom = "{{ gedcom }}";
+</script>
+
+<div class="startdiv">
+    <div>
+	    <h2>{{ _("Gedcom tools") }}</h2>
+	    <div id="errors" class="errors"></div>
+
+
+{% endblock %}

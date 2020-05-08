@@ -124,6 +124,9 @@ shareds.app.register_blueprint(dbeditor_bp)
 from bp.refname_editor import bp as refname_editor_bp
 shareds.app.register_blueprint(refname_editor_bp)
 
+from bp.stat import bp as stat_bp
+shareds.app.register_blueprint(stat_bp)
+
 @shareds.babel.localeselector
 def get_locale():
     reqlang = request.args.get('lang')
