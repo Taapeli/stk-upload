@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="/static/css/k_screen.css" media="screen">
 <link rel="stylesheet" type="text/css" href="/static/css/popup.css">
-</head>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script></head>
 <body>
 <style>
 .popuptext a.inlink {
@@ -14,7 +14,7 @@
 </style>
 
 <h2>Popup</h2>
-<p style="margin:5em;">&nbsp;</p>
+<p style="margin:4em;">&nbsp;</p>
 <table>
 <td class="ColumnPerson">
     <div>
@@ -93,14 +93,32 @@
   <span class="popuptext" id="popWin">A Simple Popup!</span>
 </div>
 
+<hr>
+<div id="app">
+  <p>{{ message }}</p>
+  <button v-on:click="reverseMessage">Reverse Message</button>
+</div>
+
+
 <script>
 // When the user clicks on div, open the popup
 function myFunction() {
   var popup = document.getElementById("popWin");
   popup.classList.toggle("show");
 }
-</script>
 
+var app = new Vue({
+  el: '#app',
+  data: {
+    message: 'Hello Vue!'
+  },
+  methods: {
+    reverseMessage: function () {
+      this.message = this.message.split('').reverse().join('')
+    }
+  }
+})
+</script>
 </body>
 </html>
 
