@@ -20,7 +20,6 @@ from . import bp
 @login_required
 @roles_accepted('admin')
 def stat_home():
-    """ Person etc listings
-        tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla 
+    """Statistiikkaa palvelimelta.
     """
-    return render_template("/stat.html")
+    return render_template("/stat/stat.html")
