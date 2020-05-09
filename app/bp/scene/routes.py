@@ -6,13 +6,14 @@ Created on 12.8.2018
 import logging 
 import io
 #import os
-from flask import send_file, Response
 import shareds
 import os
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
 
+from flask import send_file, Response
+from flask import jsonify # request
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
@@ -350,6 +351,28 @@ def show_family_page(uid=None):
     logger.info("-> bp.scene.routes.show_family_page")
     return render_template("/scene/family.html", 
                            family=family, menuno=3, user_context=u_context)
+
+# TESTIING:
+bp.route('/scene/json/families', methods=['GET','POST'])
+def json_get_person_families(uuid=None):
+    """ TODO: Get famailies for a Person.
+    """
+    uuid = request.args.get('uuid', uuid)
+    if not uuid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
+    
+    u_context = UserContext(user_session, current_user, request)
+    try:
+        family = Family_combo.get_family_data(uuid, u_context)
+    except KeyError as e:
+        return '{rsp="", status="' + str(e) + '"}'
+    logger.info(f"-> bp.scene.routes.show_person_families_json: n={len(family)}")
+    response = jsonify(family)
+    print(response)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+#     return render_template("/scene/family.html", 
+#                            family=family, menuno=3, user_context=u_context)
 
 # @bp.route('/pop/family=<int:fid>')
 # def show_family_popup(fid):

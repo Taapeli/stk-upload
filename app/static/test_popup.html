@@ -5,6 +5,7 @@
 <link rel="stylesheet" type="text/css" href="/static/css/k_screen.css" media="screen">
 <link rel="stylesheet" type="text/css" href="/static/css/popup.css">
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script></head>
+<script src="/static/js/axios.min.js"></script>
 <body>
 <style>
 .popuptext a.inlink {
@@ -95,8 +96,11 @@
 
 <hr>
 <div id="app">
-  <p>{{ message }}</p>
+  <span>${ message }</span>
   <button v-on:click="reverseMessage">Reverse Message</button>
+  <input type="button" id="search" value="Haku" 
+    v-on:click="getFamilies('ea28f1c846714c4dbfb337e61fe770ad')">
+  <p>${status} – ${names}</p>
 </div>
 
 
@@ -108,14 +112,27 @@ function myFunction() {
 }
 
 var app = new Vue({
-  el: '#app',
-  data: {
-    message: 'Hello Vue!'
-  },
-  methods: {
-    reverseMessage: function () {
-      this.message = this.message.split('').reverse().join('')
-    }
+   el: '#app',
+   delimiters: ['${', '}'],
+   data: {
+     message: 'Hello Vue!',
+     names: '-',
+     status: 'ok'
+   },
+   methods: {
+	   getFamilies(uuid) {
+           axios.get('/scene/json/families?uuid=' + uuid).
+           then(function(rsp, status) {
+        	   app.status = status;
+               app.names = rsp.data.records;
+               //app.selected = [];
+               //app.lastquery = q;
+           });
+		   //console.log(uuid);
+	   },
+       reverseMessage: function () {
+     	  this.message = this.message.split('').reverse().join('')
+   	   }
   }
 })
 </script>
