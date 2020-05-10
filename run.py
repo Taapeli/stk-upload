@@ -13,7 +13,7 @@ if running_on_server:
     import sys
     sys.path.insert(0, os.path.join(os.getcwd(),"app"))
     from app import app as application
-    application.secret_key = "You don't know OUR secret key"
+    application.secret_key = "You don'n know OUR secret key"
 else:
     if __name__ == '__main__':
         import logging
