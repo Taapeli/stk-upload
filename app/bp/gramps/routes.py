@@ -27,7 +27,7 @@ from ..admin import uploads
 @roles_accepted('research', 'admin')
 def gramps_index():
     """ Home page gramps input file processing """
-    print("-> bp.start.routes.gramps_index")
+    logger.info("-> bp.start.routes.gramps_index")
     return render_template("/gramps/index_gramps.html")
 
 @bp.route('/gramps/show_log/<xmlfile>')
@@ -44,7 +44,7 @@ def show_upload_log(xmlfile):
 @roles_accepted('research', 'admin')
 def list_uploads():
     upload_list = uploads.list_uploads(current_user.username) 
-    logger.info(f"-> bp.gramps.routes.list_uploads")
+    logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
     return render_template("/gramps/uploads.html", uploads=upload_list)
 
 @bp.route('/gramps/upload', methods=['POST'])
@@ -75,6 +75,7 @@ def upload_gramps():
                     "Stk: Gramps XML file uploaded",
                     msg )
         syslog.log(type="gramps file uploaded",file=infile.filename)
+        logger.info(f'bp.gramps.routes.upload_gramps')
     except Exception as e:
         return redirect(url_for('gramps.error_page', code=1, text=str(e)))
 
@@ -102,7 +103,9 @@ def error_page(code, text=''):
 @roles_accepted('research', 'admin')
 def xml_analyze(xmlfile):
     references = gramps_loader.analyze(current_user.username, xmlfile)
-    return render_template("/gramps/analyze_xml.html", references=references)
+    logger.info(f'bp.gramps.routes.xml_analyze n={len(references)}')
+    return render_template("/gramps/analyze_xml.html", 
+                           references=references, file=xmlfile)
 
 @bp.route('/gramps/xml_delete/<xmlfile>')
 @login_required

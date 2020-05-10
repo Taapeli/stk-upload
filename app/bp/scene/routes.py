@@ -301,7 +301,7 @@ def show_event(uniq_id):
         Derived from bp.tools.routes.show_baptism_data()
     """
     event, persons = get_event_participants(uniq_id)
-    logger.info("-> bp.scene.routes.show_event")
+    logger.info(f"-> bp.scene.routes.show_event n={len(persons)}")
     return render_template("/scene/event.html",
                            event=event, persons=persons)
 
@@ -389,7 +389,7 @@ def show_places():
 #     for p in result.items:
 #         print ("# {} ".format(p))
     logger.info("-> bp.scene.routes.show_places "
-               f"{u_context.owner_or_common()} n='{len(results.items)}'")
+               f"{u_context.owner_or_common()} n={len(results.items)}")
     return render_template("/scene/places.html", places=results.items, menuno=4,
                            user_context=u_context, elapsed=time.time()-t0)
 

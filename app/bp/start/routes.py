@@ -60,7 +60,7 @@ def start_logged():
     if "gedcom_user" in session: del session["gedcom_user"]  
     
     role_names = [role.name for role in current_user.roles]
-    logger.info(f"-> bp.start.routes.start u={current_user.username} lang={get_locale().language}")
+    logger.info(f"-> bp.start.routes.start lang={get_locale().language}")
     logger.debug("-> bp.start.routes.start_logged "
                 f"user {current_user.username}/{current_user.email}, roles {role_names}")
     return render_template('/start/index_logged.html')

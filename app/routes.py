@@ -48,7 +48,7 @@ def entry():
         logger.info(f'-> routes.entry user')
         return redirect(url_for('start_logged'))
 
-    logger.info(f'-> routes.entry do_login')
+    logger.info(f'-> routes.entry -')
     lang = get_locale().language
     demo_site = f"{app.config['DEMO_URL']}?lang={lang}"
     logger.debug(f'-> routes.entry auth={current_user.is_authenticated} demo={demo_site}')

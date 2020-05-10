@@ -175,7 +175,7 @@ def analyze(username, filename):
     references.append(row)
     
     row = Analyze_row()
-    row.individ = "Object"
+    row.individ = "Media"
     row.number_of_individs = values["object_cnt"]
     row.reference = "Citation"
     row.number_of_references = values["object_citation_cnt"]
