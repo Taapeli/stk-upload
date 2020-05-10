@@ -1,0 +1,25 @@
+{# templates/stat/stat.html #}
+{% extends "admin/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _("Statistics") }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div class="startdiv">
+  <h2>{{ _("Statistics about STK (under construction)") }}</h2>
+  <div id="errors" class="errors"></div>
+
+  {{ code_files }} .py files with {{ code_lines }} lines,
+  {{ html_files }} .html files with {{ html_lines }} lines,
+  {{ route_files }} routes.py files with {{ route_lines }} @*route definitions,
+  and {{ commits }} git commits.
+  <p>
+    Some application statistics links:
+  <ul>
+    <li> about neo4j nodes, node types, ...
+    <li> about stk users and roles
+    <li> <a href="/stat/appstat">db acces types / user</a>
+  </ul>
+
+</div>
+{% endblock %}

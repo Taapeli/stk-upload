@@ -1,0 +1,18 @@
+{# templates/stat/anstk.html #}
+{% extends "admin/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _("App Stats") }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div class="startdiv">
+  <h2>{{ _("Server logs") }}</h2>
+  <div id="errors" class="errors"></div>
+  Return to <a href="/stat">statistics start page</a>
+  <p>
+    <pre>
+      {% for line in lines %}{{ line }}
+      {% endfor %}
+    </pre>
+</div>
+{% endblock %}
