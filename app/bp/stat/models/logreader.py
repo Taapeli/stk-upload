@@ -6,7 +6,7 @@ import re
 import os
 
 version = "0.1"
-timestamp = r'Time-stamp: <10.05.2020 15:38:11 juha@rauta>'
+timestamp = r'Time-stamp: <10.05.2020 19:45:19 juha@rauta>'
 
 ################################################################
 #
@@ -184,15 +184,15 @@ Used to help group similar messages together for actual counting.
             return longest
 
         ################ start print_counts()
-        if "topn" in self._opts:
-            # sort by count and keep top N
+        if "bycount" in self._opts:
             countsx = sorted(self._counts.items(),
                              key=lambda k: sum_of(k[1]),
                              reverse=True)
-            countsx = countsx[:self._opts["topn"]]
         else:
-            # sort alphabetically
             countsx = sorted(self._counts.items())
+
+        if "topn" in self._opts:
+            countsx = countsx[:self._opts["topn"]]
 
         n = 0
         longest = find_longest_user(countsx)
