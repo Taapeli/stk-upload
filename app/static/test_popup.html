@@ -99,8 +99,8 @@
   <span>${ message }</span>
   <button v-on:click="reverseMessage">Reverse Message</button>
   <input type="button" id="search" value="Haku" 
-    v-on:click="getFamilies('ea28f1c846714c4dbfb337e61fe770ad')">
-  <p>${status} – ${names}</p>
+    v-on:click="getFamilies('e8450bbbd48348338abce8b900df3bf8')">
+  <p>${status} – <tt>${id}</tt>${rel_type} <b>${father_sortname}</b></p>
 </div>
 
 
@@ -116,18 +116,30 @@ var app = new Vue({
    delimiters: ['${', '}'],
    data: {
      message: 'Hello Vue!',
-     names: '-',
+     rel_type: '',
+     id: 'F',
+     father_sortname: '-',
+     mother_sortname: '-',
      status: 'ok'
    },
    methods: {
 	   getFamilies(uuid) {
-           axios.get('/scene/json/families?uuid=' + uuid).
-           then(function(rsp, status) {
-        	   app.status = status;
-               app.names = rsp.data.records;
+	       axios.post(
+	    		   "/scene/json/families", 
+	    		   {uuid:uuid}, 
+	               function(rsp) {
+	    			   app.rel_type = rsp.rel_type;
+	    			   //console.log( rsp );
+    			   }
+	   );
+
+// 	           axios.get('/scene/json/families?uuid=' + uuid).
+//            then(function(rsp, status) {
+//         	   app.status = status;
+//                app.names = rsp.data.records;
                //app.selected = [];
                //app.lastquery = q;
-           });
+//            });
 		   //console.log(uuid);
 	   },
        reverseMessage: function () {
