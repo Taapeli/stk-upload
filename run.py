@@ -6,7 +6,8 @@ import platform
 
 # On linux system uids are < 1000.  I know nothin about windows uids.
 # This should tell if we are on server or developer enviroment:
-running_on_server = (platform.system == "Linux") and (os.getuid() < 1000)
+running_on_server = ((platform.system == "Linux") and (os.getuid() < 1000))
+#running_on_server = os.path.isdir('/var/log/httpd/stkserver')
 
 if running_on_server:
     import sys
