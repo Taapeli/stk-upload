@@ -1,0 +1,62 @@
+{# _templates/scene/layout.html_ scene #}
+<!DOCTYPE html>
+<html xml:lang="fi-FI" xmlns="http://www.w3.org/1999/xhtml" lang="fi-FI"><head lang="fi-FI">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>{{ config.STK_SYSNAME }} – {% block title %}{% endblock %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="generator" content="stk-server">
+    <meta name="author" content="SSS / JMä">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/k_screen.css') }}" media="screen">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/k_print.css') }}" media="print">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hamburger.css') }}">
+<!--
+    <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
+    <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
+-->
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="/static/js/gettext.js"></script>
+    <script src="/static/js/scene_scripts.js"></script>
+</head>
+<body>
+{% if user_context %}
+  {% if user_context.context == 1 %}{% set material_st = "passed" %}
+  {% elif user_context.context == 2 %}{% set material_st = "own" %}
+{% endif %}{% endif %}
+{% block body %}
+    <h1 class={{material_st}}><a href="/"><img id="logo" src="/static/tam.png" 
+             alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
+             onmouseover="this.src='/static/tam1.png';" 
+             onmouseout="this.src='/static/tam.png';"/></a>
+        <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
+        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
+        
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu((
+   ) ) }}
+
+{% if root %}{# root vector like ('PASSED', 'jpek', '2020-01-03.001') #}
+	<div class='credit'>{% if root[0] == 'PASSED' %}{{ _('Origin from') }}
+	     {% else %}{{ _('User data') }}:{% endif %}
+	     <b>{{root[1]}}</b> {{person.root[2]}}</div>
+{% endif %}
+{% endblock %}
+
+    <div class="fullclear"></div>
+    <div id="footer">
+        <span class="copyright">© 2019 {{ _('The Genealogical Society of Finland') }}</span>
+        <span class="createdate">{{ config.STK_SYSNAME }} &nbsp;
+            {{ _('Version') }} {{ 'app'|app_date }}
+	        {% if elapsed %}
+	            <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+	        {% endif %}
+        </span>
+    </div>
+    <div class="fullclear"></div>
+
+    <script src="/static/js/help.js?2"></script>
+
+</body></html>
