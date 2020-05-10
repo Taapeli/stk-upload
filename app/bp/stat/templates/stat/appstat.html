@@ -10,6 +10,36 @@
   <div id="errors" class="errors"></div>
   Return to <a href="/stat">statistics start page</a>
   <p>
+    <div>
+      Set options:
+      <form action="/stat/appstat">
+	<fieldset>
+	  <label for="topn">{{ _("How many:") }}</label>
+	  <input type="text" name="topn" size="1"
+	         title="{{ _("How many at most?") }}"
+	         value="{{ topn }}">
+	  &nbsp;&nbsp;
+	  <label for="width">{{ _("Line length:") }}</label>
+	  <input type="text" name="width" size="1"
+	         title="{{ _("How long lines?") }}"
+	         value="{{ width }}">
+	  &nbsp;&nbsp;
+	  <label for="seeall">{{ _("See all:") }}</label>
+	  <input type="checkbox" name="seeall" size="1"
+	         title="{{ _("See counts/user?") }}"
+		 {% if seeall == 'x' %} checked {% endif %}
+		 id="seeall" value="{{ 'x' }}">
+	  &nbsp;&nbsp;
+	  <label for="bycount">{{ _("Sort by count:") }}</label>
+	  <input type="checkbox" name="bycount" size="1"
+	         title="{{ _("Sort by count or by text?") }}"
+		 {% if bycount == 'x' %} checked {% endif %}
+		 id="bycount" value="{{ 'x' }}">
+	  &nbsp;&nbsp;
+	  <input type="submit" value=" > ">
+	</fieldset>
+      </form>
+    </div>
     <pre>
       {% for line in lines %}{{ line }}
       {% endfor %}

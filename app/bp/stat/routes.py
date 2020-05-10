@@ -5,15 +5,18 @@
 import logging
 logger = logging.getLogger('stkserver')
 import time
-import re
+# import re
 
-from flask import render_template, request, redirect, url_for, jsonify
-from flask_security import roles_accepted, login_required
+from flask import render_template, request, redirect, url_for, session as user_session
+from flask_security import current_user, roles_accepted, login_required
 from flask_babelex import _
+
+from ui.user_context import UserContext
 
 import shareds
 
 from . import bp
+from .models import logreader
 
 
 def run_cmd(cmd):
@@ -72,7 +75,7 @@ def stat_home():
     )
 
 
-@bp.route('/stat/appstat')
+@bp.route('/stat/appstat', methods = ['GET', 'POST'])
 @login_required
 @roles_accepted('admin')
 def stat_app():
@@ -82,11 +85,20 @@ def stat_app():
 
     log_root = shareds.app.config['STK_LOGDIR']
     log_file = shareds.app.config['STK_LOGFILE']
-    from .models import logreader
+
+    u_context = UserContext(user_session, current_user, request)
+    topn = int(request.args.get("topn", 42))
+    width = int(request.args.get("width", 70))
+    seeall = request.args.get("seeall", None)
+    bycount = request.args.get("bycount", None)
+
     opts = {
-        "topn": 99,
-        "width": 80,
+        "topn": topn,
+        "width": width,
     }
+    if seeall == "x": opts["verbose"] = 1
+    if bycount == "x": opts["bycount"] = 1
+
 
     log = logreader.Log(opts)
     log.work_with(f"{log_root}/{log_file}")
@@ -98,5 +110,9 @@ def stat_app():
     logger.info(f"-> bp.stat.app, {elapsed:.4f}")
     return render_template("/stat/appstat.html",
                            lines = lines,
+                           topn = topn,
+                           width = width,
+                           seeall = seeall,
+                           bycount = bycount,
                            elapsed = elapsed )
 

@@ -2,6 +2,7 @@
 groups = [
     "bp.stat.app",
     "bp.stat",
+    "routes.entry auth=False demo="
 ]
 
 excludes = [
