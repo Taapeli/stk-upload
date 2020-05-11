@@ -11,18 +11,18 @@ div.content > p {
 	<h2>{{ _("Analyze of the Gramps XML") }}</h2>
 	{% if references %}
 		<div class="content">
-			<h3>{{ _("Results") }}</h3>
+			<h3>{{ _("File") }} <i>{{file}}</i></h3>
 			<table>
-				<th>{{ _("Number_of") }}</th>
-				<th>{{ _("Individs with reference to") }}</th>
-				<th>{{ _("Number_of") }}</th>
-				<th>{{ _("References") }}</th>
-				{% for line in references %}
-			       <tr><td>{{line.number_of_individs}}</td>
-			       <td>{{line.individ}}</td>
-			       <td>{{line.number_of_references}}</td>
-			       <td>{{line.reference}}</td></tr>
-			    {% endfor %}
+                <tr>
+   				    <th>{{ _("Objects ...") }}</th>
+   				    <th>{{ _("referring") }}</th>
+                </tr>
+				{% for line in references %}<tr>
+                    <td>{{line.number_of_individs}}
+                        {{ _(line.individ)|lower }} <!--{{ line.individ }}--></td>
+			        <td>{{line.number_of_references}}
+                        {{ _(line.reference)|lower }} <!--{{line.reference}}--></td>
+                </tr>{% endfor %}
 		    </table>
         </div>
 	{% endif %}

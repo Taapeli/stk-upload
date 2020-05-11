@@ -45,9 +45,9 @@ def scene():
     """ Home page for scene narrative pages ('kertova') for anonymous. """    
     print(f"--- {request}")
     print(f"--- {user_session}")
-    my_context = UserContext(user_session, current_user, request)
-    my_context.set_scope_from_request(request, 'person_scope')
-    logger.info(f"-> bp.scene.routes.scene '{my_context.scope[0]}'")
+    u_context = UserContext(user_session, current_user, request)
+    u_context.set_scope_from_request(request, 'person_scope')
+    logger.info(f"-> bp.scene.routes.scene '{u_context.scope[0]}'")
     return render_template('/start/index_scene.html')
 
 
@@ -67,7 +67,7 @@ def show_person_list(selection=None):
         try:
             # Selection from search form
             keys = (request.form['rule'], request.form['name'])
-            logger.info(f"-> bp.scene.routes.show_person_list POST {keys}, {args}")
+            theme=keys[0]
             #TODO: filter by user in the read method
             persons = read_persons_with_events(keys, args)
 
@@ -81,11 +81,13 @@ def show_person_list(selection=None):
         if selection:
             # Use selection context
             keys = selection.split('=')
+            theme=keys[0]
         else:
             keys = ('surname',)
-        logger.info(f"-> bp.scene.routes.show_person_list GET {keys}, {args}")
+            theme='-'
         #TODO: filter by user in the read method
         persons = read_persons_with_events(keys, args)
+        
 
     # If Context is COMMON (1):
     #    - show both own candidate and approved materials
@@ -104,7 +106,9 @@ def show_person_list(selection=None):
         else:
             #print(f'Show {p.sortname} too_new={p.too_new}, owner {p.user}')
             persons_out.append(p)
-    print(f'--> bp.scene.routes.show_person_list shows {len(persons_out)}/{len(persons)} persons')
+    #print(f'--> bp.scene.routes.show_person_list shows {len(persons_out)}/{len(persons)} persons')
+    logger.info("-> bp.scene.routes.show_person_list"
+                f" {u_context.owner_or_common()} {request.method} {theme} n={len(persons_out)}/{len(persons)}")
 
     return render_template("/scene/persons.html", persons=persons_out,
                            user_context=u_context, num_hidden=hidden, 
@@ -118,7 +122,7 @@ def show_persons_by_refname(refname, opt=""):
     """
     logger.warning("#TODO: fix material selevtion or remove action show_persons_by_refname")
 
-    my_context = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     keys = ('refname', refname)
     ref = ('ref' in opt)
     order = 0
@@ -128,7 +132,7 @@ def show_persons_by_refname(refname, opt=""):
     persons = read_persons_with_events(keys, args=args)
     logger.info("-> bp.scene.routes.show_persons_by_refname")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           user_context=my_context, order=order, rule=keys)
+                           user_context=u_context, order=order, rule=keys)
 
 @bp.route('/scene/persons/all/<string:opt>')
 @bp.route('/scene/persons/all/')
@@ -146,7 +150,7 @@ def show_all_persons_list(opt=''):
     logger.warning("#TODO: fix material selevtion or remove action show_all_persons_list")
 
     t0 = time.time()
-    my_context = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     keys = ('all',)
     ref = ('ref' in opt)
     if 'fn' in opt: order = 1   # firstname
@@ -158,7 +162,7 @@ def show_all_persons_list(opt=''):
     persons = read_persons_with_events(keys, args=args) #user=user, take_refnames=ref, order=order)
     logger.info("-> bp.scene.routes.show_all_persons_list")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           user_context=my_context, order=order,
+                           user_context=u_context, order=order,
                            rule=keys, elapsed=time.time()-t0)
 
 
@@ -189,16 +193,14 @@ def show_persons_all():
     # How many objects are shown?
     u_context.count = int(request.args.get('c', 100))
     u_context.privacy_limit = shareds.PRIVACY_LIMIT
-
-    logger.info("-> bp.scene.routes.show_persons_all: "
-               f"{u_context.owner_str()} forward from '{u_context.scope[0]}'")
     t0 = time.time()
 
     dbdriver = Neo4jReadDriver(shareds.driver)
     db = DBreader(dbdriver, u_context) 
     
     results = db.get_person_list()
-#         limit=count, start=None, include=["events"])
+    logger.info("-> bp.scene.routes.show_persons_all: "
+               f"{u_context.owner_or_common()} n={len(results.items)}/{len(results.items)-results.num_hidden}")
     print(f'Got {len(results.items)} persons with {results.num_hidden} hidden and {results.error} errors')
     return render_template("/scene/persons_list.html", persons=results.items,
                            num_hidden=results.num_hidden, 
@@ -245,12 +247,12 @@ def show_person(uid=None):
     uid = request.args.get('uuid', uid)
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
-    logger.info(f"-> bp.scene.routes.show_person u={u_context.owner_or_common()}")
 
     # v3 Person page
     person, objs, jscode = get_person_full_data(uid, u_context.user, u_context.use_common())
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
+    logger.info(f"-> bp.scene.routes.show_person {u_context.owner_or_common()} obj={len(objs)}")
 
     #for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
@@ -300,7 +302,7 @@ def show_event(uniq_id):
         Derived from bp.tools.routes.show_baptism_data()
     """
     event, persons = get_event_participants(uniq_id)
-    logger.info("-> bp.scene.routes.show_event")
+    logger.info(f"-> bp.scene.routes.show_event n={len(persons)}")
     return render_template("/scene/event.html",
                            event=event, persons=persons)
 
@@ -314,19 +316,20 @@ def show_families():
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set context by owner and the data selections
-    my_context = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_context.set_scope_from_request(request, 'person_scope')
+    u_context.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
     # 'families' has Family objects
-    families = Family_combo.get_families(o_context=my_context, opt=opt, limit=count)
+    families = Family_combo.get_families(o_context=u_context, opt=opt, limit=count)
 
-    logger.info("-> bp.scene.routes.show_families")
+    logger.info("-> bp.scene.routes.show_families "
+                f"{u_context.owner_or_common()} by={opt} n={len(families)}")
     return render_template("/scene/families.html", families=families, 
-                           user_context=my_context, elapsed=time.time()-t0)
+                           user_context=u_context, elapsed=time.time()-t0)
 
 # @bp.route('/scene/family=<int:fid>')
 # def show_family_page(fid):
@@ -415,8 +418,8 @@ def show_places():
 
 #     for p in result.items:
 #         print ("# {} ".format(p))
-    logger.info("-> bp.scene.routes.show_places "\
-               f"u={u_context.owner_or_common()} fw='{u_context.next_name_fw()}'")
+    logger.info("-> bp.scene.routes.show_places "
+               f"{u_context.owner_or_common()} n={len(results.items)}")
     return render_template("/scene/places.html", places=results.items, menuno=4,
                            user_context=u_context, elapsed=time.time()-t0)
 
@@ -441,7 +444,7 @@ def show_place(locid):
 #     for p in hierarchy:         print (f"# {p} ")
 #     for e in events:            print (f"# {e} {e.description}")
 #     for u in place.notes:       print (f"# {u} ")
-    logger.info(f"-> bp.scene.routes.show_place u={u_context.owner_or_common()} n={len(results.events)}")
+    logger.info(f"-> bp.scene.routes.show_place {u_context.owner_or_common()} n={len(results.events)}")
     return render_template("/scene/place_events.html", place=results.items, 
                            pl_hierarchy=results.hierarchy,
                            user_context=u_context, events=results.events)
@@ -476,7 +479,7 @@ def show_sources(series=None):
         results = reader.get_source_list()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info(f"-> bp.scene.routes.show_sources series={u_context.series} c={len(results.items)}")
+    logger.info(f"-> bp.scene.routes.show_sources by={u_context.series} c={len(results.items)}")
     return render_template("/scene/sources.html", sources=results.items, 
                            user_context=u_context)
 
@@ -517,17 +520,17 @@ def show_medias():
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set context by owner and the data selections
-    my_context = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_context.set_scope_from_request(request, 'media_scope')
+    u_context.set_scope_from_request(request, 'media_scope')
     try:
-        medias = Media.read_my_media_list(my_context, 20)
+        medias = Media.read_my_media_list(u_context, 20)
 
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info(f"-> bp.scene.media.show_medias: forward from '{my_context.scope[0]}'")
+    logger.info(f"-> bp.scene.media.show_medias: {u_context.owner_or_common()} fw n={len(medias)}")
     return render_template("/scene/medias.html", medias=medias, 
-                           user_context=my_context, elapsed=time.time()-t0)
+                           user_context=u_context, elapsed=time.time()-t0)
 
 @bp.route('/scene/media', methods=['GET'])
 def show_media(uid=None):
@@ -535,20 +538,20 @@ def show_media(uid=None):
         One Media
     """
     uid = request.args.get('uuid', uid)
-    my_context = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
     
     try:
-        mediaobj = Media.get_one(uid)
-        fullname, _mimetype = media.get_fullname(mediaobj.uuid)
+        medium = Media.get_one(uid)
+        fullname, _mimetype = media.get_fullname(medium.uuid)
         size = media.get_image_size(fullname)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    logger.info("-> bp.scene.routes.show_media")
-    return render_template("/scene/media.html", media=mediaobj, size=size,
-                           user_context=my_context, menuno=6)
+    logger.info(f"-> bp.scene.routes.show_media n={len(medium.ref)}")
+    return render_template("/scene/media.html", media=medium, size=size,
+                           user_context=u_context, menuno=6)
 
 # ----------- Access media file ---------------
 
@@ -575,18 +578,18 @@ def fetch_media(fname):
         if crop:
             # crop dimensions are diescribed as % of width and height
             image = media.get_cropped_image(fullname, crop, show_thumb)
-            logger.info("-> bp.scene.routes.fetch_media cropped png")
+            logger.debug("-> bp.scene.routes.fetch_media cropped png")
             # Create a png image in memery and display it
             buffer = io.BytesIO()
             image.save(buffer, format="PNG")
             return Response(buffer.getvalue(), mimetype='image/png')
         else:
-            logger.info("-> bp.scene.routes.fetch_media")
+            logger.debug("-> bp.scene.routes.fetch_media full")
             return send_file(fullname, mimetype=mimetype)        
     except FileNotFoundError:
         # Show default image
         ret = send_file(os.path.join('static', 'noone.jpg'), mimetype=mimetype)
-        logger.warning(f"-> bp.scene.routes.fetch_thumbnail: missing {fullname}")
+        logger.debug(f"-> bp.scene.routes.fetch_media none")
         return ret
 
 @bp.route('/scene/thumbnail')
@@ -597,7 +600,7 @@ def fetch_thumbnail():
     crop = request.args.get("crop")
     if crop == "None":
         crop = None
-    logger.info(f"-> bp.scene.routes.fetch_thumbnail {uuid}")
+    logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
     mimetype='image/jpg'
     thumbname = "(no file)"
     try:
@@ -608,6 +611,6 @@ def fetch_thumbnail():
     except FileNotFoundError:
         # Show default image
         ret = send_file(os.path.join('static', 'noone.jpg'), mimetype=mimetype)
-        logger.warning(f"-> bp.scene.routes.fetch_thumbnail: missing {thumbname}")
+        logger.debug(f"-> bp.scene.routes.fetch_thumbnail none")
         return ret
         

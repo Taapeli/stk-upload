@@ -12,7 +12,7 @@ logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, session , flash
 from flask_security import login_required, roles_accepted, current_user, utils as secutils
-from flask_babelex import _
+from flask_babelex import _, get_locale
 
 import shareds
 from models import email
@@ -44,7 +44,7 @@ def start_guest():
     """
     user = shareds.user_datastore.get_user('guest')
     secutils.login_user(user)
-    logger.info('-> bp.start.routes.start_guest: Anonymous user')
+    logger.info('-> bp.start.routes.start u=guest')
     return render_template('/start/index_guest.html')
 
 
@@ -59,14 +59,12 @@ def start_logged():
     """
     if "gedcom_user" in session: del session["gedcom_user"]  
     
-#     if current_user.is_authenticated:
     role_names = [role.name for role in current_user.roles]
-    logger.info("-> bp.start.routes.start_logged "
+    logger.info(f"-> bp.start.routes.start lang={get_locale().language}")
+    logger.debug("-> bp.start.routes.start_logged "
                 f"user {current_user.username}/{current_user.email}, roles {role_names}")
     return render_template('/start/index_logged.html')
-#     else:
-#         logger.info('-> bp.start.routes.start Anonymous user')
-#         return render_template('/start/guest_index.html')
+
 
 @shareds.app.route('/thankyou')
 def thankyou():
@@ -132,7 +130,6 @@ def my_settings():
     lang = request.form.get("lang")
     is_guest = current_user.username == "guest"
     referrer = request.form.get("referrer",default=request.referrer)
-    logger.info(f"-> bp.start.routes.my_settings lang={lang}, guest={is_guest}")
     if lang:
         try:
             from bp.admin.models.user_admin import UserAdmin # can't import earlier
@@ -151,6 +148,7 @@ def my_settings():
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)
     print(f'# Gedcoms {gedcoms}')
     
+    logger.info("-> bp.start.routes.my_settings")
     return render_template("/start/my_settings.html",
                            is_guest=is_guest,
                            referrer=referrer,

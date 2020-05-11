@@ -40,15 +40,18 @@ def entry():
     '''
     if current_user.has_role("guest"):
 #        print("Authenticated guest user at entry") 
+        logger.info(f'-> routes.entry guest')
         logout_user()
 
     if current_user.is_authenticated:
         # Home page for logged in user
+        logger.info(f'-> routes.entry user')
         return redirect(url_for('start_logged'))
 
+    logger.info(f'-> routes.entry -')
     lang = get_locale().language
     demo_site = f"{app.config['DEMO_URL']}?lang={lang}"
-    logger.info(f'-> routes.entry auth={current_user.is_authenticated} demo={demo_site}')
+    logger.debug(f'-> routes.entry auth={current_user.is_authenticated} demo={demo_site}')
 
     # If not logged in, a login page is shown here first
     return render_template('/index_entry.html', demo_site=demo_site)

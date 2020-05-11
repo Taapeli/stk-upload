@@ -3,14 +3,14 @@
 # KKu 19.12.2019
 
 import logging 
-import urllib
-from flask_security import roles_accepted, current_user
+#import urllib
+#from flask_security import roles_accepted, current_user
 
 logger = logging.getLogger('stkserver')
 
 from flask import request, jsonify
 # from flask_security import roles_accepted, login_required #, render_template, current_user ,roles_required
-from flask_babelex import _
+#from flask_babelex import _
 
 from . import bp
 from . import apikey
