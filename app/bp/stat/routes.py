@@ -5,7 +5,7 @@
 import logging
 logger = logging.getLogger('stkserver')
 import time
-# import re
+import re
 
 from flask import render_template, request, redirect, url_for, session as user_session
 from flask_security import current_user, roles_accepted, login_required
@@ -91,14 +91,18 @@ def stat_app():
     width = int(request.args.get("width", 70))
     seeall = request.args.get("seeall", None)
     bycount = request.args.get("bycount", None)
+    users = request.args.get("users", "")
 
     opts = {
         "topn": topn,
         "width": width,
     }
-    if seeall == "x": opts["verbose"] = 1
-    if bycount == "x": opts["bycount"] = 1
-
+    if seeall is not None: opts["verbose"] = 1
+    if bycount is not None: opts["bycount"] = 1
+    if users != "":
+        users = "," . join(re.split("[, ]+", users))
+        print(f"users = '{users}'")
+        opts["users"] = users
 
     log = logreader.Log(opts)
     log.work_with(f"{log_root}/{log_file}")
@@ -113,6 +117,7 @@ def stat_app():
                            topn = topn,
                            width = width,
                            seeall = seeall,
+                           users = users,
                            bycount = bycount,
                            elapsed = elapsed )
 

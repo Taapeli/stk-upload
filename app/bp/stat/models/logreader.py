@@ -5,8 +5,10 @@
 import re
 import os
 
+from flask import flash
+
 version = "0.1"
-timestamp = r'Time-stamp: <10.05.2020 19:45:19 juha@rauta>'
+timestamp = r'Time-stamp: <11.05.2020 17:01:34 juha@rauta>'
 
 ################################################################
 #
@@ -134,11 +136,22 @@ Used to help group similar messages together for actual counting.
             return message
 
         ################ work_with() starts here
+        # debug_print(2, f"working with {file}, opts={opts}")
+        if file in self._files:
+            print(f"Logreader already did file {file}")
+            return
         self._files.append(file)
-        if "user" in self._opts:
-            users = self._opts["user"].split(",")
 
-        # debug_print(2, f"working with {file}")
+        users_re = None
+        if "users" in self._opts:
+            try:
+                x = re.sub(",", "|", self._opts["users"])
+                print(f"x={x}")
+                users_re = re.compile(x)
+            except Exception as e:
+                flash(f"Bad regexp '{self._opts['users']}': {e}", category='warning')
+
+
         for line in read_lines(file):
             match = log_re.match(line)
             if not match:
@@ -148,8 +161,9 @@ Used to help group similar messages together for actual counting.
             # debug_print(4, f"{ymd} {hms} '{logger}' {level} {user} '{message}'")
             if level != 'INFO':
                 continue
-            if "user" in self._opts and self._opts["user"] not in users:
-                continue
+            if users_re:
+                m = users_re.match(user)
+                if not m: continue
             message = clean_message(message)
             if not message: continue
             if "group_level" in self._opts:
