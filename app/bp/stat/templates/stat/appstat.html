@@ -24,16 +24,16 @@
 	         title="{{ _("How long lines?") }}"
 	         value="{{ width }}">
 	  &nbsp;&nbsp;
-	  <label for="users">{{ _(" See users:") }}</label>
+	  <label for="users">{{ _(" Show users:") }}</label>
 	  <input type="text" name="users" size="8"
-	         title="{{ _("regexp(s) for users to see (match start of name)") }}"
-		 {% if users %} value="{{ users }}"> {% endif %}
+	         title="{{ _("regexp(s) for users to show (match start of name)") }}"
+		 {% if users %} value="{{ users }}" {% endif %}>
 	  &nbsp;&nbsp;
-	  <label for="seeall">{{ _("See all:") }}</label>
-	  <input type="checkbox" name="seeall" size="1"
-	         title="{{ _("See counts/user?") }}"
-		 {% if seeall %} checked {% endif %}
-		 id="seeall" value="{{ 'x' }}">
+	  <label for="showall">{{ _("Show all:") }}</label>
+	  <input type="checkbox" name="showall" size="1"
+	         title="{{ _("Show counts/user?") }}"
+		 {% if showall %} checked {% endif %}
+		 id="showall" value="{{ 'x' }}">
 	  &nbsp;&nbsp;
 	  <label for="bycount">{{ _("By count:") }}</label>
 	  <input type="checkbox" name="bycount" size="1"
@@ -46,8 +46,8 @@
       </form>
     </div>
     <pre>
-      {% for line in lines %}{{ line }}
-      {% endfor %}
+ {% for line in lines %}{{ line }}
+ {% endfor %}
     </pre>
 </div>
 {% endblock %}

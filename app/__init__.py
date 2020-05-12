@@ -38,6 +38,7 @@ def setup_logging():
         print("Config param '{}' not found, exiting".format(key))
         exit(1)
 
+    # Mapping of config file strings to constants known by Formatter class
     loglevels = { "NOTSET": logging.NOTSET,
                   "DEBUG": logging.DEBUG,
                   "INFO": logging.INFO,
@@ -49,11 +50,12 @@ def setup_logging():
     logfile = need('STK_LOGFILE')
     loglevel = need('STK_LOGLEVEL')
 
-    # Hard coded or not:
-    loggername = 'stkserver'    # this name is hardcoded in other places
-    # loggername = need('STK_LOGGER')
+    # Name of out application level logger:
+    loggername = 'stkserver'
+
+    # Format of our application level log messages,
+    # used for log parsing in app/bp/stat/models/logreader.py
     logformat = '%(asctime)s %(name)s %(levelname)s %(user)s %(message)s'
-    # logformat = need('STK_LOGFORMAT')
 
     if loglevel in loglevels:
         loglevel = loglevels[loglevel]
