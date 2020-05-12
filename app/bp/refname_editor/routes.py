@@ -39,7 +39,7 @@ def refnameapi_search_v1():
             status="Error",
             statusText="Missing argument 'lookfor'",
         ))
-    usage = 'firstname'
+    #usage = 'firstname'
     usage = request.form.get("usage")
     match = request.form.get("match")
     rsp = refnameapi_v1.search(lookfor, usage, match) 

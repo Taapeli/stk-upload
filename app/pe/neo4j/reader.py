@@ -160,7 +160,7 @@ class Neo4jReadDriver:
 
 
     def dr_get_place_w_na_no_me(self, user, uuid, lang='fi'): 
-        """ Returns the PlaceBl with Notes and PlaceNames included.
+        """ Returns the PlaceBl with PlaceNames, Notes and Medias included.
         """
         pl = None
         with self.driver.session() as session:

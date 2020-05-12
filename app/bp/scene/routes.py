@@ -6,13 +6,13 @@ Created on 12.8.2018
 import logging 
 import io
 #import os
-from flask import send_file, Response
 import shareds
 import os
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
 
+from flask import send_file, Response
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
@@ -235,7 +235,7 @@ def obsolete_show_person_v2(uid=None):
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin', 'guest')
-def     show_person(uid=None):
+def show_person(uid=None):
     """ One Person with all connected nodes - NEW version 3.
 
         Arguments:
@@ -353,6 +353,61 @@ def show_family_page(uid=None):
     logger.info("-> bp.scene.routes.show_family_page")
     return render_template("/scene/family.html", 
                            family=family, menuno=3, user_context=u_context)
+
+
+@bp.route('/scene/json/families', methods=['GET','POST'])
+def json_get_person_families(uuid=None):
+    """ Get person family.
+        TODO: Get families for a Person.
+    """
+    import json
+    #uuid = request.args.get('uuid', uuid)
+    uuid = json.loads(request.data)['uuid']
+    print(f'got uuid:{uuid}')
+    if not uuid:
+        return json.dumps({"rsp":"", "status":"Missing Family key"})
+    u_context = UserContext(user_session, current_user, request)
+    try:
+        family = Family_combo.get_family_data(uuid, u_context)
+    except KeyError as e:
+        return '{rsp="", status="' + str(e) + '"}'
+    fdict = {
+        "rel_type":family.rel_type,
+        "dates": family.dates.to_list(),
+        "id":family.id,
+         "uuid":family.uuid
+    }
+    #print(f'♂ {family.father} {family.father.event_birth} – {family.father.event_death}')
+    if family.father:
+        fdict["father"] = {
+            "name":family.father.sortname,
+            "dates":family.father.event_birth.dates.to_list()
+        }
+        #fdict["father_birth_dates"] = family.father.event_birth.dates.to_list()
+    #print(f'♀ {family.mother} {family.mother.event_birth} – {family.mother.event_death}')
+    if family.mother:
+        fdict["mother"] = {
+            "name":family.mother.sortname,
+            "dates":family.mother.event_birth.dates.to_list()
+        }
+        #fdict["mother_birth_dates"] = family.mother.event_birth.dates.to_list()
+    chidren = []
+    for ch in family.children:
+        #print (f'-child {ch} {ch.event_birth}')
+        child = {"gender":ch.sex, "sortname":ch.sortname}
+        if ch.event_birth:
+            child['dates'] = ch.event_birth.dates.to_list()
+        chidren.append(child)
+    events = []
+    for ev in family.events:
+        #print (f'-event {ev}')
+        events.append({"type":ev.type, "id":ev.id, "uuid":ev.uuid})
+    logger.info(f"-> bp.scene.routes.show_person_families_json")
+    response = {'rsp':fdict, 'status':'ok'}
+    print(json.dumps(response,indent=True))
+    #response.headers['Access-Control-Allow-Origin'] = '*'
+    return json.dumps(response) 
+#     return render_template("/scene/family.html", family=family, ...)
 
 # @bp.route('/pop/family=<int:fid>')
 # def show_family_popup(fid):
