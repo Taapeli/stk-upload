@@ -5,11 +5,14 @@
 import re
 import os
 
+from flask import flash
+
 version = "0.1"
-timestamp = r'Time-stamp: <10.05.2020 19:45:19 juha@rauta>'
+timestamp = r'Time-stamp: <11.05.2020 18:33:12 juha@rauta>'
 
 ################################################################
 #
+# Format of log messages (see app/__init__.py)
 # '%(asctime)s %(name)s %(levelname)s %(user)s %(message)s'
 #
 ymd_re = r'\d\d\d\d-\d\d-\d\d'
@@ -28,8 +31,8 @@ helptext = """
 
 ################################################################
 #
-def error(msg: str) -> None:
-    print(f"*** {msg}")
+# def error(msg: str) -> None:
+#     print(f"*** {msg}")
 
 # def debug_print(level: int, msg: str) -> None:
 #     if opts.debug >= level:
@@ -134,24 +137,35 @@ Used to help group similar messages together for actual counting.
             return message
 
         ################ work_with() starts here
+        # debug_print(2, f"working with {file}, opts={opts}")
+        if file in self._files:
+            print(f"Logreader already did file {file}")
+            return
         self._files.append(file)
-        if "user" in self._opts:
-            users = self._opts["user"].split(",")
 
-        # debug_print(2, f"working with {file}")
+        users_re = None
+        if "users" in self._opts:
+            try:
+                users_re = re.compile(re.sub(",", "|", self._opts["users"]))
+            except Exception as e:
+                flash(f"Bad regexp '{self._opts['users']}': {e}", category='warning')
+
+
         for line in read_lines(file):
             match = log_re.match(line)
             if not match:
-                error(f"strange line {line}", end='') # this should not happen
+                print(f"strange log line {line}", end='') # this should not happen
                 continue
             (ymd, hms, logger, level, user, message) = match.groups()
             # debug_print(4, f"{ymd} {hms} '{logger}' {level} {user} '{message}'")
             if level != 'INFO':
                 continue
-            if "user" in self._opts and self._opts["user"] not in users:
+            if users_re and not users_re.match(user):
                 continue
             message = clean_message(message)
-            if not message: continue
+            if not message:
+                continue
+
             if "group_level" in self._opts:
                 collect_messages(self, message)
             else:

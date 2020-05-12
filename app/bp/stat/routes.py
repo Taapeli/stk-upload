@@ -5,7 +5,8 @@
 import logging
 logger = logging.getLogger('stkserver')
 import time
-# import re
+import re
+import os
 
 from flask import render_template, request, redirect, url_for, session as user_session
 from flask_security import current_user, roles_accepted, login_required
@@ -86,22 +87,28 @@ def stat_app():
     log_root = shareds.app.config['STK_LOGDIR']
     log_file = shareds.app.config['STK_LOGFILE']
 
-    u_context = UserContext(user_session, current_user, request)
+    # u_context = UserContext(user_session, current_user, request)
     topn = int(request.args.get("topn", 42))
     width = int(request.args.get("width", 70))
-    seeall = request.args.get("seeall", None)
+    showall = request.args.get("showall", None)
     bycount = request.args.get("bycount", None)
+    users = request.args.get("users", "")
 
     opts = {
         "topn": topn,
         "width": width,
     }
-    if seeall == "x": opts["verbose"] = 1
-    if bycount == "x": opts["bycount"] = 1
-
+    if showall is not None: opts["verbose"] = 1
+    if bycount is not None: opts["bycount"] = 1
+    if users != "":
+        users = "," . join(re.split("[, ]+", users))
+        print(f"users = '{users}'")
+        opts["users"] = users
 
     log = logreader.Log(opts)
-    log.work_with(f"{log_root}/{log_file}")
+    for f in os.listdir(log_root):
+        if log_file in f:
+            log.work_with(f"{log_root}/{f}")
     log.print_counts()
     lines = log.result()
     # log.clear()
@@ -112,7 +119,8 @@ def stat_app():
                            lines = lines,
                            topn = topn,
                            width = width,
-                           seeall = seeall,
+                           showall = showall,
+                           users = users,
                            bycount = bycount,
                            elapsed = elapsed )
 
