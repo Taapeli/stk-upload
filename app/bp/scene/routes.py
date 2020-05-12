@@ -358,31 +358,31 @@ def show_family_page(uid=None):
 
 @bp.route('/scene/json/families', methods=['GET','POST'])
 def json_get_person_families(uuid=None):
-    """ TODO: Get famailies for a Person.
+    """ Get person family.
+        TODO: Get families for a Person.
     """
     import json
-    uuid = request.args.get('uuid', uuid)
+    #uuid = request.args.get('uuid', uuid)
+    uuid = json.loads(request.data)['uuid']
     print(f'got uuid:{uuid}')
     if not uuid:
-        return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
-    
+        return json.dumps({"rsp":"", "status":"Missing Family key"})
     u_context = UserContext(user_session, current_user, request)
     try:
         family = Family_combo.get_family_data(uuid, u_context)
     except KeyError as e:
         return '{rsp="", status="' + str(e) + '"}'
-    family = {"father_sortname":"#Anders#Jacobsson",
-              "rel_type":"Married",
-              "dates": json.dumps(family.dates.to_list()),
-              "id":"F0245",
-              "uuid":"fdef6b6a24344d27a2459016aad8d36b"}
+    family = {"father_sortname":family.father_sortname,
+              "rel_type":family.rel_type,
+              "dates": family.dates.to_list(),
+              "id":family.id,
+              "uuid":family.uuid}
     logger.info(f"-> bp.scene.routes.show_person_families_json")
     response = {'rsp':family, 'status':'ok'}
     print(response)
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response 
-#     return render_template("/scene/family.html", 
-#                            family=family, menuno=3, user_context=u_context)
+    #response.headers['Access-Control-Allow-Origin'] = '*'
+    return json.dumps(response) 
+#     return render_template("/scene/family.html", family=family, ...)
 
 # @bp.route('/pop/family=<int:fid>')
 # def show_family_popup(fid):

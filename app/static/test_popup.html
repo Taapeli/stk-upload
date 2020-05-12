@@ -12,6 +12,7 @@
     background: #666;
     color:white;
 }
+.row div { display: inline-block; }
 </style>
 
 <h2>Popup</h2>
@@ -96,13 +97,24 @@
 
 <hr>
 <div id="app">
-  <span>${ message }</span>
-  <button v-on:click="reverseMessage">Reverse Message</button>
-  <input type="button" id="search" value="Haku" 
-    v-on:click="getFamilies('e8450bbbd48348338abce8b900df3bf8')">
-  <p>${status} – <tt>${id}</tt>${rel_type} <b>${father_sortname}</b></p>
+  <div class="row">
+    <div>
+        <span>${ message }</span>
+        <button v-on:click="reverseMessage">Reverse Message</button>
+      
+        <input type="button" id="search" value="Haku" 
+          v-on:click="getFamilies(uuid='e8450bbbd48348338abce8b900df3bf8')">
+    </div>
+    <div style="display: inline-block;">
+        ${status} – Family
+        <span style="background:white; padding:3px;">&nbsp;
+            <tt>${id}</tt> ${rel_type} ${dates[1]}
+            <i>${father_sortname} <> ${mother_sortname}</i>&nbsp;</span>
+    </div>
+  </div>
 </div>
-
+</body>
+</html>
 
 <script>
 // When the user clicks on div, open the popup
@@ -118,20 +130,27 @@ var app = new Vue({
      message: 'Hello Vue!',
      rel_type: '',
      id: 'F',
-     father_sortname: '-',
-     mother_sortname: '-',
-     status: 'ok'
+     father_sortname: 'father',
+     mother_sortname: 'mother',
+     dates: [-1, "?", ""],
+     uuid:'_',
+     status: 'Not run'
    },
    methods: {
 	   getFamilies(uuid) {
-	       axios.post(
-	    		   "/scene/json/families", 
-	    		   {uuid:uuid}, 
-	               function(rsp) {
-	    			   app.rel_type = rsp.rel_type;
-	    			   //console.log( rsp );
-    			   }
-	   );
+	       axios
+	       .post("/scene/json/families", {uuid:uuid})
+	       .then (function(rsp) {
+	    			   app.status = rsp.status;
+                       app.id = rsp.data.rsp.id;
+                       app.rel_type = rsp.data.rsp.rel_type;
+                       app.dates = rsp.data.rsp.dates;
+                       app.father_sortname = rsp.data.rsp.father_sortname;
+                       app.mother_sortname = rsp.data.rsp.mother_sortname;
+                       console.log( rsp.data );
+	    			   //app.rel_type = rsp.rel_type;
+    			 })
+	   },
 
 // 	           axios.get('/scene/json/families?uuid=' + uuid).
 //            then(function(rsp, status) {
@@ -141,13 +160,10 @@ var app = new Vue({
                //app.lastquery = q;
 //            });
 		   //console.log(uuid);
-	   },
+
        reverseMessage: function () {
      	  this.message = this.message.split('').reverse().join('')
    	   }
   }
 })
 </script>
-</body>
-</html>
-
