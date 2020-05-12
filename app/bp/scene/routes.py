@@ -13,7 +13,6 @@ import time
 from datetime import datetime
 
 from flask import send_file, Response
-from flask import jsonify # request
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
@@ -372,14 +371,40 @@ def json_get_person_families(uuid=None):
         family = Family_combo.get_family_data(uuid, u_context)
     except KeyError as e:
         return '{rsp="", status="' + str(e) + '"}'
-    family = {"father_sortname":family.father_sortname,
-              "rel_type":family.rel_type,
-              "dates": family.dates.to_list(),
-              "id":family.id,
-              "uuid":family.uuid}
+    fdict = {
+        "rel_type":family.rel_type,
+        "dates": family.dates.to_list(),
+        "id":family.id,
+         "uuid":family.uuid
+    }
+    #print(f'♂ {family.father} {family.father.event_birth} – {family.father.event_death}')
+    if family.father:
+        fdict["father"] = {
+            "name":family.father.sortname,
+            "dates":family.father.event_birth.dates.to_list()
+        }
+        #fdict["father_birth_dates"] = family.father.event_birth.dates.to_list()
+    #print(f'♀ {family.mother} {family.mother.event_birth} – {family.mother.event_death}')
+    if family.mother:
+        fdict["mother"] = {
+            "name":family.mother.sortname,
+            "dates":family.mother.event_birth.dates.to_list()
+        }
+        #fdict["mother_birth_dates"] = family.mother.event_birth.dates.to_list()
+    chidren = []
+    for ch in family.children:
+        #print (f'-child {ch} {ch.event_birth}')
+        child = {"gender":ch.sex, "sortname":ch.sortname}
+        if ch.event_birth:
+            child['dates'] = ch.event_birth.dates.to_list()
+        chidren.append(child)
+    events = []
+    for ev in family.events:
+        #print (f'-event {ev}')
+        events.append({"type":ev.type, "id":ev.id, "uuid":ev.uuid})
     logger.info(f"-> bp.scene.routes.show_person_families_json")
-    response = {'rsp':family, 'status':'ok'}
-    print(response)
+    response = {'rsp':fdict, 'status':'ok'}
+    print(json.dumps(response,indent=True))
     #response.headers['Access-Control-Allow-Origin'] = '*'
     return json.dumps(response) 
 #     return render_template("/scene/family.html", family=family, ...)

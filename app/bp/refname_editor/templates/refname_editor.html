@@ -34,7 +34,7 @@ div.box {
 }
 
 div.box1 {
-   	width: 100%;
+   	width: 944px;
     min-height: 100px;
 }
 
@@ -53,25 +53,26 @@ td.checkbox {
 	width: 20px;
 }
 
-span.initial a {
-	background: lightsteelblue;
-	margin: 10px;
-	padding: 5px;
-	border: 1px;
+div.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+.flex-container > div {
+  background-color: lightsteelblue;
+  width: 2em;
+  height: 2em;
+  padding-top: .5em;
+  margin: 5px;
+  text-align: center;
+  border-radius: 5px;
+  border: 1px solid gray;
+}
 }
 
-span.initial2 a {
-	background: chartreuse;
-	margin: 10px;
-	padding: 5px;
-	border: 1px;
-}
-
-span.initial3 a {
-	background: lightyellow;
-	margin: 10px;
-	padding: 5px;
-	border: 1px;
+div.initial a {
+    display:inline;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 a.bolded {
@@ -119,15 +120,21 @@ div#edit_dialog {
 		<input type=radio v-model="match" value="contains">contains
 		<p>
 	    <input type="button" id="addname" value="Lisää hakuteksti uutena nimenä" :disabled="q.length < 1" @click="addname(q)">
-		<p>
-		<span class="initial" v-for="initial in initials"><a v-if="initial<='Z'" href="#" @click="make_initials1(initial)">${initial}</a></span>
-		<p>
-		<span class="initial" v-for="initial in initials"><a v-if="initial>'Z'" href="#" @click="make_initials1(initial)">${initial}</a></span>
-		<p>
-		<span class="initial2" v-show="prefix" v-for="initial in initials2"><a href="#" @click="make_initials2(initial)">${initial}</a></span>
-		<p>
-		<span class="initial3" v-show="prefix2" v-for="initial in initials3"><a href="#" @click="q=initial;search(initial)">${initial}</a></span>
-	
+        </p>
+		<div class="flex-container">
+   		   <div class="initial" v-for="initial in initials">
+               <a v-if="initial<='Z'" href="#" @click="make_initials1(initial)">${initial}</a>
+           </div>
+   		   <div class="initial" v-for="initial in initials">
+               <a v-if="initial>'Z'" href="#" @click="make_initials1(initial)">${initial}</a>
+           </div>
+   		   <div class="initial" v-show="prefix" v-for="initial in initials2">
+               <a href="#" @click="make_initials2(initial)">${initial}</a>
+           </div>
+   		   <div class="initial" v-show="prefix" v-for="initial in initials3">
+               <a href="#" @click="q=initial;search(initial)">${initial}</a>
+           </div>
+        </div>
     </div>
     <div>
     
