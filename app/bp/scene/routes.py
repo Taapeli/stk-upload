@@ -362,20 +362,21 @@ def json_get_person_families(uuid=None):
     """
     import json
     try:
-        #uuid = request.args.get('uuid', uuid)
-        uuid = json.loads(request.data)['uuid']
+        uuid = request.args.get('uuid', None)
+        if not uuid:
+            uuid = json.loads(request.data)['uuid']
         print(f'got uuid: {uuid}')
         if not uuid:
             return json.dumps({"records":[], "statusText":"Missing Family key"})
     except Exception as e:
-        #return json.dumps({"records":[], "statusText":"Missing Family key, "+str(e)})
-        uuid="ea28f1c846714c4dbfb337e61fe770ad"
+        return json.dumps({"records":[], "statusText":"Missing Family key, "+str(e)})
+        #uuid="ea28f1c846714c4dbfb337e61fe770ad"
 
     u_context = UserContext(user_session, current_user, request)
     try:
         family = Family_combo.get_family_data(uuid, u_context)
         if not family:
-            return json.dumps({"records":[], "statusText":"Invalid family key"})
+            return json.dumps({"records":[], "statusText":"No family got"})
         fdict = {
             "rel_type":family.rel_type,
             "dates": family.dates.to_list(),
