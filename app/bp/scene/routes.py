@@ -355,20 +355,27 @@ def show_family_page(uid=None):
                            family=family, menuno=3, user_context=u_context)
 
 
-@bp.route('/scene/json/families', methods=['POST'])
+@bp.route('/scene/json/families', methods=['POST','GET'])
 def json_get_person_families(uuid=None):
-    """ Get person family.
+    """ Get data for a family by its uuid
         TODO: Get all families for a Person.
     """
     import json
-    #uuid = request.args.get('uuid', uuid)
-    uuid = json.loads(request.data)['uuid']
-    print(f'got uuid: {uuid}')
-    if not uuid:
-        return json.dumps({"records":[], "statusText":"Missing Family key"})
+    try:
+        #uuid = request.args.get('uuid', uuid)
+        uuid = json.loads(request.data)['uuid']
+        print(f'got uuid: {uuid}')
+        if not uuid:
+            return json.dumps({"records":[], "statusText":"Missing Family key"})
+    except Exception as e:
+        #return json.dumps({"records":[], "statusText":"Missing Family key, "+str(e)})
+        uuid="ea28f1c846714c4dbfb337e61fe770ad"
+
     u_context = UserContext(user_session, current_user, request)
     try:
         family = Family_combo.get_family_data(uuid, u_context)
+        if not family:
+            return json.dumps({"records":[], "statusText":"Invalid family key"})
         fdict = {
             "rel_type":family.rel_type,
             "dates": family.dates.to_list(),
