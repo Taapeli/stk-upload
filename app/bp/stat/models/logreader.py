@@ -24,24 +24,21 @@ arrow_re = re.compile(r"^-> ([^ ]+)")
 
 
 
-def find_longest_user(counts):
+def find_longest(list_of_tuples, what):
     longest = 0
-    for message, ulist in counts:
-        for user in ulist:
-            if len(user) > longest:
-                longest = len(user)
+    for tup in list_of_tuples:
+        if what == "msg":
+            if len(tup[0]) > longest:
+                longest = len(tup[0])
+            continue
+        for u in tup[1].keys():
+            if len(u) > longest:
+                longest = len(u)
     return longest
 
 def make_filler(totlen, flen):
     return(" "*(totlen % flen)
            + (" "*(flen-1) + ".") * (totlen // flen))
-
-def find_longest_message(counts):
-    longest = 0
-    for message in counts:
-        if len(message[0]) > longest:
-            longest = len(message[0])
-    return longest
 
 
 ################################################################
@@ -148,13 +145,14 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
             countx = countx[:self._opts["topn"]]
 
         n = 0
-        longest_user = find_longest_user(countx)
-        longest_message = find_longest_message(countx)
+        longest_user = find_longest(countx, "user")
+        longest_message = find_longest(countx, "msg")
         destcol = self._opts["width"] - longest_user - 6  # room for count + some space
         if destcol > longest_message +8:
             destcol = longest_message +8
         if destcol < 10:
             destcol = 10
+        # print(f"u={longest_user} m={longest_message} d={destcol}")
         result = []
         for message, ulist in countx:
             n += 1

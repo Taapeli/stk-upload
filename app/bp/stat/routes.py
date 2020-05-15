@@ -113,10 +113,15 @@ def stat_app():
         opts["users"] = users
 
     log = logreader.Log(opts)
+    lines = []
     for f in os.listdir(log_root):
-        if log_file in f:
+        print(f"i see file {f}")
+        if f.startswith(log_file):
+            # print(f"reading {f}")
             log.work_with(f"{log_root}/{f}")
-    lines = log.get_by_msg_text()
+            lines.append(f"\n{f}")
+            for l in log.get_by_msg_text():
+                lines.append(l)
 
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app {elapsed:.4f}")
