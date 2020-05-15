@@ -20,6 +20,7 @@ from flask_security import current_user, login_required, roles_accepted
 from ui.user_context import UserContext
 from bl.place import PlaceReader
 from bl.source import SourceReader
+from bl.family import FamilyReader
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
@@ -343,16 +344,23 @@ def show_family_page(uid=None):
     uid = request.args.get('uuid', uid)
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
-    
-    u_context = UserContext(user_session, current_user, request)
+    t0 = time.time()
+
     try:
-        family = Family_combo.get_family_data(uid, u_context)
+        u_context = UserContext(user_session, current_user, request)
+        dbdriver = Neo4jReadDriver(shareds.driver)
+        reader = FamilyReader(dbdriver, u_context) 
+    
+        results = reader.get_family_data(uid)
+        #family = Family_combo.get_family_data(uid, u_context)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     logger.info("-> bp.scene.routes.show_family_page")
-    return render_template("/scene/family.html", 
-                           family=family, menuno=3, user_context=u_context)
+    if results.error:
+        return redirect(url_for('virhesivu', code=1, text=results.error))
+    return render_template("/scene/family.html",  menuno=3, family=results.items,
+                           user_context=u_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/json/families', methods=['POST','GET'])
@@ -477,8 +485,6 @@ def show_place(locid):
         reader = PlaceReader(dbdriver, u_context) 
     
         results = reader.get_with_events(locid)
-        #results = db.get_place_with_events(locid)
-        #place, place_list, events = get_place_with_events(locid)
 
     except KeyError as e:
         import traceback
