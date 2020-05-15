@@ -12,7 +12,7 @@ logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
 
-from flask import send_file, Response
+from flask import send_file, Response, jsonify
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
@@ -367,16 +367,16 @@ def json_get_person_families(uuid=None):
             uuid = json.loads(request.data)['uuid']
         print(f'got uuid: {uuid}')
         if not uuid:
-            return json.dumps({"records":[], "statusText":"Missing Family key"})
+            return jsonify({"records":[], "statusText":"Missing Family key"})
     except Exception as e:
-        return json.dumps({"records":[], "statusText":"Missing Family key, "+str(e)})
+        return jsonify({"records":[], "statusText":"Missing Family key, "+str(e)})
         #uuid="ea28f1c846714c4dbfb337e61fe770ad"
 
     u_context = UserContext(user_session, current_user, request)
     try:
         family = Family_combo.get_family_data(uuid, u_context)
         if not family:
-            return json.dumps({"records":[], "statusText":"No family got"})
+            return jsonify({"records":[], "statusText":"No family got"})
         fdict = {
             "rel_type":family.rel_type,
             "dates": family.dates.to_list(),
@@ -384,37 +384,47 @@ def json_get_person_families(uuid=None):
              "uuid":family.uuid
         }
     except KeyError as e:
-        return json.dumps({"records":[], "statusText":str(e)})
+        return jsonify({"records":[], "statusText":str(e)})
 
+    parents = []
     if family.father:
-        fdict["father"] = {
-            "name":family.father.sortname,
-            "dates":family.father.event_birth.dates.to_list()
+        parent = {
+            "role":"father",
+            "sortname":family.father.sortname,
+            "dates":family.father.event_birth.dates.to_list(),
+            "uuid":family.father.uuid
         }
+        parents.append(parent)
 
     if family.mother:
-        fdict["mother"] = {
-            "name":family.mother.sortname,
-            "dates":family.mother.event_birth.dates.to_list()
+        parent = {
+            "role":"mother",
+            "sortname":family.mother.sortname,
+            "dates":family.mother.event_birth.dates.to_list(),
+            "uuid":family.mother.uuid
         }
+        parents.append(parent)
+    fdict['parents'] = parents
 
-    chidren = []
+    children = []
     for ch in family.children:
-        child = {"gender":ch.sex, "sortname":ch.sortname}
+        child = {"sex":ch.sex, "sortname":ch.sortname, "uuid":ch.uuid}
         if ch.event_birth:
             child['dates'] = ch.event_birth.dates.to_list()
-        chidren.append(child)
+        children.append(child)
+    fdict["children"] = children
 
     events = []
     for ev in family.events:
-        #print (f'-event {ev}')
         events.append({"type":ev.type, "id":ev.id, "uuid":ev.uuid})
+    fdict["events"] = events
+
     logger.info(f"-> bp.scene.routes.show_person_families_json")
-    response = {'records':[fdict], 'statusText':'ok'}
-    print(json.dumps(response,indent=True))
+    response = {'records':[fdict], 'statusText':'Löytyi 1 perhe (TESTING)'}
+    print(json.dumps(response))
     #response.headers['Access-Control-Allow-Origin'] = '*'
 
-    return json.dumps(response) 
+    return jsonify(response) 
 #     return render_template("/scene/family.html", family=family, ...)
 
 # @bp.route('/pop/family=<int:fid>')
