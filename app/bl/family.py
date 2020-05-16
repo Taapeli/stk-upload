@@ -236,7 +236,8 @@ RETURN family"""
         if not family:
             return results
         results.items = family
-
+        # The Nodes for search of Sources
+        src_list = [family.uniq_id]
         """
             2. Get Parent nodes
                optionally with default Name
@@ -273,50 +274,35 @@ RETURN family"""
         res = self.dbdriver.dr_get_family_events(family.uniq_id, with_places=True)
         for e in res.get('items'):
             family.events.append(e)
+            src_list.append(e.uniq_id)
 
         """
-            5 Get family event Sources Citations and Repositories
+            5 Get family and event Sources Citations and Repositories
               optionally with Notes
         """
-        sources = self.dbdriver.dr_get_family_sources(family.uniq_id, with_notes=True)
-        for c in sources:
-            family.sources.append(c)
+        res = self.dbdriver.dr_get_family_sources(src_list) #, with_notes=True)
+        for s in res.get('items'):
+            family.sources.append(s)
+
+        """
+            6 Get Notes for family and events
+        """
+        res = self.dbdriver.dr_get_family_notes(src_list) #, with_notes=True)
+        for s in res.get('items'):
+            family.sources.append(s)
 
 
 
         with shareds.driver.session() as session:
             try:
-                result = session.run(CypherFamily.get_family_data, 
+                result = session.run(CypherFamily.obsolete_get_family_data, 
                                      id_list=[family.uniq_id])
                 for record in result:
                     """
                         2. Get Events node [with Place?]
                     """
-#                     for event_node, place_node in record['family_event']:
-#                         if event_node:
-#                             # event_node:
-#                             # <Node id=242570 labels={'Event'} 
-#                             #    properties={'datetype': 0, 'change': 1528183878, 'description': '', 
-#                             #        'handle': '_dcf94f35ea262b7e1a0a0066d6e', 'id': 'E1692', 
-#                             #        'date2': 1875043, 'type': 'Marriage', 'date1': 1875043}>
-#                             e = Event_combo.from_node(event_node)
-#                             if place_node:
-#                                 # place_node: <Node id=73479 labels={'Place'} properties={'coord':
-#                                 # [60.5625, 21.609722222222224], 'id': 'P0468', 'type': 'City', 'uuid':
-#                                 # 'd1d0693de1714a47acf6442d64246a50', 'pname': 'Taivassalo', 'change':
-#                                 # 1556953682}>
-#                                 e.place = PlaceBl.from_node(place_node)
-# 
-#                                 # Look for surrounding place:
-#                                 res = session.run(Cypher_person.get_places, uid_list=[e.uniq_id])
-#                                 for rec in res:
-#                                     e.place.names = place_names_from_nodes(rec['pnames'])
-#                                     if rec['pi']:
-#                                         pl_in = PlaceBl.from_node(rec['pi'])
-#                                         pl_in.names = place_names_from_nodes(rec['pinames'])
-#                                         e.place.uppers.append(pl_in)
-# 
-#                             family.events.append(e)
+#                     for event_node, place_node in record['family_event']
+
                     """
                         3. Get Parent nodes [with default Name?]
                     """
@@ -325,38 +311,8 @@ RETURN family"""
                     """
                         4. Get Child nodes [with Birth and Death nodes?]
                     """
-#                     family.no_of_children = 0
-#                     family.num_hidden_children = 0
-#                     for person_node, name_node, birth_node, death_node in record['child']:
-#                         # record['child'][0]:
-#                         # [<Node id=235176 labels={'Person'} 
-#                         #    properties={'sortname': '#Andersdotter#Maria Christina', 
-#                         #        'datetype': 19, 'confidence': '2.0', 'sex': 2, 'change': 1532009600, 
-#                         #        'handle': '_dd2a65b2f8c7e05bc664bd49d54', 'id': 'I0781', 'date2': 1877226, 'date1': 1877219}>, 
-#                         #  <Node id=235177 labels={'Name'} 
-#                         #    properties={'firstname': 'Maria Christina', 'type': 'Birth Name', 'suffix': 'Andersdotter', 
-#                         #        'prefix': '', 'surname': '', 'order': 0}>, 
-#                         #  <Node id=242697 labels={'Event'} 
-#                         #    properties={'datetype': 0, 'change': 1532009545, 'description': '', 'handle': '_dd2a65b218a14e81692d77955d2', 
-#                         #        'id': 'E1886', 'date2': 1877219, 'type': 'Birth', 'date1': 1877219}>, 
-#                         #  <Node id=242702 labels={'Event'} 
-#                         #    properties={'datetype': 0, 'change': 1519916327, 'description': '', 'handle': '_dd2a65b218a4e85ab141faeab48', 
-#                         #        'id': 'E1887', 'date2': 1877226, 'type': 'Death', 'date1': 1877226}>
-#                         # ]
-#                         if person_node:
-#                             family.no_of_children += 1
-#                             p = Person_combo.from_node(person_node)
-#                             if name_node:
-#                                 p.names.append(Name.from_node(name_node))
-#                             set_birth_death(p, birth_node, death_node)
-#                             if not self.use_user:
-#                                 # Common data
-#                                 if p.too_new:
-#                                     family.num_hidden_children += 1
-#                                     continue
-#                             else: 
-#                                 p.too_new = False
-#                             family.children.append(p)
+#                     for person_node, name_node, birth_node, death_node in record['child']
+
                     """
                         5. Get Citation, Source, Repository nodes
                     """

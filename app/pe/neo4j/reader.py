@@ -352,6 +352,56 @@ class Neo4jReadDriver:
         return {"items":events, "status":self.ST_OK}
 
 
+    def dr_get_family_sources(self, id_list, with_notes=True):
+        """
+            Get Sources Citations and Repositories for given families and events.
+
+            The id_list should include the uniq_ids for Family and events Events
+
+            returns dict {items, status, statustext}
+        """
+        sources = []
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_family_sources, 
+                                     id_list=id_list)
+                for record in result:
+                    # <Record 
+                    #    src_id=543995
+                    #    repository=<Node id=529693 labels={'Repository'}
+                    #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'uuid': 'ef2369ac6e67450abc9ed8c0bd04ce45', 'change': 1585409708}> 
+                    #    source=<Node id=534511 labels={'Source'}
+                    #        properties={'id': 'S0876', 'stitle': 'Loviisan srk - vihityt 1794-1837', 'uuid': '8b29ab449849434c984dcf4885b5882b',
+                    #            'spubinfo': 'MKO131-133', 'change': 1585409705, 'sauthor': ''}>
+                    #    citation=<Node id=537795 labels={'Citation'}
+                    #        properties={'id': 'C2598', 'page': '1817 Mars 13', 'uuid': 'e0841eb28d8143ce92bbb2c9a43f4d23',
+                    #            'change': 1585409707, 'confidence': '2'}>
+                    # >
+                    repository_node = record['repository']
+                    if repository_node:
+                        source_node = record['source']
+                        citation_node = record['citation']
+                        src_id = record['src_id']
+
+                        source = SourceBl.from_node(source_node)
+                        cita = Citation.from_node(citation_node)
+                        repo = Repository.from_node(repository_node)
+                        source.repositories.append(repo)
+                        source.citations.append(cita)
+                        source.referrer = src_id
+                        sources.append(source)
+                        
+#                     for node in record['note']:
+#                         note = Note.from_node(node)
+#                         family.notes.append(note)
+
+            except Exception as e:
+                return {"status":self.ST_ERROR, 
+                        "statustext": f'Error get_family_sources: {e}'}     
+
+        return {"items":sources, "status":self.ST_OK}
+
+
     #Todo Obsolete idea? ------------------------------------------------------
     def dr_get_family_group(self, uniq_id_list:list, groups=['pa:ev']):
         ''' 
