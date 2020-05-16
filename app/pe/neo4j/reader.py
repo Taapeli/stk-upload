@@ -5,14 +5,19 @@ Created on 17.3.2020
 '''
 import logging
 from models.gen.family_combo import Family_combo
+from models.gen.dates import DateRange
 logger = logging.getLogger('stkserver')
 
+from bl.base import Status
 from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
-#from pe.neo4j.neo_source import SourceDb
-#from bl.place_coordinates import Point
+from bl.family import FamilyBl
+
+from ui.place import place_names_from_nodes
+
 from .cypher_place import CypherPlace
 from .cypher_source import CypherSource
+from .cypher_family import CypherFamily
 
 #Todo: Change Old style includes to bl classes
 from models.gen.person_combo import Person_combo
@@ -102,6 +107,306 @@ class Neo4jReadDriver:
             persons.append(p)   
 
         return persons
+
+
+    def dr_get_family_uuid(self, user:str, uuid:str):
+        '''
+        Read a Family using uuid and user info.
+        
+        Returns dict {item, status, statustext}
+        '''
+        family = None
+
+        with self.driver.session() as session:
+            try:
+                if user: 
+                    # Show my researcher data
+                    result = session.run(CypherFamily.get_a_family_own, 
+                                     f_uuid=uuid, user=user)
+                else:
+                    print("dr_get_source_list_fw: approved common only")
+                    result = session.run(CypherFamily.get_a_family_common, 
+                                     f_uuid=uuid)
+                for record in result:
+                    if record['f']:
+                        # <Record 
+                        #    f=<Node id=590928 labels={'Family'}
+                        #        properties={'datetype': 1, 'father_sortname': 'Gadd#Peter Olofsson#', 
+                        #            'change': 1560931512, 'rel_type': 'Unknown', 'id': 'F0002', 
+                        #            'date2': 1766592, 'date1': 1766592, 'uuid': '9488e3c76c6645f8b024902f2119e15a'}>
+                        #    root_type='OWNS' 
+                        #    root=<Node id=384349 labels={'Batch'} 
+                        #        properties={'mediapath': '/home/rinminlij1l1j1/paikat_pirkanmaa_yhdistetty_06052020.gpkg.media', 
+                        #            'file': 'uploads/juha/paikat_pirkanmaa_yhdistetty_6.5.2020_clean.gramps', 
+                        #            'id': '2020-05-09.001', 'user': 'juha', 'timestamp': 1589022866282, 'status': 'completed'}>
+                        # >
+                        node = record['f']
+                        family = FamilyBl.from_node(node)
+                    return {"item":family, "status":Status.OK}
+            except Exception as e:
+                return {"item":None, "status":Status.ERROR, "statustext":str(e)}
+
+        return {"item":None, "status":Status.NOT_FOUND, "statustext":"No families found"}
+
+
+    def _set_birth_death(self, person, birth_node, death_node):
+        '''
+        Set person.birth and person.death events from db nodes
+        '''
+        if birth_node:
+            person.event_birth = Event_combo.from_node(birth_node)
+        if death_node:
+            person.event_death = Event_combo.from_node(death_node)
+
+
+
+    def dr_get_family_parents(self, uniq_id:int, with_name=True):
+        """
+            Get Parent nodes, optionally with default Name
+            
+            returns dict {items, status, statustext}
+        """
+        parents = []
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_family_parents, 
+                                     fuid=uniq_id)
+                for record in result:
+                    # <Record 
+                    #    role='father'
+                    #    parent=<Node id=550536 labels={'Person'}
+                    #        properties={'sortname': 'Linderoos#Johan Wilhelm#', 'death_high': 1844,
+                    #            'confidence': '2.0', 'sex': 1, 'change': 1585409699, 'birth_low': 1788,
+                    #            'birth_high': 1788, 'id': 'I1314', 'uuid': '8a4d49509d26434bb3bf63c4657af9e2',
+                    #            'death_low': 1844}>
+                    #    name=<Node id=550537 labels={'Name'}
+                    #        properties={'firstname': 'Johan Wilhelm', 'type': 'Birth Name',
+                    #            'suffix': '', 'prefix': '', 'surname': 'Linderoos', 'order': 0}>
+                    #    birth=<Node id=543985 labels={'Event'}
+                    #        properties={'datetype': 0, 'change': 1585409702, 'description': '',
+                    #            'id': 'E4460', 'date2': 1831101, 'type': 'Birth', 'date1': 1831101,
+                    #            'uuid': '5f9b78fe1a644834bc52715d58d61774'}>
+                    #   death=<Node id=543986 labels={'Event'} properties={'id': 'E4461', ...}>
+                    # >
+
+                    role = record['role']
+                    person_node = record['person']
+                    if person_node:
+                        if uniq_id != person_node.id:
+                            # Skip person with double default name
+                            p = Person_combo.from_node(person_node)
+                            p.role = role
+                            name_node = record['name']
+                            if name_node:
+                                p.names.append(Name.from_node(name_node))
+
+                            birth_node = record['birth']
+                            death_node = record['death']
+                            self._set_birth_death(p, birth_node, death_node)
+
+                            parents.append(p)
+
+            except Exception as e:
+                return {"status":Status.ERROR, 
+                        "statustext": f'Error get_family_data: {e}'}     
+    
+        return {"items":parents, "status":Status.OK, "statustext":""}
+
+
+    def dr_get_family_children(self, uniq_id, with_events=True, with_names=True):
+        """ 
+        Get Child nodes, optionally with Birth and Death nodes
+            
+            returns dict {items, status, statustext}
+        """
+        children = []
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_family_children, 
+                                     fuid=uniq_id)
+                for record in result:
+                    # <Record 
+                    #    person=<Node id=550538 labels={'Person'}
+                    #        properties={'sortname': 'Linderoos#Gustaf Mathias Israel#',...}> 
+                    #    name=<Node id=550539 labels={'Name'}
+                    #        properties={'firstname': 'Gustaf Mathias Israel', 'type': 'Birth Name',...'order': 0}>
+                    #    birth=<Node id=543988 labels={'Event'}
+                    #        properties={'id': 'E4463', 'type': 'Birth', ...}>
+                    #    death=None
+                    # >
+                    person_node = record['person']
+                    if person_node:
+                        p = Person_combo.from_node(person_node)
+                        name_node = record['name']
+                        if name_node:
+                            p.names.append(Name.from_node(name_node))
+                        birth_node = record['birth']
+                        death_node = record['death']
+                        self._set_birth_death(p, birth_node, death_node)
+
+                        children.append(p)
+
+            except Exception as e:
+                return {"status":Status.ERROR, 
+                        "statustext": f'Error get_family_children: {e}'}     
+
+        return {"items":children, "status":Status.OK}
+
+
+    def dr_get_family_events(self, uniq_id, with_places=True):
+        """
+            4. Get family Events node with Places
+
+            returns dict {items, status, statustext}
+        """
+        events = []
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_events_w_places, 
+                                     fuid=uniq_id)
+                for record in result:
+                    # <Record 
+                    # >
+                    event_node = record['event']
+                    if event_node:
+                        #    event=<Node id=543995 labels={'Event'}
+                        #        properties={'datetype': 0, 'change': 1585409702, 'description': '', 
+                        #            'id': 'E0170', 'date2': 1860684, 'type': 'Marriage', 'date1': 1860684, 
+                        #            'uuid': '38c0d5bdc0f245c88bfb1083228db219'}>
+                        e = Event_combo.from_node(event_node)
+
+                        place_node = record['place']
+                        if place_node:
+                            #    place=<Node id=531912 labels={'Place'} 
+                            #        properties={'id': 'P1077', 'type': 'Parish', 'uuid': '55c069c9cee54092a88366a15b75d1a4', 
+                            #            'pname': 'Loviisan srk', 'change': 1585562874}>
+                            #    names=[ <Node id=531913 labels={'Place_name'} 
+                            #                properties={'name': 'Loviisan srk', 'lang': ''}>
+                            #        ] 
+                            e.place = PlaceBl.from_node(place_node)
+                            e.place.names = place_names_from_nodes(record['names'])
+                            
+                        inside_node = record['inside']
+                        if inside_node:
+                            #    inside=<Node id=529916 labels={'Place'} 
+                            #        properties={'id': 'P1874', 'type': 'Organisaatio', 'uuid': '7100e387dd7f4130a5804eb338162703', 
+                            #            'pname': 'Suomen ev.lut. kirkko', 'change': 1585490980}> 
+                            #    in_rel=<Relationship id=454774 nodes=(
+                            #        <Node id=531912 labels={'Place'} 
+                            #            properties={'id': 'P1077', 'type': 'Parish', 'uuid': '55c069c9cee54092a88366a15b75d1a4', 
+                            #                'pname': 'Loviisan srk', 'change': 1585562874}>, 
+                            #        <Node id=529916 labels={'Place'}
+                            #            properties={'id': 'P1874', 'type': 'Organisaatio', 'uuid': '7100e387dd7f4130a5804eb338162703',
+                            #                'pname': 'Suomen ev.lut. kirkko', 'change': 1585490980}>
+                            #        )
+                            #        type='IS_INSIDE'
+                            #        properties={}
+                            #    in_names=[   <Node id=533693 labels={'Place_name'} properties={...}>,
+                            #            <Node id=533694 labels={'Place_name'} properties={'name': 'Evangelisk-lutherska kyrkan i Finland', 'lang': 'sv'}>,
+                            #        ]
+                            pl_in = PlaceBl.from_node(inside_node)
+                            inside_rel = record['in_rel']
+                            if len(inside_rel._properties):
+                                pl_in.dates = DateRange.from_node(inside_rel._properties)
+
+                            pl_in.names = place_names_from_nodes(record['in_names'])
+                            e.place.uppers.append(pl_in)
+
+                        events.append(e)
+
+            except Exception as e:
+                return {"status":Status.ERROR, 
+                        "statustext": f'Error get_family_children: {e}'}     
+
+        return {"items":events, "status":Status.OK}
+
+
+    def dr_get_family_sources(self, id_list, with_notes=True):
+        """
+            Get Sources Citations and Repositories for given families and events.
+
+            The id_list should include the uniq_ids for Family and events Events
+
+            returns dict {items, status, statustext}
+        """
+        sources = []
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_family_sources, 
+                                     id_list=id_list)
+                for record in result:
+                    # <Record 
+                    #    src_id=543995
+                    #    repository=<Node id=529693 labels={'Repository'}
+                    #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'uuid': 'ef2369ac6e67450abc9ed8c0bd04ce45', 'change': 1585409708}> 
+                    #    source=<Node id=534511 labels={'Source'}
+                    #        properties={'id': 'S0876', 'stitle': 'Loviisan srk - vihityt 1794-1837', 'uuid': '8b29ab449849434c984dcf4885b5882b',
+                    #            'spubinfo': 'MKO131-133', 'change': 1585409705, 'sauthor': ''}>
+                    #    citation=<Node id=537795 labels={'Citation'}
+                    #        properties={'id': 'C2598', 'page': '1817 Mars 13', 'uuid': 'e0841eb28d8143ce92bbb2c9a43f4d23',
+                    #            'change': 1585409707, 'confidence': '2'}>
+                    # >
+                    repository_node = record['repository']
+                    if repository_node:
+                        source_node = record['source']
+                        citation_node = record['citation']
+                        src_id = record['src_id']
+
+                        source = SourceBl.from_node(source_node)
+                        cita = Citation.from_node(citation_node)
+                        repo = Repository.from_node(repository_node)
+                        source.repositories.append(repo)
+                        source.citations.append(cita)
+                        source.referrer = src_id
+                        sources.append(source)
+                        
+#                     for node in record['note']:
+#                         note = Note.from_node(node)
+#                         family.notes.append(note)
+
+            except Exception as e:
+                return {"status":Status.ERROR, 
+                        "statustext": f'Error get_family_sources: {e}'}     
+
+        return {"items":sources, "status":Status.OK}
+
+
+    def dr_get_family_notes(self, id_list:list): #, with_notes=True)
+        """
+            Get Notes for family and events
+            The id_list should include the uniq_ids for Family and events Events
+
+            returns dict {items, status, statustext}
+        """
+        notes = []
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_family_notes, 
+                                     id_list=id_list)
+                for record in result:
+                    # <Record 
+                    #    src_id=543995
+                    #    repository=<Node id=529693 labels={'Repository'}
+                    #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'uuid': 'ef2369ac6e67450abc9ed8c0bd04ce45', 'change': 1585409708}> 
+                    #    source=<Node id=534511 labels={'Source'}
+                    #        properties={'id': 'S0876', 'stitle': 'Loviisan srk - vihityt 1794-1837', 'uuid': '8b29ab449849434c984dcf4885b5882b',
+                    #            'spubinfo': 'MKO131-133', 'change': 1585409705, 'sauthor': ''}>
+                    #    citation=<Node id=537795 labels={'Citation'}
+                    #        properties={'id': 'C2598', 'page': '1817 Mars 13', 'uuid': 'e0841eb28d8143ce92bbb2c9a43f4d23',
+                    #            'change': 1585409707, 'confidence': '2'}>
+                    # >
+                    note_node = record['note']
+                    if note_node:
+                        src_id = record['src_id']
+                        note = Note.from_node(note_node)
+                        note.referrer = src_id
+                        notes.append(note)
+                        
+            except Exception as e:
+                return {"status":Status.ERROR, 
+                        "statustext": f'Error get_family_notes: {e}'}     
+
+        return {"items":notes, "status":Status.OK}
 
 
     def dr_get_place_list_fw(self, user, fw_from, limit, lang='fi'):

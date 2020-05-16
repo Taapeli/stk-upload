@@ -27,7 +27,7 @@ from models.gen import family
 #from .person_combo import Person_as_member
 
 
-class Family_combo(Family):
+class Family_combo(Family): # -> bl.family.FamilyBl
     """ Perhe
             
         Properties from Family:
@@ -124,10 +124,10 @@ RETURN family"""
     
     def get_family_data_by_id(self):
         """ Luetaan perheen tiedot.
-        
             Called from models.datareader.get_families_data_by_id 
+                   from bp.tools.routes.show_family_data
         """
-                        
+
         pid = int(self.uniq_id)
         query = """
 MATCH (family:Family)
@@ -170,7 +170,7 @@ RETURN family"""
     
     
     @staticmethod
-    def get_family_data(uuid, context: UserContext):
+    def get_family_data(uuid, context: UserContext): # -> bl.family.FamilyReader.get_family_data
         """ Read Family information including Events, Children, Notes and Sources.
         
             1) read 

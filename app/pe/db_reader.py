@@ -130,6 +130,12 @@ class PlaceResult(BaseResult):
             n = 1
         return f"n={n} events={len(self.events)} hidden={self.num_hidden}"
 
+# class FamilyResult(BaseResult):
+#     ''' Person's result object is a dict {item:Family, status=0, statustext:None}
+#     '''
+#     def __init__(self, items=[], num_hidden=0):
+#         BaseResult.__init__(self, items, num_hidden)
+
 class PersonResult(BaseResult):
     ''' Person's result object.
     '''
