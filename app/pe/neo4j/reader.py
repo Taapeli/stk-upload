@@ -8,6 +8,7 @@ from models.gen.family_combo import Family_combo
 from models.gen.dates import DateRange
 logger = logging.getLogger('stkserver')
 
+from bl.base import Status
 from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
 from bl.family import FamilyBl
@@ -34,10 +35,6 @@ from models.gen.citation import Citation
 class Neo4jReadDriver:
     ''' Methods for accessing Neo4j database.
     '''
-    ST_OK = 0
-    ST_NOT_FOUND = 1
-    ST_ERROR = 2
-
     def __init__(self, driver):
         self.driver = driver
     
@@ -145,11 +142,11 @@ class Neo4jReadDriver:
                         # >
                         node = record['f']
                         family = FamilyBl.from_node(node)
-                    return {"item":family, "status":self.ST_OK}
+                    return {"item":family, "status":Status.OK}
             except Exception as e:
-                return {"item":None, "status":self.ST_ERROR, "statustext":str(e)}
+                return {"item":None, "status":Status.ERROR, "statustext":str(e)}
 
-        return {"item":None, "status":self.ST_NOT_FOUND, "statustext":"No families found"}
+        return {"item":None, "status":Status.NOT_FOUND, "statustext":"No families found"}
 
 
     def _set_birth_death(self, person, birth_node, death_node):
@@ -210,10 +207,10 @@ class Neo4jReadDriver:
                             parents.append(p)
 
             except Exception as e:
-                return {"status":self.ST_ERROR, 
+                return {"status":Status.ERROR, 
                         "statustext": f'Error get_family_data: {e}'}     
     
-        return {"items":parents, "status":self.ST_OK, "statustext":""}
+        return {"items":parents, "status":Status.OK, "statustext":""}
 
 
     def dr_get_family_children(self, uniq_id, with_events=True, with_names=True):
@@ -237,22 +234,6 @@ class Neo4jReadDriver:
                     #        properties={'id': 'E4463', 'type': 'Birth', ...}>
                     #    death=None
                     # >
-#for person_node, name_node, birth_node, death_node in record['child']:
-# record['child'][0]:
-# [<Node id=235176 labels={'Person'} 
-#    properties={'sortname': '#Andersdotter#Maria Christina', 
-#        'datetype': 19, 'confidence': '2.0', 'sex': 2, 'change': 1532009600, 
-#        'handle': '_dd2a65b2f8c7e05bc664bd49d54', 'id': 'I0781', 'date2': 1877226, 'date1': 1877219}>, 
-#  <Node id=235177 labels={'Name'} 
-#    properties={'firstname': 'Maria Christina', 'type': 'Birth Name', 'suffix': 'Andersdotter', 
-#        'prefix': '', 'surname': '', 'order': 0}>, 
-#  <Node id=242697 labels={'Event'} 
-#    properties={'datetype': 0, 'change': 1532009545, 'description': '', 'handle': '_dd2a65b218a14e81692d77955d2', 
-#        'id': 'E1886', 'date2': 1877219, 'type': 'Birth', 'date1': 1877219}>, 
-#  <Node id=242702 labels={'Event'} 
-#    properties={'datetype': 0, 'change': 1519916327, 'description': '', 'handle': '_dd2a65b218a4e85ab141faeab48', 
-#        'id': 'E1887', 'date2': 1877226, 'type': 'Death', 'date1': 1877226}>
-# ]
                     person_node = record['person']
                     if person_node:
                         p = Person_combo.from_node(person_node)
@@ -266,22 +247,10 @@ class Neo4jReadDriver:
                         children.append(p)
 
             except Exception as e:
-                return {"status":self.ST_ERROR, 
+                return {"status":Status.ERROR, 
                         "statustext": f'Error get_family_children: {e}'}     
 
-        return {"items":children, "status":self.ST_OK}
-
-
-    def _get_surrounding_place(self, place):
-        # Look for surrounding place:
-        result = self.driver.session.run(Cypher_person.get_places, 
-                                         uid_list=[place.uniq_id])
-        for rec in result:
-            place.place.names = place_names_from_nodes(rec['pnames'])
-            if rec['pi']:
-                pl_in = PlaceBl.from_node(rec['pi'])
-                pl_in.names = place_names_from_nodes(rec['pinames'])
-                place.place.uppers.append(pl_in)
+        return {"items":children, "status":Status.OK}
 
 
     def dr_get_family_events(self, uniq_id, with_places=True):
@@ -346,10 +315,10 @@ class Neo4jReadDriver:
                         events.append(e)
 
             except Exception as e:
-                return {"status":self.ST_ERROR, 
+                return {"status":Status.ERROR, 
                         "statustext": f'Error get_family_children: {e}'}     
 
-        return {"items":events, "status":self.ST_OK}
+        return {"items":events, "status":Status.OK}
 
 
     def dr_get_family_sources(self, id_list, with_notes=True):
@@ -396,53 +365,48 @@ class Neo4jReadDriver:
 #                         family.notes.append(note)
 
             except Exception as e:
-                return {"status":self.ST_ERROR, 
+                return {"status":Status.ERROR, 
                         "statustext": f'Error get_family_sources: {e}'}     
 
-        return {"items":sources, "status":self.ST_OK}
+        return {"items":sources, "status":Status.OK}
 
 
-    #Todo Obsolete idea? ------------------------------------------------------
-    def dr_get_family_group(self, uniq_id_list:list, groups=['pa:ev']):
-        ''' 
-        Read Family with selected connected data.
-        
-        The groups may be defined by keywords separated with ':':
-            all - all below
-            pa - Parents (mother, father)
-            ch - Children
-            pe - Person names (for parents, children)
-            ev - Events
-            pl - Places (for events)
-            no - Notes
-            me - Medias
-            so - Sources (Citations, Sources, Repositories)
-        
-            1) read 
-                (f:Family) --> (e:Event)
-                (f:Family) -[:PARENT]-> (pp:Person) -> (np:Name)
-                (f:Family) -[:CHILD]->  (pc:Person) -> (nc:Name)
-                (f:Family) --> (fn:Note)
-                (e:Event) --> (en:Note)
-                (f:Family) --> (fac:Citation) --> (fas:Source) --> (far:Repository)
-                (e:Event) --> (evc:Citation) --> (evs:Source) --> (evr:Repository)
- 
-            2) read
-                (pp:Person) --> (ppe:Event) --> (:Place)
-                (pc:Person) --> (pce:Event) --> (:Place)
+    def dr_get_family_notes(self, id_list:list): #, with_notes=True)
+        """
+            Get Notes for family and events
+            The id_list should include the uniq_ids for Family and events Events
 
-            3) build
-                Family_combo.mother, .names, event_birth, event_death
-                Family_combo.father, .names, event_birth, event_death
-                Family_combo.events
-                Family_combo.notes
-                Family_combo.sources / citation -> source -> repocitory ?
-                Family_combo.children, .names, event_birth, event_death
-            Returns a Family object with other objects included
-        '''
+            returns dict {items, status, statustext}
+        """
+        notes = []
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_family_notes, 
+                                     id_list=id_list)
+                for record in result:
+                    # <Record 
+                    #    src_id=543995
+                    #    repository=<Node id=529693 labels={'Repository'}
+                    #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'uuid': 'ef2369ac6e67450abc9ed8c0bd04ce45', 'change': 1585409708}> 
+                    #    source=<Node id=534511 labels={'Source'}
+                    #        properties={'id': 'S0876', 'stitle': 'Loviisan srk - vihityt 1794-1837', 'uuid': '8b29ab449849434c984dcf4885b5882b',
+                    #            'spubinfo': 'MKO131-133', 'change': 1585409705, 'sauthor': ''}>
+                    #    citation=<Node id=537795 labels={'Citation'}
+                    #        properties={'id': 'C2598', 'page': '1817 Mars 13', 'uuid': 'e0841eb28d8143ce92bbb2c9a43f4d23',
+                    #            'change': 1585409707, 'confidence': '2'}>
+                    # >
+                    note_node = record['note']
+                    if note_node:
+                        src_id = record['src_id']
+                        note = Note.from_node(note_node)
+                        note.referrer = src_id
+                        notes.append(note)
+                        
+            except Exception as e:
+                return {"status":Status.ERROR, 
+                        "statustext": f'Error get_family_notes: {e}'}     
 
-        families = []
-        return families
+        return {"items":notes, "status":Status.OK}
 
 
     def dr_get_place_list_fw(self, user, fw_from, limit, lang='fi'):

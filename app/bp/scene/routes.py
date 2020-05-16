@@ -357,9 +357,9 @@ def show_family_page(uid=None):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     logger.info("-> bp.scene.routes.show_family_page")
-    if results.error:
-        return redirect(url_for('virhesivu', code=1, text=results.error))
-    return render_template("/scene/family.html",  menuno=3, family=results.items,
+    if results['status']:
+        return redirect(url_for('virhesivu', code=1, text=results['statustext']))
+    return render_template("/scene/family.html",  menuno=3, family=results['item'],
                            user_context=u_context, elapsed=time.time()-t0)
 
 

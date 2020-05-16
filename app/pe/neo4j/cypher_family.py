@@ -51,15 +51,14 @@ RETURN e as event,
     pi AS inside, ri AS in_rel, COLLECT(DISTINCT pin) AS in_names"""
 
     get_family_sources = """
-MATCH (f) WHERE ID(f) in $id_list
-    OPTIONAL MATCH (f) -[:CITATION]-> (c:Citation) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
-    OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
+MATCH (f) -[:CITATION]-> (c:Citation)  WHERE ID(f) in $id_list
+    OPTIONAL MATCH (c) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
 RETURN ID(f) AS src_id,
     re AS repository, s AS source, c AS citation"""
 
     get_family_notes = """
-MATCH (f) WHERE ID(f) in $id_list
-    OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
+MATCH (f) -[:NOTE]- (note:Note) WHERE ID(f) in $id_list
+    OPTIONAL MATCH (f) 
 RETURN ID(f) AS src_id, note"""
 
     obsolete_get_family_data = """

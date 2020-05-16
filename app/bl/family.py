@@ -8,34 +8,13 @@ Components moved 15.5.2020 from
 
 @author: jm 
 '''
-#from sys import stderr
 import  shareds
-from .base import NodeObject
-from pe.db_reader import DBreader, FamilyResult
 
-from bl.place import PlaceBl
-from bl.source import SourceBl
-from ui.place import place_names_from_nodes
-
-#TODO remove this
-from pe.neo4j.cypher_family import CypherFamily
+from .base import NodeObject #, Status
+from pe.db_reader import DBreader
 
 from models.gen.dates import DateRange
-from models.gen.cypher import Cypher_person #, Cypher_family
-from models.gen.event_combo import Event_combo
-#from models.gen.person import Person
-from models.gen.person_name import Name
-from models.gen.citation import Citation
-from models.gen.repository import Repository
-from models.gen.note import Note
-#from .source import Source
-#from .place_combo import Place_combo
-#from ui.user_context import UserContext
-#from models.gen import family
 
-# Import these later to handle circular dependencies where referencing from Person classes! 
-#from .person_combo import Person_combo
-#from .person_combo import Person_as_member
 
 class Family(NodeObject):
     """ Family Node object.
@@ -146,13 +125,140 @@ class FamilyReader(DBreader):
 
         - Returns a Result object which includes the tems and eventuel error object.
     '''
+    
+    def get_family_data(self, uuid:str, groups="all"):
+        """ Read Family information including Events, Children, Notes and Sources.
 
-#     @staticmethod
-#     def get_family_paths_apoc(uniq_id):
-#         ''' Read a person and paths for all connected nodes.
-#             Experimental!
-#         '''
+            Returns a dict {item:Family, status=0, statustext:None}
+            
+            where status code is one of
+                - Status.OK = 0
+                - Status.NOT_FOUND = 1
+                - Status.ERROR = 2
+            
+            Ther groups parameter is a string of short keywords separated by ':'.
+            
+            Operations path
+            1) read 
+                (f:Family) --> (e:Event)
+                (f:Family) -[:PARENT]-> (pp:Person) -> (np:Name)
+                (f:Family) -[:CHILD]->  (pc:Person) -> (nc:Name)
+                (f:Family) --> (fn:Note)
+                (e:Event) --> (en:Note)
+                (f:Family) --> (fac:Citation) --> (fas:Source) --> (far:Repository)
+                (e:Event) --> (evc:Citation) --> (evs:Source) --> (evr:Repository)
+ 
+            2) read
+                (pp:Person) --> (ppe:Event) --> (:Place)
+                (pc:Person) --> (pce:Event) --> (:Place)
 
+            3) build
+                Family_combo.mother, .names, event_birth, event_death
+                Family_combo.father, .names, event_birth, event_death
+                Family_combo.events
+                Family_combo.notes
+                Family_combo.sources / citation -> source -> repocitory ?
+                Family_combo.children, .names, event_birth, event_death
+        """
+
+        # Select data by groups parameter like 'pare:name:even:plac':
+        
+        # all - all data
+        select_all = 'all' in groups
+        # pa - Parents (mother, father)
+        select_parents  = select_all or 'pare' in groups
+        # ch - Children
+        select_children = select_all or 'chil' in groups
+        # pe - Person names (for parents, children)
+        select_names    = select_all or 'name' in groups
+        # ev - Events
+        select_events   = select_all or 'even' in groups
+        # pl - Places (for events)
+        select_places   = select_all or 'plac' in groups
+        # no - Notes
+        select_notes    = select_all or 'note' in groups
+        # so - Sources (Citations, Sources, Repositories)
+        select_sources  = select_all or 'sour' in groups
+#         # me - Media
+#         select_media  = select_all or 'medi' in groups
+
+        """
+            1. Get Family node by user/common
+
+            res is dict {item, status, statustext}
+        """
+        res = self.dbdriver.dr_get_family_uuid(self.use_user, uuid)
+        family = res.get('item')
+        results = {'item': family, 
+                   'status': res.get('status'),
+                   'statustext':res.get('statustext')}
+        if not family:
+            return results
+        # The Nodes for search of Sources and Notes (Family and Events)
+        src_list = [family.uniq_id]
+
+        """
+            2. Get Parent nodes [optionally] with default Name
+
+            res is dict {items, status, statustext}
+        """
+        if select_parents:
+            res = self.dbdriver.dr_get_family_parents(family.uniq_id, 
+                                                      with_name=select_names)
+            for p in res.get('items'):
+                # For User's own data, no hiding for too new persons
+                if self.use_user:           p.too_new = False
+                if p.role == 'father':      family.father = p
+                elif p.role == 'mother':    family.mother = p
+
+        """
+            3. Get Child nodes [optionally] with Birth and Death nodes
+
+            res is dict {items, status, statustext}
+        """
+        if select_children:
+            res = self.dbdriver.dr_get_family_children(family.uniq_id,
+                                                       with_events=select_events,
+                                                       with_names=select_names)
+            family.num_hidden_children = 0
+            for p in res.get('items'):
+                # For User's own data, no hiding for too new persons
+                if self.use_user:   p.too_new = False
+                if p.too_new:       family.num_hidden_children += 1
+                family.children.append(p)
+
+        """
+            4. Get family Events node with Places
+
+            res is dict {items, status, statustext}
+        """
+        if select_events:
+            res = self.dbdriver.dr_get_family_events(family.uniq_id, 
+                                                     with_places=select_places)
+            for e in res.get('items'):
+                family.events.append(e)
+                src_list.append(e.uniq_id)
+
+        """
+            5 Get family and event Sources Citations and Repositories
+              optionally with Notes
+        """
+        if select_sources:
+            res = self.dbdriver.dr_get_family_sources(src_list)
+            for s in res.get('items'):
+                family.sources.append(s)
+
+        """
+            6 Get Notes for family and events
+        """
+        if select_notes:
+            res = self.dbdriver.dr_get_family_notes(src_list)
+            for s in res.get('items'):
+                family.sources.append(s)
+
+        return results
+
+    # The followind may be obsolete
 
     def get_children_by_id(self):
         """ Luetaan perheen lasten tiedot """
@@ -197,157 +303,6 @@ RETURN family"""
 #             Called from models.datareader.get_families_data_by_id 
 #                    from bp.tools.routes.show_family_data
     
-    
-    def get_family_data(self, uuid:str):
-        """ Read Family information including Events, Children, Notes and Sources.
-        
-            1) read 
-                (f:Family) --> (e:Event)
-                (f:Family) -[:PARENT]-> (pp:Person) -> (np:Name)
-                (f:Family) -[:CHILD]->  (pc:Person) -> (nc:Name)
-                (f:Family) --> (fn:Note)
-                (e:Event) --> (en:Note)
-                (f:Family) --> (fac:Citation) --> (fas:Source) --> (far:Repository)
-                (e:Event) --> (evc:Citation) --> (evs:Source) --> (evr:Repository)
- 
-            2) read
-                (pp:Person) --> (ppe:Event) --> (:Place)
-                (pc:Person) --> (pce:Event) --> (:Place)
-
-            3) build
-                Family_combo.mother, .names, event_birth, event_death
-                Family_combo.father, .names, event_birth, event_death
-                Family_combo.events
-                Family_combo.notes
-                Family_combo.sources / citation -> source -> repocitory ?
-                Family_combo.children, .names, event_birth, event_death
-            Returns a Family object with other objects included
-        """
-
-        results = FamilyResult()
-        """
-            1. Get Family node by user/common
-
-            res is dict {item, status, statustext}
-        """
-        res = self.dbdriver.dr_get_family_uuid(self.use_user, uuid)
-        family = res.get('item')
-        results.error = res.get('statustext')
-        if not family:
-            return results
-        results.items = family
-        # The Nodes for search of Sources
-        src_list = [family.uniq_id]
-        """
-            2. Get Parent nodes
-               optionally with default Name
-
-            res is dict {items, status, statustext}
-        """
-        res = self.dbdriver.dr_get_family_parents(family.uniq_id, with_name=True)
-        for p in res.get('items'):
-            # For User's own data, no hiding for too new persons
-            if self.use_user:           p.too_new = False
-            if p.role == 'father':      family.father = p
-            elif p.role == 'mother':    family.mother = p
-
-        """
-            3. Get Child nodes
-               optionally with Birth and Death nodes
-
-            res is dict {items, status, statustext}
-        """
-        res = self.dbdriver.\
-              dr_get_family_children(family.uniq_id, with_events=True, with_names=True)
-        family.num_hidden_children = 0
-        for p in res.get('items'):
-            # For User's own data, no hiding for too new persons
-            if self.use_user:   p.too_new = False
-            if p.too_new:       family.num_hidden_children += 1
-            family.children.append(p)
-
-        """
-            4. Get family Events node with Places
-
-            res is dict {items, status, statustext}
-        """
-        res = self.dbdriver.dr_get_family_events(family.uniq_id, with_places=True)
-        for e in res.get('items'):
-            family.events.append(e)
-            src_list.append(e.uniq_id)
-
-        """
-            5 Get family and event Sources Citations and Repositories
-              optionally with Notes
-        """
-        res = self.dbdriver.dr_get_family_sources(src_list) #, with_notes=True)
-        for s in res.get('items'):
-            family.sources.append(s)
-
-        """
-            6 Get Notes for family and events
-        """
-        res = self.dbdriver.dr_get_family_notes(src_list) #, with_notes=True)
-        for s in res.get('items'):
-            family.sources.append(s)
-
-
-
-        with shareds.driver.session() as session:
-            try:
-                result = session.run(CypherFamily.obsolete_get_family_data, 
-                                     id_list=[family.uniq_id])
-                for record in result:
-                    """
-                        2. Get Events node [with Place?]
-                    """
-#                     for event_node, place_node in record['family_event']
-
-                    """
-                        3. Get Parent nodes [with default Name?]
-                    """
-#                     for role, person_node, name_node, birth_node, death_node in record['parent']
-
-                    """
-                        4. Get Child nodes [with Birth and Death nodes?]
-                    """
-#                     for person_node, name_node, birth_node, death_node in record['child']
-
-                    """
-                        5. Get Citation, Source, Repository nodes
-                    """
-                    for repository_node, source_node, citation_node in record['sources']:
-                        # record['sources'][0]:
-                        # [<Node id=253027 labels={'Repository'} 
-                        #    properties={'handle': '_dcad22f5914b34fe61c341dad0', 'id': 'R0068', 'rname': 'Taivassalon seurakunnan arkisto', 
-                        #        'type': 'Archive', 'change': '1546265916'}>, 
-                        #  <Node id=247578 labels={'Source'} 
-                        #    properties={'handle': '_e085cd6d68d256a94afecd2162d', 'id': 'S1418', 
-                        #        'stitle': 'Taivassalon seurakunnan syntyneiden ja kastettujen luettelot 1790-1850 (I C:4)', 
-                        #        'change': '1543186596'}>, 
-                        #  <Node id=246371 labels={'Citation'} 
-                        #    properties={'handle': '_dd12b0b88d5741ee11d8bef1ca5', 'id': 'C0854', 'page': 'Vigde år 1831 April 4', 
-                        #        /* dates missing here */, 'change': 1543186596, 'confidence': '2'}>
-                        # ]
-                        if repository_node:
-                            source = SourceBl.from_node(source_node)
-                            cita = Citation.from_node(citation_node)
-                            repo = Repository.from_node(repository_node)
-                            source.repositories.append(repo)
-                            source.citations.append(cita)
-                            family.sources.append(source)
-                        
-                    for node in record['note']:
-                        note = Note.from_node(node)
-                        family.notes.append(note)
-
-            
-            except Exception as e:
-                results.error = 'Error get_family_data: {} {}'.format(e.__class__.__name__, e)          
-                raise      
-    
-        return results
-
     
 #     @staticmethod           
 #     def get_dates_parents(tx, uniq_id): #see models.gen.family_combo.Family_combo
