@@ -224,13 +224,12 @@ RETURN family"""
             Returns a Family object with other objects included
         """
 
-        # Import here to handle circular dependency
-        from models.gen.person_combo import Person_combo
         results = FamilyResult()
         """
             1. Get Family node by user/common
+
+            res is dict {item, status, statustext}
         """
-        # res is dict {item, status, statustext}
         res = self.dbdriver.dr_get_family_uuid(self.use_user, uuid)
         family = res.get('item')
         results.error = res.get('statustext')
@@ -241,8 +240,9 @@ RETURN family"""
         """
             2. Get Parent nodes
                optionally with default Name
+
+            res is dict {items, status, statustext}
         """
-        # res is dict {items, status, statustext}
         res = self.dbdriver.dr_get_family_parents(family.uniq_id, with_name=True)
         for p in res.get('items'):
             # For User's own data, no hiding for too new persons
@@ -253,22 +253,27 @@ RETURN family"""
         """
             3. Get Child nodes
                optionally with Birth and Death nodes
+
+            res is dict {items, status, statustext}
         """
         res = self.dbdriver.\
               dr_get_family_children(family.uniq_id, with_events=True, with_names=True)
-        num_hidden_children = 0
+        family.num_hidden_children = 0
         for p in res.get('items'):
             # For User's own data, no hiding for too new persons
             if self.use_user:   p.too_new = False
-            if p.too_new:       num_hidden_children += 1
+            if p.too_new:       family.num_hidden_children += 1
             family.children.append(p)
 
         """
             4. Get family Events node with Places
+
+            res is dict {items, status, statustext}
         """
-        events = self.dbdriver.dr_get_family_events(family.uniq_id, with_places=True)
-        for e in events:
+        res = self.dbdriver.dr_get_family_events(family.uniq_id, with_places=True)
+        for e in res.get('items'):
             family.events.append(e)
+
         """
             5 Get family event Sources Citations and Repositories
               optionally with Notes
@@ -287,31 +292,31 @@ RETURN family"""
                     """
                         2. Get Events node [with Place?]
                     """
-                    for event_node, place_node in record['family_event']:
-                        if event_node:
-                            # event_node:
-                            # <Node id=242570 labels={'Event'} 
-                            #    properties={'datetype': 0, 'change': 1528183878, 'description': '', 
-                            #        'handle': '_dcf94f35ea262b7e1a0a0066d6e', 'id': 'E1692', 
-                            #        'date2': 1875043, 'type': 'Marriage', 'date1': 1875043}>
-                            e = Event_combo.from_node(event_node)
-                            if place_node:
-                                # place_node: <Node id=73479 labels={'Place'} properties={'coord':
-                                # [60.5625, 21.609722222222224], 'id': 'P0468', 'type': 'City', 'uuid':
-                                # 'd1d0693de1714a47acf6442d64246a50', 'pname': 'Taivassalo', 'change':
-                                # 1556953682}>
-                                e.place = PlaceBl.from_node(place_node)
-
-                                # Look for surrounding place:
-                                res = session.run(Cypher_person.get_places, uid_list=[e.uniq_id])
-                                for rec in res:
-                                    e.place.names = place_names_from_nodes(rec['pnames'])
-                                    if rec['pi']:
-                                        pl_in = PlaceBl.from_node(rec['pi'])
-                                        pl_in.names = place_names_from_nodes(rec['pinames'])
-                                        e.place.uppers.append(pl_in)
-
-                            family.events.append(e)
+#                     for event_node, place_node in record['family_event']:
+#                         if event_node:
+#                             # event_node:
+#                             # <Node id=242570 labels={'Event'} 
+#                             #    properties={'datetype': 0, 'change': 1528183878, 'description': '', 
+#                             #        'handle': '_dcf94f35ea262b7e1a0a0066d6e', 'id': 'E1692', 
+#                             #        'date2': 1875043, 'type': 'Marriage', 'date1': 1875043}>
+#                             e = Event_combo.from_node(event_node)
+#                             if place_node:
+#                                 # place_node: <Node id=73479 labels={'Place'} properties={'coord':
+#                                 # [60.5625, 21.609722222222224], 'id': 'P0468', 'type': 'City', 'uuid':
+#                                 # 'd1d0693de1714a47acf6442d64246a50', 'pname': 'Taivassalo', 'change':
+#                                 # 1556953682}>
+#                                 e.place = PlaceBl.from_node(place_node)
+# 
+#                                 # Look for surrounding place:
+#                                 res = session.run(Cypher_person.get_places, uid_list=[e.uniq_id])
+#                                 for rec in res:
+#                                     e.place.names = place_names_from_nodes(rec['pnames'])
+#                                     if rec['pi']:
+#                                         pl_in = PlaceBl.from_node(rec['pi'])
+#                                         pl_in.names = place_names_from_nodes(rec['pinames'])
+#                                         e.place.uppers.append(pl_in)
+# 
+#                             family.events.append(e)
                     """
                         3. Get Parent nodes [with default Name?]
                     """

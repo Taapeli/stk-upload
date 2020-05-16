@@ -35,6 +35,21 @@ OPTIONAL MATCH (f) -[:CHILD]- (pc:Person)
 RETURN pc AS person, nc AS name, cbe AS birth, cde AS death
     ORDER BY cbe.date1"""
 
+    get_family_events = """
+MATCH (f:Family) -[:EVENT]-> (fe:Event) WHERE ID(f) = $fuid
+OPTIONAL MATCH (fe) -[:PLACE]-> (fep:Place)
+RETURN fe as event, fep AS place"""
+
+    get_events_w_places = """
+MATCH (x) -[:EVENT]-> (e:Event) WHERE ID(x) = $fuid
+OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
+OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
+OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
+OPTIONAL MATCH (pi) -[NAME]-> (pin:Place_name)
+RETURN e as event, 
+    pl AS place, COLLECT(DISTINCT pn) AS names,
+    pi AS inside, ri AS in_rel, COLLECT(DISTINCT pin) AS in_names"""
+
     get_family_data = """
 MATCH (f:Family) WHERE ID(f) in $id_list
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
