@@ -33,6 +33,10 @@ from models.gen.citation import Citation
 class Neo4jReadDriver:
     ''' Methods for accessing Neo4j database.
     '''
+    ST_OK = 0
+    ST_NOT_FOUND = 1
+    ST_ERROR = 2
+
     def __init__(self, driver):
         self.driver = driver
     
@@ -110,6 +114,8 @@ class Neo4jReadDriver:
     def dr_get_family_uuid(self, user:str, uuid:str):
         '''
         Read a Family using uuid and user info.
+        
+        Returns dict {item, status, statustext}
         '''
         family = None
 
@@ -138,11 +144,80 @@ class Neo4jReadDriver:
                         # >
                         node = record['f']
                         family = FamilyBl.from_node(node)
-                    return (family, None)
+                    return {"item":family, "status":self.ST_OK}
             except Exception as e:
-                return (None, e)
-        return (None,"Got no Families")
+                return {"item":None, "status":self.ST_ERROR, "statustext":str(e)}
 
+        return {"item":None, "status":self.ST_NOT_FOUND, "statustext":"No families found"}
+
+
+    def _set_birth_death(self, person, birth_node, death_node):
+        '''
+        Set person.birth and person.death events from db nodes
+        '''
+        if birth_node:
+            person.event_birth = Event_combo.from_node(birth_node)
+        if death_node:
+            person.event_death = Event_combo.from_node(death_node)
+
+
+
+    def dr_get_family_parents(self, uniq_id:int, with_name=True):
+        """
+            2. Get Parent nodes
+               optionally with default Name
+            
+            returns dict {items, status, statustext}
+        """
+        parents = []
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_family_parents, 
+                                     fuid=uniq_id)
+                for record in result:
+                    # <Record 
+                    #    role='father'
+                    #    parent=<Node id=550536 labels={'Person'}
+                    #        properties={'sortname': 'Linderoos#Johan Wilhelm#', 'death_high': 1844,
+                    #            'confidence': '2.0', 'sex': 1, 'change': 1585409699, 'birth_low': 1788,
+                    #            'birth_high': 1788, 'id': 'I1314', 'uuid': '8a4d49509d26434bb3bf63c4657af9e2',
+                    #            'death_low': 1844}>
+                    #    name=<Node id=550537 labels={'Name'}
+                    #        properties={'firstname': 'Johan Wilhelm', 'type': 'Birth Name',
+                    #            'suffix': '', 'prefix': '', 'surname': 'Linderoos', 'order': 0}>
+                    #    birth=<Node id=543985 labels={'Event'}
+                    #        properties={'datetype': 0, 'change': 1585409702, 'description': '',
+                    #            'id': 'E4460', 'date2': 1831101, 'type': 'Birth', 'date1': 1831101,
+                    #            'uuid': '5f9b78fe1a644834bc52715d58d61774'}>
+                    #   death=<Node id=543986 labels={'Event'} properties={'id': 'E4461', ...}>
+                    # >
+
+                    role = record['role']
+                    person_node = record['parent']
+                    if person_node:
+                        if uniq_id != person_node.id:
+                            # Skip person with double default name
+                            p = Person_combo.from_node(person_node)
+                            p.role = role
+                            name_node = record['name']
+                            if name_node:
+                                p.names.append(Name.from_node(name_node))
+
+                            birth_node = record['birth']
+                            death_node = record['death']
+                            self._set_birth_death(p, birth_node, death_node)
+
+                            parents.append(p)
+
+            except Exception as e:
+                return {"status":self.ST_ERROR, 
+                        "statustext": f'Error get_family_data: {e.__class__.__name__} {e}'
+                    }     
+    
+        return {"items":parents, "status":self.ST_OK, "statustext":""}
+
+
+    #Todo Obsolete idea?
     def dr_get_family_group(self, uniq_id_list:list, groups=['pa:ev']):
         ''' 
         Read Family with selected connected data.

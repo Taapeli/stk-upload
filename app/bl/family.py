@@ -223,29 +223,58 @@ RETURN family"""
                 Family_combo.children, .names, event_birth, event_death
             Returns a Family object with other objects included
         """
+
         # Import here to handle circular dependency
         from models.gen.person_combo import Person_combo
-
-        def set_birth_death(person, birth_node, death_node):
-            '''
-            Set person.birth and person.death events from db nodes
-            '''
-            if birth_node:
-                person.event_birth = Event_combo.from_node(birth_node)
-            if death_node:
-                person.event_death = Event_combo.from_node(death_node)
-
+        results = FamilyResult()
         """
             1. Get Family node by user/common
         """
-        family, statusText = self.dbdriver.dr_get_family_uuid(self.use_user, uuid)
-        results = FamilyResult()
-        results.error = statusText
+        # res is dict {item, status, statustext}
+        res = self.dbdriver.dr_get_family_uuid(self.use_user, uuid)
+        family = res.get('item')
+        results.error = res.get('statustext')
         if not family:
             return results
         results.items = family
-        
-        #TODO: Move to pe.neo4j.reader.Neo4jReadDriver
+
+        """
+            2. Get Parent nodes
+               optionally with default Name
+        """
+        # res is dict {items, status, statustext}
+        res = self.dbdriver.dr_get_family_parents(family.uniq_id, with_name=True)
+        for p in res.get('items'):
+            # For User's own data, no hiding for too new persons
+            if self.use_user:           p.too_new = False
+            if p.role == 'father':      family.father = p
+            elif p.role == 'mother':    family.mother = p
+
+        """
+            3. Get Child nodes
+               optionally with Birth and Death nodes
+        """
+        children = self.dbdriver.dr_get_family_children(family.uniq_id,
+                                                        with_events=True,
+                                                        with_names=True)
+        for c in children:
+            family.children.append(c)
+        """
+            4. Get family Events node with Places
+        """
+        events = self.dbdriver.dr_get_family_events(family.uniq_id, with_places=True)
+        for e in events:
+            family.events.append(e)
+        """
+            5 Get family event Sources Citations and Repositories
+              optionally with Notes
+        """
+        sources = self.dbdriver.dr_get_family_sources(family.uniq_id, with_notes=True)
+        for c in sources:
+            family.sources.append(c)
+
+
+
         with shareds.driver.session() as session:
             try:
                 result = session.run(CypherFamily.get_family_data, 
@@ -282,45 +311,45 @@ RETURN family"""
                     """
                         3. Get Parent nodes [with default Name?]
                     """
-                    uniq_id = -1
-                    for role, person_node, name_node, birth_node, death_node in record['parent']:
-                        # ['mother', 
-                        #    <Node id=235105 labels={'Person'} 
-                        #        properties={'sortname': 'Gröndahl#Juhantytär#Fredrika', 'datetype': 19, 
-                        #            'confidence': '2.0', 'sex': 2, 'change': 1536161195, 
-                        #            'handle': '_dcf94f357d9f565664a975f99f', 'id': 'I2475', 
-                        #            'date2': 1937706, 'date1': 1856517}>, 
-                        #    <Node id=235106 labels={'Name'} 
-                        #        properties={'firstname': 'Fredrika', 'type': 'Married Name', 
-                        #            'suffix': 'Juhantytär', 'prefix': '', 'surname': 'Gröndahl', 'order': 0}>, 
-                        #    <Node id=242532 labels={'Event'} 
-                        #        properties={'datetype': 0, 'change': 1519151217, 'description': '', 
-                        #            'handle': '_dcf94f357db6f3c846e6472915f', 'id': 'E1531', 
-                        #            'date2': 1856517, 'type': 'Birth', 'date1': 1856517}>, 
-                        #    <Node id=242536 labels={'Event'} 
-                        #        properties={'datetype': 0, 'change': 1519150640, 'description': '', 
-                        #            'handle': '_dcf94f357e2d61f5f76e1ba7cb', 'id': 'E1532', 
-                        #            'date2': 1937700, 'type': 'Death', 'date1': 1937700}>
-                        # ]
-                        if person_node:
-                            if uniq_id != person_node.id:
-                                # Skip person with double default name
-                                p = Person_combo.from_node(person_node)
-                                p.role = role
-                                if name_node:
-                                    p.names.append(Name.from_node(name_node))
-
-                                set_birth_death(p, birth_node, death_node)
-
-                                if role == 'father':
-                                    family.father = p
-                                elif role == 'mother':
-                                    family.mother = p
-
-                    if self.use_user:
-                        # User's own data
-                        if family.father: family.father.too_new = False
-                        if family.mother: family.mother.too_new = False
+#                     uniq_id = -1
+#                     for role, person_node, name_node, birth_node, death_node in record['parent']:
+#                         # ['mother', 
+#                         #    <Node id=235105 labels={'Person'} 
+#                         #        properties={'sortname': 'Gröndahl#Juhantytär#Fredrika', 'datetype': 19, 
+#                         #            'confidence': '2.0', 'sex': 2, 'change': 1536161195, 
+#                         #            'handle': '_dcf94f357d9f565664a975f99f', 'id': 'I2475', 
+#                         #            'date2': 1937706, 'date1': 1856517}>, 
+#                         #    <Node id=235106 labels={'Name'} 
+#                         #        properties={'firstname': 'Fredrika', 'type': 'Married Name', 
+#                         #            'suffix': 'Juhantytär', 'prefix': '', 'surname': 'Gröndahl', 'order': 0}>, 
+#                         #    <Node id=242532 labels={'Event'} 
+#                         #        properties={'datetype': 0, 'change': 1519151217, 'description': '', 
+#                         #            'handle': '_dcf94f357db6f3c846e6472915f', 'id': 'E1531', 
+#                         #            'date2': 1856517, 'type': 'Birth', 'date1': 1856517}>, 
+#                         #    <Node id=242536 labels={'Event'} 
+#                         #        properties={'datetype': 0, 'change': 1519150640, 'description': '', 
+#                         #            'handle': '_dcf94f357e2d61f5f76e1ba7cb', 'id': 'E1532', 
+#                         #            'date2': 1937700, 'type': 'Death', 'date1': 1937700}>
+#                         # ]
+#                         if person_node:
+#                             if uniq_id != person_node.id:
+#                                 # Skip person with double default name
+#                                 p = Person_combo.from_node(person_node)
+#                                 p.role = role
+#                                 if name_node:
+#                                     p.names.append(Name.from_node(name_node))
+# 
+#                                 set_birth_death(p, birth_node, death_node)
+# 
+#                                 if role == 'father':
+#                                     family.father = p
+#                                 elif role == 'mother':
+#                                     family.mother = p
+# 
+#                     if self.use_user:
+#                         # User's own data
+#                         if family.father: family.father.too_new = False
+#                         if family.mother: family.mother.too_new = False
                     """
                         4. Get Child nodes [with Birth and Death nodes?]
                     """

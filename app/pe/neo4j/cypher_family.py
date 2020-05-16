@@ -19,6 +19,13 @@ RETURN f, type(r) AS root_type, root'''
 MATCH (root:Batch {user:$user}) -[r:OWNS]-> (f:Family {uuid:$f_uuid}) 
 RETURN f, type(r) AS root_type, root'''
 
+    get_family_parents = """
+MATCH (f:Family) -[r:PARENT]-> (pp:Person) WHERE ID(f) = $fuid
+    OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+    OPTIONAL MATCH (pp) -[:EVENT]-> (pbe:Event {type:"Birth"})
+    OPTIONAL MATCH (pp) -[:EVENT]-> (pde:Event {type:"Death"})
+RETURN r.role AS role, pp AS parent, np AS name, pbe AS birth, pde AS death"""
+
     get_family_data = """
 MATCH (f:Family) WHERE ID(f) in $id_list
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
