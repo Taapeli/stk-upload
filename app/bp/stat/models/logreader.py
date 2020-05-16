@@ -20,9 +20,10 @@ log_re = re.compile(f'({ymd_re}) ({hms_re})'
                     f' (\S+) (\S+) (\S+) (.*)')
 
 # We are interested only about entries where %(message)s part looks like this:
-arrow_re = re.compile(r"^-> ([^ ]+)")
+arrow_re = re.compile(r"^-> ([^ ]+)(.*)")
 
-
+# Additional info in %(message)s part look like this:
+equals_re = re.compile(r"\b(\S+)=(\S+)\b")
 
 def find_longest(list_of_tuples, what):
     longest = 0
@@ -91,7 +92,7 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
         users_re = None
         if "users" in self._opts:
             try:
-                users_re = re.compile(re.sub(",", "|", self._opts["users"]))
+                users_re = re.compile( re.sub(",", "|", self._opts["users"]) )
             except Exception as e:
                 flash(f"Bad regexp '{self._opts['users']}': {e}", category='warning')
 
@@ -104,13 +105,16 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
             if level != 'INFO':
                 continue
 
+            if users_re and not users_re.match(user):
+                continue
+
             match = arrow_re.match(message)
             if not match:
                 continue
-            module = match.group(1)
 
-            if users_re and not users_re.match(user):
-                continue
+            (module, rest) = match.groups()
+            for tup in equals_re.findall(rest):
+                print(f"got {tup[0]} = {tup[1]}")
 
             update_counters(self, module, user, ymd)
         return
