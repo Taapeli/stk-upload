@@ -24,7 +24,16 @@ MATCH (f:Family) -[r:PARENT]-> (pp:Person) WHERE ID(f) = $fuid
     OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
     OPTIONAL MATCH (pp) -[:EVENT]-> (pbe:Event {type:"Birth"})
     OPTIONAL MATCH (pp) -[:EVENT]-> (pde:Event {type:"Death"})
-RETURN r.role AS role, pp AS parent, np AS name, pbe AS birth, pde AS death"""
+RETURN r.role AS role, pp AS person, np AS name, pbe AS birth, pde AS death"""
+
+    get_family_children = """
+MATCH (f:Family) WHERE ID(f) = $fuid
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+    OPTIONAL MATCH (pc) -[:NAME]-> (nc:Name {order:0}) 
+    OPTIONAL MATCH (pc) -[:EVENT]-> (cbe:Event {type:"Birth"})
+    OPTIONAL MATCH (pc) -[:EVENT]-> (cde:Event {type:"Death"})
+RETURN pc AS person, nc AS name, cbe AS birth, cde AS death
+    ORDER BY cbe.date1"""
 
     get_family_data = """
 MATCH (f:Family) WHERE ID(f) in $id_list

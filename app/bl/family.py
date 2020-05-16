@@ -254,11 +254,15 @@ RETURN family"""
             3. Get Child nodes
                optionally with Birth and Death nodes
         """
-        children = self.dbdriver.dr_get_family_children(family.uniq_id,
-                                                        with_events=True,
-                                                        with_names=True)
-        for c in children:
-            family.children.append(c)
+        res = self.dbdriver.\
+              dr_get_family_children(family.uniq_id, with_events=True, with_names=True)
+        num_hidden_children = 0
+        for p in res.get('items'):
+            # For User's own data, no hiding for too new persons
+            if self.use_user:   p.too_new = False
+            if p.too_new:       num_hidden_children += 1
+            family.children.append(p)
+
         """
             4. Get family Events node with Places
         """
@@ -311,80 +315,43 @@ RETURN family"""
                     """
                         3. Get Parent nodes [with default Name?]
                     """
-#                     uniq_id = -1
-#                     for role, person_node, name_node, birth_node, death_node in record['parent']:
-#                         # ['mother', 
-#                         #    <Node id=235105 labels={'Person'} 
-#                         #        properties={'sortname': 'Gröndahl#Juhantytär#Fredrika', 'datetype': 19, 
-#                         #            'confidence': '2.0', 'sex': 2, 'change': 1536161195, 
-#                         #            'handle': '_dcf94f357d9f565664a975f99f', 'id': 'I2475', 
-#                         #            'date2': 1937706, 'date1': 1856517}>, 
-#                         #    <Node id=235106 labels={'Name'} 
-#                         #        properties={'firstname': 'Fredrika', 'type': 'Married Name', 
-#                         #            'suffix': 'Juhantytär', 'prefix': '', 'surname': 'Gröndahl', 'order': 0}>, 
-#                         #    <Node id=242532 labels={'Event'} 
-#                         #        properties={'datetype': 0, 'change': 1519151217, 'description': '', 
-#                         #            'handle': '_dcf94f357db6f3c846e6472915f', 'id': 'E1531', 
-#                         #            'date2': 1856517, 'type': 'Birth', 'date1': 1856517}>, 
-#                         #    <Node id=242536 labels={'Event'} 
-#                         #        properties={'datetype': 0, 'change': 1519150640, 'description': '', 
-#                         #            'handle': '_dcf94f357e2d61f5f76e1ba7cb', 'id': 'E1532', 
-#                         #            'date2': 1937700, 'type': 'Death', 'date1': 1937700}>
-#                         # ]
-#                         if person_node:
-#                             if uniq_id != person_node.id:
-#                                 # Skip person with double default name
-#                                 p = Person_combo.from_node(person_node)
-#                                 p.role = role
-#                                 if name_node:
-#                                     p.names.append(Name.from_node(name_node))
-# 
-#                                 set_birth_death(p, birth_node, death_node)
-# 
-#                                 if role == 'father':
-#                                     family.father = p
-#                                 elif role == 'mother':
-#                                     family.mother = p
-# 
-#                     if self.use_user:
-#                         # User's own data
-#                         if family.father: family.father.too_new = False
-#                         if family.mother: family.mother.too_new = False
+#                     for role, person_node, name_node, birth_node, death_node in record['parent']
+
                     """
                         4. Get Child nodes [with Birth and Death nodes?]
                     """
-                    family.no_of_children = 0
-                    family.num_hidden_children = 0
-                    for person_node, name_node, birth_node, death_node in record['child']:
-                        # record['child'][0]:
-                        # [<Node id=235176 labels={'Person'} 
-                        #    properties={'sortname': '#Andersdotter#Maria Christina', 
-                        #        'datetype': 19, 'confidence': '2.0', 'sex': 2, 'change': 1532009600, 
-                        #        'handle': '_dd2a65b2f8c7e05bc664bd49d54', 'id': 'I0781', 'date2': 1877226, 'date1': 1877219}>, 
-                        #  <Node id=235177 labels={'Name'} 
-                        #    properties={'firstname': 'Maria Christina', 'type': 'Birth Name', 'suffix': 'Andersdotter', 
-                        #        'prefix': '', 'surname': '', 'order': 0}>, 
-                        #  <Node id=242697 labels={'Event'} 
-                        #    properties={'datetype': 0, 'change': 1532009545, 'description': '', 'handle': '_dd2a65b218a14e81692d77955d2', 
-                        #        'id': 'E1886', 'date2': 1877219, 'type': 'Birth', 'date1': 1877219}>, 
-                        #  <Node id=242702 labels={'Event'} 
-                        #    properties={'datetype': 0, 'change': 1519916327, 'description': '', 'handle': '_dd2a65b218a4e85ab141faeab48', 
-                        #        'id': 'E1887', 'date2': 1877226, 'type': 'Death', 'date1': 1877226}>
-                        # ]
-                        if person_node:
-                            family.no_of_children += 1
-                            p = Person_combo.from_node(person_node)
-                            if name_node:
-                                p.names.append(Name.from_node(name_node))
-                            set_birth_death(p, birth_node, death_node)
-                            if not self.use_user:
-                                # Common data
-                                if p.too_new:
-                                    family.num_hidden_children += 1
-                                    continue
-                            else: 
-                                p.too_new = False
-                            family.children.append(p)
+#                     family.no_of_children = 0
+#                     family.num_hidden_children = 0
+#                     for person_node, name_node, birth_node, death_node in record['child']:
+#                         # record['child'][0]:
+#                         # [<Node id=235176 labels={'Person'} 
+#                         #    properties={'sortname': '#Andersdotter#Maria Christina', 
+#                         #        'datetype': 19, 'confidence': '2.0', 'sex': 2, 'change': 1532009600, 
+#                         #        'handle': '_dd2a65b2f8c7e05bc664bd49d54', 'id': 'I0781', 'date2': 1877226, 'date1': 1877219}>, 
+#                         #  <Node id=235177 labels={'Name'} 
+#                         #    properties={'firstname': 'Maria Christina', 'type': 'Birth Name', 'suffix': 'Andersdotter', 
+#                         #        'prefix': '', 'surname': '', 'order': 0}>, 
+#                         #  <Node id=242697 labels={'Event'} 
+#                         #    properties={'datetype': 0, 'change': 1532009545, 'description': '', 'handle': '_dd2a65b218a14e81692d77955d2', 
+#                         #        'id': 'E1886', 'date2': 1877219, 'type': 'Birth', 'date1': 1877219}>, 
+#                         #  <Node id=242702 labels={'Event'} 
+#                         #    properties={'datetype': 0, 'change': 1519916327, 'description': '', 'handle': '_dd2a65b218a4e85ab141faeab48', 
+#                         #        'id': 'E1887', 'date2': 1877226, 'type': 'Death', 'date1': 1877226}>
+#                         # ]
+#                         if person_node:
+#                             family.no_of_children += 1
+#                             p = Person_combo.from_node(person_node)
+#                             if name_node:
+#                                 p.names.append(Name.from_node(name_node))
+#                             set_birth_death(p, birth_node, death_node)
+#                             if not self.use_user:
+#                                 # Common data
+#                                 if p.too_new:
+#                                     family.num_hidden_children += 1
+#                                     continue
+#                             else: 
+#                                 p.too_new = False
+#                             family.children.append(p)
                     """
                         5. Get Citation, Source, Repository nodes
                     """

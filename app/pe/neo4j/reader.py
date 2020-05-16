@@ -164,8 +164,7 @@ class Neo4jReadDriver:
 
     def dr_get_family_parents(self, uniq_id:int, with_name=True):
         """
-            2. Get Parent nodes
-               optionally with default Name
+            Get Parent nodes, optionally with default Name
             
             returns dict {items, status, statustext}
         """
@@ -193,7 +192,7 @@ class Neo4jReadDriver:
                     # >
 
                     role = record['role']
-                    person_node = record['parent']
+                    person_node = record['person']
                     if person_node:
                         if uniq_id != person_node.id:
                             # Skip person with double default name
@@ -211,13 +210,67 @@ class Neo4jReadDriver:
 
             except Exception as e:
                 return {"status":self.ST_ERROR, 
-                        "statustext": f'Error get_family_data: {e.__class__.__name__} {e}'
-                    }     
+                        "statustext": f'Error get_family_data: {e}'}     
     
         return {"items":parents, "status":self.ST_OK, "statustext":""}
 
+    def dr_get_family_children(self, uniq_id, with_events=True, with_names=True):
+        """ 
+        Get Child nodes, optionally with Birth and Death nodes
+            
+            returns dict {items, status, statustext}
+        """
+        children = []
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_family_children, 
+                                     fuid=uniq_id)
+                for record in result:
+                    # <Record 
+                    #    person=<Node id=550538 labels={'Person'}
+                    #        properties={'sortname': 'Linderoos#Gustaf Mathias Israel#',...}> 
+                    #    name=<Node id=550539 labels={'Name'}
+                    #        properties={'firstname': 'Gustaf Mathias Israel', 'type': 'Birth Name',...'order': 0}>
+                    #    birth=<Node id=543988 labels={'Event'}
+                    #        properties={'id': 'E4463', 'type': 'Birth', ...}>
+                    #    death=None
+                    # >
+#for person_node, name_node, birth_node, death_node in record['child']:
+# record['child'][0]:
+# [<Node id=235176 labels={'Person'} 
+#    properties={'sortname': '#Andersdotter#Maria Christina', 
+#        'datetype': 19, 'confidence': '2.0', 'sex': 2, 'change': 1532009600, 
+#        'handle': '_dd2a65b2f8c7e05bc664bd49d54', 'id': 'I0781', 'date2': 1877226, 'date1': 1877219}>, 
+#  <Node id=235177 labels={'Name'} 
+#    properties={'firstname': 'Maria Christina', 'type': 'Birth Name', 'suffix': 'Andersdotter', 
+#        'prefix': '', 'surname': '', 'order': 0}>, 
+#  <Node id=242697 labels={'Event'} 
+#    properties={'datetype': 0, 'change': 1532009545, 'description': '', 'handle': '_dd2a65b218a14e81692d77955d2', 
+#        'id': 'E1886', 'date2': 1877219, 'type': 'Birth', 'date1': 1877219}>, 
+#  <Node id=242702 labels={'Event'} 
+#    properties={'datetype': 0, 'change': 1519916327, 'description': '', 'handle': '_dd2a65b218a4e85ab141faeab48', 
+#        'id': 'E1887', 'date2': 1877226, 'type': 'Death', 'date1': 1877226}>
+# ]
+                    person_node = record['person']
+                    if person_node:
+                        p = Person_combo.from_node(person_node)
+                        name_node = record['name']
+                        if name_node:
+                            p.names.append(Name.from_node(name_node))
+                        birth_node = record['birth']
+                        death_node = record['death']
+                        self._set_birth_death(p, birth_node, death_node)
 
-    #Todo Obsolete idea?
+                        children.append(p)
+
+            except Exception as e:
+                return {"status":self.ST_ERROR, 
+                        "statustext": f'Error get_family_children: {e}'}     
+
+        return {"items":children, "status":self.ST_OK, "statustext":""}
+
+
+    #Todo Obsolete idea? ------------------------------------------------------
     def dr_get_family_group(self, uniq_id_list:list, groups=['pa:ev']):
         ''' 
         Read Family with selected connected data.
