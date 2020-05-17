@@ -53,8 +53,8 @@ class Family(NodeObject):
         '''
         Transforms a db node to an object of type Family.
         
-        You can create a Family or Family_combo instance. (cls is the class 
-        where we are, either Family or Family_combo)
+        You can create a Family or FamilyBl instance. (cls is the class 
+        where we are, either Family or FamilyBl)
         
         <Node id=99991 labels={'Family'} 
             properties={'rel_type': 'Married', 'handle': '_da692e4ca604cf37ac7973d7778', 
@@ -153,12 +153,12 @@ class FamilyReader(DBreader):
                 (pc:Person) --> (pce:Event) --> (:Place)
 
             3) build
-                Family_combo.mother, .names, event_birth, event_death
-                Family_combo.father, .names, event_birth, event_death
-                Family_combo.events
-                Family_combo.notes
-                Family_combo.sources / citation -> source -> repocitory ?
-                Family_combo.children, .names, event_birth, event_death
+                FamilyBl.mother, .names, event_birth, event_death
+                FamilyBl.father, .names, event_birth, event_death
+                FamilyBl.events
+                FamilyBl.notes
+                FamilyBl.sources / citation -> source -> repocitory ?
+                FamilyBl.children, .names, event_birth, event_death
         """
 
         # Select data by groups parameter like 'pare:name:even:plac':
