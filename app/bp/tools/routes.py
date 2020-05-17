@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger('stkserver')
 import time
 
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash #, jsonify
 from flask_security import roles_accepted, login_required #, current_user ,roles_required
 from flask_babelex import _
 
@@ -42,6 +42,7 @@ def show_table_data(subj):
         args=request.args
     else:
         args={}
+    logger.info(f"-> bp.tools.routes.show_table_data theme={subj}")
 
     if subj == "persons":
         persons = datareader.read_persons_with_events(args=args)
@@ -118,11 +119,8 @@ def show_table_data(subj):
 @bp.route('/list/refnames', defaults={'reftype': None})
 def list_refnames(reftype):
     """ Table of reference names """
-#     if reftype and reftype != "":
-#         names = datareader.read_typed_refnames(reftype)  # TODO: Not tested method
-#         return render_template("table_refnames_1.html", names=names, reftype=reftype)
-#     else:
     names = datareader.read_refnames()
+    logger.info(f"-> bp.tools.routes.list_refnames n={len(names)}")
     print(names[0])
     return render_template("/tools/table_refnames.html", names=names)
 
@@ -145,9 +143,10 @@ def show_person_data(uniq_id):
         linkki oli sukunimiluettelosta
     """
     person, events, photos, sources, families = datareader.get_person_data_by_id(uniq_id)
+    logger.info(f"-> bp.tools.routes.show_person_data")
     logger.debug("Got {} persons, {} events, {} photos, {} sources, {} families".\
                  format(len(person), len(events), len(photos), len(sources), len(families)))
-    return render_template("/tools/table_person_by_id.html",
+    return render_template("/tools/obsolete_table_person_by_id.html",
                        person=person, events=events, photos=photos, sources=sources)
 
 
@@ -158,7 +157,7 @@ def compare_person_page(cond):
     """
     key, value = cond.split('=')
     uniq_id_1, uniq_id_2 = value.split(',')
-    print(f"-> bp.tools.routes.compare_person_page {cond}")
+    logger.info(f"-> bp.tools.routes.compare_person_page {cond}")
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
@@ -217,6 +216,7 @@ def show_baptism_data(uniq_id):
         kastetapahtuman tietojen näyttäminen ruudulla 
     """
     event, persons = datareader.get_baptism_data(uniq_id)
+    logger.info(f"-> bp.tools.routes.show_baptism_data")
     return render_template("/tools/table_baptism_data.html",
                            event=event, persons=persons)
 
@@ -226,9 +226,10 @@ def show_family_data(uniq_id):
     """ Table of families of a Person
         henkilön perheen tietojen näyttäminen ruudulla 
     """
-    person, families = datareader.get_families_data_by_id(uniq_id)
-    return render_template("/tools/table_families_by_id.html",
-                           person=person, families=families)
+    return "bp.tools.routes.show_family_data poistettu 17.5.2020"
+#     person, families = datareader.get_families_data_by_id(uniq_id)
+#     return render_template("/tools/obsolete_table_families_by_id.html",
+#                            person=person, families=families)
 
 
 @bp.route('/pick/<string:cond>')
@@ -236,16 +237,18 @@ def pick_selection(cond):
     """ Table of objects selected by the argument
     """
     key, value = cond.split('=')
+    logger.info(f"-> bp.tools.routes.pick_selection theme={key}")
     try:
         if key == 'name':               # A prototype for later development
             value=value.title()
             persons = datareader.read_persons_with_events(keys=('surname',value))
             return render_template("/tools/join_persons.html",
                                    persons=persons, pattern=value)
-        elif key == 'cite_sour_repo':   # from table_person_by_id.html Ei käytössä
-            events = datareader.read_cite_sour_repo(uniq_id=value)
-            return render_template("/tools/cite_sour_repo.html",
-                                   events=events)
+        elif key == 'cite_sour_repo':   # from obsolete_table_person_by_id.html Ei käytössä
+            return "bp.tools.routes.pick_selection/cite_sour_repo poistettu 17.5.2020"
+#             events = datareader.read_cite_sour_repo(uniq_id=value)
+#             return render_template("/tools/cite_sour_repo.html",
+#                                    events=events)
 #         elif key == 'repo_uniq_id':     # from cite_sourc_repo.html, 
 #                                         # ng_table_repositories.html,
 #                                         # table_repositories.html
@@ -289,9 +292,10 @@ def show_person_data_dbl(uniq_id):
     """
     person, events, photos, sources, families = \
         datareader.get_person_data_by_id(uniq_id)
+    logger.info(f"-> bp.tools.routes.show_person_data_dbl")
     logger.debug("Got {} persons, {} events, {} photos, {} sources, {} families".\
                  format(len(person), len(events), len(photos), len(sources), len(families)))
-    return render_template("/tools/table_person_by_id.html",
+    return render_template("/tools/obsolete_table_person_by_id.html",
                        person=person, events=events, photos=photos, sources=sources)
 
 
@@ -322,39 +326,39 @@ def show_person_data_dbl(uniq_id):
 #         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
-@bp.route('/compare2/<string:cond>')
-def compare_person_page2_dbl(cond):
-    """ Vertailu - henkilön tietojen näyttäminen ruudulla
-        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
-    """
-    key, value = cond.split('=')
-    try:
-        if key == 'uniq_id':
-            person, events, photos, sources, families = \
-                datareader.get_person_data_by_id(value)
-            for f in families:
-                print (_("{} in the family {} / {}").format(f.role, f.uniq_id, f.id))
-                if f.mother:
-                    print(_("  Mother: {} / {} s. {}").format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-                if f.father:
-                    print(_("  Father:  {} / {} s. {}").format(f.father.uniq_id, f.father.id, f.father.birth_date))
-                if f.children:
-                    for c in f.children:
-                        print(_("    Child ({}): {} / {} *{}").format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
-        else:
-            raise(KeyError(_('Wrong Search key')))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("/tools/compare2.html", person=person, events=events, 
-                           photos=photos, sources=sources, families=families)
-
+# @bp.route('/compare2/<string:cond>')
+# def compare_person_page2_dbl(cond):
+#     """ Vertailu - henkilön tietojen näyttäminen ruudulla
+#         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+#     """
+#     key, value = cond.split('=')
+#     try:
+#         if key == 'uniq_id':
+#             person, events, photos, sources, families = \
+#                 datareader.get_person_data_by_id(value)
+#             for f in families:
+#                 print (_("{} in the family {} / {}").format(f.role, f.uniq_id, f.id))
+#                 if f.mother:
+#                     print(_("  Mother: {} / {} s. {}").format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+#                 if f.father:
+#                     print(_("  Father:  {} / {} s. {}").format(f.father.uniq_id, f.father.id, f.father.birth_date))
+#                 if f.children:
+#                     for c in f.children:
+#                         print(_("    Child ({}): {} / {} *{}").format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
+#         else:
+#             raise(KeyError(_('Wrong Search key')))
+#     except KeyError as e:
+#         return redirect(url_for('virhesivu', code=1, text=str(e)))
+#     return render_template("/tools/compare2.html", person=person, events=events, 
+#                            photos=photos, sources=sources, families=families)
 
 @bp.route('/lista/family_data/<string:uniq_id>')
 def show_family_data_dbl(uniq_id):
     """ henkilön perheen tietojen näyttäminen ruudulla """
-    person, families = datareader.get_families_data_by_id(uniq_id)
-    return render_template("/tools/table_families_by_id.html",
-                           person=person, families=families)
+    return "bp.tools.routes.show_family_data_dbl poistettu 17.5.2020"
+#     person, families = datareader.get_families_data_by_id(uniq_id)
+#     return render_template("/tools/obsolete_table_families_by_id.html",
+#                            person=person, families=families)
 
 
 @bp.route('/yhdista', methods=['POST'])
