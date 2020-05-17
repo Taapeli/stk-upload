@@ -24,13 +24,13 @@
 	         title="{{ _("How long lines?") }}"
 	         value="{{ width }}">
 	  &nbsp;&nbsp;
-	  <label for="users">{{ _(" Show users:") }}</label>
-	  <input type="text" name="users" size="8"
+	  <label for="users">{{ _(" Users:") }}</label>
+	  <input type="text" name="users" size="6"
 	         title="{{ _("python regexp(s) to match start of username") }}"
 		 {% if users %} value="{{ users }}" {% endif %}>
 	  &nbsp;&nbsp;
-	  <label for="logs">{{ _(" Show logs:") }}</label>
-	  <input type="text" name="logs" size="8"
+	  <label for="logs">{{ _(" Logs:") }}</label>
+	  <input type="text" name="logs" size="6"
 	         title="{{ _("shell glob to match log files") }}"
 		 {% if logs %} value="{{ logs }}" {% endif %}>
 	  &nbsp;&nbsp;
@@ -40,13 +40,44 @@
 		 {% if bycount %} checked {% endif %}
 		 id="bycount" value="{{ 'x' }}">
 	  &nbsp;&nbsp;
-	  <input type="submit" value=" > ">
+	  <select id="style" name="style">
+	    <option value="text" {%
+		    if style=="text" %}selected{% endif %}>As text</option>
+	    <option value="table" {%
+		    if style=="table" %}selected{% endif %}>As table</option>
+	  </select>
+	  &nbsp;&nbsp;
+	  <input type="submit" value="Go">
 	</fieldset>
       </form>
     </div>
-    <pre>
- {% for line in lines %}{{ line }}
- {% endfor %}
-    </pre>
+
+    {% for sections in lines %}
+    {# sections[0] is log file name #}
+    {# sections[1] is contents from that log file #}
+    <h3>Logfile(s) <tt>{{ sections[0] }}</tt></h3>
+    {% for section in sections[1] %}
+    {# section[0] is 'By xxx' #}
+    <i> {{ section[0] }} </i>
+
+{% if style == "text" %}
+<pre>
+{% for l2 in section[1] %}  {{ l2 }}
+{% endfor %}</pre>
+{% else %}
+<table>
+  {% for row in section[1] %}
+  <tr>
+    {% for col in row %}
+    <td {% if loop.first %} style="text-align: right" {% endif %}
+	 {% if loop.last %} style="text-align: right" {% endif %}
+	>
+      {{ col }} </td> {% endfor %}
+  </tr>
+{% endfor %}</table><br>
+{% endif %}
+
+   {% endfor %}
+  {% endfor %}
 </div>
 {% endblock %}

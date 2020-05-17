@@ -112,23 +112,24 @@ def stat_app():
     bycount = request.args.get("bycount", None)
     users = request.args.get("users", "")
     logs = request.args.get("logs", "")
+    style = request.args.get("style", "text")
 
     opts = {
         "topn": topn,
         "width": width,
+        "style": style,
     }
     if bycount is not None: opts["bycount"] = 1
     if users != "":
         users = "," . join(re.split("[, ]+", users))
         opts["users"] = users
 
-    log = logreader.Log(opts)
+    # lines[] will collect results from all log files
     lines = []
     for f in get_logfiles(logs):
-            log.work_with(f"{f}")
-            lines.append(f"\n{f}")
-            for l in log.get_by_msg_text():
-                lines.append(l)
+        log = logreader.Log(opts) # each file needs own Log
+        log.work_with(f"{f}")
+        lines.append(log.get_counts(style=style))
 
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
@@ -139,5 +140,6 @@ def stat_app():
                            users = users,
                            bycount = bycount,
                            logs = logs,
+                           style = style,
                            elapsed = elapsed )
 
