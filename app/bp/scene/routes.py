@@ -365,75 +365,86 @@ def show_family_page(uid=None):
 
 @bp.route('/scene/json/families', methods=['POST','GET'])
 def json_get_person_families(uuid=None):
-    """ Get data for a family by its uuid
-        TODO: Get all families for a Person.
+    """ Get all families for a Person as json array.
+
+        The first element is childhood family or None, 
+        the others are marriages in time order.
     """
     import json
     try:
-        uuid = request.args.get('uuid', None)
         if not uuid:
             uuid = json.loads(request.data)['uuid']
-        print(f'got uuid: {uuid}')
+            #uuid = request.args.get('uuid', None)
+        #print(f'got uuid: {uuid}')
         if not uuid:
             return jsonify({"records":[], "statusText":"Missing Family key"})
-    except Exception as e:
-        return jsonify({"records":[], "statusText":"Missing Family key, "+str(e)})
-        #uuid="ea28f1c846714c4dbfb337e61fe770ad"
 
-    u_context = UserContext(user_session, current_user, request)
-    try:
-        family = Family_combo.get_family_data(uuid, u_context)
-        if not family:
-            return jsonify({"records":[], "statusText":"No family got"})
-        fdict = {
-            "rel_type":family.rel_type,
-            "dates": family.dates.to_list(),
-            "id":family.id,
-             "uuid":family.uuid
-        }
+        u_context = UserContext(user_session, current_user, request)
+        dbdriver = Neo4jReadDriver(shareds.driver)
+        reader = FamilyReader(dbdriver, u_context) 
+    
+        results = reader.get_person_families(uuid)
+        #family = Family_combo.get_family_data(uuid, u_context)
+
+        if results.get('status') != 0:
+            return jsonify({"records":[], "statusText":results.get('status')})
+        res = []
+        for family in results['items']:
+            if not family:   # Missing childhood family
+                res.append(None)
+                continue
+
+            fdict = {
+                "rel_type":family.rel_type,
+                "dates": family.dates.to_list(),
+                "id":family.id,
+                "uuid":family.uuid
+            }
+            parents = []
+            if family.father:
+                parent = {
+                    "role":"father",
+                    "sortname":family.father.sortname,
+                    "uuid":family.father.uuid
+                }
+                if family.father.event_birth:
+                    parent['dates'] = family.father.event_birth.dates.to_list()
+                parents.append(parent)
+            if family.mother:
+                parent = {
+                    "role":"mother",
+                    "sortname":family.mother.sortname,
+                    "uuid":family.mother.uuid
+                }
+                if family.mother.event_birth:
+                    parent['dates'] = family.mother.event_birth.dates.to_list()
+                parents.append(parent)
+            fdict['parents'] = parents
+        
+            children = []
+            for ch in family.children:
+                child = {"sex":ch.sex, "sortname":ch.sortname, "uuid":ch.uuid}
+                if ch.event_birth:
+                    child['dates'] = ch.event_birth.dates.to_list()
+                children.append(child)
+            fdict["children"] = children
+
+            events = []
+            for ev in family.events:
+                events.append({"type":ev.type, "id":ev.id, "uuid":ev.uuid})
+            fdict["events"] = events
+            res.append(fdict)
+
     except KeyError as e:
         return jsonify({"records":[], "statusText":str(e)})
 
-    parents = []
-    if family.father:
-        parent = {
-            "role":"father",
-            "sortname":family.father.sortname,
-            "dates":family.father.event_birth.dates.to_list(),
-            "uuid":family.father.uuid
-        }
-        parents.append(parent)
-
-    if family.mother:
-        parent = {
-            "role":"mother",
-            "sortname":family.mother.sortname,
-            "dates":family.mother.event_birth.dates.to_list(),
-            "uuid":family.mother.uuid
-        }
-        parents.append(parent)
-    fdict['parents'] = parents
-
-    children = []
-    for ch in family.children:
-        child = {"sex":ch.sex, "sortname":ch.sortname, "uuid":ch.uuid}
-        if ch.event_birth:
-            child['dates'] = ch.event_birth.dates.to_list()
-        children.append(child)
-    fdict["children"] = children
-
-    events = []
-    for ev in family.events:
-        events.append({"type":ev.type, "id":ev.id, "uuid":ev.uuid})
-    fdict["events"] = events
 
     logger.info(f"-> bp.scene.routes.show_person_families_json")
-    response = {'records':[fdict], 'statusText':'Löytyi 1 perhe (TESTING)'}
+    response = {'records':res, 'statusText':f'Löytyi {len(res)} perhettä (TESTING)'}
     print(json.dumps(response))
     #response.headers['Access-Control-Allow-Origin'] = '*'
-
     return jsonify(response) 
-#     return render_template("/scene/family.html", family=family, ...)
+
 
 # @bp.route('/pop/family=<int:fid>')
 # def show_family_popup(fid):
