@@ -69,19 +69,27 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
 
         """
 
-        def update_counters(self, msg, user, ymd):
+        def update_counters(self, msg, user, ymd, tuples):
             """Update counters for MSG, USER"""
 
-            def update_one(outer, k):
-                if k not in outer:
-                    outer[k] = dict()
-                inner = outer[k]
+            def update_one(outer, key):
+                """Update (or create) the dict OUTER[KEY]"""
+                if key not in outer:
+                    outer[key] = dict()
+                # the inner dict is keyed by USER (found from callers namespace)
+                inner = outer[key]
                 if user in inner:  inner[user] += 1
                 else:              inner[user] = 1
+
                 return
 
             update_one(self._by_msg, msg)
             update_one(self._by_ymd, ymd)
+
+            # what to do with these?
+            for tup in tuples:
+                print(f"got {module} {user} {tup[0]}={tup[1]}")
+                continue
             return
 
         if file in self._files:
@@ -113,75 +121,93 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
                 continue
 
             (module, rest) = match.groups()
-            for tup in equals_re.findall(rest):
-                print(f"got {tup[0]} = {tup[1]}")
+            tuples = equals_re.findall(rest)
 
-            update_counters(self, module, user, ymd)
+            update_counters(self, module, user, ymd, tuples)
         return
 
-
     ################
     #
-    def get_by_msg_dict(self):
-        """Get the counts of messages, maybe per user.  As python (nested) dict."""
-        return self._by_msg
+    def get_counts(self, style="text"):
+        """Get the counts of this Log, maybe per user.
 
-    ################
-    #
-    def get_by_msg_text(self):
-        """Get the counts of messages, maybe per user.  As list of text lines."""
+Return value is list of nested tuples: (heading, data-tuple).
+        """
+        def get_section_counts(outer, heading):
+            """Get counts of one section.
 
-        # make the total counts
-        for x in self._by_msg.values():
-            sum = 0
-            for count in x.values():
-                sum += count
-            x["TOTAL"] = sum
+Return value is a tuple (HEADING, data-list).
+            """
+            def get_topn(tuples):
+                # use the negative number trick to get numeric sorting
+                # reverse & alpa non-reverse (we can't use reverse=True
+                # because that woud reverse the alpha sorting too)
+                if "bycount" in self._opts:
+                    result = sorted(tuples.items(),
+                                    key=lambda x:
+                                    (-x[1] if type(x[1]) == int else -x[1]["TOTAL"],
+                                     x[0]))
+                else:
+                    result = sorted(tuples.items())
+                if "topn" in self._opts:
+                    result = result[:self._opts["topn"]]
+                return result
 
-        if "bycount" in self._opts:
-            countx = sorted(self._by_msg.items(),
-                             key=lambda item: item[1]["TOTAL"],
-                             reverse=True)
-        else:
-            countx = sorted(self._by_msg.items())
+            # make the total counts
+            for x in outer.values():
+                sum = 0
+                for count in x.values():
+                    sum += count
+                x["TOTAL"] = sum
 
-        if "topn" in self._opts:
-            countx = countx[:self._opts["topn"]]
+            countx = get_topn(outer)
+            len_user = find_longest(countx, "user")
+            len_msg = find_longest(countx, "msg")
+            destcol = self._opts["width"] - len_user - 6  # room for count + some space
+            if destcol > len_msg +10:  destcol = len_msg +10
+            if destcol < 8:            destcol = 8
+            # print(f"u={len_user} m={len_msg} d={destcol}")
+            lines = []
+            n = 0
+            for message, ulist in countx:
+                n += 1
+                before = f"{n:2d} " if "topn" in self._opts else ""
 
-        n = 0
-        longest_user = find_longest(countx, "user")
-        longest_message = find_longest(countx, "msg")
-        destcol = self._opts["width"] - longest_user - 6  # room for count + some space
-        if destcol > longest_message +8:
-            destcol = longest_message +8
-        if destcol < 10:
-            destcol = 10
-        # print(f"u={longest_user} m={longest_message} d={destcol}")
-        result = []
-        for message, ulist in countx:
-            n += 1
-            before = f"{n:2d} " if "topn" in self._opts else ""
+                # Truncate too long messages
+                if len(message) > destcol - 3 -len(before):
+                    message = message[:destcol-3-len(before)] + "·"*3
 
-            # Truncate too long messages
-            if len(message) > destcol - 3 -len(before):
-                message = message[:destcol-3-len(before)] + "·"*3
+                # The message and filler to make report look nicer
+                part1 = f"{before}{message}"
+                filler = make_filler(destcol - len(message) - len(before), 3)
 
-            # Print the message, without newline
-            part1 = f"{before}{message}"
+                # add them and count stuff
+                if "users" not in self._opts:   #  show not users' counts?
+                    if style == "text":
+                        lines.append(f"{part1} {filler}  {ulist['TOTAL']:4d}")
+                    if style == "table":
+                        lines.append([before, message, ulist["TOTAL"]])
+                    continue
 
-            # use filler to make report look nicer
-            filler = make_filler(destcol - len(message) - len(before), 3)
+                # lines after first line are filled with spaces up to destcol
+                for user, count in get_topn(ulist):
+                    if user == "TOTAL" and len(ulist) < 3:
+                        # We have just one user, so don't show the TOTAL
+                        continue
+                    if style == "text":
+                        lines.append(f"{part1} {filler} {user:{len_user}s} {count:4d}")
+                        filler = " " * destcol
+                    if style == "table":
+                        lines.append([before, message, user, count])
+                        before = ""
+                        message = ""
+                    part1 = ""
 
-            # print the filler and count stuff
-            if "users" not in self._opts:   #  show not users' counts?
-                result.append(f"{part1} {filler}  {ulist['TOTAL']:4d}")
-                continue
+            return(heading, lines)
 
-            # lines after first line are filled with spaces up to destcol
-            for user, count in sorted(ulist.items()):
-                if user == "TOTAL": continue
-                result.append(f"{part1} {filler} {user:{longest_user}s} {count:4d}")
-                part1 = ""
-                filler = " " * destcol
+        res = []
+        res.append(get_section_counts(self._by_msg, "By msg:"))
+        res.append(get_section_counts(self._by_ymd, "By date:"))
+        files = [ x[x.rindex("/")+1:] for x in self._files ]
 
-        return(result)
+        return(", ".join(files), res)
