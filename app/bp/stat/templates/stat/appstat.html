@@ -66,14 +66,12 @@
 {% endfor %}</pre>
 {% else %}
 <table>
-  {% for row in section[1] %}
-  <tr>
-    {% for col in row %}
-    <td {% if loop.first %} style="text-align: right" {% endif %}
-	 {% if loop.last %} style="text-align: right" {% endif %}
-	>
-      {{ col }} </td> {% endfor %}
-  </tr>
+{% for row in section[1] %}  <tr>
+  {% for col in row
+    %} <td{% if loop.first %} style="text-align: right"{% endif
+	%}{% if loop.last %} style="text-align: right"{% endif
+	   %}> {{ col }} </td>
+  {% endfor %}</tr>
 {% endfor %}</table><br>
 {% endif %}
 
