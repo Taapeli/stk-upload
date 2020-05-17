@@ -192,19 +192,26 @@ def show_persons_all():
     # How many objects are shown?
     u_context.count = int(request.args.get('c', 100))
     u_context.privacy_limit = shareds.PRIVACY_LIMIT
-    t0 = time.time()
 
+    t0 = time.time()
     dbdriver = Neo4jReadDriver(shareds.driver)
-    db = DBreader(dbdriver, u_context) 
-    
+    db = DBreader(dbdriver, u_context)
     results = db.get_person_list()
-    logger.info("-> bp.scene.routes.show_persons_all: "
-               f"{u_context.owner_or_common()} n={len(results.items)}/{len(results.items)-results.num_hidden}")
-    print(f'Got {len(results.items)} persons with {results.num_hidden} hidden and {results.error} errors')
+    elapsed = time.time() - t0
+
+    hidden = f" hide={results.num_hidden}" if results.num_hidden > 0 else ""
+    logger.info("-> bp.scene.routes.show_persons_all"
+                f" kind={u_context.owner_or_common()}"
+                f" got={len(results.items)}{hidden}"
+                f" e={elapsed:.4f}")
+    print(f"Got {len(results.items)} persons"
+          f" with {results.num_hidden} hidden"
+          f" and {results.error} errors"
+          f" in {elapsed:.4f}s")
     return render_template("/scene/persons_list.html", persons=results.items,
-                           num_hidden=results.num_hidden, 
+                           num_hidden=results.num_hidden,
                            user_context=u_context,
-                           menuno=12, elapsed=time.time()-t0)
+                           menuno=12, elapsed=elapsed)
 
 
 @bp.route('/scene/person/<int:uid>')
