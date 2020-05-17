@@ -35,6 +35,7 @@ OPTIONAL MATCH (f) -[:CHILD]- (pc:Person)
 RETURN pc AS person, nc AS name, cbe AS birth, cde AS death
     ORDER BY cbe.date1"""
 
+# Not in use:
     get_family_events = """
 MATCH (f:Family) -[:EVENT]-> (fe:Event) WHERE ID(f) = $fuid
 OPTIONAL MATCH (fe) -[:PLACE]-> (fep:Place)
