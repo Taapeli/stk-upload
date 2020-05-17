@@ -111,9 +111,9 @@
 <div id="popup_app">
   <div class="row">
     <div>
-        <span>${ message }</span>
-        <button v-on:click="getFamily(uuid='e8450bbbd48348338abce8b900df3bf8')">
-          Hae tietty perhe</button>
+        <span style="color:red">${ message }</span>
+        <button v-on:click="getFamily(uuid='37c9e39f8a704fac886079481c2ff62e')">
+          Hae henkilön perheet</button>
     </div>
     <div style="display: inline-block;padding:.5em;">
         ${status} – Family
@@ -208,6 +208,7 @@ var vm = new Vue({
    delimiters: ['${', '}'],
    data: {
      message: 'Not yet run',
+     families: [],
      rel_type: '',
      id: 'F',
      dates: '',
@@ -240,33 +241,37 @@ var vm = new Vue({
                     	   vm.has_children=false;
                     	   return;
                        }
-	    			   var rec = rsp.data.records[0];
-	    			   console.log(rec);
-                       vm.id = rec.id;
-                       vm.rel_type = rec.rel_type;
-                       vm.dates = datesStr(rec.dates, first=true);
+                       for (rec of rsp.data.records) {
+                           console.log(rec);
+                    	   fam = {};
+                    	   if (rec) {
+                               fam.id = rec.id;
+                               fam.rel_type = rec.rel_type;
+                               fam.dates = datesStr(rec.dates, first=true);
 
-                       for (parent of rec.parents) {
-                    	   var p = {};
-                    	   p.role = parent.role;
-                           p.name = parseSortname(parent.sortname);
-                           if (p.role == 'father')  vm.father_name = p.name;
-                           else                     vm.mother_name = p.name;
-                    	   p.uuid = parent.uuid;
-                    	   p.href = "/scene/person?uuid="+parent.uuid
-                           p.birth = datesStr(parent.dates);
-                           vm.parents.push(p);
-
-                       }
-                       var gentext = ['Lapsi','Poika','Tytär'];
-                       for (child of rec.children) {
-                    	   vm.has_children = true;
-                           var c = {uuid:child.uuid};
-                           c.href = "/scene/person?uuid="+child.uuid
-                           c['name'] = parseSortname(child.sortname);
-                    	   c['gender'] = gentext[child.sex];
-                    	   c['birth'] = datesStr(child.dates);
-                    	   vm.children.push(c);
+                               for (parent of rec.parents) {
+                                   var p = {};
+                                   p.role = parent.role;
+                                   p.name = parseSortname(parent.sortname);
+                                   if (p.role == 'father')  vm.father_name = p.name;
+                                   else                     vm.mother_name = p.name;
+                                   p.uuid = parent.uuid;
+                                   p.href = "/scene/person?uuid="+parent.uuid
+                                   p.birth = datesStr(parent.dates);
+                                   p.parents.push(p);
+                               }
+                               var gentext = ['Lapsi','Poika','Tytär'];
+                               for (child of rec.children) {
+                                   vm.has_children = true;
+                                   var c = {uuid:child.uuid};
+                                   c.href = "/scene/person?uuid="+child.uuid
+                                   c['name'] = parseSortname(child.sortname);
+                                   c['gender'] = gentext[child.sex];
+                                   c['birth'] = datesStr(child.dates);
+                                   p.children.push(c);
+                               }
+                               vm.families.push(fam);
+                    	   }
                        }
     			 })
    	   }
