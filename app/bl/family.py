@@ -187,7 +187,7 @@ class FamilyReader(DBreader):
 
             res is dict {item, status, statustext}
         """
-        res = self.dbdriver.dr_get_family_uuid(self.use_user, uuid)
+        res = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
         family = res.get('item')
         results = {'item': family, 
                    'status': res.get('status'),

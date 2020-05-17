@@ -169,7 +169,7 @@ class Place(NodeObject):
 #             Palauttaa listan paikka-olioita ylimmästä alimpaan.
 
 
-#     def get_place_events(loc_id): @staticmethod --> pe.neo4j.reader.Neo4jDriver.dr_get_place_events
+#     def get_place_events(loc_id): @staticmethod --> pe.neo4j.read_driver.Neo4jDriver.dr_get_place_events
 #         """ Haetaan paikkaan liittyvät tapahtumat sekä
 #             osallisen henkilön nimitiedot.
 

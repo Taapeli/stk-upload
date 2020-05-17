@@ -35,7 +35,7 @@ from models.datareader import get_event_participants
 #from models.datareader import get_place_with_events
 #from models.datareader import get_source_with_events
 
-from pe.neo4j.reader import Neo4jReadDriver
+from pe.neo4j.read_driver import Neo4jReadDriver
 from pe.db_reader import DBreader
 
 # Narrative start page
