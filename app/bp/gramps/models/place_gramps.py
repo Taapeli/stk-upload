@@ -8,7 +8,7 @@ from sys import stderr
 
 import shareds
 from bl.place import Place, PlaceBl
-from pe.neo4j.writer import Neo4jWriteDriver
+from pe.neo4j.write_driver import Neo4jWriteDriver
 from pe.db_writer import DBwriter
 
 from models.gen.dates import DateRange

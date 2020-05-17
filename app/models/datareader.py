@@ -850,56 +850,58 @@ def get_baptism_data(uniq_id):
 
 def get_families_data_by_id(uniq_id):
     # Sivua "table_families_by_id.html" varten
-    families = []
+    raise(NotImplementedError, "models.datareader.get_families_data_by_id poistettu 17.5.2020")
 
-    p = Person_combo()
-    p.uniq_id = uniq_id
-    p.get_person_and_name_data_by_id()
-
-    if p.sex == SEX_MALE:
-        result = p.get_his_families_by_id()
-    else:
-        result = p.get_her_families_by_id()
-
-    for record in result:
-        f = Family_combo()
-        f.uniq_id = record['uniq_id']
-        f.get_family_data_by_id()
-
-        # Person's birth family
-        result = p.get_parentin_id()
-        for record in result:
-            pf = Family()
-            pf.uniq_id = record["family_ref"]
-            pf.get_family_data_by_id()
-
-            father = Person_combo()
-            father.uniq_id = pf.father
-            father.get_person_and_name_data_by_id()
-            f.father = father
-
-            mother = Person_combo()
-            mother.uniq_id = pf.mother
-            mother.get_person_and_name_data_by_id()
-            f.mother = mother
-
-        spouse = Person_combo()
-        if p.sex == SEX_MALE:
-            spouse.uniq_id = f.mother
-        else:
-            spouse.uniq_id = f.father
-        spouse.get_person_and_name_data_by_id()
-        f.spouse = spouse
-
-        for child_id in f.childref_hlink:
-            child = Person_combo()
-            child.uniq_id = child_id
-            child.get_person_and_name_data_by_id()
-            f.children.append(child)
-
-        families.append(f)
-
-    return (p, families)
+#     families = []
+# 
+#     p = Person_combo()
+#     p.uniq_id = uniq_id
+#     p.get_person_and_name_data_by_id()
+# 
+#     if p.sex == SEX_MALE:
+#         result = p.get_his_families_by_id()
+#     else:
+#         result = p.get_her_families_by_id()
+# 
+#     for record in result:
+#         f = Family_combo()
+#         f.uniq_id = record['uniq_id']
+#         f.get_family_data_by_id()
+# 
+#         # Person's birth family
+#         result = p.get_parentin_id()
+#         for record in result:
+#             pf = Family()
+#             pf.uniq_id = record["family_ref"]
+#             pf.get_family_data_by_id()
+# 
+#             father = Person_combo()
+#             father.uniq_id = pf.father
+#             father.get_person_and_name_data_by_id()
+#             f.father = father
+# 
+#             mother = Person_combo()
+#             mother.uniq_id = pf.mother
+#             mother.get_person_and_name_data_by_id()
+#             f.mother = mother
+# 
+#         spouse = Person_combo()
+#         if p.sex == SEX_MALE:
+#             spouse.uniq_id = f.mother
+#         else:
+#             spouse.uniq_id = f.father
+#         spouse.get_person_and_name_data_by_id()
+#         f.spouse = spouse
+# 
+#         for child_id in f.childref_hlink:
+#             child = Person_combo()
+#             child.uniq_id = child_id
+#             child.get_person_and_name_data_by_id()
+#             f.children.append(child)
+# 
+#         families.append(f)
+# 
+#     return (p, families)
 
 
 # def get_place_with_events (loc_id): --> DBreader.get_place_with_events

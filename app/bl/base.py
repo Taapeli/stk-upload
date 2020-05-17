@@ -5,11 +5,26 @@ Created on 22.8.2019
 '''
 import uuid
 
+class Status():
+    """ Status code values for result dictionary.
+    
+        Result dictionary may have
+        - item / items    data
+        - status          int code
+        - statustext      error message
+        etc
+        
+        example: {"items":events, "status":Status.OK}
+    """
+    OK = 0
+    NOT_FOUND = 1
+    ERROR = 2
+
+
 class NodeObject():
     '''
     Class representing Neo4j node type objects
     '''
-
 
     def __init__(self, uniq_id=None):
         '''

@@ -20,6 +20,7 @@ from flask_security import current_user, login_required, roles_accepted
 from ui.user_context import UserContext
 from bl.place import PlaceReader
 from bl.source import SourceReader
+from bl.family import FamilyReader
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
@@ -34,7 +35,7 @@ from models.datareader import get_event_participants
 #from models.datareader import get_place_with_events
 #from models.datareader import get_source_with_events
 
-from pe.neo4j.reader import Neo4jReadDriver
+from pe.neo4j.read_driver import Neo4jReadDriver
 from pe.db_reader import DBreader
 
 # Narrative start page
@@ -71,7 +72,7 @@ def show_person_list(selection=None):
             persons = read_persons_with_events(keys, args)
 
         except Exception as e:
-            logger.info("iError {} in show_person_list".format(e))
+            logger.error("iError {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
     else:
         # the code below is executed if the request method
@@ -350,16 +351,23 @@ def show_family_page(uid=None):
     uid = request.args.get('uuid', uid)
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
-    
-    u_context = UserContext(user_session, current_user, request)
+    t0 = time.time()
+
     try:
-        family = Family_combo.get_family_data(uid, u_context)
+        u_context = UserContext(user_session, current_user, request)
+        dbdriver = Neo4jReadDriver(shareds.driver)
+        reader = FamilyReader(dbdriver, u_context) 
+    
+        results = reader.get_family_data(uid)
+        #family = Family_combo.get_family_data(uid, u_context)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     logger.info("-> bp.scene.routes.show_family_page")
-    return render_template("/scene/family.html", 
-                           family=family, menuno=3, user_context=u_context)
+    if results['status']:
+        return redirect(url_for('virhesivu', code=1, text=results['statustext']))
+    return render_template("/scene/family.html",  menuno=3, family=results['item'],
+                           user_context=u_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/json/families', methods=['POST','GET'])
@@ -484,8 +492,6 @@ def show_place(locid):
         reader = PlaceReader(dbdriver, u_context) 
     
         results = reader.get_with_events(locid)
-        #results = db.get_place_with_events(locid)
-        #place, place_list, events = get_place_with_events(locid)
 
     except KeyError as e:
         import traceback
