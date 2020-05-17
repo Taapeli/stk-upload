@@ -129,16 +129,24 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
     ################
     #
     def get_counts(self, style="text"):
-        """Get the counts of messages, maybe per user.  As list of text lines."""
+        """Get the counts of this Log, maybe per user.
 
-        def get_counts_of(outer, heading):
+Return value is list of nested tuples: (heading, data-tuple).
+        """
+        def get_section_counts(outer, heading):
+            """Get counts of one section.
 
-            def sort_them(tuples):
+Return value is a tuple (HEADING, data-list).
+            """
+            def get_topn(tuples):
+                # use the negative number trick to get numeric sorting
+                # reverse & alpa non-reverse (we can't use reverse=True
+                # because that woud reverse the alpha sorting too)
                 if "bycount" in self._opts:
                     result = sorted(tuples.items(),
-                                    key=lambda item:
-                                    item[1] if type(item[1]) == int else item[1]["TOTAL"],
-                                    reverse = True)
+                                    key=lambda x:
+                                    (-x[1] if type(x[1]) == int else -x[1]["TOTAL"],
+                                     x[0]))
                 else:
                     result = sorted(tuples.items())
                 if "topn" in self._opts:
@@ -152,7 +160,7 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
                     sum += count
                 x["TOTAL"] = sum
 
-            countx = sort_them(outer)
+            countx = get_topn(outer)
             len_user = find_longest(countx, "user")
             len_msg = find_longest(countx, "msg")
             destcol = self._opts["width"] - len_user - 6  # room for count + some space
@@ -182,8 +190,10 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
                     continue
 
                 # lines after first line are filled with spaces up to destcol
-                for user, count in sort_them(ulist):
-                    if user == "TOTAL": continue
+                for user, count in get_topn(ulist):
+                    if user == "TOTAL" and len(ulist) < 3:
+                        # We have just one user, so don't show the TOTAL
+                        continue
                     if style == "text":
                         lines.append(f"{part1} {filler} {user:{len_user}s} {count:4d}")
                         filler = " " * destcol
@@ -196,8 +206,8 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
             return(heading, lines)
 
         res = []
-        res.append(get_counts_of(self._by_msg, "By msg:"))
-        res.append(get_counts_of(self._by_ymd, "By date:"))
+        res.append(get_section_counts(self._by_msg, "By msg:"))
+        res.append(get_section_counts(self._by_ymd, "By date:"))
         files = [ x[x.rindex("/")+1:] for x in self._files ]
 
         return(", ".join(files), res)
