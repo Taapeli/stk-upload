@@ -35,7 +35,7 @@ from models.datareader import get_event_participants
 #from models.datareader import get_place_with_events
 #from models.datareader import get_source_with_events
 
-from pe.neo4j.reader import Neo4jReadDriver
+from pe.neo4j.read_driver import Neo4jReadDriver
 from pe.db_reader import DBreader
 
 # Narrative start page
@@ -72,7 +72,7 @@ def show_person_list(selection=None):
             persons = read_persons_with_events(keys, args)
 
         except Exception as e:
-            logger.info("iError {} in show_person_list".format(e))
+            logger.error("iError {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
     else:
         # the code below is executed if the request method

@@ -85,15 +85,15 @@ RETURN extract(x IN relationships |
         return  shareds.driver.session().run(all_nodes_query_w_apoc, fid=uniq_id)
 
 
-    def get_children_by_id(self):
-        """ Luetaan perheen lasten tiedot """
-                        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (family:Family)-[r:CHILD]->(person:Person)
-  WHERE ID(family)=$pid
-RETURN ID(person) AS children"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+#     def get_children_by_id(self): #-> bl.family.FamilyReader.get_children_by_id
+#         """ Luetaan perheen lasten tiedot """
+#                         
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (family:Family)-[r:CHILD]->(person:Person)
+#   WHERE ID(family)=$pid
+# RETURN ID(person) AS children"""
+#         return  shareds.driver.session().run(query, {"pid": pid})
 
 
     def get_family_events(self):
@@ -125,48 +125,48 @@ RETURN family"""
     def get_family_data_by_id(self):
         """ Luetaan perheen tiedot.
             Called from models.datareader.get_families_data_by_id 
-                   from bp.tools.routes.show_family_data
         """
+        raise(NotImplementedError, "models.gen.family_combo.Family_combo.get_family_data_by_id poistettu 17.5.2020")
 
-        pid = int(self.uniq_id)
-        query = """
-MATCH (family:Family)
-  WHERE ID(family)=$pid
-RETURN family"""
-        family_result = shareds.driver.session().run(query, {"pid": pid})
-        
-        for family_record in family_result:
-            family = family_record["family"]
-            self.change = family['change']
-            self.id = family['id']
-            self.rel_type = family['rel_type']
-            
-            self.father_sortname = family['father_sortname']
-            self.mother_sortname = family['mother_sortname']
-            datetype = family['datetype']
-            date1 = family['date1']
-            date2 = family['date2']
-            if datetype != None:
-                self.marriage_date = DateRange(datetype, date1, date2)
-            
-        father_result = self.get_parent_by_id('father')
-        for father_record in father_result:            
-            self.father = father_record["father"]
-
-        mother_result = self.get_parent_by_id('mother')
-        for mother_record in mother_result:            
-            self.mother = mother_record["mother"]
-
-        event_result = self.get_family_events()
-        for event_record in event_result:            
-            self.eventref_hlink.append(event_record["eventref_hlink"])
-            self.eventref_role.append(event_record["eventref_role"])
-
-        children_result = self.get_children_by_id()
-        for children_record in children_result:            
-            self.childref_hlink.append(children_record["children"])
-            
-        return True
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (family:Family)
+#   WHERE ID(family)=$pid
+# RETURN family"""
+#         family_result = shareds.driver.session().run(query, {"pid": pid})
+#         
+#         for family_record in family_result:
+#             family = family_record["family"]
+#             self.change = family['change']
+#             self.id = family['id']
+#             self.rel_type = family['rel_type']
+#             
+#             self.father_sortname = family['father_sortname']
+#             self.mother_sortname = family['mother_sortname']
+#             datetype = family['datetype']
+#             date1 = family['date1']
+#             date2 = family['date2']
+#             if datetype != None:
+#                 self.marriage_date = DateRange(datetype, date1, date2)
+#             
+#         father_result = self.get_parent_by_id('father')
+#         for father_record in father_result:            
+#             self.father = father_record["father"]
+# 
+#         mother_result = self.get_parent_by_id('mother')
+#         for mother_record in mother_result:            
+#             self.mother = mother_record["mother"]
+# 
+#         event_result = self.get_family_events()
+#         for event_record in event_result:            
+#             self.eventref_hlink.append(event_record["eventref_hlink"])
+#             self.eventref_role.append(event_record["eventref_role"])
+# 
+#         children_result = self.get_children_by_id()
+#         for children_record in children_result:            
+#             self.childref_hlink.append(children_record["children"])
+#             
+#         return True
     
     
     @staticmethod

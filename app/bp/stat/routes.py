@@ -63,7 +63,7 @@ def stat_home():
     commits = run_cmd("git log | grep commit | wc -l")
 
     elapsed = time.time() - t0
-    logger.info(f"-> bp.stat, {elapsed:.4f}")
+    logger.info(f"-> bp.stat e={elapsed:.4f}")
     return render_template("/stat/stat.html",
                            code_files = code_files,
                            code_lines = code_lines,
@@ -82,45 +82,62 @@ def stat_home():
 def stat_app():
     """Statistiikkaa palvelimelta.
     """
+
+    def get_logfiles(patterns):
+        import glob
+        log_root = shareds.app.config['STK_LOGDIR']
+        log_file = shareds.app.config['STK_LOGFILE']
+        if patterns == "":
+            patterns = f"{log_file}*"
+        files = []
+        for pat in re.split(" ", patterns):
+            files += list(filter(os.path.isfile, glob.glob(f"{log_root}/{pat}")))
+        files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+        return files
+
+    def safe_get_request(key, default):
+        res = request.args.get(key, default)
+        if res == "":
+            return default
+        try:
+            res = int(res)
+        except ValueError:
+            return default
+        return int(res)
+
     t0 = time.time()
 
-    log_root = shareds.app.config['STK_LOGDIR']
-    log_file = shareds.app.config['STK_LOGFILE']
-
-    # u_context = UserContext(user_session, current_user, request)
-    topn = int(request.args.get("topn", 42))
-    width = int(request.args.get("width", 70))
-    showall = request.args.get("showall", None)
+    topn = safe_get_request("topn", 42)
+    width = safe_get_request("width", 70)
     bycount = request.args.get("bycount", None)
     users = request.args.get("users", "")
+    logs = request.args.get("logs", "")
 
     opts = {
         "topn": topn,
         "width": width,
     }
-    if showall is not None: opts["verbose"] = 1
     if bycount is not None: opts["bycount"] = 1
     if users != "":
         users = "," . join(re.split("[, ]+", users))
-        print(f"users = '{users}'")
         opts["users"] = users
 
     log = logreader.Log(opts)
-    for f in os.listdir(log_root):
-        if log_file in f:
-            log.work_with(f"{log_root}/{f}")
-    log.print_counts()
-    lines = log.result()
-    # log.clear()
+    lines = []
+    for f in get_logfiles(logs):
+            log.work_with(f"{f}")
+            lines.append(f"\n{f}")
+            for l in log.get_by_msg_text():
+                lines.append(l)
 
     elapsed = time.time() - t0
-    logger.info(f"-> bp.stat.app, {elapsed:.4f}")
+    logger.info(f"-> bp.stat.app e={elapsed:.4f}")
     return render_template("/stat/appstat.html",
                            lines = lines,
                            topn = topn,
                            width = width,
-                           showall = showall,
                            users = users,
                            bycount = bycount,
+                           logs = logs,
                            elapsed = elapsed )
 

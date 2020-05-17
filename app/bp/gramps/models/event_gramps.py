@@ -10,7 +10,7 @@ from sys import stderr
 import shareds
 from shareds import logger
 
-from pe.neo4j.writer import Neo4jWriteDriver
+from pe.neo4j.write_driver import Neo4jWriteDriver
 from pe.db_writer import DBwriter
 from models.gen.event import Event
 from models.cypher_gramps import Cypher_event_w_handle

@@ -187,7 +187,7 @@ class FamilyReader(DBreader):
 
             res is dict {item, status, statustext}
         """
-        res = self.dbdriver.dr_get_family_uuid(self.use_user, uuid)
+        res = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
         family = res.get('item')
         results = {'item': family, 
                    'status': res.get('status'),
@@ -261,14 +261,7 @@ class FamilyReader(DBreader):
     # The followind may be obsolete
 
     def get_children_by_id(self):
-        """ Luetaan perheen lasten tiedot """
-                        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (family:Family)-[r:CHILD]->(person:Person)
-  WHERE ID(family)=$pid
-RETURN ID(person) AS children"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+        raise("Obsolete bl.family.FamilyReader.get_children_by_id")
 
 
     def get_family_events(self):

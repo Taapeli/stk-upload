@@ -56,7 +56,7 @@ class Neo4jReadDriver:
                                          user=user, start_name=fw_from, limit=limit)
                 # Returns person, names, events
         except Exception as e:
-            print('Error pe.neo4j.reader.Neo4jReadDriver.dr_get_person_list: {} {}'.format(e.__class__.__name__, e))            
+            print('Error pe.neo4j.read_driver.Neo4jReadDriver.dr_get_person_list: {} {}'.format(e.__class__.__name__, e))            
             raise      
 
         persons = []
@@ -109,7 +109,7 @@ class Neo4jReadDriver:
         return persons
 
 
-    def dr_get_family_uuid(self, user:str, uuid:str):
+    def dr_get_family_by_uuid(self, user:str, uuid:str):
         '''
         Read a Family using uuid and user info.
         
@@ -416,12 +416,12 @@ class Neo4jReadDriver:
         with self.driver.session() as session: 
             if user == None: 
                 #1 get approved common data
-                print("pe.neo4j.reader.Neo4jReadDriver.dr_get_place_list_fw: from common")
+                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: from common")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
                                      fw=fw_from, limit=limit, lang=lang)
             else: 
                 #2 get my own
-                print("pe.neo4j.reader.Neo4jReadDriver.dr_get_place_list_fw: by owner")
+                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: by owner")
                 result = session.run(CypherPlace.get_my_name_hierarchies,
                                      user=user, fw=fw_from, limit=limit, lang=lang)
         for record in result:
