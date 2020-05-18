@@ -104,8 +104,8 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
                         if val is not None:
                             update_one(inner_dicti, inner_key, tup[0], incr=val)
                         else:
-                            print(f"got {module} {user} {tup[0]}={tup[1]}")
-
+                            # print(f"got {module} {user} {tup[0]}={tup[1]}")
+                            continue
                 return
 
             update_one(self._by_msg, msg, user)
