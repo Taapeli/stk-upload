@@ -433,6 +433,9 @@ class Neo4jReadDriver:
                     #        properties={'sortname': 'Åkerberg#Mathias#Andersson', 'death_high': 1831, 'confidence': '2.6', 
                     #            'sex': 1, 'change': 1585409697, 'birth_low': 1750, 'birth_high': 1750, 'id': 'I0022', 
                     #            'uuid': '265b22a5a1544ce2b66371fa195f9d89', 'death_low': 1831}>
+                    #    birth=<Node id=539796 labels={'Event'}
+                    #        properties={'datetype': 0, 'change': 1585409700, 'description': '', 'id': 'E0238', 
+                    #            'date2': 1792123, 'type': 'Birth', 'date1': 1792123, 'uuid': 'f6d314f7e47a431e9a7df5bbdd090fa7'}>
                     # >
                     family_node = record['family']
                     fid = family_node.id
@@ -443,6 +446,10 @@ class Neo4jReadDriver:
                     family = families[fid]
                     person_node = record['person']
                     person = Person_combo.from_node(person_node)
+                    birth_node = record['birth']
+                    if birth_node:
+                        birth = Event_combo.from_node(birth_node)
+                        person.event_birth = birth
                     if record['type'] == 'PARENT':
                         person.role = record['role']
                         if person.role == 'father':
