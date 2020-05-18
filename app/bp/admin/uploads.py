@@ -152,6 +152,7 @@ def background_load_to_neo4j(username,filename):
         msg += "\n"
         for step in steps:
             msg += "\n{}".format(step)
+        msg += "\n"
         open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
                     "Stk: Gramps XML file stored",
@@ -166,6 +167,7 @@ def background_load_to_neo4j(username,filename):
         msg += "\n" + res
         for step in steps:
             msg += "\n{}".format(step)
+        msg += "\n"
         open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
                     "Stk: Gramps XML file storing FAILED",
