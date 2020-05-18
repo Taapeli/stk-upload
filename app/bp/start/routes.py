@@ -22,7 +22,7 @@ from bp.start.forms import JoinForm
 from models.gen.batch_audit import Batch
 
 """ Application route definitions
-""" 
+"""
 
 @shareds.app.before_request
 def force_https():
@@ -33,7 +33,7 @@ def force_https():
         return redirect(request.url.replace('http://', 'https://'))
 
 # @shareds.app.route('/')
-#     Home page for a guest user (from login page or home button) 
+#     Home page for a guest user (from login page or home button)
 #     or anonymous user (home)
 #
 #     @See: routes.entry
@@ -52,17 +52,20 @@ def start_guest():
 @login_required
 #@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def start_logged():
-    """ Opening the home page for logged in user (from login page or home button) 
+    """ Opening the home page for logged in user (from login page or home button)
         or anonymous user (home).
-        
+
         Note. The home page for anonymous user is routes.entry in app/routes.py
     """
-    if "gedcom_user" in session: del session["gedcom_user"]  
-    
+    if "gedcom_user" in session: del session["gedcom_user"]
+
     role_names = [role.name for role in current_user.roles]
-    logger.info(f"-> bp.start.routes.start roles={','.join(role_names)}")
-    logger.debug("-> bp.start.routes.start_logged lang={get_locale().language} "
-                f"user {current_user.username}/{current_user.email}, roles {role_names}")
+    logger.info(f"-> bp.start.routes.start"
+                f" roles={','.join(role_names)}")
+    logger.debug(f"bp.start.routes.start_logged"
+                 f" lang={get_locale().language}"
+                 f" user={current_user.username}/{current_user.email}"
+                 f" roles= {role_names}")
     return render_template('/start/index_logged.html')
 
 

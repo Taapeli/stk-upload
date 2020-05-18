@@ -72,37 +72,63 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
         def update_counters(self, msg, user, ymd, tuples):
             """Update counters for MSG, USER"""
 
-            def update_one(outer, key):
+            def update_one(dicti, outer_key, inner_key, incr=1, tuples=None):
                 """Update (or create) the dict OUTER[KEY]"""
-                if key not in outer:
-                    outer[key] = dict()
-                # the inner dict is keyed by USER (found from callers namespace)
-                inner = outer[key]
-                if user in inner:  inner[user] += 1
-                else:              inner[user] = 1
+                def get_value(txt):
+                    try:
+                        val = int(txt)
+                        return val
+                    except ValueError:
+                        pass
+                    try:
+                        val = float(txt)
+                        return val
+                    except ValueError:
+                        return None
+                if outer_key not in dicti:
+                    dicti[outer_key] = dict()
+                    dicti[outer_key]["TOTAL"] = 0
+
+                inner_dicti = dicti[outer_key]
+                inner_dicti["TOTAL"] += 1
+
+                if tuples is None:
+                    if inner_key in inner_dicti:
+                        inner_dicti[inner_key] += incr
+                    else:
+                        inner_dicti[inner_key] = incr
+                else:
+                    update_one(inner_dicti, inner_key, "TOTAL")
+                    for tup in tuples:
+                        val = get_value(tup[1])
+                        if val is not None:
+                            update_one(inner_dicti, inner_key, tup[0], incr=val)
+                        else:
+                            print(f"got {module} {user} {tup[0]}={tup[1]}")
 
                 return
 
-            update_one(self._by_msg, msg)
-            update_one(self._by_ymd, ymd)
-
-            # what to do with these?
-            for tup in tuples:
-                print(f"got {module} {user} {tup[0]}={tup[1]}")
-                continue
+            update_one(self._by_msg, msg, user)
+            update_one(self._by_ymd, ymd, user, tuples=tuples)
             return
+
+        def get_regexp_from_opts(what):
+            if what not in self._opts or self._opts[what] == "":
+                return None
+            try:
+                return re.compile( re.sub("[, ]+", "|", self._opts[what]) )
+            except Exception as e:
+                flash(f"Bad regexp for {what} '{self._opts[what]}': {e}",
+                      category='warning')
+                return None
 
         if file in self._files:
             flash(f"Already done file {file}") # this should not happen
             return
         self._files.append(file)  # protect against double processing
 
-        users_re = None
-        if "users" in self._opts:
-            try:
-                users_re = re.compile( re.sub(",", "|", self._opts["users"]) )
-            except Exception as e:
-                flash(f"Bad regexp '{self._opts['users']}': {e}", category='warning')
+        users_re = get_regexp_from_opts("users")
+        msg_re   = get_regexp_from_opts("msg")
 
         for line in open(file, "r").read().splitlines():
             match = log_re.match(line)
@@ -121,6 +147,9 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
                 continue
 
             (module, rest) = match.groups()
+            if msg_re and not msg_re.match(module):
+                continue
+
             tuples = equals_re.findall(rest)
 
             update_counters(self, module, user, ymd, tuples)
@@ -149,37 +178,38 @@ Return value is a tuple (HEADING, data-list).
                                      x[0]))
                 else:
                     result = sorted(tuples.items())
+
                 if "topn" in self._opts:
                     result = result[:self._opts["topn"]]
                 return result
 
-            # make the total counts
-            for x in outer.values():
-                sum = 0
-                for count in x.values():
-                    sum += count
-                x["TOTAL"] = sum
+            def format_count(count):
+                if type(count) == int:
+                    return f"{count:4d}"
+                elif type(count) == dict:
+                    return f"{count['TOTAL']:4d}"
+                else:
+                    return "???"
 
             countx = get_topn(outer)
             len_user = find_longest(countx, "user")
             len_msg = find_longest(countx, "msg")
-            destcol = self._opts["width"] - len_user - 6  # room for count + some space
-            if destcol > len_msg +10:  destcol = len_msg +10
-            if destcol < 8:            destcol = 8
+            destcol = min(self._opts["width"], len_msg+1)
+            destcol = max(destcol, 10)
             # print(f"u={len_user} m={len_msg} d={destcol}")
             lines = []
             n = 0
             for message, ulist in countx:
                 n += 1
-                before = f"{n:2d} " if "topn" in self._opts else ""
+                before = f"{n:2d}" if "topn" in self._opts else ""
 
                 # Truncate too long messages
-                if len(message) > destcol - 3 -len(before):
-                    message = message[:destcol-3-len(before)] + "·"*3
+                if len(message) >= destcol:
+                    message = message[:destcol-3] + "·"*3
 
                 # The message and filler to make report look nicer
-                part1 = f"{before}{message}"
-                filler = make_filler(destcol - len(message) - len(before), 3)
+                part1 = f"{before} {message}"
+                filler = make_filler(destcol - len(message), 3)
 
                 # add them and count stuff
                 if "users" not in self._opts:   #  show not users' counts?
@@ -191,14 +221,15 @@ Return value is a tuple (HEADING, data-list).
 
                 # lines after first line are filled with spaces up to destcol
                 for user, count in get_topn(ulist):
+                    # For just one user, don't show the TOTAL
                     if user == "TOTAL" and len(ulist) < 3:
-                        # We have just one user, so don't show the TOTAL
                         continue
+                    cnt = format_count(count)
                     if style == "text":
-                        lines.append(f"{part1} {filler} {user:{len_user}s} {count:4d}")
-                        filler = " " * destcol
+                        lines.append(f"{part1} {filler} {user:{len_user}s} {cnt}")
+                        filler = " " * (destcol + len(before) +1)
                     if style == "table":
-                        lines.append([before, message, user, count])
+                        lines.append([before, message, user, cnt])
                         before = ""
                         message = ""
                     part1 = ""

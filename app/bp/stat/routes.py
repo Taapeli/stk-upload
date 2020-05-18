@@ -8,7 +8,7 @@ import time
 import re
 import os
 
-from flask import render_template, request, redirect, url_for, session as user_session
+from flask import flash, render_template, request, redirect, url_for, session as user_session
 from flask_security import current_user, roles_accepted, login_required
 from flask_babelex import _
 
@@ -95,34 +95,50 @@ def stat_app():
         files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
         return files
 
-    def safe_get_request(key, default):
-        res = request.args.get(key, default)
+    def safe_get_request(what, default):
+        res = request.args.get(what, default)
         if res == "":
             return default
         try:
-            res = int(res)
-        except ValueError:
+            return int(res)
+        except ValueError as e:
+            flash(f"Bad number for {what} '{res}': {e}; using default {default}",
+                  category='warning')
             return default
-        return int(res)
+
+    def check_regexp_option(what, default=""):
+        val = request.args.get(what, default)
+        if val == "":
+            return ""
+        try:
+            re.compile( re.sub("[, ]+", "|", val) )
+            return "," . join(re.split("[, ]+", val))
+        except Exception as e:
+            flash(f"Bad regexp for {what} '{val}': {e}",
+                  category='warning')
+            return ""
 
     t0 = time.time()
 
-    topn = safe_get_request("topn", 42)
-    width = safe_get_request("width", 70)
+    users   = check_regexp_option("users")
+    msg     = check_regexp_option("msg")     # ...took the place of width in UI
+    width   = safe_get_request("width", 70) # no way to set this in UI...
+    topn    = safe_get_request("topn", 42)
     bycount = request.args.get("bycount", None)
-    users = request.args.get("users", "")
-    logs = request.args.get("logs", "")
-    style = request.args.get("style", "text")
+    style   = request.args.get("style", "text")
+    logs    = request.args.get("logs", "")
 
     opts = {
-        "topn": topn,
-        "width": width,
-        "style": style,
+        "topn"   : topn,
+        "width"  : width,
+        "style"  : style,
     }
+    # Absense/precense of these in opts matters:
     if bycount is not None: opts["bycount"] = 1
-    if users != "":
-        users = "," . join(re.split("[, ]+", users))
-        opts["users"] = users
+    for k,v in { "msg"  : msg,
+                 "users": users }.items():
+        if v != "":
+            opts[k] = v
 
     # lines[] will collect results from all log files
     lines = []
@@ -134,12 +150,13 @@ def stat_app():
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
     return render_template("/stat/appstat.html",
-                           lines = lines,
-                           topn = topn,
-                           width = width,
-                           users = users,
+                           topn    = topn,
+                           width   = width,
                            bycount = bycount,
-                           logs = logs,
-                           style = style,
+                           logs    = logs,
+                           style   = style,
+                           users   = users,
+                           msg     = msg,
+                           lines   = lines,
                            elapsed = elapsed )
 
