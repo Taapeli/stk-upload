@@ -391,7 +391,6 @@ def json_get_person_families(uuid=None):
         reader = FamilyReader(dbdriver, u_context) 
     
         results = reader.get_person_families(uuid)
-        #family = Family_combo.get_family_data(uuid, u_context)
 
         if results.get('status') != 0:
             return jsonify({"records":[], "statusText":results.get('status')})

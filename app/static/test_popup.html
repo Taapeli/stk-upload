@@ -214,10 +214,10 @@ function datesStr(dates,first=false) {
 function dateLocal(date) {
     // Parses ISO style date 1820-12-03 to local 3.12.1820
     var a = date.split('-');
-    if (a[2].startsWith('0'))   a[2] = a[2].substr(1,1);
-    if (a[1].startsWith('0'))   a[1] = a[1].substr(1,1);
     if (a.length == 1) return date;
+    if (a[1].startsWith('0'))   a[1] = a[1].substr(1,1);
     if (a.length == 2) return a[1]+'.'+a[0];
+    if (a[2].startsWith('0'))   a[2] = a[2].substr(1,1);
     if (a.length == 3) return a[2]+'.'+a[1]+'.'+a[0];
     return "?"
   }

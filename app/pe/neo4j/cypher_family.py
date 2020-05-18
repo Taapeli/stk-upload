@@ -89,7 +89,7 @@ RETURN //f,
     get_person_families = """
 MATCH (p:Person) <-- (family:Family) WHERE p.uuid = $p_uuid
 MATCH (family) -[r]-> (person:Person)
-//OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0}) 
-RETURN family, TYPE(r) AS type, r.role AS role, person //,name.firstname+' '+name.surname AS n, 
+OPTIONAL MATCH (person) -[:EVENT]-> (birth:Event {type:'Birth'}) 
+RETURN family, TYPE(r) AS type, r.role AS role, person, birth 
 ORDER BY family, person.birth_high"""
 
