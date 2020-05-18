@@ -112,17 +112,23 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
             update_one(self._by_ymd, ymd, user, tuples=tuples)
             return
 
+        def get_regexp_from_opts(what):
+            if what not in self._opts or self._opts[what] == "":
+                return None
+            try:
+                return re.compile( re.sub("[, ]+", "|", self._opts[what]) )
+            except Exception as e:
+                flash(f"Bad regexp for {what} '{self._opts[what]}': {e}",
+                      category='warning')
+                return None
+
         if file in self._files:
             flash(f"Already done file {file}") # this should not happen
             return
         self._files.append(file)  # protect against double processing
 
-        users_re = None
-        if "users" in self._opts:
-            try:
-                users_re = re.compile( re.sub(",", "|", self._opts["users"]) )
-            except Exception as e:
-                flash(f"Bad regexp '{self._opts['users']}': {e}", category='warning')
+        users_re = get_regexp_from_opts("users")
+        msg_re   = get_regexp_from_opts("msg")
 
         for line in open(file, "r").read().splitlines():
             match = log_re.match(line)
@@ -141,6 +147,9 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
                 continue
 
             (module, rest) = match.groups()
+            if msg_re and not msg_re.match(module):
+                continue
+
             tuples = equals_re.findall(rest)
 
             update_counters(self, module, user, ymd, tuples)
@@ -174,6 +183,14 @@ Return value is a tuple (HEADING, data-list).
                     result = result[:self._opts["topn"]]
                 return result
 
+            def format_count(count):
+                if type(count) == int:
+                    return f"{count:4d}"
+                elif type(count) == dict:
+                    return f"{count['TOTAL']:4d}"
+                else:
+                    return "???"
+
             countx = get_topn(outer)
             len_user = find_longest(countx, "user")
             len_msg = find_longest(countx, "msg")
@@ -204,15 +221,10 @@ Return value is a tuple (HEADING, data-list).
 
                 # lines after first line are filled with spaces up to destcol
                 for user, count in get_topn(ulist):
+                    # For just one user, don't show the TOTAL
                     if user == "TOTAL" and len(ulist) < 3:
-                        # We have just one user, so don't show the TOTAL
                         continue
-                    if type(count) == int:
-                        cnt = f"{count:4d}"
-                    elif type(count) == dict:
-                        cnt = f"{count['TOTAL']:4d}"
-                    else:
-                        cnt = "???"
+                    cnt = format_count(count)
                     if style == "text":
                         lines.append(f"{part1} {filler} {user:{len_user}s} {cnt}")
                         filler = " " * (destcol + len(before) +1)
