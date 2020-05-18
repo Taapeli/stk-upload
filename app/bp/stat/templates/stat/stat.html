@@ -6,18 +6,32 @@
 {{ super() }}
 
 <div class="startdiv">
-  <h2>{{ _("Statistics about STK (under construction)") }}</h2>
+  <h2>{{ _("Statistics about STK") }}</h2>
   <div id="errors" class="errors"></div>
 
-  {{ code_files }} .py files with {{ code_lines }} lines,
-  {{ html_files }} .html files with {{ html_lines }} lines,
-  {{ route_files }} routes.py files with {{ route_lines }} @*route definitions,
-  and {{ commits }} git commits.
+  <table cellspacing="0" cellpadding="0">
+    <tr>
+      <td> {{ code_files }} .py files</td>
+      <td> {{ code_lines }} lines,</td>
+    </tr>
+    <tr>
+      <td> {{ html_files }} .html files</td>
+      <td> {{ html_lines }} lines,</td>
+    </tr>
+    <tr>
+      <td> {{ route_files }} routes.py files</td>
+      <td> with {{ route_lines }} @*route definitions, and</td>
+    </tr>
+    <tr>
+      <td> {{ commits }} git commits</td>
+      <td> ({{ commits1m }} in last month).</td>
+    </tr>
+  </table>
   <p>
     Some application statistics links:
   <ul>
     <li> about neo4j nodes, node types, ...
-    <li> about stk users and roles
+    <li> <a href="/stat/uploadstat">about material uploading</a>
     <li> <a href="/stat/appstat">db acces types / user</a>
   </ul>
 

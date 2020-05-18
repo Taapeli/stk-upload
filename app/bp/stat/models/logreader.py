@@ -7,7 +7,8 @@ import os
 
 from flask import flash
 
-################################################################
+
+################
 #
 # Format of log messages (see app/__init__.py)
 # '%(asctime)s %(name)s %(levelname)s %(user)s %(message)s'
@@ -25,6 +26,9 @@ arrow_re = re.compile(r"^-> ([^ ]+)(.*)")
 # Additional info in %(message)s part look like this:
 equals_re = re.compile(r"\b(\S+)=(\S+)\b")
 
+
+################
+#
 def find_longest(list_of_tuples, what):
     longest = 0
     for tup in list_of_tuples:
@@ -37,27 +41,113 @@ def find_longest(list_of_tuples, what):
                 longest = len(u)
     return longest
 
+################
+#
 def make_filler(totlen, flen):
     return(" "*(totlen % flen)
            + (" "*(flen-1) + ".") * (totlen // flen))
 
+################
+#
+def string_to_number(txt):
+    """Try to convert TXT into integer or float (in that order)."""
+    try:
+        val = int(txt)
+        return val
+    except ValueError:
+        pass
+    try:
+        val = float(txt)
+        return val
+    except ValueError:
+        return None
+
+################
+#
+def get_regexp_from_opts(what, opts):
+    """Compile comma separated regexp patterns into one."""
+    if what not in opts or opts[what] == "":
+        return None
+    try:
+        return re.compile( re.sub("[, ]+", "|", opts[what]) )
+    except Exception as e:
+        flash(f"Bad regexp for {what} '{opts[what]}': {e}",
+              category='warning')
+    return None
+
+################
+#
+def update_one_counter(dicti, outer_key, inner_key, incr=1, tuples=None):
+    """Update (or create) the dict OUTER[KEY]"""
+    if outer_key not in dicti:
+        dicti[outer_key] = dict()
+        dicti[outer_key]["TOTAL"] = 0
+
+    inner_dicti = dicti[outer_key]
+    if tuples is None:
+        # Update these only after recursion?
+        print(f" -> {outer_key}, {inner_key}, {inner_dicti['TOTAL']}, {incr}, {tuples}")
+        inner_dicti["TOTAL"] += 1
+        if inner_key in inner_dicti:
+            inner_dicti[inner_key] += incr
+        else:
+            inner_dicti[inner_key] = incr
+        return
+
+    # Recursive call to process TUPLES
+    # update_one_counter (inner_dicti, inner_key, "TOTAL")
+    for tup in tuples:
+        val = string_to_number(tup[1])
+        if val is not None:
+            update_one_counter(inner_dicti, inner_key, tup[0], incr=val)
+        else:
+            # what to do with these?
+            # print(f"got {module} {user} {tup[0]}={tup[1]}")
+            continue
+    return
+
+################
+#
+def get_topn(tuples, topn=None, by_count=False):
+    # use the negative number trick to get numeric sorting
+    # reverse & alpa non-reverse (we can't use reverse=True
+    # because that woud reverse the alpha sorting too)
+    if by_count:
+        result = sorted(tuples.items(),
+                        key=lambda x:
+                        (-x[1] if type(x[1]) == int else -x[1]["TOTAL"],
+                         x[0]))
+    else:
+        result = sorted(tuples.items())
+
+    if topn is not None:
+        result = result[:topn]
+    return result
+
+################
+#
+def format_count(count_or_dict):
+    if type(count_or_dict) == int:
+        return f"{count_or_dict:4d}"
+    elif type(count_or_dict) == dict:
+        return f"{count_or_dict['TOTAL']:4d}"
+    else:
+        return "???"
+
+
+################################################################
+#### class definitions below
 
 ################################################################
 #
-class Log():
-    """Class to handle stk log file(s)."""
+class StkServerlog ():
+    """Class to handle stkserver log file(s)."""
 
     def __init__(self, opts={}):
         self._opts = opts
         self._by_msg = dict()
         self._by_ymd = dict()
-        self._files = []        # lis of files already processed
-
-
-    ################
-    #
-    def work_with(self, file: str) -> None:
-        """Read stkserver log FILE.  Collect counts of messages."""
+        self._files = []        # list of files already processed
 
         """
 Toistaiseksi olisi 2 mittaria: modulin nimi=käydyt sivut ja n=käsitellyt
@@ -69,66 +159,19 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
 
         """
 
-        def update_counters(self, msg, user, ymd, tuples):
-            """Update counters for MSG, USER"""
 
-            def update_one(dicti, outer_key, inner_key, incr=1, tuples=None):
-                """Update (or create) the dict OUTER[KEY]"""
-                def get_value(txt):
-                    try:
-                        val = int(txt)
-                        return val
-                    except ValueError:
-                        pass
-                    try:
-                        val = float(txt)
-                        return val
-                    except ValueError:
-                        return None
-                if outer_key not in dicti:
-                    dicti[outer_key] = dict()
-                    dicti[outer_key]["TOTAL"] = 0
-
-                inner_dicti = dicti[outer_key]
-                inner_dicti["TOTAL"] += 1
-
-                if tuples is None:
-                    if inner_key in inner_dicti:
-                        inner_dicti[inner_key] += incr
-                    else:
-                        inner_dicti[inner_key] = incr
-                else:
-                    update_one(inner_dicti, inner_key, "TOTAL")
-                    for tup in tuples:
-                        val = get_value(tup[1])
-                        if val is not None:
-                            update_one(inner_dicti, inner_key, tup[0], incr=val)
-                        else:
-                            # print(f"got {module} {user} {tup[0]}={tup[1]}")
-                            continue
-                return
-
-            update_one(self._by_msg, msg, user)
-            update_one(self._by_ymd, ymd, user, tuples=tuples)
-            return
-
-        def get_regexp_from_opts(what):
-            if what not in self._opts or self._opts[what] == "":
-                return None
-            try:
-                return re.compile( re.sub("[, ]+", "|", self._opts[what]) )
-            except Exception as e:
-                flash(f"Bad regexp for {what} '{self._opts[what]}': {e}",
-                      category='warning')
-                return None
+    ################
+    #
+    def work_with(self, file: str) -> None:
+        """Read stkserver log FILE.  Collect counts of messages."""
 
         if file in self._files:
             flash(f"Already done file {file}") # this should not happen
             return
         self._files.append(file)  # protect against double processing
 
-        users_re = get_regexp_from_opts("users")
-        msg_re   = get_regexp_from_opts("msg")
+        users_re    = get_regexp_from_opts("users", self._opts)
+        want_msg_re = get_regexp_from_opts("msg", self._opts)
 
         for line in open(file, "r").read().splitlines():
             match = log_re.match(line)
@@ -147,12 +190,15 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
                 continue
 
             (module, rest) = match.groups()
-            if msg_re and not msg_re.match(module):
+            if want_msg_re and not want_msg_re.match(module):
                 continue
 
+            # Get list of all x=y stuff (if any)
             tuples = equals_re.findall(rest)
 
-            update_counters(self, module, user, ymd, tuples)
+            update_one_counter(self._by_msg, module, user)
+            update_one_counter(self._by_ymd, ymd, user, tuples=tuples)
+
         return
 
     ################
@@ -167,31 +213,8 @@ Return value is list of nested tuples: (heading, data-tuple).
 
 Return value is a tuple (HEADING, data-list).
             """
-            def get_topn(tuples):
-                # use the negative number trick to get numeric sorting
-                # reverse & alpa non-reverse (we can't use reverse=True
-                # because that woud reverse the alpha sorting too)
-                if "bycount" in self._opts:
-                    result = sorted(tuples.items(),
-                                    key=lambda x:
-                                    (-x[1] if type(x[1]) == int else -x[1]["TOTAL"],
-                                     x[0]))
-                else:
-                    result = sorted(tuples.items())
 
-                if "topn" in self._opts:
-                    result = result[:self._opts["topn"]]
-                return result
-
-            def format_count(count):
-                if type(count) == int:
-                    return f"{count:4d}"
-                elif type(count) == dict:
-                    return f"{count['TOTAL']:4d}"
-                else:
-                    return "???"
-
-            countx = get_topn(outer)
+            countx = get_topn(outer, self._opts["topn"])
             len_user = find_longest(countx, "user")
             len_msg = find_longest(countx, "msg")
             destcol = min(self._opts["width"], len_msg+1)
@@ -221,7 +244,7 @@ Return value is a tuple (HEADING, data-list).
 
                 # lines after first line are filled with spaces up to destcol
                 for user, count in get_topn(ulist):
-                    # For just one user, don't show the TOTAL
+                    # For just one user, don't show the TOTAL, unless explicit request
                     if user == "TOTAL" and len(ulist) < 3:
                         continue
                     cnt = format_count(count)
@@ -242,3 +265,70 @@ Return value is a tuple (HEADING, data-list).
         files = [ x[x.rindex("/")+1:] for x in self._files ]
 
         return(", ".join(files), res)
+
+
+################################################################
+#
+class StkUploadlog():
+    """Class to handle stk upload log file(s)."""
+
+    def __init__(self, opts={}):
+        self._opts = opts
+        self._by_step = dict()
+        self._files = []        # list of files already processed
+
+
+    ################
+    #
+    def work_with(self, file: str) -> None:
+        """Read stkserver log FILE.  Collect counts of messages."""
+
+        if file in self._files:
+            flash(f"Already done file {file}") # this should not happen
+            return
+        print(f"working with {file}")
+        self._files.append(file)  # protect against double processing
+        upload_re1 = re.compile(r"^INFO ([^:]+): (\d+)(?: / ([\d.]+) sek)?$")
+        upload_re2 = re.compile(r"^TITLE ([^:]+):(?:  / ([\d.]+) sek)? *$")
+        upload_re3 = re.compile(r"^([^:]+):(.*)$")
+        upload_re4 = re.compile(r"^Stored the file (.+) from user (.+) to neo4j$")
+        for line in open(file, "r").read().splitlines():
+            m = upload_re1.match(line)
+            if m:               # starts with INFO
+                (step, count, time) = m.groups()
+                step = step.split(" ")[0]
+                if time is None: time = "0.0"
+                print(f"INFO: s='{step}' n='{count}' t='{time}'")
+                update_one_counter(self._by_step, "INFO", step,
+                                   tuples=[ ("n", count),
+                                            ("t", time ), ])
+                continue
+
+            m = upload_re2.match(line)
+            if m:               # starts with TITLE
+                print(f"got 2 meta {m.groups()}")
+                continue
+
+            m = upload_re3.match(line)
+            if m:               # line has :
+                print(f"got 3 timestamp {m.groups()}")
+                continue
+
+            m = upload_re4.match(line)
+            if m:               # other lines
+                print(f"got 4 total {m.groups()}")
+                continue
+
+            if line != "":
+                print(line)
+
+            #update_one_counter(self._by_step, ymd, user, tuples=tuples)
+
+        return
+
+    def get_counts(self, style="text"):
+        for step, count in self._by_step.items():
+            print(f"{step} {format_count(count)}")
+            for k,v in count.items():
+                print(f"  {k}  {format_count(v)}")
+        return

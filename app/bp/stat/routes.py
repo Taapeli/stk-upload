@@ -19,7 +19,10 @@ import shareds
 from . import bp
 from .models import logreader
 
+################ helper fuctions ################
 
+################
+#
 def run_cmd(cmd):
     import subprocess
     # see https://docs.python.org/3.3/library/subprocess.html
@@ -34,12 +37,59 @@ def run_cmd(cmd):
     lines = [x.rstrip() for x in output.split("\n")]
     return (lines)
 
+################
+#
+def get_logfiles(log_root, log_file, patterns=""):
+    """Get ist of log files matching PATTERNS.
 
+Empty PATTERNS equals LOG_FILES.  Return matching filenames in LOG_ROOT."""
+    import glob
+    if patterns == "":
+        patterns = f"{log_file}*"
+    files = []
+    for pat in re.split(" ", patterns):
+        files += list(filter(os.path.isfile, glob.glob(f"{log_root}/{pat}")))
+    files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+    return files
+
+################
+#
+def safe_get_request(what, default):
+    res = request.args.get(what, default)
+    if res == "":
+        return default
+    try:
+        return int(res)
+    except ValueError as e:
+        flash(f"Bad number for {what} '{res}': {e}; using default {default}",
+              category='warning')
+        return default
+
+################
+#
+def check_regexp_option(what, default=""):
+    val = request.args.get(what, default)
+    if val == "":
+        return ""
+    try:
+        re.compile( re.sub("[, ]+", "|", val) )
+        return "," . join(re.split("[, ]+", val))
+    except Exception as e:
+        flash(f"Bad regexp for {what} '{val}': {e}",
+              category='warning')
+    return ""
+
+
+################################################################
+#### @route funtions below
+
+################################################################
+#
 @bp.route('/stat')
 @login_required
 @roles_accepted('admin')
 def stat_home():
-    """Statistiikkaa palvelimelta.
+    """Statistics from stk server.
     """
     import shareds
     code_root = shareds.app.config['APP_ROOT']
@@ -61,7 +111,7 @@ def stat_home():
     (html_files, html_lines) = count_files_lines("*.html")
     (route_files, route_lines) = count_files_lines("routes.py", lpat=r"^@.*route")
     commits = run_cmd("git log | grep commit | wc -l")
-
+    commits1m = run_cmd(f"git log --after '1 month ago' | grep commit | wc -l")
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat e={elapsed:.4f}")
     return render_template("/stat/stat.html",
@@ -72,51 +122,71 @@ def stat_home():
                            route_files = route_files,
                            route_lines = route_lines,
                            commits = int(commits[0]),
+                           commits1m = int(commits1m[0]),
                            elapsed = elapsed,
     )
 
-
+################################################################
+#
 @bp.route('/stat/appstat', methods = ['GET', 'POST'])
 @login_required
 @roles_accepted('admin')
 def stat_app():
-    """Statistiikkaa palvelimelta.
+    """Statistics about stk application usage.
     """
 
-    def get_logfiles(patterns):
-        import glob
-        log_root = shareds.app.config['STK_LOGDIR']
-        log_file = shareds.app.config['STK_LOGFILE']
-        if patterns == "":
-            patterns = f"{log_file}*"
-        files = []
-        for pat in re.split(" ", patterns):
-            files += list(filter(os.path.isfile, glob.glob(f"{log_root}/{pat}")))
-        files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-        return files
+    t0 = time.time()
+    users   = check_regexp_option("users")
+    msg     = check_regexp_option("msg")     # ...took the place of width in UI
+    width   = safe_get_request("width", 70) # no way to set this in UI...
+    topn    = safe_get_request("topn", 42)
+    bycount = request.args.get("bycount", None)
+    style   = request.args.get("style", "text")
+    logs    = request.args.get("logs", "")
 
-    def safe_get_request(what, default):
-        res = request.args.get(what, default)
-        if res == "":
-            return default
-        try:
-            return int(res)
-        except ValueError as e:
-            flash(f"Bad number for {what} '{res}': {e}; using default {default}",
-                  category='warning')
-            return default
+    opts = {
+        "topn"   : topn,
+        "width"  : width,
+        "style"  : style,
+    }
+    # Absense/precense of these in opts matters:
+    if bycount is not None: opts["bycount"] = 1
+    for k,v in { "msg"  : msg,
+                 "users": users }.items():
+        if v != "":
+            opts[k] = v
 
-    def check_regexp_option(what, default=""):
-        val = request.args.get(what, default)
-        if val == "":
-            return ""
-        try:
-            re.compile( re.sub("[, ]+", "|", val) )
-            return "," . join(re.split("[, ]+", val))
-        except Exception as e:
-            flash(f"Bad regexp for {what} '{val}': {e}",
-                  category='warning')
-            return ""
+    # lines[] will collect results from all log files
+    lines = []
+    for f in get_logfiles(shareds.app.config['STK_LOGDIR'],
+                          shareds.app.config['STK_LOGFILE'],
+                          patterns = logs):
+        log = logreader.StkServerlog(opts) # each file needs own Log
+        log.work_with(f)
+        lines.append(log.get_counts(style=style))
+
+    elapsed = time.time() - t0
+    logger.info(f"-> bp.stat.app e={elapsed:.4f}")
+    return render_template("/stat/appstat.html",
+                           topn    = topn,
+                           width   = width,
+                           bycount = bycount,
+                           logs    = logs,
+                           style   = style,
+                           users   = users,
+                           msg     = msg,
+                           lines   = lines,
+                           elapsed = elapsed )
+
+
+################################################################
+#
+@bp.route('/stat/uploadstat', methods = ['GET', 'POST'])
+@login_required
+@roles_accepted('admin')
+def stat_upload():
+    """Statistics about material uploading.
+    """
 
     t0 = time.time()
 
@@ -140,23 +210,16 @@ def stat_app():
         if v != "":
             opts[k] = v
 
-    # lines[] will collect results from all log files
-    lines = []
-    for f in get_logfiles(logs):
-        log = logreader.Log(opts) # each file needs own Log
-        log.work_with(f"{f}")
-        lines.append(log.get_counts(style=style))
+    log = logreader.StkUploadlog(opts)
+    for f in get_logfiles("/home/juha/projs/Taapeli/stk-upload/uploads",
+                          "*/*.log",
+                          ""):
+        log.work_with(f)
+    log.get_counts()
 
+    lines = []
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
-    return render_template("/stat/appstat.html",
-                           topn    = topn,
-                           width   = width,
-                           bycount = bycount,
-                           logs    = logs,
-                           style   = style,
-                           users   = users,
-                           msg     = msg,
+    return render_template("/stat/uploadstat.html",
                            lines   = lines,
                            elapsed = elapsed )
-

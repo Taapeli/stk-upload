@@ -6,7 +6,7 @@
 {{ super() }}
 
 <div class="startdiv">
-  <h2>{{ _("Application usage statistics") }}</h2>
+  <h2>{{ _("Upload statistics") }}</h2>
   <div id="errors" class="errors"></div>
   Return to <a href="/stat">statistics start page</a>
   <p>
@@ -52,30 +52,5 @@
       </form>
     </div>
 
-    {% for sections in lines %}
-    {# sections[0] is log file name #}
-    {# sections[1] is contents from that log file #}
-    <h3>Logfile(s) <tt>{{ sections[0] }}</tt></h3>
-    {% for section in sections[1] %}
-    {# section[0] is 'By xxx' #}
-    <i> {{ section[0] }} </i>
-
-{% if style == "text" %}
-<pre>
-{% for l2 in section[1] %}  {{ l2 }}
-{% endfor %}</pre>
-{% else %}
-<table>
-{% for row in section[1] %}  <tr>
-  {% for col in row
-    %} <td{% if loop.first %} style="text-align: right"{% endif
-	%}{% if loop.last %} style="text-align: right"{% endif
-	   %}> {{ col }} </td>
-  {% endfor %}</tr>
-{% endfor %}</table><br>
-{% endif %}
-
-   {% endfor %}
-  {% endfor %}
 </div>
 {% endblock %}
