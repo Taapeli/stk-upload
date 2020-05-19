@@ -126,7 +126,7 @@ class FamilyReader(DBreader):
         - Returns a Result object which includes the tems and eventuel error object.
     '''
     
-    def get_family_data(self, uuid:str, groups="all"):
+    def get_family_data(self, uuid:str, wanted=[]):
         """ Read Family information including Events, Children, Notes and Sources.
 
             Returns a dict {item:Family, status=0, statustext:None}
@@ -136,7 +136,7 @@ class FamilyReader(DBreader):
                 - Status.NOT_FOUND = 1
                 - Status.ERROR = 2
             
-            Ther groups parameter is a string of short keywords separated by ':'.
+            Ther wanted parameter is a string of short keywords separated by ':'.
             
             Operations path
             1) read 
@@ -161,26 +161,27 @@ class FamilyReader(DBreader):
                 FamilyBl.children, .names, event_birth, event_death
         """
 
-        # Select data by groups parameter like 'pare:name:even:plac':
+        # Select data by wanted parameter like 'pare:name:even:plac':
         
         # all - all data
-        select_all = 'all' in groups
-        # pa - Parents (mother, father)
-        select_parents  = select_all or 'pare' in groups
-        # ch - Children
-        select_children = select_all or 'chil' in groups
-        # pe - Person names (for parents, children)
-        select_names    = select_all or 'name' in groups
-        # ev - Events
-        select_events   = select_all or 'even' in groups
-        # pl - Places (for events)
-        select_places   = select_all or 'plac' in groups
-        # no - Notes
-        select_notes    = select_all or 'note' in groups
-        # so - Sources (Citations, Sources, Repositories)
-        select_sources  = select_all or 'sour' in groups
-#         # me - Media
-#         select_media  = select_all or 'medi' in groups
+        select_all = 'all' in wanted
+        if not wanted:  select_all = True
+        # pare - Parents (mother, father)
+        select_parents  = select_all or 'pare' in wanted
+        # chil - Children
+        select_children = select_all or 'chil' in wanted
+        # name - Person names (for parents, children)
+        select_names    = select_all or 'name' in wanted
+        # even - Events
+        select_events   = select_all or 'even' in wanted
+        # plac - Places (for events)
+        select_places   = select_all or 'plac' in wanted
+        # note - Notes
+        select_notes    = select_all or 'note' in wanted
+        # soour - Sources (Citations, Sources, Repositories)
+        select_sources  = select_all or 'sour' in wanted
+        ## medi - Media
+        #select_media  = select_all or 'medi' in wanted
         """
             1. Get Family node by user/common
                res is dict {item, status, statustext}
