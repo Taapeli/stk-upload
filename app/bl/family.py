@@ -166,22 +166,22 @@ class FamilyReader(DBreader):
         # all - all data
         select_all = 'all' in wanted
         if not wanted:  select_all = True
-        # pa - Parents (mother, father)
+        # pare - Parents (mother, father)
         select_parents  = select_all or 'pare' in wanted
-        # ch - Children
+        # chil - Children
         select_children = select_all or 'chil' in wanted
-        # pe - Person names (for parents, children)
+        # name - Person names (for parents, children)
         select_names    = select_all or 'name' in wanted
-        # ev - Events
+        # even - Events
         select_events   = select_all or 'even' in wanted
-        # pl - Places (for events)
+        # plac - Places (for events)
         select_places   = select_all or 'plac' in wanted
-        # no - Notes
+        # note - Notes
         select_notes    = select_all or 'note' in wanted
-        # so - Sources (Citations, Sources, Repositories)
+        # soour - Sources (Citations, Sources, Repositories)
         select_sources  = select_all or 'sour' in wanted
-#         # me - Media
-#         select_media  = select_all or 'medi' in wanted
+        ## medi - Media
+        #select_media  = select_all or 'medi' in wanted
         """
             1. Get Family node by user/common
                res is dict {item, status, statustext}

@@ -3,21 +3,24 @@ Created on 12.8.2018
 
 @author: jm
 '''
-import logging 
 import io
-#import os
-import shareds
 import os
+import traceback
+import json
+
+import logging 
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
 
+import shareds
 from flask import send_file, Response, jsonify
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
 
 from ui.user_context import UserContext
+from bl.base import Status
 from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
@@ -371,20 +374,23 @@ def show_family_page(uid=None):
 
 
 @bp.route('/scene/json/families', methods=['POST','GET'])
-def json_get_person_families(uuid=None):
+def json_get_person_families():
     """ Get all families for a Person as json array.
 
         The first element is childhood family or None, 
         the others are marriages in time order.
     """
-    import json
+    t0 = time.time()
     try:
+        args = request.args
+        if args:
+            print(f'got request args: {args}')
+        else:
+            args = json.loads(request.data)
+            print(f'got request data: {args}')
+        uuid = args.get('uuid')
         if not uuid:
-            uuid = json.loads(request.data)['uuid']
-            #uuid = request.args.get('uuid', None)
-        #print(f'got uuid: {uuid}')
-        if not uuid:
-            return jsonify({"records":[], "statusText":"Missing Family key"})
+            return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
         dbdriver = Neo4jReadDriver(shareds.driver)
@@ -441,24 +447,18 @@ def json_get_person_families(uuid=None):
             fdict["events"] = events
             res.append(fdict)
 
-    except KeyError as e:
-        return jsonify({"records":[], "statusText":str(e)})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"records":[], "status":Status.ERROR,
+                        "statusText":f"Failed {e.__class__.__name__}"})
 
-
-    logger.info(f"-> bp.scene.routes.show_person_families_json")
+    t1 = time.time()-t0
+    logger.info(f"-> bp.scene.routes.show_person_families_json n={len(results['items'])} e={t1:.3f}")
     response = {'records':res, 'statusText':f'Löytyi {len(res)} perhettä (TESTING)'}
     print(json.dumps(response))
     #response.headers['Access-Control-Allow-Origin'] = '*'
     return jsonify(response) 
 
-
-# @bp.route('/pop/family=<int:fid>')
-# def show_family_popup(fid):
-#     """ Small Family pop-up. EXPERIMENTAL
-#     """
-#     #TODO Create a pop-up window; Gen only fewer pieces of data
-#     family = Family_combo.get_family_data(fid)
-#     return render_template("/scene/family_pop.html", family=family)
 
 # ------------------------------ Menu 4: Places --------------------------------
 
