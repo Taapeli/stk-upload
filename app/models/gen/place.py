@@ -91,52 +91,50 @@ class Place(NodeObject):
         p.coord = node['coord'] or None
         return p
 
+#     def show_names_list(self): # See: models.gen.place_combo.Place_combo.show_names_list
+#         # Returns list of referred Place_names for this place
+#         # If none, return pname
+#         name_list = []
+#         for nm in self.names:
+#             if nm.lang:
+#                 name_list.append("{} ({})".format(nm.name, nm.lang))
+#             else:
+#                 # Put first the name with no lang
+#                 name_list = [nm.name] + name_list
+#         if name_list:
+#             return name_list
+#         else:
+#             return [self.pname]
 
-    def show_names_list(self):
-        # Returns list of referred Place_names for this place
-        # If none, return pname
-        name_list = []
-        for nm in self.names:
-            if nm.lang:
-                name_list.append("{} ({})".format(nm.name, nm.lang))
-            else:
-                # Put first the name with no lang
-                name_list = [nm.name] + name_list
-        if name_list:
-            return name_list
-        else:
-            return [self.pname]
 
-
-    @staticmethod
-    def read_place_w_names(uniq_id):
-        """ Reads Place nodes or selected Place node with Place_name objects
-            and clearname
-        """
-        result = None
-        with shareds.driver.session() as session:
-            if uniq_id:
-                result = session.run(Cypher_place.place_get_one, pid=uniq_id)
-            else:
-                result = session.run(Cypher_place.place_get_all)
-
-        places = []
-
-        for record in result:
-            # Create a Place object from record
-            node = record['p']
-            pl = Place.from_node(node)
-            names = []
-            for node in record['names']:
-                # <Node id=78278 labels={'Place_name'} properties={'lang': '', 
-                #    'name': 'Kangasalan srk'}>
-                plname = PlaceName.from_node(node)
-                names.append(str(plname))
-                pl.names.append(plname)
-            pl.clearname = ' • '.join(names)
-            places.append(pl)
-
-        return places
+#     def read_place_w_names(uniq_id): # Use: @staticmethod models.gen.place_combo.Place_combo.read_place_w_names
+#         """ Reads Place nodes or selected Place node with Place_name objects
+#             and clearname
+#         """
+#         result = None
+#         with shareds.driver.session() as session:
+#             if uniq_id:
+#                 result = session.run(Cypher_place.place_get_one, pid=uniq_id)
+#             else:
+#                 result = session.run(Cypher_place.place_get_all)
+# 
+#         places = []
+# 
+#         for record in result:
+#             # Create a Place object from record
+#             node = record['p']
+#             pl = Place.from_node(node)
+#             names = []
+#             for node in record['names']:
+#                 # <Node id=78278 labels={'Place_name'} properties={'lang': '', 
+#                 #    'name': 'Kangasalan srk'}>
+#                 plname = PlaceName.from_node(node)
+#                 names.append(str(plname))
+#                 pl.names.append(plname)
+#             pl.clearname = ' • '.join(names)
+#             places.append(pl)
+# 
+#         return places
 
 
 #     def read_w_notes(self): # See: Place_combo.get_w_notes()
@@ -146,22 +144,22 @@ class Place(NodeObject):
 #         """ Luetaan kaikki paikat kannasta
 #         """
 
-    @staticmethod
-    def namelist_w_lang(field):
-        """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit
-            mainittuna.
-            Jos sarakkeessa field[1] on mainittu kielikoodi
-            se lisätään kunkin nimen field[0] perään suluissa
-        #TODO Lajiteltava kielen mukaan jotenkin
-        """
-        names = []
-        for n in sorted(field, key=lambda x:x[1]):
-            if n[1]:
-                # Name with langiage code
-                names.append("{} ({})".format(n[0], n[1]))
-            else:
-                names.append(n[0])
-        return names
+    
+#     def namelist_w_lang(field): # Use @staticmethod models.gen.place_combo.Place_combo.namelist_w_lang
+#         """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit
+#             mainittuna.
+#             Jos sarakkeessa field[1] on mainittu kielikoodi
+#             se lisätään kunkin nimen field[0] perään suluissa
+#         #TODO Lajiteltava kielen mukaan jotenkin
+#         """
+#         names = []
+#         for n in sorted(field, key=lambda x:x[1]):
+#             if n[1]:
+#                 # Name with langiage code
+#                 names.append("{} ({})".format(n[0], n[1]))
+#             else:
+#                 names.append(n[0])
+#         return names
 
 
 #     @staticmethod get_place_tree(locid):
