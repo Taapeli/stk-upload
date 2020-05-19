@@ -31,7 +31,7 @@
 	  &nbsp;&nbsp;
 	  <label for="logs">{{ _(" Logs:") }}</label>
 	  <input type="text" name="logs" size="6"
-	         title="{{ _("shell glob to match log files") }}"
+	         title="{{ _("shell glob to match log files\nin ") }} {{logdir}}"
 		 {% if logs %} value="{{ logs }}" {% endif %}>
 	  &nbsp;&nbsp;
 	  <label for="bycount">{{ _("By count:") }}</label>
@@ -76,6 +76,7 @@
 {% endif %}
 
    {% endfor %}
-  {% endfor %}
+{% endfor %}
+
 </div>
 {% endblock %}

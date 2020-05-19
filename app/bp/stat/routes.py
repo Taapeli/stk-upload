@@ -156,9 +156,10 @@ def stat_app():
         if v != "":
             opts[k] = v
 
+    logdir = shareds.app.config['STK_LOGDIR']
     # lines[] will collect results from all log files
     lines = []
-    for f in get_logfiles(shareds.app.config['STK_LOGDIR'],
+    for f in get_logfiles(logdir,
                           shareds.app.config['STK_LOGFILE'],
                           patterns = logs):
         log = logreader.StkServerlog(opts) # each file needs own Log
@@ -172,6 +173,7 @@ def stat_app():
                            width   = width,
                            bycount = bycount,
                            logs    = logs,
+                           logdir  = logdir,
                            style   = style,
                            users   = users,
                            msg     = msg,
@@ -192,7 +194,7 @@ def stat_upload():
 
     users   = check_regexp_option("users")
     msg     = check_regexp_option("msg")     # ...took the place of width in UI
-    width   = safe_get_request("width", 70) # no way to set this in UI...
+    # width   = safe_get_request("width", 70) # no way to set this in UI...
     topn    = safe_get_request("topn", 42)
     bycount = request.args.get("bycount", None)
     style   = request.args.get("style", "text")
@@ -200,7 +202,7 @@ def stat_upload():
 
     opts = {
         "topn"   : topn,
-        "width"  : width,
+        # "width"  : width,
         "style"  : style,
     }
     # Absense/precense of these in opts matters:
@@ -210,16 +212,23 @@ def stat_upload():
         if v != "":
             opts[k] = v
 
-    log = logreader.StkUploadlog(opts)
-    for f in get_logfiles("/home/juha/projs/Taapeli/stk-upload/uploads",
-                          "*/*.log",
-                          ""):
-        log.work_with(f)
-    log.get_counts()
-
     lines = []
+    log = logreader.StkUploadlog(opts)
+    logdir = "/home/juha/projs/Taapeli/stk-upload/uploads/*"
+    for f in get_logfiles(logdir, "*.log", logs):
+        log.work_with(f)
+    lines.append(log.get_counts(style=style))
+
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
     return render_template("/stat/uploadstat.html",
+                           topn    = topn,
+                           # width   = width,
+                           bycount = bycount,
+                           logdir  = logdir,
+                           logs    = logs,
+                           style   = style,
+                           users   = users,
+                           msg     = msg,
                            lines   = lines,
                            elapsed = elapsed )
