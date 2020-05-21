@@ -25,7 +25,7 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from .base import NodeObject, Status
-from pe.db_reader import DBreader, PlaceResult
+from pe.db_reader import DBreader
 #from .place_coordinates import Point
 
 
@@ -177,8 +177,10 @@ class PlaceReader(DBreader):
         results = {"place":place}
 
         if not place:
-            results['status'] = Status.ERROR
-            results['statustext'] = f"bl.place.PlaceReader.get_with_events: {self.use_user} - no Place with uuid={uuid}"
+            results = {'status':Status.ERROR,
+                       'statustext':f"get_with_events: "
+                                    f"{self.use_user} - no Place with uuid={uuid}"
+                }
             return results
         
         #TODO: Find Citation -> Source -> Repository for each uniq_ids

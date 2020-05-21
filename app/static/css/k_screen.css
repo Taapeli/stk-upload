@@ -525,10 +525,14 @@ td.Value > ul {
     padding-left:0; 
     list-style: none;
 }
-td.Value > ul > li { padding: 0 0 .5em 0; }
+td.Value > ul > li {
+	padding: 0 0 .5em 0;
+	margin-left: 1em;
+}
 td.Value > ul li:before {
   content: '►';
-  padding-right: .5em;
+/*   padding-right: .5em; */
+  margin-left: -1em;
 }
 
 /* Surnames

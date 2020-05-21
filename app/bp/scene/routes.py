@@ -528,6 +528,7 @@ def show_sources(series=None):
     """
     print(f"--- {request}")
     print(f"--- {user_session}")
+    t0 = time.time()
     # Set context by owner and the data selections
     u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
@@ -543,9 +544,9 @@ def show_sources(series=None):
 
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info(f"-> bp.scene.routes.show_sources by={u_context.series} c={len(results.items)}")
-    return render_template("/scene/sources.html", sources=results.items, 
-                           user_context=u_context)
+    logger.info(f"-> bp.scene.routes.show_sources by={u_context.series} c={len(results['items'])}")
+    return render_template("/scene/sources.html", sources=results['items'], 
+                           user_context=u_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/source', methods=['GET'])
@@ -566,13 +567,13 @@ def show_source_page(sourceid=None):
         #source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info(f"-> bp.scene.routes.show_source_page n={len(results.citations)}")
+    logger.info(f"-> bp.scene.routes.show_source_page n={len(results['citations'])}")
 #     for c in results.citations:
 #         for i in c.citators:
 #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
 #             else:               print(f'{c} – person {i} {i.sortname}')
-    return render_template("/scene/source_events.html", source=results.items,
-                           citations=results.citations, user_context=u_context)
+    return render_template("/scene/source_events.html", source=results['item'],
+                           citations=results['citations'], user_context=u_context)
 
 # ------------------------------ Menu 6: Media --------------------------------
 

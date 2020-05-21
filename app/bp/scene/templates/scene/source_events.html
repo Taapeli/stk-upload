@@ -41,13 +41,16 @@ td.Citation div ol {padding-top:.3em;}
                     <td></td>
                 </tr>
 {% endif %}
-            </tbody></table>
 <!--                <p>{{ _("Identifiers") }} {{macro.all_obj_ids(source)}}</p> -->
 {% if source.notes %}
-	            <ul>{% for note in source.notes %}
-	                <li>{{ macro.notelink(note) }}</li>
-	            {% endfor %}</ul>
+	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
+                    <td class="Value"><ul>
+    {% for note in source.notes %}
+	                   <li>{{ macro.notelink(note) }}</li>
+	{% endfor -%}
+                    </ul>
 {% endif %}
+            </tbody></table>
 	        </div>
 
 	        <div class="subsection" id="citations">
