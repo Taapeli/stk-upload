@@ -169,7 +169,7 @@
 {% macro person(p, uuid="-") -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}
     {% if p.uuid == uuid %}
-    <span class="myself">&nbsp;({{ _('self') }})&nbsp;</span>
+    <span class="myself">({{ _('self') }})</span>
     {% else %}
     <a href="/scene/person?uuid={{p.uuid}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr. {{p.uniq_id}})">
