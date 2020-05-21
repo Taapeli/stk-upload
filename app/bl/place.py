@@ -24,7 +24,7 @@ import traceback
 import logging 
 logger = logging.getLogger('stkserver')
 
-from .base import NodeObject
+from .base import NodeObject, Status
 from pe.db_reader import DBreader, PlaceResult
 #from .place_coordinates import Point
 
@@ -159,7 +159,7 @@ class PlaceReader(DBreader):
             context.update_session_scope('place_scope', 
                                           places[0].pname, places[-1].pname, 
                                           context.count, len(places))
-        place_result = PlaceResult(places)
+        place_result = {'items':places, 'status':Status.OK}
         return place_result
 
 
@@ -171,26 +171,34 @@ class PlaceReader(DBreader):
     
         """
         # Get a Place with Names, Notes and Medias
-        place = self.dbdriver.dr_get_place_w_na_no_me(self.use_user, uuid, 
+        res = self.dbdriver.dr_get_place_w_na_no_me(self.use_user, uuid, 
                                                       self.user_context.lang)
-        place_result = PlaceResult(place)
+        place = res.get("place")
+        results = {"place":place}
+
         if not place:
-            place_result.error = f"bl.place.PlaceReader.get_with_events: {self.use_user} - no Place with uuid={uuid}"
-            return place_result
+            results['status'] = Status.ERROR
+            results['statustext'] = f"bl.place.PlaceReader.get_with_events: {self.use_user} - no Place with uuid={uuid}"
+            return results
+        
+        #TODO: Find Citation -> Source -> Repository for each uniq_ids
         try:
-            place_result.hierarchy = \
+            results['hierarchy'] = \
                 self.dbdriver.dr_get_place_tree(place.uniq_id, lang=self.user_context.lang)
 
         except AttributeError as e:
             traceback.print_exc()
-            place_result.error = f"Place tree for {place.uniq_id}: {e}"
-            return place_result
+            results['status'] = Status.ERROR
+            results['statustext'] = f"Place tree for {place.uniq_id}: {e}"
+            return results
         except ValueError as e:
-            place_result.error = f"Place tree for {place.uniq_id}: {e}"
+            results['status'] = Status.ERROR
+            results['statustext'] = f"Place tree for {place.uniq_id}: {e}"
             traceback.print_exc()
-                
-        place_result.events = self.dbdriver.dr_get_place_events(place.uniq_id)
-        return place_result
+
+        results['status'] = Status.OK
+        results['events'] = self.dbdriver.dr_get_place_events(place.uniq_id)
+        return results
 
 
 

@@ -536,6 +536,7 @@ class Neo4jReadDriver:
         """ Returns the PlaceBl with PlaceNames, Notes and Medias included.
         """
         pl = None
+        node_ids = []   # List of uniq_is for place, name, note and media nodes 
         with self.driver.session() as session:
             if user == None: 
                 result = session.run(CypherPlace.get_common_w_names_notes,
@@ -562,26 +563,24 @@ class Neo4jReadDriver:
                 # Default lang name
                 name_node = record["name"]
                 pl.name = PlaceName.from_node(name_node)
+                node_ids.append(pl.uniq_id)
                 # Other name versions
                 for name_node in record["names"]:
                     pl.names.append(PlaceName.from_node(name_node))
+                    node_ids.append(pl.names[-1].uniq_id)
 
                 for notes_node in record['notes']:
                     n = Note.from_node(notes_node)
                     pl.notes.append(n)
+                    node_ids.append(pl.names[-1].uniq_id)
 
                 for medias_node in record['medias']:
                     m = Media.from_node(medias_node)
+                    #Todo: should replace pl.media_ref[] <-- pl.medias[]
                     pl.media_ref.append(m)
+                    node_ids.append(pl.names[-1].uniq_id)
 
-        return pl
-#                 if not (pl.type and pl.id):
-#                     logger.error(f"Place_combo.read_w_notes: missing data for {pl}")
-#         try:
-#             return pl
-#         except Exception:
-#             logger.error(f"Place_combo.read_w_notes: no Place with uuid={uuid}") 
-#             return None
+        return {"place":pl, "uniq_ids":node_ids}
 
 
     def dr_get_place_tree(self, locid, lang="fi"):

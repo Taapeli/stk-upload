@@ -482,20 +482,18 @@ def show_places():
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
 
     results = reader.get_list()
-    #results = db.get_place_list()
 
-#     for p in result.items:
-#         print ("# {} ".format(p))
     logger.info("-> bp.scene.routes.show_places "
-               f"{u_context.owner_or_common()} n={len(results.items)}")
-    return render_template("/scene/places.html", places=results.items, menuno=4,
-                           user_context=u_context, elapsed=time.time()-t0)
+               f"{u_context.owner_or_common()} n={len(results['items'])}")
+    return render_template("/scene/places.html", places=results['items'], 
+                           menuno=4, user_context=u_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/location/uuid=<locid>')
 def show_place(locid):
     """ Home page for a Place, shows events and place hierarchy.
     """
+    t0 = time.time()
     try:
         u_context = UserContext(user_session, current_user, request)
         dbdriver = Neo4jReadDriver(shareds.driver)
@@ -504,16 +502,15 @@ def show_place(locid):
         results = reader.get_with_events(locid)
 
     except KeyError as e:
-        import traceback
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in hierarchy:         print (f"# {p} ")
-#     for e in events:            print (f"# {e} {e.description}")
-#     for u in place.notes:       print (f"# {u} ")
-    logger.info(f"-> bp.scene.routes.show_place {u_context.owner_or_common()} n={len(results.events)}")
-    return render_template("/scene/place_events.html", place=results.items, 
-                           pl_hierarchy=results.hierarchy,
-                           user_context=u_context, events=results.events)
+
+    logger.info(f"-> bp.scene.routes.show_place {u_context.owner_or_common()} n={len(results['events'])}")
+    return render_template("/scene/place_events.html", 
+                           place=results['place'], 
+                           pl_hierarchy=results['hierarchy'],
+                           events=results['events'],
+                           user_context=u_context, elapsed=time.time()-t0)
 
 # ------------------------------ Menu 5: Sources --------------------------------
 
@@ -543,6 +540,7 @@ def show_sources(series=None):
         u_context.series = series
     try:
         results = reader.get_source_list()
+
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info(f"-> bp.scene.routes.show_sources by={u_context.series} c={len(results.items)}")
