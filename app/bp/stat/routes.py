@@ -8,11 +8,11 @@ import time
 import re
 import os
 
-from flask import flash, render_template, request, redirect, url_for, session as user_session
-from flask_security import current_user, roles_accepted, login_required
-from flask_babelex import _
+from flask import flash, render_template, request
+from flask_security import roles_accepted, login_required
+# from flask_babelex import _
 
-from ui.user_context import UserContext
+# from ui.user_context import UserContext
 
 import shareds
 
@@ -91,7 +91,6 @@ def check_regexp_option(what, default=""):
 def stat_home():
     """Statistics from stk server.
     """
-    import shareds
     code_root = shareds.app.config['APP_ROOT']
 
     def count_files_lines(fpat, lpat=None):
@@ -137,6 +136,7 @@ def stat_app():
 
     t0 = time.time()
     msg     = check_regexp_option("msg")
+    users   = check_regexp_option("users")
     maxlev  = safe_get_request("maxlev", 2)
     topn    = safe_get_request("topn", 42)
     bycount = request.args.get("bycount", None)
@@ -148,6 +148,7 @@ def stat_app():
     opts = {
         "topn"   : topn,
         "msg"    : msg,
+        "users"  : users,
         "maxlev" : maxlev,
         "logs"   : logs,        # used before logreader to filter logfiles
         "bycount": bycount,
@@ -163,14 +164,16 @@ def stat_app():
     res = []
     for f in logfiles:
         # Create a logreader for each logfile
-        #  that can do "By_msg" and "By_date" statistics
+        #  that can do "By_msg" and "By_date" and "By_user" statistics
         logrdr = logreader.StkServerlog(
             "Top_level",
-            by_what = [("By_msg",  logreader.StkServerlog.saver_bymsg),
-                       ("By_date", logreader.StkServerlog.saver_bydate)],
+            by_what = [("By_msg",  logreader.StkServerlog.save_bymsg),
+                       ("By_date", logreader.StkServerlog.save_bydate),
+                       ("By_user", logreader.StkServerlog.save_byuser),
+            ],
             opts    = opts, )
         logrdr.work_with(f)
-        res.append(logrdr.get_report())
+        res.append(logrdr.get_report()) # that will be one filesection
 
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app e={elapsed:.4f}")

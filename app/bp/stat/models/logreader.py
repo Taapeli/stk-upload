@@ -29,26 +29,12 @@ def string_to_number(txt):
 
 ################
 #
-def number_to_string(x):
-    """Format our numbers, floats to reasonable precision."""
+def number_to_string(x, w=2):
+    """Format our number X, floats to W decimal places (default=2)."""
     if type(x) == int:
         return str(x)
     if type(x) == float:
-        return f"{x:.3f}"
-
-
-################
-#
-def get_regexp_from_opts(what, opts):
-    """Compile comma separated regexp patterns into one."""
-    if what not in opts or opts[what] == "":
-        return None
-    try:
-        return re.compile( re.sub("[, ]+", "|", opts[what]) )
-    except Exception as e:
-        flash(f"Bad regexp for {what} '{opts[what]}': {e}",
-              category='warning')
-    return None
+        return f"{x:.{w}f}"
 
 
 ################################################################
@@ -67,12 +53,12 @@ class Counter():
         self._name   = name     # name of this (sub)Counter
         self._counters = {}     # dict of subCounter objects
         self._values = {        # values that we keep track at this level
-            "call_count": 0,
+            "N": 0,             # ...more will come from log files
         }
 
     ################
     #
-    def increment(self, tag="call_count", incr=1):
+    def increment(self, tag="N", incr=1):
         """Increment (or create) Counters _values[TAG] by INCR (default=1)."""
         incval = incr
         if type(incr) == str:
@@ -98,7 +84,7 @@ class Counter():
         if can_create:
             if opts is None:
                 opts = self._opts
-            self._counters[name] = Counter(name, self._level+1, opts=opts)
+            self._counters[name] = Counter(name, level=self._level+1, opts=opts)
             return self._counters[name]
         return None
 
@@ -116,20 +102,21 @@ class Counter():
         """
 
         if taglist is not None:
-            # Increment all given tags with given values
+            # Increment own tags with given values
             for (tag_name, incr) in taglist:
                 self.increment(tag=tag_name, incr=incr)
 
         # Are there sub-Counters?
         if inner_specs is None:
-            self.increment()
+            self.increment()    # no, just increment self
             return
 
         # Go thru all sub-Counters (levels) given in INNER_SPECS.
         # INNER_SPECS is list of tuples: (key, TAGLIST) ...
+        cc = self
         for (counter_name, inner_taglist) in inner_specs:
-            counter = self.get_or_create(counter_name)
-            counter.update(taglist=inner_taglist)
+            cc = cc.get_or_create(counter_name)
+            cc.update(taglist=inner_taglist)
 
         return
 
@@ -141,7 +128,7 @@ class Counter():
         If CUMUL is True, sum up all sublevels and return total count.
         """
         if not cumul or len(self._counters) == 0:
-            return self._values["call_count"]
+            return self._values["N"]
 
         res = 0
         for counter in self._counters.values():
@@ -191,17 +178,25 @@ class Counter():
 
         Return value is a tuple (self._name, [dataline, ...],
         Each dataline is list [column, ...], first columns is line number.
-        """
-        if level >= self._opts["maxlev"]:
-            print(f"too deep {level} >= {self._opts['maxlev']}")
-            return()
 
-        lines = []
+        This will end as one subsection in html template.
+        Return value is a tuple (section_name, [line, ...]),
+        section_name is 'By_xxx' or some such.
+        """
+
+        lines = []              # lines is list of columns
         columns = []
+
+        for _ in range(level-1):
+            columns += ["", ""]
+
         # before sub-Counters, add own level tags
-        for tag, value in self._values.items():
-            txt = self._name if tag == "call_count" else tag
-            columns += [f"{txt}", f"{number_to_string(value)}"]
+        if level > 0:
+            columns += [self._name]
+            for tag, value in self._values.items():
+                columns += [f"{tag}", f"{number_to_string(value)}"]
+                if tag == "e" and self._values["N"] != 0:
+                    columns += [f"{number_to_string(value/self._values['N'],w=3)}"]
         lines.append(columns)
 
         # Get list of TOPN sub-Counters
@@ -214,15 +209,22 @@ class Counter():
             # sub_lines = sub_res[1]
             # for sub_line in sub_lines:
             #     lines.append(line + sub_line)
-        return(lines)
+
+        if level == 0:
+            return self._name, lines
+        else:
+            return lines
 
 
     ################
     #
     def get_report(self):
-        """Get the counts of this Log.
+        """Get the counts of this log.
 
-Return value is list of nested tuples: (filename, [dataline, ...]).
+        Return value is list of nested tuples: (filename, [dataline, ...]).
+
+        This will end as one filesection in html template.
+
         """
 
         res = []
@@ -231,6 +233,20 @@ Return value is list of nested tuples: (filename, [dataline, ...]).
         files = [ x[x.rindex("/")+1:] for x in self._files ]
 
         return(", ".join(files), res)
+
+
+    ################
+    #
+    def get_regexp_from_opts(self, what):
+        """Compile comma separated regexp patterns into one."""
+        if what not in self._opts or self._opts[what] == "":
+            return None
+        try:
+            return re.compile( re.sub("[, ]+", "|", self._opts[what]) )
+        except Exception as e:
+            flash(f"Bad regexp for {what} '{self._opts[what]}': {e}",
+                  category='warning')
+        return None
 
 
 ################################################################
@@ -247,14 +263,15 @@ Counters are kept in list of Counter objects.
         self._savers = {}
         for (name, saver) in by_what:
             self._savers[saver] = self.get_or_create(name)
+        return
 
-        """
-Toistaiseksi olisi 2 mittaria: modulin nimi=käydyt sivut ja n=käsitellyt
-rivit tms.  Raportointia voisi rakentaa käyttäjien käyntimääristä
-kuukausittain (käyttäjittäin monenako päivänä, montako eri käyttäjää) ja
-suosituimmat sivut ja niiden datavolyymit.
+    """Toistaiseksi olisi 2 mittaria: modulin nimi=käydyt sivut ja
+    n=käsitellyt rivit tms.  Raportointia voisi rakentaa käyttäjien
+    käyntimääristä kuukausittain (käyttäjittäin monenako päivänä, montako
+    eri käyttäjää) ja suosituimmat sivut ja niiden datavolyymit.
 
-Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
+    Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden
+    lokeja.
 
         """
 
@@ -270,20 +287,28 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
         # read date, module, user, tuples from parser
         # call designated counter_xxx to store values
         for tup in self.parser(file):
-            print(f"{tup}")
+            # print(f"{tup}")
             for saver in self._savers:
                 counter = self._savers[saver]
                 saver(counter, tup)
         return
 
 
-    def saver_bymsg(self, tup):
-        (_, module, user, tuples) = tup
+    def save_bymsg(self, tup):
+        """Save TUP data by by module | user order."""
+        (date, module, user, tuples) = tup
         self.update(inner_specs = [ (module, None), (user, tuples), ] )
 
-    def saver_bydate(self, tup):
-        (date, _, user, tuples) = tup
-        self.update(inner_specs = [ (date, None), (user, tuples) ] )
+    def save_bydate(self, tup):
+        """Save TUP data by by date | user order."""
+        (date, module, user, tuples) = tup
+        self.update(inner_specs = [ (date, None), (user, None), (module, tuples) ] )
+
+
+    def save_byuser(self, tup):
+        """Save TUP data by by user | module | date order."""
+        (date, module, user, tuples) = tup
+        self.update(inner_specs = [ (user, None), (module, None), (date, tuples) ] )
 
 
     ################
@@ -311,9 +336,9 @@ Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden lokeja.
         # Additional info in %(message)s part look like x=y
         equals_re = re.compile(r"\b(\S+)=(\S+)\b")
 
-
-        users_re    = get_regexp_from_opts("users", self._opts)
-        want_msg_re = get_regexp_from_opts("msg", self._opts)
+        # some filtering wanted by caller:
+        users_re    = self.get_regexp_from_opts("users")
+        want_msg_re = self.get_regexp_from_opts("msg")
 
         for line in open(file, "r").read().splitlines():
             match = log_re.match(line)

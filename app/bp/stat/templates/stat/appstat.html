@@ -14,67 +14,76 @@
       Set options:
       <form action="/stat/appstat">
 	<fieldset>
-{% set topn = opts["topn"] %}
-	  <label for="topn">{{ _("How many:") }}</label>
-	  <input type="text" name="topn" size="1"
-	         title="{{ _("How many at most?") }}"
-	         value="{{ topn }}">
-	  &nbsp;&nbsp;
-
-{% set msg = opts["msg"] %}
+	  <table>
+	    <tr>
+	      <td>
+		{% set msg = opts["msg"] %}
 	  <label for="msg">{{ _("Msgs:") }}</label>
 	  <input type="text" name="msg" size="6"
 	         title="{{ _("python regexp(s) to match messages") }}"
 	         value="{{ msg }}">
-	  &nbsp;&nbsp;
-
-{% set maxlev = opts["maxlev"] %}
-	  <label for="maxlev">{{ _(" Maxlev:") }}</label>
-	  <input type="text" name="maxlev" size="6"
-	         title="{{ _("report max level") }}"
-		 {% if maxlev %} value="{{ maxlev }}" {% endif %}>
-	  &nbsp;&nbsp;
-
-{% set logs = opts["logs"] %}
+	      </td>
+	      <td>
+	  {% set users = opts["users"] %}
+	  <label for="users">{{ _("Users:") }}</label>
+	  <input type="text" name="users" size="6"
+	         title="{{ _("python regexp(s) to match users") }}"
+	         value="{{ users }}">
+	      </td>
+	      <td>
+	  {% set logs = opts["logs"] %}
 	  <label for="logs">{{ _(" Logs:") }}</label>
 	  <input type="text" name="logs" size="6"
 	         title="{{ _("shell glob to match log files\nin ") }} {{logdir}}"
 		 {% if logs %} value="{{ opts['logs'] }}" {% endif %}>
-	  &nbsp;&nbsp;
-
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+	  {% set maxlev = opts["maxlev"] %}
+	  <label for="maxlev">{{ _(" Maxlev:") }}</label>
+	  <input type="text" name="maxlev" size="6"
+	         title="{{ _("report max level") }}"
+		 {% if maxlev %} value="{{ maxlev }}" {% endif %}>
+	      </td>
+	      <td>
 	  <label for="bycount">{{ _("By count:") }}</label>
 	  <input type="checkbox" name="bycount" size="1"
 	         title="{{ _("Sort by count or by text?") }}"
 		 {% if opts["bycount"] %} checked {% endif %}
 		 id="bycount" value="x">
-	  &nbsp;&nbsp;
-
+	      </td>
+	      <td>
 	  <label for="cumul">{{ _("Cumulative:") }}</label>
 	  <input type="checkbox" name="cumul" size="1"
 	         title="{{ _("Cumulative counts?") }}"
 		 {% if opts["cumul"] %} checked {% endif %}
 		 id="cumul" value="x">
-	  &nbsp;&nbsp;
-	  <input type="submit" value="Go">
+	      </td>
+	    </tr>
+	  </table>
+	  <p>
+	  <input type="submit" value=" -- Go! --">
+
 	</fieldset>
       </form>
     </div>
 
-    {% for sections in res %}
-    {# sections[0] is log file name #}
-    {# sections[1] is contents from that log file #}
-    <h3>Logfile(s) <tt>{{ sections[0] }}</tt></h3>
+    {% for filesection in res %}
+    {# filesection[0] is log file name #}
+    {# filesection[1] is contents from that log file #}
+    <h3>Logfile(s) <tt>{{ filesection[0] }}</tt></h3>
 
-    {% for sectiondata in sections[1] %}
-    {# sectiondata[0] is 'By xxx' #}
-    <i> {{ sectiondata[0] }} </i>
+    {% for subsection in filesection[1] %}
+    {# subsection[0] is 'By xxx' #}
+    {# subsection[1] is contents for that section #}
+    <i> {{ subsection[0] }} </i>
 
 <table>
-{% for row in sectiondata[1] %}  <tr>
+{% for row in subsection[1] %}  <tr>
   {% for col in row
-    %} <td{% if loop.first %} style="text-align: right"{% endif
-	%}{% if loop.last %} style="text-align: right"{% endif
-	   %}> {{ col }} </td>
+  %} <td{% if col != "" and col[0] in "0123456789"
+	   %} style="text-align: right"{% endif	%}> {{ col }} </td>
   {% endfor %}</tr>
 {% endfor %}</table><br>
 
