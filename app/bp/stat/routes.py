@@ -136,99 +136,98 @@ def stat_app():
     """
 
     t0 = time.time()
-    users   = check_regexp_option("users")
-    msg     = check_regexp_option("msg")     # ...took the place of width in UI
-    width   = safe_get_request("width", 70) # no way to set this in UI...
+    msg     = check_regexp_option("msg")
+    maxlev  = safe_get_request("maxlev", 2)
     topn    = safe_get_request("topn", 42)
     bycount = request.args.get("bycount", None)
-    style   = request.args.get("style", "text")
+    cumul   = request.args.get("cumul", None)
     logs    = request.args.get("logs", "")
 
+    # opts from template, they go to logreader and back to template as
+    # defaults values
     opts = {
         "topn"   : topn,
-        "width"  : width,
-        "style"  : style,
+        "msg"    : msg,
+        "maxlev" : maxlev,
+        "logs"   : logs,        # used before logreader to filter logfiles
+        "bycount": bycount,
+        "cumul"  : cumul,
     }
-    # Absense/precense of these in opts matters:
-    if bycount is not None: opts["bycount"] = 1
-    for k,v in { "msg"  : msg,
-                 "users": users }.items():
-        if v != "":
-            opts[k] = v
-
+    # print(f"{opts}")
     logdir = shareds.app.config['STK_LOGDIR']
-    # lines[] will collect results from all log files
-    lines = []
-    for f in get_logfiles(logdir,
-                          shareds.app.config['STK_LOGFILE'],
-                          patterns = logs):
-        log = logreader.StkServerlog(opts) # each file needs own Log
-        log.work_with(f)
-        lines.append(log.get_counts(style=style))
+    logfiles = get_logfiles(logdir,
+                            shareds.app.config['STK_LOGFILE'],
+                            patterns = logs)
+    # res [] will collect results from all logreader invocations, one set
+    # from each call
+    res = []
+    for f in logfiles:
+        # Create a logreader for each logfile
+        #  that can do "By_msg" and "By_date" statistics
+        logrdr = logreader.StkServerlog(
+            "Top_level",
+            by_what = [("By_msg",  logreader.StkServerlog.saver_bymsg),
+                       ("By_date", logreader.StkServerlog.saver_bydate)],
+            opts    = opts, )
+        logrdr.work_with(f)
+        res.append(logrdr.get_report())
 
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
     return render_template("/stat/appstat.html",
-                           topn    = topn,
-                           width   = width,
-                           bycount = bycount,
-                           logs    = logs,
-                           logdir  = logdir,
-                           style   = style,
-                           users   = users,
-                           msg     = msg,
-                           lines   = lines,
+                           res     = res,
+                           opts    = opts,
                            elapsed = elapsed )
 
 
-################################################################
-#
-@bp.route('/stat/uploadstat', methods = ['GET', 'POST'])
-@login_required
-@roles_accepted('admin')
-def stat_upload():
-    """Statistics about material uploading.
-    """
+# ################################################################
+# #
+# @bp.route('/stat/uploadstat', methods = ['GET', 'POST'])
+# @login_required
+# @roles_accepted('admin')
+# def stat_upload():
+#     """Statistics about material uploading.
+#     """
 
-    t0 = time.time()
+#     t0 = time.time()
 
-    users   = check_regexp_option("users")
-    msg     = check_regexp_option("msg")     # ...took the place of width in UI
-    # width   = safe_get_request("width", 70) # no way to set this in UI...
-    topn    = safe_get_request("topn", 42)
-    bycount = request.args.get("bycount", None)
-    style   = request.args.get("style", "text")
-    logs    = request.args.get("logs", "")
+#     users   = check_regexp_option("users")
+#     msg     = check_regexp_option("msg")     # ...took the place of width in UI
+#     # width   = safe_get_request("width", 70) # no way to set this in UI...
+#     topn    = safe_get_request("topn", 42)
+#     bycount = request.args.get("bycount", None)
+#     style   = request.args.get("style", "text")
+#     logs    = request.args.get("logs", "")
 
-    opts = {
-        "topn"   : topn,
-        # "width"  : width,
-        "style"  : style,
-    }
-    # Absense/precense of these in opts matters:
-    if bycount is not None: opts["bycount"] = 1
-    for k,v in { "msg"  : msg,
-                 "users": users }.items():
-        if v != "":
-            opts[k] = v
+#     opts = {
+#         "topn"   : topn,
+#         # "width"  : width,
+#         "style"  : style,
+#     }
+#     # Absense/precense of these in opts matters:
+#     if bycount is not None: opts["bycount"] = 1
+#     for k,v in { "msg"  : msg,
+#                  "users": users }.items():
+#         if v != "":
+#             opts[k] = v
 
-    lines = []
-    log = logreader.StkUploadlog(opts)
-    logdir = "/home/juha/projs/Taapeli/stk-upload/uploads/*"
-    for f in get_logfiles(logdir, "*.log", logs):
-        log.work_with(f)
-    lines.append(log.get_counts(style=style))
+#     lines = []
+#     log = logreader.StkUploadlog(opts)
+#     logdir = "/home/juha/projs/Taapeli/stk-upload/uploads/*"
+#     for f in get_logfiles(logdir, "*.log", logs):
+#         log.work_with(f)
+#     lines.append(log.get_counts(style=style))
 
-    elapsed = time.time() - t0
-    logger.info(f"-> bp.stat.app e={elapsed:.4f}")
-    return render_template("/stat/uploadstat.html",
-                           topn    = topn,
-                           # width   = width,
-                           bycount = bycount,
-                           logdir  = logdir,
-                           logs    = logs,
-                           style   = style,
-                           users   = users,
-                           msg     = msg,
-                           lines   = lines,
-                           elapsed = elapsed )
+#     elapsed = time.time() - t0
+#     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
+#     return render_template("/stat/uploadstat.html",
+#                            topn    = topn,
+#                            # width   = width,
+#                            bycount = bycount,
+#                            logdir  = logdir,
+#                            logs    = logs,
+#                            style   = style,
+#                            users   = users,
+#                            msg     = msg,
+#                            lines   = lines,
+#                            elapsed = elapsed )
