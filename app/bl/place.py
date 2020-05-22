@@ -172,15 +172,13 @@ class PlaceReader(DBreader):
         """
         # Get a Place with Names, Notes and Medias
         res = self.dbdriver.dr_get_place_w_na_no_me(self.use_user, uuid, 
-                                                      self.user_context.lang)
+                                                    self.user_context.lang)
         place = res.get("place")
-        results = {"place":place}
+        results = {"place":place, 'status':Status.OK}
 
         if not place:
-            results = {'status':Status.ERROR,
-                       'statustext':f"get_with_events: "
-                                    f"{self.use_user} - no Place with uuid={uuid}"
-                }
+            results = {'status':Status.ERROR, 'statustext':
+                       f'get_with_events:{self.use_user} - no Place with uuid={uuid}'}
             return results
         
         #TODO: Find Citation -> Source -> Repository for each uniq_ids
@@ -198,8 +196,8 @@ class PlaceReader(DBreader):
             results['statustext'] = f"Place tree for {place.uniq_id}: {e}"
             traceback.print_exc()
 
-        results['status'] = Status.OK
-        results['events'] = self.dbdriver.dr_get_place_events(place.uniq_id)
+        res = self.dbdriver.dr_get_place_events(place.uniq_id)
+        results['events'] = res['items']
         return results
 
 

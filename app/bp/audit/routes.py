@@ -55,7 +55,7 @@ def move_in_1(batch_name):
     total = 0
     for _label, cnt in labels:
         total += cnt
-    logger.info(f' bp.audit.routes.move_in_1 {user} / {batch_name}, total {total} nodes')
+    # Not needed: logger.info(f' bp.audit.routes.move_in_1 {user} / {batch_name}, total {total} nodes')
 
     return render_template('/audit/move_in_1.html', user=user, batch=batch_id, 
                            label_nodes=labels, total=total, time=tstring)
@@ -68,7 +68,7 @@ def move_in_2():
     owner = request.form['user']
     batch_id = request.form['batch']
     auditor = current_user.username
-    logger.info(f' bp.audit.routes.move_in_2 {owner} / {batch_id}')
+    logger.info(f' bp.audit.routes.move_in_2 u={owner} b={batch_id}')
     merger = Batch_merge()
     msg = merger.move_whole_batch(batch_id, owner, auditor)
     syslog.log(type="batch to Common data", batch=batch_id, by=owner, msg=msg)

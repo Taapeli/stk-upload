@@ -171,7 +171,11 @@ div#events div.scrollbox {
         {% for e in events|sort %}
                     <tr>
                         <td class="ColumnPerson">
-	                        {{ macro.person_names_anon(e.person, e.person.names) }}
+            {% if e.indi_label == "Person" %}
+	                        {{ macro.person_names_anon(e.indi, e.indi.names) }}
+            {% else %}
+                            {{ macro.family_name(e.indi) }}
+            {% endif %}
                         </td>
                         <td class="ColumnEvent">{{e.type|transl('evt')}}
                           {% if e.role != "Primary" %}({{e.role|transl('role')}}){% endif %}

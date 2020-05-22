@@ -665,12 +665,12 @@ class Neo4jReadDriver:
             Haetaan paikkaan liittyvät tapahtumat sekä
             osallisen henkilön nimitiedot.
         """
-        result = self.driver.session().run(CypherPlace.get_person_events, 
+        result = self.driver.session().run(CypherPlace.get_person_family_events, 
                                            locid=uniq_id)
         ret = []
         for record in result:
             # <Record 
-            #    person=<Node id=523974 labels={'Person'}
+            #    indi=<Node id=523974 labels={'Person'}
             #        properties={'sortname': 'Borg#Maria Charlotta#', 'death_high': 1897, 
             #            'confidence': '', 'sex': 2, 'change': 1585409709, 'birth_low': 1841, 
             #            'birth_high': 1841, 'id': 'I0029', 'uuid': 'e9bc18f7e9b34f1e8291de96002689cd', 
@@ -688,13 +688,20 @@ class Neo4jReadDriver:
             e = Event_combo.from_node(record['event'])
             # Fields uid (person uniq_id) and names are on standard in Event_combo
             e.role = record["role"]
-            e.person = Person_combo.from_node(record['person'])
-            if e.person.too_new:    # Check privacy
-                continue
-            for node in record["names"]:
-                e.person.names.append(Name.from_node(node))
+            if 'Person' in record['indi'].labels:
+                e.indi_label = 'Person'
+                e.indi = Person_combo.from_node(record['indi'])
+                if e.indi.too_new:    # Check privacy
+                    continue
+                for node in record["names"]:
+                    e.indi.names.append(Name.from_node(node))
+                ##ret.append({'event':e, 'indi':e.indi, 'label':'Person'})
+            else: # Family
+                e.indi_label = 'Family'
+                e.indi = FamilyBl.from_node(record['indi'])
+                ##ret.append({'event':e, 'indi':e.indi, 'label':'Family'})
             ret.append(e)
-        return ret
+        return {'items':ret, 'status':Status.OK}
 
 
     def dr_get_source_list_fw(self, **kwargs):

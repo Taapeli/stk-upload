@@ -109,7 +109,6 @@ def show_person_list(selection=None):
         else:
             #print(f'Show {p.sortname} too_new={p.too_new}, owner {p.user}')
             persons_out.append(p)
-    #print(f'--> bp.scene.routes.show_person_list shows {len(persons_out)}/{len(persons)} persons')
     logger.info("-> bp.scene.routes.show_person_list"
                 f" {u_context.owner_or_common()} {request.method} {theme} n={len(persons_out)}/{len(persons)}")
 
@@ -133,7 +132,7 @@ def show_persons_by_refname(refname, opt=""):
     if current_user.is_authenticated:
         args['user'] = current_user.username
     persons = read_persons_with_events(keys, args=args)
-    logger.info("-> bp.scene.routes.show_persons_by_refname")
+    logger.info(f"-> bp.scene.routes.show_persons_by_refname n={len(persons)}")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            user_context=u_context, order=order, rule=keys)
 
@@ -204,9 +203,8 @@ def show_persons_all():
     elapsed = time.time() - t0
 
     hidden = f" hide={results.num_hidden}" if results.num_hidden > 0 else ""
-    logger.info("-> bp.scene.routes.show_persons_all"
-                f" kind={u_context.owner_or_common()}"
-                f" got={len(results.items)}{hidden}"
+    logger.info(f"-> bp.scene.routes.show_persons_all/{u_context.owner_or_common()}"
+                f" n={len(results.items)} hidden={hidden}"
                 f" e={elapsed:.4f}")
     print(f"Got {len(results.items)} persons"
           f" with {results.num_hidden} hidden"
@@ -262,7 +260,7 @@ def show_person(uid=None):
     person, objs, jscode = get_person_full_data(uid, u_context.user, u_context.use_common())
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
-    logger.info(f"-> bp.scene.routes.show_person {u_context.owner_or_common()} obj={len(objs)}")
+    logger.info(f"-> bp.scene.routes.show_person/{u_context.owner_or_common()} n={len(objs)}")
 
     #for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
@@ -272,15 +270,15 @@ def show_person(uid=None):
                            user_context=u_context)
 
 
-@bp.route('/scene/person/uuid=<pid>')
-@bp.route('/scene/person=<int:pid>')
-#     @login_required
-def obsolete_show_person_v1(pid):
-    """ Full homepage for a Person in database (v1 versio).
-
-        The pid may be 1) an uuid or 2) an uniq_id
-    """
-    return 'Obsolete: show_person_v1<br><a href="javascript:history.back()">Go Back</a>'
+# @bp.route('/scene/person/uuid=<pid>')
+# @bp.route('/scene/person=<int:pid>')
+# #     @login_required
+# def obsolete_show_person_v1(pid):
+#     """ Full homepage for a Person in database (v1 versio).
+# 
+#         The pid may be 1) an uuid or 2) an uniq_id
+#     """
+#     return 'Obsolete: show_person_v1<br><a href="javascript:history.back()">Go Back</a>'
 #     t0 = time.time()
 #     try:
 #         person, events, photos, citations, families = get_person_data_by_id(pid)
@@ -544,7 +542,7 @@ def show_sources(series=None):
 
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info(f"-> bp.scene.routes.show_sources by={u_context.series} c={len(results['items'])}")
+    logger.info(f"-> bp.scene.routes.show_sources/{u_context.series} n={len(results['items'])}")
     return render_template("/scene/sources.html", sources=results['items'], 
                            user_context=u_context, elapsed=time.time()-t0)
 
@@ -563,8 +561,7 @@ def show_source_page(sourceid=None):
         reader = SourceReader(dbdriver, u_context) 
     
         results = reader.get_source_with_references(uuid, u_context)
-        #results = db.get_source_with_references(uuid, u_context)
-        #source, citations = get_source_with_events(sourceid)
+
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info(f"-> bp.scene.routes.show_source_page n={len(results['citations'])}")

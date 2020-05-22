@@ -49,12 +49,13 @@ class Source(NodeObject):
     def from_node(cls, node):
         '''
         Transforms a db node to an object of type Source.
-        
-        <Node id=91394 labels={'Source'} 
-            properties={'handle': '_d9edc4e4a9a6defc258', 'id': 'S0078', 
-                'stitle': 'Kangasala syntyneet 1721-1778', 'change': '1507149115'}>
         '''
-        s = cls()   # create a new Source
+        # <Node id=355993 labels={'Source'}
+        #     properties={'id': 'S0296', 'stitle': 'Hämeenlinnan lyseo 1873-1972',
+        #         'uuid': 'c1367bbdc6e54297b0ef12d0dff6884f', 'spubinfo': 'Karisto 1973',
+        #         'sauthor': 'toim. Mikko Uola', 'change': 1585409705}>
+
+        s = cls()   # create a new Source, SourceBl
         s.uniq_id = node.id
         s.id = node['id']
         s.uuid = node['uuid']
@@ -63,6 +64,7 @@ class Source(NodeObject):
         s.stitle = node['stitle']
         s.sauthor = node['sauthor']
         s.spubinfo = node['spubinfo']
+        s.sabbrev = node.get('sabbrev','')
         s.change = node['change']
         return s
 
