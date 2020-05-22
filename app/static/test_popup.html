@@ -8,7 +8,20 @@
 <script src="/static/js/axios.min.js"></script>
 <body>
 <style>
-.popuptext a.inlink {
+.pop-container {
+  display: flex;
+  flex-wrap: nowrap;
+}
+.pop-container > div {
+    background: #d09d7f;
+    max-width: 450px;
+    background: #d09d7f;
+    color:white;
+    width:50%;
+    padding:4px;
+    margin:4px;
+}
+.pop-box a.inlink {
     background: #777;
     color:white;
     margin: 0 .3em;
@@ -34,7 +47,7 @@
             ♂ <a href="/scene/person?uuid=034454cf72af445088845d390d1390f0"
             class="inlink" title="Katso henkilön 034454 tiedot (nr. 549094)">Anders Reinhold <i>Andersson</i>  <b></b></a>
             <div class="popup" onclick="showPopup('034454cf72af445088845d390d1390f0')"
-                title="Näytä perheet">⭐
+                title="Näytä perheet">💜<!-- 💙❤ -->
                <span class="popuptext" id="popWin" title="perhe F0249">
                         <p><a href="/scene/family?uuid=e8450bbbd48348338abce8b900df3bf8" title="e8450bbbd48348338abce8b900df3bf8" class="inlink">
                              Perhe avioliitossa</a>
@@ -103,7 +116,7 @@
 </td>
 </table>
 
-<!-- div onclick="showPopup()">Click ⭐ to toggle the popup!
+<!-- div onclick="showPopup()">Click ⭐💜 to toggle the popup!
   <span class="popuptext" id="popWin">A Simple Popup!</span>
 </div -->
 
@@ -111,45 +124,53 @@
 <div id="popup_app">
   <div class="row">
     <div>
-        <span>${ message }</span>
-        <button v-on:click="getFamily(uuid='e8450bbbd48348338abce8b900df3bf8')">
-          Hae tietty perhe</button>
+        <span style="color:red">${ message }</span>
+        <button v-on:click="getFamily(uuid='37c9e39f8a704fac886079481c2ff62e')">
+          Hae henkilön perheet</button>
     </div>
     <div style="display: inline-block;padding:.5em;">
-        ${status} – Family
-        <span style="background:white; padding:3px;">&nbsp;
+        ${status}
+        <!--  – Family <span style="background:white; padding:3px;">&nbsp;
             <tt>${id}</tt> ${rel_type} ${dates}
-            <i>${father_name} <> ${mother_name}</i>&nbsp;</span>
+            <i>${father_name} <> ${mother_name}</i>&nbsp;</span> -->
     </div>
   </div>
 
-  <div class="poptest">
-      <span class="popuptext" id="popWin" title="perhe F0249">
+  <div class="pop-container">
+      <div class="pop-box" v-bind:title="f.title" v-for="f of families">
           <p><a href="/scene/family?uuid=e8450bbbd48348338abce8b900df3bf8" 
               title="e8450bbbd48348338abce8b900df3bf8" class="inlink">
-              Perhe</a>  ${rel_type} ${dates}
+              Perhe</a>  ${f.rel_type} ${f.dates}
           </p>
           <ul>
-              <li v-for="p in parents" :key="p.uuid">
-                  ${p.role}: 
-                  <a v-bind:href="p.href" class="inlink" title="Katso henkilöä">
-                      ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b>
-                  </a>
-                  s.&nbsp;${p.birth}
+              <li v-for="p in f.parents" :key="p.uuid">
+                  ${p.role}
+                  <span v-if="p.is_self" style="color:black;font-weight:bold;">
+                    itse
+                  </span>
+                  <span v-else>
+                    <a v-bind:href="p.href" class="inlink" title="Katso henkilöä">
+                       ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b>
+                    </a> s.&nbsp;${p.birth}
+                  </span>
               </li>
               <li v-if="has_children">Lapset
                  <ul>
-                     <li v-for="ch in children" :key="ch.uuid">
-                       ${ch.gender}: 
-                       <a v-bind:href="ch.href" class="inlink" title="Katso henkilöä">
-                          ${ch.name[1]} <i>${ch.name[2]}</i> <b>${ch.name[0]}</b>
-                       </a>
-                       s.&nbsp;${ch.birth}
+                     <li v-for="p in f.children" :key="p.uuid">
+                       ${p.gender}:
+                       <span v-if="p.is_self" style="color:black;font-weight:bold;">
+                         itse
+                       </span>
+                       <span v-else>
+                         <a v-bind:href="p.href" class="inlink" title="Katso henkilöä">
+                            ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b>
+                         </a> s.&nbsp;${p.birth}
+                       </span>
                      </li>
                  </ul>
               </li>
           </ul>
-      </span>
+      </div>
   </div>
 
 </div>
@@ -181,6 +202,7 @@ function htmlSortname(name) {
 
 function datesStr(dates,first=false) {
 	// Parses a DateRange list format object (<int>, <str> [,<str>])
+	if (!dates) return '';
     if (dates.length < 2) return '';
     if (first) return dateLocal(dates[1]);
     if (dates.length == 3) {
@@ -192,10 +214,10 @@ function datesStr(dates,first=false) {
 function dateLocal(date) {
     // Parses ISO style date 1820-12-03 to local 3.12.1820
     var a = date.split('-');
-    if (a[2].startsWith('0'))   a[2] = a[2].substr(1,1);
-    if (a[1].startsWith('0'))   a[1] = a[1].substr(1,1);
     if (a.length == 1) return date;
+    if (a[1].startsWith('0'))   a[1] = a[1].substr(1,1);
     if (a.length == 2) return a[1]+'.'+a[0];
+    if (a[2].startsWith('0'))   a[2] = a[2].substr(1,1);
     if (a.length == 3) return a[2]+'.'+a[1]+'.'+a[0];
     return "?"
   }
@@ -208,15 +230,7 @@ var vm = new Vue({
    delimiters: ['${', '}'],
    data: {
      message: 'Not yet run',
-     rel_type: '',
-     id: 'F',
-     dates: '',
-     uuid:'_',
-     children: [],
-     parents: [],
-     father_name: '',
-     mother_name: '',
-     has_children: false,
+     families: [],
      status: ''
    },
    methods: {
@@ -229,44 +243,55 @@ var vm = new Vue({
                       //console.log("stk result: "+rsp.data.statusText);
                        vm.message=rsp.data.statusText;
                        if (rsp.data.records.length == 0) {
-                    	   vm.rel_type='';
-                    	   vm.id='';
-                    	   vm.dates='';
-                    	   vm.uuid='';
-                    	   vm.children=[];
-                    	   vm.parents=[];
-                    	   vm.father_name='';
-                    	   vm.mother_name='';
-                    	   vm.has_children=false;
+                    	   vm.families=[];
                     	   return;
                        }
-	    			   var rec = rsp.data.records[0];
-	    			   console.log(rec);
-                       vm.id = rec.id;
-                       vm.rel_type = rec.rel_type;
-                       vm.dates = datesStr(rec.dates, first=true);
+                       for (rec of rsp.data.records) {
+                           console.log(rec);
+                    	   fam = {};
+                    	   if (rec) {
+                               fam.id = rec.id;
+                               fam.rel_type = rec.rel_type;
+                               fam.dates = datesStr(rec.dates, first=true);
+                               fam.parents = [];
+                               fam.children = [];
+                               fam.title = "Perhe "+fam.id;
 
-                       for (parent of rec.parents) {
-                    	   var p = {};
-                    	   p.role = parent.role;
-                           p.name = parseSortname(parent.sortname);
-                           if (p.role == 'father')  vm.father_name = p.name;
-                           else                     vm.mother_name = p.name;
-                    	   p.uuid = parent.uuid;
-                    	   p.href = "/scene/person?uuid="+parent.uuid
-                           p.birth = datesStr(parent.dates);
-                           vm.parents.push(p);
-
-                       }
-                       var gentext = ['Lapsi','Poika','Tytär'];
-                       for (child of rec.children) {
-                    	   vm.has_children = true;
-                           var c = {uuid:child.uuid};
-                           c.href = "/scene/person?uuid="+child.uuid
-                           c['name'] = parseSortname(child.sortname);
-                    	   c['gender'] = gentext[child.sex];
-                    	   c['birth'] = datesStr(child.dates);
-                    	   vm.children.push(c);
+                               for (parent of rec.parents) {
+                                   var p = {};
+                                   p.uuid = parent.uuid;
+                                   if (p.uuid == uuid) {
+                                	   p.is_self = "itse";
+                                       p.name = ['','',''];
+                                   } else {
+                                       p.name = parseSortname(parent.sortname);
+                                       p.is_self = "";
+                                   }
+                                   p.role = parent.role;
+                                   //if (p.role == 'father')  vm.father_name = p.name;
+                                   //else                     vm.mother_name = p.name;
+                                   p.href = "/scene/person?uuid="+parent.uuid
+                                   p.birth = datesStr(parent.dates, first=false);
+                                   fam.parents.push(p);
+                               }
+                               var gentext = ['Lapsi','Poika','Tytär'];
+                               for (child of rec.children) {
+                                   vm.has_children = true;
+                                   var c = {uuid:child.uuid};
+                                   if (c.uuid == uuid) {
+                                	   c.is_self = "itse";
+                                	   c.name = ['','',''];
+                                   } else {
+                                       c.name = parseSortname(child.sortname);
+                                       c.is_self = "";
+                                   }
+                                   c.href = "/scene/person?uuid="+child.uuid
+                                   c.gender = gentext[child.sex];
+                                   c.birth = datesStr(child.dates, first=false);
+                                   fam.children.push(c);
+                               }
+                               vm.families.push(fam);
+                    	   }
                        }
     			 })
    	   }

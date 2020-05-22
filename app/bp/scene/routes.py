@@ -3,21 +3,24 @@ Created on 12.8.2018
 
 @author: jm
 '''
-import logging 
 import io
-#import os
-import shareds
 import os
+import traceback
+import json
+
+import logging 
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
 
+import shareds
 from flask import send_file, Response, jsonify
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
 
 from ui.user_context import UserContext
+from bl.base import Status
 from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
@@ -371,84 +374,91 @@ def show_family_page(uid=None):
 
 
 @bp.route('/scene/json/families', methods=['POST','GET'])
-def json_get_person_families(uuid=None):
-    """ Get data for a family by its uuid
-        TODO: Get all families for a Person.
+def json_get_person_families():
+    """ Get all families for a Person as json array.
+
+        The first element is childhood family or None, 
+        the others are marriages in time order.
     """
-    import json
+    t0 = time.time()
     try:
-        uuid = request.args.get('uuid', None)
+        args = request.args
+        if args:
+            print(f'got request args: {args}')
+        else:
+            args = json.loads(request.data)
+            print(f'got request data: {args}')
+        uuid = args.get('uuid')
         if not uuid:
-            uuid = json.loads(request.data)['uuid']
-        print(f'got uuid: {uuid}')
-        if not uuid:
-            return jsonify({"records":[], "statusText":"Missing Family key"})
+            return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
+
+        u_context = UserContext(user_session, current_user, request)
+        dbdriver = Neo4jReadDriver(shareds.driver)
+        reader = FamilyReader(dbdriver, u_context) 
+    
+        results = reader.get_person_families(uuid)
+
+        if results.get('status') != 0:
+            return jsonify({"records":[], "statusText":results.get('status')})
+        res = []
+        for family in results['items']:
+            if not family:   # Missing childhood family
+                res.append(None)
+                continue
+
+            fdict = {
+                "rel_type":family.rel_type,
+                "dates": family.dates.to_list(),
+                "id":family.id,
+                "uuid":family.uuid
+            }
+            parents = []
+            if family.father:
+                parent = {
+                    "role":"father",
+                    "sortname":family.father.sortname,
+                    "uuid":family.father.uuid
+                }
+                if family.father.event_birth:
+                    parent['dates'] = family.father.event_birth.dates.to_list()
+                parents.append(parent)
+            if family.mother:
+                parent = {
+                    "role":"mother",
+                    "sortname":family.mother.sortname,
+                    "uuid":family.mother.uuid
+                }
+                if family.mother.event_birth:
+                    parent['dates'] = family.mother.event_birth.dates.to_list()
+                parents.append(parent)
+            fdict['parents'] = parents
+        
+            children = []
+            for ch in family.children:
+                child = {"sex":ch.sex, "sortname":ch.sortname, "uuid":ch.uuid}
+                if ch.event_birth:
+                    child['dates'] = ch.event_birth.dates.to_list()
+                children.append(child)
+            fdict["children"] = children
+
+            events = []
+            for ev in family.events:
+                events.append({"type":ev.type, "id":ev.id, "uuid":ev.uuid})
+            fdict["events"] = events
+            res.append(fdict)
+
     except Exception as e:
-        return jsonify({"records":[], "statusText":"Missing Family key, "+str(e)})
-        #uuid="ea28f1c846714c4dbfb337e61fe770ad"
+        traceback.print_exc()
+        return jsonify({"records":[], "status":Status.ERROR,
+                        "statusText":f"Failed {e.__class__.__name__}"})
 
-    u_context = UserContext(user_session, current_user, request)
-    try:
-        family = Family_combo.get_family_data(uuid, u_context)
-        if not family:
-            return jsonify({"records":[], "statusText":"No family got"})
-        fdict = {
-            "rel_type":family.rel_type,
-            "dates": family.dates.to_list(),
-            "id":family.id,
-             "uuid":family.uuid
-        }
-    except KeyError as e:
-        return jsonify({"records":[], "statusText":str(e)})
-
-    parents = []
-    if family.father:
-        parent = {
-            "role":"father",
-            "sortname":family.father.sortname,
-            "dates":family.father.event_birth.dates.to_list(),
-            "uuid":family.father.uuid
-        }
-        parents.append(parent)
-
-    if family.mother:
-        parent = {
-            "role":"mother",
-            "sortname":family.mother.sortname,
-            "dates":family.mother.event_birth.dates.to_list(),
-            "uuid":family.mother.uuid
-        }
-        parents.append(parent)
-    fdict['parents'] = parents
-
-    children = []
-    for ch in family.children:
-        child = {"sex":ch.sex, "sortname":ch.sortname, "uuid":ch.uuid}
-        if ch.event_birth:
-            child['dates'] = ch.event_birth.dates.to_list()
-        children.append(child)
-    fdict["children"] = children
-
-    events = []
-    for ev in family.events:
-        events.append({"type":ev.type, "id":ev.id, "uuid":ev.uuid})
-    fdict["events"] = events
-
-    logger.info(f"-> bp.scene.routes.show_person_families_json")
-    response = {'records':[fdict], 'statusText':'Löytyi 1 perhe (TESTING)'}
+    t1 = time.time()-t0
+    logger.info(f"-> bp.scene.routes.show_person_families_json n={len(results['items'])} e={t1:.3f}")
+    response = {'records':res, 'statusText':f'Löytyi {len(res)} perhettä (TESTING)'}
     print(json.dumps(response))
     #response.headers['Access-Control-Allow-Origin'] = '*'
-
     return jsonify(response) 
-#     return render_template("/scene/family.html", family=family, ...)
 
-# @bp.route('/pop/family=<int:fid>')
-# def show_family_popup(fid):
-#     """ Small Family pop-up. EXPERIMENTAL
-#     """
-#     #TODO Create a pop-up window; Gen only fewer pieces of data
-#     family = Family_combo.get_family_data(fid)
-#     return render_template("/scene/family_pop.html", family=family)
 
 # ------------------------------ Menu 4: Places --------------------------------
 
@@ -472,20 +482,18 @@ def show_places():
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
 
     results = reader.get_list()
-    #results = db.get_place_list()
 
-#     for p in result.items:
-#         print ("# {} ".format(p))
     logger.info("-> bp.scene.routes.show_places "
-               f"{u_context.owner_or_common()} n={len(results.items)}")
-    return render_template("/scene/places.html", places=results.items, menuno=4,
-                           user_context=u_context, elapsed=time.time()-t0)
+               f"{u_context.owner_or_common()} n={len(results['items'])}")
+    return render_template("/scene/places.html", places=results['items'], 
+                           menuno=4, user_context=u_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/location/uuid=<locid>')
 def show_place(locid):
     """ Home page for a Place, shows events and place hierarchy.
     """
+    t0 = time.time()
     try:
         u_context = UserContext(user_session, current_user, request)
         dbdriver = Neo4jReadDriver(shareds.driver)
@@ -494,16 +502,15 @@ def show_place(locid):
         results = reader.get_with_events(locid)
 
     except KeyError as e:
-        import traceback
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in hierarchy:         print (f"# {p} ")
-#     for e in events:            print (f"# {e} {e.description}")
-#     for u in place.notes:       print (f"# {u} ")
-    logger.info(f"-> bp.scene.routes.show_place {u_context.owner_or_common()} n={len(results.events)}")
-    return render_template("/scene/place_events.html", place=results.items, 
-                           pl_hierarchy=results.hierarchy,
-                           user_context=u_context, events=results.events)
+
+    logger.info(f"-> bp.scene.routes.show_place {u_context.owner_or_common()} n={len(results['events'])}")
+    return render_template("/scene/place_events.html", 
+                           place=results['place'], 
+                           pl_hierarchy=results['hierarchy'],
+                           events=results['events'],
+                           user_context=u_context, elapsed=time.time()-t0)
 
 # ------------------------------ Menu 5: Sources --------------------------------
 
@@ -521,6 +528,7 @@ def show_sources(series=None):
     """
     print(f"--- {request}")
     print(f"--- {user_session}")
+    t0 = time.time()
     # Set context by owner and the data selections
     u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
@@ -533,11 +541,12 @@ def show_sources(series=None):
         u_context.series = series
     try:
         results = reader.get_source_list()
+
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info(f"-> bp.scene.routes.show_sources by={u_context.series} c={len(results.items)}")
-    return render_template("/scene/sources.html", sources=results.items, 
-                           user_context=u_context)
+    logger.info(f"-> bp.scene.routes.show_sources by={u_context.series} c={len(results['items'])}")
+    return render_template("/scene/sources.html", sources=results['items'], 
+                           user_context=u_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/source', methods=['GET'])
@@ -558,13 +567,13 @@ def show_source_page(sourceid=None):
         #source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info(f"-> bp.scene.routes.show_source_page n={len(results.citations)}")
+    logger.info(f"-> bp.scene.routes.show_source_page n={len(results['citations'])}")
 #     for c in results.citations:
 #         for i in c.citators:
 #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
 #             else:               print(f'{c} – person {i} {i.sortname}')
-    return render_template("/scene/source_events.html", source=results.items,
-                           citations=results.citations, user_context=u_context)
+    return render_template("/scene/source_events.html", source=results['item'],
+                           citations=results['citations'], user_context=u_context)
 
 # ------------------------------ Menu 6: Media --------------------------------
 

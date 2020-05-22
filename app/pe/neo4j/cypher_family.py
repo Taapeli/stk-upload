@@ -35,6 +35,7 @@ OPTIONAL MATCH (f) -[:CHILD]- (pc:Person)
 RETURN pc AS person, nc AS name, cbe AS birth, cde AS death
     ORDER BY cbe.date1"""
 
+# Not in use:
     get_family_events = """
 MATCH (f:Family) -[:EVENT]-> (fe:Event) WHERE ID(f) = $fuid
 OPTIONAL MATCH (fe) -[:PLACE]-> (fep:Place)
@@ -84,3 +85,11 @@ RETURN //f,
     // COUNT(DISTINCT pc) AS no_of_children,
     COLLECT(DISTINCT [re, s, c]) + COLLECT(DISTINCT [fre, fs, fc]) AS sources,
     COLLECT(DISTINCT note) AS note"""
+    
+    get_person_families = """
+MATCH (p:Person) <-- (family:Family) WHERE p.uuid = $p_uuid
+MATCH (family) -[r]-> (person:Person)
+OPTIONAL MATCH (person) -[:EVENT]-> (birth:Event {type:'Birth'}) 
+RETURN family, TYPE(r) AS type, r.role AS role, person, birth 
+ORDER BY family, person.birth_high"""
+

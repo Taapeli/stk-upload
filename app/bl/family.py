@@ -10,7 +10,7 @@ Components moved 15.5.2020 from
 '''
 import  shareds
 
-from .base import NodeObject #, Status
+from .base import NodeObject, Status
 from pe.db_reader import DBreader
 
 from models.gen.dates import DateRange
@@ -53,8 +53,8 @@ class Family(NodeObject):
         '''
         Transforms a db node to an object of type Family.
         
-        You can create a Family or Family_combo instance. (cls is the class 
-        where we are, either Family or Family_combo)
+        You can create a Family or FamilyBl instance. (cls is the class 
+        where we are, either Family or FamilyBl)
         
         <Node id=99991 labels={'Family'} 
             properties={'rel_type': 'Married', 'handle': '_da692e4ca604cf37ac7973d7778', 
@@ -126,7 +126,7 @@ class FamilyReader(DBreader):
         - Returns a Result object which includes the tems and eventuel error object.
     '''
     
-    def get_family_data(self, uuid:str, groups="all"):
+    def get_family_data(self, uuid:str, wanted=[]):
         """ Read Family information including Events, Children, Notes and Sources.
 
             Returns a dict {item:Family, status=0, statustext:None}
@@ -136,7 +136,7 @@ class FamilyReader(DBreader):
                 - Status.NOT_FOUND = 1
                 - Status.ERROR = 2
             
-            Ther groups parameter is a string of short keywords separated by ':'.
+            Ther wanted parameter is a string of short keywords separated by ':'.
             
             Operations path
             1) read 
@@ -153,39 +153,38 @@ class FamilyReader(DBreader):
                 (pc:Person) --> (pce:Event) --> (:Place)
 
             3) build
-                Family_combo.mother, .names, event_birth, event_death
-                Family_combo.father, .names, event_birth, event_death
-                Family_combo.events
-                Family_combo.notes
-                Family_combo.sources / citation -> source -> repocitory ?
-                Family_combo.children, .names, event_birth, event_death
+                FamilyBl.mother, .names, event_birth, event_death
+                FamilyBl.father, .names, event_birth, event_death
+                FamilyBl.events
+                FamilyBl.notes
+                FamilyBl.sources / citation -> source -> repocitory ?
+                FamilyBl.children, .names, event_birth, event_death
         """
 
-        # Select data by groups parameter like 'pare:name:even:plac':
+        # Select data by wanted parameter like 'pare:name:even:plac':
         
         # all - all data
-        select_all = 'all' in groups
-        # pa - Parents (mother, father)
-        select_parents  = select_all or 'pare' in groups
-        # ch - Children
-        select_children = select_all or 'chil' in groups
-        # pe - Person names (for parents, children)
-        select_names    = select_all or 'name' in groups
-        # ev - Events
-        select_events   = select_all or 'even' in groups
-        # pl - Places (for events)
-        select_places   = select_all or 'plac' in groups
-        # no - Notes
-        select_notes    = select_all or 'note' in groups
-        # so - Sources (Citations, Sources, Repositories)
-        select_sources  = select_all or 'sour' in groups
-#         # me - Media
-#         select_media  = select_all or 'medi' in groups
-
+        select_all = 'all' in wanted
+        if not wanted:  select_all = True
+        # pare - Parents (mother, father)
+        select_parents  = select_all or 'pare' in wanted
+        # chil - Children
+        select_children = select_all or 'chil' in wanted
+        # name - Person names (for parents, children)
+        select_names    = select_all or 'name' in wanted
+        # even - Events
+        select_events   = select_all or 'even' in wanted
+        # plac - Places (for events)
+        select_places   = select_all or 'plac' in wanted
+        # note - Notes
+        select_notes    = select_all or 'note' in wanted
+        # soour - Sources (Citations, Sources, Repositories)
+        select_sources  = select_all or 'sour' in wanted
+        ## medi - Media
+        #select_media  = select_all or 'medi' in wanted
         """
             1. Get Family node by user/common
-
-            res is dict {item, status, statustext}
+               res is dict {item, status, statustext}
         """
         res = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
         family = res.get('item')
@@ -196,11 +195,9 @@ class FamilyReader(DBreader):
             return results
         # The Nodes for search of Sources and Notes (Family and Events)
         src_list = [family.uniq_id]
-
         """
             2. Get Parent nodes [optionally] with default Name
-
-            res is dict {items, status, statustext}
+               res is dict {items, status, statustext}
         """
         if select_parents:
             res = self.dbdriver.dr_get_family_parents(family.uniq_id, 
@@ -210,11 +207,9 @@ class FamilyReader(DBreader):
                 if self.use_user:           p.too_new = False
                 if p.role == 'father':      family.father = p
                 elif p.role == 'mother':    family.mother = p
-
         """
             3. Get Child nodes [optionally] with Birth and Death nodes
-
-            res is dict {items, status, statustext}
+               res is dict {items, status, statustext}
         """
         if select_children:
             res = self.dbdriver.dr_get_family_children(family.uniq_id,
@@ -226,11 +221,9 @@ class FamilyReader(DBreader):
                 if self.use_user:   p.too_new = False
                 if p.too_new:       family.num_hidden_children += 1
                 family.children.append(p)
-
         """
             4. Get family Events node with Places
-
-            res is dict {items, status, statustext}
+               res is dict {items, status, statustext}
         """
         if select_events:
             res = self.dbdriver.dr_get_family_events(family.uniq_id, 
@@ -238,7 +231,6 @@ class FamilyReader(DBreader):
             for e in res.get('items'):
                 family.events.append(e)
                 src_list.append(e.uniq_id)
-
         """
             5 Get family and event Sources Citations and Repositories
               optionally with Notes
@@ -247,7 +239,6 @@ class FamilyReader(DBreader):
             res = self.dbdriver.dr_get_family_sources(src_list)
             for s in res.get('items'):
                 family.sources.append(s)
-
         """
             6 Get Notes for family and events
         """
@@ -257,6 +248,32 @@ class FamilyReader(DBreader):
                 family.sources.append(s)
 
         return results
+
+
+    def get_person_families(self, uuid:str):
+        """ Get all families for given person.
+
+            Result 'items' is a list's first element is childhood family or None,
+            followed by those families where original person is a parent.
+        """
+        fam_as_child = None     # The family born in
+        fam_as_parent = []      # Other families by marriage
+
+        res = self.dbdriver.dr_get_person_families(uuid)
+        families = res.get('items')
+        if len(families) > 0:
+            for family in families:
+                if family.role == 'child':
+                    fam_as_child = family
+                else:
+                    fam_as_parent.append(family)
+            fam_as_parent.sort(key=lambda x: x.dates)
+            
+            return {"items":[fam_as_child] + fam_as_parent, "status":Status.OK}
+        else:
+            return {"items":[], "status":Status.NOT_FOUND, 
+                    "statustext": 'This person has no families'}
+
 
     # The followind may be obsolete
 

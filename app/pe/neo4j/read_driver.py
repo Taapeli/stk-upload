@@ -208,7 +208,7 @@ class Neo4jReadDriver:
 
             except Exception as e:
                 return {"status":Status.ERROR, 
-                        "statustext": f'Error get_family_data: {e}'}     
+                        "statustext": f'Error dr_get_family_parents: {e}'}     
     
         return {"items":parents, "status":Status.OK, "statustext":""}
 
@@ -248,7 +248,7 @@ class Neo4jReadDriver:
 
             except Exception as e:
                 return {"status":Status.ERROR, 
-                        "statustext": f'Error get_family_children: {e}'}     
+                        "statustext": f'Error dr_get_family_children: {e}'}     
 
         return {"items":children, "status":Status.OK}
 
@@ -316,7 +316,7 @@ class Neo4jReadDriver:
 
             except Exception as e:
                 return {"status":Status.ERROR, 
-                        "statustext": f'Error get_family_children: {e}'}     
+                        "statustext": f'Error dr_get_family_events: {e}'}     
 
         return {"items":events, "status":Status.OK}
 
@@ -366,12 +366,12 @@ class Neo4jReadDriver:
 
             except Exception as e:
                 return {"status":Status.ERROR, 
-                        "statustext": f'Error get_family_sources: {e}'}     
+                        "statustext": f'Error dr_get_family_sources: {e}'}     
 
         return {"items":sources, "status":Status.OK}
 
 
-    def dr_get_family_notes(self, id_list:list): #, with_notes=True)
+    def dr_get_family_notes(self, id_list:list):
         """
             Get Notes for family and events
             The id_list should include the uniq_ids for Family and events Events
@@ -404,9 +404,77 @@ class Neo4jReadDriver:
                         
             except Exception as e:
                 return {"status":Status.ERROR, 
-                        "statustext": f'Error get_family_notes: {e}'}     
+                        "statustext": f'Error dr_get_family_notes: {e}'}     
 
         return {"items":notes, "status":Status.OK}
+
+
+    def dr_get_person_families(self, uuid):
+        """
+            Get Notes for family and events
+            The id_list should include the uniq_ids for Family and events Events
+
+            returns dict {items, status, statustext}
+        """
+        families = {}
+        with self.driver.session() as session:
+            try:
+                result = session.run(CypherFamily.get_person_families, 
+                                     p_uuid=uuid)
+                for record in result:
+                    #<Record 
+                    #    family=<Node id=552768 labels={'Family'}
+                    #        properties={'datetype': 3, 'father_sortname': 'Åkerberg#Mathias#Andersson',
+                    #            'change': 1585409700, 'rel_type': 'Married', 'mother_sortname': 'Unonius#Catharina Ulrica#',
+                    #            'id': 'F0011', 'date2': 1842189, 'date1': 1834016, 'uuid': '01ddf9439408445fb725d580e060c02a'}>
+                    #    type='PARENT'
+                    #    role='father'
+                    #    person=<Node id=547514 labels={'Person'}
+                    #        properties={'sortname': 'Åkerberg#Mathias#Andersson', 'death_high': 1831, 'confidence': '2.6', 
+                    #            'sex': 1, 'change': 1585409697, 'birth_low': 1750, 'birth_high': 1750, 'id': 'I0022', 
+                    #            'uuid': '265b22a5a1544ce2b66371fa195f9d89', 'death_low': 1831}>
+                    #    birth=<Node id=539796 labels={'Event'}
+                    #        properties={'datetype': 0, 'change': 1585409700, 'description': '', 'id': 'E0238', 
+                    #            'date2': 1792123, 'type': 'Birth', 'date1': 1792123, 'uuid': 'f6d314f7e47a431e9a7df5bbdd090fa7'}>
+                    # >
+                    family_node = record['family']
+                    fid = family_node.id
+                    if not fid in families:
+                        # New family
+                        family = FamilyBl.from_node(family_node)
+                        families[fid] = family
+                    family = families[fid]
+                    person_node = record['person']
+                    person = Person_combo.from_node(person_node)
+                    birth_node = record['birth']
+                    if birth_node:
+                        birth = Event_combo.from_node(birth_node)
+                        person.event_birth = birth
+                    if record['type'] == 'PARENT':
+                        person.role = record['role']
+                        if person.role == 'father':
+                            family.father = person
+                        else:
+                            family.mother = person
+                        if uuid == person.uuid:
+                            family.role = 'parent'
+                            print(f'# Family {family.id} {family.role} --> {person.id}')
+                    else:
+                        person.role = "child"
+                        family.children.append(person)
+                        if uuid == person.uuid:
+                            family.role = 'child'
+                            print(f'# Family {family.id} {family.role} --> {person.id}')
+                    
+                if not families:
+                    return {"status":Status.NOT_FOUND, 
+                            "statustext": f'No families for this person'}
+
+            except Exception as e:
+                return {"status":Status.ERROR, 
+                        "statustext": f'Error dr_get_person_families: {e}'}     
+
+        return {"items":list(families.values()), "status":Status.OK}
 
 
     def dr_get_place_list_fw(self, user, fw_from, limit, lang='fi'):
@@ -468,6 +536,7 @@ class Neo4jReadDriver:
         """ Returns the PlaceBl with PlaceNames, Notes and Medias included.
         """
         pl = None
+        node_ids = []   # List of uniq_is for place, name, note and media nodes 
         with self.driver.session() as session:
             if user == None: 
                 result = session.run(CypherPlace.get_common_w_names_notes,
@@ -494,26 +563,24 @@ class Neo4jReadDriver:
                 # Default lang name
                 name_node = record["name"]
                 pl.name = PlaceName.from_node(name_node)
+                node_ids.append(pl.uniq_id)
                 # Other name versions
                 for name_node in record["names"]:
                     pl.names.append(PlaceName.from_node(name_node))
+                    node_ids.append(pl.names[-1].uniq_id)
 
                 for notes_node in record['notes']:
                     n = Note.from_node(notes_node)
                     pl.notes.append(n)
+                    node_ids.append(pl.names[-1].uniq_id)
 
                 for medias_node in record['medias']:
                     m = Media.from_node(medias_node)
+                    #Todo: should replace pl.media_ref[] <-- pl.medias[]
                     pl.media_ref.append(m)
+                    node_ids.append(pl.names[-1].uniq_id)
 
-        return pl
-#                 if not (pl.type and pl.id):
-#                     logger.error(f"Place_combo.read_w_notes: missing data for {pl}")
-#         try:
-#             return pl
-#         except Exception:
-#             logger.error(f"Place_combo.read_w_notes: no Place with uuid={uuid}") 
-#             return None
+        return {"place":pl, "uniq_ids":node_ids}
 
 
     def dr_get_place_tree(self, locid, lang="fi"):

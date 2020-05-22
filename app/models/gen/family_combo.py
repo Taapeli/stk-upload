@@ -98,13 +98,13 @@ RETURN extract(x IN relationships |
 
     def get_family_events(self):
         """ Luetaan perheen tapahtumien tiedot """
-                        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (family:Family)-[r:EVENT]->(event:Event)
-  WHERE ID(family)=$pid
-RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+        raise(NotImplementedError, "models.gen.family_combo.Family_combo.find_family_for_event poistettu 17.5.2020")                        
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (family:Family)-[r:EVENT]->(event:Event)
+#   WHERE ID(family)=$pid
+# RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
+#         return  shareds.driver.session().run(query, {"pid": pid})
 
     @staticmethod
     def find_family_for_event(event_uniq_id):
@@ -112,15 +112,16 @@ RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
 
             NOT IN USE. For models.datareader.get_source_with_events
         """                
-        query = """
-MATCH (family:Family)-[r:EVENT]->(event)
-  WHERE ID(event)=$pid
-RETURN family"""
-        result = shareds.driver.session().run(query, pid=event_uniq_id)
-        for record in result:
-            f = Family_combo.from_node(record[0])
-            return f
-        raise LookupError(f"Family {event_uniq_id} not found")
+        raise(NotImplementedError, "models.gen.family_combo.Family_combo.find_family_for_event poistettu 17.5.2020")
+#         query = """
+# MATCH (family:Family)-[r:EVENT]->(event)
+#   WHERE ID(event)=$pid
+# RETURN family"""
+#         result = shareds.driver.session().run(query, pid=event_uniq_id)
+#         for record in result:
+#             f = Family_combo.from_node(record[0])
+#             return f
+#         raise LookupError(f"Family {event_uniq_id} not found")
     
     def get_family_data_by_id(self):
         """ Luetaan perheen tiedot.
@@ -388,7 +389,10 @@ RETURN family"""
 
     @staticmethod       
     def get_families(o_context, opt='father', limit=100):
-        """ Find families from the database """
+        """ Find families from the database 
+        
+            from /scene/families, tools: /listall/families
+        """
 
         # Import here to handle circular dependency 
         from .person_combo import Person_as_member
@@ -533,8 +537,7 @@ RETURN family"""
         return families
 
     
-#     @staticmethod       
-#     def get_all_families():
+#     def get_all_families():# @staticmethod Not in use
 #         """ Find all families from the database - not in use!
 #         """
 #         
@@ -579,8 +582,7 @@ RETURN family"""
 #                 families.append(family)
 #         return (families)
     
-#     @staticmethod       
-#     def get_own_families(user=None):
+#     def get_own_families(user=None):# @staticmethod Not in use
 #         """ Find all families from the database - not in use!
 #         """
 #         
@@ -654,64 +656,60 @@ RETURN family"""
 #         
 #         return (families)
 
+#     def get_marriage_parent_names(event_uniq_id): # @staticmethod  not in use
+#         """ 
+#         Find the parents and all their names.
+# 
+#         Called from models.datareader.get_source_with_events
+#     
+#         Returns a dictionary like 
+#         {'father': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
+#         
+#         TODO: Return list, not dictionary. Any not used fields?
+#         ╒════════╤═════╤═══════════════════════════════════════════════════╕
+#         │"frole" │"pid"│"names"                                            │
+#         ╞════════╪═════╪═══════════════════════════════════════════════════╡
+#         │"father"│73538│[{"alt":"","firstname":"Carl","type":"Birth Name","│
+#         │        │     │suffix":"","surname":"Forstén"}]                   │
+#         ├────────┼─────┼───────────────────────────────────────────────────┤
+#         │"mother"│73540│[{"alt":"","firstname":"Catharina Margareta","type"│
+#         │        │     │:"Birth Name","suffix":"","surname":"Stenfeldt"},{"│
+#         │        │     │alt":"1","firstname":"Catharina Margareta","type":"│
+#         │        │     │Also Known As","suffix":"","surname":"Forstén"}]   │
+#         └────────┴─────┴───────────────────────────────────────────────────┘
+#         """
+#                          
+#         result = shareds.driver.session().run(Cypher_family.get_wedding_couple_names, 
+#                                               eid=event_uniq_id)
+#         namedict = {}
+#         for record in result:
+#             # <Record frole='father' pid=320750 
+#             #    names=[
+#             #        <Node id=320751 labels={'Name'} 
+#             #            properties={'firstname': 'Carl Gustaf', 'type': 'Birth Name',
+#             #                'suffix': '', 'surname': 'Swan', 'prefix': '', 'order': 0}>, 
+#             #        <Node id=320752 labels={'Name'} properties={'firstname': 'Karl Gustaf', ...}>
+#             #    ]
+#             # >
+#             role = record['frole']
+#             names = []
+#             for name in record['names']:
+#                 fn = name['firstname']
+#                 sn = name['surname']
+#                 pn = name['suffix']
+#                 names.append("{} {} {}".format(fn, pn, sn))
+#             namedict[role] = ' • '.join(names)
+#         return namedict
 
-    @staticmethod       
-    def get_marriage_parent_names(event_uniq_id):
-        """ 
-        Find the parents and all their names.
-
-        Called from models.datareader.get_source_with_events
-    
-        Returns a dictionary like 
-        {'father': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
-        
-        TODO: Return list, not dictionary. Any not used fields?
-        ╒════════╤═════╤═══════════════════════════════════════════════════╕
-        │"frole" │"pid"│"names"                                            │
-        ╞════════╪═════╪═══════════════════════════════════════════════════╡
-        │"father"│73538│[{"alt":"","firstname":"Carl","type":"Birth Name","│
-        │        │     │suffix":"","surname":"Forstén"}]                   │
-        ├────────┼─────┼───────────────────────────────────────────────────┤
-        │"mother"│73540│[{"alt":"","firstname":"Catharina Margareta","type"│
-        │        │     │:"Birth Name","suffix":"","surname":"Stenfeldt"},{"│
-        │        │     │alt":"1","firstname":"Catharina Margareta","type":"│
-        │        │     │Also Known As","suffix":"","surname":"Forstén"}]   │
-        └────────┴─────┴───────────────────────────────────────────────────┘
-        """
-                         
-        result = shareds.driver.session().run(Cypher_family.get_wedding_couple_names, 
-                                              eid=event_uniq_id)
-        namedict = {}
-        for record in result:
-            # <Record frole='father' pid=320750 
-            #    names=[
-            #        <Node id=320751 labels={'Name'} 
-            #            properties={'firstname': 'Carl Gustaf', 'type': 'Birth Name',
-            #                'suffix': '', 'surname': 'Swan', 'prefix': '', 'order': 0}>, 
-            #        <Node id=320752 labels={'Name'} properties={'firstname': 'Karl Gustaf', ...}>
-            #    ]
-            # >
-            role = record['frole']
-            names = []
-            for name in record['names']:
-                fn = name['firstname']
-                sn = name['surname']
-                pn = name['suffix']
-                names.append("{} {} {}".format(fn, pn, sn))
-            namedict[role] = ' • '.join(names)
-        return namedict
-
-
-    def get_parent_by_id(self, role='father'):
-        """ Luetaan perheen isän (tai äidin) tiedot """
-                        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (family:Family) -[r:PARENT]-> (person:Person)
-  WHERE ID(family)=$pid and r.role = $role
-RETURN ID(person) AS father"""
-        return  shareds.driver.session().run(query, pid=pid, role=role)
-
+#     def get_parent_by_id(self, role='father'): # Not in use
+#         """ Luetaan perheen isän (tai äidin) tiedot """
+#                         
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (family:Family) -[r:PARENT]-> (person:Person)
+#   WHERE ID(family)=$pid and r.role = $role
+# RETURN ID(person) AS father"""
+#         return  shareds.driver.session().run(query, pid=pid, role=role)
 
 #     def get_mother_by_id(self):
 #         """ Luetaan perheen äidin tiedot """
@@ -737,9 +735,6 @@ RETURN ID(person) AS father"""
             for i in range(len(self.childref_hlink)):
                 print ("Childref_hlink: " + self.childref_hlink[i])
         return True
-
-     
-     
 
 
 #    @staticmethod       

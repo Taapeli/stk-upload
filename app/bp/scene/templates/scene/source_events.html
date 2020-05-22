@@ -25,12 +25,32 @@ td.Citation div ol {padding-top:.3em;}
                   <span class="typedesc">{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
                   {{ _('in the repository') }} <b>{{repo.rname}}</b></p>
 {% endfor %}
-               <p>{{ _("Identifiers") }} {{macro.all_obj_ids(source)}}</p>
-{% if source.notes %}
-	            <ul>{% for note in source.notes %}
-	                <li>{{ macro.notelink(note) }}</li>
-	            {% endfor %}</ul>
+            <table><tbody>
+                <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="Value">{{macro.all_obj_ids(source)}}</td>
+                    <td></td>
+                </tr>
+                <tr><td></td></tr>
+{% if source.sauthor or source.spubinfo %}
+                <tr><td class="ColumnAttribute">{{ _("Author") }}</td>
+                    <td class="Value">{{source.sauthor}}</td>
+                    <td></td>
+                </tr>
+                <tr><td class="ColumnAttribute">{{ _("Publishing info") }}</td>
+                    <td class="Value">{{source.spubinfo}}</td>
+                    <td></td>
+                </tr>
 {% endif %}
+<!--                <p>{{ _("Identifiers") }} {{macro.all_obj_ids(source)}}</p> -->
+{% if source.notes %}
+	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
+                    <td class="Value"><ul>
+    {% for note in source.notes %}
+	                   <li>{{ macro.notelink(note) }}</li>
+	{% endfor -%}
+                    </ul>
+{% endif %}
+            </tbody></table>
 	        </div>
 
 	        <div class="subsection" id="citations">

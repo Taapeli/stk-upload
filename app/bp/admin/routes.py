@@ -57,7 +57,7 @@ def clear_db(opt):
     try:
         updater = DataAdmin(current_user)
         msg =  updater.db_reset(opt) # dbutil.alusta_kanta()
-        logger.info(f"-> bp.admin.routes.admin {opt}")
+        logger.info(f"-> bp.admin.routes.clear_db {opt}")
         return render_template("/admin/talletettu.html", text=msg)
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -98,7 +98,7 @@ def clear_empty_batches():
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
         
-    logger.info(f"-> bp.admin.routes.clear_empty_batches, clear={clear}")
+    logger.info(f"-> bp.admin.routes.clear_empty_batches/{'clean' if clear else 'show'}")
     return render_template("/admin/batch_clear.html", uploads=batches,  
                            user=user, removed=cnt)
 
@@ -133,9 +133,10 @@ def refnames():
 def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
-    message = dataupdater.set_person_name_properties(ops=['refname']) or _('Done')
-    logger.info(f"-> bp.admin.routes.set_all_person_refnames {message}")
-    return render_template("/admin/talletettu.html", text=message, uri=dburi)
+    (refname_count, _sortname_count) = dataupdater.set_person_name_properties(ops=['refname']) or _('Done')
+    logger.info(f"-> bp.admin.routes.set_all_person_refnames n={refname_count}")
+    return render_template("/admin/talletettu.html", uri=dburi, 
+                           text=f'Updated {_sortname_count} person sortnames, {refname_count} refnames')
 
 @bp.route('/admin/upload_csv', methods=['POST'])
 @login_required
@@ -146,11 +147,11 @@ def upload_csv():
     try:
         infile = request.files['filenm']
         material = request.form['material']
-        logging.info(f"-> bp.admin.routes.upload_csv sel={material} f='{infile.filename}'")
+        logging.info(f"-> bp.admin.routes.upload_csv/{material} f='{infile.filename}'")
 
         loadfile.upload_file(infile)
         if 'destroy' in request.form and request.form['destroy'] == 'all':
-            logger.warning("-> bp.admin.routes.upload_csv deleting all previous Refnames")
+            logger.info("-> bp.admin.routes.upload_csv/delete_all_Refnames")
             datareader.recreate_refnames()
 
     except Exception as e:
@@ -165,7 +166,7 @@ def save_loaded_csv(filename, subj):
     """ Save loaded cvs data to the database """
     pathname = loadfile.fullname(filename)
     dburi = dbutil.get_server_location()
-    logging.info(f"-> bp.admin.routes.save_loaded_csv sel={subj} f='{filename}'")
+    logging.info(f"-> bp.admin.routes.save_loaded_csv/{subj} f='{filename}'")
     try:
         if subj == 'refnames':    # Stores Refname objects
             status = load_refnames(pathname)
@@ -219,7 +220,7 @@ def update_allowed_email(email):
 #                 created_at = form.created.data,
 #                 confirmed_at = form.confirmed_at.data) 
         _updated_allowed_email = UserAdmin.update_allowed_email(allowed_email)
-        logging.info(f"-> bp.admin.routes.list_allowed_emails u={email}")
+        logging.info(f"-> bp.admin.routes.update_allowed_email u={email}")
         flash(_("Allowed email updated"))
         return redirect(url_for("admin.update_allowed_email", email=form.email.data))
 
@@ -385,7 +386,7 @@ def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
     msg = open(fname, encoding="utf-8").read()
-    logger.info(f"-> bp.admin.routes.show_upload_log f={xmlfile}")
+    logger.info(f"-> bp.admin.routes.show_upload_log")
     return render_template("/admin/load_result.html", msg=msg)
 
 
@@ -586,6 +587,8 @@ def add_access():
     print(data)
     username = data.get("username")
     batchid = data.get("batchid")
+    #TODO Should log the batch owner, not batchid?
+    logger.info(f"-> bp.admin.routes.add_access u={username} batch={batchid}")
     rsp = UserAdmin.add_access(username,batchid)
     print(rsp)
     print(rsp.get("r"))
@@ -597,6 +600,7 @@ def add_access():
 def delete_accesses():
     data = json.loads(request.data)
     print(data)
+    logger.info(f"-> bp.admin.routes.delete_accesses u={username} batch={batchid}")
     rsp = UserAdmin.delete_accesses(data)
     return jsonify(rsp)
 

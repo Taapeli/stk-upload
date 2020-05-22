@@ -83,19 +83,20 @@ div#events div.scrollbox {
                     <td class="Value">{{macro.all_obj_ids(place)}}</td>
                     <td></td>
                 </tr>
+    {% if place.notes %}
+                <tr><td class="ColumnAttribute">{{ _('Notes') }}</td>
+                    <td class="Value"><ul>
+         {% for note in place.notes %}
+                        <li><span class="typedesc">{{ note.type|transl('notet') }}</span>
+                            {{ macro.notelink(note) }}</li>
+        {% endfor %}
+                    </ul></td>
+                </tr>
+    {% endif %}
+            </div>
+        </div>
             </tbody></table>
         </div>
-    {% if place.notes %}
-        <div id="notes">
-            <h4>{{ _('Notes') }}</h4>
-         {% for note in place.notes %}
-            <div class="grampsstylednote">
-                 <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
-                    {{ macro.notelink(note) }}</p>
-            </div>
-        {% endfor %}
-        </div>
-    {% endif %}
 
     {% if place.noteref_hlink %}
         <div id="notes">

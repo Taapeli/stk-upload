@@ -3,6 +3,7 @@ Created on 17.3.2020
 
 @author: jm
 '''
+from bl.base import Status
 #import traceback
 from models.gen.person_combo import Person_combo
 
@@ -64,7 +65,7 @@ class DBreader:
     def get_source_with_references(self, uuid, u_context):
         """ Read the source, repository and events etc referencing this source.
         
-            Returns a SourceResult object, where items = SourceDb object.
+            Returns a dictionary, where items = SourceDb object.
             - item.notes[]      Notes connected to Source
             - item.repositories Repositories for Source
             - item.citations    Citating Persons, Events, Families and Medias
@@ -72,13 +73,14 @@ class DBreader:
                                 
         """
         source = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
-        source_result = SourceResult(source)
+        results = {'item':source, 'status':Status.OK}
         if not source:
-            source_result.error = f"DBreader.get_source_with_references: {self.use_user} - no Source with uuid={uuid}"
-            return source_result
+            results = {'status':Status.NOT_FOUND, 'statustext':f"Source with uuid={uuid}"}
+            return results
         
         citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
 
+        citations = []
         for c_id, c in citations.items():
             if c_id in notes:
                 c.notes = notes[c_id]
@@ -91,9 +93,10 @@ class DBreader:
                 else:
                     print(f'DBreader.get_source_with_references: hide {target}')
 
-            source_result.citations.append(c)
+            citations.append(c)
+        results['citations':citations]
 
-        return source_result
+        return results
 
 
 # ------------------------------ Result sets ----------------------------------
@@ -106,35 +109,6 @@ class BaseResult:
         self.num_hidden = num_hidden
         self.items = items
 
-class SourceResult(BaseResult):
-    ''' Source's result object.
-    '''
-    def __init__(self, items=[]):
-        BaseResult.__init__(self, items)
-        self.citations = []    # Events etc referencing the selected source
-
-class PlaceResult(BaseResult):
-    ''' Place's result object.
-    '''
-    def __init__(self, items=[]):
-        BaseResult.__init__(self, items)
-        self.hierarchy = []    # Hirearchy tree
-        self.events = []       # Events for selected place
-
-    def __str__(self):
-        if self.error:
-            return f"ERROR {self.error}"
-        if isinstance(self.items, list):
-            n = len(self.items)
-        else:
-            n = 1
-        return f"n={n} events={len(self.events)} hidden={self.num_hidden}"
-
-# class FamilyResult(BaseResult):
-#     ''' Person's result object is a dict {item:Family, status=0, statustext:None}
-#     '''
-#     def __init__(self, items=[], num_hidden=0):
-#         BaseResult.__init__(self, items, num_hidden)
 
 class PersonResult(BaseResult):
     ''' Person's result object.
