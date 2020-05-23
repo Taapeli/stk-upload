@@ -194,7 +194,7 @@ def stat_app():
 def stat_upload():
     """Statistics about stk uploads.
     """
-    logdir = "/home/juha/projs/Taapeli/stk-upload/uploads/*"
+    logdir = "uploads/*"
 
     t0 = time.time()
     msg     = check_regexp_option("msg")
