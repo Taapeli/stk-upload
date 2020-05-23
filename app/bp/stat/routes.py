@@ -133,11 +133,12 @@ def stat_home():
 def stat_app():
     """Statistics about stk application usage.
     """
+    logdir = shareds.app.config['STK_LOGDIR']
 
     t0 = time.time()
     msg     = check_regexp_option("msg")
     users   = check_regexp_option("users")
-    maxlev  = safe_get_request("maxlev", 2)
+    maxdepth  = safe_get_request("maxdepth", 2)
     topn    = safe_get_request("topn", 42)
     bycount = request.args.get("bycount", None)
     cumul   = request.args.get("cumul", None)
@@ -149,13 +150,13 @@ def stat_app():
         "topn"   : topn,
         "msg"    : msg,
         "users"  : users,
-        "maxlev" : maxlev,
+        "maxdepth" : maxdepth,
         "logs"   : logs,        # used before logreader to filter logfiles
+        "logdir" : logdir,
         "bycount": bycount,
         "cumul"  : cumul,
     }
     # print(f"{opts}")
-    logdir = shareds.app.config['STK_LOGDIR']
     logfiles = get_logfiles(logdir,
                             shareds.app.config['STK_LOGFILE'],
                             patterns = logs)
@@ -178,59 +179,71 @@ def stat_app():
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
     return render_template("/stat/appstat.html",
+                           h2      = "Application usage statistics",
+                           caller  = "/stat/appstat",
                            res     = res,
                            opts    = opts,
                            elapsed = elapsed )
 
 
-# ################################################################
-# #
-# @bp.route('/stat/uploadstat', methods = ['GET', 'POST'])
-# @login_required
-# @roles_accepted('admin')
-# def stat_upload():
-#     """Statistics about material uploading.
-#     """
+################################################################
+#
+@bp.route('/stat/uploadstat', methods = ['GET', 'POST'])
+@login_required
+@roles_accepted('admin')
+def stat_upload():
+    """Statistics about stk uploads.
+    """
+    logdir = "/home/juha/projs/Taapeli/stk-upload/uploads/*"
 
-#     t0 = time.time()
+    t0 = time.time()
+    msg     = check_regexp_option("msg")
+    users   = check_regexp_option("users")
+    maxdepth  = safe_get_request("maxdepth", 2)
+    topn    = safe_get_request("topn", 42)
+    bycount = request.args.get("bycount", None)
+    cumul   = request.args.get("cumul", None)
+    logs    = request.args.get("logs", "")
 
-#     users   = check_regexp_option("users")
-#     msg     = check_regexp_option("msg")     # ...took the place of width in UI
-#     # width   = safe_get_request("width", 70) # no way to set this in UI...
-#     topn    = safe_get_request("topn", 42)
-#     bycount = request.args.get("bycount", None)
-#     style   = request.args.get("style", "text")
-#     logs    = request.args.get("logs", "")
+    # opts from template, they go to logreader and back to template as
+    # defaults values
+    opts = {
+        "topn"   : topn,
+        "msg"    : msg,
+        "users"  : users,
+        "maxdepth" : maxdepth,
+        "logs"   : logs,        # used before logreader to filter logfiles
+        "logdir" : logdir,
+        "bycount": bycount,
+        "cumul"  : cumul,
+    }
+    # print(f"{opts}")
+    logfiles = get_logfiles(logdir, "*.log", logs)
 
-#     opts = {
-#         "topn"   : topn,
-#         # "width"  : width,
-#         "style"  : style,
-#     }
-#     # Absense/precense of these in opts matters:
-#     if bycount is not None: opts["bycount"] = 1
-#     for k,v in { "msg"  : msg,
-#                  "users": users }.items():
-#         if v != "":
-#             opts[k] = v
+    # res [] will collect results from our logreader invocation, one for
+    # all files
 
-#     lines = []
-#     log = logreader.StkUploadlog(opts)
-#     logdir = "/home/juha/projs/Taapeli/stk-upload/uploads/*"
-#     for f in get_logfiles(logdir, "*.log", logs):
-#         log.work_with(f)
-#     lines.append(log.get_counts(style=style))
+    logrdr = logreader.StkUploadlog(
+        "Top_level",
+        by_what = [
+            ("By_byuser",  logreader.StkUploadlog.save_byuser),
+            ("By_bydate",  logreader.StkUploadlog.save_bydate),
+            ("By_bystep",  logreader.StkUploadlog.save_bystep),
+        ],
+        opts    = opts, )
+    for f in logfiles:
+        # Create a logreader for each logfile
+        #  that can do "By_msg" and "By_date" and "By_user" statistics
+        logrdr.work_with(f)
+    res = [logrdr.get_report()] # that will be one filesection for all
+                                    # files in the loop
 
-#     elapsed = time.time() - t0
-#     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
-#     return render_template("/stat/uploadstat.html",
-#                            topn    = topn,
-#                            # width   = width,
-#                            bycount = bycount,
-#                            logdir  = logdir,
-#                            logs    = logs,
-#                            style   = style,
-#                            users   = users,
-#                            msg     = msg,
-#                            lines   = lines,
-#                            elapsed = elapsed )
+    elapsed = time.time() - t0
+    logger.info(f"-> bp.stat.app e={elapsed:.4f}")
+    return render_template("/stat/appstat.html",
+                           h2      = "Data upload statistics",
+                           caller  = "/stat/uploadstat",
+                           res     = res,
+                           opts    = opts,
+                           elapsed = elapsed )
+
