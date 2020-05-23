@@ -5,66 +5,90 @@
 {% block body %}
 {{ super() }}
 
+{% macro make_table(rows) -%}
+<table>
+{% for row in rows %}  <tr>
+  {% for col in row
+  %} <td{% if col != "" and col[0] in "0123456789"
+	   %} style="text-align: right"{% endif	%}> {{ col }} </td>
+  {% endfor %}
+</tr>
+{% endfor %}
+</table>
+{% endmacro -%}
+
+
 <div class="startdiv">
-  <h2>{{ _("Application usage statistics") }}</h2>
+  <h2>{{ _(h2) }}</h2>
   <div id="errors" class="errors"></div>
-  Return to <a href="/stat">statistics start page</a>
+
+  Return to <a href="/stat">statistics start page.</a>
   <p>
+    TODO valintakriteerit:
+    <ul>
+      <li> aikaväliin perustuva (mikä käyttöliittymä?)
+      <li> By_xxx valinta (pudotusvalikko), sen sijaan että näytetään kaikki
+      <li> Liekö Maxdepth tarpeen lainkaan?
+      <li> Tai cumulative? (nyt se ei edes toimi...)
+    </ul>
     <div>
       Set options:
-      <form action="/stat/appstat">
+      <form action="{{ caller }}">
 	<fieldset>
 	  <table>
 	    <tr>
 	      <td>
 		{% set msg = opts["msg"] %}
-	  <label for="msg">{{ _("Msgs:") }}</label>
-	  <input type="text" name="msg" size="6"
-	         title="{{ _("python regexp(s) to match messages") }}"
-	         value="{{ msg }}">
+		<label for="msg">{{ _("Methods:") }}</label>
+		<input type="text" name="msg" size="6"
+	               title="{{ _("python regexp(s) to match messages/methods") }}"
+	               value="{{ msg }}">
 	      </td>
 	      <td>
-	  {% set users = opts["users"] %}
-	  <label for="users">{{ _("Users:") }}</label>
-	  <input type="text" name="users" size="6"
-	         title="{{ _("python regexp(s) to match users") }}"
-	         value="{{ users }}">
+		{% set users = opts["users"] %}
+		<label for="users">{{ _("Users:") }}</label>
+		<input type="text" name="users" size="6"
+	               title="{{ _("python regexp(s) to match users") }}"
+	               value="{{ users }}">
 	      </td>
 	      <td>
-	  {% set logs = opts["logs"] %}
-	  <label for="logs">{{ _(" Logs:") }}</label>
-	  <input type="text" name="logs" size="6"
-	         title="{{ _("shell glob to match log files\nin ") }} {{logdir}}"
-		 {% if logs %} value="{{ opts['logs'] }}" {% endif %}>
+		{% set logs = opts["logs"] %}
+		{% set logdir = opts["logdir"] %}
+		<label for="logs">{{ _(" Log files:") }}</label>
+		<input type="text" name="logs" size="6"
+	               title="{{ _("shell glob to match log files\nin ") }} {{logdir}}"
+		       {% if logs %} value="{{ opts['logs'] }}" {% endif %}>
+	      </td>
+	      <td rowspan="2"> <input type="submit"
+				      value=" -- Go! --"
+				      style="height: 7ex">
 	      </td>
 	    </tr>
+
 	    <tr>
 	      <td>
-	  {% set maxlev = opts["maxlev"] %}
-	  <label for="maxlev">{{ _(" Maxlev:") }}</label>
-	  <input type="text" name="maxlev" size="6"
-	         title="{{ _("report max level") }}"
-		 {% if maxlev %} value="{{ maxlev }}" {% endif %}>
+		{% set maxdepth = opts["maxdepth"] %}
+		<label for="maxdepth">{{ _(" Maxdepth:") }}</label>
+		<input type="text" name="maxdepth" size="6"
+	               title="{{ _("report max depth") }}"
+		       {% if maxdepth %} value="{{ maxdepth }}" {% endif %}>
 	      </td>
 	      <td>
-	  <label for="bycount">{{ _("By count:") }}</label>
-	  <input type="checkbox" name="bycount" size="1"
-	         title="{{ _("Sort by count or by text?") }}"
-		 {% if opts["bycount"] %} checked {% endif %}
-		 id="bycount" value="x">
+		<label for="bycount">{{ _("By count:") }}</label>
+		<input type="checkbox" name="bycount" size="1"
+	               title="{{ _("Sort by count or by text?") }}"
+		       {% if opts["bycount"] %} checked {% endif %}
+		       id="bycount" value="x">
 	      </td>
 	      <td>
-	  <label for="cumul">{{ _("Cumulative:") }}</label>
-	  <input type="checkbox" name="cumul" size="1"
-	         title="{{ _("Cumulative counts?") }}"
+		<label for="cumul">{{ _("Cumulative:") }}</label>
+		<input type="checkbox" name="cumul" size="1"
+	               title="{{ _("Cumulative counts?") }}"
 		 {% if opts["cumul"] %} checked {% endif %}
-		 id="cumul" value="x">
+		       id="cumul" value="x">
 	      </td>
 	    </tr>
 	  </table>
-	  <p>
-	  <input type="submit" value=" -- Go! --">
-
 	</fieldset>
       </form>
     </div>
@@ -73,22 +97,14 @@
     {# filesection[0] is log file name #}
     {# filesection[1] is contents from that log file #}
     <h3>Logfile(s) <tt>{{ filesection[0] }}</tt></h3>
-
     {% for subsection in filesection[1] %}
     {# subsection[0] is 'By xxx' #}
     {# subsection[1] is contents for that section #}
     <i> {{ subsection[0] }} </i>
-
-<table>
-{% for row in subsection[1] %}  <tr>
-  {% for col in row
-  %} <td{% if col != "" and col[0] in "0123456789"
-	   %} style="text-align: right"{% endif	%}> {{ col }} </td>
-  {% endfor %}</tr>
-{% endfor %}</table><br>
-
-   {% endfor %}
-{% endfor %}
+    {{ make_table (subsection[1]) }}
+    <br>
+    {% endfor %} {# subsection #}
+    {% endfor %} {# filesection #}
 
 </div>
 {% endblock %}

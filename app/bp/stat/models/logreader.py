@@ -146,6 +146,9 @@ class Counter():
         Returns list of Counter objects.
         """
 
+        def x_name(x):
+            return "" if x._name is None else x._name
+
         # use the negative number trick to get numeric sorting
         # reverse & alpa non-reverse (we can't use reverse=True
         # because that woud reverse the alpha sorting too)
@@ -158,7 +161,7 @@ class Counter():
 
         else:
             result = sorted(self._counters.values(),
-                            key = lambda x: x._name)
+                            key = lambda x: x_name(x))
 
         topn = self._opts["topn"]
         if topn is not None:
@@ -174,12 +177,13 @@ class Counter():
         TOPN limits the length of resulting list (at each level).
         BYCOUNT makes reult sorted by count (default=False).
         LEVEL is current level of Counter.
-        MAXLEVELS gives the number of sub-Counters to show
+
+        self._opts['maxdepth'] gives the number of sub-Counters to show
 
         Return value is a tuple (self._name, [dataline, ...],
         Each dataline is list [column, ...], first columns is line number.
 
-        This will end as one subsection in html template.
+        This will finally become one subsection in html template.
         Return value is a tuple (section_name, [line, ...]),
         section_name is 'By_xxx' or some such.
         """
@@ -197,6 +201,8 @@ class Counter():
                 columns += [f"{tag}", f"{number_to_string(value)}"]
                 if tag == "e" and self._values["N"] != 0:
                     columns += [f"{number_to_string(value/self._values['N'],w=3)}"]
+                if tag == "t" and "n" in self._values and self._values["n"] != 0:
+                    columns += [f"{number_to_string(value/self._values['n'],w=3)}"]
         lines.append(columns)
 
         # Get list of TOPN sub-Counters
@@ -276,7 +282,7 @@ Counters are kept in list of Counter objects.
         """
 
     def work_with(self, file):
-        """Call log_parser to get values, store them useing counter_xxx.
+        """Call parser to get values, store them useing counter_xxx.
 
         """
         if file in self._files:
@@ -313,9 +319,12 @@ Counters are kept in list of Counter objects.
 
     ################
     #
-    def parser(self, file: str):
-        """Read stkserver log FILE.  Collect counts of messages."""
+    def parser(self, logfile: str):
+        """Parse data from stkserver log LOGFILE.
 
+        Read the file line by line, yield the values found from each line.
+
+        """
 
         # Format of log messages (see app/__init__.py)
         # '%(asctime)s %(name)s %(levelname)s %(user)s %(message)s'
@@ -324,7 +333,7 @@ Counters are kept in list of Counter objects.
         ymd_part = r'\d\d\d\d-\d\d-\d\d'
         hms_part = r'\d\d:\d\d:\d\d,\d\d\d'
 
-        # This shall match each line in log file;
+        # This shall match each line in log LOGFILE;
         # we don't need the %(name)s part, the other groups we keep
         log_re = re.compile(f'({ymd_part}) ({hms_part})'
                             f' \S+ (\S+) (\S+) (.*)')
@@ -340,7 +349,7 @@ Counters are kept in list of Counter objects.
         users_re    = self.get_regexp_from_opts("users")
         want_msg_re = self.get_regexp_from_opts("msg")
 
-        for line in open(file, "r").read().splitlines():
+        for line in open(logfile, "r").read().splitlines():
             match = log_re.match(line)
             if not match:
                 flash(f"strange log line {line}") # this should not happen
@@ -367,98 +376,135 @@ Counters are kept in list of Counter objects.
         return
 
 
-# ################################################################
-# #
-# class StkUploadlog():
-#     """Class to handle stk upload log file(s)."""
+################################################################
+#
+class StkUploadlog(Counter):
+    """Class to handle stk upload log file(s)."""
 
-#     def __init__(self, opts={}):
-#         self._opts = opts
-#         self._by_date = dict()
-#         self._by_step = dict()
-#         self._by_user = dict()
-#         self._files = []        # list of files already processed
+    def __init__(self, name, level=0, by_what=[], opts=None):
+        super().__init__(name, level, opts=opts)
+        self._files  = []       # list of files already processed
+        self._savers = {}
+        for (name, saver) in by_what:
+            self._savers[saver] = self.get_or_create(name)
+        return
 
+    def work_with(self, logfile):
+        """Call parser to get values from stk upload log files.
 
-#     ################
-#     #
-#     def work_with(self, logfile: str) -> None:
-#         """Read stkserver log FILE.  Collect counts of messages."""
+        """
+        if logfile in self._files:
+            flash(f"Already done file {logfile}") # this should not happen
+            return
+        self._files.append(logfile)  # protect against double processing
 
-#         if logfile in self._files:
-#             flash(f"Already done file {logfile}") # this should not happen
-#             return
-#         print(f"working with {logfile}")
-#         self._files.append(logfile)  # protect against double processing
+        # read date, module, user, tuples from parser
+        # call designated counter_xxx to store values
+        for tup in self.parser(logfile):
+            # print(f"{tup}")
+            for saver in self._savers:
+                counter = self._savers[saver]
+                saver(counter, tup)
+        return
 
-#         # Dig the user name from logfile pathname:
-#         last_slash_pos = logfile.rindex("/")
-#         second_to_last = logfile.rindex("/", 0, last_slash_pos-1)
-#         user = logfile[second_to_last+1 : last_slash_pos]
-#         print(f"u={user}")
+    ################
+    #
+    def save_byuser(self, tup):
+        """Save TUP data by by user | module | date order."""
+        (date, step, user, tuples) = tup
+        self.update(inner_specs = [ (user, None), (step, None), (date, tuples) ] )
+        return
 
-#         upload_re1 = re.compile(r"^INFO ([^:]+): (\d+)(?: / ([\d.]+) sek)?$")
-#         upload_re2 = re.compile(r"^TITLE Total time: +/ ([\d.]+) sek")
-#         upload_re3 = re.compile(r"^(\d\d\.\d\d.\d\d\d\d) (?:\d\d:\d\d)")
-#         upload_re4 = re.compile(r"^Stored the file (.+) from user (.+) to neo4j$")
+    def save_bydate(self, tup):
+        """Save TUP data by by user | module | date order."""
+        (date, step, user, tuples) = tup
+        self.update(inner_specs = [ (date, None), (step, None), (user, tuples) ] )
+        return
 
-#         ymd = None
-#         for line in open(logfile, "r").read().splitlines():
-#             m = upload_re1.match(line)
-#             if m:               # starts with INFO
-#                 if user is None:
-#                     flash(f"logfile {logfile} no user found before INFO line")
-#                     return
-#                 (step, count, time) = m.groups()
-#                 step = step.split(" ")[0]
-#                 # print(f"INFO: s='{step}' n='{count}' t='{time}'")
-#                 if time is None: time = "0.0"
-#                 update_counter( self._by_step, step, user,
-#                              tuples=[ ("n", count), ("t", time ), ] )
-#                 update_counter( self._by_date, ymd, step,
-#                              tuples=[ ("n", count), ("t", time ), ] )
-#                 continue
+    def save_bystep(self, tup):
+        """Save TUP data by by user | module | date order."""
+        (date, step, user, tuples) = tup
+        self.update(inner_specs = [ (step, None),  (date, None), (user, tuples) ] )
+        return
 
-#             m = upload_re2.match(line)
-#             if m:               # has Total time
-#                 time = m.group(1)
-#                 print(f"t='{time}'")
-#                 update_counter( self._by_user, user, "total_time",
-#                              tuples=[ ("n", 1), ("t", time ), ] )
-#                 continue
+    ################
+    #
+    def parser(self, logfile: str) -> None:
+        """Parse data from stk upload log LOGFILE.
 
-#             m = upload_re3.match(line)
-#             if m:               # line has {dmy} ...
-#                 dmy = m.group(1)
-#                 parts = dmy.split("\.")
-#                 parts.reverse()
-#                 # just remeber the ymd
-#                 ymd = "-".join(parts)
-#                 # print(f"ymd='{ymd}'")
-#                 continue
+        Read the whole file, return the values found? or maybe not...
+        """
 
-#             m = upload_re4.match(line)
-#             if m:               # Stored .... from user {user}
-#                 # just remember the user
-#                 # (datafile, user) = m.groups()
-#                 # print(f"Stored f='{datafile}' u='{user}'")
-#                 continue
+        # Dig the user name from logfile pathname:
+        last_slash_pos = logfile.rindex("/")
+        second_to_last = logfile.rindex("/", 0, last_slash_pos-1)
+        user = logfile[second_to_last+1 : last_slash_pos]
+        users_re    = self.get_regexp_from_opts("users")
+        if users_re and not users_re.match(user):
+            return
+        # print(f"u={user}")
 
-#             if line != "":
-#                 print(line)
+        upload_re1 = re.compile(r"^INFO ([^:]+): (\d+)(?: / ([\d.]+) sek)?$")
+        upload_re2 = re.compile(r"^TITLE Total time: +/ ([\d.]+) sek")
+        upload_re3 = re.compile(r"^(\d\d?\.\d\d?.\d\d\d\d) (?:\d\d:\d\d)")
+        upload_re4 = re.compile(r"^Stored the file (.+) from user (.+) to neo4j$")
 
-#         return
+        # some filtering wanted by caller:
+        want_msg_re = self.get_regexp_from_opts("msg")
 
-#     def get_counts(self, style="text"):
-#         res = []
-#         res.append(get_section_counts(self._by_step, "By step",
-#                                       width     = 6,
-#                                       bycount   = "bycount" in self._opts,
-#                                       showusers = "users" in self._opts,
-#                                       topn      = self._opts["topn"],
-#                                       style     = self._opts["style"],
-#         ))
-#         files = [ x[x.rindex("/")+1:] for x in self._files ]
+        ymd = None
+        for line in open(logfile, "r").read().splitlines():
+            m = upload_re1.match(line)
+            if m:               # starts with INFO
+                if user is None:
+                    flash(f"logfile {logfile} no user found before INFO line")
+                    return
+                (step, count, time) = m.groups()
+                if count == "0":
+                    continue
+                if want_msg_re and not want_msg_re.match(step):
+                    continue
 
-#         return(", ".join(files), res)
+                step = step.split(" ")[0]
+                if ymd is None or step is None or user is None:
+                    print(f"{logfile}: ymd='{ymd}', s='{step}' user='{user}'")
+                    continue
+                tuples = [ ("n", count) ]
+                if time is not None:
+                    tuples.append( ("t", time ) )
+                yield ymd, step, user, tuples
+                continue
 
+            m = upload_re2.match(line)
+            if m:               # has Total time
+                time = m.group(1)
+                if ymd is None or user is None or time is None:
+                    print(f"{logfile}: ymd='{ymd}', s='total_time' user='{user}'")
+                    continue
+                # print(f"t='{time}'")
+                step = "total_time"
+                if want_msg_re and not want_msg_re.match(step):
+                    continue
+                yield ymd, step, user, [ ("t", time ) ]
+                continue
+
+            m = upload_re3.match(line)
+            if m:               # line has {dmy} ...
+                dmy = m.group(1)
+                parts = dmy.split(".")
+                parts.reverse()
+                # just remeber the ymd
+                ymd = "-".join(parts)
+                # print(f"ymd='{ymd}'")
+                continue
+
+            m = upload_re4.match(line)
+            if m:               # Stored .... from user {user}
+                # just remember the user
+                # (datafile, user) = m.groups()
+                # print(f"Stored f='{datafile}' u='{user}'")
+                continue
+
+            if line != "":
+                # print(line)
+                continue
