@@ -398,7 +398,9 @@ def json_get_person_families():
         results = reader.get_person_families(uuid)
 
         if results.get('status') != 0:
-            return jsonify({"records":[], "member":uuid, "statusText":results.get('status')})
+            return jsonify({"member":uuid, 
+                            "statusText":results.get('statustext'),
+                            "status":Status.NOT_FOUND})
         res = []
         for family in results['items']:
             if not family:   # Missing childhood family

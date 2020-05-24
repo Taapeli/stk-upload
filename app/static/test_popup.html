@@ -8,32 +8,51 @@
 <script src="/static/js/axios.min.js"></script>
 <body>
 <style>
+#pop-window {
+    max-width: 416px; 
+    height: 250px; 
+    background: #e3bda7;
+    overflow: scroll;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+#pop-buttons {
+    list-style-type: none;
+}
+div#pop-buttons button.button {
+  padding: 2px 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  background-color: #008CBA;
+  color: white;
+  border-radius: 1em;
+}
+
 .pop-container {
   display: flex;
   flex-wrap: nowrap;
 }
 .pop-container > div {
     background: #d09d7f;
-    max-width: 450px;
-    background: #d09d7f;
     color:white;
-    width:50%;
+    font-size:9pt;
     padding:4px;
     margin:4px;
+    width:404px !important;
 }
 .pop-box a.inlink {
+    width:100%;
     background: #777;
     color:white;
     margin: 0 .3em;
     padding: 0 .3em;
     border-radius: 5px;
 }
-.poptest {
-    background: #d09d7f;
-    color:white;
-    width:50%;
-    padding:4px;
-    margin:4px;
+
+
+div.pop-box ul {
+    padding-left:1.5em;
 }
 .row div { display: inline-block; }
 </style>
@@ -130,17 +149,22 @@
     </div>
     <div style="display: inline-block;padding:.5em;">
         ${status}
-        <!--  – Family <span style="background:white; padding:3px;">&nbsp;
-            <tt>${id}</tt> ${rel_type} ${dates}
-            <i>${father_name} <> ${mother_name}</i>&nbsp;</span> -->
     </div>
   </div>
 
-  <div class="pop-container">
-      <div class="pop-box" v-bind:title="f.title" v-for="f of families">
-          <p><a v-bind:href="f.href"
-              title="e8450bbbd48348338abce8b900df3bf8" class="inlink">
-              Perheessä ${f.role_text}</a>  ${f.rel_type} ${f.dates}
+  <div id="pop-window">
+
+    <div id="pop-buttons">
+      <button class="button" v-bind:disabled="f.show" v-on:click="showFamily(index)"
+            v-for="(f, index) of families" :key="f.id">
+        ${index+1}. ${f.role}</button>
+    </div>
+
+    <div class="pop-container">
+      <div class="pop-box" v-bind:title="f.title"  v-show="f.show"
+           v-for="(f, index) of families">
+          <p><a v-bind:href="f.href" title="See family" class="inlink">
+              Perheessä ${f.role}</a>  ${f.rel_type} ${f.dates}  show=${f.show}
           </p>
           <ul>
               <li v-for="p in f.parents" :key="p.uuid">
@@ -149,12 +173,12 @@
                     itse
                   </span>
                   <span v-else>
-                    <a v-bind:href="p.href" class="inlink" title="Katso henkilöä">
-                       ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b>
-                    </a> s.&nbsp;${p.birth}
+                    <a v-bind:href="p.href" class="inlink" title="Katso henkilöä"
+                        >${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
+                    s.&nbsp;${p.birth}
                   </span>
               </li>
-              <li v-if="has_children">Lapset
+              <li v-if="f.has_children">Lapset
                  <ul>
                      <li v-for="p in f.children" :key="p.uuid">
                        ${p.gender}:
@@ -162,15 +186,16 @@
                          itse
                        </span>
                        <span v-else>
-                         <a v-bind:href="p.href" class="inlink" title="Katso henkilöä">
-                            ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b>
-                         </a> s.&nbsp;${p.birth}
+                         <a v-bind:href="p.href" class="inlink" title="Katso henkilöä"
+                            >${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
+                         s.&nbsp;${p.birth}
                        </span>
                      </li>
                  </ul>
               </li>
           </ul>
       </div>
+    </div>
   </div>
 
 </div>
@@ -235,11 +260,24 @@ var vm = new Vue({
      status: ''
    },
    methods: {
+	   showFamily(index) {
+		   for (i = 0; i < vm.families.length; i++)  {
+			   var f = vm.families[i];
+			   if (i == index) {
+	                console.log("Näytetään "+f.id);
+	                f.show = true;
+			   } else {
+                    f.show = false;
+			   }
+			   console.log("nyt "+vm.families[i].id+'->'+vm.families[i].show);
+		   }
+		},
+
 	   getFamily(q_uuid) {
-		   // Asks for data of a family
-		   // Todo: ask for all families of given person
+		   // Asks for data for all families of given person
 	       axios.post("/scene/json/families", {uuid:q_uuid})
 	            .then (function(rsp, q_uuid) {
+	            	  vm,families = [];
 	    			   vm.status = "Status code: "+String(rsp.status);
                        //console.log("stk result: "+rsp.data.statusText);
                        vm.message=rsp.data.statusText;
@@ -248,18 +286,13 @@ var vm = new Vue({
                     	   return;
                        }
                        for (rec of rsp.data.records) {
-                           console.log(rec);
+                           //console.log(rec);
                     	   var fam = {};
                     	   if (rec) {
                                fam.id = rec.id;
                                fam.rel_type = rec.rel_type;
                                fam.dates = datesStr(rec.dates, first=true);
-                               //fam.role = rec.role;
-                               if (rec.role == "child") {
-                            	   fam.role_text = "lapsena"
-                               } else {
-                            	   fam.role_text = "puolisona"
-                               }
+                               fam.role = rec.role;
                                fam.href = "/scene/family?uuid="+rec.uuid;
                                fam.parents = [];
                                fam.children = [];
@@ -301,6 +334,7 @@ var vm = new Vue({
                                vm.families.push(fam);
                     	   }
                        }
+                       vm.showFamily(0);
     			 })
    	   }
   }
