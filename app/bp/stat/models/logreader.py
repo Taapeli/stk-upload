@@ -248,6 +248,41 @@ class Counter():
         return None
 
 
+    def save_bymsg(self, tup):
+        """Save TUP data by by module | user order."""
+        (date, module, user, tuples) = tup
+        self.update(inner_specs = [ (module, None), (user, tuples), ] )
+
+    def save_bydate(self, tup):
+        """Save TUP data by by date | user order."""
+        (date, module, user, tuples) = tup
+        self.update(inner_specs = [ (date, None), (user, None), (module, tuples) ] )
+
+
+    def save_byuser(self, tup):
+        """Save TUP data by by user | module | date order."""
+        (date, module, user, tuples) = tup
+        self.update(inner_specs = [ (user, None), (module, None), (date, tuples) ] )
+
+
+    def work_with(self, logfile):
+        """Call parser to get values from stk upload log files.
+
+        """
+        if logfile in self._files:
+            flash(f"Already done file {logfile}") # this should not happen
+            return
+        self._files.append(logfile)  # protect against double processing
+
+        # read date, module, user, tuples from parser
+        # call designated counter_xxx to store values
+        for tup in self.parser(logfile):
+            # print(f"{tup}")
+            for saver in self._savers:
+                counter = self._savers[saver]
+                saver(counter, tup)
+        return
+
 ################################################################
 #
 class StkServerlog(Counter):
@@ -273,42 +308,6 @@ Counters are kept in list of Counter objects.
     lokeja.
 
         """
-
-    def work_with(self, file):
-        """Call parser to get values, store them useing counter_xxx.
-
-        """
-        if file in self._files:
-            flash(f"Already done file {file}") # this should not happen
-            return
-        self._files.append(file)  # protect against double processing
-
-        # read date, module, user, tuples from parser
-        # call designated counter_xxx to store values
-        for tup in self.parser(file):
-            # print(f"{tup}")
-            for saver in self._savers:
-                counter = self._savers[saver]
-                saver(counter, tup)
-        return
-
-
-    def save_bymsg(self, tup):
-        """Save TUP data by by module | user order."""
-        (date, module, user, tuples) = tup
-        self.update(inner_specs = [ (module, None), (user, tuples), ] )
-
-    def save_bydate(self, tup):
-        """Save TUP data by by date | user order."""
-        (date, module, user, tuples) = tup
-        self.update(inner_specs = [ (date, None), (user, None), (module, tuples) ] )
-
-
-    def save_byuser(self, tup):
-        """Save TUP data by by user | module | date order."""
-        (date, module, user, tuples) = tup
-        self.update(inner_specs = [ (user, None), (module, None), (date, tuples) ] )
-
 
     ################
     #
@@ -380,44 +379,6 @@ class StkUploadlog(Counter):
         self._savers = {}
         for (name, saver) in by_what:
             self._savers[saver] = self.get_or_create(name)
-        return
-
-    def work_with(self, logfile):
-        """Call parser to get values from stk upload log files.
-
-        """
-        if logfile in self._files:
-            flash(f"Already done file {logfile}") # this should not happen
-            return
-        self._files.append(logfile)  # protect against double processing
-
-        # read date, module, user, tuples from parser
-        # call designated counter_xxx to store values
-        for tup in self.parser(logfile):
-            # print(f"{tup}")
-            for saver in self._savers:
-                counter = self._savers[saver]
-                saver(counter, tup)
-        return
-
-    ################
-    #
-    def save_byuser(self, tup):
-        """Save TUP data by by user | module | date order."""
-        (date, step, user, tuples) = tup
-        self.update(inner_specs = [ (user, None), (step, None), (date, tuples) ] )
-        return
-
-    def save_bydate(self, tup):
-        """Save TUP data by by user | module | date order."""
-        (date, step, user, tuples) = tup
-        self.update(inner_specs = [ (date, None), (step, None), (user, tuples) ] )
-        return
-
-    def save_bystep(self, tup):
-        """Save TUP data by by user | module | date order."""
-        (date, step, user, tuples) = tup
-        self.update(inner_specs = [ (step, None),  (date, None), (user, tuples) ] )
         return
 
     ################

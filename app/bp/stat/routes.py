@@ -224,7 +224,7 @@ def stat_upload():
 
     (pkey, parser, logfiles, opts) = build_options(
         logdir, "*.log", {
-            "By_msg"   :  logreader.StkUploadlog.save_bystep,
+            "By_msg"   :  logreader.StkUploadlog.save_bymsg,
             "By_date"  :  logreader.StkUploadlog.save_bydate,
             "By_user"  :  logreader.StkUploadlog.save_byuser,
         })
