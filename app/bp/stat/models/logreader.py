@@ -122,19 +122,14 @@ class Counter():
 
     ################
     #
-    def get_value(self, cumul=False):
-        """Get current Counter's _value['n'].
-
-        If CUMUL is True, sum up all sublevels and return total count.
-        """
-        if not cumul or len(self._counters) == 0:
-            return self._values["N"]
-
-        res = 0
-        for counter in self._counters.values():
-            # counter = self.get_or_create(counter_name, can_create=False)
-            res += counter.get_value(cumul=True)
-        return res
+    def get_value(self):
+        """Get current Counter's _value['N']."""
+        return self._values['N']
+        # res = 0
+        # for counter in self._counters.values():
+        #     # counter = self.get_or_create(counter_name, can_create=False)
+        #     res += counter.get_value()
+        # return res
 
 
     ################
@@ -142,7 +137,7 @@ class Counter():
     def topn_subcounters(self):
         """Get TOPN first sub-Counter objects.
 
-        Details (bycount?, cumulative?, topN) are in SELF._opts.
+        Details (bycount?, topN) are in SELF._opts.
         Returns list of Counter objects.
         """
 
@@ -152,11 +147,9 @@ class Counter():
         # use the negative number trick to get numeric sorting
         # reverse & alpa non-reverse (we can't use reverse=True
         # because that woud reverse the alpha sorting too)
-        bycount = self._opts["bycount"] is not None
-        if bycount:
-            cumulative = self._opts["cumul"] is not None
+        if self._opts["bycount"] is not None:
             result = sorted(self._counters.values(),
-                            key = lambda x: (-x.get_value(cumul=cumulative),
+                            key = lambda x: (-x._values["N"],
                                              x._name) )
 
         else:
@@ -432,8 +425,20 @@ class StkUploadlog(Counter):
     def parser(self, logfile: str) -> None:
         """Parse data from stk upload log LOGFILE.
 
-        Read the whole file, return the values found? or maybe not...
+        1) check that there is line starting with 'TITLE Total time:'; if
+        not, the processing was not completed and count this log as
+        failure.
+
+        2) If that line was found, do actual counting.
+
         """
+        def fix_date(dmy):
+            """Transform DMY in d.m.yyyy format into yyyy-mm-dd format."""
+            parts = dmy.split(".")
+            parts.reverse()
+            for i in range(1,3):
+                parts[i] = f"{int(parts[i]):02d}"
+            return "-".join(parts)
 
         # Dig the user name from logfile pathname:
         last_slash_pos = logfile.rindex("/")
@@ -445,14 +450,28 @@ class StkUploadlog(Counter):
         # print(f"u={user}")
 
         upload_re1 = re.compile(r"^INFO ([^:]+): (\d+)(?: / ([\d.]+) sek)?$")
-        upload_re2 = re.compile(r"^TITLE Total time: +/ ([\d.]+) sek")
+        upload_re2 = re.compile(r"^TITLE Total time: +([/:] )?([\d.]+)( sek)?")
         upload_re3 = re.compile(r"^(\d\d?\.\d\d?.\d\d\d\d) (?:\d\d:\d\d)")
         upload_re4 = re.compile(r"^Stored the file (.+) from user (.+) to neo4j$")
+
+        ymd = "????-??-??"
+        found_total = False
+        line_count = 0
+        for line in open(logfile, "r").read().splitlines():
+            line_count += 1
+            if upload_re2.match(line):
+                found_total = True
+                break
+            m = upload_re3.match(line)
+            if m:
+                ymd = fix_date(m.group(1))
+        if not found_total:
+            yield ymd, "Failed", user, [(logfile, f"{line_count}")]
+            return
 
         # some filtering wanted by caller:
         want_msg_re = self.get_regexp_from_opts("msg")
 
-        ymd = None
         for line in open(logfile, "r").read().splitlines():
             m = upload_re1.match(line)
             if m:               # starts with INFO
@@ -482,7 +501,7 @@ class StkUploadlog(Counter):
                     print(f"{logfile}: ymd='{ymd}', s='total_time' user='{user}'")
                     continue
                 # print(f"t='{time}'")
-                step = "total_time"
+                step = "Done"
                 if want_msg_re and not want_msg_re.match(step):
                     continue
                 yield ymd, step, user, [ ("t", time ) ]
@@ -490,12 +509,8 @@ class StkUploadlog(Counter):
 
             m = upload_re3.match(line)
             if m:               # line has {dmy} ...
-                dmy = m.group(1)
-                parts = dmy.split(".")
-                parts.reverse()
-                # just remeber the ymd
-                ymd = "-".join(parts)
-                # print(f"ymd='{ymd}'")
+                ymd = fix_date(m.group(1))
+                # print(f"ymd {dmy} -> {ymd}")
                 continue
 
             m = upload_re4.match(line)

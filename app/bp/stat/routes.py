@@ -42,7 +42,10 @@ def run_cmd(cmd):
 def get_logfiles(log_root, log_file, patterns=""):
     """Get ist of log files matching PATTERNS.
 
-Empty PATTERNS equals LOG_FILES.  Return matching filenames in LOG_ROOT."""
+    Empty PATTERNS equals LOG_FILES.  Return matching filenames in
+    LOG_ROOT.
+
+    """
     import glob
     if patterns == "":
         patterns = f"{log_file}*"
@@ -50,6 +53,7 @@ Empty PATTERNS equals LOG_FILES.  Return matching filenames in LOG_ROOT."""
     for pat in re.split(" ", patterns):
         files += list(filter(os.path.isfile, glob.glob(f"{log_root}/{pat}")))
     files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+    files = [ x for x in files if re.search("\.log(_[\d-]+)?$", x)]
     return files
 
 ################
@@ -78,6 +82,43 @@ def check_regexp_option(what, default=""):
         flash(f"Bad regexp for {what} '{val}': {e}",
               category='warning')
     return ""
+
+################
+#
+def build_options(logdir, logname_template, lookup_table):
+
+    bycount = request.args.get("bycount", None)
+    bywhat  = request.args.get("bywhat", "user")
+    logs    = request.args.get("logs", "")
+    msg     = check_regexp_option("msg")
+    users   = check_regexp_option("users")
+    topn    = safe_get_request("topn", 42)
+
+    # opts from template, they go to logreader and back to template as
+    # defaults values
+    opts = {
+        "bycount": bycount,
+        "bywhat" : bywhat,
+        "logdir" : logdir,
+        "logs"   : logs,        # used before logreader to filter logfiles
+        "msg"    : msg,
+        "users"  : users,
+        "topn"   : topn,
+    }
+
+    pkey = f"By_{bywhat}"
+    if pkey not in lookup_table:
+        if "By_user" in lookup_table:
+            flash(f"Bad primary sort key '{bywhat}', trying 'user'")
+            pkey = "By_user"
+        else:
+            flash("Can not decide primary sort key")
+            return None         # this will fail in caller
+
+    logfiles = get_logfiles(logdir, logname_template, patterns=logs)
+
+    return pkey, lookup_table[pkey], logfiles, opts
+
 
 
 ################################################################
@@ -136,30 +177,15 @@ def stat_app():
     logdir = shareds.app.config['STK_LOGDIR']
 
     t0 = time.time()
-    msg     = check_regexp_option("msg")
-    users   = check_regexp_option("users")
-    maxdepth  = safe_get_request("maxdepth", 2)
-    topn    = safe_get_request("topn", 42)
-    bycount = request.args.get("bycount", None)
-    cumul   = request.args.get("cumul", None)
-    logs    = request.args.get("logs", "")
 
-    # opts from template, they go to logreader and back to template as
-    # defaults values
-    opts = {
-        "topn"   : topn,
-        "msg"    : msg,
-        "users"  : users,
-        "maxdepth" : maxdepth,
-        "logs"   : logs,        # used before logreader to filter logfiles
-        "logdir" : logdir,
-        "bycount": bycount,
-        "cumul"  : cumul,
-    }
-    # print(f"{opts}")
-    logfiles = get_logfiles(logdir,
-                            shareds.app.config['STK_LOGFILE'],
-                            patterns = logs)
+    (pkey, parser, logfiles, opts) = build_options(
+        logdir, shareds.app.config['STK_LOGFILE'], {
+        "By_msg" : logreader.StkServerlog.save_bymsg,
+        "By_date": logreader.StkServerlog.save_bydate,
+        "By_user": logreader.StkServerlog.save_byuser,
+    })
+    # print(f"{opts} {logfiles}")
+
     # res [] will collect results from all logreader invocations, one set
     # from each call
     res = []
@@ -168,11 +194,9 @@ def stat_app():
         #  that can do "By_msg" and "By_date" and "By_user" statistics
         logrdr = logreader.StkServerlog(
             "Top_level",
-            by_what = [("By_msg",  logreader.StkServerlog.save_bymsg),
-                       ("By_date", logreader.StkServerlog.save_bydate),
-                       ("By_user", logreader.StkServerlog.save_byuser),
-            ],
-            opts    = opts, )
+            by_what = [ (pkey, parser) ],
+            opts    = opts,
+        )
         logrdr.work_with(f)
         res.append(logrdr.get_report()) # that will be one filesection
 
@@ -197,40 +221,20 @@ def stat_upload():
     logdir = "uploads/*"
 
     t0 = time.time()
-    msg     = check_regexp_option("msg")
-    users   = check_regexp_option("users")
-    maxdepth  = safe_get_request("maxdepth", 2)
-    topn    = safe_get_request("topn", 42)
-    bycount = request.args.get("bycount", None)
-    cumul   = request.args.get("cumul", None)
-    logs    = request.args.get("logs", "")
 
-    # opts from template, they go to logreader and back to template as
-    # defaults values
-    opts = {
-        "topn"   : topn,
-        "msg"    : msg,
-        "users"  : users,
-        "maxdepth" : maxdepth,
-        "logs"   : logs,        # used before logreader to filter logfiles
-        "logdir" : logdir,
-        "bycount": bycount,
-        "cumul"  : cumul,
-    }
-    # print(f"{opts}")
-    logfiles = get_logfiles(logdir, "*.log", logs)
-
-    # res [] will collect results from our logreader invocation, one for
-    # all files
+    (pkey, parser, logfiles, opts) = build_options(
+        logdir, "*.log", {
+            "By_msg"   :  logreader.StkUploadlog.save_bystep,
+            "By_date"  :  logreader.StkUploadlog.save_bydate,
+            "By_user"  :  logreader.StkUploadlog.save_byuser,
+        })
+    # print(f"{opts} {logfiles}")
 
     logrdr = logreader.StkUploadlog(
         "Top_level",
-        by_what = [
-            ("By_byuser",  logreader.StkUploadlog.save_byuser),
-            ("By_bydate",  logreader.StkUploadlog.save_bydate),
-            ("By_bystep",  logreader.StkUploadlog.save_bystep),
-        ],
-        opts    = opts, )
+        by_what = [ (pkey, parser) ],
+        opts    = opts,
+    )
     for f in logfiles:
         # Create a logreader for each logfile
         #  that can do "By_msg" and "By_date" and "By_user" statistics
@@ -245,5 +249,6 @@ def stat_upload():
                            caller  = "/stat/uploadstat",
                            res     = res,
                            opts    = opts,
-                           elapsed = elapsed )
+                           elapsed = elapsed,
+    )
 
