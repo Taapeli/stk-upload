@@ -153,9 +153,8 @@ class Counter():
         Details (bycount?, topN) are in SELF._opts.
         Returns list of Counter objects.
         """
-
-        def x_name(x):
-            return "" if x._name is None else x._name
+        def counter_value(x, tag):
+            return x._values[tag] if tag in x._values else 0
 
         # use the negative number trick to get numeric sorting
         # reverse & alpa non-reverse (we can't use reverse=True
@@ -163,12 +162,13 @@ class Counter():
         # print(f"{self._name}")
         if self._opts["bycount"] is not None:
             result = sorted(self._counters.values(),
-                            key = lambda x: (-x._values["N"],
+                            key = lambda x: (-counter_value(x, "N"),
+                                             -counter_value(x, "n"),
                                              x._name) )
 
         else:
             result = sorted(self._counters.values(),
-                            key = lambda x: x_name(x))
+                            key = lambda x: x._name)
 
         topn = self._opts["topn"]
         if topn is not None:
@@ -205,11 +205,15 @@ class Counter():
         if level > 0:
             columns += [self._name]
             for tag, value in self._values.items():
-                columns += [f"{tag}", f"{number_to_string(value)}"]
+                columns.append(f"{tag}")
+                val = f"{number_to_string(value)}"
+                if tag == "e" or tag == "t":
+                    val += " s"
+                columns.append(val)
                 if tag == "e" and self._values["N"] != 0:
-                    columns += [f"{number_to_string(value/self._values['N'],w=3)}"]
+                    columns.append(f"{number_to_string(1000*value/self._values['N'])} ms")
                 if tag == "t" and "n" in self._values and self._values["n"] != 0:
-                    columns += [f"{number_to_string(value/self._values['n'],w=3)}"]
+                    columns += [f"{number_to_string(1000*value/self._values['n'])} ms"]
         lines.append(columns)
 
         # Get list of TOPN sub-Counters
