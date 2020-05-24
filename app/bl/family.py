@@ -34,7 +34,6 @@ class Family(NodeObject):
         """ Creates a new Family instance representing a database Family node.
         
         """
-        """ Luo uuden family-instanssin """
         NodeObject.__init__(self, uniq_id)
         self.priv = None
         self.rel_type = ''
@@ -251,25 +250,13 @@ class FamilyReader(DBreader):
 
 
     def get_person_families(self, uuid:str):
-        """ Get all families for given person.
-
-            Result 'items' is a list's first element is childhood family or None,
-            followed by those families where original person is a parent.
+        """ Get all families for given person in marriage date order.
         """
-        fam_as_child = None     # The family born in
-        fam_as_parent = []      # Other families by marriage
-
         res = self.dbdriver.dr_get_person_families(uuid)
         families = res.get('items')
-        if len(families) > 0:
-            for family in families:
-                if family.role == 'child':
-                    fam_as_child = family
-                else:
-                    fam_as_parent.append(family)
-            fam_as_parent.sort(key=lambda x: x.dates)
-            
-            return {"items":[fam_as_child] + fam_as_parent, "status":Status.OK}
+        if families:
+            families.sort(key=lambda x: x.dates)
+            return {"items":families, "status":Status.OK}
         else:
             return {"items":[], "status":Status.NOT_FOUND, 
                     "statustext": 'This person has no families'}

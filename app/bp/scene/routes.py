@@ -17,7 +17,7 @@ import shareds
 from flask import send_file, Response, jsonify
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
-#from flask_babelex import _
+from flask_babelex import _
 
 from ui.user_context import UserContext
 from bl.base import Status
@@ -378,6 +378,7 @@ def json_get_person_families():
         The first element is childhood family or None, 
         the others are marriages in time order.
     """
+    from templates.jinja_filters import translate
     t0 = time.time()
     try:
         args = request.args
@@ -397,7 +398,9 @@ def json_get_person_families():
         results = reader.get_person_families(uuid)
 
         if results.get('status') != 0:
-            return jsonify({"records":[], "statusText":results.get('status')})
+            return jsonify({"member":uuid, 
+                            "statusText":results.get('statustext'),
+                            "status":Status.NOT_FOUND})
         res = []
         for family in results['items']:
             if not family:   # Missing childhood family
@@ -405,15 +408,16 @@ def json_get_person_families():
                 continue
 
             fdict = {
-                "rel_type":family.rel_type,
+                "rel_type": translate(family.rel_type, 'marr'),
                 "dates": family.dates.to_list(),
-                "id":family.id,
-                "uuid":family.uuid
+                "id": family.id,
+                "uuid": family.uuid,
+                "role": translate(family.role, 'role')
             }
             parents = []
             if family.father:
                 parent = {
-                    "role":"father",
+                    "role":_('husband'),
                     "sortname":family.father.sortname,
                     "uuid":family.father.uuid
                 }
@@ -422,7 +426,7 @@ def json_get_person_families():
                 parents.append(parent)
             if family.mother:
                 parent = {
-                    "role":"mother",
+                    "role":_('wife'),
                     "sortname":family.mother.sortname,
                     "uuid":family.mother.uuid
                 }
@@ -433,7 +437,9 @@ def json_get_person_families():
         
             children = []
             for ch in family.children:
-                child = {"sex":ch.sex, "sortname":ch.sortname, "uuid":ch.uuid}
+                child = {"sex":translate(ch.sex, 'child'), 
+                         "sortname":ch.sortname, 
+                         "uuid":ch.uuid}
                 if ch.event_birth:
                     child['dates'] = ch.event_birth.dates.to_list()
                 children.append(child)
@@ -441,18 +447,21 @@ def json_get_person_families():
 
             events = []
             for ev in family.events:
-                events.append({"type":ev.type, "id":ev.id, "uuid":ev.uuid})
+                events.append({"type":ev.type, 
+                               "id":ev.id, 
+                               "uuid":ev.uuid})
             fdict["events"] = events
             res.append(fdict)
 
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"records":[], "status":Status.ERROR,
+        return jsonify({"records":[], "status":Status.ERROR,"member":uuid,
                         "statusText":f"Failed {e.__class__.__name__}"})
 
     t1 = time.time()-t0
     logger.info(f"-> bp.scene.routes.show_person_families_json n={len(results['items'])} e={t1:.3f}")
-    response = {'records':res, 'statusText':f'Löytyi {len(res)} perhettä (TESTING)'}
+    response = {'records':res, "member":uuid, 
+                'statusText':f'Löytyi {len(res)} perhettä (TESTING)'}
     print(json.dumps(response))
     #response.headers['Access-Control-Allow-Origin'] = '*'
     return jsonify(response) 

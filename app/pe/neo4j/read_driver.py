@@ -411,8 +411,7 @@ class Neo4jReadDriver:
 
     def dr_get_person_families(self, uuid):
         """
-            Get Notes for family and events
-            The id_list should include the uniq_ids for Family and events Events
+            Get the Families where Person is a member (parent or child).
 
             returns dict {items, status, statustext}
         """
@@ -454,11 +453,11 @@ class Neo4jReadDriver:
                         person.role = record['role']
                         if person.role == 'father':
                             family.father = person
-                        else:
+                        else:           # 'mother'
                             family.mother = person
                         if uuid == person.uuid:
                             family.role = 'parent'
-                            print(f'# Family {family.id} {family.role} --> {person.id}')
+                            print(f'# Family {family.id} {family.role} --> {person.id} ({person.role})')
                     else:
                         person.role = "child"
                         family.children.append(person)
