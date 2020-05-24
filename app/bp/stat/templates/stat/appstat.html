@@ -24,12 +24,17 @@
 
   Return to <a href="/stat">statistics start page.</a>
   <p>
-    TODO valintakriteerit:
+    Valintakriteereistä:
     <ul>
-      <li> aikaväliin perustuva (mikä käyttöliittymä?)
-      <li> By_xxx valinta (pudotusvalikko), sen sijaan että näytetään kaikki
-      <li> Liekö Maxdepth tarpeen lainkaan?
-      <li> Tai cumulative? (nyt se ei edes toimi...)
+      <li> <b>TODO: Aikaväliin perustuva valinta</b> (mikä käyttöliittymä?),
+	ja/tai
+	<ul>
+	  <li> by day
+	  <li> by month
+	</ul>
+      <li> Log files rajataan tässä annettavan suodatuksen lisäksi
+      päättyväksi '<tt>.log[_yyyy-mm-dd]</tt>'
+      <li> Maxdepth ja Cumulative jätetty pois (oliko tarpeen?)
     </ul>
     <div>
       Set options:
@@ -37,25 +42,21 @@
 	<fieldset>
 	  <table>
 	    <tr>
-	      <td>
-		{% set msg = opts["msg"] %}
-		<label for="msg">{{ _("Methods:") }}</label>
-		<input type="text" name="msg" size="6"
+	      <td>{% set msg = opts["msg"]
+		%} <label for="msg">{{ _("Methods:") }}</label>
+		    <input type="text" name="msg" size="6"
 	               title="{{ _("python regexp(s) to match messages/methods") }}"
 	               value="{{ msg }}">
 	      </td>
-	      <td>
-		{% set users = opts["users"] %}
-		<label for="users">{{ _("Users:") }}</label>
-		<input type="text" name="users" size="6"
+	      <td>{% set users = opts["users"]
+		%} <label for="users">{{ _("Users:") }}</label>
+		    <input type="text" name="users" size="6"
 	               title="{{ _("python regexp(s) to match users") }}"
 	               value="{{ users }}">
 	      </td>
-	      <td>
-		{% set logs = opts["logs"] %}
-		{% set logdir = opts["logdir"] %}
-		<label for="logs">{{ _(" Log files:") }}</label>
-		<input type="text" name="logs" size="6"
+	      <td>{% set logs = opts["logs"] %}{% set logdir = opts["logdir"]
+		%} <label for="logs">{{ _(" Log files:") }}</label>
+		    <input type="text" name="logs" size="6"
 	               title="{{ _("shell glob to match log files\nin ") }} {{logdir}}"
 		       {% if logs %} value="{{ opts['logs'] }}" {% endif %}>
 	      </td>
@@ -66,26 +67,25 @@
 	    </tr>
 
 	    <tr>
-	      <td>
-		{% set maxdepth = opts["maxdepth"] %}
-		<label for="maxdepth">{{ _(" Maxdepth:") }}</label>
-		<input type="text" name="maxdepth" size="6"
-	               title="{{ _("report max depth") }}"
-		       {% if maxdepth %} value="{{ maxdepth }}" {% endif %}>
+	      <td>{% set topn = opts["topn"]
+		%} <label for="topn">{{ _("How many:") }}</label>
+	  	     <input type="text" name="topn" size="1"
+	               title="{{ _("How many at most?") }}"
+	               value="{{ topn }}">
 	      </td>
-	      <td>
-		<label for="bycount">{{ _("By count:") }}</label>
-		<input type="checkbox" name="bycount" size="1"
+	      <td> <label for="bycount">{{ _("Sort by count:") }}</label>
+		     <input type="checkbox" name="bycount" size="1"
 	               title="{{ _("Sort by count or by text?") }}"
 		       {% if opts["bycount"] %} checked {% endif %}
 		       id="bycount" value="x">
 	      </td>
-	      <td>
-		<label for="cumul">{{ _("Cumulative:") }}</label>
-		<input type="checkbox" name="cumul" size="1"
-	               title="{{ _("Cumulative counts?") }}"
-		 {% if opts["cumul"] %} checked {% endif %}
-		       id="cumul" value="x">
+	      <td>{% set bywhat = opts["bywhat"]
+		%} <select id="bywhat" name="bywhat"> {%
+		  for what in ["msg", "date", "user"] %}
+		      <option value={{ what }} {% if bywhat==what
+			  %}selected{% endif
+			  %}>By {{ what }}</option>{% endfor %}
+		    </select>
 	      </td>
 	    </tr>
 	  </table>
@@ -96,7 +96,9 @@
     {% for filesection in res %}
     {# filesection[0] is log file name #}
     {# filesection[1] is contents from that log file #}
-    <h3>Logfile(s) <tt>{{ filesection[0] }}</tt></h3>
+  <p>
+    <b>Logfile(s):</b> <tt>{{ filesection[0] }}</tt>
+  <p>
     {% for subsection in filesection[1] %}
     {# subsection[0] is 'By xxx' #}
     {# subsection[1] is contents for that section #}
