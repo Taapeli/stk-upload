@@ -36,6 +36,19 @@ def number_to_string(x, w=2):
     if type(x) == float:
         return f"{x:.{w}f}"
 
+def is_wanted(target, matcher, want_if_match):
+    """Return True if TARGET is matched by MATCER if WANT_IF_MATCH is True.
+
+    If want_if_match is False return True is not matched.
+    But if MATCHER is None, return always True.
+
+    """
+    if matcher is None:
+        return True
+    if want_if_match:
+        return matcher.match(target)
+    else:
+        return not matcher.match(target)
 
 ################################################################
 #### class definitions
@@ -140,21 +153,22 @@ class Counter():
         Details (bycount?, topN) are in SELF._opts.
         Returns list of Counter objects.
         """
-
-        def x_name(x):
-            return "" if x._name is None else x._name
+        def counter_value(x, tag):
+            return x._values[tag] if tag in x._values else 0
 
         # use the negative number trick to get numeric sorting
         # reverse & alpa non-reverse (we can't use reverse=True
         # because that woud reverse the alpha sorting too)
+        # print(f"{self._name}")
         if self._opts["bycount"] is not None:
             result = sorted(self._counters.values(),
-                            key = lambda x: (-x._values["N"],
+                            key = lambda x: (-counter_value(x, "N"),
+                                             -counter_value(x, "n"),
                                              x._name) )
 
         else:
             result = sorted(self._counters.values(),
-                            key = lambda x: x_name(x))
+                            key = lambda x: x._name)
 
         topn = self._opts["topn"]
         if topn is not None:
@@ -191,11 +205,15 @@ class Counter():
         if level > 0:
             columns += [self._name]
             for tag, value in self._values.items():
-                columns += [f"{tag}", f"{number_to_string(value)}"]
+                columns.append(f"{tag}")
+                val = f"{number_to_string(value)}"
+                if tag == "e" or tag == "t":
+                    val += " s"
+                columns.append(val)
                 if tag == "e" and self._values["N"] != 0:
-                    columns += [f"{number_to_string(value/self._values['N'],w=3)}"]
+                    columns.append(f"{number_to_string(1000*value/self._values['N'])} ms")
                 if tag == "t" and "n" in self._values and self._values["n"] != 0:
-                    columns += [f"{number_to_string(value/self._values['n'],w=3)}"]
+                    columns += [f"{number_to_string(1000*value/self._values['n'])} ms"]
         lines.append(columns)
 
         # Get list of TOPN sub-Counters
@@ -237,16 +255,62 @@ class Counter():
     ################
     #
     def get_regexp_from_opts(self, what):
-        """Compile comma separated regexp patterns into one."""
+        """Compile comma separated list of regexp patterns into one.
+
+Return value is tuple (regex, wanted_if_match)
+If the list starts with '!', the second retun value is False."""
+
         if what not in self._opts or self._opts[what] == "":
-            return None
+            return None, True
+
+        want_if_match = True
+        pattern = self._opts[what]
+        if pattern.startswith("!"):
+            pattern = pattern[1:]
+            want_if_match = False
+
         try:
-            return re.compile( re.sub("[, ]+", "|", self._opts[what]) )
+            return re.compile(re.sub("[, ]+", "|", pattern)), want_if_match
         except Exception as e:
             flash(f"Bad regexp for {what} '{self._opts[what]}': {e}",
                   category='warning')
-        return None
+        return None, True
 
+
+    def save_bymsg(self, tup):
+        """Save TUP data by by module | user order."""
+        (date, module, user, tuples) = tup
+        self.update(inner_specs = [ (module, None), (user, tuples), ] )
+
+    def save_bydate(self, tup):
+        """Save TUP data by by date | user order."""
+        (date, module, user, tuples) = tup
+        self.update(inner_specs = [ (date, None), (user, None), (module, tuples) ] )
+
+
+    def save_byuser(self, tup):
+        """Save TUP data by by user | module | date order."""
+        (date, module, user, tuples) = tup
+        self.update(inner_specs = [ (user, None), (module, None), (date, tuples) ] )
+
+
+    def work_with(self, logfile):
+        """Call parser to get values from stk upload log files.
+
+        """
+        if logfile in self._files:
+            flash(f"Already done file {logfile}") # this should not happen
+            return
+        self._files.append(logfile)  # protect against double processing
+
+        # read date, module, user, tuples from parser
+        # call designated counter_xxx to store values
+        for tup in self.parser(logfile):
+            # print(f"{tup}")
+            for saver in self._savers:
+                counter = self._savers[saver]
+                saver(counter, tup)
+        return
 
 ################################################################
 #
@@ -273,42 +337,6 @@ Counters are kept in list of Counter objects.
     lokeja.
 
         """
-
-    def work_with(self, file):
-        """Call parser to get values, store them useing counter_xxx.
-
-        """
-        if file in self._files:
-            flash(f"Already done file {file}") # this should not happen
-            return
-        self._files.append(file)  # protect against double processing
-
-        # read date, module, user, tuples from parser
-        # call designated counter_xxx to store values
-        for tup in self.parser(file):
-            # print(f"{tup}")
-            for saver in self._savers:
-                counter = self._savers[saver]
-                saver(counter, tup)
-        return
-
-
-    def save_bymsg(self, tup):
-        """Save TUP data by by module | user order."""
-        (date, module, user, tuples) = tup
-        self.update(inner_specs = [ (module, None), (user, tuples), ] )
-
-    def save_bydate(self, tup):
-        """Save TUP data by by date | user order."""
-        (date, module, user, tuples) = tup
-        self.update(inner_specs = [ (date, None), (user, None), (module, tuples) ] )
-
-
-    def save_byuser(self, tup):
-        """Save TUP data by by user | module | date order."""
-        (date, module, user, tuples) = tup
-        self.update(inner_specs = [ (user, None), (module, None), (date, tuples) ] )
-
 
     ################
     #
@@ -339,8 +367,8 @@ Counters are kept in list of Counter objects.
         equals_re = re.compile(r"\b(\S+)=(\S+)\b")
 
         # some filtering wanted by caller:
-        users_re    = self.get_regexp_from_opts("users")
-        want_msg_re = self.get_regexp_from_opts("msg")
+        (users_re, want_user)    = self.get_regexp_from_opts("users")
+        (msg_re, want_msg) = self.get_regexp_from_opts("msg")
 
         for line in open(logfile, "r").read().splitlines():
             match = log_re.match(line)
@@ -351,7 +379,7 @@ Counters are kept in list of Counter objects.
             if level != 'INFO':
                 continue
 
-            if users_re and not users_re.match(user):
+            if not is_wanted(user, users_re, want_user):
                 continue
 
             match = arrow_re.match(message)
@@ -359,7 +387,7 @@ Counters are kept in list of Counter objects.
                 continue
 
             (module, rest) = match.groups()
-            if want_msg_re and not want_msg_re.match(module):
+            if not is_wanted(module, msg_re, want_msg):
                 continue
 
             # Get list of all x=y stuff (if any)
@@ -378,46 +406,10 @@ class StkUploadlog(Counter):
         super().__init__(name, level, opts=opts)
         self._files  = []       # list of files already processed
         self._savers = {}
+        (self._want_step_re,
+         self._want_step_if_match) = self.get_regexp_from_opts("msg")
         for (name, saver) in by_what:
             self._savers[saver] = self.get_or_create(name)
-        return
-
-    def work_with(self, logfile):
-        """Call parser to get values from stk upload log files.
-
-        """
-        if logfile in self._files:
-            flash(f"Already done file {logfile}") # this should not happen
-            return
-        self._files.append(logfile)  # protect against double processing
-
-        # read date, module, user, tuples from parser
-        # call designated counter_xxx to store values
-        for tup in self.parser(logfile):
-            # print(f"{tup}")
-            for saver in self._savers:
-                counter = self._savers[saver]
-                saver(counter, tup)
-        return
-
-    ################
-    #
-    def save_byuser(self, tup):
-        """Save TUP data by by user | module | date order."""
-        (date, step, user, tuples) = tup
-        self.update(inner_specs = [ (user, None), (step, None), (date, tuples) ] )
-        return
-
-    def save_bydate(self, tup):
-        """Save TUP data by by user | module | date order."""
-        (date, step, user, tuples) = tup
-        self.update(inner_specs = [ (date, None), (step, None), (user, tuples) ] )
-        return
-
-    def save_bystep(self, tup):
-        """Save TUP data by by user | module | date order."""
-        (date, step, user, tuples) = tup
-        self.update(inner_specs = [ (step, None),  (date, None), (user, tuples) ] )
         return
 
     ################
@@ -440,48 +432,84 @@ class StkUploadlog(Counter):
                 parts[i] = f"{int(parts[i]):02d}"
             return "-".join(parts)
 
-        # Dig the user name from logfile pathname:
-        last_slash_pos = logfile.rindex("/")
-        second_to_last = logfile.rindex("/", 0, last_slash_pos-1)
-        user = logfile[second_to_last+1 : last_slash_pos]
-        users_re    = self.get_regexp_from_opts("users")
-        if users_re and not users_re.match(user):
+        def user_from_filename(logfile):
+            """Dig the user name from logfile pathname:"""
+            last_slash_pos = logfile.rindex("/")
+            second_to_last = logfile.rindex("/", 0, last_slash_pos-1)
+            user = logfile[second_to_last+1 : last_slash_pos]
+            (users_re, want_if_match) = self.get_regexp_from_opts("users")
+            if is_wanted(user, users_re, want_if_match):
+                return user
+
+        def loading_succesfull(logfile, total_re, ts1_re, ts2_re):
+            """Tell if LOGFILE contains data for succesfull loading.
+
+            Judgement is based on TOTAL_RE and TS_RE (must be found in the
+            file).  Return value is the timestamp matching TS_RE (or None).
+
+            """
+            ymd = "????-??-??"
+            for line in open(logfile, "r").read().splitlines():
+                if total_re.match(line):
+                    return ymd, True
+                m = ts1_re.match(line)
+                if m:
+                    ymd = fix_date(m.group(1))
+                    continue
+                m = ts2_re.match(line)
+                if m:
+                    ymd = m.group(1)
+                    continue
+            return ymd, False
+
+        #### THE PARSER IS UGLY !!!  ( But so are the log files :-( )
+
+        INFO_re = re.compile(
+            r"^INFO ([^:]+): "  # step name
+            r"(\d+)"            # the first number (int)
+            r"(?: *[:/] *)?"    # maybe separator
+            r"([\d.]+)?"        # mayme second number (float)
+            r"(?: sek)?"        # another optional group
+            r" *"               # maybe trailing space
+            r"\Z")              # end of txt
+        total_re = re.compile(r"^TITLE Total time: +([/:] )?([\d.]+)( sek)?")
+        ts1_re = re.compile(r"^(\d\d?\.\d\d?.\d\d\d\d) (?:\d\d:\d\d)")
+        ts2_re = re.compile(r"^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)"
+                            r" (\d\d\d\d-\d\d-\d\d) (?:\d\d:\d\d:\d\d)")
+        stored_re = re.compile(r"^Stored the file (.+) from user (.+) to neo4j$")
+        storing_re = re.compile(r"^TITLE Storing data from ")
+        WARNING_re = re.compile(r"^WARNING (.+)$")
+        batchid_re = re.compile(r"^Batch id: (.+)$")
+        loaded_re = re.compile(r"^Loaded the file (.+)$")
+        INFOloaded_re = re.compile(r"^INFO Loaded file (.+)$")
+        log_re = re.compile(r"^Log file: (.+)$")
+
+        user = user_from_filename(logfile)
+        if user is None:
             return
         # print(f"u={user}")
 
-        upload_re1 = re.compile(r"^INFO ([^:]+): (\d+)(?: / ([\d.]+) sek)?$")
-        upload_re2 = re.compile(r"^TITLE Total time: +([/:] )?([\d.]+)( sek)?")
-        upload_re3 = re.compile(r"^(\d\d?\.\d\d?.\d\d\d\d) (?:\d\d:\d\d)")
-        upload_re4 = re.compile(r"^Stored the file (.+) from user (.+) to neo4j$")
-
-        ymd = "????-??-??"
-        found_total = False
-        line_count = 0
-        for line in open(logfile, "r").read().splitlines():
-            line_count += 1
-            if upload_re2.match(line):
-                found_total = True
-                break
-            m = upload_re3.match(line)
-            if m:
-                ymd = fix_date(m.group(1))
-        if not found_total:
-            yield ymd, "Failed", user, [(logfile, f"{line_count}")]
-            return
-
         # some filtering wanted by caller:
-        want_msg_re = self.get_regexp_from_opts("msg")
+        (ymd, load_success) = loading_succesfull(logfile, total_re, ts1_re, ts2_re)
+        if not load_success:
+            step = "Failed"
+            if is_wanted(step, self._want_step_re, self._want_step_if_match):
+                print(f"** ==> Failed {logfile}")
+                yield ymd, step, user, [(logfile, "1")]
+                return
 
         for line in open(logfile, "r").read().splitlines():
-            m = upload_re1.match(line)
-            if m:               # starts with INFO
+
+            # This is the most intresting kind of line
+            m = INFO_re.match(line)
+            if m:
                 if user is None:
                     flash(f"logfile {logfile} no user found before INFO line")
                     return
                 (step, count, time) = m.groups()
                 if count == "0":
                     continue
-                if want_msg_re and not want_msg_re.match(step):
+                if not is_wanted(step, self._want_step_re, self._want_step_if_match):
                     continue
 
                 step = step.split(" ")[0]
@@ -494,32 +522,29 @@ class StkUploadlog(Counter):
                 yield ymd, step, user, tuples
                 continue
 
-            m = upload_re2.match(line)
+            m = total_re.match(line)
             if m:               # has Total time
                 time = m.group(1)
                 if ymd is None or user is None or time is None:
-                    print(f"{logfile}: ymd='{ymd}', s='total_time' user='{user}'")
+                    print(f"** --> {logfile}: ymd='{ymd}', s='total_time' user='{user}'")
                     continue
                 # print(f"t='{time}'")
                 step = "Done"
-                if want_msg_re and not want_msg_re.match(step):
+                if not is_wanted(step, self._want_step_re, self._want_step_if_match):
                     continue
                 yield ymd, step, user, [ ("t", time ) ]
                 continue
 
-            m = upload_re3.match(line)
-            if m:               # line has {dmy} ...
-                ymd = fix_date(m.group(1))
-                # print(f"ymd {dmy} -> {ymd}")
-                continue
-
-            m = upload_re4.match(line)
-            if m:               # Stored .... from user {user}
-                # just remember the user
-                # (datafile, user) = m.groups()
-                # print(f"Stored f='{datafile}' u='{user}'")
-                continue
+            if ts1_re.match(line): continue # already got at start
+            if ts2_re.match(line): continue
+            if stored_re.match(line): continue
+            if storing_re.match(line): continue
+            if WARNING_re.match(line): continue
+            if batchid_re.match(line): continue
+            if loaded_re.match(line): continue
+            if INFOloaded_re.match(line): continue
+            if log_re.match(line): continue
 
             if line != "":
-                # print(line)
+                print(f"Unhandled line: {line}")
                 continue
