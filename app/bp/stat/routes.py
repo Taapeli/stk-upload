@@ -115,8 +115,7 @@ def build_options(logdir, logname_template, lookup_table):
             flash("Can not decide primary sort key")
             return None         # this will fail in caller
 
-    logfiles = get_logfiles(logdir, logname_template,
-                            patterns = logs)
+    logfiles = get_logfiles(logdir, logname_template, patterns=logs)
 
     return pkey, lookup_table[pkey], logfiles, opts
 
@@ -185,7 +184,7 @@ def stat_app():
         "By_date": logreader.StkServerlog.save_bydate,
         "By_user": logreader.StkServerlog.save_byuser,
     })
-    print(f"{opts} {logfiles}")
+    # print(f"{opts} {logfiles}")
 
     # res [] will collect results from all logreader invocations, one set
     # from each call
@@ -229,7 +228,7 @@ def stat_upload():
             "By_date"  :  logreader.StkUploadlog.save_bydate,
             "By_user"  :  logreader.StkUploadlog.save_byuser,
         })
-    print(f"{opts} {logfiles}")
+    # print(f"{opts} {logfiles}")
 
     logrdr = logreader.StkUploadlog(
         "Top_level",
