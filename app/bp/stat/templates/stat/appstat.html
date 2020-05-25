@@ -35,6 +35,10 @@
       <li> Log files rajataan tässä annettavan suodatuksen lisäksi
       päättyväksi '<tt>.log[_yyyy-mm-dd]</tt>'
       <li> Maxdepth ja Cumulative jätetty pois (oliko tarpeen?)
+	<li> N, n, e jne. ovat oikeammin sarakeotsikoita.  Lopullisempi
+	 toteutus on työn alla.  Toistaiseksi ne on tuolla riveillä, kun eri
+	 lokientryissä on eri määrät noita tietoja (helpompi ehkä nähdä, missä
+	 saatetaan haluta täydentää lokitusta...).
     </ul>
     <div>
       Set options:
@@ -85,6 +89,13 @@
 		      <option value={{ what }} {% if bywhat==what
 			  %}selected{% endif
 			  %}>By {{ what }}</option>{% endfor %}
+		</select>
+		{% set period = opts["period"]
+		%} <select id="period" name="period"> {%
+		  for per in ["daily", "monthly"] %}
+		      <option value={{ per }} {% if period==per
+			  %}selected{% endif
+			  %}>{{ per }}</option>{% endfor %}
 		    </select>
 	      </td>
 	    </tr>
