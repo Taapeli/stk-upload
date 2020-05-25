@@ -90,10 +90,10 @@ def translate(term, var_name):
             "Pääosallinen": _("Pääosallinen"), #"pääosallisena"
             "Edunsaaja": _("Edunsaaja"), #"edunsaajana"
             "Myyjä": _("Myyjä"), #"myyjänä"
-            "father": _("Mies"), 
-            "mother": _("Vaimo"),
-            "man": _("Mies"), 
-            "wife": _("Vaimo"),
+            "father": _("Father"), 
+            "mother": _("Mother"),
+            "man": _("Husband"), 
+            "wife": _("Wife"),
             "child": _("as child"),     # Role as family member
             "parent": _("as parent"),   # Role as family member
             "Unknown": _("Unknown role") #"määräämätön"
