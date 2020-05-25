@@ -293,7 +293,8 @@ If the list starts with '!', the second retun value is False."""
         (date, module, user, tuples) = tup
         self.update(inner_specs = [ (user, None), (module, None), (date, tuples) ] )
 
-
+    ################
+    #
     def work_with(self, logfile):
         """Call parser to get values from stk upload log files.
 
@@ -311,6 +312,26 @@ If the list starts with '!', the second retun value is False."""
                 counter = self._savers[saver]
                 saver(counter, tup)
         return
+
+    ################
+    #
+    def date_of_period(self, date):
+        """Truncate DATE string to match SELF._opts['period']
+
+        At input DATE = yyyy-mm-dd.  'daily' is easy, 'monthly' is almost as
+        easy; for 'weekly'... we need to do some calendar math.
+
+        """
+        period = self._opts['period']
+        if period == "daily":
+            return date
+        if period == "monthly":
+            if "-" not in date:
+                print(f"Bad date: '{date}'")
+                return date
+            return date[:date.rindex("-")]
+        return date             # for the moment
+
 
 ################################################################
 #
@@ -392,7 +413,7 @@ Counters are kept in list of Counter objects.
 
             # Get list of all x=y stuff (if any)
             tuples = equals_re.findall(rest)
-            yield date, module, user, tuples
+            yield self.date_of_period(date), module, user, tuples
 
         return
 
@@ -445,13 +466,14 @@ class StkUploadlog(Counter):
             """Tell if LOGFILE contains data for succesfull loading.
 
             Judgement is based on TOTAL_RE and TS_RE (must be found in the
-            file).  Return value is the timestamp matching TS_RE (or None).
+            file).  Return value is the timestamp matching TS_RE (or None),
+            modified to match SELF._opts['period']
 
             """
             ymd = "????-??-??"
             for line in open(logfile, "r").read().splitlines():
                 if total_re.match(line):
-                    return ymd, True
+                    return self.date_of_period(ymd), True
                 m = ts1_re.match(line)
                 if m:
                     ymd = fix_date(m.group(1))
@@ -460,7 +482,7 @@ class StkUploadlog(Counter):
                 if m:
                     ymd = m.group(1)
                     continue
-            return ymd, False
+            return self.date_of_period(ymd), False
 
         #### THE PARSER IS UGLY !!!  ( But so are the log files :-( )
 

@@ -91,6 +91,7 @@ def build_options(logdir, logname_template, lookup_table):
     bywhat  = request.args.get("bywhat", "user")
     logs    = request.args.get("logs", "")
     msg     = check_regexp_option("msg")
+    period  = request.args.get("period", "daily")
     users   = check_regexp_option("users")
     topn    = safe_get_request("topn", 42)
 
@@ -102,6 +103,7 @@ def build_options(logdir, logname_template, lookup_table):
         "logdir" : logdir,
         "logs"   : logs,        # used before logreader to filter logfiles
         "msg"    : msg,
+        "period" : period,
         "users"  : users,
         "topn"   : topn,
     }
