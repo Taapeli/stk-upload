@@ -89,7 +89,7 @@ def build_options(logdir, logname_template, lookup_table):
 
     bycount = request.args.get("bycount", None)
     bywhat  = request.args.get("bywhat", "user")
-    logs    = request.args.get("logs", "")
+    logs    = request.args.get("logs", "") # removed selection from UI
     msg     = check_regexp_option("msg")
     period  = request.args.get("period", "daily")
     users   = check_regexp_option("users")
@@ -186,21 +186,19 @@ def stat_app():
         "By_date": logreader.StkServerlog.save_bydate,
         "By_user": logreader.StkServerlog.save_byuser,
     })
-    # print(f"{opts} {logfiles}")
 
-    # res [] will collect results from all logreader invocations, one set
-    # from each call
+    # res [] could collect results from many logreader invocations, one set
+    # from each call (inside loop, as we once did)
     res = []
+    # We now have one logreader to read all log files (outside the loop):
+    logrdr = logreader.StkServerlog(
+        "Top_level",
+        by_what = [ (pkey, parser) ],
+        opts    = opts,
+    )
     for f in logfiles:
-        # Create a logreader for each logfile
-        #  that can do "By_msg" and "By_date" and "By_user" statistics
-        logrdr = logreader.StkServerlog(
-            "Top_level",
-            by_what = [ (pkey, parser) ],
-            opts    = opts,
-        )
         logrdr.work_with(f)
-        res.append(logrdr.get_report()) # that will be one filesection
+    res.append(logrdr.get_report()) # that will be one filesection
 
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
@@ -231,16 +229,14 @@ def stat_upload():
             "By_date"  :  logreader.StkUploadlog.save_bydate,
             "By_user"  :  logreader.StkUploadlog.save_byuser,
         })
-    # print(f"{opts} {logfiles}")
 
+    # Create one logreader to read all logfiles
     logrdr = logreader.StkUploadlog(
         "Top_level",
         by_what = [ (pkey, parser) ],
         opts    = opts,
     )
     for f in logfiles:
-        # Create a logreader for each logfile
-        #  that can do "By_msg" and "By_date" and "By_user" statistics
         logrdr.work_with(f)
     res = [logrdr.get_report()] # that will be one filesection for all
                                     # files in the loop
