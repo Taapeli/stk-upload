@@ -15,7 +15,7 @@ from flask_babelex import lazy_gettext as N_
 
 
 class UserContext():
-    """ Store filter values for finding the active subset of database.
+    """ Store filter values for finding the required subset of database.
     
         Usage:
             #    Create context with defaults from session and request (1)
@@ -170,7 +170,7 @@ class UserContext():
         self.choices = self.ChoicesOfView()   # set of allowed material choices
         self.context = self.ChoicesOfView.COMMON
         self.years = []                         # example [1800, 1899]
-        self.series = None                      # Source data theme like "birth"
+        self.series = None                      # 'Source' data theme like "birth"
         self.count = 10000                      # Max count ow objects to display
         self.lang = user_session.get('lang','') # User language
 
@@ -216,13 +216,15 @@ class UserContext():
                 if self.context:
                     self.session['user_context'] = self.context
                     print(f"UserContext: Now user_context={self.context}")
-            # Clear obslete session variable
-            user_session.pop('owner_filter', None)
 
         if new_selection == 0:
             # If got no request user_context, use session value or 1
             self.context = user_session.get('user_context', self.choices.COMMON)
             print(f"UserContext: Uses same or default user_context={self.context}")
+
+        #   For logging of scene area pages, set User.current_context variable:
+        #   are you browsing common, audited data or her own batches?
+        current_user.current_context=self.context
 
 
     def get_my_user_id(self):

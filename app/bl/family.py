@@ -61,13 +61,13 @@ class Family(NodeObject):
         '''
         n = cls()
         n.uniq_id = node.id
-        n.id = node['id'] or ''
+        n.id = node.get('id','')
         n.uuid = node['uuid']
         n.handle = node['handle']
         n.change = node['change']
-        n.rel_type = node['rel_type'] or ''
-        n.father_sortname = node['father_sortname']
-        n.mother_sortname = node['mother_sortname']
+        n.rel_type = node.get('rel_type','')
+        n.father_sortname = node.get('father_sortname','')
+        n.mother_sortname = node.get('mother_sortname','')
         if "datetype" in node:
             n.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         return n

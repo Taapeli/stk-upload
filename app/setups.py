@@ -31,6 +31,7 @@ from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
 from bp.admin.models.user_admin import UserAdmin, UserProfile, Allowed_email
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
 from datetime import datetime
+from ui.user_context import UserContext
 
 #import logging
 #from flask_login.utils import current_user
@@ -75,7 +76,8 @@ class Role(RoleMixin):
 
 
 class User(UserMixin):
-    """ Object describing distinct user security properties """
+    """ Object describing distinct user security properties.
+    """
     id = ''
     email = ''
     username = ''   
@@ -90,6 +92,8 @@ class User(UserMixin):
     current_login_at = None
     current_login_ip = ''
     login_count = 0
+    # View filtering option. Stored here for logging in scene pages
+    current_context = UserContext.ChoicesOfView.COMMON
 
     def __init__(self, **kwargs):
         if 'id' in kwargs:
@@ -107,6 +111,11 @@ class User(UserMixin):
         self.current_login_at = kwargs.get('current_login_at')
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
+
+    def is_showing_common(self):
+        """ Is showing common, approved data only?
+        """
+        return not (self.current_context & UserContext.ChoicesOfView.OWN)
 
 
 # class UserProfile():

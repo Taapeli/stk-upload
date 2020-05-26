@@ -856,10 +856,12 @@ class Neo4jReadDriver:
             if 'Person' in node.labels:
                 obj = Person_combo.from_node(node)
             elif 'Family' in node.labels:
-                obj = Family_combo.from_node(node)
+                obj = FamilyBl.from_node(node)
                 obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
             else:
-                raise NotImplementedError('Person or Family expexted: {node.labels}')
+                #raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
+                logger.warning(f'dr_get_source_citations Person or Family expexted: {list(node.labels)}')
+                return None
             obj.role = role
             if obj.role == 'Primary':
                 obj.role = None
@@ -906,9 +908,9 @@ class Neo4jReadDriver:
             #    ]
             # >
             citation_node = record['citation']
-            note_nodes = record['notes']
             near_node = record['near']
             far_nodes = record['far']
+            note_nodes = record['notes']
 
             uniq_id = citation_node.id
             citation = Citation.from_node(citation_node)
@@ -920,7 +922,7 @@ class Neo4jReadDriver:
             if notelist:
                 notes[uniq_id] = notelist
 
-            targetlist = []
+            targetlist = []     # Persons or Families referring this source
             for node, role in far_nodes:
                 if not node: continue
                 obj = obj_from_node(node, role)
@@ -929,8 +931,12 @@ class Neo4jReadDriver:
                     targetlist.append(obj)
             if not targetlist:  # No far node: there is a middle node near
                 obj = obj_from_node(near_node)
-                targetlist.append(obj)
-            targets[uniq_id] = targetlist
+                if obj:
+                    targetlist.append(obj)
+            if targetlist:
+                targets[uniq_id] = targetlist
+            else:
+                print(f'dr_get_source_citations: Event {near_node.id} {near_node.get("id")} without Person or Family?')
 
         # Result dictionaries using key = Citation uniq_id
         return citations, notes, targets
