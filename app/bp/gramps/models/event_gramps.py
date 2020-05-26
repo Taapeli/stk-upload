@@ -78,7 +78,8 @@ class Event_gramps(Event):
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:
-            result = tx.run(Cypher_event_w_handle.create, date=today, e_attr=e_attr)
+            result = tx.run(Cypher_event_w_handle.create_to_batch, 
+                            date=today, e_attr=e_attr)
             ids = []
             for record in result:
                 self.uniq_id = record[0]

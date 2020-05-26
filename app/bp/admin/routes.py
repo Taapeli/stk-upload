@@ -10,12 +10,10 @@ Created on 8.8.2018
 import os
 
 import json
-import logging 
 #import inspect
 import traceback
 
-#from bp.gramps.models import batch #TODO: move into models.gen.batch_audit
-
+import logging 
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
@@ -56,11 +54,14 @@ def clear_db(opt):
     """ Clear database - with no confirmation! """
     try:
         updater = DataAdmin(current_user)
-        msg =  updater.db_reset(opt) # dbutil.alusta_kanta()
-        logger.info(f"-> bp.admin.routes.clear_db {opt}")
-        return render_template("/admin/talletettu.html", text=msg)
+        result =  updater.db_reset(opt) # dbutil.alusta_kanta()
+        logger.info(f"-> bp.admin.routes.clear_db/{opt} n={result['count']}")
+        return render_template("/admin/talletettu.html", text=result['msg'])
     except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        traceback.print_exc()
+        return redirect(url_for('virhesivu', code=1, 
+                                text=', '.join( (str(e), result['msg']) )
+                       ))
 
 @bp.route('/admin/clear_my_own')
 @login_required
