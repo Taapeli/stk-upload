@@ -316,7 +316,7 @@ If the list starts with '!', the second retun value is False."""
     ################
     #
     def date_of_period(self, date):
-        """Truncate DATE string to match SELF._opts['period']
+        """Return new date string, derived from DATE to match SELF._opts['period']
 
         At input DATE = yyyy-mm-dd.  'daily' is easy, 'monthly' is almost as
         easy; for 'weekly'... we need to do some calendar math.
@@ -329,8 +329,14 @@ If the list starts with '!', the second retun value is False."""
             if "-" not in date:
                 print(f"Bad date: '{date}'")
                 return date
-            return date[:date.rindex("-")]
-        return date             # for the moment
+            return date[:date.rindex("-")] + "-01"
+        # Do some datetime math to find beginning of week
+        import datetime
+        myformat = "%Y-%m-%d"
+        mydt = datetime.datetime.strptime(date, myformat)
+        start = mydt - datetime.timedelta(days = mydt.weekday())
+        return start.strftime(myformat)
+
 
 
 ################################################################

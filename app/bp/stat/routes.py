@@ -207,6 +207,7 @@ def stat_app():
     return render_template("/stat/appstat.html",
                            h2      = "Application usage statistics",
                            caller  = "/stat/appstat",
+                           title   = "App stats",
                            res     = res,
                            opts    = opts,
                            elapsed = elapsed )
@@ -249,6 +250,7 @@ def stat_upload():
     return render_template("/stat/appstat.html",
                            h2      = "Data upload statistics",
                            caller  = "/stat/uploadstat",
+                           title   = "Upload stats",
                            res     = res,
                            opts    = opts,
                            elapsed = elapsed,

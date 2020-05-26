@@ -1,7 +1,7 @@
 {# templates/stat/anstk.html #}
 {% extends "admin/layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _("App Stats") }}{% endblock %}
+{% block title %}{{ _(title) }}{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -92,7 +92,7 @@
 		</select>
 		{% set period = opts["period"]
 		%} <select id="period" name="period"> {%
-		  for per in ["daily", "monthly"] %}
+		  for per in ["daily", "weekly", "monthly"] %}
 		      <option value={{ per }} {% if period==per
 			  %}selected{% endif
 			  %}>{{ per }}</option>{% endfor %}
