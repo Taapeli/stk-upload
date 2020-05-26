@@ -9,7 +9,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from sys import stderr
 
 from shareds import logger
-from models.gen.source import Source
+from bl.source import Source
+#from models.gen.source import Source
 from models.cypher_gramps import Cypher_source_w_handle
 
 

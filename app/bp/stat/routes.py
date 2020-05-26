@@ -8,18 +8,21 @@ import time
 import re
 import os
 
-from flask import flash, render_template, request, redirect, url_for, session as user_session
-from flask_security import current_user, roles_accepted, login_required
-from flask_babelex import _
+from flask import flash, render_template, request
+from flask_security import roles_accepted, login_required
+# from flask_babelex import _
 
-from ui.user_context import UserContext
+# from ui.user_context import UserContext
 
 import shareds
 
 from . import bp
 from .models import logreader
 
+################ helper fuctions ################
 
+################
+#
 def run_cmd(cmd):
     import subprocess
     # see https://docs.python.org/3.3/library/subprocess.html
@@ -34,14 +37,103 @@ def run_cmd(cmd):
     lines = [x.rstrip() for x in output.split("\n")]
     return (lines)
 
+################
+#
+def get_logfiles(log_root, log_file, patterns=""):
+    """Get ist of log files matching PATTERNS.
 
+    Empty PATTERNS equals LOG_FILES.  Return matching filenames in
+    LOG_ROOT.
+
+    """
+    import glob
+    if patterns == "":
+        patterns = f"{log_file}*"
+    files = []
+    for pat in re.split(" ", patterns):
+        files += list(filter(os.path.isfile, glob.glob(f"{log_root}/{pat}")))
+    files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+    files = [ x for x in files if re.search("\.log(_[\d-]+)?$", x)]
+    return files
+
+################
+#
+def safe_get_request(what, default):
+    res = request.args.get(what, default)
+    if res == "":
+        return default
+    try:
+        return int(res)
+    except ValueError as e:
+        flash(f"Bad number for {what} '{res}': {e}; using default {default}",
+              category='warning')
+        return default
+
+################
+#
+def check_regexp_option(what, default=""):
+    val = request.args.get(what, default)
+    if val == "":
+        return ""
+    try:
+        re.compile( re.sub("[, ]+", "|", val) )
+        return "," . join(re.split("[, ]+", val))
+    except Exception as e:
+        flash(f"Bad regexp for {what} '{val}': {e}",
+              category='warning')
+    return ""
+
+################
+#
+def build_options(logdir, logname_template, lookup_table):
+
+    bycount = request.args.get("bycount", None)
+    bywhat  = request.args.get("bywhat", "user")
+    logs    = request.args.get("logs", "")
+    msg     = check_regexp_option("msg")
+    period  = request.args.get("period", "daily")
+    users   = check_regexp_option("users")
+    topn    = safe_get_request("topn", 42)
+
+    # opts from template, they go to logreader and back to template as
+    # defaults values
+    opts = {
+        "bycount": bycount,
+        "bywhat" : bywhat,
+        "logdir" : logdir,
+        "logs"   : logs,        # used before logreader to filter logfiles
+        "msg"    : msg,
+        "period" : period,
+        "users"  : users,
+        "topn"   : topn,
+    }
+
+    pkey = f"By_{bywhat}"
+    if pkey not in lookup_table:
+        if "By_user" in lookup_table:
+            flash(f"Bad primary sort key '{bywhat}', trying 'user'")
+            pkey = "By_user"
+        else:
+            flash("Can not decide primary sort key")
+            return None         # this will fail in caller
+
+    logfiles = get_logfiles(logdir, logname_template, patterns=logs)
+
+    return pkey, lookup_table[pkey], logfiles, opts
+
+
+
+################################################################
+#### @route funtions below
+
+################################################################
+#
 @bp.route('/stat')
 @login_required
 @roles_accepted('admin')
 def stat_home():
-    """Statistiikkaa palvelimelta.
+    """Statistics from stk server.
     """
-    import shareds
     code_root = shareds.app.config['APP_ROOT']
 
     def count_files_lines(fpat, lpat=None):
@@ -61,7 +153,7 @@ def stat_home():
     (html_files, html_lines) = count_files_lines("*.html")
     (route_files, route_lines) = count_files_lines("routes.py", lpat=r"^@.*route")
     commits = run_cmd("git log | grep commit | wc -l")
-
+    commits1m = run_cmd(f"git log --after '1 month ago' | grep commit | wc -l")
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat e={elapsed:.4f}")
     return render_template("/stat/stat.html",
@@ -72,91 +164,95 @@ def stat_home():
                            route_files = route_files,
                            route_lines = route_lines,
                            commits = int(commits[0]),
+                           commits1m = int(commits1m[0]),
                            elapsed = elapsed,
     )
 
-
+################################################################
+#
 @bp.route('/stat/appstat', methods = ['GET', 'POST'])
 @login_required
 @roles_accepted('admin')
 def stat_app():
-    """Statistiikkaa palvelimelta.
+    """Statistics about stk application usage.
     """
-
-    def get_logfiles(patterns):
-        import glob
-        log_root = shareds.app.config['STK_LOGDIR']
-        log_file = shareds.app.config['STK_LOGFILE']
-        if patterns == "":
-            patterns = f"{log_file}*"
-        files = []
-        for pat in re.split(" ", patterns):
-            files += list(filter(os.path.isfile, glob.glob(f"{log_root}/{pat}")))
-        files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-        return files
-
-    def safe_get_request(what, default):
-        res = request.args.get(what, default)
-        if res == "":
-            return default
-        try:
-            return int(res)
-        except ValueError as e:
-            flash(f"Bad number for {what} '{res}': {e}; using default {default}",
-                  category='warning')
-            return default
-
-    def check_regexp_option(what, default=""):
-        val = request.args.get(what, default)
-        if val == "":
-            return ""
-        try:
-            re.compile( re.sub("[, ]+", "|", val) )
-            return "," . join(re.split("[, ]+", val))
-        except Exception as e:
-            flash(f"Bad regexp for {what} '{val}': {e}",
-                  category='warning')
-            return ""
+    logdir = shareds.app.config['STK_LOGDIR']
 
     t0 = time.time()
 
-    users   = check_regexp_option("users")
-    msg     = check_regexp_option("msg")     # ...took the place of width in UI
-    width   = safe_get_request("width", 70) # no way to set this in UI...
-    topn    = safe_get_request("topn", 42)
-    bycount = request.args.get("bycount", None)
-    style   = request.args.get("style", "text")
-    logs    = request.args.get("logs", "")
+    (pkey, parser, logfiles, opts) = build_options(
+        logdir, shareds.app.config['STK_LOGFILE'], {
+        "By_msg" : logreader.StkServerlog.save_bymsg,
+        "By_date": logreader.StkServerlog.save_bydate,
+        "By_user": logreader.StkServerlog.save_byuser,
+    })
+    # print(f"{opts} {logfiles}")
 
-    opts = {
-        "topn"   : topn,
-        "width"  : width,
-        "style"  : style,
-    }
-    # Absense/precense of these in opts matters:
-    if bycount is not None: opts["bycount"] = 1
-    for k,v in { "msg"  : msg,
-                 "users": users }.items():
-        if v != "":
-            opts[k] = v
-
-    # lines[] will collect results from all log files
-    lines = []
-    for f in get_logfiles(logs):
-        log = logreader.Log(opts) # each file needs own Log
-        log.work_with(f"{f}")
-        lines.append(log.get_counts(style=style))
+    # res [] will collect results from all logreader invocations, one set
+    # from each call
+    res = []
+    for f in logfiles:
+        # Create a logreader for each logfile
+        #  that can do "By_msg" and "By_date" and "By_user" statistics
+        logrdr = logreader.StkServerlog(
+            "Top_level",
+            by_what = [ (pkey, parser) ],
+            opts    = opts,
+        )
+        logrdr.work_with(f)
+        res.append(logrdr.get_report()) # that will be one filesection
 
     elapsed = time.time() - t0
     logger.info(f"-> bp.stat.app e={elapsed:.4f}")
     return render_template("/stat/appstat.html",
-                           topn    = topn,
-                           width   = width,
-                           bycount = bycount,
-                           logs    = logs,
-                           style   = style,
-                           users   = users,
-                           msg     = msg,
-                           lines   = lines,
+                           h2      = "Application usage statistics",
+                           caller  = "/stat/appstat",
+                           title   = "App stats",
+                           res     = res,
+                           opts    = opts,
                            elapsed = elapsed )
+
+
+################################################################
+#
+@bp.route('/stat/uploadstat', methods = ['GET', 'POST'])
+@login_required
+@roles_accepted('admin')
+def stat_upload():
+    """Statistics about stk uploads.
+    """
+    logdir = "uploads/*"
+
+    t0 = time.time()
+
+    (pkey, parser, logfiles, opts) = build_options(
+        logdir, "*.log", {
+            "By_msg"   :  logreader.StkUploadlog.save_bymsg,
+            "By_date"  :  logreader.StkUploadlog.save_bydate,
+            "By_user"  :  logreader.StkUploadlog.save_byuser,
+        })
+    # print(f"{opts} {logfiles}")
+
+    logrdr = logreader.StkUploadlog(
+        "Top_level",
+        by_what = [ (pkey, parser) ],
+        opts    = opts,
+    )
+    for f in logfiles:
+        # Create a logreader for each logfile
+        #  that can do "By_msg" and "By_date" and "By_user" statistics
+        logrdr.work_with(f)
+    res = [logrdr.get_report()] # that will be one filesection for all
+                                    # files in the loop
+
+    elapsed = time.time() - t0
+    logger.info(f"-> bp.stat.app e={elapsed:.4f}")
+    return render_template("/stat/appstat.html",
+                           h2      = "Data upload statistics",
+                           caller  = "/stat/uploadstat",
+                           title   = "Upload stats",
+                           res     = res,
+                           opts    = opts,
+                           elapsed = elapsed,
+    )
 

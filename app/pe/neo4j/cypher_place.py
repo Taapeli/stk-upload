@@ -75,10 +75,20 @@ MATCH () -[:PASSED]-> (place:Place)
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (:Batch) -[:OWNS]-> (place:Place)
     WHERE prof.username = $user AND place.uuid=$uuid""" + _get_w_names_notes_tail
 
+    # Result indi is a Person or Family
+    get_person_family_events = """
+MATCH (e:Event) -[:PLACE]-> (l:Place)
+    WHERE id(l) = $locid
+WITH e,l
+    MATCH (indi) -[r]-> (e)
+    OPTIONAL MATCH (indi) -[:NAME]-> (n)
+RETURN indi, r.role AS role, COLLECT(DISTINCT n) AS names, e AS event
+ORDER BY e.date1"""
     get_person_events = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
     WHERE id(l) = $locid
     MATCH (p) --> (n:Name)
+    OPTIONAL MATCH (p) -[:F
 WITH p, r, e, l, n ORDER BY n.order
 RETURN p AS person, r.role AS role,
     COLLECT(n) AS names, e AS event

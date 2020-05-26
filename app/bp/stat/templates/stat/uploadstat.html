@@ -1,0 +1,82 @@
+{# templates/stat/anstk.html #}
+{% extends "admin/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _("App Stats") }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div class="startdiv">
+  <h2>{{ _("Upload statistics") }}</h2>
+  <div id="errors" class="errors"></div>
+  Return to <a href="/stat">statistics start page</a>
+  <p>
+    <div>
+      Set options:
+      <form action="/stat/uploadstat">
+	<fieldset>
+	  <label for="topn">{{ _("How many:") }}</label>
+	  <input type="text" name="topn" size="1"
+	         title="{{ _("How many at most?") }}"
+	         value="{{ topn }}">
+	  &nbsp;&nbsp;
+	  <label for="msg">{{ _("Msgs:") }}</label>
+	  <input type="text" name="msg" size="6"
+	         title="{{ _("python regexp(s) to match messages") }}"
+	         value="{{ msg }}">
+	  &nbsp;&nbsp;
+	  <label for="users">{{ _(" Users:") }}</label>
+	  <input type="text" name="users" size="6"
+	         title="{{ _("python regexp(s) to match start of username") }}"
+		 {% if users %} value="{{ users }}" {% endif %}>
+	  &nbsp;&nbsp;
+	  <label for="logs">{{ _(" Logs:") }}</label>
+	  <input type="text" name="logs" size="6"
+	         title="{{ _("shell glob to match log files\nin ") }} {{logdir}}"
+		 {% if logs %} value="{{ logs }}" {% endif %}>
+	  &nbsp;&nbsp;
+	  <label for="bycount">{{ _("By count:") }}</label>
+	  <input type="checkbox" name="bycount" size="1"
+	         title="{{ _("Sort by count or by text?") }}"
+		 {% if bycount %} checked {% endif %}
+		 id="bycount" value="{{ 'x' }}">
+	  &nbsp;&nbsp;
+	  <select id="style" name="style">
+	    <option value="text" {%
+		    if style=="text" %}selected{% endif %}>As text</option>
+	    <option value="table" {%
+		    if style=="table" %}selected{% endif %}>As table</option>
+	  </select>
+	  &nbsp;&nbsp;
+	  <input type="submit" value="Go">
+	</fieldset>
+      </form>
+    </div>
+
+    {% for sections in lines %}
+    {# sections[0] is log file name #}
+    {# sections[1] is contents from that log file #}
+    <h3>Logfile(s) <tt>{{ sections[0] }}</tt></h3>
+    {% for section in sections[1] %}
+    {# section[0] is 'By xxx' #}
+    <i> {{ section[0] }} </i>
+
+{% if style == "text" %}
+<pre>
+{% for l2 in section[1] %}  {{ l2 }}
+{% endfor %}</pre>
+{% else %}
+<table>
+{% for row in section[1] %}  <tr>
+  {% for col in row
+    %} <td{% if loop.first %} style="text-align: right"{% endif
+	%}{% if loop.last %} style="text-align: right"{% endif
+	   %}> {{ col }} </td>
+  {% endfor %}</tr>
+{% endfor %}</table><br>
+{% endif %}
+
+   {% endfor %}
+{% endfor %}
+
+</div>
+{% endblock %}

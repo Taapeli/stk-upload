@@ -71,7 +71,7 @@ class Neo4jWriteDriver(object):
                     r_attr['right'] = resu.crop[2]
                     r_attr['lower'] = resu.crop[3]
                 doing = f"(src:{uniq_id}) -[{r_attr}]-> Media {resu.media_handle}"
-                print(doing)
+#                 print(doing)
                 result = self.tx.run(CypherObjectWHandle.link_media, 
                                      root_id=uniq_id, handle=resu.media_handle, 
                                      r_attr=r_attr)

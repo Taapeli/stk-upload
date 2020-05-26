@@ -16,8 +16,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 import logging 
 logger = logging.getLogger('stkserver')
 
-from .base import NodeObject
-from pe.db_reader import DBreader, SourceResult
+from .base import NodeObject, Status
+from pe.db_reader import DBreader #, SourceResult
 
 #Todo: move gen.Person_combo to bi.PersonBl
 from models.gen.person_combo import Person_combo
@@ -49,12 +49,13 @@ class Source(NodeObject):
     def from_node(cls, node):
         '''
         Transforms a db node to an object of type Source.
-        
-        <Node id=91394 labels={'Source'} 
-            properties={'handle': '_d9edc4e4a9a6defc258', 'id': 'S0078', 
-                'stitle': 'Kangasala syntyneet 1721-1778', 'change': '1507149115'}>
         '''
-        s = cls()   # create a new Source
+        # <Node id=355993 labels={'Source'}
+        #     properties={'id': 'S0296', 'stitle': 'Hämeenlinnan lyseo 1873-1972',
+        #         'uuid': 'c1367bbdc6e54297b0ef12d0dff6884f', 'spubinfo': 'Karisto 1973',
+        #         'sauthor': 'toim. Mikko Uola', 'change': 1585409705}>
+
+        s = cls()   # create a new Source, SourceBl
         s.uniq_id = node.id
         s.id = node['id']
         s.uuid = node['uuid']
@@ -63,6 +64,7 @@ class Source(NodeObject):
         s.stitle = node['stitle']
         s.sauthor = node['sauthor']
         s.spubinfo = node['spubinfo']
+        s.sabbrev = node.get('sabbrev','')
         s.change = node['change']
         return s
 
@@ -116,37 +118,41 @@ class SourceReader(DBreader):
             kwargs["theme1"] = theme_fi 
             kwargs["theme2"] = theme_sv
         try:
-            source_result = SourceResult()
             sources = self.dbdriver.dr_get_source_list_fw(**kwargs)
+            results = {'sources':sources,'status':Status.OK}
     
             # Update the page scope according to items really found 
             if sources:
                 context.update_session_scope('source_scope', 
                                               sources[0].stitle, sources[-1].stitle, 
                                               context.count, len(sources))
-            source_result.items = sources
+            else:
+                return {'status':Status.NOT_FOUND}
+
+            results = {'items':sources, 'status':Status.OK}
         except Exception as e:
-            source_result.error = f"Source list: {e}"
-        return source_result
+            results = {'status':Status.ERROR, 'statustext':f"Source list: {e}"}
+        return results
 
 
     def get_source_with_references(self, uuid, u_context):
         """ Read the source, repository and events etc referencing this source.
         
-            Returns a SourceResult object, where items = Source object.
+            Returns a dicitonary, where items = Source object.
             - item.notes[]      Notes connected to Source
             - item.repositories Repositories for Source
             - item.citations    Citating Persons, Events, Families and Medias
                                 as [label, object] tuples(?)
         """
         source = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
-        source_result = SourceResult(source)
+        results = {'item':source, 'status':Status.OK}
         if not source:
-            source_result.error = f"DBreader.get_source_with_references: {self.use_user} - no Source with uuid={uuid}"
-            return source_result
+            results.error = f"DBreader.get_source_with_references: {self.use_user} - no Source with uuid={uuid}"
+            return results
         
         citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
 
+        cit = []
         for c_id, c in citations.items():
             if c_id in notes:
                 c.notes = notes[c_id]
@@ -159,6 +165,7 @@ class SourceReader(DBreader):
                 else:
                     print(f'DBreader.get_source_with_references: hide {target}')
 
-            source_result.citations.append(c)
+            cit.append(c)
+        results['citations'] = cit
 
-        return source_result
+        return results

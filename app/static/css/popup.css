@@ -10,7 +10,7 @@
 }
 
 /* The actual popup */
-.popup .popuptext {
+.popup .popupbox {
   visibility: hidden;
   width: 400px;
   background-color: #555;
@@ -26,7 +26,7 @@
 }
 
 /* Popup arrow */
-.popup .popuptext::after {
+.popup .popupbox::after {
   content: "";
   position: absolute;
   top: 100%;

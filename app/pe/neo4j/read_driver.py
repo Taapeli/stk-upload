@@ -411,8 +411,7 @@ class Neo4jReadDriver:
 
     def dr_get_person_families(self, uuid):
         """
-            Get Notes for family and events
-            The id_list should include the uniq_ids for Family and events Events
+            Get the Families where Person is a member (parent or child).
 
             returns dict {items, status, statustext}
         """
@@ -454,11 +453,11 @@ class Neo4jReadDriver:
                         person.role = record['role']
                         if person.role == 'father':
                             family.father = person
-                        else:
+                        else:           # 'mother'
                             family.mother = person
                         if uuid == person.uuid:
                             family.role = 'parent'
-                            print(f'# Family {family.id} {family.role} --> {person.id}')
+                            print(f'# Family {family.id} {family.role} --> {person.id} ({person.role})')
                     else:
                         person.role = "child"
                         family.children.append(person)
@@ -536,6 +535,7 @@ class Neo4jReadDriver:
         """ Returns the PlaceBl with PlaceNames, Notes and Medias included.
         """
         pl = None
+        node_ids = []   # List of uniq_is for place, name, note and media nodes 
         with self.driver.session() as session:
             if user == None: 
                 result = session.run(CypherPlace.get_common_w_names_notes,
@@ -562,26 +562,24 @@ class Neo4jReadDriver:
                 # Default lang name
                 name_node = record["name"]
                 pl.name = PlaceName.from_node(name_node)
+                node_ids.append(pl.uniq_id)
                 # Other name versions
                 for name_node in record["names"]:
                     pl.names.append(PlaceName.from_node(name_node))
+                    node_ids.append(pl.names[-1].uniq_id)
 
                 for notes_node in record['notes']:
                     n = Note.from_node(notes_node)
                     pl.notes.append(n)
+                    node_ids.append(pl.names[-1].uniq_id)
 
                 for medias_node in record['medias']:
                     m = Media.from_node(medias_node)
+                    #Todo: should replace pl.media_ref[] <-- pl.medias[]
                     pl.media_ref.append(m)
+                    node_ids.append(pl.names[-1].uniq_id)
 
-        return pl
-#                 if not (pl.type and pl.id):
-#                     logger.error(f"Place_combo.read_w_notes: missing data for {pl}")
-#         try:
-#             return pl
-#         except Exception:
-#             logger.error(f"Place_combo.read_w_notes: no Place with uuid={uuid}") 
-#             return None
+        return {"place":pl, "uniq_ids":node_ids}
 
 
     def dr_get_place_tree(self, locid, lang="fi"):
@@ -666,12 +664,12 @@ class Neo4jReadDriver:
             Haetaan paikkaan liittyvät tapahtumat sekä
             osallisen henkilön nimitiedot.
         """
-        result = self.driver.session().run(CypherPlace.get_person_events, 
+        result = self.driver.session().run(CypherPlace.get_person_family_events, 
                                            locid=uniq_id)
         ret = []
         for record in result:
             # <Record 
-            #    person=<Node id=523974 labels={'Person'}
+            #    indi=<Node id=523974 labels={'Person'}
             #        properties={'sortname': 'Borg#Maria Charlotta#', 'death_high': 1897, 
             #            'confidence': '', 'sex': 2, 'change': 1585409709, 'birth_low': 1841, 
             #            'birth_high': 1841, 'id': 'I0029', 'uuid': 'e9bc18f7e9b34f1e8291de96002689cd', 
@@ -689,13 +687,20 @@ class Neo4jReadDriver:
             e = Event_combo.from_node(record['event'])
             # Fields uid (person uniq_id) and names are on standard in Event_combo
             e.role = record["role"]
-            e.person = Person_combo.from_node(record['person'])
-            if e.person.too_new:    # Check privacy
-                continue
-            for node in record["names"]:
-                e.person.names.append(Name.from_node(node))
+            if 'Person' in record['indi'].labels:
+                e.indi_label = 'Person'
+                e.indi = Person_combo.from_node(record['indi'])
+                if e.indi.too_new:    # Check privacy
+                    continue
+                for node in record["names"]:
+                    e.indi.names.append(Name.from_node(node))
+                ##ret.append({'event':e, 'indi':e.indi, 'label':'Person'})
+            else: # Family
+                e.indi_label = 'Family'
+                e.indi = FamilyBl.from_node(record['indi'])
+                ##ret.append({'event':e, 'indi':e.indi, 'label':'Family'})
             ret.append(e)
-        return ret
+        return {'items':ret, 'status':Status.OK}
 
 
     def dr_get_source_list_fw(self, **kwargs):

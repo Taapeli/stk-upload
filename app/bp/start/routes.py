@@ -44,7 +44,7 @@ def start_guest():
     """
     user = shareds.user_datastore.get_user('guest')
     secutils.login_user(user)
-    logger.info('-> bp.start.routes.start u=guest')
+    logger.info('-> bp.start.routes.start_guest')
     return render_template('/start/index_guest.html')
 
 
@@ -60,8 +60,7 @@ def start_logged():
     if "gedcom_user" in session: del session["gedcom_user"]
 
     role_names = [role.name for role in current_user.roles]
-    logger.info(f"-> bp.start.routes.start"
-                f" roles={','.join(role_names)}")
+    logger.info(f"-> bp.start.routes.start_logged")
     logger.debug(f"bp.start.routes.start_logged"
                  f" lang={get_locale().language}"
                  f" user={current_user.username}/{current_user.email}"

@@ -1,81 +1,123 @@
 {# templates/stat/anstk.html #}
 {% extends "admin/layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _("App Stats") }}{% endblock %}
+{% block title %}{{ _(title) }}{% endblock %}
 {% block body %}
 {{ super() }}
 
+{% macro make_table(rows) -%}
+<table>
+{% for row in rows %}  <tr>
+  {% for col in row
+  %} <td{% if col != "" and col[0] in "0123456789"
+	   %} style="text-align: right"{% endif	%}> {{ col }} </td>
+  {% endfor %}
+</tr>
+{% endfor %}
+</table>
+{% endmacro -%}
+
+
 <div class="startdiv">
-  <h2>{{ _("Server logs") }}</h2>
+  <h2>{{ _(h2) }}</h2>
   <div id="errors" class="errors"></div>
-  Return to <a href="/stat">statistics start page</a>
+
+  Return to <a href="/stat">statistics start page.</a>
   <p>
+    Valintakriteereistä:
+    <ul>
+      <li> <b>TODO: Aikaväliin perustuva valinta</b> (mikä käyttöliittymä?),
+	ja/tai
+	<ul>
+	  <li> by day
+	  <li> by month
+	</ul>
+      <li> Log files rajataan tässä annettavan suodatuksen lisäksi
+      päättyväksi '<tt>.log[_yyyy-mm-dd]</tt>'
+      <li> Maxdepth ja Cumulative jätetty pois (oliko tarpeen?)
+	<li> N, n, e jne. ovat oikeammin sarakeotsikoita.  Lopullisempi
+	 toteutus on työn alla.  Toistaiseksi ne on tuolla riveillä, kun eri
+	 lokientryissä on eri määrät noita tietoja (helpompi ehkä nähdä, missä
+	 saatetaan haluta täydentää lokitusta...).
+    </ul>
     <div>
       Set options:
-      <form action="/stat/appstat">
+      <form action="{{ caller }}">
 	<fieldset>
-	  <label for="topn">{{ _("How many:") }}</label>
-	  <input type="text" name="topn" size="1"
-	         title="{{ _("How many at most?") }}"
-	         value="{{ topn }}">
-	  &nbsp;&nbsp;
-	  <label for="msg">{{ _("Msgs:") }}</label>
-	  <input type="text" name="msg" size="6"
-	         title="{{ _("python regexp(s) to match messages") }}"
-	         value="{{ msg }}">
-	  &nbsp;&nbsp;
-	  <label for="users">{{ _(" Users:") }}</label>
-	  <input type="text" name="users" size="6"
-	         title="{{ _("python regexp(s) to match start of username") }}"
-		 {% if users %} value="{{ users }}" {% endif %}>
-	  &nbsp;&nbsp;
-	  <label for="logs">{{ _(" Logs:") }}</label>
-	  <input type="text" name="logs" size="6"
-	         title="{{ _("shell glob to match log files") }}"
-		 {% if logs %} value="{{ logs }}" {% endif %}>
-	  &nbsp;&nbsp;
-	  <label for="bycount">{{ _("By count:") }}</label>
-	  <input type="checkbox" name="bycount" size="1"
-	         title="{{ _("Sort by count or by text?") }}"
-		 {% if bycount %} checked {% endif %}
-		 id="bycount" value="{{ 'x' }}">
-	  &nbsp;&nbsp;
-	  <select id="style" name="style">
-	    <option value="text" {%
-		    if style=="text" %}selected{% endif %}>As text</option>
-	    <option value="table" {%
-		    if style=="table" %}selected{% endif %}>As table</option>
-	  </select>
-	  &nbsp;&nbsp;
-	  <input type="submit" value="Go">
+	  <table>
+	    <tr>
+	      <td>{% set msg = opts["msg"]
+		%} <label for="msg">{{ _("Methods:") }}</label>
+		    <input type="text" name="msg" size="6"
+	               title="{{ _("python regexp(s) to match messages/methods") }}"
+	               value="{{ msg }}">
+	      </td>
+	      <td>{% set users = opts["users"]
+		%} <label for="users">{{ _("Users:") }}</label>
+		    <input type="text" name="users" size="6"
+	               title="{{ _("python regexp(s) to match users") }}"
+	               value="{{ users }}">
+	      </td>
+	      <td>{% set logs = opts["logs"] %}{% set logdir = opts["logdir"]
+		%} <label for="logs">{{ _(" Log files:") }}</label>
+		    <input type="text" name="logs" size="6"
+	               title="{{ _("shell glob to match log files\nin ") }} {{logdir}}"
+		       {% if logs %} value="{{ opts['logs'] }}" {% endif %}>
+	      </td>
+	      <td rowspan="2"> <input type="submit"
+				      value=" -- Go! --"
+				      style="height: 7ex">
+	      </td>
+	    </tr>
+
+	    <tr>
+	      <td>{% set topn = opts["topn"]
+		%} <label for="topn">{{ _("How many:") }}</label>
+	  	     <input type="text" name="topn" size="1"
+	               title="{{ _("How many at most?") }}"
+	               value="{{ topn }}">
+	      </td>
+	      <td> <label for="bycount">{{ _("Sort by count:") }}</label>
+		     <input type="checkbox" name="bycount" size="1"
+	               title="{{ _("Sort by count or by text?") }}"
+		       {% if opts["bycount"] %} checked {% endif %}
+		       id="bycount" value="x">
+	      </td>
+	      <td>{% set bywhat = opts["bywhat"]
+		%} <select id="bywhat" name="bywhat"> {%
+		  for what in ["msg", "date", "user"] %}
+		      <option value={{ what }} {% if bywhat==what
+			  %}selected{% endif
+			  %}>By {{ what }}</option>{% endfor %}
+		</select>
+		{% set period = opts["period"]
+		%} <select id="period" name="period"> {%
+		  for per in ["daily", "weekly", "monthly"] %}
+		      <option value={{ per }} {% if period==per
+			  %}selected{% endif
+			  %}>{{ per }}</option>{% endfor %}
+		    </select>
+	      </td>
+	    </tr>
+	  </table>
 	</fieldset>
       </form>
     </div>
 
-    {% for sections in lines %}
-    {# sections[0] is log file name #}
-    {# sections[1] is contents from that log file #}
-    <h3>Logfile(s) <tt>{{ sections[0] }}</tt></h3>
-    {% for section in sections[1] %}
-    {# section[0] is 'By xxx' #}
-    <i> {{ section[0] }} </i>
+    {% for filesection in res %}
+    {# filesection[0] is log file name #}
+    {# filesection[1] is contents from that log file #}
+  <p>
+    <b>Logfile(s):</b> <tt>{{ filesection[0] }}</tt>
+  <p>
+    {% for subsection in filesection[1] %}
+    {# subsection[0] is 'By xxx' #}
+    {# subsection[1] is contents for that section #}
+    <i> {{ subsection[0] }} </i>
+    {{ make_table (subsection[1]) }}
+    <br>
+    {% endfor %} {# subsection #}
+    {% endfor %} {# filesection #}
 
-{% if style == "text" %}
-<pre>
-{% for l2 in section[1] %}  {{ l2 }}
-{% endfor %}</pre>
-{% else %}
-<table>
-{% for row in section[1] %}  <tr>
-  {% for col in row
-    %} <td{% if loop.first %} style="text-align: right"{% endif
-	%}{% if loop.last %} style="text-align: right"{% endif
-	   %}> {{ col }} </td>
-  {% endfor %}</tr>
-{% endfor %}</table><br>
-{% endif %}
-
-   {% endfor %}
-  {% endfor %}
 </div>
 {% endblock %}

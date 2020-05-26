@@ -34,7 +34,7 @@ def analyze_xml(username, filename):
     
 
     ''' Get XML DOM parser and start DOM elements handler transaction '''
-    handler = DOM_handler(file_cleaned, username)
+    handler = DOM_handler(file_cleaned, username, filename)
     
     citation_source_cnt = 0
     event_citation_cnt = 0
@@ -521,7 +521,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
 
     ''' Get XML DOM parser and start DOM elements handler transaction '''
-    handler = DOM_handler(file_cleaned, userid)
+    handler = DOM_handler(file_cleaned, userid, pathname)
 
     # Initialize Run report
     handler.blog = Batch(userid)
