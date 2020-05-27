@@ -270,18 +270,6 @@ class DOM_handler():
             # Extract handle, change and id
             self._extract_base(event, e)
 
-#             if False and counter > 0 and counter % 1000 == 0: 
-#                 elapsed = time.time()-t0
-#                 eventspersec = counter/elapsed
-#                 remainingevents = len(events) - counter
-#                 remainingtime = remainingevents/eventspersec
-#                 print(f"Event {counter} {e.id} "
-#                                          f"{time.asctime()} {elapsed:6.2f} "
-#                                          f"{eventspersec:6.2f} "
-#                                          f"{remainingevents} "
-#                                          f"{remainingtime:6.2f} "
-#                                          )
-
             if len(event.getElementsByTagName('type') ) == 1:
                 event_type = event.getElementsByTagName('type')[0]
                 # If there are type tags, but no type data
@@ -337,7 +325,7 @@ class DOM_handler():
             e.media_refs = self._extract_mediaref(event)
 
             try:
-                self.save_and_link_handle(e)
+                self.save_and_link_handle(e, batch_id=self.batch_id)
                 counter += 1
             except RuntimeError as e:
                 self.blog.log_event({'title':"Events", 'count':counter, 

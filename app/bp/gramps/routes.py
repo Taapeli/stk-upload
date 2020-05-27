@@ -37,6 +37,7 @@ def show_upload_log(xmlfile):
     upload_folder = uploads.get_upload_folder(current_user.username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
     msg = open(fname, encoding="utf-8").read()
+    logger.info(f"-> bp.gramps.routes.show_upload_log f='{xmlfile}'")
     return render_template("/admin/load_result.html", msg=msg)
 
 @bp.route('/gramps/uploads')
@@ -88,7 +89,7 @@ def upload_gramps():
 @roles_accepted('research')
 def start_load_to_neo4j(xmlname):
     uploads.initiate_background_load_to_neo4j(current_user.username,xmlname)
-    logger.info(f"-> bp.gramps.routes.start_load_to_neo4j file={os.path.basename(xmlname)}")
+    logger.info(f'-> bp.gramps.routes.start_load_to_neo4j f="{os.path.basename(xmlname)}"')
     flash(_("Data import from %(i)s to database has been started.", i=xmlname), 'info')
     return redirect(url_for('gramps.list_uploads'))
 

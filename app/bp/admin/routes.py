@@ -348,7 +348,7 @@ def list_uploads_all():
 @roles_accepted('admin', 'audit')
 def start_load_to_neo4j(username,xmlname):
     uploads.initiate_background_load_to_neo4j(username,xmlname)
-    logger.info(f"-> bp.admin.routes.start_load_to_neo4j u={username} f={xmlname}")
+    logger.info(f'-> bp.admin.routes.start_load_to_neo4j u={username} f="{xmlname}"')
     flash(_('Data import from %(i)s to database has been started.', i=xmlname), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 
@@ -373,7 +373,7 @@ def list_threads():
 def xml_download(username,xmlfile):
     xml_folder = uploads.get_upload_folder(username)
     xml_folder = os.path.abspath(xml_folder)
-    logger.info(f"-> bp.admin.routes.xml_download f={xmlfile}")
+    logger.info(f'-> bp.admin.routes.xml_download f="{xmlfile}"')
     logging.debug(xml_folder)
     return send_from_directory(directory=xml_folder, filename=xmlfile, 
                                mimetype="application/gzip",
@@ -397,7 +397,7 @@ def show_upload_log(username,xmlfile):
 def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
-    logger.info(f"-> bp.admin.routes.xml_delete f={xmlfile}")
+    logger.info(f'-> bp.admin.routes.xml_delete f="{xmlfile}"')
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------
@@ -420,7 +420,7 @@ def list_user_gedcoms(user):
 @roles_accepted('admin', 'audit')
 def list_user_gedcom(user,gedcomname):
     session["gedcom_user"] = user
-    logger.info(f"-> bp.admin.routes.list_user_gedcom u={user} f={gedcomname}")
+    logger.info(f'-> bp.admin.routes.list_user_gedcom u={user} f="{gedcomname}"')
     return gedcom.routes.gedcom_info(gedcomname)
 
 @bp.route('/admin/list_gedcoms_for_users', methods=['POST'])
