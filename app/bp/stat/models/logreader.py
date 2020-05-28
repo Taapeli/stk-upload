@@ -279,8 +279,8 @@ If the list starts with '!', the second retun value is False."""
 
     def save_bymsg(self, tup):
         """Save TUP data by by module | user order."""
-        (_, module, user, tuples) = tup
-        self.update(inner_specs=[(module, None), (user, tuples),])
+        (date, module, user, tuples) = tup
+        self.update(inner_specs=[(module, None), (user, None), (date, tuples)])
 
     def save_bydate(self, tup):
         """Save TUP data by by date | user order."""
@@ -296,7 +296,7 @@ If the list starts with '!', the second retun value is False."""
     ################
     #
     def work_with(self, logfile):
-        """Call parser to get values from stk upload log files.
+        """Call parser to get values from stk log files.
 
         """
         if logfile in self._files:
@@ -380,7 +380,7 @@ Counters are kept in list of Counter objects.
         # This shall match each line in log LOGFILE;
         # we don't need the %(name)s part, the other groups we keep
         # The %(asctime)s part is made of two parts:
-        log_re = re.compile(r"\d\d\d\d-\d\d-\d\d" # YYYY-MM-DD (keep this)
+        log_re = re.compile(r"(\d\d\d\d-\d\d-\d\d)"   # YYYY-MM-DD (keep this)
                             r" \d\d:\d\d:\d\d,\d\d\d" # hh:mm:ss (skip this)
                             r" \S+"                   # %(name)s (skip)
                             r" (\S+) (\S+) (.*)")     # the rest (keep
@@ -401,7 +401,7 @@ Counters are kept in list of Counter objects.
             if not match:
                 flash(f"strange log line {line}") # this should not happen
                 continue
-            (date, _, level, user, message) = match.groups()
+            (date, level, user, message) = match.groups()
             if level != "INFO":
                 continue
 
