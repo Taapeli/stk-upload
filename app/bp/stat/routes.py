@@ -76,7 +76,7 @@ def check_regexp_option(what, default=""):
     if val == "":
         return ""
     try:
-        re.compile( re.sub("[, ]+", "|", val) )
+        re.compile(re.sub("[, ]+", "|", val))
         return "," . join(re.split("[, ]+", val))
     except Exception as e:
         flash(f"Bad regexp for {what} '{val}': {e}",
@@ -208,7 +208,8 @@ def stat_app():
                            title   = "App stats",
                            res     = res,
                            opts    = opts,
-                           elapsed = elapsed )
+                           elapsed = elapsed,
+    )
 
 
 ################################################################
