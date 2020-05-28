@@ -243,7 +243,7 @@ def stat_upload():
                                     # files in the loop
 
     elapsed = time.time() - t0
-    logger.info(f"-> bp.stat.app e={elapsed:.4f}")
+    logger.info(f"-> bp.stat.uploadstat e={elapsed:.4f}")
     return render_template("/stat/appstat.html",
                            h2      = "Data upload statistics",
                            caller  = "/stat/uploadstat",
