@@ -586,8 +586,8 @@ def fetch_accesses():
 def add_access():
     data = json.loads(request.data)
     print(data)
-    username = data.get("username")
-    batchid = data.get("batchid")
+    username = data.get("username",'-')
+    batchid = data.get("batchid",'-')
     #TODO Should log the batch owner, not batchid?
     logger.info(f"-> bp.admin.routes.add_access u={username} batch={batchid}")
     rsp = UserAdmin.add_access(username,batchid)
@@ -601,7 +601,10 @@ def add_access():
 def delete_accesses():
     data = json.loads(request.data)
     print(data)
-    logger.info(f"-> bp.admin.routes.delete_accesses u={username} batch={batchid}")
+    username = data.get("username",'-')
+    batchid = data.get("batchid",'-')
+    #TODO Should log the batch owner, not batchid?
+    logger.info(f'-> bp.admin.routes.delete_accesses u={username} batch={batchid}')
     rsp = UserAdmin.delete_accesses(data)
     return jsonify(rsp)
 
