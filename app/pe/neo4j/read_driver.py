@@ -687,7 +687,10 @@ class Neo4jReadDriver:
             e = Event_combo.from_node(record['event'])
             # Fields uid (person uniq_id) and names are on standard in Event_combo
             e.role = record["role"]
-            if 'Person' in record['indi'].labels:
+            indi_label = list(record['indi'].labels)[0]
+            if indi_label in ['Audit', 'Batch']:
+                continue
+            if 'Person' == indi_label:
                 e.indi_label = 'Person'
                 e.indi = Person_combo.from_node(record['indi'])
                 if e.indi.too_new:    # Check privacy
@@ -695,11 +698,15 @@ class Neo4jReadDriver:
                 for node in record["names"]:
                     e.indi.names.append(Name.from_node(node))
                 ##ret.append({'event':e, 'indi':e.indi, 'label':'Person'})
-            else: # Family
+                ret.append(e)
+            elif 'Family' == indi_label:
                 e.indi_label = 'Family'
                 e.indi = FamilyBl.from_node(record['indi'])
                 ##ret.append({'event':e, 'indi':e.indi, 'label':'Family'})
-            ret.append(e)
+                ret.append(e)
+            else:   # Audit or Batch
+                print(f"r_get_place_events No Person or Family:"
+                      f" {e.id} {record['indi'].labels} {record['indi'].get('id')}")
         return {'items':ret, 'status':Status.OK}
 
 
