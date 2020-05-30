@@ -17,7 +17,8 @@ from difflib import HtmlDiff
 import shareds
 
 import logging 
-LOG = logging.getLogger(__name__)
+#LOG = logging.getLogger(__name__)
+logger = logging.getLogger('stkserver')
 
 from . import bp
 from models import util, syslog
@@ -33,6 +34,7 @@ def gedcom_list():
     username = gedcom_utils.get_gedcom_user()
     files = gedcom_utils.list_gedcoms(username)
     allowed_extensions = ",".join(["."+ext for ext in ALLOWED_EXTENSIONS])
+    logger.info(f'-> bp.gedcom.routes.gedcom_list n={len(files)}')
     return render_template('gedcom_list.html', title=_("Gedcoms"),
                            user=username, 
                            files=files, kpl=len(files),
@@ -109,6 +111,7 @@ def gedcom_save(gedcom):
     gedcom_utils.history_append(filename1,"\n{}:".format(util.format_timestamp()))
     gedcom_utils.history_append(filename1,_("File {} saved as {}").format(filename1,newname))
     gedcom_utils.history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
+    logger.info(f'-> bp.gedcom.routes.gedcom_save f="{os.path.basename(newname)}"')
     rsp = dict(newname=os.path.basename(newname))
     return jsonify(rsp) 
 
@@ -163,9 +166,10 @@ def gedcom_upload():
         }
         gedcom_utils.save_metadata(filename, metadata)
         gedcom_utils.history_init(fullname)
-        syslog.log(type="uploaded a gedcom",gedcom=file.filename)    
+        syslog.log(type="uploaded a gedcom",gedcom=file.filename)
+        logger.info(f'-> bp.gedcom.routes.gedcom_upload n={os.stat(fullname).st_size/1024.}kb')
         return redirect(url_for('.gedcom_info',gedcom=filename))
-  
+
 @bp.route('/gedcom/download/<gedcom>')
 @login_required
 @roles_accepted('gedcom', 'research')
@@ -183,6 +187,7 @@ def gedcom_download(gedcom):
     gedcom_folder = os.path.abspath(gedcom_folder)
     gedcom = secure_filename(gedcom)
 #     filename = os.path.join(gedcom_folder, gedcom)
+    logger.info(f'-> bp.gedcom.routes.gedcom_download f="{gedcom}"')
     return send_from_directory(directory=gedcom_folder, filename=gedcom, as_attachment=True) 
 
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
@@ -206,6 +211,7 @@ def gedcom_info(gedcom):
         info = gedcom_utils.get_info(filename,encoding)
         metadata['info'] = repr(info.__dict__)
         gedcom_utils.save_metadata(gedcom,metadata) 
+    logger.info(f'-> bp.gedcom.routes.gedcom_info f="{gedcom}"')
     return render_template('gedcom_info.html', 
                            user=gedcom_utils.get_gedcom_user(), gedcom=gedcom, 
                            filename=filename, info=info, transforms=transforms, 
@@ -229,6 +235,7 @@ def gedcom_update_permission(gedcom,permission):
     metadata = gedcom_utils.get_metadata(gedcom)
     metadata['admin_permission'] = (permission == "true")
     gedcom_utils.save_metadata(gedcom,metadata)
+    logger.info(f'-> bp.gedcom.routes.gedcom_update_permission/{permission} f="{gedcom}"')
     return "ok"
 
 @bp.route('/gedcom/analyze/<gedcom>')
@@ -238,6 +245,7 @@ def gedcom_analyze(gedcom):
     filename = gedcom_utils.gedcom_fullname(gedcom)
     metadata = gedcom_utils.get_metadata(gedcom)
     encoding = metadata['encoding']
+    logger.info(f'-> bp.gedcom.routes.gedcom_analyze f="{gedcom}"')
     rsp = gedcom_utils.analyze(filename,encoding)
     return rsp
 
@@ -281,6 +289,7 @@ def gedcom_delete(gedcom):
             gedcom_utils.removefile(filename) 
             logging.info("Deleted:"+filename)
     syslog.log(type="deleted a gedcom",gedcom=gedcom)    
+    logger.info(f'-> bp.gedcom.routes.gedcom_delete f="{gedcom}"')
     return redirect(url_for('.gedcom_list'))
 
 @bp.route('/gedcom/delete_old_versions/<gedcom>')
@@ -332,7 +341,9 @@ def gedcom_transform(gedcom,transform):
             arglist = [gedcom_filename] + command_args 
             arglist += ["--logfile",logfile]
             arglist += ["--encoding",encoding]
-            
+
+            module_name = transform_module.__name__.split('.')[-1]
+            logger.info(f'-> bp.gedcom.routes.gedcom_transform/{module_name}')
             rsp = process_gedcom(arglist, transform_module)
             return jsonify(rsp)
         

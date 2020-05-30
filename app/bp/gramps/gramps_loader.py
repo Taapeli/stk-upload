@@ -28,7 +28,7 @@ def analyze_xml(username, filename):
     # Read the xml file
     upload_folder = get_upload_folder(username) 
     pathname = os.path.join(upload_folder,filename)
-    print("Pathname: " + pathname)
+    print("bp.gramps.gramps_loader.analyze_xml Pathname: " + pathname)
     
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
     
