@@ -11,20 +11,28 @@
 
   <table cellspacing="0" cellpadding="0">
     <tr>
-      <td style="text-align: right"> {{ code_files }} </td> <td> .py files       </td>
-      <td style="text-align: right"> {{ code_lines }} </td> <td> lines           </td>
+      <td style="text-align: right"> {{ res["code_files"] }}
+      </td> <td> .py files       </td>
+      <td style="text-align: right"> {{ res["code_lines"] }} </td>
+      <td> lines           </td>
     </tr>
     <tr>
-      <td style="text-align: right"> {{ html_files }} </td> <td> .html files     </td>
-      <td style="text-align: right"> {{ html_lines }} </td> <td>  lines          </td>
+      <td style="text-align: right"> {{ res["html_files"] }} </td>
+      <td> .html files     </td>
+      <td style="text-align: right"> {{ res["html_lines"] }} </td>
+      <td>  lines          </td>
     </tr>
     <tr>
-      <td style="text-align: right"> {{ route_files }} </td> <td> routes.py files </td>
-      <td style="text-align: right"> {{ route_lines }} </td> <td> @route's        </td>
+      <td style="text-align: right"> {{ res["route_files"] }} </td>
+      <td> routes.py files </td>
+      <td style="text-align: right"> {{ res["route_lines"] }} </td>
+      <td> @route's        </td>
     </tr>
     <tr>
-      <td style="text-align: right"> {{ commits }}     </td> <td> git commits     </td>
-      <td style="text-align: right"> {{ commits1m }}   </td> <td> in last month   </td>
+      <td style="text-align: right"> {{ res["commits"] }}     </td>
+      <td> git commits     </td>
+      <td style="text-align: right"> {{ res["commits1m"] }}   </td>
+      <td> in last month   </td>
     </tr>
   </table>
   <p>
