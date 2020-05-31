@@ -571,13 +571,13 @@ class Neo4jReadDriver:
                 for notes_node in record['notes']:
                     n = Note.from_node(notes_node)
                     pl.notes.append(n)
-                    node_ids.append(pl.names[-1].uniq_id)
+                    node_ids.append(pl.notes[-1].uniq_id)
 
                 for medias_node in record['medias']:
                     m = Media.from_node(medias_node)
                     #Todo: should replace pl.media_ref[] <-- pl.medias[]
                     pl.media_ref.append(m)
-                    node_ids.append(pl.names[-1].uniq_id)
+                    node_ids.append(pl.media_ref[-1].uniq_id)
 
         return {"place":pl, "uniq_ids":node_ids}
 
