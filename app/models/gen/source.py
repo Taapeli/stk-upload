@@ -10,13 +10,13 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 import shareds
 from bl.base import NodeObject
-from pe.source_cypher import SourceCypher   # v0.4 structures
+from pe.neo4j.cypher_source import CypherSource  # v0.4.1 structures
 from .cypher import Cypher_source  # obsolete v0.3 structures
 from .repository import Repository
 from .note import Note
 
 
-class Source(NodeObject):
+class Source(NodeObject): # -> bl.source.Source, bl.source.SourceBl
     """ Lähde
             
         Properties:
@@ -136,7 +136,7 @@ return s'''
 
             Luetaan lähteen tiedot
             
-            #Todo: Use new SourceCypher and material selection!
+            #Todo: Use new CypherSource and material selection!
         """
                         
         return  shareds.driver.session().run(Cypher_source.get_a_source_w_notes,
@@ -182,105 +182,106 @@ return s'''
                                             sid=int(sourceid))
 
 
-    @staticmethod
-    def get_source_list(o_context=None):
-        """ Read all sources with notes and repositories, optionally limited by keywords.
-        
-            Todo: Valinta vuosien mukaan
-            Todo: tuloksen sivuttaminen esim. 100 kpl / sivu
-        """
-        sources = []
-
-        with shareds.driver.session() as session:
-            if o_context.series:
-                # Filtered by series (Lähdesarja)
-                THEMES = {"birth": ('syntyneet','födda'),
-                          "babtism": ('kastetut','döpta'),
-                          "wedding": ('vihityt','vigda'),
-                          "death": ('kuolleet','döda'),
-                          "move": ('muuttaneet','flyttade')
-                    }
-                key1, key2 = THEMES[o_context.series]
-                print(f'# Sources containing "{key1}" or "{key2}"')
-            
-                if o_context.context == o_context.choices.COMMON: 
-                    print("get_source_list: approved common only")
-                    result = session.run(SourceCypher.get_auditted_set_selections,
-                                         key1=key1, key2=key2)
-                elif o_context.context == o_context.choices.OWN:
-                    # Show my researcher data
-                    print("get_source_list: my researcher data")
-                    result = session.run(SourceCypher.get_own_set_selections,
-                                         key1=key1, key2=key2)
-                else:
-                    # No other choices implemented
-                    raise KeyError(f"get_source_list: invalid context value {o_context.context}")
-            else:
-                # Show all series
-                if o_context.context == o_context.choices.COMMON: 
-                    print("get_source_list: approved common only")
-                    result = session.run(SourceCypher.get_auditted_sets)
-                elif o_context.context == o_context.choices.OWN:
-                    # Show my researcher data
-                    print("get_source_list: my researcher data")
-                    result = session.run(SourceCypher.get_own_sets)
-                else:
-                    # No other choices implemented
-                    raise KeyError(f"get_source_list: invalid context value {o_context.context}")
-
-        for record in result:
-            # <Record 
-            #    owner_type='PASSED' 
-            #    source=<Node id=333338 labels={'Source'}
-            #        properties={'id': 'S0029', 'stitle': 'Lapinjärvi vihityt 1788-1803 vol  es346', 
-            #            'uuid': '4637e07dcc7f42c09236a8482fb01b7c', 'spubinfo': '', 'sauthor': '', 
-            #            'change': 1532807569}>
-            #    notes=[
-            #        <Node id=445002 labels={'Note'} 
-            #            properties={'id': 'N2207', 'text': '', 'type': 'Source Note', 
-            #                'uuid': 'e6efcc1fbcad4dcd85352fd95cd5bf35', 'url': 'http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=3788',
-            #                'change': 1532807569}>] 
-            #    repositories=[
-            #        [   'Book', 
-            #            <Node id=393661 labels={'Repository'} 
-            #                properties={'id': 'R0003', 'rname': 'Lapinjärven seurakunnan arkisto',
-            #                    'type': 'Archive', 'uuid': 'b6171feb05bc47de87ee509a79821d8f',
-            #                    'change': 1577815469}>]] cit_cnt=0 ref_cnt=0>
-            
-            # <Record
-            # 0  uniq_id=242567 
-            # 1  source=<Node id=242567 labels={'Source'} 
-            #        properties={'handle': '_dcb5682a0f47b7de686b3251557', 'id': 'S0334', 
-            #            'stitle': 'Åbo stifts herdaminne 1554-1640', 'change': '1516698633'}> 
-            # 2  notes=[<Node id=238491 labels={'Note'} 
-            #        properties={'handle': '_e07cd6210c57e0d53393a62fa7a', 'id': 'N3952', 
-            #        'text': '', 'type': 'Source Note', 'url': 'http://www.narc.fi:8080/...', 
-            #        'change': 1542667331}>] 
-            # 3  repositories=[
-            #        ['Book', <Node id=238996 labels={'Repository'} 
-            #            properties={'handle': '_db51a3f358e67ac82ade828edd1', 'id': 'R0057', 
-            #            'rname': 'Painoteokset', 'type': 'Collection', 'change': '1541350910'}>]]
-            # 4  cit_cnt=1 
-            # 5  ref_cnt=1
-            # >
-            source = record['source']
-            s = Source.from_node(source)
-            notes = record['notes']
-            for note in notes:
-                n = Note.from_node(note)
-                s.notes.append(n)
-            repositories = record['repositories']
-            for repo in repositories:
-                # [medium, repo_node]
-                if repo[1] != None:
-                    rep = Repository.from_node(repo[1])
-                    rep.medium = repo[0]
-                    s.repositories.append(rep)
-            s.cit_cnt = record['cit_cnt']
-            s.ref_cnt = record['ref_cnt']
-            sources.append(s)
-
-        return sources, o_context.series
+#     
+#     def get_source_list(o_context=None): # @staticmethod -> bl.source.SourceReader.get_source_list(),
+#                                                             pe.neo4j.read_driver.Neo4jReadDriver.dr_get_source_list_fw()
+#         """ Read all sources with notes and repositories, optionally limited by keywords.
+#         
+#             Todo: Valinta vuosien mukaan
+#             Todo: tuloksen sivuttaminen esim. 100 kpl / sivu
+#         """
+#         sources = []
+# 
+#         with shareds.driver.session() as session:
+#             if o_context.series:
+#                 # Filtered by series (Lähdesarja)
+#                 THEMES = {"birth": ('syntyneet','födda'),
+#                           "babtism": ('kastetut','döpta'),
+#                           "wedding": ('vihityt','vigda'),
+#                           "death": ('kuolleet','döda'),
+#                           "move": ('muuttaneet','flyttade')
+#                     }
+#                 key1, key2 = THEMES[o_context.series]
+#                 print(f'# Sources containing "{key1}" or "{key2}"')
+#             
+#                 if o_context.context == o_context.choices.COMMON: 
+#                     print("get_source_list: approved common only")
+#                     result = session.run(CypherSource.get_auditted_set_selections,
+#                                          key1=key1, key2=key2)
+#                 elif o_context.context == o_context.choices.OWN:
+#                     # Show my researcher data
+#                     print("get_source_list: my researcher data")
+#                     result = session.run(CypherSource.get_own_set_selections,
+#                                          key1=key1, key2=key2)
+#                 else:
+#                     # No other choices implemented
+#                     raise KeyError(f"get_source_list: invalid context value {o_context.context}")
+#             else:
+#                 # Show all series
+#                 if o_context.context == o_context.choices.COMMON: 
+#                     print("get_source_list: approved common only")
+#                     result = session.run(CypherSource.get_auditted_sets)
+#                 elif o_context.context == o_context.choices.OWN:
+#                     # Show my researcher data
+#                     print("get_source_list: my researcher data")
+#                     result = session.run(CypherSource.get_own_sets)
+#                 else:
+#                     # No other choices implemented
+#                     raise KeyError(f"get_source_list: invalid context value {o_context.context}")
+# 
+#         for record in result:
+#             # <Record 
+#             #    owner_type='PASSED' 
+#             #    source=<Node id=333338 labels={'Source'}
+#             #        properties={'id': 'S0029', 'stitle': 'Lapinjärvi vihityt 1788-1803 vol  es346', 
+#             #            'uuid': '4637e07dcc7f42c09236a8482fb01b7c', 'spubinfo': '', 'sauthor': '', 
+#             #            'change': 1532807569}>
+#             #    notes=[
+#             #        <Node id=445002 labels={'Note'} 
+#             #            properties={'id': 'N2207', 'text': '', 'type': 'Source Note', 
+#             #                'uuid': 'e6efcc1fbcad4dcd85352fd95cd5bf35', 'url': 'http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=3788',
+#             #                'change': 1532807569}>] 
+#             #    repositories=[
+#             #        [   'Book', 
+#             #            <Node id=393661 labels={'Repository'} 
+#             #                properties={'id': 'R0003', 'rname': 'Lapinjärven seurakunnan arkisto',
+#             #                    'type': 'Archive', 'uuid': 'b6171feb05bc47de87ee509a79821d8f',
+#             #                    'change': 1577815469}>]] cit_cnt=0 ref_cnt=0>
+#             
+#             # <Record
+#             # 0  uniq_id=242567 
+#             # 1  source=<Node id=242567 labels={'Source'} 
+#             #        properties={'handle': '_dcb5682a0f47b7de686b3251557', 'id': 'S0334', 
+#             #            'stitle': 'Åbo stifts herdaminne 1554-1640', 'change': '1516698633'}> 
+#             # 2  notes=[<Node id=238491 labels={'Note'} 
+#             #        properties={'handle': '_e07cd6210c57e0d53393a62fa7a', 'id': 'N3952', 
+#             #        'text': '', 'type': 'Source Note', 'url': 'http://www.narc.fi:8080/...', 
+#             #        'change': 1542667331}>] 
+#             # 3  repositories=[
+#             #        ['Book', <Node id=238996 labels={'Repository'} 
+#             #            properties={'handle': '_db51a3f358e67ac82ade828edd1', 'id': 'R0057', 
+#             #            'rname': 'Painoteokset', 'type': 'Collection', 'change': '1541350910'}>]]
+#             # 4  cit_cnt=1 
+#             # 5  ref_cnt=1
+#             # >
+#             source = record['source']
+#             s = Source.from_node(source)
+#             notes = record['notes']
+#             for note in notes:
+#                 n = Note.from_node(note)
+#                 s.notes.append(n)
+#             repositories = record['repositories']
+#             for repo in repositories:
+#                 # [medium, repo_node]
+#                 if repo[1] != None:
+#                     rep = Repository.from_node(repo[1])
+#                     rep.medium = repo[0]
+#                     s.repositories.append(rep)
+#             s.cit_cnt = record['cit_cnt']
+#             s.ref_cnt = record['ref_cnt']
+#             sources.append(s)
+# 
+#         return sources, o_context.series
 
     @staticmethod       
     def get_source_citation (uniq_id):

@@ -8,13 +8,22 @@ div.content > p {
     margin: 0.5em 1em;
 }
 </style>
-    <h2>{{ _("Analyze of the Gramps XML") }}</h2>
-      {% if text %}
-        <div class="content">
-           <h3>{{ _("Results") }}</h3>
-	    {% for line in text %}
-	       <p>{{line}}</p>
-	    {% endfor %}
+	<h2>{{ _("Analyze of the Gramps XML") }}</h2>
+	{% if references %}
+		<div class="content">
+			<h3>{{ _("File") }} <i>{{file}}</i></h3>
+			<table>
+                <tr>
+   				    <th>{{ _("Objects ...") }}</th>
+   				    <th>{{ _("referring") }}</th>
+                </tr>
+				{% for line in references %}<tr>
+                    <td>{{line.number_of_individs}}
+                        {{ _(line.individ)|lower }} <!--{{ line.individ }}--></td>
+			        <td>{{line.number_of_references}}
+                        {{ _(line.reference)|lower }} <!--{{line.reference}}--></td>
+                </tr>{% endfor %}
+		    </table>
         </div>
 	{% endif %}
     <p>&rtrif; <a href="/gramps/uploads">{{ _("Return") }}</a></p>

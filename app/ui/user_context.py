@@ -15,7 +15,7 @@ from flask_babelex import lazy_gettext as N_
 
 
 class UserContext():
-    """ Store filter values for finding the active subset of database.
+    """ Store filter values for finding the required subset of database.
     
         Usage:
             #    Create context with defaults from session and request (1)
@@ -35,6 +35,17 @@ class UserContext():
             context.update_session_scope('person_scope', 
                                           persons[0].sortname, persons[-1].sortname, 
                                           context.count, len(persons))
+
+        Useful methods:
+            get_my_user_id()            Get effective user id or None
+            owner_str()                 Get owner descripition in current language
+            use_owner_filter()          True, if data is filtered by owner id
+            use_common()                True, if using common data
+            privacy_ok(obj)             returns True, if there is no privacy reason
+                                        to hide given object
+            set_scope_from_request()    update session scope by request params
+            update_session_scope()      update session scope by actually found items
+            next_name_fw()              set next object forwards
 
         Settings stored in self:
 
@@ -149,8 +160,8 @@ class UserContext():
                 self.session[self.session_var] = self.scope
                 print(f"UserContext: Now {self.session_var} is cleared")
                 return self.scope
-            
-    
+
+
     def __init__(self, user_session, current_user=None, request=None):
         '''
             Set filtering properties from user session, request and current user.
@@ -159,7 +170,7 @@ class UserContext():
         self.choices = self.ChoicesOfView()   # set of allowed material choices
         self.context = self.ChoicesOfView.COMMON
         self.years = []                         # example [1800, 1899]
-        self.series = None                      # Source data theme like "birth"
+        self.series = None                      # 'Source' data theme like "birth"
         self.count = 10000                      # Max count ow objects to display
         self.lang = user_session.get('lang','') # User language
 
@@ -205,13 +216,15 @@ class UserContext():
                 if self.context:
                     self.session['user_context'] = self.context
                     print(f"UserContext: Now user_context={self.context}")
-            # Clear obslete session variable
-            user_session.pop('owner_filter', None)
 
         if new_selection == 0:
             # If got no request user_context, use session value or 1
             self.context = user_session.get('user_context', self.choices.COMMON)
             print(f"UserContext: Uses same or default user_context={self.context}")
+
+        #   For logging of scene area pages, set User.current_context variable:
+        #   are you browsing common, audited data or her own batches?
+        current_user.current_context=self.context
 
 
     def get_my_user_id(self):
@@ -228,12 +241,21 @@ class UserContext():
         except:
             return ''
 
+    def owner_or_common(self):
+        ''' Tells, if you should select object by data owner.
+
+            Always when others but self.ChoicesOfView.OWN only are required
+        '''
+        if (self.context & 2) > 0:
+            return 'user'
+        else:
+            return 'common'
+    
     def use_owner_filter(self):
         ''' Tells, if you should select object by data owner.
 
             Always when others but self.ChoicesOfView.OWN only are required
         '''
-        
         return (self.context & 2) > 0
     
     def use_common(self):
@@ -243,6 +265,21 @@ class UserContext():
         '''
         return (self.context & 1) > 0
 
+    def privacy_ok(self, obj):
+        ''' Returns True, if there is no privacy reason to hide given object.
+        
+            Rules:
+            - if common data (not researcher's own)
+              - use obj.too_new variable, if available
+            - else allow
+        '''
+        if self.use_common():
+            # Privacy limits only for common data
+            try:
+                return (obj.too_new == False)
+            except: # No privacy limit for this kind of object
+                pass
+        return True
 
     def set_scope_from_request(self, request, var_name):
         """ Eventuel request fw or bw parameters are stored in session['person_scope'].

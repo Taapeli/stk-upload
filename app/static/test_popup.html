@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="/static/css/k_screen.css" media="screen">
+<link rel="stylesheet" type="text/css" href="/static/css/popup.css">
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script></head>
+<script src="/static/js/axios.min.js"></script>
+<body>
+<style>
+#pop-window {
+    max-width: 416px; 
+    max-height: 250px; 
+    background: #e3bda7;
+    overflow: scroll;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    position: absolute;
+    z-index: 1;
+    top: 25%;
+    left: 50%;
+    margin-left: -208px;
+}
+#pop-buttons {
+    list-style-type: none;
+}
+div#pop-buttons button.button {
+  padding: 2px 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  background-color: #008CBA;
+  color: white;
+  border-radius: 1em;
+  margin: 5px 2px;
+}
+
+.pop-container {
+    display: flex;
+    flex-wrap: nowrap;
+}
+.pop-container > div {
+    background: #d09d7f;
+    color:white;
+    font-size:9pt;
+    padding:4px;
+    margin:4px;
+    width:404px !important;
+}
+.pop-box a.inlink {
+    width:100%;
+    background: #777;
+    color:white;
+    margin: 0 .3em;
+    padding: 0 .3em;
+    border-radius: 5px;
+}
+
+
+div.pop-box ul {
+    padding-left:1.5em;
+}
+.row div { display: inline-block; }
+</style>
+
+<h2>Popup</h2>
+<p style="margin:4em;">&nbsp;</p>
+<table>
+<td class="ColumnPerson">
+    <div>
+        <div class="detail_link">
+            ♂ <a href="/scene/person?uuid=67b6c330b183429fa9a5d8c7eb7472d8"
+            class="inlink" title="Katso henkilön 034454 tiedot (nr. 549094)">Anders Reinhold <i>Andersson</i>
+                <b></b></a>
+            <div class="popup" onclick="showPopup('67b6c330b183429fa9a5d8c7eb7472d8')"
+                title="Näytä perheet">&nbsp;💜</div>
+        </div>
+        <br>
+        <span class="idno">Uuid:034454 /</span>
+        <span class="id" title="Alkuperäinen tunniste">I2090</span>
+    </div>
+</td>
+<td class="ColumnEvent">
+    <div>
+        <div class="eventgrid">
+            <div class="col col_event"><span class="evtype major">syntymä</span></div>
+            <div class="col col_date">15.8.1825 | Perttala</div>
+        </div>
+        <div class="eventgrid">
+            <div class="col col_event"><span class="evtype major">kuolema</span></div>
+            <div class="col col_date">8.12.1846 | Keskitalo</div>
+        </div>
+    </div>
+</td>
+</table>
+
+<hr>
+<div id="popup_app">
+  <div class="row">
+    <div>
+        <span style="color:red">${ message }</span>
+        <button v-on:click="getFamilies(uuid='1ae40195fcd34cc0adadc1f3be88d163')">
+          Hae henkilön perheet</button>
+    </div>
+    <div style="display: inline-block;padding:.5em;">
+        ${status}
+    </div>
+  </div>
+
+<div class="popup">
+    <span class="popupbox" id="popWin" title="perhe F0249" v-show="false">
+        <p><a href="/scene/family?uuid=e8450bbbd48348338abce8b900df3bf8" title="e8450bbbd48348338abce8b900df3bf8" class="inlink">
+                         Perhe avioliitossa</a>
+                       3.12.1820</p>
+        <ul>
+            <li>Mies: <a href="/scene/person?uuid=ea28" class="inlink" title="Katso henkilön ea28f1 tiedot (nr. 548956)">Anders <i>Jacobsson</i>  <b></b></a> s.&nbsp;19.11.1762
+            </li>
+            <li>Vaimo: <a href="/scene/person?uuid=f8bb" class="inlink" title="Katso henkilön f8bb4c tiedot (nr. 548968)">Maria <i>Johansdotter</i>  <b></b></a> s.&nbsp;26.9.1787
+            </li>
+            <li>Lapset<ul>
+                <li>Poika: <a href="/scene/person?uuid=36a1" class="inlink" title="Katso henkilön 36a108 tiedot (nr. 549096)">Jonas <i>Andersson</i>  <b></b></a> s.&nbsp;15.8.1825
+                </li>
+                <li>Poika: <span class="myself">&nbsp;(itse)&nbsp;</span>
+                </li>
+                </ul>
+            </li>
+       </ul>
+    </span>
+</div>
+
+  <div id="pop-window" v-if="families.length > 0">
+
+    <div id="pop-buttons" v-if="families.length > 1">
+      <button class="button" v-bind:disabled="f.show" 
+            v-on:mouseover="changeFamily(index)"
+            v-for="(f, index) of families" :key="f.id">
+        ${index+1}. ${f.role}</button>
+    </div>
+
+    <div class="pop-container">
+      <div class="pop-box" v-if="currentId">
+          <p><a v-bind:href="current.href" title="See family" class="inlink">
+              Perheessä ${current.role}</a>  ${current.rel_type} ${current.dates}
+          </p>
+          <ul>
+              <li v-for="p in current.parents" :key="p.uuid">
+                  ${p.role}
+                  <span v-if="p.is_self" style="color:black;font-weight:bold;">
+                    itse
+                  </span>
+                  <span v-else>
+                    <a v-bind:href="p.href" class="inlink" title="Katso henkilöä"
+                        >${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
+                    s.&nbsp;${p.birth}
+                  </span>
+              </li>
+              <li v-if="current.has_children">Lapset
+                 <ul>
+                     <li v-for="p in current.children" :key="p.uuid">
+                       ${p.gender}:
+                       <span v-if="p.is_self" style="color:black;font-weight:bold;">
+                         itse
+                       </span>
+                       <span v-else>
+                         <a v-bind:href="p.href" class="inlink" title="Katso henkilöä"
+                            >${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
+                         s.&nbsp;${p.birth}
+                       </span>
+                     </li>
+                 </ul>
+              </li>
+          </ul>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
+
+<script>
+function showPopup(id) {
+	// When the user clicks on div, open the popup
+	// Open a popup window
+    var popup = document.getElementById("popWin");
+    console.log("family for person "+id);
+    popup.classList.toggle("show");
+    //TODO: Find person families first
+    vm.getFamilies(id);
+  }
+
+function parseSortname(name) {
+	// Returns [surname,firstname,patronyme]
+    return name.split("#");
+  }
+  
+function htmlSortname(name) {
+    // Parses a sortname to html representation
+    var a = name.split('#');
+    if (a.length != 3)  return name;
+    return a[1]+" <i>"+a[2]+"</i> <b>"+a[0];
+  }
+
+function datesStr(dates,first=false) {
+	// Parses a DateRange list format object (<int>, <str> [,<str>])
+	if (!dates) return '';
+    if (dates.length < 2) return '';
+    if (first) return dateLocal(dates[1]);
+    if (dates.length == 3) {
+        return dateLocal(dates[1]) + ' ... ' + dateLocal(dates[2]);
+    } else return dateLocal(dates[1]);
+    return name.split("#");
+  }
+
+function dateLocal(date) {
+    // Parses ISO style date 1820-12-03 to local 3.12.1820
+    var a = date.split('-');
+    if (a.length == 1) return date;
+    if (a[1].startsWith('0'))   a[1] = a[1].substr(1,1);
+    if (a.length == 2) return a[1]+'.'+a[0];
+    if (a[2].startsWith('0'))   a[2] = a[2].substr(1,1);
+    if (a.length == 3) return a[2]+'.'+a[1]+'.'+a[0];
+    return "?"
+  }
+</script>
+
+<script>
+var vm = new Vue({
+   el: '#popup_app',
+   delimiters: ['${', '}'],
+   data: {
+     message: 'Not yet run',
+     uuid: '?',
+     families: [],
+     currentId: 0,
+     status: ''
+   },
+   computed: {
+  		 current: function () {
+  			 // currentId = 1,2,...
+  			 if (vm.currentId <= vm.families.length &&
+  					vm.currentId > 0)
+  				 return vm.families[vm.currentId-1];
+  			 console.log("false currentId "+ vm.currentId);
+  			 return false;
+  		    }
+   },
+   methods: {
+	   changeFamily(index) {
+		   // No 0 (=false) is allowed in currentId
+           console.log("changeFamily: katsotaan "+vm.families[index].id);
+           vm.currentId = index+1;
+		},
+
+	   getFamilies(q_uuid) {
+		   // Asks for data for all families of given person
+	       axios.post("/scene/json/families", {uuid:q_uuid})
+	            .then (function(rsp, q_uuid) {
+	            	   vm.families = [];
+	    			   vm.status = "Status code: "+String(rsp.status);
+                       //console.log("stk result: "+rsp.data.statusText);
+                       vm.message=rsp.data.statusText;
+                       if (rsp.data.records.length == 0) {
+                    	   vm.families=[];
+                    	   return;
+                       }
+                       for (rec of rsp.data.records) {
+                           //console.log(rec);
+                    	   var fam = {};
+                    	   if (rec) {
+                               fam.id = rec.id;
+                               fam.rel_type = rec.rel_type;
+                               fam.dates = datesStr(rec.dates, first=true);
+                               fam.role = rec.role;
+                               fam.href = "/scene/family?uuid="+rec.uuid;
+                               fam.parents = [];
+                               fam.children = [];
+                               fam.title = "Perhe "+fam.id;
+
+                               for (parent of rec.parents) {
+                                   var p = {};
+                                   p.uuid = parent.uuid;
+                                   if (p.uuid == q_uuid) {
+                                	   p.is_self = "itse";
+                                       p.name = ['','',''];
+                                   } else {
+                                       p.name = parseSortname(parent.sortname);
+                                       p.is_self = "";
+                                   }
+                                   p.role = parent.role;
+                                   //if (p.role == 'father')  vm.father_name = p.name;
+                                   //else                     vm.mother_name = p.name;
+                                   p.href = "/scene/person?uuid="+parent.uuid
+                                   p.birth = datesStr(parent.dates, first=false);
+                                   fam.parents.push(p);
+                               }
+                               var gentext = ['Lapsi','Poika','Tytär'];
+                               for (child of rec.children) {
+                                   fam.has_children = true;
+                                   var c = {uuid:child.uuid};
+                                   if (c.uuid == q_uuid) {
+                                	   c.is_self = "itse";
+                                	   c.name = ['','',''];
+                                   } else {
+                                       c.name = parseSortname(child.sortname);
+                                       c.is_self = "";
+                                   }
+                                   c.href = "/scene/person?uuid="+child.uuid
+                                   c.gender = gentext[child.sex];
+                                   c.birth = datesStr(child.dates, first=false);
+                                   fam.children.push(c);
+                               }
+                               vm.families.push(fam);
+                    	   }
+                       }
+                       vm.changeFamily(0);
+    			 })
+   	   }
+  }
+})
+</script>

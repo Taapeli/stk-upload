@@ -1,31 +1,49 @@
+'''
+Setups imported from bp.admin.routes.
+
+    Classes
+    - User management classes: Role, User
+    - Extended forms for login and register
+
+    Jinja2 filters
+    - Various filters methods
+
+    Import routes
+
+Created on 2016 or earlier
+
+@author: timnal
+'''
+
 from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, PasswordField, ValidationError
-from wtforms import SelectField, SubmitField, BooleanField
 from flask_security.utils import _
 from flask_mail import Mail
+from templates import jinja_filters
+from wtforms import SelectField, SubmitField, BooleanField
+
 from database.models.neo4jengine import Neo4jEngine 
-from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
-from bp.admin.models.user_admin import UserAdmin, UserProfile, Allowed_email
-from models.gen.dates import DateRange  # Aikavälit ym. määreet
 from database import adminDB
 import shareds
 from chkdate import Chkdate
-from templates import jinja_filters
 
+from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
+from bp.admin.models.user_admin import UserAdmin, UserProfile, Allowed_email
+from models.gen.dates import DateRange  # Aikavälit ym. määreet
 from datetime import datetime
+from ui.user_context import UserContext
 
-import logging
+#import logging
 #from flask_login.utils import current_user
 #from flask.globals import session
 import json
 from flask_babelex import lazy_gettext as _l
 
-logger = logging.getLogger('stkserver') 
 
-
-# Classes to create user session 
-# See: database.cypher_setup.SetupCypher
-
+"""
+    Classes to create user session.
+    See: database.cypher_setup.SetupCypher
+"""
        
 class Role(RoleMixin):
     """ Object describing any application user roles,
@@ -58,7 +76,8 @@ class Role(RoleMixin):
 
 
 class User(UserMixin):
-    """ Object describing distinct user security properties """
+    """ Object describing distinct user security properties.
+    """
     id = ''
     email = ''
     username = ''   
@@ -73,6 +92,8 @@ class User(UserMixin):
     current_login_at = None
     current_login_ip = ''
     login_count = 0
+    # View filtering option. Stored here for logging in scene pages
+    current_context = UserContext.ChoicesOfView.COMMON
 
     def __init__(self, **kwargs):
         if 'id' in kwargs:
@@ -90,6 +111,11 @@ class User(UserMixin):
         self.current_login_at = kwargs.get('current_login_at')
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
+
+    def is_showing_common(self):
+        """ Is showing common, approved data only?
+        """
+        return not (self.current_context & UserContext.ChoicesOfView.OWN)
 
 
 # class UserProfile():
@@ -168,6 +194,7 @@ def security_register_processor():
 
 adminDB.initialize_db() 
 
+
 """ 
     Jinja application filter definitions 
 """
@@ -237,6 +264,8 @@ def _is_list(value):
 
 @shareds.app.template_filter('app_date')
 def app_date(value):
+    ''' Application date from git status.
+    '''
     if value == 'git':
         return sysversion.revision_time()
     elif value == 'app':
@@ -246,6 +275,8 @@ def app_date(value):
 
 @shareds.app.template_filter('logcontent')
 def logcontent(row):
+    ''' Create an Application log content from a json row.
+    '''
     s = ""
     sep = ""
     row = json.loads(row)

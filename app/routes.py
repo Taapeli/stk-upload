@@ -7,15 +7,10 @@ import urllib
 
 import logging 
 logger = logging.getLogger('stkserver')
-#import time
 
 from flask import render_template, request, redirect, url_for #, g, flash
 from flask_security import login_required, logout_user, current_user # ,roles_required
-
 from flask_babelex import get_locale
-# i18n: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n-legacy
-#from flask_babelex import Babel
-#from flask_babelex import _
 
 import shareds
 
@@ -24,7 +19,19 @@ if not app:
     raise RuntimeError("Start this application in '..' from 'run.py' or 'runssl.py'")
 
 
-@shareds.app.route('/')
+@app.before_request
+def before_request():
+    ''' Set user variable for log message filtering
+    '''
+    for filt in logger.filters:
+        if current_user.is_authenticated:
+            filt.user = current_user.username
+        else:
+            filt.user = '<anon>'
+        #print (f'routes.before_request current_user for {logger.name}: {filt.user}')
+
+
+@app.route('/')
 def entry():
     ''' Home page needing autentication.
 
@@ -35,15 +42,18 @@ def entry():
     '''
     if current_user.has_role("guest"):
 #        print("Authenticated guest user at entry") 
+        logger.info(f'-> routes.entry/guest')
         logout_user()
 
     if current_user.is_authenticated:
         # Home page for logged in user
+        logger.info(f'-> routes.entry/user')
         return redirect(url_for('start_logged'))
 
+    logger.info(f'-> routes.entry/-')
     lang = get_locale().language
     demo_site = f"{app.config['DEMO_URL']}?lang={lang}"
-    logger.info(f'-> routes.entry auth={current_user.is_authenticated} demo={demo_site}')
+    logger.debug(f'-> routes.entry auth={current_user.is_authenticated} demo={demo_site}')
 
     # If not logged in, a login page is shown here first
     return render_template('/index_entry.html', demo_site=demo_site)
@@ -72,7 +82,7 @@ def get_locale():
     #return request.accept_languages.best_match(get('LANGUAGES'))
     '''
 
-@shareds.app.route('/help')
+@app.route('/help')
 @login_required
 def app_help():
     url = request.args.get("url")

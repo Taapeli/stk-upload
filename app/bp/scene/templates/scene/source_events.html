@@ -1,17 +1,15 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "/scene/layout.html" %}
 {% block title %}{{ _('Events of a Source') }}{% endblock %}
+{% import '/scene/macros.html' as macro with context %}
 {% block body %}
 {{ super() }}
 <style>
 div#summaryarea ul li p { margin: 0 0 0.3em 0; }
+td.Citation {padding:.3em;}
+td.Citation div ol {padding-top:.3em;}
 </style>
 
-{#<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
-    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
-    crossorigin="anonymous">
-#}
-{% import '/scene/macros.html' as macro with context %}
 
 <div id="startdiv">
     <h2>{{ _('Source References') }}</h2>
@@ -27,12 +25,36 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
                   <span class="typedesc">{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
                   {{ _('in the repository') }} <b>{{repo.rname}}</b></p>
 {% endfor %}
-               <p>{{ _("Identifiers") }} {{macro.all_obj_ids(source)}}</p>
-{% if source.notes %}
-	            <ul>{% for note in source.notes %}
-	                <li>{{ macro.notelink(note) }}</li>
-	            {% endfor %}</ul>
+            <table><tbody>
+                <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="Value">{{macro.all_obj_ids(source)}}</td>
+                    <td></td>
+                </tr>
+                <tr><td></td></tr>
+{% if source.sauthor or source.spubinfo or source.sabbreviation %}
+                <tr><td class="ColumnAttribute">{{ _("Author") }}</td>
+                    <td class="Value">{{source.sauthor}}</td>
+                    <td></td>
+                </tr>
+                <tr><td class="ColumnAttribute">{{ _("Publishing info") }}</td>
+                    <td class="Value">{{source.spubinfo}}</td>
+                    <td></td>
+                </tr>
+                <tr><td class="ColumnAttribute">{{ _("Abbreviation") }}</td>
+                    <td class="Value">{{source.sabbrev}}</td>
+                    <td></td>
+                </tr>
 {% endif %}
+<!--                <p>{{ _("Identifiers") }} {{macro.all_obj_ids(source)}}</p> -->
+{% if source.notes %}
+	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
+                    <td class="Value"><ul>
+    {% for note in source.notes %}
+	                   <li>{{ macro.notelink(note) }}</li>
+	{% endfor -%}
+                    </ul>
+{% endif %}
+            </tbody></table>
 	        </div>
 
 	        <div class="subsection" id="citations">
@@ -50,33 +72,30 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
 	   					  {{ _( "Page" ) }} <b>{{c.page}}</b> 
 	   					  {{ macro.stars(c.confidence|float) }}
-                          {% set conf = c.confidence | int %} 
 
-                          {% if c.note_ref %}
-                            {% for note in c.note_ref %}
-                                {{ macro.notelink(note) }}
+                          {% if c.notes %}
+                            {% for note in c.notes %}
+                                <br>{{ macro.notelink(note) }}
                             {% endfor %}
                           {% endif %}
 
 	               		  <ol type="a">
-	               		{% for noderef in c.citators|sort(attribute='date') %}
+	               		{% for indi in c.citators %}
 	                        <li>
-	                          {% if noderef.eventtype %}
-                                 {{noderef.eventtype}}
-	                          {% else %}
-	                           {{ _('The person') }}
-	                          {% endif %}
-                              {% if noderef.label == "Family" %}
-                                 <a href="/scene/family?uuid={{noderef.uuid}}" class="inlink"
-                                    title="{{ _('see details of family') }}">
-                                    {{noderef.clearname}}</a>
-                              {% else %}
-                                 <a href="/scene/person?uuid={{noderef.uuid}}" class="inlink"
-                                    title="{{ _('see details of person %(id)s', id=noderef.id) }}">
-                                    {{noderef.clearname}}</a>
-                                 <i>{{noderef.eventtype}}</i>
-                              {% endif %}
-	                           {% if noderef.edates %}{{noderef.edates}}{% endif %}
+                          {% if indi.eventtype %}
+                                 {{ _(indi.eventtype)|capitalize 
+                             }}{% if indi.role %}
+                                 <i>{{indi.role|transl('role')}}</i>{% endif -%}:
+                          {% endif -%}
+                          {% if indi.id[0] == "F" %}
+                                 <a href="/scene/family?uuid={{indi.uuid}}" class="inlink"
+                                    title="{{ _('see details of family') }}"> 
+                                    {{ indi.clearname | replace("#", " ") }}</a>
+                          {% else %}
+                                 {{ macro.person_name_by_sortname_anon(indi) }}
+                                 {% if indi.event_birth.dates %}{{ indi.event_birth.dates }}{% endif %} &ndash;
+                                 {% if indi.event_death.dates %}{{ indi.event_death.dates }}{% endif %}
+                          {% endif %}
                			    </li>
 	                    {% endfor %}
 	                      </ol>

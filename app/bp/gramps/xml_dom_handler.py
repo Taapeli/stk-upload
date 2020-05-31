@@ -6,10 +6,13 @@ Extracted from gramps_loader.py on 2.12.2018
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 
+import logging 
+logger = logging.getLogger('stkserver')
+
 from collections import defaultdict
-import logging
 import re
 import time
+import os
 import xml.dom.minidom
 
 from flask_babelex import _
@@ -25,6 +28,7 @@ from bl.media import MediaRefResult
 
 from .batchlogger import Log
 
+from models.cypher_gramps import Cypher_mixed
 from models.gen.dates import Gramps_DateRange
 from models.gen.note import Note
 from models.gen.media import Media
@@ -95,7 +99,7 @@ class DOM_handler():
             return f'dbKeys({self.uuid[:6]},{self.uniq_id})'
 
 
-    def __init__(self, infile, current_user):
+    def __init__(self, infile, current_user, pathname=""):
         """ Set DOM collection and username """
         DOMTree = xml.dom.minidom.parse(open(infile, encoding='utf-8'))
         self.collection = DOMTree.documentElement    # XML documentElement
@@ -106,6 +110,7 @@ class DOM_handler():
         self.family_ids = []                # List of processed Family node unique id's
         self.tx = None                      # Transaction not opened
         self.batch_id = None
+        self.file = os.path.basename(pathname) # for messages
         self.progress = defaultdict(int)    # key=object type, value=count of objects processed
 
     def begin_tx(self, session):
@@ -117,6 +122,7 @@ class DOM_handler():
         if rollback:
             self.tx.rollback()
             print("Transaction discarded")
+            logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/rollback f="{self.file}"')
             self.blog.log_event({'title': _("Database save failed"), 'level':"ERROR"})
             return
 
@@ -125,8 +131,10 @@ class DOM_handler():
         else:
             try:
                 self.tx.commit()
+                logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/ok f="{self.file}"')
                 print("Transaction committed")
             except Exception as e:
+                logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/fail f="{self.file}"')
                 print("Transaction failed")
                 self.blog.log_event({'title':_("Database save failed due to {} {}".\
                                      format(e.__class__.__name__, e)), 'level':"ERROR"})
@@ -134,37 +142,25 @@ class DOM_handler():
     def remove_handles(self):
 #         print("remove_handles NOT DONE!")
 #         return
-        cypher_remove_handles = """
-            match (b:Batch {id:$batch_id}) -[*]-> (a)
-            remove a.handle
-            return count(a),labels(a)[0]
-        """
         total = 0
-        results = self.tx.run(cypher_remove_handles, batch_id=self.batch_id)
+        results = self.tx.run(Cypher_mixed.remove_handles, batch_id=self.batch_id)
         for count, label in results:
             print(f'# - cleaned {count} {label} handles')
             total += count
         print (f'# --- removed handle from {total} nodes')
 
 
-    def add_links(self):
+    def add_missing_links(self):
         ''' Link the Nodes without OWNS link to Batch
         '''
-        cypher_add_links = """
-           match (n) where exists (n.handle)
-            match (b:Batch{id:$batch_id})
-            merge (b)-[:OWNS_OTHER]->(n)
-            remove n.handle
-            return count(n)
-        """
-        result = self.tx.run(cypher_add_links,batch_id=self.batch_id)
+        result = self.tx.run(Cypher_mixed.add_links, batch_id=self.batch_id)
         counters = result.consume().counters
         if counters.relationships_created:
             print(f"Created {counters.relationships_created} relations")
 
     def set_mediapath(self, path):
         ''' Store media files path. '''
-        self.tx.run("match (b:Batch{id:$batch_id}) set b.mediapath = $path", 
+        self.tx.run(Cypher_mixed.set_mediapath, 
                     batch_id=self.batch_id, path=path)
 
     def update_progress(self, key):
@@ -274,18 +270,6 @@ class DOM_handler():
             # Extract handle, change and id
             self._extract_base(event, e)
 
-#             if False and counter > 0 and counter % 1000 == 0: 
-#                 elapsed = time.time()-t0
-#                 eventspersec = counter/elapsed
-#                 remainingevents = len(events) - counter
-#                 remainingtime = remainingevents/eventspersec
-#                 print(f"Event {counter} {e.id} "
-#                                          f"{time.asctime()} {elapsed:6.2f} "
-#                                          f"{eventspersec:6.2f} "
-#                                          f"{remainingevents} "
-#                                          f"{remainingtime:6.2f} "
-#                                          )
-
             if len(event.getElementsByTagName('type') ) == 1:
                 event_type = event.getElementsByTagName('type')[0]
                 # If there are type tags, but no type data
@@ -341,7 +325,7 @@ class DOM_handler():
             e.media_refs = self._extract_mediaref(event)
 
             try:
-                self.save_and_link_handle(e)
+                self.save_and_link_handle(e, batch_id=self.batch_id)
                 counter += 1
             except RuntimeError as e:
                 self.blog.log_event({'title':"Events", 'count':counter, 
@@ -599,8 +583,7 @@ class DOM_handler():
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     ##print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
 
-            for ref in p.media_refs: 
-                print(f'# saving Person {p.id}: media_ref {ref}')
+            #for ref in p.media_refs: print(f'# saving Person {p.id}: media_ref {ref}')
             self.save_and_link_handle(p, batch_id=self.batch_id)
             #print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
@@ -638,6 +621,7 @@ class DOM_handler():
             # List of upper places in hierarchy as {hlink, dates} dictionaries
             pl.surround_ref = []
 
+            # Note. The ptitle is never saved to Place object!
             if len(placeobj.getElementsByTagName('ptitle')) == 1:
                 placeobj_ptitle = placeobj.getElementsByTagName('ptitle')[0]
                 pl.ptitle = placeobj_ptitle.childNodes[0].data
@@ -652,6 +636,7 @@ class DOM_handler():
                     placename.order = place_order
                     place_order += 1
                     placename.name = placeobj_pname.getAttribute("value")
+                    #print(f"# placeobj {pl.id} pname {place_order} {placename.name}")
                     if placename.name:
                         if pl.pname == '':
                             # First name is default pname for Place node
@@ -659,8 +644,17 @@ class DOM_handler():
                         placename.lang = placeobj_pname.getAttribute("lang")
                         pl.names.append(placename)
                     else:
-                        self.blog.log_event({'title':"This place has an empty name",
-                                             'level':"WARNING", 'count':pl.id})
+                        self.blog.log_event({'title':"An empty place name discarded",
+                                             'level':"WARNING", 
+                                             'count':f"{pl.id}({place_order})"})
+                        place_order -= 1
+
+                try:
+                    # Returns Gramps_DateRange or None
+                    placename.dates = self._extract_daterange(placeobj_pname)
+                    #TODO: val="1700-luvulla" muunnettava Noteksi
+                except:
+                    placename.dates = None
 
             for placeobj_coord in placeobj.getElementsByTagName('coord'):
                 if placeobj_coord.hasAttribute("lat") \
@@ -799,6 +793,14 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one spubinfo in a source",
                                      'level':"WARNING", 'count':s.id})
 
+            if len(source.getElementsByTagName('sabbrev') ) == 1:
+                source_spubinfo = source.getElementsByTagName('sabbrev')[0]
+                if len(source_spubinfo.childNodes) > 0:
+                    s.sabbrev = source_spubinfo.childNodes[0].data
+            elif len(source.getElementsByTagName('sabbrev') ) > 1:
+                self.blog.log_event({'title':"More than one sabbrev in a source",
+                                     'level':"WARNING", 'count':s.id})
+
             for source_noteref in source.getElementsByTagName('noteref'):
                 # Traverse links to surrounding places
                 if source_noteref.hasAttribute("hlink"):
@@ -918,8 +920,9 @@ class DOM_handler():
                     date_quality = dateobj.getAttribute("quality")
                 else:
                     date_quality = None
-                logging.debug("Creating {}, date_type={}, quality={}, {} - {}".\
-                              format(tag, date_type, date_quality, date_start, date_stop))
+                logger.debug("bp.gramps.xml_dom_handler.DOM_handler._extract_daterange"
+                             f"Creating {tag}, date_type={date_type}, quality={date_quality},"
+                             f" {date_start} - {date_stop}")
                 return Gramps_DateRange(tag, date_type, date_quality,
                                         date_start, date_stop)
 
@@ -975,19 +978,19 @@ class DOM_handler():
                         right = region.getAttribute('corner2_x')
                         lower = region.getAttribute('corner2_y')
                         resu.crop = int(left), int(upper), int(right), int(lower)
-                        print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle} crop={resu.crop}')
-                if not resu.crop: print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle}')
+                        #print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle} crop={resu.crop}')
+                #if not resu.crop: print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle}')
     
                 # Add note and citation references
                 for ref in objref.getElementsByTagName('noteref'):
                     if ref.hasAttribute("hlink"):
                         resu.note_handles.append(ref.getAttribute("hlink"))
-                        print(f'#_extract_mediaref: Note {resu.note_handles[-1]}')
+                        #print(f'#_extract_mediaref: Note {resu.note_handles[-1]}')
                            
                 for ref in objref.getElementsByTagName('citationref'):
                     if ref.hasAttribute("hlink"):
                         resu.citation_handles.append(ref.getAttribute("hlink"))
-                        print(f'#_extract_mediaref: Cite {resu.citation_handles[-1]}')
+                        #print(f'#_extract_mediaref: Cite {resu.citation_handles[-1]}')
     
                 result_list.append(resu)
 

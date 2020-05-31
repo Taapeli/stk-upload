@@ -12,7 +12,7 @@ td ul li p { margin: 0 0 0.3em 0; }
 </style>
 
 <div id="startdiv">
-    <h2>{{ _('List of Sources') }}{% if title %} ({{ _(title) }}){% endif %}</h2>
+    <h2>{{ _('List of Sources') }}{% if user_context.series %} ({{ _(user_context.series) }}){% endif %}</h2>
     <div>{{ macro.select_dataset() }}</div>
 </div>
 
@@ -64,11 +64,9 @@ td ul li p { margin: 0 0 0.3em 0; }
                 </td>
             <td class="ColumnSource">
                <div>
-                 {% set uniq_id = s.uniq_id %}
-                 {% set id = s.id %}
-               
-                  <a href="/scene/source={{s.uniq_id}}" {% if s.ref_cnt == 0 %} class="dimmed" 
-                     title="{{ _('Source') }} {{s.uniq_id}} ({{s.id}}) {{ _('unused') }}">{% else %}
+<!--                  {% set uniq_id = s.uniq_id %}{% set id = s.id %} -->
+                  <a href="/scene/source?uuid={{s.uuid}}" {% if s.ref_cnt == 0 %} class="dimmed" 
+                     title="{{ _('Source') }} {{s.uuid}} ({{s.id}}) {{ _('unused') }}">{% else %}
                      title="{{ _('see details of source %(uniq_id)s (%(id)s)', uniq_id=uniq_id, id=id) }}">{% endif %}
                      {{s.stitle}}</a>
                 </div>

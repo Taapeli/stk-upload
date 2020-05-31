@@ -12,7 +12,7 @@ logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, session , flash
 from flask_security import login_required, roles_accepted, current_user, utils as secutils
-from flask_babelex import _
+from flask_babelex import _, get_locale
 
 import shareds
 from models import email
@@ -22,7 +22,7 @@ from bp.start.forms import JoinForm
 from models.gen.batch_audit import Batch
 
 """ Application route definitions
-""" 
+"""
 
 @shareds.app.before_request
 def force_https():
@@ -33,7 +33,7 @@ def force_https():
         return redirect(request.url.replace('http://', 'https://'))
 
 # @shareds.app.route('/')
-#     Home page for a guest user (from login page or home button) 
+#     Home page for a guest user (from login page or home button)
 #     or anonymous user (home)
 #
 #     @See: routes.entry
@@ -44,7 +44,7 @@ def start_guest():
     """
     user = shareds.user_datastore.get_user('guest')
     secutils.login_user(user)
-    logger.info('-> bp.start.routes.start_guest: Anonymous user')
+    logger.info('-> bp.start.routes.start_guest')
     return render_template('/start/index_guest.html')
 
 
@@ -52,21 +52,21 @@ def start_guest():
 @login_required
 #@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def start_logged():
-    """ Opening the home page for logged in user (from login page or home button) 
+    """ Opening the home page for logged in user (from login page or home button)
         or anonymous user (home).
-        
+
         Note. The home page for anonymous user is routes.entry in app/routes.py
     """
-    if "gedcom_user" in session: del session["gedcom_user"]  
-    
-#     if current_user.is_authenticated:
+    if "gedcom_user" in session: del session["gedcom_user"]
+
     role_names = [role.name for role in current_user.roles]
-    logger.info("-> bp.start.routes.start_logged "
-                f"user {current_user.username}/{current_user.email}, roles {role_names}")
+    logger.info(f"-> bp.start.routes.start_logged")
+    logger.debug(f"bp.start.routes.start_logged"
+                 f" lang={get_locale().language}"
+                 f" user={current_user.username}/{current_user.email}"
+                 f" roles= {role_names}")
     return render_template('/start/index_logged.html')
-#     else:
-#         logger.info('-> bp.start.routes.start Anonymous user')
-#         return render_template('/start/guest_index.html')
+
 
 @shareds.app.route('/thankyou')
 def thankyou():
@@ -132,7 +132,6 @@ def my_settings():
     lang = request.form.get("lang")
     is_guest = current_user.username == "guest"
     referrer = request.form.get("referrer",default=request.referrer)
-    logger.info(f"-> bp.start.routes.my_settings lang={lang}, guest={is_guest}")
     if lang:
         try:
             from bp.admin.models.user_admin import UserAdmin # can't import earlier
@@ -151,6 +150,7 @@ def my_settings():
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)
     print(f'# Gedcoms {gedcoms}')
     
+    logger.info("-> bp.start.routes.my_settings")
     return render_template("/start/my_settings.html",
                            is_guest=is_guest,
                            referrer=referrer,

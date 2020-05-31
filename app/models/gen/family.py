@@ -10,7 +10,7 @@ from bl.base import NodeObject
 from .dates import DateRange
 
 
-class Family(NodeObject):
+class Family(NodeObject): # -> bl.family.Family
     """ Family Node object.
     
         Perhe

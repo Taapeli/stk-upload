@@ -17,6 +17,8 @@ Created on 2.3.2018
 '''
 import shareds
 import logging
+logger = logging.getLogger('stkserver')
+
 from flask_babelex import _
 
 from .cypher_adm import Cypher_adm
@@ -66,16 +68,16 @@ class DataAdmin():
         if opt == "total":
             """ Koko kanta tyhjennetään """
             msg = _("All data is deleted. ")
-            logging.info(msg)
             cnt = self._remove_chuncks(Cypher_adm.remove_all_nodes)
+            #logger.info(f'bp.admin.models.data_admin.DataAdmin.db_reset/{opt} n={cnt}')
 
         elif opt == "save_users":
             msg = _("All data but users and roles are removed.")
-            logging.info(msg)
             cnt = self._remove_chuncks(Cypher_adm.remove_data_nodes)
+            #logger.info(f'bp.admin.models.data_admin.DataAdmin.db_reset/{opt} n={cnt}')
 
         elif opt == "my_own":
-            # It is possible to check, id there are nodes whith a foreign owners, 
+            # It is possible to check, id there are nodes with a foreign owners, 
             # too. It takes 60s for 750 persons data:
             #
             # match (u:User) -[:SUPPLEMENTED]-> (up:UserProfile) -[*]-> (x)  
@@ -85,11 +87,10 @@ class DataAdmin():
             #     RETURN labels(x)[0] as lab, count(x)
 
             msg = _("All persons and event by %(un)s are removed.", un=self.username)
-            logging.info(msg)
             cnt = self._remove_chuncks(Cypher_adm.remove_my_nodes, user=self.username)
+            #logger.info(f'bp.admin.models.data_admin.DataAdmin.db_reset/{opt} n={cnt}')
 
         msg2 = _('Removed %(cnt)d nodes', cnt=cnt)
-        logging.info(msg2)
-        return '\n'.join((msg, msg2))
+        return {'msg':'\n'.join((msg, msg2)), 'count':cnt}
 
         

@@ -1,0 +1,47 @@
+{# templates/stat/stat.html #}
+{% extends "admin/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _("Statistics") }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div class="startdiv">
+  <h2>{{ _("Statistics about STK") }}</h2>
+  <div id="errors" class="errors"></div>
+
+  <table cellspacing="0" cellpadding="0">
+    <tr>
+      <td style="text-align: right"> {{ res["code_files"] }}
+      </td> <td> .py files       </td>
+      <td style="text-align: right"> {{ res["code_lines"] }} </td>
+      <td> lines           </td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> {{ res["html_files"] }} </td>
+      <td> .html files     </td>
+      <td style="text-align: right"> {{ res["html_lines"] }} </td>
+      <td>  lines          </td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> {{ res["route_files"] }} </td>
+      <td> routes.py files </td>
+      <td style="text-align: right"> {{ res["route_lines"] }} </td>
+      <td> @route's        </td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> {{ res["commits"] }}     </td>
+      <td> git commits     </td>
+      <td style="text-align: right"> {{ res["commits1m"] }}   </td>
+      <td> in last month   </td>
+    </tr>
+  </table>
+  <p>
+    <h3>Some application statistics links:</h3>
+  <ul>
+    <li> about neo4j nodes, node types, ...
+    <li> <a href="/stat/uploadstat">Uploading statistics</a>
+    <li> <a href="/stat/appstat">DB acces and usage, per method, per user, per date</a>
+  </ul>
+
+</div>
+{% endblock %}

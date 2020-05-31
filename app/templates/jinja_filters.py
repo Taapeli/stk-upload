@@ -75,7 +75,7 @@ def translate(term, var_name):
             "Family": _("Family") #"ehtoollinen"      
     }
     elif var_name == "role":
-        # Name types
+        # Event role types or member role in family
         tabl = {
             "Primary": _("Primary"), #"pääosallisena"
             "Family": _("Family"), #"perheenä"
@@ -90,10 +90,12 @@ def translate(term, var_name):
             "Pääosallinen": _("Pääosallinen"), #"pääosallisena"
             "Edunsaaja": _("Edunsaaja"), #"edunsaajana"
             "Myyjä": _("Myyjä"), #"myyjänä"
-            "father": _("Mies"), 
-            "mother": _("Vaimo"),
-            "man": _("Mies"), 
-            "wife": _("Vaimo"),
+            "father": _("Father"), 
+            "mother": _("Mother"),
+            "man": _("Husband"), 
+            "wife": _("Wife"),
+            "child": _("as child"),     # Role as family member
+            "parent": _("as parent"),   # Role as family member
             "Unknown": _("Unknown role") #"määräämätön"
         }
     elif var_name == "conf":
@@ -105,15 +107,15 @@ def translate(term, var_name):
             "3": _("confidence 3/4"), #"korkea"
             "4": _("confidence 4/4")  #"erittäin korkea"
             }
-    elif var_name == "conf_star":
-        # Confidence level symbols oo, o, *, **, ***
-        tabl = {
-            "0": "oo",   # fa-exclamation-circle [&#xf06a;]
-            "1": "o",
-            "2": "*",    # fa-star [&#xf005;]
-            "3": "**",
-            "4": "***"
-            }
+#     elif var_name == "conf_star":
+#         # Confidence level symbols oo, o, *, **, ***
+#         tabl = {
+#             "0": "oo",   # fa-exclamation-circle [&#xf06a;]
+#             "1": "o",
+#             "2": "*",    # fa-star [&#xf005;]
+#             "3": "**",
+#             "4": "***"
+#             }
     elif var_name == "notet":
         # Note types
         tabl = {

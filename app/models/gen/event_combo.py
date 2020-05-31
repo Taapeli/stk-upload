@@ -42,6 +42,7 @@ class Event_combo(Event):
         Constructor Luo uuden Event_combo -instanssin
         '''
         Event.__init__(self)
+        #TODO Remove:  Event_combo.clearnames is not set or in use
         self.clearnames = []    # filled by models.gen.place.Place.show_names_list
                                 # to show names list 
         self.role = ''          # role of event from EVENT relation, if available

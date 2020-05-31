@@ -1,3 +1,4 @@
+*~
 *.pyc
 instance/*.py
 .settings/
@@ -21,3 +22,4 @@ kku/
 app/static/tmp/
 
 app/messages.pot
+/media/

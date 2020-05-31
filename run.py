@@ -1,28 +1,23 @@
+#!/usr/bin/python
 # coding=UTF-8
-import logging
-logging.basicConfig(level=logging.INFO, format=('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-logger = logging.getLogger('stkserver')
-#logger.setLevel(logging.DEBUG)
 
-# Do not log neo4j.bolt INFO messages
-neo4j_log = logging.getLogger("neo4j.bolt")
-neo4j_log.setLevel(logging.WARNING)
+import os
+import platform
 
-"""
- ----------------------------- Käynnistys -------------------------------
- ----------------------------- URL http://127.0.0.1:5000/ --------------
-"""
+# On linux system uids are < 1000.  I know nothin about windows uids.
+# This should tell if we are on server or developer enviroment:
+running_on_server = ((platform.system() == "Linux") and (os.getuid() < 1000))
+#running_on_server = os.path.isdir('/var/log/httpd/stkserver')
 
-if __name__ == '__main__':
-    from app import app
-    print(f'Käynnistys: {app}, logging {logger}')
-    app.run()
-
-#     if True:
-#         loglevel = 'DEBUG'
-#         # Ajo paikallisesti
-#         print ("Stk server ajetaan {}-lokitasolla".format(loglevel))
-#         app.run(debug=loglevel)
-#     else:
-#         # Julkinen sovellus
-#         app.run(host='0.0.0.0', port=8000)
+if running_on_server:
+    import sys
+    sys.path.insert(0, os.path.join(os.getcwd(),"app"))
+    from app import app as application
+    application.secret_key = "You don'n know OUR secret key"
+else:
+    if __name__ == '__main__':
+        import logging
+        neo4j_log = logging.getLogger("neo4j.bolt")
+        neo4j_log.setLevel(logging.WARNING)
+        from app import app
+        app.run()

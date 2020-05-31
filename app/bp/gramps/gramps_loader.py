@@ -28,13 +28,13 @@ def analyze_xml(username, filename):
     # Read the xml file
     upload_folder = get_upload_folder(username) 
     pathname = os.path.join(upload_folder,filename)
-    print("Pathname: " + pathname)
+    print("bp.gramps.gramps_loader.analyze_xml Pathname: " + pathname)
     
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
     
 
     ''' Get XML DOM parser and start DOM elements handler transaction '''
-    handler = DOM_handler(file_cleaned, username)
+    handler = DOM_handler(file_cleaned, username, filename)
     
     citation_source_cnt = 0
     event_citation_cnt = 0
@@ -47,15 +47,15 @@ def analyze_xml(username, filename):
     event_no_citation_cnt = 0 # How many events do not have any citationref?
     
     # Estimated times per item (ms)
-    e_citation = 26
-    e_event = 47
-    e_family = 82
-    e_object = 2
-    e_note = 1
-    e_person = 130
-    e_place = 2
-    e_repository = 1
-    e_source = 6
+    e_citation = 3
+    e_event = 3
+    e_family = 4
+    e_object = 6
+    e_note = 3
+    e_person = 16
+    e_place = 6
+    e_repository = 2
+    e_source = 3
     e_total = 0
 
     citations = handler.collection.getElementsByTagName("citation")
@@ -130,6 +130,105 @@ def analyze_xml(username, filename):
 def analyze(username, filename):
     values = analyze_xml(username, filename)
 
+    references = []
+    
+    class Analyze_row(): pass
+    
+    row = Analyze_row()
+    row.individ = "Events with no references to"
+    row.number_of_individs = values["event_no_citation_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = " "
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Citation"
+    row.number_of_individs = values["citation_cnt"]
+    row.reference = "Source"
+    row.number_of_references = values["citation_source_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Event"
+    row.number_of_individs = values["event_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["event_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Family"
+    row.number_of_individs = values["family_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["family_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Note"
+    row.number_of_individs = values["note_cnt"]
+    row.reference = " "
+    row.number_of_references = " "
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Media"
+    row.number_of_individs = values["object_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["object_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Person"
+    row.number_of_individs = values["person_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["person_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Place"
+    row.number_of_individs = values["place_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["place_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Repository"
+    row.number_of_individs = values["repository_cnt"]
+    row.reference = " "
+    row.number_of_references = " "
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Source"
+    row.number_of_individs = values["source_cnt"]
+    row.reference = "Repository"
+    row.number_of_references = values["source_repository_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Estimated time (sec):"
+    e_total = values["e_total"]
+    row.number_of_individs = " "
+    row.reference = " "
+    row.number_of_references = str(int(e_total))
+    
+    references.append(row)
+    
+    return(references)
+                    
+
+def analyze_old2(username, filename):
+    values = analyze_xml(username, filename)
+
     text = []
     citation_cnt = values["citation_cnt"]
     citation_source_cnt = values["citation_source_cnt"]
@@ -159,7 +258,8 @@ def analyze(username, filename):
     text.append(" ")
     text.append(str(event_citation_cnt) + " Citation references in Events,")
     text.append(" ")
-    text.append(str(event_no_citation_cnt) + " Events, which do not have Citation references,")
+    text.append(str(event_no_citation_cnt) + " Events, which do not have a Citation reference \
+     (NOTE! This should be near or equal to zero),")
     text.append(" ")
     text.append(str(family_cnt) + " Families, which have references to: " +
       str(family_citation_cnt) + " Citations,")
@@ -421,7 +521,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
 
     ''' Get XML DOM parser and start DOM elements handler transaction '''
-    handler = DOM_handler(file_cleaned, userid)
+    handler = DOM_handler(file_cleaned, userid, pathname)
 
     # Initialize Run report
     handler.blog = Batch(userid)
@@ -475,7 +575,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             handler.set_family_sortname_dates()
 
             handler.remove_handles()
-            handler.add_links()
+            handler.add_missing_links()
 
 # Huom. Paikkahierarkia on tehty metodissa Place_gramps.save niin että
 #       aluksi luodaan tarvittaessa viitattu ylempi paikka vajailla tiedoilla.

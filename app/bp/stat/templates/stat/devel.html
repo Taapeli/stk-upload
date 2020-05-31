@@ -1,0 +1,16 @@
+{# templates/stat/stat.html #}
+{% extends "admin/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _("Devel Stats") }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div class="startdiv">
+  <h3>{{ _("Development stats") }}</h3>
+  <ul>
+    <li> code lines: {{ code_lines }}
+    <li> git commits: {{ commits }}
+    <li> routes: {{ routes }}
+  </ul>
+</div>
+{% endblock %}

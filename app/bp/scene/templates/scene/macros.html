@@ -146,7 +146,7 @@
     {% if person.too_new %}
         N N
     {% else %}
-		{{ person_names(person, names) }}
+        {{ person_names(person, names) }}
      {% endif %}
 {%- endmacro %}
 
@@ -169,7 +169,7 @@
 {% macro person(p, uuid="-") -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}
     {% if p.uuid == uuid %}
-    <span class="myself">&nbsp;({{ _('self') }})&nbsp;</span>
+    <span class="myself">({{ _('self') }})</span>
     {% else %}
     <a href="/scene/person?uuid={{p.uuid}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr. {{p.uniq_id}})">
@@ -208,7 +208,7 @@
 {%- endmacro %}
 
 {% macro lifetimes(p) -%}
-    {# Displays Person's life time estimates '1662/1709 — 1726/1819' #}
+    {# Displays Person's life time estimates '1662…1709 — 1726…1819' #}
     {% if p.death_high != 9999 %}
         {% if p.birth_low != p.birth_high %}
             {{p.birth_low}}…{% endif 
@@ -219,8 +219,24 @@
     {% endif %}
 {%- endmacro %}
 
+# 2.2 Family
 
-# 2.2 Note and citation
+{% macro family_name(family) -%}
+    {#  Formats a Family name with link. #}
+         {# <span class="typedesc">{{family.rel_type|transl('marr')}}</span> #}
+         <a href="/scene/family?uuid={{family.uuid}}" class="inlink"
+            title="{{ _("See Family Details") }}">
+            {% for name in [family.father_sortname, family.mother_sortname] %}
+                {% set a = name.split('#') %}
+                {{a[1]}} <i>{{a[2]}}</i> <b>{{a[0]}}</b>
+                {% if not loop.last %}&lt;&gt;{% endif %}
+            {%- endfor %}
+            </a>
+{%- endmacro %}
+
+
+
+# 2.3 Note and citation
 
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
@@ -267,7 +283,7 @@
 %}{%- endmacro %}
 
 
-# 2.3 Place
+# 2.4 Place
 
 {% macro place_names_lang(pl) -%}
     {# Displays Place_combo name variations as "Rymättylä / Rimito" #}

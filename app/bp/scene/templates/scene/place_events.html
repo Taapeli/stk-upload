@@ -4,6 +4,24 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
+<style>
+#summaryarea { margin-left: 4em; }
+div#summaryarea div.scrollbox {
+    max-height: 230px; 
+    overflow: scroll;
+    margin-left: 15px;
+/*     border: 1px solid #CCC; */
+    padding: .5em;
+}
+div.scrollbox ul { margin: 0 }
+
+div#events div.scrollbox {
+    display: inline-block;
+    max-height: 600px; 
+    overflow: scroll;
+/*     border: 1px solid #CCC; */
+}
+</style>
 
 <div id="startdiv">
     <h2>{{ _('Place events') }}</h2>
@@ -12,7 +30,7 @@
 {{ macro.menu(4) }}
     <div class="content" id="Place">
 {% if place %}
-    {% set locid = place.uuid %}
+    {% set current_p = place.uuid %}
       {% if place.coord %}
         <div id="map">{% if '°' in place.coord %}
         {{ _('Invalid coordinates') }}: {{place.coord}}
@@ -34,7 +52,7 @@
         {% endif %}</div>
       {% endif %}
 
-    <h3 class="sticky" title="{{ _('Top') }}"><a href="#">
+    <h3 class="sticky" title="▲ {{ _('Top') }}"><a href="#">
         {{ place.name.name }} ({{ place.type|transl('lt') }})</a></h3>
         <div>
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -46,36 +64,39 @@
         </ol>
       {% endif %}
     {% endwith %}
-            <ul>{% for p in pl_hierarchy %}
-                <li style="margin-left: {{p.level * 2}}em;">
-                {% if p.uuid == locid %}
-                    <b style="font-size:larger;">{{ macro.place_names(p) }}</b>
-                {% else %}<a href="/scene/location/uuid={{p.uuid}}" class="inlink">
-                    {{ macro.place_names(p) }}
-                </a>
-                {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
-            {% endfor %}</ul>
         </div>
 
         <div id="summaryarea">
+            <div class="scrollbox">
+                <ul>{% for p in pl_hierarchy %}
+                    <li style="margin-left: {{p.level * 2 - 2}}em;">
+                    {% if p.uuid == current_p %}
+                        <b style="font-size:larger;">{{ macro.place_names(p) }}</b>
+                    {% else %}<a href="/scene/location/uuid={{p.uuid}}" class="inlink">
+                        {{ macro.place_names(p) }}
+                    </a>
+                    {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
+                {% endfor %}</ul>
+            </div>
             <table><tbody>
                 <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="Value">{{macro.all_obj_ids(place)}}</td>
                     <td></td>
                 </tr>
+    {% if place.notes %}
+                <tr><td class="ColumnAttribute">{{ _('Notes') }}</td>
+                    <td class="Value"><ul>
+         {% for note in place.notes %}
+                        <li><span class="typedesc">{{ note.type|transl('notet') }}</span>
+                            {{ macro.notelink(note) }}</li>
+        {% endfor %}
+                    </ul></td>
+                </tr>
+    {% endif %}
+            </div>
+        </div>
             </tbody></table>
         </div>
-    {% if place.notes %}
-        <div id="notes">
-            <h4>{{ _('Notes') }}</h4>
-         {% for note in place.notes %}
-            <div class="grampsstylednote">
-                 <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
-                    {{ macro.notelink(note) }}</p>
-            </div>
-        {% endfor %}
-        </div>
-    {% endif %}
 
     {% if place.noteref_hlink %}
         <div id="notes">
@@ -133,56 +154,44 @@
         </div>
     {% endif %}
     
-        <div id="events"> <!--class="subsection"-->
+        <div id="events">
             <h4>{{ _('Events') }}</h4>
     {% if events %}
-            <table class="infolist eventlist">
+            <div class="scrollbox">
+              <table class="infolist eventlist">
                 <thead>
                     <tr>
                         <th class="ColumnPerson">{{ _('Person') }}</th>
                         <th class="ColumnEvent">{{ _('Event') }}</th>
                         <th class="ColumnDate">{{ _('Date') }}</th>
                         <th class="ColumnDescription">{{ _('Description') }}</th>
-<!--                    <th class="ColumnNotes">{{ _('Note') }}</th>
-                        <th class="ColumnSources">{{ _('Sources') }}</th>
--->
                     </tr>
                 </thead>
                 <tbody>
         {% for e in events|sort %}
                     <tr>
                         <td class="ColumnPerson">
-	                        {{ macro.person_names_anon(e.person, e.person.names) }}
+            {% if e.indi_label == "Person" %}
+	                        {{ macro.person_names_anon(e.indi, e.indi.names) }}
+            {% else %}
+                            {{ macro.family_name(e.indi) }}
+            {% endif %}
                         </td>
-                        {# e.person.too_new checked in pe.neo4j.reader #}
                         <td class="ColumnEvent">{{e.type|transl('evt')}}
-                          {% if e.role != "Primary" %}<span class="langcode">({{e.role|transl('role')}})</span>{% endif %}</td>
+                          {% if e.role != "Primary" %}({{e.role|transl('role')}}){% endif %}
+                        </td>
                         <td class="ColumnDate">{{e.dates}}</td>
                         <td class="ColumnDescription">{{e.description}}</td>
-<!--
-                        <td class="ColumnNotes">
-                            <div></div>
-                        </td>
-                        <td class="ColumnSources">
-                         <!-- generoi href="#sref3a">3a</a>
-                        </td>
--->
                     </tr>
          {% endfor %}
                  </tbody>
-            </table>
+              </table>
+            </div>
     {% else %}
         <p>{{ _('No events') }}</p>
     {% endif %}
         </div>
 
-<!-- <div class="subsection" id="sourcerefs">
-        <div>
-            <h4>{{ _('Source References') }}</h4>
-            <p style="margin-left:2em;">{{ _('No source pointers found') }}</p>
-        </div>
-     </div>
--->
 {% else %}
 <p>{{ _('The required place was not found.') }}</p>
 </div>

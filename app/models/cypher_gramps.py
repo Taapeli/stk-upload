@@ -27,18 +27,17 @@ MERGE (u) -[:HAS_ACCESS]-> (b)
 MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
     SET b.status="completed"
-WITH u, b
-    OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
-        DELETE c
-    MERGE (u) -[:CURRENT_LOAD]-> (b)
 """
-
+#Removed 2.5.2020
+# WITH u, b
+#     OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
+#         DELETE c
+#     MERGE (u) -[:CURRENT_LOAD]-> (b)
 #Moved to models.gen.batch_audit / 3.2.2020/JMä
 #     batch_list = """
 #     batch_list_all = """
 #     batch_delete = """
 #     get_batch_filename = """
-
 #Removed / 3.2.2020/JMä
 #     batch_count = """
 #     batch_person_count = """
@@ -52,12 +51,12 @@ WITH u, b
     original items from the user's Gramps database
     '''
 
-
 class Cypher_event_w_handle():
     """ For Event class """
 
-    create = """
-MERGE (e:Event {handle: $e_attr.handle})
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
+MERGE (b) -[r:OWNS]-> (e:Event {handle: $e_attr.handle})
     SET e = $e_attr
 RETURN ID(e) as uniq_id"""
 
@@ -400,13 +399,23 @@ CREATE (u) -[:OWNS]-> (a:Repository)
 RETURN ID(a) as uniq_id"""
 
 
-# class Cypher_repository_w_handle():
-#     """ For Repository class """
-# 
-#     create = """
-# MERGE (r:Repository {handle: $r_attr.handle}) 
-#     SET r = $r_attr
-# RETURN id(r) as uniq_id"""
+class Cypher_mixed():
+    
+    remove_handles = """
+match (b:Batch {id:$batch_id}) -[*]-> (a)
+    remove a.handle
+return count(a),labels(a)[0]"""
+
+    add_links = """
+match (n) where exists (n.handle)
+match (b:Batch{id:$batch_id})
+    merge (b)-[:OWNS_OTHER]->(n)
+    remove n.handle
+return count(n)"""
+
+    set_mediapath = """
+match (b:Batch{id:$batch_id})
+set b.mediapath = $path"""
 
 
 class Cypher_x():

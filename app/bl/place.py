@@ -1,10 +1,16 @@
 '''
-Created on 11.3.2020
+    Placeclasses: Place, PlaceBl, SPlaceReader and PlaceName.
 
+    - Place        represents Place Node in database
+    - PlaceBl      represents Place and connected data (was Place_combo)
+    - PlaceReader  has methods for reading Place and connected data
+                   called from ui routes.py
+
+Created on 11.3.2020 in bl.place
 @author: jm
-'''
-'''
+
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
+@author: jm
 
 Todo:
     Miten paikkakuntiin saisi kokoluokituksen? Voisi näyttää sopivan zoomauksen karttaan
@@ -13,12 +19,13 @@ Todo:
     3. _Suuria_ maa, osavaltio, lääni
     - Loput näyttäisi keskikokoisina
 
-@author: jm
 '''
+import traceback
 import logging 
 logger = logging.getLogger('stkserver')
 
-from .base import NodeObject
+from .base import NodeObject, Status
+from pe.db_reader import DBreader
 #from .place_coordinates import Point
 
 
@@ -61,8 +68,6 @@ class Place(NodeObject):
     @classmethod
     def from_node(cls, node):
         ''' Creates a node object of type Place from a Neo4j node.
-        
-        models.gen.place.Place.from_node. 
         
         Example node:
         <Node id=78279 labels={'Place'} 
@@ -127,6 +132,74 @@ class Place(NodeObject):
             logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
         return
 
+class PlaceReader(DBreader):
+    '''
+        Data reading class for Place objects with associated data.
+
+        - Use pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
+          to define the database driver and user context
+
+        - Returns a Result object which includes the tems and eventuel error object.
+    '''
+#     def get_list(u_context):    # @staticmethod --> pe.db_reader.DBreader.place_list
+#         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
+
+    def get_list(self):
+        """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
+        
+            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
+    """
+        context = self.user_context
+        fw = context.next_name_fw()
+        places = self.dbdriver.dr_get_place_list_fw(self.use_user, fw, context.count, 
+                                                    lang=context.lang)
+
+        # Update the page scope according to items really found 
+        if places:
+            context.update_session_scope('place_scope', 
+                                          places[0].pname, places[-1].pname, 
+                                          context.count, len(places))
+        place_result = {'items':places, 'status':Status.OK}
+        return place_result
+
+
+    def get_with_events(self, uuid):
+        """ Read the place hierarchy and events connected to this place.
+        
+            Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
+            Palauttaa paikkahierarkian ja (henkilö)tapahtumat.
+    
+        """
+        # Get a Place with Names, Notes and Medias
+        res = self.dbdriver.dr_get_place_w_na_no_me(self.use_user, uuid, 
+                                                    self.user_context.lang)
+        place = res.get("place")
+        results = {"place":place, 'status':Status.OK}
+
+        if not place:
+            results = {'status':Status.ERROR, 'statustext':
+                       f'get_with_events:{self.use_user} - no Place with uuid={uuid}'}
+            return results
+        
+        #TODO: Find Citation -> Source -> Repository for each uniq_ids
+        try:
+            results['hierarchy'] = \
+                self.dbdriver.dr_get_place_tree(place.uniq_id, lang=self.user_context.lang)
+
+        except AttributeError as e:
+            traceback.print_exc()
+            results['status'] = Status.ERROR
+            results['statustext'] = f"Place tree for {place.uniq_id}: {e}"
+            return results
+        except ValueError as e:
+            results['status'] = Status.ERROR
+            results['statustext'] = f"Place tree for {place.uniq_id}: {e}"
+            traceback.print_exc()
+
+        res = self.dbdriver.dr_get_place_events(place.uniq_id)
+        results['events'] = res['items']
+        return results
+
 
 
 class PlaceBl(Place):
@@ -163,10 +236,6 @@ class PlaceBl(Place):
         self.note_ref = []      # uniq_ids of Notes
         self.media_ref = []     # uniq_id of models.gen.media.Media
         self.ref_cnt = None     # for display: count of referencing objects
-
-
-#     def get_list(u_context):    # @staticmethod --> pe.db_reader.DBreader.place_list
-#         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
 
 
     @staticmethod
@@ -236,8 +305,7 @@ class PlaceName():
 
     @classmethod
     def from_node(cls, node):
-        ''' models.gen.place.Place_name.from_node
-        Transforms a db node to an object of type Place_name.
+        ''' Transforms a db node to an object of type Place_name.
         
         <Node id=78278 labels={'Place_name'} 
             properties={'lang': '', 'name': 'Kangasalan srk'}>

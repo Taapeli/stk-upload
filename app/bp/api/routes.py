@@ -3,17 +3,21 @@
 # KKu 19.12.2019
 
 import logging 
+#import urllib
+#from flask_security import roles_accepted, current_user
+
 logger = logging.getLogger('stkserver')
 
 from flask import request, jsonify
 # from flask_security import roles_accepted, login_required #, render_template, current_user ,roles_required
-from flask_babelex import _
+#from flask_babelex import _
 
 from . import bp
 from . import apikey
 from . import api
 from . import placeapi
 from . import refnameapi
+#from . import refnameapi_v1
 
 @bp.route('/placeapi/search', methods=['POST'])
 def placeapi_v0_search():
@@ -130,7 +134,7 @@ def refnameapi_v0_basename():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
-@bp.route('/refnameapi/fetch', methods=['POST'])
+@bp.route('/refnameapi/fetch_namefamily', methods=['POST'])
 def refnameapi_v0_namefamily():
     key = request.form.get("apikey")
     if not apikey.is_validkey(key): return jsonify(dict(
@@ -150,7 +154,6 @@ def refnameapi_v0_namefamily():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
-                 
 @bp.route('/api/v1/search', methods=['GET'])
 def api_v1_search():
     lookfor = request.args.get("lookfor")

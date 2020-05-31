@@ -75,9 +75,12 @@ class Place_combo(Place):
 #         ''' Creates a node object of type Place_combo from a Neo4j node.
 
 
-    def show_names_list(self):
-        # Returns list of referred Place_names for this place
-        # If none, return pname
+    def show_names_list(self): 
+        """ Returns list of referred Place_names for this place.
+            If none, return pname
+
+            #TODO Remove:  Event_combo.clearnames is not set or in use
+        """
         name_list = []
         for nm in self.names:
             if nm.lang:
@@ -94,6 +97,8 @@ class Place_combo(Place):
     @staticmethod
     def read_place_w_names(uniq_id):
         """ Reads Place_combo nodes or selected node with PlaceName objects.
+
+            TODO Remove: Not in use
         """
         result = None
         with shareds.driver.session() as session:
@@ -329,6 +334,8 @@ class Place_combo(Place):
             mainittuna.
             Jos sarakkeessa field[1] on mainittu kielikoodi
             se lisätään kunkin nimen field[0] perään suluissa
+
+        #TODO Remove, not in use
         #TODO Lajiteltava kielen mukaan jotenkin
         """
         ret = []

@@ -135,19 +135,16 @@ class Person_combo(Person):
                 only your own data.
         '''
         try:
-            record = session.run(Cypher_person.get_person, uuid=uuid).single()
-            # <Record 
-            #    p=<Node id=434495 labels={'Person'} properties={'sortname': '#Valborg#Matintytär', 
-            #        'death_low': 1726, 'confidence': '', 'sex': 2, 'change': 1489929214, 
-            #        'birth_high': 1709, 'death_high': 1819, 'id': 'I0208', 
-            #        'uuid': 'a698ebcee0a84c78bfeeaeaff1736c00', 'birth_low': 1662}> 
-            #    root_type='OWNS' 
-            #    root=<Node id=436587 labels={'Batch'} properties={'mediapath': '/home/jm/Mäkeläiset_2017-11-07.gpkg.media', 
-            #        'file': 'uploads/juha/Silius_esivanhemmat_clean.xml', 'id': '2020-02-05.001', 'user': 'juha', 
-            #        'timestamp': 1580913105068, 'status': 'completed'}>
-            # >
+#             if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
+#                 record = session.run(Cypher_person.get_by_user,
+#                                      uuid=uuid, user=user).single()
+#             else:       # Select person from public database
+#                 #TODO: Rule for public database is missing, taking any
+            record = session.run(Cypher_person.get_person,
+                                 uuid=uuid).single()
             if record is None:
                 raise LookupError(f"Person {uuid} not found.")
+
             root_type = record['root_type']
             if use_common or user == 'guest':
                 # Select person from public database
@@ -157,6 +154,7 @@ class Person_combo(Person):
                 # Select the person only if owned by user
                 if root_type == "PASSED":
                     pass    # Allow reading on passed persons, too (?)
+
             node = record['p']
             p = Person_combo.from_node(node)
             # p = <Node id=259641 labels={'Audit'} 
@@ -1007,7 +1005,6 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
             Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
             and models.dataupdater.set_estimated_dates
         """
-        print("Calculating lifetime estimates")
         from models import lifetime
         from models.gen.dates import DR 
         try:

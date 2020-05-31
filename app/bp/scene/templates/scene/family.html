@@ -52,41 +52,50 @@ td { padding-right:1em;}
                 {% endif %}
             {% endfor %}
             </tbody></table>
+        </div>
 
-        {% if family.events %} 
+{% if family.events %} 
         <h3>{{ _("Family Events") }}</h3>
         <div id="summaryarea">
-            <table style="margin-top:1em;"><tbody>
-        {% for e in family.events|sort(attribute='dates') %}
+            <table><tbody>
+    {% for e in family.events|sort(attribute='dates') %}
                 <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
                     <td class="ColumnDate">{{e.dates}}</td>
                     <td class="ColumnPlace">
                     <a href="/scene/location/uuid={{e.place.uuid}}" class="inlink"
                        title="{{ _('of type') }} {{e.place.type}}; {{ _('see details of place') }}">
-                      {{macro.place_names_lang(e.place)}}</a>{% if e.place.uppers %},
-		    <small>{{macro.place_names_lang(e.place.uppers[0])}}</small>
-		    {% endif %}
-		  </td>
+                      {{macro.place_names_lang(e.place)}}
+        </a>{% if e.place.uppers %},
+		              <small>{{macro.place_names_lang(e.place.uppers[0])}}</small>
+		{% endif %}
+		          </td>
                 </tr>
-        {% endfor %}
+    {% endfor %}
+
+ {% if family.sources %}
+                <tr><td colspan="3">&nbsp;</td></tr>
+                <tr><td class="ColumnAttribute"><b>{{ _('Sources') }}</b></td>
+                    <td class="Value" colspan="2"><ul>
+        {% for s in family.sources %}
+                        <li><a href="/scene/source?uuid={{s.uuid}}" class="inlink">{{s.stitle}}</a>, 
+            {% for c in s.citations %}
+                            {{ _("Page") }}: {{c.page}}
+            {% endfor -%}
+            {% for repo in s.repositories %}
+                            <br>&nbsp;&nbsp; – {% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
+                            {{ _('in the repository') }} <b>{{repo.rname}}</b>
+            {% endfor -%}
+                        </li>
+        {% endfor -%}
+                    </ul></td>
+{% endif -%}
+                </tr>
             </tbody></table>
-
-        {% if family.sources %}<div class="source-flex">
-            <div><p><b>{{ _("Sources") }}:</b></p></div>
-            <div>{% for data in family.sources %}
-                <p>► <a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>, 
-                    {{ data[3] }}, {{ data[4] }}
-                    {{ _("Page") }}: {{ data[5] }}
-                    <br>&nbsp; – {{ data[0] }}</p>
-
-            {% endfor %}</div>
-        </div>
-        {% endif %}
 
       </div>
       {% endif %}
 
-        {% if family.no_of_children %} 
+        {% if family.children %} 
 	        <h3>{{ _("Children") }}</h3>
 	        <div id="summaryarea">
 	            <table style="margin-top:1em;"><tbody>

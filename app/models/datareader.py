@@ -11,7 +11,7 @@ from sys import stderr
 
 from flask_babelex import _
 #from flask import flash
-from flask import request, flash #, render_template, redirect, url_for
+from flask import request #, flash, render_template, redirect, url_for
 from flask import session as user_session
 from flask_security import current_user #, login_required #, roles_accepted
 
@@ -25,15 +25,15 @@ from models.gen.media import Media
 from models.gen.person import SEX_MALE #, SEX_FEMALE
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
-from models.gen.place import Place
+#from models.gen.place import Place
 from models.gen.place_combo import Place_combo
 from models.gen.refname import Refname
-from models.gen.citation import Citation, NodeRef
+from models.gen.citation import Citation #, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
 from models.gen.dates import DateRange
 from ui.user_context import UserContext
-import traceback
+#import traceback
 
 
 def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=False, order=0):
@@ -504,151 +504,8 @@ def read_places():
     return (headings, titles, events)
 
 
-def get_source_with_events(sourceid):
-    """ Reads a Source with events, citations and notes.
-    
-        Lukee tietokannasta Source- objektin tapahtumineen näytettäväksi
-    """
-
-    result = Source.get_source_w_notes(sourceid)
-    for record in result:
-        # <Record source=<Node id=312705 labels={'Source'} 
-        #    properties={'id': 'S0278', 'stitle': 'Taivassalon seurakunnan vihit...', 
-        #        'uuid': '6e75056295854ca28d14338d29c202d8', 'spubinfo': '', 'sauthor': '', 'change': 1566726449}>
-        #    notes=[
-        #        <Node id=316600 labels={'Note'}
-        #            properties={'id': 'N4817', 'text': 'Sisältää myös kuolleet ja haudatut', 
-        #                'type': 'Source Note', 'uuid': '43171020689c46b0bb7b1f565aad4d58', 
-        #                'change': 1566726446}>
-        #        ]
-        #    reps=[
-        #        ['Book', 
-        #         <Node id=316858 labels={'Repository'} 
-        #            properties={'id': 'R0068', 'rname': 'Taivassalon seurakunnan arkisto', 
-        #            'type': 'Archive', 'uuid': '41a44def1a2b43c88001d8c1bad9d6e6', 
-        #            'change': 1569934209}>]
-        #        ]
-        # >
-        s = Source.from_node(record['source'])
-        # Add notes
-        notes = record['notes']
-        for node in notes:
-            n = Note.from_node(node)
-            s.notes.append(n)
-        # Add repositories and their mediums
-        for medium, node in record['reps']:
-            if node:
-                rep = Repository.from_node(node)
-                rep.medium = medium
-                s.repositories.append(rep)
-
-#     result = Source.get_citating_nodes(sourceid)
-        import shareds
-        from models.gen.cypher import Cypher_source
-        result = shareds.driver.session().run(Cypher_source.get_citators_of_source, 
-                                              sid=int(sourceid))
-
-    citations = {}
-    notes = {}
-    clearnames = dict()    # {uniq_id: clearname}
-
-    for record in result:               # Nodes record
-        # Example: Person directly linked to Citation
-        # <Record c_id=89359
-        #         c=<Node id=89359 labels={'Citation'}
-        #            properties={'id': 'C1361', 'confidence': '2',
-        #                        'page': '1891 Syyskuu 22',
-        #                        'handle': '_dd7686926d946cd18c5642e61e2',
-        #                        'dateval': '', 'change': 1521882215} >
-        #        x_id=72104 label='Person'
-        #        x=<Node id=72104 labels={'Person'}
-        #           properties={'sex': '2', 'confidence': '2.0', 'id': 'I1069',
-        #                       'handle': '_dd76810c8e6763f7ea816742a59',
-        #                       'priv': '', 'change': 1521883281}>
-        #        p_id=72104 >
-
-        # Example: Person or Family Event linked to Citation
-        # <Record c_id=89824
-        #         c=<Node id=89824 labels={'Citation'}...>
-        #           x_id=81210 label='Event'
-        #           x=<Node id=81210 labels=set()
-        #              properties={'date1': 1813643, 'description': '', 'date2': 1813643,
-        #                          'change': 1527261385, 'attr_type': '',
-        #                          'handle': '_de2f3ce910e6008cd0bbdc05b6d', 'id': 'E3557',
-        #                          'type': 'Birth', 'attr_value': '', 'datetype': 0}>
-        #           p_id=73543>
-
-        node = record['c']
-        c = Citation.from_node(node)
-        if c.uniq_id not in citations.keys():
-            # A new citation
-            citations[c.uniq_id] = c
-        else:
-            # Use previous
-            c = citations[c.uniq_id]
-
-        # Notes
-        n_nodes = record['notes']
-        for node in n_nodes:
-            n = Note.from_node(node)
-            if n.uniq_id not in notes.keys():
-                c.note_ref.append(n)
-                notes[n.uniq_id] = n
-
-        # Referring node:  Person, Family, Name ... as NodeRef structure
-        root_uuid = record['p_uuid']
-        root_uniq_id = record['p_uid']
-        root_label = record.get('p_label')
-        node = record['x']
-        x_uid = node.id    # Nearest referring node (Event, Person, Name, ...)
-
-        noderef = NodeRef()
-        noderef.uuid = root_uuid      # 72104
-        noderef.uniq_id = root_uniq_id      # 72104
-        noderef.id = node['id']    # 'I1069' or 'E2821' TODO Why?
-        noderef.label = root_label
-        noderef.obj = record['p']    # node for Person or Family etc
-
-        event_role = record.get('role', "")
-        print(f'{root_label} {root_uuid} Citation {c.uniq_id} {noderef.label}({event_role}) {noderef.uuid} {noderef.uniq_id} {noderef.id}')
-
-        noderef.person = None
-        noderef.family = None
-        if 'Person' in noderef.obj.labels:
-            noderef.person = Person_combo.from_node(noderef.obj)
-        if 'Family' in noderef.obj.labels:
-            noderef.family = Family.from_node(noderef.obj)
-            
-        if noderef.label == "Person":
-            pass
-        elif noderef.label == "Family":
-            noderef.eventtype = _(node['type'])
-        elif noderef.label == "Name":
-            noderef.eventtype = f"{node['order']+1}. {_('Name').lower()}"
-        elif noderef.label == "Event":
-            noderef.eventtype = _(node['type'])
-            noderef.edates = DateRange.from_node(node)
-
-        if noderef.uuid not in clearnames.keys():
-            #Todo: aseta tässä baseObject.type jne ???
-            if event_role == 'Family':
-                # Family event witch is directly connected to a Person Event
-                parent_names = Family_combo.get_marriage_parent_names(x_uid)
-                if 'father' in parent_names:
-                    noderef.clearname += parent_names['father']
-                noderef.clearname += " <> "
-                if 'mother' in parent_names:
-                    noderef.clearname += parent_names['mother']
-            else:
-                # Read Person names as cleartext string
-                noderef.clearname = Name.get_clearname(noderef.uniq_id)
-            clearnames[root_uuid] = noderef.clearname
-        else:
-            noderef.clearname = clearnames[root_uuid]
-
-        c.citators.append(noderef)
-
-    return (s, list(citations.values()))
+# def get_source_with_events(sourceid): # -> bl.source.SourceReader.get_source_list
+#     """ Reads a Source with events, citations and notes.
 
 
 def read_sources_wo_cites():
@@ -993,56 +850,58 @@ def get_baptism_data(uniq_id):
 
 def get_families_data_by_id(uniq_id):
     # Sivua "table_families_by_id.html" varten
-    families = []
+    raise(NotImplementedError, "models.datareader.get_families_data_by_id poistettu 17.5.2020")
 
-    p = Person_combo()
-    p.uniq_id = uniq_id
-    p.get_person_and_name_data_by_id()
-
-    if p.sex == SEX_MALE:
-        result = p.get_his_families_by_id()
-    else:
-        result = p.get_her_families_by_id()
-
-    for record in result:
-        f = Family_combo()
-        f.uniq_id = record['uniq_id']
-        f.get_family_data_by_id()
-
-        # Person's birth family
-        result = p.get_parentin_id()
-        for record in result:
-            pf = Family()
-            pf.uniq_id = record["family_ref"]
-            pf.get_family_data_by_id()
-
-            father = Person_combo()
-            father.uniq_id = pf.father
-            father.get_person_and_name_data_by_id()
-            f.father = father
-
-            mother = Person_combo()
-            mother.uniq_id = pf.mother
-            mother.get_person_and_name_data_by_id()
-            f.mother = mother
-
-        spouse = Person_combo()
-        if p.sex == SEX_MALE:
-            spouse.uniq_id = f.mother
-        else:
-            spouse.uniq_id = f.father
-        spouse.get_person_and_name_data_by_id()
-        f.spouse = spouse
-
-        for child_id in f.childref_hlink:
-            child = Person_combo()
-            child.uniq_id = child_id
-            child.get_person_and_name_data_by_id()
-            f.children.append(child)
-
-        families.append(f)
-
-    return (p, families)
+#     families = []
+# 
+#     p = Person_combo()
+#     p.uniq_id = uniq_id
+#     p.get_person_and_name_data_by_id()
+# 
+#     if p.sex == SEX_MALE:
+#         result = p.get_his_families_by_id()
+#     else:
+#         result = p.get_her_families_by_id()
+# 
+#     for record in result:
+#         f = Family_combo()
+#         f.uniq_id = record['uniq_id']
+#         f.get_family_data_by_id()
+# 
+#         # Person's birth family
+#         result = p.get_parentin_id()
+#         for record in result:
+#             pf = Family()
+#             pf.uniq_id = record["family_ref"]
+#             pf.get_family_data_by_id()
+# 
+#             father = Person_combo()
+#             father.uniq_id = pf.father
+#             father.get_person_and_name_data_by_id()
+#             f.father = father
+# 
+#             mother = Person_combo()
+#             mother.uniq_id = pf.mother
+#             mother.get_person_and_name_data_by_id()
+#             f.mother = mother
+# 
+#         spouse = Person_combo()
+#         if p.sex == SEX_MALE:
+#             spouse.uniq_id = f.mother
+#         else:
+#             spouse.uniq_id = f.father
+#         spouse.get_person_and_name_data_by_id()
+#         f.spouse = spouse
+# 
+#         for child_id in f.childref_hlink:
+#             child = Person_combo()
+#             child.uniq_id = child_id
+#             child.get_person_and_name_data_by_id()
+#             f.children.append(child)
+# 
+#         families.append(f)
+# 
+#     return (p, families)
 
 
 # def get_place_with_events (loc_id): --> DBreader.get_place_with_events

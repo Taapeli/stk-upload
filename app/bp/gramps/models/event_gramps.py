@@ -6,11 +6,12 @@ Created on 2.5.2017
 '''
 import datetime
 from sys import stderr
+import traceback
 
 import shareds
 from shareds import logger
 
-from pe.neo4j.writer import Neo4jWriteDriver
+from pe.neo4j.write_driver import Neo4jWriteDriver
 from pe.db_writer import DBwriter
 from models.gen.event import Event
 from models.cypher_gramps import Cypher_event_w_handle
@@ -57,10 +58,12 @@ class Event_gramps(Event):
             - links to existing Place, Note, Citation, Media objects
             - Does not link it from UserProfile or Person
         """
-        if kwargs:
-            print(f"Warning: Event_gramps.save: extra arguments {kwargs}!")
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Event_gramps.save needs batch_id for {self.id}")
 
-        today = str(datetime.date.today())
+        #today = str(datetime.date.today())
         self.uuid = self.newUuid()
         e_attr = {
             "uuid": self.uuid,
@@ -78,7 +81,8 @@ class Event_gramps(Event):
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:
-            result = tx.run(Cypher_event_w_handle.create, date=today, e_attr=e_attr)
+            result = tx.run(Cypher_event_w_handle.create_to_batch, #date=today, 
+                            batch_id=batch_id, e_attr=e_attr)
             ids = []
             for record in result:
                 self.uniq_id = record[0]
@@ -86,6 +90,7 @@ class Event_gramps(Event):
                 if len(ids) > 1:
                     print("iError updated multiple Events {} - {}, attr={}".format(self.id, ids, e_attr))
         except Exception as err:
+            traceback.print_exc()
             print(f"iError: Event_save: {err} attr={e_attr}", file=stderr)
             raise RuntimeError(f"Could not save Event {self.id}")
 

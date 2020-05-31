@@ -53,7 +53,8 @@ class Batch_merge(object):
         label_sets = [  # Grouped to not too big chunks in logical order
                 ["Note"],
                 ["Repository", "Media"],
-                ["Place", "Place_name", "Source", "Citation"],
+                ["Place", "Place_name"],
+                ["Source", "Citation"],
                 ["Event"],
                 ["Person", "Name"],
                 ["Family"]
@@ -64,7 +65,7 @@ class Batch_merge(object):
                 for labels in label_sets:
                     tx = session.begin_transaction()
                     # while new_relationships != 0: ?
-                    result = tx.run(Cypher_audit.copy_batch_to_audition, 
+                    result = tx.run(Cypher_audit.copy_batch_to_audit, 
                                     user=user, batch=batch_id, oper=auditor,
                                     labels=labels)
                     counters = result.summary().counters
@@ -79,7 +80,7 @@ class Batch_merge(object):
                     #        'change': 1495632125}>>
                     cnt = record[0]
                     moved_nodes += cnt
-                    logger.info(f"Batch_merge.move_whole_batch: moved {cnt} nodes of type {labels}")
+                    logger.debug(f"Batch_merge.move_whole_batch: moved {cnt} nodes of type {labels}")
                     tx.commit()
 
         except Exception as e:
@@ -92,5 +93,6 @@ class Batch_merge(object):
         if nodes_created: msg += _("a new Common data set")
         else:             msg += _("Common data set")
 
+        logger.info(f"Batch_merge.move_whole_batch: n={moved_nodes}")
         flash(_("Transfer succeeded: ") + msg)
         return msg

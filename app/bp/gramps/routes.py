@@ -27,7 +27,7 @@ from ..admin import uploads
 @roles_accepted('research', 'admin')
 def gramps_index():
     """ Home page gramps input file processing """
-    print("-> bp.start.routes.gramps_index")
+    logger.info("-> bp.start.routes.gramps_index")
     return render_template("/gramps/index_gramps.html")
 
 @bp.route('/gramps/show_log/<xmlfile>')
@@ -37,6 +37,7 @@ def show_upload_log(xmlfile):
     upload_folder = uploads.get_upload_folder(current_user.username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
     msg = open(fname, encoding="utf-8").read()
+    logger.info(f"-> bp.gramps.routes.show_upload_log f='{xmlfile}'")
     return render_template("/admin/load_result.html", msg=msg)
 
 @bp.route('/gramps/uploads')
@@ -44,7 +45,7 @@ def show_upload_log(xmlfile):
 @roles_accepted('research', 'admin')
 def list_uploads():
     upload_list = uploads.list_uploads(current_user.username) 
-    logger.info(f"-> bp.gramps.routes.list_uploads")
+    #Not essential: logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
     return render_template("/gramps/uploads.html", uploads=upload_list)
 
 @bp.route('/gramps/upload', methods=['POST'])
@@ -56,7 +57,7 @@ def upload_gramps():
     try:
         infile = request.files['filenm']
         material = request.form['material']
-        logging.debug("Got a {} file '{}'".format(material, infile.filename))
+        #logger.debug("Got a {} file '{}'".format(material, infile.filename))
 
         t0 = time.time()
         upload_folder = uploads.get_upload_folder(current_user.username)
@@ -75,6 +76,8 @@ def upload_gramps():
                     "Stk: Gramps XML file uploaded",
                     msg )
         syslog.log(type="gramps file uploaded",file=infile.filename)
+        logger.info(f'-> bp.gramps.routes.upload_gramps/{material} f="{infile.filename}"'
+                    f' e={shareds.tdiff:.3f}sek')
     except Exception as e:
         return redirect(url_for('gramps.error_page', code=1, text=str(e)))
 
@@ -86,6 +89,7 @@ def upload_gramps():
 @roles_accepted('research')
 def start_load_to_neo4j(xmlname):
     uploads.initiate_background_load_to_neo4j(current_user.username,xmlname)
+    logger.info(f'-> bp.gramps.routes.start_load_to_neo4j f="{os.path.basename(xmlname)}"')
     flash(_("Data import from %(i)s to database has been started.", i=xmlname), 'info')
     return redirect(url_for('gramps.list_uploads'))
 
@@ -94,21 +98,24 @@ def start_load_to_neo4j(xmlname):
 @roles_accepted('research', 'admin')
 def error_page(code, text=''):
     """ Virhesivu näytetään """
-    logging.debug('Virhesivu ' + str(code) )
+    logger.info(f'bp.gramps.routes.error_page/{code}' )
     return render_template("virhe_lataus.html", code=code, text=text)
 
 @bp.route('/gramps/xml_analyze/<xmlfile>')
 @login_required
 @roles_accepted('research', 'admin')
 def xml_analyze(xmlfile):
-    text = gramps_loader.analyze(current_user.username, xmlfile)
-    return render_template("/gramps/analyze_xml.html", text=text)
+    references = gramps_loader.analyze(current_user.username, xmlfile)
+    logger.info(f'bp.gramps.routes.xml_analyze f="{os.path.basename(xmlfile)}"')
+    return render_template("/gramps/analyze_xml.html", 
+                           references=references, file=xmlfile)
 
 @bp.route('/gramps/xml_delete/<xmlfile>')
 @login_required
 @roles_accepted('research', 'admin')
 def xml_delete(xmlfile):
     uploads.delete_files(current_user.username,xmlfile)
+    logger.info(f'-> bp.gramps.routes.xml_delete f="{os.path.basename(xmlfile)}"')
     syslog.log(type="gramps file deleted",file=xmlfile)
     return redirect(url_for('gramps.list_uploads'))
 
@@ -139,6 +146,7 @@ def batch_delete(batch_id):
             data['status'] = uploads.STATUS_REMOVED
             open(metafile,"w").write(repr(data))
     Batch.delete_batch(current_user.username,batch_id)
+    logger.info(f'-> bp.gramps.routes.batch_delete f="{batch_id}"')
     syslog.log(type="batch_id deleted",batch_id=batch_id) 
     flash(_("Batch id %(batch_id)s has been deleted", batch_id=batch_id), 'info')
     referrer = request.headers.get("Referer")                               
