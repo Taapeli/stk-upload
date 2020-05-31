@@ -120,64 +120,6 @@ def estimate_dates(uid=None):
     ext = _("estimated lifetime")
     return render_template("/admin/talletettu.html", text=message, info=ext)
 
-# Refnames home page
-@bp.route('/admin/refnames')
-@login_required
-@roles_required('audit')
-def refnames():
-    """ Operations for reference names """
-    return render_template("/admin/reference.html")
-
-@bp.route('/admin/set/refnames')
-@login_required
-@roles_accepted('member', 'admin')
-def set_all_person_refnames():
-    """ Setting reference names for all persons """
-    dburi = dbutil.get_server_location()
-    (refname_count, _sortname_count) = dataupdater.set_person_name_properties(ops=['refname']) or _('Done')
-    logger.info(f"-> bp.admin.routes.set_all_person_refnames n={refname_count}")
-    return render_template("/admin/talletettu.html", uri=dburi, 
-                           text=f'Updated {_sortname_count} person sortnames, {refname_count} refnames')
-
-@bp.route('/admin/upload_csv', methods=['POST'])
-@login_required
-@roles_required('admin')
-def upload_csv():
-    """ Load a cvs file to temp directory for processing in the server
-    """
-    try:
-        infile = request.files['filenm']
-        material = request.form['material']
-        logging.info(f"-> bp.admin.routes.upload_csv/{material} f='{infile.filename}'")
-
-        loadfile.upload_file(infile)
-        if 'destroy' in request.form and request.form['destroy'] == 'all':
-            logger.info("-> bp.admin.routes.upload_csv/delete_all_Refnames")
-            datareader.recreate_refnames()
-
-    except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-
-    return redirect(url_for('admin.save_loaded_csv', filename=infile.filename, subj=material))
-
-@bp.route('/admin/save/<string:subj>/<string:filename>')
-@login_required
-@roles_required('admin')
-def save_loaded_csv(filename, subj):
-    """ Save loaded cvs data to the database """
-    pathname = loadfile.fullname(filename)
-    dburi = dbutil.get_server_location()
-    logging.info(f"-> bp.admin.routes.save_loaded_csv/{subj} f='{filename}'")
-    try:
-        if subj == 'refnames':    # Stores Refname objects
-            status = load_refnames(pathname)
-        else:
-            return redirect(url_for('virhesivu', code=1, text= \
-                _("Data type '{}' is not supported").format(subj)))
-    except KeyError as e:
-        return render_template("virhe_lataus.html", code=1, \
-               text=_("Missing proper column title: ") + str(e))
-    return render_template("/admin/talletettu.html", text=status, uri=dburi)
 
 # # Ei ilmeisesti käytössä
 # @bp.route('/admin/aseta/confidence')

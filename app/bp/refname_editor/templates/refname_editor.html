@@ -1,5 +1,5 @@
-{# templates/admin/start.html_ #}
-{% extends "/admin/layout.html" %}
+{# templates/refname_editor.html_ #}
+{% extends "/audit/layout.html" %}
 {% include "security/_messages.html" %}
 {% block title %}{{ _('Administrator') }}{% endblock %}
 {% block body %}}
@@ -27,7 +27,7 @@ div.box {
     vertical-align:top;
     margin: 0 1em 1em 0;
     padding: 1em; 
-    background-color: bisque;
+    background-color: #f9f8bf;
     width: 450px;
     min-height: 200px;
     border-radius: 15px;
@@ -106,7 +106,7 @@ div#edit_dialog {
 
 <div id="myApp">
 
-	<div class="box box1">
+	<div class="startbox box box1">
 		Valitse nimityyppi:
 		<input type=radio v-model="use" @change="select_type()" value="firstname">etunimi
 		<input type=radio v-model="use" @change="select_type()" value="surname">sukunimi
