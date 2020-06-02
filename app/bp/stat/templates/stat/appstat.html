@@ -78,13 +78,13 @@
 		       {% if opts["bycount"] %} checked {% endif %}
 		       id="bycount" value="x">
 	      </td>
-	      <td>{% set bywhat = opts["bywhat"]
-		%}<label for="bywhat">Primary sort:</label>
-		<select id="bywhat" name="bywhat"> {%
+	      <td>{% set pkey = opts["pkey"]
+		%}<label for="pkey">Primary sort:</label>
+		<select id="pkey" name="pkey"> {%
 		  for what in ["msg", "date", "user"] %}
-		      <option value={{ what }} {% if bywhat==what
+		      <option value={{ what }} {% if pkey==what
 			  %}selected{% endif
-			  %}>by {{ what }}</option>{% endfor %}
+			  %}>{{ what }}</option>{% endfor %}
 		</select>
 	      </td>
 	    </tr>

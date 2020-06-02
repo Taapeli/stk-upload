@@ -109,14 +109,14 @@ def build_general_stats():
 def build_options(logdir, logname_template, lookup_table):
     """Create options to do logfile parsing.
 
-    Given LOGDIR and LOGNAME_TEMPLATE, create list of log file name
-    (3. return value).
+    Given LOGDIR and LOGNAME_TEMPLATE (each may be shell file glob pattern),
+    create list of log file name (3. return value).
 
     User options from http GET/POST method are collected (4. return value).
 
-    User's option 'bywhat' is used to decide what logreader class seve_xxx
-    method in LOOKUP_TABLE shoud be used to perform log file processing
-    (1. and 2. return values).
+    LOOKUP_TABLE is dict where each key shall match user's option 'pkey',
+    and value must be a logreader class save_byxxx method, to be used for
+    counting log file entries (1. and 2. return values).
 
     """
     ################
@@ -124,13 +124,17 @@ def build_options(logdir, logname_template, lookup_table):
     def get_logfiles(log_root, log_files):
         """Get list of log files.
 
-        Potential files are searced under LOG_ROOT (shell glob) directory/ies.
+        Potential files are searched under LOG_ROOT (shell glob)
+        directory (directories).
 
-        Return filenames ending with '.log', + maybe timestamp '_yyyy-mm-dd'.
+        Return filenames mathing LOG_FILES (shell glob) and ending with
+        '.log', + maybe timestamp '_yyyy-mm-dd', sorted by age.
 
         """
         import glob
-        files = list(filter(os.path.isfile, glob.glob(f"{log_root}/{log_files}")))
+        files = list(filter(os.path.isfile,
+                            glob.glob(f"{log_root}/{log_files}")))
+        # sort by age:
         files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
         files = [ x for x in files if re.search("\.log(_[\d-]+)?$", x)]
         return files
@@ -159,36 +163,35 @@ def build_options(logdir, logname_template, lookup_table):
         # Verify that it is valid
         (regexp, _) = glob2regexp(opt_val)
         if regexp is None:
-            return ""
-        return opt_val
+            return ""           # it failed, pretend it was empty
+        return opt_val          # it works, keep it
 
 
     bycount = request.args.get("bycount", None)
-    bywhat  = request.args.get("bywhat", "user")
+    pkey  = request.args.get("pkey", "user")
     logs    = request.args.get("logs", "") # removed selection from UI
     msg     = verify_option_as_valid_regexp("msg")
     period  = request.args.get("period", "daily")
     users   = verify_option_as_valid_regexp("users")
     topn    = safe_get_request("topn", 42)
 
-    # opts from template, they go to logreader and back to template as
-    # defaults values
+    # opts from html form, they go to logreader and back to html form as next
+    # default values
     opts = {
-        "bycount": bycount,
-        "bywhat" : bywhat,
-        "logdir" : logdir,
-        "logs"   : logs,        # used before logreader to filter logfiles
-        "msg"    : msg,
-        "period" : period,
-        "users"  : users,
-        "topn"   : topn,
+        "bycount": bycount,     # sorting order for log entries: count/text
+        "pkey"   : pkey,        # primary key for report ordering: user/date/method
+        "logdir" : logdir,      # root directory of log files
+        "logs"   : logs,        # ... to filter logfiles (not used now, but maybe soon)
+        "msg"    : msg,         # str (regexp) to filter log msgs/methods
+        "period" : period,      # aggregation period: day/week/month
+        "users"  : users,       # str (regexp) to filter log entries by username
+        "topn"   : topn,        # integer to limit max count of log entries
     }
 
-    pkey = f"By_{bywhat}"
     if pkey not in lookup_table:
-        if "By_user" in lookup_table:
-            flash(f"Bad primary sort key '{bywhat}', trying 'user'")
-            pkey = "By_user"
+        if "user" in lookup_table:
+            flash(f"Bad primary sort key '{pkey}', trying 'user'")
+            pkey = "user"
         else:
             flash("Can not decide primary sort key")
             return None         # this will fail in caller

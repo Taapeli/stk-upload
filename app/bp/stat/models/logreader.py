@@ -267,7 +267,6 @@ class Counter():
 
         if what not in self._opts or self._opts[what] == "":
             return None, True
-
         return (utils.glob2regexp(self._opts[what]))
 
 
