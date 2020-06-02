@@ -8,6 +8,41 @@ import re
 import os
 import shareds
 
+################################################################
+#
+def glob2regexp(glob):
+    """Convert (almost) shell wildcard pattern GLOB into python regexp.
+
+    Return value is tuple (regex, wanted_if_match).
+
+    If the list starts with '!', the second retun value is False, meaning: do
+    not select objects matching GLOB.
+
+    """
+    val = glob
+    want_if_match = True
+
+    if val.startswith("!"):
+        val = re.sub(r"^!\s*", "", val)
+        want_if_match = False
+
+    parts = []
+    for part in re.split("[, ]", val):
+        parts.append(re
+                     .escape(part)
+                     .replace(r'\?', '.')
+                     .replace(r'\*', '.*?')
+        )
+    val = "|".join([f"(?:{x})" for x in parts])
+    val = "^" + val + "\Z"
+    #print(f"val = '{val}'")
+    try:
+        return re.compile(val), want_if_match
+    except Exception as e:
+        flash(f"Bad regexp for {what} '{self._opts[what]}': {e}",
+              category='warning')
+    return None, True
+
 
 ################################################################
 #
@@ -86,19 +121,16 @@ def build_options(logdir, logname_template, lookup_table):
     """
     ################
     #
-    def get_logfiles(log_root, log_files, patterns=""):
-        """Get ist of log files matching PATTERNS.
+    def get_logfiles(log_root, log_files):
+        """Get list of log files.
 
-        Empty PATTERNS equals LOG_FILES.  Return matching filenames in
-        LOG_ROOT.
+        Potential files are searced under LOG_ROOT (shell glob) directory/ies.
+
+        Return filenames ending with '.log', + maybe timestamp '_yyyy-mm-dd'.
 
         """
         import glob
-        if patterns == "":
-            patterns = f"{log_files}*"
-        files = []
-        for pat in re.split(" ", patterns):
-            files += list(filter(os.path.isfile, glob.glob(f"{log_root}/{pat}")))
+        files = list(filter(os.path.isfile, glob.glob(f"{log_root}/{log_files}")))
         files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
         files = [ x for x in files if re.search("\.log(_[\d-]+)?$", x)]
         return files
@@ -121,16 +153,14 @@ def build_options(logdir, logname_template, lookup_table):
     #
     def verify_option_as_valid_regexp(opt_key, default=""):
         """Verify that OPT_KEY compiles as valid regexp."""
-        val = request.args.get(opt_key, default)
-        if val == "":
+        opt_val = request.args.get(opt_key, default)
+        if opt_val is None or opt_val == "":
             return ""
-        try:
-            re.compile(re.sub("[, ]+", "|", val))
-            return "," . join(re.split("[, ]+", val))
-        except Exception as e:
-            flash(f"Bad regexp for {opt_key} '{val}': {e}",
-                  category='warning')
-        return ""
+        # Verify that it is valid
+        (regexp, _) = glob2regexp(opt_val)
+        if regexp is None:
+            return ""
+        return opt_val
 
 
     bycount = request.args.get("bycount", None)
@@ -163,7 +193,7 @@ def build_options(logdir, logname_template, lookup_table):
             flash("Can not decide primary sort key")
             return None         # this will fail in caller
 
-    logfiles = get_logfiles(logdir, logname_template, patterns=logs)
+    logfiles = get_logfiles(logdir, logname_template)
 
     return pkey, lookup_table[pkey], logfiles, opts
 

@@ -40,13 +40,13 @@
 	      <td>{% set msg = opts["msg"]
 		%} <label for="msg">{{ _("Methods:") }}</label>
 		    <input type="text" name="msg" size="6"
-	               title="{{ _("python regexp(s) to match messages/methods") }}"
+	               title="{{ _("regexp(s) to match messages/methods") }}"
 	               value="{{ msg }}">
 	      </td>
 	      <td>{% set users = opts["users"]
 		%} <label for="users">{{ _("Users:") }}</label>
 		    <input type="text" name="users" size="6"
-	               title="{{ _("python regexp(s) to match users") }}"
+	               title="{{ _("regexp(s) to match users") }}"
 			   value="{{ users }}">
 	      </td>
 	      <td>{% set period = opts["period"]

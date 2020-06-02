@@ -49,7 +49,7 @@ def stat_app():
 
     (pkey, parser, logfiles, opts) = utils.build_options(
         shareds.app.config['STK_LOGDIR'],
-        shareds.app.config['STK_LOGFILE'], {
+        shareds.app.config['STK_LOGFILE'] + "*", {
         "By_msg" : logreader.StkServerlog.save_bymsg,
         "By_date": logreader.StkServerlog.save_bydate,
         "By_user": logreader.StkServerlog.save_byuser,
@@ -91,7 +91,7 @@ def stat_upload():
 
     (pkey, parser, logfiles, opts) = utils.build_options(
         "uploads/*",
-        "*.log", {
+        "*.log*", {
             "By_msg"   :  logreader.StkUploadlog.save_bymsg,
             "By_date"  :  logreader.StkUploadlog.save_bydate,
             "By_user"  :  logreader.StkUploadlog.save_byuser,
