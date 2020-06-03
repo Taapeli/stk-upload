@@ -276,7 +276,7 @@ class PlaceBl(Place):
 #         self.names = place_names_from_nodes(nodes)
 
 
-class PlaceName():
+class PlaceName(NodeObject):
     """ Paikan nimi
 
         Properties:
