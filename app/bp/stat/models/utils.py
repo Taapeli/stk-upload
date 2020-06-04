@@ -156,7 +156,8 @@ def build_options(logname_template, lookup_table):
         if logname_template.startswith("*"):
             return [stk_logdir[inx+1:]]
         parent = stk_logdir[:inx]
-        dirs = list(filter(os.path.isdir, glob.glob(parent + "/*")))
+        dirs = [ d for d in glob.glob(parent + "/*")
+                 if os.path.isdir(d) or os.path.ismount(d) ]
         servers = [x[x.rindex("/")+1:] for x in dirs]
         return sorted(servers)
 
