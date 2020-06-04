@@ -59,9 +59,10 @@ RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
 
 # For place page
     _get_w_names_notes_tail = """
-MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
+OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
 WITH place, name
-    OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) WHERE not n = name
+    OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 
+        WHERE name is null or not n = name
     OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
     OPTIONAL MATCH (place) -[mr:MEDIA]-> (media:Media)
 RETURN place, name,
@@ -111,10 +112,11 @@ RETURN p.type AS type, p.uuid as uuid, p.pname AS name
 """
     # Query to get names for a Place with $locid, $lang
     read_pl_names="""
-MATCH (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
-    WHERE ID(place) = $locid
-with place, name
-    OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) WHERE not n = name
+MATCH (place:Place) WHERE ID(place) = $locid
+OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
+WITH place, name
+    OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 
+        WHERE name is null or not n = name
 RETURN name, COLLECT(n) AS names LIMIT 15
 """
 # MATCH (l:Place)-[:NAME]->(n:Place_name) WHERE ID(l) = $locid
