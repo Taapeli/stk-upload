@@ -90,7 +90,7 @@ def show_person_list(selection=None):
             persons = read_persons_with_events(keys, args)
 
         except Exception as e:
-            logger.error("iError {} in show_person_list".format(e))
+            logger.error(f"bp.scene.routes.show_person_list error {e}")
             flash("Valitse haettava nimi ja tyyppi", category='warning')
     else:
         # the code below is executed if the request method
@@ -102,7 +102,7 @@ def show_person_list(selection=None):
             theme=keys[0]
         else:
             keys = ('surname',)
-            theme='-'
+            theme=''
         #TODO: filter by user in the read method
         persons = read_persons_with_events(keys, args)
         
@@ -124,9 +124,9 @@ def show_person_list(selection=None):
         else:
             #print(f'Show {p.sortname} too_new={p.too_new}, owner {p.user}')
             persons_out.append(p)
-    stk_logger(u_context, "-> bp.scene.routes.show_person_list"
-                    f" {u_context.owner_or_common()} {request.method} {theme}"
-                    f" n={len(persons_out)} hide={len(persons)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_person_list/{theme}-{request.method}"
+               f" {u_context.owner_or_common()}"
+               f" n={len(persons_out)} hide={len(persons)-len(persons_out)}")
 
     return render_template("/scene/persons.html", persons=persons_out,
                            user_context=u_context, num_hidden=hidden, 
@@ -165,7 +165,7 @@ def show_all_persons_list(opt=''):
 
         TODO Should have restriction by owner's UserProfile 
     """
-    logger.warning("#TODO: fix material selevtion or remove action show_all_persons_list")
+    logger.warning("#TODO: fix material selection or remove action show_all_persons_list")
 
     t0 = time.time()
     u_context = UserContext(user_session, current_user, request)
@@ -221,10 +221,10 @@ def show_persons_all():
     hidden = f" hide={results.num_hidden}" if results.num_hidden > 0 else ""
     stk_logger(u_context, f"-> bp.scene.routes.show_persons_all"
                     f" n={len(results.items)}{hidden} e={elapsed:.3f}")
-    print(f"Got {len(results.items)} persons"
-          f" with {results.num_hidden} hidden"
-          f" and {results.error} errors"
-          f" in {elapsed:.3f}s")
+#     print(f"Got {len(results.items)} persons"
+#           f" with {len(results.items)-results.num_hidden} hidden"
+#           f" and {results.error} errors"
+#           f" in {elapsed:.3f}s")
     return render_template("/scene/persons_list.html", persons=results.items,
                            num_hidden=results.num_hidden,
                            user_context=u_context,

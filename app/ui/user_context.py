@@ -97,7 +97,7 @@ class UserContext():
         COMMON = 1  # Approved data
         OWN = 2     # Candidate data
         BATCH = 4   # Candicate batch - currently not implemented
-        CODE_VALUES = ['', 'apr', 'can', 'all', '_ba', '_ab']
+        CODE_VALUES = ['', 'apr', 'can', 'apr,can', 'bat', 'can,bat']
 
         def __init__(self):
             ''' Initialise choise texts in user language '''
