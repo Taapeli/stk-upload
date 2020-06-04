@@ -48,12 +48,11 @@ def stat_app():
     t0 = time.time()
 
     (pkey, parser, logfiles, opts) = utils.build_options(
-        shareds.app.config['STK_LOGDIR'],
         shareds.app.config['STK_LOGFILE'], {
-        "By_msg" : logreader.StkServerlog.save_bymsg,
-        "By_date": logreader.StkServerlog.save_bydate,
-        "By_user": logreader.StkServerlog.save_byuser,
-    })
+            "msg" : logreader.StkServerlog.save_bymsg,
+            "date": logreader.StkServerlog.save_bydate,
+            "user": logreader.StkServerlog.save_byuser,
+        })
 
     # res [] could collect results from many logreader invocations, one set
     # from each call (inside loop, as we once did)
@@ -90,11 +89,10 @@ def stat_upload():
     t0 = time.time()
 
     (pkey, parser, logfiles, opts) = utils.build_options(
-        "uploads/*",
         "*.log", {
-            "By_msg"   :  logreader.StkUploadlog.save_bymsg,
-            "By_date"  :  logreader.StkUploadlog.save_bydate,
-            "By_user"  :  logreader.StkUploadlog.save_byuser,
+            "msg"   :  logreader.StkUploadlog.save_bymsg,
+            "date"  :  logreader.StkUploadlog.save_bydate,
+            "user"  :  logreader.StkUploadlog.save_byuser,
         })
 
     # Create one logreader to read all logfiles
