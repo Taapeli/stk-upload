@@ -15,6 +15,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 import logging 
 logger = logging.getLogger('stkserver')
+from flask_babelex import _
 
 from .base import NodeObject, Status
 from pe.db_reader import DBreader #, SourceResult
@@ -151,6 +152,15 @@ class SourceReader(DBreader):
             return results
         
         citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
+
+        if len(targets) == 0:
+            # Only Citations connected to Person Event or Family Event can be
+            # processed. 
+            #TODO: Should allow citating a Source from Place, Note, Meida etc
+
+            results['status'] = Status.NOT_FOUND
+            results['statustext'] = _('No person or family has uses this source')
+            return results
 
         cit = []
         for c_id, c in citations.items():

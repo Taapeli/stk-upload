@@ -559,10 +559,11 @@ class Neo4jReadDriver:
 
                 node = record["place"]
                 pl = PlaceBl.from_node(node)
+                node_ids.append(pl.uniq_id)
                 # Default lang name
                 name_node = record["name"]
-                pl.name = PlaceName.from_node(name_node)
-                node_ids.append(pl.uniq_id)
+                if name_node:
+                    pl.names.append(PlaceName.from_node(name_node))
                 # Other name versions
                 for name_node in record["names"]:
                     pl.names.append(PlaceName.from_node(name_node))
@@ -571,13 +572,13 @@ class Neo4jReadDriver:
                 for notes_node in record['notes']:
                     n = Note.from_node(notes_node)
                     pl.notes.append(n)
-                    node_ids.append(pl.names[-1].uniq_id)
+                    node_ids.append(pl.notes[-1].uniq_id)
 
                 for medias_node in record['medias']:
                     m = Media.from_node(medias_node)
                     #Todo: should replace pl.media_ref[] <-- pl.medias[]
                     pl.media_ref.append(m)
-                    node_ids.append(pl.names[-1].uniq_id)
+                    node_ids.append(pl.media_ref[-1].uniq_id)
 
         return {"place":pl, "uniq_ids":node_ids}
 
@@ -642,8 +643,9 @@ class Neo4jReadDriver:
                 lv = t.tree.depth(n)
                 p = PlaceBl(uniq_id=tnode, ptype=n.data['type'], level=lv)
                 p.uuid = n.data['uuid']
-                node = record['name']    
-                p.names.append(PlaceName.from_node(node))
+                node = record['name']
+                if node:
+                    p.names.append(PlaceName.from_node(node))
                 oth_names = []
                 for node in record['names']:
                     oth_names.append(PlaceName.from_node(node))
@@ -687,7 +689,10 @@ class Neo4jReadDriver:
             e = Event_combo.from_node(record['event'])
             # Fields uid (person uniq_id) and names are on standard in Event_combo
             e.role = record["role"]
-            if 'Person' in record['indi'].labels:
+            indi_label = list(record['indi'].labels)[0]
+            if indi_label in ['Audit', 'Batch']:
+                continue
+            if 'Person' == indi_label:
                 e.indi_label = 'Person'
                 e.indi = Person_combo.from_node(record['indi'])
                 if e.indi.too_new:    # Check privacy
@@ -695,11 +700,15 @@ class Neo4jReadDriver:
                 for node in record["names"]:
                     e.indi.names.append(Name.from_node(node))
                 ##ret.append({'event':e, 'indi':e.indi, 'label':'Person'})
-            else: # Family
+                ret.append(e)
+            elif 'Family' == indi_label:
                 e.indi_label = 'Family'
                 e.indi = FamilyBl.from_node(record['indi'])
                 ##ret.append({'event':e, 'indi':e.indi, 'label':'Family'})
-            ret.append(e)
+                ret.append(e)
+            else:   # Audit or Batch
+                print(f"r_get_place_events No Person or Family:"
+                      f" {e.id} {record['indi'].labels} {record['indi'].get('id')}")
         return {'items':ret, 'status':Status.OK}
 
 
@@ -856,10 +865,12 @@ class Neo4jReadDriver:
             if 'Person' in node.labels:
                 obj = Person_combo.from_node(node)
             elif 'Family' in node.labels:
-                obj = Family_combo.from_node(node)
+                obj = FamilyBl.from_node(node)
                 obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
             else:
-                raise NotImplementedError('Person or Family expexted: {node.labels}')
+                #raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
+                logger.warning(f'dr_get_source_citations Person or Family expexted: {list(node.labels)}')
+                return None
             obj.role = role
             if obj.role == 'Primary':
                 obj.role = None
@@ -906,9 +917,9 @@ class Neo4jReadDriver:
             #    ]
             # >
             citation_node = record['citation']
-            note_nodes = record['notes']
             near_node = record['near']
             far_nodes = record['far']
+            note_nodes = record['notes']
 
             uniq_id = citation_node.id
             citation = Citation.from_node(citation_node)
@@ -920,7 +931,7 @@ class Neo4jReadDriver:
             if notelist:
                 notes[uniq_id] = notelist
 
-            targetlist = []
+            targetlist = []     # Persons or Families referring this source
             for node, role in far_nodes:
                 if not node: continue
                 obj = obj_from_node(node, role)
@@ -929,8 +940,12 @@ class Neo4jReadDriver:
                     targetlist.append(obj)
             if not targetlist:  # No far node: there is a middle node near
                 obj = obj_from_node(near_node)
-                targetlist.append(obj)
-            targets[uniq_id] = targetlist
+                if obj:
+                    targetlist.append(obj)
+            if targetlist:
+                targets[uniq_id] = targetlist
+            else:
+                print(f'dr_get_source_citations: Event {near_node.id} {near_node.get("id")} without Person or Family?')
 
         # Result dictionaries using key = Citation uniq_id
         return citations, notes, targets

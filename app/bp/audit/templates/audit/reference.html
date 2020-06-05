@@ -1,5 +1,5 @@
-{# bp/admin/templates/admin/reference.html_ #}
-{% extends "/admin/layout.html" %}
+{# templates/audit/reference.html_ #}
+{% extends "/audit/layout.html" %}
 {% block title %}{{ _('Logged on user') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -12,7 +12,7 @@
           <div class="startbox admin">
             <div style="display: inline-block;">
                <h3>{{ _('Adding data') }}</h3>
-                 <form action="/admin/upload_csv" method="post"  enctype="multipart/form-data">
+                 <form action="/audit/upload_csv" method="post"  enctype="multipart/form-data">
 	               <div style="display: inline-block;">
 	                 <input type="hidden" name="material" value="refnames">
 	                 <p>{{ _('Download reference names') }}</p>
@@ -34,8 +34,9 @@
 	              <li><a href="/list/refnames">{{ _('List reference names') }}</a></li>
 	              <li><a href="/scene/persons/all/ref">{{ _('See people with reference names') }}</a></li>
               </ul>
-			  <li>(<a href="/admin/set/refnames">{{ _('Set changed reference names for all people') }}</a>) <i>{{ _('Do not use') }}</i></li>
-              <li><a href="/refname_editor/">{{ _('Refname Editor') }}</a></li>
+			  <li>(<a href="/audit/set/refnames">{{ _('Set changed reference names for all people') }}</a>) <i>{{ _('Do not use') }}</i></li>
+              <li><a href="/refname_editor/">{{ _('Reference name Editor') }}</a></li>
+			  <li><a href="/audit/download/refnames">{{ _('Download reference names as a CSV file') }}</a></li>
 			</ul>
           </div>
         </div>

@@ -121,3 +121,6 @@ class NodeObject():
             return self.uuid[:6]
         else:
             return f'({self.uniq_id})'
+
+    def _json_encode(self):
+        return self.__dict__

@@ -167,8 +167,9 @@ class Refname:
 
         # Setting attributes for 'A'
         a_attr = {'name': self.name}
-        if hasattr(self, 'gender'):
-            a_attr['sex'] = Person.sex_from_str(self.gender)
+        if hasattr(self, 'sex'):
+            #a_attr['sex'] = Person.sex_from_str(self.sex)
+            a_attr['sex'] = self.sex
         if hasattr(self, 'source'):
             a_attr['source'] = self.source
 #        a_newoid = get_new_oid()

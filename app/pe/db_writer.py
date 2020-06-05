@@ -4,6 +4,8 @@ Created on 23.3.2020
 @author: jm
 '''
 import logging 
+import shareds
+from bl.place import PlaceBl
 logger = logging.getLogger('stkserver')
 
 
@@ -39,4 +41,15 @@ class DBwriter(object):
 
         if media_refs:
             self.dbdriver.media_save_w_handles(uniq_id, media_refs)
+
+    def mergeplaces(self, id1, id2):
+        with shareds.driver.session() as session:
+            self.dbdriver.tx = session
+            place, names = self.dbdriver.mergeplaces(id1,id2)
+            # Select default names for default languages
+            def_names = PlaceBl.find_default_names(names, ['fi', 'sv'])
+            # Update default language name links
+            if def_names:
+                self.place_set_default_names(place, def_names)
+            return place
 

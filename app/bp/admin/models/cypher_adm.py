@@ -17,8 +17,9 @@ MATCH (a)
 WHERE NOT ( 'UserProfile' IN labels(a)
     OR 'Allowed_email' IN labels(a)
     OR 'User' IN labels(a)
-    OR 'Guest' IN labels(a)
-    OR 'Role' IN labels(a) )
+    OR 'Role' IN labels(a)
+    OR 'Lock' IN labels(a)
+    OR 'Syslog' IN labels(a) )
 WITH  a LIMIT $limit
 DETACH DELETE a"""
 

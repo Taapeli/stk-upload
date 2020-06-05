@@ -9,12 +9,11 @@
 <table>
 {% for row in rows %}  <tr>
   {% for col in row
-  %} <td{% if col != "" and col[0] in "0123456789"
+  %}  <td{% if col != "" and col[0] in "0123456789"
 	   %} style="text-align: right"{% endif	%}> {{ col }} </td>
-  {% endfor %}
-</tr>
-{% endfor %}
-</table>
+  {% endfor%}</tr>
+{% endfor
+%}</table>
 {% endmacro -%}
 
 
@@ -24,21 +23,13 @@
 
   Return to <a href="/stat">statistics start page.</a>
   <p>
-    Valintakriteereistä:
+    <b>Valintakriteereistä:</b>
     <ul>
-      <li> <b>TODO: Aikaväliin perustuva valinta</b> (mikä käyttöliittymä?),
-	ja/tai
-	<ul>
-	  <li> by day
-	  <li> by month
-	</ul>
-      <li> Log files rajataan tässä annettavan suodatuksen lisäksi
-      päättyväksi '<tt>.log[_yyyy-mm-dd]</tt>'
-      <li> Maxdepth ja Cumulative jätetty pois (oliko tarpeen?)
-	<li> N, n, e jne. ovat oikeammin sarakeotsikoita.  Lopullisempi
+      <li> Logs valinta poistui, kun tuli aikaan perustuva aggregointijakson valinta.
+      <li> N, n, e jne. ovat oikeammin sarakeotsikoita.  Lopullisempi
 	 toteutus on työn alla.  Toistaiseksi ne on tuolla riveillä, kun eri
-	 lokientryissä on eri määrät noita tietoja (helpompi ehkä nähdä, missä
-	 saatetaan haluta täydentää lokitusta...).
+	 lokientryissä on eri määrät noita tietoja (helpompi ehkä nähdä,
+	 missä saatetaan haluta täydentää lokitusta...).
     </ul>
     <div>
       Set options:
@@ -46,31 +37,54 @@
 	<fieldset>
 	  <table>
 	    <tr>
+	      <td>{% set server = opts["server"]
+		%}<label for="server">Server:</label>
+		<select id="server" name="server"> {%
+		  for ser in opts["servers"] %}
+		      <option value={{ ser }} {% if server==ser
+			  %}selected{% endif
+			  %}>{{ ser }}</option>{% endfor %}
+		    </select>
+	      </td>
+	      <td>{% set pkey = opts["pkey"]
+		%}<label for="pkey">Grouping:</label>
+		<select id="pkey" name="pkey"> {%
+		  for what in ["msg", "date", "user"] %}
+		      <option value={{ what }} {% if pkey==what
+			  %}selected{% endif
+			  %}>{{ what }}</option>{% endfor %}
+		</select>
+	      </td>
+	      <td>{% set period = opts["period"]
+		%}<label for="period">Aggregation:</label>
+		<select id="period" name="period"> {%
+		  for per in ["daily", "weekly", "monthly"] %}
+		      <option value={{ per }} {% if period==per
+			  %}selected{% endif
+			  %}>{{ per }}</option>{% endfor %}
+		    </select>
+	      </td>
+	      <td> </td>
+
+	      <td rowspan="2"> <input type="submit"
+				      value=" -- Go! --"
+				      style="height: 8ex">
+	      </td>
+	    </tr>
+
+	    <tr>
 	      <td>{% set msg = opts["msg"]
 		%} <label for="msg">{{ _("Methods:") }}</label>
 		    <input type="text" name="msg" size="6"
-	               title="{{ _("python regexp(s) to match messages/methods") }}"
+	               title="{{ _("regexp(s) to match messages/methods") }}"
 	               value="{{ msg }}">
 	      </td>
 	      <td>{% set users = opts["users"]
 		%} <label for="users">{{ _("Users:") }}</label>
 		    <input type="text" name="users" size="6"
-	               title="{{ _("python regexp(s) to match users") }}"
-	               value="{{ users }}">
+	               title="{{ _("regexp(s) to match users") }}"
+			   value="{{ users }}">
 	      </td>
-	      <td>{% set logs = opts["logs"] %}{% set logdir = opts["logdir"]
-		%} <label for="logs">{{ _(" Log files:") }}</label>
-		    <input type="text" name="logs" size="6"
-	               title="{{ _("shell glob to match log files\nin ") }} {{logdir}}"
-		       {% if logs %} value="{{ opts['logs'] }}" {% endif %}>
-	      </td>
-	      <td rowspan="2"> <input type="submit"
-				      value=" -- Go! --"
-				      style="height: 7ex">
-	      </td>
-	    </tr>
-
-	    <tr>
 	      <td>{% set topn = opts["topn"]
 		%} <label for="topn">{{ _("How many:") }}</label>
 	  	     <input type="text" name="topn" size="1"
@@ -82,21 +96,6 @@
 	               title="{{ _("Sort by count or by text?") }}"
 		       {% if opts["bycount"] %} checked {% endif %}
 		       id="bycount" value="x">
-	      </td>
-	      <td>{% set bywhat = opts["bywhat"]
-		%} <select id="bywhat" name="bywhat"> {%
-		  for what in ["msg", "date", "user"] %}
-		      <option value={{ what }} {% if bywhat==what
-			  %}selected{% endif
-			  %}>By {{ what }}</option>{% endfor %}
-		</select>
-		{% set period = opts["period"]
-		%} <select id="period" name="period"> {%
-		  for per in ["daily", "weekly", "monthly"] %}
-		      <option value={{ per }} {% if period==per
-			  %}selected{% endif
-			  %}>{{ per }}</option>{% endfor %}
-		    </select>
 	      </td>
 	    </tr>
 	  </table>

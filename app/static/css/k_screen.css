@@ -75,10 +75,19 @@ body > div {
     margin-bottom:1em;
 }
 #startdiv h2 {margin-bottom: 0;}
-#startdiv div {color: #006;}
+/* Selected user case (material), right from h2 title */
+#startdiv div {
+	color: gray;
+    background-color: #f5f5f5;
+    padding: 1px 2px;
+	position: fixed;
+	right: .5em;
+    top: 4.5em;
+}
 #startdiv div i a {
-	color: #006;
-	text-decoration-line: underline;}
+	color: gray;
+	text-decoration-line: underline;
+}
 
 .content {
     background-color: white;

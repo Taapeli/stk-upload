@@ -10,12 +10,10 @@ Created on 8.8.2018
 import os
 
 import json
-import logging 
 #import inspect
 import traceback
 
-#from bp.gramps.models import batch #TODO: move into models.gen.batch_audit
-
+import logging 
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
@@ -56,11 +54,14 @@ def clear_db(opt):
     """ Clear database - with no confirmation! """
     try:
         updater = DataAdmin(current_user)
-        msg =  updater.db_reset(opt) # dbutil.alusta_kanta()
-        logger.info(f"-> bp.admin.routes.clear_db {opt}")
-        return render_template("/admin/talletettu.html", text=msg)
+        result =  updater.db_reset(opt) # dbutil.alusta_kanta()
+        logger.info(f"-> bp.admin.routes.clear_db/{opt} n={result['count']}")
+        return render_template("/admin/talletettu.html", text=result['msg'])
     except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        traceback.print_exc()
+        return redirect(url_for('virhesivu', code=1, 
+                                text=', '.join( (str(e), result['msg']) )
+                       ))
 
 @bp.route('/admin/clear_my_own')
 @login_required
@@ -119,64 +120,6 @@ def estimate_dates(uid=None):
     ext = _("estimated lifetime")
     return render_template("/admin/talletettu.html", text=message, info=ext)
 
-# Refnames home page
-@bp.route('/admin/refnames')
-@login_required
-@roles_required('audit')
-def refnames():
-    """ Operations for reference names """
-    return render_template("/admin/reference.html")
-
-@bp.route('/admin/set/refnames')
-@login_required
-@roles_accepted('member', 'admin')
-def set_all_person_refnames():
-    """ Setting reference names for all persons """
-    dburi = dbutil.get_server_location()
-    (refname_count, _sortname_count) = dataupdater.set_person_name_properties(ops=['refname']) or _('Done')
-    logger.info(f"-> bp.admin.routes.set_all_person_refnames n={refname_count}")
-    return render_template("/admin/talletettu.html", uri=dburi, 
-                           text=f'Updated {_sortname_count} person sortnames, {refname_count} refnames')
-
-@bp.route('/admin/upload_csv', methods=['POST'])
-@login_required
-@roles_required('admin')
-def upload_csv():
-    """ Load a cvs file to temp directory for processing in the server
-    """
-    try:
-        infile = request.files['filenm']
-        material = request.form['material']
-        logging.info(f"-> bp.admin.routes.upload_csv/{material} f='{infile.filename}'")
-
-        loadfile.upload_file(infile)
-        if 'destroy' in request.form and request.form['destroy'] == 'all':
-            logger.info("-> bp.admin.routes.upload_csv/delete_all_Refnames")
-            datareader.recreate_refnames()
-
-    except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-
-    return redirect(url_for('admin.save_loaded_csv', filename=infile.filename, subj=material))
-
-@bp.route('/admin/save/<string:subj>/<string:filename>')
-@login_required
-@roles_required('admin')
-def save_loaded_csv(filename, subj):
-    """ Save loaded cvs data to the database """
-    pathname = loadfile.fullname(filename)
-    dburi = dbutil.get_server_location()
-    logging.info(f"-> bp.admin.routes.save_loaded_csv/{subj} f='{filename}'")
-    try:
-        if subj == 'refnames':    # Stores Refname objects
-            status = load_refnames(pathname)
-        else:
-            return redirect(url_for('virhesivu', code=1, text= \
-                _("Data type '{}' is not supported").format(subj)))
-    except KeyError as e:
-        return render_template("virhe_lataus.html", code=1, \
-               text=_("Missing proper column title: ") + str(e))
-    return render_template("/admin/talletettu.html", text=status, uri=dburi)
 
 # # Ei ilmeisesti käytössä
 # @bp.route('/admin/aseta/confidence')
@@ -347,7 +290,7 @@ def list_uploads_all():
 @roles_accepted('admin', 'audit')
 def start_load_to_neo4j(username,xmlname):
     uploads.initiate_background_load_to_neo4j(username,xmlname)
-    logger.info(f"-> bp.admin.routes.start_load_to_neo4j u={username} f={xmlname}")
+    logger.info(f'-> bp.admin.routes.start_load_to_neo4j u={username} f="{xmlname}"')
     flash(_('Data import from %(i)s to database has been started.', i=xmlname), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 
@@ -372,7 +315,7 @@ def list_threads():
 def xml_download(username,xmlfile):
     xml_folder = uploads.get_upload_folder(username)
     xml_folder = os.path.abspath(xml_folder)
-    logger.info(f"-> bp.admin.routes.xml_download f={xmlfile}")
+    logger.info(f'-> bp.admin.routes.xml_download f="{xmlfile}"')
     logging.debug(xml_folder)
     return send_from_directory(directory=xml_folder, filename=xmlfile, 
                                mimetype="application/gzip",
@@ -396,7 +339,7 @@ def show_upload_log(username,xmlfile):
 def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
-    logger.info(f"-> bp.admin.routes.xml_delete f={xmlfile}")
+    logger.info(f'-> bp.admin.routes.xml_delete f="{xmlfile}"')
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------
@@ -419,7 +362,7 @@ def list_user_gedcoms(user):
 @roles_accepted('admin', 'audit')
 def list_user_gedcom(user,gedcomname):
     session["gedcom_user"] = user
-    logger.info(f"-> bp.admin.routes.list_user_gedcom u={user} f={gedcomname}")
+    logger.info(f'-> bp.admin.routes.list_user_gedcom u={user} f="{gedcomname}"')
     return gedcom.routes.gedcom_info(gedcomname)
 
 @bp.route('/admin/list_gedcoms_for_users', methods=['POST'])
@@ -585,8 +528,8 @@ def fetch_accesses():
 def add_access():
     data = json.loads(request.data)
     print(data)
-    username = data.get("username")
-    batchid = data.get("batchid")
+    username = data.get("username",'-')
+    batchid = data.get("batchid",'-')
     #TODO Should log the batch owner, not batchid?
     logger.info(f"-> bp.admin.routes.add_access u={username} batch={batchid}")
     rsp = UserAdmin.add_access(username,batchid)
@@ -600,7 +543,10 @@ def add_access():
 def delete_accesses():
     data = json.loads(request.data)
     print(data)
-    logger.info(f"-> bp.admin.routes.delete_accesses u={username} batch={batchid}")
+    username = data.get("username",'-')
+    batchid = data.get("batchid",'-')
+    #TODO Should log the batch owner, not batchid?
+    logger.info(f'-> bp.admin.routes.delete_accesses u={username} batch={batchid}')
     rsp = UserAdmin.delete_accesses(data)
     return jsonify(rsp)
 

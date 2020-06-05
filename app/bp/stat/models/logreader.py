@@ -2,11 +2,13 @@
 # Class for reading stk server logs
 #
 
+"""Module containing Counter class and some derived classes.
+
+"""
 import re
-#import os
 
 from flask import flash
-
+from . import utils
 
 ################################################################
 #
@@ -29,12 +31,11 @@ def string_to_number(txt):
 
 ################
 #
-def number_to_string(x, w=2):
-    """Format our number X, floats to W decimal places (default=2)."""
-    if type(x) == int:
-        return str(x)
-    if type(x) == float:
-        return f"{x:.{w}f}"
+def number_to_string(float_or_int, decimals=2):
+    """Format our number FLOAT_OR_INT, floats to DECIMALS decimal places (default=2)."""
+    if isinstance(float_or_int, float):
+        return f"{float_or_int:.{decimals}f}"
+    return str(float_or_int)
 
 def is_wanted(target, matcher, want_if_match):
     """Return True if TARGET is matched by MATCER if WANT_IF_MATCH is True.
@@ -47,8 +48,7 @@ def is_wanted(target, matcher, want_if_match):
         return True
     if want_if_match:
         return matcher.match(target)
-    else:
-        return not matcher.match(target)
+    return not matcher.match(target)
 
 ################################################################
 #### class definitions
@@ -61,9 +61,9 @@ class Counter():
     """
     def __init__(self, name, level=0, opts=None):
         """Initialize new Counter with NAME at depth LEVEL."""
-        self._opts   = opts
-        self._level  = level
-        self._name   = name     # name of this (sub)Counter
+        self._opts = opts
+        self._level = level
+        self._name = name     # name of this (sub)Counter
         self._counters = {}     # dict of subCounter objects
         self._values = {        # values that we keep track at this level
             "N": 0,             # ...more will come from log files
@@ -74,7 +74,7 @@ class Counter():
     def increment(self, tag="N", incr=1):
         """Increment (or create) Counters _values[TAG] by INCR (default=1)."""
         incval = incr
-        if type(incr) == str:
+        if isinstance(incr, str):
             incval = string_to_number(incr)
         if incval is None:
             # print(f"self._values['{tag}'] += {incr}")
@@ -126,10 +126,10 @@ class Counter():
 
         # Go thru all sub-Counters (levels) given in INNER_SPECS.
         # INNER_SPECS is list of tuples: (key, TAGLIST) ...
-        cc = self
+        current_counter = self
         for (counter_name, inner_taglist) in inner_specs:
-            cc = cc.get_or_create(counter_name)
-            cc.update(taglist=inner_taglist)
+            current_counter = current_counter.get_or_create(counter_name)
+            current_counter.update(taglist=inner_taglist)
 
         return
 
@@ -153,8 +153,8 @@ class Counter():
         Details (bycount?, topN) are in SELF._opts.
         Returns list of Counter objects.
         """
-        def counter_value(x, tag):
-            return x._values[tag] if tag in x._values else 0
+        def counter_value(cntr, tag):
+            return cntr._values[tag] if tag in cntr._values else 0
 
         # use the negative number trick to get numeric sorting
         # reverse & alpa non-reverse (we can't use reverse=True
@@ -162,13 +162,13 @@ class Counter():
         # print(f"{self._name}")
         if self._opts["bycount"] is not None:
             result = sorted(self._counters.values(),
-                            key = lambda x: (-counter_value(x, "N"),
-                                             -counter_value(x, "n"),
-                                             x._name) )
+                            key=lambda x: (-counter_value(x, "N"),
+                                           -counter_value(x, "n"),
+                                           x._name))
 
         else:
             result = sorted(self._counters.values(),
-                            key = lambda x: x._name)
+                            key=lambda x: x._name)
 
         topn = self._opts["topn"]
         if topn is not None:
@@ -207,7 +207,7 @@ class Counter():
             for tag, value in self._values.items():
                 columns.append(f"{tag}")
                 val = f"{number_to_string(value)}"
-                if tag == "e" or tag == "t":
+                if tag in ("e", "t"):
                     val += " s"
                 columns.append(val)
                 if tag == "e" and self._values["N"] != 0:
@@ -229,8 +229,7 @@ class Counter():
 
         if level == 0:
             return self._name, lines
-        else:
-            return lines
+        return lines
 
 
     ################
@@ -247,7 +246,7 @@ class Counter():
         res = []
         for counter in self._counters.values():
             res.append(counter.get_subreport(level=0))
-        files = [ x[x.rindex("/")+1:] for x in self._files ]
+        files = [x[x.rindex("/")+1:] for x in self._files]
 
         return(", ".join(files), res)
 
@@ -255,48 +254,42 @@ class Counter():
     ################
     #
     def get_regexp_from_opts(self, what):
-        """Compile comma separated list of regexp patterns into one.
+        """Compile list of shell glob patterns into one python regexp.
 
-Return value is tuple (regex, wanted_if_match)
-If the list starts with '!', the second retun value is False."""
+        The glob is found in SELF._opts[WHAT], and can be comma or space
+        separated list of shell glob patterns.
+
+        Return value is tuple (regex, wanted_if_match).
+
+        If the list starts with '!', the second retun value is False.
+
+        """
 
         if what not in self._opts or self._opts[what] == "":
             return None, True
-
-        want_if_match = True
-        pattern = self._opts[what]
-        if pattern.startswith("!"):
-            pattern = pattern[1:]
-            want_if_match = False
-
-        try:
-            return re.compile(re.sub("[, ]+", "|", pattern)), want_if_match
-        except Exception as e:
-            flash(f"Bad regexp for {what} '{self._opts[what]}': {e}",
-                  category='warning')
-        return None, True
+        return (utils.glob2regexp(self._opts[what]))
 
 
     def save_bymsg(self, tup):
         """Save TUP data by by module | user order."""
         (date, module, user, tuples) = tup
-        self.update(inner_specs = [ (module, None), (user, tuples), ] )
+        self.update(inner_specs=[(module, None), (user, None), (date, tuples)])
 
     def save_bydate(self, tup):
         """Save TUP data by by date | user order."""
         (date, module, user, tuples) = tup
-        self.update(inner_specs = [ (date, None), (user, None), (module, tuples) ] )
+        self.update(inner_specs=[(date, None), (user, None), (module, tuples)])
 
 
     def save_byuser(self, tup):
         """Save TUP data by by user | module | date order."""
         (date, module, user, tuples) = tup
-        self.update(inner_specs = [ (user, None), (module, None), (date, tuples) ] )
+        self.update(inner_specs=[(user, None), (module, None), (date, tuples)])
 
     ################
     #
     def work_with(self, logfile):
-        """Call parser to get values from stk upload log files.
+        """Call parser to get values from stk log files.
 
         """
         if logfile in self._files:
@@ -334,7 +327,7 @@ If the list starts with '!', the second retun value is False."""
         import datetime
         myformat = "%Y-%m-%d"
         mydt = datetime.datetime.strptime(date, myformat)
-        start = mydt - datetime.timedelta(days = mydt.weekday())
+        start = mydt - datetime.timedelta(days=mydt.weekday())
         return start.strftime(myformat)
 
 
@@ -347,23 +340,23 @@ class StkServerlog(Counter):
 Counters are kept in list of Counter objects.
 """
 
-    def __init__(self, name, level=0, by_what=[], opts=None):
+    def __init__(self, name, level=0, by_what=None, opts=None):
         super().__init__(name, level, opts=opts)
-        self._files  = []       # list of files already processed
+        self._files = []       # list of files already processed
         self._savers = {}
-        for (name, saver) in by_what:
-            self._savers[saver] = self.get_or_create(name)
+        if by_what is None:
+            return
+        for (sub_name, saver) in by_what:
+            self._savers[saver] = self.get_or_create(sub_name)
         return
 
-    """Toistaiseksi olisi 2 mittaria: modulin nimi=käydyt sivut ja
-    n=käsitellyt rivit tms.  Raportointia voisi rakentaa käyttäjien
-    käyntimääristä kuukausittain (käyttäjittäin monenako päivänä, montako
-    eri käyttäjää) ja suosituimmat sivut ja niiden datavolyymit.
+    # Toistaiseksi olisi 2 mittaria: modulin nimi=käydyt sivut ja
+    # n=käsitellyt rivit tms.  Raportointia voisi rakentaa käyttäjien
+    # käyntimääristä kuukausittain (käyttäjittäin monenako päivänä, montako
+    # eri käyttäjää) ja suosituimmat sivut ja niiden datavolyymit.
 
-    Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden
-    lokeja.
-
-        """
+    # Kuukausittaiset määrät tulee helposti siitä, kun lokit on kuukauden
+    # lokeja.
 
     ################
     #
@@ -377,14 +370,13 @@ Counters are kept in list of Counter objects.
         # Format of log messages (see app/__init__.py)
         # '%(asctime)s %(name)s %(levelname)s %(user)s %(message)s'
         #
-        # The %(asctime)s part is made of two parts:
-        ymd_part = r'\d\d\d\d-\d\d-\d\d'
-        hms_part = r'\d\d:\d\d:\d\d,\d\d\d'
-
         # This shall match each line in log LOGFILE;
         # we don't need the %(name)s part, the other groups we keep
-        log_re = re.compile(f'({ymd_part}) ({hms_part})'
-                            f' \S+ (\S+) (\S+) (.*)')
+        # The %(asctime)s part is made of two parts:
+        log_re = re.compile(r"(\d\d\d\d-\d\d-\d\d)"   # YYYY-MM-DD (keep this)
+                            r" \d\d:\d\d:\d\d,\d\d\d" # hh:mm:ss (skip this)
+                            r" \S+"                   # %(name)s (skip)
+                            r" (\S+) (\S+) (.*)")     # the rest (keep
 
         # We are interested only about entries where %(message)s part looks
         # like this:
@@ -394,7 +386,7 @@ Counters are kept in list of Counter objects.
         equals_re = re.compile(r"\b(\S+)=(\S+)\b")
 
         # some filtering wanted by caller:
-        (users_re, want_user)    = self.get_regexp_from_opts("users")
+        (users_re, want_user) = self.get_regexp_from_opts("users")
         (msg_re, want_msg) = self.get_regexp_from_opts("msg")
 
         for line in open(logfile, "r").read().splitlines():
@@ -402,8 +394,8 @@ Counters are kept in list of Counter objects.
             if not match:
                 flash(f"strange log line {line}") # this should not happen
                 continue
-            (date, _, level, user, message) = match.groups()
-            if level != 'INFO':
+            (date, level, user, message) = match.groups()
+            if level != "INFO":
                 continue
 
             if not is_wanted(user, users_re, want_user):
@@ -421,23 +413,22 @@ Counters are kept in list of Counter objects.
             tuples = equals_re.findall(rest)
             yield self.date_of_period(date), module, user, tuples
 
-        return
-
 
 ################################################################
 #
 class StkUploadlog(Counter):
     """Class to handle stk upload log file(s)."""
 
-    def __init__(self, name, level=0, by_what=[], opts=None):
+    def __init__(self, name, level=0, by_what=None, opts=None):
         super().__init__(name, level, opts=opts)
-        self._files  = []       # list of files already processed
+        self._files = []        # list of files already processed
         self._savers = {}
         (self._want_step_re,
          self._want_step_if_match) = self.get_regexp_from_opts("msg")
-        for (name, saver) in by_what:
-            self._savers[saver] = self.get_or_create(name)
-        return
+        if by_what is None:
+            return
+        for (sub_name, saver) in by_what:
+            self._savers[saver] = self.get_or_create(sub_name)
 
     ################
     #
@@ -455,7 +446,7 @@ class StkUploadlog(Counter):
             """Transform DMY in d.m.yyyy format into yyyy-mm-dd format."""
             parts = dmy.split(".")
             parts.reverse()
-            for i in range(1,3):
+            for i in range(1, 3):
                 parts[i] = f"{int(parts[i]):02d}"
             return "-".join(parts)
 
@@ -467,6 +458,7 @@ class StkUploadlog(Counter):
             (users_re, want_if_match) = self.get_regexp_from_opts("users")
             if is_wanted(user, users_re, want_if_match):
                 return user
+            return None
 
         def loading_succesfull(logfile, total_re, ts1_re, ts2_re):
             """Tell if LOGFILE contains data for succesfull loading.
@@ -478,101 +470,109 @@ class StkUploadlog(Counter):
             """
             ymd = "????-??-??"
             for line in open(logfile, "r").read().splitlines():
+                if re.match(r"^Traceback ", line):
+                    break
                 if total_re.match(line):
+                    # Return success
                     return self.date_of_period(ymd), True
-                m = ts1_re.match(line)
-                if m:
-                    ymd = fix_date(m.group(1))
+                match = ts1_re.match(line)
+                if match:
+                    ymd = fix_date(match.group(1))
                     continue
-                m = ts2_re.match(line)
-                if m:
-                    ymd = m.group(1)
+                match = ts2_re.match(line)
+                if match:
+                    ymd = match.group(1)
                     continue
+            # Return failure
             return self.date_of_period(ymd), False
 
         #### THE PARSER IS UGLY !!!  ( But so are the log files :-( )
 
-        INFO_re = re.compile(
-            r"^INFO ([^:]+): "  # step name
-            r"(\d+)"            # the first number (int)
+        # Most intresting line:
+        info_re = re.compile(
+            r"^INFO ([^:]+): "  # 1) step name
+            r"(\d+)"            # 2) the first number (obj count, int)
             r"(?: *[:/] *)?"    # maybe separator
-            r"([\d.]+)?"        # mayme second number (float)
+            r"([\d.]+)?"        # 3) mayme second number (time, float)
             r"(?: sek)?"        # another optional group
             r" *"               # maybe trailing space
             r"\Z")              # end of txt
-        total_re = re.compile(r"^TITLE Total time: +([/:] )?([\d.]+)( sek)?")
-        ts1_re = re.compile(r"^(\d\d?\.\d\d?.\d\d\d\d) (?:\d\d:\d\d)")
-        ts2_re = re.compile(r"^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)"
-                            r" (\d\d\d\d-\d\d-\d\d) (?:\d\d:\d\d:\d\d)")
-        stored_re = re.compile(r"^Stored the file (.+) from user (.+) to neo4j$")
-        storing_re = re.compile(r"^TITLE Storing data from ")
-        WARNING_re = re.compile(r"^WARNING (.+)$")
-        batchid_re = re.compile(r"^Batch id: (.+)$")
-        loaded_re = re.compile(r"^Loaded the file (.+)$")
-        INFOloaded_re = re.compile(r"^INFO Loaded file (.+)$")
-        log_re = re.compile(r"^Log file: (.+)$")
 
+        # This has also useful info:
+        total_re = re.compile(
+            r"^TITLE Total time:"
+            r" +(?:[/:] )?"     # maybe some separator
+            r"([\d.]+)"         # 1) time (float)
+            r"(?: sek)?")       # maybe some text
+
+        # Timestamp may be in two formats; these are used also in
+        # loading_succesfull(), before actual log parsing
+        ts1_re = re.compile(
+            r"^(\d\d?\.\d\d?.\d\d\d\d)" # 1) dmy (txt)
+            r" (?:\d\d:\d\d)")          # HH:MM
+        ts2_re = re.compile(
+            r"^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)" # dayname
+            r" (\d\d\d\d-\d\d-\d\d)"            # 1) YYYY-mm-DD (txt)
+            r" (?:\d\d:\d\d:\d\d)")             # HH:MM:SS
+
+        # The rest of lines, we are not intrested...
+        ignored_regexes = [re.compile(x) for x in (
+            "^Stored the file (.+) from user (.+) to neo4j$",
+            "^TITLE Storing data from ",
+            "^WARNING (.+)$",
+            "^Batch id: (.+)$",
+            "^Loaded the file (.+)$",
+            "^INFO Loaded file (.+)$",
+            "^Log file: (.+)$",
+        )]
         user = user_from_filename(logfile)
         if user is None:
             return
-        # print(f"u={user}")
 
         # some filtering wanted by caller:
         (ymd, load_success) = loading_succesfull(logfile, total_re, ts1_re, ts2_re)
         if not load_success:
+            # Uploading failed; we do not want to process the file,
+            # but we may be interested to include the failure in report
             step = "Failed"
             if is_wanted(step, self._want_step_re, self._want_step_if_match):
-                print(f"** ==> Failed {logfile}")
+                print(f"** ==> Failed {ymd} {logfile}")
                 yield ymd, step, user, [(logfile, "1")]
-                return
+            return              # this will discard the rest of file
 
         for line in open(logfile, "r").read().splitlines():
+            if line == "":
+                continue
 
             # This is the most intresting kind of line
-            m = INFO_re.match(line)
-            if m:
-                if user is None:
-                    flash(f"logfile {logfile} no user found before INFO line")
-                    return
-                (step, count, time) = m.groups()
+            match = info_re.match(line)
+            if match:
+                (step, count, time) = match.groups()
                 if count == "0":
                     continue
                 if not is_wanted(step, self._want_step_re, self._want_step_if_match):
                     continue
 
                 step = step.split(" ")[0]
-                if ymd is None or step is None or user is None:
-                    print(f"{logfile}: ymd='{ymd}', s='{step}' user='{user}'")
-                    continue
-                tuples = [ ("n", count) ]
+                tuples = [("n", count)]
                 if time is not None:
-                    tuples.append( ("t", time ) )
+                    tuples.append(("t", time))
                 yield ymd, step, user, tuples
                 continue
 
-            m = total_re.match(line)
-            if m:               # has Total time
-                time = m.group(1)
-                if ymd is None or user is None or time is None:
-                    print(f"** --> {logfile}: ymd='{ymd}', s='total_time' user='{user}'")
-                    continue
-                # print(f"t='{time}'")
+            match = total_re.match(line)
+            if match:               # has Total time
+                time = match.group(1)
                 step = "Done"
                 if not is_wanted(step, self._want_step_re, self._want_step_if_match):
                     continue
-                yield ymd, step, user, [ ("t", time ) ]
+                yield ymd, step, user, [("t", time)]
                 continue
 
-            if ts1_re.match(line): continue # already got at start
-            if ts2_re.match(line): continue
-            if stored_re.match(line): continue
-            if storing_re.match(line): continue
-            if WARNING_re.match(line): continue
-            if batchid_re.match(line): continue
-            if loaded_re.match(line): continue
-            if INFOloaded_re.match(line): continue
-            if log_re.match(line): continue
-
-            if line != "":
+            for regexp in ignored_regexes + [ts1_re, ts2_re]:
+                if regexp.match(line):
+                    # one of those did match; do nothing with it
+                    break
+            else:               # none did match; print the unexpeted line
                 print(f"Unhandled line: {line}")
                 continue
