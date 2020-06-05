@@ -10,15 +10,15 @@
 <style>
 #pop-window {
     max-width: 416px; 
-    max-height: 250px; 
-    background: #e3bda7;
-    overflow: scroll;
+/*     max-height: 250px;  */
+    background: white;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     position: absolute;
     z-index: 1;
     top: 25%;
     left: 50%;
     margin-left: -208px;
+    border: 2px solid brown;
 }
 #pop-buttons {
     list-style-type: none;
@@ -40,19 +40,22 @@ div#pop-buttons button.button {
     flex-wrap: nowrap;
 }
 .pop-container > div {
-    background: #d09d7f;
-    color:white;
+    background: white;
     font-size:9pt;
     padding:4px;
     margin:4px;
     width:404px !important;
+}
+.pop-box {
+    overflow: scroll;
+    background: white;
 }
 .pop-box a.inlink {
     width:100%;
     background: #777;
     color:white;
     margin: 0 .3em;
-    padding: 0 .3em;
+/*     padding: 0 .3em; */
     border-radius: 5px;
 }
 
@@ -69,11 +72,11 @@ div.pop-box ul {
 <td class="ColumnPerson">
     <div>
         <div class="detail_link">
-            ♂ <a href="/scene/person?uuid=67b6c330b183429fa9a5d8c7eb7472d8"
+            ♂ <a href="/scene/person?uuid=274a176074a547258f244dec393dc887"
             class="inlink" title="Katso henkilön 034454 tiedot (nr. 549094)">Anders Reinhold <i>Andersson</i>
                 <b></b></a>
-            <div class="popup" onclick="showPopup('67b6c330b183429fa9a5d8c7eb7472d8')"
-                title="Näytä perheet">&nbsp;💜</div>
+            <div class="popup" onclick="showPopup('274a176074a547258f244dec393dc887')"
+                title="Näytä perheet">&nbsp;&#9881;<!--💜--></div>
         </div>
         <br>
         <span class="idno">Uuid:034454 /</span>
@@ -99,7 +102,7 @@ div.pop-box ul {
   <div class="row">
     <div>
         <span style="color:red">${ message }</span>
-        <button v-on:click="getFamilies(uuid='1ae40195fcd34cc0adadc1f3be88d163')">
+        <button v-on:click="getFamilies(uuid='459d19f508b04865b333954c304313b7')">
           Hae henkilön perheet</button>
     </div>
     <div style="display: inline-block;padding:.5em;">
@@ -128,13 +131,14 @@ div.pop-box ul {
     </span>
 </div>
 
-  <div id="pop-window" v-if="families.length > 0">
+  <div id="pop-window" v-if="families.length > 0"
+       v-on:click="document.getElementById(pop-window).style.visibility='hidden'">
 
     <div id="pop-buttons" v-if="families.length > 1">
       <button class="button" v-bind:disabled="f.show" 
             v-on:mouseover="changeFamily(index)"
             v-for="(f, index) of families" :key="f.id">
-        ${index+1}. ${f.role}</button>
+        <sup>${index+1}</sup>${f.role}</button>
     </div>
 
     <div class="pop-container">
