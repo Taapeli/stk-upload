@@ -277,7 +277,7 @@ def set_confirmed_at():
 
 
 def initialize_db():
-    # Fix chaanged schema
+    # Fix changed schema
     do_schema_fixes()
     
     if not roles_exist():
@@ -297,6 +297,6 @@ def initialize_db():
 
     create_lock_constraint()
     create_uuid_constraints()
-    set_confirmed_at()
+    #set_confirmed_at()
 
 

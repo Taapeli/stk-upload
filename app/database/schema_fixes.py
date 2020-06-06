@@ -18,39 +18,87 @@ def do_schema_fixes():
     """
 
     if True:
-        change_persons_BASENAME_to_REFNAME = """
-MATCH (a:Person) <-[r0:BASENAME]- (b:Refname)
-WITH a, r0, b
-    CREATE (a) <-[r:REFNAME {use:r0.use}]- (b)
-    DELETE r0
-RETURN count(r)
-"""
-        # call with (use0="matronyme", use1="mother") or (use0="patronyme", use1="father")
-        change_matronyme_BASENAME_to_PARENTNAME = """
-MATCH (b:Refname) -[r0:BASENAME {use:$use0}]-> (c:Refname)
-WITH b, r0, c, r0.use as old
-    CREATE (b) <-[r:PARENTNAME {use:$use1}]- (c)
-    DELETE r0
-RETURN count(r)
-"""
-
+        # // Fix master HAS_LOADED => Stk HAS_ACCESS
+        # // and Add (:Batch) -[:AFTER_AUDIT]-> (:Audit) 
+        change_master_HAS_LOADED_to_Stk_HAS_AUDITED = """
+MATCH (stk:UserProfile{username:"_Stk_"})
+WITH stk
+    MATCH (master:UserProfile{username:"master"})-[r:HAS_LOADED]->(audit:Audit)
+WITH master,stk,r,audit limit 50
+    DELETE r
+    MERGE (stk)-[:HAS_ACCESS]->(audit)
+    WITH audit
+        MATCH (b:Batch) WHERE b.id = audit.id
+        MERGE (b)-[:AFTER_AUDIT]->(audit)
+    RETURN count(audit)"""
         with shareds.driver.session() as session: 
             try:
-                result = session.run(change_persons_BASENAME_to_REFNAME)
-                cnt1 = result.single()[0]
-                result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
-                                     use0="matronyme", use1="mother")
-                cnt2 = result.single()[0]
-                result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
-                                     use0="patronyme", use1="father")
-                cnt3 = result.single()[0]
-                print(f"adminDB.do_schema_fixes: fixed Refname links {cnt1} REFNAME, {cnt2} matronyme, {cnt3} patronyme")
+                # From (:UserProfile{'master'} -[:HAS_LOADED]-> (a:Audit)
+                #   to (:UserProfile{'_Stk_'} -[:HAS_ACCESS]-> (a:Audit) 
+                #  and OPTIONAL (b:Batch) -[AUDITED]-> (a)
+                result = session.run(change_master_HAS_LOADED_to_Stk_HAS_AUDITED)
+                counters = result.summary().counters
+                _cnt = result.single()[0]
+                print(counters)
+                rel_created = counters.relationships_created
+                rel_deleted = counters.relationships_deleted
+                print(f"do_schema_fixes: Audit links {rel_deleted} removed, {rel_created} added")
+                if rel_created + rel_deleted > 0:
+                    logger.info(f"database.schema_fixes.do_schema_fixes: "
+                                f"Audit links {rel_deleted} removed, {rel_created} added")
+
+#                 cnt1 = result.single()[0]
+#                 result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
+#                                      use0="matronyme", use1="mother")
+#                 cnt2 = result.single()[0]
+#                 result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
+#                                      use0="patronyme", use1="father")
+#                 cnt3 = result.single()[0]
+#                 print(f"database.schema_fixes.do_schema_fixes: fixed Refname links {cnt1} REFNAME, {cnt2} matronyme, {cnt3} patronyme")
             except Exception as e:
-                logger.error(f"{e} in database.adminDB.do_schema_fixes")
+                logger.error(f"{e} in database.adminDB.do_schema_fixes/Audit"
+                             f" Failed {e.__class__.__name__} {e.message}") 
                 return
 
             dropped=0
             created=0
+
+            for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
+                          'Note', 'Person', 'Place', 'Place_name', 'Repository',
+                          'Source']:
+                try:
+                    result = session.run(f'CREATE INDEX ON :{label}(handle)')
+                    counters = result.summary().counters
+                    created += counters.indexes_added
+#               except Exception as e:
+#                   logger.info(f"Index for {label}.handle not created: {e}")
+                except Exception as e: 
+                    logger.warning(f"do_schema_fixes Index for {label}.handle not created." 
+                                   f" Failed {e.__class__.__name__} {e.message}") 
+            return 
+
+            print(f"database.schema_fixes.do_schema_fixes: index updates: {dropped} removed, {created} created")
+
+    else:
+        print("database.schema_fixes.do_schema_fixes: No schema changes tried")
+
+
+#Removed 6.5.2020
+#         change_persons_BASENAME_to_REFNAME = """
+# MATCH (a:Person) <-[r0:BASENAME]- (b:Refname)
+# WITH a, r0, b
+#     CREATE (a) <-[r:REFNAME {use:r0.use}]- (b)
+#     DELETE r0
+# RETURN count(r)
+# """
+#         # call with (use0="matronyme", use1="mother") or (use0="patronyme", use1="father")
+#         change_matronyme_BASENAME_to_PARENTNAME = """
+# MATCH (b:Refname) -[r0:BASENAME {use:$use0}]-> (c:Refname)
+# WITH b, r0, c, r0.use as old
+#     CREATE (b) <-[r:PARENTNAME {use:$use1}]- (c)
+#     DELETE r0
+# RETURN count(r)
+# """
 
 # Removed 21.4.2020 
 #             try:
@@ -60,22 +108,6 @@ RETURN count(r)
 #                     dropped += counters.indexes_removed
 #             except Exception as e:
 #                 pass
-
-            for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
-                          'Note', 'Person', 'Place', 'Place_name', 'Repository',
-                          'Source']:
-                try:
-                    result = session.run(f'CREATE INDEX ON :{label}(handle)')
-                    counters = result.summary().counters
-                    created += counters.indexes_added
-                except Exception as e:
-                    logger.info(f"Index for {label}.handle not created: {e}")
-
-            print(f"adminDB.do_schema_fixes: index updates: {dropped} removed, {created} created")
-
-    else:
-        print("database.adminDB.do_schema_fixes: No schema changes tried")
-
 
 # Removed 28.1.2020 in a69d57bcc9e4c2e0ba2e98f3370d8efab7b1990e
 #     if False:
