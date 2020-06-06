@@ -86,7 +86,7 @@ class Batch_merge(object):
         except Exception as e:
             msg = _("No objects transferred: ") + str(e)
             flash(msg, "flash_error")
-            logger.error(msg)
+            logger.error(msg++e.message)
             return msg
 
         msg = _("moved %(new_rel)s objects to ", new_rel=relationships_created)
