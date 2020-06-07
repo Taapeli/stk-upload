@@ -31,6 +31,10 @@ WITH master,stk,r,audit limit 50
         MATCH (b:Batch) WHERE b.id = audit.id
         MERGE (b)-[:AFTER_AUDIT]->(audit)
     RETURN count(audit)"""
+        change_Stk_name = """
+MATCH (u:UserProfile {username:'_Stk_'})
+SET u.name = 'Suomi tk', u.change = timestamp()"""
+
         with shareds.driver.session() as session: 
             try:
                 # From (:UserProfile{'master'} -[:HAS_LOADED]-> (a:Audit)
@@ -39,13 +43,19 @@ WITH master,stk,r,audit limit 50
                 result = session.run(change_master_HAS_LOADED_to_Stk_HAS_AUDITED)
                 counters = result.summary().counters
                 _cnt = result.single()[0]
-                print(counters)
+                #print(counters)
                 rel_created = counters.relationships_created
                 rel_deleted = counters.relationships_deleted
                 print(f"do_schema_fixes: Audit links {rel_deleted} removed, {rel_created} added")
                 if rel_created + rel_deleted > 0:
                     logger.info(f"database.schema_fixes.do_schema_fixes: "
                                 f"Audit links {rel_deleted} removed, {rel_created} added")
+
+                # Name field missed
+                session.run(change_Stk_name)
+                counters = result.summary().counters
+                if counters.properties_set > 0:
+                    logger.info("database.schema_fixes.do_schema_fixes: profile _Stk_ name set")
 
 #                 cnt1 = result.single()[0]
 #                 result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
@@ -60,9 +70,9 @@ WITH master,stk,r,audit limit 50
                              f" Failed {e.__class__.__name__} {e.message}") 
                 return
 
+
             dropped=0
             created=0
-
             for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
                           'Note', 'Person', 'Place', 'Place_name', 'Repository',
                           'Source']:

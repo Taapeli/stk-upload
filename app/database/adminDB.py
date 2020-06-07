@@ -82,7 +82,7 @@ def user_exists(name):
     return(num_of_users > 0)    
 
 def profile_exists(name):
-    print(f'Check the existense of {name} user profile')
+    print(f'Check the existense of {name} profile')
     num_of_users = 0  
     for result in shareds.driver.session().run(SetupCypher.profile_check_existence, username=name):
         num_of_users = result[0]
@@ -161,7 +161,7 @@ def create_single_profile(name):
         try:
             session.run(SetupCypher.single_profile_create, attr=attr)
         except Exception as e:
-            logger.error("database.adminDB.create_stk_profile"
+            logger.error("database.adminDB.create_single_profile"
                          f" Failed {e.__class__.__name__} {e.message}")
             return
     logger.info(f'Profile {name} created')    
