@@ -6,13 +6,7 @@
 {% import '/scene/macros.html' as macro with context %}
 <script src="/static/infobox.js"></script>
 <style>
-td {
-    border-top: solid 1px lightgray;
-    background: white;
-}
-td.ColumnSpouse {
-    background: #f7f7f0;
-}
+div.wife { padding-left: 1.2em;}
 </style>
 {% set cnt = families|count %}
 {% set next = user_context.scope %}
@@ -23,7 +17,7 @@ td.ColumnSpouse {
 </div>
 
 {{ macro.menu(3) }}
-    <div class="content" id="Families">
+    <div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
                <div>
@@ -108,15 +102,11 @@ td.ColumnSpouse {
             </ul>
         </div>
 {% endif %}
-    </div>
-
-<section id="lista">
 
 {% if cnt %}
-    <table id="families" width="100%">
+    <table class="IndividualList">
         <tr><th>{{ _("family") }}</th>
-            <th>{{ _("Man") }}</th>
-            <th>{{ _("Wife") }}</th>
+            <th>{{ _("Man") }} / {{ _("Wife") }}</th>
             <th>{{ _("Children") }}</th>
         </tr>
     {% for f in families %}
@@ -128,14 +118,19 @@ td.ColumnSpouse {
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
-            <td class="ColumnSpouse">{% if f.father.uuid %} <!-- &#9794; -->
+
+            <td class="ColumnSpouse">
+                <div class="man">&#9794;
+            {% if f.father.uuid %}
 				{{ macro.person_names_anon(f.father, f.father.names[0:1]) }}
-            {% else %} –
-            {% endif %}</td>
-            <td class="ColumnSpouse">{% if f.mother.uuid %} <!-- &#9792; -->
+            {% endif -%}
+                </div>
+                <div class="wife">&#9792;
+            {% if f.mother.uuid %}
 				{{ macro.person_names_anon(f.mother, f.mother.names[0:1]) }}
-            {% else %} –
-            {% endif %}</td>
+            {% endif -%}
+                </div>
+            </td>
 
             <td><small>{% if f.no_of_children %}
                 {% if f.num_hidden_children > 0 %}
@@ -196,6 +191,6 @@ td.ColumnSpouse {
     </div>
 {% endif %}
 
-</section>
+</div>
 
 {% endblock %}
