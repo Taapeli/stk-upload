@@ -323,13 +323,14 @@ def show_families():
     # Which range of data is shown
     u_context.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
+    u_context.order = 'man' if opt == 'father' else 'wife'
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
     # 'families' has Family objects
     families = Family_combo.get_families(o_context=u_context, opt=opt, limit=count)
 
-    stk_logger(u_context, "-> bp.scene.routes.show_families/{opt} n={len(families)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_families/{opt} n={len(families)}")
     return render_template("/scene/families.html", families=families, 
                            user_context=u_context, elapsed=time.time()-t0)
 

@@ -6,7 +6,15 @@
 {% import '/scene/macros.html' as macro with context %}
 <script src="/static/infobox.js"></script>
 <style>
-div.wife { padding-left: 1.2em;}
+div.man-man, div.wife-wife { 
+    border-left: solid 3px blue; 
+    padding-left: 3px;
+}
+div.man-wife, div.wife-man {
+    padding-left: 6px;
+}
+
+th span.man-man, th span.wife-wife { color: #020299;}
 </style>
 {% set cnt = families|count %}
 {% set next = user_context.scope %}
@@ -18,6 +26,7 @@ div.wife { padding-left: 1.2em;}
 
 {{ macro.menu(3) }}
     <div class="content" id="Individuals">
+
         <div id="summaryarea">
             <div class="flex-container">
                <div>
@@ -53,6 +62,7 @@ div.wife { padding-left: 1.2em;}
 	               </form>
 	           </div>
             </div>
+
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
                 <ul  class='flashes'>
@@ -106,7 +116,9 @@ div.wife { padding-left: 1.2em;}
 {% if cnt %}
     <table class="IndividualList">
         <tr><th>{{ _("family") }}</th>
-            <th>{{ _("Man") }} / {{ _("Wife") }}</th>
+            <th><span class="man-{{user_context.order}}">{{ _("Man") }}</span> / 
+               <span class="wife-{{user_context.order}}">{{ _("Wife") }}</span>
+            </th>
             <th>{{ _("Children") }}</th>
         </tr>
     {% for f in families %}
@@ -120,12 +132,12 @@ div.wife { padding-left: 1.2em;}
                 </td>
 
             <td class="ColumnSpouse">
-                <div class="man">&#9794;
+                <div class="man-{{user_context.order}}">&#9794;
             {% if f.father.uuid %}
 				{{ macro.person_names_anon(f.father, f.father.names[0:1]) }}
             {% endif -%}
                 </div>
-                <div class="wife">&#9792;
+                <div class="wife-{{user_context.order}}">&#9792;
             {% if f.mother.uuid %}
 				{{ macro.person_names_anon(f.mother, f.mother.names[0:1]) }}
             {% endif -%}
