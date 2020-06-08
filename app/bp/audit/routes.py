@@ -10,9 +10,13 @@ import time
 import logging
 from bp.admin.cvs_refnames import load_refnames
 from models import dataupdater
+from io import StringIO, BytesIO
+import csv
+from models.gen.person import Person
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for #, flash, send_from_directory, session, jsonify
+from flask import send_file
 from flask_security import login_required, roles_accepted, current_user
 #from flask_babelex import _
 
@@ -121,6 +125,30 @@ def set_all_person_refnames():
     logger.info(f"-> bp.audit.routes.set_all_person_refnames n={refname_count}")
     return render_template("/audit/talletettu.html", uri=dburi, 
                            text=f'Updated {_sortname_count} person sortnames, {refname_count} refnames')
+
+
+@bp.route('/audit/download/refnames')
+@login_required
+@roles_accepted('audit')
+def download_refnames():
+    """Download reference names as a CSV file"""
+    logger.info(f"-> bp.audit.routes.download_refnames") # n={refname_count}")
+    with StringIO() as f:
+        writer = csv.writer(f)
+        hdrs = "Name,Refname,Reftype,Gender,Source,Note".split(",")
+        writer.writerow(hdrs)
+        refnames = datareader.read_refnames()
+        for refname in refnames:
+            row = [refname.name,
+                   refname.refname,
+                   refname.reftype,
+                   Person.convert_sex_to_str(refname.sex),
+                   refname.source]
+            writer.writerow(row)
+        csvdata = f.getvalue()
+        f2 = BytesIO(csvdata.encode("utf-8"))
+        f2.seek(0)
+        return send_file(f2, mimetype='text/csv', as_attachment=True, attachment_filename="refnames.csv") 
 
 
 @bp.route('/audit/upload_csv', methods=['POST'])

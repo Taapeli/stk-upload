@@ -6,10 +6,9 @@
 
 """
 import re
-#import os
 
 from flask import flash
-
+from . import utils
 
 ################################################################
 #
@@ -255,26 +254,20 @@ class Counter():
     ################
     #
     def get_regexp_from_opts(self, what):
-        """Compile comma separated list of regexp patterns into one.
+        """Compile list of shell glob patterns into one python regexp.
 
-Return value is tuple (regex, wanted_if_match)
-If the list starts with '!', the second retun value is False."""
+        The glob is found in SELF._opts[WHAT], and can be comma or space
+        separated list of shell glob patterns.
+
+        Return value is tuple (regex, wanted_if_match).
+
+        If the list starts with '!', the second retun value is False.
+
+        """
 
         if what not in self._opts or self._opts[what] == "":
             return None, True
-
-        want_if_match = True
-        pattern = self._opts[what]
-        if pattern.startswith("!"):
-            pattern = pattern[1:]
-            want_if_match = False
-
-        try:
-            return re.compile(re.sub("[, ]+", "|", pattern)), want_if_match
-        except Exception as e:
-            flash(f"Bad regexp for {what} '{self._opts[what]}': {e}",
-                  category='warning')
-        return None, True
+        return (utils.glob2regexp(self._opts[what]))
 
 
     def save_bymsg(self, tup):

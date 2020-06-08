@@ -1,0 +1,316 @@
+{# templates/refplace_editor.html_ #}
+{% extends "/audit/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _('Auditor') }}{% endblock %}
+{% block body %}}
+{{ super() }}
+
+<style>
+
+body {
+  font-family: Verdana, Helvetica, sans-serif;
+  background-color: #DDDDDD;
+} 
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+</style>
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+
+<style>
+div.box {
+    display: inline-block;
+    vertical-align:top;
+    margin: 0 1em 1em 0;
+    padding: 1em; 
+    background-color: #f9f8bf;
+    width: 300px;
+    min-height: 200px;
+    border-radius: 15px;
+}
+
+div.box1 {
+   	width: 100%;
+    min-height: 100px;
+}
+
+div.box2 {
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+div.box3 {
+    display: inline-block;
+    vertical-align:top;
+    margin: 0 1em 1em 0;
+    padding: 1em; 
+    width: 300px;
+    min-height: 200px;
+    border-radius: 15px;
+    background-color: #D5F5E3;
+}
+
+th {
+ 	position: sticky; 
+ 	top: -1px;
+ 	background: #eee;
+}
+
+td.checkbox {
+	width: 20px;
+}
+
+a.bolded {
+	font-weight: bold;
+}
+
+tr.opened {
+	background: lightgreen;
+}
+
+div#edit_dialog {
+    display: inline-block;
+    vertical-align:top;
+	background: lightgreen;
+    width: 250px;
+    height: 200px;
+    margin: 0 1em 1em 0;
+    padding: 1em; 
+    border-radius: 15px;
+}
+
+input {
+	font-size: 16px;
+	background: lightblue;
+}
+	
+</style>
+
+</head>
+
+<body>
+
+<h3>Paikkojen sulautus</h3>
+
+<p>
+
+<div id="myApp">
+
+    <div>
+    
+	<div class="box" v-show="to_be_merged.length == 0">
+	    <form>
+	        <h4>Paikat</h4>
+	        Paikkojen lukumäärä: ${ places.length }
+	        <br>
+            <a href="#" 
+            	@click="list_top_level_places()">
+            	Top
+            	</a>
+	        <span v-for="(p,i) in path">
+	        	&gt;
+                <a href="#" 
+                	@click="list_subordinate_places(p, i)">
+                	${ p.pname }
+                	</a>
+	        </span>
+	        <p>
+	        <input type="button" :disabled="selected.length != 2" value="Vertaa" @click="merge()">
+    		<input type="checkbox" v-model="show_dups" @click="clear_selected">Näytä duplikaatit
+	        <div class=box2>
+		        <table border>
+		        	<thead>
+		        	<tr><th class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		            <th>Nimi</th>
+		        	</thead>
+		        	<tbody>
+		            <tr v-for="place in places"
+		            	v-show="!show_dups || dups.indexOf(place.pname) >= 0"
+		            > 
+		            	<td class="checkbox">
+		            		<input type="checkbox" v-model="selected" 
+		            		:value="place">
+		                <td><a href="#" 
+		                	@click="list_subordinate_places(place)">
+		                	${ place.pname }
+		                	</a>
+		                <td>${ place.type }
+		            </tr>
+		        	</tbody>
+		        </table>
+	        </div>
+	        <p>
+	    </form>
+	</div>
+
+    <input type="button" value="Create test data" @click="test_create">
+    <input type="button" value="Delete test data" @click="test_delete">
+
+	<div class="box1" v-show="to_be_merged.length > 0">	    
+	<template v-for="p in to_be_merged">
+		<div class="box3">
+		        <h2>${ p.pname } (${ p.uniq_id })</h2>
+		        <div class=box2>
+		        <h3>Ominaisuudet</h3>
+		        <table border>
+		            <tr><td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		                <td>Tyyppi<td>${ p.type }
+		            <tr><td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		                <td>Coord<td>${ p.coord }
+		            </tr>
+		        </table>
+		        <h3>Nimet</h3>
+		        <table>
+		        	<tr><th class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		        	<th>Nimi<th>Kieli<th>Järjestys
+		        	<tr v-for="pname in p.names">
+		                <td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		        		<td>${ pname.name } 
+		        		<td>${ pname.lang }
+		        		<td>${ pname.order }
+		        </table>
+		        <h3>Sisältää</h3>
+		        <ul>
+		        	<li v-for="subplace in p.surrounds">
+		        	${ subplace.name } (${ subplace.type })
+		        </ul>
+				</div>
+		</div>
+	</template>
+	<br>
+	<input type=button value="Yhdistä" @click="mergeplaces()">
+	<input type=button value="Sulje" @click="to_be_merged = []">
+	</div>
+		
+	</div>
+
+    <div class="modal" ng-if="loading"></div>
+
+</div>
+</body>
+
+<script>
+function log(msg) {
+    console.log(msg);
+}
+
+function removeFromArray(arr, value) { 
+    var index = arr.indexOf(value);
+    if (index > -1) {
+        arr.splice(index, 1);
+    }
+    return arr;
+}
+
+var app = new Vue({
+    el: '#myApp',
+    delimiters: ['${', '}'],
+    created: function() {
+        this.init();    
+    },
+    data: {
+        q: "Bea",
+        ptypes: ["Valtio","Kaupunki"],
+        lastquery:"Bea",
+        use:"firstname",
+        match:"startswith",
+        to_be_merged: [],
+        show_dups: false,
+        dups: [],
+        selected: [],
+        names: [],
+        places: [], // {id:1234,name:"Suomi",type:"Valtio"}
+        path: [],
+        parentname: "",
+    }, // data
+//        ,lat:60,long:24,surrounds:["Helsinki","Tampere"]},
+
+    methods: {
+        init: function() {
+            this.list_top_level_places();
+        },
+        list_top_level_places: function() {
+            this.path = [];
+            axios.get('/refplaces/api/list_top_level_places' ).
+                then(function(rsp, status) {
+                    app.places = rsp.data.places;
+                    app.compute_dups();
+                    app.selected = [];
+                    app.show_dups = false;
+                });
+        },
+        list_subordinate_places: function(parent, index) {
+        	if (index != undefined) {
+        		app.path.splice(index, app.path.length-index);
+    		}
+            axios.get('/refplaces/api/list_subordinate_places?parent_id=' + parent.uniq_id ).
+                then(function(rsp, status) {
+                    app.places = rsp.data.places;
+                    app.compute_dups();
+                    app.selected = [];
+                    app.path.push(parent);
+                    app.show_dups = false;
+                });
+        },
+        compute_dups: function() {
+        	var prevname;
+        	app.places.forEach( function(place) {
+        		if (place.pname == prevname) app.dups.push(prevname);
+        		prevname = place.pname;
+        	});
+    	},
+        select_type: function(nametype) {
+        	this.search(this.q);
+        	if (this.basename)
+        		this.fetch_namefamily(this.basename);
+    	},
+        merge: function() {
+        	this.to_be_merged = [];
+        	this.selected.forEach( function(p) {
+	            axios.get('/refplaces/api/getplace?id=' + p.uniq_id ).
+	                then(function(rsp, status) {
+	                	var p = rsp.data.place;
+			        	app.to_be_merged.push(p);
+	                });
+        	});
+    	},
+        mergeplaces: function() {
+        	var id1 = this.selected[0].uniq_id;
+        	var id2 = this.selected[1].uniq_id;
+            axios.get('/refplaces/api/mergeplaces?id1=' + id1 + "&id2=" +id2 ).
+                then(function(rsp, status) {
+		        	app.to_be_merged = [];
+		        	var p = app.selected[0];
+		            axios.get('/refplaces/api/getplace?id=' + p.uniq_id ).
+		                then(function(rsp, status) {
+		                	var p = rsp.data.place;
+				        	app.to_be_merged.push(p);
+		                });
+                });
+    	},
+    	clear_selected: function() {
+    		this.selected = [];
+    	},
+        test_create: function() {
+            axios.get('/refplaces/api/test_create' ).
+            then (function(rsp) {
+            	alert(rsp.data);
+        	});
+    	},
+        test_delete: function() {
+            axios.get('/refplaces/api/test_delete' ).
+            then (function(rsp) {
+            	alert(rsp.data);
+        	});
+    	},
+    } // methods
+
+});
+
+</script>
+
+{% endblock %}

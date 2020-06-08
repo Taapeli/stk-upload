@@ -42,13 +42,18 @@ from pe.neo4j.read_driver import Neo4jReadDriver
 from pe.db_reader import DBreader
 
 
-def stk_info_logger(msg:str):
+def stk_logger(context, msg:str):
     """ If browsing common material only, replase msg '->' with '-->'
     """
-    if current_user.is_showing_common() and (msg[:2] == '->'):
+    if not context:
         logger.info(msg)
-    else:
-        logger.info('=>' + msg[2:])
+        return
+    uc = context.use_case()
+    if (msg[:2] != '->') or (uc == ''):
+        logger.info(msg)
+        return
+    logger.info(f'-> {msg[2:]} uc={uc}')
+    return
 
 
 # Narrative start page
@@ -60,7 +65,7 @@ def scene():
     print(f"--- {user_session}")
     u_context = UserContext(user_session, current_user, request)
     u_context.set_scope_from_request(request, 'person_scope')
-    stk_info_logger(f"-> bp.scene.routes.scene '{u_context.scope[0]}'")
+    stk_logger(u_context, f"-> bp.scene.routes.scene '{u_context.scope[0]}'")
     return render_template('/start/index_scene.html')
 
 
@@ -85,7 +90,7 @@ def show_person_list(selection=None):
             persons = read_persons_with_events(keys, args)
 
         except Exception as e:
-            logger.error("iError {} in show_person_list".format(e))
+            logger.error(f"bp.scene.routes.show_person_list error {e}")
             flash("Valitse haettava nimi ja tyyppi", category='warning')
     else:
         # the code below is executed if the request method
@@ -97,7 +102,7 @@ def show_person_list(selection=None):
             theme=keys[0]
         else:
             keys = ('surname',)
-            theme='-'
+            theme=''
         #TODO: filter by user in the read method
         persons = read_persons_with_events(keys, args)
         
@@ -119,9 +124,9 @@ def show_person_list(selection=None):
         else:
             #print(f'Show {p.sortname} too_new={p.too_new}, owner {p.user}')
             persons_out.append(p)
-    stk_info_logger("-> bp.scene.routes.show_person_list"
-                    f" {u_context.owner_or_common()} {request.method} {theme}"
-                    f" n={len(persons_out)} hide={len(persons)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_person_list/{theme}-{request.method}"
+               f" {u_context.owner_or_common()}"
+               f" n={len(persons_out)} hide={len(persons)-len(persons_out)}")
 
     return render_template("/scene/persons.html", persons=persons_out,
                            user_context=u_context, num_hidden=hidden, 
@@ -143,7 +148,7 @@ def show_persons_by_refname(refname, opt=""):
     if current_user.is_authenticated:
         args['user'] = current_user.username
     persons = read_persons_with_events(keys, args=args)
-    stk_info_logger(f"-> bp.scene.routes.show_persons_by_refname n={len(persons)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_persons_by_refname n={len(persons)}")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            user_context=u_context, order=order, rule=keys)
 
@@ -160,7 +165,7 @@ def show_all_persons_list(opt=''):
 
         TODO Should have restriction by owner's UserProfile 
     """
-    logger.warning("#TODO: fix material selevtion or remove action show_all_persons_list")
+    logger.warning("#TODO: fix material selection or remove action show_all_persons_list")
 
     t0 = time.time()
     u_context = UserContext(user_session, current_user, request)
@@ -173,7 +178,7 @@ def show_all_persons_list(opt=''):
     if current_user.is_authenticated:
         args['user'] = current_user.username
     persons = read_persons_with_events(keys, args=args) #user=user, take_refnames=ref, order=order)
-    stk_info_logger("-> bp.scene.routes.show_all_persons_list")
+    stk_logger(u_context, "-> bp.scene.routes.show_all_persons_list")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            user_context=u_context, order=order,
                            rule=keys, elapsed=time.time()-t0)
@@ -214,12 +219,12 @@ def show_persons_all():
     elapsed = time.time() - t0
 
     hidden = f" hide={results.num_hidden}" if results.num_hidden > 0 else ""
-    stk_info_logger(f"-> bp.scene.routes.show_persons_all"
+    stk_logger(u_context, f"-> bp.scene.routes.show_persons_all"
                     f" n={len(results.items)}{hidden} e={elapsed:.3f}")
-    print(f"Got {len(results.items)} persons"
-          f" with {results.num_hidden} hidden"
-          f" and {results.error} errors"
-          f" in {elapsed:.3f}s")
+#     print(f"Got {len(results.items)} persons"
+#           f" with {len(results.items)-results.num_hidden} hidden"
+#           f" and {results.error} errors"
+#           f" in {elapsed:.3f}s")
     return render_template("/scene/persons_list.html", persons=results.items,
                            num_hidden=results.num_hidden,
                            user_context=u_context,
@@ -240,7 +245,7 @@ def obsolete_show_person_v2(uid=None):
 #         user=None
 #     # v2 Person page data
 #     person, objs, marks = get_a_person_for_display_apoc(uid, user)
-#     stk_info_logger("-> bp.scene.routes.show_v2")
+#     stk_logger(u_context, "-> bp.scene.routes.show_v2")
 #     if not person:
 #         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 #     #print (f"Current language {current_user.language}")
@@ -270,7 +275,7 @@ def show_person(uid=None):
     person, objs, jscode = get_person_full_data(uid, u_context.user, u_context.use_common())
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
-    stk_info_logger(f"-> bp.scene.routes.show_person n={len(objs)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
     #for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
@@ -284,31 +289,6 @@ def show_person(uid=None):
 # @bp.route('/scene/person=<int:pid>')
 # #     @login_required
 # def obsolete_show_person_v1(pid):
-#     """ Full homepage for a Person in database (v1 versio).
-# 
-#         The pid may be 1) an uuid or 2) an uniq_id
-#     """
-#     return 'Obsolete: show_person_v1<br><a href="javascript:history.back()">Go Back</a>'
-#     t0 = time.time()
-#     try:
-#         person, events, photos, citations, families = get_person_data_by_id(pid)
-#         for f in families:
-#             print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
-#             if f.mother:
-#                 print("  Mother: {} / {} s. {}".\
-#                       format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-#             if f.father:
-#                 print("  Father:  {} / {} s. {}".\
-#                       format(f.father.uniq_id, f.father.id, f.father.birth_date))
-#             for c in f.children:
-#                 print("    Child ({}): {} / {} s. {}".\
-#                       format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
-#     except KeyError as e:
-#         return redirect(url_for('virhesivu', code=2, text=str(e)))
-#     stk_info_logger("-> bp.scene.routes.show_person_v1")
-#     return render_template("/scene/person_v1.html", person=person, events=events, 
-#                            photos=photos, citations=citations, families=families, 
-#                            elapsed=time.time()-t0)
 
 
 @bp.route('/scene/event/<int:uniq_id>')
@@ -320,7 +300,8 @@ def show_event(uniq_id):
         Derived from bp.tools.routes.show_baptism_data()
     """
     event, persons = get_event_participants(uniq_id)
-    stk_info_logger(f"-> bp.scene.routes.show_event n={len(persons)}")
+    u_context = None
+    stk_logger(u_context, f"-> bp.scene.routes.show_event n={len(persons)}")
     return render_template("/scene/event.html",
                            event=event, persons=persons)
 
@@ -344,7 +325,7 @@ def show_families():
     # 'families' has Family objects
     families = Family_combo.get_families(o_context=u_context, opt=opt, limit=count)
 
-    stk_info_logger("-> bp.scene.routes.show_families/{opt} n={len(families)}")
+    stk_logger(u_context, "-> bp.scene.routes.show_families/{opt} n={len(families)}")
     return render_template("/scene/families.html", families=families, 
                            user_context=u_context, elapsed=time.time()-t0)
 
@@ -373,7 +354,7 @@ def show_family_page(uid=None):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    stk_info_logger("-> bp.scene.routes.show_family_page")
+    stk_logger(u_context, "-> bp.scene.routes.show_family_page")
     if results['status']:
         return redirect(url_for('virhesivu', code=1, text=results['statustext']))
     return render_template("/scene/family.html",  menuno=3, family=results['item'],
@@ -468,7 +449,7 @@ def json_get_person_families():
                         "statusText":f"Failed {e.__class__.__name__}"})
 
     t1 = time.time()-t0
-    stk_info_logger(f"-> bp.scene.routes.show_person_families_json n={len(results['items'])} e={t1:.3f}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_person_families_json n={len(results['items'])} e={t1:.3f}")
     response = {'records':res, "member":uuid, 
                 'statusText':f'Löytyi {len(res)} perhettä (TESTING)'}
     print(json.dumps(response))
@@ -500,7 +481,7 @@ def show_places():
     results = reader.get_list()
 
     elapsed = time.time() - t0
-    stk_info_logger(f"-> bp.scene.routes.show_places n={len(results['items'])} e={elapsed:.3f}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_places n={len(results['items'])} e={elapsed:.3f}")
     return render_template("/scene/places.html", places=results['items'], 
                            menuno=4, user_context=u_context, elapsed=elapsed)
 
@@ -517,11 +498,16 @@ def show_place(locid):
     
         results = reader.get_with_events(locid)
 
+        if results['status'] == Status.NOT_FOUND:
+            return redirect(url_for('virhesivu', code=1, text=f'Ei löytynyt yhtään'))
+        if results['status'] != Status.OK:
+            return redirect(url_for('virhesivu', code=1, text=f'Virhetilanne'))
+
     except KeyError as e:
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    stk_info_logger(f"-> bp.scene.routes.show_place n={len(results['events'])}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_place n={len(results['events'])}")
     return render_template("/scene/place_events.html", 
                            place=results['place'], 
                            pl_hierarchy=results['hierarchy'],
@@ -563,7 +549,8 @@ def show_sources(series=None):
             return redirect(url_for('virhesivu', code=1, text=f'Virhetilanne'))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    stk_info_logger(f"-> bp.scene.routes.show_sources/{u_context.series} n={len(results['items'])}")
+    series = u_context.series if u_context.series else "all"
+    stk_logger(u_context, f"-> bp.scene.routes.show_sources/{series} n={len(results['items'])}")
     return render_template("/scene/sources.html", sources=results['items'], 
                            user_context=u_context, elapsed=time.time()-t0)
 
@@ -592,7 +579,7 @@ def show_source_page(sourceid=None):
 
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    stk_info_logger(f"-> bp.scene.routes.show_source_page n={len(results['citations'])}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_source_page n={len(results['citations'])}")
 #     for c in results.citations:
 #         for i in c.citators:
 #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
@@ -618,7 +605,7 @@ def show_medias():
 
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    stk_info_logger(f"-> bp.scene.media.show_medias fw n={len(medias)}")
+    stk_logger(u_context, f"-> bp.scene.media.show_medias fw n={len(medias)}")
     return render_template("/scene/medias.html", medias=medias, 
                            user_context=u_context, elapsed=time.time()-t0)
 
@@ -639,7 +626,7 @@ def show_media(uid=None):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    stk_info_logger(f"-> bp.scene.routes.show_media n={len(medium.ref)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
     return render_template("/scene/media.html", media=medium, size=size,
                            user_context=u_context, menuno=6)
 

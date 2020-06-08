@@ -5,16 +5,21 @@ Created on 27.1.2020
 '''
 
 class Cypher_audit():
-    ' Cypher clauses for auditor'
+    """
+        Cypher clauses for auditor.
+    """
 
     copy_batch_to_audit = '''
-MATCH (u:UserProfile {username:'master'})
-MERGE (u) -[:HAS_LOADED]-> (root:Audit {id:$batch, user:$user, auditor:$oper})
-    SET root.timestamp = timestamp()
-WITH root
-    MATCH (b:Batch {id:$batch}) -[o:OWNS|OWNS_OTHER]-> (x)
-    where labels(x)[0] in $labels
-    WITH root, o, b, x //LIMIT $limit
-        DELETE o
-        CREATE (root) -[:PASSED]-> (x)
-        RETURN count(x)'''
+MATCH (u:UserProfile {username:'_Stk_'})
+MERGE (u) -[:HAS_ACCESS]-> (audit:Audit {id:$batch, user:$user, auditor:$oper})
+    SET audit.timestamp = timestamp()
+WITH audit
+    MATCH (b:Batch {id:$batch})
+    MERGE (b) -[:AFTER_AUDIT]-> (audit)
+    WITH audit
+        MATCH (b:Batch {id:$batch}) -[o:OWNS|OWNS_OTHER]-> (x)
+            WHERE labels(x)[0] in $labels
+        WITH audit, o, b, x //LIMIT $limit
+            DELETE o
+            CREATE (audit) -[:PASSED]-> (x)
+            RETURN count(x)'''

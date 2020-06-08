@@ -53,7 +53,7 @@ div#events div.scrollbox {
       {% endif %}
 
     <h3 class="sticky" title="▲ {{ _('Top') }}"><a href="#">
-        {{ place.name.name }} ({{ place.type|transl('lt') }})</a></h3>
+        {{ place.names[0].name }} ({{ place.type|transl('lt') }})</a></h3>
         <div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

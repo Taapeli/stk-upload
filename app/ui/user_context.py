@@ -94,9 +94,10 @@ class UserContext():
     class ChoicesOfView():
         """ Represents all possible combibations of selection by owner and batch. 
         """
-        COMMON = 1
-        OWN = 2
-        BATCH = 4   # Currently not implemented
+        COMMON = 1  # Approved data
+        OWN = 2     # Candidate data
+        BATCH = 4   # Candicate batch - currently not implemented
+        CODE_VALUES = ['', 'apr', 'can', 'apr,can', 'bat', 'can,bat']
 
         def __init__(self):
             ''' Initialise choise texts in user language '''
@@ -110,6 +111,12 @@ class UserContext():
             self.batch_name = None
 
         def get_valid_key(self, number):
+            # Return the key, if valid number, otherwise 0
+            if number in list(self.as_str.keys()):
+                return number
+            return 0
+
+        def get_valid_number(self, number):
             # Return the key, if valid number, otherwise 0
             if number in list(self.as_str.keys()):
                 return number
@@ -183,7 +190,8 @@ class UserContext():
         else:
             self.user = user_session.get('username', None)
 
-        """ Store the request parameters div=1&div2=2&cmp=1 as session variable user_context.
+        """ Stores the request parameters div=1&div2=2&cmp=1 as session
+            variable user_context.
             Returns owner context name if detected, otherwise False
         """
         new_selection = 0
@@ -203,16 +211,16 @@ class UserContext():
             # Selected document series for Sources
             self.series = request.args.get('series', None)
 
-            # Selected material for display
+            # Use case: Selected material for display
             #    div=1 -> show approved material
-            #    div2=2 -> show researcher's own data
+            #    div2=2 -> show researcher's candicate material
             new_selection = int(request.args.get('div', 0)) + int(request.args.get('div2', 0))
             if new_selection:
                 # Take also common data?
                 if request.args.get('cmp', ''): 
                     new_selection = new_selection | 1
                 # Got new material selection?
-                self.context = self.choices.get_valid_key(new_selection)
+                self.context = self.choices.get_valid_number(new_selection)
                 if self.context:
                     self.session['user_context'] = self.context
                     print(f"UserContext: Now user_context={self.context}")
@@ -238,6 +246,13 @@ class UserContext():
         # Return current owner choise as text 
         try:
             return self.choices.as_str[self.context]
+        except:
+            return ''
+
+    def use_case(self):
+        # Return current use case (owner choise) as code 
+        try:
+            return self.choices.CODE_VALUES[self.context]
         except:
             return ''
 

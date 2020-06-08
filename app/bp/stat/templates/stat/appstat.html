@@ -37,20 +37,26 @@
 	<fieldset>
 	  <table>
 	    <tr>
-	      <td>{% set msg = opts["msg"]
-		%} <label for="msg">{{ _("Methods:") }}</label>
-		    <input type="text" name="msg" size="6"
-	               title="{{ _("python regexp(s) to match messages/methods") }}"
-	               value="{{ msg }}">
+	      <td>{% set server = opts["server"]
+		%}<label for="server">Server:</label>
+		<select id="server" name="server"> {%
+		  for ser in opts["servers"] %}
+		      <option value={{ ser }} {% if server==ser
+			  %}selected{% endif
+			  %}>{{ ser }}</option>{% endfor %}
+		    </select>
 	      </td>
-	      <td>{% set users = opts["users"]
-		%} <label for="users">{{ _("Users:") }}</label>
-		    <input type="text" name="users" size="6"
-	               title="{{ _("python regexp(s) to match users") }}"
-			   value="{{ users }}">
+	      <td>{% set pkey = opts["pkey"]
+		%}<label for="pkey">Grouping:</label>
+		<select id="pkey" name="pkey"> {%
+		  for what in ["msg", "date", "user"] %}
+		      <option value={{ what }} {% if pkey==what
+			  %}selected{% endif
+			  %}>{{ what }}</option>{% endfor %}
+		</select>
 	      </td>
 	      <td>{% set period = opts["period"]
-		%}<label for="period">Aggregate:</label>
+		%}<label for="period">Aggregation:</label>
 		<select id="period" name="period"> {%
 		  for per in ["daily", "weekly", "monthly"] %}
 		      <option value={{ per }} {% if period==per
@@ -58,6 +64,7 @@
 			  %}>{{ per }}</option>{% endfor %}
 		    </select>
 	      </td>
+	      <td> </td>
 
 	      <td rowspan="2"> <input type="submit"
 				      value=" -- Go! --"
@@ -66,6 +73,18 @@
 	    </tr>
 
 	    <tr>
+	      <td>{% set msg = opts["msg"]
+		%} <label for="msg">{{ _("Methods:") }}</label>
+		    <input type="text" name="msg" size="6"
+	               title="{{ _("regexp(s) to match messages/methods") }}"
+	               value="{{ msg }}">
+	      </td>
+	      <td>{% set users = opts["users"]
+		%} <label for="users">{{ _("Users:") }}</label>
+		    <input type="text" name="users" size="6"
+	               title="{{ _("regexp(s) to match users") }}"
+			   value="{{ users }}">
+	      </td>
 	      <td>{% set topn = opts["topn"]
 		%} <label for="topn">{{ _("How many:") }}</label>
 	  	     <input type="text" name="topn" size="1"
@@ -77,15 +96,6 @@
 	               title="{{ _("Sort by count or by text?") }}"
 		       {% if opts["bycount"] %} checked {% endif %}
 		       id="bycount" value="x">
-	      </td>
-	      <td>{% set bywhat = opts["bywhat"]
-		%}<label for="bywhat">Primary sort:</label>
-		<select id="bywhat" name="bywhat"> {%
-		  for what in ["msg", "date", "user"] %}
-		      <option value={{ what }} {% if bywhat==what
-			  %}selected{% endif
-			  %}>by {{ what }}</option>{% endfor %}
-		</select>
 	      </td>
 	    </tr>
 	  </table>

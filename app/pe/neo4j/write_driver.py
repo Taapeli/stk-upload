@@ -4,6 +4,7 @@ Created on 23.3.2020
 @author: jm
 '''
 import logging 
+from bl.place import PlaceBl, PlaceName
 logger = logging.getLogger('stkserver')
 
 from .cypher_place import CypherPlace
@@ -97,3 +98,28 @@ class Neo4jWriteDriver(object):
             logger.error(f"Neo4jWriteDriver.media_save_w_handles {doing}: {err}")
 
 
+
+    def mergeplaces(self, id1, id2):
+        cypher_delete_namelinks = """
+            match (node) -[r:NAME_LANG]-> (pn)
+            where id(node) = $id
+            delete r
+        """
+        cypher_mergeplaces = """
+            match (p1:Place)        where id(p1) = $id1 
+            match (p2:Place)        where id(p2) = $id2
+            call apoc.refactor.mergeNodes([p1,p2],
+                {properties:'discard',mergeRels:true})
+            yield node
+            with node
+            match (node) -[r2:NAME]-> (pn2)
+            return node, collect(pn2) as names
+        """
+        self.tx.run(cypher_delete_namelinks,id=id1).single()
+        rec = self.tx.run(cypher_mergeplaces,id1=id1,id2=id2).single()
+        node = rec['node']
+        place = PlaceBl.from_node(node)
+        name_nodes = rec['names']
+        name_objects = [PlaceName.from_node(n) for n in name_nodes]
+        return place, name_objects
+    
