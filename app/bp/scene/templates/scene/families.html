@@ -5,13 +5,21 @@
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
 <script src="/static/infobox.js"></script>
-
+<style>
+td {
+    border-top: solid 1px lightgray;
+    background: white;
+}
+td.ColumnSpouse {
+    background: #f7f7f0;
+}
+</style>
 {% set cnt = families|count %}
 {% set next = user_context.scope %}
 
 <div id="startdiv">
 	<h2>{{ _('List of Families') }}</h2>
-    <div>{{ macro.select_dataset() }}</div>
+    <div>{{ macro.show_use_case() }}</div>
 </div>
 
 {{ macro.menu(3) }}
@@ -120,11 +128,11 @@
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
-            <td>{% if f.father.uuid %} <!-- &#9794; -->
+            <td class="ColumnSpouse">{% if f.father.uuid %} <!-- &#9794; -->
 				{{ macro.person_names_anon(f.father, f.father.names[0:1]) }}
             {% else %} –
             {% endif %}</td>
-            <td>{% if f.mother.uuid %} <!-- &#9792; -->
+            <td class="ColumnSpouse">{% if f.mother.uuid %} <!-- &#9792; -->
 				{{ macro.person_names_anon(f.mother, f.mother.names[0:1]) }}
             {% else %} –
             {% endif %}</td>
