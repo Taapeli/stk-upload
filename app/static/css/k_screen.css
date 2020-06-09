@@ -77,10 +77,11 @@ body > div {
 #startdiv h2 {margin-bottom: 0;}
 /* Selected user case (material), right from h2 title */
 #startdiv div {
+	font-size: 90%;
 	color: gray;
     background-color: #f5f5f5;
     padding: 1px 2px;
-	position: fixed;
+	position: absolute;
 	right: .5em;
     top: 4.5em;
 }
@@ -442,7 +443,7 @@ div#alphanav ul li {
     float: left;
     /* font-size: larger; / JMä */
     font-weight: bold;
-    background-color: lightgray;
+    background-color: #f3f3f3;
 }
 /* div#alphanav ul li:after {
     content: " |";

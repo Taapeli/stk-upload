@@ -30,7 +30,12 @@ class SetupCypher():
     user_check_existence = """
     MATCH  (user:User) WHERE user.username = $username RETURN COUNT(user)
     """
-        
+
+    profile_check_existence = """
+    MATCH  (u:UserProfile {username:$username})
+    RETURN COUNT(u)
+    """
+
     email_val = """
     MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN COUNT(a)
     """
@@ -39,17 +44,17 @@ class SetupCypher():
     CREATE CONSTRAINT ON (user:User) 
         ASSERT (user.email) IS UNIQUE;
     """
- 
+
     set_user_constraint2 = """
     CREATE CONSTRAINT ON (user:User) 
         ASSERT (user.username) IS UNIQUE;
     """  
-     
+
     set_allowed_email_constraint = """ 
     CREATE CONSTRAINT ON (email:Allowed_email) 
     ASSERT email.allowed_email IS UNIQUE
     """  
-    
+
     master_create = """
     MATCH  (role:Role) WHERE role.name = 'master'
     CREATE (user:User 
@@ -68,8 +73,12 @@ class SetupCypher():
         login_count : $login_count} )           
         -[:HAS_ROLE]->(role)
     """ 
-    
-    
+
+    single_profile_create = """
+    CREATE (u:UserProfile)
+        SET u = $attr
+    """ 
+
     guest_create = """
     MATCH  (role:Role) WHERE role.name = 'guest' 
     CREATE (user:User 

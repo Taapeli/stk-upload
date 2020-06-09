@@ -5,17 +5,31 @@
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
 <script src="/static/infobox.js"></script>
-
+<style>
+div.man-man, div.wife-wife { 
+    border-left: solid 3px blue; 
+    padding-left: 3px;
+}
+div.man-wife, div.wife-man {
+    padding-left: 6px;
+}
+div.wife-man a.inlink, div.man-wife a.inlink {
+    color:darkgray;
+}
+th, td {width:30%;}
+th span.man-man, th span.wife-wife { color: #020299;}
+</style>
 {% set cnt = families|count %}
 {% set next = user_context.scope %}
 
 <div id="startdiv">
 	<h2>{{ _('List of Families') }}</h2>
-    <div>{{ macro.select_dataset() }}</div>
+    <div>{{ macro.show_use_case() }}</div>
 </div>
 
 {{ macro.menu(3) }}
-    <div class="content" id="Families">
+    <div class="content" id="Individuals">
+
         <div id="summaryarea">
             <div class="flex-container">
                <div>
@@ -51,6 +65,7 @@
 	               </form>
 	           </div>
             </div>
+
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
                 <ul  class='flashes'>
@@ -100,15 +115,13 @@
             </ul>
         </div>
 {% endif %}
-    </div>
-
-<section id="lista">
 
 {% if cnt %}
-    <table id="families" width="100%">
+    <table class="IndividualList">
         <tr><th>{{ _("family") }}</th>
-            <th>{{ _("Man") }}</th>
-            <th>{{ _("Wife") }}</th>
+            <th><span class="man-{{user_context.order}}">{{ _("Man") }}</span> / 
+               <span class="wife-{{user_context.order}}">{{ _("Wife") }}</span>
+            </th>
             <th>{{ _("Children") }}</th>
         </tr>
     {% for f in families %}
@@ -120,14 +133,19 @@
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
-            <td>{% if f.father.uuid %} <!-- &#9794; -->
+
+            <td class="ColumnSpouse">
+                <div class="man-{{user_context.order}}">&#9794;
+            {% if f.father.uuid %}
 				{{ macro.person_names_anon(f.father, f.father.names[0:1]) }}
-            {% else %} –
-            {% endif %}</td>
-            <td>{% if f.mother.uuid %} <!-- &#9792; -->
+            {% endif -%}
+                </div>
+                <div class="wife-{{user_context.order}}">&#9792;
+            {% if f.mother.uuid %}
 				{{ macro.person_names_anon(f.mother, f.mother.names[0:1]) }}
-            {% else %} –
-            {% endif %}</td>
+            {% endif -%}
+                </div>
+            </td>
 
             <td><small>{% if f.no_of_children %}
                 {% if f.num_hidden_children > 0 %}
@@ -188,6 +206,6 @@
     </div>
 {% endif %}
 
-</section>
+</div>
 
 {% endblock %}
