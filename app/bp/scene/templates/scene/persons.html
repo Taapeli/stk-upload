@@ -17,7 +17,7 @@ div#description_box p {
 	{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
 	{% else %}<h2>{{ _('Persons') }}</h2>
 	{% endif %}
-    <div>{{ macro.select_dataset() }}</div>
+    <div>{{ macro.show_use_case() }}</div>
 </div>
 
 {{ macro.menu(menuno) }}

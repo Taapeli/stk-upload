@@ -43,7 +43,7 @@ from pe.db_reader import DBreader
 
 
 def stk_logger(context, msg:str):
-    """ If browsing common material only, replase msg '->' with '-->'
+    """ Emit logger info message with Use Case mark uc=<code> .
     """
     if not context:
         logger.info(msg)
@@ -59,14 +59,18 @@ def stk_logger(context, msg:str):
 # Narrative start page
 
 @bp.route('/scene',  methods=['GET', 'POST'])
-def scene():
-    """ Home page for scene narrative pages ('kertova') for anonymous. """    
-    print(f"--- {request}")
-    print(f"--- {user_session}")
-    u_context = UserContext(user_session, current_user, request)
-    u_context.set_scope_from_request(request, 'person_scope')
-    stk_logger(u_context, f"-> bp.scene.routes.scene '{u_context.scope[0]}'")
-    return render_template('/start/index_scene.html')
+def obsolete_scene():
+    """ Home page for scene narrative pages ('kertova') for anonymous. 
+    
+        NOT IN USE!?
+    """
+    return 'Obsolete: scene<br><a href="javascript:history.back()">Go Back</a>'
+#     print(f"--- {request}")
+#     print(f"--- {user_session}")
+#     u_context = UserContext(user_session, current_user, request)
+#     u_context.set_scope_from_request(request, 'person_scope')
+#     stk_logger(u_context, f"-> bp.scene.routes.scene '{u_context.scope[0]}'")
+#     return render_template('/start/index_scene.html')
 
 
 # ------------------------- Menu 1: Person search ------------------------------
@@ -319,13 +323,14 @@ def show_families():
     # Which range of data is shown
     u_context.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
+    u_context.order = 'man' if opt == 'father' else 'wife'
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
     # 'families' has Family objects
     families = Family_combo.get_families(o_context=u_context, opt=opt, limit=count)
 
-    stk_logger(u_context, "-> bp.scene.routes.show_families/{opt} n={len(families)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_families/{opt} n={len(families)}")
     return render_template("/scene/families.html", families=families, 
                            user_context=u_context, elapsed=time.time()-t0)
 

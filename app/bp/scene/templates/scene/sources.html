@@ -13,7 +13,7 @@ td ul li p { margin: 0 0 0.3em 0; }
 
 <div id="startdiv">
     <h2>{{ _('List of Sources') }}{% if user_context.series %} ({{ _(user_context.series) }}){% endif %}</h2>
-    <div>{{ macro.select_dataset() }}</div>
+    <div>{{ macro.show_use_case() }}</div>
 </div>
 
 {{ macro.menu(5) }}
