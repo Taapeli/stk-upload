@@ -27,8 +27,6 @@
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">
                         {{macro.all_obj_ids(event)}} 
-                        <a href="/lista/baptism_data/{{event.uniq_id}}" 
-                           style="color:pink;font-size: 70%;">(vanhalle sivulle)</a>
                     </td>
 {#                  {% if event.citation_ref %}
                     <td class="ColumnValue" rowspan="2"><small>{{ _("Source") }}:
@@ -63,18 +61,21 @@
                 <thead>
                     <tr>
                         <th class="ColumnEvent">{{ _("Role") }}</th>
-                        <th class="ColumnSources">{{ _("Person") }}</th>
+                        <th class="ColumnSources">{{ _("Member") }}</th>
                     </tr>
                 </thead>
                 <tbody>
-	{% for person in persons %}
+	{% for p in participants %}
 			<tr>
-	    		<td>{% if person.role == "Primary" %}
+	    		<td>{% if p.role == "Primary" %}
 	    		    <span class="myself">&nbsp;{{ _('Self') }}&nbsp;</span>
 	    		{% else %}
-	    		    {{person.role|transl('role')}}
+	    		    {{p.role|transl('role')}}
 	    		{% endif %}</td>
-                <td>{{ macro.person_anon(person, None) }}</td>
+                <td>{% if p.rel_type %} {{ macro.family_name(p) }}
+                    {% else %} {{ macro.person_anon(p, None) }}
+                    {% endif %}
+                </td>
 			</tr>
 	{% endfor %}
 </table>

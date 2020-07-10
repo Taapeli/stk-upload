@@ -775,7 +775,7 @@ def get_person_data_by_id(pid):
 
 def get_event_participants(uniq_id):
     '''
-        Get event data and participants.
+        Get event data and participants: Persons and Families.
     '''
 
     e = Event_combo()
@@ -785,11 +785,11 @@ def get_event_participants(uniq_id):
     if e.place_ref:
         e.place = Place_combo.get_w_notes(e.place_ref[0])
 
-    persons = []
+    parts = []
     result = e.get_participants()
     for record in result:
         # <Record role='Clergy' 
-        #    person=<Node id=344292 labels={'Person'} 
+        #    p=<Node id=344292 labels={'Person'} 
         #        properties={'sortname': 'Hougberg#Svensson#Carl Adolf Hougberg', 
         #            'datetype': 19, 'confidence': '', 'sex': 1, 'change': 1541582091, 
         #            'id': 'I0442', 'date2': 1884352, 'date1': 1805441, 
@@ -799,17 +799,21 @@ def get_event_participants(uniq_id):
         #            'suffix': 'Svensson', 'prefix': '', 'surname': 'Hougberg', 
         #            'order': 0}
         # >  >
-        person_node = record['person']
+        node = record['p']
         name_node = record['name']
 
-        p = Person_combo.from_node(person_node)
+        if 'Person' in node.labels:
+            p = Person_combo.from_node(node)
+        elif 'Family' in node.labels:
+            p = Family_combo.from_node(node)
         p.role = record['role']
-        name = Name.from_node(name_node)
-        p.names.append(name)
+        if name_node:
+            name = Name.from_node(name_node)
+            p.names.append(name)
 
-        persons.append(p)
+        parts.append(p)
 
-    return (e, persons)
+    return (e, parts)
 
 
 def get_baptism_data(uniq_id):
