@@ -415,10 +415,13 @@ class PersonReader():
                     traceback.print_exc()
                     raise NotImplementedError(f'No rule for ({x_label}) --> ({y_label})')            
                 #print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
-                x.media_ref.sort(key=lambda x: x[2])
+                if hasattr(x, 'media_ref'):
+                    x.media_ref.sort(key=lambda x: x[2])
 
         except Exception as e:
-            print(f"Could not read places for person {self.person.uuid} objects {self.objs}: {e}")
+            traceback.print_exc()
+            print(f"Could not read 'Citations, Notes, Medias': {e}")
+            print(f"... for Person {self.person.uuid} objects {self.objs}: {e}")
         return new_objs
 
     def remove_privacy_limit_from_family(self, family):

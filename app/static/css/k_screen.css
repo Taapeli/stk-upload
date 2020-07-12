@@ -145,6 +145,8 @@ img#logo {
 .id { color: sienna; font-size: 80%; text-align: right; 
     font-family: serif
 }
+.changetime { color: gray; font-size: 80%;}
+
 .idno { color: gray; text-align:center; 
     font-family: monospace
 }

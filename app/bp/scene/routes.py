@@ -303,11 +303,11 @@ def show_event(uniq_id):
         
         Derived from bp.tools.routes.show_baptism_data()
     """
-    event, persons = get_event_participants(uniq_id)
+    event, participants = get_event_participants(uniq_id)
     u_context = None
-    stk_logger(u_context, f"-> bp.scene.routes.show_event n={len(persons)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_event n={len(participants)}")
     return render_template("/scene/event.html",
-                           event=event, persons=persons)
+                           event=event, participants=participants)
 
 
 # ------------------------------ Menu 3: Families --------------------------------
