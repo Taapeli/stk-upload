@@ -366,10 +366,10 @@ return e as event,
     collect(distinct id(n)) as note_ref'''
 
     get_participants_uniq_id = """
-MATCH (event:Event) <-[r:EVENT]- (p:Person) 
+MATCH (event:Event) <-[r:EVENT]- (p) 
     WHERE ID(event)=$pid
 OPTIONAL MATCH (p) -[:NAME]-> (n:Name {order:0})
-RETURN  r.role AS role, p AS person, n AS name
+RETURN  r.role AS role, p, n AS name
     ORDER BY role"""
 
 

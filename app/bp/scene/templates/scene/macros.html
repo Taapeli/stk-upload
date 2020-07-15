@@ -82,7 +82,7 @@
 {% macro show_use_case(no_change) -%}
     {#  Show and change data: researcher data or approved common data. #}
     {#  call show_use_case(no_change=true) if you want to deny change. #}
-    {% if not config['DEMO'] %}{{ user_context.owner_str() }}
+    {% if user_context and not config['DEMO'] %}{{ user_context.owner_str() }}
        {% if user_context.user %}
            {% if user_context.context == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
            {%endif%}
@@ -97,10 +97,13 @@
 # 2. Data display
 
 {% macro all_obj_ids(obj) -%}
-    {#  Formats object keys for display. #}
+    {#  Formats object keys and timestamp for display. #}
     <tt title="{{ _('UUID key') }}">{{obj.uuid_short()}}</tt> /
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
+    {% if obj.change %}
+    <span class="changetime" title="{{ _("latest change time") }}">[{{ _("edited") }} {{obj.change_str()}}]</span>
+    {% endif -%}
 {%- endmacro %}
 
 

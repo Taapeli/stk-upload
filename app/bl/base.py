@@ -115,6 +115,14 @@ class NodeObject():
         else:
             return ""
 
+    def change_str(self):
+        ''' Display change time like '28.03.2020 17:34:58'. '''
+        from datetime import datetime
+        try:
+            return datetime.fromtimestamp(self.change).strftime("%d.%m.%Y %H:%M:%S")
+        except TypeError:
+            return ''
+
     def uuid_str(self):
         ''' Display uuid in short form, or show self.uniq_id is missing. '''
         if self.uuid:

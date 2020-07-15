@@ -210,15 +210,15 @@ def compare_person_page(cond):
 #         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
-@bp.route('/lista/baptism_data/<int:uniq_id>')
-def show_baptism_data(uniq_id):
-    """ Table of a baptism Event selected by id(Event)
-        kastetapahtuman tietojen näyttäminen ruudulla 
-    """
-    event, persons = datareader.get_baptism_data(uniq_id)
-    logger.info(f"-> bp.tools.routes.show_baptism_data")
-    return render_template("/tools/table_baptism_data.html",
-                           event=event, persons=persons)
+# @bp.route('/lista/baptism_data/<int:uniq_id>')
+# def show_baptism_data(uniq_id):
+#     """ Table of a baptism Event selected by id(Event)
+#         kastetapahtuman tietojen näyttäminen ruudulla 
+#     """
+#     event, persons = datareader.get_baptism_data(uniq_id)
+#     logger.info(f"-> bp.tools.routes.show_baptism_data")
+#     return render_template("/tools/table_baptism_data.html",
+#                            event=event, persons=persons)
 
 
 @bp.route('/lista/family_data/<string:uniq_id>')
