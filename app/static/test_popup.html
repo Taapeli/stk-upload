@@ -136,8 +136,8 @@ div.pop-box ul {
     </span>
 </div>
 
-  <div id="pop-window" v-if="families.length > 0">
-
+<!--  <div id="pop-window" v-if="look | families.length > 0" v-on:click="look = !look"> -->
+  <div id="pop-window" v-bind:class="{ show: isShow }" v-if="families.length > 0" v-on:click="isShow != isShow">
     <div id="pop-buttons" v-if="families.length > 1">
       <button class="button"
             v-on:mouseover="changeFamily(index)"
@@ -145,7 +145,7 @@ div.pop-box ul {
         ${index+1}. ${f.role}</button>
     </div>
 
-    <div class="pop-container" v-on:click="away('Close action?')">
+    <div class="pop-container">
       <div class="pop-box" v-if="currentId">
           <p><a v-bind:href="current.href" title="See family" class="inlink">
               Perheessä ${current.role}</a>  ${current.rel_type} ${current.dates}

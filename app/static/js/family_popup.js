@@ -3,14 +3,19 @@
  */
 
 function showPopup(id) {
-	// When the user clicks on div, open the popup
-	// Open a popup window
+	// When the user clicks on div, open the popup window
     var popup = document.getElementById("popup");
-    console.log("family for person "+id);
+    console.log("showPopup for person "+id);
     popup.classList.toggle("show");
     //TODO: Find person families first
     vm.getFamilies(id);
   }
+function away() {
+	// When the user clicks on div, close the popup windoe
+    var popup = document.getElementById("popup");
+    console.log("showPopup close");
+    popup.classList.toggle("show");
+}
 
 function parseSortname(name) {
 	// Returns [surname,firstname,patronyme]
@@ -55,7 +60,8 @@ var vm = new Vue({
 	     uuid: '?',
 	     families: [],
 	     currentId: 0,
-	     status: ''
+	     status: '',
+	     isShow: false
 	   },
 	   computed: {
 	  		 current: function () {
@@ -72,6 +78,15 @@ var vm = new Vue({
 	           console.log("changeFamily: katsotaan "+vm.families[index].id);
 	           vm.currentId = index+1;
 			},
+
+//			away() {
+//				// When the user clicks on div, close the popup windoe
+//			    var popup = document.getElementById("popup");
+//			    console.log("away hidden = "+popup.hidden);
+//			    popup.hidden = true;
+//			    console.log("away hidden = "+popup.hidden);
+//			    //popup.classList.toggle("show");
+//			},
 
 		   getFamilies(q_uuid) {
 			   // Asks for data for all families of given person
