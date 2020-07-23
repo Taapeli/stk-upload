@@ -1,7 +1,8 @@
 bcrypt==3.1.6
 Flask==1.1.1
-Flask-BabelEx==0.9.3
+Flask-BabelEx==0.9.4
 Flask-Security==3.0.0
 neo4j==1.7.2
 treelib==1.5.5
 pillow>=6.2.0
+email_validator
