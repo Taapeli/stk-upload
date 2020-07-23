@@ -3,7 +3,7 @@
 from datetime import datetime
 import logging
 logger = logging.getLogger('stkserver') 
-from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
+from neo4j.exceptions import CypherSyntaxError, ConstraintError
 from flask_security import utils as sec_utils
 
 import shareds
@@ -50,11 +50,9 @@ def create_role(tx, role):
 #                print(role['name'])
     except CypherSyntaxError as cex:
         logger.error('CypherSyntaxError in create_role ' + cex.message)
-    except CypherError as cex:
-        logger.error('CypherError in create_role ' + cex.message)
-    except ConstraintError as cex:
-        logger.error('ConstraintError in create_role ' + cex.message)
-#            print(role['name'])
+    except Exception as e:
+        logging.error(f'database.adminDB.create_role: {e.__class__.__name__}, {e}')            
+        raise      
 
 def create_roles():
     with shareds.driver.session() as session:
@@ -62,15 +60,10 @@ def create_roles():
             try:    
                 session.write_transaction(create_role, role)
                 print(role['name'])
-            except CypherSyntaxError as cex:
-                print('Session ', cex)
+            except Exception as e:
+                logging.error(f'database.adminDB.create_roles: {e.__class__.__name__}, {e}')            
                 continue
-            except CypherError as cex:
-                print('Session ', cex)
-                continue
-            except ConstraintError as cex:
-                print('Session ', cex)
-                continue
+
         print('Roles initialized')
 
 
@@ -112,14 +105,8 @@ def create_master_user():
     with shareds.driver.session() as session: 
         try:
             session.run(SetupCypher.master_create, master_user) 
-        except CypherSyntaxError as cex:
-            logger.error('CypherSyntaxError in create_master ' + cex.message)
-            return
-        except CypherError as cex:
-            logger.error('CypherError in create_master ' + cex.message)
-            return
-        except ConstraintError as cex:
-            logger.error('ConstraintError in create_master ' + cex.message)
+        except Exception as e:
+            logging.error(f'database.adminDB.create_master_user: {e.__class__.__name__}, {e}')            
             return
     logger.info('Master user account created')    
 
@@ -171,11 +158,8 @@ def create_role_constraints():
     with shareds.driver.session() as session: 
         try:
             session.run(SetupCypher.set_role_constraint)
-        except CypherError as cex:
-            logger.error('CypherError in create_role_constraints: ' + cex.message)
-            return
-        except ConstraintError as cex:
-            logger.error('ConstraintError in create_role_constraints: ' + cex.message)
+        except Exception as e:
+            logging.error(f'database.adminDB.create_role_constraints: {e.__class__.__name__}, {e}')            
             return
     logger.info('Role constraints created')
 
@@ -185,14 +169,8 @@ def create_user_constraints():
         try:  
             session.run(SetupCypher.set_user_constraint1)
             session.run(SetupCypher.set_user_constraint2)  
-        except CypherSyntaxError as cex:
-            logger.error('ConstraintError in create_user_constraints: ' + cex.message)
-            return
-        except CypherError as cex:
-            logger.error('ConstraintError in create_user_constraints: ' + cex.message)
-            return
-        except ConstraintError as cex:
-            logger.error('ConstraintError in create_user_constraints: ' + cex.message)
+        except Exception as e:
+            logging.error(f'database.adminDB.create_user_constraints: {e.__class__.__name__}, {e}')            
             return
     logger.info('User constraints created')
     
@@ -201,14 +179,8 @@ def create_allowed_email_constraints():
     with shareds.driver.session() as session: 
         try:  
             session.run(SetupCypher.set_allowed_email_constraint)  
-        except CypherSyntaxError as cex:
-            logger.error('ConstraintError in create_allowed_email_constraints: ' + cex.message)
-            return
-        except CypherError as cex:
-            logger.error('ConstraintError in create_allowed_email_constraints: ' + cex.message)
-            return
-        except ConstraintError as cex:
-            logger.error('ConstraintError in create_allowed_email_constraints: ' + cex.message)
+        except Exception as e:
+            logging.error(f'database.adminDB.create_allowed_email_constraints: {e.__class__.__name__}, {e}')            
             return
     logger.info('Allowed email constraints created')
 
