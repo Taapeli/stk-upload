@@ -215,4 +215,33 @@
     <ownedEnd xmi:type="uml:Property" xmi:id="_m0PfocwuEeqb_NSDAKCaYA" name="researcher" type="_cAMZYMarEeq_9bVfBcbTkw" association="_m0ORgMwuEeqb_NSDAKCaYA"/>
     <ownedEnd xmi:type="uml:Property" xmi:id="_m0PfoswuEeqb_NSDAKCaYA" name="request_audit_of_candidate_records" type="_tx6HQMwsEeqb_NSDAKCaYA" association="_m0ORgMwuEeqb_NSDAKCaYA"/>
   </packagedElement>
+  <packagedElement xmi:type="uml:StateMachine" xmi:id="_McfQ0M2DEeqiLrd3Gs9yMw" name="record set state">
+    <connectionPoint xmi:type="uml:Pseudostate" xmi:id="_blHswM2XEeqiLrd3Gs9yMw" name="create candidate records" kind="entryPoint"/>
+    <connectionPoint xmi:type="uml:Pseudostate" xmi:id="_mJPWUM2YEeqiLrd3Gs9yMw" name="delete candidate records" kind="exitPoint"/>
+    <region xmi:type="uml:Region" xmi:id="_Qm6C0M2DEeqiLrd3Gs9yMw" name="record set lifespan">
+      <transition xmi:type="uml:Transition" xmi:id="_nUwm4M2bEeqiLrd3Gs9yMw" source="_blHswM2XEeqiLrd3Gs9yMw" target="_6uweQM2XEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_oCLtkM2bEeqiLrd3Gs9yMw" source="_6uweQM2XEeqiLrd3Gs9yMw" target="_mJPWUM2YEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_p6JUwM2bEeqiLrd3Gs9yMw" source="_wArVgM2YEeqiLrd3Gs9yMw" target="_mJPWUM2YEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_q17AgM2bEeqiLrd3Gs9yMw" source="_yVtTMM2YEeqiLrd3Gs9yMw" target="_mJPWUM2YEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_cUfh8M2cEeqiLrd3Gs9yMw" source="_6uweQM2XEeqiLrd3Gs9yMw" target="_7qcDYM2XEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_de44gM2cEeqiLrd3Gs9yMw" source="_7qcDYM2XEeqiLrd3Gs9yMw" target="_clnrAM2YEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_eX9OgM2cEeqiLrd3Gs9yMw" source="_clnrAM2YEeqiLrd3Gs9yMw" target="_wArVgM2YEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_fAX5YM2cEeqiLrd3Gs9yMw" source="_clnrAM2YEeqiLrd3Gs9yMw" target="_yVtTMM2YEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_fmxyEM2cEeqiLrd3Gs9yMw" source="_clnrAM2YEeqiLrd3Gs9yMw" target="_3irHUM2YEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_g1Le4M2cEeqiLrd3Gs9yMw" source="_3irHUM2YEeqiLrd3Gs9yMw" target="_CmGYgM2ZEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_hgrS8M2cEeqiLrd3Gs9yMw" source="_CmGYgM2ZEeqiLrd3Gs9yMw" target="_ESLf0M2ZEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_iAXfoM2cEeqiLrd3Gs9yMw" source="_ESLf0M2ZEeqiLrd3Gs9yMw" target="_6dujMM2YEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_i9Sa4M2cEeqiLrd3Gs9yMw" source="_6dujMM2YEeqiLrd3Gs9yMw" target="_jUeTMM2ZEeqiLrd3Gs9yMw"/>
+      <subvertex xmi:type="uml:Pseudostate" xmi:id="_6uweQM2XEeqiLrd3Gs9yMw" name="candidate"/>
+      <subvertex xmi:type="uml:State" xmi:id="_7qcDYM2XEeqiLrd3Gs9yMw" name="audit_requested"/>
+      <subvertex xmi:type="uml:State" xmi:id="_clnrAM2YEeqiLrd3Gs9yMw" name="in audit"/>
+      <subvertex xmi:type="uml:FinalState" xmi:id="_wArVgM2YEeqiLrd3Gs9yMw" name="rejected"/>
+      <subvertex xmi:type="uml:FinalState" xmi:id="_yVtTMM2YEeqiLrd3Gs9yMw" name="changes required"/>
+      <subvertex xmi:type="uml:State" xmi:id="_3irHUM2YEeqiLrd3Gs9yMw" name="accepted"/>
+      <subvertex xmi:type="uml:State" xmi:id="_6dujMM2YEeqiLrd3Gs9yMw" name="merged"/>
+      <subvertex xmi:type="uml:State" xmi:id="_CmGYgM2ZEeqiLrd3Gs9yMw" name="merge required"/>
+      <subvertex xmi:type="uml:State" xmi:id="_ESLf0M2ZEeqiLrd3Gs9yMw" name="in merge"/>
+      <subvertex xmi:type="uml:FinalState" xmi:id="_jUeTMM2ZEeqiLrd3Gs9yMw" name="reference"/>
+    </region>
+  </packagedElement>
 </uml:Model>
