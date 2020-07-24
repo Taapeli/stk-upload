@@ -185,42 +185,53 @@ def create_allowed_email_constraints():
     logger.info('Allowed email constraints created')
 
 
-def create_lock_constraint():
-    # can be created multiple times!
-    shareds.driver.session().run( 
-        "create constraint on (l:Lock) assert l.id is unique"
-    )
-
-def create_uuid_constraints():
-    # constraints can be created multiple times!
+def check_contraints(needed:dict):
+    # Check which UNIQUE contraints are missing from given nodes and parameters.
+    # Returns a set of missing constraints
+    import re
+    p = re.compile(":(\S*)(\s.*\.)(\w+)")
+    #print(needed)
     with shareds.driver.session() as session:
-        session.run( 
-            "create constraint on (n:Media) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Event) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Family) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Note) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Person) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Citation) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Source) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Repository) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Place) assert n.uuid is unique"
-        )
+        result = session.run("CALL db.constraints")
+        for record in result:
+            # "CONSTRAINT ON ( user:User ) ASSERT (user.email) IS UNIQUE"
+            desc = record[1]
+            x = p.search(desc)
+            label = x.group(1)
+            prop = x.group(3)
+            if label in needed.keys():
+                if prop in needed[label]:
+                    needed[label].remove(prop)
+                    print(f'constraint {label}.{prop} ok')
+    #print(f'Missing contraints: {needed}')
+    for label,props in needed.items():
+        for prop in props:
+            create_unique_constraint(label, prop)
+    return
+
+def create_lock_and_constraint():
+    # can be created multiple times!
+    with shareds.driver.session() as session:
+        record = session.run("match (n:Lock) return count(*) as exists limit 1").single()
+        if record[0] == 0:
+            # Create first Lock node and contraint
+            session.run("merge (lock:Lock {id:$lock_id}) set lock.locked = true", 
+                        lock_id="batch_id")
+            session.run("create constraint on (l:Lock) assert l.id is unique")
+            print(' - One Lock created')
+
+
+def create_unique_constraint(label, prop):
+    ' Create given contraint for given label and property.'
+    with shareds.driver.session() as session:
+        query = f"create constraint on (n:{label}) assert n.{prop} is unique"
+        try:  
+            session.run(query)  
+        except Exception as e:
+            logger.error(f'database.adminDB.create_unique_constraint: {e.__class__.__name__} {e}' )
+            raise
+        print(f'Unique contraint for {label}.{prop} created')
+    return
 
 def set_confirmed_at():
     """
@@ -266,9 +277,27 @@ def initialize_db():
 
     if not profile_exists('_Stk_'):
         create_single_profile('_Stk_')
+        # Create Lock, too
+        create_lock_and_constraint()
 
-    create_lock_constraint()
-    create_uuid_constraints()
+    needed_constraints = {
+        "Allowed_email":{"allowed_email"},
+        "Citation":{"uuid"},
+        "Event":{"uuid"},
+        "Family":{"uuid"},
+        "Media":{"uuid"},
+        "Note":{"uuid"},
+        "Person":{"uuid"},
+        "Place":{"uuid"},
+        "Repository":{"uuid"},
+        "Role":{"name"},
+        "Source":{"uuid"},
+        "User":{"email","username"}
+    }
+    check_contraints(needed_constraints)
+    return  # ============================= test only
+
+    #create_uuid_constraints()
     #set_confirmed_at()
 
 
