@@ -188,8 +188,8 @@ class Refname:
                                      b_name=self.refname)
     
                 logging.debug("Created {} nodes and {} relations for {}-->{}".format(\
-                        result.summary().counters.nodes_created, 
-                        result.summary().counters.relationships_created, 
+                        result.consume().counters.nodes_created, 
+                        result.consume().counters.relationships_created, 
                         self.name, self.refname))
 #                     for record in result:
 #                         a_oid = record["aid"]
@@ -211,7 +211,7 @@ class Refname:
                                      a_name=self.name, a_attr=a_attr)
 
                 logging.debug("Created {} node for {}".format(\
-                        result.summary().counters.nodes_created, 
+                        result.consume().counters.nodes_created, 
                         self.name))
 #                 for record in result:
 #                     a_oid = record["aid"]
@@ -240,7 +240,7 @@ class Refname:
                             pid=pid, name=name, use=reftype)
 
             logging.debug("Created Refname {} nodes for {}".format(\
-                    result.summary().counters.nodes_created, name))
+                    result.consume().counters.nodes_created, name))
 
         except Exception as err:
             # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
@@ -257,14 +257,14 @@ class Refname:
                 # Remove all Refnames
                 t0 = time.time()
                 result = session.run(Cypher_refname.delete_all)
-                counters = result.summary().counters
+                counters = result.consume().counters
                 logging.info("Deleted all Refnames: {}; {} sek".\
                               format(counters, time.time()-t0))
 
                 # Create unique constrain for Refnames
                 t0 = time.time()
                 result = session.run(Cypher_refname.set_constraint)
-                counters = result.summary().counters
+                counters = result.consume().counters
                 logging.info("Set unique constraint for Refnames: {}; {} sek".\
                               format(counters, time.time()-t0))
 

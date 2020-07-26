@@ -41,19 +41,21 @@ SET u.name = 'Suomi tk', u.change = timestamp()"""
                 #   to (:UserProfile{'_Stk_'} -[:HAS_ACCESS]-> (a:Audit) 
                 #  and OPTIONAL (b:Batch) -[AUDITED]-> (a)
                 result = session.run(change_master_HAS_LOADED_to_Stk_HAS_AUDITED)
-                counters = result.summary().counters
-                _cnt = result.single()[0]
-                #print(counters)
-                rel_created = counters.relationships_created
-                rel_deleted = counters.relationships_deleted
-                print(f"do_schema_fixes: Audit links {rel_deleted} removed, {rel_created} added")
-                if rel_created + rel_deleted > 0:
-                    logger.info(f"database.schema_fixes.do_schema_fixes: "
-                                f"Audit links {rel_deleted} removed, {rel_created} added")
+                for record in result:
+                    # If any found, get the counters of changes
+                    _cnt = record[0]
+                    counters = result.consume().counters
+                    #print(counters)
+                    rel_created = counters.relationships_created
+                    rel_deleted = counters.relationships_deleted
+                    print(f"do_schema_fixes: Audit links {rel_deleted} removed, {rel_created} added")
+                    if rel_created + rel_deleted > 0:
+                        logger.info(f"database.schema_fixes.do_schema_fixes: "
+                                    f"Audit links {rel_deleted} removed, {rel_created} added")
 
                 # Name field missed
                 session.run(change_Stk_name)
-                counters = result.summary().counters
+                counters = result.consume().counters
                 if counters.properties_set > 0:
                     logger.info("database.schema_fixes.do_schema_fixes: profile _Stk_ name set")
 
@@ -78,7 +80,7 @@ SET u.name = 'Suomi tk', u.change = timestamp()"""
                           'Source']:
                 try:
                     result = session.run(f'CREATE INDEX ON :{label}(handle)')
-                    counters = result.summary().counters
+                    counters = result.consume().counters
                     created += counters.indexes_added
 #               except Exception as e:
 #                   logger.info(f"Index for {label}.handle not created: {e}")
@@ -114,7 +116,7 @@ SET u.name = 'Suomi tk', u.change = timestamp()"""
 #             try:
 #                 for label in ['Person', 'Event', 'Place', 'Family']:
 #                     result = session.run(f'DROP INDEX ON :{label}(gramps_handle)')
-#                     counters = result.summary().counters
+#                     counters = result.consume().counters
 #                     dropped += counters.indexes_removed
 #             except Exception as e:
 #                 pass

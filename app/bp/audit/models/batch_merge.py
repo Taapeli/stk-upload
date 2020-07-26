@@ -68,7 +68,7 @@ class Batch_merge(object):
                     result = tx.run(Cypher_audit.copy_batch_to_audit, 
                                     user=user, batch=batch_id, oper=auditor,
                                     labels=labels)
-                    counters = result.summary().counters
+                    counters = result.consume().counters
                     #print(counters)
                     new_relationships = counters.relationships_created
                     relationships_created += new_relationships

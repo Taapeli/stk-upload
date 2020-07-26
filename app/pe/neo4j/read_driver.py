@@ -483,12 +483,12 @@ class Neo4jReadDriver:
         with self.driver.session() as session: 
             if user == None: 
                 #1 get approved common data
-                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: from common")
+                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: approved")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
                                      fw=fw_from, limit=limit, lang=lang)
             else: 
                 #2 get my own
-                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: by owner")
+                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: candidate")
                 result = session.run(CypherPlace.get_my_name_hierarchies,
                                      user=user, fw=fw_from, limit=limit, lang=lang)
         for record in result:

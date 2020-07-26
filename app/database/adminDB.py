@@ -3,7 +3,7 @@
 from datetime import datetime
 import logging
 logger = logging.getLogger('stkserver') 
-from neo4j.exceptions import CypherSyntaxError, ConstraintError
+from neo4j.exceptions import CypherSyntaxError #, ConstraintError
 from flask_security import utils as sec_utils
 
 import shareds
@@ -190,7 +190,7 @@ def check_contraints(needed:dict):
     # Returns a set of missing constraints
     import re
     p = re.compile(":(\S*)(\s.*\.)(\w+)")
-    #print(needed)
+    n_ok = 0
     with shareds.driver.session() as session:
         result = session.run("CALL db.constraints")
         for record in result:
@@ -202,11 +202,13 @@ def check_contraints(needed:dict):
             if label in needed.keys():
                 if prop in needed[label]:
                     needed[label].remove(prop)
-                    print(f'constraint {label}.{prop} ok')
+                    n_ok += 1
+                    #print(f'constraint {label}.{prop} ok')
     #print(f'Missing contraints: {needed}')
     for label,props in needed.items():
         for prop in props:
             create_unique_constraint(label, prop)
+    print(f'checked {n_ok} constraints ok')
     return
 
 def create_lock_and_constraint():
