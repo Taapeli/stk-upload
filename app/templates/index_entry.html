@@ -57,6 +57,7 @@ div.startbox { min-height: 270px;}
 					<div class="submit">
 						<button type="submit">{{ _('Explore demo') }}</button>
 					</div>
+					<input type="hidden" name="lang" value="{{ lang }}">
 		    {% if not config['DEMO'] %}
                     <p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
                     <div class="submit">
