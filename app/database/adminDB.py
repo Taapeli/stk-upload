@@ -3,7 +3,7 @@
 from datetime import datetime
 import logging
 logger = logging.getLogger('stkserver') 
-from neo4j.exceptions import CypherSyntaxError #, ConstraintError
+from neo4j.exceptions import CypherSyntaxError, ClientError
 from flask_security import utils as sec_utils
 
 import shareds
@@ -24,17 +24,26 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 def delete_database(tx):
     tx.run(SetupCypher.delete_database)
 
+def initiated_exist():
+    # Check, that Lock 'initiated' exists.
+    result = shareds.driver.session().run(SetupCypher.check_lock_initiated)
+    count = 0
+    for record in result:
+        count = record[0]
+#     count = [record[0] for record in result]
+    return count > 0
+
 def roles_exist():
-#  Tarkista roolien olemassaolo
+    #  Tarkista roolien olemassaolo
     print('Check the user roles')
     num_of_roles = 0
     results = shareds.driver.session().run(SetupCypher.check_role_count)
     for result in results:
         num_of_roles = result[0]
     return(num_of_roles == len(ROLES))
-        #inputs
+
 def role_exists(name):
-#    print(f'Check the existense of the {name} role')
+    # print(f'Check the existense of the {name} role')
     num_of_roles = 0  
     for result in shareds.driver.session().run(SetupCypher.role_check_existence, rolename=name):
         num_of_roles = result[0] 
@@ -91,10 +100,10 @@ def build_master_user():
              'name': 'Stk-kannan pääkäyttäjä',
              'language': 'fi',  
              'is_active': True,
-             'confirmed_at': datetime.now().timestamp()/1000, 
+             #'confirmed_at': datetime.now().timestamp()/1000, 
              'roles': ['master'],
-             'last_login_at': datetime.now().timestamp()/1000,
-             'current_login_at': datetime.now().timestamp()/1000,
+             #'last_login_at': datetime.now().timestamp()/1000,
+             #'current_login_at': datetime.now().timestamp()/1000,
              'last_login_ip': '127.0.0.1',  
              'current_login_ip': '127.0.0.1',
              'login_count': 0            
@@ -119,15 +128,15 @@ def build_guest_user():
             name = 'Vieraileva käyttäjä',
             language = 'fi',  
             is_active = True,
-            confirmed_at = datetime.now().timestamp()*1000, 
+            #confirmed_at = datetime.now().timestamp()*1000, 
             roles= ['guest'],
-            last_login_at = datetime.now().timestamp()*1000,
-            current_login_at = datetime.now().timestamp()*1000,
+            #last_login_at = datetime.now().timestamp()*1000,
+            #current_login_at = datetime.now().timestamp()*1000,
             last_login_ip = '127.0.0.1',  
             current_login_ip = '127.0.0.1',
             login_count = 0 )           
                )
-                        
+
 def create_guest_user():
     guest = build_guest_user()
     user = shareds.user_datastore.put(guest)                
@@ -188,51 +197,62 @@ def create_allowed_email_constraints():
 def check_contraints(needed:dict):
     # Check which UNIQUE contraints are missing from given nodes and parameters.
     # Returns a set of missing constraints
-    import re
-    p = re.compile(":(\S*)(\s.*\.)(\w+)")
-    n_ok = 0
-    with shareds.driver.session() as session:
-        result = session.run("CALL db.constraints")
-        for record in result:
-            # "CONSTRAINT ON ( user:User ) ASSERT (user.email) IS UNIQUE"
-            desc = record[1]
-            x = p.search(desc)
-            label = x.group(1)
-            prop = x.group(3)
-            if label in needed.keys():
-                if prop in needed[label]:
-                    needed[label].remove(prop)
-                    n_ok += 1
-                    #print(f'constraint {label}.{prop} ok')
-    #print(f'Missing contraints: {needed}')
+
+# No need to check exsistence, catching ClientError
+#         n_ok = 0
+#         import re
+#         p = re.compile(":(\S*)(\s.*\.)(\w+)")
+#         with shareds.driver.session() as session:
+#             result = session.run("CALL db.constraints")
+#             for record in result:
+#                 # "CONSTRAINT ON ( user:User ) ASSERT (user.email) IS UNIQUE"
+#                 desc = record[1]
+#                 x = p.search(desc)
+#                 label = x.group(1)
+#                 prop = x.group(3)
+#                 if label in needed.keys():
+#                     if prop in needed[label]:
+#                         needed[label].remove(prop)
+#                         n_ok += 1
+#                         #print(f'constraint {label}.{prop} ok')
+#         #print(f'Missing contraints: {needed}')
     for label,props in needed.items():
         for prop in props:
             create_unique_constraint(label, prop)
-    print(f'checked {n_ok} constraints ok')
+#     print(f'checked {n_ok} constraints ok')
     return
 
 def create_lock_and_constraint():
-    # can be created multiple times!
+    # Initial lock
     with shareds.driver.session() as session:
-        record = session.run("match (n:Lock) return count(*) as exists limit 1").single()
-        if record[0] == 0:
-            # Create first Lock node and contraint
-            session.run("merge (lock:Lock {id:$lock_id}) set lock.locked = true", 
-                        lock_id="batch_id")
-            session.run("create constraint on (l:Lock) assert l.id is unique")
-            print(' - One Lock created')
+        # Create first Lock node and contraint
+        lock_id = "initiated"
+        session.run(SetupCypher.create_lock, id=lock_id, locked=False)
+        print('Initial Lock created')
+        create_unique_constraint('Lock', 'id')
+        return
 
+def re_initiate_nodes_constraints_fixes():
+    # Remove initial lock for re-creating nodes, constraints and schema fixes
+    with shareds.driver.session() as session:
+        session.run(SetupCypher.remove_lock_initiated)
+        logger.info(f'database.adminDB.re_initiate_nodes_constraints_fixes: requested')
+        print('Initial Lock removed')
+        return
 
 def create_unique_constraint(label, prop):
     ' Create given contraint for given label and property.'
     with shareds.driver.session() as session:
         query = f"create constraint on (n:{label}) assert n.{prop} is unique"
         try:  
-            session.run(query)  
+            session.run(query)
+            print(f'Unique contraint for {label}.{prop} created')
+        except ClientError:
+            print(f'Unique contraint for {label}.{prop} ok')
+            return
         except Exception as e:
             logger.error(f'database.adminDB.create_unique_constraint: {e.__class__.__name__} {e}' )
             raise
-        print(f'Unique contraint for {label}.{prop} created')
     return
 
 def set_confirmed_at():
@@ -260,46 +280,53 @@ def set_confirmed_at():
     """
     shareds.driver.session().run(stmt)
 
+#------------------------------- Start here -----------------------------------
 
 def initialize_db():
-    # Fix changed schema
-    do_schema_fixes()
+    '''
+    Check and initiate important nodes and constraints and schema fixes,
+    if (:Lock{id:'initiated'}) does not exist.
+    ''' 
+    if not initiated_exist():
+        logger.info('database.adminDB.initialize_db: '
+                    'checking roles, constraints and schema fixes' )
+
+        if not roles_exist():
+            create_role_constraints()
+            create_roles()
+            
+        if not user_exists('master'):
+            create_user_constraints()
+            create_master_user()
+            create_allowed_email_constraints()
+            
+        if not user_exists('guest'):
+            create_guest_user()
     
-    if not roles_exist():
-        create_role_constraints()
-        create_roles()
-        
-    if not user_exists('master'):
-        create_user_constraints()
-        create_master_user()
-        create_allowed_email_constraints()
-        
-    if not user_exists('guest'):
-        create_guest_user()
-
-    if not profile_exists('_Stk_'):
-        create_single_profile('_Stk_')
-        # Create Lock, too
+        if not profile_exists('_Stk_'):
+            create_single_profile('_Stk_')
+            
         create_lock_and_constraint()
+    
+        check_contraints({
+            "Allowed_email":{"allowed_email"},
+            "Citation":{"uuid"},
+            "Event":{"uuid"},
+            "Family":{"uuid"},
+            "Media":{"uuid"},
+            "Note":{"uuid"},
+            "Person":{"uuid"},
+            "Place":{"uuid"},
+            "Repository":{"uuid"},
+            "Role":{"name"},
+            "Source":{"uuid"},
+            "User":{"email", "username"}
+        })
 
-    needed_constraints = {
-        "Allowed_email":{"allowed_email"},
-        "Citation":{"uuid"},
-        "Event":{"uuid"},
-        "Family":{"uuid"},
-        "Media":{"uuid"},
-        "Note":{"uuid"},
-        "Person":{"uuid"},
-        "Place":{"uuid"},
-        "Repository":{"uuid"},
-        "Role":{"name"},
-        "Source":{"uuid"},
-        "User":{"email","username"}
-    }
-    check_contraints(needed_constraints)
-    return  # ============================= test only
+        # Fix changed schema
+        do_schema_fixes()
 
-    #create_uuid_constraints()
-    #set_confirmed_at()
+        #set_confirmed_at()
 
+    return 
 
