@@ -14,4 +14,10 @@
 	<natures>
 		<nature>org.python.pydev.pythonNature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>VIRTUAL_ENV</name>
+			<value>$%7BPARENT-1-PROJECT_LOC%7D/venv</value>
+		</variable>
+	</variableList>
 </projectDescription>
