@@ -480,8 +480,11 @@ class Neo4jReadDriver:
         ''' Read place list from given start point
         '''
         ret = []
+        # full support only for these languages in place name
+        if lang not in ['fi', 'sv']:
+            lang = 'fi'
         with self.driver.session() as session: 
-            if user == None: 
+            if user is None:
                 #1 get approved common data
                 print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: from common")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
