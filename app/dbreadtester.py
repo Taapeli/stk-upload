@@ -20,12 +20,16 @@ RETURN place, name ORDER BY name.name LIMIT $limit"""
         result = session.run(query, user='juha', fw='', limit=5, lang='fi')
 
         for record in result:
-            print(record['place'],record['name'])
+            print(record['place']['id'], record['name']['name'])
         print('done')
 
 if __name__ == '__main__':
     neo4j_log = logging.getLogger("neo4j.bolt")
     neo4j_log.setLevel(logging.WARNING)
+
+#     shareds.app.config.from_pyfile('config.py')
+#     uri = app.config['NEO4J_URI']
+#     auth = (app.config['NEO4J_USERNAME'], app.config['NEO4J_PASSWORD']),
 
     driver = GraphDatabase.driver("bolt://localhost:7687", auth=(user,passwd),
                                   connection_timeout=15, encrypted=False)
