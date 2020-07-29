@@ -475,7 +475,7 @@ def show_places():
     u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
     u_context.set_scope_from_request(request, 'place_scope')
-    u_context.count = request.args.get('c', 100, type=int)
+    u_context.count = request.args.get('c', 50, type=int)
 
     dbdriver = Neo4jReadDriver(shareds.driver)
     reader = PlaceReader(dbdriver, u_context) 

@@ -32,7 +32,7 @@ WITH place, name ORDER BY name.name LIMIT  $limit
 MATCH (b:Batch) -[:OWNS]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
     WHERE b.user = $user AND name.name >= $fw
 WITH place, name ORDER BY name.name LIMIT $limit
-    OPTIONAL MATCH (place) <-[:PLACE]- (ref) <-[*2]- (b:Batch)
+    OPTIONAL MATCH (place) <-[:PLACE]- (ref) <-[*2]- (b)
         WHERE b.user = $user
 """ + _get_name_hierarchies_tail
 
