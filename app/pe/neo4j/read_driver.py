@@ -481,6 +481,8 @@ class Neo4jReadDriver:
         ''' Read place list from given start point
         '''
         ret = []
+        if lang not in ['fi', 'sv']:
+            lang = 'fi'
         with self.driver.session(default_access_mode='READ') as session: 
             if user == None: 
                 #1 get approved common data
