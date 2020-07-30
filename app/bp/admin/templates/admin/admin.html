@@ -55,8 +55,9 @@ function confirm_delete(url) {
                   {{ _('Clear the database but save user IDs') }}</a></li>
               <li>{{ _('Delete all my imported data') }} ➔ <a href="/settings">{{ _("My Home Page") }}</a><br></li>
            </ul>
-           <li title="Tai poista node (:Lock{id:'initial'})"><b>Todo:</b>
-              {{ _('Check and initiate important nodes and constraints and schema fixes') }}
+           <li title="Tai poista node (:Lock{id:'initial'})">
+              <a href="/admin/start_initiate">{{ _('Database refresh') }}</a>.
+              {{ _('Safely check and initiate important nodes, constraints and schema fixes') }}.
            </li>
         </ul>
       </div>

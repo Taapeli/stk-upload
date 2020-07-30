@@ -76,6 +76,22 @@ def clear_my_db():
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
+@bp.route('/admin/start_initiate')
+@login_required
+@roles_accepted('admin')
+def start_initiate():
+    """ Check and initiate important nodes and constraints and schema fixes.
+    """
+    from database.adminDB import re_initiate_nodes_constraints_fixes, initialize_db
+    logger.info(f"-> bp.admin.routes.start_initiate")
+
+    # Remove (:Lock{id:'initial'})
+    re_initiate_nodes_constraints_fixes()
+
+    initialize_db()
+    flash(_('Database initial check done.'))
+    return redirect(url_for('admin'))
+
 @bp.route('/admin/clear_batches', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('research', 'admin', 'audit')
