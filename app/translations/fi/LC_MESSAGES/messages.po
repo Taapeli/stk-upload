@@ -1311,7 +1311,7 @@ msgstr "Referenssinimien editointi"
 
 #: bp/audit/templates/audit/reference.html:39
 msgid "Download reference names as a CSV file"
-msgstr "Lataa referenssinimiä CSV-tiedostona"
+msgstr "Talleta CSV-referenssinimitiedosto koneellesi"
 
 #: bp/audit/templates/audit/talletettu.html:3
 msgid "Data stored"
