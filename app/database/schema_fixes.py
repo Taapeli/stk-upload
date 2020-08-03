@@ -16,7 +16,6 @@ def do_schema_fixes():
     
         #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
     """
-
     if True:
         # // Fix master HAS_LOADED => Stk HAS_ACCESS
         # // and Add (:Batch) -[:AFTER_AUDIT]-> (:Audit) 
@@ -44,7 +43,7 @@ SET u.name = 'Suomi tk', u.change = timestamp()"""
                 for record in result:
                     # If any found, get the counters of changes
                     _cnt = record[0]
-                    counters = result.consume().counters
+                    counters = shareds.current_neo4j.consume_counters(result)
                     #print(counters)
                     rel_created = counters.relationships_created
                     rel_deleted = counters.relationships_deleted
@@ -55,7 +54,7 @@ SET u.name = 'Suomi tk', u.change = timestamp()"""
 
                 # Name field missed
                 session.run(change_Stk_name)
-                counters = result.consume().counters
+                counters = shareds.current_neo4j.consume_counters(result)
                 if counters.properties_set > 0:
                     logger.info("database.schema_fixes.do_schema_fixes: profile _Stk_ name set")
 
@@ -80,7 +79,7 @@ SET u.name = 'Suomi tk', u.change = timestamp()"""
                           'Source']:
                 try:
                     result = session.run(f'CREATE INDEX ON :{label}(handle)')
-                    counters = result.consume().counters
+                    counters = shareds.current_neo4j.consume_counters(result)
                     created += counters.indexes_added
 #               except Exception as e:
 #                   logger.info(f"Index for {label}.handle not created: {e}")
@@ -116,7 +115,7 @@ SET u.name = 'Suomi tk', u.change = timestamp()"""
 #             try:
 #                 for label in ['Person', 'Event', 'Place', 'Family']:
 #                     result = session.run(f'DROP INDEX ON :{label}(gramps_handle)')
-#                     counters = result.consume().counters
+#                     counters = shareds.current_neo4j.consume_counters(result)
 #                     dropped += counters.indexes_removed
 #             except Exception as e:
 #                 pass

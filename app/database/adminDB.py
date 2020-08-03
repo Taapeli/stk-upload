@@ -1,6 +1,6 @@
 # coding: utf-8  
 
-from datetime import datetime
+#from datetime import datetime
 import logging
 logger = logging.getLogger('stkserver') 
 from neo4j.exceptions import CypherSyntaxError, ClientError
@@ -280,6 +280,32 @@ def set_confirmed_at():
     """
     shareds.driver.session().run(stmt)
 
+class Neo4jEnv():
+    """  Neo4j environment dependent things for versions 3.5 <> 4.1.
+    """
+    def __init__(self, requirements_file):
+        self.version_40 = self.uses_neo_40(requirements_file)
+
+    def uses_neo_40(self,requirements_file):
+        """Check, if neo4j driver is Neo4j versio 4.0 compatible"""
+        is_neo40 = False
+        with open(requirements_file) as f:
+            for line in f.read().splitlines():
+                key, ver = line.split('==')
+                if key == 'neo4j':
+                    is_neo40 = ver[:3] >= "1.7"
+                    print(f'Neo4j driver {line}, new Neo4j 4.1={is_neo40}')
+                    break
+        return is_neo40
+
+    def consume_counters(self, result):
+        ''' Get counters from Neo4j.result object (both 3.5 & 4.1 versions).
+        '''
+        if self.version_40:
+            return result.consume().counters
+        else:
+            return result.summary().counters
+
 #------------------------------- Start here -----------------------------------
 
 def initialize_db():
@@ -287,6 +313,12 @@ def initialize_db():
     Check and initiate important nodes and constraints and schema fixes,
     if (:Lock{id:'initiated'}) does not exist.
     ''' 
+    # Store neo4j version independent services:
+    #    shareds.current_neo4j.version_40    True for version 4.0 or higher
+    #    shareds.current_neo4j.consume_counters(result)
+    #                                        calls consume() or summary()
+    shareds.current_neo4j = Neo4jEnv('requirements.txt')
+
     if not initiated_exist():
         logger.info('database.adminDB.initialize_db: '
                     'checking roles, constraints and schema fixes' )
