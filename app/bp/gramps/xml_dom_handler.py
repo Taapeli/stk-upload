@@ -17,6 +17,7 @@ import xml.dom.minidom
 
 from flask_babelex import _
 
+import shareds
 from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
