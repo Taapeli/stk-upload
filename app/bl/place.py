@@ -171,8 +171,8 @@ class PlaceReader(DBreader):
     
         """
         # Get a Place with Names, Notes and Medias
-        res = self.dbdriver.dr_get_place_w_na_no_me(self.use_user, uuid, 
-                                                    self.user_context.lang)
+        res = self.dbdriver.dr_get_place_w_names_notes_medias(self.use_user, uuid, 
+                                                              self.user_context.lang)
         place = res.get("place")
         results = {"place":place, 'status':Status.OK}
 

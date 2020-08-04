@@ -3,6 +3,9 @@
     and executing Cypher commands
 
 @author: TimNal - Timo Nallikari 2017
+
+@change: 21.4.2020 JMä
+    For use Neo4.1 with older 1.7 driver needs encrypted=False driver option
 '''
 from neo4j import GraphDatabase
 
@@ -26,7 +29,8 @@ class Neo4jEngine():
             app.config['NEO4J_URI'], 
             auth = (app.config['NEO4J_USERNAME'], 
                     app.config['NEO4J_PASSWORD']),
-            connection_timeout = 15)
+            connection_timeout = 15,
+            encrypted=False)
    
     def close(self):
         self.driver.close()

@@ -4,7 +4,7 @@ Created on 17.3.2020
 @author: jm
 '''
 import logging
-from models.gen.family_combo import Family_combo
+#from models.gen.family_combo import Family_combo
 from models.gen.dates import DateRange
 logger = logging.getLogger('stkserver')
 
@@ -41,9 +41,10 @@ class Neo4jReadDriver:
     def dr_get_person_list(self, user, fw_from, limit):
         """ Read Person data from given fw_from 
         """
+        persons = []
         # Select a) filter by user or b) show Isotammi common data (too)
-        try:
-            with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
                 if user is None: 
                     #3 == #1 read approved common data
                     print("_read_person_list: approved common only")
@@ -55,56 +56,56 @@ class Neo4jReadDriver:
                     result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
                                          user=user, start_name=fw_from, limit=limit)
                 # Returns person, names, events
-        except Exception as e:
-            print('Error pe.neo4j.read_driver.Neo4jReadDriver.dr_get_person_list: {} {}'.format(e.__class__.__name__, e))            
-            raise      
 
-        persons = []
-        for record in result:
-            ''' <Record 
-                    person=<Node id=163281 labels={'Person'} 
-                      properties={'sortname': 'Ahonius##Knut Hjalmar',  
-                        'sex': '1', 'confidence': '', 'change': 1540719036, 
-                        'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
-                        'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
-                    names=[<Node id=163282 labels={'Name'} 
-                      properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
-                        'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
-                    events=[[
-                        <Node id=169494 labels={'Event'} 
-                            properties={'datetype': 0, 'change': 1540587380, 
-                            'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
-                            'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
-                         None
-                         ]] 
-                    owners=['jpek']>
-            '''
-            node = record['person']
-            # The same person is not created again
-            p = Person_combo.from_node(node)
-            #if show_with_common and p.too_new: continue
+            except Exception as e:
+                print('Error pe.neo4j.read_driver.Neo4jReadDriver.dr_get_person_list: {} {}'.format(e.__class__.__name__, e))            
+                raise
 
-#             if take_refnames and record['refnames']:
-#                 refnlist = sorted(record['refnames'])
-#                 p.refnames = ", ".join(refnlist)
-            for nnode in record['names']:
-                pname = Name.from_node(nnode)
-                p.names.append(pname)
+            for record in result:
+                ''' <Record 
+                        person=<Node id=163281 labels={'Person'} 
+                          properties={'sortname': 'Ahonius##Knut Hjalmar',  
+                            'sex': '1', 'confidence': '', 'change': 1540719036, 
+                            'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
+                            'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
+                        names=[<Node id=163282 labels={'Name'} 
+                          properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
+                            'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
+                        events=[[
+                            <Node id=169494 labels={'Event'} 
+                                properties={'datetype': 0, 'change': 1540587380, 
+                                'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
+                                'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
+                             None
+                             ]] 
+                        owners=['jpek']>
+                '''
+                node = record['person']
+                # The same person is not created again
+                p = Person_combo.from_node(node)
+                #if show_with_common and p.too_new: continue
     
-            # Create a list with the mentioned user name, if present
-            if user:
-                p.owners = record.get('owners',[user])
-                                                                                                                                
-            # Events
-            for enode, pname, role in record['events']:
-                if enode != None:
-                    e = Event_combo.from_node(enode)
-                    e.place = pname or ""
-                    if role and role != "Primary":
-                        e.role = role
-                    p.events.append(e)
-
-            persons.append(p)   
+    #             if take_refnames and record['refnames']:
+    #                 refnlist = sorted(record['refnames'])
+    #                 p.refnames = ", ".join(refnlist)
+                for nnode in record['names']:
+                    pname = Name.from_node(nnode)
+                    p.names.append(pname)
+        
+                # Create a list with the mentioned user name, if present
+                if user:
+                    p.owners = record.get('owners',[user])
+                                                                                                                                    
+                # Events
+                for enode, pname, role in record['events']:
+                    if enode != None:
+                        e = Event_combo.from_node(enode)
+                        e.place = pname or ""
+                        if role and role != "Primary":
+                            e.role = role
+                        p.events.append(e)
+    
+                persons.append(p)   
 
         return persons
 
@@ -117,7 +118,7 @@ class Neo4jReadDriver:
         '''
         family = None
 
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             try:
                 if user: 
                     # Show my researcher data
@@ -167,7 +168,7 @@ class Neo4jReadDriver:
             returns dict {items, status, statustext}
         """
         parents = []
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             try:
                 result = session.run(CypherFamily.get_family_parents, 
                                      fuid=uniq_id)
@@ -220,7 +221,7 @@ class Neo4jReadDriver:
             returns dict {items, status, statustext}
         """
         children = []
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             try:
                 result = session.run(CypherFamily.get_family_children, 
                                      fuid=uniq_id)
@@ -260,7 +261,7 @@ class Neo4jReadDriver:
             returns dict {items, status, statustext}
         """
         events = []
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             try:
                 result = session.run(CypherFamily.get_events_w_places, 
                                      fuid=uniq_id)
@@ -330,7 +331,7 @@ class Neo4jReadDriver:
             returns dict {items, status, statustext}
         """
         sources = []
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             try:
                 result = session.run(CypherFamily.get_family_sources, 
                                      id_list=id_list)
@@ -379,7 +380,7 @@ class Neo4jReadDriver:
             returns dict {items, status, statustext}
         """
         notes = []
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             try:
                 result = session.run(CypherFamily.get_family_notes, 
                                      id_list=id_list)
@@ -416,7 +417,7 @@ class Neo4jReadDriver:
             returns dict {items, status, statustext}
         """
         families = {}
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             try:
                 result = session.run(CypherFamily.get_person_families, 
                                      p_uuid=uuid)
@@ -480,63 +481,65 @@ class Neo4jReadDriver:
         ''' Read place list from given start point
         '''
         ret = []
-        with self.driver.session() as session: 
+        if lang not in ['fi', 'sv']:
+            lang = 'fi'
+        with self.driver.session(default_access_mode='READ') as session: 
             if user == None: 
                 #1 get approved common data
-                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: from common")
+                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: approved")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
                                      fw=fw_from, limit=limit, lang=lang)
             else: 
                 #2 get my own
-                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: by owner")
+                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: candidate")
                 result = session.run(CypherPlace.get_my_name_hierarchies,
                                      user=user, fw=fw_from, limit=limit, lang=lang)
-        for record in result:
-            # <Record 
-            #    place=<Node id=514341 labels={'Place'}
-            #        properties={'coord': [61.49, 23.76], 
-            #            'id': 'P0300', 'type': 'City', 'uuid': '8fbe632144584d30aa75701b49f15484', 
-            #            'pname': 'Tampere', 'change': 1585409704}>
-            #    name=<Node id=514342 labels={'Place_name'}
-            #        properties={'name': 'Tampere', 'lang': ''}> 
-            #    names=[<Node id=514344 labels={'Place_name'}
-            #            properties={'name': 'Tampereen kaupunki', 'lang': ''}>, 
-            #        <Node id=514343 ...>]
-            #    uses=4
-            #    upper=[[514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finnland', 'de'],
-            #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finland', 'sv'],
-            #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Suomi', '']
-            #    ]
-            #    lower=[[None, None, None, None, None]]>
-            node = record["place"]
-            p = PlaceBl.from_node(node)
-            p.ref_cnt = record['uses']
-
-            # Set place names and default display name pname
-            node = record['name']    
-            p.names.append(PlaceName.from_node(node))
-            oth_names = []
-            for node in record['names']:
-                oth_names.append(PlaceName.from_node(node))
-            # Arrage names by local language first 
-            lst = PlaceName.arrange_names(oth_names)
-
-            p.names += lst
-            p.pname = p.names[0].name
-            p.uppers = PlaceBl.combine_places(record['upper'], lang)
-            p.lowers = PlaceBl.combine_places(record['lower'], lang)
-            ret.append(p)
+            for record in result:
+                # <Record 
+                #    place=<Node id=514341 labels={'Place'}
+                #        properties={'coord': [61.49, 23.76], 
+                #            'id': 'P0300', 'type': 'City', 'uuid': '8fbe632144584d30aa75701b49f15484', 
+                #            'pname': 'Tampere', 'change': 1585409704}>
+                #    name=<Node id=514342 labels={'Place_name'}
+                #        properties={'name': 'Tampere', 'lang': ''}> 
+                #    names=[<Node id=514344 labels={'Place_name'}
+                #            properties={'name': 'Tampereen kaupunki', 'lang': ''}>, 
+                #        <Node id=514343 ...>]
+                #    uses=4
+                #    upper=[[514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finnland', 'de'],
+                #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finland', 'sv'],
+                #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Suomi', '']
+                #    ]
+                #    lower=[[None, None, None, None, None]]>
+                node = record["place"]
+                p = PlaceBl.from_node(node)
+                p.ref_cnt = record['uses']
+    
+                # Set place names and default display name pname
+                node = record['name']    
+                p.names.append(PlaceName.from_node(node))
+                oth_names = []
+                for node in record['names']:
+                    oth_names.append(PlaceName.from_node(node))
+                # Arrage names by local language first 
+                lst = PlaceName.arrange_names(oth_names)
+    
+                p.names += lst
+                p.pname = p.names[0].name
+                p.uppers = PlaceBl.combine_places(record['upper'], lang)
+                p.lowers = PlaceBl.combine_places(record['lower'], lang)
+                ret.append(p)
 
         # Return sorted by first name in the list p.names -> p.pname
         return sorted(ret, key=lambda x:x.pname)
 
 
-    def dr_get_place_w_na_no_me(self, user, uuid, lang='fi'): 
+    def dr_get_place_w_names_notes_medias(self, user, uuid, lang='fi'): 
         """ Returns the PlaceBl with PlaceNames, Notes and Medias included.
         """
         pl = None
         node_ids = []   # List of uniq_is for place, name, note and media nodes 
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             if user == None: 
                 result = session.run(CypherPlace.get_common_w_names_notes,
                                      uuid=uuid, lang=lang)
@@ -616,7 +619,7 @@ class Neo4jReadDriver:
         if t.tree.depth() == 0:
             # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
             # Hae oman paikan tiedot ilman yhteyksiä
-            with self.driver.session() as session:
+            with self.driver.session(default_access_mode='READ') as session:
                 result = session.run(CypherPlace.root_query, locid=int(locid))
                 record = result.single()
                 t.tree.create_node(record["name"], locid, parent=0,
@@ -628,7 +631,7 @@ class Neo4jReadDriver:
                 n = t.tree[tnode]
 
                 # Get all names: default lang: 'name' and others: 'names'
-                with self.driver.session() as session:
+                with self.driver.session(default_access_mode='READ') as session:
                     result = session.run(CypherPlace.read_pl_names,
                                          locid=tnode, lang=lang)
                     record = result.single()
@@ -666,7 +669,7 @@ class Neo4jReadDriver:
             Haetaan paikkaan liittyvät tapahtumat sekä
             osallisen henkilön nimitiedot.
         """
-        result = self.driver.session().run(CypherPlace.get_person_family_events, 
+        result = self.driver.session(default_access_mode='READ').run(CypherPlace.get_person_family_events, 
                                            locid=uniq_id)
         ret = []
         for record in result:
@@ -728,7 +731,7 @@ class Neo4jReadDriver:
         sources = []
         user = kwargs.get('user')
 
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             if kwargs.get('theme1'):
                 # Filter sources by searching keywords in fi and sv langiage
                 key1 = kwargs.get('theme1')
@@ -752,57 +755,57 @@ class Neo4jReadDriver:
                     print("dr_get_source_list_fw: approved common only")
                     result = session.run(CypherSource.get_auditted_sets)
  
-        for record in result:
-            # <Record 
-            #    owner_type='PASSED' 
-            #    source=<Node id=333338 labels={'Source'}
-            #        properties={'id': 'S0029', 'stitle': 'Lapinjärvi vihityt 1788-1803 vol  es346', 
-            #            'uuid': '4637e07dcc7f42c09236a8482fb01b7c', 'spubinfo': '', 'sauthor': '', 
-            #            'change': 1532807569}>
-            #    notes=[
-            #        <Node id=445002 labels={'Note'} 
-            #            properties={'id': 'N2207', 'text': '', 'type': 'Source Note', 
-            #                'uuid': 'e6efcc1fbcad4dcd85352fd95cd5bf35', 'url': 'http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=3788',
-            #                'change': 1532807569}>] 
-            #    repositories=[
-            #        [   'Book', 
-            #            <Node id=393661 labels={'Repository'} 
-            #                properties={'id': 'R0003', 'rname': 'Lapinjärven seurakunnan arkisto',
-            #                    'type': 'Archive', 'uuid': 'b6171feb05bc47de87ee509a79821d8f',
-            #                    'change': 1577815469}>]] cit_cnt=0 ref_cnt=0>
-             
-            # <Record
-            # 0  uniq_id=242567 
-            # 1  source=<Node id=242567 labels={'Source'} 
-            #        properties={'handle': '_dcb5682a0f47b7de686b3251557', 'id': 'S0334', 
-            #            'stitle': 'Åbo stifts herdaminne 1554-1640', 'change': '1516698633'}> 
-            # 2  notes=[<Node id=238491 labels={'Note'} 
-            #        properties={'handle': '_e07cd6210c57e0d53393a62fa7a', 'id': 'N3952', 
-            #        'text': '', 'type': 'Source Note', 'url': 'http://www.narc.fi:8080/...', 
-            #        'change': 1542667331}>] 
-            # 3  repositories=[
-            #        ['Book', <Node id=238996 labels={'Repository'} 
-            #            properties={'handle': '_db51a3f358e67ac82ade828edd1', 'id': 'R0057', 
-            #            'rname': 'Painoteokset', 'type': 'Collection', 'change': '1541350910'}>]]
-            # 4  cit_cnt=1 
-            # 5  ref_cnt=1
-            # >
-            source = record['source']
-            s = SourceBl.from_node(source)
-            notes = record['notes']
-            for note in notes:
-                n = Note.from_node(note)
-                s.notes.append(n)
-            repositories = record['repositories']
-            for repo in repositories:
-                # [medium, repo_node]
-                if repo[1] != None:
-                    rep = Repository.from_node(repo[1])
-                    rep.medium = repo[0]
-                    s.repositories.append(rep)
-            s.cit_cnt = record['cit_cnt']
-            s.ref_cnt = record['ref_cnt']
-            sources.append(s)
+            for record in result:
+                # <Record 
+                #    owner_type='PASSED' 
+                #    source=<Node id=333338 labels={'Source'}
+                #        properties={'id': 'S0029', 'stitle': 'Lapinjärvi vihityt 1788-1803 vol  es346', 
+                #            'uuid': '4637e07dcc7f42c09236a8482fb01b7c', 'spubinfo': '', 'sauthor': '', 
+                #            'change': 1532807569}>
+                #    notes=[
+                #        <Node id=445002 labels={'Note'} 
+                #            properties={'id': 'N2207', 'text': '', 'type': 'Source Note', 
+                #                'uuid': 'e6efcc1fbcad4dcd85352fd95cd5bf35', 'url': 'http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=3788',
+                #                'change': 1532807569}>] 
+                #    repositories=[
+                #        [   'Book', 
+                #            <Node id=393661 labels={'Repository'} 
+                #                properties={'id': 'R0003', 'rname': 'Lapinjärven seurakunnan arkisto',
+                #                    'type': 'Archive', 'uuid': 'b6171feb05bc47de87ee509a79821d8f',
+                #                    'change': 1577815469}>]] cit_cnt=0 ref_cnt=0>
+                 
+                # <Record
+                # 0  uniq_id=242567 
+                # 1  source=<Node id=242567 labels={'Source'} 
+                #        properties={'handle': '_dcb5682a0f47b7de686b3251557', 'id': 'S0334', 
+                #            'stitle': 'Åbo stifts herdaminne 1554-1640', 'change': '1516698633'}> 
+                # 2  notes=[<Node id=238491 labels={'Note'} 
+                #        properties={'handle': '_e07cd6210c57e0d53393a62fa7a', 'id': 'N3952', 
+                #        'text': '', 'type': 'Source Note', 'url': 'http://www.narc.fi:8080/...', 
+                #        'change': 1542667331}>] 
+                # 3  repositories=[
+                #        ['Book', <Node id=238996 labels={'Repository'} 
+                #            properties={'handle': '_db51a3f358e67ac82ade828edd1', 'id': 'R0057', 
+                #            'rname': 'Painoteokset', 'type': 'Collection', 'change': '1541350910'}>]]
+                # 4  cit_cnt=1 
+                # 5  ref_cnt=1
+                # >
+                source = record['source']
+                s = SourceBl.from_node(source)
+                notes = record['notes']
+                for note in notes:
+                    n = Note.from_node(note)
+                    s.notes.append(n)
+                repositories = record['repositories']
+                for repo in repositories:
+                    # [medium, repo_node]
+                    if repo[1] != None:
+                        rep = Repository.from_node(repo[1])
+                        rep.medium = repo[0]
+                        s.repositories.append(rep)
+                s.cit_cnt = record['cit_cnt']
+                s.ref_cnt = record['ref_cnt']
+                sources.append(s)
  
         return sources
 
@@ -811,7 +814,7 @@ class Neo4jReadDriver:
         """ Returns the PlaceBl with Notes and PlaceNames included.
         """
         source = None
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             if user == None: 
                 result = session.run(CypherSource.get_auditted_set_single_selection,
                                      uuid=uuid)
@@ -881,71 +884,71 @@ class Neo4jReadDriver:
         #near = {}           # {uniq_id:object}
         targets = {}         # {uniq_id:[object]} Person or Family
 
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             result = session.run(CypherSource.get_citators_of_source, 
                                  uniq_id=sourceid)
-        for record in result:
-            # <Record        # (1) A Person or Family
-            #                #     referencing directly Citation
-            #    citation=<Node id=342041 labels={'Citation'}
-            #        properties={'id': 'C2840', 'page': '11.10.1907 sivu 2',
-            #            'uuid': '03b2c7a7dac84701b67612bf10f60b6b', 'confidence': '2',
-            #            'change': 1585409708}>
-            #    notes=[<Node id=384644 labels={'Note'}
-            #        properties={'id': 'N3556', 'text': '', 'type': 'Citation', 'uuid': '4a377b0e936d4e68a72cad64a4925db9',
-            #            'url': 'https://digi.kansalliskirjasto.fi/sanomalehti/binding/609338?page=2&term=Sommer&term=Maria&term=Sommerin&term=sommer',
-            #            'change': 1585409709}>]
-            #    near=<Node id=347773 labels={'Person'}
-            #            properties={'sortname': 'Johansson#Gustaf#', 'death_high': 1920, 'confidence': '2.0',
-            #                'sex': 1, 'change': 1585409699, 'birth_low': 1810, 'birth_high': 1810,
-            #                'id': 'I1745', 'uuid': 'dfc866bfa9274071b37ccc2f6c33abed',
-            #                'death_low': 1852}>
-            #    far=[]
-            # >
-            # <Record        # (2) A Person or Family having an Event, Name, or Media
-            #                #     referencing the Citation
-            #    citation=<Node id=342042 labels={'Citation'} properties={...}>
-            #    notes=[<Node id=381700 labels={'Note'} properties={...}>]
-            #    near=<Node id=359150 labels={'Event'}
-            #        properties={'datetype': 0, 'change': 1585409703, 'description': '',
-            #            'id': 'E5451', 'date2': 1953097, 'type': 'Death', 'date1': 1953097,
-            #            'uuid': '467b67c1a0f84b8baed150b030a7bef0'}>
-            #    far=[
-            #         [<Node id=347835 labels={'Person'}
-            #            properties={'sortname': 'Sommer#Arthur#',...}>,
-            #          'Primary']
-            #    ]
-            # >
-            citation_node = record['citation']
-            near_node = record['near']
-            far_nodes = record['far']
-            note_nodes = record['notes']
-
-            uniq_id = citation_node.id
-            citation = Citation.from_node(citation_node)
-            citations[uniq_id] = citation
-
-            notelist = []
-            for node in note_nodes:
-                notelist.append(Note.from_node(node))
-            if notelist:
-                notes[uniq_id] = notelist
-
-            targetlist = []     # Persons or Families referring this source
-            for node, role in far_nodes:
-                if not node: continue
-                obj = obj_from_node(node, role)
-                if obj:         # Far node is the Person or Family
-                    obj.eventtype = near_node['type']
-                    targetlist.append(obj)
-            if not targetlist:  # No far node: there is a middle node near
-                obj = obj_from_node(near_node)
-                if obj:
-                    targetlist.append(obj)
-            if targetlist:
-                targets[uniq_id] = targetlist
-            else:
-                print(f'dr_get_source_citations: Event {near_node.id} {near_node.get("id")} without Person or Family?')
+            for record in result:
+                # <Record        # (1) A Person or Family
+                #                #     referencing directly Citation
+                #    citation=<Node id=342041 labels={'Citation'}
+                #        properties={'id': 'C2840', 'page': '11.10.1907 sivu 2',
+                #            'uuid': '03b2c7a7dac84701b67612bf10f60b6b', 'confidence': '2',
+                #            'change': 1585409708}>
+                #    notes=[<Node id=384644 labels={'Note'}
+                #        properties={'id': 'N3556', 'text': '', 'type': 'Citation', 'uuid': '4a377b0e936d4e68a72cad64a4925db9',
+                #            'url': 'https://digi.kansalliskirjasto.fi/sanomalehti/binding/609338?page=2&term=Sommer&term=Maria&term=Sommerin&term=sommer',
+                #            'change': 1585409709}>]
+                #    near=<Node id=347773 labels={'Person'}
+                #            properties={'sortname': 'Johansson#Gustaf#', 'death_high': 1920, 'confidence': '2.0',
+                #                'sex': 1, 'change': 1585409699, 'birth_low': 1810, 'birth_high': 1810,
+                #                'id': 'I1745', 'uuid': 'dfc866bfa9274071b37ccc2f6c33abed',
+                #                'death_low': 1852}>
+                #    far=[]
+                # >
+                # <Record        # (2) A Person or Family having an Event, Name, or Media
+                #                #     referencing the Citation
+                #    citation=<Node id=342042 labels={'Citation'} properties={...}>
+                #    notes=[<Node id=381700 labels={'Note'} properties={...}>]
+                #    near=<Node id=359150 labels={'Event'}
+                #        properties={'datetype': 0, 'change': 1585409703, 'description': '',
+                #            'id': 'E5451', 'date2': 1953097, 'type': 'Death', 'date1': 1953097,
+                #            'uuid': '467b67c1a0f84b8baed150b030a7bef0'}>
+                #    far=[
+                #         [<Node id=347835 labels={'Person'}
+                #            properties={'sortname': 'Sommer#Arthur#',...}>,
+                #          'Primary']
+                #    ]
+                # >
+                citation_node = record['citation']
+                near_node = record['near']
+                far_nodes = record['far']
+                note_nodes = record['notes']
+    
+                uniq_id = citation_node.id
+                citation = Citation.from_node(citation_node)
+                citations[uniq_id] = citation
+    
+                notelist = []
+                for node in note_nodes:
+                    notelist.append(Note.from_node(node))
+                if notelist:
+                    notes[uniq_id] = notelist
+    
+                targetlist = []     # Persons or Families referring this source
+                for node, role in far_nodes:
+                    if not node: continue
+                    obj = obj_from_node(node, role)
+                    if obj:         # Far node is the Person or Family
+                        obj.eventtype = near_node['type']
+                        targetlist.append(obj)
+                if not targetlist:  # No far node: there is a middle node near
+                    obj = obj_from_node(near_node)
+                    if obj:
+                        targetlist.append(obj)
+                if targetlist:
+                    targets[uniq_id] = targetlist
+                else:
+                    print(f'dr_get_source_citations: Event {near_node.id} {near_node.get("id")} without Person or Family?')
 
         # Result dictionaries using key = Citation uniq_id
         return citations, notes, targets
@@ -954,7 +957,7 @@ class Neo4jReadDriver:
     def dr_inlay_person_lifedata(self, person): 
         """ Reads person's default name, bith event and death event into Person obj.
         """
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             result = session.run(CypherSource.get_person_lifedata,
                                  pid=person.uniq_id)
             for record in result:

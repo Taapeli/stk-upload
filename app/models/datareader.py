@@ -53,69 +53,7 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
             keys = ("uniq_id",value)    in routes.pick_selection
     """
 
-    persons = []
-    p = None
-    p_uniq_id = None
-
-    result = Person_combo.get_person_combos(keys, args=args) #user, take_refnames=take_refnames, order=order)
-    for record in result:
-        '''
-        # <Record
-            user=None,
-            person=<Node id=48883 labels={'Person'}
-              properties={'sortname': 'Järnefelt#Elin Ailama#',
-             'id': 'I1623', 'uuid': 'c9beb251259a4c48bf433645cbe4362c',
-             'sex': 2, 'confidence': '', 'change': 1561976921,
-             'birth_low': 1870, 'birth_high': 1870,
-             'death_low': 1953, 'death_high': 1953}>
-            name=<Node id=80308 labels={'Name'}
-                properties={'type': 'Birth Name', 'suffix': '', 'order': 0,
-                    'surname': 'Klick', 'firstname': 'Brita Helena'}>
-            refnames=['Helena', 'Brita', 'Klick']
-            events=[['Primary', <Node id=88532 labels={'Event'}
-                properties={'date1': 1754183, 'id': 'E0161', 'attr_type': '',
-                    'date2': 1754183, 'attr_value': '', 'description': '',
-                    'datetype': 0, 'change': 1500907890,
-                    'handle': '_da692d0fb975c8e8ae9c4986d23', 'type': 'Birth'}>,
-                'Kangasalan srk'], ...]
-            initial='K'>
-        '''
-        # Person
-
-        node = record['person']
-        if node.id != p_uniq_id:
-            # The same person is not created again
-            p = Person_combo.from_node(node)
-            p_uniq_id = p.uniq_id
-            if args.get('take_refnames',False) and record['refnames']:
-                refnlist = sorted(record['refnames'])
-                p.refnames = ", ".join(refnlist)
-            for nnode in record['names']:
-                pname = Name.from_node(nnode)
-                if 'initial' in record and record['initial']:
-                    pname.initial = record['initial']
-                p.names.append(pname)
-        # Eventuel Researcher or blank
-        p.user = record.get('user')
-        
-        # Events
-
-        for role, event, place in record['events']:
-            # role = 'Primary',
-            # event = <Node id=88532 labels={'Event'}
-            #        properties={'attr_value': '', 'description': '', 'attr_type': '',
-            #        'datetype': 0, 'date2': 1754183, 'type': 'Birth', 'change': 1500907890,
-            #        'handle': '_da692d0fb975c8e8ae9c4986d23', 'id': 'E0161', 'date1': 1754183}>,
-            # place = None
-
-            if event:
-                e = Event_combo.from_node(event)
-                e.place = place or ""
-                e.role = role or ""
-                p.events.append(e)
-
-        persons.append(p)
-
+    persons = Person_combo.get_person_w_events(keys, args=args) #user, take_refnames=take_refnames, order=order)
     return (persons)
 
 

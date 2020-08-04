@@ -52,11 +52,11 @@ def entry():
 
     logger.info(f'-> routes.entry/-')
     lang = get_locale().language
-    demo_site = f"{app.config['DEMO_URL']}?lang={lang}"
+    demo_site = f"{app.config['DEMO_URL']}"
     logger.debug(f'-> routes.entry auth={current_user.is_authenticated} demo={demo_site}')
 
     # If not logged in, a login page is shown here first
-    return render_template('/index_entry.html', demo_site=demo_site)
+    return render_template('/index_entry.html', demo_site=demo_site, lang=lang)
 
 """ -------------------------- Yleinen virhesivu ------------------------------
 """

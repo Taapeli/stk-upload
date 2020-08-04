@@ -87,7 +87,8 @@ def join():
             if name == "csrf_token": continue
             if name == "submit": continue
             msg += f"\n{name}: {value}"
-        if email.email_admin("New user request for Isotammi", msg ):
+        if email.email_admin("New user request for Isotammi", msg,
+                             sender=request.form.get('email') ):
             flash(_("Join message sent"))
         else:
             flash(_("Sending join message failed"))

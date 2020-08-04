@@ -154,7 +154,7 @@ class DOM_handler():
         ''' Link the Nodes without OWNS link to Batch
         '''
         result = self.tx.run(Cypher_mixed.add_links, batch_id=self.batch_id)
-        counters = result.consume().counters
+        counters = shareds.current_neo4j.consume_counters(result)
         if counters.relationships_created:
             print(f"Created {counters.relationships_created} relations")
 
