@@ -247,12 +247,13 @@ class Refname:
 
 #             logging.debug("Created Refname {} nodes for {}".format(\
 #                     result.consume().counters.nodes_created, name))
-            counters = shareds.current_neo4j.consume_counters(result)
-            logger.debug(f"For {name} created {counters}")
+#             counters = shareds.current_neo4j.consume_counters(result)
+#             logger.debug(f"For {name} created {counters}")
 
-        except Exception as err:
-            # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
-            print("iError: {0}".format(err), file=stderr)
+        except Exception as e:
+            print("iError: {0}".format(e), file=stderr)
+            logging.error(f'Refname.link_to_refname: person={pid}, {e.__class__.__name__}, {e}')            
+            raise
 
 
     @staticmethod

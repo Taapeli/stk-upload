@@ -330,8 +330,7 @@ ORDER BY name.order"""
 
     get_all_persons_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
-RETURN ID(p) AS ID, n.firstname AS fn, n.prefix AS vn, n.surname AS sn, n.suffix AS pn,
-    p.sex AS sex
+RETURN ID(p) AS pid, n as name
 ORDER BY n.order"""
 
 

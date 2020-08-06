@@ -778,7 +778,7 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
         context_code = args.get('context_code')
 #        result = Person_combo.get_person_w_events(keys, args=args)
 
-        with shareds.driver.session() as session:
+        with shareds.driver.session(default_access_mode='READ') as session:
             try:
                 if rule == 'uniq_id':
                     return session.run(Cypher_person.get_events_uniq_id, id=int(key))

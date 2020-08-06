@@ -58,7 +58,7 @@ class Name:
         '''
         n = cls()
         n.uniq_id = node.id
-        n.id = node.id
+        #n.id = node.id    # Name has no id "N0000"
         n.type = node['type']
         n.firstname = node.get('firstname', '')
         n.prefix = node.get('prefix', '')
@@ -142,24 +142,32 @@ class Name:
 
     @staticmethod
     def get_personnames(tx=None, uniq_id=None):
-        """ Picks all Name versions of this Person or all persons
-    # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
-    # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
-    # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
-    # │30796│"Björn"             │""        │"Jönsson"     │"M"  │
-    # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
-    # │30858│"Catharina Fredrika"│"Åkerberg"│""            │"F"  │
-    # └─────┴────────────────────┴──────────┴──────────────┴─────┘
-        Sex field is not used currently - Remove?
+        """ Picks all Name versions of this Person or all persons.
+        
+            Use optionally refnames or sortname for person selection
         """
         if not tx:
             tx = shareds.driver.session()
 
         if uniq_id:
-            return tx.run(Cypher_person.get_names, pid=uniq_id)
+            result = tx.run(Cypher_person.get_names, pid=uniq_id)
         else:
-            return tx.run(Cypher_person.get_all_persons_names)
+            result = tx.run(Cypher_person.get_all_persons_names)
 
+        names = []
+        for record in result:
+            # <Record
+            #    pid=82
+            #    name=<Node id=83 labels=frozenset({'Name'})
+            #        properties={'firstname': 'Jan Erik', 'surname': 'Mannerheimo',
+            #            'prefix': '', 'suffix': 'Jansson', 'type': 'Birth Name', 'order': 0}
+            # >  >
+            node = record['name']
+            name = Name.from_node(node)
+            name.person_uid =  record['pid']
+            names.append(name)
+        return names
+            
 
     @staticmethod
     def get_surnames():
