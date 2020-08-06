@@ -63,6 +63,15 @@ div#pop-buttons button.button {
     padding: 0 .3em;
     border-radius: 5px;
 }
+#close-x {
+    position: relative;
+    z-index: 2;
+    height: 0;
+    cursor: pointer;
+    text-align: right;
+    color: gray;
+    font-size: x-large;
+}
 
 
 div.pop-box ul {
@@ -136,8 +145,8 @@ div.pop-box ul {
     </span>
 </div>
 
-<!--  <div id="pop-window" v-if="look | families.length > 0" v-on:click="look = !look"> -->
-  <div id="pop-window" v-bind:class="{ show: isShow }" v-if="families.length > 0" v-on:click="isShow != isShow">
+  <div id="pop-window" v-if="families.length > 0" v-on:click="families=[]">
+    <div id="close-x">✕</div>
     <div id="pop-buttons" v-if="families.length > 1">
       <button class="button"
             v-on:mouseover="changeFamily(index)"
