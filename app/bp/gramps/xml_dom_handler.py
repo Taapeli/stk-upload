@@ -17,6 +17,7 @@ import xml.dom.minidom
 
 from flask_babelex import _
 
+import shareds
 from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
@@ -154,7 +155,7 @@ class DOM_handler():
         ''' Link the Nodes without OWNS link to Batch
         '''
         result = self.tx.run(Cypher_mixed.add_links, batch_id=self.batch_id)
-        counters = result.consume().counters
+        counters = shareds.current_neo4j.consume_counters(result)
         if counters.relationships_created:
             print(f"Created {counters.relationships_created} relations")
 

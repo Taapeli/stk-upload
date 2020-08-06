@@ -47,14 +47,19 @@ function confirm_delete(url) {
     <div class="startbox admin">
       <div style="display: inline-block;">
         <h3>{{ _('Database Emptyings') }}</h3>
-            <p><i>{{ _('Dangerous operations, which can not be undone!') }}</i></p>
+        <ul><li><i>{{ _('Dangerous operations, which can not be undone!') }}</i></li>
             <ul>
               <li><a href="#" onclick="confirm_clear('/admin/clear_db/total')">
                   {{ _('Clear the entire database') }}</a></li>
               <li><a href="#" onclick="confirm_clear('/admin/clear_db/save_users')">
                   {{ _('Clear the database but save user IDs') }}</a></li>
-              <li>{{ _('Delete all my imported data') }} ➔ <a href="/settings">{{ _("My Home Page") }}</a></li>
+              <li>{{ _('Delete all my imported data') }} ➔ <a href="/settings">{{ _("My Home Page") }}</a><br></li>
            </ul>
+           <li title="Tai poista node (:Lock{id:'initial'})">
+              <a href="/admin/start_initiate">{{ _('Database refresh') }}</a>.
+              {{ _('Safely check and initiate important nodes, constraints and schema fixes') }}.
+           </li>
+        </ul>
       </div>
     </div>
 {% endif %}

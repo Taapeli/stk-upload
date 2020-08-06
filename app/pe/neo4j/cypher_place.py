@@ -10,11 +10,11 @@ class CypherPlace():
     '''
 
     _get_name_hierarchies_tail = """
-    OPTIONAL MATCH (place:Place) -[:NAME]-> (pn:Place_name)
+    OPTIONAL MATCH (place) -[:NAME]-> (pn:Place_name)
         WHERE NOT pn = name
 //  WITH place, name, COLLECT(DISTINCT pn) AS names, COUNT(ref) AS uses
-        OPTIONAL MATCH (place:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
-        OPTIONAL MATCH (place:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
+        OPTIONAL MATCH (place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
+        OPTIONAL MATCH (place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
         RETURN place, name, COUNT(DISTINCT ref) AS uses,
             COLLECT(DISTINCT pn) AS names,
             COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
@@ -25,14 +25,14 @@ class CypherPlace():
 MATCH () -[:PASSED]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
     WHERE name.name >= $fw
 WITH place, name ORDER BY name.name LIMIT  $limit
-    OPTIONAL MATCH (place:Place) <-[:PLACE]- (ref)
+    OPTIONAL MATCH (place) <-[:PLACE]- (ref)
 """ + _get_name_hierarchies_tail
 
     get_my_name_hierarchies = """
 MATCH (b:Batch) -[:OWNS]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
     WHERE b.user = $user AND name.name >= $fw
 WITH place, name ORDER BY name.name LIMIT $limit
-    OPTIONAL MATCH (place:Place) <-[:PLACE]- (ref) <-[*2]- (b:Batch)
+    OPTIONAL MATCH (place) <-[:PLACE]- (ref) <-[*2]- (b)
         WHERE b.user = $user
 """ + _get_name_hierarchies_tail
 

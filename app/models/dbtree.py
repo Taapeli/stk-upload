@@ -78,7 +78,7 @@ class DbTree():
             └──────────────────────────────┴────┴───────┘
         """
         self.node_id = node_id
-        with self.driver.session() as session:
+        with self.driver.session(default_access_mode='READ') as session:
             result = session.run(self.query, locid=int(node_id))
             return [(record["nodes"], record["lv"], record["r"]) 
                     for record in result]
@@ -111,7 +111,7 @@ class DbTree():
         # then move all nodes under correct parent
         for nodes, _level, relations in hierarchy_result:
             for rel in relations:
-                self.tree.move_node(rel.start, rel.end)
+                self.tree.move_node(rel.start_node.id, rel.end_node.id)
         return self.tree
 
 
