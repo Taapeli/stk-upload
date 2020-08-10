@@ -10,12 +10,12 @@ function showPopup(id) {
     //TODO: Find person families first
     vm.getFamilies(id);
   }
-function away() {
-	// When the user clicks on div, close the popup windoe
-    var popup = document.getElementById("popup");
-    console.log("showPopup close");
-    popup.classList.toggle("show");
-}
+//function away() {
+//	// When the user clicks on div, close the popup windoe
+//    var popup = document.getElementById("popup");
+//    console.log("showPopup close");
+//    popup.classList.toggle("show");
+//}
 
 function parseSortname(name) {
 	// Returns [surname,firstname,patronyme]
@@ -73,6 +73,17 @@ var vm = new Vue({
 	  		    }
 	   },
 	   methods: {
+		   showFamilies(event) {
+			      var pop = document.getElementById('popup-window');
+			      var x = event.clientX;
+			      var y = event.clientY; //  - pop.clientHeight/2;
+			      console.log("Click on x=" + x + ", y=" + y);
+			      y -= pop.clientHeight/2;
+			      x += 14;
+			      pop.style.left = x+"px";
+			      pop.style.top = y+"px";
+			      pop.style.visibility = "visible";
+			},
 		   changeFamily(index) {
 			   // No 0 (=false) is allowed in currentId
 	           console.log("changeFamily: katsotaan "+vm.families[index].id);
