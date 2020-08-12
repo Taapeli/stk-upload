@@ -18,16 +18,13 @@
     
 */
 #pop-window {
-    max-width: 416px; 
+    max-width: 516px; 
     max-height: 250px; 
     background: #f2f1f0;
     overflow: scroll;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
     position: absolute;
     z-index: 1;
-    top: 25%;
-    left: 50%;
-    margin-left: -208px;
 }
 #pop-buttons {
     list-style-type: none;
@@ -117,7 +114,7 @@ div.pop-box ul {
     <div>Henkilön uuid <input v-model="person_uuid"></div>
     <div>
         
-        <button v-on:click="getFamilies(uuid=person_uuid)">
+        <button v-on:click="getFamilies(uuid=person_uuid, $event)">
           Hae perheet</button>
     </div>
     <div>${status} <span style="color:red">${ message }</span></div>
@@ -145,11 +142,11 @@ div.pop-box ul {
     </span>
 </div>
 
-  <div id="pop-window" v-if="families.length > 0" v-on:click="families=[]">
+  <div id="pop-window" v-show="families.length > 0" v-on:click="families=[]">
     <div id="close-x">✕</div>
     <div id="pop-buttons" v-if="families.length > 1">
       <button class="button"
-            v-on:mouseover="changeFamily(index)"
+            v-on:mouseover="changeFamily(index, $event)"
             v-for="(f, index) of families" :key="f.id">
         ${index+1}. ${f.role}</button>
     </div>

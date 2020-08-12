@@ -56,7 +56,9 @@ var vm = new Vue({
 	   delimiters: ['${', '}'],
 	   data: {
 	     message: 'Not yet run',
-	     person_uuid: '459d19f508b04865b333954c304313b7', //'paste here',
+	     //person_uuid: '459d19f508b04865b333954c304313b7', //'paste here',
+	     person_uuid: '6d51d0c8201c4065b9a8f0d33274ae00', //'paste here',
+
 	     uuid: '?',
 	     families: [],
 	     currentId: 0,
@@ -84,7 +86,7 @@ var vm = new Vue({
 			      pop.style.top = y+"px";
 			      pop.style.visibility = "visible";
 			},
-		   changeFamily(index) {
+		   changeFamily(index, event) {
 			   // No 0 (=false) is allowed in currentId
 	           console.log("changeFamily: katsotaan "+vm.families[index].id);
 	           vm.currentId = index+1;
@@ -99,9 +101,11 @@ var vm = new Vue({
 //			    //popup.classList.toggle("show");
 //			},
 
-		   getFamilies(q_uuid) {
+		   getFamilies(q_uuid, event) {
 			   // Asks for data for all families of given person
 	           console.log("family for person "+q_uuid);
+			   var x = event.pageX;
+			   var y = event.pageY; 
 		       axios.post("/scene/json/families", {uuid:q_uuid})
 		            .then (function(rsp, q_uuid) {
 		            	   vm.families = [];
@@ -161,6 +165,9 @@ var vm = new Vue({
 	                               vm.families.push(fam);
 	                    	   }
 	                       }
+					       var pop = document.getElementById('pop-window');
+					       pop.style.left = x+"px";
+					       pop.style.top = y+"px";
 	                       vm.changeFamily(0);
 	    			 })
 	   	   }
