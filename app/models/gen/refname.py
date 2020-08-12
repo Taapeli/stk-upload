@@ -193,7 +193,7 @@ class Refname:
 #                         result.consume().counters.nodes_created, 
 #                         result.consume().counters.relationships_created, 
 #                         self.name, self.refname))
-                counters = shareds.current_neo4j.consume_counters(result)
+                counters = shareds.db.consume_counters(result)
                 logger.debug(f"For {self.name}-->{self.refname} created {counters}")
 #                     for record in result:
 #                         a_oid = record["aid"]
@@ -217,7 +217,7 @@ class Refname:
 #                 logging.debug("Created {} node for {}".format(\
 #                         result.consume().counters.nodes_created, 
 #                         self.name))
-                counters = shareds.current_neo4j.consume_counters(result)
+                counters = shareds.db.consume_counters(result)
                 logger.debug(f"For {self.name} created {counters}")
 #                 for record in result:
 #                     a_oid = record["aid"]
@@ -247,7 +247,7 @@ class Refname:
 
 #             logging.debug("Created Refname {} nodes for {}".format(\
 #                     result.consume().counters.nodes_created, name))
-#             counters = shareds.current_neo4j.consume_counters(result)
+#             counters = shareds.db.consume_counters(result)
 #             logger.debug(f"For {name} created {counters}")
 
         except Exception as e:
@@ -266,7 +266,7 @@ class Refname:
                 # Remove all Refnames
                 t0 = time.time()
                 result = session.run(Cypher_refname.delete_all)
-                counters = shareds.current_neo4j.consume_counters(result)
+                counters = shareds.db.consume_counters(result)
                 logger.info("Deleted all Refnames: {}; {} sek".\
                               format(counters, time.time()-t0))
             except Exception as e:
@@ -276,7 +276,7 @@ class Refname:
                 # Create unique constrain for Refnames
                 t0 = time.time()
                 result = session.run(Cypher_refname.set_constraint)
-                counters = shareds.current_neo4j.consume_counters(result)
+                counters = shareds.db.consume_counters(result)
                 logger.info("Set unique constraint for Refnames: {}; {} sek".\
                               format(counters, time.time()-t0))
             except Exception as e: # ClientError in neo4j 4.0
