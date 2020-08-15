@@ -56,8 +56,7 @@ var vm = new Vue({
 	   delimiters: ['${', '}'],
 	   data: {
 	     message: 'Not yet run',
-	     //person_uuid: '459d19f508b04865b333954c304313b7', //'paste here',
-	     person_uuid: '6d51d0c8201c4065b9a8f0d33274ae00', //'paste here',
+	     person_uuid: 'a7388323a535424a8dca5730408628bf', // 'paste here',
 
 	     uuid: '?',
 	     families: [],
@@ -78,7 +77,7 @@ var vm = new Vue({
 		   showFamilies(event) {
 			      var pop = document.getElementById('popup-window');
 			      var x = event.clientX;
-			      var y = event.clientY; //  - pop.clientHeight/2;
+			      var y = event.clientY;
 			      console.log("Click on x=" + x + ", y=" + y);
 			      y -= pop.clientHeight/2;
 			      x += 14;
@@ -91,15 +90,6 @@ var vm = new Vue({
 	           console.log("changeFamily: katsotaan "+vm.families[index].id);
 	           vm.currentId = index+1;
 			},
-
-//			away() {
-//				// When the user clicks on div, close the popup windoe
-//			    var popup = document.getElementById("popup");
-//			    console.log("away hidden = "+popup.hidden);
-//			    popup.hidden = true;
-//			    console.log("away hidden = "+popup.hidden);
-//			    //popup.classList.toggle("show");
-//			},
 
 		   getFamilies(q_uuid, event) {
 			   // Asks for data for all families of given person
@@ -166,6 +156,8 @@ var vm = new Vue({
 	                    	   }
 	                       }
 					       var pop = document.getElementById('pop-window');
+					       y -= y/2;
+					       x += 14;
 					       pop.style.left = x+"px";
 					       pop.style.top = y+"px";
 	                       vm.changeFamily(0);

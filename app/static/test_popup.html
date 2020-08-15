@@ -10,22 +10,49 @@
 
 <body>
 <style>
-/* Color scale:
-    pop-window:         #f2f1f0 / black
+/* Color palette:
+    pop-window:         #a1c6d9 / black
+    - border:           #6491a8
     - button:           #008CBA / white
     pop-container > div:#d4dee3 / black
     - inlink:           #f9ebcd LemonChiffon / #006
     
 */
 #pop-window {
-    max-width: 516px; 
+    max-width: 416px; 
     max-height: 250px; 
-    background: #f2f1f0;
+    background: #a1c6d9;
     overflow: scroll;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
     position: absolute;
+    margin:6px;
+    padding: 5px;
+    border-radius: 5px;
+    border-color: #6491a8;
+    border-width: 1.5pt;
+    border-style: solid;
     z-index: 1;
 }
+#pop-window:after {
+    right: 100%;
+    top: 50%;
+    content: ' ';
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-style:solid;
+    border-color: white;
+    border-width: 6px;
+    border-radius: 6px;
+    margin-right: -6px;
+    border-right-color: green;
+    z-index: 2;
+/*     border: solid transparent; */
+/*     margin-top: -6px; */
+    border-right-color: #6491a8;
+}
+
 #pop-buttons {
     list-style-type: none;
 }
@@ -66,7 +93,7 @@ div#pop-buttons button.button {
     height: 0;
     cursor: pointer;
     text-align: right;
-    color: gray;
+    color: white;
     font-size: x-large;
 }
 
@@ -120,27 +147,7 @@ div.pop-box ul {
     <div>${status} <span style="color:red">${ message }</span></div>
   </div>
 
-<div id="popup" class="popup">
-    <span class="popupbox" id="popWin" title="perhe F0249" v-show="false">
-        <p>Staattinen popup-esimerkki</p>
-        <p><a href="/scene/family?uuid=e8450bbbd48348338abce8b900df3bf8" title="e8450bbbd48348338abce8b900df3bf8" class="inlink">
-                         Perhe avioliitossa</a>
-                       3.12.1820</p>
-        <ul>
-            <li>Mies: <a href="/scene/person?uuid=ea28" class="inlink" title="Katso henkilön ea28f1 tiedot (nr. 548956)">Anders <i>Jacobsson</i>  <b></b></a> s.&nbsp;19.11.1762
-            </li>
-            <li>Vaimo: <a href="/scene/person?uuid=f8bb" class="inlink" title="Katso henkilön f8bb4c tiedot (nr. 548968)">Maria <i>Johansdotter</i>  <b></b></a> s.&nbsp;26.9.1787
-            </li>
-            <li>Lapset<ul>
-                <li>Poika: <a href="/scene/person?uuid=36a1" class="inlink" title="Katso henkilön 36a108 tiedot (nr. 549096)">Jonas <i>Andersson</i>  <b></b></a> s.&nbsp;15.8.1825
-                </li>
-                <li>Poika: <span class="myself">&nbsp;(itse)&nbsp;</span>
-                </li>
-                </ul>
-            </li>
-       </ul>
-    </span>
-</div>
+<!--div id="popup" class="popup">Removed 15.8.2020</div -->
 
   <div id="pop-window" v-show="families.length > 0" v-on:click="families=[]">
     <div id="close-x">✕</div>
