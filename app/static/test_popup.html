@@ -10,133 +10,44 @@
 
 <body>
 <style>
-/* Color palette:
-    pop-window:         #a1c6d9 / black
-    - border:           #6491a8
-    - button:           #008CBA / white
-    pop-container > div:#d4dee3 / black
-    - inlink:           #f9ebcd LemonChiffon / #006
-    
-*/
-#pop-window {
-    max-width: 416px; 
-    max-height: 250px; 
-    background: #a1c6d9;
-    overflow: scroll;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
-    position: absolute;
-    margin:6px;
-    padding: 5px;
-    border-radius: 5px;
-    border-color: #6491a8;
-    border-width: 1.5pt;
-    border-style: solid;
-    z-index: 1;
-}
-#pop-window:after {
-    right: 100%;
-    top: 50%;
-    content: ' ';
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-    border-style:solid;
-    border-color: white;
-    border-width: 6px;
-    border-radius: 6px;
-    margin-right: -6px;
-    border-right-color: green;
-    z-index: 2;
-/*     border: solid transparent; */
-/*     margin-top: -6px; */
-    border-right-color: #6491a8;
-}
-
-#pop-buttons {
-    list-style-type: none;
-}
-div#pop-buttons button.button {
-  padding: 2px 5px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  cursor: pointer;
-  background: #008CBA;
-  color: white;
-  border-radius: 1em;
-  margin: 5px 2px;
-}
-
-.pop-container {
-    display: flex;
-    flex-wrap: nowrap;
-}
-.pop-container > div {
-    background: #d4dee3;
-/*     color:white; */
-    font-size:9pt;
-    padding:4px;
-    margin:4px;
-    width:404px !important;
-}
-.pop-box a.inlink {
-    background: #f9ebcd;
-/*  color:white; */
-    margin: 0 .3em;
-    padding: 0 .3em;
-    border-radius: 5px;
-}
-#close-x {
-    position: relative;
-    z-index: 2;
-    height: 0;
-    cursor: pointer;
-    text-align: right;
-    color: white;
-    font-size: x-large;
-}
-
-
-div.pop-box ul {
-    padding-left:1.5em;
-}
 .row div { display: inline-block; }
 </style>
 
-<h2>Popup</h2>
-<p style="margin:4em;">&nbsp;</p>
-<table>
-<td class="ColumnPerson">
-    <div>
-        <div class="detail_link">
-            ♂ <a href="/scene/person?uuid=58dc6b1ec48a490c94f52ea2b2024936"
-            class="inlink" title="Katso henkilön 034454 tiedot (nr. 549094)">Anders Reinhold <i>Andersson</i>
-                <b></b></a>
-            <div class="popup" onclick="showPopup(id='58dc6b1ec48a490c94f52ea2b2024936')"
-                title="Näytä perheet"> 👨‍👧‍👦</div>
-        </div>
-        <br>
-        <span class="idno">Uuid:0206d8 /</span>
-        <span class="id" title="Alkuperäinen tunniste">I2090</span>
-    </div>
-</td>
-<td class="ColumnEvent">
-    <div>
-        <div class="eventgrid">
-            <div class="col col_event"><span class="evtype major">syntymä</span></div>
-            <div class="col col_date">15.8.1825 | Perttala</div>
-        </div>
-        <div class="eventgrid">
-            <div class="col col_event"><span class="evtype major">kuolema</span></div>
-            <div class="col col_date">8.12.1846 | Keskitalo</div>
-        </div>
-    </div>
-</td>
-</table>
-
-<hr>
 <div id="popup_app">
+
+  <h2>Popup test</h2>
+  <p style="margin:4em;">&nbsp;</p>
+  <table>
+  <td class="ColumnPerson">
+      <div>
+          <div class="detail_link">
+              ♂ <a href="/scene/person?uuid=58dc6b1ec48a490c94f52ea2b2024936"
+              class="inlink" title="Katso henkilön 034454 tiedot (nr. 549094)">Anders Reinhold <i>Andersson</i>
+                  <b></b></a>
+              <div class="pop-open-family" 
+                  v-on:click="showPopup(id='58dc6b1ec48a490c94f52ea2b2024936',$event)"
+                  title="Näytä perheet"> 👨‍👧‍👦</div>
+          </div>
+          <br>
+          <span class="idno">Uuid:0206d8 /</span>
+          <span class="id" title="Alkuperäinen tunniste">I2090</span>
+      </div>
+  </td>
+  <td class="ColumnEvent">
+      <div>
+          <div class="eventgrid">
+              <div class="col col_event"><span class="evtype major">syntymä</span></div>
+              <div class="col col_date">15.8.1825 | Perttala</div>
+          </div>
+          <div class="eventgrid">
+              <div class="col col_event"><span class="evtype major">kuolema</span></div>
+              <div class="col col_date">8.12.1846 | Keskitalo</div>
+          </div>
+      </div>
+  </td>
+  </table>
+  
+  <hr>
   <div class="row">
     <div>Henkilön uuid <input v-model="person_uuid"></div>
     <div>
@@ -147,7 +58,6 @@ div.pop-box ul {
     <div>${status} <span style="color:red">${ message }</span></div>
   </div>
 
-<!--div id="popup" class="popup">Removed 15.8.2020</div -->
 
   <div id="pop-window" v-show="families.length > 0" v-on:click="families=[]">
     <div id="close-x">✕</div>
@@ -159,7 +69,7 @@ div.pop-box ul {
     </div>
 
     <div class="pop-container">
-      <div class="pop-box" v-if="currentId">
+      <div class="pop-text" v-if="currentId">
           <p><a v-bind:href="current.href" title="See family" class="inlink">
               Perheessä ${current.role}</a>  ${current.rel_type} ${current.dates}
           </p>
@@ -192,13 +102,15 @@ div.pop-box ul {
               </li>
           </ul>
       </div>
-
     </div>
   </div>
+  <div class="pop-error" v-show="families.length == 0" v-on:click="families=[]">
+    <!-- No families -->
+    <p style="border:2ps sold red;">${message}</p>
+  </div>
 
-</div>
 </body>
 </html>
-<!-- vue and assistant  -->
+<!-- vue and assistant methods -->
 <script src="/static/js/family_popup.js"></script>
 

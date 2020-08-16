@@ -393,7 +393,7 @@ def json_get_person_families():
         results = reader.get_person_families(uuid)
 
         if results.get('status') != 0:
-            return jsonify({"member":uuid, 
+            return jsonify({"member":uuid, "records":[],
                             "statusText":results.get('statustext'),
                             "status":Status.NOT_FOUND})
         res = []

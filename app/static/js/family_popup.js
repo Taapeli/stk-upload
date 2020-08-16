@@ -2,21 +2,6 @@
  * Method for displaying Family information as popup-window
  */
 
-function showPopup(id) {
-	// When the user clicks on div, open the popup window
-    var popup = document.getElementById("popup");
-    console.log("showPopup for person "+id);
-    popup.classList.toggle("show");
-    //TODO: Find person families first
-    vm.getFamilies(id);
-  }
-//function away() {
-//	// When the user clicks on div, close the popup windoe
-//    var popup = document.getElementById("popup");
-//    console.log("showPopup close");
-//    popup.classList.toggle("show");
-//}
-
 function parseSortname(name) {
 	// Returns [surname,firstname,patronyme]
     return name.split("#");
@@ -51,6 +36,8 @@ function dateLocal(date) {
     return "?"
   }
 
+/* --------------------------------- Vue ----------------------------------- */
+
 var vm = new Vue({
 	   el: '#popup_app',
 	   delimiters: ['${', '}'],
@@ -65,15 +52,26 @@ var vm = new Vue({
 	     isShow: false
 	   },
 	   computed: {
-	  		 current: function () {
+	  		current: function () {
 	  			 // currentId = 1,2,...
 	  			 if (vm.currentId <= vm.families.length && vm.currentId > 0)
 	  				 return vm.families[vm.currentId-1];
-	  			 console.log("false currentId "+ vm.currentId);
+	  			 //console.log("Exit currentId "+ vm.currentId);
 	  			 return false;
-	  		    }
+	  		},
+	   		getMessage: function () {
+	   			return vm.message;
+	   		}
 	   },
 	   methods: {
+		   showPopup(id, event) {
+				// When the user clicks, open the popup window
+			    var popup = document.getElementById("pop-window");
+			    console.log("showPopup for person "+id);
+			    popup.classList.toggle("show");
+			    //TODO: Find person families first
+			    vm.getFamilies(id, event);
+			  },
 		   showFamilies(event) {
 			      var pop = document.getElementById('popup-window');
 			      var x = event.clientX;
@@ -103,6 +101,7 @@ var vm = new Vue({
 	                       //console.log("stk result: "+rsp.data.statusText);
 	                       vm.message=rsp.data.statusText;
 	                       if (rsp.data.records.length == 0) {
+	                    	   // No families found
 	                    	   vm.families=[];
 	                    	   return;
 	                       }
