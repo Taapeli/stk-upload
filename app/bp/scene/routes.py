@@ -404,11 +404,12 @@ def json_get_person_families():
 
             fdict = {
                 "rel_type": translate(family.rel_type, 'marr'),
-                "dates": family.dates.to_list(),
                 "id": family.id,
                 "uuid": family.uuid,
                 "role": translate(family.role, 'role')
             }
+            if family.dates:
+                fdict['dates'] = family.dates.to_list()
             parents = []
             if family.father:
                 parent = {

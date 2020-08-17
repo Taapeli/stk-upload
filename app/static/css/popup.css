@@ -90,25 +90,24 @@
     border-style: solid;
     z-index: 1;
 }
-#pop-window:after {
-    right: 100%;
-    top: 50%;
-    content: ' ';
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-    border-style:solid;
-    border-color: white;
-    border-width: 6px;
-    border-radius: 6px;
-    margin-right: -6px;
-    border-right-color: green;
-    z-index: 2;
-/*     border: solid transparent; */
-/*     margin-top: -6px; */
-    border-right-color: #6491a8;
-}
+/* #pop-window:after { */
+/*     right: 100%; */
+/*     top: 50%; */
+/*     content: ' '; */
+/*     height: 0; */
+/*     width: 0; */
+/*     position: absolute; */
+/*     pointer-events: none; */
+/*     border-style:solid; */
+/*     border-color: white; */
+/*     border-width: 6px; */
+/*     border-radius: 6px; */
+/*     margin-right: -6px; */
+/*     border-right-color: green; */
+/*     z-index: 2; */
+/* *   border: solid transparent; margin-top: -6px; */
+/*     border-right-color: #6491a8; */
+/* } */
 
 #pop-buttons {
     list-style-type: none;

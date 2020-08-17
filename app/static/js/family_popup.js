@@ -47,16 +47,16 @@ var vm = new Vue({
 
 	     uuid: '?',
 	     families: [],
-	     currentId: 0,
+	     currentIndex: 0,
 	     status: '',
 	     isShow: false
 	   },
 	   computed: {
 	  		current: function () {
-	  			 // currentId = 1,2,...
-	  			 if (vm.currentId <= vm.families.length && vm.currentId > 0)
-	  				 return vm.families[vm.currentId-1];
-	  			 //console.log("Exit currentId "+ vm.currentId);
+	  			 // currentIndex = 1,2,...
+	  			 if (vm.currentIndex <= vm.families.length && vm.currentIndex > 0)
+	  				 return vm.families[vm.currentIndex-1];
+	  			 //console.log("Exit currentIndex "+ vm.currentIndex);
 	  			 return false;
 	  		},
 	   		getMessage: function () {
@@ -64,14 +64,21 @@ var vm = new Vue({
 	   		}
 	   },
 	   methods: {
-		   showPopup(id, event) {
-				// When the user clicks, open the popup window
-			    var popup = document.getElementById("pop-window");
-			    console.log("showPopup for person "+id);
-			    popup.classList.toggle("show");
-			    //TODO: Find person families first
-			    vm.getFamilies(id, event);
-			  },
+		   showPopup(uuid, event) {
+			   // When the user clicks, open the popup window
+			   var popup = document.getElementById("pop-window");
+			   console.log("showPopup for person "+uuid);
+			   popup.classList.toggle("show");
+			   // Clicked position
+//			   console.log("*offset:", event.target.offsetTop, event.target.offsetLeft);
+//			   console.log(" client:", event.clientX, event.clientY);
+//			   console.log(" x,y:   ", event.x, event.y);
+//			   console.log(" page:  ", event.pageX, event.pageY);
+//			   console.log(" screen:", event.screenX, event.screenY);
+			   var x = event.target.offsetLeft;
+			   var y = event.target.offsetTop; 
+			   vm.getFamilies(uuid, x,y);
+		   },
 		   showFamilies(event) {
 			      var pop = document.getElementById('popup-window');
 			      var x = event.clientX;
@@ -84,16 +91,14 @@ var vm = new Vue({
 			      pop.style.visibility = "visible";
 			},
 		   changeFamily(index, event) {
-			   // No 0 (=false) is allowed in currentId
-	           console.log("changeFamily: katsotaan "+vm.families[index].id);
-	           vm.currentId = index+1;
+			   // No 0 (=false) is allowed in currentIndex
+		           console.log("changeFamily: katsotaan "+vm.families[index].id);
+	           vm.currentIndex = index+1;
 			},
 
-		   getFamilies(q_uuid, event) {
+		   getFamilies(q_uuid, x,y) {
 			   // Asks for data for all families of given person
-	           console.log("family for person "+q_uuid);
-			   var x = event.pageX;
-			   var y = event.pageY; 
+	           console.log("family for person "+q_uuid+" at ["+x+", "+y+"]");
 		       axios.post("/scene/json/families", {uuid:q_uuid})
 		            .then (function(rsp, q_uuid) {
 		            	   vm.families = [];
@@ -147,7 +152,7 @@ var vm = new Vue({
 	                                       c.is_self = "";
 	                                   }
 	                                   c.href = "/scene/person?uuid="+child.uuid
-	                                   c.gender = gentext[child.sex];
+	                                   c.gender = child.sex;
 	                                   c.birth = datesStr(child.dates, first=false);
 	                                   fam.children.push(c);
 	                               }
@@ -155,7 +160,7 @@ var vm = new Vue({
 	                    	   }
 	                       }
 					       var pop = document.getElementById('pop-window');
-					       y -= y/2;
+					       y -= 35;
 					       x += 14;
 					       pop.style.left = x+"px";
 					       pop.style.top = y+"px";
