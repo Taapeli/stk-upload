@@ -70,6 +70,8 @@ class Family(NodeObject):
         n.mother_sortname = node.get('mother_sortname','')
         if "datetype" in node:
             n.dates = DateRange(node["datetype"], node["date1"], node["date2"])
+        else:
+            n.dates = DateRange()
         return n
 
 
@@ -255,8 +257,13 @@ class FamilyReader(DBreader):
         res = self.dbdriver.dr_get_person_families(uuid)
         families = res.get('items')
         if families:
+#             try:
             families.sort(key=lambda x: x.dates)
             return {"items":families, "status":Status.OK}
+#             except TypeError:
+#                 print(f'bl.family.FamilyReader.get_person_families: sort by date failed')
+#                 return {"items":families, "status":Status.OK, 
+#                     "statustext": 'Failed to sort families'}
         else:
             return {"items":[], "status":Status.NOT_FOUND, 
                     "statustext": 'This person has no families'}

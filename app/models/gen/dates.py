@@ -532,7 +532,7 @@ class DateRange():
                 - if the month part is 6 --> only year is given
             """
             if self.intvalue == -1:
-                return "-1"
+                return ""
             vec = self.vector()
             if len(vec) > 2:
                 return "{:04d}-{:02d}-{:02d}".format(vec[0], vec[1], vec[2])
