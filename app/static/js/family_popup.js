@@ -47,8 +47,8 @@ var vm = new Vue({
 		uuid: '?',
 		families: [],
 		currentIndex: 0,	// 1..n, 0 = no familiy selected
-		status: ''
-		// ,isShow: false
+		status: '',
+		isShow: false
 	},
 	computed: {
 		current: function () {
@@ -62,32 +62,27 @@ var vm = new Vue({
 	methods: {
 		showPopup(uuid, event) {
 			// When the user clicks, open the popup window
-			var popup = document.getElementById("pop-window");
-			//console.log("showPopup for person "+uuid);
-			//popup.classList.toggle("show");
-			// Get vm.families
-			vm.getFamilies(uuid);
-			console.log("Got",vm.families.length,"families")
-			vm.changeFamily(0);
+
 			// Set popup position near clicked icon
 			var x = event.target.offsetLeft + 14;
 			var y = event.target.offsetTop - 35;
 			var pop = document.getElementById('pop-window');
 			pop.style.left = x+"px";
 			pop.style.top = y+"px";
-			if (vm.families.length == 0) {
-				console.log("No families:", vm.families, vm.message, vm.currentIndex);
-				event.target.innerHTML = "&ndash;";
-			}
+			//console.log("showPopup for person "+uuid);
+
+			// Get vm.families
+			vm.getFamilies(uuid);
 		},
+
 		changeFamily(index, event) {
-			// No 0 (=false) is allowed in currentIndex
+			// Current family index in 1..n; 0 as no family
 			if (vm.families.length > 0){
 				console.log("changeFamily: katsotaan "+vm.families[index].id);
 				vm.currentIndex = index+1;
 			} else {
 				console.log("changeFamily: ei perheitä");
-				vm.currentIndex = 1;
+				vm.currentIndex = 0;
 			}
 		},
 
@@ -100,10 +95,7 @@ var vm = new Vue({
 				vm.status = "Status code: "+String(rsp.status);
 				//console.log("stk result: "+rsp.data.statusText);
 				vm.message=rsp.data.statusText;
-				if (rsp.data.records.length == 0) {
-					// No families found
-					return;
-				}
+
 				for (rec of rsp.data.records) {
 					//console.log(rec);
 					var fam = {};
@@ -127,22 +119,29 @@ var vm = new Vue({
 							p.birth = datesStr(parent.dates, first=false);
 							fam.parents.push(p);
 						}
-						//var gentext = ['Lapsi','Poika','Tytär'];
 						for (child of rec.children) {
 							fam.has_children = true;
 							var c = {uuid:child.uuid};
 							c.is_self = (c.uuid == q_uuid);
 							c.name = parseSortname(child.sortname);
 							c.href = "/scene/person?uuid="+child.uuid
-							c.gender = child.sex;
+							c.gender = child.sex; // Clear text in user language
 							c.birth = datesStr(child.dates, first=false);
 							fam.children.push(c);
 						}
 						vm.families.push(fam);
 						console.log("got family ",vm.families.length,fam.id)
-					}
-				}
-			})
-		}
-	}
-})
+					} // if rec
+				} // for
+				vm.changeFamily(0);
+				console.log("Got",vm.families.length, "families, current=", vm.currentIndex)
+				vm.isShow = true;
+			}) // axios then
+			.catch(function (error) {
+				console.log('Axios error:',error);
+				vm.message = error;
+				vm.isShow = true;
+			}) // axios catch
+		} // getFamilies
+	} // methods
+}) // Vue vm

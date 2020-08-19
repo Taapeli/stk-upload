@@ -199,7 +199,7 @@
 	{% endif %}
     </div>
 
-  <div id="pop-window" v-show="families.length > 0" v-on:click="families=[]">
+  <div id="pop-window" v-show="isShow" v-on:click="isShow=false">
     <div id="close-x">✕</div>
     <div id="pop-buttons" v-if="families.length > 1">
       <button class="button"
@@ -239,9 +239,11 @@
           </ul>
       </div>
     </div>
-    <div style="margin-right:2em;">${message}</div>
+    <div style="margin-right: 20pt; margin-top: 5pt;" v-show="families.length == 0">
+        ${message}
+    </div>
   </div>
-  <div class="pop-error"> <!-- v-show="families.length == 0" v-on:click="families=[]">  -->
+  <div class="pop-error" v-show="false"><!-- For debugging change v-show -->
     <p style="border:2px solid red; position: fixed; top: 5em;right: 0;">
        Families:<br>${message}</p>
   </div>
