@@ -48,6 +48,7 @@ var vm = new Vue({
 		families: [],
 		currentIndex: 0,	// 1..n, 0 = no familiy selected
 		status: '',
+		translations: {},
 		isShow: false
 	},
 	computed: {
@@ -85,16 +86,6 @@ var vm = new Vue({
 				vm.currentIndex = 0;
 			}
 		},
-		getTabClass(index){
-			return {
-				'tab_active': ( index == (vm.currentIndex-1) ),
-				'tab': ( index != (vm.currentIndex-1) )
-			}
-		},
-		isActiveTab(index) {
-			console.log("Tab", index, vm.currentIndex-1)
-			return ( index == (vm.currentIndex-1) );
-		},
 
 		getFamilies(q_uuid) {
 			// Asks for data for all families of given person
@@ -105,6 +96,7 @@ var vm = new Vue({
 				vm.status = "Status code: "+String(rsp.status);
 				//console.log("stk result: "+rsp.data.statusText);
 				vm.message=rsp.data.statusText;
+				vm.translations=rsp.data.translations;
 
 				for (rec of rsp.data.records) {
 					//console.log(rec);
@@ -114,6 +106,7 @@ var vm = new Vue({
 						fam.rel_type = rec.rel_type;
 						fam.dates = datesStr(rec.dates, first=true);
 						fam.role = rec.role;
+						fam.as_role = rec.as_role;
 						fam.href = "/scene/family?uuid="+rec.uuid;
 						fam.parents = [];
 						fam.children = [];

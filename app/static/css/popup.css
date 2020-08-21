@@ -112,6 +112,7 @@
 #pop-buttons {
     list-style-type: none;
     margin-left: .7em;
+    margin-top: .5em;
 }
 div#pop-buttons button.tab {
   padding: 3px 11px;
@@ -126,7 +127,12 @@ div#pop-buttons button.tab {
 /*   margin: 5px 2px 0 5px; */
 }
 .tab_active {
-    background: #d4dee3;
+    background: #d4dee3 !important;
+    color: black !important;
+    border-bottom: 0px !important;
+}
+.link_self {
+    border: solid 1.5pt #000069;
 }
 
 .pop-container {
@@ -136,11 +142,11 @@ div#pop-buttons button.tab {
 }
 .pop-container > div {
     background: #d4dee3;
-/*     color:white; */
     font-size:9pt;
     padding:4px;
-/*     margin:4px; */
     width:404px !important;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 .pop-text a.inlink {
     background: #f9ebcd;
@@ -149,9 +155,8 @@ div#pop-buttons button.tab {
     padding: 0 .3em;
     border-radius: 5px;
 }
-div.pop-text ul {
-    padding-left:1.5em;
-}
+div.pop-text ul { padding-left:1.5em; }
+div.pop-text ul li { padding-bottom:1.5pt; }
 #close-x {
     position: relative;
     z-index: 2;

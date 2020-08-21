@@ -407,7 +407,8 @@ def json_get_person_families():
                 "id": family.id,
                 "uuid": family.uuid,
                 "dates": family.dates.to_list(),
-                "role": translate(family.role, 'role')
+                "role": translate(family.role, 'role'),
+                "as_role": translate('as_'+family.role, 'role')
             }
             parents = []
             if family.father:
@@ -456,7 +457,8 @@ def json_get_person_families():
     t1 = time.time()-t0
     stk_logger(u_context, f"-> bp.scene.routes.show_person_families_json n={len(results['items'])} e={t1:.3f}")
     response = {'records':res, "member":uuid, 
-                'statusText':f'Löytyi {len(res)} perhettä'}
+                'statusText':f'Löytyi {len(res)} perhettä',
+                'translations':{'family':_('In family'), 'children': _('Children')}}
     print(json.dumps(response))
     #response.headers['Access-Control-Allow-Origin'] = '*'
     return jsonify(response) 

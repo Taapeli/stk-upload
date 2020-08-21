@@ -202,35 +202,34 @@
   <div id="pop-window" v-show="isShow" v-on:click="isShow=false">
     <div id="close-x">✕</div>
     <div id="pop-buttons" v-if="families.length > 1">
-      <button class="tab" v-on:mouseover="changeFamily(index, $event)"
+      <button v-on:mouseover="changeFamily(index, $event)"
             v-for="(f, index) of families" :key="f.id"
-            v-bind:class="getTabClass(index)">${f.role}</button>
+            v-bind:class="{ 'tab': true,
+                            'tab_active': (index==(currentIndex-1)) }">
+         ${f.as_role}</button>
     </div>
 
     <div class="pop-container">
       <div class="pop-text" v-if="currentIndex">
           <p><a v-bind:href="current.href" title="See family" class="inlink">
-              Perheessä ${current.role}</a>  ${current.rel_type} ${current.dates}
+              ${translations['family']} ${current.as_role}</a>
+              ${current.rel_type} ${current.dates}
           </p>
           <ul>
               <li v-for="p in current.parents" :key="p.uuid">
-                  ${p.role} 
-                  <span v-if="p.is_self" style="color:black;font-weight:bold;">
-                    itse
-                  </span>
-                    <a v-bind:href="p.href" class="inlink" title="Katso henkilöä"
-                        >${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
-                    <span v-if="p.birth">s.&nbsp;${p.birth}</span>
+                ${p.role} 
+                <a v-bind:href="p.href" title="Katso henkilöä"
+                   v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
+                   ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
+                  <span v-if="p.birth">s.&nbsp;${p.birth}</span>
               </li>
-              <li v-if="current.has_children">Lapset
+              <li v-if="current.has_children">${translations['children']}:
                  <ul>
                      <li v-for="p in current.children" :key="p.uuid">
                        ${p.gender}:
-                       <span v-if="p.is_self" style="color:black;font-weight:bold;">
-                         itse
-                       </span>
-                         <a v-bind:href="p.href" class="inlink" title="Katso henkilöä"
-                            >${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
+                       <a v-bind:href="p.href" title="Katso henkilöä"
+                          v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
+                          ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
                        <span v-if="p.birth">s.&nbsp;${p.birth}</span>
                      </li>
                  </ul>
