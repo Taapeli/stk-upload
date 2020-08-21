@@ -204,8 +204,7 @@
     <div id="pop-buttons" v-if="families.length > 1">
       <button class="tab" v-on:mouseover="changeFamily(index, $event)"
             v-for="(f, index) of families" :key="f.id"
-            v-bind:class="getTabClass(index)"
-            >${f.role} ${index}= ${currentIndex-1}</button>
+            v-bind:class="getTabClass(index)">${f.role}</button>
     </div>
 
     <div class="pop-container">
