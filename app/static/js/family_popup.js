@@ -85,6 +85,16 @@ var vm = new Vue({
 				vm.currentIndex = 0;
 			}
 		},
+		getTabClass(index){
+			return {
+				'tab_active': ( index == (vm.currentIndex-1) ),
+				'tab': ( index != (vm.currentIndex-1) )
+			}
+		},
+		isActiveTab(index) {
+			console.log("Tab", index, vm.currentIndex-1)
+			return ( index == (vm.currentIndex-1) );
+		},
 
 		getFamilies(q_uuid) {
 			// Asks for data for all families of given person

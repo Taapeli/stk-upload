@@ -111,29 +111,35 @@
 
 #pop-buttons {
     list-style-type: none;
+    margin-left: .7em;
 }
-div#pop-buttons button.button {
-  padding: 2px 5px;
+div#pop-buttons button.tab {
+  padding: 3px 11px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   cursor: pointer;
   background: #008CBA;
   color: white;
-  border-radius: 1em;
-  margin: 5px 2px;
+  border-top-left-radius: 1em;
+  border-top-right-radius: 1em;
+/*   margin: 5px 2px 0 5px; */
+}
+.tab_active {
+    background: #d4dee3;
 }
 
 .pop-container {
     display: flex;
     flex-wrap: nowrap;
+    margin-left: .7em;
 }
 .pop-container > div {
     background: #d4dee3;
 /*     color:white; */
     font-size:9pt;
     padding:4px;
-    margin:4px;
+/*     margin:4px; */
     width:404px !important;
 }
 .pop-text a.inlink {

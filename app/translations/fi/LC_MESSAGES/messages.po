@@ -2874,8 +2874,8 @@ msgid "Private data"
 msgstr "Yksityinen tieto"
 
 #: bp/scene/templates/scene/person.html:74
-msgid "Years"
-msgstr "Vuodet"
+msgid "Possible years"
+msgstr "Mahdolliset vuodet"
 
 #: bp/scene/templates/scene/person.html:77
 msgid "confidential"
@@ -4043,7 +4043,7 @@ msgstr "Ei henkilötietoja"
 
 #: bp/tools/templates/tools/obsolete_table_families_by_id.html:42
 msgid "Spouse"
-msgstr "Puoliso"
+msgstr "puoliso"
 
 #: bp/tools/templates/tools/obsolete_table_families_by_id.html:142
 msgid "No family information"
@@ -4424,15 +4424,15 @@ msgstr "{}noin {}"
 #: models/gen/person.py:152 models/gen/person.py:155
 #: templates/jinja_filters.py:243
 msgid "Child"
-msgstr "Lapsi"
+msgstr "lapsi"
 
 #: models/gen/person.py:153 templates/jinja_filters.py:242
 msgid "Son"
-msgstr "Poika"
+msgstr "poika"
 
 #: models/gen/person.py:154 templates/jinja_filters.py:241
 msgid "Daughter"
-msgstr "Tytär"
+msgstr "tytär"
 
 #: models/gen/person.py:162
 msgid "sex not known"
@@ -4784,7 +4784,7 @@ msgstr "myyjänä"
 
 #: templates/jinja_filters.py:95
 msgid "Husband"
-msgstr "aviomies"
+msgstr "mies"
 
 #: templates/jinja_filters.py:97
 msgid "as child"
@@ -4804,19 +4804,19 @@ msgstr "erittäin matala"
 
 #: templates/jinja_filters.py:105
 msgid "confidence 1/4"
-msgstr "alhainen"
+msgstr "alhainen (1/4)"
 
 #: templates/jinja_filters.py:106
 msgid "confidence 2/4"
-msgstr "normaali"
+msgstr "normaali (2/4)"
 
 #: templates/jinja_filters.py:107
 msgid "confidence 3/4"
-msgstr "korkea"
+msgstr "korkea (3/4)"
 
 #: templates/jinja_filters.py:108
 msgid "confidence 4/4"
-msgstr "erittäin korkea"
+msgstr "erittäin korkea (4/4)"
 
 #: templates/jinja_filters.py:122
 msgid "See"

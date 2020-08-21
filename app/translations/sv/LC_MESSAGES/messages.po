@@ -4810,11 +4810,11 @@ msgstr ""
 
 #: templates/jinja_filters.py:97
 msgid "as child"
-msgstr ""
+msgstr "barn"
 
 #: templates/jinja_filters.py:98
 msgid "as parent"
-msgstr ""
+msgstr "förälder"
 
 #: templates/jinja_filters.py:99
 msgid "Unknown role"

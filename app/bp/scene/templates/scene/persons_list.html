@@ -202,10 +202,10 @@
   <div id="pop-window" v-show="isShow" v-on:click="isShow=false">
     <div id="close-x">✕</div>
     <div id="pop-buttons" v-if="families.length > 1">
-      <button class="button"
-            v-on:mouseover="changeFamily(index, $event)"
-            v-for="(f, index) of families" :key="f.id">
-        ${index+1}. ${f.role}</button>
+      <button class="tab" v-on:mouseover="changeFamily(index, $event)"
+            v-for="(f, index) of families" :key="f.id"
+            v-bind:class="getTabClass(index)"
+            >${f.role} ${index}= ${currentIndex-1}</button>
     </div>
 
     <div class="pop-container">
