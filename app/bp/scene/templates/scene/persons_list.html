@@ -127,15 +127,12 @@
                                 {{ macro.person(p) }}
                                 <div class="pop-open-family" 
                                     v-on:click="showPopup(uuid='{{p.uuid}}',$event)"
-                                    title="Näytä perheet"> 👨‍👧‍👦</div>
+                                    title="Näytä perheet">👪</div>
                             </div>
                  {% else %}{% set _x = not_mine.append(not not_mine.pop()) %}
                             <span class="owner">&nbsp;{{ow}}&nbsp;</span>
                             <div class="no_detail" title="Ei katseluoikeutta!">
                                  {{p.sex_symbol()}} {{ macro.person_name(p.names[0]) }}
-                                <div class="pop-open-family" 
-                                    v-on:click="showPopup(uuid='{{p.uuid}}',$event)"
-                                    title="Näytä perheet"> 👨‍👧‍👦</div>
                             </div>
                  {% endif %}
 	          {% endfor %}
@@ -145,7 +142,7 @@
                                 {{ macro.person(p) }}
                                  <div class="pop-open-family" 
                                     v-on:click="showPopup(uuid='{{p.uuid}}',$event)"
-                                    title="Näytä perheet"> 👨‍👧‍👦</div>
+                                    title="Näytä perheet">👪</div>
                             </div>
 	       {% endif %}
 
@@ -225,8 +222,7 @@
               </li>
               <li v-if="current.has_children">${translations['children']}:
                  <ul>
-                     <li v-for="p in current.children" :key="p.uuid">
-                       ${p.gender}:
+                     <li v-for="p in current.children" :key="p.uuid">${p.gender}
                        <a v-bind:href="p.href" title="Katso henkilöä"
                           v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
                           ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
