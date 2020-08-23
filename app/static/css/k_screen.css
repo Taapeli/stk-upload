@@ -145,11 +145,10 @@ img#logo {
 .id { color: sienna; font-size: 80%; text-align: right; 
     font-family: serif
 }
-.changetime { color: gray; font-size: 80%;}
-
 .idno { color: gray; text-align:center; 
     font-family: monospace
 }
+.changetime { color: gray; font-size: 80%; }
 .owner { color: white; 
     font-size: 70%; 
     background: RoyalBlue;
@@ -159,9 +158,9 @@ img#logo {
 
 .detail_link {
 	display: inline;
-	width: 1em; 
-	margin:0 auto; 
-	text-align: center; 
+/* 	width: 1em;  */
+/* 	margin:0 auto;  */
+/* 	text-align: center;  */
 }
 .no_detail {
 	display: inline; 
@@ -429,6 +428,7 @@ div#nav ul li.CurrentSection a {
 div#alphanav {
     background-color: #EEE;
     position: sticky; top: 0;  /* Stk/JMä */
+    z-index: 2;
     opacity: .7;
 }
 div#alphanav ul {
@@ -928,7 +928,7 @@ a.familymap {
     margin-bottom: 4px;
 }
 #footer span.createdate {
-    display: inline-block;
+/*     display: inline-block; */
     margin-top: 7px;
 	float: right;
     text-align: right;

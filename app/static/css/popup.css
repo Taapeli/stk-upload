@@ -26,7 +26,7 @@
   margin-left: -208px;
 }
 
-/* Popup arrow */
+/* Popup arrow (not working?) */
 .popup .popupbox::after {
   content: "";
   position: absolute;
@@ -72,6 +72,9 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+@media print and (min-width: 0) {
+	.pop-open-family { display: none; }
 }
 
 #pop-window {

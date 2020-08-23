@@ -79,10 +79,10 @@ var vm = new Vue({
 		changeFamily(index) {
 			// Current family index in 1..n; 0 as no family
 			if (vm.families.length > 0){
-				console.log("changeFamily: katsotaan "+vm.families[index].id);
+				console.log("changeFamily: show "+vm.families[index].id);
 				vm.currentIndex = index+1;
 			} else {
-				console.log("changeFamily: ei perheitä");
+				console.log("changeFamily: no families");
 				vm.currentIndex = 0;
 			}
 		},
@@ -133,7 +133,7 @@ var vm = new Vue({
 							fam.children.push(c);
 						}
 						vm.families.push(fam);
-						console.log("got family ",vm.families.length,fam.id)
+						//console.log("got family ",vm.families.length,fam.id)
 					} // if rec
 				} // for
 				vm.changeFamily(0);
