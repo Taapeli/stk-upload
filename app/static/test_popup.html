@@ -63,7 +63,7 @@
     <div id="close-x">✕</div>
     <div id="pop-buttons" v-if="families.length > 1">
       <button class="button"
-            v-on:mouseover="changeFamily(index, $event)"
+            v-on:mouseover="changeFamily(index)"
             v-for="(f, index) of families" :key="f.id">
         ${index+1}. ${f.role}</button>
     </div>

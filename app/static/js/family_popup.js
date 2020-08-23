@@ -76,7 +76,7 @@ var vm = new Vue({
 			vm.getFamilies(uuid);
 		},
 
-		changeFamily(index, event) {
+		changeFamily(index) {
 			// Current family index in 1..n; 0 as no family
 			if (vm.families.length > 0){
 				console.log("changeFamily: katsotaan "+vm.families[index].id);

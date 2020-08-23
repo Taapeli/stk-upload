@@ -199,11 +199,12 @@
   <div id="pop-window" v-show="isShow" v-on:click="isShow=false">
     <div id="close-x">✕</div>
     <div id="pop-buttons" v-if="families.length > 1">
-      <button v-on:mouseover="changeFamily(index, $event)"
-            v-for="(f, index) of families" :key="f.id"
-            v-bind:class="{ 'tab': true,
-                            'tab_active': (index==(currentIndex-1)) }">
-         ${f.as_role}</button>
+      <button 
+         v-on:mouseover="changeFamily(index)"
+         v-on:touchstart="changeFamily(index)"
+         v-for="(f, index) of families" :key="f.id"
+         v-bind:class="{ 'tab': true, 'tab_active': (index==(currentIndex-1)) }">
+            ${f.as_role}</button>
     </div>
 
     <div class="pop-container">
