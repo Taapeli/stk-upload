@@ -1,0 +1,68 @@
+<html>
+<!-- https://stackoverflow.com/a/44753671/4558214 -->
+<!-- https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy -->
+<style>
+.popup {
+  visibility:hidden;
+  position: absolute;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  background: green;
+  text-align: center;
+  width: 10%;
+}
+.popup:after {
+    right: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-right-color: red;
+    border-width: 6px;
+    margin-top: -6px;
+    border-right-color: green;
+}
+</style>
+<div id="window" style="background:pink;height:100%;">
+    <div onclick="showPopup(event)" style="width:20em;border:solid 1pt blueviolet;margin:3em;">
+        Click this heading to get the x (horizontal) and y (vertical) coordinates 
+        of the mouse pointer when it was clicked.
+    </div>
+    <div id="popup" class="popup">
+      Popup text...
+    </div>
+    <div style="
+    position: absolute;
+    right: 200px;
+    top: 100px;
+    content: ' ';
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-style:solid;
+    border-color: white;
+    border-width: 6px;
+    border-radius: 6px;
+    margin-top: -6px;
+    border-right-color: green;
+    "></div>
+</div>
+<script>
+function showPopup(event) {
+      var pop = document.getElementById('popup');
+	  var x = event.clientX;
+	  var y = event.clientY; //  - pop.clientHeight/2;
+	  console.log("Click on x=" + x + ", y=" + y);
+      y -= pop.clientHeight/2;
+      x += 14;
+      pop.style.left = x+"px";
+      pop.style.top = y+"px";
+      pop.style.visibility = "visible";
+	}
+</script>
+<html>

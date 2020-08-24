@@ -10,139 +10,57 @@
 
 <body>
 <style>
-/* Color scale:
-    pop-window:         #f2f1f0 / black
-    - button:           #008CBA / white
-    pop-container > div:#d4dee3 / black
-    - inlink:           #f9ebcd LemonChiffon / #006
-    
-*/
-#pop-window {
-    max-width: 416px; 
-    max-height: 250px; 
-    background: #f2f1f0;
-    overflow: scroll;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
-    position: absolute;
-    z-index: 1;
-    top: 25%;
-    left: 50%;
-    margin-left: -208px;
-    border: 2px solid brown;
-}
-#pop-buttons {
-    list-style-type: none;
-}
-div#pop-buttons button.button {
-  padding: 2px 5px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  cursor: pointer;
-  background: #008CBA;
-  color: white;
-  border-radius: 1em;
-  margin: 5px 2px;
-}
-
-.pop-container {
-    display: flex;
-    flex-wrap: nowrap;
-}
-.pop-container > div {
-    background: #d4dee3;
-/*     color:white; */
-    font-size:9pt;
-    padding:4px;
-    margin:4px;
-    width:404px !important;
-}
-.pop-box {
-    overflow: scroll;
-    background: white;
-}
-.pop-box a.inlink {
-    background: #f9ebcd;
-/*  color:white; */
-    margin: 0 .3em;
-/*     padding: 0 .3em; */
-    border-radius: 5px;
-}
-
-
-div.pop-box ul {
-    padding-left:1.5em;
-}
 .row div { display: inline-block; }
 </style>
 
-<h2>Popup</h2>
-<p style="margin:4em;">&nbsp;</p>
-<table>
-<td class="ColumnPerson">
-    <div>
-        <div class="detail_link">
-            ♂ <a href="/scene/person?uuid=58dc6b1ec48a490c94f52ea2b2024936"
-            class="inlink" title="Katso henkilön 034454 tiedot (nr. 549094)">Anders Reinhold <i>Andersson</i>
-                <b></b></a>
-            <div class="popup" onclick="showPopup(id='58dc6b1ec48a490c94f52ea2b2024936')"
-                title="Näytä perheet"> 👨‍👧‍👦</div>
-        </div>
-        <br>
-        <span class="idno">Uuid:0206d8 /</span>
-        <span class="id" title="Alkuperäinen tunniste">I2090</span>
-    </div>
-</td>
-<td class="ColumnEvent">
-    <div>
-        <div class="eventgrid">
-            <div class="col col_event"><span class="evtype major">syntymä</span></div>
-            <div class="col col_date">15.8.1825 | Perttala</div>
-        </div>
-        <div class="eventgrid">
-            <div class="col col_event"><span class="evtype major">kuolema</span></div>
-            <div class="col col_date">8.12.1846 | Keskitalo</div>
-        </div>
-    </div>
-</td>
-</table>
-
-<hr>
 <div id="popup_app">
+
+  <h2>Popup test</h2>
+  <p style="margin:4em;">&nbsp;</p>
+  <table>
+  <td class="ColumnPerson">
+      <div>
+          <div class="detail_link">
+              ♂ <a href="/scene/person?uuid=58dc6b1ec48a490c94f52ea2b2024936"
+              class="inlink" title="Katso henkilön 034454 tiedot (nr. 549094)">Anders Reinhold <i>Andersson</i>
+                  <b></b></a>
+              <div class="pop-open-family" 
+                  v-on:click="showPopup(id='58dc6b1ec48a490c94f52ea2b2024936',$event)"
+                  title="Näytä perheet"> 👨‍👧‍👦 / 👪 / ▼</div>
+          </div>
+          <br>
+          <span class="idno">Uuid:0206d8 /</span>
+          <span class="id" title="Alkuperäinen tunniste">I2090</span>
+      </div>
+  </td>
+  <td class="ColumnEvent">
+      <div>
+          <div class="eventgrid">
+              <div class="col col_event"><span class="evtype major">syntymä</span></div>
+              <div class="col col_date">15.8.1825 | Perttala</div>
+          </div>
+          <div class="eventgrid">
+              <div class="col col_event"><span class="evtype major">kuolema</span></div>
+              <div class="col col_date">8.12.1846 | Keskitalo</div>
+          </div>
+      </div>
+  </td>
+  </table>
+  
+  <hr>
   <div class="row">
     <div>Henkilön uuid <input v-model="person_uuid"></div>
     <div>
         
-        <button v-on:click="getFamilies(uuid=person_uuid)">
+        <button v-on:click="getFamilies(uuid=person_uuid, $event)">
           Hae perheet</button>
     </div>
     <div>${status} <span style="color:red">${ message }</span></div>
   </div>
 
-<div id="popup" class="popup">
-    <span class="popupbox" id="popWin" title="perhe F0249" v-show="false">
-        <p>Staattinen popup-esimerkki</p>
-        <p><a href="/scene/family?uuid=e8450bbbd48348338abce8b900df3bf8" title="e8450bbbd48348338abce8b900df3bf8" class="inlink">
-                         Perhe avioliitossa</a>
-                       3.12.1820</p>
-        <ul>
-            <li>Mies: <a href="/scene/person?uuid=ea28" class="inlink" title="Katso henkilön ea28f1 tiedot (nr. 548956)">Anders <i>Jacobsson</i>  <b></b></a> s.&nbsp;19.11.1762
-            </li>
-            <li>Vaimo: <a href="/scene/person?uuid=f8bb" class="inlink" title="Katso henkilön f8bb4c tiedot (nr. 548968)">Maria <i>Johansdotter</i>  <b></b></a> s.&nbsp;26.9.1787
-            </li>
-            <li>Lapset<ul>
-                <li>Poika: <a href="/scene/person?uuid=36a1" class="inlink" title="Katso henkilön 36a108 tiedot (nr. 549096)">Jonas <i>Andersson</i>  <b></b></a> s.&nbsp;15.8.1825
-                </li>
-                <li>Poika: <span class="myself">&nbsp;(itse)&nbsp;</span>
-                </li>
-                </ul>
-            </li>
-       </ul>
-    </span>
-</div>
 
-<!--  <div id="pop-window" v-if="look | families.length > 0" v-on:click="look = !look"> -->
-  <div id="pop-window" v-bind:class="{ show: isShow }" v-if="families.length > 0" v-on:click="isShow != isShow">
+  <div id="pop-window" v-show="families.length > 0" v-on:click="families=[]">
+    <div id="close-x">✕</div>
     <div id="pop-buttons" v-if="families.length > 1">
       <button class="button"
             v-on:mouseover="changeFamily(index)"
@@ -151,7 +69,7 @@ div.pop-box ul {
     </div>
 
     <div class="pop-container">
-      <div class="pop-box" v-if="currentId">
+      <div class="pop-text" v-if="currentId">
           <p><a v-bind:href="current.href" title="See family" class="inlink">
               Perheessä ${current.role}</a>  ${current.rel_type} ${current.dates}
           </p>
@@ -184,13 +102,15 @@ div.pop-box ul {
               </li>
           </ul>
       </div>
-
     </div>
   </div>
+  <div class="pop-error" v-show="families.length == 0" v-on:click="families=[]">
+    <!-- No families -->
+    <p style="border:2ps sold red;">${message}</p>
+  </div>
 
-</div>
 </body>
 </html>
-<!-- vue and assistant  -->
+<!-- vue and assistant methods -->
 <script src="/static/js/family_popup.js"></script>
 

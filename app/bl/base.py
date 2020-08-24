@@ -4,6 +4,7 @@ Created on 22.8.2019
 @author: jm
 '''
 import uuid
+import json
 
 class Status():
     """ Status code values for result dictionary.
@@ -19,6 +20,14 @@ class Status():
     OK = 0
     NOT_FOUND = 1
     ERROR = 2
+
+
+class StkEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, '_json_encode'):
+            return obj._json_encode()
+        else:
+            return json.JSONEncoder.default(self, obj)
 
 
 class NodeObject():
@@ -132,3 +141,4 @@ class NodeObject():
 
     def _json_encode(self):
         return self.__dict__
+

@@ -386,6 +386,13 @@ class DateRange():
             new.date2.intvalue = self.date2.intvalue + (intYears << 10)
         return new
 
+    def _json_encode(self):
+        """ Returns json structure
+            Example: {DR['BETWEEN'], "1917", "2017-10-16"}
+        """
+        return [self.datetype, self.date1.short_date(), self.date2.short_date()]
+
+
     # ----------------------- DateRange.DateInt class --------------------------
 
     class DateInt():
@@ -532,7 +539,7 @@ class DateRange():
                 - if the month part is 6 --> only year is given
             """
             if self.intvalue == -1:
-                return "-1"
+                return ""
             vec = self.vector()
             if len(vec) > 2:
                 return "{:04d}-{:02d}-{:02d}".format(vec[0], vec[1], vec[2])

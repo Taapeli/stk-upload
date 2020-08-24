@@ -1,12 +1,13 @@
 /* Popup container - can be anything you want */
-.popup {
+.pop-open {
   position: relative;
   display: inline-block;
   cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+/*   -webkit-user-select: none; */
+/*   -moz-user-select: none; */
+/*   -ms-user-select: none; */
   user-select: none;
+  border: 1px solid red;
 }
 
 /* The actual popup */
@@ -25,7 +26,7 @@
   margin-left: -208px;
 }
 
-/* Popup arrow */
+/* Popup arrow (not working?) */
 .popup .popupbox::after {
   content: "";
   position: absolute;
@@ -54,3 +55,118 @@
   from {opacity: 0;}
   to {opacity:1 ;}
 }
+
+/* Color palette: back / text
+    pop-window:         #a1c6d9 / black
+    - border:           #6491a8
+    - button:           #008CBA / white
+    pop-container > div:#d4dee3 / black
+    - inlink:           #f9ebcd LemonChiffon / #006
+    
+*/
+.pop-open-family {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+@media print and (min-width: 0) {
+	.pop-open-family { display: none; }
+}
+
+#pop-window {
+    max-width: 416px; 
+    max-height: 250px; 
+    background: #a1c6d9;
+    overflow: scroll;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
+    position: absolute;
+    cursor: pointer;
+    margin:6px;
+    padding: 5px;
+    border-radius: 5px;
+    border-color: #6491a8;
+    border-width: 1.5pt;
+    border-style: solid;
+    z-index: 1;
+}
+/* #pop-window:after { */
+/*     right: 100%; */
+/*     top: 50%; */
+/*     content: ' '; */
+/*     height: 0; */
+/*     width: 0; */
+/*     position: absolute; */
+/*     pointer-events: none; */
+/*     border-style:solid; */
+/*     border-color: white; */
+/*     border-width: 6px; */
+/*     border-radius: 6px; */
+/*     margin-right: -6px; */
+/*     border-right-color: green; */
+/*     z-index: 2; */
+/* *   border: solid transparent; margin-top: -6px; */
+/*     border-right-color: #6491a8; */
+/* } */
+
+#pop-buttons {
+    list-style-type: none;
+    margin-left: .7em;
+    margin-top: .5em;
+}
+div#pop-buttons button.tab {
+  padding: 3px 11px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  background: #008CBA;
+  color: white;
+  border-top-left-radius: 1em;
+  border-top-right-radius: 1em;
+/*   margin: 5px 2px 0 5px; */
+}
+.tab_active {
+    background: #d4dee3 !important;
+    color: black !important;
+    border-bottom: 0px !important;
+}
+.link_self {
+    border: solid 1.5pt #000069;
+}
+
+.pop-container {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-left: .7em;
+}
+.pop-container > div {
+    background: #d4dee3;
+    font-size:9pt;
+    padding:4px;
+    width:404px !important;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+.pop-text a.inlink {
+    background: #f9ebcd;
+/*  color:white; */
+    margin: 0 .3em;
+    padding: 0 .3em;
+    border-radius: 5px;
+}
+div.pop-text ul { padding-left:1.5em; }
+div.pop-text ul li { padding-bottom:1.5pt; }
+#close-x {
+    position: relative;
+    z-index: 2;
+    height: 0;
+    cursor: pointer;
+    text-align: right;
+    color: white;
+    font-size: x-large;
+}
+

@@ -80,8 +80,8 @@ def setup_logging():
     logger.setLevel(loglevel)   # ... and logger
     logger.addFilter(ContextFilter())
     logger.addHandler(fh)
-    logger.info("Starting")
-    print('Käynnistys: {} logging {} file {}'.format(app, logger, fh.stream.name))
+    logger.info(f"Starting with {logger}")
+    print(f'app.init.setup_logging: {app} with {logger} file {fh.stream.name}')
     return
 
 setup_logging()

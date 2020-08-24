@@ -176,42 +176,35 @@ def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname'
         my_tx = User.beginTransaction()
 
     # Process each name 
-    result = Name.get_personnames(my_tx, uniq_id)
-    for record in result:
-        # <Record name=<Node id=185239 labels={'Name'} 
-        #    properties={'firstname': 'Jan Erik', 'suffix': 'Jansson', 
-        #        'type': 'Birth Name', 'surname': 'Mannerquist', 'order': 0}
-        # > >
-        pid = record['pid']
-        node = record['name']
-        name = Name.from_node(node)
-        
+    names = Name.get_personnames(my_tx, uniq_id)
+    for name in names:
+
         if do_refnames:
             # Build new refnames
     
             # 1. firstnames
             if name.firstname and name.firstname != 'N':
                 for nm in name.firstname.split(' '):
-                    Refname.link_to_refname(my_tx, pid, nm, 'firstname')
+                    Refname.link_to_refname(my_tx, name.person_uid, nm, 'firstname')
                     refname_count += 1
     
             # 2. surname and patronyme
             if name.surname and name.surname != 'N':
-                Refname.link_to_refname(my_tx, pid, name.surname, 'surname')
+                Refname.link_to_refname(my_tx, name.person_uid, name.surname, 'surname')
                 refname_count += 1
     
             if name.suffix:
-                Refname.link_to_refname(my_tx, pid, name.suffix, 'patronyme')
+                Refname.link_to_refname(my_tx, name.person_uid, name.suffix, 'patronyme')
                 refname_count += 1
         
         if do_sortname and name.order == 0:
 
             # If default name, store sortname key to Person node
-            Person.set_sortname(my_tx, uniq_id, name)
+            Person.set_sortname(my_tx, name.person_uid, name)
             sortname_count += 1
     
     if not tx:
-        # Close my own created transaction
+        # Close my self created transaction
         User.endTransaction(my_tx)
 
     return (refname_count, sortname_count)
