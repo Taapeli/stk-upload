@@ -23,6 +23,10 @@ class Status():
 
 
 class StkEncoder(json.JSONEncoder):
+    ''' Returns Stk object hierarchy as a json string.
+
+        Usage: json_str = json.dumps(stk_object, cls=StkEncoder)
+    '''
     def default(self, obj):
         if hasattr(obj, '_json_encode'):
             return obj._json_encode()
@@ -140,5 +144,9 @@ class NodeObject():
             return f'({self.uniq_id})'
 
     def _json_encode(self):
-        return self.__dict__
+        ''' Creates a dictionary of class parameters, if JSON serializable.
 
+            For non serializable classes, define your own _json_encode method.
+            Called by `json.dumps(my_stk_object, cls=StkEncoder)`
+        '''
+        return self.__dict__
