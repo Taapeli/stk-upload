@@ -20,7 +20,7 @@ from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
 
 from ui.user_context import UserContext
-from bl.base import Status
+from bl.base import Status, StkEncoder
 from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
@@ -37,6 +37,7 @@ from models.datareader import read_persons_with_events
 from models.datareader import get_event_participants
 #from models.datareader import get_place_with_events
 #from models.datareader import get_source_with_events
+from templates.jinja_filters import translate
 
 from pe.neo4j.read_driver import Neo4jReadDriver
 from pe.db_reader import DBreader
@@ -368,12 +369,11 @@ def show_family_page(uid=None):
 
 @bp.route('/scene/json/families', methods=['POST','GET'])
 def json_get_person_families():
-    """ Get all families for a Person as json array.
+    """ Get all families for a Person as json structure.
 
         The first element is childhood family or None, 
         the others are marriages in time order.
     """
-    from templates.jinja_filters import translate
     t0 = time.time()
     try:
         args = request.args
@@ -395,73 +395,37 @@ def json_get_person_families():
         if results.get('status') == Status.NOT_FOUND:
             return jsonify({"member":uuid, "records":[],
                             "statusText":_('No families'),
-                            "status":Status.NOT_FOUND})
-        res = []
-        for family in results['items']:
-            if not family:   # Missing childhood family
-                res.append(None)
-                continue
+                            "status":Status.NOT_FOUND})        
+        items = results['items']
 
-            fdict = {
-                "rel_type": translate(family.rel_type, 'marr'),
-                "id": family.id,
-                "uuid": family.uuid,
-                "dates": family.dates.to_list(),
-                "role": translate(family.role, 'role'),
-                "as_role": translate('as_'+family.role, 'role')
-            }
-            parents = []
-            if family.father:
-                parent = {
-                    "role":_('husband'),
-                    "sortname":family.father.sortname,
-                    "uuid":family.father.uuid
-                }
-                if family.father.event_birth:
-                    parent['dates'] = family.father.event_birth.dates.to_list()
-                parents.append(parent)
-            if family.mother:
-                parent = {
-                    "role":_('wife'),
-                    "sortname":family.mother.sortname,
-                    "uuid":family.mother.uuid
-                }
-                if family.mother.event_birth:
-                    parent['dates'] = family.mother.event_birth.dates.to_list()
-                parents.append(parent)
-            fdict['parents'] = parents
-        
-            children = []
-            for ch in family.children:
-                child = {"sex":translate(ch.sex, 'child'), 
-                         "sortname":ch.sortname, 
-                         "uuid":ch.uuid}
-                if ch.event_birth:
-                    child['dates'] = ch.event_birth.dates.to_list()
-                children.append(child)
-            fdict["children"] = children
+        # Add translated text fields
+        for family in items:
+            family.as_rel_type = translate(family.rel_type, 'marr').lower()
+            family.as_role = translate('as_'+family.role, 'role')
+            for parent in family.parents:
+                parent.as_role = translate(parent.role, 'role')
+            for child in family.children:
+                child.as_role = translate(child.sex, 'child')
 
-            events = []
-            for ev in family.events:
-                events.append({"type":ev.type, 
-                               "id":ev.id, 
-                               "uuid":ev.uuid})
-            fdict["events"] = events
-            res.append(fdict)
+        res_dict = {'records': items, 
+                    "member": uuid, 
+                    'statusText': f'Löytyi {len(items)} perhettä',
+                    'translations':{'family': _('Family'), 
+                                    'children': _('Children')}
+                    }
+        response = json.dumps(res_dict, cls=StkEncoder)
+
+        t1 = time.time()-t0
+        stk_logger(u_context, f"-> bp.scene.routes.show_person_families_json n={len(items)} e={t1:.3f}")
+        print(response)
+        return response
 
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"records":[], "status":Status.ERROR,"member":uuid,
+        return jsonify({"records":[], 
+                        "status":Status.ERROR,
+                        "member":uuid,
                         "statusText":f"Failed {e.__class__.__name__}"})
-
-    t1 = time.time()-t0
-    stk_logger(u_context, f"-> bp.scene.routes.show_person_families_json n={len(results['items'])} e={t1:.3f}")
-    response = {'records':res, "member":uuid, 
-                'statusText':f'Löytyi {len(res)} perhettä',
-                'translations':{'family':_('In family'), 'children': _('Children')}}
-    print(json.dumps(response))
-    #response.headers['Access-Control-Allow-Origin'] = '*'
-    return jsonify(response) 
 
 
 # ------------------------------ Menu 4: Places --------------------------------

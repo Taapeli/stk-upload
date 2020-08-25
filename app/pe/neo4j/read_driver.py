@@ -414,7 +414,10 @@ class Neo4jReadDriver:
         """
             Get the Families where Person is a member (parent or child).
 
-            returns dict {items, status, statustext}
+            Returns dict {items, status, statustext}
+            
+            Family.parents[] has mother and father Person objects with 
+            corresponding .role (the fields .father and .mother are not used).
         """
         families = {}
         with self.driver.session(default_access_mode='READ') as session:
@@ -442,6 +445,7 @@ class Neo4jReadDriver:
                     if not fid in families:
                         # New family
                         family = FamilyBl.from_node(family_node)
+                        family.parents = []
                         families[fid] = family
                     family = families[fid]
                     person_node = record['person']
@@ -452,10 +456,7 @@ class Neo4jReadDriver:
                         person.event_birth = birth
                     if record['type'] == 'PARENT':
                         person.role = record['role']
-                        if person.role == 'father':
-                            family.father = person
-                        else:           # 'mother'
-                            family.mother = person
+                        family.parents.append(person)
                         if uuid == person.uuid:
                             family.role = 'parent'
                             print(f'# Family {family.id} {family.role} --> {person.id} ({person.role})')

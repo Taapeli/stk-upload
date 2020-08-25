@@ -210,8 +210,8 @@
     <div class="pop-container">
       <div class="pop-text" v-if="currentIndex">
           <p><a v-bind:href="current.href" title="See family" class="inlink">
-              ${translations['family']} ${current.as_role}</a>
-              ${current.rel_type} ${current.dates}
+              ${translations['family']}</a>
+              ${current.rel_type} ${datesStr(current.dates)}
           </p>
           <ul>
               <li v-for="p in current.parents" :key="p.uuid">
@@ -219,7 +219,7 @@
                 <a v-bind:href="p.href" title="Katso henkilöä"
                    v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
                    ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
-                  <span v-if="p.birth">s.&nbsp;${p.birth}</span>
+                  <span v-if="p.birth_date">s.&nbsp;${datesStr(p.birth_date)}</span>
               </li>
               <li v-if="current.has_children">${translations['children']}:
                  <ul>
@@ -227,7 +227,7 @@
                        <a v-bind:href="p.href" title="Katso henkilöä"
                           v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
                           ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
-                       <span v-if="p.birth">s.&nbsp;${p.birth}</span>
+                       <span v-if="p.birth_date">s.&nbsp;${datesStr(p.birth_date)}</span>
                      </li>
                  </ul>
               </li>
