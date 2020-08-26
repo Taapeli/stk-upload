@@ -20,7 +20,8 @@ var vm = new Vue({
 		currentIndex: 0,	// 1..n, 0 = no familiy selected
 		status: '',
 		translations: {},
-		isShow: false
+		isShow: false,
+		touched: false
 	},
 	computed: {
 		current: function () {
@@ -47,8 +48,22 @@ var vm = new Vue({
 			vm.getFamilies(uuid);
 		},
 
-		changeFamily(index) {
-			// Current family index in 1..n; 0 as no family
+		changeFamily(index, ev) {
+/*			Selecting family tab.
+			Current family index in 1..n; value 0 means no family.
+			On touchpad device, there comes 2 events:
+				1) touch -> mouseover
+				2) click -> ignore
+*/
+			vm.message = "event type " + (ev ? ev.type : "-");
+			console.log(vm.message);
+			if (vm.touched) {
+				vm.touched = false;
+				return;
+			}
+			if (ev && ev.type == "touchstart") {
+				vm.touched = true;
+			}
 			if (vm.families.length > 0){
 				console.log("changeFamily: show "+vm.families[index].id);
 				vm.currentIndex = index+1;
@@ -120,7 +135,7 @@ var vm = new Vue({
 						//console.log("got family ",vm.families.length,fam.id)
 					} // if rec
 				} // for
-				vm.changeFamily(0);
+				vm.changeFamily(0, null);
 				console.log("Got",vm.families.length, "families, current=", vm.currentIndex)
 				vm.isShow = true;
 			}) // axios then
