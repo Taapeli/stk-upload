@@ -55,6 +55,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 {% for pname in person.names|sort(attribute='order') %}<tr>
                     <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
                     <td class="ColumnValue">
+						{% if pname.title %}<span title="titteli">{{pname.title}}</span>{% endif %}
                         <span title="{{ _('first name') }}">{{pname.firstname}}</span>
                         <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
