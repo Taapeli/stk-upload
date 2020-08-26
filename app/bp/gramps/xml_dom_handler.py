@@ -542,6 +542,13 @@ class DOM_handler():
                     self.blog.log_event({'title':"More than one suffix in a person",
                                          'level':"WARNING", 'count':p.id})
 
+                if len(person_name.getElementsByTagName('title') ) == 1:
+                    person_title = person_name.getElementsByTagName('title')[0]
+                    pname.title = person_title.childNodes[0].data
+                elif len(person_name.getElementsByTagName('title') ) > 1:
+                    self.blog.log_event({'title':"More than one title in a person",
+                                         'level':"WARNING", 'count':p.id})
+
                 if len(person_name.getElementsByTagName('citationref') ) >= 1:
                     for i in range(len(person_name.getElementsByTagName('citationref') )):
                         person_name_citationref = person_name.getElementsByTagName('citationref')[i]
