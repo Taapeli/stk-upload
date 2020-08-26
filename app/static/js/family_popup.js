@@ -47,6 +47,9 @@ var vm = new Vue({
 			// Get vm.families
 			vm.getFamilies(uuid);
 		},
+		hidePopup() {
+			isShow = false;
+		},
 
 		changeFamily(index, ev) {
 /*			Selecting family tab.
@@ -55,17 +58,20 @@ var vm = new Vue({
 				1) touch -> mouseover
 				2) click -> ignore
 */
-			vm.message = "event type " + (ev ? ev.type : "-");
-			console.log(vm.message);
-			if (vm.touched) {
-				vm.touched = false;
-				return;
-			}
-			if (ev && ev.type == "touchstart") {
+			var ev_type = (ev !== null ? ev.type : "-");
+//			vm.message = vm.message + " <br>" 
+//				+ ev_type 
+//				+ (vm.touched ? " T": "");
+//			console.log(vm.message);
+//			if (vm.touched) {
+//				vm.touched = false;
+//				return; }
+			if (ev_type == "touchstart") {
 				vm.touched = true;
-			}
+				console.log("touchstart");
+			} else console.log('event ', ev_type);
 			if (vm.families.length > 0){
-				console.log("changeFamily: show "+vm.families[index].id);
+				console.log("changeFamily: show " + vm.families[index].id);
 				vm.currentIndex = index+1;
 			} else {
 				console.log("changeFamily: no families");
