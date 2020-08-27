@@ -91,10 +91,10 @@ def set_estimated_person_dates(uids=[]):
     return msg
 
 
-def set_family_name_properties(tx=None, uniq_id=None):
+def set_family_calculated_attributes(tx=None, uniq_id=None):
     """ Set Family sortnames and estimated DateRange.
     
-        Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_sortname_dates
+        Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes
 
         Set Family.father_sortname and Family.mother_sortname using the data in Person
         Set Family.date1 using the data in marriage Event
@@ -159,7 +159,7 @@ def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname'
     """ Set Refnames to all Persons or one Person with given uniq_id; 
         also sets Person.sortname using the default name
 
-        Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_sortname_dates,
+        Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
                     bp.admin.routes.set_all_person_refnames
 
         If handler is defined

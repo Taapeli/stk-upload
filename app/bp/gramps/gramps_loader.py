@@ -568,11 +568,11 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             #    ? Person sortname
             #    + Person lifetime
             #    - Confidence values
-            handler.set_person_sortname_refnames()
+            handler.set_person_calculated_attributes()
             handler.set_estimated_person_dates()
             
             # Copy date and name information from Person and Event nodes to Family nodes
-            handler.set_family_sortname_dates()
+            handler.set_family_calculated_attributes()
 
             handler.remove_handles()
             handler.add_missing_links()

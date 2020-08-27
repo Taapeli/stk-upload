@@ -471,6 +471,12 @@ class Neo4jReadDriver:
                     return {"status":Status.NOT_FOUND, 
                             "statustext": f'No families for this person'}
 
+                # Sort parents always on same order
+                for family in families.values():
+                    if len(family.parents) > 1:
+                        family.parents.sort(key=lambda x: x.role)
+
+
             except Exception as e:
                 return {"status":Status.ERROR, 
                         "statustext": f'Error dr_get_person_families: {e}'}     
