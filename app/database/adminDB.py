@@ -1,9 +1,9 @@
 # coding: utf-8  
 
-from datetime import datetime
+#from datetime import datetime
 import logging
 logger = logging.getLogger('stkserver') 
-from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
+from neo4j.exceptions import CypherSyntaxError, ClientError
 from flask_security import utils as sec_utils
 
 import shareds
@@ -24,17 +24,26 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 def delete_database(tx):
     tx.run(SetupCypher.delete_database)
 
+def initiated_exist():
+    # Check, that Lock 'initiated' exists.
+    result = shareds.driver.session().run(SetupCypher.check_lock_initiated)
+    count = 0
+    for record in result:
+        count = record[0]
+#     count = [record[0] for record in result]
+    return count > 0
+
 def roles_exist():
-#  Tarkista roolien olemassaolo
+    #  Tarkista roolien olemassaolo
     print('Check the user roles')
     num_of_roles = 0
     results = shareds.driver.session().run(SetupCypher.check_role_count)
     for result in results:
         num_of_roles = result[0]
     return(num_of_roles == len(ROLES))
-        #inputs
+
 def role_exists(name):
-#    print(f'Check the existense of the {name} role')
+    # print(f'Check the existense of the {name} role')
     num_of_roles = 0  
     for result in shareds.driver.session().run(SetupCypher.role_check_existence, rolename=name):
         num_of_roles = result[0] 
@@ -50,11 +59,9 @@ def create_role(tx, role):
 #                print(role['name'])
     except CypherSyntaxError as cex:
         logger.error('CypherSyntaxError in create_role ' + cex.message)
-    except CypherError as cex:
-        logger.error('CypherError in create_role ' + cex.message)
-    except ConstraintError as cex:
-        logger.error('ConstraintError in create_role ' + cex.message)
-#            print(role['name'])
+    except Exception as e:
+        logging.error(f'database.adminDB.create_role: {e.__class__.__name__}, {e}')            
+        raise      
 
 def create_roles():
     with shareds.driver.session() as session:
@@ -62,15 +69,10 @@ def create_roles():
             try:    
                 session.write_transaction(create_role, role)
                 print(role['name'])
-            except CypherSyntaxError as cex:
-                print('Session ', cex)
+            except Exception as e:
+                logging.error(f'database.adminDB.create_roles: {e.__class__.__name__}, {e}')            
                 continue
-            except CypherError as cex:
-                print('Session ', cex)
-                continue
-            except ConstraintError as cex:
-                print('Session ', cex)
-                continue
+
         print('Roles initialized')
 
 
@@ -98,10 +100,10 @@ def build_master_user():
              'name': 'Stk-kannan pääkäyttäjä',
              'language': 'fi',  
              'is_active': True,
-             'confirmed_at': datetime.now().timestamp()/1000, 
+             #'confirmed_at': datetime.now().timestamp()/1000, 
              'roles': ['master'],
-             'last_login_at': datetime.now().timestamp()/1000,
-             'current_login_at': datetime.now().timestamp()/1000,
+             #'last_login_at': datetime.now().timestamp()/1000,
+             #'current_login_at': datetime.now().timestamp()/1000,
              'last_login_ip': '127.0.0.1',  
              'current_login_ip': '127.0.0.1',
              'login_count': 0            
@@ -112,14 +114,8 @@ def create_master_user():
     with shareds.driver.session() as session: 
         try:
             session.run(SetupCypher.master_create, master_user) 
-        except CypherSyntaxError as cex:
-            logger.error('CypherSyntaxError in create_master ' + cex.message)
-            return
-        except CypherError as cex:
-            logger.error('CypherError in create_master ' + cex.message)
-            return
-        except ConstraintError as cex:
-            logger.error('ConstraintError in create_master ' + cex.message)
+        except Exception as e:
+            logging.error(f'database.adminDB.create_master_user: {e.__class__.__name__}, {e}')            
             return
     logger.info('Master user account created')    
 
@@ -132,15 +128,15 @@ def build_guest_user():
             name = 'Vieraileva käyttäjä',
             language = 'fi',  
             is_active = True,
-            confirmed_at = datetime.now().timestamp()*1000, 
+            #confirmed_at = datetime.now().timestamp()*1000, 
             roles= ['guest'],
-            last_login_at = datetime.now().timestamp()*1000,
-            current_login_at = datetime.now().timestamp()*1000,
+            #last_login_at = datetime.now().timestamp()*1000,
+            #current_login_at = datetime.now().timestamp()*1000,
             last_login_ip = '127.0.0.1',  
             current_login_ip = '127.0.0.1',
             login_count = 0 )           
                )
-                        
+
 def create_guest_user():
     guest = build_guest_user()
     user = shareds.user_datastore.put(guest)                
@@ -171,11 +167,8 @@ def create_role_constraints():
     with shareds.driver.session() as session: 
         try:
             session.run(SetupCypher.set_role_constraint)
-        except CypherError as cex:
-            logger.error('CypherError in create_role_constraints: ' + cex.message)
-            return
-        except ConstraintError as cex:
-            logger.error('ConstraintError in create_role_constraints: ' + cex.message)
+        except Exception as e:
+            logging.error(f'database.adminDB.create_role_constraints: {e.__class__.__name__}, {e}')            
             return
     logger.info('Role constraints created')
 
@@ -185,14 +178,8 @@ def create_user_constraints():
         try:  
             session.run(SetupCypher.set_user_constraint1)
             session.run(SetupCypher.set_user_constraint2)  
-        except CypherSyntaxError as cex:
-            logger.error('ConstraintError in create_user_constraints: ' + cex.message)
-            return
-        except CypherError as cex:
-            logger.error('ConstraintError in create_user_constraints: ' + cex.message)
-            return
-        except ConstraintError as cex:
-            logger.error('ConstraintError in create_user_constraints: ' + cex.message)
+        except Exception as e:
+            logging.error(f'database.adminDB.create_user_constraints: {e.__class__.__name__}, {e}')            
             return
     logger.info('User constraints created')
     
@@ -201,54 +188,72 @@ def create_allowed_email_constraints():
     with shareds.driver.session() as session: 
         try:  
             session.run(SetupCypher.set_allowed_email_constraint)  
-        except CypherSyntaxError as cex:
-            logger.error('ConstraintError in create_allowed_email_constraints: ' + cex.message)
-            return
-        except CypherError as cex:
-            logger.error('ConstraintError in create_allowed_email_constraints: ' + cex.message)
-            return
-        except ConstraintError as cex:
-            logger.error('ConstraintError in create_allowed_email_constraints: ' + cex.message)
+        except Exception as e:
+            logging.error(f'database.adminDB.create_allowed_email_constraints: {e.__class__.__name__}, {e}')            
             return
     logger.info('Allowed email constraints created')
 
 
-def create_lock_constraint():
-    # can be created multiple times!
-    shareds.driver.session().run( 
-        "create constraint on (l:Lock) assert l.id is unique"
-    )
+def check_contraints(needed:dict):
+    # Check which UNIQUE contraints are missing from given nodes and parameters.
+    # Returns a set of missing constraints
 
-def create_uuid_constraints():
-    # constraints can be created multiple times!
+# No need to check exsistence, catching ClientError
+#         n_ok = 0
+#         import re
+#         p = re.compile(":(\S*)(\s.*\.)(\w+)")
+#         with shareds.driver.session() as session:
+#             result = session.run("CALL db.constraints")
+#             for record in result:
+#                 # "CONSTRAINT ON ( user:User ) ASSERT (user.email) IS UNIQUE"
+#                 desc = record[1]
+#                 x = p.search(desc)
+#                 label = x.group(1)
+#                 prop = x.group(3)
+#                 if label in needed.keys():
+#                     if prop in needed[label]:
+#                         needed[label].remove(prop)
+#                         n_ok += 1
+#                         #print(f'constraint {label}.{prop} ok')
+#         #print(f'Missing contraints: {needed}')
+    for label,props in needed.items():
+        for prop in props:
+            create_unique_constraint(label, prop)
+#     print(f'checked {n_ok} constraints ok')
+    return
+
+def create_lock_and_constraint():
+    # Initial lock
     with shareds.driver.session() as session:
-        session.run( 
-            "create constraint on (n:Media) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Event) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Family) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Note) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Person) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Citation) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Source) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Repository) assert n.uuid is unique"
-        )
-        session.run( 
-            "create constraint on (n:Place) assert n.uuid is unique"
-        )
+        # Create first Lock node and contraint
+        lock_id = "initiated"
+        session.run(SetupCypher.create_lock, id=lock_id, locked=False)
+        print('Initial Lock created')
+        create_unique_constraint('Lock', 'id')
+        return
+
+def re_initiate_nodes_constraints_fixes():
+    # Remove initial lock for re-creating nodes, constraints and schema fixes
+    with shareds.driver.session() as session:
+        session.run(SetupCypher.remove_lock_initiated)
+        logger.info(f'database.adminDB.re_initiate_nodes_constraints_fixes: requested')
+        print('Initial Lock removed')
+        return
+
+def create_unique_constraint(label, prop):
+    ' Create given contraint for given label and property.'
+    with shareds.driver.session() as session:
+        query = f"create constraint on (n:{label}) assert n.{prop} is unique"
+        try:  
+            session.run(query)
+            print(f'Unique contraint for {label}.{prop} created')
+        except ClientError:
+            print(f'Unique contraint for {label}.{prop} ok')
+            return
+        except Exception as e:
+            logger.error(f'database.adminDB.create_unique_constraint: {e.__class__.__name__} {e}' )
+            raise
+    return
 
 def set_confirmed_at():
     """
@@ -275,28 +280,57 @@ def set_confirmed_at():
     """
     shareds.driver.session().run(stmt)
 
+# class Neo4jEnv(): # --> database.models.neo4jengine.Neo4jEngine.consume_counters
+#     """  Neo4j environment dependent things for versions 3.5 <> 4.1. """
+#     def consume_counters(self, result):
+
+#------------------------------- Start here -----------------------------------
 
 def initialize_db():
-    # Fix changed schema
-    do_schema_fixes()
+    '''
+    Check and initiate important nodes and constraints and schema fixes,
+    if (:Lock{id:'initiated'}) does not exist.
+    ''' 
+    if not initiated_exist():
+        logger.info('database.adminDB.initialize_db: '
+                    'checking roles, constraints and schema fixes' )
+
+        if not roles_exist():
+            create_role_constraints()
+            create_roles()
+            
+        if not user_exists('master'):
+            create_user_constraints()
+            create_master_user()
+            create_allowed_email_constraints()
+            
+        if not user_exists('guest'):
+            create_guest_user()
     
-    if not roles_exist():
-        create_role_constraints()
-        create_roles()
-        
-    if not user_exists('master'):
-        create_user_constraints()
-        create_master_user()
-        create_allowed_email_constraints()
-        
-    if not user_exists('guest'):
-        create_guest_user()
+        if not profile_exists('_Stk_'):
+            create_single_profile('_Stk_')
+            
+        create_lock_and_constraint()
+    
+        check_contraints({
+            "Allowed_email":{"allowed_email"},
+            "Citation":{"uuid"},
+            "Event":{"uuid"},
+            "Family":{"uuid"},
+            "Media":{"uuid"},
+            "Note":{"uuid"},
+            "Person":{"uuid"},
+            "Place":{"uuid"},
+            "Repository":{"uuid"},
+            "Role":{"name"},
+            "Source":{"uuid"},
+            "User":{"email", "username"}
+        })
 
-    if not profile_exists('_Stk_'):
-        create_single_profile('_Stk_')
+        # Fix changed schema
+        do_schema_fixes()
 
-    create_lock_constraint()
-    create_uuid_constraints()
-    #set_confirmed_at()
+        #set_confirmed_at()
 
+    return 
 

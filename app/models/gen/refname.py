@@ -24,9 +24,11 @@ II. Between Refnames there can be different references:
 The I links are created, when new Person nodes are inserted.
 The II links are created, when reference names are added from a cvs file.
 '''
-import logging
 from sys import stderr
 import time
+import logging
+logger = logging.getLogger('stkserver')
+
 import shareds
 from .cypher import Cypher_refname
 from .person import Person, SEX_UNKOWN
@@ -187,22 +189,24 @@ class Refname:
                                      a_name=self.name, a_attr=a_attr,
                                      b_name=self.refname)
     
-                logging.debug("Created {} nodes and {} relations for {}-->{}".format(\
-                        result.summary().counters.nodes_created, 
-                        result.summary().counters.relationships_created, 
-                        self.name, self.refname))
+#                 logging.debug("Created {} nodes and {} relations for {}-->{}".format(\
+#                         result.consume().counters.nodes_created, 
+#                         result.consume().counters.relationships_created, 
+#                         self.name, self.refname))
+                counters = shareds.db.consume_counters(result)
+                logger.debug(f"For {self.name}-->{self.refname} created {counters}")
 #                     for record in result:
 #                         a_oid = record["aid"]
 #                         a_name = record["aname"]
 #                         a_use = record['use']
 #                         b_oid = record["bid"]
 #                         b_name = record["bname"]
-#                         logging.debug('  ({}, {}) -[{}]-> ({}, {})'.
+#                         logger.debug('  ({}, {}) -[{}]-> ({}, {})'.
 #                                       format(a_oid, a_name, a_use, b_oid, b_name))
                     
             except Exception as err:
                 print("iError: {0}".format(err), file=stderr)
-                logging.warning('Could no store (a) -[:{}]-> (b): {}'.format(link_type, err))
+                logger.warning('Could no store (a) -[:{}]-> (b): {}'.format(link_type, err))
 
         else:
             # Create (A:{name:name}) only (if needed)
@@ -210,9 +214,11 @@ class Refname:
                 result = session.run(Cypher_refname.save_single, 
                                      a_name=self.name, a_attr=a_attr)
 
-                logging.debug("Created {} node for {}".format(\
-                        result.summary().counters.nodes_created, 
-                        self.name))
+#                 logging.debug("Created {} node for {}".format(\
+#                         result.consume().counters.nodes_created, 
+#                         self.name))
+                counters = shareds.db.consume_counters(result)
+                logger.debug(f"For {self.name} created {counters}")
 #                 for record in result:
 #                     a_oid = record["aid"]
 #                     a_name = record["aname"]
@@ -221,7 +227,7 @@ class Refname:
             except Exception as err:
                 # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
                 print("iError: {0}".format(err), file=stderr)
-                logging.warning('Lisääminen (a) ei onnistunut: {}'.format(err))
+                logger.warning('Lisääminen (a) ei onnistunut: {}'.format(err))
 
 
     @staticmethod
@@ -239,12 +245,15 @@ class Refname:
             result = tx.run(Cypher_refname.link_person_to,
                             pid=pid, name=name, use=reftype)
 
-            logging.debug("Created Refname {} nodes for {}".format(\
-                    result.summary().counters.nodes_created, name))
+#             logging.debug("Created Refname {} nodes for {}".format(\
+#                     result.consume().counters.nodes_created, name))
+#             counters = shareds.db.consume_counters(result)
+#             logger.debug(f"For {name} created {counters}")
 
-        except Exception as err:
-            # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
-            print("iError: {0}".format(err), file=stderr)
+        except Exception as e:
+            print("iError: {0}".format(e), file=stderr)
+            logging.error(f'Refname.link_to_refname: person={pid}, {e.__class__.__name__}, {e}')            
+            raise
 
 
     @staticmethod
@@ -257,20 +266,21 @@ class Refname:
                 # Remove all Refnames
                 t0 = time.time()
                 result = session.run(Cypher_refname.delete_all)
-                counters = result.summary().counters
-                logging.info("Deleted all Refnames: {}; {} sek".\
+                counters = shareds.db.consume_counters(result)
+                logger.info("Deleted all Refnames: {}; {} sek".\
                               format(counters, time.time()-t0))
+            except Exception as e:
+                logger.error(f"Refname delete failed: {e.__class__.__name__}, {e}")
 
+            try:
                 # Create unique constrain for Refnames
                 t0 = time.time()
                 result = session.run(Cypher_refname.set_constraint)
-                counters = result.summary().counters
-                logging.info("Set unique constraint for Refnames: {}; {} sek".\
+                counters = shareds.db.consume_counters(result)
+                logger.info("Set unique constraint for Refnames: {}; {} sek".\
                               format(counters, time.time()-t0))
-
-            except Exception as err:
-                logging.error("iError: {0}".format(err))
-
+            except Exception as e: # ClientError in neo4j 4.0
+                logger.info(f"Unique constraint for Refnames ok: {e.__class__.__name__}")
 
 
 #     @staticmethod   

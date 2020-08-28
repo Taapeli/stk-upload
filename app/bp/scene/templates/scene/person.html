@@ -55,6 +55,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 {% for pname in person.names|sort(attribute='order') %}<tr>
                     <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
                     <td class="ColumnValue">
+						{% if pname.title %}<span title="titteli">{{pname.title}}</span>{% endif %}
                         <span title="{{ _('first name') }}">{{pname.firstname}}</span>
                         <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
@@ -71,7 +72,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 {% if person.priv %}<tr>
                     <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(person.priv) }}</td>
                 </tr>{% endif %}
-                <tr><td class="ColumnAttribute">{{ _('Years') }}</td>
+                <tr><td class="ColumnAttribute">{{ _('Possible years') }}</td>
                     <td class="ColumnValue">{{ macro.lifetimes(person) }}
            {% if person.death_high >= last_year_allowed %}
                         <span style="color:red">{{ _('confidential') }}!</span>

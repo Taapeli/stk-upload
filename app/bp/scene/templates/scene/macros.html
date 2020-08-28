@@ -87,7 +87,7 @@
            {% if user_context.context == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
            {%endif%}
            {% if not no_change %}
-            (<i><a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a></i>)
+            <i>(<a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a>)</i>
            {% endif %}
        {% endif %}
     {% endif %}

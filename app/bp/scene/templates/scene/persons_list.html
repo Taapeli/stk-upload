@@ -23,6 +23,8 @@
 </div>
 
 {{ macro.menu(menuno) }}
+<div id="popup_app">
+
 	<div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
@@ -41,7 +43,7 @@
                        {% endif %}
                        </p>
 	           </div>
-	           <div>
+	           <div class="SearchBox">
 	               <form action="/scene/persons_all">
 	                 <fieldset>
 	                    <input type="hidden" name="c" value="50" >
@@ -123,6 +125,9 @@
                             <div class="detail_link" alt="{{p.uniq_id}}">
                                  {{p.sex_symbol()}} 
                                 {{ macro.person(p) }}
+                                <div class="pop-open-family" 
+                                    v-on:click="showPopup(uuid='{{p.uuid}}',$event)"
+                                    title="Näytä perheet">👪</div>
                             </div>
                  {% else %}{% set _x = not_mine.append(not not_mine.pop()) %}
                             <span class="owner">&nbsp;{{ow}}&nbsp;</span>
@@ -135,6 +140,9 @@
                             <div class="detail_link" alt="{{p.uniq_id}}">
                                 {{p.sex_symbol()}} 
                                 {{ macro.person(p) }}
+                                 <div class="pop-open-family" 
+                                    v-on:click="showPopup(uuid='{{p.uuid}}',$event)"
+                                    title="Näytä perheet">👪</div>
                             </div>
 	       {% endif %}
 
@@ -187,4 +195,57 @@
         <p>&nbsp;</p>
 	{% endif %}
     </div>
+
+  <div id="pop-window" v-show="isShow" v-on:click="isShow=false">
+    <div id="close-x">✕</div>
+    <div id="pop-buttons" v-if="families.length > 1">
+      <button 
+         v-on:mouseover="changeFamily(index, $event)"
+         v-on:touchstart="changeFamily(index, $event)"
+         v-for="(f, index) of families" :key="f.id"
+         v-bind:class="{ 'tab': true, 'tab_active': (index==(currentIndex-1)) }">
+            ${f.as_role}</button>
+    </div>
+
+    <div class="pop-container">
+      <div class="pop-text" v-if="currentIndex">
+          <p><a v-bind:href="current.href" title="See family" class="inlink">
+              ${translations['family']}</a>
+              ${current.rel_type} ${datesStr(current.dates)}
+          </p>
+          <ul>
+              <li v-for="p in current.parents" :key="p.uuid">
+                ${p.role} 
+                <a v-bind:href="p.href" title="Katso henkilöä"
+                   v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
+                   ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
+                  <span v-if="p.birth_date">s.&nbsp;${datesStr(p.birth_date)}</span>
+              </li>
+              <li v-if="current.has_children">${translations['children']}:
+                 <ul>
+                     <li v-for="p in current.children" :key="p.uuid">${p.gender}
+                       <a v-bind:href="p.href" title="Katso henkilöä"
+                          v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
+                          ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
+                       <span v-if="p.birth_date">s.&nbsp;${datesStr(p.birth_date)}</span>
+                     </li>
+                 </ul>
+              </li>
+          </ul>
+      </div>
+    </div>
+    <div style="margin-right: 20pt; margin-top: 5pt;" v-show="families.length == 0">
+        ${message}
+    </div>
+  </div>
+  <div class="pop-error" v-show="false"><!-- For debugging change v-show -->
+    <p style="border:2px solid red; position: fixed; top: 5em;right: 0;">
+       Families:<br>${message}</p>
+  </div>
+
+</div>
+
+<!-- vue and assistant methods -->
+<script src="/static/js/family_popup.js"></script>
+
 {% endblock %}

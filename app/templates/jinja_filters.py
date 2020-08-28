@@ -94,8 +94,10 @@ def translate(term, var_name):
             "mother": _("Mother"),
             "man": _("Husband"), 
             "wife": _("Wife"),
-            "child": _("as child"),     # Role as family member
-            "parent": _("as parent"),   # Role as family member
+            "child": _("Child"),     # Role as family member
+            "parent": _("Spouse"),   # Role as family member
+            "as_child": _("as a child"),   # Role as family member
+            "as_parent": _("as spouse"), # Role as family member
             "Unknown": _("Unknown role") #"määräämätön"
         }
     elif var_name == "conf":

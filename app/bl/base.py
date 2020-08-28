@@ -4,6 +4,7 @@ Created on 22.8.2019
 @author: jm
 '''
 import uuid
+import json
 
 class Status():
     """ Status code values for result dictionary.
@@ -19,6 +20,18 @@ class Status():
     OK = 0
     NOT_FOUND = 1
     ERROR = 2
+
+
+class StkEncoder(json.JSONEncoder):
+    ''' Returns Stk object hierarchy as a json string.
+
+        Usage: json_str = json.dumps(stk_object, cls=StkEncoder)
+    '''
+    def default(self, obj):
+        if hasattr(obj, '_json_encode'):
+            return obj._json_encode()
+        else:
+            return json.JSONEncoder.default(self, obj)
 
 
 class NodeObject():
@@ -131,4 +144,9 @@ class NodeObject():
             return f'({self.uniq_id})'
 
     def _json_encode(self):
+        ''' Creates a dictionary of class parameters, if JSON serializable.
+
+            For non serializable classes, define your own _json_encode method.
+            Called by `json.dumps(my_stk_object, cls=StkEncoder)`
+        '''
         return self.__dict__

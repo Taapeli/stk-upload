@@ -53,7 +53,7 @@ class DataAdmin():
                                                       user=user)
             else:
                 result = shareds.driver.session().run(cypher_clause, limit=LIMIT)
-            counters = result.consume().counters
+            counters = shareds.db.consume_counters(result)
             if counters:
                 cnt_nodes = counters.nodes_deleted
                 cnt_relations = counters.relationships_deleted

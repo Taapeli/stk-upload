@@ -10,7 +10,7 @@ from datetime import datetime
 from flask import flash
 from flask_security import current_user
 from flask_babelex import _
-from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError, ConstraintError
+from neo4j.exceptions import ServiceUnavailable, ConstraintError
 
 from .cypher_adm import Cypher_adm
 
@@ -151,15 +151,9 @@ class UserAdmin():
         except ConstraintError as ex:
             logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
             flash(_("Given allowed email address already exists"))                            
-        except CypherError as ex:
-            logging.error('CypherError: ', ex.message, ' ', ex.code)            
+        except Exception as e:
+            logging.error(f'UserAdmin.register_applicant: {e.__class__.__name__}, {e}')            
             raise      
-        except ClientError as ex:
-            logging.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
-            raise  
  
     @classmethod
     def update_applicant(cls, profile, email):
@@ -185,18 +179,10 @@ class UserAdmin():
         except ConstraintError as ex:
             logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
             flash(_("Given allowed email address already exists"))                            
-        except CypherError as ex:
-            logging.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logging.error('ClientError: ', ex.message, ' ', ex.code)            
+        except Exception as e:
+            logging.error(f'UserAdmin.update_applicant: {e.__class__.__name__}, {e}')          
             raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
-            raise  
-          
-                          
-                 
+
     @classmethod
     def register_allowed_email(cls, email, role):
         try:
@@ -207,30 +193,18 @@ class UserAdmin():
         except ConstraintError as ex:
             logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
             flash(_("Given allowed email address already exists"))                            
-        except CypherError as ex:
-            logging.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logging.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
+        except Exception as e:
+            logging.error(f'UserAdmin.register_allowed_email: {e.__class__.__name__}, {e}')          
             raise  
-          
+
     @classmethod
     def confirm_allowed_email(cls, tx, email, confirmtime):
         try:
             for record in tx.run(Cypher_adm.allowed_email_confirm, email=email, confirmtime=confirmtime):
                 return(record['ae'])
-        except CypherError as ex:
-            logging.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logging.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
-            raise
+        except Exception as e:
+            logging.error(f'UserAdmin.confirm_allowed_email: {e.__class__.__name__}, {e}')          
+            raise  
  
     @classmethod 
     def update_allowed_email(cls, allowed_email):
@@ -261,16 +235,10 @@ class UserAdmin():
             logging.info('Allowed email with email address {} updated'.format(allowed_email.allowed_email)) 
             return(result.single())
 #                      return(result.single()['allowed_email'])
-        except CypherError as ex:
-            logging.error('CypherError', ex)            
-            raise ex            
-        except ClientError as ex:
-            logging.error('ClientError: ', ex)            
-            raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
-            raise
-        
+        except Exception as e:
+            logging.error(f'UserAdmin._update_allowed_email: {e.__class__.__name__}, {e}')          
+            raise  
+
     @classmethod   
     def get_allowed_emails(cls):
         try:
@@ -297,15 +265,9 @@ class UserAdmin():
         try:
             emailRecords = [record for record in tx.run(Cypher_adm.allowed_emails_get)]    
             return(emailRecords)       
-        except CypherError as ex:
-            logging.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logging.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
-            raise
+        except Exception as e:
+            logging.error(f'UserAdmin._getAllowedEmails: {e.__class__.__name__}, {e}')          
+            raise  
         
     @classmethod 
     def find_allowed_email(cls, email):
@@ -328,15 +290,9 @@ class UserAdmin():
 #                 for record in records:
 #                     emailRecord = record['email']
 #                     return emailNode        
-        except CypherError as ex:
-            logging.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logging.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
-            raise
+        except Exception as e:
+            logging.error(f'UserAdmin._findAllowedEmail: {e.__class__.__name__}, {e}')          
+            raise  
 
     @classmethod
     def user_profile_add(cls, tx, email, username):
@@ -344,16 +300,10 @@ class UserAdmin():
         try:
             tx.run(Cypher_adm.user_profile_add, email=email, username=username) 
             return
-        except CypherError as ex:
-            logging.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logging.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
-            raise
-        
+        except Exception as e:
+            logging.error(f'UserAdmin.user_profile_add: {e.__class__.__name__}, {e}')          
+            raise  
+
     @classmethod   
     def get_user_profiles(cls):
         try:
@@ -374,16 +324,10 @@ class UserAdmin():
         try:
             profileRecords = [record for record in tx.run(Cypher_adm.user_profiles_get)]    
             return(profileRecords)       
-        except CypherError as ex:
-            logging.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logging.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
-            raise
-         
+        except Exception as e:
+            logging.error(f'UserAdmin._getUserProfiles: {e.__class__.__name__}, {e}')          
+            raise  
+
     @classmethod 
     def update_user_language(cls, username, language):
         try:
@@ -466,15 +410,9 @@ class UserAdmin():
           
             logging.info('User with email address {} updated'.format(user.email)) 
             return(result.single()['user'])
-        except CypherError as ex:
-            logging.error('CypherError', ex)            
-            raise ex            
-        except ClientError as ex:
-            logging.error('ClientError: ', ex)            
-            raise
-        except Exception as ex:
-            logging.error('Exception: ', ex)            
-            raise
+        except Exception as e:
+            logging.error(f'UserAdmin._update_user: {e.__class__.__name__}, {e}')          
+            raise  
 
     @staticmethod 
     def get_accesses():

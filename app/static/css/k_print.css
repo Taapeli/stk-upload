@@ -250,6 +250,75 @@ table tbody tr td.ColumnParents {
 table tbody tr td.ColumnParents span.mother:before {
     content:"+ ";
 }
+/* Stk scene rules 2020-08-30/JMä
+----------------------------------------------------- */
+div#alphanav, .SearchBox, #startdiv div i, div#menuToggle { 
+	display:none;
+}
+.detail_link {
+    display: inline;
+}
+h1 div.curr_user {
+    float: right; 
+    margin-right: 30px; 
+    font-family: verdana, sans-serif;
+    font-weight: normal; 
+    font-size: 9pt;
+    padding: 4px;
+}
+img#logo {
+    width: 43px;
+    height: 44px;
+    float: left;
+    margin: -5px 5px 0 5px;
+    vertical-align: text-top;
+}
+#startdiv {
+    margin-left: 50px;
+    margin-bottom: 1em;
+    margin-top: 2em;
+}
+#startdiv div {
+    font-size: 90%;
+    color: gray;
+    padding: 1px 2px;
+    position: absolute;
+    right: .5em;
+    top: 4.5em;
+}
+
+.id { color: sienna; font-size: 80%; text-align: right; 
+    font-family: serif
+}
+.idno { color: gray; text-align:center; 
+    font-family: monospace
+}
+.changetime { color: gray; font-size: 80%; }
+.owner { color: white; 
+    font-size: 70%; 
+    background: RoyalBlue;
+    border-radius: 5px;
+}
+.notmy {color:blue;}
+
+/* For person list td.ColumnEvent div div.eventgrid */
+.eventgrid {  display: flex; }
+.eventgrid .col { float: left; }
+.eventgrid .col.col_event { width: 15em; }
+.eventgrid .col.col_event span {
+    font-style: italic;
+    color: #006;
+}
+
+#footer span.createdate {
+    margin-top: 7px;
+    float: right;
+    text-align: right;
+    padding-right: 15px;
+    width: 40%;
+    font-size: 8pt;
+    color: gray;
+}
 
 /* Home/ Welcome
 ----------------------------------------------------- */

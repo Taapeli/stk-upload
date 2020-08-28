@@ -22,13 +22,15 @@ td ul li p { margin: 0 0 0.3em 0; }
             <div class="flex-container">
 	            <div style="width:100%">
 		            <p>{{ _('This page contains a directory of %(num)s sources.',num=sources|count) }}
-                    <br>{{ _("Select series:") }}
+                    <span class="SearchBox"><br>
+                      {{ _("Select series:") }}
 			          <a href="/scene/sources" class="inlink">{{ _('all') }}</a> |
 			          <a href="/scene/sources/birth" class="inlink">{{ _('birth') }}</a> |
 			          <a href="/scene/sources/babtism" class="inlink">{{ _('babtism') }}</a> |
 			          <a href="/scene/sources/wedding" class="inlink">{{ _('wedding') }}</a> |
 			          <a href="/scene/sources/death" class="inlink">{{ _('death') }}</a> |
 			          <a href="/scene/sources/move" class="inlink">{{ _('move') }}</a>
+                    </span>
 					</p>
 				</div>
             </div>

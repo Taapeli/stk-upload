@@ -35,7 +35,7 @@
                        {% endif %}
                    </p>
 	           </div>
-	           <div>
+	           <div class="SearchBox">
 		           <form action="/scene/locations">
 		             <fieldset>
 		                <input type="hidden" name="c" value="50" >
@@ -128,7 +128,7 @@
 		           </ul>
 	        {% endif %}
 	        <td>{% if p.coord %}
-                <small>({{p.coord[0]|round(4)}}, {{p.coord[1]|round(4)}})</small>
+                <small>({{p.coord[0]|round(1)}},&nbsp;{{p.coord[1]|round(1)}})</small>
             {% endif %}</td>
             <td class="numbers">{% if p.ref_cnt %}{{p.ref_cnt}}{% endif %}</td>
 	    {% endfor %}

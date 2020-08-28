@@ -14,9 +14,8 @@
         - get_people_with_same_deathday() Etsi henkilöt, joiden kuolinaika on sama
         - get_people_wo_birth()         Luetaan henkilöt ilman syntymätapahtumaa
         - get_old_people_top()          Henkilöt joilla syntymä- ja kuolintapahtuma
-        - get_person_combos (keys, currentuser, take_refnames=False, order=0):
-                                        Read Persons with Names, Events and Refnames
-        - get_my_places(self)              Tallettaa liittyvät Paikat henkilöön
+        - get_person_w_events (keys, args): Read Persons with Names, Events and Refnames
+        - get_my_places(self)           Tallettaa liittyvät Paikat henkilöön
         - get_all_citation_source(self) Tallettaa liittyvät Cition ja Source
         - get_all_notes(self)           Tallettaa liittyvät Notes (ja web-viittaukset)
         - get_family_members (uniq_id)  Luetaan liittyvät Names, Families and Events
@@ -740,7 +739,7 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
 
 
     @staticmethod
-    def get_person_combos (keys, args={}): #, currentuser, take_refnames=False, order=0):
+    def get_person_w_events (keys, args={}): #, currentuser, take_refnames=False, order=0):
         """ Read Persons with Names, Events, Refnames (reference names) and Places
             and Researcher's username.
         
@@ -764,6 +763,10 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
             #TODO: take_refnames should determine, if refnames are returned, too
 
         """
+        persons = []
+        p = None
+        p_uniq_id = None
+
         if keys:
             rule=keys[0]
             key=keys[1].title() if len(keys) > 1 else None
@@ -773,9 +776,10 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
             key=""
         user = args.get('user')
         context_code = args.get('context_code')
+#        result = Person_combo.get_person_w_events(keys, args=args)
 
-        try:
-            with shareds.driver.session() as session:
+        with shareds.driver.session(default_access_mode='READ') as session:
+            try:
                 if rule == 'uniq_id':
                     return session.run(Cypher_person.get_events_uniq_id, id=int(key))
                 elif rule == 'refname':
@@ -794,24 +798,83 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
                         years = [-9999, 9999]
                     order = args.get('order')
                     if order == 1:      # order by first name
-                        return session.run(Cypher_person.get_events_all_firstname, years=years)
+                        result = session.run(Cypher_person.get_events_all_firstname, years=years)
                     elif order == 2:    # order by patroname
-                        return session.run(Cypher_person.get_events_all_patronyme, years=years)
+                        result = session.run(Cypher_person.get_events_all_patronyme, years=years)
                     else:
-                        return session.run(Cypher_person.get_events_all, years=years)
+                        result = session.run(Cypher_person.get_events_all, years=years)
                 else:
                     # Selected names and name types
                     if context_code == 1: # COMMON
-                        return session.run(Cypher_person.get_common_events_by_refname_use,
-                                           attr={'use':rule, 'name':key})
+                        result = session.run(Cypher_person.get_common_events_by_refname_use,
+                                             attr={'use':rule, 'name':key})
                     elif context_code == 2: # OWN
-                        return session.run(Cypher_person.get_my_events_by_refname_use,
-                                           attr={'use':rule, 'name':key}, user=user)
+                        result = session.run(Cypher_person.get_my_events_by_refname_use,
+                                             attr={'use':rule, 'name':key}, user=user)
                     else: # From my OWN Batch & approved COMMON
-                        return session.run(Cypher_person.get_both_events_by_refname_use,
-                                           attr={'use':rule, 'name':key}, user=user)
-        except Exception as err:
-            print("iError get_person_combos: {1} {0}".format(err, keys), file=stderr)
+                        result = session.run(Cypher_person.get_both_events_by_refname_use,
+                                             attr={'use':rule, 'name':key}, user=user)
+            except Exception as err:
+                print("iError get_person_w_events: {1} {0}".format(err, keys), file=stderr)
+
+            for record in result:
+                '''
+                # <Record
+                    user=None,
+                    person=<Node id=48883 labels={'Person'}
+                      properties={'sortname': 'Järnefelt#Elin Ailama#',
+                     'id': 'I1623', 'uuid': 'c9beb251259a4c48bf433645cbe4362c',
+                     'sex': 2, 'confidence': '', 'change': 1561976921,
+                     'birth_low': 1870, 'birth_high': 1870,
+                     'death_low': 1953, 'death_high': 1953}>
+                    name=<Node id=80308 labels={'Name'}
+                        properties={'type': 'Birth Name', 'suffix': '', 'order': 0,
+                            'surname': 'Klick', 'firstname': 'Brita Helena'}>
+                    refnames=['Helena', 'Brita', 'Klick']
+                    events=[['Primary', <Node id=88532 labels={'Event'}
+                        properties={'date1': 1754183, 'id': 'E0161', 'attr_type': '',
+                            'date2': 1754183, 'attr_value': '', 'description': '',
+                            'datetype': 0, 'change': 1500907890,
+                            'handle': '_da692d0fb975c8e8ae9c4986d23', 'type': 'Birth'}>,
+                        'Kangasalan srk'], ...]
+                    initial='K'>
+                '''
+                # Person
+        
+                node = record['person']
+                if node.id != p_uniq_id:
+                    # The same person is not created again
+                    p = Person_combo.from_node(node)
+                    p_uniq_id = p.uniq_id
+                    if args.get('take_refnames',False) and record['refnames']:
+                        refnlist = sorted(record['refnames'])
+                        p.refnames = ", ".join(refnlist)
+                    for nnode in record['names']:
+                        pname = Name.from_node(nnode)
+                        if 'initial' in record and record['initial']:
+                            pname.initial = record['initial']
+                        p.names.append(pname)
+                # Eventuel Researcher or blank
+                p.user = record.get('user')
+                
+                # Events
+        
+                for role, event, place in record['events']:
+                    # role = 'Primary',
+                    # event = <Node id=88532 labels={'Event'}
+                    #        properties={'attr_value': '', 'description': '', 'attr_type': '',
+                    #        'datetype': 0, 'date2': 1754183, 'type': 'Birth', 'change': 1500907890,
+                    #        'handle': '_da692d0fb975c8e8ae9c4986d23', 'id': 'E0161', 'date1': 1754183}>,
+                    # place = None
+        
+                    if event:
+                        e = Event_combo.from_node(event)
+                        e.place = place or ""
+                        e.role = role or ""
+                p.events.append(e)
+
+                persons.append(p)
+        return persons
 
 
     @staticmethod
