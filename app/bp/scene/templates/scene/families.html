@@ -118,7 +118,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
 
 {% if cnt %}
     <table class="IndividualList">
-        <tr><th>{{ _("family") }}</th>
+        <tr><th>{{ _("Family") }}</th>
             <th><span class="man-{{user_context.order}}">{{ _("Man") }}</span> / 
                <span class="wife-{{user_context.order}}">{{ _("Wife") }}</span>
             </th>
@@ -126,8 +126,9 @@ th span.man-man, th span.wife-wife { color: #020299;}
         </tr>
     {% for f in families %}
         <tr>
-            <td><a href="/scene/family?uuid={{f.uuid}}" class="inlink"
-                   title="{{ _('Go to family page') }}">{{f.rel_type|transl('marr')}}</a>
+            <td class="ColumnFamily">
+                <a href="/scene/family?uuid={{f.uuid}}" class="inlink"
+                   title="{{ _('Go to family page') }}">&rarr; {{f.rel_type|transl('marr')}}</a>
                 {% if f.marriage_place %}{{f.marriage_place}}{% endif %}
                 {% if f.dates %}{{f.dates}}{% endif %}
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
