@@ -22,11 +22,12 @@ class Name:
                 surname             str sukunimi
                 prefix              str etuliite
                 suffix              str patronyme / patronyymi
+                title               str titteli, esim. Sir, Dr.
                 citation_handles[]  str gramps handles for citations
                 citation_ref[]      int uniq_ids of citation nodes
     """
 
-    def __init__(self, givn='', surn='', pref='', suff=''):
+    def __init__(self, givn='', surn='', pref='', suff='', titl=''):
         """ Luo uuden name-instanssin """
         self.type = ''
         self.order = None
@@ -34,6 +35,7 @@ class Name:
         self.surname = surn
         self.prefix = pref
         self.suffix = suff
+        self.title = titl
         # For gramps xml?
         self.citation_handles = []
         # For person page
@@ -41,7 +43,7 @@ class Name:
 
     def __str__(self):
         # Gedcom style key
-        return "{}/{}/{}/{}".format(self.firstname, self.prefix, self.surname, self.suffix)
+        return "{}/{}/{}/{}/{}".format(self.title, self.firstname, self.prefix, self.surname, self.suffix)
 
     def key_surname(self):
         # Standard sort order key "Klick#Brita Helena#Jönsdotter"
@@ -53,7 +55,7 @@ class Name:
         Transforms a db node to an object of type Name
         
         <Node id=80308 labels={'Name'} 
-            properties={'firstname': 'Brita Helena', 'suffix': '', 'order': 0, 
+            properties={'title': 'Sir', 'firstname': 'Brita Helena', 'suffix': '', 'order': 0, 
                 'surname': 'Klick', '': 'Birth Name'}>
         '''
         n = cls()
@@ -63,6 +65,7 @@ class Name:
         n.firstname = node.get('firstname', '')
         n.prefix = node.get('prefix', '')
         n.suffix = node.get('suffix', '')
+        n.title = node.get('title', '')
         n.surname = node.get('surname', '')
         n.order = node['order']
         return n
@@ -83,7 +86,8 @@ class Name:
                 "firstname": self.firstname,
                 "surname": self.surname,
                 "prefix": self.prefix,
-                "suffix": self.suffix
+                "suffix": self.suffix,
+                "title": self.title
             }
             tx.run(Cypher_name.create_as_leaf,
                    n_attr=n_attr, parent_id=kwargs['parent_id'], 
@@ -103,9 +107,9 @@ class Name:
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2)
                 AND n2.surname = n1.surname AND n2.firstname = n1.firstname
                 RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death,
-                n1.firstname, n1.suffix, n1.surname,
+                n1.firstname, n1.suffix, n1.title, n1.surname,
                 ID(p2), p2.est_birth, p2.est_death,
-                n2.firstname, n2.suffix, n2.surname]) AS ids
+                n2.firstname, n2.suffix, n2.title, n2.surname]) AS ids
             """.format()
         return shareds.driver.session().run(query)
 
@@ -129,14 +133,15 @@ class Name:
         names = []
         for record in result:
             # <Node id=210189 labels={'Name'} 
-            #    properties={'firstname': 'Jan Erik', 'type': 'Birth Name', 
+            #    properties={'title': 'Sir', 'firstname': 'Jan Erik', 'type': 'Birth Name', 
             #        'suffix': 'Jansson', 'surname': 'Mannerheim', 'order': 0}>
             node = record['name']
             fn = node.get('firstname', '')
             vn = node.get('prefix', '')
             sn = node.get('surname', '')
             pn = node.get('suffix', '')
-            names.append("{} {} {} {}".format(fn, pn, vn, sn))
+            ti = node.get('title', '')
+            names.append("{} {} {} {} {}".format(ti, fn, pn, vn, sn))
         return ' • '.join(names)
 
 
@@ -159,7 +164,7 @@ class Name:
             # <Record
             #    pid=82
             #    name=<Node id=83 labels=frozenset({'Name'})
-            #        properties={'firstname': 'Jan Erik', 'surname': 'Mannerheimo',
+            #        properties={'title': 'Sir', 'firstname': 'Jan Erik', 'surname': 'Mannerheimo',
             #            'prefix': '', 'suffix': 'Jansson', 'type': 'Birth Name', 'order': 0}
             # >  >
             node = record['name']

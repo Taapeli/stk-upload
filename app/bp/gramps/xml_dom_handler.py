@@ -542,6 +542,13 @@ class DOM_handler():
                     self.blog.log_event({'title':"More than one suffix in a person",
                                          'level':"WARNING", 'count':p.id})
 
+                if len(person_name.getElementsByTagName('title') ) == 1:
+                    person_title = person_name.getElementsByTagName('title')[0]
+                    pname.title = person_title.childNodes[0].data
+                elif len(person_name.getElementsByTagName('title') ) > 1:
+                    self.blog.log_event({'title':"More than one title in a person",
+                                         'level':"WARNING", 'count':p.id})
+
                 if len(person_name.getElementsByTagName('citationref') ) >= 1:
                     for i in range(len(person_name.getElementsByTagName('citationref') )):
                         person_name_citationref = person_name.getElementsByTagName('citationref')[i]
@@ -827,7 +834,7 @@ class DOM_handler():
 
 # -------------------------- Other process steps -------------------------------
 
-    def set_family_sortname_dates(self):
+    def set_family_calculated_attributes(self):
         ''' Set sortnames and lifetime dates for each Family in the list self.family_ids.
 
             For each Family set Family.father_sortname, Family.mother_sortname, 
@@ -841,7 +848,7 @@ class DOM_handler():
 
         for p_id in self.family_ids:
             if p_id != None:
-                dc, sc = dataupdater.set_family_name_properties(tx=self.tx, uniq_id=p_id)
+                dc, sc = dataupdater.set_family_calculated_attributes(tx=self.tx, uniq_id=p_id)
                 dates_count += dc
                 sortname_count += sc
 
@@ -849,7 +856,7 @@ class DOM_handler():
         self.blog.log_event({'title':"Family sorting names", 'count':sortname_count})
         
 
-    def set_person_sortname_refnames(self):
+    def set_person_calculated_attributes(self):
         ''' Add links from each Person to Refnames and set Person.sortname
         '''
 

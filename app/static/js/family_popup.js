@@ -1,39 +1,10 @@
 /*!
- * Method for displaying Family information in a popup-window
+ * Methods for displaying Family information in a popup-window
  */
 
 function parseSortname(name) {
 	// Returns [surname,firstname,patronyme]
 	return name.split("#");
-}
-
-function htmlSortname(name) {
-	// Parses a sortname to html representation
-	var a = name.split('#');
-	if (a.length != 3)  return name;
-	return a[1]+" <i>"+a[2]+"</i> <b>"+a[0];
-}
-
-function datesStr(dates,first=false) {
-	// Parses a DateRange list format object (<int>, <str> [,<str>])
-	if (!dates) return '';
-	if (dates.length < 2) return '';
-	if (first) return dateLocal(dates[1]);
-	if (dates.length == 3) {
-		return dateLocal(dates[1]) + ' ... ' + dateLocal(dates[2]);
-	} else return dateLocal(dates[1]);
-	return name.split("#");
-}
-
-function dateLocal(date) {
-	// Parses ISO style date 1820-12-03 to local 3.12.1820
-	var a = date.split('-');
-	if (a.length == 1) return date;
-	if (a[1].startsWith('0'))   a[1] = a[1].substr(1,1);
-	if (a.length == 2) return a[1]+'.'+a[0];
-	if (a[2].startsWith('0'))   a[2] = a[2].substr(1,1);
-	if (a.length == 3) return a[2]+'.'+a[1]+'.'+a[0];
-	return "?"
 }
 
 /* --------------------------------- Vue ----------------------------------- */
@@ -49,7 +20,8 @@ var vm = new Vue({
 		currentIndex: 0,	// 1..n, 0 = no familiy selected
 		status: '',
 		translations: {},
-		isShow: false
+		isShow: false,
+		touched: false
 	},
 	computed: {
 		current: function () {
@@ -58,7 +30,7 @@ var vm = new Vue({
 				return vm.families[vm.currentIndex-1];
 			console.log("Exit currentIndex "+ vm.currentIndex);
 			return false;
-		}
+		},
 	},
 	methods: {
 		showPopup(uuid, event) {
@@ -75,16 +47,42 @@ var vm = new Vue({
 			// Get vm.families
 			vm.getFamilies(uuid);
 		},
+		hidePopup() {
+			isShow = false;
+		},
 
-		changeFamily(index) {
-			// Current family index in 1..n; 0 as no family
+		changeFamily(index, ev) {
+/*			Selecting family tab.
+			Current family index in 1..n; value 0 means no family.
+			On touchpad device, there comes 2 events:
+				1) touch -> mouseover
+				2) click -> ignore
+*/
+			var ev_type = (ev !== null ? ev.type : "-");
+//			vm.message = vm.message + " <br>" 
+//				+ ev_type 
+//				+ (vm.touched ? " T": "");
+//			console.log(vm.message);
+//			if (vm.touched) {
+//				vm.touched = false;
+//				return; }
+			if (ev_type == "touchstart") {
+				vm.touched = true;
+				console.log("touchstart");
+			} else console.log('event ', ev_type);
 			if (vm.families.length > 0){
-				console.log("changeFamily: show "+vm.families[index].id);
+				console.log("changeFamily: show " + vm.families[index].id);
 				vm.currentIndex = index+1;
 			} else {
 				console.log("changeFamily: no families");
 				vm.currentIndex = 0;
 			}
+		},
+
+		datesStr(dates) {
+			// Show DateRange as full text.
+			if (!dates) return '';
+			return dates['as_str'];
 		},
 
 		getFamilies(q_uuid) {
@@ -103,8 +101,8 @@ var vm = new Vue({
 					var fam = {};
 					if (rec) {
 						fam.id = rec.id;
-						fam.rel_type = rec.rel_type;
-						fam.dates = datesStr(rec.dates, first=true);
+						fam.rel_type = rec.as_rel_type;
+						fam.dates = rec.dates;
 						fam.role = rec.role;
 						fam.as_role = rec.as_role;
 						fam.href = "/scene/family?uuid="+rec.uuid;
@@ -117,9 +115,11 @@ var vm = new Vue({
 							p.uuid = parent.uuid;
 							p.is_self = (p.uuid == q_uuid);
 							p.name = parseSortname(parent.sortname);
-							p.role = parent.role;
-							p.href = "/scene/person?uuid="+parent.uuid
-							p.birth = datesStr(parent.dates, first=false);
+							p.role = parent.as_role;
+							p.href = "/scene/person?uuid="+parent.uuid;
+							if (parent.event_birth) {
+								p.birth_date = parent.event_birth.dates;
+							} else p.birth_date = null;
 							fam.parents.push(p);
 						}
 						for (child of rec.children) {
@@ -128,15 +128,20 @@ var vm = new Vue({
 							c.is_self = (c.uuid == q_uuid);
 							c.name = parseSortname(child.sortname);
 							c.href = "/scene/person?uuid="+child.uuid
-							c.gender = child.sex; // Clear text in user language
-							c.birth = datesStr(child.dates, first=false);
+							c.gender = child.as_role; // Clear text in user language
+							if (child.event_birth) {
+								c.birth_date = child.event_birth.dates;
+							} else {
+								c.birth_date = null;
+							}
+								
 							fam.children.push(c);
 						}
 						vm.families.push(fam);
 						//console.log("got family ",vm.families.length,fam.id)
 					} // if rec
 				} // for
-				vm.changeFamily(0);
+				vm.changeFamily(0, null);
 				console.log("Got",vm.families.length, "families, current=", vm.currentIndex)
 				vm.isShow = true;
 			}) // axios then

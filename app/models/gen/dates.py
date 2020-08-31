@@ -387,10 +387,18 @@ class DateRange():
         return new
 
     def _json_encode(self):
-        """ Returns json structure
-            Example: {DR['BETWEEN'], "1917", "2017-10-16"}
+        """ Returns json structure with string presentation.
+        
+            Example:   {"datetype": 3, 
+                        "date1": "1828-10-28", "date2": "1874-08-22", 
+                        "as_str": "28.10.1828 \\u2013 22.8.1874"}
         """
-        return [self.datetype, self.date1.short_date(), self.date2.short_date()]
+        date2 = self.date2.short_date() if self.date2 else ""
+        return {'datetype':self.datetype, 
+                'date1':self.date1.short_date(),
+                'date2':date2,
+                'as_str': self.__str__()
+                }
 
 
     # ----------------------- DateRange.DateInt class --------------------------

@@ -118,17 +118,19 @@
     margin-top: .5em;
 }
 div#pop-buttons button.tab {
-  padding: 3px 11px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  cursor: pointer;
-  background: #008CBA;
-  color: white;
-  border-top-left-radius: 1em;
-  border-top-right-radius: 1em;
-/*   margin: 5px 2px 0 5px; */
+	z-index: 2;
+	padding: 3px 11px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	cursor: pointer;
+	background: #008CBA;
+	color: white;
+	border-top-left-radius: 1em;
+	border-top-right-radius: 1em;
+	/*   margin: 5px 2px 0 5px; */
 }
+
 .tab_active {
     background: #d4dee3 !important;
     color: black !important;

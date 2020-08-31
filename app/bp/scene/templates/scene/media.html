@@ -87,9 +87,9 @@ tr > td > img {
 	    {% if media.ref %}
 	    <ul>
 		    {% for label,obj,crop in media.ref %}
-		      <li>{{ _(label) }}:<i>
+		      <li>{{ _(label) }}:
 		    	{% if label == 'Person' %}
-		    		<a href="/scene/person?uuid={{obj.uuid}}"
+		    		<a href="/scene/person?uuid={{obj.uuid}}" class="inlink"
 			               title="{{ _('see details of person %(id)s', id=obj.uuid_short()) }} (nr={{obj.uniq_id}})">
 			               {{obj.sortname|replace("#", " ")}}</a>
 			    {% elif label == 'Place' %}
@@ -97,7 +97,7 @@ tr > td > img {
 			               title="{{ _('see details of place %(id)s', id=obj.uuid_short()) }} (nr={{obj.uniq_id}})">
 			               {{obj.pname}}</a>
 			    {% else %}{{obj.id}}
-			    {% endif %}</i>
+			    {% endif %}
 			    {% if crop %}{{ _('cropped') }}<br>{% set cr_str = ( crop|join(',') ) %}
 			         <img alt="({{ _('Thumbnail') }})"
                         src="/scene/media/kuva2?id={{media.uuid}}&crop={{cr_str}}" 

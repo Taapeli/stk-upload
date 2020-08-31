@@ -200,8 +200,8 @@
     <div id="close-x">✕</div>
     <div id="pop-buttons" v-if="families.length > 1">
       <button 
-         v-on:mouseover="changeFamily(index)"
-         v-on:touchstart="changeFamily(index)"
+         v-on:mouseover="changeFamily(index, $event)"
+         v-on:touchstart="changeFamily(index, $event)"
          v-for="(f, index) of families" :key="f.id"
          v-bind:class="{ 'tab': true, 'tab_active': (index==(currentIndex-1)) }">
             ${f.as_role}</button>
@@ -210,8 +210,8 @@
     <div class="pop-container">
       <div class="pop-text" v-if="currentIndex">
           <p><a v-bind:href="current.href" title="See family" class="inlink">
-              ${translations['family']} ${current.as_role}</a>
-              ${current.rel_type} ${current.dates}
+              ${translations['family']}</a>
+              ${current.rel_type} ${datesStr(current.dates)}
           </p>
           <ul>
               <li v-for="p in current.parents" :key="p.uuid">
@@ -219,7 +219,7 @@
                 <a v-bind:href="p.href" title="Katso henkilöä"
                    v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
                    ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
-                  <span v-if="p.birth">s.&nbsp;${p.birth}</span>
+                  <span v-if="p.birth_date">s.&nbsp;${datesStr(p.birth_date)}</span>
               </li>
               <li v-if="current.has_children">${translations['children']}:
                  <ul>
@@ -227,7 +227,7 @@
                        <a v-bind:href="p.href" title="Katso henkilöä"
                           v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
                           ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>
-                       <span v-if="p.birth">s.&nbsp;${p.birth}</span>
+                       <span v-if="p.birth_date">s.&nbsp;${datesStr(p.birth_date)}</span>
                      </li>
                  </ul>
               </li>

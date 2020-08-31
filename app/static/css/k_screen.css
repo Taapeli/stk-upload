@@ -516,6 +516,9 @@ td.ColumnSources {
 td.ColumnBirth, td.ColumnDeath, td.ColumnPartner, td.ColumnParents {
     font-size: 90%;
 }
+td.ColumnFamily { /* Space for leading arrow */
+	text-indent: -1em;
+}
 table.infolist tr td ol {
     margin: 0px;
 }
