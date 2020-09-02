@@ -12,12 +12,14 @@ from bl.base import Status
 from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
 from bl.family import FamilyBl
+from bl.event import EventBl
 
 from ui.place import place_names_from_nodes
 
 from .cypher_place import CypherPlace
 from .cypher_source import CypherSource
 from .cypher_family import CypherFamily
+from .cypher_event import CypherEvent
 
 #Todo: Change Old style includes to bl classes
 from models.gen.person_combo import Person_combo
@@ -38,6 +40,35 @@ class Neo4jReadDriver:
     def __init__(self, driver):
         self.driver = driver
     
+
+    def _set_birth_death(self, person, birth_node, death_node):
+        '''
+        Set person.birth and person.death events from db nodes
+        '''
+        if birth_node:
+            person.event_birth = Event_combo.from_node(birth_node)
+        if death_node:
+            person.event_death = Event_combo.from_node(death_node)
+
+
+    def _obj_from_node(self, node, role=None):
+        ''' Create Person or Family object from db node.
+        '''
+        if 'Person' in node.labels:
+            obj = Person_combo.from_node(node)
+        elif 'Family' in node.labels:
+            obj = FamilyBl.from_node(node)
+            obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
+        else:
+            #raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
+            logger.warning(f'pe.neo4j.read_driver.Neo4jReadDriver._obj_from_node: Person or Family expexted: {list(node.labels)}')
+            return None
+        obj.role = role
+        if obj.role == 'Primary':
+            obj.role = None
+        return obj
+
+
     def dr_get_person_list(self, user, fw_from, limit):
         """ Read Person data from given fw_from 
         """
@@ -109,6 +140,84 @@ class Neo4jReadDriver:
 
         return persons
 
+    def dr_get_event_by_uuid(self, user:str, uuid:str):
+        '''
+        Read an Event using uuid and user info.
+        
+        Returns dict {item, status, statustext}
+        '''
+        event = None
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                if user: 
+                    # Show my researcher data
+                    result = session.run(CypherEvent.get_an_event_own,
+                                         uuid=uuid, user=user)
+                else:
+                    print("dr_get_event_by_uuid: approved common only")
+                    result = session.run(CypherEvent.get_an_event_common, 
+                                         uuid=uuid)
+                for record in result:
+                    if record['e']:
+                        # Record: <Record 
+                        #    e=<Node id=16580 labels=frozenset({'Event'}) 
+                        #        properties={'datetype': 0, 'change': 1585409701, 'description': '', 
+                        #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589, 
+                        #            'type': 'Baptism', 'uuid': 'dc969e6831dc47d7b6719edd94fe6007'}>
+                        #    root_type='PASSED'
+                        #    root=<Node id=31100 labels=frozenset({'Audit'})
+                        #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
+                        #            'timestamp': 1596463360673}>
+                        # >
+                        node = record['e']
+                        event = EventBl.from_node(node)
+                if event:
+                    return {"item":event, "status":Status.OK}
+
+            except Exception as e:
+                return {"item":None, "status":Status.ERROR, "statustext":str(e)}
+
+        return {"item":event, "status":Status.NOT_FOUND, "statustext":"No Event found"}
+
+
+    def dr_get_event_participants(self, uid):
+        ''' Get Event data, if allowed. 
+
+            Returns dict {event, members, status, statustext}
+        '''
+        try:
+            with self.driver.session(default_access_mode='READ') as session:
+                result = session.run(CypherEvent.get_event_w_participants, uid=uid)
+                parts = []
+                for record in result:
+                        # <Record
+                        #    role='Primary' 
+                        #    p=<Node id=24571 labels=frozenset({'Person'})
+                        #        properties={'sortname': 'Lekatt#Johan#', 'death_high': 1809, 
+                        #            'sex': 1, 'change': 1585409698, 'confidence': '2.0', 
+                        #            'birth_low': 1773, 'birth_high': 1773, 'id': 'I0718', 
+                        #            'uuid': '80198ed21942468db2ecf777a3de88fa', 'death_low': 1807}>
+                        #    name=<Node id=24572 labels=frozenset({'Name'}) 
+                        #        properties={'firstname': 'Johan', 'surname': 'Lekatt', 'prefix': '', 
+                        #            'suffix': '', 'type': 'Also Known As', 'order': 0}>
+                        # >
+                    node = record['p']
+                    role = record['role']
+                    name_node = record['name']
+                    # Create Person or Family
+                    referee = self._obj_from_node(node, role)
+                    # Person may have Name
+                    if name_node:
+                        name = Name.from_node(name_node)
+                        referee.names.append(name)
+                    parts.append(referee)
+
+        except Exception as e:
+            return {"status":Status.ERROR, 
+                    "statustext": f'Error dr_get_event_participants: {e}'}     
+
+        return {"items":parts, "status":Status.OK}
+
 
     def dr_get_family_by_uuid(self, user:str, uuid:str):
         '''
@@ -148,17 +257,6 @@ class Neo4jReadDriver:
                 return {"item":None, "status":Status.ERROR, "statustext":str(e)}
 
         return {"item":None, "status":Status.NOT_FOUND, "statustext":"No families found"}
-
-
-    def _set_birth_death(self, person, birth_node, death_node):
-        '''
-        Set person.birth and person.death events from db nodes
-        '''
-        if birth_node:
-            person.event_birth = Event_combo.from_node(birth_node)
-        if death_node:
-            person.event_death = Event_combo.from_node(death_node)
-
 
 
     def dr_get_family_parents(self, uniq_id:int, with_name=True):
@@ -858,6 +956,7 @@ class Neo4jReadDriver:
             return source
 
 
+
     def dr_get_source_citations(self, sourceid:int):
         """ Read Events and Person, Family and Media citating this Source.
 
@@ -868,23 +967,6 @@ class Neo4jReadDriver:
             - targets       list of the Person or Family nodes 
                             (from near or behind near)
         """
-
-        def obj_from_node(node, role=None):
-            ''' Create Person or Family object from node
-            '''
-            if 'Person' in node.labels:
-                obj = Person_combo.from_node(node)
-            elif 'Family' in node.labels:
-                obj = FamilyBl.from_node(node)
-                obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
-            else:
-                #raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
-                logger.warning(f'dr_get_source_citations Person or Family expexted: {list(node.labels)}')
-                return None
-            obj.role = role
-            if obj.role == 'Primary':
-                obj.role = None
-            return obj
 
         citations = {}      # {uniq_id:citation_object}
         notes = {}          # {uniq_id:[note_object]}
@@ -944,12 +1026,12 @@ class Neo4jReadDriver:
                 targetlist = []     # Persons or Families referring this source
                 for node, role in far_nodes:
                     if not node: continue
-                    obj = obj_from_node(node, role)
+                    obj = self._obj_from_node(node, role)
                     if obj:         # Far node is the Person or Family
                         obj.eventtype = near_node['type']
                         targetlist.append(obj)
                 if not targetlist:  # No far node: there is a middle node near
-                    obj = obj_from_node(near_node)
+                    obj = self._obj_from_node(near_node)
                     if obj:
                         targetlist.append(obj)
                 if targetlist:

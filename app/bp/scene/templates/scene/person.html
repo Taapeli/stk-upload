@@ -125,7 +125,7 @@ u { color: DarkKhaki; text-decoration: none; }
                     <tr>
                         <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
-                                <a href="/scene/event/{{e.uniq_id}}" class="inlink">
+                                <a href="/scene/event/uuid={{e.uuid}}" class="inlink">
                                    {{e.type|transl('evt')}}</a>
     {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>

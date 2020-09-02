@@ -201,6 +201,60 @@ class PlaceReader(DBreader):
         return results
 
 
+    @staticmethod
+    def get_w_notes_places(locid): # orig: models.gen.place_combo.Place_combo.get_w_notes
+        """ Returns the Place_combo with Notes and PlaceNames included.
+
+            #TODO: Luetaan Notes ja Citations vasta get_persondata_by_id() lopuksi?
+        """
+
+        with shareds.driver.session() as session:
+            if isinstance(locid,int):
+                place_result = session.run(Cypher_place.get_w_names_notes, 
+                                       place_id=locid)
+            else:
+                place_result = session.run(Cypher_place.get_w_names_notes_uuid, 
+                                       uuid=locid)
+
+            for place_record in place_result:
+                # <Record
+                #    place=<Node id=287246 labels={'Place'}
+                #        properties={'coord': [60.375, 21.943], 
+                #            'handle': '_da3b305b41147508033e318249b', 'id': 'P0335', 
+                #            'type': 'City', 'pname': 'Rymättylä', 'change': 1556954336}> 
+                #    names=[
+                #        <Node id=287247 labels={'Place_name'} 
+                #            properties={'name': 'Rymättylä', 'lang': ''}>, 
+                #        <Node id=287248 labels={'Place_name'} 
+                #            properties={'name': 'Rimito', 'lang': 'sv'}> ] 
+                #    notes=[]>
+
+                node = place_record["place"]
+                pl = Place_combo.from_node(node)
+
+                for names_node in place_record["names"]:
+                    pl.names.append(PlaceName.from_node(names_node))
+#                     if pl.names[-1].lang in ['fi', '']:
+#                         #TODO: use current_user's lang
+#                         pl.pname = pl.names[-1].name
+
+                for notes_node in place_record['notes']:
+                    n = Note.from_node(notes_node)
+                    pl.notes.append(n)
+
+                for medias_node in place_record['medias']:
+                    m = Media.from_node(medias_node)
+                    pl.media_ref.append(m)
+                    
+                if not (pl.type and pl.id):
+                    logger.error(f"Place_combo.read_w_notes: missing data for {pl}")
+
+        try:
+            return pl
+        except Exception:
+            logger.error(f"Place_combo.read_w_notes: no Place with locid={locid}") 
+            return None
+
 
 class PlaceBl(Place):
     """ Place / Paikka:
