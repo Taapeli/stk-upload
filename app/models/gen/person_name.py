@@ -9,10 +9,11 @@ Created on 10.9.2018
 from sys import stderr
 
 import shareds
+from bl.base import NodeObject
 from .cypher import Cypher_person
 from .cypher import Cypher_name
 
-class Name:
+class Name(NodeObject):
     """ Person name.
 
         Properties:

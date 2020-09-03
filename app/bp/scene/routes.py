@@ -24,6 +24,7 @@ from bl.base import Status, StkEncoder
 from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
+from bl.event import EventReader
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
@@ -34,10 +35,10 @@ from models.gen.media import Media
 
 from models.datareader import read_persons_with_events
 #from models.datareader import get_person_data_by_id # -- vanhempi versio ---
-from models.datareader import get_event_participants
+#from models.datareader import get_event_participants
 #from models.datareader import get_place_with_events
 #from models.datareader import get_source_with_events
-from templates.jinja_filters import translate
+#from templates.jinja_filters import translate
 
 from pe.neo4j.read_driver import Neo4jReadDriver
 from pe.db_reader import DBreader
@@ -296,19 +297,67 @@ def show_person(uid=None):
 # def obsolete_show_person_v1(pid):
 
 
-@bp.route('/scene/event/<int:uniq_id>')
-def show_event(uniq_id):
+#@bp.route('/scene/event/<int:uniq_id>')
+@bp.route('/scene/event/uuid=<string:uuid>')
+def show_event_page(uuid):
     """ Table of a (baptism) Event persons.
 
         Kastetapahtuman tietojen näyttäminen ruudulla
         
         Derived from bp.tools.routes.show_baptism_data()
     """
-    event, participants = get_event_participants(uniq_id)
-    u_context = None
-    stk_logger(u_context, f"-> bp.scene.routes.show_event n={len(participants)}")
+    u_context = UserContext(user_session, current_user, request)
+    dbdriver = Neo4jReadDriver(shareds.driver)
+    reader = EventReader(dbdriver, u_context) 
+
+    results = reader.get_event_data(uuid)
+
+    status = results.get('status')
+    if status != Status.OK:
+        flash(f'{_("Event not found")}: {results.get("statustext")}','error')
+    event = results.get('event', None)
+    members = results.get('members', [])
+
+    stk_logger(u_context, f"-> bp.scene.routes.show_event_page n={len(members)}")
     return render_template("/scene/event.html",
-                           event=event, participants=participants)
+                           event=event, participants=members)
+
+@bp.route('/scene/json/event/uuid=<string:uuid>')
+def json_get_event(uuid):
+    """ Table of a (baptism) Event persons.
+
+        Kastetapahtuman tietojen näyttäminen ruudulla
+        
+        Derived from bp.scene.routes.show_event_page()
+    """
+    # TODO: use POST or GET arguments
+    u_context = UserContext(user_session, current_user, request)
+    dbdriver = Neo4jReadDriver(shareds.driver)
+    reader = EventReader(dbdriver, u_context) 
+
+    results = reader.get_event_data(uuid)
+
+    status = results.get('status')
+    if status != Status.OK:
+        flash(f'{_("Event not found")}: {results.get("statustext")}','error')
+    event = results.get('event', None)
+    members = results.get('members', [])
+    if status == Status.NOT_FOUND:
+        return jsonify({"event":None, "members":[],
+                        "statusText":_('No event found'),
+                        "status":status})
+    elif status != Status.OK:
+        return jsonify({"event":None, "members":[],
+                        "statusText":_('No event found'),
+                        "status":status})
+    res_dict = {"event": event, 'members': members, 
+                'statusText': f'Löytyi {len(members)} tapahtuman osallista',
+                'translations':{}
+                }
+    response = json.dumps(res_dict, cls=StkEncoder)
+    print(response)
+    stk_logger(u_context, f"-> bp.scene.routes.json_get_event n={len(members)}")
+    return response
 
 
 # ------------------------------ Menu 3: Families --------------------------------
@@ -371,8 +420,7 @@ def show_family_page(uid=None):
 def json_get_person_families():
     """ Get all families for a Person as json structure.
 
-        The first element is childhood family or None, 
-        the others are marriages in time order.
+        The families are ordered by marriage time.
     """
     t0 = time.time()
     try:
@@ -384,6 +432,7 @@ def json_get_person_families():
             print(f'got request data: {args}')
         uuid = args.get('uuid')
         if not uuid:
+            print("bp.scene.routes.json_get_person_families: Missing uuid")
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
@@ -396,17 +445,8 @@ def json_get_person_families():
             return jsonify({"member":uuid, "records":[],
                             "statusText":_('No families'),
                             "status":Status.NOT_FOUND})        
+
         items = results['items']
-
-        # Add translated text fields
-        for family in items:
-            family.as_rel_type = translate(family.rel_type, 'marr').lower()
-            family.as_role = translate('as_'+family.role, 'role')
-            for parent in family.parents:
-                parent.as_role = translate(parent.role, 'role')
-            for child in family.children:
-                child.as_role = translate(child.sex, 'child')
-
         res_dict = {'records': items, 
                     "member": uuid, 
                     'statusText': f'Löytyi {len(items)} perhettä',

@@ -9,6 +9,7 @@ Components moved 15.5.2020 from
 @author: jm 
 '''
 import  shareds
+from templates.jinja_filters import translate
 
 from .base import NodeObject, Status
 from pe.db_reader import DBreader
@@ -255,18 +256,22 @@ class FamilyReader(DBreader):
         """ Get all families for given person in marriage date order.
         """
         res = self.dbdriver.dr_get_person_families(uuid)
-        families = res.get('items')
-        if families:
-#             try:
-            families.sort(key=lambda x: x.dates)
-            return {"items":families, "status":Status.OK}
-#             except TypeError:
-#                 print(f'bl.family.FamilyReader.get_person_families: sort by date failed')
-#                 return {"items":families, "status":Status.OK, 
-#                     "statustext": 'Failed to sort families'}
+        items = res.get('items')
+        if items:
+            items.sort(key=lambda x: x.dates)
+            # Add translated text fields
+            for family in items:
+                family.as_rel_type = translate(family.rel_type, 'marr').lower()
+                family.as_role = translate('as_'+family.role, 'role')
+                for parent in family.parents:
+                    parent.as_role = translate(parent.role, 'role')
+                for child in family.children:
+                    child.as_role = translate(child.sex, 'child')
+    
+            return {"items":items, "status":Status.OK}
         else:
             return {"items":[], "status":Status.NOT_FOUND, 
-                    "statustext": 'This person has no families'}
+                    "statustext": _('This person has no families')}
 
 
     # The followind may be obsolete
