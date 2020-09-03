@@ -35,7 +35,7 @@ from models.gen.media import Media
 
 from models.datareader import read_persons_with_events
 #from models.datareader import get_person_data_by_id # -- vanhempi versio ---
-from models.datareader import get_event_participants
+#from models.datareader import get_event_participants
 #from models.datareader import get_place_with_events
 #from models.datareader import get_source_with_events
 #from templates.jinja_filters import translate
@@ -317,25 +317,47 @@ def show_event_page(uuid):
         flash(f'{_("Event not found")}: {results.get("statustext")}','error')
     event = results.get('event', None)
     members = results.get('members', [])
-#     if status == Status.NOT_FOUND:
-#         return jsonify({"event":None, "members":[],
-#                         "statusText":_('No event found'),
-#                         "status":status})
-#     elif status != Status.OK:
-#         return jsonify({"event":None, "members":[],
-#                         "statusText":_('No event found'),
-#                         "status":status})
-#     res_dict = {'members': members, 
-#                 "event": results.get('event'), 
-#                 'statusText': f'Löytyi {len(members)} tapahtuman osallista',
-#                 'translations':{}
-#                 }
-#     response = json.dumps(res_dict, cls=StkEncoder)
-#     print(response)
-    #return response
+
     stk_logger(u_context, f"-> bp.scene.routes.show_event_page n={len(members)}")
     return render_template("/scene/event.html",
                            event=event, participants=members)
+
+@bp.route('/scene/json/event/uuid=<string:uuid>')
+def json_get_event(uuid):
+    """ Table of a (baptism) Event persons.
+
+        Kastetapahtuman tietojen näyttäminen ruudulla
+        
+        Derived from bp.scene.routes.show_event_page()
+    """
+    # TODO: use POST or GET arguments
+    u_context = UserContext(user_session, current_user, request)
+    dbdriver = Neo4jReadDriver(shareds.driver)
+    reader = EventReader(dbdriver, u_context) 
+
+    results = reader.get_event_data(uuid)
+
+    status = results.get('status')
+    if status != Status.OK:
+        flash(f'{_("Event not found")}: {results.get("statustext")}','error')
+    event = results.get('event', None)
+    members = results.get('members', [])
+    if status == Status.NOT_FOUND:
+        return jsonify({"event":None, "members":[],
+                        "statusText":_('No event found'),
+                        "status":status})
+    elif status != Status.OK:
+        return jsonify({"event":None, "members":[],
+                        "statusText":_('No event found'),
+                        "status":status})
+    res_dict = {"event": event, 'members': members, 
+                'statusText': f'Löytyi {len(members)} tapahtuman osallista',
+                'translations':{}
+                }
+    response = json.dumps(res_dict, cls=StkEncoder)
+    print(response)
+    stk_logger(u_context, f"-> bp.scene.routes.json_get_event n={len(members)}")
+    return response
 
 
 # ------------------------------ Menu 3: Families --------------------------------

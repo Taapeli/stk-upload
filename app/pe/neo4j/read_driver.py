@@ -187,7 +187,7 @@ class Neo4jReadDriver:
         '''
         try:
             with self.driver.session(default_access_mode='READ') as session:
-                result = session.run(CypherEvent.get_event_w_participants, uid=uid)
+                result = session.run(CypherEvent.get_event_participants, uid=uid)
                 parts = []
                 for record in result:
                         # <Record

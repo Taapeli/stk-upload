@@ -110,7 +110,7 @@ class EventReader(DBreader):
         - Use pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
           to define the database driver and user context
 
-        - Returns a Result object which includes the items and eventuel error object.
+        - Returns a Result object.
     '''
     def get_event_data(self, uuid):
         '''
@@ -130,45 +130,7 @@ class EventReader(DBreader):
 
         return {'event':event, 'members':members, 'status':result['status'], 
                     'statustext': f'Got {len(members)} participants'}
-    
 
-#     def get_event_w_place_note_citation(self, uuid):
-#         """ Read this event with connected Persons and Families.
-# 
-#             Luetaan tapahtuman tiedot 
-#         """
-#         # Get a Event with connected Persons and Families
-#         result = self.dbdriver.dr_get_event_w_participants(self.use_user, uuid, 
-#                                                         self.user_context.lang)
-#         # Got {"place":pl, "uniq_ids":referenced_node_ids}
-#         place = result.get("place")
-#         results = {"place":place, 'status':Status.OK}
-#         for record in result:
-#             # <Record 
-#             #    event=<Node id=84467 labels={'Event'} 
-#             #    properties={'datetype': 0, 'change': 1522422810, 'description': '', 
-#             #        'handle': '_dd8aab5481c7c18befdd4baa628', 'attr_type': '', 
-#             #        'id': 'E2965', 'date2': 1829189, 'type': 'Baptism', 
-#             #        'date1': 1829189, 'attr_value': ''}> 
-#             #        place_ref=[78213] 
-#             #    citation_ref=[] 
-#             #    note_ref=[]>
-#             node = record["event"]
-#             # Marshall self from the Node from db
-#             self.from_node(node, self)
-# 
-#             # Related data
-#             for ref in record["note_ref"]:
-#                 self.note_ref.append(ref) # List of uniq_ids
-#             for ref in record["citation_ref"]:
-#                 # uniq_ids of connected Citations
-#                 self.citation_ref.append(ref)
-#             for ref in record["place_ref"]:
-#                 self.place_ref.append(ref)
-# #     except Exception as err:
-# #         print("iError get_w_place_note_citation: {1} {0}".format(err, self.uniq_id), file=stderr)
-# # 
-# #     return 
 
 class EventBl(Event):
     """ Event / Paikka:

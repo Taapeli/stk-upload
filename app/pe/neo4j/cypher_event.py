@@ -18,7 +18,7 @@ MATCH (root:Batch {user:$user}) -[r:OWNS]-> (e:Event {uuid:$uuid})
 RETURN e, type(r) AS root_type, root'''
 
     # Get Event with referring Persons and Families
-    get_event_w_participants = """
+    get_event_participants = """
 MATCH (event:Event) <-[r:EVENT]- (p) 
     WHERE ID(event) = $uid
 OPTIONAL MATCH (p) -[:NAME]-> (n:Name {order:0})
