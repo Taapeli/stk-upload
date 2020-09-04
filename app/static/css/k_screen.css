@@ -83,7 +83,7 @@ body > div {
     padding: 1px 2px;
 	position: absolute;
 	right: .5em;
-    top: 4.5em;
+    top: 3.5em;
 }
 #startdiv div i a {
 	color: gray;
@@ -98,6 +98,17 @@ body > div {
     float: right;
     margin: 2em 2em 0 2em;
 }
+.content div.credit {
+    position: relative;
+    top: -2.5em;
+	text-align: right;
+    padding: 5px;
+    color: #7e6b53;
+    font-size: 8pt;
+    height: 0;
+}
+
+
 .fullclear {
     clear: both;
 }
@@ -412,15 +423,6 @@ div#nav ul li.CurrentSection a {
 }
 #subnavigation ul li.CurrentSection a {
     background-color: white;
-}
-
-.credit {
-    position: absolute;
-    top: 40px;
-    right: 10px;
-    color: #7e6b53;
-    font-size: 8pt;
-/*  border: 3px solid #73AD21; */
 }
 
 /* Alphabet Navigation
