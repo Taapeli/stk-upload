@@ -300,10 +300,8 @@ def show_person(uid=None):
 #@bp.route('/scene/event/<int:uniq_id>')
 @bp.route('/scene/event/uuid=<string:uuid>')
 def show_event_page(uuid):
-    """ Table of a (baptism) Event persons.
+    """ Event page with accompanied persons and families.
 
-        Kastetapahtuman tietojen näyttäminen ruudulla
-        
         Derived from bp.tools.routes.show_baptism_data()
     """
     u_context = UserContext(user_session, current_user, request)
@@ -322,13 +320,14 @@ def show_event_page(uuid):
     return render_template("/scene/event.html",
                            event=event, participants=members)
 
+@bp.route('/scene/event2/uuid=<string:uuid>')
+def show_event_vue(uuid):
+    """ Show Event page template which marchals data by Vue. """
+    return render_template("/scene/event_vue.html", uuid=uuid)
+
 @bp.route('/scene/json/event/uuid=<string:uuid>')
 def json_get_event(uuid):
-    """ Table of a (baptism) Event persons.
-
-        Kastetapahtuman tietojen näyttäminen ruudulla
-        
-        Derived from bp.scene.routes.show_event_page()
+    """ Get Event page data.
     """
     # TODO: use POST or GET arguments
     u_context = UserContext(user_session, current_user, request)

@@ -1,0 +1,87 @@
+{# _scene/event_baptism.html_ #}
+{% extends "/scene/layout.html" %}
+{% block title %}{{ _("Event details") }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+
+<div id="startdiv">
+    <h2>{{ _("Event details") }}</h2>
+    <div>{{ macro.show_use_case(no_change=true) }}</div>
+</div>
+
+{{ macro.menu(12) }}
+{% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul  class='flashes'>
+        {% for message in messages %}
+          <li class='flash_{{category}}}'>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+{% endwith %} 
+
+<div id="vue_app">
+    <div class="content" id="IndividualDetail">
+
+        <h3 style="position:sticky; top:0;">
+        <span v-if="${description}">
+            <i>${event.type|transl('evt')|title}:</i> ${event.description}
+        </span>
+        <span v-else>
+            <i>${event.type|transl('evt')|title}</i>
+        </span>
+        </h3>
+
+        <div id="summaryarea">
+            <table v-if="${event}">
+                <tr>
+                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="ColumnValue">
+                        ${macro.all_obj_ids(event)}
+                    </td>
+                </tr>
+                <tr v-if="${event.description}">
+                    <td class="ColumnAttribute">{{ _("Description") }}</td>
+                    <td class="ColumnValue">${ event.description }</td>
+                </tr>
+                <tr v-if="${"event.dates}">
+                    <td class="ColumnAttribute">{{ _("Date") }}</td>
+                    <td class="ColumnValue">${ event.dates }</td>
+                </tr>
+                <tr v-if="${"event.place">
+                    <td class="ColumnAttribute">{{ _("Place") }}</td>
+                    <td class="ColumnValue">
+                        <a href="/scene/location/uuid=${event.place.uuid}" class="inlink">
+                            ${event.place.pname}</a>
+                    </td>
+                </tr>
+            </table>
+        </div><!-- div#summaryarea -->
+
+        <div class="subsection" id="persons">
+            <h4>{{ _("Participants") }}</h4>
+            <table class="infolist eventlist">
+                <thead>
+                    <tr>
+                        <th class="ColumnEvent">{{ _("Role") }}</th>
+                        <th class="ColumnSources">{{ _("Member") }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="p in participants" :key="p.uuid">
+                        <td v-if="p.role">
+                            ${p.role|transl('role')}
+                        </td>
+                        <td v-else>
+                            <span class="myself">&nbsp;{{ _('Self') }}&nbsp;</span>
+                        </td>
+                        <td v-if="p.rel_type">${ macro.family_name(p) }</td>
+                        <td v-else> ${ macro.person_anon(p, None) }</td>
+        			</tr>
+            </table>
+
+        </div><!-- div#persons -->
+    </div><!-- div.content -->
+</div><!-- div.vue_app -->
+{% endblock %}
