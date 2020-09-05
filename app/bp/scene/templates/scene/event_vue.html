@@ -21,35 +21,35 @@
       {% endif %}
 {% endwith %} 
 
-<div id="vue_app" :args="setJson({ uuid: {{uuid}} })">
+<div id="vue_app" :args="{uuid:'{{uuid}}'}">
     <div class="content" id="IndividualDetail">
     <div id="query_uuid" style="display:none">{{uuid}}</div>
 
         <h3 style="position:sticky; top:0;">
-            <span v-if="${description}"><i>${event.type}:</i> ${event.description}</span>
+            <span v-if="description"><i>${event.type}:</i> ${event.description}</span>
             <span v-else><i>${event.type}</i> </span>
         </h3>
 
         <div id="summaryarea">
-            <table v-if="${event}">
+            <table v-if="event">
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">
                         todo: {macro.all_obj_ids(event)}
                     </td>
                 </tr>
-                <tr v-if="${event.description}">
+                <tr v-if="event.description">
                     <td class="ColumnAttribute">{{ _("Description") }}</td>
                     <td class="ColumnValue">${ event.description }</td>
                 </tr>
-                <tr v-if="${"event.dates}">
+                <tr v-if="event.dates">
                     <td class="ColumnAttribute">{{ _("Date") }}</td>
                     <td class="ColumnValue">${ event.dates }</td>
                 </tr>
-                <tr v-if="${"event.place">
+                <tr v-if="event.place">
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
                     <td class="ColumnValue">
-                        <a href="/scene/location/uuid=${event.place.uuid}" class="inlink">
+                        <a href="/scene/location/" :uuid="event.place.uuid" class="inlink">
                             ${event.place.pname}</a>
                     </td>
                 </tr>
@@ -67,11 +67,8 @@
                 </thead>
                 <tbody>
                     <tr v-for="p in participants" :key="p.uuid">
-                        <td v-if="p.role">
-                            ${p.role|transl('role')}
-                        </td>
-                        <td v-else>
-                            <span class="myself">&nbsp;{{ _('Self') }}&nbsp;</span>
+                        <td v-if="p.role">${p.role}</td>
+                        <td v-else><span class="myself">&nbsp;{{myself}}&nbsp;</span>
                         </td>
                         <td v-if="p.rel_type">${ macro.family_name(p) }</td>
                         <td v-else> ${ macro.person_anon(p, None) }</td>
@@ -81,7 +78,7 @@
         </div><!-- div#persons -->
     </div><!-- div.content -->
 </div><!-- div.vue_app -->
-{% endblock %}
+
 <script>
 
 /* --------------------------------- Vue ----------------------------------- */
@@ -97,10 +94,14 @@ var vm = new Vue({
         referees: [],
         translations: {}
     },
+    created: function () {
+        // `this` points to the vm instance
+        console.log("uuid is: "+this.uuid);
+    },
     computed: {},
     methods: {
         beforeMount(){
-            this.getEvent(q_uuid:args['uuid'])
+            this.getEvent(uuid);
         },
         datesStr(dates) {
             // Show DateRange as full text.
@@ -119,53 +120,6 @@ var vm = new Vue({
                 vm.message=rsp.data.statusText;
                 vm.event=rsp.data.event;
                 vm.translations=rsp.data.translations;
-/*
-                for (rec of rsp.data.records) {
-                    //console.log(rec);
-                    var fam = {};
-                    if (rec) {
-                        fam.id = rec.id;
-                        fam.rel_type = rec.as_rel_type;
-                        fam.dates = rec.dates;
-                        fam.role = rec.role;
-                        fam.as_role = rec.as_role;
-                        fam.href = "/scene/family?uuid="+rec.uuid;
-                        fam.parents = [];
-                        fam.children = [];
-                        fam.title = "Perhe "+fam.id;
-
-                        for (parent of rec.parents) {
-                            var p = {};
-                            p.uuid = parent.uuid;
-                            p.is_self = (p.uuid == q_uuid);
-                            p.name = parseSortname(parent.sortname);
-                            p.role = parent.as_role;
-                            p.href = "/scene/person?uuid="+parent.uuid;
-                            if (parent.event_birth) {
-                                p.birth_date = parent.event_birth.dates;
-                            } else p.birth_date = null;
-                            fam.parents.push(p);
-                        }
-                        for (child of rec.children) {
-                            fam.has_children = true;
-                            var c = {uuid:child.uuid};
-                            c.is_self = (c.uuid == q_uuid);
-                            c.name = parseSortname(child.sortname);
-                            c.href = "/scene/person?uuid="+child.uuid
-                            c.gender = child.as_role; // Clear text in user language
-                            if (child.event_birth) {
-                                c.birth_date = child.event_birth.dates;
-                            } else {
-                                c.birth_date = null;
-                            }
-                                
-                            fam.children.push(c);
-                        }
-                        vm.families.push(fam);
-                        //console.log("got family ",vm.families.length,fam.id)
-                    } // if rec
-                } // for
-*/
                 console.log("Got",vm.referees.length, "referees")
             }) // axios then
             .catch(function (error) {
@@ -176,3 +130,5 @@ var vm = new Vue({
     } // methods
 }) // Vue vm
 </script>
+{% endblock %}
+
