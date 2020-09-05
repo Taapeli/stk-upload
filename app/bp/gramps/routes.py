@@ -9,6 +9,7 @@ Created on 15.8.2018
 import os
 import time
 import logging 
+from bp.gramps import gramps_runner
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, jsonify
@@ -109,6 +110,15 @@ def xml_analyze(xmlfile):
     logger.info(f'bp.gramps.routes.xml_analyze f="{os.path.basename(xmlfile)}"')
     return render_template("/gramps/analyze_xml.html", 
                            references=references, file=xmlfile)
+
+@bp.route('/gramps/gramps_analyze/<xmlfile>')
+@login_required
+@roles_accepted('research', 'admin')
+def gramps_analyze(xmlfile):
+    msgs = gramps_runner.gramps_verify(current_user.username, xmlfile)
+    logger.info(f'bp.gramps.routes.gramps_analyze f="{os.path.basename(xmlfile)}"')
+    return render_template("/gramps/gramps_analyze.html", 
+                           msgs=msgs, file=xmlfile)
 
 @bp.route('/gramps/xml_delete/<xmlfile>')
 @login_required

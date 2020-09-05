@@ -1,0 +1,24 @@
+{# _myapp/templates/gr_result.html_ #}
+{% extends "a_layout.html" %}
+{% block title %}{{ _("Gramps analyze") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+<style>
+div.content > p {
+    margin: 0.5em 1em;
+}
+</style>
+
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+
+	<h2>{{ _("Analyze of the Gramps XML") }}</h2>
+	<table>
+	{% for msg in msgs %}
+	    <tr><td>{{ msg }}
+    {% endfor %}
+	</table>
+    <p>
+    &rtrif; <a href="/gramps/uploads">{{ _("Return") }}</a></p>
+{% endblock %}
+
