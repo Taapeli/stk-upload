@@ -325,38 +325,59 @@ def show_event_vue(uuid):
     """ Show Event page template which marchals data by Vue. """
     return render_template("/scene/event_vue.html", uuid=uuid)
 
-@bp.route('/scene/json/event/uuid=<string:uuid>')
-def json_get_event(uuid):
+@bp.route('/scene/json/event', methods=['POST','GET'])
+def json_get_event():
     """ Get Event page data.
     """
-    # TODO: use POST or GET arguments
-    u_context = UserContext(user_session, current_user, request)
-    dbdriver = Neo4jReadDriver(shareds.driver)
-    reader = EventReader(dbdriver, u_context) 
+    t0 = time.time()
+    try:
+        args = request.args
+        if args:
+            print(f'got request args: {args}')
+        else:
+            args = json.loads(request.data)
+            print(f'got request data: {args}')
+        uuid = args.get('uuid')
+        if not uuid:
+            print("bp.scene.routes.json_get_person_families: Missing uuid")
+            return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
-    results = reader.get_event_data(uuid)
+        u_context = UserContext(user_session, current_user, request)
+        dbdriver = Neo4jReadDriver(shareds.driver)
+        reader = EventReader(dbdriver, u_context) 
+    
+        results = reader.get_event_data(uuid)
+    
+        status = results.get('status')
+        if status != Status.OK:
+            flash(f'{_("Event not found")}: {results.get("statustext")}','error')
+        event = results.get('event', None)
+        members = results.get('members', [])
+        if status == Status.NOT_FOUND:
+            return jsonify({"event":None, "members":[],
+                            "statusText":_('No event found'),
+                            "status":status})
+        elif status != Status.OK:
+            return jsonify({"event":None, "members":[],
+                            "statusText":_('No event found'),
+                            "status":status})
+        res_dict = {"event": event, 'members': members, 
+                    'statusText': f'Löytyi {len(members)} tapahtuman osallista',
+                    'translations':{}
+                    }
 
-    status = results.get('status')
-    if status != Status.OK:
-        flash(f'{_("Event not found")}: {results.get("statustext")}','error')
-    event = results.get('event', None)
-    members = results.get('members', [])
-    if status == Status.NOT_FOUND:
-        return jsonify({"event":None, "members":[],
-                        "statusText":_('No event found'),
-                        "status":status})
-    elif status != Status.OK:
-        return jsonify({"event":None, "members":[],
-                        "statusText":_('No event found'),
-                        "status":status})
-    res_dict = {"event": event, 'members': members, 
-                'statusText': f'Löytyi {len(members)} tapahtuman osallista',
-                'translations':{}
-                }
-    response = json.dumps(res_dict, cls=StkEncoder)
-    print(response)
-    stk_logger(u_context, f"-> bp.scene.routes.json_get_event n={len(members)}")
-    return response
+        response = json.dumps(res_dict, cls=StkEncoder)
+        print(response)
+        t1 = time.time()-t0
+        stk_logger(u_context, f"-> bp.scene.routes.json_get_event n={len(members)} e={t1:.3f}")
+        return response
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"records":[], 
+                        "status":Status.ERROR,
+                        "member":uuid,
+                        "statusText":f"Failed {e.__class__.__name__}"})
 
 
 # ------------------------------ Menu 3: Families --------------------------------
