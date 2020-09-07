@@ -114,7 +114,6 @@ It is referred to in Import Batch in Audit Use Case.</body>
   <packagedElement xmi:type="uml:Component" xmi:id="_O3sX0Ok2Eeq7p7cp-9M6dg" name="gramps_app" useCase="_v0V_EOk2Eeq7p7cp-9M6dg">
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_v0V_EOk2Eeq7p7cp-9M6dg" name="load_comments" subject="_O3sX0Ok2Eeq7p7cp-9M6dg"/>
   </packagedElement>
-  <packagedElement xmi:type="uml:UseCase" xmi:id="_QGfFMOlBEeq7p7cp-9M6dg" name="import_batch_audit_review"/>
   <packagedElement xmi:type="uml:StateMachine" xmi:id="_McfQ0M2DEeqiLrd3Gs9yMw" name="import_batch_state">
     <connectionPoint xmi:type="uml:Pseudostate" xmi:id="_blHswM2XEeqiLrd3Gs9yMw" name="upload_gramps" kind="entryPoint"/>
     <connectionPoint xmi:type="uml:Pseudostate" xmi:id="_mJPWUM2YEeqiLrd3Gs9yMw" name="delete_gramps" kind="exitPoint"/>
@@ -145,9 +144,8 @@ It is referred to in Import Batch in Audit Use Case.</body>
     <region xmi:type="uml:Region" xmi:id="_Yi3XUOrQEeqFiNbRr7evfg" name="item_lifespan">
       <transition xmi:type="uml:Transition" xmi:id="_RBhH8OrfEeqFiNbRr7evfg" name="create_item" source="_gGNEkOreEeqFiNbRr7evfg" target="_BE4FEOrfEeqFiNbRr7evfg"/>
       <transition xmi:type="uml:Transition" xmi:id="_Q-RxQOrgEeqFiNbRr7evfg" name="delete_item" source="_BE4FEOrfEeqFiNbRr7evfg" target="_hDZsoOreEeqFiNbRr7evfg"/>
-      <transition xmi:type="uml:Transition" xmi:id="_5HYYIOrgEeqFiNbRr7evfg" name="audit_requested" source="_BE4FEOrfEeqFiNbRr7evfg" target="_d5qfEOrfEeqFiNbRr7evfg"/>
-      <transition xmi:type="uml:Transition" xmi:id="_6Se5UOrgEeqFiNbRr7evfg" name="audit_reject_item" source="_d5qfEOrfEeqFiNbRr7evfg" target="_XnGU0OrfEeqFiNbRr7evfg"/>
-      <transition xmi:type="uml:Transition" xmi:id="_7SSwgOrgEeqFiNbRr7evfg" name="audit_accept_item" source="_d5qfEOrfEeqFiNbRr7evfg" target="_g6Ne8OrfEeqFiNbRr7evfg"/>
+      <transition xmi:type="uml:Transition" xmi:id="_6Se5UOrgEeqFiNbRr7evfg" name="audit_reject_item" source="_BE4FEOrfEeqFiNbRr7evfg" target="_XnGU0OrfEeqFiNbRr7evfg"/>
+      <transition xmi:type="uml:Transition" xmi:id="_7SSwgOrgEeqFiNbRr7evfg" name="audit_accept_item" source="_BE4FEOrfEeqFiNbRr7evfg" target="_g6Ne8OrfEeqFiNbRr7evfg"/>
       <transition xmi:type="uml:Transition" xmi:id="_8ITLcOrgEeqFiNbRr7evfg" name="taken_to_merge" source="_g6Ne8OrfEeqFiNbRr7evfg" target="_1gaG4OrfEeqFiNbRr7evfg"/>
       <transition xmi:type="uml:Transition" xmi:id="_-UIw4OrgEeqFiNbRr7evfg" name="merge_completed" source="_1gaG4OrfEeqFiNbRr7evfg" target="_4YtJsOrfEeqFiNbRr7evfg"/>
       <transition xmi:type="uml:Transition" xmi:id="_BOd0AOrhEeqFiNbRr7evfg" name="changed_accepted" source="_g6Ne8OrfEeqFiNbRr7evfg" target="_JFeB8OrgEeqFiNbRr7evfg"/>
@@ -155,7 +153,6 @@ It is referred to in Import Batch in Audit Use Case.</body>
       <transition xmi:type="uml:Transition" xmi:id="_DdXUgOrhEeqFiNbRr7evfg" name="changed_merged" source="_4YtJsOrfEeqFiNbRr7evfg" target="_JFeB8OrgEeqFiNbRr7evfg"/>
       <subvertex xmi:type="uml:State" xmi:id="_BE4FEOrfEeqFiNbRr7evfg" name="candidate"/>
       <subvertex xmi:type="uml:FinalState" xmi:id="_XnGU0OrfEeqFiNbRr7evfg" name="rejected"/>
-      <subvertex xmi:type="uml:State" xmi:id="_d5qfEOrfEeqFiNbRr7evfg" name="in_audit"/>
       <subvertex xmi:type="uml:State" xmi:id="_g6Ne8OrfEeqFiNbRr7evfg" name="accepted"/>
       <subvertex xmi:type="uml:State" xmi:id="_1gaG4OrfEeqFiNbRr7evfg" name="in_merge"/>
       <subvertex xmi:type="uml:FinalState" xmi:id="_4YtJsOrfEeqFiNbRr7evfg" name="merged"/>
@@ -167,6 +164,7 @@ It is referred to in Import Batch in Audit Use Case.</body>
   <packagedElement xmi:type="uml:UseCase" xmi:id="_HUnRgO0TEeqFiNbRr7evfg" name="manage_gramps_files"/>
   <packagedElement xmi:type="uml:UseCase" xmi:id="_i8XQoO0TEeqFiNbRr7evfg" name="managed_import_batch_in_database"/>
   <packagedElement xmi:type="uml:UseCase" xmi:id="_UnTtQO0sEeqFiNbRr7evfg" name="audit_items_review"/>
+  <packagedElement xmi:type="uml:UseCase" xmi:id="_QGfFMOlBEeq7p7cp-9M6dg" name="import_batch_audit_review"/>
   <packagedElement xmi:type="uml:Association" xmi:id="_nG06IMasEeq_9bVfBcbTkw" memberEnd="_nG39cMasEeq_9bVfBcbTkw _nG39ccasEeq_9bVfBcbTkw">
     <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_nG2vUMasEeq_9bVfBcbTkw" source="org.eclipse.papyrus">
       <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_nG2vUcasEeq_9bVfBcbTkw" key="nature" value="UML_Nature"/>
