@@ -7,6 +7,10 @@
     <body>Audit of Items is described in Audit Items in Import Batch Use Case.
 It is referred to in Import Batch in Audit Use Case.</body>
   </ownedComment>
+  <ownedComment xmi:type="uml:Comment" xmi:id="_JVhQkPG5EeqAwsu2Le8lYA" annotatedElement="_HUnRgO0TEeqFiNbRr7evfg">
+    <body>Managing Gramps Files is described in Import Batch File Management Use Case.
+Import Batch Management Use Case.</body>
+  </ownedComment>
   <packageImport xmi:type="uml:PackageImport" xmi:id="_zbFzAMaqEeq_9bVfBcbTkw">
     <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
   </packageImport>
@@ -53,6 +57,7 @@ It is referred to in Import Batch in Audit Use Case.</body>
   <packagedElement xmi:type="uml:Component" xmi:id="_1eOmQOkWEeq7p7cp-9M6dg" name="import_batch" useCase="_k1RnYOefEeq7p7cp-9M6dg _-0YYQOegEeq7p7cp-9M6dg _pA89oOefEeq7p7cp-9M6dg _m3SewMarEeq_9bVfBcbTkw _sZK2oOefEeq7p7cp-9M6dg _nKnDYMarEeq_9bVfBcbTkw _tx6HQMwsEeqb_NSDAKCaYA _Pi3DcOkwEeq7p7cp-9M6dg _XrpvgOkwEeq7p7cp-9M6dg _Ee2uAOkxEeq7p7cp-9M6dg _neN74MarEeq_9bVfBcbTkw _pjZ-wOkxEeq7p7cp-9M6dg _8UlMgOk2Eeq7p7cp-9M6dg _xf76AOk9Eeq7p7cp-9M6dg _Kts18OreEeqFiNbRr7evfg _LNxdIOreEeqFiNbRr7evfg _tXjtkMwsEeqb_NSDAKCaYA _r-HY8MwtEeqb_NSDAKCaYA _sA_YsMwrEeqb_NSDAKCaYA _rpXi4MwrEeqb_NSDAKCaYA _rF8k4O0pEeqFiNbRr7evfg _zFl8AO0pEeqFiNbRr7evfg">
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_k1RnYOefEeq7p7cp-9M6dg" name="upload_gramps" subject="_1eOmQOkWEeq7p7cp-9M6dg _T23h0MarEeq_9bVfBcbTkw">
       <extensionPoint xmi:type="uml:ExtensionPoint" xmi:id="_9P1PoOk9Eeq7p7cp-9M6dg" name="ExtensionPoint1"/>
+      <extensionPoint xmi:type="uml:ExtensionPoint" xmi:id="_nKzTsPG4EeqAwsu2Le8lYA" name="ExtensionPoint2"/>
     </ownedUseCase>
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_-0YYQOegEeq7p7cp-9M6dg" name="download_gramps" subject="_1eOmQOkWEeq7p7cp-9M6dg _T23h0MarEeq_9bVfBcbTkw"/>
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_pA89oOefEeq7p7cp-9M6dg" name="view_gramps_analysis" subject="_1eOmQOkWEeq7p7cp-9M6dg _T23h0MarEeq_9bVfBcbTkw"/>
@@ -85,6 +90,7 @@ It is referred to in Import Batch in Audit Use Case.</body>
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_8UlMgOk2Eeq7p7cp-9M6dg" name="load_comments" subject="_1eOmQOkWEeq7p7cp-9M6dg"/>
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_xf76AOk9Eeq7p7cp-9M6dg" name="upload_gramps_new" subject="_1eOmQOkWEeq7p7cp-9M6dg">
       <extend xmi:type="uml:Extend" xmi:id="_9PUSQOk9Eeq7p7cp-9M6dg" extendedCase="_k1RnYOefEeq7p7cp-9M6dg" extensionLocation="_9P1PoOk9Eeq7p7cp-9M6dg"/>
+      <extend xmi:type="uml:Extend" xmi:id="_nKtNEPG4EeqAwsu2Le8lYA" extendedCase="_k1RnYOefEeq7p7cp-9M6dg" extensionLocation="_nKzTsPG4EeqAwsu2Le8lYA"/>
     </ownedUseCase>
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_Kts18OreEeqFiNbRr7evfg" name="create_item" subject="_1eOmQOkWEeq7p7cp-9M6dg"/>
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_LNxdIOreEeqFiNbRr7evfg" name="delete_item" subject="_1eOmQOkWEeq7p7cp-9M6dg"/>
@@ -114,7 +120,6 @@ It is referred to in Import Batch in Audit Use Case.</body>
   <packagedElement xmi:type="uml:Component" xmi:id="_O3sX0Ok2Eeq7p7cp-9M6dg" name="gramps_app" useCase="_v0V_EOk2Eeq7p7cp-9M6dg">
     <ownedUseCase xmi:type="uml:UseCase" xmi:id="_v0V_EOk2Eeq7p7cp-9M6dg" name="load_comments" subject="_O3sX0Ok2Eeq7p7cp-9M6dg"/>
   </packagedElement>
-  <packagedElement xmi:type="uml:UseCase" xmi:id="_QGfFMOlBEeq7p7cp-9M6dg" name="import_batch_audit_review"/>
   <packagedElement xmi:type="uml:StateMachine" xmi:id="_McfQ0M2DEeqiLrd3Gs9yMw" name="import_batch_state">
     <connectionPoint xmi:type="uml:Pseudostate" xmi:id="_blHswM2XEeqiLrd3Gs9yMw" name="upload_gramps" kind="entryPoint"/>
     <connectionPoint xmi:type="uml:Pseudostate" xmi:id="_mJPWUM2YEeqiLrd3Gs9yMw" name="delete_gramps" kind="exitPoint"/>
@@ -145,9 +150,8 @@ It is referred to in Import Batch in Audit Use Case.</body>
     <region xmi:type="uml:Region" xmi:id="_Yi3XUOrQEeqFiNbRr7evfg" name="item_lifespan">
       <transition xmi:type="uml:Transition" xmi:id="_RBhH8OrfEeqFiNbRr7evfg" name="create_item" source="_gGNEkOreEeqFiNbRr7evfg" target="_BE4FEOrfEeqFiNbRr7evfg"/>
       <transition xmi:type="uml:Transition" xmi:id="_Q-RxQOrgEeqFiNbRr7evfg" name="delete_item" source="_BE4FEOrfEeqFiNbRr7evfg" target="_hDZsoOreEeqFiNbRr7evfg"/>
-      <transition xmi:type="uml:Transition" xmi:id="_5HYYIOrgEeqFiNbRr7evfg" name="audit_requested" source="_BE4FEOrfEeqFiNbRr7evfg" target="_d5qfEOrfEeqFiNbRr7evfg"/>
-      <transition xmi:type="uml:Transition" xmi:id="_6Se5UOrgEeqFiNbRr7evfg" name="audit_reject_item" source="_d5qfEOrfEeqFiNbRr7evfg" target="_XnGU0OrfEeqFiNbRr7evfg"/>
-      <transition xmi:type="uml:Transition" xmi:id="_7SSwgOrgEeqFiNbRr7evfg" name="audit_accept_item" source="_d5qfEOrfEeqFiNbRr7evfg" target="_g6Ne8OrfEeqFiNbRr7evfg"/>
+      <transition xmi:type="uml:Transition" xmi:id="_6Se5UOrgEeqFiNbRr7evfg" name="audit_reject_item" source="_BE4FEOrfEeqFiNbRr7evfg" target="_XnGU0OrfEeqFiNbRr7evfg"/>
+      <transition xmi:type="uml:Transition" xmi:id="_7SSwgOrgEeqFiNbRr7evfg" name="audit_accept_item" source="_BE4FEOrfEeqFiNbRr7evfg" target="_g6Ne8OrfEeqFiNbRr7evfg"/>
       <transition xmi:type="uml:Transition" xmi:id="_8ITLcOrgEeqFiNbRr7evfg" name="taken_to_merge" source="_g6Ne8OrfEeqFiNbRr7evfg" target="_1gaG4OrfEeqFiNbRr7evfg"/>
       <transition xmi:type="uml:Transition" xmi:id="_-UIw4OrgEeqFiNbRr7evfg" name="merge_completed" source="_1gaG4OrfEeqFiNbRr7evfg" target="_4YtJsOrfEeqFiNbRr7evfg"/>
       <transition xmi:type="uml:Transition" xmi:id="_BOd0AOrhEeqFiNbRr7evfg" name="changed_accepted" source="_g6Ne8OrfEeqFiNbRr7evfg" target="_JFeB8OrgEeqFiNbRr7evfg"/>
@@ -155,18 +159,23 @@ It is referred to in Import Batch in Audit Use Case.</body>
       <transition xmi:type="uml:Transition" xmi:id="_DdXUgOrhEeqFiNbRr7evfg" name="changed_merged" source="_4YtJsOrfEeqFiNbRr7evfg" target="_JFeB8OrgEeqFiNbRr7evfg"/>
       <subvertex xmi:type="uml:State" xmi:id="_BE4FEOrfEeqFiNbRr7evfg" name="candidate"/>
       <subvertex xmi:type="uml:FinalState" xmi:id="_XnGU0OrfEeqFiNbRr7evfg" name="rejected"/>
-      <subvertex xmi:type="uml:State" xmi:id="_d5qfEOrfEeqFiNbRr7evfg" name="in_audit"/>
       <subvertex xmi:type="uml:State" xmi:id="_g6Ne8OrfEeqFiNbRr7evfg" name="accepted"/>
       <subvertex xmi:type="uml:State" xmi:id="_1gaG4OrfEeqFiNbRr7evfg" name="in_merge"/>
       <subvertex xmi:type="uml:FinalState" xmi:id="_4YtJsOrfEeqFiNbRr7evfg" name="merged"/>
       <subvertex xmi:type="uml:FinalState" xmi:id="_JFeB8OrgEeqFiNbRr7evfg" name="obsolete"/>
     </region>
   </packagedElement>
-  <packagedElement xmi:type="uml:Actor" xmi:id="_cAMZYMarEeq_9bVfBcbTkw" name="researcher"/>
-  <packagedElement xmi:type="uml:Actor" xmi:id="_cVsIQMarEeq_9bVfBcbTkw" name="auditor"/>
+  <packagedElement xmi:type="uml:Actor" xmi:id="_cAMZYMarEeq_9bVfBcbTkw" name="researcher">
+    <generalization xmi:type="uml:Generalization" xmi:id="_KiYpIPG1EeqAwsu2Le8lYA" general="_fzx_oPG0EeqAwsu2Le8lYA"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Actor" xmi:id="_cVsIQMarEeq_9bVfBcbTkw" name="auditor">
+    <generalization xmi:type="uml:Generalization" xmi:id="_SKwIsPG1EeqAwsu2Le8lYA" general="_fzx_oPG0EeqAwsu2Le8lYA"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Actor" xmi:id="_fzx_oPG0EeqAwsu2Le8lYA" name="user"/>
   <packagedElement xmi:type="uml:UseCase" xmi:id="_HUnRgO0TEeqFiNbRr7evfg" name="manage_gramps_files"/>
   <packagedElement xmi:type="uml:UseCase" xmi:id="_i8XQoO0TEeqFiNbRr7evfg" name="managed_import_batch_in_database"/>
   <packagedElement xmi:type="uml:UseCase" xmi:id="_UnTtQO0sEeqFiNbRr7evfg" name="audit_items_review"/>
+  <packagedElement xmi:type="uml:UseCase" xmi:id="_QGfFMOlBEeq7p7cp-9M6dg" name="import_batch_audit_review"/>
   <packagedElement xmi:type="uml:Association" xmi:id="_nG06IMasEeq_9bVfBcbTkw" memberEnd="_nG39cMasEeq_9bVfBcbTkw _nG39ccasEeq_9bVfBcbTkw">
     <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_nG2vUMasEeq_9bVfBcbTkw" source="org.eclipse.papyrus">
       <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_nG2vUcasEeq_9bVfBcbTkw" key="nature" value="UML_Nature"/>

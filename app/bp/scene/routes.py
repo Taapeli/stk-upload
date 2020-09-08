@@ -363,7 +363,7 @@ def json_get_event():
                             "status":status})
         res_dict = {"event": event, 'members': members, 
                     'statusText': f'Löytyi {len(members)} tapahtuman osallista',
-                    'translations':{}
+                    'translations':{'myself': _('Self') }
                     }
 
         response = json.dumps(res_dict, cls=StkEncoder)
