@@ -25,6 +25,7 @@ from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
 from bl.event import EventReader
+from templates import jinja_filters
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
@@ -298,7 +299,7 @@ def show_person(uid=None):
 
 
 #@bp.route('/scene/event/<int:uniq_id>')
-@bp.route('/scene/event/uuid=<string:uuid>')
+@bp.route('/older/event/uuid=<string:uuid>')
 def show_event_page(uuid):
     """ Event page with accompanied persons and families.
 
@@ -320,7 +321,7 @@ def show_event_page(uuid):
     return render_template("/scene/event.html",
                            event=event, participants=members)
 
-@bp.route('/scene/event2/uuid=<string:uuid>')
+@bp.route('/scene/event/uuid=<string:uuid>')
 def show_event_vue(uuid):
     """ Show Event page template which marchals data by Vue. """
     return render_template("/scene/event_vue.html", uuid=uuid)
@@ -351,8 +352,6 @@ def json_get_event():
         status = results.get('status')
         if status != Status.OK:
             flash(f'{_("Event not found")}: {results.get("statustext")}','error')
-        event = results.get('event', None)
-        members = results.get('members', [])
         if status == Status.NOT_FOUND:
             return jsonify({"event":None, "members":[],
                             "statusText":_('No event found'),
@@ -361,6 +360,17 @@ def json_get_event():
             return jsonify({"event":None, "members":[],
                             "statusText":_('No event found'),
                             "status":status})
+        event = results.get('event', None)
+        members = results.get('members', [])
+        for m in members:
+            if m.label == "Person":
+                m.href = '/scene/person?uuid=' + m.uuid
+                m.names[0].type_lang = jinja_filters.translate(m.names[0].type, 'nt')
+            elif m.label == "Family":
+                m.href = '/scene/family?uuid=' + m.uuid
+            m.role_lang = jinja_filters.translate(m.role, 'role')
+        event.type_lang = jinja_filters.translate(event.type, 'evt').title()
+
         res_dict = {"event": event, 'members': members, 
                     'statusText': f'Löytyi {len(members)} tapahtuman osallista',
                     'translations':{'myself': _('Self') }

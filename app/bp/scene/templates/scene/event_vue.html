@@ -25,8 +25,9 @@
     <div class="content" id="IndividualDetail" v-if="event">
 
         <h3 style="position:sticky; top:0;">
-            <span v-if="event.description"><i>${event.type}:</i> ${event.description}</span>
-            <span v-else><i>${event.type}</i> </span>
+            <span v-if="event.description">${event.type_lang}: 
+                <i>${event.description}</i></span>
+            <span v-else>${event.type_lang} </span>
         </h3>
 
         <div id="summaryarea">
@@ -60,7 +61,7 @@
 
         <div class="subsection" id="persons">
             <h4>{{ _("Participants") }}</h4>
-            <table class="infolist eventlist">
+            <table class="infolist eventlist" v-if="referees">
                 <thead>
                     <tr>
                         <th class="ColumnEvent">{{ _("Role") }}</th>
@@ -69,21 +70,20 @@
                 </thead>
                 <tbody>
                     <tr v-for="p in referees" :key="p.uuid">
-                        <td v-if="p.role">${p.role}</td>
+                        <td v-if="p.role">${p.role_lang}</td>
                         <td v-else><span class="myself">&nbsp;${translations["myself"]}&nbsp;</span>
                         </td>
-                        <td v-if="p.names">{# macro.family_name(p) #}
+                        <td v-if="p.label == 'Person'">{# macro.person_anon(p, None) #}
                            <a v-bind:href="p.href"
                               class="inlink" title="Katso tiedot">
-                              <span class="typedesc">${p.names[0].type}</span>
-                              <span>${p.names[0].prefix}</span>
                               <span>${p.names[0].firstname}</span>
                               <i>${p.names[0].suffix}</i>
+                              <span>${p.names[0].prefix}</span>
                               <b>${p.names[0].surname}</b></a>
                         </td>
                         <td v-else>
                             <a v-bind:href="p.href"
-                              class="inlink" title="Katso tiedot">{# macro.person_anon(p, None) #}
+                              class="inlink" title="Katso tiedot">{# macro.family_name(p) #}
                                 ${p.clearname.replace(/#/g, " ")}</a>
                         </td>
         			</tr>
@@ -126,8 +126,13 @@ var vm = new Vue({
                 vm.message=rsp.data.statusText;
                 vm.event=rsp.data.event;
                 vm.referees = rsp.data.members;
-                vm.translations=rsp.data.translations;
-                //console.log("Got",vm.referees.length, "referees")
+/*                 if (vm.referees) {
+                   console.log("Got",vm.referees.length, "referees");
+                   for ( var i in vm.referees ) {
+                   	console.log('Referee '+vm.referees[i].url);
+                   }
+                }
+ */                vm.translations=rsp.data.translations;
             }) // axios then
             .catch(function (error) {
                 console.log('Axios error:',error);

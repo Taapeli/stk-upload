@@ -206,6 +206,13 @@ class Neo4jReadDriver:
                     name_node = record['name']
                     # Create Person or Family
                     referee = self._obj_from_node(node, role)
+                    cls_name = referee.__class__.__name__
+                    if cls_name == "Person_combo":
+                        referee.label = "Person"
+                    elif cls_name == "FamilyBl":
+                        referee.label = "Family"
+                    else:
+                        raise TypeError('dr_get_event_participants: Invalid member class '+cls_name);
                     # Person may have Name
                     if name_node:
                         name = Name.from_node(name_node)
