@@ -435,10 +435,10 @@ class PlaceName(NodeObject):
         a = self._lang_key(self)
         b = self._lang_key(other)
         return a < b
-        #return self._lang_key(self) < self.lang_key(other)
-    def __le__(self, other):        return self._lang_key(self) <= self.lang_key(other)
-    def __eq__(self, other):        return self._lang_key(self) == self.lang_key(other)
-    def __ge__(self, other):        return self._lang_key(self) >= self.lang_key(other)
-    def __gt__(self, other):        return self._lang_key(self) > self.lang_key(other)
-    def __ne__(self, other):        return self._lang_key(self) != self.lang_key(other)
+        #return self._lang_key(self) < self._lang_key(other)
+    def __le__(self, other):        return self._lang_key(self) <= self._lang_key(other)
+    def __eq__(self, other):        return self._lang_key(self) == self._lang_key(other)
+    def __ge__(self, other):        return self._lang_key(self) >= self._lang_key(other)
+    def __gt__(self, other):        return self._lang_key(self) > self._lang_key(other)
+    def __ne__(self, other):        return self._lang_key(self) != self._lang_key(other)
 
