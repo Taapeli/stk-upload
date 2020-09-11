@@ -112,24 +112,41 @@ class EventReader(DBreader):
 
         - Returns a Result object.
     '''
-    def get_event_data(self, uuid):
+    def get_event_data(self, uuid, args):
         '''
             Get event data and participants: Persons and Families.
+            
+            The args may include
+            - 'uuid': 'f726974424974652bf6a1e3623c6bad3'
+            - 'referees': True
+            - 'notes': True
         '''
+        res_dict = {}
         result = self.dbdriver.dr_get_event_by_uuid(self.use_user, uuid)
         if (result['status'] != Status.OK):
             return {'item':None, 'status':result['status'], 
                     'statustext': _('The event is not accessible')}
         event = result['item']
+        res_dict['event'] = event
 
-        result = self.dbdriver.dr_get_event_participants(event.uniq_id)
-        if (result['status'] == Status.ERROR):
-            return {'item':None, 'status':result['status'], 
-                    'statustext': _('Participants read error')}
-        members = result['items']
+        members= []
+        if args.get('referees'):
+            result = self.dbdriver.dr_get_event_participants(event.uniq_id)
+            if (result['status'] == Status.ERROR):
+                return {'item':None, 'status':result['status'], 
+                        'statustext': _('Participants read error')}
+            members = result['items']
+            res_dict['members'] = members
 
-        return {'event':event, 'members':members, 'status':result['status'], 
-                    'statustext': f'Got {len(members)} participants'}
+        notes = []
+        if args.get('notes'):
+            print('bl.event.EventReader.get_event_data: TODO notes')
+        
+        res_dict['status'] = result['status']
+        res_dict['statustext'] = f'Got {len(members)} participants, {len(notes)} notes'
+        return res_dict
+#         return {'event':event, 'members':members, 'status':result['status'], 
+#                     'statustext': f'Got {len(members)} participants'}
 
 
 class EventBl(Event):

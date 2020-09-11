@@ -300,7 +300,7 @@ def show_person(uid=None):
 
 #@bp.route('/scene/event/<int:uniq_id>')
 @bp.route('/older/event/uuid=<string:uuid>')
-def show_event_page(uuid):
+def show_event_v1(uuid):
     """ Event page with accompanied persons and families.
 
         Derived from bp.tools.routes.show_baptism_data()
@@ -347,7 +347,7 @@ def json_get_event():
         dbdriver = Neo4jReadDriver(shareds.driver)
         reader = EventReader(dbdriver, u_context) 
     
-        results = reader.get_event_data(uuid)
+        results = reader.get_event_data(uuid, args)
     
         status = results.get('status')
         if status != Status.OK:
@@ -360,7 +360,10 @@ def json_get_event():
             return jsonify({"event":None, "members":[],
                             "statusText":_('No event found'),
                             "status":status})
+        # Event
         event = results.get('event', None)
+        event.type_lang = jinja_filters.translate(event.type, 'evt').title()
+        # Event members
         members = results.get('members', [])
         for m in members:
             if m.label == "Person":
@@ -368,14 +371,16 @@ def json_get_event():
                 m.names[0].type_lang = jinja_filters.translate(m.names[0].type, 'nt')
             elif m.label == "Family":
                 m.href = '/scene/family?uuid=' + m.uuid
-            m.role_lang = jinja_filters.translate(m.role, 'role')
-        event.type_lang = jinja_filters.translate(event.type, 'evt').title()
+            m.role_lang = jinja_filters.translate(m.role, 'role') if m.role  else  ''
+        # Event notes
+        notes = results.get('notes', [])
 
         res_dict = {"event": event, 'members': members, 
+                        "notes":notes,
                     'statusText': f'Löytyi {len(members)} tapahtuman osallista',
                     'translations':{'myself': _('Self') }
                     }
-
+        
         response = json.dumps(res_dict, cls=StkEncoder)
         print(response)
         t1 = time.time()-t0

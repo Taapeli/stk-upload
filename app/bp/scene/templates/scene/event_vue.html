@@ -108,6 +108,7 @@ var vm = new Vue({
         uuid: '?',
         event: null,
         referees: [],
+        notes: [],
         translations: {}
     },
     created: function () {
@@ -119,20 +120,14 @@ var vm = new Vue({
         getEvent(q_uuid) {
             // Asks for data for all families of given person
             console.log("event "+q_uuid);
-            axios.post("/scene/json/event", {uuid:q_uuid})
+            axios.post("/scene/json/event", {uuid:q_uuid,referees:true,notes:true})
             .then (function(rsp) {
                 vm.status = "Status code: "+String(rsp.status);
                 //console.log("stk result: "+rsp.data.statusText);
                 vm.message=rsp.data.statusText;
                 vm.event=rsp.data.event;
                 vm.referees = rsp.data.members;
-/*                 if (vm.referees) {
-                   console.log("Got",vm.referees.length, "referees");
-                   for ( var i in vm.referees ) {
-                   	console.log('Referee '+vm.referees[i].url);
-                   }
-                }
- */                vm.translations=rsp.data.translations;
+                vm.translations=rsp.data.translations;
             }) // axios then
             .catch(function (error) {
                 console.log('Axios error:',error);
