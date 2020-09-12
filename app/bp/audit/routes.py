@@ -123,7 +123,7 @@ def set_all_person_refnames():
     dburi = dbutil.get_server_location()
     (refname_count, _sortname_count) = dataupdater.set_person_name_properties(ops=['refname']) or _('Done')
     logger.info(f"-> bp.audit.routes.set_all_person_refnames n={refname_count}")
-    return render_template("/audit/talletettu.html", uri=dburi, 
+    return render_template("/talletettu.html", uri=dburi, 
                            text=f'Updated {_sortname_count} person sortnames, {refname_count} refnames')
 
 
@@ -189,4 +189,4 @@ def save_loaded_csv(filename, subj):
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
                text=_("Missing proper column title: ") + str(e))
-    return render_template("/audit/talletettu.html", text=status, uri=dburi)
+    return render_template("/talletettu.html", text=status, uri=dburi)

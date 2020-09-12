@@ -56,7 +56,7 @@ def clear_db(opt):
         updater = DataAdmin(current_user)
         result =  updater.db_reset(opt) # dbutil.alusta_kanta()
         logger.info(f"-> bp.admin.routes.clear_db/{opt} n={result['count']}")
-        return render_template("/admin/talletettu.html", text=result['msg'])
+        return render_template("/talletettu.html", text=result['msg'])
     except Exception as e:
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, 
@@ -72,7 +72,7 @@ def clear_my_db():
         updater = DataAdmin(current_user)
         msg =  updater.db_reset('my_own') # dbutil.alusta_kanta()
         logger.info(f"-> bp.admin.routes.clear_my_db")
-        return render_template("/admin/talletettu.html", text=msg)
+        return render_template("/talletettu.html", text=msg)
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
@@ -134,7 +134,7 @@ def estimate_dates(uid=None):
         uids=[]
     message = dataupdater.set_estimated_person_dates(uids)
     ext = _("estimated lifetime")
-    return render_template("/admin/talletettu.html", text=message, info=ext)
+    return render_template("/talletettu.html", text=message, info=ext)
 
 
 # # Ei ilmeisesti käytössä
@@ -144,7 +144,7 @@ def estimate_dates(uid=None):
 #     """ tietojen laatuarvion asettaminen henkilöille """
 #     dburi = dbutil.get_server_location()
 #     message = dataupdater.set_confidence_value()
-#     return render_template("/admin/talletettu.html", text=message, uri=dburi)
+#     return render_template("/talletettu.html", text=message, uri=dburi)
 
 
 @bp.route('/admin/allowed_emails',  methods=['GET', 'POST'])
