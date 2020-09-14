@@ -374,7 +374,14 @@ def json_get_event():
             m.role_lang = jinja_filters.translate(m.role, 'role') if m.role  else  ''
         # Event notes
         notes = results.get('notes', [])
+        # Actually there is one place and one pl.uppers
         places = results.get('places', [])
+        for pl in places:
+            pl.href = '/scene/location/uuid=' + pl.uuid
+            pl.type_lang = jinja_filters.translate(pl.type, 'lt').title()
+            for up in pl.uppers:
+                up.href = '/scene/location/uuid=' + up.uuid
+                up.type_lang = jinja_filters.translate(up.type, 'lt_in').title()
 
         res_dict = {"event": event, 'members': members, 
                     'notes':notes, 'places':places,

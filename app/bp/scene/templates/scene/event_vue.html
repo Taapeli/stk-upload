@@ -52,12 +52,12 @@
                 <tr v-for="pl in places">
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
                     <td class="ColumnValue">
-                        <span class="typedesc">${pl.type}</span>
-                        <a href="/scene/location/" :uuid="pl.uuid" class="inlink">
+                        <a v-bind:href="pl.href" :uuid="pl.uuid" class="inlink">
                             ${pl.names[0].name}</a>
-                        <span v-if="pl.uppers">•
-                           <span class="typedesc">${pl.uppers[0].type}</span>
-                           <a href="/scene/location/" :uuid="pl.uppers[0].uuid" class="inlink">
+                        <span class="typedesc">${pl.type_lang}</span>
+                         <span v-if="pl.uppers">
+                           <span class="typedesc">${pl.uppers[0].type_lang}</span>
+                           <a v-bind:href="pl.uppers[0].href" :uuid="pl.uppers[0].uuid" class="inlink">
                                ${pl.uppers[0].names[0].name}</a>
                         </span>
                     </td>
