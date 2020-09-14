@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-08-21 16:44+0300\n"
+"POT-Creation-Date: 2020-09-20 22:38+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.7.0\n"
+"Generated-By: Babel 2.6.0\n"
 
 #: chkdate.py:13
 msgid "Undefined"
@@ -52,9 +52,10 @@ msgstr ""
 msgid "Login"
 msgstr ""
 
-#: bp/admin/forms.py:37 bp/admin/forms.py:106 bp/admin/forms.py:142
+#: bp/admin/forms.py:38 bp/admin/forms.py:108 bp/admin/forms.py:144
 #: bp/admin/templates/admin/list_users.html:83
-#: bp/admin/templates/admin/list_users_mails.html:87 setups.py:135
+#: bp/admin/templates/admin/list_users_mails.html:87
+#: bp/start/templates/start/join.html:65 setups.py:135
 msgid "Email address"
 msgstr ""
 
@@ -64,7 +65,6 @@ msgid ""
 "use</a>"
 msgstr ""
 
-#: bp/start/templates/start/join.html:55
 #: bp/stk_security/templates/security/_menu.html:5 setups.py:139
 msgid "Register"
 msgstr ""
@@ -73,53 +73,66 @@ msgstr ""
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr ""
 
-#: setups.py:151
+#: setups.py:152
 msgid "Email address has been confirmed earlier"
 msgstr ""
 
-#: setups.py:153
+#: setups.py:154
 msgid "Email address has not been approved yet"
 msgstr ""
 
-#: setups.py:157
+#: setups.py:158
 msgid "Email address must be an authorized one"
 msgstr ""
 
-#: setups.py:162
+#: setups.py:163
 msgid "Username has been reserved already"
 msgstr ""
 
-#: setups.py:164 templates/del_table_users.html:39
+#: setups.py:165 templates/del_table_users.html:39
 msgid "Username"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:82
 #: bp/admin/templates/admin/list_users_mails.html:86
 #: bp/scene/templates/scene/persons.html:70
+#: bp/start/templates/start/join.html:63
 #: bp/tools/templates/tools/person2.html:16
 #: bp/tools/templates/tools/table_persons.html:22
-#: bp/tools/templates/tools/table_refnames.html:32 setups.py:165 setups.py:193
+#: bp/tools/templates/tools/table_refnames.html:32 setups.py:166 setups.py:194
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr ""
 
-#: bp/admin/forms.py:42 bp/admin/forms.py:45 bp/admin/forms.py:145
-#: bp/admin/forms.py:148 bp/admin/templates/admin/list_users.html:84
-#: bp/admin/templates/admin/list_users_mails.html:88 bp/start/forms.py:18
-#: bp/start/forms.py:22 setups.py:166 setups.py:193
+#: bp/admin/forms.py:43 bp/admin/forms.py:46 bp/admin/forms.py:147
+#: bp/admin/forms.py:150 bp/admin/templates/admin/list_users.html:84
+#: bp/admin/templates/admin/list_users_mails.html:88 bp/start/forms.py:20
+#: bp/start/forms.py:24 setups.py:167 setups.py:194
 msgid "Language"
 msgstr ""
 
-#: setups.py:168
+#: setups.py:169
 msgid "Language required"
 msgstr ""
 
-#: bp/admin/forms.py:39 setups.py:193
+#: bp/admin/forms.py:40 bp/start/templates/start/join.html:64 setups.py:194
 msgid "User name"
 msgstr ""
 
-#: bl/family.py:47 models/gen/family.py:45
+#: bl/event.py:122
+msgid "The event is not accessible"
+msgstr ""
+
+#: bl/event.py:128
+msgid "Participants read error"
+msgstr ""
+
+#: bl/family.py:48 models/gen/family.py:45
 msgid "undefined relation"
+msgstr ""
+
+#: bl/family.py:274
+msgid "This person has no families"
 msgstr ""
 
 #: bl/source.py:162
@@ -130,186 +143,192 @@ msgstr ""
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
 msgstr ""
 
-#: bp/admin/forms.py:33
+#: bp/admin/forms.py:34
 msgid "id:"
 msgstr ""
 
-#: bp/admin/forms.py:34
+#: bp/admin/forms.py:35
 msgid "Id of the user"
 msgstr ""
 
-#: bp/admin/forms.py:35 bp/admin/forms.py:75 bp/admin/forms.py:104
-#: bp/admin/forms.py:140
+#: bp/admin/forms.py:36 bp/admin/forms.py:77 bp/admin/forms.py:106
+#: bp/admin/forms.py:142
 msgid "Email Address:"
 msgstr ""
 
-#: bp/admin/forms.py:38
+#: bp/admin/forms.py:39
 msgid "Username:"
 msgstr ""
 
-#: bp/admin/forms.py:40 bp/admin/forms.py:143
+#: bp/admin/forms.py:41 bp/admin/forms.py:145
 msgid "Name:"
 msgstr ""
 
-#: bp/admin/forms.py:41 bp/admin/forms.py:144 bp/start/forms.py:12
+#: bp/admin/forms.py:42 bp/admin/forms.py:146 bp/start/forms.py:14
 msgid "Name of the user"
 msgstr ""
 
-#: bp/admin/forms.py:46 bp/admin/templates/admin/list_users.html:79
+#: bp/admin/forms.py:47 bp/admin/templates/admin/list_users.html:79
 #: bp/admin/templates/admin/list_users_mails.html:83
 msgid "Is active"
 msgstr ""
 
-#: bp/admin/forms.py:47
+#: bp/admin/forms.py:48
 msgid "Active / passive user"
 msgstr ""
 
-#: bp/admin/forms.py:48 bp/admin/templates/admin/list_users.html:85
+#: bp/admin/forms.py:49 bp/admin/templates/admin/list_users.html:85
 #: bp/admin/templates/admin/list_users_mails.html:89
 msgid "Roles"
 msgstr ""
 
-#: bp/admin/forms.py:50 bp/admin/forms.py:85 bp/admin/forms.py:109
-#: bp/admin/forms.py:153
+#: bp/admin/forms.py:51 bp/admin/forms.py:87 bp/admin/forms.py:111
+#: bp/admin/forms.py:155
 msgid "Gedcom-files"
 msgstr ""
 
-#: bp/admin/forms.py:51 bp/admin/forms.py:86 bp/admin/forms.py:110
-#: bp/admin/forms.py:154 bp/scene/templates/scene/event.html:64
+#: bp/admin/forms.py:52 bp/admin/forms.py:88 bp/admin/forms.py:112
+#: bp/admin/forms.py:156 bp/scene/templates/scene/event.html:76
+#: bp/scene/templates/scene/event_vue.html:65
 msgid "Member"
 msgstr ""
 
-#: bp/admin/forms.py:52 bp/admin/forms.py:87 bp/admin/forms.py:111
-#: bp/admin/forms.py:155 templates/jinja_filters.py:131
+#: bp/admin/forms.py:53 bp/admin/forms.py:89 bp/admin/forms.py:113
+#: bp/admin/forms.py:157 templates/jinja_filters.py:131
 msgid "Research"
 msgstr ""
 
-#: bp/admin/forms.py:53 bp/admin/forms.py:88 bp/admin/forms.py:112
-#: bp/admin/forms.py:156
+#: bp/admin/forms.py:54 bp/admin/forms.py:90 bp/admin/forms.py:114
+#: bp/admin/forms.py:158
 msgid "Audit"
 msgstr ""
 
-#: bp/admin/forms.py:54 bp/admin/forms.py:89 bp/admin/forms.py:113
-#: bp/admin/forms.py:157
+#: bp/admin/forms.py:55 bp/admin/forms.py:91 bp/admin/forms.py:115
+#: bp/admin/forms.py:159
 msgid "Admin"
 msgstr ""
 
-#: bp/admin/forms.py:55
+#: bp/admin/forms.py:56
 msgid "Assigned roles"
 msgstr ""
 
-#: bp/admin/forms.py:56 bp/admin/forms.py:122 bp/admin/forms.py:159
+#: bp/admin/forms.py:57 bp/admin/forms.py:124 bp/admin/forms.py:161
 msgid "Email confirmed time"
 msgstr ""
 
-#: bp/admin/forms.py:57
+#: bp/admin/forms.py:58
 msgid "Time of email confirmation"
 msgstr ""
 
-#: bp/admin/forms.py:58 bp/admin/templates/admin/list_users.html:80
+#: bp/admin/forms.py:59 bp/admin/templates/admin/list_users.html:80
 #: bp/admin/templates/admin/list_users_mails.html:84
 msgid "Last login time"
 msgstr ""
 
-#: bp/admin/forms.py:59
+#: bp/admin/forms.py:60
 msgid "Time of last login"
 msgstr ""
 
-#: bp/admin/forms.py:60
+#: bp/admin/forms.py:61
 msgid "Last login IP address"
 msgstr ""
 
-#: bp/admin/forms.py:61
+#: bp/admin/forms.py:62
 msgid "IP address of last login"
 msgstr ""
 
-#: bp/admin/forms.py:62
+#: bp/admin/forms.py:63
 msgid "Current login time"
 msgstr ""
 
-#: bp/admin/forms.py:63
+#: bp/admin/forms.py:64
 msgid "Time of current login"
 msgstr ""
 
-#: bp/admin/forms.py:64
+#: bp/admin/forms.py:65
 msgid "Current login IP address"
 msgstr ""
 
-#: bp/admin/forms.py:65
+#: bp/admin/forms.py:66
 msgid "IP address of current login"
 msgstr ""
 
-#: bp/admin/forms.py:66
+#: bp/admin/forms.py:67
 msgid "Login count"
 msgstr ""
 
-#: bp/admin/forms.py:67
+#: bp/admin/forms.py:68
 msgid "Count of logins"
 msgstr ""
 
-#: bp/admin/forms.py:69 bp/admin/templates/admin/update_user.html:4
+#: bp/admin/forms.py:70 bp/admin/templates/admin/update_user.html:4
 #: bp/admin/templates/admin/update_user.html:11
 msgid "Update user"
 msgstr ""
 
-#: bp/admin/forms.py:76 bp/start/forms.py:15
-msgid "Maximum 100 characters"
+#: bp/admin/forms.py:71
+msgid "Approve user"
 msgstr ""
 
 #: bp/admin/forms.py:78 bp/start/forms.py:17
+msgid "Maximum 100 characters"
+msgstr ""
+
+#: bp/admin/forms.py:80 bp/start/forms.py:19
 msgid "Enter the email address"
 msgstr ""
 
-#: bp/admin/forms.py:83
+#: bp/admin/forms.py:85
 msgid "Default role:"
 msgstr ""
 
-#: bp/admin/forms.py:91
+#: bp/admin/forms.py:93
 msgid "Enter the default role"
 msgstr ""
 
-#: bp/admin/forms.py:92
+#: bp/admin/forms.py:94
 msgid "Add user candidate"
 msgstr ""
 
-#: bp/admin/forms.py:107 bp/admin/forms.py:151
-#: bp/scene/templates/scene/event.html:63
+#: bp/admin/forms.py:109 bp/admin/forms.py:153
+#: bp/scene/templates/scene/event.html:75
+#: bp/scene/templates/scene/event_vue.html:64
 msgid "Role"
 msgstr ""
 
-#: bp/admin/forms.py:114 bp/admin/forms.py:158
+#: bp/admin/forms.py:116 bp/admin/forms.py:160
 msgid "Assigned role choices"
 msgstr ""
 
-#: bp/admin/forms.py:115 bp/admin/forms.py:149
+#: bp/admin/forms.py:117 bp/admin/forms.py:151
 msgid "Approved"
 msgstr ""
 
-#: bp/admin/forms.py:116 bp/admin/forms.py:150
+#: bp/admin/forms.py:118 bp/admin/forms.py:152
 msgid "Approved / pending user"
 msgstr ""
 
-#: bp/admin/forms.py:117
+#: bp/admin/forms.py:119
 msgid "Creator:"
 msgstr ""
 
-#: bp/admin/forms.py:119
+#: bp/admin/forms.py:121
 msgid "User name of creator"
 msgstr ""
 
-#: bp/admin/forms.py:120
+#: bp/admin/forms.py:122
 msgid "Email creation time"
 msgstr ""
 
-#: bp/admin/forms.py:121
+#: bp/admin/forms.py:123
 msgid "Time of allowed email creation"
 msgstr ""
 
-#: bp/admin/forms.py:123 bp/admin/forms.py:160
+#: bp/admin/forms.py:125 bp/admin/forms.py:162
 msgid "Time of registered email confirmation"
 msgstr ""
 
-#: bp/admin/forms.py:126 bp/admin/forms.py:163
+#: bp/admin/forms.py:128 bp/admin/forms.py:165
 #: bp/admin/templates/admin/update_allowed_email.html:11
 msgid "Update allowed email"
 msgstr ""
@@ -326,15 +345,19 @@ msgstr ""
 msgid "estimated lifetime"
 msgstr ""
 
-#: bp/admin/routes.py:183
-msgid "Allowed email updated"
+#: bp/admin/routes.py:194
+msgid "Isotammi user approved"
 msgstr ""
 
-#: bp/admin/routes.py:253
+#: bp/admin/routes.py:195
+msgid "You are now approved to use Isotammi at {server} with user name {user}."
+msgstr ""
+
+#: bp/admin/routes.py:199
 msgid "User updated"
 msgstr ""
 
-#: bp/admin/routes.py:310 bp/gramps/routes.py:93
+#: bp/admin/routes.py:256 bp/gramps/routes.py:93
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr ""
@@ -499,71 +522,63 @@ msgstr ""
 msgid "Delete all my imported data"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:56
-msgid "My Home Page"
-msgstr ""
-
-#: bp/admin/templates/admin/admin.html:59
-msgid "Database refresh"
+#: bp/admin/templates/admin/admin.html:57
+#: bp/gramps/templates/gramps/uploads.html:140
+msgid "Uploaded Candidate Materials"
 msgstr ""
 
 #: bp/admin/templates/admin/admin.html:60
+msgid "Database refresh"
+msgstr ""
+
+#: bp/admin/templates/admin/admin.html:61
 msgid "Safely check and initiate important nodes, constraints and schema fixes"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:71
+#: bp/admin/templates/admin/admin.html:72
 msgid "User and reference information management"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:73
+#: bp/admin/templates/admin/admin.html:74
 msgid "Usernames and uploaded materials"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:74
-#: bp/admin/templates/admin/allowed_emails.html:50
-msgid "User candidates"
-msgstr ""
-
 #: bp/admin/templates/admin/admin.html:75
-msgid "Active and pending users"
-msgstr ""
-
-#: bp/admin/templates/admin/admin.html:76
 msgid "Access management"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:77
+#: bp/admin/templates/admin/admin.html:76
 msgid "Users and roles table"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:87
+#: bp/admin/templates/admin/admin.html:86
 msgid "Data maintenance"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:90
+#: bp/admin/templates/admin/admin.html:89
 msgid "Set the estimated birth and death dates of a person"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:91
+#: bp/admin/templates/admin/admin.html:90
 msgid "DB Editor"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:101
+#: bp/admin/templates/admin/admin.html:100
 msgid "Application management"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:103
+#: bp/admin/templates/admin/admin.html:102
 #: bp/audit/templates/audit/approvals.html:50
 #: bp/audit/templates/audit/batches.html:86
 #: bp/audit/templates/audit/index.html:21
 msgid "Display application log"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:104
+#: bp/admin/templates/admin/admin.html:103
 msgid "List all application pages"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:105
+#: bp/admin/templates/admin/admin.html:104
 msgid "Server statistics"
 msgstr ""
 
@@ -573,6 +588,10 @@ msgstr ""
 
 #: bp/admin/templates/admin/allowed_emails.html:37
 msgid "Notifications"
+msgstr ""
+
+#: bp/admin/templates/admin/allowed_emails.html:50
+msgid "User candidates"
 msgstr ""
 
 #: bp/admin/templates/admin/allowed_emails.html:53
@@ -752,7 +771,7 @@ msgstr ""
 #: bp/admin/templates/admin/layout.html:21
 #: bp/audit/templates/audit/layout.html:44
 #: bp/scene/templates/scene/layout.html:38
-#: bp/scene/templates/scene/layout.html:54
+#: bp/scene/templates/scene/layout.html:48
 #: bp/start/templates/start/s_layout.html:37
 #: bp/stat/templates/stat/layout.html:34 bp/stat/templates/stat/layout.html:50
 #: templates/a_layout.html:28
@@ -791,7 +810,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/layout.html:39
 #: bp/audit/templates/audit/layout.html:60 bp/gedcom/templates/g_layout.html:45
-#: bp/scene/templates/scene/layout.html:56
+#: bp/scene/templates/scene/layout.html:50
 #: bp/start/templates/start/s_layout.html:45
 #: bp/stat/templates/stat/layout.html:52 templates/a_layout.html:37
 msgid "Version"
@@ -856,7 +875,7 @@ msgid "No users"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:114
-msgid "Gramps Files and Candicate Materials"
+msgid "Gramps Files and Candidate Materials"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:115
@@ -985,7 +1004,7 @@ msgstr ""
 msgid "Allowed email list"
 msgstr ""
 
-#: bp/admin/templates/admin/update_user.html:47
+#: bp/admin/templates/admin/update_user.html:51
 msgid "User list"
 msgstr ""
 
@@ -1192,7 +1211,7 @@ msgid "List approved Isotammi data sets"
 msgstr ""
 
 #: bp/audit/templates/audit/index.html:27
-#: bp/scene/templates/scene/sources.html:26
+#: bp/scene/templates/scene/sources.html:27
 msgid "all"
 msgstr ""
 
@@ -1311,23 +1330,6 @@ msgstr ""
 
 #: bp/audit/templates/audit/reference.html:40
 msgid "Download reference names as a CSV file"
-msgstr ""
-
-#: bp/audit/templates/audit/talletettu.html:3
-msgid "Data stored"
-msgstr ""
-
-#: bp/audit/templates/audit/talletettu.html:6
-msgid "Store to Database"
-msgstr ""
-
-#: bp/audit/templates/audit/talletettu.html:28
-#: bp/start/templates/start/my_settings.html:30
-#: bp/tools/templates/tools/person2.html:43
-#: bp/tools/templates/tools/source_citations.html:35
-#: templates/cite_sour_repo.html:75 templates/db_test.html:10
-#: templates/repo_sources.html:54 templates/virhe_lataus.html:20
-msgid "Go back"
 msgstr ""
 
 #: bp/dupsearch/templates/dupsearch.html:3
@@ -1585,7 +1587,7 @@ msgstr ""
 #: bp/scene/templates/scene/persons.html:137
 #: bp/scene/templates/scene/persons_list.html:113
 #: bp/scene/templates/scene/places.html:101
-#: bp/scene/templates/scene/sources.html:62
+#: bp/scene/templates/scene/sources.html:64
 msgid "Back to Top"
 msgstr ""
 
@@ -1610,8 +1612,9 @@ msgstr ""
 #: bp/gedcom/templates/gedcom_info.html:29
 #: bp/gedcom/templates/gedcom_info.html:179
 #: bp/gedcom/templates/gedcom_list.html:42
-#: bp/scene/templates/scene/event.html:40
-#: bp/scene/templates/scene/person.html:119
+#: bp/scene/templates/scene/event.html:51
+#: bp/scene/templates/scene/event_vue.html:42
+#: bp/scene/templates/scene/person.html:126
 #: bp/scene/templates/scene/place_events.html:168
 #: bp/start/templates/start/my_settings.html:140
 #: bp/tools/templates/tools/table_baptism_data.html:16
@@ -2249,10 +2252,6 @@ msgstr ""
 msgid "Are you sure you want to delete this batch from database?"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:140
-msgid "Uploaded Candidate Materials"
-msgstr ""
-
 #: bp/gramps/templates/gramps/uploads.html:153
 msgid "Steps for uploading Gramps files"
 msgstr ""
@@ -2317,42 +2316,65 @@ msgstr ""
 msgid "Return to front page"
 msgstr ""
 
-#: bp/scene/routes.py:397
+#: bp/scene/routes.py:358 bp/scene/routes.py:362
+msgid "No event found"
+msgstr ""
+
+#: bp/scene/routes.py:366 bp/scene/templates/scene/event.html:83
+#: bp/scene/templates/scene/person.html:237
+msgid "Self"
+msgstr ""
+
+#: bp/scene/routes.py:466
 msgid "No families"
 msgstr ""
 
-#: bp/scene/routes.py:416
-msgid "husband"
+#: bp/scene/routes.py:473 bp/scene/templates/scene/families.html:121
+#: bp/scene/templates/scene/family.html:33
+#: bp/scene/templates/scene/person.html:216
+#: bp/scene/templates/scene/person.html:253
+#: bp/tools/templates/tools/obsolete_table_families_by_id.html:37
+#: bp/tools/templates/tools/table_families.html:19
+#: templates/jinja_filters.py:75 templates/jinja_filters.py:81
+msgid "Family"
 msgstr ""
 
-#: bp/scene/routes.py:425
-msgid "wife"
+#: bp/scene/routes.py:474 bp/scene/templates/scene/families.html:125
+#: bp/scene/templates/scene/family.html:100
+#: bp/scene/templates/scene/person.html:223
+#: bp/scene/templates/scene/person.html:260
+#: bp/tools/templates/tools/obsolete_table_families_by_id.html:115
+msgid "Children"
 msgstr ""
 
-#: bp/scene/routes.py:580
+#: bp/scene/routes.py:605
 msgid "No objects found"
 msgstr ""
 
-#: bp/scene/routes.py:583
+#: bp/scene/routes.py:608
 msgid "Error"
 msgstr ""
 
 #: bp/scene/templates/scene/event.html:3 bp/scene/templates/scene/event.html:9
+#: bp/scene/templates/scene/event_vue.html:3
+#: bp/scene/templates/scene/event_vue.html:9
 msgid "Event details"
 msgstr ""
 
-#: bp/scene/templates/scene/event.html:27
+#: bp/scene/templates/scene/event.html:38
+#: bp/scene/templates/scene/event_vue.html:36
 #: bp/scene/templates/scene/family.html:36
 #: bp/scene/templates/scene/media.html:63
-#: bp/scene/templates/scene/person.html:48
+#: bp/scene/templates/scene/person.html:54
 #: bp/scene/templates/scene/place_events.html:83
 #: bp/scene/templates/scene/source_events.html:30
 #: bp/scene/templates/scene/source_events.html:49
 msgid "Identifiers"
 msgstr ""
 
-#: bp/scene/templates/scene/event.html:44
-#: bp/scene/templates/scene/person.html:117
+#: bp/scene/templates/scene/event.html:55
+#: bp/scene/templates/scene/event_vue.html:46
+#: bp/scene/templates/scene/person.html:124
 #: bp/scene/templates/scene/place_events.html:167
 #: bp/start/templates/start/my_settings.html:138
 #: bp/tools/templates/tools/table_baptism_data.html:12
@@ -2362,8 +2384,9 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: bp/scene/templates/scene/event.html:48
-#: bp/scene/templates/scene/person.html:118
+#: bp/scene/templates/scene/event.html:59
+#: bp/scene/templates/scene/event_vue.html:50
+#: bp/scene/templates/scene/person.html:125
 #: bp/scene/templates/scene/places.html:45
 #: bp/tools/templates/tools/table_baptism_data.html:15
 #: bp/tools/templates/tools/table_persons.html:25
@@ -2371,13 +2394,9 @@ msgstr ""
 msgid "Place"
 msgstr ""
 
-#: bp/scene/templates/scene/event.html:59
-msgid "Participants"
-msgstr ""
-
 #: bp/scene/templates/scene/event.html:71
-#: bp/scene/templates/scene/person.html:230
-msgid "Self"
+#: bp/scene/templates/scene/event_vue.html:60
+msgid "Participants"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:3
@@ -2420,8 +2439,8 @@ msgstr ""
 #: bp/scene/templates/scene/families.html:47
 #: bp/scene/templates/scene/families.html:86
 #: bp/scene/templates/scene/families.html:87
-#: bp/scene/templates/scene/families.html:175
-#: bp/scene/templates/scene/person.html:249
+#: bp/scene/templates/scene/families.html:176
+#: bp/scene/templates/scene/person.html:256
 #: bp/tools/templates/tools/obsolete_table_families_by_id.html:67
 #: bp/tools/templates/tools/table_families.html:21
 #: templates/jinja_filters.py:93
@@ -2446,8 +2465,8 @@ msgstr ""
 #: bp/scene/templates/scene/families.html:59
 #: bp/scene/templates/scene/families.html:102
 #: bp/scene/templates/scene/families.html:103
-#: bp/scene/templates/scene/families.html:187
-#: bp/scene/templates/scene/person.html:251
+#: bp/scene/templates/scene/families.html:188
+#: bp/scene/templates/scene/person.html:258
 #: bp/tools/templates/tools/obsolete_table_families_by_id.html:91
 #: bp/tools/templates/tools/table_families.html:23
 #: templates/jinja_filters.py:94
@@ -2455,7 +2474,7 @@ msgid "Mother"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:83
-#: bp/scene/templates/scene/families.html:173
+#: bp/scene/templates/scene/families.html:174
 #: bp/scene/templates/scene/medias.html:58
 #: bp/scene/templates/scene/medias.html:122
 #: bp/scene/templates/scene/persons_list.html:72
@@ -2464,22 +2483,22 @@ msgstr ""
 
 #: bp/scene/templates/scene/families.html:86
 #: bp/scene/templates/scene/families.html:102
-#: bp/scene/templates/scene/families.html:175
-#: bp/scene/templates/scene/families.html:187
-#: bp/scene/templates/scene/families.html:204
+#: bp/scene/templates/scene/families.html:176
+#: bp/scene/templates/scene/families.html:188
+#: bp/scene/templates/scene/families.html:205
 #: bp/scene/templates/scene/medias.html:61
 #: bp/scene/templates/scene/medias.html:124
 #: bp/scene/templates/scene/medias.html:141
 #: bp/scene/templates/scene/persons_list.html:74
-#: bp/scene/templates/scene/persons_list.html:195
+#: bp/scene/templates/scene/persons_list.html:192
 #: bp/scene/templates/scene/places.html:66
 msgid "first page"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:93
 #: bp/scene/templates/scene/families.html:109
-#: bp/scene/templates/scene/families.html:180
-#: bp/scene/templates/scene/families.html:192
+#: bp/scene/templates/scene/families.html:181
+#: bp/scene/templates/scene/families.html:193
 #: bp/scene/templates/scene/medias.html:68
 #: bp/scene/templates/scene/medias.html:129
 #: bp/scene/templates/scene/persons_list.html:86
@@ -2487,57 +2506,40 @@ msgstr ""
 msgid "no next page"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:121
-#: bp/scene/templates/scene/person.html:207
-#: bp/tools/templates/tools/obsolete_table_families_by_id.html:44
-#: bp/tools/templates/tools/obsolete_table_families_by_id.html:54
-#: bp/tools/templates/tools/obsolete_table_person_by_id.html:39
-#: bp/tools/templates/tools/obsolete_table_person_by_id.html:45
-msgid "family"
-msgstr ""
-
 #: bp/scene/templates/scene/families.html:122
-#: bp/scene/templates/scene/person.html:212
+#: bp/scene/templates/scene/person.html:219
 msgid "Man"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:123
-#: bp/scene/templates/scene/person.html:214 templates/jinja_filters.py:96
+#: bp/scene/templates/scene/person.html:221 templates/jinja_filters.py:96
 msgid "Wife"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:125
-#: bp/scene/templates/scene/family.html:100
-#: bp/scene/templates/scene/person.html:216
-#: bp/scene/templates/scene/person.html:253
-#: bp/tools/templates/tools/obsolete_table_families_by_id.html:115
-msgid "Children"
-msgstr ""
-
-#: bp/scene/templates/scene/families.html:130
+#: bp/scene/templates/scene/families.html:131
 msgid "Go to family page"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:133
+#: bp/scene/templates/scene/families.html:134
 #: bp/scene/templates/scene/medias.html:93
-#: bp/scene/templates/scene/persons_list.html:157
+#: bp/scene/templates/scene/persons_list.html:154
 msgid "Original ID"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:134
+#: bp/scene/templates/scene/families.html:135
 #: bp/scene/templates/scene/medias.html:94
 msgid "Key"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:152
-#: bp/scene/templates/scene/families.html:155
+#: bp/scene/templates/scene/families.html:153
+#: bp/scene/templates/scene/families.html:156
 #, python-format
 msgid "%(num)d child"
 msgid_plural "%(num)d children"
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/scene/templates/scene/families.html:153
+#: bp/scene/templates/scene/families.html:154
 #: bp/scene/templates/scene/family.html:116
 #, python-format
 msgid "hidden"
@@ -2545,35 +2547,26 @@ msgid_plural "%(num)d hidden"
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/scene/templates/scene/families.html:166
+#: bp/scene/templates/scene/families.html:167
 #: bp/scene/templates/scene/medias.html:114
-#: bp/scene/templates/scene/persons_list.html:185
+#: bp/scene/templates/scene/persons_list.html:182
 msgid "The last item found"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:202
-#: bp/scene/templates/scene/persons_list.html:193
+#: bp/scene/templates/scene/families.html:203
+#: bp/scene/templates/scene/persons_list.html:190
 #, python-format
 msgid "No one found with search keys starting \"%(name)s\""
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:204
-#: bp/scene/templates/scene/persons_list.html:195
+#: bp/scene/templates/scene/families.html:205
+#: bp/scene/templates/scene/persons_list.html:192
 msgid "Go to the first person"
 msgstr ""
 
 #: bp/scene/templates/scene/family.html:3
 #: bp/scene/templates/scene/family.html:16
 msgid "Family details"
-msgstr ""
-
-#: bp/scene/templates/scene/family.html:33
-#: bp/scene/templates/scene/person.html:209
-#: bp/scene/templates/scene/person.html:246
-#: bp/tools/templates/tools/obsolete_table_families_by_id.html:37
-#: bp/tools/templates/tools/table_families.html:19
-#: templates/jinja_filters.py:75 templates/jinja_filters.py:81
-msgid "Family"
 msgstr ""
 
 #: bp/scene/templates/scene/family.html:40
@@ -2585,12 +2578,12 @@ msgid "Family Events"
 msgstr ""
 
 #: bp/scene/templates/scene/family.html:67
-#: bp/scene/templates/scene/person.html:142
+#: bp/scene/templates/scene/person.html:149
 msgid "of type"
 msgstr ""
 
 #: bp/scene/templates/scene/family.html:67
-#: bp/scene/templates/scene/person.html:142
+#: bp/scene/templates/scene/person.html:149
 msgid "see details of place"
 msgstr ""
 
@@ -2620,16 +2613,6 @@ msgstr ""
 msgid "Notes"
 msgstr ""
 
-#: bp/scene/templates/scene/layout.html:46
-#: bp/stat/templates/stat/layout.html:42
-msgid "Origin from"
-msgstr ""
-
-#: bp/scene/templates/scene/layout.html:47
-#: bp/stat/templates/stat/layout.html:43
-msgid "User data"
-msgstr ""
-
 #: bp/scene/templates/scene/macros.html:48
 msgid "Search for people"
 msgstr ""
@@ -2650,8 +2633,8 @@ msgid "Persons"
 msgstr ""
 
 #: bp/scene/templates/scene/macros.html:63
-#: bp/scene/templates/scene/person.html:200
-#: bp/scene/templates/scene/person.html:203
+#: bp/scene/templates/scene/person.html:207
+#: bp/scene/templates/scene/person.html:210
 msgid "Families"
 msgstr ""
 
@@ -2701,7 +2684,7 @@ msgid "See Person's Details"
 msgstr ""
 
 #: bp/scene/templates/scene/macros.html:177
-#: bp/scene/templates/scene/person.html:228
+#: bp/scene/templates/scene/person.html:235
 msgid "self"
 msgstr ""
 
@@ -2748,7 +2731,7 @@ msgstr ""
 #: bp/scene/templates/scene/media.html:85
 #: bp/scene/templates/scene/medias.html:84
 #: bp/scene/templates/scene/places.html:91
-#: bp/scene/templates/scene/sources.html:53
+#: bp/scene/templates/scene/sources.html:55
 #: bp/tools/templates/tools/source_citations.html:20
 #: templates/cite_sour_repo.html:25
 msgid "References"
@@ -2808,8 +2791,8 @@ msgstr ""
 #: bp/scene/templates/scene/medias.html:100
 #: bp/scene/templates/scene/person.html:29
 #: bp/scene/templates/scene/person.html:32
-#: bp/scene/templates/scene/person.html:273
-#: bp/scene/templates/scene/person.html:275
+#: bp/scene/templates/scene/person.html:280
+#: bp/scene/templates/scene/person.html:282
 #: bp/scene/templates/scene/place_events.html:137
 #: bp/scene/templates/scene/place_events.html:147
 #: templates/jinja_filters.py:171
@@ -2830,32 +2813,42 @@ msgstr ""
 msgid "Person's details"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:38
+#: bp/scene/templates/scene/person.html:39
+#: bp/stat/templates/stat/layout.html:42
+msgid "Origin from"
+msgstr ""
+
+#: bp/scene/templates/scene/person.html:40
+#: bp/stat/templates/stat/layout.html:43
+msgid "User data"
+msgstr ""
+
+#: bp/scene/templates/scene/person.html:44
 #: bp/scene/templates/scene/persons.html:113
 #: bp/scene/templates/scene/place_events.html:56
 #: bp/scene/templates/scene/places.html:64
-#: bp/scene/templates/scene/sources.html:38
+#: bp/scene/templates/scene/sources.html:40
 msgid "Top"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:51
+#: bp/scene/templates/scene/person.html:57
 msgid "Sorting key"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:58
-#: bp/scene/templates/scene/person.html:231
+#: bp/scene/templates/scene/person.html:65
+#: bp/scene/templates/scene/person.html:238
 #: bp/scene/templates/scene/persons.html:7
 msgid "first name"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:59
-#: bp/scene/templates/scene/person.html:232
+#: bp/scene/templates/scene/person.html:66
+#: bp/scene/templates/scene/person.html:239
 #: bp/scene/templates/scene/persons.html:7
 msgid "patronymic"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:61
-#: bp/scene/templates/scene/person.html:233
+#: bp/scene/templates/scene/person.html:68
+#: bp/scene/templates/scene/person.html:240
 #: bp/scene/templates/scene/persons.html:7
 #: bp/tools/templates/tools/obsolete_table_families_by_id.html:11
 #: bp/tools/templates/tools/obsolete_table_families_by_id.html:44
@@ -2868,53 +2861,53 @@ msgstr ""
 msgid "surname"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:68
+#: bp/scene/templates/scene/person.html:75
 msgid "Gender"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:72
+#: bp/scene/templates/scene/person.html:79
 #: bp/scene/templates/scene/place_events.html:116
 msgid "Private data"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:74
+#: bp/scene/templates/scene/person.html:81
 msgid "Possible years"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:77
+#: bp/scene/templates/scene/person.html:84
 msgid "confidential"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:82
+#: bp/scene/templates/scene/person.html:89
 msgid "Age at death"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:86
+#: bp/scene/templates/scene/person.html:93
 msgid "at least"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:88
+#: bp/scene/templates/scene/person.html:95
 msgid "about"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:91
+#: bp/scene/templates/scene/person.html:98
 msgid "years"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:96
+#: bp/scene/templates/scene/person.html:103
 msgid "Confidence of data"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:103
+#: bp/scene/templates/scene/person.html:110
 msgid "See person note"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:104
+#: bp/scene/templates/scene/person.html:111
 #, python-format
 msgid "See %(num)d person notes"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:112
+#: bp/scene/templates/scene/person.html:119
 #: bp/scene/templates/scene/persons_list.html:98
 #: bp/scene/templates/scene/place_events.html:159
 #: bp/tools/templates/tools/ng_compare.html:40
@@ -2924,50 +2917,58 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:116
+#: bp/scene/templates/scene/person.html:123
 #: bp/scene/templates/scene/place_events.html:166
 #: templates/cite_sour_repo.html:8
 msgid "Event"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:177
+#: bp/scene/templates/scene/person.html:184
 msgid "Place Notes"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:204
+#: bp/scene/templates/scene/person.html:211
 msgid "Parents' family"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:227
+#: bp/scene/templates/scene/person.html:214
+#: bp/tools/templates/tools/obsolete_table_families_by_id.html:44
+#: bp/tools/templates/tools/obsolete_table_families_by_id.html:54
+#: bp/tools/templates/tools/obsolete_table_person_by_id.html:39
+#: bp/tools/templates/tools/obsolete_table_person_by_id.html:45
+msgid "family"
+msgstr ""
+
+#: bp/scene/templates/scene/person.html:234
 msgid "Central person"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:240
+#: bp/scene/templates/scene/person.html:247
 msgid "Own families"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:241
+#: bp/scene/templates/scene/person.html:248
 msgid "As Parent in Family"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:267
+#: bp/scene/templates/scene/person.html:274
 #: bp/tools/templates/tools/table_media.html:14
 msgid "Media files"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:278
+#: bp/scene/templates/scene/person.html:285
 msgid "Go to photo page"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:280
+#: bp/scene/templates/scene/person.html:287
 msgid "crop"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:290
+#: bp/scene/templates/scene/person.html:297
 msgid "Person Notes"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:302
+#: bp/scene/templates/scene/person.html:309
 msgid "Source references"
 msgstr ""
 
@@ -3048,7 +3049,7 @@ msgstr ""
 #: bp/scene/templates/scene/persons_list.html:82
 #: bp/scene/templates/scene/places.html:74
 #: bp/scene/templates/scene/places.html:75
-#: bp/scene/templates/scene/sources.html:42
+#: bp/scene/templates/scene/sources.html:44
 msgid "Alphabetical Menu"
 msgstr ""
 
@@ -3176,7 +3177,7 @@ msgid "Source References"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:21
-#: bp/scene/templates/scene/sources.html:69
+#: bp/scene/templates/scene/sources.html:71
 #: bp/tools/templates/tools/source_citations.html:8
 msgid "Source"
 msgstr ""
@@ -3216,117 +3217,117 @@ msgstr ""
 msgid "This page contains a directory of %(num)s sources."
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:25
+#: bp/scene/templates/scene/sources.html:26
 msgid "Select series:"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:27
+#: bp/scene/templates/scene/sources.html:28
 msgid "birth"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:28
+#: bp/scene/templates/scene/sources.html:29
 msgid "babtism"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:29
+#: bp/scene/templates/scene/sources.html:30
 msgid "wedding"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:30
+#: bp/scene/templates/scene/sources.html:31
 msgid "death"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:31
+#: bp/scene/templates/scene/sources.html:32
 msgid "move"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:50
+#: bp/scene/templates/scene/sources.html:52
 msgid "Source, notes"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:51
+#: bp/scene/templates/scene/sources.html:53
 msgid "Media in the repository"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:53
+#: bp/scene/templates/scene/sources.html:55
 msgid "events, persons, etc., referred from"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:69
+#: bp/scene/templates/scene/sources.html:71
 msgid "unused"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:70
+#: bp/scene/templates/scene/sources.html:72
 #, python-format
 msgid "see details of source %(uniq_id)s (%(id)s)"
 msgstr ""
 
-#: bp/scene/templates/scene/sources.html:80
-#: bp/scene/templates/scene/sources.html:85
+#: bp/scene/templates/scene/sources.html:82
+#: bp/scene/templates/scene/sources.html:87
 msgid "Repository Name"
 msgstr ""
 
-#: bp/start/forms.py:10
+#: bp/start/forms.py:12
 msgid "Your name:"
 msgstr ""
 
-#: bp/start/forms.py:13
+#: bp/start/forms.py:15
 msgid "Your email address:"
 msgstr ""
 
-#: bp/start/forms.py:23
+#: bp/start/forms.py:25
 msgid "Are you a member of the Genealogical Society of Finland?"
 msgstr ""
 
-#: bp/start/forms.py:26
+#: bp/start/forms.py:28
 msgid "Yes"
 msgstr ""
 
-#: bp/start/forms.py:27
+#: bp/start/forms.py:29
 msgid "No"
 msgstr ""
 
-#: bp/start/forms.py:28
+#: bp/start/forms.py:30
 msgid "Don't know"
 msgstr ""
 
-#: bp/start/forms.py:30
+#: bp/start/forms.py:32
 msgid "How many years have you been doing genealogical research?"
 msgstr ""
 
-#: bp/start/forms.py:31
+#: bp/start/forms.py:33
 msgid "What genealogy software are you mainly using?"
 msgstr ""
 
-#: bp/start/forms.py:32
+#: bp/start/forms.py:34
 msgid "Which families/surnames are you mainly researching?"
 msgstr ""
 
-#: bp/start/forms.py:33
+#: bp/start/forms.py:35
 msgid "Which places are you mainly researching?"
 msgstr ""
 
-#: bp/start/forms.py:34
+#: bp/start/forms.py:36
 msgid "Message:"
 msgstr ""
 
-#: bp/start/forms.py:37
+#: bp/start/forms.py:38
 msgid "Send request"
 msgstr ""
 
-#: bp/start/routes.py:92
+#: bp/start/routes.py:100
 msgid "Join message sent"
 msgstr ""
 
-#: bp/start/routes.py:94
+#: bp/start/routes.py:102
 msgid "Sending join message failed"
 msgstr ""
 
-#: bp/start/routes.py:142
+#: bp/start/routes.py:150
 msgid "Update did not work1"
 msgstr ""
 
-#: bp/start/routes.py:145
+#: bp/start/routes.py:153
 msgid "Update did not work"
 msgstr ""
 
@@ -3398,7 +3399,7 @@ msgid "My Gedcom files"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:42
-msgid "My candicate materials and files"
+msgid "My candidate materials and files"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:44
@@ -3472,55 +3473,26 @@ msgid "Explore the database"
 msgstr ""
 
 #: bp/start/templates/start/join.html:5 bp/start/templates/start/join.html:36
-#: bp/stk_security/templates/security/register_user.html:17
 msgid "Join Isotammi"
 msgstr ""
 
-#: bp/start/templates/start/join.html:49 templates/index_entry.html:64
-msgid "Join us"
-msgstr ""
-
 #: bp/start/templates/start/join.html:50
-msgid "Enroll as a user on this page"
+msgid "To join the Isotammi project please provide some basic information below."
 msgstr ""
 
-#: bp/start/templates/start/join.html:52
-msgid "Approval"
-msgstr ""
-
-#: bp/start/templates/start/join.html:53
-msgid "You are granted to register by Office"
-msgstr ""
-
-#: bp/start/templates/start/join.html:56
-msgid "Create your user name and password"
-msgstr ""
-
-#: bp/start/templates/start/join.html:58
-msgid "Confirm"
-msgstr ""
-
-#: bp/start/templates/start/join.html:59
-msgid "Press Confirm button in your email and log in"
-msgstr ""
-
-#: bp/start/templates/start/join.html:65
-msgid ""
-"To join the Isotammi project we wish that you will provide some basic "
-"information below."
-msgstr ""
-
-#: bp/start/templates/start/join.html:66
-msgid "Please let us know at least your name and email address."
-msgstr ""
-
-#: bp/start/templates/start/join.html:67
+#: bp/start/templates/start/join.html:51
 msgid ""
 "You can also provide any comments or additional information in the "
 "message field."
 msgstr ""
 
-#: bp/start/templates/start/join.html:68
+#: bp/start/templates/start/join.html:52
+msgid ""
+"After sending this form you will still have to wait for a confirmation "
+"email from the Isotammi team before you can access the application."
+msgstr ""
+
+#: bp/start/templates/start/join.html:53
 msgid "Thank You!"
 msgstr ""
 
@@ -3543,6 +3515,15 @@ msgstr ""
 
 #: bp/start/templates/start/my_settings.html:27
 msgid "My Profile Page"
+msgstr ""
+
+#: bp/start/templates/start/my_settings.html:30
+#: bp/tools/templates/tools/person2.html:43
+#: bp/tools/templates/tools/source_citations.html:35
+#: templates/cite_sour_repo.html:75 templates/db_test.html:10
+#: templates/repo_sources.html:54 templates/talletettu.html:28
+#: templates/virhe_lataus.html:20
+msgid "Go back"
 msgstr ""
 
 #: bp/start/templates/start/my_settings.html:46
@@ -3795,18 +3776,6 @@ msgstr ""
 msgid "Can't login?"
 msgstr ""
 
-#: bp/stk_security/templates/security/login_user.html:38
-msgid "You must first ask for enrolling a user from administrator."
-msgstr ""
-
-#: bp/stk_security/templates/security/login_user.html:39
-msgid "Then you can register in and create your user id."
-msgstr ""
-
-#: bp/stk_security/templates/security/login_user.html:42
-msgid "Enroll as a user"
-msgstr ""
-
 #: bp/stk_security/templates/security/register_user.html:4
 msgid "Registration"
 msgstr ""
@@ -3820,31 +3789,25 @@ msgid "Register as an user of Isotammi Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:16
-msgid ""
-"It is possible to register only if you have got an invitation. You may "
-"ask for invitation on the page"
-msgstr ""
-
-#: bp/stk_security/templates/security/register_user.html:18
 msgid "Note!"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:19
+#: bp/stk_security/templates/security/register_user.html:17
 #, python-format
 msgid ""
 "When you have sent this form, you must wait for mail from us and click "
 "the link \"%(link)s\" in the message you got. Then you can log in!"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:22
+#: bp/stk_security/templates/security/register_user.html:20
 msgid "Other Operations"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:27
+#: bp/stk_security/templates/security/register_user.html:25
 msgid "My User Properties"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:34
+#: bp/stk_security/templates/security/register_user.html:32
 msgid "Define a username and password for you"
 msgstr ""
 
@@ -3862,8 +3825,55 @@ msgstr ""
 
 #: bp/stk_security/templates/security/send_confirmation.html:13
 msgid ""
-"If you can't find the registeration confirmation mail message we have "
+"If you can't find the registration confirmation mail message we have "
 "sent, you can ask for a new one."
+msgstr ""
+
+#: bp/stk_security/templates/security/email/change_notice.html:1
+msgid "Your password has been changed."
+msgstr ""
+
+#: bp/stk_security/templates/security/email/change_notice.html:3
+msgid "If you did not change your password,"
+msgstr ""
+
+#: bp/stk_security/templates/security/email/change_notice.html:3
+msgid "click here to reset it"
+msgstr ""
+
+#: bp/stk_security/templates/security/email/confirmation_instructions.html:1
+msgid "Please confirm your email through the link below:"
+msgstr ""
+
+#: bp/stk_security/templates/security/email/confirmation_instructions.html:3
+#: bp/stk_security/templates/security/email/welcome.html:6
+msgid "Confirm my account"
+msgstr ""
+
+#: bp/stk_security/templates/security/email/login_instructions.html:1
+#: bp/stk_security/templates/security/email/welcome.html:1
+#, python-format
+msgid "Welcome %(email)s!"
+msgstr ""
+
+#: bp/stk_security/templates/security/email/login_instructions.html:3
+msgid "You can log into your account through the link below:"
+msgstr ""
+
+#: bp/stk_security/templates/security/email/login_instructions.html:5
+msgid "Login now"
+msgstr ""
+
+#: bp/stk_security/templates/security/email/reset_instructions.html:1
+msgid "Click here to reset your password"
+msgstr ""
+
+#: bp/stk_security/templates/security/email/reset_notice.html:1
+msgid "Your password has been reset"
+msgstr ""
+
+#: bp/stk_security/templates/security/email/welcome.html:4
+msgid "You can confirm your email through the link below:"
 msgstr ""
 
 #: bp/tools/routes.py:69
@@ -4569,6 +4579,10 @@ msgstr ""
 msgid "To see the full data, you can fill the registration form here"
 msgstr ""
 
+#: templates/index_entry.html:64
+msgid "Join us"
+msgstr ""
+
 #: templates/index_entry.html:73
 msgid "As a member of <i>Suomen sukututkimusseura</i>, you can log in,"
 msgstr ""
@@ -4773,7 +4787,7 @@ msgid "Husband"
 msgstr ""
 
 #: templates/jinja_filters.py:99
-msgid "as child"
+msgid "as a child"
 msgstr ""
 
 #: templates/jinja_filters.py:100
@@ -5280,6 +5294,14 @@ msgstr ""
 
 #: templates/select_refcols.html:84
 msgid "Accept"
+msgstr ""
+
+#: templates/talletettu.html:3
+msgid "Data stored"
+msgstr ""
+
+#: templates/talletettu.html:6
+msgid "Store to Database"
 msgstr ""
 
 #: templates/virhe_lataus.html:3

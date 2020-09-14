@@ -141,11 +141,6 @@ class UserAdmin():
                         researched_places = profile.researched_places,
                         text_message = profile.text_message)
                     
-                    tx.run(Cypher_adm.allowed_email_register, 
-                        email = profile.email, 
-                        role = role,
-                        approved = False, 
-                        creator = 'system')              
                     tx.commit()
             return(True)        
         except ConstraintError as ex:
@@ -156,7 +151,7 @@ class UserAdmin():
             raise      
  
     @classmethod
-    def update_applicant(cls, profile, email):
+    def update_user_profile(cls, profile):
         try:
             with shareds.driver.session() as session:
                 with session.begin_transaction() as tx:
@@ -170,15 +165,8 @@ class UserAdmin():
                         researched_names = profile.researched_names,
                         researched_places = profile.researched_places,
                         text_message = profile.text_message)
-                    
-                    tx.run(Cypher_adm.allowed_email_update, 
-                        email = email.allowed_email, 
-                        role = email.role)              
                     tx.commit()
             return(True)        
-        except ConstraintError as ex:
-            logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
-            flash(_("Given allowed email address already exists"))                            
         except Exception as e:
             logging.error(f'UserAdmin.update_applicant: {e.__class__.__name__}, {e}')          
             raise

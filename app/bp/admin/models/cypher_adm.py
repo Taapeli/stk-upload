@@ -75,16 +75,16 @@ CREATE (up:UserProfile {
 
     user_profile_update = """
 MATCH (up:UserProfile) WHERE up.email = $email 
-    SET name = $name,
-    SET email = $email,
-    SET username = $username,
-    SET language = $language,
-    SET research_years = $research_years,
-    SET software = $software,
-    SET researched_names = $researched_names,
-    SET researched_places = $researched_places,
-    SET text_message = profile.text_message
-RETURN up)"""
+    SET up.name = $name,
+        up.email = $email,
+        up.username = $username,
+        up.language = $language,
+        up.research_years = $research_years,
+        up.software = $software,
+        up.researched_names = $researched_names,
+        up.researched_places = $researched_places,
+        up.text_message = $text_message
+RETURN up"""
 
 
 #     user_profile_add = '''         

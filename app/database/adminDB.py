@@ -2,6 +2,7 @@
 
 #from datetime import datetime
 import logging
+from neobolt.exceptions import ConstraintError
 logger = logging.getLogger('stkserver') 
 from neo4j.exceptions import CypherSyntaxError, ClientError
 from flask_security import utils as sec_utils
@@ -194,11 +195,11 @@ def create_allowed_email_constraints():
     logger.info('Allowed email constraints created')
 
 
-def check_contraints(needed:dict):
-    # Check which UNIQUE contraints are missing from given nodes and parameters.
+def check_constraints(needed:dict):
+    # Check which UNIQUE constraints are missing from given nodes and parameters.
     # Returns a set of missing constraints
 
-# No need to check exsistence, catching ClientError
+# No need to check existence, catching ClientError
 #         n_ok = 0
 #         import re
 #         p = re.compile(":(\S*)(\s.*\.)(\w+)")
@@ -215,7 +216,7 @@ def check_contraints(needed:dict):
 #                         needed[label].remove(prop)
 #                         n_ok += 1
 #                         #print(f'constraint {label}.{prop} ok')
-#         #print(f'Missing contraints: {needed}')
+#         #print(f'Missing constraints: {needed}')
     for label,props in needed.items():
         for prop in props:
             create_unique_constraint(label, prop)
@@ -280,6 +281,13 @@ def set_confirmed_at():
     """
     shareds.driver.session().run(stmt)
 
+def create_to_be_approved_role():
+    stmt = "create (r:Role{name:'to_be_approved',description:'Käyttäjä joka odottaa hyväksymistä'});"
+    try:
+        shareds.driver.session().run(stmt)
+    except ConstraintError: # already exists, ok
+        pass
+
 # class Neo4jEnv(): # --> database.models.neo4jengine.Neo4jEngine.consume_counters
 #     """  Neo4j environment dependent things for versions 3.5 <> 4.1. """
 #     def consume_counters(self, result):
@@ -312,7 +320,7 @@ def initialize_db():
             
         create_lock_and_constraint()
     
-        check_contraints({
+        check_constraints({
             "Allowed_email":{"allowed_email"},
             "Citation":{"uuid"},
             "Event":{"uuid"},
@@ -331,6 +339,7 @@ def initialize_db():
         do_schema_fixes()
 
         #set_confirmed_at()
-
+        create_to_be_approved_role()
+        
     return 
 

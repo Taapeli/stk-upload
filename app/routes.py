@@ -33,17 +33,25 @@ def before_request():
 
 @app.route('/')
 def entry():
-    ''' Home page needing autentication.
+    ''' Home page needing authentication.
 
         1. a guest user (from login page or home button) or anonymous user (home)
         2. authenticated user
 
-        When not autenticated, should show a login page first!
+        When not authenticated, should show a login page first!
     '''
     if current_user.has_role("guest"):
 #        print("Authenticated guest user at entry") 
         logger.info(f'-> routes.entry/guest')
         logout_user()
+
+    print("xxx",current_user.is_authenticated)
+    print("xxx",current_user.has_role('to_be_approved'))
+    #xxx
+    if current_user.is_authenticated and current_user.has_role('to_be_approved'):
+        # Home page for logged in user
+        logger.info(f'-> routes.entry/join')
+        return redirect(url_for('join'))
 
     if current_user.is_authenticated:
         # Home page for logged in user

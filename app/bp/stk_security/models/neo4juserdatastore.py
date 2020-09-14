@@ -113,13 +113,13 @@ class Neo4jUserDatastore(UserDatastore):
 #                               
         
     def put(self, model):
-        
             try:
                 if isinstance(model, self.user_model):
                     userRecord = None
                     if not model.id:    # New user to insert
                         with self.driver.session() as session:
                             userRecord = session.write_transaction(self._put_user, model)
+                            print("userRecord",userRecord)
                     else:               # Old user to update
                         with self.driver.session() as session:                        
                             userRecord = session.write_transaction(self._update_user, model) 
@@ -134,17 +134,20 @@ class Neo4jUserDatastore(UserDatastore):
                 raise
             
     def _put_user (self, tx, user):    # ============ New user ==============
-
-        if not user.username == 'guest':
-            allowed_email = UserAdmin.find_allowed_email(user.email)
-            if (allowed_email == None) or (allowed_email.approved != True):
-                return(None)
+        print("user:",user)
+#         if not user.username == 'guest':
+#             allowed_email = UserAdmin.find_allowed_email(user.email)
+#             if (allowed_email == None) or (allowed_email.approved != True):
+#                 return(None)
+#         if len(user.roles) == 0:
+#             user.roles = [allowed_email.default_role] 
         if len(user.roles) == 0:
-            user.roles = [allowed_email.default_role] 
+             user.roles = ["to_be_approved"] 
 #        user.confirmed_at = None
+        #user.is_active = False
         user.is_active = True
         try:
-            logger.info('_put_user new %s %s', user.username, user.roles[0])                
+            logger.info('_put_user new %s %s', user.username, user.roles[0:1])                
             result = tx.run(Cypher.user_register,
                 email = user.email,
                 password = user.password, 
@@ -166,7 +169,8 @@ class Neo4jUserDatastore(UserDatastore):
                 if user.username == 'guest':
                     status = None
                 else:    
-                    status = allowed_email.approved
+                    #status = allowed_email.approved
+                    status = None
                 if (status == None) or (status == True):
 #                userNode = (record['user'])
 #                logger.debug(userNode)
@@ -182,9 +186,11 @@ class Neo4jUserDatastore(UserDatastore):
                 
 #            tx.commit()
         except Exception as e:
+            print("error:",e)
             logging.error(f'Neo4jUserDatastore._put_user: {e.__class__.__name__}, {e}')            
             raise      
-
+        print("error:",node)
+        
     def _update_user (self, tx, user):         # ============ User update ==============
 
 #         print(user.email, user.confirmed_at)
@@ -330,9 +336,7 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             with self.driver.session() as session:
                 userRoles = session.read_transaction(self._findUserRoles, email) 
-                if len(userRoles) > 0:
-                    return [self.role_model(**roleRecord) for roleRecord in userRoles] 
-                return None
+                return [self.role_model(**roleRecord) for roleRecord in userRoles] 
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
             raise

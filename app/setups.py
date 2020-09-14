@@ -145,6 +145,7 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
             return True 
 
     def validate_email(self, field):
+        return True
         allowed_email = UserAdmin.find_allowed_email(field.data)
         if allowed_email:
             if allowed_email.confirmed_at != None:

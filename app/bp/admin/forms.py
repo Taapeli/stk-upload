@@ -8,6 +8,7 @@ from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, 
 from wtforms.validators import InputRequired, Optional, Email, Length
 from flask_wtf import FlaskForm
 from flask_babelex import _
+from flask_babelex import lazy_gettext as _l
 import shareds
 
 class UpdateUserForm(FlaskForm):
@@ -30,22 +31,22 @@ class UpdateUserForm(FlaskForm):
     """
 
     strip_filter = lambda x: x.strip() if x else None
-    id = HiddenField(_('id:'), 
+    id = HiddenField(_l('id:'), 
         description = _('Id of the user'))  
-    email = StringField(_('Email Address:'), 
+    email = StringField(_l('Email Address:'), 
         filters = [strip_filter],
         description = _('Email address'))
-    username = StringField(_('Username:'), 
+    username = StringField(_l('Username:'), 
         description = _('User name'))  
-    name = StringField(_('Name:'), 
+    name = StringField(_l('Name:'), 
         description = _('Name of the user'))      
-    language = SelectField( _('Language'), [Optional()],
+    language = SelectField( _l('Language'), [Optional()],
             choices=shareds.app.config.get('LANGUAGES'),
             default=2,
             description = _('Language')) 
-    is_active = BooleanField(_('Is active'), [Optional()],
+    is_active = BooleanField(_l('Is active'), [Optional()],
         description = _('Active / passive user')) 
-    roles = SelectMultipleField(_('Roles'), 
+    roles = SelectMultipleField(_l('Roles'), 
                 choices=[
                    ("gedcom",_("Gedcom-files")),
                    ("member",_("Member")),
@@ -53,20 +54,21 @@ class UpdateUserForm(FlaskForm):
                    ("audit",_("Audit")),                      
                    ("admin",_("Admin")) ],
                 description = _('Assigned roles')) 
-    confirmed_at = DateTimeField(_('Email confirmed time'), [Optional()],
+    confirmed_at = DateTimeField(_l('Email confirmed time'), [Optional()],
         description = _('Time of email confirmation'))        
-    last_login_at = DateTimeField(_('Last login time'), [Optional()],
+    last_login_at = DateTimeField(_l('Last login time'), [Optional()],
         description = _('Time of last login'))   
-    last_login_ip = StringField(_('Last login IP address'), [Optional()],
+    last_login_ip = StringField(_l('Last login IP address'), [Optional()],
         description = _('IP address of last login'))    
-    current_login_at = DateTimeField(_('Current login time'), [Optional()],
+    current_login_at = DateTimeField(_l('Current login time'), [Optional()],
         description = _('Time of current login'))   
-    current_login_ip = StringField(_('Current login IP address'), [Optional()],
+    current_login_ip = StringField(_l('Current login IP address'), [Optional()],
         description = _('IP address of current login'))
-    login_count = IntegerField(_('Login count'), [Optional()],
+    login_count = IntegerField(_l('Login count'), [Optional()],
         description = _('Count of logins'))
-
-    submit = SubmitField(_('Update user'))
+    
+    submit = SubmitField(_l('Update user'))
+    approve = SubmitField(_l('Approve user'))
     
 
 class AllowedEmailForm(FlaskForm):
