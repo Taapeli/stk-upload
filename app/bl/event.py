@@ -121,6 +121,7 @@ class EventReader(DBreader):
             - 'referees': True
             - 'notes': True
         '''
+        statustext = ''
         res_dict = {}
         result = self.dbdriver.dr_get_event_by_uuid(self.use_user, uuid)
         if (result['status'] != Status.OK):
@@ -133,10 +134,16 @@ class EventReader(DBreader):
         if args.get('referees'):
             result = self.dbdriver.dr_get_event_participants(event.uniq_id)
             if (result['status'] == Status.ERROR):
-                return {'item':None, 'status':result['status'], 
-                        'statustext': _('Participants read error')}
+                statustext.append(_('Participants read error ') + result['statustext']+' ')
             members = result['items']
             res_dict['members'] = members
+        places = []
+        if args.get('places'):
+            result = self.dbdriver.dr_get_event_place(event.uniq_id)
+            if (result['status'] == Status.ERROR):
+                statustext.append(_('Place read error ' + result['statustext']+' '))
+            places = result['items']
+            res_dict['places'] = places
 
         notes = []
         if args.get('notes'):

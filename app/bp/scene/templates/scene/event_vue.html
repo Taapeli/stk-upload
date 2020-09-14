@@ -49,11 +49,17 @@
                     <td class="ColumnAttribute">{{ _("Date") }}</td>
                     <td class="ColumnValue">${ event.dates.as_str }</td>
                 </tr>
-                <tr v-if="event.place">
+                <tr v-for="pl in places">
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
                     <td class="ColumnValue">
-                        <a href="/scene/location/" :uuid="event.place.uuid" class="inlink">
-                            ${event.place.pname}</a>
+                        <span class="typedesc">${pl.type}</span>
+                        <a href="/scene/location/" :uuid="pl.uuid" class="inlink">
+                            ${pl.names[0].name}</a>
+                        <span v-if="pl.uppers">•
+                           <span class="typedesc">${pl.uppers[0].type}</span>
+                           <a href="/scene/location/" :uuid="pl.uppers[0].uuid" class="inlink">
+                               ${pl.uppers[0].names[0].name}</a>
+                        </span>
                     </td>
                 </tr>
             </table>
@@ -109,6 +115,7 @@ var vm = new Vue({
         event: null,
         referees: [],
         notes: [],
+        places: [],
         translations: {}
     },
     created: function () {
@@ -120,13 +127,15 @@ var vm = new Vue({
         getEvent(q_uuid) {
             // Asks for data for all families of given person
             console.log("event "+q_uuid);
-            axios.post("/scene/json/event", {uuid:q_uuid,referees:true,notes:true})
+            axios.post("/scene/json/event", {uuid:q_uuid,referees:true,notes:true,places:true})
             .then (function(rsp) {
                 vm.status = "Status code: "+String(rsp.status);
                 //console.log("stk result: "+rsp.data.statusText);
                 vm.message=rsp.data.statusText;
                 vm.event=rsp.data.event;
                 vm.referees = rsp.data.members;
+                vm.notes = rsp.data.notes;
+                vm.places = rsp.data.places;
                 vm.translations=rsp.data.translations;
             }) // axios then
             .catch(function (error) {

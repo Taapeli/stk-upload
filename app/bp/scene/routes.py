@@ -374,9 +374,10 @@ def json_get_event():
             m.role_lang = jinja_filters.translate(m.role, 'role') if m.role  else  ''
         # Event notes
         notes = results.get('notes', [])
+        places = results.get('places', [])
 
         res_dict = {"event": event, 'members': members, 
-                        "notes":notes,
+                    'notes':notes, 'places':places,
                     'statusText': f'Löytyi {len(members)} tapahtuman osallista',
                     'translations':{'myself': _('Self') }
                     }
