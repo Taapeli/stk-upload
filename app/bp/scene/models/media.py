@@ -27,7 +27,6 @@ def make_thumbnail(fname, thumbname, crop=None):
         im.convert('RGB').save(thumbname, "JPEG")
     except FileNotFoundError as e:
         print(f'bp.scene.models.media.make_thumbnail: {e}')
-        raise
 
 def get_media_files_folder(batch_id):
     media_folder = os.path.join(media_base_folder,batch_id)
@@ -56,9 +55,18 @@ def get_thumbname(uuid, crop=None):
     rec = shareds.driver.session().run("match (m:Media{uuid:$uuid}) return m",
                                        uuid=uuid).single()
     if rec:
+        # <Record
+        #    m=<Node id=29198 labels=frozenset({'Media'}) 
+        #        properties={'batch_id': '2020-08-30.001', 'src': 'Dok/Silius-hauta Tampereella.pdf', 
+        #            'mime': 'application/pdf', 'change': 1515865209, 'description': 'Silius-hauta pdf', 
+        #            'id': 'O0077', 'uuid': '33a96ff532a4467fac86af58bc80dc1a'}>
+        # >
         m = rec['m']
         batch_id = m['batch_id']
         src = m['src']
+        mime = m['mime']
+        if mime == 'application/pdf':
+            return ""
         media_thumbnails_folder = get_media_thumbnails_folder(batch_id)
         thumbname = os.path.join(media_thumbnails_folder,src)
         if crop:

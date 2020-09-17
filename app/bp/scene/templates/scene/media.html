@@ -68,8 +68,10 @@ tr > td > img {
                      src="/scene/thumbnail?id={{media.uuid}}" 
                      title="key = {{media.uuid_str()}}"/>
     
-                     <p style="nowrap;">{% if size %}
-                        {{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>{%endif%}
+                     <p style="nowrap;">
+                     {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
+                     {%else%}{{media.description}}
+                     {%endif%}
                      &rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
                             {{ _('Show fullscreen') }}</a>
                      </p>
@@ -111,6 +113,7 @@ tr > td > img {
 		{% endif %}
 	</div>
 
+{% if size %}
 	<div class="pic_container">
         <div class="pic">
             	<img alt="picture {{media.description}}" 
@@ -118,6 +121,7 @@ tr > td > img {
                  	 title="key = {{media.uuid_str()}}"/>
         </div>
 	</div>
+ {% endif %}
   </div>
   <div class="fullclear"></div>
 {% endif %}

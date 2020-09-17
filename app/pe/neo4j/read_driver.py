@@ -252,6 +252,34 @@ class Neo4jReadDriver:
         return {"items":places, "status":Status.OK}
 
 
+    def dr_get_event_notes_medias(self, uid):
+        ''' Get notes and media connected this event. 
+
+            Returns dict {items, status, statustext}
+        '''
+        notes = []
+        medias = []
+        try:
+            with self.driver.session(default_access_mode='READ') as session:
+                result = session.run(CypherEvent.get_event_notes_medias, uid=uid)
+                for record in result:
+                    # Return COLLECT(DISTINCT [properties(rel_n), note]) AS notes, 
+                    #        COLLECT(DISTINCT [properties(rel_m), media]) AS medias
+                    for _rel_prop, node in record['notes']:
+                        if node:
+                            notes.append(Note.from_node(node))
+                    for _rel_prop, node in record['medias']:
+                        # _rel_prop may be {"order":0} (not used)
+                        if node:
+                            medias.append(Media.from_node(node))
+
+        except Exception as e:
+            return {"status":Status.ERROR, 
+                    "statustext": f'Error dr_get_event_notes_medias: {e}'}     
+
+        return {"notes":notes, "medias":medias, "status":Status.OK}
+
+
     def dr_get_family_by_uuid(self, user:str, uuid:str):
         '''
         Read a Family using uuid and user info.

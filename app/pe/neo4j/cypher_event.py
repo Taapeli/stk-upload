@@ -34,12 +34,12 @@ RETURN e, cite,source
     get_event_notes_medias = """
 MATCH (e:Event)
     WHERE ID(e) = $uid
-OPTIONAL MATCH (e) -[rn:NOTE]-> (note)
-OPTIONAL MATCH (e) -[rm:MEDIA]-> (media)
-WITH e, note, rn, media, rm 
+OPTIONAL MATCH (e) -[rel_n:NOTE]-> (note)
+OPTIONAL MATCH (e) -[rel_m:MEDIA]-> (media)
+WITH e, note, rel_n, media, rel_m 
     WHERE NOT note IS NULL OR NOT media IS NULL
-RETURN COLLECT(DISTINCT [properties(rn), note]) AS notes, 
-       COLLECT(DISTINCT [properties(rm), media]) AS medias
+RETURN COLLECT(DISTINCT [properties(rel_n), note]) AS notes, 
+       COLLECT(DISTINCT [properties(rel_m), media]) AS medias
 """
 
     # Get Event with referring Persons and Families

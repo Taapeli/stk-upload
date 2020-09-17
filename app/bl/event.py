@@ -134,26 +134,32 @@ class EventReader(DBreader):
         if args.get('referees'):
             result = self.dbdriver.dr_get_event_participants(event.uniq_id)
             if (result['status'] == Status.ERROR):
-                statustext.append(_('Participants read error ') + result['statustext']+' ')
+                statustext += _('Participants read error ') + result['statustext']+' '
             members = result['items']
             res_dict['members'] = members
         places = []
         if args.get('places'):
             result = self.dbdriver.dr_get_event_place(event.uniq_id)
             if (result['status'] == Status.ERROR):
-                statustext.append(_('Place read error ' + result['statustext']+' '))
+                statustext += _('Place read error ' + result['statustext']+' ')
             places = result['items']
             res_dict['places'] = places
 
         notes = []
+        medias = []
         if args.get('notes'):
-            print('bl.event.EventReader.get_event_data: TODO notes')
+            result = self.dbdriver.dr_get_event_notes_medias(event.uniq_id)
+            if (result['status'] == Status.ERROR):
+                statustext += _('Notes read error ' + result['statustext']+' ')
+            notes = result['notes']
+            res_dict['notes'] = medias
+            medias = result['medias']
+            res_dict['medias'] = medias
+
         
         res_dict['status'] = result['status']
         res_dict['statustext'] = f'Got {len(members)} participants, {len(notes)} notes'
         return res_dict
-#         return {'event':event, 'members':members, 'status':result['status'], 
-#                     'statustext': f'Got {len(members)} participants'}
 
 
 class EventBl(Event):

@@ -372,8 +372,6 @@ def json_get_event():
             elif m.label == "Family":
                 m.href = '/scene/family?uuid=' + m.uuid
             m.role_lang = jinja_filters.translate(m.role, 'role') if m.role  else  ''
-        # Event notes
-        notes = results.get('notes', [])
         # Actually there is one place and one pl.uppers
         places = results.get('places', [])
         for pl in places:
@@ -382,13 +380,19 @@ def json_get_event():
             for up in pl.uppers:
                 up.href = '/scene/location/uuid=' + up.uuid
                 up.type_lang = jinja_filters.translate(up.type, 'lt_in').title()
+        # Event notes
+        notes = results.get('notes', [])
+        # Medias
+        medias = results.get('medias', [])
+        for m in medias:
+            m.href = '/scene/media?uuid=' + m.uuid
+        
 
         res_dict = {"event": event, 'members': members, 
-                    'notes':notes, 'places':places,
+                    'notes':notes, 'places':places, 'medias':medias,
                     'statusText': f'Löytyi {len(members)} tapahtuman osallista',
                     'translations':{'myself': _('Self') }
                     }
-        
         response = json.dumps(res_dict, cls=StkEncoder)
         print(response)
         t1 = time.time()-t0
@@ -675,8 +679,11 @@ def show_media(uid=None):
     
     try:
         medium = Media.get_one(uid)
-        fullname, _mimetype = media.get_fullname(medium.uuid)
-        size = media.get_image_size(fullname)
+        fullname, mimetype = media.get_fullname(medium.uuid)
+        if mimetype == "application/pdf":
+            size = 0
+        else:
+            size = media.get_image_size(fullname)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
@@ -719,7 +726,7 @@ def fetch_media(fname):
             return send_file(fullname, mimetype=mimetype)        
     except FileNotFoundError:
         # Show default image
-        ret = send_file(os.path.join('static', 'noone.jpg'), mimetype=mimetype)
+        ret = send_file(os.path.join('static', 'image/noone.jpg'), mimetype=mimetype)
         logger.debug(f"-> bp.scene.routes.fetch_media none")
         return ret
 
@@ -732,16 +739,19 @@ def fetch_thumbnail():
     if crop == "None":
         crop = None
     logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
-    mimetype='image/jpg'
+    thumb_mime='image/jpg'
     thumbname = "(no file)"
     try:
         thumbname = media.get_thumbname(uuid, crop)
         #print(thumbname)
-        ret = send_file(thumbname, mimetype=mimetype)
-        return ret
+        if thumbname:
+            ret = send_file(thumbname, mimetype=thumb_mime)
+        else:
+            ret = send_file(os.path.join('static', 'image/a_pdf.jpg'), mimetype=thumb_mime)
     except FileNotFoundError:
         # Show default image
-        ret = send_file(os.path.join('static', 'noone.jpg'), mimetype=mimetype)
+        ret = send_file(os.path.join('static', 'image/noone.jpg'), mimetype=thumb_mime)
         logger.debug(f"-> bp.scene.routes.fetch_thumbnail none")
-        return ret
+
+    return ret
         
