@@ -6,25 +6,23 @@ Created on Aug 16, 2019
 import os
 from PIL import Image 
 
-#from flask_security import current_user 
-
 import shareds
 
 media_base_folder = "media"
 
-def make_thumbnail(fname, thumbname, crop=None):
-    ''' Create a thumbnail size image from file fname to file thumbname.
+def make_thumbnail(src_file, dst_file, crop=None):
+    ''' Create a thumbnail size image from src_file to dst_file.
     '''
-    #os.system(f"convert '{fname}' -resize 200x200  '{thumbname}'")
+    #os.system(f"convert '{src_file}' -resize 200x200  '{dst_file}'")
     size = 128, 128
     try:
         if crop:
             # crop dimensions are diescribed as % of width and height
-            im = get_cropped_image(fname, crop, True)
+            im = get_cropped_image(src_file, crop, True)
         else:
-            im = Image.open(fname)
-            im.thumbnail(size)
-        im.convert('RGB').save(thumbname, "JPEG")
+            im = Image.open(src_file)
+        im.thumbnail(size)
+        im.convert('RGB').save(dst_file, "JPEG")
     except FileNotFoundError as e:
         print(f'bp.scene.models.media.make_thumbnail: {e}')
 
@@ -50,10 +48,13 @@ def get_fullname(uuid):
 
 def get_thumbname(uuid, crop=None):
     ''' Find stored thumbnail file name; create a new file, if needed.
-        If there is crop parameter, its value is added to thumbname.
+        If there is crop parameter, its value is added to thumb file name.
     '''
-    rec = shareds.driver.session().run("match (m:Media{uuid:$uuid}) return m",
-                                       uuid=uuid).single()
+    if not uuid:
+        raise FileNotFoundError('bp.scene.models.media.get_thumbname: no uuid')
+
+    rec = shareds.driver.session(default_access_mode='READ').\
+             run("match (m:Media{uuid:$uuid}) return m", uuid=uuid).single()
     if rec:
         # <Record
         #    m=<Node id=29198 labels=frozenset({'Media'}) 
@@ -66,23 +67,37 @@ def get_thumbname(uuid, crop=None):
         src = m['src']
         mime = m['mime']
         if mime == 'application/pdf':
-            return ""
-        media_thumbnails_folder = get_media_thumbnails_folder(batch_id)
-        thumbname = os.path.join(media_thumbnails_folder,src)
+            print("#bp.scene.models.media.get_thumbname: Show missing pdf thumbnail")
+            return "", "pdf"
+
+        # Example: png --> cropped jpg
+        #    src       = "Sibelius/CharlottaBorg&CristianSibelius.png"
+        #    base      = "Sibelius/CharlottaBorg&CristianSibelius"
+        #    src_file  = "files/Sibelius/CharlottaBorg&CristianSibelius.png"
+        #    crop_tail = "#47,21,91,67"
+        #    dst_file  = "thumbnails/Sibelius/CharlottaBorg&CristianSibelius#47,21,91,67.jpg"
+        base, _ext = src.rsplit('.',1)
         if crop:
-            #clean cropping data
-            c = crop.replace(' ', '').replace('(', '').replace(')', '')
-            thumbname += f'#{c}'
-        if not os.path.exists(thumbname):
+            crop_tail = '#'+crop.replace(' ', '').replace('(', '').replace(')', '')
+        else:
+            crop_tail = ""
+        media_thumbnails_folder = get_media_thumbnails_folder(batch_id)
+        dst_file = os.path.join(media_thumbnails_folder, base) + crop_tail + '.jpg'
+        if not os.path.exists(dst_file):
             media_files_folder = get_media_files_folder(batch_id)
-            fname = os.path.join(media_files_folder,src)
-            thumbdir, _x = os.path.split(thumbname)
+            src_file = os.path.join(media_files_folder, src)
+            thumbdir, _x = os.path.split(dst_file)
             os.makedirs(thumbdir, exist_ok=True)
-            make_thumbnail(fname,thumbname,crop=crop)
+            make_thumbnail(src_file, dst_file, crop)
+#             print(f"# Created file {dst_file}")
+#         else:
+#             print(f"# Existing file {dst_file}")
         # Thumbnail picture found/created
-        return thumbname
+        return dst_file, "jpg"
+
     # No db Media node
-    return ""
+    print(f"#bp.scene.models.media.get_thumbname: No media {uuid}")
+    return "", None
 
 def get_image_size(path):
     # Get image size as tuple (width, height)
@@ -114,7 +129,7 @@ def get_cropped_image(path, crop, thumbsize=False):
     width, heigth = image.size
     box = [float(x1)*width/100., float(y1)*heigth/100.,
            float(x2)*width/100., float(y2)*heigth/100.]
-    print(f"size=({width},{heigth}), crop={crop} => box={box}")
+    #print(f"size=({width},{heigth}), crop={crop} => box={box}")
     image = image.crop(box)
     if thumbsize:
         image.thumbnail((128,128))

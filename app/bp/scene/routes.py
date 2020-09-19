@@ -25,6 +25,7 @@ from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
 from bl.event import EventReader
+#from bl.media import MediaBl_todo
 from templates import jinja_filters
 
 from . import bp
@@ -738,16 +739,17 @@ def fetch_thumbnail():
     crop = request.args.get("crop")
     if crop == "None":
         crop = None
-    logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
     thumb_mime='image/jpg'
     thumbname = "(no file)"
     try:
-        thumbname = media.get_thumbname(uuid, crop)
-        #print(thumbname)
-        if thumbname:
+        thumbname, cl = media.get_thumbname(uuid, crop)
+        if cl == "jpg":
             ret = send_file(thumbname, mimetype=thumb_mime)
+        elif cl == "pdf":
+            ret = send_file(os.path.join('static', 'image/a_pdf.png'), mimetype=thumb_mime)
         else:
-            ret = send_file(os.path.join('static', 'image/a_pdf.jpg'), mimetype=thumb_mime)
+            ret = send_file(os.path.join('static', 'image/noone.jpg'), mimetype=thumb_mime)
+        logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
     except FileNotFoundError:
         # Show default image
         ret = send_file(os.path.join('static', 'image/noone.jpg'), mimetype=thumb_mime)

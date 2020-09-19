@@ -72,7 +72,8 @@ tr > td > img {
                      {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
                      {%else%}{{media.description}}
                      {%endif%}
-                     &rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
+                     &rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}"
+                                style="text-decoration:underline;">
                             {{ _('Show fullscreen') }}</a>
                      </p>
                    </td>
@@ -88,22 +89,41 @@ tr > td > img {
 		
 	    {% if media.ref %}
 	    <ul>
-		    {% for label,obj,crop in media.ref %}
-		      <li>{{ _(label) }}:
-		    	{% if label == 'Person' %}
-		    		<a href="/scene/person?uuid={{obj.uuid}}" class="inlink"
-			               title="{{ _('see details of person %(id)s', id=obj.uuid_short()) }} (nr={{obj.uniq_id}})">
-			               {{obj.sortname|replace("#", " ")}}</a>
-			    {% elif label == 'Place' %}
-		    		<a href="/scene/location/uuid={{obj.uuid}}"
-			               title="{{ _('see details of place %(id)s', id=obj.uuid_short()) }} (nr={{obj.uniq_id}})">
-			               {{obj.pname}}</a>
-			    {% else %}{{obj.id}}
+		    {% for ref in media.ref %}
+		      <li>{{ _(ref.label) }}:
+		    	{% if ref.label == 'Person' %}
+		    		<a href="/scene/person?uuid={{ref.obj.uuid}}" class="inlink"
+			               title="{{ _('see details of person %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
+			               {{ref.obj.sortname|replace("#", " ")}}</a>
+                {% elif ref.label == 'Place' %}
+                    <a href="/scene/location/uuid={{ref.obj.uuid}}" class="inlink"
+                           title="{{ _('see details of place %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
+                           {{ref.obj.pname}}</a>
+                {% elif ref.label == 'Event' %}
+                    <a href="/scene/event/uuid={{ref.obj.uuid}}" class="inlink"
+                           title="{{ _('see details of event %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
+                           {{ _(ref.obj.type) }}</a> {{ref.obj.description}}
+                    {% if ref.next_objs %}<ul>
+                        {% for p in ref.next_objs %}<li>
+                            {% if p.label == "Person" %}
+                                <a href="/scene/person?uuid={{p.uuid}}" class="inlink"
+                                    title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
+                                {{ macro.person_name_by_sortname(p) }}</a>
+                            {% elif p.label == "Family" %}
+                                <a href="/scene/family?uuid={{p.uuid}}" class="inlink"
+                                    title="{{ _('see details of family %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
+                                {{ macro.family_name(p) }}</a>
+                            {% endif %}
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+			    {% else %}{{ref.obj.id}}
 			    {% endif %}
-			    {% if crop %}{{ _('cropped') }}<br>{% set cr_str = ( crop|join(',') ) %}
+			    {% if ref.crop %}{{ _('cropped') }}<br>{% set cr_str = (ref.crop|join(',')) %}
 			         <img alt="({{ _('Thumbnail') }})"
-                        src="/scene/media/kuva2?id={{media.uuid}}&crop={{cr_str}}" 
-                        title="{{crop}} %"/>
+                        src="/scene/thumbnail?id={{media.uuid}}&crop={{cr_str}}" 
+                        title="{{ _('cropped') }} (%): {{ref.crop}}"/>
 			    {% endif %}
 			  </li>
 		    {% endfor %}
