@@ -777,9 +777,12 @@ class Cypher_media():
 # RETURN obj"""
 
     get_by_uuid = """
-MATCH (obj:Media) <-[r:MEDIA] - (n) 
-    WHERE obj.uuid = $rid
-RETURN obj, COLLECT([n, properties(r)]) as ref"""
+MATCH (media:Media) <-[r:MEDIA] - (n) 
+    WHERE media.uuid = $rid
+OPTIONAL MATCH (n) <-[:EVENT]- (m)
+RETURN media,
+    COLLECT(DISTINCT [properties(r), n]) as m_ref,
+    COLLECT(DISTINCT [ID(n), m]) AS e_ref"""
 
     get_all = "MATCH (o:Media) RETURN o"
 

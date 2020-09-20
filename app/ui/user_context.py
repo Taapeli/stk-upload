@@ -196,6 +196,8 @@ class UserContext():
         """
         new_selection = 0
         if request:
+            # All args
+            self.args = request.args
             # Selected years (from-to)
             #    years=1111-2222
             years = request.args.get('years', None)

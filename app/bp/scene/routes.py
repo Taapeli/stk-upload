@@ -25,6 +25,8 @@ from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
 from bl.event import EventReader
+#from bl.media import MediaBl_todo
+from templates import jinja_filters
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
@@ -298,8 +300,8 @@ def show_person(uid=None):
 
 
 #@bp.route('/scene/event/<int:uniq_id>')
-@bp.route('/scene/event/uuid=<string:uuid>')
-def show_event_page(uuid):
+@bp.route('/older/event/uuid=<string:uuid>')
+def show_event_v1(uuid):
     """ Event page with accompanied persons and families.
 
         Derived from bp.tools.routes.show_baptism_data()
@@ -320,10 +322,11 @@ def show_event_page(uuid):
     return render_template("/scene/event.html",
                            event=event, participants=members)
 
-@bp.route('/scene/event2/uuid=<string:uuid>')
+@bp.route('/scene/event/uuid=<string:uuid>')
 def show_event_vue(uuid):
     """ Show Event page template which marchals data by Vue. """
-    return render_template("/scene/event_vue.html", uuid=uuid)
+    u_context = UserContext(user_session, current_user, request)
+    return render_template("/scene/event_vue.html", uuid=uuid, user_context=u_context)
 
 @bp.route('/scene/json/event', methods=['POST','GET'])
 def json_get_event():
@@ -346,13 +349,11 @@ def json_get_event():
         dbdriver = Neo4jReadDriver(shareds.driver)
         reader = EventReader(dbdriver, u_context) 
     
-        results = reader.get_event_data(uuid)
+        results = reader.get_event_data(uuid, args)
     
         status = results.get('status')
         if status != Status.OK:
             flash(f'{_("Event not found")}: {results.get("statustext")}','error')
-        event = results.get('event', None)
-        members = results.get('members', [])
         if status == Status.NOT_FOUND:
             return jsonify({"event":None, "members":[],
                             "statusText":_('No event found'),
@@ -361,11 +362,45 @@ def json_get_event():
             return jsonify({"event":None, "members":[],
                             "statusText":_('No event found'),
                             "status":status})
+        # Event
+        event = results.get('event', None)
+        event.type_lang = jinja_filters.translate(event.type, 'evt').title()
+        # Event members
+        members = results.get('members', [])
+        for m in members:
+            if m.label == "Person":
+                m.href = '/scene/person?uuid=' + m.uuid
+                m.names[0].type_lang = jinja_filters.translate(m.names[0].type, 'nt')
+            elif m.label == "Family":
+                m.href = '/scene/family?uuid=' + m.uuid
+            m.role_lang = jinja_filters.translate(m.role, 'role') if m.role  else  ''
+        # Actually there is one place and one pl.uppers
+        places = results.get('places', [])
+        for pl in places:
+            pl.href = '/scene/location/uuid=' + pl.uuid
+            pl.type_lang = jinja_filters.translate(pl.type, 'lt').title()
+            for up in pl.uppers:
+                up.href = '/scene/location/uuid=' + up.uuid
+                up.type_lang = jinja_filters.translate(up.type, 'lt_in').title()
+        # Event notes
+        notes = results.get('notes', [])
+        # Medias
+        medias = results.get('medias', [])
+        for m in medias:
+            m.href = '/scene/media?uuid=' + m.uuid
+
+        #TODO: The auditor may edit, not user self as here
+        if u_context.user and u_context.context == u_context.choices.OWN:
+            allow_edit = True
+        else:
+            allow_edit = False
+
         res_dict = {"event": event, 'members': members, 
+                    'notes':notes, 'places':places, 'medias':medias,
                     'statusText': f'Löytyi {len(members)} tapahtuman osallista',
+                    'allow_edit': allow_edit,
                     'translations':{'myself': _('Self') }
                     }
-
         response = json.dumps(res_dict, cls=StkEncoder)
         print(response)
         t1 = time.time()-t0
@@ -652,8 +687,11 @@ def show_media(uid=None):
     
     try:
         medium = Media.get_one(uid)
-        fullname, _mimetype = media.get_fullname(medium.uuid)
-        size = media.get_image_size(fullname)
+        fullname, mimetype = media.get_fullname(medium.uuid)
+        if mimetype == "application/pdf":
+            size = 0
+        else:
+            size = media.get_image_size(fullname)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
@@ -696,7 +734,7 @@ def fetch_media(fname):
             return send_file(fullname, mimetype=mimetype)        
     except FileNotFoundError:
         # Show default image
-        ret = send_file(os.path.join('static', 'noone.jpg'), mimetype=mimetype)
+        ret = send_file(os.path.join('static', 'image/noone.jpg'), mimetype=mimetype)
         logger.debug(f"-> bp.scene.routes.fetch_media none")
         return ret
 
@@ -708,17 +746,21 @@ def fetch_thumbnail():
     crop = request.args.get("crop")
     if crop == "None":
         crop = None
-    logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
-    mimetype='image/jpg'
+    thumb_mime='image/jpg'
     thumbname = "(no file)"
     try:
-        thumbname = media.get_thumbname(uuid, crop)
-        #print(thumbname)
-        ret = send_file(thumbname, mimetype=mimetype)
-        return ret
+        thumbname, cl = media.get_thumbname(uuid, crop)
+        if cl == "jpg":
+            ret = send_file(thumbname, mimetype=thumb_mime)
+        elif cl == "pdf":
+            ret = send_file(os.path.join('static', 'image/a_pdf.png'), mimetype=thumb_mime)
+        else:
+            ret = send_file(os.path.join('static', 'image/noone.jpg'), mimetype=thumb_mime)
+        logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
     except FileNotFoundError:
         # Show default image
-        ret = send_file(os.path.join('static', 'noone.jpg'), mimetype=mimetype)
+        ret = send_file(os.path.join('static', 'image/noone.jpg'), mimetype=thumb_mime)
         logger.debug(f"-> bp.scene.routes.fetch_thumbnail none")
-        return ret
+
+    return ret
         
