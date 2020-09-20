@@ -325,7 +325,8 @@ def show_event_v1(uuid):
 @bp.route('/scene/event/uuid=<string:uuid>')
 def show_event_vue(uuid):
     """ Show Event page template which marchals data by Vue. """
-    return render_template("/scene/event_vue.html", uuid=uuid)
+    u_context = UserContext(user_session, current_user, request)
+    return render_template("/scene/event_vue.html", uuid=uuid, user_context=u_context)
 
 @bp.route('/scene/json/event', methods=['POST','GET'])
 def json_get_event():
@@ -387,11 +388,17 @@ def json_get_event():
         medias = results.get('medias', [])
         for m in medias:
             m.href = '/scene/media?uuid=' + m.uuid
-        
+
+        #TODO: The auditor may edit, not user self as here
+        if u_context.user and u_context.context == u_context.choices.OWN:
+            allow_edit = True
+        else:
+            allow_edit = False
 
         res_dict = {"event": event, 'members': members, 
                     'notes':notes, 'places':places, 'medias':medias,
                     'statusText': f'Löytyi {len(members)} tapahtuman osallista',
+                    'allow_edit': allow_edit,
                     'translations':{'myself': _('Self') }
                     }
         response = json.dumps(res_dict, cls=StkEncoder)

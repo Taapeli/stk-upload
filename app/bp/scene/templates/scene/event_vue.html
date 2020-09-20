@@ -5,6 +5,11 @@
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
 
+<style>
+#summaryarea {display: flex; /*height:75vh;*/
+    flex-wrap: wrap;
+}
+</style>
 <div id="startdiv">
     <h2>{{ _("Event details") }}</h2>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
@@ -31,6 +36,18 @@
         </h3>
 
         <div id="summaryarea">
+            <div v-if="allow_edit" style="background:khaki; padding:.5em;">
+                <img src="/static/image/edit-property-26.png" 
+                    v-on:click="toggle_edit_mode()"
+                    style="cursor: pointer;"/>
+                <span v-if="edit_mode"><br>
+                    <img src="/static/image/icons8-ok-26.png"
+                        style="cursor: pointer;" title="OK"/><br>
+                    <img src="/static/image/icons8-cancel-24.png"
+                        style="cursor:pointer;padding-left:1px;" title="peru"/>
+                </span>
+            </div>
+            <div>
             <table v-if="event">
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
@@ -71,6 +88,7 @@
                     </td>
                 </tr>
             </table>
+            </div>
         </div><!-- div#summaryarea -->
 
         <div class="subsection" id="persons">
@@ -125,11 +143,13 @@ var vm = new Vue({
         places: [],
         notes: [],
         medias: [],
-        translations: {}
+        translations: {},
+        allow_edit: false,
+        edit_mode: false
     },
     created: function () {
         // `this` points to the vm instance
-        console.log("uuid is: "+uuid);
+        //console.log("uuid is: "+uuid);
         this.getEvent(uuid);
     },
     methods: {
@@ -147,12 +167,18 @@ var vm = new Vue({
                 vm.notes = rsp.data.notes;
                 vm.medias = rsp.data.medias;
                 vm.translations=rsp.data.translations;
+                vm.allow_edit = rsp.data.allow_edit;
+                console.log('Allow editing: '+vm.allow_edit);
             }) // axios then
             .catch(function (error) {
                 console.log('Axios error:',error);
                 vm.message = error;
             }) // axios catch
-        } // getEvent
+        }, // getEvent
+        toggle_edit_mode() {
+        	vm.edit_mode = !vm.edit_mode;
+        	console.log('Edit mode:'+vm.edit_mode);
+        }
     } // methods
 }) // Vue vm
 </script>
