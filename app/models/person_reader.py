@@ -369,8 +369,9 @@ class PersonReader():
                     if hasattr(x, 'citation_ref'):
                         x.citation_ref.append(o.uniq_id)
                     else:
-                        traceback.print_exc()
-                        raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
+                        x.citation_ref = [o.uniq_id]
+#                         traceback.print_exc()
+#                         raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
                     #print(f'# ({x_label}:{x.uniq_id}) --> (Citation:{o.id})')
 
                 elif y_label == "Note":
@@ -407,6 +408,9 @@ class PersonReader():
                             crop = None
                         print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
                         x.media_ref.append((o.uniq_id,crop,order))
+                        if len(x.media_ref) > 1 and x.media_ref[-2][2] > x.media_ref[-1][2]:
+                            x.media_ref.sort(key=lambda x: x[2])
+                            print("#\tMedia sort done")
                     else:
                         print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
                     #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
@@ -415,8 +419,6 @@ class PersonReader():
                     traceback.print_exc()
                     raise NotImplementedError(f'No rule for ({x_label}) --> ({y_label})')            
                 #print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
-                if hasattr(x, 'media_ref'):
-                    x.media_ref.sort(key=lambda x: x[2])
 
         except Exception as e:
             traceback.print_exc()

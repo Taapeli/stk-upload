@@ -5,6 +5,11 @@
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
 
+<style>
+#summaryarea {display: flex; /*height:75vh;*/
+    flex-wrap: wrap;
+}
+</style>
 <div id="startdiv">
     <h2>{{ _("Event details") }}</h2>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
@@ -22,20 +27,35 @@
 {% endwith %} 
 
 <div id="vue_app" :args="{uuid:'{{uuid}}'}">
-    <div class="content" id="IndividualDetail">
-    <div id="query_uuid" style="display:none">{{uuid}}</div>
+    <div class="content" id="IndividualDetail" v-if="event">
 
         <h3 style="position:sticky; top:0;">
-            <span v-if="description"><i>${event.type}:</i> ${event.description}</span>
-            <span v-else><i>${event.type}</i> </span>
+            <span v-if="event.description">${event.type_lang}: 
+                <i>${event.description}</i></span>
+            <span v-else>${event.type_lang} </span>
         </h3>
 
         <div id="summaryarea">
+            <div v-if="allow_edit" style="background:khaki; padding:.5em;">
+                <img src="/static/image/edit-property-26.png" 
+                    v-on:click="toggle_edit_mode()"
+                    style="cursor: pointer;"/>
+                <span v-if="edit_mode"><br>
+                    <img src="/static/image/icons8-ok-26.png"
+                        style="cursor: pointer;" title="OK"/><br>
+                    <img src="/static/image/icons8-cancel-24.png"
+                        style="cursor:pointer;padding-left:1px;" title="peru"/>
+                </span>
+            </div>
+            <div>
             <table v-if="event">
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">
-                        todo: {macro.all_obj_ids(event)}
+                        <tt>${event.uuid.substring(0,6)}</tt> /
+                        <span class="gedcom_id">${event.id}</span> /
+                        <span class="id">${event.uniq_id}</span>
+                        {# todo: {macro.all_obj_ids(event) #}
                     </td>
                 </tr>
                 <tr v-if="event.description">
@@ -44,21 +64,36 @@
                 </tr>
                 <tr v-if="event.dates">
                     <td class="ColumnAttribute">{{ _("Date") }}</td>
-                    <td class="ColumnValue">${ event.dates }</td>
+                    <td class="ColumnValue">${ event.dates.as_str }</td>
                 </tr>
-                <tr v-if="event.place">
+                <tr v-for="pl in places">
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
                     <td class="ColumnValue">
-                        <a href="/scene/location/" :uuid="event.place.uuid" class="inlink">
-                            ${event.place.pname}</a>
+                        <a v-bind:href="pl.href" :uuid="pl.uuid" class="inlink">
+                            ${pl.names[0].name}</a>
+                        <span class="typedesc">${pl.type_lang}</span>
+                         <span v-if="pl.uppers">
+                           <span class="typedesc">${pl.uppers[0].type_lang}</span>
+                           <a v-bind:href="pl.uppers[0].href" :uuid="pl.uppers[0].uuid" class="inlink">
+                               ${pl.uppers[0].names[0].name}</a>
+                        </span>
+                    </td>
+                </tr>
+                <tr v-for="m in medias">
+                    <td class="ColumnAttribute">{{ _("Media") }}</td>
+                    <td class="ColumnValue">
+                        <a v-bind:href="m.href" :uuid="m.uuid" class="inlink">
+                            ${m.description}</a>
+                        <span class="typedesc">${m.mime}</span>
                     </td>
                 </tr>
             </table>
+            </div>
         </div><!-- div#summaryarea -->
 
         <div class="subsection" id="persons">
             <h4>{{ _("Participants") }}</h4>
-            <table class="infolist eventlist">
+            <table class="infolist eventlist" v-if="referees">
                 <thead>
                     <tr>
                         <th class="ColumnEvent">{{ _("Role") }}</th>
@@ -66,12 +101,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="p in participants" :key="p.uuid">
-                        <td v-if="p.role">${p.role}</td>
-                        <td v-else><span class="myself">&nbsp;{{myself}}&nbsp;</span>
+                    <tr v-for="p in referees" :key="p.uuid">
+                        <td v-if="p.role">${p.role_lang}</td>
+                        <td v-else><span class="myself">&nbsp;${translations["myself"]}&nbsp;</span>
                         </td>
-                        <td v-if="p.rel_type">${ macro.family_name(p) }</td>
-                        <td v-else> ${ macro.person_anon(p, None) }</td>
+                        <td v-if="p.label == 'Person'">{# macro.person_anon(p, None) #}
+                           <a v-bind:href="p.href"
+                              class="inlink" title="Katso tiedot">
+                              <span>${p.names[0].firstname}</span>
+                              <i>${p.names[0].suffix}</i>
+                              <span>${p.names[0].prefix}</span>
+                              <b>${p.names[0].surname}</b></a>
+                        </td>
+                        <td v-else>
+                            <a v-bind:href="p.href"
+                              class="inlink" title="Katso tiedot">{# macro.family_name(p) #}
+                                ${p.clearname.replace(/#/g, " ")}</a>
+                        </td>
         			</tr>
             </table>
 
@@ -80,7 +126,9 @@
 </div><!-- div.vue_app -->
 
 <script>
-
+const uuid = '{{uuid}}';    /*  Another solution, see: 
+	https://stackoverflow.com/questions/35914069/how-can-i-get-query-parameters-from-a-url-in-vue-js
+*/
 /* --------------------------------- Vue ----------------------------------- */
 
 var vm = new Vue({
@@ -92,41 +140,45 @@ var vm = new Vue({
         uuid: '?',
         event: null,
         referees: [],
-        translations: {}
+        places: [],
+        notes: [],
+        medias: [],
+        translations: {},
+        allow_edit: false,
+        edit_mode: false
     },
     created: function () {
         // `this` points to the vm instance
-        console.log("uuid is: "+this.uuid);
+        //console.log("uuid is: "+uuid);
+        this.getEvent(uuid);
     },
-    computed: {},
     methods: {
-        beforeMount(){
-            this.getEvent(uuid);
-        },
-        datesStr(dates) {
-            // Show DateRange as full text.
-            if (!dates) return '';
-            return dates['as_str'];
-        },
-
         getEvent(q_uuid) {
             // Asks for data for all families of given person
             console.log("event "+q_uuid);
-            axios.post("/scene/json/event", {uuid:q_uuid})
+            axios.post("/scene/json/event", {uuid:q_uuid,referees:true,notes:true,places:true})
             .then (function(rsp) {
-                vm.referees = [];
                 vm.status = "Status code: "+String(rsp.status);
-                console.log("stk result: "+rsp.data.statusText);
+                //console.log("stk result: "+rsp.data.statusText);
                 vm.message=rsp.data.statusText;
                 vm.event=rsp.data.event;
+                vm.referees = rsp.data.members;
+                vm.places = rsp.data.places;
+                vm.notes = rsp.data.notes;
+                vm.medias = rsp.data.medias;
                 vm.translations=rsp.data.translations;
-                console.log("Got",vm.referees.length, "referees")
+                vm.allow_edit = rsp.data.allow_edit;
+                console.log('Allow editing: '+vm.allow_edit);
             }) // axios then
             .catch(function (error) {
                 console.log('Axios error:',error);
                 vm.message = error;
             }) // axios catch
-        } // getFamilies
+        }, // getEvent
+        toggle_edit_mode() {
+        	vm.edit_mode = !vm.edit_mode;
+        	console.log('Edit mode:'+vm.edit_mode);
+        }
     } // methods
 }) // Vue vm
 </script>

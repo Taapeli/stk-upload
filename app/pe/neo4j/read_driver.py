@@ -181,9 +181,9 @@ class Neo4jReadDriver:
 
 
     def dr_get_event_participants(self, uid):
-        ''' Get Event data, if allowed. 
+        ''' Get people and families connected to this event. 
 
-            Returns dict {event, members, status, statustext}
+            Returns dict {items, status, statustext}
         '''
         try:
             with self.driver.session(default_access_mode='READ') as session:
@@ -206,6 +206,13 @@ class Neo4jReadDriver:
                     name_node = record['name']
                     # Create Person or Family
                     referee = self._obj_from_node(node, role)
+                    cls_name = referee.__class__.__name__
+                    if cls_name == "Person_combo":
+                        referee.label = "Person"
+                    elif cls_name == "FamilyBl":
+                        referee.label = "Family"
+                    else:
+                        raise TypeError('dr_get_event_participants: Invalid member class '+cls_name);
                     # Person may have Name
                     if name_node:
                         name = Name.from_node(name_node)
@@ -217,6 +224,60 @@ class Neo4jReadDriver:
                     "statustext": f'Error dr_get_event_participants: {e}'}     
 
         return {"items":parts, "status":Status.OK}
+
+    def dr_get_event_place(self, uid):
+        ''' Get event place(s) of this event with surrounding place. 
+
+            Returns dict {items, status, statustext}
+        '''
+        places = []
+        try:
+            with self.driver.session(default_access_mode='READ') as session:
+                result = session.run(CypherEvent.get_event_place, uid=uid, lang="fi")
+                for record in result:
+                    # Returns place, name, COLLECT(DISTINCT [properties(r), upper,uname]) as upper_n
+                    pl = PlaceBl.from_node(record['place'])
+                    pl_name = PlaceName.from_node(record['name'])
+                    pl.names.append(pl_name)
+                    for _rel_prop, upper, uname in record['upper_n']:
+                        pl_upper = PlaceBl.from_node(upper)
+                        pl_upper.names.append(PlaceName.from_node(uname))
+                        pl.uppers.append(pl_upper)
+                    places.append(pl)
+
+        except Exception as e:
+            return {"status":Status.ERROR, 
+                    "statustext": f'Error dr_get_event_participants: {e}'}     
+
+        return {"items":places, "status":Status.OK}
+
+
+    def dr_get_event_notes_medias(self, uid):
+        ''' Get notes and media connected this event. 
+
+            Returns dict {items, status, statustext}
+        '''
+        notes = []
+        medias = []
+        try:
+            with self.driver.session(default_access_mode='READ') as session:
+                result = session.run(CypherEvent.get_event_notes_medias, uid=uid)
+                for record in result:
+                    # Return COLLECT(DISTINCT [properties(rel_n), note]) AS notes, 
+                    #        COLLECT(DISTINCT [properties(rel_m), media]) AS medias
+                    for _rel_prop, node in record['notes']:
+                        if node:
+                            notes.append(Note.from_node(node))
+                    for _rel_prop, node in record['medias']:
+                        # _rel_prop may be {"order":0} (not used)
+                        if node:
+                            medias.append(Media.from_node(node))
+
+        except Exception as e:
+            return {"status":Status.ERROR, 
+                    "statustext": f'Error dr_get_event_notes_medias: {e}'}     
+
+        return {"notes":notes, "medias":medias, "status":Status.OK}
 
 
     def dr_get_family_by_uuid(self, user:str, uuid:str):
