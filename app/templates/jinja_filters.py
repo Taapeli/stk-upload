@@ -145,6 +145,7 @@ def translate(term, var_name):
             "Place Note": _("Place Note"), #"paikan lisätieto"
             "Repository Note": _("Repository Note"), #"arkiston lisätieto"
             "Source Note": _("Source Note"), #"lähteen lisätieto"
+            "Transcript": _("Transcript"), #"kirjoituskopio"
             "Web Search": _("Web Search"), #"Verkosta löytynyt"
             "Web Home": _("Home Page") #"Kotisivu"
             }
