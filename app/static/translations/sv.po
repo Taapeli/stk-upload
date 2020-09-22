@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-09-20 22:38+0300\n"
-"PO-Revision-Date: 2019-11-08 01:03+0200\n"
+"POT-Creation-Date: 2020-09-22 18:06+0300\n"
+"PO-Revision-Date: 2020-09-20 22:47+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
 "Language-Team: sv <LL@li.org>\n"
@@ -52,10 +52,9 @@ msgstr ""
 msgid "Login"
 msgstr "Logga in"
 
-#: bp/admin/forms.py:38 bp/admin/forms.py:108 bp/admin/forms.py:144
+#: bp/admin/forms.py:38 bp/admin/forms.py:89
 #: bp/admin/templates/admin/list_users.html:83
-#: bp/admin/templates/admin/list_users_mails.html:87
-#: bp/start/templates/start/join.html:65 setups.py:135
+#: bp/start/templates/start/join.html:55 setups.py:135
 msgid "Email address"
 msgstr "Epost address"
 
@@ -73,58 +72,52 @@ msgstr "Registrera"
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr "Indikera att du har läst och godkänner användar vilkoren"
 
-#: setups.py:152
-msgid "Email address has been confirmed earlier"
-msgstr "E-postadressen har bekräftats tidigare"
-
-#: setups.py:154
-msgid "Email address has not been approved yet"
-msgstr "E-postadressen har inte godkänts ännu"
-
-#: setups.py:158
-msgid "Email address must be an authorized one"
-msgstr "Epost addressen måste vara godkänd av administratören"
-
-#: setups.py:163
+#: setups.py:153
 msgid "Username has been reserved already"
 msgstr "Användarnamnet redan reserverat"
 
-#: setups.py:165 templates/del_table_users.html:39
+#: setups.py:155 templates/del_table_users.html:39
 msgid "Username"
 msgstr "Användarnamn"
 
 #: bp/admin/templates/admin/list_users.html:82
-#: bp/admin/templates/admin/list_users_mails.html:86
 #: bp/scene/templates/scene/persons.html:70
-#: bp/start/templates/start/join.html:63
+#: bp/start/templates/start/join.html:53
 #: bp/tools/templates/tools/person2.html:16
 #: bp/tools/templates/tools/table_persons.html:22
-#: bp/tools/templates/tools/table_refnames.html:32 setups.py:166 setups.py:194
+#: bp/tools/templates/tools/table_refnames.html:32 setups.py:156 setups.py:183
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Namn"
 
-#: bp/admin/forms.py:43 bp/admin/forms.py:46 bp/admin/forms.py:147
-#: bp/admin/forms.py:150 bp/admin/templates/admin/list_users.html:84
-#: bp/admin/templates/admin/list_users_mails.html:88 bp/start/forms.py:20
-#: bp/start/forms.py:24 setups.py:167 setups.py:194
+#: bp/admin/forms.py:43 bp/admin/forms.py:46 bp/admin/forms.py:92
+#: bp/admin/forms.py:95 bp/admin/templates/admin/list_users.html:84
+#: bp/start/forms.py:20 bp/start/forms.py:24 setups.py:157 setups.py:183
 msgid "Language"
 msgstr "Språk"
 
-#: setups.py:169
+#: setups.py:159
 msgid "Language required"
 msgstr "Språk som krävs"
 
-#: bp/admin/forms.py:40 bp/start/templates/start/join.html:64 setups.py:194
+#: bp/admin/forms.py:40 bp/start/templates/start/join.html:54 setups.py:183
 msgid "User name"
 msgstr "Användar namn"
 
-#: bl/event.py:122
+#: bl/event.py:129
 msgid "The event is not accessible"
 msgstr ""
 
-#: bl/event.py:128
-msgid "Participants read error"
+#: bl/event.py:137
+msgid "Participants read error "
+msgstr ""
+
+#: bl/event.py:144
+msgid "Place read error statustext "
+msgstr ""
+
+#: bl/event.py:153
+msgid "Notes read error statustext "
 msgstr ""
 
 #: bl/family.py:48 models/gen/family.py:45
@@ -151,8 +144,7 @@ msgstr "id:"
 msgid "Id of the user"
 msgstr "Användarens id"
 
-#: bp/admin/forms.py:36 bp/admin/forms.py:77 bp/admin/forms.py:106
-#: bp/admin/forms.py:142
+#: bp/admin/forms.py:36 bp/admin/forms.py:87
 msgid "Email Address:"
 msgstr "Epost address:"
 
@@ -160,16 +152,15 @@ msgstr "Epost address:"
 msgid "Username:"
 msgstr "Användar namn:"
 
-#: bp/admin/forms.py:41 bp/admin/forms.py:145
+#: bp/admin/forms.py:41 bp/admin/forms.py:90
 msgid "Name:"
 msgstr "Namn:"
 
-#: bp/admin/forms.py:42 bp/admin/forms.py:146 bp/start/forms.py:14
+#: bp/admin/forms.py:42 bp/admin/forms.py:91 bp/start/forms.py:14
 msgid "Name of the user"
 msgstr "Användarens namn"
 
 #: bp/admin/forms.py:47 bp/admin/templates/admin/list_users.html:79
-#: bp/admin/templates/admin/list_users_mails.html:83
 msgid "Is active"
 msgstr "Är aktiv"
 
@@ -178,33 +169,28 @@ msgid "Active / passive user"
 msgstr "Aktiv / inaktiv användare"
 
 #: bp/admin/forms.py:49 bp/admin/templates/admin/list_users.html:85
-#: bp/admin/templates/admin/list_users_mails.html:89
 msgid "Roles"
 msgstr "Roll"
 
-#: bp/admin/forms.py:51 bp/admin/forms.py:87 bp/admin/forms.py:111
-#: bp/admin/forms.py:155
+#: bp/admin/forms.py:51 bp/admin/forms.py:100
 msgid "Gedcom-files"
 msgstr "GEDCOM-filer"
 
-#: bp/admin/forms.py:52 bp/admin/forms.py:88 bp/admin/forms.py:112
-#: bp/admin/forms.py:156 bp/scene/templates/scene/event.html:76
-#: bp/scene/templates/scene/event_vue.html:65
+#: bp/admin/forms.py:52 bp/admin/forms.py:101
+#: bp/scene/templates/scene/event.html:76
+#: bp/scene/templates/scene/event_vue.html:100
 msgid "Member"
 msgstr "Medlem"
 
-#: bp/admin/forms.py:53 bp/admin/forms.py:89 bp/admin/forms.py:113
-#: bp/admin/forms.py:157 templates/jinja_filters.py:131
+#: bp/admin/forms.py:53 bp/admin/forms.py:102 templates/jinja_filters.py:131
 msgid "Research"
 msgstr "Forskare"
 
-#: bp/admin/forms.py:54 bp/admin/forms.py:90 bp/admin/forms.py:114
-#: bp/admin/forms.py:158
+#: bp/admin/forms.py:54 bp/admin/forms.py:103
 msgid "Audit"
 msgstr "Granskare"
 
-#: bp/admin/forms.py:55 bp/admin/forms.py:91 bp/admin/forms.py:115
-#: bp/admin/forms.py:159
+#: bp/admin/forms.py:55 bp/admin/forms.py:104
 msgid "Admin"
 msgstr "Administratör"
 
@@ -212,7 +198,7 @@ msgstr "Administratör"
 msgid "Assigned roles"
 msgstr "Given roll"
 
-#: bp/admin/forms.py:57 bp/admin/forms.py:124 bp/admin/forms.py:161
+#: bp/admin/forms.py:57 bp/admin/forms.py:106
 msgid "Email confirmed time"
 msgstr "Epost konfirmations tid"
 
@@ -221,7 +207,6 @@ msgid "Time of email confirmation"
 msgstr "Tid när eposten konfirmerats"
 
 #: bp/admin/forms.py:59 bp/admin/templates/admin/list_users.html:80
-#: bp/admin/templates/admin/list_users_mails.html:84
 msgid "Last login time"
 msgstr "Senaste inloggnings tid"
 
@@ -270,66 +255,28 @@ msgstr "Uppdatera användare"
 msgid "Approve user"
 msgstr ""
 
-#: bp/admin/forms.py:78 bp/start/forms.py:17
-msgid "Maximum 100 characters"
-msgstr "Maximum 100 tecken"
-
-#: bp/admin/forms.py:80 bp/start/forms.py:19
-msgid "Enter the email address"
-msgstr "Ange epost address"
-
-#: bp/admin/forms.py:85
-msgid "Default role:"
-msgstr "Standard roll:"
-
-#: bp/admin/forms.py:93
-msgid "Enter the default role"
-msgstr "Ange standard roll"
-
-#: bp/admin/forms.py:94
-msgid "Add user candidate"
-msgstr "Lägg till användare kandidat"
-
-#: bp/admin/forms.py:109 bp/admin/forms.py:153
-#: bp/scene/templates/scene/event.html:75
-#: bp/scene/templates/scene/event_vue.html:64
-msgid "Role"
-msgstr "Roll"
-
-#: bp/admin/forms.py:116 bp/admin/forms.py:160
-msgid "Assigned role choices"
-msgstr "Given roll"
-
-#: bp/admin/forms.py:117 bp/admin/forms.py:151
+#: bp/admin/forms.py:96
 msgid "Approved"
 msgstr "Godkänd"
 
-#: bp/admin/forms.py:118 bp/admin/forms.py:152
+#: bp/admin/forms.py:97
 msgid "Approved / pending user"
 msgstr "Godkänd / väntande användare"
 
-#: bp/admin/forms.py:119
-msgid "Creator:"
-msgstr "Skapare:"
+#: bp/admin/forms.py:98 bp/scene/templates/scene/event.html:75
+#: bp/scene/templates/scene/event_vue.html:99
+msgid "Role"
+msgstr "Roll"
 
-#: bp/admin/forms.py:121
-msgid "User name of creator"
-msgstr "Skaparens användarnamn"
+#: bp/admin/forms.py:105
+msgid "Assigned role choices"
+msgstr "Given roll"
 
-#: bp/admin/forms.py:122
-msgid "Email creation time"
-msgstr "Emailen skapad"
-
-#: bp/admin/forms.py:123
-msgid "Time of allowed email creation"
-msgstr "Tid när emailen skapades"
-
-#: bp/admin/forms.py:125 bp/admin/forms.py:162
+#: bp/admin/forms.py:107
 msgid "Time of registered email confirmation"
 msgstr "Tid när emailen konfirmerades"
 
-#: bp/admin/forms.py:128 bp/admin/forms.py:165
-#: bp/admin/templates/admin/update_allowed_email.html:11
+#: bp/admin/forms.py:110
 msgid "Update allowed email"
 msgstr "Uppdatera godkänd email"
 
@@ -399,7 +346,7 @@ msgstr "FEL"
 msgid "REMOVED"
 msgstr "RADERAD"
 
-#: bp/admin/models/data_admin.py:41 bp/admin/models/user_admin.py:80
+#: bp/admin/models/data_admin.py:41 bp/admin/models/user_admin.py:64
 msgid "User {} has not admin privileges"
 msgstr "Användare {} har inte administratörs behörighet"
 
@@ -421,8 +368,7 @@ msgstr "Alla personer och händelser av %(un)s tages bort"
 msgid "Removed %(cnt)d nodes"
 msgstr ""
 
-#: bp/admin/models/user_admin.py:153 bp/admin/models/user_admin.py:181
-#: bp/admin/models/user_admin.py:195
+#: bp/admin/models/user_admin.py:119
 msgid "Given allowed email address already exists"
 msgstr "Angiven giltig epost address finns redan"
 
@@ -451,7 +397,6 @@ msgstr ""
 #: bp/admin/templates/admin/admin.html:39
 #: bp/admin/templates/admin/batch_clear.html:24
 #: bp/admin/templates/admin/list_users.html:81
-#: bp/admin/templates/admin/list_users_mails.html:85
 #: bp/admin/templates/admin/syslog.html:14
 #: bp/audit/templates/audit/batches.html:50
 #: bp/dupsearch/templates/dupsearch.html:25
@@ -581,108 +526,6 @@ msgstr "Visa alla program sidor"
 #: bp/admin/templates/admin/admin.html:104
 msgid "Server statistics"
 msgstr ""
-
-#: bp/admin/templates/admin/allowed_emails.html:5
-msgid "User candidates from database"
-msgstr "Användar kandidater från databasen"
-
-#: bp/admin/templates/admin/allowed_emails.html:37
-msgid "Notifications"
-msgstr "Notifikationer"
-
-#: bp/admin/templates/admin/allowed_emails.html:50
-msgid "User candidates"
-msgstr "Användare kandidater"
-
-#: bp/admin/templates/admin/allowed_emails.html:53
-msgid "Create a new user candidate"
-msgstr "Skapa en ny användar kandidat"
-
-#: bp/admin/templates/admin/allowed_emails.html:64
-#: bp/admin/templates/admin/list_users.html:68
-#: bp/admin/templates/admin/list_users_mails.html:72
-msgid "Show"
-msgstr "Visa"
-
-#: bp/admin/templates/admin/allowed_emails.html:65
-#: bp/admin/templates/admin/list_users.html:69
-#: bp/admin/templates/admin/list_users_mails.html:73
-msgid "all users"
-msgstr "alla användare"
-
-#: bp/admin/templates/admin/allowed_emails.html:66
-msgid "registered users"
-msgstr "registrerade användare"
-
-#: bp/admin/templates/admin/allowed_emails.html:67
-msgid "pending candidates"
-msgstr "väntande användarkandidater"
-
-#: bp/admin/templates/admin/allowed_emails.html:71
-msgid "Pending user candidates"
-msgstr "Väntande användarkandidater"
-
-#: bp/admin/templates/admin/allowed_emails.html:77
-#: templates/del_table_users.html:20
-msgid "email"
-msgstr "epost"
-
-#: bp/admin/templates/admin/allowed_emails.html:78
-#: bp/tools/templates/tools/table_baptism_data.html:22
-msgid "role"
-msgstr "roll"
-
-#: bp/admin/templates/admin/allowed_emails.html:79
-msgid "approved"
-msgstr "godkänd"
-
-#: bp/admin/templates/admin/allowed_emails.html:80
-msgid "creator"
-msgstr "skapare"
-
-#: bp/admin/templates/admin/allowed_emails.html:81
-msgid "created"
-msgstr "skapad"
-
-#: bp/admin/templates/admin/allowed_emails.html:82
-msgid "registered"
-msgstr "registrerad"
-
-#: bp/admin/templates/admin/allowed_emails.html:88
-#: bp/admin/templates/admin/list_users.html:97
-#: bp/admin/templates/admin/list_users_mails.html:101
-msgid "Edit"
-msgstr "Redigera"
-
-#: bp/admin/templates/admin/allowed_emails.html:99
-#: bp/admin/templates/admin/list_users_mails.html:147
-#: bp/tools/templates/tools/table_media.html:35
-#: bp/tools/templates/tools/table_of_data.html:46
-#: bp/tools/templates/tools/table_of_data.html:49
-#: bp/tools/templates/tools/table_of_objects.html:49
-#: bp/tools/templates/tools/table_of_objects.html:52
-#: bp/tools/templates/tools/table_people_by_surname.html:29
-#: bp/tools/templates/tools/table_sources.html:38
-#: bp/tools/templates/tools/table_surnames.html:23
-#: templates/_ng_table_repositories.html:28 templates/del_table_users.html:32
-msgid "No data"
-msgstr "Inget data"
-
-#: bp/admin/templates/admin/allowed_emails.html:103
-#: bp/admin/templates/admin/list_users.html:113
-#: bp/admin/templates/admin/list_users_mails.html:117
-msgid "Operations for selected users"
-msgstr "Åtgärder för valda användare"
-
-#: bp/admin/templates/admin/allowed_emails.html:105
-#: bp/admin/templates/admin/list_users.html:116
-#: bp/admin/templates/admin/list_users_mails.html:121
-msgid "Send email"
-msgstr "Skicka e-post"
-
-#: bp/admin/templates/admin/allowed_emails.html:106
-msgid "Delete unregistered users"
-msgstr "Tag bort ej registrerad användare"
 
 #: bp/admin/templates/admin/batch_clear.html:3
 #: bp/admin/templates/admin/batch_clear.html:16
@@ -840,75 +683,60 @@ msgid "Database Information"
 msgstr "Databas information"
 
 #: bp/admin/templates/admin/list_users.html:55
-#: bp/admin/templates/admin/list_users_mails.html:71
 msgid "Active User names"
 msgstr "Namn på aktiva användare"
 
+#: bp/admin/templates/admin/list_users.html:68
+msgid "Show"
+msgstr "Visa"
+
+#: bp/admin/templates/admin/list_users.html:69
+msgid "all users"
+msgstr "alla användare"
+
 #: bp/admin/templates/admin/list_users.html:70
-#: bp/admin/templates/admin/list_users_mails.html:74
 msgid "active users only"
 msgstr "aktiva användare endast"
 
 #: bp/admin/templates/admin/list_users.html:71
-#: bp/admin/templates/admin/list_users_mails.html:75
 msgid "inactive users only"
 msgstr "inaktiva användare endast"
 
 #: bp/admin/templates/admin/list_users.html:91
-#: bp/admin/templates/admin/list_users_mails.html:95
 msgid "Active"
 msgstr "Aktiv"
 
 #: bp/admin/templates/admin/list_users.html:91
-#: bp/admin/templates/admin/list_users_mails.html:95
 msgid "Inactive"
 msgstr "Inaktiv"
 
 #: bp/admin/templates/admin/list_users.html:94
-#: bp/admin/templates/admin/list_users_mails.html:98
 msgid "Edit me"
 msgstr "Redigera mig"
 
+#: bp/admin/templates/admin/list_users.html:97
+msgid "Edit"
+msgstr "Redigera"
+
 #: bp/admin/templates/admin/list_users.html:109
-#: bp/admin/templates/admin/list_users_mails.html:113
 msgid "No users"
 msgstr "Inga användare"
+
+#: bp/admin/templates/admin/list_users.html:113
+msgid "Operations for selected users"
+msgstr "Åtgärder för valda användare"
 
 #: bp/admin/templates/admin/list_users.html:114
 msgid "Gramps Files and Candidate Materials"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:115
-#: bp/admin/templates/admin/list_users_mails.html:120
 msgid "Uploaded GEDCOMs"
 msgstr "Uppladdade GEDCOM"
 
-#: bp/admin/templates/admin/list_users_mails.html:3
-#: bp/admin/templates/admin/list_users_mails.html:58
-msgid "Isotammi User List"
-msgstr "Användar lista för Isotammi"
-
-#: bp/admin/templates/admin/list_users_mails.html:119
-msgid "Show uploaded Gramps files"
-msgstr "Visa uppladdade Gramps filer"
-
-#: bp/admin/templates/admin/list_users_mails.html:131
-msgid "Users and user candidates"
-msgstr "Användare och användare kandidater"
-
-#: bp/admin/templates/admin/list_users_mails.html:133
-msgid "<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>"
-msgstr ""
-"<th> e-post </th> <th> roll </th> <th> skapare </th> <th> skapad </th> "
-"<th> registrerad </th>"
-
-#: bp/admin/templates/admin/list_users_mails.html:143
-msgid "Pending"
-msgstr "Väntande"
-
-#: bp/admin/templates/admin/list_users_mails.html:151
-msgid "Add a new user candidate"
-msgstr "Lägg till en ny användar kandidat"
+#: bp/admin/templates/admin/list_users.html:116
+msgid "Send email"
+msgstr "Skicka e-post"
 
 #: bp/admin/templates/admin/load_result.html:3
 msgid "Gramps to Neo4j log"
@@ -997,14 +825,6 @@ msgstr "Nyare händelser"
 #: bp/admin/templates/admin/syslog.html:43
 msgid "Back"
 msgstr "Tillbaka"
-
-#: bp/admin/templates/admin/update_allowed_email.html:4
-msgid "Update allowed_email"
-msgstr "Uppdatera godkänd email"
-
-#: bp/admin/templates/admin/update_allowed_email.html:34
-msgid "Allowed email list"
-msgstr "Godkänd email lista"
 
 #: bp/admin/templates/admin/update_user.html:51
 msgid "User list"
@@ -1615,7 +1435,7 @@ msgstr "användare"
 #: bp/gedcom/templates/gedcom_info.html:179
 #: bp/gedcom/templates/gedcom_list.html:42
 #: bp/scene/templates/scene/event.html:51
-#: bp/scene/templates/scene/event_vue.html:42
+#: bp/scene/templates/scene/event_vue.html:62
 #: bp/scene/templates/scene/person.html:126
 #: bp/scene/templates/scene/place_events.html:168
 #: bp/start/templates/start/my_settings.html:140
@@ -2324,20 +2144,20 @@ msgstr "Titta på ditt kandidat material"
 msgid "Return to front page"
 msgstr "Tillbaka till första sidan"
 
-#: bp/scene/routes.py:358 bp/scene/routes.py:362
+#: bp/scene/routes.py:359 bp/scene/routes.py:363
 msgid "No event found"
 msgstr ""
 
-#: bp/scene/routes.py:366 bp/scene/templates/scene/event.html:83
+#: bp/scene/routes.py:402 bp/scene/templates/scene/event.html:83
 #: bp/scene/templates/scene/person.html:237
 msgid "Self"
 msgstr "Själv"
 
-#: bp/scene/routes.py:466
+#: bp/scene/routes.py:501
 msgid "No families"
 msgstr "Inga familjer"
 
-#: bp/scene/routes.py:473 bp/scene/templates/scene/families.html:121
+#: bp/scene/routes.py:508 bp/scene/templates/scene/families.html:121
 #: bp/scene/templates/scene/family.html:33
 #: bp/scene/templates/scene/person.html:216
 #: bp/scene/templates/scene/person.html:253
@@ -2347,7 +2167,7 @@ msgstr "Inga familjer"
 msgid "Family"
 msgstr "Familj"
 
-#: bp/scene/routes.py:474 bp/scene/templates/scene/families.html:125
+#: bp/scene/routes.py:509 bp/scene/templates/scene/families.html:125
 #: bp/scene/templates/scene/family.html:100
 #: bp/scene/templates/scene/person.html:223
 #: bp/scene/templates/scene/person.html:260
@@ -2355,22 +2175,22 @@ msgstr "Familj"
 msgid "Children"
 msgstr "Barn"
 
-#: bp/scene/routes.py:605
+#: bp/scene/routes.py:640
 msgid "No objects found"
 msgstr "Ingenting funnits"
 
-#: bp/scene/routes.py:608
+#: bp/scene/routes.py:643
 msgid "Error"
 msgstr "Fel"
 
 #: bp/scene/templates/scene/event.html:3 bp/scene/templates/scene/event.html:9
 #: bp/scene/templates/scene/event_vue.html:3
-#: bp/scene/templates/scene/event_vue.html:9
+#: bp/scene/templates/scene/event_vue.html:14
 msgid "Event details"
 msgstr "Händelse detaljer"
 
 #: bp/scene/templates/scene/event.html:38
-#: bp/scene/templates/scene/event_vue.html:36
+#: bp/scene/templates/scene/event_vue.html:53
 #: bp/scene/templates/scene/family.html:36
 #: bp/scene/templates/scene/media.html:63
 #: bp/scene/templates/scene/person.html:54
@@ -2381,7 +2201,7 @@ msgid "Identifiers"
 msgstr "Identifierare"
 
 #: bp/scene/templates/scene/event.html:55
-#: bp/scene/templates/scene/event_vue.html:46
+#: bp/scene/templates/scene/event_vue.html:66
 #: bp/scene/templates/scene/person.html:124
 #: bp/scene/templates/scene/place_events.html:167
 #: bp/start/templates/start/my_settings.html:138
@@ -2393,7 +2213,7 @@ msgid "Date"
 msgstr "Datum"
 
 #: bp/scene/templates/scene/event.html:59
-#: bp/scene/templates/scene/event_vue.html:50
+#: bp/scene/templates/scene/event_vue.html:70
 #: bp/scene/templates/scene/person.html:125
 #: bp/scene/templates/scene/places.html:45
 #: bp/tools/templates/tools/table_baptism_data.html:15
@@ -2403,9 +2223,17 @@ msgid "Place"
 msgstr "Plats"
 
 #: bp/scene/templates/scene/event.html:71
-#: bp/scene/templates/scene/event_vue.html:60
+#: bp/scene/templates/scene/event_vue.html:95
 msgid "Participants"
 msgstr "Deltagare"
+
+#: bp/scene/templates/scene/event_vue.html:83
+#: bp/scene/templates/scene/medias.html:61
+#: bp/scene/templates/scene/medias.html:62
+#: bp/scene/templates/scene/medias.html:124
+#: bp/scene/templates/scene/place_events.html:132
+msgid "Media"
+msgstr "Media"
 
 #: bp/scene/templates/scene/families.html:3
 msgid "List of families"
@@ -2698,7 +2526,8 @@ msgstr "själv"
 
 #: bp/scene/templates/scene/macros.html:180
 #: bp/scene/templates/scene/macros.html:206
-#: bp/scene/templates/scene/media.html:93
+#: bp/scene/templates/scene/media.html:96
+#: bp/scene/templates/scene/media.html:110
 #: bp/scene/templates/scene/persons.html:150
 #, python-format
 msgid "see details of person %(id)s"
@@ -2724,7 +2553,7 @@ msgstr "Bilden"
 
 #: bp/scene/templates/scene/media.html:66
 #: bp/scene/templates/scene/media.html:67
-#: bp/scene/templates/scene/media.html:102
+#: bp/scene/templates/scene/media.html:124
 msgid "Thumbnail"
 msgstr ""
 
@@ -2732,11 +2561,11 @@ msgstr ""
 msgid "Size"
 msgstr "Storlek"
 
-#: bp/scene/templates/scene/media.html:74
+#: bp/scene/templates/scene/media.html:77
 msgid "Show fullscreen"
 msgstr "Visa fullt utslagen"
 
-#: bp/scene/templates/scene/media.html:85
+#: bp/scene/templates/scene/media.html:88
 #: bp/scene/templates/scene/medias.html:84
 #: bp/scene/templates/scene/places.html:91
 #: bp/scene/templates/scene/sources.html:55
@@ -2745,13 +2574,24 @@ msgstr "Visa fullt utslagen"
 msgid "References"
 msgstr "Referenser"
 
-#: bp/scene/templates/scene/media.html:97
+#: bp/scene/templates/scene/media.html:100
 #: bp/scene/templates/scene/places.html:110
 #, python-format
 msgid "see details of place %(id)s"
 msgstr "se detaljer om plats %(id)s"
 
-#: bp/scene/templates/scene/media.html:101
+#: bp/scene/templates/scene/media.html:104
+#, python-format
+msgid "see details of event %(id)s"
+msgstr ""
+
+#: bp/scene/templates/scene/media.html:114
+#, python-format
+msgid "see details of family %(id)s"
+msgstr ""
+
+#: bp/scene/templates/scene/media.html:123
+#: bp/scene/templates/scene/media.html:126
 msgid "cropped"
 msgstr "beskuren"
 
@@ -2778,13 +2618,6 @@ msgstr ""
 #: bp/tools/templates/tools/source_citations.html:15
 msgid "Title"
 msgstr "Titel"
-
-#: bp/scene/templates/scene/medias.html:61
-#: bp/scene/templates/scene/medias.html:62
-#: bp/scene/templates/scene/medias.html:124
-#: bp/scene/templates/scene/place_events.html:132
-msgid "Media"
-msgstr "Media"
 
 #: bp/scene/templates/scene/medias.html:86
 msgid "User Batch"
@@ -3285,6 +3118,14 @@ msgstr "Ditt namn:"
 msgid "Your email address:"
 msgstr "Din e-post adress:"
 
+#: bp/start/forms.py:17
+msgid "Maximum 100 characters"
+msgstr "Maximum 100 tecken"
+
+#: bp/start/forms.py:19
+msgid "Enter the email address"
+msgstr "Ange epost address"
+
 #: bp/start/forms.py:25
 msgid "Are you a member of the Genealogical Society of Finland?"
 msgstr "Är du medlem i Genealogiska sällskapet i Finland?"
@@ -3495,11 +3336,11 @@ msgstr "Utforska databasen"
 msgid "Join Isotammi"
 msgstr "Anslut Isotammi"
 
-#: bp/start/templates/start/join.html:50
+#: bp/start/templates/start/join.html:40
 msgid "To join the Isotammi project please provide some basic information below."
 msgstr ""
 
-#: bp/start/templates/start/join.html:51
+#: bp/start/templates/start/join.html:41
 msgid ""
 "You can also provide any comments or additional information in the "
 "message field."
@@ -3507,13 +3348,13 @@ msgstr ""
 "Du kan också lämna kommentarer eller ytterligare information i meddelande"
 " fältet."
 
-#: bp/start/templates/start/join.html:52
+#: bp/start/templates/start/join.html:42
 msgid ""
 "After sending this form you will still have to wait for a confirmation "
 "email from the Isotammi team before you can access the application."
 msgstr ""
 
-#: bp/start/templates/start/join.html:53
+#: bp/start/templates/start/join.html:43
 msgid "Thank You!"
 msgstr "Tack!"
 
@@ -3883,7 +3724,7 @@ msgstr ""
 #: bp/stk_security/templates/security/email/welcome.html:1
 #, python-format
 msgid "Welcome %(email)s!"
-msgstr ""
+msgstr "Välkommen %(email)s!"
 
 #: bp/stk_security/templates/security/email/login_instructions.html:3
 msgid "You can log into your account through the link below:"
@@ -3903,7 +3744,7 @@ msgstr ""
 
 #: bp/stk_security/templates/security/email/welcome.html:4
 msgid "You can confirm your email through the link below:"
-msgstr ""
+msgstr "Du kan bekräfta din epostaddress med att klicka länken:"
 
 #: bp/tools/routes.py:69
 msgid "Note List"
@@ -4179,6 +4020,10 @@ msgstr "Identifierare<br />Datum<br />Sida<br />Förtroende"
 msgid "Baptism data"
 msgstr "Dopdatum"
 
+#: bp/tools/templates/tools/table_baptism_data.html:22
+msgid "role"
+msgstr "roll"
+
 #: bp/tools/templates/tools/table_families.html:15
 msgid "Number of families:"
 msgstr "Antal familjer:"
@@ -4220,6 +4065,18 @@ msgstr "mime"
 #: bp/tools/templates/tools/table_media.html:22
 msgid "picture"
 msgstr "bild"
+
+#: bp/tools/templates/tools/table_media.html:35
+#: bp/tools/templates/tools/table_of_data.html:46
+#: bp/tools/templates/tools/table_of_data.html:49
+#: bp/tools/templates/tools/table_of_objects.html:49
+#: bp/tools/templates/tools/table_of_objects.html:52
+#: bp/tools/templates/tools/table_people_by_surname.html:29
+#: bp/tools/templates/tools/table_sources.html:38
+#: bp/tools/templates/tools/table_surnames.html:23
+#: templates/_ng_table_repositories.html:28 templates/del_table_users.html:32
+msgid "No data"
+msgstr "Inget data"
 
 #: bp/tools/templates/tools/table_persons.html:16
 msgid "List of Persons"
@@ -4545,6 +4402,10 @@ msgstr "Användare"
 #: templates/del_table_users.html:20
 msgid "user id"
 msgstr "användar id"
+
+#: templates/del_table_users.html:20
+msgid "email"
+msgstr "epost"
 
 #: templates/del_table_users.html:20
 msgid "roles"

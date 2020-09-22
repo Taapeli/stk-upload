@@ -21,12 +21,12 @@ from flask_security import login_required, roles_accepted, roles_required, curre
 from flask_babelex import _, Domain
 
 import shareds
-from setups import User, Allowed_email #, Role
+from setups import User
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
 
 from .cvs_refnames import load_refnames
-from .forms import AllowedEmailForm, UpdateAllowedEmailForm, UpdateUserForm
+from .forms import UpdateUserForm
 from . import bp
 from . import uploads
 from .. gedcom.models import gedcom_utils

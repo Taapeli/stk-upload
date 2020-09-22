@@ -28,38 +28,6 @@ MATCH (u:UserProfile) -[*]-> (a) WHERE u.username=$user
 WITH a LIMIT $limit
 DETACH DELETE a"""
 
-    allowed_email_register = """
-CREATE (ae:Allowed_email {
-    allowed_email: $email,
-    default_role: $role,
-    approved: $approved,
-    creator: $creator,
-    created_at: timestamp() } )"""
-    
-    allowed_email_confirm = """
-MATCH (ae:Allowed_email)
-  WHERE ae.allowed_email = $email 
-SET ae.confirmed_at = $confirmtime
-RETURN ae """
-             
-    allowed_email_update = """
-MATCH (ae:Allowed_email)
-    WHERE ae.allowed_email = $email
-SET ae.default_role = $role,
-    ae.approved = $approved,
-    ae.creator = $creator
-RETURN ae"""
-
-    allowed_emails_get = """
-MATCH (ae:Allowed_email)
-RETURN DISTINCT ae 
-    ORDER BY ae.created_at DESC"""    
-    
-    allowed_email_find = """
-MATCH (ae:Allowed_email)
-    WHERE ae.allowed_email = $email
-RETURN ae"""
-
     user_profile_register = """
 CREATE (up:UserProfile {   
     name: $name,

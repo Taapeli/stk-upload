@@ -185,16 +185,6 @@ def create_user_constraints():
     logger.info('User constraints created')
     
 
-def create_allowed_email_constraints():
-    with shareds.driver.session() as session: 
-        try:  
-            session.run(SetupCypher.set_allowed_email_constraint)  
-        except Exception as e:
-            logging.error(f'database.adminDB.create_allowed_email_constraints: {e.__class__.__name__}, {e}')            
-            return
-    logger.info('Allowed email constraints created')
-
-
 def check_constraints(needed:dict):
     # Check which UNIQUE constraints are missing from given nodes and parameters.
     # Returns a set of missing constraints
@@ -256,35 +246,11 @@ def create_unique_constraint(label, prop):
             raise
     return
 
-def set_confirmed_at():
-    """
-    For some reason many User nodes were missing the 'confirmed_at'
-    property. This code creates the missing properties by copying
-    it from the corresponding 'Allowed_email' node. The actual value
-    is in fact not very important.
-    """
-    stmt = """
-        match (allowed:Allowed_email),(user:User) 
-        where not exists(user.confirmed_at) and 
-              allowed.allowed_email=user.email
-        return count(user) as count
-    """
-    result = shareds.driver.session().run(stmt).single()
-    count = result['count']
-    print(f"Setting confirmed_at for {count} users") 
-
-    stmt = """
-        match (allowed:Allowed_email),(user:User) 
-        where not exists(user.confirmed_at) and 
-              allowed.allowed_email=user.email
-        set user.confirmed_at = allowed.confirmed_at
-    """
-    shareds.driver.session().run(stmt)
-
 def create_to_be_approved_role():
     stmt = "create (r:Role{name:'to_be_approved',description:'Käyttäjä joka odottaa hyväksymistä'});"
     try:
         shareds.driver.session().run(stmt)
+        logger.info("Created Role 'to_be_approved'")
     except ConstraintError: # already exists, ok
         pass
 
@@ -310,7 +276,6 @@ def initialize_db():
         if not user_exists('master'):
             create_user_constraints()
             create_master_user()
-            create_allowed_email_constraints()
             
         if not user_exists('guest'):
             create_guest_user()
@@ -321,7 +286,6 @@ def initialize_db():
         create_lock_and_constraint()
     
         check_constraints({
-            "Allowed_email":{"allowed_email"},
             "Citation":{"uuid"},
             "Event":{"uuid"},
             "Family":{"uuid"},
@@ -338,8 +302,6 @@ def initialize_db():
         # Fix changed schema
         do_schema_fixes()
 
-        #set_confirmed_at()
         create_to_be_approved_role()
         
-    return 
 

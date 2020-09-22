@@ -45,9 +45,6 @@ def entry():
         logger.info(f'-> routes.entry/guest')
         logout_user()
 
-    print("xxx",current_user.is_authenticated)
-    print("xxx",current_user.has_role('to_be_approved'))
-    #xxx
     if current_user.is_authenticated and current_user.has_role('to_be_approved'):
         # Home page for logged in user
         logger.info(f'-> routes.entry/join')
