@@ -394,8 +394,8 @@ RETURN extract(x IN relationships |
             from /scene/families, tools: /listall/families
         """
 
-        # Import here to handle circular dependency 
-        from .person_combo import Person_as_member
+#         # Import here to handle circular dependency 
+#         from .person_combo import Person_as_member
         
 
         families = []
@@ -476,21 +476,22 @@ RETURN extract(x IN relationships |
                             #    'date2': 1997946, 'date1': 1929380}>
                             if uniq_id != parent_node.id:
                                 # Skip person with double default name
-                                pp = Person_as_member()
+#                                 pp = Person_as_member()
+#                                 pp = Person.from_node(parent_node)
+#                                 Person_as_member.__init__(pp)
                                 pp = Person.from_node(parent_node)
-                                Person_as_member.__init__(pp)
-                                uniq_id = parent_node.id
-                                pp.uniq_id = uniq_id
-                                pp.uuid = parent_node['uuid']
-                                pp.sortname = parent_node['sortname']
-                                pp.sex = parent_node['sex']
+#                                 uniq_id = parent_node.id
+#                                 pp.uniq_id = uniq_id
+#                                 pp.uuid = parent_node['uuid']
+#                                 pp.sortname = parent_node['sortname']
+#                                 pp.sex = parent_node['sex']
                                 if role == 'father':
                                     family.father = pp
                                 elif role == 'mother':
                                     family.mother = pp
     
                             pname = Name.from_node(name_node)
-                            pp.names.append(pname)
+                            pp.names = [pname]
     
                     
                     for ch in record['child']:
@@ -499,12 +500,12 @@ RETURN extract(x IN relationships |
                         #    'confidence': '', 'sex': 0, 'change': 1507492602, 
                         #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
                         #    'date2': 1609920, 'date1': 1609920}>
-                        child = Person_as_member()
+#                         child = Person_as_member()
                         child = Person.from_node(ch)
-                        Person_as_member.__init__(child)
-                        child.uniq_id = ch.id
-                        child.uuid = ch['uuid']
-                        child.sortname = ch['sortname']
+#                         Person_as_member.__init__(child)
+#                         child.uniq_id = ch.id
+#                         child.uuid = ch['uuid']
+#                         child.sortname = ch['sortname']
                         family.children.append(child)
                     
                     if record['no_of_children']:
