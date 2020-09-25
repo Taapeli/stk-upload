@@ -712,8 +712,6 @@ def fetch_media(fname):
             id    uuid of Media
             crop  pixel coordinates as "left,upper,right,lower" %
             full  "1" = show full size, "0" thumbnail size (default)
-    
-        #TODO. Assumes jpg. Accept other file formats
     """
     uuid = request.args.get("id")
     crop = request.args.get("crop")
