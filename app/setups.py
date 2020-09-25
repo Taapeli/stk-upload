@@ -140,7 +140,7 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
  
     def validate_agree(self, field):
         if not field.data:
-            raise ValidationError(_('Please indicate that you have read and agree to the Terms and Conditions'), 'error') 
+            raise ValidationError(_l('Please indicate that you have read and agree to the Terms and Conditions'), 'error') 
         else:
             return True 
 
@@ -150,7 +150,7 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
     def validate_username(self, field):
         user = shareds.user_datastore.get_user(field.data)
         if user:
-            raise ValidationError(_('Username has been reserved already'))
+            raise ValidationError(_l('Username has been reserved already'))
 
     username = StringField(_l('Username'), validators=[Required('Username required')])
     name = StringField(_l('Name'), validators=[Required('Name required')])
