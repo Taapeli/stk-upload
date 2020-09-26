@@ -204,7 +204,7 @@
          v-on:touchstart="changeFamily(index, $event)"
          v-for="(f, index) of families" :key="f.id"
          v-bind:class="{ 'tab': true, 'tab_active': (index==(currentIndex-1)) }">
-            ${f.as_role}</button>
+            ${f.role_lang}</button>
     </div>
 
     <div class="pop-container">

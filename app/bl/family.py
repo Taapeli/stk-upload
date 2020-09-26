@@ -261,12 +261,12 @@ class FamilyReader(DBreader):
             items.sort(key=lambda x: x.dates)
             # Add translated text fields
             for family in items:
-                family.as_rel_type = translate(family.rel_type, 'marr').lower()
-                family.as_role = translate('as_'+family.role, 'role')
+                family.rel_type_lang = translate(family.rel_type, 'marr').lower()
+                family.role_lang = translate('as_'+family.role, 'role')
                 for parent in family.parents:
-                    parent.as_role = translate(parent.role, 'role')
+                    parent.role_lang = translate(parent.role, 'role')
                 for child in family.children:
-                    child.as_role = translate(child.sex, 'child')
+                    child.role_lang = translate(child.sex, 'child')
     
             return {"items":items, "status":Status.OK}
         else:
