@@ -9,7 +9,7 @@ Created on 15.8.2018
 import os
 import time
 import logging 
-from bp.gramps import gramps_runner
+from bp.gramps import gramps_utils
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, jsonify
@@ -47,7 +47,11 @@ def show_upload_log(xmlfile):
 def list_uploads():
     upload_list = uploads.list_uploads(current_user.username) 
     #Not essential: logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
-    return render_template("/gramps/uploads.html", uploads=upload_list)
+    gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
+    gramps_verify = gramps_runner and os.path.exists(gramps_runner)
+    return render_template("/gramps/uploads.html", 
+                           uploads=upload_list, gramps_verify=gramps_verify)
+
 
 @bp.route('/gramps/upload', methods=['POST'])
 @login_required
@@ -113,12 +117,23 @@ def xml_analyze(xmlfile):
 
 @bp.route('/gramps/gramps_analyze/<xmlfile>')
 @login_required
-@roles_accepted('research', 'admin')
+@roles_accepted('research', 'admin', 'audit')
 def gramps_analyze(xmlfile):
-    msgs = gramps_runner.gramps_verify(current_user.username, xmlfile)
     logger.info(f'bp.gramps.routes.gramps_analyze f="{os.path.basename(xmlfile)}"')
-    return render_template("/gramps/gramps_analyze.html", 
-                           msgs=msgs, file=xmlfile)
+    return render_template("/gramps/gramps_analyze.html",
+                           file=xmlfile)
+
+@bp.route('/gramps/gramps_analyze_json/<xmlfile>')
+@login_required
+@roles_accepted('research', 'admin', 'audit')
+def gramps_analyze_json(xmlfile):
+    gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
+    if gramps_runner:
+        msgs = gramps_utils.gramps_verify(gramps_runner, current_user.username, xmlfile)
+    else:
+        msgs = {}
+    logger.info(f'bp.gramps.routes.gramps_analyze_json f="{os.path.basename(xmlfile)}"')
+    return jsonify(msgs)
 
 @bp.route('/gramps/xml_delete/<xmlfile>')
 @login_required

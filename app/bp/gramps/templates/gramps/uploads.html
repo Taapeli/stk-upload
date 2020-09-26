@@ -230,7 +230,9 @@ function confirm_delete(subj, name) {
         <div>{{ _("Saving data") }}:
             <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
             <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
+		    {% if gramps_verify %}
             <button id="gramps_analyze" disabled>{{ _("Execute Gramps Verify Tool") }}</button>
+            {% endif %}
             <button id="start_upload" disabled>{{ _("Store to database") }}</button>
             <button id="show_log" disabled>{{ _("Show last log") }}</button>
         </div>
