@@ -180,7 +180,7 @@ class FamilyReader(DBreader):
         select_places   = select_all or 'plac' in wanted
         # note - Notes
         select_notes    = select_all or 'note' in wanted
-        # soour - Sources (Citations, Sources, Repositories)
+        # sour - Sources (Citations, Sources, Repositories)
         select_sources  = select_all or 'sour' in wanted
         ## medi - Media
         #select_media  = select_all or 'medi' in wanted

@@ -2,7 +2,7 @@
 
 #from datetime import datetime
 import logging
-from neobolt.exceptions import ConstraintError
+#from neobolt.exceptions import ConstraintError # Obsolete, not allowed! Use ClientError
 logger = logging.getLogger('stkserver') 
 from neo4j.exceptions import CypherSyntaxError, ClientError
 from flask_security import utils as sec_utils
@@ -186,27 +186,8 @@ def create_user_constraints():
     
 
 def check_constraints(needed:dict):
-    # Check which UNIQUE constraints are missing from given nodes and parameters.
-    # Returns a set of missing constraints
+    # Create missing UNIQUE constraints from given nodes and parameters.
 
-# No need to check existence, catching ClientError
-#         n_ok = 0
-#         import re
-#         p = re.compile(":(\S*)(\s.*\.)(\w+)")
-#         with shareds.driver.session() as session:
-#             result = session.run("CALL db.constraints")
-#             for record in result:
-#                 # "CONSTRAINT ON ( user:User ) ASSERT (user.email) IS UNIQUE"
-#                 desc = record[1]
-#                 x = p.search(desc)
-#                 label = x.group(1)
-#                 prop = x.group(3)
-#                 if label in needed.keys():
-#                     if prop in needed[label]:
-#                         needed[label].remove(prop)
-#                         n_ok += 1
-#                         #print(f'constraint {label}.{prop} ok')
-#         #print(f'Missing constraints: {needed}')
     for label,props in needed.items():
         for prop in props:
             create_unique_constraint(label, prop)
@@ -251,8 +232,8 @@ def create_to_be_approved_role():
     try:
         shareds.driver.session().run(stmt)
         logger.info("Created Role 'to_be_approved'")
-    except ConstraintError: # already exists, ok
-        pass
+    except ClientError: # already exists, ok
+        print(f"Role 'to_be_approved' already exists")
 
 # class Neo4jEnv(): # --> database.models.neo4jengine.Neo4jEngine.consume_counters
 #     """  Neo4j environment dependent things for versions 3.5 <> 4.1. """
