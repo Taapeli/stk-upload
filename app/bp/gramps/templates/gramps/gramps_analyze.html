@@ -1,0 +1,86 @@
+{# _myapp/templates/gr_result.html_ #}
+{% extends "a_layout.html" %}
+{% block title %}{{ _("Gramps analyze") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+<style>
+div.content > p {
+    margin: 0.5em 1em;
+}
+td.number {
+	text-align: right;
+}
+
+</style>
+
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+
+<div id="app">
+	<h2>{{ _("Gramps Verify Tool") }}</h2>
+	File name: {{ file }}
+	<p>
+	<img v-show="!ready" src="/static/5.gif">
+	<table v-show="ready">
+		<tr><th>Message<th>Count
+	    <tr v-for="msg,i in msgs">
+	    	<td @click="toggle(i)">${ msg[0] }
+	    	<td class=number>${ msg[1].length }
+	    	<td v-show="current == i">
+	    		<table>
+	    		<tr v-for="line in msg[1]">
+	    			<td>${ line }
+    			</tr>
+    			</table>
+			</td>
+    	</tr>
+	</table>
+    <p>
+    &rtrif; <a href="/gramps/uploads">{{ _("Return") }}</a></p>
+
+</div>
+
+<script>
+var app = new Vue({
+    delimiters: ['${', '}'],
+    el: '#app',
+    created: function() {
+        this.init();    
+    },
+    filters: {
+        truncate: function(value, size) {
+            if (value.length > size) {
+                value = value.substring(0, size-3) + '...';
+            }
+            return value;
+        }
+    },
+    data: {
+    	ready: false,
+    	xmlfile: '{{ file }}',
+    	msgs: [],
+    	current: -1,
+    },
+    methods: {
+    	init: function() {
+    		axios.get('/gramps/gramps_analyze_json/' + this.xmlfile)
+    		.then( function(rsp) {
+    			app.msgs = Object.entries(rsp.data);
+    			console.log(this.msgs);
+    			app.ready = true;
+    		});
+    	},
+    	toggle: function(i) {
+    		console.log(i);
+    		if (app.current == i) 
+    			app.current = -1;
+			else
+				app.current = i;
+    	},
+    },
+});
+
+</script>
+
+{% endblock %}
+        
