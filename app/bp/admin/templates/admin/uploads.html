@@ -1,4 +1,9 @@
 {# _admin/uploads.html_ #}
+<!-- See different versions:
+     ./gramps/templates/gramps/uploads.html
+     ./audit/templates/audit/batches.html
+     ./admin/templates/admin/uploads.html
+ -->
 {% extends "/admin/layout.html" %}
 {% block title %}{{ _("Uploads") }}{% endblock %}
 {% block body %}
@@ -68,7 +73,8 @@
 			      {% endif %}
 	           <td class="msg_INFO">
     	           <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}>
-    	               {{upload.xmlname}}</a> {{upload.upload_time_s}} 
+    	               {{upload.xmlname}}</a>
+                   <br>{{upload.upload_time_s}} 
 	           </td>
 	           <td class="msg_INFO">{{upload.status}}
 	           	{% if upload.batch_id %}

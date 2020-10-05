@@ -65,7 +65,8 @@
     		{% endif -%}
 	           <td><a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}
     	             title="{{ _("Download file") }}">
-    	               {{upload.xmlname}}</a> {{upload.upload_time_s}} 
+    	               {{upload.xmlname}}</a>
+                   <br>{{upload.upload_time_s}} 
 	           </td>
 	           <td>{{upload.status}}
 	        {% if upload.batch_id %}
