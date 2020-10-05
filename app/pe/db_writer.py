@@ -1,4 +1,9 @@
 '''
+
+    VANHENTUNUT TOTEUTUSMALLI
+    
+    Toiminnot pitäisi siirtää pe.neo4j.write_driver.Neo4jWriteDriver -luokkaan
+    
 Created on 23.3.2020
 
 @author: jm

@@ -1,4 +1,9 @@
 '''
+
+    VANHENTUNUT TOTEUTUSMALLI
+    
+    Toiminnot pitäisi siirtää pe.neo4j.read_driver.Neo4jReadDriver -luokkaan
+    
 Created on 17.3.2020
 
 @author: jm
