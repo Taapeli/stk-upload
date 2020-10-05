@@ -18,15 +18,15 @@ logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
 from flask_security import login_required, roles_accepted, roles_required, current_user
-from flask_babelex import _
+from flask_babelex import _, Domain
 
 import shareds
-from setups import User, Allowed_email #, Role
+from setups import User
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
 
 from .cvs_refnames import load_refnames
-from .forms import AllowedEmailForm, UpdateAllowedEmailForm, UpdateUserForm
+from .forms import UpdateUserForm
 from . import bp
 from . import uploads
 from .. gedcom.models import gedcom_utils
@@ -147,50 +147,6 @@ def estimate_dates(uid=None):
 #     return render_template("/talletettu.html", text=message, uri=dburi)
 
 
-@bp.route('/admin/allowed_emails',  methods=['GET', 'POST'])
-@login_required
-@roles_accepted('admin', 'master') 
-def list_allowed_emails():
-    form = AllowedEmailForm()
-#    if request.method == 'POST':
-    lista = UserAdmin.get_allowed_emails()
-    logging.info(f"-> bp.admin.routes.list_allowed_emails n={len(lista)}")
-    if form.validate_on_submit(): 
-# Register a new email
-        UserAdmin.register_allowed_email(form.allowed_email.data,
-                                         form.default_role.data)
-        return redirect(url_for('admin.list_allowed_emails'))
-
-    return render_template("/admin/allowed_emails.html", emails=lista, 
-                            form=form)
-    
-@bp.route('/admin/update_allowed_email/<email>', methods=['GET', 'POST'])
-@login_required
-@roles_accepted('admin', 'master')
-def update_allowed_email(email):
-    
-    form = UpdateAllowedEmailForm()
-    if form.validate_on_submit():
-        allowed_email = Allowed_email(
-                allowed_email = form.email.data,
-                default_role = form.role.data,
-                approved = form.approved.data,
-                creator = form.creator.data)
-#                 created_at = form.created.data,
-#                 confirmed_at = form.confirmed_at.data) 
-        _updated_allowed_email = UserAdmin.update_allowed_email(allowed_email)
-        logging.info(f"-> bp.admin.routes.update_allowed_email u={email}")
-        flash(_("Allowed email updated"))
-        return redirect(url_for("admin.update_allowed_email", email=form.email.data))
-
-    allowed_email = UserAdmin.find_allowed_email(email) 
-    form.email.data = allowed_email.allowed_email
-    form.approved.data = allowed_email.approved
-    form.role.data = allowed_email.default_role
-    form.creator.data = allowed_email.creator
-    form.created.data = allowed_email.created_at
-    form.confirmed_at.data = allowed_email.confirmed_at
-    return render_template("/admin/update_allowed_email.html", allowed_email=allowed_email.allowed_email, form=form)  
 
 @bp.route('/admin/list_users', methods=['GET'])
 @login_required
@@ -200,37 +156,14 @@ def list_users():
     logging.info(f"-> bp.admin.routes.list_users n={len(lista)}")
     return render_template("/admin/list_users.html", users=lista)  
 
-
-@bp.route('/admin/list_all_users', methods=['GET', 'POST'])
-@login_required
-@roles_accepted('admin', 'audit', 'master')
-def list_all_users():
-    """ List users and candidate users.
-    
-        list_allowed_emails + list_users
-    """
-    # Allowe emails
-    form = AllowedEmailForm()
-    list_emails = UserAdmin.get_allowed_emails()
-    if form.validate_on_submit(): 
-        # Register a new email
-#        lista = UserAdmin.get_allowed_emails()
-        UserAdmin.register_allowed_email(form.allowed_email.data,
-                                         form.default_role.data)
-        return redirect(url_for('admin.list_allowed_emails'))
-
-
-    list_users = shareds.user_datastore.get_users()
-    logging.info(f"-> bp.admin.routes.list_all_users n={len(list_users)}")
-    return render_template("/admin/list_users_mails.html", 
-                           users=list_users, emails=list_emails)  
-
-
 @bp.route('/admin/update_user/<username>', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'master')
 def update_user(username):
-    
+    #d = Domain("translations/sv/LC_MESSAGES")
+    #s = d.gettext("Return")
+    #print("s:",s)
+
     form = UpdateUserForm()
     if form.validate_on_submit(): 
         user = User(id = form.id.data,
@@ -249,6 +182,19 @@ def update_user(username):
         updated_user = UserAdmin.update_user(user)
         if updated_user.username == current_user.username:
             session['lang'] = form.language.data
+        if form.approve.data:
+            # use user's language; see https://stackoverflow.com/a/46036518
+            from flask import Flask
+            from flask_babelex import Locale
+            app = Flask("app")  
+            host = request.host # save the actual host
+            with app.test_request_context() as ctx:
+                lang = form.language.data
+                ctx.babel_locale = Locale.parse(lang)
+                subject = _("Isotammi user approved")
+                msg = _("You are now approved to use Isotammi at {server} with user name {user}.")
+                msg = msg.format(server=f"http://{host}",user=form.username.data)
+            email.email_from_admin(subject, msg, form.email.data)        
         logging.info(f"-> bp.admin.routes.update_user u={form.email.data}")
         flash(_("User updated"))
         return redirect(url_for("admin.update_user", username=updated_user.username))

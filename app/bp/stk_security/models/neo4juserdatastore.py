@@ -80,7 +80,6 @@ class Neo4jUserDatastore(UserDatastore):
         self.driver = driver
         self.user_model = user_model
         self.user_profile_model = user_profile_model
-#        self.allowed_email_model = allowed_email_model        
         self.role_model = role_model
 #       self.role_dict = self.get_roles() 
         
@@ -107,13 +106,8 @@ class Neo4jUserDatastore(UserDatastore):
         except Exception as ex:
             print(ex)
             traceback.print_exc()
-#  
-#     def email_accepted(self, proposed_email):
-#         return proposed_email == self.find_allowed_email(proposed_email)
-#                               
         
     def put(self, model):
-        
             try:
                 if isinstance(model, self.user_model):
                     userRecord = None
@@ -134,17 +128,11 @@ class Neo4jUserDatastore(UserDatastore):
                 raise
             
     def _put_user (self, tx, user):    # ============ New user ==============
-
-        if not user.username == 'guest':
-            allowed_email = UserAdmin.find_allowed_email(user.email)
-            if (allowed_email == None) or (allowed_email.approved != True):
-                return(None)
         if len(user.roles) == 0:
-            user.roles = [allowed_email.default_role] 
-#        user.confirmed_at = None
+             user.roles = ["to_be_approved"] 
         user.is_active = True
         try:
-            logger.info('_put_user new %s %s', user.username, user.roles[0])                
+            logger.info('_put_user new %s %s', user.username, user.roles[0:1])                
             result = tx.run(Cypher.user_register,
                 email = user.email,
                 password = user.password, 
@@ -163,28 +151,20 @@ class Neo4jUserDatastore(UserDatastore):
             node = result.single()
             if node:
                 userRecord = node['user']
-                if user.username == 'guest':
-                    status = None
-                else:    
-                    status = allowed_email.approved
-                if (status == None) or (status == True):
-#                userNode = (record['user'])
-#                logger.debug(userNode)
-                    UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
-                   
-#                tx.commit()
+                UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
                 logger.info(f'User with email address {user.email} registered') 
-                
-                return(userRecord)
+                return userRecord
             else:
                 logger.info(f'put_user: Cannot register user with {user.email}') 
                 raise RuntimeError(f'Could not register user with {user.email}')
                 
 #            tx.commit()
         except Exception as e:
+            print("error:",e)
             logging.error(f'Neo4jUserDatastore._put_user: {e.__class__.__name__}, {e}')            
             raise      
-
+        print("error:",node)
+        
     def _update_user (self, tx, user):         # ============ User update ==============
 
 #         print(user.email, user.confirmed_at)
@@ -235,9 +215,6 @@ class Neo4jUserDatastore(UserDatastore):
                            email = user.email,
                            name = rolename)        
             logger.info('User with email address {} updated'.format(user.email))
-#   Confirm time is copied to allowed email         
-            if user.confirmed_at:
-                UserAdmin.confirm_allowed_email(tx, user.email, confirmtime)   
 
             return (userRecord)
         
@@ -330,9 +307,7 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             with self.driver.session() as session:
                 userRoles = session.read_transaction(self._findUserRoles, email) 
-                if len(userRoles) > 0:
-                    return [self.role_model(**roleRecord) for roleRecord in userRoles] 
-                return None
+                return [self.role_model(**roleRecord) for roleRecord in userRoles] 
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
             raise
@@ -421,7 +396,6 @@ class Neo4jUserDatastore(UserDatastore):
             with driver.session() as session:
                 with session.begin_transaction() as tx:
                     tx.run(Cypher.confirm_email, email=email)
-                    UserAdmin.confirm_allowed_email(tx, email['email'], email['confirmed__at'])   
                     tx.commit()
             logger.info('Email address {} confirmed'.format(email))                            
         except Exception as e:

@@ -39,9 +39,6 @@ class SetupCypher():
     MATCH  (u:UserProfile {username:$username})
     RETURN COUNT(u)
     """
-#     email_val = """
-#     MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN COUNT(a)
-#     """
 
     set_user_constraint1 = """
     CREATE CONSTRAINT ON (user:User) 
@@ -51,10 +48,6 @@ class SetupCypher():
     CREATE CONSTRAINT ON (user:User) 
         ASSERT (user.username) IS UNIQUE;
     """
-    set_allowed_email_constraint = """ 
-    CREATE CONSTRAINT ON (email:Allowed_email) 
-    ASSERT email.allowed_email IS UNIQUE
-    """  
 
     master_create = """
     MATCH  (role:Role) WHERE role.name = 'master'

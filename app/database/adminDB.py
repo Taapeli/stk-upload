@@ -2,6 +2,7 @@
 
 #from datetime import datetime
 import logging
+#from neobolt.exceptions import ConstraintError # Obsolete, not allowed! Use ClientError
 logger = logging.getLogger('stkserver') 
 from neo4j.exceptions import CypherSyntaxError, ClientError
 from flask_security import utils as sec_utils
@@ -184,38 +185,9 @@ def create_user_constraints():
     logger.info('User constraints created')
     
 
-def create_allowed_email_constraints():
-    with shareds.driver.session() as session: 
-        try:  
-            session.run(SetupCypher.set_allowed_email_constraint)  
-        except Exception as e:
-            logging.error(f'database.adminDB.create_allowed_email_constraints: {e.__class__.__name__}, {e}')            
-            return
-    logger.info('Allowed email constraints created')
+def check_constraints(needed:dict):
+    # Create missing UNIQUE constraints from given nodes and parameters.
 
-
-def check_contraints(needed:dict):
-    # Check which UNIQUE contraints are missing from given nodes and parameters.
-    # Returns a set of missing constraints
-
-# No need to check exsistence, catching ClientError
-#         n_ok = 0
-#         import re
-#         p = re.compile(":(\S*)(\s.*\.)(\w+)")
-#         with shareds.driver.session() as session:
-#             result = session.run("CALL db.constraints")
-#             for record in result:
-#                 # "CONSTRAINT ON ( user:User ) ASSERT (user.email) IS UNIQUE"
-#                 desc = record[1]
-#                 x = p.search(desc)
-#                 label = x.group(1)
-#                 prop = x.group(3)
-#                 if label in needed.keys():
-#                     if prop in needed[label]:
-#                         needed[label].remove(prop)
-#                         n_ok += 1
-#                         #print(f'constraint {label}.{prop} ok')
-#         #print(f'Missing contraints: {needed}')
     for label,props in needed.items():
         for prop in props:
             create_unique_constraint(label, prop)
@@ -255,30 +227,13 @@ def create_unique_constraint(label, prop):
             raise
     return
 
-def set_confirmed_at():
-    """
-    For some reason many User nodes were missing the 'confirmed_at'
-    property. This code creates the missing properties by copying
-    it from the corresponding 'Allowed_email' node. The actual value
-    is in fact not very important.
-    """
-    stmt = """
-        match (allowed:Allowed_email),(user:User) 
-        where not exists(user.confirmed_at) and 
-              allowed.allowed_email=user.email
-        return count(user) as count
-    """
-    result = shareds.driver.session().run(stmt).single()
-    count = result['count']
-    print(f"Setting confirmed_at for {count} users") 
-
-    stmt = """
-        match (allowed:Allowed_email),(user:User) 
-        where not exists(user.confirmed_at) and 
-              allowed.allowed_email=user.email
-        set user.confirmed_at = allowed.confirmed_at
-    """
-    shareds.driver.session().run(stmt)
+def create_to_be_approved_role():
+    stmt = "create (r:Role{name:'to_be_approved',description:'Käyttäjä joka odottaa hyväksymistä'});"
+    try:
+        shareds.driver.session().run(stmt)
+        logger.info("Created Role 'to_be_approved'")
+    except ClientError: # already exists, ok
+        print(f"Role 'to_be_approved' already exists")
 
 # class Neo4jEnv(): # --> database.models.neo4jengine.Neo4jEngine.consume_counters
 #     """  Neo4j environment dependent things for versions 3.5 <> 4.1. """
@@ -302,7 +257,6 @@ def initialize_db():
         if not user_exists('master'):
             create_user_constraints()
             create_master_user()
-            create_allowed_email_constraints()
             
         if not user_exists('guest'):
             create_guest_user()
@@ -312,8 +266,7 @@ def initialize_db():
             
         create_lock_and_constraint()
     
-        check_contraints({
-            "Allowed_email":{"allowed_email"},
+        check_constraints({
             "Citation":{"uuid"},
             "Event":{"uuid"},
             "Family":{"uuid"},
@@ -330,7 +283,6 @@ def initialize_db():
         # Fix changed schema
         do_schema_fixes()
 
-        #set_confirmed_at()
-
-    return 
+        create_to_be_approved_role()
+        
 

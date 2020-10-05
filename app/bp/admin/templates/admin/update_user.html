@@ -39,8 +39,12 @@ label { display: inline-block; width:140pt; }
     	  <p> {{ form.current_login_at.label }}  {{ form.current_login_at(readonly=true) }} </p>	   	      
  	      <p> {{ form.current_login_ip.label }}  {{ form.current_login_ip(readonly=true) }} </p>  	      
    	      <p> {{ form.login_count.label }}  {{ form.login_count(readonly=true) }} </p>		
-   	      
-   	      {{ render_field(form.submit) }}  	    	      
+
+		  {% if 'to_be_approved' in form.roles.data %}
+     	      {{ render_field(form.approve) }}  	    	      
+	      {% else %}
+     	      {{ render_field(form.submit) }}  	    	      
+		  {% endif %}   
   	      		  
     </form>
     

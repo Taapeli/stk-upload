@@ -28,7 +28,7 @@ import shareds
 from chkdate import Chkdate
 
 from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
-from bp.admin.models.user_admin import UserAdmin, UserProfile, Allowed_email
+from bp.admin.models.user_admin import UserAdmin, UserProfile
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
 from datetime import datetime
 from ui.user_context import UserContext
@@ -140,26 +140,17 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
  
     def validate_agree(self, field):
         if not field.data:
-            raise ValidationError(_('Please indicate that you have read and agree to the Terms and Conditions'), 'error') 
+            raise ValidationError(_l('Please indicate that you have read and agree to the Terms and Conditions'), 'error') 
         else:
             return True 
 
     def validate_email(self, field):
-        allowed_email = UserAdmin.find_allowed_email(field.data)
-        if allowed_email:
-            if allowed_email.confirmed_at != None:
-                raise ValidationError(_('Email address has been confirmed earlier'))
-            elif (allowed_email.creator == 'system') and not allowed_email.approved:
-                raise ValidationError(_('Email address has not been approved yet'))             
-#            if (allowed_email.creator != 'system') or allowed_email.approved:
-            else: 
-                return True
-        raise ValidationError(_('Email address must be an authorized one')) 
+        return True
 
     def validate_username(self, field):
         user = shareds.user_datastore.get_user(field.data)
         if user:
-            raise ValidationError(_('Username has been reserved already'))
+            raise ValidationError(_l('Username has been reserved already'))
 
     username = StringField(_l('Username'), validators=[Required('Username required')])
     name = StringField(_l('Name'), validators=[Required('Name required')])
@@ -181,7 +172,6 @@ sysversion = Chkdate()  # Last application commit date or "Unknown"
 
 # Setup Flask-Security
 shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)
-shareds.allowed_email_model = Allowed_email
 shareds.security = Security(shareds.app, shareds.user_datastore,
     confirm_register_form=ExtendedConfirmRegisterForm,
     login_form=ExtendedLoginForm)

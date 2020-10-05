@@ -13,8 +13,6 @@
     <div class="row"> 
        <div class="startbox"> 
           <h3>{{ _('Register as an user of Isotammi Service') }}</h3> 
-              <p>{{ _('It is possible to register only if you have got an invitation. ' 
-              'You may ask for invitation on the page') }} <a href="/join">{{ _('Join Isotammi') }}</a>.</p>
               <p><b>{{ _('Note!') }}</b>
                 {{ _('When you have sent this form, you must wait for mail from us and click the link '
                      '"%(link)s" in the message you got. Then you can log in!', 
@@ -38,7 +36,7 @@
 				  {% if register_user_form.password_confirm %} 
 				    {{ render_field_with_errors(register_user_form.password_confirm) }} 
 				  {% endif %} 
-				  {{ render_field_with_errors(register_user_form.language) }} 
+				  <input type=hidden name=language value={{ session.lang }}>
 				  {# render_field(register_user_form.terms) #} 
  
                   {{ render_field_with_errors(register_user_form.agree) }} 

@@ -512,7 +512,7 @@ def json_get_person_families():
 
         t1 = time.time()-t0
         stk_logger(u_context, f"-> bp.scene.routes.show_person_families_json n={len(items)} e={t1:.3f}")
-        print(response)
+        #print(response)
         return response
 
     except Exception as e:

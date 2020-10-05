@@ -65,6 +65,14 @@ def start_logged():
                  f" lang={get_locale().language}"
                  f" user={current_user.username}/{current_user.email}"
                  f" roles= {role_names}")
+
+    print(current_user.is_authenticated)
+    print(current_user.has_role('to_be_approved'))
+    if current_user.is_authenticated and current_user.has_role('to_be_approved'):
+        # Home page for logged in user
+        logger.info(f'-> start.routes.entry/join')
+        return redirect(url_for('join'))
+
     return render_template('/start/index_logged.html')
 
 
@@ -73,20 +81,20 @@ def thankyou():
     return render_template("/start/thankyou.html")
 
 @shareds.app.route('/join', methods=['GET', 'POST'])
+@login_required
 def join():
     from bp.admin.models.user_admin import UserProfile, UserAdmin
 
     form = JoinForm()
     logger.info('-> bp.start.routes.join')
-    msg = ""
-    for name,value in request.form.items():
-        msg += f"\n{name}: {value}"
     if form.validate_on_submit(): 
         msg = ""
+        username = request.form['username']
         for name,value in request.form.items():
             if name == "csrf_token": continue
             if name == "submit": continue
             msg += f"\n{name}: {value}"
+        msg += f"\n\nApprove user: http://{request.host}/admin/update_user/{username}"
         if email.email_admin("New user request for Isotammi", msg,
                              sender=request.form.get('email') ):
             flash(_("Join message sent"))
@@ -103,7 +111,7 @@ def join():
             researched_places = request.form.get('researched_places'),
             text_message = request.form.get('text_message'),
         )
-        UserAdmin.register_applicant(profile,role=None)
+        UserAdmin.update_user_profile(profile)
         return redirect(url_for("thankyou"))
 
     return render_template("/start/join.html", form=form)  

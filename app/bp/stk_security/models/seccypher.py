@@ -31,7 +31,8 @@ MATCH (user:User)
 RETURN user'''
 
     get_users = '''
-MATCH (user:User) -[:HAS_ROLE]-> (role:Role)  
+MATCH (user:User)
+OPTIONAL MATCH (user) -[:HAS_ROLE]-> (role:Role)  
 RETURN DISTINCT user, COLLECT(role) 
     ORDER BY user.username'''
 
