@@ -350,159 +350,161 @@ def get_person_full_data(uuid, owner, use_common=True):
 #     return (person, objs, fns.getFootnotes())
 
 
-def connect_object_as_leaf(src, target, rel_type=None):
-    ''' Subroutine for Person page display.
-
-        Saves target object in appropiate place in the src object 
-        (Person, Event etc).
-        Returns saved target object or None, if no new object was saved here.
-    
-    Plan 17 Sep 2018 / JMä
-
-    The following relation targets are stored as instances in root object 
-    'src' variable:
-        (:Person)                not linked to self
-        -[:NAME]-> (:Name)       to .names[]
-        -[:EVENT]-> (:Event)     to .events[]
-        -[:CHILD]-> (:Family)    to .child[]
-        -[:PARENT {role:'father'}]-> (:Family)   to .father
-        -[:PARENT {role:'mother'}]-> (:Family)   to .mother
-        -[:HIERARCHY]-> (:Place) to .place
-        (:Place)
-        -[:NAME]-> (:Name)       to .names[]
-        
-    The following relation targets are stored as object references (uniq_id) 
-    in root object variable. The actual referenced target objects are stored to 
-    separate 'obj_dict' variable:
-        -[:CITATION]-> (:Citation)     to .citation_ref[]
-        -[:SOURCE]-> (:Source)         to .source_id
-        -[:REPOSITORY]-> (:Repository) to .repo_ref[]
-        -[:NOTE]-> (:Note)             to .note_ref[]
-        -[:PLACE]-> (:Place)           to .place_ref[]
-        -[:MEDIA]-> (:Media)           to .media_ref[]
-    
-    Object to object connection variables:
-    
-        Person combo 
-            .names[]
-            .events[]
-            .media_ref[]
-            .families[]
-            .note_ref[]
-            .citation_ref[]
-        Name 
-            .note_ref[]
-            .citation_ref[]
-        Refname
-            -
-        Media
-            .note_ref[]
-            .citation_ref[]
-        Note 
-            .citation_ref[]
-        Event combo
-            .place_ref[]
-            .note_ref[]
-        Place 
-            .place_ref[]
-            .note_ref[]
-            .citation_ref[]
-            #TODO: .media_ref[]
-        Family_combo
-             children[]
-            .father, .mother, .children[]
-            .events[]
-            .note_ref[]
-            .citation_ref[]
-        Citation
-            .note_ref[]
-        Source
-            .repo_ref[]
-        Repository
-            -
-    '''
-
-    src_class = src.__class__.__name__
-    target_class = target.__class__.__name__
-    
-    if src_class == 'Person_combo':
-        if target_class == 'Name':
-            src.names.append(target)
-            return src.names[-1]
-        elif target_class == 'Event_combo':
-            src.events.append(target)
-            return src.events[-1]
-        elif target_class == 'Family_combo':
-            if rel_type == 'CHILD':
-                src.families_as_child.append(target)
-                return src.families_as_child[-1]
-            if rel_type == 'PARENT': #'MOTHER' or rel_type == 'FATHER':
-                src.families_as_parent.append(target)
-                return src.families_as_parent[-1]
-        elif target_class == 'Citation':
-            src.citation_ref.append(target.uniq_id)
-            return None
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-        if target_class == 'Media':
-            # TODO Noudata medioiden järjestystä!
-            src.media_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Event_combo':
-        if target_class == 'Place_combo':
-            src.place_ref.append(target.uniq_id)
-            return None
-        elif target_class == 'Citation':
-            #src.citations.append(target) 
-            src.citation_ref.append(target.uniq_id)
-            return None
-        elif target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Citation':
-        if target_class == 'Source':
-            src.source_id = target.uniq_id
-            return None
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Place_combo':
-        if target_class == 'Place_name':
-            src.names.append(target)
-            return src.names[-1]
-        if target_class == 'Place_combo':
-            src.uppers.append(target)
-            return src.uppers[-1]
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-        if target_class == 'Media':
-            # TODO Noudata medioiden järjestystä!
-            src.media_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Family_combo':
-        if target_class == 'Event_combo':
-            src.events.append(target)
-            return src.events[-1]
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Source':
-        if target_class == 'Repository':
-            src.repositories.append(target.uniq_id)
-            return None
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-
-    print('Ei toteutettu {} --> {}'.format(src_class, target_class))
-    return None
+# def connect_object_as_leaf(src, target, rel_type=None):
+#     ''' Subroutine for Person page display.
+# 
+#         Saves target object in appropiate place in the src object 
+#         (Person, Event etc).
+#         Returns saved target object or None, if no new object was saved here.
+#         
+#         OBSOLETE: Called from get_a_person_for_display_apoc
+#     
+#     Plan 17 Sep 2018 / JMä
+# 
+#     The following relation targets are stored as instances in root object 
+#     'src' variable:
+#         (:Person)                not linked to self
+#         -[:NAME]-> (:Name)       to .names[]
+#         -[:EVENT]-> (:Event)     to .events[]
+#         -[:CHILD]-> (:Family)    to .child[]
+#         -[:PARENT {role:'father'}]-> (:Family)   to .father
+#         -[:PARENT {role:'mother'}]-> (:Family)   to .mother
+#         -[:HIERARCHY]-> (:Place) to .place
+#         (:Place)
+#         -[:NAME]-> (:Name)       to .names[]
+#         
+#     The following relation targets are stored as object references (uniq_id) 
+#     in root object variable. The actual referenced target objects are stored to 
+#     separate 'obj_dict' variable:
+#         -[:CITATION]-> (:Citation)     to .citation_ref[]
+#         -[:SOURCE]-> (:Source)         to .source_id
+#         -[:REPOSITORY]-> (:Repository) to .repo_ref[]
+#         -[:NOTE]-> (:Note)             to .note_ref[]
+#         -[:PLACE]-> (:Place)           to .place_ref[]
+#         -[:MEDIA]-> (:Media)           to .media_ref[]
+#     
+#     Object to object connection variables:
+#     
+#         Person combo 
+#             .names[]
+#             .events[]
+#             .media_ref[]
+#             .families[]
+#             .note_ref[]
+#             .citation_ref[]
+#         Name 
+#             .note_ref[]
+#             .citation_ref[]
+#         Refname
+#             -
+#         Media
+#             .note_ref[]
+#             .citation_ref[]
+#         Note 
+#             .citation_ref[]
+#         Event combo
+#             .place_ref[]
+#             .note_ref[]
+#         Place 
+#             .place_ref[]
+#             .note_ref[]
+#             .citation_ref[]
+#             #TODO: .media_ref[]
+#         Family_combo
+#              children[]
+#             .father, .mother, .children[]
+#             .events[]
+#             .note_ref[]
+#             .citation_ref[]
+#         Citation
+#             .note_ref[]
+#         Source
+#             .repo_ref[]
+#         Repository
+#             -
+#     '''
+# 
+#     src_class = src.__class__.__name__
+#     target_class = target.__class__.__name__
+#     
+#     if src_class == 'Person_combo':
+#         if target_class == 'Name':
+#             src.names.append(target)
+#             return src.names[-1]
+#         elif target_class == 'Event_combo':
+#             src.events.append(target)
+#             return src.events[-1]
+#         elif target_class == 'Family_combo':
+#             if rel_type == 'CHILD':
+#                 src.families_as_child.append(target)
+#                 return src.families_as_child[-1]
+#             if rel_type == 'PARENT': #'MOTHER' or rel_type == 'FATHER':
+#                 src.families_as_parent.append(target)
+#                 return src.families_as_parent[-1]
+#         elif target_class == 'Citation':
+#             src.citation_ref.append(target.uniq_id)
+#             return None
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+#         if target_class == 'Media':
+#             # TODO Noudata medioiden järjestystä!
+#             src.media_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Event_combo':
+#         if target_class == 'Place_combo':
+#             src.place_ref.append(target.uniq_id)
+#             return None
+#         elif target_class == 'Citation':
+#             #src.citations.append(target) 
+#             src.citation_ref.append(target.uniq_id)
+#             return None
+#         elif target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Citation':
+#         if target_class == 'Source':
+#             src.source_id = target.uniq_id
+#             return None
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Place_combo':
+#         if target_class == 'Place_name':
+#             src.names.append(target)
+#             return src.names[-1]
+#         if target_class == 'Place_combo':
+#             src.uppers.append(target)
+#             return src.uppers[-1]
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+#         if target_class == 'Media':
+#             # TODO Noudata medioiden järjestystä!
+#             src.media_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Family_combo':
+#         if target_class == 'Event_combo':
+#             src.events.append(target)
+#             return src.events[-1]
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Source':
+#         if target_class == 'Repository':
+#             src.repositories.append(target.uniq_id)
+#             return None
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+# 
+#     print('Ei toteutettu {} --> {}'.format(src_class, target_class))
+#     return None
 
  
 # def get_person_data_by_id(uniq_id): @see: models.datareader.get_person_data_by_id
