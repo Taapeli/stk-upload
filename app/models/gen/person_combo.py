@@ -124,7 +124,7 @@ class Person_combo(Person):
 
 
     @staticmethod
-    def get_my_person(session, uuid, user, use_common):
+    def get_my_person(session, uuid, user, use_common): # --> bl.person.PersonReader.get_a_person()
         ''' Read a person from common data or user's own Batch.
 
             -   If you have selected to use common approved data, you can read
@@ -132,6 +132,8 @@ class Person_combo(Person):
 
             -   If you havn't selected common data, you can read 
                 only your own data.
+            
+            Called only from models.gen.person_reader
         '''
         try:
 #             if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user

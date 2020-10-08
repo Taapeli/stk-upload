@@ -62,164 +62,11 @@ class PersonReader():
         self.objs[self.person.uniq_id] = self.person
 
 
-    def read_person_names_events(self):
-        ''' Read names and events to Person object p.
-        '''
-        try:
-            results = self.session.run(Cypher_person.get_names_events,
-                                       uid=self.person.uniq_id)
-            for record in results:
-                # <Record
-                #    rel=<Relationship id=453912
-                #        nodes=(
-                #            <Node id=261207 labels=set() properties={}>,
-                #            <Node id=261208 labels={'Name'}
-                #                properties={'firstname': 'Vilhelm Edvard', 'type': 'Also Known As',
-                #                    'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>)
-                #        type='NAME' properties={}>
-                #    x=<Node id=261208 labels={'Name'}
-                #        properties={'firstname': 'Vilhelm Edvard', 'type': 'Also Known As',
-                #            'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>>
-                relation = record['rel']
-                rel_type = relation.type
-                role = relation.get('role', '')
-                node = record['x']
-                label = list(record['x'].labels)[0]
-                #print(f"# -[:{rel_type} {relation._properties}]-> (x:{label})")
-                if label == 'Name':
-                    x = Name.from_node(node)
-                    self.person.names.append(x)
-                    self.objs[x.uniq_id] = x
-                elif label == 'Event':
-                    x = Event_combo.from_node(node)
-                    x.role = role
-                    self.person.events.append(x)
-                    self.objs[x.uniq_id] = x 
-                    if x.type == "Cause Of Death":
-                        self.person.cause_of_death = x
-                print(f"# ({self.person.id}) -[:{rel_type} {role}]-> ({x.uniq_id}:{label} '{x}')")
+#     def read_person_names_events(self): # --> pe.neo4j.read_driver.Neo4jReadDriver.dr_get_person_names_events()
+#         ''' Read names and events to Person object p. '''
 
-        except Exception as e:
-            print(f"Could not read names and events for person {self.person.uuid}: {e}")
-        return
-
-
-    def read_person_families(self):
-        ''' Read the families, where this Person is a member.
-
-            Also return the Family members with their birth event
-            and add family events to this person's events.
-
-            (p:Person) <-- (f:Family)
-               for f
-                 (f) --> (fp:Person) -[*1]-> (fpn:Name)
-                 (f) --> (fe:Event)
-        '''
-        try:
-            results = self.session.run(Cypher_person.get_families,
-                                       uid=self.person.uniq_id)
-            for record in results:
-                # <Record
-                #  rel=<Relationship id=671269
-                #     nodes=(
-                #        <Node id=432641 labels={'Family'} 
-                #            properties={'datetype': 3, 'father_sortname': 'Järnefelt##August Aleksander', 
-                #                'change': 1542401728, 'rel_type': 'Married', 'mother_sortname': 'Clodt von Jürgensburg##Elisabeth', 
-                #                'date2': 1941614, 'id': 'F0015', 'date1': 1901974, 'uuid': '90282a3cf6ee47a1b8f9a4a2c710c736'}>, 
-                #        <Node id=427799 labels={'Person'} 
-                #            properties={'sortname': 'Järnefelt##Aino', 'datetype': 19, 'confidence': '2.0', 
-                #                'sex': 2, 'change': 1566323471, 'id': 'I0035', 'date2': 2016423, 'date1': 1916169, 
-                #                'uuid': '925ea92d7dab4e8c92b53c1dcbdad36f'}>) 
-                #    type='CHILD' 
-                #    properties={}> 
-                #  family=<Node id=432641 labels={'Family'} properties={...}> 
-                #  events=[<Node id=269554 labels={'Event'} properties={'type': 'Marriage', ...}> ...]
-                #  members=[[
-                #    <Relationship ...  type='CHILD' ...>, 
-                #    <Node ... labels={'Person'}...>, 
-                #    <Node ... labels={'Name'}...>, 
-                #    <Node ... labels={'Event'}...]
-                #    ...]>
-
-                # 1. What is the relation this Person to their Family
-
-                relation = record['rel']
-                rel_type = relation.type
-                role = relation.get('role', "")
-
-                # 2. The Family node
-
-                node = record['family']
-                family = Family_combo.from_node(node)
-                family.role = rel_type
-                family.marriage_dates = ""  # string "" or a DataRange
-                if rel_type == "CHILD":
-                    self.person.families_as_child.append(family)
-                elif rel_type == "PARENT":
-                    self.person.families_as_parent.append(family)
-                print(f"# ({self.person.id}) -[:{rel_type} {role}]-> (:Family '{family}')")
-
-                # 3. Family Events
-                #TODO: Cause of death is not displayed!
-
-                for event_node in record['events']:
-                    f_event = Event_combo.from_node(event_node)
-                    #print(f"#\tevent {f_event}")
-                    if f_event.type == "Marriage":
-                        family.marriage_dates = f_event.dates
-                    # Add family events to person events, too
-                    if rel_type == "PARENT":
-                        f_event.role = "Family"
-                        print(f"# ({self.person.id}) -[:EVENT {f_event.role}]-> (:Event '{f_event}')")
-                        self.person.events.append(f_event)
-                        # Add Event to list of those events, who's Citation etc
-                        # references must be checked
-                        if not f_event.uniq_id in self.objs.keys():
-                            self.objs[f_event.uniq_id] = f_event
-
-                # 4. Family members and their birth events
-
-                for relation, member_node, name_node, event_node in record['members']:
-                    # relation = <Relationship
-                    #    id=671263 
-                    #    nodes=(
-                    #        <Node id=432641 labels={'Family'} properties={'rel_type': 'Married', ...}>, 
-                    #        <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ...}>)
-                    #    type='CHILD' 
-                    #    properties={}>
-                    # member_node = <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ... }>
-                    # name_node = <Node id=428884 labels={'Name'} properties={'firstname': 'Caspar Woldemar' ...}>
-                    # event_node = <Node id=267935 labels={'Event'} properties={'type': 'Birth', ... }>
-                    role = relation['role']
-                    member = Person_combo.from_node(member_node)
-                    if name_node:
-                        name = Name.from_node(name_node)
-                        member.names.append(name)
-                    else:
-                        name = None
-                    if event_node:
-                        event = Event_combo.from_node(event_node)
-                        member.birth_date = event.dates
-                    else:
-                        event = None
-
-#                     if rel_type == "CHILD":
-#                         print(f"#  parent's family ({relation.start}) -[:CHILD {relation._properties}]-> ({relation.end}) {member} {name} {event}")
-#                     elif rel_type == "PARENT":
-#                         print(f"#  own family ({relation.start}) -[:PARENT {relation._properties}]-> ({relation.end}) {member} {name} {event}")
-
-                    if role == "father":
-                        family.father = member
-                    elif role == "mother":
-                        family.mother = member
-                    else:
-                        family.children.append(member)
-                    pass
-
-        except Exception as e:
-            print(f"Could not read families for person {self.person.uuid}: {e}")
-        return
-
+#     def read_person_families(self): # --> pe.neo4j.read_driver.Neo4jReadDriver.dr_get_person_families
+#         ''' Read the families, where this Person is a member. '''
 
     def read_object_places(self):
         ''' Read Place hierarchies for all objects in objs.
@@ -427,16 +274,22 @@ class PersonReader():
         return new_objs
 
     def remove_privacy_limit_from_family(self, family):
+        ''' Clear privacy limitations from given family.
+        
+            Todo: should be in FamilyReader instead
+        '''
         if family.father: family.father.too_new = False
         if family.mother: family.mother.too_new = False
         for c in family.children:
             c.too_new = False
 
-    def remove_privacy_limit_from_families(self):
-        for family in self.person.families_as_child:
-            self.remove_privacy_limit_from_family(family)
-        for family in self.person.families_as_parent:
-            self.remove_privacy_limit_from_family(family)
+#     def remove_privacy_limit_from_families(self): # --> bl.person.PersonBl.remove_privacy_limit_from_families()
+#         ''' Clear privacy limitations from self.person's families.
+#         '''
+#         for family in self.person.families_as_child:
+#             self.remove_privacy_limit_from_family(family)
+#         for family in self.person.families_as_parent:
+#             self.remove_privacy_limit_from_family(family)
             
     
     

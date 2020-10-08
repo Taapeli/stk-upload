@@ -25,11 +25,12 @@ from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
 from bl.event import EventReader
+from bl.person import PersonReader
 #from bl.media import MediaBl_todo
 from templates import jinja_filters
 
 from . import bp
-from bp.scene.scene_reader import get_person_full_data
+#from bp.scene.scene_reader import get_person_full_data
 from bp.scene.models import media
 from models.gen.family_combo import Family_combo
 #from models.gen.source import Source
@@ -222,20 +223,25 @@ def show_persons_all():
 
     t0 = time.time()
     dbdriver = Neo4jReadDriver(shareds.driver)
-    db = DBreader(dbdriver, u_context)
-    results = db.get_person_list()
-    elapsed = time.time() - t0
+    reader = PersonReader(dbdriver, u_context)
 
-    hidden = f" hide={results.num_hidden}" if results.num_hidden > 0 else ""
+    results = reader.get_person_list()
+    status = results.get('status')
+    if status != Status.OK:
+        flash(f'{_("No persons found")}: {results.get("statustext")}','error')
+
+    elapsed = time.time() - t0
+    found = results.get('items',[])
+    hide = results['num_hidden']
+    hidden = f" hide={hide}" if hide > 0 else ""
     stk_logger(u_context, f"-> bp.scene.routes.show_persons_all"
-                    f" n={len(results.items)}{hidden} e={elapsed:.3f}")
-#     print(f"Got {len(results.items)} persons"
-#           f" with {len(results.items)-results.num_hidden} hidden"
-#           f" and {results.error} errors"
+                    f" n={len(found)}{hidden} e={elapsed:.3f}")
+#     print(f"Got {len(found)} persons"
+#           f" with {len(found)-results.hide} hidden"
+#           f" and status {status}"
 #           f" in {elapsed:.3f}s")
-    return render_template("/scene/persons_list.html", persons=results.items,
-                           num_hidden=results.num_hidden,
-                           user_context=u_context,
+    return render_template("/scene/persons_list.html", persons=found,
+                           num_hidden=hide, user_context=u_context,
                            menuno=12, elapsed=elapsed)
 
 
@@ -279,18 +285,28 @@ def show_person(uid=None):
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
 
-    # v3 Person page
-    person, objs, jscode = get_person_full_data(uid, u_context.user, u_context.use_common())
-    if not person:
-        return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
+    dbdriver = Neo4jReadDriver(shareds.driver)
+    reader = PersonReader(dbdriver, u_context)
+    args = {}
+
+    result = reader.get_person_data(uid, args)
+    # result {'person', 'objs': self.dbdriver, 'jscode', 'root'}
+    status = result.get('status')
+    if status != Status.OK:
+        flash(f'{_("Person not found")}: {result.get("statustext","error")}', 'error')
+    person = result.get('person')
+    objs = result.get('objs',[])
+    jscode = result.get('jscode','')
+    root = result.get('root')
+
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
     #for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     return render_template("/scene/person.html", person=person, obj=objs, 
-                           jscode=jscode, menuno=12, debug=dbg, root=person.root,
-                           last_year_allowed=last_year_allowed, elapsed=time.time()-t0,
-                           user_context=u_context)
+                           jscode=jscode, menuno=12, debug=dbg, root=root,
+                           last_year_allowed=last_year_allowed, 
+                           elapsed=time.time()-t0, user_context=u_context)
 
 
 # @bp.route('/scene/person/uuid=<pid>')

@@ -82,14 +82,13 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
     
     The standard specifies that its use may be referred to by the designator "SEX". 
 '''
-from datetime import datetime
+#from datetime import datetime
 
 import shareds
 from bl.base import NodeObject
-from .cypher import Cypher_person
-from .dates import DateRange
-
-from flask_babelex import _
+#from .cypher import Cypher_person
+#from .dates import DateRange
+#from flask_babelex import _
 
 SEX_UNKOWN = 0 
 SEX_MALE = 1
@@ -131,108 +130,108 @@ class Person(NodeObject):
         self.birth_high = None
         self.death_high = None
 
-    def __str__(self):
-        dates = self.dates if self.dates else ''
-        return "{} {} {}".format(self.sex_str(), self.id, dates)
-
-    def sex_str(self):
-        " Returns person's sex as string"
-        return self.convert_sex_to_str(self.sex)
-
-    def sex_symbol(self):
-        " Returns person's sex as string"
-        symbols = {SEX_UNKOWN:'', 
-                   SEX_MALE:'♂',
-                   SEX_FEMALE:'♀',
-                   SEX_NOT_APPLICABLE:'-'}
-        return symbols.get(self.sex, '?')
-
-    def child_by_sex(self):
-        " Returns person's sex as string"
-        ch = {SEX_UNKOWN:_('Child'), 
-              SEX_MALE:_('Son'),
-              SEX_FEMALE:_('Daughter'),
-              SEX_NOT_APPLICABLE:_('Child')}
-        return ch.get(self.sex, '?')
-
-    @staticmethod
-    def convert_sex_to_str(sex):
-        " Returns sex code as string"
-
-        sexstrings = {SEX_UNKOWN:_('sex not known'), 
-                      SEX_MALE:_('male'),
-                      SEX_FEMALE:_('female'),
-                      SEX_NOT_APPLICABLE:_('sex not applicable')}
-        return sexstrings.get(sex, '?')
-
-    @staticmethod
-    def sex_from_str(s):
-        # Converts gender strings to ISO/IEC 5218 codes
-        ss = s[:1].upper()
-        if ss == 'M' or  ss == str(SEX_MALE):
-            return SEX_MALE
-        if ss == 'F' or ss == 'N' or ss == str(SEX_FEMALE):
-            return SEX_FEMALE
-        return 0
-        
-    @classmethod
-    def from_node(cls, node, obj=None):
-        '''
-        Transforms a db node to an object of type Person.
-
-        Youc can create a Person or Person_node instance. (cls is the class 
-        where we are, either Person or Person_combo)
-
-        <Node id=80307 labels={'Person'} 
-            properties={'id': 'I0119', 'confidence': '2.5', 'sex': '2', 'change': 1507492602, 
-            'handle': '_da692a09bac110d27fa326f0a7', 'priv': 1}>
-        '''
-        if not obj:
-            obj = cls()
-        obj.uuid = node.get('uuid')
-        obj.uniq_id = node.id
-        obj.id = node['id']
-        obj.sex = node.get('sex', 'UNKNOWN')
-        obj.change = node['change']
-        obj.confidence = node.get('confidence', '')
-        obj.sortname = node['sortname']
-        obj.priv = node['priv']
-        obj.birth_low = node['birth_low']
-        obj.birth_high = node['birth_high']
-        obj.death_low = node['death_low']
-        obj.death_high = node['death_high']
-        last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
-        obj.too_new = obj.death_high > last_year_allowed
-        if "datetype" in node:
-            obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
-        return obj
-
-
-    @staticmethod
-    def set_sortname(tx, uniq_id, namenode):
-        """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
-            using given default Name node
-        """
-        key = namenode.key_surname()
-        return tx.run(Cypher_person.set_sortname, id=uniq_id, key=key)
-        
-    @staticmethod
-    def get_confidence (uniq_id=None):
-        """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
-        """
-        if uniq_id:
-            return shareds.driver.session().run(Cypher_person.get_confidence,
-                                                id=uniq_id)
-        else:
-            return shareds.driver.session().run(Cypher_person.get_confidences_all)
-
-
-    def set_confidence (self, tx):
-        """ Sets a quality rate to this Person
-            Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
-        """
-        return tx.run(Cypher_person.set_confidence,
-                      id=self.uniq_id, confidence=self.confidence)
+#     def __str__(self):
+#         dates = self.dates if self.dates else ''
+#         return "{} {} {}".format(self.sex_str(), self.id, dates)
+# 
+#     def sex_str(self):
+#         " Returns person's sex as string"
+#         return self.convert_sex_to_str(self.sex)
+# 
+#     def sex_symbol(self):
+#         " Returns person's sex as string"
+#         symbols = {SEX_UNKOWN:'', 
+#                    SEX_MALE:'♂',
+#                    SEX_FEMALE:'♀',
+#                    SEX_NOT_APPLICABLE:'-'}
+#         return symbols.get(self.sex, '?')
+# 
+#     def child_by_sex(self):
+#         " Returns person's sex as string"
+#         ch = {SEX_UNKOWN:_('Child'), 
+#               SEX_MALE:_('Son'),
+#               SEX_FEMALE:_('Daughter'),
+#               SEX_NOT_APPLICABLE:_('Child')}
+#         return ch.get(self.sex, '?')
+# 
+#     @staticmethod
+#     def convert_sex_to_str(sex):
+#         " Returns sex code as string"
+# 
+#         sexstrings = {SEX_UNKOWN:_('sex not known'), 
+#                       SEX_MALE:_('male'),
+#                       SEX_FEMALE:_('female'),
+#                       SEX_NOT_APPLICABLE:_('sex not applicable')}
+#         return sexstrings.get(sex, '?')
+# 
+#     @staticmethod
+#     def sex_from_str(s):
+#         # Converts gender strings to ISO/IEC 5218 codes
+#         ss = s[:1].upper()
+#         if ss == 'M' or  ss == str(SEX_MALE):
+#             return SEX_MALE
+#         if ss == 'F' or ss == 'N' or ss == str(SEX_FEMALE):
+#             return SEX_FEMALE
+#         return 0
+#         
+#     @classmethod
+#     def from_node(cls, node, obj=None):
+#         '''
+#         Transforms a db node to an object of type Person.
+# 
+#         Youc can create a Person or Person_node instance. (cls is the class 
+#         where we are, either Person or Person_combo)
+# 
+#         <Node id=80307 labels={'Person'} 
+#             properties={'id': 'I0119', 'confidence': '2.5', 'sex': '2', 'change': 1507492602, 
+#             'handle': '_da692a09bac110d27fa326f0a7', 'priv': 1}>
+#         '''
+#         if not obj:
+#             obj = cls()
+#         obj.uuid = node.get('uuid')
+#         obj.uniq_id = node.id
+#         obj.id = node['id']
+#         obj.sex = node.get('sex', 'UNKNOWN')
+#         obj.change = node['change']
+#         obj.confidence = node.get('confidence', '')
+#         obj.sortname = node['sortname']
+#         obj.priv = node['priv']
+#         obj.birth_low = node['birth_low']
+#         obj.birth_high = node['birth_high']
+#         obj.death_low = node['death_low']
+#         obj.death_high = node['death_high']
+#         last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
+#         obj.too_new = obj.death_high > last_year_allowed
+#         if "datetype" in node:
+#             obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
+#         return obj
+# 
+# 
+#     @staticmethod
+#     def set_sortname(tx, uniq_id, namenode):
+#         """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
+#             using given default Name node
+#         """
+#         key = namenode.key_surname()
+#         return tx.run(Cypher_person.set_sortname, id=uniq_id, key=key)
+#         
+#     @staticmethod
+#     def get_confidence (uniq_id=None):
+#         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
+#         """
+#         if uniq_id:
+#             return shareds.driver.session().run(Cypher_person.get_confidence,
+#                                                 id=uniq_id)
+#         else:
+#             return shareds.driver.session().run(Cypher_person.get_confidences_all)
+# 
+# 
+#     def set_confidence (self, tx):
+#         """ Sets a quality rate to this Person
+#             Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
+#         """
+#         return tx.run(Cypher_person.set_confidence,
+#                       id=self.uniq_id, confidence=self.confidence)
 
 
     @staticmethod

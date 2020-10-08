@@ -15,141 +15,141 @@ from models.source_citation_reader import read_sources_repositories, get_citatio
 import traceback
 
 
-def get_person_full_data(uuid, owner, use_common=True):
-    """ Get a Person with all connected nodes for display in Person page.
-
-
-    Obtaining Person object tree
-
-    For Person data page we must have all business objects, which has connection
-    to current Person. This is done in the following steps:
-
-    1. (p:Person) --> (x:Name|Event)
-    2. (p:Person) <-- (f:Family)
-       for f
-       (f) --> (fp:Person) -[*1]-> (fpn:Name)
-       (f) --> (fe:Event)
-    3. for z in p, x, fe, z, s, r
-       (y) --> (z:Citation|Note|Media)
-    4. for pl in z:Place, ph
-       (pl) --> (pn:Place_name)
-       (pl) --> (ph:Place)
-    5. for c in z:Citation
-       (c) --> (s:Source) --> (r:Repository)
-
-    p:Person
-      +-- x:Name
-      |     +-- z:Citation (2)
-      |     +-- z:Note (3)
-      |     +-- z:Media (4)
-(1)   +-- x:Event
-      |     +-- z:Place
-      |     |     +-- pn:Place_name
-      |     |     +-- z:Place (hierarkia)
-      |     |     +-- z:Citation (2)
-      |     |     +-- z:Note (3)
-      |     |     +-- z:Media (4)
-      |     +-- z:Citation (2)
-      |     +-- z:Note (3)
-      |     +-- z:Media (4)
-      +-- f:Family
-      |     +-- fp:Person
-      |     |     +-- fpn:Name
-      |     +-- fe:Event (1)
-      |     +-- z:Citation (2)
-      |     +-- z:Note (3)
-      |     +-- z:Media (4)
-(2)   +-- z:Citation
-      |     +-- s:Source
-      |     |     +-- r:Repository
-      |     |     |     +-- z:Citation (2)
-      |     |     |     +-- z:Note (3)
-      |     |     |     +-- z:Media (4)
-      |     |     +-- z:Citation (2)
-      |     |     +-- z:Note (3)
-      |     |     +-- z:Media (4)
-      |     +-- z:Note (3)
-      |     +-- z:Media (4)
-(3)    +-- z:Note
-      |     +-- z:Citation (2)
-      |     +-- z:Media (4)
-(4)   +-- z:Media
-            +-- z:Citation (2)
-            +-- z:Note (3)
-      
-    The objects are stored in PersonReader.person object p tree.
-    - x and f: included objects (in p.names etc)
-    - others: reference to "PersonReader.objs" dictionary (p.citation_ref[] etc)
-
-    For ex. Sources may be referenced multiple times and we want to process them 
-    once only.
-
-    - The Person is identified by uuid key.
-
-    """
-
-    try:
-        reader = PersonReader(use_common)
-
-        # 1. Read Person p, if not denied
-        reader.get_person(uuid, owner)
-        print(f"#Person {reader.person}")
-
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Could not read Person {uuid}: {e}")
-        return None, None, None
-
-    if use_common and reader.person.too_new: 
-        return None, None, None
-    
-    # 2. (p:Person) --> (x:Name|Event)
-    reader.read_person_names_events()
-
-    # 3. (p:Person) <-- (f:Family)
-    #    for f
-    #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
-    #      (fp)--> (me:Event{type:Birth})
-    #      (f) --> (fe:Event)
-    reader.read_person_families()
-    if not use_common: reader.remove_privacy_limit_from_families()
-
-    #    Sort all Person and family Events by date
-    reader.person.events.sort()
-
-    # 4. for pl in z:Place, ph
-    #      (pl) --> (pn:Place_name)
-    #      (pl) --> (pi:Place)
-    #      (pi) --> (pin:Place_name)
-    reader.read_object_places()
-
-    # 5. Read their connected nodes z: Citations, Notes, Medias
-    #    for y in p, x, fe, z, s, r
-    #        (y) --> (z:Citation|Note|Media)
-    new_objs = [-1]
-    while len(new_objs) > 0:
-        new_objs = reader.read_object_citation_note_media(new_objs)
-        
-    # Calculate the average confidence of the sources
-    if len(reader.citations) > 0:
-        summa = 0
-        for cita in reader.citations.values():
-            summa += int(cita.confidence)
-            
-        aver = summa / len(reader.citations)
-        reader.person.confidence = "%0.1f" % aver # string with one decimal
-
-    # 6. Read Sources s and Repositories r for all Citations
-    #    for c in z:Citation
-    #        (c) --> (s:Source) --> (r:Repository)
-    read_sources_repositories(reader.session, reader.objs, reader.citations)
-
-    # Create Javascript code to create source/citation list
-    jscode = get_citations_js(reader.objs)
-
-    # Return Person with included objects,  and javascript code to create
-    # Citations, Sources and Repositories with their Notes
-    return (reader.person, reader.objs, jscode)
+# def get_person_full_data(uuid, owner, use_common=True): --> bl.person.PersonReader.get_person_data()
+#     """ Get a Person with all connected nodes for display in Person page.
+# 
+# 
+#     Obtaining Person object tree
+# 
+#     For Person data page we must have all business objects, which has connection
+#     to current Person. This is done in the following steps:
+# 
+#     1. (p:Person) --> (x:Name|Event)
+#     2. (p:Person) <-- (f:Family)
+#        for f
+#        (f) --> (fp:Person) -[*1]-> (fpn:Name)
+#        (f) --> (fe:Event)
+#     3. for z in p, x, fe, z, s, r
+#        (y) --> (z:Citation|Note|Media)
+#     4. for pl in z:Place, ph
+#        (pl) --> (pn:Place_name)
+#        (pl) --> (ph:Place)
+#     5. for c in z:Citation
+#        (c) --> (s:Source) --> (r:Repository)
+# 
+#     p:Person
+#       +-- x:Name
+#       |     +-- z:Citation (2)
+#       |     +-- z:Note (3)
+#       |     +-- z:Media (4)
+# (1)   +-- x:Event
+#       |     +-- z:Place
+#       |     |     +-- pn:Place_name
+#       |     |     +-- z:Place (hierarkia)
+#       |     |     +-- z:Citation (2)
+#       |     |     +-- z:Note (3)
+#       |     |     +-- z:Media (4)
+#       |     +-- z:Citation (2)
+#       |     +-- z:Note (3)
+#       |     +-- z:Media (4)
+#       +-- f:Family
+#       |     +-- fp:Person
+#       |     |     +-- fpn:Name
+#       |     +-- fe:Event (1)
+#       |     +-- z:Citation (2)
+#       |     +-- z:Note (3)
+#       |     +-- z:Media (4)
+# (2)   +-- z:Citation
+#       |     +-- s:Source
+#       |     |     +-- r:Repository
+#       |     |     |     +-- z:Citation (2)
+#       |     |     |     +-- z:Note (3)
+#       |     |     |     +-- z:Media (4)
+#       |     |     +-- z:Citation (2)
+#       |     |     +-- z:Note (3)
+#       |     |     +-- z:Media (4)
+#       |     +-- z:Note (3)
+#       |     +-- z:Media (4)
+# (3)    +-- z:Note
+#       |     +-- z:Citation (2)
+#       |     +-- z:Media (4)
+# (4)   +-- z:Media
+#             +-- z:Citation (2)
+#             +-- z:Note (3)
+#       
+#     The objects are stored in PersonReader.person object p tree.
+#     - x and f: included objects (in p.names etc)
+#     - others: reference to "PersonReader.objs" dictionary (p.citation_ref[] etc)
+# 
+#     For ex. Sources may be referenced multiple times and we want to process them 
+#     once only.
+# 
+#     - The Person is identified by uuid key.
+# 
+#     """
+# 
+#     try:
+#         reader = PersonReader(use_common)
+# 
+#         # 1. Read Person p, if not denied
+#         reader.get_person(uuid, owner)
+#         print(f"#Person {reader.person}")
+# 
+#     except Exception as e:
+#         traceback.print_exc()
+#         print(f"Could not read Person {uuid}: {e}")
+#         return None, None, None
+# 
+#     if use_common and reader.person.too_new: 
+#         return None, None, None
+#     
+#     # 2. (p:Person) --> (x:Name|Event)
+#     reader.read_person_names_events()
+# 
+#     # 3. (p:Person) <-- (f:Family)
+#     #    for f
+#     #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
+#     #      (fp)--> (me:Event{type:Birth})
+#     #      (f) --> (fe:Event)
+#     reader.read_person_families()
+#     if not use_common: reader.remove_privacy_limit_from_families()
+# 
+#     #    Sort all Person and family Events by date
+#     reader.person.events.sort()
+# 
+#     # 4. for pl in z:Place, ph
+#     #      (pl) --> (pn:Place_name)
+#     #      (pl) --> (pi:Place)
+#     #      (pi) --> (pin:Place_name)
+#     reader.read_object_places()
+# 
+#     # 5. Read their connected nodes z: Citations, Notes, Medias
+#     #    for y in p, x, fe, z, s, r
+#     #        (y) --> (z:Citation|Note|Media)
+#     new_objs = [-1]
+#     while len(new_objs) > 0:
+#         new_objs = reader.read_object_citation_note_media(new_objs)
+#         
+#     # Calculate the average confidence of the sources
+#     if len(reader.citations) > 0:
+#         summa = 0
+#         for cita in reader.citations.values():
+#             summa += int(cita.confidence)
+#             
+#         aver = summa / len(reader.citations)
+#         reader.person.confidence = "%0.1f" % aver # string with one decimal
+# 
+#     # 6. Read Sources s and Repositories r for all Citations
+#     #    for c in z:Citation
+#     #        (c) --> (s:Source) --> (r:Repository)
+#     read_sources_repositories(reader.session, reader.objs, reader.citations)
+# 
+#     # Create Javascript code to create source/citation list
+#     jscode = get_citations_js(reader.objs)
+# 
+#     # Return Person with included objects,  and javascript code to create
+#     # Citations, Sources and Repositories with their Notes
+#     return (reader.person, reader.objs, jscode)
 
 
 # def get_a_person_for_display_apoc(uid, user):

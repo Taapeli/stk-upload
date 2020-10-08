@@ -255,7 +255,7 @@ class FamilyReader(DBreader):
     def get_person_families(self, uuid:str):
         """ Get all families for given person in marriage date order.
         """
-        res = self.dbdriver.dr_get_person_families(uuid)
+        res = self.dbdriver.dr_get_person_families_uuid(uuid)
         items = res.get('items')
         if items:
             items.sort(key=lambda x: x.dates)

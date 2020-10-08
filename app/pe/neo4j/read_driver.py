@@ -13,6 +13,7 @@ from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
 from bl.family import FamilyBl
 from bl.event import EventBl
+from bl.person import PersonBl
 
 from ui.place import place_names_from_nodes
 
@@ -22,11 +23,11 @@ from .cypher_family import CypherFamily
 from .cypher_event import CypherEvent
 
 #Todo: Change Old style includes to bl classes
-from models.gen.person_combo import Person_combo
+#from models.gen.person_combo import Person_combo
 from models.gen.cypher import Cypher_person
 from models.gen.person_name import Name
 from models.gen.event import Event
-from models.gen.event_combo import Event_combo
+#from models.gen.event_combo import Event_combo
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.repository import Repository
@@ -46,16 +47,16 @@ class Neo4jReadDriver:
         Set person.birth and person.death events from db nodes
         '''
         if birth_node:
-            person.event_birth = Event_combo.from_node(birth_node)
+            person.event_birth = EventBl.from_node(birth_node)
         if death_node:
-            person.event_death = Event_combo.from_node(death_node)
+            person.event_death = EventBl.from_node(death_node)
 
 
     def _obj_from_node(self, node, role=None):
         ''' Create Person or Family object from db node.
         '''
         if 'Person' in node.labels:
-            obj = Person_combo.from_node(node)
+            obj = PersonBl.from_node(node)
         elif 'Family' in node.labels:
             obj = FamilyBl.from_node(node)
             obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
@@ -69,13 +70,255 @@ class Neo4jReadDriver:
         return obj
 
 
-    def dr_get_person_list(self, user, fw_from, limit):
-        """ Read Person data from given fw_from 
+    def dr_get_person_by_uuid(self, uuid:str, user:str):
+        ''' Read a person from common data or user's own Batch.
+
+            -   If you have selected to use common approved data, you can read
+                both your own and passed data.
+            -   If you havn't selected common data, you can read 
+                only your own data.
+
+            --> Origin from models.gen.person_combo.Person_combo.get_my_person
+        '''
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+    #             if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
+    #                 record = session.run(Cypher_person.get_by_user,
+    #                                      uuid=uuid, user=user).single()
+    #             else:       # Select person from public database
+    #                 #TODO: Rule for public database is missing, taking any
+                record = session.run(Cypher_person.get_person, uuid=uuid).single()
+                # <Record 
+                #    p=<Node id=25651 labels=frozenset({'Person'})
+                #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
+                #            'sex': 1, 'confidence': '', 'change': 1585409698, 'birth_low': 1783,
+                #            'birth_high': 1783, 'id': 'I1135', 'uuid': 'dc6a05ca6b2249bfbdd9708c2ee6ef2b',
+                #            'death_low': 1865}>
+                #    root_type='PASSED'
+                #    root=<Node id=31100 labels=frozenset({'Audit'})
+                #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
+                #            'timestamp': 1596463360673}>
+                # >
+                if record is None:
+                    print(f'dr_get_person_by_uuid: person={uuid} not found')
+                    return {'item': None, 'status': Status.NOT_FOUND,
+                                'statustext': 'The person does not exist'}
+    
+                # Store original researcher data to p.root:
+                # - root_type    which kind of owner link points to this object
+                # - nodeuser     the (original) owner of this object
+                # - bid          Batch id, if any
+                root_type = record['root_type']
+                node = record['root']
+                nodeuser = node.get('user', "")
+                bid = node.get('id', "")
+                if user is None:
+                    # Select person from public database
+                    if root_type != "PASSED":
+                        print(f'dr_get_person_by_uuid: PASSED not allowed for person {uuid}')
+                        return {'item': None, 'status': Status.NOT_FOUND,
+                                'statustext': 'The person is not accessible'}
+                else:
+                    # Select the person only if owned by user
+                    if root_type != "OWNS":
+                        print(f'dr_get_person_by_uuid: OWNS not allowed for person {uuid}')
+                        return {'item': None, 'status': Status.NOT_FOUND,
+                                'statustext': 'The person is not accessible'}
+    
+                node = record['p']
+                p = PersonBl.from_node(node)
+                return {'item': p, 
+                        'root': {'root_type':root_type, 'usernode': nodeuser, 'id':bid}, 
+                        'status': Status.OK}
+    
+            except Exception as e:
+                msg = f'person={uuid} {e.__class__.name} {e}'
+                print(f'dr_get_person_by_uuid: {msg}')
+                return {'item': None, 'status': Status.ERROR,
+                        'statustext': msg}
+
+    def dr_get_person_names_events(self, puid:int):
+        ''' Read names and events to Person object self.person.
+        '''
+        names = []
+        events =[]
+        cause_of_death = None
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                results = session.run(Cypher_person.get_names_events, uid=puid)
+                for record in results:
+                    # <Record
+                    #    rel=<Relationship id=453912
+                    #        nodes=(
+                    #            <Node id=261207 labels=set() properties={}>,
+                    #            <Node id=261208 labels={'Name'}
+                    #                properties={'firstname': 'Vilhelm Edvard', 'type': 'Also Known As',
+                    #                    'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>)
+                    #        type='NAME' properties={}>
+                    #    x=<Node id=261208 labels={'Name'}
+                    #        properties={'firstname': 'Vilhelm Edvard', 'type': 'Also Known As',
+                    #            'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>>
+                    relation = record['rel']
+                    rel_type = relation.type
+                    role = relation.get('role', '')
+                    node = record['x']
+                    label = list(record['x'].labels)[0]
+                    #print(f"# -[:{rel_type} {relation._properties}]-> (x:{label})")
+                    if label == 'Name':
+                        x = Name.from_node(node)
+                        names.append(x)
+                        self.objs[x.uniq_id] = x
+                    elif label == 'Event':
+                        x = EventBl.from_node(node)
+                        x.role = role
+                        events.append(x)
+                        self.objs[x.uniq_id] = x 
+                        if x.type == "Cause Of Death":
+                            cause_of_death = x
+                    print(f"# ({puid}) -[:{rel_type} {role}]-> ({x.uniq_id}:{label} '{x}')")
+    
+                return {'names':names,
+                        'events':events,
+                        'cause_of_death':cause_of_death,
+                        'status':Status.OK}
+            except Exception as e:
+                msg = f'person={puid} {e.__class__.name} {e}'
+                print(f'dr_get_person_names_events: {msg}')
+                return {'item': None, 'status': Status.ERROR,
+                        'statustext': f"Could not read names and events: {msg}"}
+
+
+    def dr_get_person_families(self, puid:int):
+        ''' Read the families, where given Person is a member.
+
+            Also return the Family members with their birth event
+            and add family events to this person's events.
+
+            (p:Person) <-- (f:Family)
+               for f
+                 (f) --> (fp:Person) -[*1]-> (fpn:Name)
+                 (f) --> (fe:Event)
+        '''
+        family_as_child = []
+        family_as_parent = []
+        person_events = []
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                results = session.run(Cypher_person.get_families, uid=puid)
+                for record in results:
+                    # <Record
+                    #  rel=<Relationship id=671269
+                    #     nodes=(
+                    #        <Node id=432641 labels={'Family'} 
+                    #            properties={'datetype': 3, 'father_sortname': 'Järnefelt##August Aleksander', 
+                    #                'change': 1542401728, 'rel_type': 'Married', 'mother_sortname': 'Clodt von Jürgensburg##Elisabeth', 
+                    #                'date2': 1941614, 'id': 'F0015', 'date1': 1901974, 'uuid': '90282a3cf6ee47a1b8f9a4a2c710c736'}>, 
+                    #        <Node id=427799 labels={'Person'} 
+                    #            properties={'sortname': 'Järnefelt##Aino', 'datetype': 19, 'confidence': '2.0', 
+                    #                'sex': 2, 'change': 1566323471, 'id': 'I0035', 'date2': 2016423, 'date1': 1916169, 
+                    #                'uuid': '925ea92d7dab4e8c92b53c1dcbdad36f'}>) 
+                    #    type='CHILD' 
+                    #    properties={}> 
+                    #  family=<Node id=432641 labels={'Family'} properties={...}> 
+                    #  events=[<Node id=269554 labels={'Event'} properties={'type': 'Marriage', ...}> ...]
+                    #  members=[[
+                    #    <Relationship ...  type='CHILD' ...>, 
+                    #    <Node ... labels={'Person'}...>, 
+                    #    <Node ... labels={'Name'}...>, 
+                    #    <Node ... labels={'Event'}...]
+                    #    ...]>
+    
+                    # 1. What is the relation this Person to their Family
+    
+                    relation = record['rel']
+                    rel_type = relation.type
+                    role = relation.get('role', "")
+    
+                    # 2. The Family node
+    
+                    node = record['family']
+                    family = FamilyBl.from_node(node)
+                    family.role = rel_type
+                    family.marriage_dates = ""  # string "" or a DataRange
+                    if rel_type == "CHILD":
+                        family_as_child.append(family)
+                    elif rel_type == "PARENT":
+                        family_as_parent.append(family)
+                    print(f"# ({puid}) -[:{rel_type} {role}]-> (:Family '{family}')")
+    
+                    # 3. Family Events
+    
+                    for event_node in record['events']:
+                        f_event = EventBl.from_node(event_node)
+                        #print(f"#\tevent {f_event}")
+                        if f_event.type == "Marriage":
+                            family.marriage_dates = f_event.dates
+                        # Add family events to person events, too
+                        if rel_type == "PARENT":
+                            f_event.role = "Family"
+                            print(f"# ({puid}) -[:EVENT {f_event.role}]-> (:Event '{f_event}')")
+                            person_events.append(f_event)
+                            # Add Event to list of those events, who's Citation etc
+                            # references must be checked
+                            if not f_event.uniq_id in self.objs.keys():
+                                self.objs[f_event.uniq_id] = f_event
+    
+                    # 4. Family members and their birth events
+    
+                    for relation, member_node, name_node, event_node in record['members']:
+                        # relation = <Relationship
+                        #    id=671263 
+                        #    nodes=(
+                        #        <Node id=432641 labels={'Family'} properties={'rel_type': 'Married', ...}>, 
+                        #        <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ...}>)
+                        #    type='CHILD' 
+                        #    properties={}>
+                        # member_node = <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ... }>
+                        # name_node = <Node id=428884 labels={'Name'} properties={'firstname': 'Caspar Woldemar' ...}>
+                        # event_node = <Node id=267935 labels={'Event'} properties={'type': 'Birth', ... }>
+                        role = relation['role']
+                        member = PersonBl.from_node(member_node)
+                        if name_node:
+                            name = Name.from_node(name_node)
+                            member.names.append(name)
+                        else:
+                            name = None
+                        if event_node:
+                            event = EventBl.from_node(event_node)
+                            member.birth_date = event.dates
+                        else:
+                            event = None
+                        if role == "father":
+                            family.father = member
+                        elif role == "mother":
+                            family.mother = member
+                        else:
+                            family.children.append(member)
+    
+                return {'family_as_child':family_as_child,
+                        'family_as_parent': family_as_parent,
+                        'person_events': person_events,
+                        'status': Status.OK}
+
+            except Exception as e:
+                msg = f'person={puid} {e}' #{e.__class__.name} {e}'
+                print(f'dr_get_person_families: {msg}')
+                return {'item': None, 'status': Status.ERROR,
+                        'statustext': f"Could not read families: {msg}"}
+
+
+    def dr_get_person_list(self, args):
+        """ Read Person data from given fw_from .
+        
+            args = {'use_user', 'fw', 'limit'}
         """
         persons = []
         # Select a) filter by user or b) show Isotammi common data (too)
         with self.driver.session(default_access_mode='READ') as session:
             try:
+                user = args.get('use_user')
+                fw_from = args.get('fw','')
+                limit = args.get('limit', 100)
                 if user is None: 
                     #3 == #1 read approved common data
                     print("_read_person_list: approved common only")
@@ -89,36 +332,37 @@ class Neo4jReadDriver:
                 # Returns person, names, events
 
             except Exception as e:
-                print('Error pe.neo4j.read_driver.Neo4jReadDriver.dr_get_person_list: {} {}'.format(e.__class__.__name__, e))            
-                raise
+                return {'items':[], 'status':Status.ERROR,
+                        'statustext': f'dr_get_person_list: {e.__class__.__name__} {e}'}
+#                       _('dr_get_person_list: %(err)s %(msg)s', e.__class__.__name__, e)}
 
             for record in result:
-                ''' <Record 
-                        person=<Node id=163281 labels={'Person'} 
-                          properties={'sortname': 'Ahonius##Knut Hjalmar',  
-                            'sex': '1', 'confidence': '', 'change': 1540719036, 
-                            'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
-                            'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
-                        names=[<Node id=163282 labels={'Name'} 
-                          properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
-                            'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
-                        events=[[
-                            <Node id=169494 labels={'Event'} 
-                                properties={'datetype': 0, 'change': 1540587380, 
-                                'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
-                                'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
-                             None
-                             ]] 
-                        owners=['jpek']>
-                '''
+                #  <Record 
+                #     person=<Node id=163281 labels={'Person'} 
+                #       properties={'sortname': 'Ahonius##Knut Hjalmar',  
+                #         'sex': '1', 'confidence': '', 'change': 1540719036, 
+                #         'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
+                #         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
+                #     names=[<Node id=163282 labels={'Name'} 
+                #       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
+                #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
+                #     events=[[
+                #         <Node id=169494 labels={'Event'} 
+                #             properties={'datetype': 0, 'change': 1540587380, 
+                #             'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
+                #             'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
+                #          None
+                #          ]] 
+                #     owners=['jpek']>
                 node = record['person']
                 # The same person is not created again
-                p = Person_combo.from_node(node)
+                p = PersonBl.from_node(node)
                 #if show_with_common and p.too_new: continue
     
     #             if take_refnames and record['refnames']:
     #                 refnlist = sorted(record['refnames'])
     #                 p.refnames = ", ".join(refnlist)
+                p.names = []
                 for nnode in record['names']:
                     pname = Name.from_node(nnode)
                     p.names.append(pname)
@@ -130,15 +374,18 @@ class Neo4jReadDriver:
                 # Events
                 for enode, pname, role in record['events']:
                     if enode != None:
-                        e = Event_combo.from_node(enode)
+                        e = EventBl.from_node(enode)
                         e.place = pname or ""
                         if role and role != "Primary":
                             e.role = role
                         p.events.append(e)
     
                 persons.append(p)   
+        if len(persons) == 0:
+            return {'items': persons, 'status': Status.NOT_FOUND,
+                    'statustext': _('No persons found after name %(name)s', name=fw_from)}
+        return {'items': persons, 'status': Status.OK}
 
-        return persons
 
     def dr_get_event_by_uuid(self, user:str, uuid:str):
         '''
@@ -207,7 +454,7 @@ class Neo4jReadDriver:
                     # Create Person or Family
                     referee = self._obj_from_node(node, role)
                     cls_name = referee.__class__.__name__
-                    if cls_name == "Person_combo":
+                    if cls_name == "PersonBl":
                         referee.label = "Person"
                     elif cls_name == "FamilyBl":
                         referee.label = "Family"
@@ -354,7 +601,7 @@ class Neo4jReadDriver:
                     if person_node:
                         if uniq_id != person_node.id:
                             # Skip person with double default name
-                            p = Person_combo.from_node(person_node)
+                            p = PersonBl.from_node(person_node)
                             p.role = role
                             name_node = record['name']
                             if name_node:
@@ -396,7 +643,7 @@ class Neo4jReadDriver:
                     # >
                     person_node = record['person']
                     if person_node:
-                        p = Person_combo.from_node(person_node)
+                        p = PersonBl.from_node(person_node)
                         name_node = record['name']
                         if name_node:
                             p.names.append(Name.from_node(name_node))
@@ -433,7 +680,7 @@ class Neo4jReadDriver:
                         #        properties={'datetype': 0, 'change': 1585409702, 'description': '', 
                         #            'id': 'E0170', 'date2': 1860684, 'type': 'Marriage', 'date1': 1860684, 
                         #            'uuid': '38c0d5bdc0f245c88bfb1083228db219'}>
-                        e = Event_combo.from_node(event_node)
+                        e = EventBl.from_node(event_node)
 
                         place_node = record['place']
                         if place_node:
@@ -569,7 +816,7 @@ class Neo4jReadDriver:
         return {"items":notes, "status":Status.OK}
 
 
-    def dr_get_person_families(self, uuid):
+    def dr_get_person_families_uuid(self, uuid):
         """
             Get the Families where Person is a member (parent or child).
 
@@ -608,10 +855,10 @@ class Neo4jReadDriver:
                         families[fid] = family
                     family = families[fid]
                     person_node = record['person']
-                    person = Person_combo.from_node(person_node)
+                    person = PersonBl.from_node(person_node)
                     birth_node = record['birth']
                     if birth_node:
-                        birth = Event_combo.from_node(birth_node)
+                        birth = EventBl.from_node(birth_node)
                         person.event_birth = birth
                     if record['type'] == 'PARENT':
                         person.role = record['role']
@@ -855,15 +1102,15 @@ class Neo4jReadDriver:
             #                'id': 'E0080', 'date2': 1885458, 'type': 'Birth', 'date1': 1885458, 
             #                'uuid': '160a0c75659145a4ac09809823fca5f9'}>
             # >
-            e = Event_combo.from_node(record['event'])
-            # Fields uid (person uniq_id) and names are on standard in Event_combo
+            e = EventBl.from_node(record['event'])
+            # Fields uid (person uniq_id) and names are on standard in EventBl
             e.role = record["role"]
             indi_label = list(record['indi'].labels)[0]
             if indi_label in ['Audit', 'Batch']:
                 continue
             if 'Person' == indi_label:
                 e.indi_label = 'Person'
-                e.indi = Person_combo.from_node(record['indi'])
+                e.indi = PersonBl.from_node(record['indi'])
                 if e.indi.too_new:    # Check privacy
                     continue
                 for node in record["names"]:
