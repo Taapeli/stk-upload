@@ -69,7 +69,7 @@ class Person(NodeObject):
         self.sex = SEX_UNKOWN
         self.confidence = ''
         self.sortname = ''
-        #self.dates = None    # Daterange: Estimated datetype, date1, date2
+        self.dates = None    # Daterange: Estimated datetype, date1, date2
 
         self.birth_low = None
         self.death_low = None
@@ -126,7 +126,7 @@ class Person(NodeObject):
         Transforms a db node to an object of type Person.
 
         Youc can create a Person or Person_node instance. (cls is the class 
-        where we are, either Person or Person_combo)
+        where we are, either Person or PersonBl)
 
         <Node id=80307 labels={'Person'} 
             properties={'id': 'I0119', 'confidence': '2.5', 'sex': '2', 'change': 1507492602, 
@@ -357,11 +357,11 @@ class PersonReader(DBreader):
         #      (f) --> (fe:Event)
         #person.read_person_families()
         result = self.dbdriver.dr_get_person_families(person.uniq_id)
-        # result {'family_as_child', 'family_as_parent', 'person_events', 'status'}
+        # result {'families_as_child', 'families_as_parent', 'family_events', 'status'}
         if  status == Status.OK:
-            person.family_as_child = result.get('family_as_child')
-            person.family_as_parent = result.get('family_as_parent')
-            person.person_events = result.get('person_events')
+            person.families_as_child = result.get('families_as_child')
+            person.families_as_parent = result.get('families_as_parent')
+            person.events = person.events + result.get('family_events')
         else:
             print(f'get_person_data: No families for person {uuid}')
 
@@ -417,10 +417,11 @@ class PersonBl(Person):
         '''
         Constructor creates a new PersonBl intance.
         '''
+        Person.__init__(self)
         self.user = None                # Researcher batch owner, if any
         self.names = []                 # models.gen.person_name.Name
 
-        self.events = []                # models.gen.event_combo.Event_combo
+        self.events = []                # bl.event.EventBl
         #self.event_ref = []             # Event uniq_ids # Gramps event handles (?)
         #self.eventref_role = []         # ... and roles
         #self.event_birth = None         # For birth ans death events

@@ -199,9 +199,9 @@ class Neo4jReadDriver:
                  (f) --> (fp:Person) -[*1]-> (fpn:Name)
                  (f) --> (fe:Event)
         '''
-        family_as_child = []
-        family_as_parent = []
-        person_events = []
+        families_as_child = []
+        families_as_parent = []
+        family_events = []
         with self.driver.session(default_access_mode='READ') as session:
             try:
                 results = session.run(Cypher_person.get_families, uid=puid)
@@ -241,9 +241,9 @@ class Neo4jReadDriver:
                     family.role = rel_type
                     family.marriage_dates = ""  # string "" or a DataRange
                     if rel_type == "CHILD":
-                        family_as_child.append(family)
+                        families_as_child.append(family)
                     elif rel_type == "PARENT":
-                        family_as_parent.append(family)
+                        families_as_parent.append(family)
                     print(f"# ({puid}) -[:{rel_type} {role}]-> (:Family '{family}')")
     
                     # 3. Family Events
@@ -257,7 +257,7 @@ class Neo4jReadDriver:
                         if rel_type == "PARENT":
                             f_event.role = "Family"
                             print(f"# ({puid}) -[:EVENT {f_event.role}]-> (:Event '{f_event}')")
-                            person_events.append(f_event)
+                            family_events.append(f_event)
                             # Add Event to list of those events, who's Citation etc
                             # references must be checked
                             if not f_event.uniq_id in self.objs.keys():
@@ -295,9 +295,9 @@ class Neo4jReadDriver:
                         else:
                             family.children.append(member)
     
-                return {'family_as_child':family_as_child,
-                        'family_as_parent': family_as_parent,
-                        'person_events': person_events,
+                return {'families_as_child':families_as_child,
+                        'families_as_parent': families_as_parent,
+                        'family_events': family_events,
                         'status': Status.OK}
 
             except Exception as e:
