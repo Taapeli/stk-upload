@@ -46,8 +46,9 @@ td { padding-right:1em;}
                 {% if p %}
                 <tr><td class="ColumnAttribute">{{p.role|transl('role')|capitalize}}</td>
                     <td class="Value">{{ macro.person_anon(p, uuid) }}</td>
-                    <td class="Value">{% if p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
-                                      {% if p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
+                    <td class="Value">
+                   {% if p.event_birth and p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
+                   {% if p.event_death and p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
                     </td>
                 </tr>
                 {% endif %}
@@ -104,8 +105,9 @@ td { padding-right:1em;}
 	        {% for p in family.children %}
 	                <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
 	                    <td class="Value">{{ macro.person(p, uuid) }}</td>
-	                    <td class="Value">{% if p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
-	                                      {% if p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
+	                    <td class="Value">
+               {% if p.event_birth and p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
+	           {% if p.event_death and p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
 	                    </td>
 	                </tr>
 	        {% endfor %}

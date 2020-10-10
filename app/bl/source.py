@@ -145,10 +145,12 @@ class SourceReader(DBreader):
             - item.citations    Citating Persons, Events, Families and Medias
                                 as [label, object] tuples(?)
         """
-        source = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
-        results = {'item':source, 'status':Status.OK}
+        results = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
+        if results.get('status') != Status.OK:
+            return results
+        source = results.get('item')
         if not source:
-            results.error = f"DBreader.get_source_with_references: {self.use_user} - no Source with uuid={uuid}"
+            results.statustext = f"no Source with uuid={uuid}"
             return results
         
         citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)

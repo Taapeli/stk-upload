@@ -669,11 +669,10 @@ class Neo4jReadDriver:
         events = []
         with self.driver.session(default_access_mode='READ') as session:
             try:
-                result = session.run(CypherFamily.get_events_w_places, 
-                                     fuid=uniq_id)
+                result = session.run(CypherFamily.get_events_w_places, fuid=uniq_id)
+                # RETURN event, place, names,
+                #        COLLECT(DISTINCT [place_in, rel_in, COLLECT in_names]) AS inside
                 for record in result:
-                    # <Record 
-                    # >
                     event_node = record['event']
                     if event_node:
                         #    event=<Node id=543995 labels={'Event'}
@@ -693,31 +692,34 @@ class Neo4jReadDriver:
                             e.place = PlaceBl.from_node(place_node)
                             e.place.names = place_names_from_nodes(record['names'])
                             
-                        inside_node = record['inside']
-                        if inside_node:
-                            #    inside=<Node id=529916 labels={'Place'} 
-                            #        properties={'id': 'P1874', 'type': 'Organisaatio', 'uuid': '7100e387dd7f4130a5804eb338162703', 
-                            #            'pname': 'Suomen ev.lut. kirkko', 'change': 1585490980}> 
-                            #    in_rel=<Relationship id=454774 nodes=(
-                            #        <Node id=531912 labels={'Place'} 
-                            #            properties={'id': 'P1077', 'type': 'Parish', 'uuid': '55c069c9cee54092a88366a15b75d1a4', 
-                            #                'pname': 'Loviisan srk', 'change': 1585562874}>, 
-                            #        <Node id=529916 labels={'Place'}
-                            #            properties={'id': 'P1874', 'type': 'Organisaatio', 'uuid': '7100e387dd7f4130a5804eb338162703',
-                            #                'pname': 'Suomen ev.lut. kirkko', 'change': 1585490980}>
-                            #        )
-                            #        type='IS_INSIDE'
-                            #        properties={}
-                            #    in_names=[   <Node id=533693 labels={'Place_name'} properties={...}>,
-                            #            <Node id=533694 labels={'Place_name'} properties={'name': 'Evangelisk-lutherska kyrkan i Finland', 'lang': 'sv'}>,
-                            #        ]
-                            pl_in = PlaceBl.from_node(inside_node)
-                            inside_rel = record['in_rel']
-                            if len(inside_rel._properties):
-                                pl_in.dates = DateRange.from_node(inside_rel._properties)
-
-                            pl_in.names = place_names_from_nodes(record['in_names'])
-                            e.place.uppers.append(pl_in)
+                        for inside_node, inside_rel, inside_names in record['inside']:
+                            if inside_node:
+                                # <Node id=5494 labels=frozenset({'Place'})
+                                #     properties={'id': 'P0024', 'type': 'Country', 'uuid': '199338cdcd754760acfe3d2165c2805c', 
+                                #         'pname': 'Venäjä', 'change': 1585409705}>
+                                # <Relationship id=6192
+                                #     nodes=(
+                                #         <Node id=5788 labels=frozenset({'Place'})
+                                #             properties={'coord': [60.70911111111111, 28.745330555555558],
+                                #                 'pname': 'Viipuri', 'change': 1585409704, 'id': 'P0011',
+                                #                 'type': 'City', 'uuid': '4bea93a25e7841cfb2160f00dccbfcf5'}>,
+                                #         <Node id=5494 labels=frozenset({'Place'})
+                                #             properties={'id': 'P0024', 'type': 'Country', 'uuid': '199338cdcd754760acfe3d2165c2805c',
+                                #                 'pname': 'Venäjä', 'change': 1585409705}>
+                                #     )
+                                #     type='IS_INSIDE'
+                                #     properties={'datetype': 2, 'date2': 2040000, 'date1': 2040000}
+                                # >
+                                # [
+                                #     <Node id=5496 labels=frozenset({'Place_name'}) properties={'name': 'Ryssland', 'lang': 'sv'}>
+                                #     <Node id=5495 labels=frozenset({'Place_name'}) properties={'name': 'Venäjä', 'lang': ''}>
+                                # ]
+                                pl_in = PlaceBl.from_node(inside_node)
+                                if len(inside_rel._properties):
+                                    pl_in.dates = DateRange.from_node(inside_rel._properties)
+    
+                                pl_in.names = place_names_from_nodes(inside_names)
+                                e.place.uppers.append(pl_in)
 
                         events.append(e)
 
@@ -1261,7 +1263,10 @@ class Neo4jReadDriver:
                         rep.medium = medium
                         source.repositories.append(rep)
 
-            return source
+            if source:
+                return {'item': source, 'status':Status.OK}
+            return {'status':Status.NOT_FOUND,
+                    'statustext': f"source uuid={uuid} not found"}
 
 
 

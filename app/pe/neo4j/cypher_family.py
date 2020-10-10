@@ -47,9 +47,10 @@ OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
 OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
 OPTIONAL MATCH (pi) -[NAME]-> (pin:Place_name)
-RETURN e as event, 
-    pl AS place, COLLECT(DISTINCT pn) AS names,
-    pi AS inside, ri AS in_rel, COLLECT(DISTINCT pin) AS in_names"""
+WITH e AS event, pl AS place, COLLECT(DISTINCT pn) AS names,
+    pi, ri, COLLECT(DISTINCT pin) AS in_names
+RETURN event, place, names,
+    COLLECT(DISTINCT [pi, ri, in_names]) AS inside"""
 
     get_family_sources = """
 MATCH (f) -[:CITATION]-> (c:Citation)  WHERE ID(f) in $id_list

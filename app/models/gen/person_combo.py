@@ -48,6 +48,10 @@ from sys import stderr
 
 import shareds
 from .dates import DateRange
+
+from bl.person import PersonBl
+from bl.event import EventBl
+
 from .person import Person
 from .person_name import Name
 
@@ -858,7 +862,7 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
                 node = record['person']
                 if node.id != p_uniq_id:
                     # The same person is not created again
-                    p = Person_combo.from_node(node)
+                    p = PersonBl.from_node(node)
                     p_uniq_id = p.uniq_id
                     if args.get('take_refnames',False) and record['refnames']:
                         refnlist = sorted(record['refnames'])
@@ -882,7 +886,7 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
                     # place = None
         
                     if event:
-                        e = Event_combo.from_node(event)
+                        e = EventBl.from_node(event)
                         e.place = place or ""
                         e.role = role or ""
                 p.events.append(e)

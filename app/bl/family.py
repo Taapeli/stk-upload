@@ -168,33 +168,24 @@ class FamilyReader(DBreader):
         # all - all data
         select_all = 'all' in wanted
         if not wanted:  select_all = True
-        # pare - Parents (mother, father)
-        select_parents  = select_all or 'pare' in wanted
-        # chil - Children
-        select_children = select_all or 'chil' in wanted
-        # name - Person names (for parents, children)
-        select_names    = select_all or 'name' in wanted
-        # even - Events
-        select_events   = select_all or 'even' in wanted
-        # plac - Places (for events)
-        select_places   = select_all or 'plac' in wanted
-        # note - Notes
-        select_notes    = select_all or 'note' in wanted
-        # sour - Sources (Citations, Sources, Repositories)
-        select_sources  = select_all or 'sour' in wanted
-        ## medi - Media
-        #select_media  = select_all or 'medi' in wanted
+        select_parents  = select_all or 'pare' in wanted    # Parents (mother, father)
+        select_children = select_all or 'chil' in wanted    # Children
+        select_names    = select_all or 'name' in wanted    # Person names (for parents, children)
+        select_events   = select_all or 'even' in wanted    # Events
+        select_places   = select_all or 'plac' in wanted    # Places (for events)
+        select_notes    = select_all or 'note' in wanted    # Notes
+        select_sources  = select_all or 'sour' in wanted    # Sources (Citations, Sources, Repositories)
+        #select_media  = select_all or 'medi' in wanted     # Media
         """
             1. Get Family node by user/common
                res is dict {item, status, statustext}
         """
-        res = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
-        family = res.get('item')
-        results = {'item': family, 
-                   'status': res.get('status'),
-                   'statustext':res.get('statustext')}
-        if not family:
+        results = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
+        # results {'item': <bl.family.FamilyBl>, 'status': Status}
+        if results.get('status') != Status.OK:
             return results
+
+        family = results.get('item')
         # The Nodes for search of Sources and Notes (Family and Events)
         src_list = [family.uniq_id]
         """
@@ -217,6 +208,7 @@ class FamilyReader(DBreader):
             res = self.dbdriver.dr_get_family_children(family.uniq_id,
                                                        with_events=select_events,
                                                        with_names=select_names)
+            # res {'items': [<bl.person.PersonBl>], 'status': Status}
             family.num_hidden_children = 0
             for p in res.get('items'):
                 # For User's own data, no hiding for too new persons

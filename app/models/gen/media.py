@@ -10,6 +10,7 @@ from bl.base import NodeObject
 from bl.event import EventBl
 from bl.place import PlaceBl
 from bl.family import FamilyBl
+from bl.person import PersonBl
 
 from .cypher import Cypher_media
 from .person import Person
@@ -199,7 +200,7 @@ class Media(NodeObject):
                 mref = MediaReferee()
                 mref.label, = node.labels   # Get the 1st label
                 if mref.label == 'Person':
-                    mref.obj = Person.from_node(node)
+                    mref.obj = PersonBl.from_node(node)
                     mref.obj.label = "Person"
                 elif mref.label == 'Place':
                     mref.obj = PlaceBl.from_node(node)
