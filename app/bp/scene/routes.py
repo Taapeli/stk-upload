@@ -80,6 +80,8 @@ def obsolete_scene():
 # ------------------------- Menu 1: Person search ------------------------------
 
 @bp.route('/scene/persons', methods=['POST', 'GET'])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_person_list(selection=None):
     """ Show list of selected Persons for menu(0). """
     t0 = time.time()
@@ -143,6 +145,7 @@ def show_person_list(selection=None):
 @bp.route('/scene/persons/ref=<string:refname>')
 @bp.route('/scene/persons/ref=<string:refname>/<opt>')
 @login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_persons_by_refname(refname, opt=""):
     """ List persons by refname for menu(0). Called from /list/refnames
     """
@@ -162,7 +165,8 @@ def show_persons_by_refname(refname, opt=""):
 
 @bp.route('/scene/persons/all/<string:opt>')
 @bp.route('/scene/persons/all/')
-#     @login_required
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_all_persons_list(opt=''):
     """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
 
@@ -266,7 +270,7 @@ def obsolete_show_person_v2(uid=None):
 
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
-@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin', 'guest')
+@roles_accepted('guest','research', 'audit', 'admin')
 def show_person(uid=None):
     """ One Person with all connected nodes - NEW version 3.
 
@@ -301,6 +305,8 @@ def show_person(uid=None):
 
 #@bp.route('/scene/event/<int:uniq_id>')
 @bp.route('/older/event/uuid=<string:uuid>')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_event_v1(uuid):
     """ Event page with accompanied persons and families.
 
@@ -323,12 +329,16 @@ def show_event_v1(uuid):
                            event=event, participants=members)
 
 @bp.route('/scene/event/uuid=<string:uuid>')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_event_vue(uuid):
     """ Show Event page template which marchals data by Vue. """
     u_context = UserContext(user_session, current_user, request)
     return render_template("/scene/event_vue.html", uuid=uuid, user_context=u_context)
 
 @bp.route('/scene/json/event', methods=['POST','GET'])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def json_get_event():
     """ Get Event page data.
     """
@@ -418,6 +428,8 @@ def json_get_event():
 # ------------------------------ Menu 3: Families --------------------------------
 
 @bp.route('/scene/families')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_families():
     """ List of Families for menu(3)
     """
@@ -446,6 +458,8 @@ def show_families():
 #     """
 
 @bp.route('/scene/family', methods=['GET'])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_family_page(uid=None):
     """ One Family.
     """
@@ -472,6 +486,8 @@ def show_family_page(uid=None):
 
 
 @bp.route('/scene/json/families', methods=['POST','GET'])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def json_get_person_families():
     """ Get all families for a Person as json structure.
 
@@ -526,6 +542,8 @@ def json_get_person_families():
 # ------------------------------ Menu 4: Places --------------------------------
 
 @bp.route('/scene/locations')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_places():
     """ List of Places for menu(4)
     """
@@ -553,6 +571,8 @@ def show_places():
 
 
 @bp.route('/scene/location/uuid=<locid>')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_place(locid):
     """ Home page for a Place, shows events and place hierarchy.
     """
@@ -584,6 +604,8 @@ def show_place(locid):
 
 @bp.route('/scene/sources')
 @bp.route('/scene/sources/<series>')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_sources(series=None):
     """ Lähdeluettelon näyttäminen ruudulla for menu(5)
     
@@ -623,6 +645,8 @@ def show_sources(series=None):
 
 @bp.route('/scene/source', methods=['GET'])
 #@bp.route('/scene/source=<string:sourceid>')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_source_page(sourceid=None):
     """ Home page for a Source with referring Event and Person data
     """
@@ -656,6 +680,8 @@ def show_source_page(sourceid=None):
 # ------------------------------ Menu 6: Media --------------------------------
 
 @bp.route('/scene/medias')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_medias():
     """ List of Medias for menu(5)
     """
@@ -676,6 +702,8 @@ def show_medias():
                            user_context=u_context, elapsed=time.time()-t0)
 
 @bp.route('/scene/media', methods=['GET'])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_media(uid=None):
     """ 
         One Media
@@ -702,6 +730,8 @@ def show_media(uid=None):
 # ----------- Access media file ---------------
 
 @bp.route('/scene/media/<fname>')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def fetch_media(fname):
     """ Fetch media file to display full screen.
     
@@ -737,6 +767,8 @@ def fetch_media(fname):
         return ret
 
 @bp.route('/scene/thumbnail')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def fetch_thumbnail():
     """ Fetch thumbnail file to display
     """
