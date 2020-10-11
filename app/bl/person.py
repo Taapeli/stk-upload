@@ -338,7 +338,7 @@ class PersonReader(DBreader):
             # Not found, not allowd (person.too_new) or error
             return result
         person = result.get('item')
-        root = result.get('root')
+        root = result.get('root')   # Batch or Audit data
 
         # 2. (p:Person) --> (x:Name|Event)
         #person.read_person_names_events()
@@ -372,12 +372,13 @@ class PersonReader(DBreader):
         person.events.sort()
 
 #TODO:
-#         # 4. for pl in z:Place, ph
-#         #      (pl) --> (pn:Place_name)
-#         #      (pl) --> (pi:Place)
-#         #      (pi) --> (pin:Place_name)
-#         self.read_object_places()
-#     
+        # 4. for pl in z:Place, ph
+        #      (pl) --> (pn:Place_name)
+        #      (pl) --> (pi:Place)
+        #      (pi) --> (pin:Place_name)
+        # calls pe.neo4j.read_driver.Neo4jReadDriver.dr_get_object_places()
+        self.dbdriver.dr_get_object_places(person)
+     
 #         # 5. Read their connected nodes z: Citations, Notes, Medias
 #         #    for y in p, x, fe, z, s, r
 #         #        (y) --> (z:Citation|Note|Media)

@@ -891,6 +891,85 @@ class Neo4jReadDriver:
 
         return {"items":list(families.values()), "status":Status.OK}
 
+    def dr_get_object_places(self, person):
+        ''' Read Place hierarchies for all objects in self.objs.
+        '''
+        uids = list(self.objs.keys())
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                results = session.run(Cypher_person.get_places, uid_list=uids)
+                for record in results:
+                    # <Record
+                    #    label='Event'
+                    #    uniq_id=426916 
+                    #    pl=<Node id=306042 labels={'Place'}
+                    #        properties={'id': 'P0456', 'type': 'Parish', 'uuid': '7aeb4e26754d46d0aacfd80910fa1bb1',
+                    #            'pname': 'Helsingin seurakunnat', 'change': 1543867969}> 
+                    #    pnames=[
+                    #        <Node id=306043 labels={'Place_name'}
+                    #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>, 
+                    #        <Node id=306043 labels={'Place_name'} 
+                    #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>
+                    #    ]
+                    ##    ri=<Relationship id=631695 
+                    ##        nodes=(
+                    ##            <Node id=306042 labels={'Place'} properties={'id': 'P0456', ...>, 
+                    ##            <Node id=307637 labels={'Place'} 
+                    ##                properties={'coord': [60.16664166666666, 24.94353611111111], 
+                    ##                    'id': 'P0366', 'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 
+                    ##                    'pname': 'Helsinki', 'change': 1556954884}>
+                    ##        )
+                    ##        type='IS_INSIDE' properties={}> 
+                    #    pi=<Node id=307637 labels={'Place'} 
+                    #        properties={'coord': [60.16664166666666, 24.94353611111111], 'id': 'P0366', 
+                    #            'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 'pname': 'Helsinki', 'change': 1556954884}> 
+                    #    pinames=[
+                    #        <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
+                    #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
+                    #    ]>
+    
+                    src_label = record['label']
+                    if src_label != "Event":
+                        raise TypeError(f'Neo4jReadDriver.dr_get_object_places: An Event excepted, got {src_label}')
+                    src_uniq_id = record['uniq_id']
+                    src = None
+    
+                    # Use the Event from Person events
+                    for e in person.events:
+                        if e.uniq_id == src_uniq_id:
+                            src = e
+                            break
+                    if not src:
+                        raise LookupError(f"Neo4jReadDriver.dr_get_object_places: Unknown Event {src_uniq_id}!?")
+    
+                    pl = PlaceBl.from_node(record['pl'])
+                    if not pl.uniq_id in self.objs.keys():
+                        # A new place
+                        self.objs[pl.uniq_id] = pl
+                        #print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
+                        pl.names = place_names_from_nodes(record['pnames'])
+                    #else:
+                    #   print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
+                    src.place_ref.append(pl.uniq_id)
+    
+                    # Surrounding places
+                    if record['pi']:
+                        pl_in = PlaceBl.from_node(record['pi'])
+                        ##print(f"# Hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
+                        if pl_in.uniq_id in self.objs:
+                            pl.uppers.append(self.objs[pl_in.uniq_id])
+                            ##print(f"# - Using a known place {objs[pl_in.uniq_id]}")
+                        else:
+                            pl.uppers.append(pl_in)
+                            self.objs[pl_in.uniq_id] = pl_in
+                            pl_in.names = place_names_from_nodes(record['pinames'])
+                            #print(f"#  ({pl_in} names {pl_in.names})")
+                    pass
+    
+            except Exception as e:
+                print(f"Could not read places for person {person.id} objects {self.objs}: {e}")
+        return
+
 
     def dr_get_place_list_fw(self, user, fw_from, limit, lang='fi'):
         ''' Read place list from given start point
