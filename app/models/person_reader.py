@@ -69,209 +69,132 @@ class PersonReader():
 #         ''' Read the families, where this Person is a member. '''
 
 #     def read_object_places(self): # --> pe.neo4j.read_driver.Neo4jReadDriver.dr_get_object_places
-#         ''' Read Place hierarchies for all objects in objs.
+#         ''' Read Place hierarchies for all objects in objs. '''
+
+#     def read_object_citation_note_media(self, active_objs=[]):
+#         ''' Read Citations, Notes, Medias for list of objects.
+# 
+#                 (x) -[r:CITATION|NOTE|MEDIA]-> (y)
+# 
+#             Returns a list of created new objects, where this search should
+#             be repeated.
 #         '''
+#         new_objs = []
+# 
 #         try:
-#             uids = list(self.objs.keys())
-#             results = self.session.run(Cypher_person.get_places,
+#             if active_objs and active_objs[0] > 0:
+#                 # Search next level destinations x) -[r:CITATION|NOTE|MEDIA]-> (y)
+#                 uids = active_objs
+#             else:
+#                 # Search all (x) -[r:CITATION|NOTE|MEDIA]-> (y)
+#                 uids = list(self.objs.keys())
+#             print(f'# --- Search Citations, Notes, Medias for {uids}')
+# 
+#             results = self.session.run(Cypher_person.get_citation_note_media,
 #                                        uid_list=uids)
 #             for record in results:
-#                 # <Record label='Event' uniq_id=426916 
-#                 #    pl=<Node id=306042 labels={'Place'}
-#                 #        properties={'id': 'P0456', 'type': 'Parish', 'uuid': '7aeb4e26754d46d0aacfd80910fa1bb1',
-#                 #            'pname': 'Helsingin seurakunnat', 'change': 1543867969}> 
-#                 #    pnames=[
-#                 #        <Node id=306043 labels={'Place_name'}
-#                 #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>, 
-#                 #        <Node id=306043 labels={'Place_name'} 
-#                 #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>
-#                 #    ]
-#                 ##    ri=<Relationship id=631695 
-#                 ##        nodes=(
-#                 ##            <Node id=306042 labels={'Place'} properties={'id': 'P0456', ...>, 
-#                 ##            <Node id=307637 labels={'Place'} 
-#                 ##                properties={'coord': [60.16664166666666, 24.94353611111111], 
-#                 ##                    'id': 'P0366', 'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 
-#                 ##                    'pname': 'Helsinki', 'change': 1556954884}>
-#                 ##        )
-#                 ##        type='IS_INSIDE' properties={}> 
-#                 #    pi=<Node id=307637 labels={'Place'} 
-#                 #        properties={'coord': [60.16664166666666, 24.94353611111111], 'id': 'P0366', 
-#                 #            'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 'pname': 'Helsinki', 'change': 1556954884}> 
-#                 #    pinames=[
-#                 #        <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
-#                 #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
-#                 #    ]>
+#                 # <Record label='Person' uniq_id=327766
+#                 #    r=<Relationship id=426799
+#                 #        nodes=(
+#                 #            <Node id=327766 labels=set() properties={}>, 
+#                 #            <Node id=327770 labels={'Note'}
+#                 #                properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 
+#                 #                    'id': 'N2-I0033', 'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
+#                 #                    'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}>
+#                 #        ) 
+#                 #        type='NOTE' properties={}>
+#                 #    y=<Node id=327770 labels={'Note'}
+#                 #            properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 'id': 'N2-I0033', 
+#                 #                'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
+#                 #                'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}
+#                 # >    >
 # 
-#                 src_label = record['label']
-#                 if src_label != "Event":
-#                     traceback.print_exc()
-#                     raise TypeError(f'An Event excepted, got {src_label}')
-#                 src_uniq_id = record['uniq_id']
-#                 src = None
+#                 # The existing object x
+#                 x_label = record['label']
+#                 x = self.objs[record['uniq_id']]
 # 
-#                 # Use the Event from Person events
-#                 for e in self.person.events:
-#                     if e.uniq_id == src_uniq_id:
-#                         src = e
-#                         break
-#                 if not src:
-#                     traceback.print_exc()
-#                     raise LookupError(f"ERROR: Unknown Event {src_uniq_id}!?")
+#                 # Relation r between (x) --> (y)
+#                 rel = record['r']
+#                 #rel_type = rel.type
+#                 #rel_properties = 
 # 
-#                 pl = PlaceBl.from_node(record['pl'])
-#                 if not pl.uniq_id in self.objs.keys():
-#                     # A new place
-#                     self.objs[pl.uniq_id] = pl
-#                     #print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
-#                     pl.names = place_names_from_nodes(record['pnames'])
-#                 #else:
-#                 #   print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
-#                 src.place_ref.append(pl.uniq_id)
-# 
-#                 # Surrounding places
-#                 if record['pi']:
-#                     pl_in = PlaceBl.from_node(record['pi'])
-#                     ##print(f"# Hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
-#                     if pl_in.uniq_id in self.objs:
-#                         pl.uppers.append(self.objs[pl_in.uniq_id])
-#                         ##print(f"# - Using a known place {objs[pl_in.uniq_id]}")
+#                 # Target y is a Citation, Note or Media
+#                 y_node = record['y']    # 
+#                 y_label = list(y_node.labels)[0]
+#                 y_uniq_id = y_node.id
+#                 #print(f'# Linking ({x.uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
+#                 #for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
+#                 if y_label == "Citation":
+#                     o = self.objs.get(y_uniq_id, None)
+#                     if not o:
+#                         o = Citation.from_node(y_node)
+#                         if not x.uniq_id in o.citators:
+#                             # This citation is referenced by x
+#                             o.citators.append(x.uniq_id)
+#                         # The list of Citations, for further reference search
+#                         self.citations[o.uniq_id] = o
+#                         self.objs[o.uniq_id] = o
+#                         new_objs.append(o.uniq_id)
+#                     # Store reference to referee object
+#                     if hasattr(x, 'citation_ref'):
+#                         x.citation_ref.append(o.uniq_id)
 #                     else:
-#                         pl.uppers.append(pl_in)
-#                         self.objs[pl_in.uniq_id] = pl_in
-#                         pl_in.names = place_names_from_nodes(record['pinames'])
-#                         #print(f"#  ({pl_in} names {pl_in.names})")
-#                 pass
+#                         x.citation_ref = [o.uniq_id]
+# #                         traceback.print_exc()
+# #                         raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
+#                     #print(f'# ({x_label}:{x.uniq_id}) --> (Citation:{o.id})')
 # 
-#         except Exception as e:
-#             print(f"Could not read places for person {self.person.id} objects {self.objs}: {e}")
-#         return
-
-
-    def read_object_citation_note_media(self, active_objs=[]):
-        ''' Read Citations, Notes, Medias for list of objects.
-
-                (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-
-            Returns a list of created new objects, where this search should
-            be repeated.
-        '''
-        new_objs = []
-
-        try:
-            if active_objs and active_objs[0] > 0:
-                # Search next level destinations x) -[r:CITATION|NOTE|MEDIA]-> (y)
-                uids = active_objs
-            else:
-                # Search all (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-                uids = list(self.objs.keys())
-            print(f'# --- Search Citations, Notes, Medias for {uids}')
-
-            results = self.session.run(Cypher_person.get_citation_note_media,
-                                       uid_list=uids)
-            for record in results:
-                # <Record label='Person' uniq_id=327766
-                #    r=<Relationship id=426799
-                #        nodes=(
-                #            <Node id=327766 labels=set() properties={}>, 
-                #            <Node id=327770 labels={'Note'}
-                #                properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 
-                #                    'id': 'N2-I0033', 'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
-                #                    'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}>
-                #        ) 
-                #        type='NOTE' properties={}>
-                #    y=<Node id=327770 labels={'Note'}
-                #            properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 'id': 'N2-I0033', 
-                #                'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
-                #                'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}
-                # >    >
-
-                # The existing object x
-                x_label = record['label']
-                x = self.objs[record['uniq_id']]
-
-                # Relation r between (x) --> (y)
-                rel = record['r']
-                #rel_type = rel.type
-                #rel_properties = 
-
-                # Target y is a Citation, Note or Media
-                y_node = record['y']    # 
-                y_label = list(y_node.labels)[0]
-                y_uniq_id = y_node.id
-                #print(f'# Linking ({x.uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
-                #for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
-                if y_label == "Citation":
-                    o = self.objs.get(y_uniq_id, None)
-                    if not o:
-                        o = Citation.from_node(y_node)
-                        if not x.uniq_id in o.citators:
-                            # This citation is referenced by x
-                            o.citators.append(x.uniq_id)
-                        # The list of Citations, for further reference search
-                        self.citations[o.uniq_id] = o
-                        self.objs[o.uniq_id] = o
-                        new_objs.append(o.uniq_id)
-                    # Store reference to referee object
-                    if hasattr(x, 'citation_ref'):
-                        x.citation_ref.append(o.uniq_id)
-                    else:
-                        x.citation_ref = [o.uniq_id]
+#                 elif y_label == "Note":
+#                     o = self.objs.get(y_uniq_id, None)
+#                     if not o:
+#                         o = Note.from_node(y_node)
+#                         self.objs[o.uniq_id] = o
+#                         new_objs.append(o.uniq_id)
+#                     # Store reference to referee object
+#                     if hasattr(x, 'note_ref'):
+#                         x.note_ref.append(o.uniq_id)
+#                     else:
 #                         traceback.print_exc()
 #                         raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    #print(f'# ({x_label}:{x.uniq_id}) --> (Citation:{o.id})')
-
-                elif y_label == "Note":
-                    o = self.objs.get(y_uniq_id, None)
-                    if not o:
-                        o = Note.from_node(y_node)
-                        self.objs[o.uniq_id] = o
-                        new_objs.append(o.uniq_id)
-                    # Store reference to referee object
-                    if hasattr(x, 'note_ref'):
-                        x.note_ref.append(o.uniq_id)
-                    else:
-                        traceback.print_exc()
-                        raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-
-                elif y_label == "Media":
-                    o = self.objs.get(y_uniq_id, None)
-                    if not o:
-                        o = Media.from_node(y_node)
-                        self.objs[o.uniq_id] = o
-                        new_objs.append(o.uniq_id)
-                    # Get relation properties
-                    order = rel.get('order')
-                    # Store reference to referee object
-                    if hasattr(x, 'media_ref'):
-                        # Add media reference crop attributes
-                        left = rel.get('left')
-                        if left != None:
-                            upper = rel.get('upper')
-                            right = rel.get('right')
-                            lower = rel.get('lower')
-                            crop = (left, upper, right, lower)
-                        else:
-                            crop = None
-                        print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
-                        x.media_ref.append((o.uniq_id,crop,order))
-                        if len(x.media_ref) > 1 and x.media_ref[-2][2] > x.media_ref[-1][2]:
-                            x.media_ref.sort(key=lambda x: x[2])
-                            print("#\tMedia sort done")
-                    else:
-                        print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
-
-                else:
-                    traceback.print_exc()
-                    raise NotImplementedError(f'No rule for ({x_label}) --> ({y_label})')            
-                #print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
-
-        except Exception as e:
-            traceback.print_exc()
-            print(f"Could not read 'Citations, Notes, Medias': {e}")
-            print(f"... for Person {self.person.uuid} objects {self.objs}: {e}")
-        return new_objs
+# 
+#                 elif y_label == "Media":
+#                     o = self.objs.get(y_uniq_id, None)
+#                     if not o:
+#                         o = Media.from_node(y_node)
+#                         self.objs[o.uniq_id] = o
+#                         new_objs.append(o.uniq_id)
+#                     # Get relation properties
+#                     order = rel.get('order')
+#                     # Store reference to referee object
+#                     if hasattr(x, 'media_ref'):
+#                         # Add media reference crop attributes
+#                         left = rel.get('left')
+#                         if left != None:
+#                             upper = rel.get('upper')
+#                             right = rel.get('right')
+#                             lower = rel.get('lower')
+#                             crop = (left, upper, right, lower)
+#                         else:
+#                             crop = None
+#                         print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
+#                         x.media_ref.append((o.uniq_id,crop,order))
+#                         if len(x.media_ref) > 1 and x.media_ref[-2][2] > x.media_ref[-1][2]:
+#                             x.media_ref.sort(key=lambda x: x[2])
+#                             print("#\tMedia sort done")
+#                     else:
+#                         print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
+#                     #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
+# 
+#                 else:
+#                     traceback.print_exc()
+#                     raise NotImplementedError(f'No rule for ({x_label}) --> ({y_label})')            
+#                 #print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
+# 
+#         except Exception as e:
+#             traceback.print_exc()
+#             print(f"Could not read 'Citations, Notes, Medias': {e}")
+#             print(f"... for Person {self.person.uuid} objects {self.objs}: {e}")
+#         return new_objs
 
     def remove_privacy_limit_from_family(self, family):
         ''' Clear privacy limitations from given family.

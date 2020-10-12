@@ -317,7 +317,7 @@ def show_person(uid=None):
 
 #@bp.route('/scene/event/<int:uniq_id>')
 @bp.route('/older/event/uuid=<string:uuid>')
-def show_event_v1(uuid):
+def obsolete_show_event(uuid):
     """ Event page with accompanied persons and families.
 
         Derived from bp.tools.routes.show_baptism_data()

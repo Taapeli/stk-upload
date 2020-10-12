@@ -376,29 +376,29 @@ class PersonReader(DBreader):
         #      (pl) --> (pn:Place_name)
         #      (pl) --> (pi:Place)
         #      (pi) --> (pin:Place_name)
-        # calls pe.neo4j.read_driver.Neo4jReadDriver.dr_get_object_places()
         self.dbdriver.dr_get_object_places(person)
      
-#         # 5. Read their connected nodes z: Citations, Notes, Medias
-#         #    for y in p, x, fe, z, s, r
-#         #        (y) --> (z:Citation|Note|Media)
-#         new_objs = [-1]
-#         while len(new_objs) > 0:
-#             new_objs = self.read_object_citation_note_media(new_objs)
-#             
-#         # Calculate the average confidence of the sources
-#         if len(self.citations) > 0:
-#             summa = 0
-#             for cita in self.citations.values():
-#                 summa += int(cita.confidence)
-#                 
-#             aver = summa / len(self.citations)
-#             person.confidence = "%0.1f" % aver # string with one decimal
-#     
-#         # 6. Read Sources s and Repositories r for all Citations
-#         #    for c in z:Citation
-#         #        (c) --> (s:Source) --> (r:Repository)
-#         read_sources_repositories(self.session, self.objs, self.citations)
+        # 5. Read their connected nodes z: Citations, Notes, Medias
+        #    for y in p, x, fe, z, s, r
+        #        (y) --> (z:Citation|Note|Media)
+        new_objs = [-1]
+        self.dbdriver.citations = {}
+        while len(new_objs) > 0:
+            new_objs = self.dbdriver.dr_get_object_citation_note_media(person, new_objs)
+
+        # Calculate the average confidence of the sources
+        if len(self.dbdriver.citations) > 0:
+            summa = 0
+            for cita in self.dbdriver.citations.values():
+                summa += int(cita.confidence)
+                 
+            aver = summa / len(self.dbdriver.citations)
+            person.confidence = "%0.1f" % aver # string with one decimal
+     
+        # 6. Read Sources s and Repositories r for all Citations
+        #    for c in z:Citation
+        #        (c) --> (s:Source) --> (r:Repository)
+        self.dbdriver.dr_get_object_sources_repositories()
     
         # Create Javascript code to create source/citation list
         jscode = get_citations_js(self.dbdriver.objs)
