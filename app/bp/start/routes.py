@@ -102,6 +102,7 @@ def join():
             flash(_("Sending join message failed"))
         profile = UserProfile(
             name=request.form.get("name"),
+            username=request.form.get("username"),
             email = request.form.get('email'),
             language = request.form.get('language'),
             GSF_membership = request.form.get('GSF_membership'),
