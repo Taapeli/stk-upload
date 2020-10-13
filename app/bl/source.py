@@ -18,10 +18,8 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 from .base import NodeObject, Status
+from .person import Person
 from pe.db_reader import DBreader #, SourceResult
-
-#Todo: move gen.Person_combo to bi.PersonBl
-from models.gen.person_combo import Person_combo
 
 
 class Source(NodeObject):
@@ -171,7 +169,7 @@ class SourceReader(DBreader):
             for target in targets[c_id]:
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
-                    if isinstance(target, Person_combo):
+                    if isinstance(target, Person):
                         self.dbdriver.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:

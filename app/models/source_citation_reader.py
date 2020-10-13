@@ -5,10 +5,10 @@ Created on 15.11.2019
 
 @author: jm
 '''
-from .gen.cypher import Cypher_source
 from .gen.citation import Citation
-from .gen.source import Source
 from .gen.repository import Repository
+#from .gen.cypher import Cypher_source
+#from .gen.source import Source
 
 #TODO Should be somewhere else!
 from templates.jinja_filters import translate
@@ -86,6 +86,8 @@ def get_citations_js(objs):
         
         js-style person[id] = {name: "John", age: 31, city: "New York"}
     '''
+    from bl.source import Source
+
     def unquote(s):
         ''' Change quites (") to fancy quotes (“)
             Change new lines to '¤' symbol
