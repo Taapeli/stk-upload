@@ -70,6 +70,112 @@ class Neo4jReadDriver:
         return obj
 
 
+    def dr_get_persons(self, rule:str, key:str, years:str=None):
+        """ Read Persons with Names, Events, Refnames (reference names) and Places
+            and Researcher's username.
+        
+                rule=all                  all
+                rule=surname, key=name    by start of surname
+                rule=firstname, key=name  by start of the first of first names
+                rule=patronyme, key=name  by start of patronyme name
+                rule=refname, key=name    by exact refname
+
+            #TODO: take_refnames should determine, if refnames are returned, too
+        """
+        persons = []
+        p = None
+        p_uniq_id = None
+
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                if rule == 'uniq_id':
+                    return session.run(Cypher_person.get_events_uniq_id, id=int(key))
+                elif rule == 'refname':
+                    return session.run(Cypher_person.get_events_by_refname, name=key)
+                elif rule == 'all':
+                    # Rajaus args['years'] mukaan
+                    order = args.get('order')
+                    if order == 1:      # order by first name
+                        result = session.run(Cypher_person.get_events_all_firstname, years=ytbl)
+                    elif order == 2:    # order by patroname
+                        result = session.run(Cypher_person.get_events_all_patronyme, years=ytbl)
+                    else:
+                        result = session.run(Cypher_person.get_events_all, years=ytbl)
+                else:
+                    # Selected names and name types
+                    if self.use_user: 
+                        # Show my researcher data
+                        print("dr_get_source_list_fw: my researcher data")
+                        result = session.run(Cypher_person.get_common_events_by_refname_use,
+                                             attr={'use':rule, 'name':key})
+                    else: # Show approved common data
+                        result = session.run(Cypher_person.get_my_events_by_refname_use,
+                                             attr={'use':rule, 'name':key}, user=user)
+#                     else: # From my OWN Batch & approved COMMON
+#                         result = session.run(Cypher_person.get_both_events_by_refname_use,
+#                                              attr={'use':rule, 'name':key}, user=user)
+            except Exception as err:
+                print("iError get_person_w_events: {1} {0}".format(err, keys), file=stderr)
+
+            for record in result:
+                '''
+                # <Record
+                    user=None,
+                    person=<Node id=48883 labels={'Person'}
+                      properties={'sortname': 'Järnefelt#Elin Ailama#',
+                     'id': 'I1623', 'uuid': 'c9beb251259a4c48bf433645cbe4362c',
+                     'sex': 2, 'confidence': '', 'change': 1561976921,
+                     'birth_low': 1870, 'birth_high': 1870,
+                     'death_low': 1953, 'death_high': 1953}>
+                    name=<Node id=80308 labels={'Name'}
+                        properties={'type': 'Birth Name', 'suffix': '', 'order': 0,
+                            'surname': 'Klick', 'firstname': 'Brita Helena'}>
+                    refnames=['Helena', 'Brita', 'Klick']
+                    events=[['Primary', <Node id=88532 labels={'Event'}
+                        properties={'date1': 1754183, 'id': 'E0161', 'attr_type': '',
+                            'date2': 1754183, 'attr_value': '', 'description': '',
+                            'datetype': 0, 'change': 1500907890,
+                            'handle': '_da692d0fb975c8e8ae9c4986d23', 'type': 'Birth'}>,
+                        'Kangasalan srk'], ...]
+                    initial='K'>
+                '''
+                # Person
+        
+                node = record['person']
+                if node.id != p_uniq_id:
+                    # The same person is not created again
+                    p = PersonBl.from_node(node)
+                    p_uniq_id = p.uniq_id
+                    if args.get('take_refnames',False) and record['refnames']:
+                        refnlist = sorted(record['refnames'])
+                        p.refnames = ", ".join(refnlist)
+                    for nnode in record['names']:
+                        pname = Name.from_node(nnode)
+                        if 'initial' in record and record['initial']:
+                            pname.initial = record['initial']
+                        p.names.append(pname)
+                # Eventuel Researcher or blank
+                p.user = record.get('user')
+                
+                # Events
+        
+                for role, event, place in record['events']:
+                    # role = 'Primary',
+                    # event = <Node id=88532 labels={'Event'}
+                    #        properties={'attr_value': '', 'description': '', 'attr_type': '',
+                    #        'datetype': 0, 'date2': 1754183, 'type': 'Birth', 'change': 1500907890,
+                    #        'handle': '_da692d0fb975c8e8ae9c4986d23', 'id': 'E0161', 'date1': 1754183}>,
+                    # place = None
+        
+                    if event:
+                        e = EventBl.from_node(event)
+                        e.place = place or ""
+                        e.role = role or ""
+                p.events.append(e)
+
+                persons.append(p)
+        return persons
+
     def dr_get_person_by_uuid(self, uuid:str, user:str):
         ''' Read a person from common data or user's own Batch.
 
@@ -365,6 +471,7 @@ class Neo4jReadDriver:
                 p.names = []
                 for nnode in record['names']:
                     pname = Name.from_node(nnode)
+                    pname.initial = pname.surname[0] if pname.surname else ''
                     p.names.append(pname)
         
                 # Create a list with the mentioned user name, if present

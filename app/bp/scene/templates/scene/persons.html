@@ -13,8 +13,8 @@ div#description_box p {
 }
 </style>
 <div id="startdiv">
-	{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
-	{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
+	{% if rule == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
+	{% elif rule == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ key }}</h2>
 	{% else %}<h2>{{ _('Persons') }}</h2>
 	{% endif %}
     <div>{{ macro.show_use_case() }}</div>
@@ -30,10 +30,8 @@ div#description_box p {
                                    'Displaying %(num)s persons.', cnt ) }}
                        {{ _('If the person has many names, they may appear in the list under each name.') }}
                     </p>
-                    <p>{{ _('Note that family events are not included.') }} </p>
-                    </p>
                     <ul>
-    {% if rule[0] == 'all' %}
+    {% if rule == 'all' %}
                         <li>{{ _('Sorted by %(order)s.', order=ordname[order]) }}
                             {{ _('Change Order:') }} 
         {% if order != 0 %}<a href="/scene/persons/all/" 
@@ -58,15 +56,15 @@ div#description_box p {
 
                 <div id="searching" class="SearchBox">
                    <fieldset>
-                       {% if rule[0] %}{% set selection = rule[0] %}
+                       {% if rule %}{% set selection = rule %}
                        {% else %}{% set selection = "surname" %}
                        {% endif %}
            
-                       <form  action="/scene/persons" method="post">
+                       <form  action="/scene/persons/search" method="post">
                            <p>{{ _('Search takes place from beginning of selected name part, e.g. in Surname "Sib" coincides with the name "Sibbe".') }}</p>
                            <label for="snam">{{ _('Search word (beginning part)') }}&nbsp; </label>
-                           <input type="text" name="name" id="snam" 
-                              {% if name %}value="{{name}}"
+                           <input type="text" name="key" id="snam" 
+                              {% if key %}value="{{key}}"
                               {% else %}placeholder="{{ _('Name') }}"{% endif %} required>
                            <br>
                            <input type="radio" name="rule" id="ssur" value="surname"
@@ -112,10 +110,10 @@ div#description_box p {
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
 	        {% for p in persons %}
-	        	{% set ini = p.names[0].initial|upper %}
-	            {% if loop.changed(ini) %}
-	                <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
-	            {% endif %}
+         	  {% set ini = p.names[0].initial|upper %}
+              {% if loop.changed(ini) %}
+                 <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+              {% endif %}
 	        {% endfor %}
 			</ul>
 	</div>
@@ -123,7 +121,7 @@ div#description_box p {
 	<table class="IndividualList">
 		<thead>
 			<tr><th></th>
-                   <th>{{ _('Owner') }}</th>
+<!--                    <th>{{ _('Owner') }}</th> -->
                    <th>{{ _('Person') }}</th>
                    <th>{{ _("Person's events") }}</th>
 			</tr>
@@ -138,12 +136,10 @@ div#description_box p {
 			{% endif %}
 				</td>
 					
-				<td style="text-align:center; padding:3px;">
-		    {%- if p.user %}{{p.user}}
-		    {% else %} – 
-		    {% endif %}
+<!--			<td style="text-align:center; padding:3px;">
+ 		    {%- if p.user %}{{p.user}}{% else %} – {% endif %}
 				</td>
-
+ -->
 	            <td class="ColumnPerson">
                     <div>
 	                    <a href="/scene/person?uuid={{p.uuid}}"

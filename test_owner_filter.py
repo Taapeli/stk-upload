@@ -46,7 +46,7 @@ def test_ownerfilter_user_selection(user_env):
             - Show all my data / div=2
             - with common data / cmp=1
 
-        <Request 'http://127.0.0.1:5000/scene/persons_all/?div=2&cmp=1' [GET]>
+        <Request 'http://127.0.0.1:5000/scene/persons/all?div=2&cmp=1' [GET]>
         <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
             'lang': 'en', 'next_person': ['', '>'], 'user_context': 2, 'user_id': 'juha'}>
     '''
@@ -69,7 +69,7 @@ def test_ownerfilter_next_item(user_env):
             - from previous next_person 'Abrahamsson##Juho Kustaa'
             - from previous next_person: end '>'
 
-        <Request 'http://127.0.0.1:5000/scene/persons_all/?div=2&cmp=1' [GET]>
+        <Request 'http://127.0.0.1:5000/scene/persons/all?div=2&cmp=1' [GET]>
         <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
             'lang': 'en', 'next_person': ['', '>'], 'user_context': 2, 'user_id': 'juha'}>
     '''

@@ -160,6 +160,74 @@ class PersonReader(DBreader):
 
         - Returns a Result object.
     '''
+    def get_person_search(self, args):
+        """ Read Persons with Names, Events, Refnames (reference names) and Places
+            and Researcher's username.
+        
+            Search by name by args['rule'], args['key']:
+                rule=all                  all
+                rule=surname, key=name    by start of surname
+                rule=firstname, key=name  by start of the first of first names
+                rule=patronyme, key=name  by start of patronyme name
+                rule=refname, key=name    by exact refname
+            Time limiting by args['years']:
+                years='y1'    single year
+                years='y1-'   from year
+                years='y1-y2' year range
+                years='-y2'   untill year
+
+            #TODO: 'take_refnames' could determine, if refnames are returned, too
+        """
+        if 'years' in args:
+            # Any of
+            #     ['1800']
+            #     ['1800', '']
+            #     ['', '1800']
+            #     ['1800', '1900']
+            #     ['']
+            lim = args['years'].split('-')
+            if len(lim) < 2:
+                lim.append(lim[0])
+            y1 = int(lim[0]) if lim[0] > '' else -9999
+            y2 = int(lim[1]) if lim[1] > '' else 9999
+            if y1 > y2:
+                (y1,y2) = (y2,y1)
+            args['years'] = (y1, y2)
+        else:
+            args['years'] = (-9999, 9999)
+
+        context = self.user_context
+        args['use_user'] = self.use_user
+        args['fw'] = context.next_name_fw()
+        args['limit'] = context.count
+        
+        result = self.dbdriver.dr_get_person_list(args)
+        # {'items': persons, 'status': Status.OK}
+
+        if (result['status'] != Status.OK):
+            return {'items':None, 'status':result['status'], 
+                    'statustext': _('No persons found')}
+
+        # Update the page scope according to items really found
+        persons = result['items']
+        if len(persons) > 0:
+            context.update_session_scope('person_scope', 
+                                          persons[0].sortname, persons[-1].sortname, 
+                                          context.count, len(persons))
+
+        if self.use_user is None:
+            persons2 = [p for p in persons if not p.too_new]
+            num_hidden = len(persons) - len(persons2)
+        else:
+            persons2 = persons
+            num_hidden = 0
+        res_dict = {}
+        res_dict['status'] = Status.OK
+
+        res_dict['num_hidden'] = num_hidden
+        res_dict['items'] = persons2
+        return res_dict
+
 
     def get_person_list(self):
         ''' List person data including all data needed to Person page.
@@ -183,11 +251,6 @@ class PersonReader(DBreader):
             context.update_session_scope('person_scope', 
                                           persons[0].sortname, persons[-1].sortname, 
                                           context.count, len(persons))
-
-        #Todo: remove this after next main version
-#         if 'next_person' in context.session: # Remove an obsolete field
-#             context.session.pop('next_person')
-#             context.session.modified = True
 
         if self.use_user is None:
             persons2 = [p for p in persons if not p.too_new]
