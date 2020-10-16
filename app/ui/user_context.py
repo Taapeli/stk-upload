@@ -164,8 +164,9 @@ class UserContext():
                     return [None, unquote_plus(bw)]
             else:
                 # No request
-                self.session[self.session_var] = self.scope
-                print(f"UserContext: Now {self.session_var} is cleared")
+                if self.session_var:
+                    self.session[self.session_var] = self.scope
+                    print(f"UserContext: Now {self.session_var} is cleared")
                 return self.scope
 
 
@@ -298,7 +299,7 @@ class UserContext():
                 pass
         return True
 
-    def set_scope_from_request(self, request, var_name):
+    def set_scope_from_request(self, request=None, var_name=None):
         """ Eventuel request fw or bw parameters are stored in session['person_scope'].
 
             - If fw is defined, clear bw; otherwise clear bw

@@ -108,7 +108,7 @@ def show_persons():
     # /all
     # /all?years=1900-1950
     t0 = time.time()
-    args = {'rule': 'all'}
+    args = {'rule': None}
     years = request.args.get('years', default='', type=str)
     if years: args['years'] = years
     print(f'{request.method} All persons {args}')
@@ -116,7 +116,7 @@ def show_persons():
     res, u_context = _do_show_persons(args)
 
     found = res.get('items',[])
-    hide = res['num_hidden']
+    hide = res.get('num_hidden',0)
     hidden = f" hide={hide}" if hide > 0 else ""
     elapsed = time.time() - t0
     stk_logger(u_context, f"-> bp.scene.routes.show_persons"
@@ -145,17 +145,22 @@ def show_person_search():
     t0 = time.time()
     args = {'rule': request.args.get('rule', default='all'),
             'restart': True}
-    key = request.args.get('key', default=None, type=str)
+    if request.method == "GET":
+        rq = request.args
+    else:
+        rq = request.form
+    key = rq.get('key', default=None, type=str)
     if key:
         args['key'] = key
-    years = request.args.get('years', default=None, type=str)
+    years = rq.get('years', default=None, type=str)
     if years:
         args['years'] = years
+
     print(f'{request.method} Persons {args}')
 
     res, u_context = _do_show_persons(args)
     found = res.get('items',[])
-    hide = res['num_hidden']
+    hide = res.get('num_hidden',0)
     hidden = f" hide={hide}" if hide > 0 else ""
     elapsed = time.time() - t0
     stk_logger(u_context, f"-> bp.scene.routes.show_person_search"
@@ -164,7 +169,7 @@ def show_person_search():
                            persons=found,
                            user_context=u_context, 
                            num_hidden=res.get('num_hidden'), 
-                           rule=args.get('key'), elapsed=time.time()-t0)
+                           rule=args.get('key',''), elapsed=time.time()-t0)
 
 @bp.route('/obsolete/search', methods=['POST'])
 @bp.route('/obsolete/ref=<key>', methods=['GET'])

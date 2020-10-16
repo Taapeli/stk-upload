@@ -20,6 +20,7 @@ class Status():
     OK = 0
     NOT_FOUND = 1
     ERROR = 2
+    NOT_STARTED = 4
 
 
 class StkEncoder(json.JSONEncoder):

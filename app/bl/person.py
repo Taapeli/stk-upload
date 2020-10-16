@@ -204,8 +204,8 @@ class PersonReader(DBreader):
         result = self.dbdriver.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
 
-        if (result['status'] != Status.OK):
-            return {'items':None, 'status':result['status'], 
+        if (result['status'] in [Status.NOT_FOUND, Status.ERROR]):
+            return {'items':[], 'status':result['status'], 
                     'statustext': _('No persons found')}
 
         # Update the page scope according to items really found
@@ -221,12 +221,7 @@ class PersonReader(DBreader):
         else:
             persons2 = persons
             num_hidden = 0
-        res_dict = {}
-        res_dict['status'] = Status.OK
-
-        res_dict['num_hidden'] = num_hidden
-        res_dict['items'] = persons2
-        return res_dict
+        return {'items': persons2, 'num_hidden': num_hidden, 'status': Status.OK}
 
 
     def get_person_list(self):
