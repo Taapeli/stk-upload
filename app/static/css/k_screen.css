@@ -216,7 +216,12 @@ div.NotFound {
 	padding: 1em;
 	border: maroon solid 1pt;
 }
-
+div.Failed {
+    padding: 1em;
+	text-align: center;
+	font-size: large;
+    font-style: italic;
+}
 /* Button style link (Next - Previous) */
 .navbar { text-align: center; 
   background-color: #EEE;

@@ -25,11 +25,12 @@ from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
 from bl.event import EventReader
+from bl.person import PersonReader
 #from bl.media import MediaBl_todo
 from templates import jinja_filters
 
 from . import bp
-from bp.scene.scene_reader import get_person_full_data
+#from bp.scene.scene_reader import get_person_full_data
 from bp.scene.models import media
 from models.gen.family_combo import Family_combo
 #from models.gen.source import Source
@@ -43,7 +44,7 @@ from models.datareader import read_persons_with_events
 #from templates.jinja_filters import translate
 
 from pe.neo4j.read_driver import Neo4jReadDriver
-from pe.db_reader import DBreader
+#from pe.db_reader import DBreader
 
 
 def stk_logger(context, msg:str):
@@ -79,10 +80,192 @@ def obsolete_scene():
 
 # ------------------------- Menu 1: Person search ------------------------------
 
-@bp.route('/scene/persons', methods=['POST', 'GET'])
+def _do_get_persons(args):
+    ''' Execute persons list query by arguments.
+
+    Persons, current
+        GET    /all                                       --> args={pg:all}
+    Persons, forward
+        GET    /all?fw=<sortname>&c=<count>               --> args={pg:all,fw:sortname,c:count}
+    Persons, by years range
+        GET    /all?years=<y1-y2>                         --> args={pg:all,years:y1_y2}
+    Persons fw,years
+        GET    /all?years=<y1-y2>&fw=<sortname>&c=<count> --> args={pg:all,fw:sortname,c:count,years:y1_y2}
+    Search form
+        GET    /search                                    --> args={pg:search,restart:True}
+    Search by refname
+        GET    /search?rule=ref,key=<str>                 --> args={pg:search,rule:ref,key:str}
+    Search form
+        POST   /search                                    --> args={pg:search,restart:True}
+    Search by name starting
+        POST   /search rule=<rule>,key=<str>              --> args={pg:search,rule:ref,key:str}
+    Search by years range
+        POST   /search years=<y1-y2>                      --> args={pg:search,years:y1_y2}
+    Search by name & years
+        POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
+    '''
+    u_context = UserContext(user_session, current_user, request)
+    if args.get('pg') == 'search':
+        # No scope
+        u_context.set_scope_from_request()
+    else:
+        u_context.set_scope_from_request(request, 'person_scope')
+    u_context.count = request.args.get('c', 100, type=int)
+    dbdriver = Neo4jReadDriver(shareds.driver)
+    reader = PersonReader(dbdriver, u_context)
+    
+    res = reader.get_person_search(args)
+    if res.get('status') != Status.OK:
+        flash(f'{_("No persons found")}: {res.get("statustext")}','error')
+
+    return res, u_context
+
+
+#@bp.route('/scene/persons', methods=['POST', 'GET'])
+@bp.route('/scene/persons/all', methods=['GET'])
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
-def show_person_list(selection=None):
+def show_persons():
+    ''' Persons listings.
+    '''
+    t0 = time.time()
+    args = {'pg':'all'}
+    years = request.args.get('years')
+    if years: args['years'] = years
+    fw = request.args.get('fw')
+    if fw:    args['fw'] = fw
+    c = request.args.get('c')
+    if c:     args['c'] = c
+    print(f'{request.method} All persons {args}')
+
+    res, u_context = _do_get_persons(args)
+
+    found = res.get('items',[])
+    hide = res.get('num_hidden',0)
+    hidden = f" hide={hide}" if hide > 0 else ""
+    elapsed = time.time() - t0
+    stk_logger(u_context, f"-> bp.scene.routes.show_persons"
+                    f" n={len(found)}{hidden} e={elapsed:.3f}")
+    return render_template("/scene/persons_list.html", 
+                           persons=found, menuno=12, 
+                           num_hidden=hide, user_context=u_context,
+                           elapsed=elapsed)
+#     return render_template("/scene/persons.html",  menuno=12,
+#                            persons=res.get('items'),
+#                            user_context=u_context, 
+#                            num_hidden=res.get('num_hidden'), 
+#                            rule=args.get('key'), elapsed=time.time()-t0)
+
+
+@bp.route('/scene/persons/search', methods=['GET','POST'])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
+def show_person_search():
+    ''' Persons search page.
+    '''
+    t0 = time.time()
+    args = {'pg':'search'}
+    rq = request.args if request.method == "GET" else request.form
+    rule = rq.get('rule')
+    if rule:  args['rule'] = rule
+    key = rq.get('key')
+    if key:   args['key'] = key
+    years = rq.get('years', default=None, type=str)
+    if years: args['years'] = years
+    if rule is None and years is None:
+        args['restart'] = True
+
+    print(f'{request.method} Persons {args}')
+
+    res, u_context = _do_get_persons(args)
+    found = res.get('items',[])
+    hide = res.get('num_hidden',0)
+    hidden = f" hide={hide}" if hide > 0 else ""
+    elapsed = time.time() - t0
+    stk_logger(u_context, f"-> bp.scene.routes.show_person_search"
+                    f" n={len(found)}{hidden} e={elapsed:.3f}")
+    return render_template("/scene/persons.html",  menuno=0,
+                           persons=found,
+                           user_context=u_context, 
+                           num_hidden=res.get('num_hidden'), 
+                           rule=args.get('key',''), elapsed=time.time()-t0)
+
+@bp.route('/obsolete/search', methods=['POST'])
+@bp.route('/obsolete/ref=<key>', methods=['GET'])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
+def obsolete_show_person_search(selection=None):
+    """ Show list of selected Persons for menu(1) or menu(12).
+    
+        GET persons [?years]
+        GET persons/?haku [&years]
+        POST persons form: rule, name [,years]
+        
+    """
+    t0 = time.time()
+    u_context = UserContext(user_session, current_user, request)
+    #u_context.set_scope_from_request(request, 'person_scope')
+    args={}
+    args['user'] = u_context.user
+    args['context_code'] = u_context.context
+    persons = []
+    if request.method == 'POST':
+        try:
+            # Selection from search form
+            keys = (request.form['rule'], request.form['name'])
+            theme=keys[0]
+            #TODO: filter by user in the read method
+            print(f'{request.method}: keys={keys}, theme={theme}, args={args}')
+            persons = read_persons_with_events(keys, args)
+
+        except Exception as e:
+            logger.error(f"bp.scene.routes.show_person_list error {e}")
+            flash("Valitse haettava nimi ja tyyppi", category='warning')
+    else:
+        # the code below is executed if the request method
+        # was GET (no search name given) or the credentials were invalid
+        persons = []
+        if selection:
+            # Use selection context
+            keys = selection.split('=')
+            theme=keys[0]
+        else:
+            keys = ('surname',)
+            theme=''
+        #TODO: filter by user in the read method
+        print(f'{request.method}: keys={keys}, theme={theme}, args={args}')
+        persons = read_persons_with_events(keys, args)
+        
+
+    # If Context is COMMON (1):
+    #    - show both own candidate and approved materials
+    #    - but hide candadate materials of other users
+    # If Context is OWN (2): show all own candidate materials
+    select_users = [None] # COMMON, no user
+    if u_context.use_owner_filter():
+        #select_users.append(None)
+        select_users.append(u_context.user)
+    hidden=0
+    persons_out = []
+    for p in persons:
+        if p.too_new and p.user != u_context.user:
+            print(f'Hide {p.sortname} too_new={p.too_new}, owner {p.user}')
+            hidden += 1
+        else:
+            #print(f'Show {p.sortname} too_new={p.too_new}, owner {p.user}')
+            persons_out.append(p)
+    stk_logger(u_context, f"-> bp.scene.routes.show_person_list/{theme}-{request.method}"
+               f" {u_context.owner_or_common()}"
+               f" n={len(persons_out)} hide={len(persons)-len(persons_out)}")
+
+    return render_template("/scene/persons.html", persons=persons_out,
+                           user_context=u_context, num_hidden=hidden, 
+                           menuno=0, rule=keys, elapsed=time.time()-t0)
+
+@bp.route('/obsolete/persons/v1', methods=['POST', 'GET'])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
+def obsolete_show_person_list_v2(selection=None):
     """ Show list of selected Persons for menu(0). """
     t0 = time.time()
     u_context = UserContext(user_session, current_user, request)
@@ -142,11 +325,11 @@ def show_person_list(selection=None):
                            user_context=u_context, num_hidden=hidden, 
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
-@bp.route('/scene/persons/ref=<string:refname>')
-@bp.route('/scene/persons/ref=<string:refname>/<opt>')
+@bp.route('/obsolete/persons/ref=<string:refname>')
+@bp.route('/obsolete/persons/ref=<string:refname>/<opt>')
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
-def show_persons_by_refname(refname, opt=""):
+def obsolete_show_persons_by_refname(refname, opt=""):
     """ List persons by refname for menu(0). Called from /list/refnames
     """
     logger.warning("#TODO: fix material selevtion or remove action show_persons_by_refname")
@@ -158,16 +341,19 @@ def show_persons_by_refname(refname, opt=""):
     args = {'ref': ref, 'order': order}
     if current_user.is_authenticated:
         args['user'] = current_user.username
+    print(f'Obsolete! {request.method}: keys={keys}, args={args}')
     persons = read_persons_with_events(keys, args=args)
-    stk_logger(u_context, f"-> bp.scene.routes.show_persons_by_refname n={len(persons)}")
+    print(persons)
+    persons = []
+    stk_logger(u_context, f"-> bp.scene.routes.show_persons_by_refname FAIL?") #n={len(persons)}")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            user_context=u_context, order=order, rule=keys)
 
-@bp.route('/scene/persons/all/<string:opt>')
-@bp.route('/scene/persons/all/')
+@bp.route('/obsolete/persons/all/<string:opt>')
+@bp.route('/obsolete/persons/all/')
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
-def show_all_persons_list(opt=''):
+def obsolete_show_all_persons_list(opt=''):
     """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
 
         Linked from admin/refnames only
@@ -177,32 +363,33 @@ def show_all_persons_list(opt=''):
 
         TODO Should have restriction by owner's UserProfile 
     """
-    logger.warning("#TODO: fix material selection or remove action show_all_persons_list")
-
-    t0 = time.time()
-    u_context = UserContext(user_session, current_user, request)
-    keys = ('all',)
-    ref = ('ref' in opt)
-    if 'fn' in opt: order = 1   # firstname
-    elif 'pn' in opt: order = 2 # firstname
-    else: order = 0             # surname
-    args = {'ref': ref, 'order': order}
-    if current_user.is_authenticated:
-        args['user'] = current_user.username
-    persons = read_persons_with_events(keys, args=args) #user=user, take_refnames=ref, order=order)
-    stk_logger(u_context, "-> bp.scene.routes.show_all_persons_list")
-    return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           user_context=u_context, order=order,
-                           rule=keys, elapsed=time.time()-t0)
+    return 'Obsolete! show_all_persons_list<br><a href="javascript:history.back()">Go Back</a>'
+#     logger.warning("#TODO: fix material selection or remove action show_all_persons_list")
+# 
+#     t0 = time.time()
+#     u_context = UserContext(user_session, current_user, request)
+#     keys = ('all',)
+#     ref = ('ref' in opt)
+#     if 'fn' in opt: order = 1   # firstname
+#     elif 'pn' in opt: order = 2 # firstname
+#     else: order = 0             # surname
+#     args = {'ref': ref, 'order': order}
+#     if current_user.is_authenticated:
+#         args['user'] = current_user.username
+#     persons = read_persons_with_events(keys, args=args) #user=user, take_refnames=ref, order=order)
+#     stk_logger(u_context, "-> bp.scene.routes.show_all_persons_list")
+#     return render_template("/scene/persons.html", persons=persons, menuno=1, 
+#                            user_context=u_context, order=order,
+#                            rule=keys, elapsed=time.time()-t0)
 
 
 
 # -------------------------- Menu 12 Persons by user ---------------------------
 
-@bp.route('/scene/persons_all/')
+@bp.route('/obsolete/persons_all/')
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
-def show_persons_all():
+def obsolete_show_persons_all():
     """ List all persons for menu(12).
 
         Both my own and other persons depending on sum of url attributes div + div2
@@ -223,27 +410,33 @@ def show_persons_all():
     # How many objects are shown?
     u_context.count = int(request.args.get('c', 100))
     u_context.privacy_limit = shareds.PRIVACY_LIMIT
+    print(f'{request.method}: keys=-, args=-')
 
     t0 = time.time()
     dbdriver = Neo4jReadDriver(shareds.driver)
-    db = DBreader(dbdriver, u_context)
-    results = db.get_person_list()
-    elapsed = time.time() - t0
+    reader = PersonReader(dbdriver, u_context)
 
-    hidden = f" hide={results.num_hidden}" if results.num_hidden > 0 else ""
+    results = reader.get_person_list()
+    status = results.get('status')
+    if status != Status.OK:
+        flash(f'{_("No persons found")}: {results.get("statustext")}','error')
+
+    elapsed = time.time() - t0
+    found = results.get('items',[])
+    hide = results['num_hidden']
+    hidden = f" hide={hide}" if hide > 0 else ""
     stk_logger(u_context, f"-> bp.scene.routes.show_persons_all"
-                    f" n={len(results.items)}{hidden} e={elapsed:.3f}")
-#     print(f"Got {len(results.items)} persons"
-#           f" with {len(results.items)-results.num_hidden} hidden"
-#           f" and {results.error} errors"
+                    f" n={len(found)}{hidden} e={elapsed:.3f}")
+#     print(f"Got {len(found)} persons"
+#           f" with {len(found)-results.hide} hidden"
+#           f" and status {status}"
 #           f" in {elapsed:.3f}s")
-    return render_template("/scene/persons_list.html", persons=results.items,
-                           num_hidden=results.num_hidden,
-                           user_context=u_context,
+    return render_template("/scene/persons_list.html", persons=found,
+                           num_hidden=hide, user_context=u_context,
                            menuno=12, elapsed=elapsed)
 
 
-@bp.route('/scene/person/<int:uid>')
+@bp.route('/obsolete/person/<int:uid>')
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def obsolete_show_person_v2(uid=None):
@@ -283,18 +476,28 @@ def show_person(uid=None):
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
 
-    # v3 Person page
-    person, objs, jscode = get_person_full_data(uid, u_context.user, u_context.use_common())
-    if not person:
-        return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
+    dbdriver = Neo4jReadDriver(shareds.driver)
+    reader = PersonReader(dbdriver, u_context)
+    args = {}
+
+    result = reader.get_person_data(uid, args)
+    # result {'person', 'objs': self.dbdriver, 'jscode', 'root'}
+    status = result.get('status')
+    if status != Status.OK:
+        flash(f'{_("Person not found")}: {result.get("statustext","error")}', 'error')
+    person = result.get('person')
+    objs = result.get('objs',[])
+    jscode = result.get('jscode','')
+    root = result.get('root')
+
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
     #for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     return render_template("/scene/person.html", person=person, obj=objs, 
-                           jscode=jscode, menuno=12, debug=dbg, root=person.root,
-                           last_year_allowed=last_year_allowed, elapsed=time.time()-t0,
-                           user_context=u_context)
+                           jscode=jscode, menuno=12, debug=dbg, root=root,
+                           last_year_allowed=last_year_allowed, 
+                           elapsed=time.time()-t0, user_context=u_context)
 
 
 # @bp.route('/scene/person/uuid=<pid>')
@@ -307,7 +510,7 @@ def show_person(uid=None):
 @bp.route('/older/event/uuid=<string:uuid>')
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
-def show_event_v1(uuid):
+def obsolete_show_event_v1(uuid):
     """ Event page with accompanied persons and families.
 
         Derived from bp.tools.routes.show_baptism_data()

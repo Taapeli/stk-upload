@@ -6,6 +6,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 import  shareds
 from bl.place import PlaceBl
+from bl.person import PersonBl
 from ui.place import place_names_from_nodes
 
 from .cypher import Cypher_family, Cypher_person
@@ -476,15 +477,7 @@ RETURN extract(x IN relationships |
                             #    'date2': 1997946, 'date1': 1929380}>
                             if uniq_id != parent_node.id:
                                 # Skip person with double default name
-#                                 pp = Person_as_member()
-#                                 pp = Person.from_node(parent_node)
-#                                 Person_as_member.__init__(pp)
-                                pp = Person.from_node(parent_node)
-#                                 uniq_id = parent_node.id
-#                                 pp.uniq_id = uniq_id
-#                                 pp.uuid = parent_node['uuid']
-#                                 pp.sortname = parent_node['sortname']
-#                                 pp.sex = parent_node['sex']
+                                pp = PersonBl.from_node(parent_node)
                                 if role == 'father':
                                     family.father = pp
                                 elif role == 'mother':
@@ -501,7 +494,7 @@ RETURN extract(x IN relationships |
                         #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
                         #    'date2': 1609920, 'date1': 1609920}>
 #                         child = Person_as_member()
-                        child = Person.from_node(ch)
+                        child = PersonBl.from_node(ch)
 #                         Person_as_member.__init__(child)
 #                         child.uniq_id = ch.id
 #                         child.uuid = ch['uuid']

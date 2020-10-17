@@ -57,7 +57,7 @@ class Event(NodeObject):
                 #place_hlink       str paikan handle
                 #citation_ref      str viittauksen handle
                 #objref_hlink      str median handle
-        Event_combo properties:
+        Previous Event_combo properties:
                 citations = []     Citations attached
                 names = []         Names attached
      """
@@ -152,7 +152,7 @@ class EventReader(DBreader):
             if (result['status'] == Status.ERROR):
                 statustext += _('Notes read error ' + result['statustext']+' ')
             notes = result['notes']
-            res_dict['notes'] = medias
+            res_dict['notes'] = notes
             medias = result['medias']
             res_dict['medias'] = medias
 
@@ -180,7 +180,7 @@ class EventBl(Event):
 
     def __init__(self):         #, eid='', desc='', handle=''):
         '''
-        Constructor Luo uuden Event_combo -instanssin
+        Constructor Luo uuden EventBl -instanssin
         '''
         Event.__init__(self)
         self.role = ''          # role of event from EVENT relation, if available

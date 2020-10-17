@@ -73,7 +73,7 @@ class Person_gramps(Person):
         self.citationref_hlink = []     # models.gen.citation.Citation
         
         # Program objects
-        self.events = []                # models.gen.event_combo.Event_combo
+        self.events = []                # bl.event.EventBl
         self.notes = []                 # models.gen.note.Note, used for
                                         # generated objects which have no hlink
 

@@ -44,14 +44,14 @@
         <div class="container">
             <ul class="menu" id="dropmenu">
                 <li{% if value == 0 %} class="CurrentSection"
-                  {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons"{% endif %}
+                  {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons/search"{% endif %}
                    title="{{ _('Search for people') }}">{{ _('Search') }}</a></li>
 {#              <li{% if value == 1 %} class="CurrentSection"
                   {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons/all"{% endif %}
                    title="{{ _('All persons') }}">{{ _('Names') }}</a></li>
 #}
                 <li{% if value == 12 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons_all/"
+                  {% endif %}><a href="/scene/persons/all"
                    title="{{ _('Person list by default name') }}">{{ _('Persons') }}</a></li>
 
             {# <li{% if value == 2 %} class="CurrentSection"
@@ -166,7 +166,7 @@
     {% if p.too_new %}
         N N
     {% else %}
-        <a href="/scene/person?uuid={{p.uuid}}"
+        <a href="/scene/person?uuid={{p.uuid}}" class="inlink"
             title="{{ _("See Person's Details") }}">{{ person_name_by_sortname(p) }}</a>
      {% endif %}
 {%- endmacro %}

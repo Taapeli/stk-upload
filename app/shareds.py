@@ -27,4 +27,4 @@ role_model = None
 
 DEFAULT_ROLE = 'member'    # Value overridden with configuration in application setup
 
-PRIVACY_LIMIT = 0
+PRIVACY_LIMIT = 0       #Todo: Use bl.person.PRIVACY_LIMIT (?)

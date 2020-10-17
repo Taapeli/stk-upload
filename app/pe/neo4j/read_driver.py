@@ -13,6 +13,7 @@ from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
 from bl.family import FamilyBl
 from bl.event import EventBl
+from bl.person import PersonBl
 
 from ui.place import place_names_from_nodes
 
@@ -20,13 +21,14 @@ from .cypher_place import CypherPlace
 from .cypher_source import CypherSource
 from .cypher_family import CypherFamily
 from .cypher_event import CypherEvent
+from .cypher_person import CypherPerson
 
 #Todo: Change Old style includes to bl classes
-from models.gen.person_combo import Person_combo
-from models.gen.cypher import Cypher_person
+#from models.gen.person_combo import Person_combo
+#from models.gen.cypher import Cypher_person
 from models.gen.person_name import Name
 from models.gen.event import Event
-from models.gen.event_combo import Event_combo
+#from models.gen.event_combo import Event_combo
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.repository import Repository
@@ -46,16 +48,16 @@ class Neo4jReadDriver:
         Set person.birth and person.death events from db nodes
         '''
         if birth_node:
-            person.event_birth = Event_combo.from_node(birth_node)
+            person.event_birth = EventBl.from_node(birth_node)
         if death_node:
-            person.event_death = Event_combo.from_node(death_node)
+            person.event_death = EventBl.from_node(death_node)
 
 
     def _obj_from_node(self, node, role=None):
         ''' Create Person or Family object from db node.
         '''
         if 'Person' in node.labels:
-            obj = Person_combo.from_node(node)
+            obj = PersonBl.from_node(node)
         elif 'Family' in node.labels:
             obj = FamilyBl.from_node(node)
             obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
@@ -69,76 +71,348 @@ class Neo4jReadDriver:
         return obj
 
 
-    def dr_get_person_list(self, user, fw_from, limit):
-        """ Read Person data from given fw_from 
-        """
-        persons = []
-        # Select a) filter by user or b) show Isotammi common data (too)
+    def dr_get_person_by_uuid(self, uuid:str, user:str):
+        ''' Read a person from common data or user's own Batch.
+
+            -   If you have selected to use common approved data, you can read
+                both your own and passed data.
+            -   If you havn't selected common data, you can read 
+                only your own data.
+
+            --> Origin from models.gen.person_combo.Person_combo.get_my_person
+        '''
         with self.driver.session(default_access_mode='READ') as session:
             try:
-                if user is None: 
-                    #3 == #1 read approved common data
-                    print("_read_person_list: approved common only")
-                    result = session.run(Cypher_person.read_approved_persons_with_events_starting_name,
-                                         start_name=fw_from, limit=limit)
-                else: 
-                    #2 get my own (no owner name needed)
-                    print("_read_person_list: by owner only")
-                    result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
-                                         user=user, start_name=fw_from, limit=limit)
-                # Returns person, names, events
+    #             if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
+    #                 record = session.run(Cypher_person.get_by_user,
+    #                                      uuid=uuid, user=user).single()
+    #             else:       # Select person from public database
+    #                 #TODO: Rule for public database is missing, taking any
+                record = session.run(CypherPerson.get_person, uuid=uuid).single()
+                # <Record 
+                #    p=<Node id=25651 labels=frozenset({'Person'})
+                #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
+                #            'sex': 1, 'confidence': '', 'change': 1585409698, 'birth_low': 1783,
+                #            'birth_high': 1783, 'id': 'I1135', 'uuid': 'dc6a05ca6b2249bfbdd9708c2ee6ef2b',
+                #            'death_low': 1865}>
+                #    root_type='PASSED'
+                #    root=<Node id=31100 labels=frozenset({'Audit'})
+                #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
+                #            'timestamp': 1596463360673}>
+                # >
+                if record is None:
+                    print(f'dr_get_person_by_uuid: person={uuid} not found')
+                    return {'item': None, 'status': Status.NOT_FOUND,
+                                'statustext': 'The person does not exist'}
+    
+                # Store original researcher data to p.root:
+                # - root_type    which kind of owner link points to this object
+                # - nodeuser     the (original) owner of this object
+                # - bid          Batch id, if any
+                root_type = record['root_type']
+                node = record['root']
+                nodeuser = node.get('user', "")
+                bid = node.get('id', "")
+                if user is None:
+                    # Select person from public database
+                    if root_type != "PASSED":
+                        print(f'dr_get_person_by_uuid: PASSED not allowed for person {uuid}')
+                        return {'item': None, 'status': Status.NOT_FOUND,
+                                'statustext': 'The person is not accessible'}
+                else:
+                    # Select the person only if owned by user
+                    if root_type != "OWNS":
+                        print(f'dr_get_person_by_uuid: OWNS not allowed for person {uuid}')
+                        return {'item': None, 'status': Status.NOT_FOUND,
+                                'statustext': 'The person is not accessible'}
+    
+                node = record['p']
+                p = PersonBl.from_node(node)
+                return {'item': p, 
+                        'root': {'root_type':root_type, 'usernode': nodeuser, 'id':bid}, 
+                        'status': Status.OK}
+    
+            except Exception as e:
+                msg = f'person={uuid} {e.__class__.name} {e}'
+                print(f'dr_get_person_by_uuid: {msg}')
+                return {'item': None, 'status': Status.ERROR,
+                        'statustext': msg}
+
+    def dr_get_person_names_events(self, puid:int):
+        ''' Read names and events to Person object person.
+        '''
+        names = []
+        events =[]
+        cause_of_death = None
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                results = session.run(CypherPerson.get_names_events, uid=puid)
+                for record in results:
+                    # <Record
+                    #    rel=<Relationship id=453912
+                    #        nodes=(
+                    #            <Node id=261207 labels=set() properties={}>,
+                    #            <Node id=261208 labels={'Name'}
+                    #                properties={'firstname': 'Vilhelm Edvard', 'type': 'Also Known As',
+                    #                    'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>)
+                    #        type='NAME' properties={}>
+                    #    x=<Node id=261208 labels={'Name'}
+                    #        properties={'firstname': 'Vilhelm Edvard', 'type': 'Also Known As',
+                    #            'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>>
+                    relation = record['rel']
+                    rel_type = relation.type
+                    role = relation.get('role', '')
+                    node = record['x']
+                    label = list(record['x'].labels)[0]
+                    #print(f"# -[:{rel_type} {relation._properties}]-> (x:{label})")
+                    if label == 'Name':
+                        x = Name.from_node(node)
+                        names.append(x)
+                        self.objs[x.uniq_id] = x
+                    elif label == 'Event':
+                        x = EventBl.from_node(node)
+                        x.role = role
+                        events.append(x)
+                        self.objs[x.uniq_id] = x 
+                        if x.type == "Cause Of Death":
+                            cause_of_death = x
+                    print(f"# ({puid}) -[:{rel_type} {role}]-> ({x.uniq_id}:{label} '{x}')")
+    
+                return {'names':names,
+                        'events':events,
+                        'cause_of_death':cause_of_death,
+                        'status':Status.OK}
+            except Exception as e:
+                msg = f'person={puid} {e.__class__.name} {e}'
+                print(f'dr_get_person_names_events: {msg}')
+                return {'item': None, 'status': Status.ERROR,
+                        'statustext': f"Could not read names and events: {msg}"}
+
+
+    def dr_get_person_families(self, puid:int):
+        ''' Read the families, where given Person is a member.
+
+            Also return the Family members with their birth event
+            and add family events to this person's events.
+
+            (p:Person) <-- (f:Family)
+               for f
+                 (f) --> (fp:Person) -[*1]-> (fpn:Name)
+                 (f) --> (fe:Event)
+        '''
+        families_as_child = []
+        families_as_parent = []
+        family_events = []
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                results = session.run(CypherPerson.get_families, uid=puid)
+                for record in results:
+                    # <Record
+                    #  rel=<Relationship id=671269
+                    #     nodes=(
+                    #        <Node id=432641 labels={'Family'} 
+                    #            properties={'datetype': 3, 'father_sortname': 'Järnefelt##August Aleksander', 
+                    #                'change': 1542401728, 'rel_type': 'Married', 'mother_sortname': 'Clodt von Jürgensburg##Elisabeth', 
+                    #                'date2': 1941614, 'id': 'F0015', 'date1': 1901974, 'uuid': '90282a3cf6ee47a1b8f9a4a2c710c736'}>, 
+                    #        <Node id=427799 labels={'Person'} 
+                    #            properties={'sortname': 'Järnefelt##Aino', 'datetype': 19, 'confidence': '2.0', 
+                    #                'sex': 2, 'change': 1566323471, 'id': 'I0035', 'date2': 2016423, 'date1': 1916169, 
+                    #                'uuid': '925ea92d7dab4e8c92b53c1dcbdad36f'}>) 
+                    #    type='CHILD' 
+                    #    properties={}> 
+                    #  family=<Node id=432641 labels={'Family'} properties={...}> 
+                    #  events=[<Node id=269554 labels={'Event'} properties={'type': 'Marriage', ...}> ...]
+                    #  members=[[
+                    #    <Relationship ...  type='CHILD' ...>, 
+                    #    <Node ... labels={'Person'}...>, 
+                    #    <Node ... labels={'Name'}...>, 
+                    #    <Node ... labels={'Event'}...]
+                    #    ...]>
+    
+                    # 1. What is the relation this Person to their Family
+    
+                    relation = record['rel']
+                    rel_type = relation.type
+                    role = relation.get('role', "")
+    
+                    # 2. The Family node
+    
+                    node = record['family']
+                    family = FamilyBl.from_node(node)
+                    family.role = rel_type
+                    family.marriage_dates = ""  # string "" or a DataRange
+                    if rel_type == "CHILD":
+                        families_as_child.append(family)
+                    elif rel_type == "PARENT":
+                        families_as_parent.append(family)
+                    print(f"# ({puid}) -[:{rel_type} {role}]-> (:Family '{family}')")
+    
+                    # 3. Family Events
+    
+                    for event_node in record['events']:
+                        f_event = EventBl.from_node(event_node)
+                        #print(f"#\tevent {f_event}")
+                        if f_event.type == "Marriage":
+                            family.marriage_dates = f_event.dates
+                        # Add family events to person events, too
+                        if rel_type == "PARENT":
+                            f_event.role = "Family"
+                            print(f"# ({puid}) -[:EVENT {f_event.role}]-> (:Event '{f_event}')")
+                            family_events.append(f_event)
+                            # Add Event to list of those events, who's Citation etc
+                            # references must be checked
+                            if not f_event.uniq_id in self.objs.keys():
+                                self.objs[f_event.uniq_id] = f_event
+    
+                    # 4. Family members and their birth events
+    
+                    for relation, member_node, name_node, event_node in record['members']:
+                        # relation = <Relationship
+                        #    id=671263 
+                        #    nodes=(
+                        #        <Node id=432641 labels={'Family'} properties={'rel_type': 'Married', ...}>, 
+                        #        <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ...}>)
+                        #    type='CHILD' 
+                        #    properties={}>
+                        # member_node = <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ... }>
+                        # name_node = <Node id=428884 labels={'Name'} properties={'firstname': 'Caspar Woldemar' ...}>
+                        # event_node = <Node id=267935 labels={'Event'} properties={'type': 'Birth', ... }>
+                        role = relation['role']
+                        member = PersonBl.from_node(member_node)
+                        if name_node:
+                            name = Name.from_node(name_node)
+                            member.names.append(name)
+                        else:
+                            name = None
+                        if event_node:
+                            event = EventBl.from_node(event_node)
+                            member.birth_date = event.dates
+                        else:
+                            event = None
+                        if role == "father":
+                            family.father = member
+                        elif role == "mother":
+                            family.mother = member
+                        else:
+                            family.children.append(member)
+    
+                return {'families_as_child':families_as_child,
+                        'families_as_parent': families_as_parent,
+                        'family_events': family_events,
+                        'status': Status.OK}
 
             except Exception as e:
-                print('Error pe.neo4j.read_driver.Neo4jReadDriver.dr_get_person_list: {} {}'.format(e.__class__.__name__, e))            
-                raise
+                msg = f'person={puid} {e}' #{e.__class__.name} {e}'
+                print(f'dr_get_person_families: {msg}')
+                return {'item': None, 'status': Status.ERROR,
+                        'statustext': f"Could not read families: {msg}"}
 
-            for record in result:
-                ''' <Record 
-                        person=<Node id=163281 labels={'Person'} 
-                          properties={'sortname': 'Ahonius##Knut Hjalmar',  
-                            'sex': '1', 'confidence': '', 'change': 1540719036, 
-                            'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
-                            'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
-                        names=[<Node id=163282 labels={'Name'} 
-                          properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
-                            'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
-                        events=[[
-                            <Node id=169494 labels={'Event'} 
-                                properties={'datetype': 0, 'change': 1540587380, 
-                                'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
-                                'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
-                             None
-                             ]] 
-                        owners=['jpek']>
-                '''
-                node = record['person']
-                # The same person is not created again
-                p = Person_combo.from_node(node)
-                #if show_with_common and p.too_new: continue
-    
-    #             if take_refnames and record['refnames']:
-    #                 refnlist = sorted(record['refnames'])
-    #                 p.refnames = ", ".join(refnlist)
-                for nnode in record['names']:
-                    pname = Name.from_node(nnode)
-                    p.names.append(pname)
+
+    def dr_get_person_list(self, args):
+        """ Read Person data from given fw_from .
         
-                # Create a list with the mentioned user name, if present
-                if user:
-                    p.owners = record.get('owners',[user])
-                                                                                                                                    
-                # Events
-                for enode, pname, role in record['events']:
-                    if enode != None:
-                        e = Event_combo.from_node(enode)
-                        e.place = pname or ""
-                        if role and role != "Primary":
-                            e.role = role
-                        p.events.append(e)
-    
-                persons.append(p)   
+            args = {'use_user', 'fw', 'limit'}
+        """
+        user = args.get('use_user')
+        show_approved = (user is None)
+        rule = args.get('rule')
+        key = args.get('key')
+        fw_from = args.get('fw','')
+        limit = args.get('limit', 100)
+        restart = args.get('restart', False)
+        
+        persons = []
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                if restart:
+                    # Show search form
+                    return {'items': [], 'status': Status.NOT_STARTED }
+                elif args.get('pg') == 'all':
+                    # Show persons, no search form
+                    if show_approved:
+                        print(f'Show approved, common data fw={fw_from}')
+                        result = session.run(CypherPerson.read_approved_persons_w_events_fw_name,
+                                             start_name=fw_from, limit=limit)
+                    else:
+                        print(f'Show candidate data fw={fw_from}')
+                        result = session.run(CypherPerson.read_my_persons_w_events_fw_name,
+                                             user=user, start_name=fw_from, limit=limit)
+                elif rule in ['surname', 'firstname', 'patronyme']:
+                    # Search persons matching <rule> field to <key> value
+                    if show_approved:
+                        print(f'Show approved common data {rule} ~ {key}*')
+                        result = session.run(CypherPerson.get_common_events_by_refname_use,
+                                             use=rule, name=key)
+                    else:
+                        print(f'Show candidate data {rule} ~ {key}*')
+                        result = session.run(CypherPerson.get_my_events_by_refname_use,
+                                             use=rule, name=key, user=user)
+                elif rule == 'ref':
+                    # Search persons where a reference name = <key> value
+                    if show_approved:
+                        print(f'TODO: Show approved common data {rule}={key}')
+                        #return session.run(Cypher_person.get_events_by_refname, name=key)
+                    else:
+                        print(f'TODO: Show candidate data {rule}={key}')
+                        #return session.run(Cypher_person.get_events_by_refname, name=key)
+                else:
+                    return {'items': [], 'status': Status.ERROR,
+                            'statustext': 'dr_get_person_list: Invalid rule'}
+                # result: person, names, events
+                for record in result:
+                    #  <Record 
+                    #     person=<Node id=163281 labels={'Person'} 
+                    #       properties={'sortname': 'Ahonius##Knut Hjalmar',  
+                    #         'sex': '1', 'confidence': '', 'change': 1540719036, 
+                    #         'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
+                    #         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
+                    #     names=[<Node id=163282 labels={'Name'} 
+                    #       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
+                    #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
+                    #     events=[[
+                    #         <Node id=169494 labels={'Event'} 
+                    #             properties={'datetype': 0, 'change': 1540587380, 
+                    #             'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
+                    #             'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
+                    #          None
+                    #          ]] 
+                    #     owners=['jpek']>
+                    p = PersonBl.from_node(record['person'])
+                    #if show_with_common and p.too_new: continue
 
-        return persons
+                    # if take_refnames and record['refnames']:
+                    #     refnlist = sorted(record['refnames'])
+                    #     p.refnames = ", ".join(refnlist)
+                    p.names = []
+                    for node in record['names']:
+                        pname = Name.from_node(node)
+                        pname.initial = pname.surname[0] if pname.surname else ''
+                        p.names.append(pname)
+            
+                    # Create a list with the mentioned user name, if present
+                    if user:
+                        p.owners = record.get('owners',[user])
+                                                                                                                                        
+                    # Events
+                    for node, pname, role in record['events']:
+                        if not node is None:
+                            e = EventBl.from_node(node)
+                            e.place = pname or ""
+                            if role and role != "Primary":
+                                e.role = role
+                            p.events.append(e)
+        
+                    persons.append(p)   
+
+            except Exception as e:
+                return {'items':[], 'status':Status.ERROR,
+                        'statustext': f'dr_get_person_list: {e.__class__.__name__} {e}'}
+
+        if len(persons) == 0:
+            return {'items': persons, 'status': Status.NOT_FOUND,
+                    'statustext': _('No persons found after name %(name)s', name=fw_from)}
+        return {'items': persons, 'status': Status.OK}
+
 
     def dr_get_event_by_uuid(self, user:str, uuid:str):
         '''
@@ -207,7 +481,7 @@ class Neo4jReadDriver:
                     # Create Person or Family
                     referee = self._obj_from_node(node, role)
                     cls_name = referee.__class__.__name__
-                    if cls_name == "Person_combo":
+                    if cls_name == "PersonBl":
                         referee.label = "Person"
                     elif cls_name == "FamilyBl":
                         referee.label = "Family"
@@ -354,7 +628,7 @@ class Neo4jReadDriver:
                     if person_node:
                         if uniq_id != person_node.id:
                             # Skip person with double default name
-                            p = Person_combo.from_node(person_node)
+                            p = PersonBl.from_node(person_node)
                             p.role = role
                             name_node = record['name']
                             if name_node:
@@ -396,7 +670,7 @@ class Neo4jReadDriver:
                     # >
                     person_node = record['person']
                     if person_node:
-                        p = Person_combo.from_node(person_node)
+                        p = PersonBl.from_node(person_node)
                         name_node = record['name']
                         if name_node:
                             p.names.append(Name.from_node(name_node))
@@ -422,18 +696,17 @@ class Neo4jReadDriver:
         events = []
         with self.driver.session(default_access_mode='READ') as session:
             try:
-                result = session.run(CypherFamily.get_events_w_places, 
-                                     fuid=uniq_id)
+                result = session.run(CypherFamily.get_events_w_places, fuid=uniq_id)
+                # RETURN event, place, names,
+                #        COLLECT(DISTINCT [place_in, rel_in, COLLECT in_names]) AS inside
                 for record in result:
-                    # <Record 
-                    # >
                     event_node = record['event']
                     if event_node:
                         #    event=<Node id=543995 labels={'Event'}
                         #        properties={'datetype': 0, 'change': 1585409702, 'description': '', 
                         #            'id': 'E0170', 'date2': 1860684, 'type': 'Marriage', 'date1': 1860684, 
                         #            'uuid': '38c0d5bdc0f245c88bfb1083228db219'}>
-                        e = Event_combo.from_node(event_node)
+                        e = EventBl.from_node(event_node)
 
                         place_node = record['place']
                         if place_node:
@@ -446,31 +719,34 @@ class Neo4jReadDriver:
                             e.place = PlaceBl.from_node(place_node)
                             e.place.names = place_names_from_nodes(record['names'])
                             
-                        inside_node = record['inside']
-                        if inside_node:
-                            #    inside=<Node id=529916 labels={'Place'} 
-                            #        properties={'id': 'P1874', 'type': 'Organisaatio', 'uuid': '7100e387dd7f4130a5804eb338162703', 
-                            #            'pname': 'Suomen ev.lut. kirkko', 'change': 1585490980}> 
-                            #    in_rel=<Relationship id=454774 nodes=(
-                            #        <Node id=531912 labels={'Place'} 
-                            #            properties={'id': 'P1077', 'type': 'Parish', 'uuid': '55c069c9cee54092a88366a15b75d1a4', 
-                            #                'pname': 'Loviisan srk', 'change': 1585562874}>, 
-                            #        <Node id=529916 labels={'Place'}
-                            #            properties={'id': 'P1874', 'type': 'Organisaatio', 'uuid': '7100e387dd7f4130a5804eb338162703',
-                            #                'pname': 'Suomen ev.lut. kirkko', 'change': 1585490980}>
-                            #        )
-                            #        type='IS_INSIDE'
-                            #        properties={}
-                            #    in_names=[   <Node id=533693 labels={'Place_name'} properties={...}>,
-                            #            <Node id=533694 labels={'Place_name'} properties={'name': 'Evangelisk-lutherska kyrkan i Finland', 'lang': 'sv'}>,
-                            #        ]
-                            pl_in = PlaceBl.from_node(inside_node)
-                            inside_rel = record['in_rel']
-                            if len(inside_rel._properties):
-                                pl_in.dates = DateRange.from_node(inside_rel._properties)
-
-                            pl_in.names = place_names_from_nodes(record['in_names'])
-                            e.place.uppers.append(pl_in)
+                        for inside_node, inside_rel, inside_names in record['inside']:
+                            if inside_node:
+                                # <Node id=5494 labels=frozenset({'Place'})
+                                #     properties={'id': 'P0024', 'type': 'Country', 'uuid': '199338cdcd754760acfe3d2165c2805c', 
+                                #         'pname': 'Venäjä', 'change': 1585409705}>
+                                # <Relationship id=6192
+                                #     nodes=(
+                                #         <Node id=5788 labels=frozenset({'Place'})
+                                #             properties={'coord': [60.70911111111111, 28.745330555555558],
+                                #                 'pname': 'Viipuri', 'change': 1585409704, 'id': 'P0011',
+                                #                 'type': 'City', 'uuid': '4bea93a25e7841cfb2160f00dccbfcf5'}>,
+                                #         <Node id=5494 labels=frozenset({'Place'})
+                                #             properties={'id': 'P0024', 'type': 'Country', 'uuid': '199338cdcd754760acfe3d2165c2805c',
+                                #                 'pname': 'Venäjä', 'change': 1585409705}>
+                                #     )
+                                #     type='IS_INSIDE'
+                                #     properties={'datetype': 2, 'date2': 2040000, 'date1': 2040000}
+                                # >
+                                # [
+                                #     <Node id=5496 labels=frozenset({'Place_name'}) properties={'name': 'Ryssland', 'lang': 'sv'}>
+                                #     <Node id=5495 labels=frozenset({'Place_name'}) properties={'name': 'Venäjä', 'lang': ''}>
+                                # ]
+                                pl_in = PlaceBl.from_node(inside_node)
+                                if len(inside_rel._properties):
+                                    pl_in.dates = DateRange.from_node(inside_rel._properties)
+    
+                                pl_in.names = place_names_from_nodes(inside_names)
+                                e.place.uppers.append(pl_in)
 
                         events.append(e)
 
@@ -569,7 +845,7 @@ class Neo4jReadDriver:
         return {"items":notes, "status":Status.OK}
 
 
-    def dr_get_person_families(self, uuid):
+    def dr_get_person_families_uuid(self, uuid):
         """
             Get the Families where Person is a member (parent or child).
 
@@ -608,10 +884,10 @@ class Neo4jReadDriver:
                         families[fid] = family
                     family = families[fid]
                     person_node = record['person']
-                    person = Person_combo.from_node(person_node)
+                    person = PersonBl.from_node(person_node)
                     birth_node = record['birth']
                     if birth_node:
-                        birth = Event_combo.from_node(birth_node)
+                        birth = EventBl.from_node(birth_node)
                         person.event_birth = birth
                     if record['type'] == 'PARENT':
                         person.role = record['role']
@@ -641,6 +917,216 @@ class Neo4jReadDriver:
                         "statustext": f'Error dr_get_person_families: {e}'}     
 
         return {"items":list(families.values()), "status":Status.OK}
+
+
+    def dr_get_object_places(self, person):
+        ''' Read Place hierarchies for all objects in self.objs.
+        '''
+        uids = list(self.objs.keys())
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                results = session.run(CypherPerson.get_objs_places, uid_list=uids)
+                for record in results:
+                    # <Record
+                    #    label='Event'
+                    #    uniq_id=426916 
+                    #    pl=<Node id=306042 labels={'Place'}
+                    #        properties={'id': 'P0456', 'type': 'Parish', 'uuid': '7aeb4e26754d46d0aacfd80910fa1bb1',
+                    #            'pname': 'Helsingin seurakunnat', 'change': 1543867969}> 
+                    #    pnames=[
+                    #        <Node id=306043 labels={'Place_name'}
+                    #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>, 
+                    #        <Node id=306043 labels={'Place_name'} 
+                    #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>
+                    #    ]
+                    ##    ri=<Relationship id=631695 
+                    ##        nodes=(
+                    ##            <Node id=306042 labels={'Place'} properties={'id': 'P0456', ...>, 
+                    ##            <Node id=307637 labels={'Place'} 
+                    ##                properties={'coord': [60.16664166666666, 24.94353611111111], 
+                    ##                    'id': 'P0366', 'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 
+                    ##                    'pname': 'Helsinki', 'change': 1556954884}>
+                    ##        )
+                    ##        type='IS_INSIDE' properties={}> 
+                    #    pi=<Node id=307637 labels={'Place'} 
+                    #        properties={'coord': [60.16664166666666, 24.94353611111111], 'id': 'P0366', 
+                    #            'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 'pname': 'Helsinki', 'change': 1556954884}> 
+                    #    pinames=[
+                    #        <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
+                    #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
+                    #    ]>
+    
+                    src_label = record['label']
+                    if src_label != "Event":
+                        raise TypeError(f'dr_get_object_places: An Event excepted, got {src_label}')
+                    src_uniq_id = record['uniq_id']
+    
+                    # Use the Event from Person events
+                    src = None
+                    for e in person.events:
+                        if e.uniq_id == src_uniq_id:
+                            src = e
+                            break
+                    if not src:
+                        raise LookupError(f"dr_get_object_places: Unknown Event {src_uniq_id}!?")
+    
+                    pl = PlaceBl.from_node(record['pl'])
+                    if not pl.uniq_id in self.objs.keys():
+                        # A new place
+                        self.objs[pl.uniq_id] = pl
+                        #print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
+                        pl.names = place_names_from_nodes(record['pnames'])
+                        
+                    #else:
+                    #   print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
+                    src.place_ref.append(pl.uniq_id)
+    
+                    # Surrounding places
+                    if record['pi']:
+                        pl_in = PlaceBl.from_node(record['pi'])
+                        ##print(f"# Hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
+                        if pl_in.uniq_id in self.objs:
+                            pl.uppers.append(self.objs[pl_in.uniq_id])
+                            ##print(f"# - Using a known place {objs[pl_in.uniq_id]}")
+                        else:
+                            pl.uppers.append(pl_in)
+                            self.objs[pl_in.uniq_id] = pl_in
+                            pl_in.names = place_names_from_nodes(record['pinames'])
+                            #print(f"#  ({pl_in} names {pl_in.names})")
+                    pass
+    
+            except Exception as e:
+                print(f"Could not read places for person {person.id} objects {self.objs}: {e}")
+        return
+
+
+    def dr_get_object_citation_note_media(self, person, active_objs=[]):
+        ''' Read Citations, Notes, Medias for list of objects.
+
+                (x) -[r:CITATION|NOTE|MEDIA]-> (y)
+
+            First (when active_objs is empty) searches all Notes, Medias and
+            Citations of person or it's connected objects.
+            
+            Returns a list of created new objects, where this search should
+            be repeated.
+        '''
+        new_objs = []
+
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                if active_objs and active_objs[0] > 0:
+                    # Search next level destinations x) -[r:CITATION|NOTE|MEDIA]-> (y)
+                    uids = active_objs
+                else:
+                    # Search all (x) -[r:CITATION|NOTE|MEDIA]-> (y)
+                    uids = list(self.objs.keys())
+                print(f'# Searching Citations, Notes, Medias for {len(uids)} nodes')
+
+                results = session.run(CypherPerson.get_objs_citation_note_media,
+                                      uid_list=uids)
+                for record in results:
+                    # <Record
+                    #    label='Person'
+                    #    uniq_id=327766
+                    #    r=<Relationship id=426799
+                    #        nodes=(
+                    #            <Node id=327766 labels=set() properties={}>, 
+                    #            <Node id=327770 labels={'Note'}
+                    #                properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 
+                    #                    'id': 'N2-I0033', 'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
+                    #                    'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}>
+                    #        ) 
+                    #        type='NOTE' properties={}>
+                    #    y=<Node id=327770 labels={'Note'}
+                    #            properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 'id': 'N2-I0033', 
+                    #                'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
+                    #                'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}>
+                    # >
+    
+                    # The existing object x
+                    x_label = record['label']
+                    x = self.objs[record['uniq_id']]
+    
+                    # Relation r between (x) --> (y)
+                    rel = record['r']
+                    #rel_type = rel.type
+                    #rel_properties = 
+    
+                    # Target y is a Citation, Note or Media
+                    y_node = record['y']    # 
+                    y_label = list(y_node.labels)[0]
+                    y_uniq_id = y_node.id
+                    #print(f'# Linking ({x.uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
+                    #for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
+                    if y_label == "Citation":
+                        o = self.objs.get(y_uniq_id)
+                        if not o:
+                            o = Citation.from_node(y_node)
+                            if not x.uniq_id in o.citators:
+                                # This citation is referenced by x
+                                o.citators.append(x.uniq_id)
+                            # The list of Citations, for further reference search
+                            self.citations[o.uniq_id] = o
+                            self.objs[o.uniq_id] = o
+                            new_objs.append(o.uniq_id)
+                        # Store reference to referee object
+                        if hasattr(x, 'citation_ref'):
+                            x.citation_ref.append(o.uniq_id)
+                        else:
+                            x.citation_ref = [o.uniq_id]
+    #                         traceback.print_exc()
+    #                         raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
+                        #print(f'# ({x_label}:{x.uniq_id}) --> (Citation:{o.id})')
+    
+                    elif y_label == "Note":
+                        o = self.objs.get(y_uniq_id, None)
+                        if not o:
+                            o = Note.from_node(y_node)
+                            self.objs[o.uniq_id] = o
+                            new_objs.append(o.uniq_id)
+                        # Store reference to referee object
+                        if hasattr(x, 'note_ref'):
+                            x.note_ref.append(o.uniq_id)
+                        else:
+                            raise LookupError(f'dr_get_object_citation_note_media: No field for {x_label}.{y_label.lower()}_ref')            
+    
+                    elif y_label == "Media":
+                        o = self.objs.get(y_uniq_id, None)
+                        if not o:
+                            o = Media.from_node(y_node)
+                            self.objs[o.uniq_id] = o
+                            new_objs.append(o.uniq_id)
+                        # Get relation properties
+                        order = rel.get('order')
+                        # Store reference to referee object
+                        if hasattr(x, 'media_ref'):
+                            # Add media reference crop attributes
+                            left = rel.get('left')
+                            if left != None:
+                                upper = rel.get('upper')
+                                right = rel.get('right')
+                                lower = rel.get('lower')
+                                crop = (left, upper, right, lower)
+                            else:
+                                crop = None
+                            print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
+                            x.media_ref.append((o.uniq_id,crop,order))
+                            if len(x.media_ref) > 1 and x.media_ref[-2][2] > x.media_ref[-1][2]:
+                                x.media_ref.sort(key=lambda x: x[2])
+                                print("#\tMedia sort done")
+                        else:
+                            print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
+                        #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
+    
+                    else:
+                        raise NotImplementedError(f'dr_get_object_citation_note_media: No rule for ({x_label}) --> ({y_label})')            
+                    #print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
+    
+            except Exception as e:
+                print(f"dr_get_object_citation_note_media: Could not read 'Citations, Notes, Medias': {e}")
+                print(f"... for Person {person.uuid} objects {self.objs}: {e}")
+            return new_objs
 
 
     def dr_get_place_list_fw(self, user, fw_from, limit, lang='fi'):
@@ -855,15 +1341,15 @@ class Neo4jReadDriver:
             #                'id': 'E0080', 'date2': 1885458, 'type': 'Birth', 'date1': 1885458, 
             #                'uuid': '160a0c75659145a4ac09809823fca5f9'}>
             # >
-            e = Event_combo.from_node(record['event'])
-            # Fields uid (person uniq_id) and names are on standard in Event_combo
+            e = EventBl.from_node(record['event'])
+            # Fields uid (person uniq_id) and names are on standard in EventBl
             e.role = record["role"]
             indi_label = list(record['indi'].labels)[0]
             if indi_label in ['Audit', 'Batch']:
                 continue
             if 'Person' == indi_label:
                 e.indi_label = 'Person'
-                e.indi = Person_combo.from_node(record['indi'])
+                e.indi = PersonBl.from_node(record['indi'])
                 if e.indi.too_new:    # Check privacy
                     continue
                 for node in record["names"]:
@@ -1014,8 +1500,82 @@ class Neo4jReadDriver:
                         rep.medium = medium
                         source.repositories.append(rep)
 
-            return source
+            if source:
+                return {'item': source, 'status':Status.OK}
+            return {'status':Status.NOT_FOUND,
+                    'statustext': f"source uuid={uuid} not found"}
 
+
+    def dr_get_object_sources_repositories(self):
+        ''' Get Sources and Repositories udes by listed objects
+        
+            Read Source -> Repository hierarchies for given list of citations
+                            
+            - session       neo4j.session   for database access
+            - citations[]   list int        list of citation.uniq_ids
+            - objs{}        dict            objs[uniq_id] = NodeObject
+            
+            * The Citations mentioned must be in objs dictionary
+            * On return, the new Sources and Repositories found are added to objs{} 
+            
+            --> Origin from models.source_citation_reader.read_sources_repositories
+        '''
+        if len(self.citations) == 0:
+            return
+    
+        uids = list(self.citations.keys())
+        with self.driver.session(default_access_mode='READ') as session:
+            results = session.run(CypherSource.get_citation_sources_repositories, 
+                                  uid_list=uids)
+            for record in results:
+                # <Record label='Citation' uniq_id=392761 
+                #    s=<Node id=397146 labels={'Source'} 
+                #        properties={'id': 'S1723', 'stitle': 'Hauhon seurakunnan rippikirja 1757-1764', 
+                #            'uuid': 'f704b8b90c0640efbade4332e126a294', 'spubinfo': '', 'sauthor': '', 'change': 1563727817}>
+                #    rel=<Relationship id=566238 
+                #      nodes=(
+                #        <Node id=397146 labels={'Source'} 
+                #            properties={'id': 'S1723', 'stitle': 'Hauhon seurakunnan rippikirja 1757-1764', 
+                #                'uuid': 'f704b8b90c0640efbade4332e126a294', 'spubinfo': '', 'sauthor': '', 'change': 1563727817}>, 
+                #        <Node id=316903 labels={'Repository'}
+                #            properties={'id': 'R0157', 'rname': 'Hauhon seurakunnan arkisto', 'type': 'Archive', 
+                #                'uuid': '7ac1615894ea4457ba634c644e8921d6', 'change': 1563727817}>) 
+                #      type='REPOSITORY' 
+                #      properties={'medium': 'Book'}>
+                #    r=<Node id=316903 labels={'Repository'}
+                #        properties={'id': 'R0157', 'rname': 'Hauhon seurakunnan arkisto', 'type': 'Archive', 
+                #            'uuid': '7ac1615894ea4457ba634c644e8921d6', 'change': 1563727817}>
+                # >
+                
+                # 1. The Citation node
+                uniq_id = record['uniq_id']
+                cita = self.objs[uniq_id]
+        
+                # 2. The Source node
+                node = record['s']
+                source = SourceBl.from_node(node)
+                if not source.uniq_id in self.objs:
+                    self.objs[source.uniq_id] = source
+        
+                if record['rel']:
+                    # 3. Medium from REPOSITORY relation
+                    relation = record['rel']
+                    medium = relation.get('medium', "")
+        
+                    # 4. The Repository node
+                    node = record['r']
+                    repo = Repository.from_node(node)
+                    repo.medium = medium
+                    if not repo.uniq_id in self.objs:
+                        self.objs[repo.uniq_id] = repo
+                    if not repo.uniq_id in source.repositories:
+                        source.repositories.append(repo.uniq_id)
+                
+                # Referencing a (Source, medium, Repository) tuple
+                cita.source_id = source.uniq_id
+                #print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
+    
+        return
 
 
     def dr_get_source_citations(self, sourceid:int):

@@ -10,7 +10,7 @@ Created on 17.3.2020
 '''
 from bl.base import Status
 #import traceback
-from models.gen.person_combo import Person_combo
+#from models.gen.person_combo import Person_combo
 
 class DBreader:
     ''' Public methods for accessing active database.
@@ -28,35 +28,8 @@ class DBreader:
         else:
             self.use_user = u_context.user
    
-    def get_person_list(self):
-        ''' List person data including all data needed to Person page.
-        
-            Calls Neo4jDriver.dr_get_person_list(user, fw_from, limit)
-        '''
-        context = self.user_context
-        fw = context.next_name_fw()
-        persons = self.dbdriver.dr_get_person_list(self.use_user, fw, context.count)
-
-        # Update the page scope according to items really found 
-        if persons:
-            context.update_session_scope('person_scope', 
-                                          persons[0].sortname, persons[-1].sortname, 
-                                          context.count, len(persons))
-
-        #Todo: remove this after next main version
-        if 'next_person' in context.session: # Remove an obsolete field
-            context.session.pop('next_person')
-            context.session.modified = True
-
-        if self.use_user is None:
-            persons2 = [p for p in persons if not p.too_new]
-            num_hidden = len(persons) - len(persons2)
-        else:
-            persons2 = persons
-            num_hidden = 0
-        person_result = PersonResult(persons2, num_hidden)
-        return person_result
-
+#     def get_person_list(self): # --> bl.person.PersonReader.get_person_list()
+#         ''' List person data including all data needed to Person page. '''
 
 #     def get_place_list(self): # --> bl.place.PlaceReader.get_list()
 #         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
@@ -77,13 +50,15 @@ class DBreader:
                                 as [label, object] tuples(?)
                                 
         """
+        from bl.person import Person
+
         source = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
         results = {'item':source, 'status':Status.OK}
         if not source:
             results = {'status':Status.NOT_FOUND, 'statustext':f"Source with uuid={uuid}"}
             return results
         
-        citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
+        _citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
 
         citations = []
         for c_id, c in citations.items():
@@ -92,7 +67,7 @@ class DBreader:
             for target in targets[c_id]:
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
-                    if isinstance(target, Person_combo):
+                    if isinstance(target, Person):
                         self.dbdriver.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:
@@ -102,25 +77,3 @@ class DBreader:
         results['citations':citations]
 
         return results
-
-
-# ------------------------------ Result sets ----------------------------------
-
-class BaseResult:
-    ''' Result objects common operations
-    '''
-    def __init__(self, items=[], num_hidden=0):
-        self.error = 0  
-        self.num_hidden = num_hidden
-        self.items = items
-
-
-class PersonResult(BaseResult):
-    ''' Person's result object.
-    '''
-    def __init__(self, items=[], num_hidden=0):
-        BaseResult.__init__(self, items, num_hidden)
-#         self.error = 0  
-#         self.num_hidden = num_hidden
-#         self.items = items  
-

@@ -15,141 +15,141 @@ from models.source_citation_reader import read_sources_repositories, get_citatio
 import traceback
 
 
-def get_person_full_data(uuid, owner, use_common=True):
-    """ Get a Person with all connected nodes for display in Person page.
-
-
-    Obtaining Person object tree
-
-    For Person data page we must have all business objects, which has connection
-    to current Person. This is done in the following steps:
-
-    1. (p:Person) --> (x:Name|Event)
-    2. (p:Person) <-- (f:Family)
-       for f
-       (f) --> (fp:Person) -[*1]-> (fpn:Name)
-       (f) --> (fe:Event)
-    3. for z in p, x, fe, z, s, r
-       (y) --> (z:Citation|Note|Media)
-    4. for pl in z:Place, ph
-       (pl) --> (pn:Place_name)
-       (pl) --> (ph:Place)
-    5. for c in z:Citation
-       (c) --> (s:Source) --> (r:Repository)
-
-    p:Person
-      +-- x:Name
-      |     +-- z:Citation (2)
-      |     +-- z:Note (3)
-      |     +-- z:Media (4)
-(1)   +-- x:Event
-      |     +-- z:Place
-      |     |     +-- pn:Place_name
-      |     |     +-- z:Place (hierarkia)
-      |     |     +-- z:Citation (2)
-      |     |     +-- z:Note (3)
-      |     |     +-- z:Media (4)
-      |     +-- z:Citation (2)
-      |     +-- z:Note (3)
-      |     +-- z:Media (4)
-      +-- f:Family
-      |     +-- fp:Person
-      |     |     +-- fpn:Name
-      |     +-- fe:Event (1)
-      |     +-- z:Citation (2)
-      |     +-- z:Note (3)
-      |     +-- z:Media (4)
-(2)   +-- z:Citation
-      |     +-- s:Source
-      |     |     +-- r:Repository
-      |     |     |     +-- z:Citation (2)
-      |     |     |     +-- z:Note (3)
-      |     |     |     +-- z:Media (4)
-      |     |     +-- z:Citation (2)
-      |     |     +-- z:Note (3)
-      |     |     +-- z:Media (4)
-      |     +-- z:Note (3)
-      |     +-- z:Media (4)
-(3)    +-- z:Note
-      |     +-- z:Citation (2)
-      |     +-- z:Media (4)
-(4)   +-- z:Media
-            +-- z:Citation (2)
-            +-- z:Note (3)
-      
-    The objects are stored in PersonReader.person object p tree.
-    - x and f: included objects (in p.names etc)
-    - others: reference to "PersonReader.objs" dictionary (p.citation_ref[] etc)
-
-    For ex. Sources may be referenced multiple times and we want to process them 
-    once only.
-
-    - The Person is identified by uuid key.
-
-    """
-
-    try:
-        reader = PersonReader(use_common)
-
-        # 1. Read Person p, if not denied
-        reader.get_person(uuid, owner)
-        print(f"#Person {reader.person}")
-
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Could not read Person {uuid}: {e}")
-        return None, None, None
-
-    if use_common and reader.person.too_new: 
-        return None, None, None
-    
-    # 2. (p:Person) --> (x:Name|Event)
-    reader.read_person_names_events()
-
-    # 3. (p:Person) <-- (f:Family)
-    #    for f
-    #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
-    #      (fp)--> (me:Event{type:Birth})
-    #      (f) --> (fe:Event)
-    reader.read_person_families()
-    if not use_common: reader.remove_privacy_limit_from_families()
-
-    #    Sort all Person and family Events by date
-    reader.person.events.sort()
-
-    # 4. for pl in z:Place, ph
-    #      (pl) --> (pn:Place_name)
-    #      (pl) --> (pi:Place)
-    #      (pi) --> (pin:Place_name)
-    reader.read_object_places()
-
-    # 5. Read their connected nodes z: Citations, Notes, Medias
-    #    for y in p, x, fe, z, s, r
-    #        (y) --> (z:Citation|Note|Media)
-    new_objs = [-1]
-    while len(new_objs) > 0:
-        new_objs = reader.read_object_citation_note_media(new_objs)
-        
-    # Calculate the average confidence of the sources
-    if len(reader.citations) > 0:
-        summa = 0
-        for cita in reader.citations.values():
-            summa += int(cita.confidence)
-            
-        aver = summa / len(reader.citations)
-        reader.person.confidence = "%0.1f" % aver # string with one decimal
-
-    # 6. Read Sources s and Repositories r for all Citations
-    #    for c in z:Citation
-    #        (c) --> (s:Source) --> (r:Repository)
-    read_sources_repositories(reader.session, reader.objs, reader.citations)
-
-    # Create Javascript code to create source/citation list
-    jscode = get_citations_js(reader.objs)
-
-    # Return Person with included objects,  and javascript code to create
-    # Citations, Sources and Repositories with their Notes
-    return (reader.person, reader.objs, jscode)
+# def get_person_full_data(uuid, owner, use_common=True): --> bl.person.PersonReader.get_person_data()
+#     """ Get a Person with all connected nodes for display in Person page.
+# 
+# 
+#     Obtaining Person object tree
+# 
+#     For Person data page we must have all business objects, which has connection
+#     to current Person. This is done in the following steps:
+# 
+#     1. (p:Person) --> (x:Name|Event)
+#     2. (p:Person) <-- (f:Family)
+#        for f
+#        (f) --> (fp:Person) -[*1]-> (fpn:Name)
+#        (f) --> (fe:Event)
+#     3. for z in p, x, fe, z, s, r
+#        (y) --> (z:Citation|Note|Media)
+#     4. for pl in z:Place, ph
+#        (pl) --> (pn:Place_name)
+#        (pl) --> (ph:Place)
+#     5. for c in z:Citation
+#        (c) --> (s:Source) --> (r:Repository)
+# 
+#     p:Person
+#       +-- x:Name
+#       |     +-- z:Citation (2)
+#       |     +-- z:Note (3)
+#       |     +-- z:Media (4)
+# (1)   +-- x:Event
+#       |     +-- z:Place
+#       |     |     +-- pn:Place_name
+#       |     |     +-- z:Place (hierarkia)
+#       |     |     +-- z:Citation (2)
+#       |     |     +-- z:Note (3)
+#       |     |     +-- z:Media (4)
+#       |     +-- z:Citation (2)
+#       |     +-- z:Note (3)
+#       |     +-- z:Media (4)
+#       +-- f:Family
+#       |     +-- fp:Person
+#       |     |     +-- fpn:Name
+#       |     +-- fe:Event (1)
+#       |     +-- z:Citation (2)
+#       |     +-- z:Note (3)
+#       |     +-- z:Media (4)
+# (2)   +-- z:Citation
+#       |     +-- s:Source
+#       |     |     +-- r:Repository
+#       |     |     |     +-- z:Citation (2)
+#       |     |     |     +-- z:Note (3)
+#       |     |     |     +-- z:Media (4)
+#       |     |     +-- z:Citation (2)
+#       |     |     +-- z:Note (3)
+#       |     |     +-- z:Media (4)
+#       |     +-- z:Note (3)
+#       |     +-- z:Media (4)
+# (3)    +-- z:Note
+#       |     +-- z:Citation (2)
+#       |     +-- z:Media (4)
+# (4)   +-- z:Media
+#             +-- z:Citation (2)
+#             +-- z:Note (3)
+#       
+#     The objects are stored in PersonReader.person object p tree.
+#     - x and f: included objects (in p.names etc)
+#     - others: reference to "PersonReader.objs" dictionary (p.citation_ref[] etc)
+# 
+#     For ex. Sources may be referenced multiple times and we want to process them 
+#     once only.
+# 
+#     - The Person is identified by uuid key.
+# 
+#     """
+# 
+#     try:
+#         reader = PersonReader(use_common)
+# 
+#         # 1. Read Person p, if not denied
+#         reader.get_person(uuid, owner)
+#         print(f"#Person {reader.person}")
+# 
+#     except Exception as e:
+#         traceback.print_exc()
+#         print(f"Could not read Person {uuid}: {e}")
+#         return None, None, None
+# 
+#     if use_common and reader.person.too_new: 
+#         return None, None, None
+#     
+#     # 2. (p:Person) --> (x:Name|Event)
+#     reader.read_person_names_events()
+# 
+#     # 3. (p:Person) <-- (f:Family)
+#     #    for f
+#     #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
+#     #      (fp)--> (me:Event{type:Birth})
+#     #      (f) --> (fe:Event)
+#     reader.read_person_families()
+#     if not use_common: reader.remove_privacy_limit_from_families()
+# 
+#     #    Sort all Person and family Events by date
+#     reader.person.events.sort()
+# 
+#     # 4. for pl in z:Place, ph
+#     #      (pl) --> (pn:Place_name)
+#     #      (pl) --> (pi:Place)
+#     #      (pi) --> (pin:Place_name)
+#     reader.read_object_places()
+# 
+#     # 5. Read their connected nodes z: Citations, Notes, Medias
+#     #    for y in p, x, fe, z, s, r
+#     #        (y) --> (z:Citation|Note|Media)
+#     new_objs = [-1]
+#     while len(new_objs) > 0:
+#         new_objs = reader.read_object_citation_note_media(new_objs)
+#         
+#     # Calculate the average confidence of the sources
+#     if len(reader.citations) > 0:
+#         summa = 0
+#         for cita in reader.citations.values():
+#             summa += int(cita.confidence)
+#             
+#         aver = summa / len(reader.citations)
+#         reader.person.confidence = "%0.1f" % aver # string with one decimal
+# 
+#     # 6. Read Sources s and Repositories r for all Citations
+#     #    for c in z:Citation
+#     #        (c) --> (s:Source) --> (r:Repository)
+#     read_sources_repositories(reader.session, reader.objs, reader.citations)
+# 
+#     # Create Javascript code to create source/citation list
+#     jscode = get_citations_js(reader.objs)
+# 
+#     # Return Person with included objects,  and javascript code to create
+#     # Citations, Sources and Repositories with their Notes
+#     return (reader.person, reader.objs, jscode)
 
 
 # def get_a_person_for_display_apoc(uid, user):
@@ -350,159 +350,161 @@ def get_person_full_data(uuid, owner, use_common=True):
 #     return (person, objs, fns.getFootnotes())
 
 
-def connect_object_as_leaf(src, target, rel_type=None):
-    ''' Subroutine for Person page display.
-
-        Saves target object in appropiate place in the src object 
-        (Person, Event etc).
-        Returns saved target object or None, if no new object was saved here.
-    
-    Plan 17 Sep 2018 / JMä
-
-    The following relation targets are stored as instances in root object 
-    'src' variable:
-        (:Person)                not linked to self
-        -[:NAME]-> (:Name)       to .names[]
-        -[:EVENT]-> (:Event)     to .events[]
-        -[:CHILD]-> (:Family)    to .child[]
-        -[:PARENT {role:'father'}]-> (:Family)   to .father
-        -[:PARENT {role:'mother'}]-> (:Family)   to .mother
-        -[:HIERARCHY]-> (:Place) to .place
-        (:Place)
-        -[:NAME]-> (:Name)       to .names[]
-        
-    The following relation targets are stored as object references (uniq_id) 
-    in root object variable. The actual referenced target objects are stored to 
-    separate 'obj_dict' variable:
-        -[:CITATION]-> (:Citation)     to .citation_ref[]
-        -[:SOURCE]-> (:Source)         to .source_id
-        -[:REPOSITORY]-> (:Repository) to .repo_ref[]
-        -[:NOTE]-> (:Note)             to .note_ref[]
-        -[:PLACE]-> (:Place)           to .place_ref[]
-        -[:MEDIA]-> (:Media)           to .media_ref[]
-    
-    Object to object connection variables:
-    
-        Person combo 
-            .names[]
-            .events[]
-            .media_ref[]
-            .families[]
-            .note_ref[]
-            .citation_ref[]
-        Name 
-            .note_ref[]
-            .citation_ref[]
-        Refname
-            -
-        Media
-            .note_ref[]
-            .citation_ref[]
-        Note 
-            .citation_ref[]
-        Event combo
-            .place_ref[]
-            .note_ref[]
-        Place 
-            .place_ref[]
-            .note_ref[]
-            .citation_ref[]
-            #TODO: .media_ref[]
-        Family_combo
-             children[]
-            .father, .mother, .children[]
-            .events[]
-            .note_ref[]
-            .citation_ref[]
-        Citation
-            .note_ref[]
-        Source
-            .repo_ref[]
-        Repository
-            -
-    '''
-
-    src_class = src.__class__.__name__
-    target_class = target.__class__.__name__
-    
-    if src_class == 'Person_combo':
-        if target_class == 'Name':
-            src.names.append(target)
-            return src.names[-1]
-        elif target_class == 'Event_combo':
-            src.events.append(target)
-            return src.events[-1]
-        elif target_class == 'Family_combo':
-            if rel_type == 'CHILD':
-                src.families_as_child.append(target)
-                return src.families_as_child[-1]
-            if rel_type == 'PARENT': #'MOTHER' or rel_type == 'FATHER':
-                src.families_as_parent.append(target)
-                return src.families_as_parent[-1]
-        elif target_class == 'Citation':
-            src.citation_ref.append(target.uniq_id)
-            return None
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-        if target_class == 'Media':
-            # TODO Noudata medioiden järjestystä!
-            src.media_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Event_combo':
-        if target_class == 'Place_combo':
-            src.place_ref.append(target.uniq_id)
-            return None
-        elif target_class == 'Citation':
-            #src.citations.append(target) 
-            src.citation_ref.append(target.uniq_id)
-            return None
-        elif target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Citation':
-        if target_class == 'Source':
-            src.source_id = target.uniq_id
-            return None
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Place_combo':
-        if target_class == 'Place_name':
-            src.names.append(target)
-            return src.names[-1]
-        if target_class == 'Place_combo':
-            src.uppers.append(target)
-            return src.uppers[-1]
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-        if target_class == 'Media':
-            # TODO Noudata medioiden järjestystä!
-            src.media_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Family_combo':
-        if target_class == 'Event_combo':
-            src.events.append(target)
-            return src.events[-1]
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-
-    elif src_class == 'Source':
-        if target_class == 'Repository':
-            src.repositories.append(target.uniq_id)
-            return None
-        if target_class == 'Note':
-            src.note_ref.append(target.uniq_id)
-            return None
-
-    print('Ei toteutettu {} --> {}'.format(src_class, target_class))
-    return None
+# def connect_object_as_leaf(src, target, rel_type=None):
+#     ''' Subroutine for Person page display.
+# 
+#         Saves target object in appropiate place in the src object 
+#         (Person, Event etc).
+#         Returns saved target object or None, if no new object was saved here.
+#         
+#         OBSOLETE: Called from get_a_person_for_display_apoc
+#     
+#     Plan 17 Sep 2018 / JMä
+# 
+#     The following relation targets are stored as instances in root object 
+#     'src' variable:
+#         (:Person)                not linked to self
+#         -[:NAME]-> (:Name)       to .names[]
+#         -[:EVENT]-> (:Event)     to .events[]
+#         -[:CHILD]-> (:Family)    to .child[]
+#         -[:PARENT {role:'father'}]-> (:Family)   to .father
+#         -[:PARENT {role:'mother'}]-> (:Family)   to .mother
+#         -[:HIERARCHY]-> (:Place) to .place
+#         (:Place)
+#         -[:NAME]-> (:Name)       to .names[]
+#         
+#     The following relation targets are stored as object references (uniq_id) 
+#     in root object variable. The actual referenced target objects are stored to 
+#     separate 'obj_dict' variable:
+#         -[:CITATION]-> (:Citation)     to .citation_ref[]
+#         -[:SOURCE]-> (:Source)         to .source_id
+#         -[:REPOSITORY]-> (:Repository) to .repo_ref[]
+#         -[:NOTE]-> (:Note)             to .note_ref[]
+#         -[:PLACE]-> (:Place)           to .place_ref[]
+#         -[:MEDIA]-> (:Media)           to .media_ref[]
+#     
+#     Object to object connection variables:
+#     
+#         Person combo 
+#             .names[]
+#             .events[]
+#             .media_ref[]
+#             .families[]
+#             .note_ref[]
+#             .citation_ref[]
+#         Name 
+#             .note_ref[]
+#             .citation_ref[]
+#         Refname
+#             -
+#         Media
+#             .note_ref[]
+#             .citation_ref[]
+#         Note 
+#             .citation_ref[]
+#         Event combo
+#             .place_ref[]
+#             .note_ref[]
+#         Place 
+#             .place_ref[]
+#             .note_ref[]
+#             .citation_ref[]
+#             #TODO: .media_ref[]
+#         Family_combo
+#              children[]
+#             .father, .mother, .children[]
+#             .events[]
+#             .note_ref[]
+#             .citation_ref[]
+#         Citation
+#             .note_ref[]
+#         Source
+#             .repo_ref[]
+#         Repository
+#             -
+#     '''
+# 
+#     src_class = src.__class__.__name__
+#     target_class = target.__class__.__name__
+#     
+#     if src_class == 'Person_combo':
+#         if target_class == 'Name':
+#             src.names.append(target)
+#             return src.names[-1]
+#         elif target_class == 'Event_combo':
+#             src.events.append(target)
+#             return src.events[-1]
+#         elif target_class == 'Family_combo':
+#             if rel_type == 'CHILD':
+#                 src.families_as_child.append(target)
+#                 return src.families_as_child[-1]
+#             if rel_type == 'PARENT': #'MOTHER' or rel_type == 'FATHER':
+#                 src.families_as_parent.append(target)
+#                 return src.families_as_parent[-1]
+#         elif target_class == 'Citation':
+#             src.citation_ref.append(target.uniq_id)
+#             return None
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+#         if target_class == 'Media':
+#             # TODO Noudata medioiden järjestystä!
+#             src.media_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Event_combo':
+#         if target_class == 'Place_combo':
+#             src.place_ref.append(target.uniq_id)
+#             return None
+#         elif target_class == 'Citation':
+#             #src.citations.append(target) 
+#             src.citation_ref.append(target.uniq_id)
+#             return None
+#         elif target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Citation':
+#         if target_class == 'Source':
+#             src.source_id = target.uniq_id
+#             return None
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Place_combo':
+#         if target_class == 'Place_name':
+#             src.names.append(target)
+#             return src.names[-1]
+#         if target_class == 'Place_combo':
+#             src.uppers.append(target)
+#             return src.uppers[-1]
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+#         if target_class == 'Media':
+#             # TODO Noudata medioiden järjestystä!
+#             src.media_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Family_combo':
+#         if target_class == 'Event_combo':
+#             src.events.append(target)
+#             return src.events[-1]
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+# 
+#     elif src_class == 'Source':
+#         if target_class == 'Repository':
+#             src.repositories.append(target.uniq_id)
+#             return None
+#         if target_class == 'Note':
+#             src.note_ref.append(target.uniq_id)
+#             return None
+# 
+#     print('Ei toteutettu {} --> {}'.format(src_class, target_class))
+#     return None
 
  
 # def get_person_data_by_id(uniq_id): @see: models.datareader.get_person_data_by_id

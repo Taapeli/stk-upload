@@ -18,10 +18,8 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 from .base import NodeObject, Status
+from .person import Person
 from pe.db_reader import DBreader #, SourceResult
-
-#Todo: move gen.Person_combo to bi.PersonBl
-from models.gen.person_combo import Person_combo
 
 
 class Source(NodeObject):
@@ -145,10 +143,12 @@ class SourceReader(DBreader):
             - item.citations    Citating Persons, Events, Families and Medias
                                 as [label, object] tuples(?)
         """
-        source = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
-        results = {'item':source, 'status':Status.OK}
+        results = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
+        if results.get('status') != Status.OK:
+            return results
+        source = results.get('item')
         if not source:
-            results.error = f"DBreader.get_source_with_references: {self.use_user} - no Source with uuid={uuid}"
+            results.statustext = f"no Source with uuid={uuid}"
             return results
         
         citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
@@ -169,7 +169,7 @@ class SourceReader(DBreader):
             for target in targets[c_id]:
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
-                    if isinstance(target, Person_combo):
+                    if isinstance(target, Person):
                         self.dbdriver.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:

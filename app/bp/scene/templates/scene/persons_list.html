@@ -44,7 +44,7 @@
                        </p>
 	           </div>
 	           <div class="SearchBox">
-	               <form action="/scene/persons_all">
+	               <form action="/scene/persons/all">
 	                 <fieldset>
 	                    <input type="hidden" name="c" value="50" >
 	                    <label for="fw">{{ _('Go to') }}</label>
@@ -71,7 +71,7 @@
 		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
 			    <li>{% if next[0] > ' ' %}
-			         <a href="/scene/persons_all/?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+			         <a href="/scene/persons/all?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
 			    {% else %}<span class="navlink">|&lt;</span>
 			    {% endif %}</li>
                 <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed"> &lt; </span></li>
@@ -85,7 +85,7 @@
             {% if next[1] and next[1].startswith('>') %}
                 <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
             {% else %}
-	            <li><a href="/scene/persons_all/?{{ {'fw':next[1]} | urlencode }}" 
+	            <li><a href="/scene/persons/all?{{ {'fw':next[1]} | urlencode }}" 
 	                 title="{{ _('next page') }}" class="navlink"> &gt; </a></li>
             {% endif %}
             </ul>
@@ -188,7 +188,7 @@
 	{% else %}
         <div class="NotFound">
             <p>{{ _('No one found with search keys starting "%(name)s"', name=next[0]) }}.</p>
-            {% if next[0] %}<p>&nbsp;&#9656; <a href="/scene/persons_all/?fw=%20" 
+            {% if next[0] %}<p>&nbsp;&#9656; <a href="/scene/persons/all?fw=%20" 
                 title="{{ _('first page') }}">{{ _("Go to the first person") }}</a></p>
             {% endif %}
         </div>

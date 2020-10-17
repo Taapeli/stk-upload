@@ -37,17 +37,6 @@ RETURN p, type(r) AS root_type, root"""
 # RETURN p, batch"""
 #     get_public = """MATCH (root) -[:PASSED]-> (p:Person {uuid:$uuid}) 
 # RETURN p, root"""
-    get_names_events = """
-MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
-RETURN rel, x ORDER BY x.order"""
-    get_families = """
-MATCH (p:Person) <-[rel:CHILD|PARENT]- (f:Family) WHERE ID(p) = $uid
-OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event)
-OPTIONAL MATCH (f) -[mr:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
-OPTIONAL MATCH (m) -[:EVENT]-> (me:Event {type:"Birth"})
-RETURN rel, f AS family, COLLECT(distinct fe) AS events, 
-    COLLECT(distinct [mr, m, n, me]) AS members
-    ORDER BY family.date1"""
     get_places = """
 MATCH (x) -[:PLACE]-> (pl:Place)
     WHERE ID(x) IN $uid_list
@@ -57,10 +46,6 @@ OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
 RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, 
     pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
-    get_citation_note_media = """
-MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-    WHERE ID(x) IN $uid_list
-RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
     #        (c) --> (s:Source) --> (r:Repository)
 
 #For Person_pg v2

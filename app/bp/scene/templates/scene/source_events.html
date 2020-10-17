@@ -94,8 +94,12 @@ td.Citation div ol {padding-top:.3em;}
                                     {{ indi.clearname | replace("#", " ") }}</a>
                           {% else %}
                                  {{ macro.person_name_by_sortname_anon(indi) }}
-                                 {% if indi.event_birth.dates %}{{ indi.event_birth.dates }}{% endif %} &ndash;
-                                 {% if indi.event_death.dates %}{{ indi.event_death.dates }}{% endif %}
+                             {% if indi.event_birth and indi.event_birth.dates %}
+                                {{ indi.event_birth.dates }}
+                             {% endif %} &ndash;
+                             {% if indi.event_death and indi.event_death.dates %}
+                                {{ indi.event_death.dates }}
+                             {% endif %}
                           {% endif %}
                			    </li>
 	                    {% endfor %}

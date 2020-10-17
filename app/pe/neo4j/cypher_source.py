@@ -56,7 +56,6 @@ return c as citation, collect(distinct n) as notes, x as near,
     collect(distinct [pe, re.role]) as far
 order by c.id, x.id"""
 
-
     # ------------------------ Cypher clauses ------------------------
 
     get_auditted_sets = _match_auditted + _sets
@@ -75,4 +74,12 @@ match (p:Person) -[:NAME]-> (n:Name {order:0})
 optional match (p) -[re:EVENT]-> (e:Event)
     where e.type = "Birth" or e.type = "Death"
 return n as name, collect(distinct e) as events"""
+
+    get_citation_sources_repositories = """
+MATCH (c:Citation) -[:SOURCE]-> (s:Source)
+    WHERE ID(c) IN $uid_list
+    OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
+RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
+
+
     
