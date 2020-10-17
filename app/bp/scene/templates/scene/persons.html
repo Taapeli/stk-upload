@@ -30,6 +30,7 @@ div#description_box p {
                                    'Displaying %(num)s persons.', cnt ) }}
                        {{ _('If the person has many names, they may appear in the list under each name.') }}
                     </p>
+                    <p>{{ _('The years displayed are estimates of possible life years determined by person data.') }} </p>
                     <ul>
     {% if rule == 'all' %}
                         <li>{{ _('Sorted by %(order)s.', order=ordname[order]) }}

@@ -313,7 +313,6 @@ class Neo4jReadDriver:
         
             args = {'use_user', 'fw', 'limit'}
         """
-        persons = []
         user = args.get('use_user')
         show_approved = (user is None)
         rule = args.get('rule')
@@ -322,13 +321,13 @@ class Neo4jReadDriver:
         limit = args.get('limit', 100)
         restart = args.get('restart', False)
         
-        # Select a) filter by user or b) show Isotammi common data (too)
+        persons = []
         with self.driver.session(default_access_mode='READ') as session:
             try:
                 if restart:
                     # Show search form
                     return {'items': [], 'status': Status.NOT_STARTED }
-                elif rule is None:
+                elif args.get('pg') == 'all':
                     # Show persons, no search form
                     if show_approved:
                         print(f'Show approved, common data fw={fw_from}')
@@ -341,15 +340,21 @@ class Neo4jReadDriver:
                 elif rule in ['surname', 'firstname', 'patronyme']:
                     # Search persons matching <rule> field to <key> value
                     if show_approved:
-                        print(f'Show approved, common data {rule} ~ {key}')
+                        print(f'Show approved common data {rule} ~ {key}*')
+                        result = session.run(CypherPerson.get_common_events_by_refname_use,
+                                             use=rule, name=key)
                     else:
-                        print(f'Show candidate data {rule} ~ {key}')
+                        print(f'Show candidate data {rule} ~ {key}*')
+                        result = session.run(CypherPerson.get_my_events_by_refname_use,
+                                             use=rule, name=key, user=user)
                 elif rule == 'ref':
                     # Search persons where a reference name = <key> value
                     if show_approved:
-                        print(f'Show approved, common data {rule}={key}')
+                        print(f'TODO: Show approved common data {rule}={key}')
+                        #return session.run(Cypher_person.get_events_by_refname, name=key)
                     else:
-                        print(f'Show candidate data {rule}={key}')
+                        print(f'TODO: Show candidate data {rule}={key}')
+                        #return session.run(Cypher_person.get_events_by_refname, name=key)
                 else:
                     return {'items': [], 'status': Status.ERROR,
                             'statustext': 'dr_get_person_list: Invalid rule'}
@@ -372,17 +377,15 @@ class Neo4jReadDriver:
                     #          None
                     #          ]] 
                     #     owners=['jpek']>
-                    node = record['person']
-                    # The same person is not created again
-                    p = PersonBl.from_node(node)
+                    p = PersonBl.from_node(record['person'])
                     #if show_with_common and p.too_new: continue
-        
+
                     # if take_refnames and record['refnames']:
                     #     refnlist = sorted(record['refnames'])
                     #     p.refnames = ", ".join(refnlist)
                     p.names = []
-                    for nnode in record['names']:
-                        pname = Name.from_node(nnode)
+                    for node in record['names']:
+                        pname = Name.from_node(node)
                         pname.initial = pname.surname[0] if pname.surname else ''
                         p.names.append(pname)
             
@@ -391,9 +394,9 @@ class Neo4jReadDriver:
                         p.owners = record.get('owners',[user])
                                                                                                                                         
                     # Events
-                    for enode, pname, role in record['events']:
-                        if enode != None:
-                            e = EventBl.from_node(enode)
+                    for node, pname, role in record['events']:
+                        if not node is None:
+                            e = EventBl.from_node(node)
                             e.place = pname or ""
                             if role and role != "Primary":
                                 e.role = role

@@ -175,8 +175,6 @@ class PersonReader(DBreader):
                 years='y1-'   from year
                 years='y1-y2' year range
                 years='-y2'   untill year
-
-            #TODO: 'take_refnames' could determine, if refnames are returned, too
         """
         if 'years' in args:
             # Any of
@@ -204,7 +202,10 @@ class PersonReader(DBreader):
         result = self.dbdriver.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
 
-        if (result['status'] in [Status.NOT_FOUND, Status.ERROR]):
+        if result.get('status') == Status.ERROR:
+            msg = result.get("statustext")
+            logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
+            print(f'bl.person.PersonReader.get_person_search: {msg}')
             return {'items':[], 'status':result['status'], 
                     'statustext': _('No persons found')}
 

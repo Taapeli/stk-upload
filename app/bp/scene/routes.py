@@ -80,11 +80,32 @@ def obsolete_scene():
 
 # ------------------------- Menu 1: Person search ------------------------------
 
-def _do_show_persons(args):
-    ''' Execute persons list query by arguments
+def _do_get_persons(args):
+    ''' Execute persons list query by arguments.
+
+    Persons, current
+        GET    /all                                       --> args={pg:all}
+    Persons, forward
+        GET    /all?fw=<sortname>&c=<count>               --> args={pg:all,fw:sortname,c:count}
+    Persons, by years range
+        GET    /all?years=<y1-y2>                         --> args={pg:all,years:y1_y2}
+    Persons fw,years
+        GET    /all?years=<y1-y2>&fw=<sortname>&c=<count> --> args={pg:all,fw:sortname,c:count,years:y1_y2}
+    Search form
+        GET    /search                                    --> args={pg:search,restart:True}
+    Search by refname
+        GET    /search?rule=ref,key=<str>                 --> args={pg:search,rule:ref,key:str}
+    Search form
+        POST   /search                                    --> args={pg:search,restart:True}
+    Search by name starting
+        POST   /search rule=<rule>,key=<str>              --> args={pg:search,rule:ref,key:str}
+    Search by years range
+        POST   /search years=<y1-y2>                      --> args={pg:search,years:y1_y2}
+    Search by name & years
+        POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
     '''
     u_context = UserContext(user_session, current_user, request)
-    if args.get('restart',False):
+    if args.get('pg') == 'search':
         # No scope
         u_context.set_scope_from_request()
     else:
@@ -105,15 +126,19 @@ def _do_show_persons(args):
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
 def show_persons():
-    # /all
-    # /all?years=1900-1950
+    ''' Persons listings.
+    '''
     t0 = time.time()
-    args = {'rule': None}
-    years = request.args.get('years', default='', type=str)
+    args = {'pg':'all'}
+    years = request.args.get('years')
     if years: args['years'] = years
+    fw = request.args.get('fw')
+    if fw:    args['fw'] = fw
+    c = request.args.get('c')
+    if c:     args['c'] = c
     print(f'{request.method} All persons {args}')
 
-    res, u_context = _do_show_persons(args)
+    res, u_context = _do_get_persons(args)
 
     found = res.get('items',[])
     hide = res.get('num_hidden',0)
@@ -136,29 +161,23 @@ def show_persons():
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
 def show_person_search():
-    # /search?rule=all
-    # /search?rule=surname&key=Sib
-    # /search?rule=firstname&key=Anders
-    # /search?rule=patronyme&key=Anders
-    # /search?ref=Anders
-    # /search?years=1900-1950
+    ''' Persons search page.
+    '''
     t0 = time.time()
-    args = {'rule': request.args.get('rule', default='all'),
-            'restart': True}
-    if request.method == "GET":
-        rq = request.args
-    else:
-        rq = request.form
-    key = rq.get('key', default=None, type=str)
-    if key:
-        args['key'] = key
+    args = {'pg':'search'}
+    rq = request.args if request.method == "GET" else request.form
+    rule = rq.get('rule')
+    if rule:  args['rule'] = rule
+    key = rq.get('key')
+    if key:   args['key'] = key
     years = rq.get('years', default=None, type=str)
-    if years:
-        args['years'] = years
+    if years: args['years'] = years
+    if rule is None and years is None:
+        args['restart'] = True
 
     print(f'{request.method} Persons {args}')
 
-    res, u_context = _do_show_persons(args)
+    res, u_context = _do_get_persons(args)
     found = res.get('items',[])
     hide = res.get('num_hidden',0)
     hidden = f" hide={hide}" if hide > 0 else ""
