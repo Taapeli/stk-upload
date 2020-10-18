@@ -150,7 +150,7 @@ def show_persons():
                            persons=found, menuno=12, 
                            num_hidden=hide, user_context=u_context,
                            elapsed=elapsed)
-#     return render_template("/scene/persons.html",  menuno=12,
+#     return render_template("/scene/persons_search.html",  menuno=12,
 #                            persons=res.get('items'),
 #                            user_context=u_context, 
 #                            num_hidden=res.get('num_hidden'), 
@@ -174,21 +174,23 @@ def show_person_search():
     if years: args['years'] = years
     if rule is None and years is None:
         args['restart'] = True
-
     print(f'{request.method} Persons {args}')
 
     res, u_context = _do_get_persons(args)
+
     found = res.get('items',[])
     hide = res.get('num_hidden',0)
     hidden = f" hide={hide}" if hide > 0 else ""
     elapsed = time.time() - t0
     stk_logger(u_context, f"-> bp.scene.routes.show_person_search"
                     f" n={len(found)}{hidden} e={elapsed:.3f}")
-    return render_template("/scene/persons.html",  menuno=0,
+    return render_template("/scene/persons_search.html",  menuno=0,
                            persons=found,
                            user_context=u_context, 
                            num_hidden=res.get('num_hidden'), 
-                           rule=args.get('key',''), elapsed=time.time()-t0)
+                           rule=args.get('rule',''), 
+                           key=key, years=years,
+                           elapsed=time.time()-t0)
 
 @bp.route('/obsolete/search', methods=['POST'])
 @bp.route('/obsolete/ref=<key>', methods=['GET'])
@@ -258,7 +260,7 @@ def obsolete_show_person_search(selection=None):
                f" {u_context.owner_or_common()}"
                f" n={len(persons_out)} hide={len(persons)-len(persons_out)}")
 
-    return render_template("/scene/persons.html", persons=persons_out,
+    return render_template("/scene/persons_search.html", persons=persons_out,
                            user_context=u_context, num_hidden=hidden, 
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
@@ -321,7 +323,7 @@ def obsolete_show_person_list_v2(selection=None):
                f" {u_context.owner_or_common()}"
                f" n={len(persons_out)} hide={len(persons)-len(persons_out)}")
 
-    return render_template("/scene/persons.html", persons=persons_out,
+    return render_template("/scene/persons_search.html", persons=persons_out,
                            user_context=u_context, num_hidden=hidden, 
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
@@ -346,7 +348,7 @@ def obsolete_show_persons_by_refname(refname, opt=""):
     print(persons)
     persons = []
     stk_logger(u_context, f"-> bp.scene.routes.show_persons_by_refname FAIL?") #n={len(persons)}")
-    return render_template("/scene/persons.html", persons=persons, menuno=1, 
+    return render_template("/scene/persons_search.html", persons=persons, menuno=1, 
                            user_context=u_context, order=order, rule=keys)
 
 @bp.route('/obsolete/persons/all/<string:opt>')
@@ -364,23 +366,6 @@ def obsolete_show_all_persons_list(opt=''):
         TODO Should have restriction by owner's UserProfile 
     """
     return 'Obsolete! show_all_persons_list<br><a href="javascript:history.back()">Go Back</a>'
-#     logger.warning("#TODO: fix material selection or remove action show_all_persons_list")
-# 
-#     t0 = time.time()
-#     u_context = UserContext(user_session, current_user, request)
-#     keys = ('all',)
-#     ref = ('ref' in opt)
-#     if 'fn' in opt: order = 1   # firstname
-#     elif 'pn' in opt: order = 2 # firstname
-#     else: order = 0             # surname
-#     args = {'ref': ref, 'order': order}
-#     if current_user.is_authenticated:
-#         args['user'] = current_user.username
-#     persons = read_persons_with_events(keys, args=args) #user=user, take_refnames=ref, order=order)
-#     stk_logger(u_context, "-> bp.scene.routes.show_all_persons_list")
-#     return render_template("/scene/persons.html", persons=persons, menuno=1, 
-#                            user_context=u_context, order=order,
-#                            rule=keys, elapsed=time.time()-t0)
 
 
 

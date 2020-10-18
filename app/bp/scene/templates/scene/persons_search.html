@@ -21,28 +21,23 @@ div#description_box p {
 </div>
 
 {{ macro.menu(menuno) }}
-    <div class="content" id="Individuals">
+    <div class="content">
         <div id="summaryarea">
-            <div class="flex-container">
+          <form  action="/scene/persons/search" method="post">
+            <div class="flex-container2">
 {% if cnt %}
-                <div>
-                    <p>{{ ngettext('Displaying %(num)s person.', 
-                                   'Displaying %(num)s persons.', cnt ) }}
-                       {{ _('If the person has many names, they may appear in the list under each name.') }}
-                    </p>
-                    <p>{{ _('The years displayed are estimates of possible life years determined by person data.') }} </p>
+                <div class="description_box2">
+    {%- if key %}
+                    <p>{{ ngettext('Displaying %(num)s person by name.', 
+                                   'Displaying %(num)s persons by name.', cnt ) }}
+                       {{ _('If the person has many names, they may appear in the list under each name.') }}</p>
+    {%- elif years %}
+                    <p>{{ ngettext('Displaying %(num)s person,', 
+                                   'Displaying %(num)s persons,', cnt ) }}
+                       {{ _('who may have lived during required years.') }}</p>
+    {%- endif %}
+                    <p>{{ _('Under person\'s name there are the estimated possible life years determined by person data.') }} </p>
                     <ul>
-    {% if rule == 'all' %}
-                        <li>{{ _('Sorted by %(order)s.', order=ordname[order]) }}
-                            {{ _('Change Order:') }} 
-        {% if order != 0 %}<a href="/scene/persons/all/" 
-                              class="inlink">{{ _('Surname') }}</a> /{% endif %}
-        {% if order != 1 %}<a href="/scene/persons/all/fn" 
-                              class="inlink">{{ _('First Name') }}</a> /{% endif %}
-        {% if order != 2 %}<a href="/scene/persons/all/pn" 
-                              class="inlink">{{ _('Patronymic or Matronymic') }}</a>{% endif %}.
-                        </li>
-    {% endif %}
     {% if num_hidden %}
                         <li>{{ ngettext(
                               '%(num)s person hidden because of privacy protection', 
@@ -55,43 +50,43 @@ div#description_box p {
                 </div>
 {% endif %}
 
-                <div id="searching" class="SearchBox">
-                   <fieldset>
-                       {% if rule %}{% set selection = rule %}
-                       {% else %}{% set selection = "surname" %}
-                       {% endif %}
+{% if rule %}{% set selection = rule %}
+{% else %}{% set selection = "surname" %}
+{% endif %}
            
-                       <form  action="/scene/persons/search" method="post">
-                           <p>{{ _('Search takes place from beginning of selected name part, e.g. in Surname "Sib" coincides with the name "Sibbe".') }}</p>
-                           <label for="snam">{{ _('Search word (beginning part)') }}&nbsp; </label>
-                           <input type="text" name="key" id="snam" 
-                              {% if key %}value="{{key}}"
-                              {% else %}placeholder="{{ _('Name') }}"{% endif %} required>
-                           <br>
-                           <input type="radio" name="rule" id="ssur" value="surname"
-                            {% if selection == "surname" %}checked{% endif %}>
-                           <label for="ssur">{{ _('Surname') }}</label>
-                           <input type="radio" name="rule" id="sfir" value="firstname"
-                            {% if selection == "firstname" %}checked{% endif %}>
-                           <label for="sfir">{{ _('Firstname') }}</label>
-                           <input type="radio" name="rule" id="ssuf" value="patronyme"
-                            {% if selection == "patronyme" %}checked{% endif %}>
-                           <label for="ssuf">{{ _('Patronymic') }}</label>
-                           <input type="submit" value="Hae">
-                       </form>
+                <div id="namesearch" class="SearchBox2">
+                   <fieldset>
+                       <legend>{{ _('Search by a name part') }}</legend>
+<!--                        <p>{{ _('Search takes place from beginning of selected name part, e.g. in Surname "Sib" coincides with the name "Sibbe".') }}</p> -->
+                       <label for="snam">{{ _('Search word (beginning part)') }}&nbsp; </label>
+                       <input type="text" name="key" id="snam" 
+                          {% if key %}value="{{key}}"
+                          {% else %}placeholder="{{ _('Name') }}"{% endif %}>
+                       <br>
+                       <input type="radio" name="rule" id="ssur" value="surname"
+                        {% if selection == "surname" %}checked{% endif %}><label for="ssur">{{ _('Surname') }}</label>
+                       <input type="radio" name="rule" id="sfir" value="firstname"
+                        {% if selection == "firstname" %}checked{% endif %}><label for="sfir">{{ _('Firstname') }}</label>
+                       <input type="radio" name="rule" id="ssuf" value="patronyme"
+                        {% if selection == "patronyme" %}checked{% endif %}><label for="ssuf">{{ _('Patronymic') }}</label>
                    </fieldset>
+<!--                 </div> -->
+
+<!--                 <div id="yearsearch" class="SearchBox2"> -->
+                   <fieldset>
+                       <legend>{{ _('Search scope by life time') }}</legend>
+                       <div>{{ _('Give one to two years: 1918, -1917, 1918- or 1880-1899.') }}</div>
+                       <label for="years">{{ _('Years') }}&nbsp; </label>
+                       <input type="text" name="years" id="years" size=7
+                          {% if years %}value="{{years}}"
+                          {% else %}placeholder="1880-1899"{% endif %}>
+                   </fieldset>
+                       <div class="submit"><input type="submit" value="Hae"></div>
                 </div>
-            </div>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <ol  class='flashes'>
-                {% for category, message in messages %}
-                  <li class='flash_{{category}}'>{{ message }}</li>
-                {% endfor %}
-                </ol>
-              {% endif %}
-            {% endwith %}
-       </div>
+
+            </div><!-- flex-container -->
+          </form>
+       </div><!-- summaryarea -->
        
     <div>
 	        {% with messages = get_flashed_messages(with_categories=true) %}
@@ -104,9 +99,9 @@ div#description_box p {
 	          {% endif %}
 	        {% endwith %}
 
-    </div><!-- summaryarea -->
+    </div>
 
-{% if persons|count > 0 %}
+{% if persons %}
 
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
@@ -175,7 +170,7 @@ div#description_box p {
 	    {% endfor %}
         </tbody>
     </table>
-{% elif rule | count > 1 %}
+{% elif rule or years %}
     <div class="NotFound">
         <p>{{ _('No one found with search keys') }}.</p>
     </div>
