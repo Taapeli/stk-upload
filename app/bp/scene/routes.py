@@ -43,8 +43,9 @@ from models.datareader import read_persons_with_events
 #from models.datareader import get_source_with_events
 #from templates.jinja_filters import translate
 
+# Select the read driver for current database
 from pe.neo4j.read_driver import Neo4jReadDriver
-#from pe.db_reader import DBreader
+dbreader = Neo4jReadDriver(shareds.driver)
 
 
 def stk_logger(context, msg:str):
@@ -111,8 +112,7 @@ def _do_get_persons(args):
     else:
         u_context.set_scope_from_request(request, 'person_scope')
     u_context.count = request.args.get('c', 100, type=int)
-    dbdriver = Neo4jReadDriver(shareds.driver)
-    reader = PersonReader(dbdriver, u_context)
+    reader = PersonReader(dbreader, u_context)
     
     res = reader.get_person_search(args)
     if res.get('status') != Status.OK:
@@ -145,7 +145,7 @@ def show_persons():
     hidden = f" hide={hide}" if hide > 0 else ""
     elapsed = time.time() - t0
     stk_logger(u_context, f"-> bp.scene.routes.show_persons"
-                    f" n={len(found)}{hidden} e={elapsed:.3f}")
+                    f" n={len(found)}/{hidden} e={elapsed:.3f}")
     return render_template("/scene/persons_list.html", 
                            persons=found, menuno=12, 
                            num_hidden=hide, user_context=u_context,
@@ -183,7 +183,7 @@ def show_person_search():
     hidden = f" hide={hide}" if hide > 0 else ""
     elapsed = time.time() - t0
     stk_logger(u_context, f"-> bp.scene.routes.show_person_search"
-                    f" n={len(found)}{hidden} e={elapsed:.3f}")
+                    f" n={len(found)}/{hidden} e={elapsed:.3f}")
     return render_template("/scene/persons.html",  menuno=0,
                            persons=found,
                            user_context=u_context, 
@@ -413,8 +413,7 @@ def obsolete_show_persons_all():
     print(f'{request.method}: keys=-, args=-')
 
     t0 = time.time()
-    dbdriver = Neo4jReadDriver(shareds.driver)
-    reader = PersonReader(dbdriver, u_context)
+    reader = PersonReader(dbreader, u_context)
 
     results = reader.get_person_list()
     status = results.get('status')
@@ -476,12 +475,11 @@ def show_person(uid=None):
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
 
-    dbdriver = Neo4jReadDriver(shareds.driver)
-    reader = PersonReader(dbdriver, u_context)
+    reader = PersonReader(dbreader, u_context)
     args = {}
 
     result = reader.get_person_data(uid, args)
-    # result {'person', 'objs': self.dbdriver, 'jscode', 'root'}
+    # result {'person', 'objs', 'jscode', 'root'}
     status = result.get('status')
     if status != Status.OK:
         flash(f'{_("Person not found")}: {result.get("statustext","error")}', 'error')
@@ -516,8 +514,7 @@ def obsolete_show_event_v1(uuid):
         Derived from bp.tools.routes.show_baptism_data()
     """
     u_context = UserContext(user_session, current_user, request)
-    dbdriver = Neo4jReadDriver(shareds.driver)
-    reader = EventReader(dbdriver, u_context) 
+    reader = EventReader(dbreader, u_context) 
 
     results = reader.get_event_data(uuid)
 
@@ -559,8 +556,7 @@ def json_get_event():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        dbdriver = Neo4jReadDriver(shareds.driver)
-        reader = EventReader(dbdriver, u_context) 
+        reader = EventReader(dbreader, u_context) 
     
         results = reader.get_event_data(uuid, args)
     
@@ -673,8 +669,7 @@ def show_family_page(uid=None):
 
     try:
         u_context = UserContext(user_session, current_user, request)
-        dbdriver = Neo4jReadDriver(shareds.driver)
-        reader = FamilyReader(dbdriver, u_context) 
+        reader = FamilyReader(dbreader, u_context) 
     
         results = reader.get_family_data(uid)
         #family = Family_combo.get_family_data(uid, u_context)
@@ -710,8 +705,7 @@ def json_get_person_families():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        dbdriver = Neo4jReadDriver(shareds.driver)
-        reader = FamilyReader(dbdriver, u_context) 
+        reader = FamilyReader(dbreader, u_context) 
 
         results = reader.get_person_families(uuid)
 
@@ -759,8 +753,7 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    dbdriver = Neo4jReadDriver(shareds.driver)
-    reader = PlaceReader(dbdriver, u_context) 
+    reader = PlaceReader(dbreader, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
@@ -782,8 +775,7 @@ def show_place(locid):
     t0 = time.time()
     try:
         u_context = UserContext(user_session, current_user, request)
-        dbdriver = Neo4jReadDriver(shareds.driver)
-        reader = PlaceReader(dbdriver, u_context) 
+        reader = PlaceReader(dbreader, u_context) 
     
         results = reader.get_with_events(locid)
 
@@ -828,8 +820,7 @@ def show_sources(series=None):
     u_context.set_scope_from_request(request, 'source_scope')
     u_context.count = request.args.get('c', 100, type=int)
 
-    dbdriver = Neo4jReadDriver(shareds.driver)
-    reader = SourceReader(dbdriver, u_context) 
+    reader = SourceReader(dbreader, u_context) 
     if series:
         u_context.series = series
     try:
@@ -858,8 +849,7 @@ def show_source_page(sourceid=None):
         return redirect(url_for('virhesivu', code=1, text="Missing Source key"))
     u_context = UserContext(user_session, current_user, request)
     try:
-        dbdriver = Neo4jReadDriver(shareds.driver)
-        reader = SourceReader(dbdriver, u_context) 
+        reader = SourceReader(dbreader, u_context) 
     
         results = reader.get_source_with_references(uuid, u_context)
         
