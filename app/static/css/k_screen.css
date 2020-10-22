@@ -257,6 +257,7 @@ a.navlink:hover, a.navlink:active {
 	margin:1px;
 	color:darkred;
 }
+.submit { text-align:right; }
 
 /* Flexbox boxes floats next to each other */
 .flex-container {
@@ -267,9 +268,35 @@ a.navlink:hover, a.navlink:active {
 .flex-container > div {
   background-color: ivory;
   width: 300px;
-  /*border: 1px solid lightgray;*/
   margin: 1em;
 }
+.flex-container2 {
+  display: flex;
+/*   width: 350px; */
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.flex-container2 > div {
+  margin: 1em;
+}
+.description_box2 {
+    width: 250px;
+}
+.SearchBox2 {
+    background: bisque;
+    margin: 1em;
+    border: 1px solid #CCC;
+    padding: 5px;
+    padding: 5px;
+    width: 320px !important;
+    min-width: 200px;
+    max-width: 430px;
+}
+.SearchBox2 fieldset {
+    border: 1px solid gray;
+    margin-bottom: .5em;
+}
+
 
 /* Styles with icon  */
 
@@ -365,16 +392,6 @@ a[href]:hover, a[href]:active {
     padding-left: 15px;
 }
 
-#searching {
-	background: bisque;
-    margin: 1em;
-    border: 1px solid #CCC;
-    padding: 5px;
-    padding: 5px;
-    width: 400px;
-    min-width: 200px;
-    max-width: 430px;
-}
 .flashes {
     color: darkblue;
     border: solid 2pt #c9ac45;

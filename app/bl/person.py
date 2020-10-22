@@ -26,6 +26,8 @@ Created on 6.10.2020
 '''
 from flask_babelex import _
 from datetime import datetime
+import logging 
+logger = logging.getLogger('stkserver')
 
 from bl.base import NodeObject, Status
 from pe.db_reader import DBreader
@@ -189,10 +191,14 @@ class PersonReader(DBreader):
             y1 = int(lim[0]) if lim[0] > '' else -9999
             y2 = int(lim[1]) if lim[1] > '' else 9999
             if y1 > y2:
-                (y1,y2) = (y2,y1)
-            args['years'] = (y1, y2)
-        else:
-            args['years'] = (-9999, 9999)
+                y2, y1 = [y1, y2]
+            args['years'] = [y1, y2]
+            if args.get('key') is None:
+                args['rule'] = 'years'
+                args['key'] = None
+
+#         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
+#                           'years':args.get('years')}
 
         context = self.user_context
         args['use_user'] = self.use_user
@@ -206,7 +212,7 @@ class PersonReader(DBreader):
             msg = result.get("statustext")
             logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
             print(f'bl.person.PersonReader.get_person_search: {msg}')
-            return {'items':[], 'status':result['status'], 
+            return {'items':[], 'status':result['status'],
                     'statustext': _('No persons found')}
 
         # Update the page scope according to items really found

@@ -111,4 +111,15 @@ WITH nodes(path) AS x UNWIND x AS rn
     MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
 
+    get_common_events_by_years = """
+MATCH () -[:PASSED]-> (person:Person)
+    WHERE $years[0] >= person.birth_low AND $years[1] <= person.death_high
+OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH person, name""" + _get_events_tail + _get_events_surname
 
+    get_my_events_by_years = """
+(prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (p:Person)
+    WHERE prof.username = $user AND 
+        person.birth_low >= $years[0] AND person.death_high <= $years[1]
+OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH person, name""" + _get_events_tail + _get_events_surname

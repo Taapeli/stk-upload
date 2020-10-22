@@ -318,6 +318,7 @@ class Neo4jReadDriver:
         rule = args.get('rule')
         key = args.get('key')
         fw_from = args.get('fw','')
+        years= args.get('years',[-9999,9999])
         limit = args.get('limit', 100)
         restart = args.get('restart', False)
         
@@ -325,7 +326,7 @@ class Neo4jReadDriver:
         with self.driver.session(default_access_mode='READ') as session:
             try:
                 if restart:
-                    # Show search form
+                    # Show search form only
                     return {'items': [], 'status': Status.NOT_STARTED }
                 elif args.get('pg') == 'all':
                     # Show persons, no search form
@@ -347,6 +348,16 @@ class Neo4jReadDriver:
                         print(f'Show candidate data {rule} ~ {key}*')
                         result = session.run(CypherPerson.get_my_events_by_refname_use,
                                              use=rule, name=key, user=user)
+                elif rule == 'years':
+                    # Search persons matching <years>
+                    if show_approved:
+                        print(f'Show approved common data years {years}')
+                        result = session.run(CypherPerson.get_common_events_by_years,
+                                             years=years)
+                    else:
+                        print(f'Show candidate data  years {years}')
+                        result = session.run(CypherPerson.get_my_events_by_years,
+                                             years=years, user=user)
                 elif rule == 'ref':
                     # Search persons where a reference name = <key> value
                     if show_approved:
@@ -410,7 +421,7 @@ class Neo4jReadDriver:
 
         if len(persons) == 0:
             return {'items': persons, 'status': Status.NOT_FOUND,
-                    'statustext': _('No persons found after name %(name)s', name=fw_from)}
+                    'statustext': 'No persons found by "{args}"'}
         return {'items': persons, 'status': Status.OK}
 
 
