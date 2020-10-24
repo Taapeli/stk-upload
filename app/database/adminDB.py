@@ -2,41 +2,47 @@
 
 #from datetime import datetime
 import logging
-#from neobolt.exceptions import ConstraintError # Obsolete, not allowed! Use ClientError
-logger = logging.getLogger('stkserver') 
-from neo4j.exceptions import CypherSyntaxError, ClientError
+logger = logging.getLogger('stkserver')
+
+#from neobolt.exceptions import ConstraintError # Obsolete
+from neo4j.exceptions import ClientError, ConstraintError #,CypherSyntaxError
 from flask_security import utils as sec_utils
 
 import shareds
 from .cypher_setup import SetupCypher
 from .schema_fixes import do_schema_fixes
 
-#inputs
+# All User roles here:
 ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön käyttäjä, näkee esittelysukupuun'},
          {'level':'1',  'name':'gedcom',   'description':'Kirjautunut käyttäjä, pääsee vain gedcom-muunnoksiin'},
          {'level':'2',  'name':'member',   'description':'Seuran jäsen täysin lukuoikeuksin'},
          {'level':'4',  'name':'research', 'description':'Tutkija, joka voi käsitellä omaa tarjokasaineistoaan'},
-         {'level':'8',  'name':'audit',    'description':'#Valvoja, joka auditoi ja hyväksyy gramps- ja tarjokasaineistoja'},
+         {'level':'8',  'name':'audit',    'description':'Valvoja, joka auditoi ja hyväksyy gramps- ja tarjokasaineistoja'},
          {'level':'16', 'name':'admin',    'description':'Ylläpitäjä kaikin oikeuksin'},
-         {'level':'32', 'name':'master',   'description':'Tietokannan pääkäyttäjä, ei sovellusoikeuksia'})
+         {'level':'32', 'name':'master',   'description':'Tietokannan pääkäyttäjä, ei sovellusoikeuksia'},
+         {'level':'',   'name':'to_be_approved','description':'Käyttäjä joka odottaa hyväksymistä'}
+)
 
+# ====== Database schema ======
+# increment this, if shcema must be updated
+DB_SCHEMA_VERSION = 1
+# =============================
 
 #erase total database 
 def delete_database(tx):
     tx.run(SetupCypher.delete_database)
 
-def initiated_exist():
-    # Check, that Lock 'initiated' exists.
+def schema_updated():
+    # Check, that Lock 'initiated' exists and schema is updated.
     result = shareds.driver.session().run(SetupCypher.check_lock_initiated)
-    count = 0
+    active_version = 0
     for record in result:
-        count = record[0]
-#     count = [record[0] for record in result]
-    return count > 0
+        active_version = record[0]
+    return active_version == DB_SCHEMA_VERSION
 
 def roles_exist():
     #  Tarkista roolien olemassaolo
-    print('Check the user roles')
+    print(f'Check there are {len(ROLES)} user roles')
     num_of_roles = 0
     results = shareds.driver.session().run(SetupCypher.check_role_count)
     for result in results:
@@ -56,10 +62,10 @@ def create_role(tx, role):
             level=role['level'],    
             name=role['name'], 
             description=role['description'])
-#        tx.commit()            
-#                print(role['name'])
-    except CypherSyntaxError as cex:
-        logger.error('CypherSyntaxError in create_role ' + cex.message)
+        print(f'Role {role["name"]} created')
+    except ClientError as e:
+        #print(f'Role {role["name"]} exists')
+        return
     except Exception as e:
         logging.error(f'database.adminDB.create_role: {e.__class__.__name__}, {e}')            
         raise      
@@ -67,12 +73,7 @@ def create_role(tx, role):
 def create_roles():
     with shareds.driver.session() as session:
         for role in ROLES:
-            try:    
-                session.write_transaction(create_role, role)
-                print(role['name'])
-            except Exception as e:
-                logging.error(f'database.adminDB.create_roles: {e.__class__.__name__}, {e}')            
-                continue
+            create_role(session, role)
 
         print('Roles initialized')
 
@@ -168,6 +169,10 @@ def create_role_constraints():
     with shareds.driver.session() as session: 
         try:
             session.run(SetupCypher.set_role_constraint)
+        except ClientError as e:
+            msgs = e.message.split(',')
+            print(f'Role constraint ok: {msgs[0]}')
+            return
         except Exception as e:
             logging.error(f'database.adminDB.create_role_constraints: {e.__class__.__name__}, {e}')            
             return
@@ -179,10 +184,26 @@ def create_user_constraints():
         try:  
             session.run(SetupCypher.set_user_constraint1)
             session.run(SetupCypher.set_user_constraint2)  
+        except ConstraintError:
+            print(f'User constraints ok')
         except Exception as e:
             logging.error(f'database.adminDB.create_user_constraints: {e.__class__.__name__}, {e}')            
             return
     logger.info('User constraints created')
+    
+def create_year_indexes():
+    ''' Person node is indexed by two year properties.
+    '''
+    with shareds.driver.session() as session: 
+        try:
+            session.run(SetupCypher.index_year_birth_low)
+            session.run(SetupCypher.index_year_death_high)  
+        except ConstraintError:
+            print(f'Person years indexes ok')
+        except Exception as e:
+            logging.error(f'database.adminDB.create_year_indexes: {e.__class__.__name__}, {e}')            
+            return
+    logger.info('Person years indexes created')
     
 
 def check_constraints(needed:dict):
@@ -194,13 +215,15 @@ def check_constraints(needed:dict):
 #     print(f'checked {n_ok} constraints ok')
     return
 
-def create_lock_and_constraint():
-    # Initial lock
+def create_lock_w_constraint():
+    # Initial lock with schema version.
     with shareds.driver.session() as session:
         # Create first Lock node and contraint
-        lock_id = "initiated"
-        session.run(SetupCypher.create_lock, id=lock_id, locked=False)
-        print('Initial Lock created')
+        session.run(SetupCypher.create_lock, 
+                    id="initiated", 
+                    db_schema=DB_SCHEMA_VERSION, 
+                    locked=False)
+        print(f'Initial Lock (version {DB_SCHEMA_VERSION}) created')
         create_unique_constraint('Lock', 'id')
         return
 
@@ -218,37 +241,50 @@ def create_unique_constraint(label, prop):
         query = f"create constraint on (n:{label}) assert n.{prop} is unique"
         try:  
             session.run(query)
-            print(f'Unique contraint for {label}.{prop} created')
-        except ClientError:
-            print(f'Unique contraint for {label}.{prop} ok')
+            print(f'Unique constraint for {label}.{prop} created')
+        except ClientError as e:
+            msgs = e.message.split(',')
+            print(f'Unique constraint for {label}.{prop} ok: {msgs[0]}')
             return
         except Exception as e:
             logger.error(f'database.adminDB.create_unique_constraint: {e.__class__.__name__} {e}' )
             raise
     return
 
-def create_to_be_approved_role():
-    stmt = "create (r:Role{name:'to_be_approved',description:'Käyttäjä joka odottaa hyväksymistä'});"
-    try:
-        shareds.driver.session().run(stmt)
-        logger.info("Created Role 'to_be_approved'")
-    except ClientError: # already exists, ok
-        print(f"Role 'to_be_approved' already exists")
+def create_constraint(label, prop):
+    ' Create given contraint for given label and property.'
+    with shareds.driver.session() as session:
+        query = f"create constraint on (n:{label})"
+        try:  
+            session.run(query)
+            print(f'Constraint for {label}.{prop} created')
+        except ClientError as e:
+            msgs = e.message.split(',')
+            print(f'Constraint for {label}.{prop} ok: {msgs[0]}')
+            return
+        except Exception as e:
+            logger.error(f'database.adminDB.create_constraint: {e.__class__.__name__} {e}' )
+            raise
+    return
 
-# class Neo4jEnv(): # --> database.models.neo4jengine.Neo4jEngine.consume_counters
-#     """  Neo4j environment dependent things for versions 3.5 <> 4.1. """
-#     def consume_counters(self, result):
+# def create_to_be_approved_role():
+#     stmt = "create (r:Role{name:'to_be_approved',description:'Käyttäjä joka odottaa hyväksymistä'});"
+#     try:
+#         shareds.driver.session().run(stmt)
+#         logger.info("Created Role 'to_be_approved'")
+#     except ClientError: # already exists, ok
+#         print(f"Role 'to_be_approved' already exists")
 
 #------------------------------- Start here -----------------------------------
 
 def initialize_db():
     '''
     Check and initiate important nodes and constraints and schema fixes,
-    if (:Lock{id:'initiated'}) does not exist.
+    if (:Lock{id:'initiated'}) schema is not == database.adminDB.DB_SCHEMA_VERSION.
     ''' 
-    if not initiated_exist():
-        logger.info('database.adminDB.initialize_db: '
-                    'checking roles, constraints and schema fixes' )
+    if not schema_updated():
+        logger.info('database.adminDB.initialize_db: checking roles, constraints '
+                    f'and schema fixes (version {DB_SCHEMA_VERSION})' )
 
         if not roles_exist():
             create_role_constraints()
@@ -260,13 +296,15 @@ def initialize_db():
             
         if not user_exists('guest'):
             create_guest_user()
-    
+
         if not profile_exists('_Stk_'):
             create_single_profile('_Stk_')
-            
-        create_lock_and_constraint()
-    
-        check_constraints({
+
+        create_lock_w_constraint()
+
+        create_year_indexes()
+
+        constr_list = {
             "Citation":{"uuid"},
             "Event":{"uuid"},
             "Family":{"uuid"},
@@ -278,11 +316,12 @@ def initialize_db():
             "Role":{"name"},
             "Source":{"uuid"},
             "User":{"email", "username"}
-        })
+        }
+        check_constraints(constr_list)
 
         # Fix changed schema
         do_schema_fixes()
 
-        create_to_be_approved_role()
-        
+        # Done in database.adminDB.create_role_constraints()
+        #create_to_be_approved_role()
 
