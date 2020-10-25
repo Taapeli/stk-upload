@@ -80,7 +80,7 @@ RETURN p as person,
 
 # ----- Search page -----
 
-    _get_events_tail = """
+    _get_events_tail_w_refnames = """
  OPTIONAL MATCH (batch:Batch) -[:OWNS]-> (person)
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
@@ -88,6 +88,15 @@ RETURN p as person,
 RETURN batch.user AS user, person, 
     COLLECT(DISTINCT name) AS names,
     COLLECT(DISTINCT refn.name) AS refnames,
+    COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
+    _get_events_tail = """
+ OPTIONAL MATCH (batch:Batch) -[:OWNS]-> (person)
+ OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
+ OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
+ //OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
+RETURN batch.user AS user, person, 
+    COLLECT(DISTINCT name) AS names,
+    //COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
     ORDER BY TOUPPER(names[0].surname), names[0].firstname"""

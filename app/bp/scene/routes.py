@@ -98,12 +98,12 @@ def _do_get_persons(args):
         GET    /search?rule=ref,key=<str>                 --> args={pg:search,rule:ref,key:str}
     Search form
         POST   /search                                    --> args={pg:search,restart:True}
-    Search by name starting
+    Search by name starting or years
         POST   /search rule=<rule>,key=<str>              --> args={pg:search,rule:ref,key:str}
-    Search by years range
-        POST   /search years=<y1-y2>                      --> args={pg:search,years:y1_y2}
-    Search by name & years
-        POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
+    #Search by years range
+    #    POST   /search years=<y1-y2>                      --> args={pg:search,years:y1_y2}
+    #Search by name & years
+    #    POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
     '''
     u_context = UserContext(user_session, current_user, request)
     if args.get('pg') == 'search':
@@ -182,14 +182,15 @@ def show_person_search():
     hide = res.get('num_hidden',0)
     hidden = f" hide={hide}" if hide > 0 else ""
     elapsed = time.time() - t0
-    stk_logger(u_context, f"-> bp.scene.routes.show_person_search"
-                    f" n={len(found)}/{hidden} e={elapsed:.3f}")
+    stk_logger(u_context, 
+               f"-> bp.scene.routes.show_person_search/{rule}"
+               f" n={len(found)}/{hidden} e={elapsed:.3f}")
     return render_template("/scene/persons_search.html",  menuno=0,
                            persons=found,
                            user_context=u_context, 
-                           num_hidden=res.get('num_hidden'), 
-                           rule=args.get('rule',''), 
-                           key=key, years=years,
+                           num_hidden=hide, 
+                           rule=rule, 
+                           key=key,
                            elapsed=time.time()-t0)
 
 @bp.route('/obsolete/search', methods=['POST'])

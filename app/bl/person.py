@@ -172,20 +172,14 @@ class PersonReader(DBreader):
                 rule=firstname, key=name  by start of the first of first names
                 rule=patronyme, key=name  by start of patronyme name
                 rule=refname, key=name    by exact refname
-            Time limiting by args['years']:
-                years='y1'    single year
-                years='y1-'   from year
-                years='y1-y2' year range
-                years='-y2'   untill year
+                rule=years, key=str       by possible living years:
+                    str='-y2'   untill year
+                    str='y1'    single year
+                    str='y1-y2' year range
+                    str='y1-'   from year
         """
-        if 'years' in args:
-            # Any of
-            #     ['1800']
-            #     ['1800', '']
-            #     ['', '1800']
-            #     ['1800', '1900']
-            #     ['']
-            lim = args['years'].split('-')
+        if args.get('rule') == 'years':
+            lim = args['key'].split('-')
             if len(lim) < 2:
                 lim.append(lim[0])
             y1 = int(lim[0]) if lim[0] > '' else -9999
@@ -193,12 +187,6 @@ class PersonReader(DBreader):
             if y1 > y2:
                 y2, y1 = [y1, y2]
             args['years'] = [y1, y2]
-            if args.get('key') is None:
-                args['rule'] = 'years'
-                args['key'] = None
-
-#         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
-#                           'years':args.get('years')}
 
         context = self.user_context
         args['use_user'] = self.use_user
