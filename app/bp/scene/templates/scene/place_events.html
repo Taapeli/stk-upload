@@ -81,7 +81,11 @@ div#events div.scrollbox {
             </div>
             <table><tbody>
                 <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+        {% if place.coord -%}
+                    <td class="Value">{{macro.all_obj_ids(place,"300px")}}</td>
+        {% else %}
                     <td class="Value">{{macro.all_obj_ids(place)}}</td>
+        {% endif %}
                     <td></td>
                 </tr>
     {% if place.notes %}
