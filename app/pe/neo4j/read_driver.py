@@ -309,9 +309,9 @@ class Neo4jReadDriver:
 
 
     def dr_get_person_list(self, args):
-        """ Read Person data from given fw_from .
+        """ Read Person data from given fw_from.
         
-            args = {'use_user', 'fw', 'limit'}
+            args = dict {use_user, fw, limit, rule, key, years}
         """
         user = args.get('use_user')
         show_approved = (user is None)
@@ -320,7 +320,7 @@ class Neo4jReadDriver:
         fw_from = args.get('fw','')
         years= args.get('years',[-9999,9999])
         limit = args.get('limit', 100)
-        restart = args.get('restart', False)
+        restart = (rule == 'start')
         
         persons = []
         with self.driver.session(default_access_mode='READ') as session:
@@ -388,7 +388,9 @@ class Neo4jReadDriver:
                     #          None
                     #          ]] 
                     #     owners=['jpek']>
-                    p = PersonBl.from_node(record['person'])
+                    node = record['person']
+                    #print(node.id, node.get('sortname'), node.get('death_high'))
+                    p = PersonBl.from_node(node)
                     #if show_with_common and p.too_new: continue
 
                     # if take_refnames and record['refnames']:
@@ -421,7 +423,7 @@ class Neo4jReadDriver:
 
         if len(persons) == 0:
             return {'items': persons, 'status': Status.NOT_FOUND,
-                    'statustext': 'No persons found by "{args}"'}
+                    'statustext': f'No persons found by "{args}"'}
         return {'items': persons, 'status': Status.OK}
 
 
