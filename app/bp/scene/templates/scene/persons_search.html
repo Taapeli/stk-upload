@@ -30,9 +30,9 @@ div#description_box p {
                 <div class="description_box2">
 <!-- {{cnt}} persons, {{num_hidden}} hidden, rule={{rule}}, status={{status}} -->
     {%- if rule == "years" %}
-                    <p>{{ ngettext('Displaying %(num)s person,', 
-                                   'Displaying %(num)s persons,', cnt ) }}
-                       {{ _('who may have lived during required years.') }}</p>
+                    <p>{{ ngettext('Displaying %(num)s person, who may have lived during required years.', 
+                                   'Displaying %(num)s persons, who may have lived during required years.', cnt ) }}
+                    </p>
     {%- elif rule %}
                     <p>{{ ngettext('Displaying %(num)s person by name.', 
                                    'Displaying %(num)s persons by name.', cnt ) }}
