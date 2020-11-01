@@ -4,33 +4,34 @@
 import json
 import re
 import traceback
-from flask import Flask, request, jsonify
+from flask import request, jsonify # Flask
 
-from neo4j import GraphDatabase
+#from neo4j import GraphDatabase
 
 # https://neo4j.com/docs/cypher-manual/3.5/schema/index/#schema-index-fulltext-search 
 # http://lucene.apache.org/core/5_5_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
 #
 # Requires Neo4j 3.5 or later
 
-import config
 import shareds
 from flask import render_template
 from flask_security import roles_required
 app = shareds.app
  
-neo4j_uri = shareds.app.config.get("NEO4J_URI")
-neo4j_username = shareds.app.config.get("NEO4J_USERNAME")
-neo4j_password = shareds.app.config.get("NEO4J_PASSWORD")
+import setups   # Defines shareds.driver! Do not remove!!
 
-neo4j_driver = GraphDatabase.driver(
-        neo4j_uri,
-        auth = (neo4j_username,neo4j_password),
-        connection_timeout = 15) 
+#Removed 1.11.2020: got from setups
+# neo4j_uri = app.config.get("NEO4J_URI")
+# neo4j_username = app.config.get("NEO4J_USERNAME")
+# neo4j_password = app.config.get("NEO4J_PASSWORD")
+# neo4j_driver = GraphDatabase.driver(
+#         neo4j_uri,
+#         auth = (neo4j_username,neo4j_password),
+#         connection_timeout = 15) 
 
 def run(cypher,callback=None,**kwargs):
     try:
-        res = neo4j_driver.session().run(cypher, kwargs)
+        res = shareds.driver.session().run(cypher, kwargs)
         n = 0
         for rec in res:
             if callback: callback(rec)
@@ -42,7 +43,7 @@ def run(cypher,callback=None,**kwargs):
 
 def runcypher(cypher, **kwargs):
     print(cypher,kwargs)
-    res = neo4j_driver.session().run(cypher, kwargs)
+    res = shareds.driver.session().run(cypher, kwargs)
     return res
 
 @app.route("/dbeditor/")
@@ -75,7 +76,7 @@ def search():
     label = data['label']
     attr = data['attr']
     pattern = data.get('pattern')
-    datatype = data['datatype']
+    #datatype = data['datatype']
     if pattern:
         pattern = re.escape(pattern)
         pattern = f"(?i).*{pattern}.*"
@@ -93,7 +94,7 @@ def update():
     print(request.data)
     data = json.loads(request.data.decode("utf-8"))
     print(data)
-    id = int(data['id'])
+    #id = int(data['id'])
     label = data['label']
     attr = data['attr']
     value = data.get('value','')
