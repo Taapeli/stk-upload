@@ -892,8 +892,8 @@
       <styles xmi:type="notation:FontStyle" xmi:id="_dfFFwc2cEeqiLrd3Gs9yMw"/>
       <element xmi:type="uml:Transition" href="isotammi.uml#_de44gM2cEeqiLrd3Gs9yMw"/>
       <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_dfFFws2cEeqiLrd3Gs9yMw" points="[395, 560, -643984, -643984]$[395, 599, -643984, -643984]"/>
-      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_dfeHUM2cEeqiLrd3Gs9yMw" id="(1.0,0.32786885245901637)"/>
-      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_dfeHUc2cEeqiLrd3Gs9yMw" id="(0.12422360248447205,1.0)"/>
+      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_dfeHUM2cEeqiLrd3Gs9yMw" id="(1.0,0.6557377049180327)"/>
+      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_dfeHUc2cEeqiLrd3Gs9yMw" id="(0.4968944099378882,1.0)"/>
     </edges>
     <edges xmi:type="notation:Connector" xmi:id="_fm-mYM2cEeqiLrd3Gs9yMw" type="Transition_Edge" source="_cltKkM2YEeqiLrd3Gs9yMw" target="_3izDIM2YEeqiLrd3Gs9yMw">
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_7os_A-rYEeqFiNbRr7evfg" source="displayNameLabelIcon">
@@ -914,8 +914,8 @@
       <styles xmi:type="notation:FontStyle" xmi:id="_fm-mYc2cEeqiLrd3Gs9yMw"/>
       <element xmi:type="uml:Transition" href="isotammi.uml#_fmxyEM2cEeqiLrd3Gs9yMw"/>
       <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_fm-mYs2cEeqiLrd3Gs9yMw" points="[467, 620, -643984, -643984]$[487, 659, -643984, -643984]"/>
-      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_fnY2EM2cEeqiLrd3Gs9yMw" id="(0.49586776859504134,1.0)"/>
-      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_fnY2Ec2cEeqiLrd3Gs9yMw" id="(0.12422360248447205,0.0)"/>
+      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_fnY2EM2cEeqiLrd3Gs9yMw" id="(0.8695652173913043,1.0)"/>
+      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_fnY2Ec2cEeqiLrd3Gs9yMw" id="(0.4968944099378882,0.0)"/>
     </edges>
     <edges xmi:type="notation:Connector" xmi:id="_rCPDYOrVEeqFiNbRr7evfg" type="Transition_Edge" source="_cHC2cOrVEeqFiNbRr7evfg" target="_6u0IoM2XEeqiLrd3Gs9yMw">
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_7os_CerYEeqFiNbRr7evfg" source="displayNameLabelIcon">
@@ -1022,6 +1022,22 @@
       <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_LtAJEurZEeqFiNbRr7evfg" points="[520, 440, -643984, -643984]$[580, 381, -643984, -643984]"/>
       <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_Lta_0OrZEeqFiNbRr7evfg" id="(0.8695652173913043,0.0)"/>
       <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_Lta_0erZEeqFiNbRr7evfg" id="(0.4968944099378882,1.0)"/>
+    </edges>
+    <edges xmi:type="notation:Connector" xmi:id="_NSNQMB0JEeuPbLxtDi-ZxQ" type="Transition_Edge" source="_cltKkM2YEeqiLrd3Gs9yMw" target="_7qgU0M2XEeqiLrd3Gs9yMw">
+      <children xmi:type="notation:DecorationNode" xmi:id="_NSPscB0JEeuPbLxtDi-ZxQ" type="Transition_NameLabel">
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_NSPscR0JEeuPbLxtDi-ZxQ" y="20"/>
+      </children>
+      <children xmi:type="notation:DecorationNode" xmi:id="_NSPsch0JEeuPbLxtDi-ZxQ" type="Transition_GuardLabel">
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_NSPscx0JEeuPbLxtDi-ZxQ" y="-20"/>
+      </children>
+      <children xmi:type="notation:DecorationNode" xmi:id="_NSPsdB0JEeuPbLxtDi-ZxQ" type="Transition_StereotypeLabel">
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_NSPsdR0JEeuPbLxtDi-ZxQ" y="60"/>
+      </children>
+      <styles xmi:type="notation:FontStyle" xmi:id="_NSNQMR0JEeuPbLxtDi-ZxQ"/>
+      <element xmi:type="uml:Transition" href="isotammi.uml#_NMQZMB0JEeuPbLxtDi-ZxQ"/>
+      <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_NSNQMh0JEeuPbLxtDi-ZxQ" points="[300, 340, -643984, -643984]$[220, 440, -643984, -643984]"/>
+      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_NS3-kB0JEeuPbLxtDi-ZxQ" id="(0.0,0.6557377049180327)"/>
+      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_NS4loB0JEeuPbLxtDi-ZxQ" id="(0.7453416149068323,0.0)"/>
     </edges>
   </notation:Diagram>
   <notation:Diagram xmi:id="_kCngcOkVEeq7p7cp-9M6dg" type="UseCase" name="import_batch_management_uc" measurementUnit="Pixel">
