@@ -186,6 +186,10 @@ def create_user_constraints():
             session.run(SetupCypher.set_user_constraint2)  
         except ConstraintError:
             print(f'User constraints ok')
+            return
+        except ClientError:
+            print(f'User constraints seems to be ok')
+            return
         except Exception as e:
             logging.error(f'database.adminDB.create_user_constraints: {e.__class__.__name__}, {e}')            
             return
@@ -201,7 +205,8 @@ def create_year_indexes():
         except ConstraintError:
             print(f'Person years indexes ok')
         except Exception as e:
-            logging.error(f'database.adminDB.create_year_indexes: {e.__class__.__name__}, {e}')            
+            msgs = e.message.split(',')
+            print(f'database.adminDB.create_year_indexes: {e.__class__.__name__}, {msgs[0]}')            
             return
     logger.info('Person years indexes created')
     
@@ -219,7 +224,7 @@ def create_lock_w_constraint():
     # Initial lock with schema version.
     with shareds.driver.session() as session:
         # Create first Lock node and contraint
-        session.run(SetupCypher.create_lock, 
+        session.run(SetupCypher.update_lock, 
                     id="initiated", 
                     db_schema=DB_SCHEMA_VERSION, 
                     locked=False)

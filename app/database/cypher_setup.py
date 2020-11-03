@@ -16,7 +16,7 @@ class SetupCypher():
     check_lock_initiated = """
     MATCH (lock:Lock {id:'initiated'}) RETURN lock.db_schema
     """
-    create_lock = """
+    update_lock = """
     MERGE (lock:Lock {id:$id}) 
         SET lock.locked = $locked
         SET lock.db_schema = $db_schema
