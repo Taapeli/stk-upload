@@ -21,20 +21,22 @@ div#description_box p {
 </div>
 
 {{ macro.menu(menuno) }}
-    <div class="content">
+
+    <div class="content" id="Individuals">
         <div id="summaryarea">
           <form  action="/scene/persons/search" method="post">
             <div class="flex-container2">
-{% if cnt %}
+{% if cnt + num_hidden > 0 %}
                 <div class="description_box2">
-    {%- if key %}
+<!-- {{cnt}} persons, {{num_hidden}} hidden, rule={{rule}}, status={{status}} -->
+    {%- if rule == "years" %}
+                    <p>{{ ngettext('Displaying %(num)s person, who may have lived during required years.', 
+                                   'Displaying %(num)s persons, who may have lived during required years.', cnt ) }}
+                    </p>
+    {%- elif rule %}
                     <p>{{ ngettext('Displaying %(num)s person by name.', 
                                    'Displaying %(num)s persons by name.', cnt ) }}
                        {{ _('If the person has many names, they may appear in the list under each name.') }}</p>
-    {%- elif years %}
-                    <p>{{ ngettext('Displaying %(num)s person,', 
-                                   'Displaying %(num)s persons,', cnt ) }}
-                       {{ _('who may have lived during required years.') }}</p>
     {%- endif %}
                     <p>{{ _('Under person\'s name there are the estimated possible life years determined by person data.') }} </p>
                     <ul>
@@ -53,41 +55,50 @@ div#description_box p {
 {% if rule %}{% set selection = rule %}
 {% else %}{% set selection = "surname" %}
 {% endif %}
+{% set oldkey = key %}
            
                 <div id="namesearch" class="SearchBox2">
-                   <fieldset>
-                       <legend>{{ _('Search by a name part') }}</legend>
-<!--                        <p>{{ _('Search takes place from beginning of selected name part, e.g. in Surname "Sib" coincides with the name "Sibbe".') }}</p> -->
-                       <label for="snam">{{ _('Search word (beginning part)') }}&nbsp; </label>
-                       <input type="text" name="key" id="snam" 
-                          {% if key %}value="{{key}}"
-                          {% else %}placeholder="{{ _('Name') }}"{% endif %}>
+                       <h3>
+                          <label for="cars">{{ _('Search term') }}</label>
+                          <select id="rule" name="rule">
+                            <option value="surname"
+                                x-desc="{{ _('Any surname (beginning part)') }}"
+                        {% if selection == "surname" %}selected{% endif %}>{{ _('Surname') }}</option>
+                            <option value="firstname"
+                                x-desc="{{ _('Any firstname (beginning part)') }}"
+                        {% if selection == "firstname" %}selected{% endif %}>{{ _('Firstname') }}</option>
+                            <option value="patronyme"
+                                x-desc="{{ _('Any patronymic (beginning part)') }}"
+                        {% if selection == "patronyme" %}selected{% endif %}>{{ _('Patronymic') }}</option>
+                            <option value="years"
+                                x-desc="{{ _('A year (1750) or years range (1700-1750) where persons might live') }}"
+                        {% if selection == "years" %}selected{% endif %}>{{ _('Years range') }}</option>
+                          </select>
+                       </h3>
+                       <label for="snam" id="keydesc">Descr.</label>
+                       <input type="text" name="key" id="snam"
+                          {% if oldkey %}value="{{oldkey}}"
+                            {# else %}placeholder="{{ _('Name') }}"#}
+                          {% endif %}>
                        <br>
-                       <input type="radio" name="rule" id="ssur" value="surname"
-                        {% if selection == "surname" %}checked{% endif %}><label for="ssur">{{ _('Surname') }}</label>
-                       <input type="radio" name="rule" id="sfir" value="firstname"
-                        {% if selection == "firstname" %}checked{% endif %}><label for="sfir">{{ _('Firstname') }}</label>
-                       <input type="radio" name="rule" id="ssuf" value="patronyme"
-                        {% if selection == "patronyme" %}checked{% endif %}><label for="ssuf">{{ _('Patronymic') }}</label>
-                   </fieldset>
-<!--                 </div> -->
-
-<!--                 <div id="yearsearch" class="SearchBox2"> -->
-                   <fieldset>
-                       <legend>{{ _('Search scope by life time') }}</legend>
-                       <div>{{ _('Give one to two years: 1918, -1917, 1918- or 1880-1899.') }}</div>
-                       <label for="years">{{ _('Years') }}&nbsp; </label>
-                       <input type="text" name="years" id="years" size=7
-                          {% if years %}value="{{years}}"
-                          {% else %}placeholder="1880-1899"{% endif %}>
-                   </fieldset>
-                       <div class="submit"><input type="submit" value="Hae"></div>
+                      <div class="submit"><input type="submit" value="Hae"></div>
+                      <div id="searchHelp"></div>
                 </div>
-
             </div><!-- flex-container -->
           </form>
        </div><!-- summaryarea -->
-       
+<script>
+let selector = document.querySelector("#rule");
+let helpText = document.querySelector("#keydesc");
+let msg = selector.options[selector.selectedIndex].getAttribute('x-desc');
+helpText.textContent = msg;
+
+selector.addEventListener("change", () => {
+	let msg = selector.options[selector.selectedIndex].getAttribute('x-desc');
+	helpText.textContent = msg;
+});
+</script>
+
     <div>
 	        {% with messages = get_flashed_messages(with_categories=true) %}
 	          {% if messages %}
@@ -98,10 +109,9 @@ div#description_box p {
 	            </ul>
 	          {% endif %}
 	        {% endwith %}
-
     </div>
 
-{% if persons %}
+{% if status == 0 %}
 
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
@@ -170,7 +180,7 @@ div#description_box p {
 	    {% endfor %}
         </tbody>
     </table>
-{% elif rule or years %}
+{% elif rule %}
     <div class="NotFound">
         <p>{{ _('No one found with search keys') }}.</p>
     </div>

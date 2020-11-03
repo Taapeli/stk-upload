@@ -170,13 +170,12 @@ def my_settings():
                            batches=user_batches,
                            gedcoms=gedcoms)
 
-# Admin start page
-@shareds.app.route('/admin',  methods=['GET', 'POST'])
-@login_required
-@roles_accepted('admin', 'master')
-def admin():
-    """ Home page for administrator """    
-    logger.info("-> bp.start.routes.admin")
-    return render_template('/admin/admin.html')
-
+# # Admin start page in bp.admin
+# @shareds.app.route('/admin',  methods=['GET', 'POST'])
+# @login_required
+# @roles_accepted('admin', 'master')
+# def admin():
+#     """ Home page for administrator """    
+#     logger.info("-> bp.start.routes.admin")
+#     return render_template('/admin/admin.html')
 

@@ -159,7 +159,12 @@ img#logo {
 .idno { color: gray; text-align:center; 
     font-family: monospace
 }
-.changetime { color: gray; font-size: 80%; }
+#changetime { 
+	display: block;
+    position: absolute;
+    right: 0;
+	color: gray; font-size: 80%;
+}
 .owner { color: white; 
     font-size: 70%; 
     background: RoyalBlue;
@@ -280,7 +285,7 @@ a.navlink:hover, a.navlink:active {
   margin: 1em;
 }
 .description_box2 {
-    width: 250px;
+    width: 320px;
 }
 .SearchBox2 {
     background: bisque;

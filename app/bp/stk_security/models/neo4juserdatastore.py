@@ -8,7 +8,7 @@ Created on 28.9.2017
 #from flask_security import current_user
 from flask_security.datastore import UserDatastore
 from .seccypher import Cypher  
-from neo4j.exceptions import ServiceUnavailable, ClientError, ConstraintError
+from neo4j.exceptions import ServiceUnavailable #, ClientError, ConstraintError
 from datetime import datetime
 #import shareds
 import logging
@@ -129,7 +129,7 @@ class Neo4jUserDatastore(UserDatastore):
             
     def _put_user (self, tx, user):    # ============ New user ==============
         if len(user.roles) == 0:
-             user.roles = ["to_be_approved"] 
+            user.roles = ["to_be_approved"] 
         user.is_active = True
         try:
             logger.info('_put_user new %s %s', user.username, user.roles[0:1])                

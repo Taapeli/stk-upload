@@ -28,14 +28,11 @@ import shareds
 from chkdate import Chkdate
 
 from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
-from bp.admin.models.user_admin import UserAdmin, UserProfile
+from bp.admin.models.user_admin import UserProfile
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
 from datetime import datetime
 from ui.user_context import UserContext
 
-#import logging
-#from flask_login.utils import current_user
-#from flask.globals import session
 import json
 from flask_babelex import lazy_gettext as _l
 

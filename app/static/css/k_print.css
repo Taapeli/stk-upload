@@ -293,7 +293,7 @@ img#logo {
 .idno { color: gray; text-align:center; 
     font-family: monospace
 }
-.changetime { color: gray; font-size: 80%; }
+#changetime { color: gray; font-size: 80%; }
 .owner { color: white; 
     font-size: 70%; 
     background: RoyalBlue;

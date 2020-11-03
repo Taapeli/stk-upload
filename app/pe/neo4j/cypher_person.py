@@ -64,7 +64,7 @@ RETURN p as person,
 ORDER BY person.sortname"""
 
     read_my_persons_w_events_fw_name = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (p:Person)
+MATCH (prof:UserProfile) -[:HAS_ACCESS]-> (b:Batch) -[:OWNS]-> (p:Person)
     WHERE prof.username = $user AND p.sortname >= $start_name
 WITH p ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
@@ -80,7 +80,7 @@ RETURN p as person,
 
 # ----- Search page -----
 
-    _get_events_tail = """
+    _get_events_tail_w_refnames = """
  OPTIONAL MATCH (batch:Batch) -[:OWNS]-> (person)
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
@@ -88,6 +88,15 @@ RETURN p as person,
 RETURN batch.user AS user, person, 
     COLLECT(DISTINCT name) AS names,
     COLLECT(DISTINCT refn.name) AS refnames,
+    COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
+    _get_events_tail = """
+ OPTIONAL MATCH (batch:Batch) -[:OWNS]-> (person)
+ OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
+ OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
+ //OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
+RETURN batch.user AS user, person, 
+    COLLECT(DISTINCT name) AS names,
+    //COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
     ORDER BY TOUPPER(names[0].surname), names[0].firstname"""
@@ -113,13 +122,13 @@ WITH person, name""" + _get_events_tail + _get_events_surname
 
     get_common_events_by_years = """
 MATCH () -[:PASSED]-> (person:Person)
-    WHERE $years[0] >= person.birth_low AND $years[1] <= person.death_high
+    WHERE person.death_high >= $years[0] AND person.birth_low <= $years[1]
 OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
 
     get_my_events_by_years = """
-(prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (p:Person)
+MATCH (prof:UserProfile) -[:HAS_ACCESS]-> (b:Batch) -[:OWNS]-> (person:Person)
     WHERE prof.username = $user AND 
-        person.birth_low >= $years[0] AND person.death_high <= $years[1]
+          person.death_high >= $years[0] AND person.birth_low <= $years[1]
 OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname

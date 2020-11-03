@@ -134,6 +134,7 @@ Import Batch Management Use Case.</body>
       <transition xmi:type="uml:Transition" xmi:id="_3-WCkOrXEeqFiNbRr7evfg" name="audit_finish_reject" source="_clnrAM2YEeqiLrd3Gs9yMw" target="_yUF1gOrXEeqFiNbRr7evfg"/>
       <transition xmi:type="uml:Transition" xmi:id="_dg7TIOrYEeqFiNbRr7evfg" name="merge_completed" source="_ESLf0M2ZEeqiLrd3Gs9yMw" target="_jUeTMM2ZEeqiLrd3Gs9yMw"/>
       <transition xmi:type="uml:Transition" xmi:id="_Ls1xAOrZEeqFiNbRr7evfg" name="taken_to_merge" source="_3irHUM2YEeqiLrd3Gs9yMw" target="_ESLf0M2ZEeqiLrd3Gs9yMw"/>
+      <transition xmi:type="uml:Transition" xmi:id="_NMQZMB0JEeuPbLxtDi-ZxQ" name="audit_cancel" source="_clnrAM2YEeqiLrd3Gs9yMw" target="_7qcDYM2XEeqiLrd3Gs9yMw"/>
       <subvertex xmi:type="uml:Pseudostate" xmi:id="_6uweQM2XEeqiLrd3Gs9yMw" name="file"/>
       <subvertex xmi:type="uml:State" xmi:id="_7qcDYM2XEeqiLrd3Gs9yMw" name="audit_requested"/>
       <subvertex xmi:type="uml:State" xmi:id="_clnrAM2YEeqiLrd3Gs9yMw" name="in_audit"/>

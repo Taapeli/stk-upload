@@ -149,6 +149,8 @@ class Person(NodeObject):
         obj.death_low = node['death_low']
         obj.death_high = node['death_high']
         last_year_allowed = datetime.now().year - PRIVACY_LIMIT
+#         if obj.death_high < 9999:
+#             print('ok? uniq_id=',obj.uniq_id,obj.death_high)
         obj.too_new = obj.death_high > last_year_allowed
         return obj
 
@@ -172,30 +174,19 @@ class PersonReader(DBreader):
                 rule=firstname, key=name  by start of the first of first names
                 rule=patronyme, key=name  by start of patronyme name
                 rule=refname, key=name    by exact refname
-            Time limiting by args['years']:
-                years='y1'    single year
-                years='y1-'   from year
-                years='y1-y2' year range
-                years='-y2'   untill year
+                rule=years, key=str       by possible living years:
+                    str='-y2'   untill year
+                    str='y1'    single year
+                    str='y1-y2' year range
+                    str='y1-'   from year
         """
-        if 'years' in args:
-            # Any of
-            #     ['1800']
-            #     ['1800', '']
-            #     ['', '1800']
-            #     ['1800', '1900']
-            #     ['']
-            lim = args['years'].split('-')
-            if len(lim) < 2:
-                lim.append(lim[0])
+        if args.get('rule') == 'years':
+            lim = args['key'].split('-')
             y1 = int(lim[0]) if lim[0] > '' else -9999
-            y2 = int(lim[1]) if lim[1] > '' else 9999
+            y2 = int(lim[-1]) if lim[-1] > '' else 9999
             if y1 > y2:
                 y2, y1 = [y1, y2]
             args['years'] = [y1, y2]
-            if args.get('key') is None:
-                args['rule'] = 'years'
-                args['key'] = None
 
 #         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
 #                           'years':args.get('years')}
@@ -208,11 +199,12 @@ class PersonReader(DBreader):
         result = self.dbdriver.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
 
-        if result.get('status') == Status.ERROR:
+        status = result.get('status')
+        if status == Status.ERROR:
             msg = result.get("statustext")
             logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
             print(f'bl.person.PersonReader.get_person_search: {msg}')
-            return {'items':[], 'status':result['status'],
+            return {'items':[], 'status':status,
                     'statustext': _('No persons found')}
 
         # Update the page scope according to items really found
@@ -228,7 +220,7 @@ class PersonReader(DBreader):
         else:
             persons2 = persons
             num_hidden = 0
-        return {'items': persons2, 'num_hidden': num_hidden, 'status': Status.OK}
+        return {'items': persons2, 'num_hidden': num_hidden, 'status': status}
 
 
     def get_person_list(self):
