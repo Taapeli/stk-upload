@@ -25,6 +25,8 @@ def get_upload_folder(username):
     return os.path.join("uploads", username)
 
 def analyze_xml(username, filename):
+    ''' Returns a dict of Gremp xml objec type counts.
+    '''
     # Read the xml file
     upload_folder = get_upload_folder(username) 
     pathname = os.path.join(upload_folder,filename)
@@ -120,14 +122,18 @@ def analyze_xml(username, filename):
             source_repository_cnt += len(source.getElementsByTagName('reporef') )
 
     counts = {}
-    for name,value in locals().items():
-        if name.endswith("_cnt"):
-            counts[name] = value
+    # This avoids RuntimeError: dictionary changed size during iteration
+    items = list(locals().items())
+    for item in items:
+        if item[0].endswith("_cnt"):
+            counts[item[0]] = item[1]
     counts["e_total"] = e_total
     return counts
                     
 
 def analyze(username, filename):
+    ''' Returns a list of Analyze_row objects carrying number of items and references.
+    '''
     values = analyze_xml(username, filename)
 
     references = []

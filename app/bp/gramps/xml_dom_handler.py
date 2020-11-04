@@ -23,6 +23,8 @@ from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
 from .models.place_gramps import Place_gramps
+
+from bl.person import PersonBl
 from bl.place import PlaceName
 from bl.place_coordinates import Point
 from bl.media import MediaRefResult
@@ -832,7 +834,7 @@ class DOM_handler():
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
-# -------------------------- Other process steps -------------------------------
+    # -------------------------- Other process steps -------------------------------
 
     def set_family_calculated_attributes(self):
         ''' Set sortnames and lifetime dates for each Family in the list self.family_ids.
@@ -888,12 +890,12 @@ class DOM_handler():
         print ("***** {} Estimated lifetimes *****".format(len(self.person_ids)))
         t0 = time.time()
 
-        cnt = Person_combo.estimate_lifetimes(self.tx, self.person_ids)
+        cnt = PersonBl.estimate_lifetimes(self.tx, self.person_ids)
                             
         self.blog.log_event({'title':"Estimated person lifetimes", 
                              'count':cnt, 'elapsed':time.time()-t0}) 
 
-# --------------------------- DOM subtree procesors ----------------------------
+    # --------------------------- DOM subtree procesors ----------------------------
 
     def _extract_daterange(self, obj):
         """ Extract date information from these kind of date formats:

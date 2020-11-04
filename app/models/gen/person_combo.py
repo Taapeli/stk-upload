@@ -1072,94 +1072,94 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
 #         print("Estimated lifetime for {} persons".format(pers_count))
 #         return pers_count
 
-    @staticmethod
-    def estimate_lifetimes(tx, uids=[]):
-        """ Sets an estimated lifetime to Person.dates.
-
-            Stores it as Person properties: datetype, date1, and date2
-
-            The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
-            sets all lifetimes.
-
-            Asettaa valituille henkilölle arvioidut syntymä- ja kuolinajat
-            
-            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
-            and models.dataupdater.set_estimated_dates
-        """
-        from models import lifetime
-        from models.gen.dates import DR 
-        try:
-            if uids:
-                result = tx.run(Cypher_person.fetch_selected_for_lifetime_estimates, idlist=uids)
-            else:
-                result = tx.run(Cypher_person.fetch_all_for_lifetime_estimates)
-            personlist = []
-            personmap = {}
-            for rec in result:
-                p = lifetime.Person()
-                p.pid = rec['pid']
-                p.gramps_id = rec['p']['id']
-                events = rec['events']
-                fam_events = rec['fam_events']
-                for e,role in events + fam_events:
-                    if e is None: continue
-                    #print("e:",e)
-                    eventtype = e['type']
-                    datetype = e['datetype']
-                    datetype1 = None
-                    datetype2 = None
-                    if datetype == DR['DATE']:
-                        datetype1 = "exact"
-                    elif datetype == DR['BEFORE']:
-                        datetype1 = "before"
-                    elif datetype == DR['AFTER']:
-                        datetype1 = "after"
-                    elif datetype == DR['BETWEEN']:
-                        datetype1 = "after"
-                        datetype2 = "before"
-                    elif datetype == DR['PERIOD']:
-                        datetype1 = "after"
-                        datetype2 = "before"
-                    date1 = e['date1']
-                    date2 = e['date2']
-                    if datetype1 and date1 is not None:
-                        year1 = date1 // 1024
-                        ev = lifetime.Event(eventtype,datetype1,year1,role)
-                        p.events.append(ev)
-                    if datetype2 and date2 is not None:
-                        year2 = date2 // 1024
-                        ev = lifetime.Event(eventtype,datetype2,year2,role)
-                        p.events.append(ev)
-                p.parent_pids = []
-                for _parent,pid in rec['parents']:
-                    if pid: p.parent_pids.append(pid)
-                p.child_pids = []
-                for _parent,pid in rec['children']:
-                    if pid: p.child_pids.append(pid)
-                personlist.append(p)
-                personmap[p.pid] = p
-            for p in personlist:
-                for pid in p.parent_pids:
-                    p.parents.append(personmap[pid])
-                for pid in p.child_pids:
-                    p.children.append(personmap[pid])
-            lifetime.calculate_estimates(personlist)
-            for p in personlist:
-                result = tx.run(Cypher_person.update_lifetime_estimate, 
-                                id=p.pid,
-                                birth_low = p.birth_low.getvalue(),
-                                death_low = p.death_low.getvalue(),
-                                birth_high = p.birth_high.getvalue(),
-                                death_high = p.death_high.getvalue() )
-                                
-            pers_count = len(personlist)
-            print(f"Estimated lifetime for {pers_count} persons")
-            return pers_count
-
-        except Exception as err:
-            print("iError (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
-            traceback.print_exc()
-            return 0
+#     @staticmethod
+#     def estimate_lifetimes(tx, uids=[]):# --> bl.person.PersonBl.estimate_lifetimes()
+#         """ Sets an estimated lifetime to Person.dates.
+#  
+#             Stores it as Person properties: datetype, date1, and date2
+#  
+#             The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
+#             sets all lifetimes.
+#  
+#             Asettaa valituille henkilölle arvioidut syntymä- ja kuolinajat
+#              
+#             Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
+#             and models.dataupdater.set_estimated_dates
+#         """
+#         from models import lifetime
+#         from models.gen.dates import DR 
+#         try:
+#             if uids:
+#                 result = tx.run(Cypher_person.fetch_selected_for_lifetime_estimates, idlist=uids)
+#             else:
+#                 result = tx.run(Cypher_person.fetch_all_for_lifetime_estimates)
+#             personlist = []
+#             personmap = {}
+#             for rec in result:
+#                 p = lifetime.Person()
+#                 p.pid = rec['pid']
+#                 p.gramps_id = rec['p']['id']
+#                 events = rec['events']
+#                 fam_events = rec['fam_events']
+#                 for e,role in events + fam_events:
+#                     if e is None: continue
+#                     #print("e:",e)
+#                     eventtype = e['type']
+#                     datetype = e['datetype']
+#                     datetype1 = None
+#                     datetype2 = None
+#                     if datetype == DR['DATE']:
+#                         datetype1 = "exact"
+#                     elif datetype == DR['BEFORE']:
+#                         datetype1 = "before"
+#                     elif datetype == DR['AFTER']:
+#                         datetype1 = "after"
+#                     elif datetype == DR['BETWEEN']:
+#                         datetype1 = "after"
+#                         datetype2 = "before"
+#                     elif datetype == DR['PERIOD']:
+#                         datetype1 = "after"
+#                         datetype2 = "before"
+#                     date1 = e['date1']
+#                     date2 = e['date2']
+#                     if datetype1 and date1 is not None:
+#                         year1 = date1 // 1024
+#                         ev = lifetime.Event(eventtype,datetype1,year1,role)
+#                         p.events.append(ev)
+#                     if datetype2 and date2 is not None:
+#                         year2 = date2 // 1024
+#                         ev = lifetime.Event(eventtype,datetype2,year2,role)
+#                         p.events.append(ev)
+#                 p.parent_pids = []
+#                 for _parent,pid in rec['parents']:
+#                     if pid: p.parent_pids.append(pid)
+#                 p.child_pids = []
+#                 for _parent,pid in rec['children']:
+#                     if pid: p.child_pids.append(pid)
+#                 personlist.append(p)
+#                 personmap[p.pid] = p
+#             for p in personlist:
+#                 for pid in p.parent_pids:
+#                     p.parents.append(personmap[pid])
+#                 for pid in p.child_pids:
+#                     p.children.append(personmap[pid])
+#             lifetime.calculate_estimates(personlist)
+#             for p in personlist:
+#                 result = tx.run(Cypher_person.update_lifetime_estimate, 
+#                                 id=p.pid,
+#                                 birth_low = p.birth_low.getvalue(),
+#                                 death_low = p.death_low.getvalue(),
+#                                 birth_high = p.birth_high.getvalue(),
+#                                 death_high = p.death_high.getvalue() )
+#                                 
+#             pers_count = len(personlist)
+#             print(f"Estimated lifetime for {pers_count} persons")
+#             return pers_count
+# 
+#         except Exception as err:
+#             print("iError (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
+#             traceback.print_exc()
+#             return 0
 
 
     def print_compared_data(self, comp_person, print_out=True):

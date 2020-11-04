@@ -7,12 +7,15 @@ from flask_babelex import _
 
 from bp.gramps.batchlogger import Batch
 from models.gen.user import User
-from models.gen.person import Person
+from bl.person import PersonBl
+from bl.family import FamilyBl
+
+#from models.gen.person import Person
 #from models.gen.place import Place
 from models.gen.person_name import Name
 from models.gen.refname import Refname
-from models.gen.person_combo import Person_combo
-from models.gen.family_combo import Family_combo
+#from models.gen.person_combo import Person_combo
+#from models.gen.family_combo import Family_combo
 from models.gen.dates import DateRange, DR
 
 
@@ -49,9 +52,9 @@ def set_confidence_values(tx, uniq_id=None, batch_logger=None):
     counter = 0
     t0 = time.time()
 
-    result = Person.get_confidence(uniq_id)
+    result = PersonBl.get_confidence(uniq_id)
     for record in result:
-        p = Person()
+        p = PersonBl()
         p.uniq_id = record["uniq_id"]
         
         if len(record["list"]) > 0:
@@ -83,7 +86,7 @@ def set_estimated_person_dates(uids=[]):
     """
     my_tx = User.beginTransaction()
 
-    cnt = Person_combo.estimate_lifetimes(my_tx, uids)
+    cnt = PersonBl.estimate_lifetimes(my_tx, uids)
 
     msg = _("Estimated {} person lifetimes").format(cnt)
     User.endTransaction(my_tx)
@@ -111,7 +114,7 @@ def set_family_calculated_attributes(tx=None, uniq_id=None):
         my_tx = User.beginTransaction()
 
     # Process each family 
-    result = Family_combo.get_dates_parents(my_tx, uniq_id)
+    result = FamilyBl.get_dates_parents(my_tx, uniq_id)
     for record in result:
         father_sortname = record['father_sortname']
         father_death_date = record['father_death_date']
@@ -143,7 +146,7 @@ def set_family_calculated_attributes(tx=None, uniq_id=None):
             dates = DateRange(DR['BEFORE'], end_date)
         
         # Copy the dates from Event node and sortnames from Person nodes
-        Family_combo.set_dates_sortnames(my_tx, uniq_id, dates,
+        models.dataupdater.set_family_calculated_attributes(my_tx, uniq_id, dates,
                                          father_sortname, mother_sortname)
         dates_count += 1
         sortname_count += 1
@@ -200,7 +203,7 @@ def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname'
         if do_sortname and name.order == 0:
 
             # If default name, store sortname key to Person node
-            Person.set_sortname(my_tx, name.person_uid, name)
+            PersonBl.set_sortname(my_tx, name.person_uid, name)
             sortname_count += 1
     
     if not tx:
