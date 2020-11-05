@@ -11,7 +11,7 @@ from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import Batch, Log
-from models import dataupdater
+#from models import dataupdater
 #from models.dataupdater import set_confidence_values
 import shareds
 import traceback
@@ -609,19 +609,10 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
     return handler.blog.list(), handler.batch_id
 
 
-# def create_thumbnails(media_folder):
-#     print("walk")
-#     for dirname,dirnames,filenames in os.walk(media_folder):
-#         print(dirname,dirnames,filenames)
-#         for name in filenames:
-#             fname = os.path.join(dirname,name)
-#             thumbnail_fname = "media/thumbnails/" + fname
-
-
 def file_clean(pathname):
-    # Decompress file and clean problematic delimiter (')
+    # Decompress file and clean problematic delimiter (').
     # - build 2nd filename
-    # - create Log for logging
+    # - create Log item in the upload log
 
     def _clean_apostrophes(file_in, file_out):
         '''
@@ -642,7 +633,7 @@ def file_clean(pathname):
     t0 = time.time()
     root, ext = splitext(pathname)
     file_cleaned = root + "_clean" + ext
-# - filename for display
+    # Filename for display
     file_displ = basename(pathname)
     with open(file_cleaned, "w", encoding='utf-8') as file_out:
         # Creates the output file and closes it
@@ -666,7 +657,10 @@ def file_clean(pathname):
                      'elapsed':time.time()-t0}) #, 'percent':1})
     return (file_cleaned, file_displ, event)
 
+
 def extract_media(pathname,batch_id):
+    ''' Save media files from Gramps .gpkg package.
+    '''
     try:
         media_files_folder = media.get_media_files_folder(batch_id)
         os.makedirs(media_files_folder, exist_ok=True)
@@ -675,4 +669,3 @@ def extract_media(pathname,batch_id):
         os.remove(xml_filename)
     except:
         traceback.print_exc()
-    #create_thumbnails(media_folder)

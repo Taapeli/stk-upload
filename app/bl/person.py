@@ -31,7 +31,7 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from bl.base import NodeObject, Status
-from pe.db_reader import DBreader
+from pe.db_reader import DbReader
 
 from models.source_citation_reader import get_citations_js
 
@@ -156,11 +156,11 @@ class Person(NodeObject):
         return obj
 
 
-class PersonReader(DBreader):
+class PersonReader(DbReader):
     '''
         Data reading class for Person objects with associated data.
 
-        - Uses pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
+        - Uses pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
           to define the database driver and user context
 
         - Returns a Result object.

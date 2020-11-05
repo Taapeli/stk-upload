@@ -12,7 +12,7 @@ import shareds
 from shareds import logger
 
 from pe.neo4j.write_driver import Neo4jWriteDriver
-from pe.db_writer import DBwriter
+from pe.db_writer import DbWriter
 from bl.event import EventBl
 #from models.gen.event import Event
 from models.cypher_gramps import Cypher_event_w_handle
@@ -125,7 +125,7 @@ class Event_gramps(EventBl):
         # Make relations to the Media nodes and their Note and Citation references
         if self.media_refs:
             dbdriver = Neo4jWriteDriver(shareds.driver, tx)
-            db = DBwriter(dbdriver)
+            db = DbWriter(dbdriver)
             db.media_save_w_handles(self.uniq_id, self.media_refs)
             
         return

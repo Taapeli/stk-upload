@@ -14,7 +14,7 @@ from bl.place import PlaceBl
 logger = logging.getLogger('stkserver')
 
 
-class DBwriter(object):
+class DbWriter(object):
     '''
     classdocs
     '''
@@ -35,22 +35,22 @@ class DBwriter(object):
             - def_names     dict {lang, uid} uniq_id's of PlaceName objects
         '''
 
-        self.dbdriver.place_set_default_names(place.uniq_id, 
-                                              def_names['fi'], def_names['sv'])
+        self.dbdriver.dw_place_set_default_names(place.uniq_id, 
+                                                 def_names['fi'], def_names['sv'])
 
 
     def media_save_w_handles(self, uniq_id, media_refs):
         ''' Save media object and it's Note and Citation references
             using their Gramps handles.
         '''
-
         if media_refs:
-            self.dbdriver.media_save_w_handles(uniq_id, media_refs)
+            self.dbdriver.dw_media_save_w_handles(uniq_id, media_refs)
+
 
     def mergeplaces(self, id1, id2):
         with shareds.driver.session() as session:
             self.dbdriver.tx = session
-            place, names = self.dbdriver.mergeplaces(id1,id2)
+            place, names = self.dbdriver.dw_mergeplaces(id1,id2)
             # Select default names for default languages
             def_names = PlaceBl.find_default_names(names, ['fi', 'sv'])
             # Update default language name links

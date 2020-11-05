@@ -4,7 +4,7 @@ from models.gen.dates import DateRange
 import pprint
 from bl.place import PlaceBl, PlaceName
 from pe.neo4j.write_driver import Neo4jWriteDriver
-from pe.db_writer import DBwriter
+from pe.db_writer import DbWriter
 import json
 from operator import attrgetter
 

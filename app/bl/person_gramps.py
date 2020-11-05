@@ -21,7 +21,7 @@ import shareds
 from shareds import logger
 
 from pe.neo4j.write_driver import Neo4jWriteDriver
-from pe.db_writer import DBwriter
+from pe.db_writer import DbWriter
 from bl.person import PersonBl
 #from models.gen.person import Person
 from models.cypher_gramps import Cypher_person_w_handle
@@ -78,7 +78,7 @@ class PersonGramps(PersonBl):
         self.notes = []                 # models.gen.note.Note, used for
                                         # generated objects which have no hlink
 
-        # Other variables ???
+#         # Other variables ???
 #         self.est_birth = ''
 #         self.est_death = ''
 
@@ -97,7 +97,7 @@ class PersonGramps(PersonBl):
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
 
         dbdriver = Neo4jWriteDriver(shareds.driver, tx)
-        db = DBwriter(dbdriver)
+        db = DbWriter(dbdriver)
         today = str(datetime.date.today())
 
         self.uuid = self.newUuid()

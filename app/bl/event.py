@@ -26,7 +26,7 @@ from flask_babelex import _
 
 from .base import NodeObject, Status
 #from .place import PlaceReader
-from pe.db_reader import DBreader
+from pe.db_reader import DbReader
 
 from models.gen.dates import DateRange
 #from models.gen.person_combo import Person_combo, Name
@@ -103,11 +103,11 @@ class Event(NodeObject):
         return obj
 
 
-class EventReader(DBreader):
+class EventReader(DbReader):
     '''
         Data reading class for Event objects with associated data.
 
-        - Use pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
+        - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
           to define the database driver and user context
 
         - Returns a Result object.

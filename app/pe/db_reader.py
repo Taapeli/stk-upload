@@ -12,7 +12,7 @@ from bl.base import Status
 #import traceback
 #from models.gen.person_combo import Person_combo
 
-class DBreader:
+class DbReader:
     ''' Public methods for accessing active database.
     
         Returns a PersonResult object
@@ -71,7 +71,7 @@ class DBreader:
                         self.dbdriver.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:
-                    print(f'DBreader.get_source_with_references: hide {target}')
+                    print(f'DbReader.get_source_with_references: hide {target}')
 
             citations.append(c)
         results['citations':citations]

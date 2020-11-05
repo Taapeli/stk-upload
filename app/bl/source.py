@@ -19,7 +19,7 @@ from flask_babelex import _
 
 from .base import NodeObject, Status
 from .person import Person
-from pe.db_reader import DBreader #, SourceResult
+from pe.db_reader import DbReader #, SourceResult
 
 
 class Source(NodeObject):
@@ -91,11 +91,11 @@ class SourceBl(Source):
 
 
 
-class SourceReader(DBreader):
+class SourceReader(DbReader):
     '''
         Data reading class for Source objects with associated data.
 
-        - Use pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
+        - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
           to define the database driver and user context
 
         - Returns a Result object which includes the tems and eventuel error object.
@@ -173,7 +173,7 @@ class SourceReader(DBreader):
                         self.dbdriver.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:
-                    print(f'DBreader.get_source_with_references: hide {target}')
+                    print(f'DbReader.get_source_with_references: hide {target}')
 
             cit.append(c)
         results['citations'] = cit

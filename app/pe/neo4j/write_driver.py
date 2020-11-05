@@ -23,7 +23,7 @@ class Neo4jWriteDriver(object):
         self.tx = tx
     
         
-    def place_set_default_names(self, place_id, fi_id, sv_id):
+    def dw_place_set_default_names(self, place_id, fi_id, sv_id):
         ''' Creates default links from Place to fi and sv PlaceNames.
 
             - place_id      Place object id
@@ -51,11 +51,11 @@ class Neo4jWriteDriver(object):
             return err
 
 
-    def media_save_w_handles(self, uniq_id:int, media_refs:list):
+    def dw_media_save_w_handles(self, uniq_id:int, media_refs:list):
         ''' Save media object and it's Note and Citation references
             using their Gramps handles.
             
-            media_handle:
+            media_refs:
                 media_handle      # Media object handle
                 media_order       # Media reference order nr
                 crop              # Four coordinates
@@ -98,8 +98,9 @@ class Neo4jWriteDriver(object):
             logger.error(f"Neo4jWriteDriver.media_save_w_handles {doing}: {err}")
 
 
-
-    def mergeplaces(self, id1, id2):
+    def dw_mergeplaces(self, id1, id2):
+        ''' Merges given two Place objects using apoc library.
+        '''
         cypher_delete_namelinks = """
             match (node) -[r:NAME_LANG]-> (pn)
             where id(node) = $id

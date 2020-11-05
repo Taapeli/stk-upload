@@ -12,7 +12,7 @@ import  shareds
 from templates.jinja_filters import translate
 
 from .base import NodeObject, Status
-from pe.db_reader import DBreader
+from pe.db_reader import DbReader
 
 from models.gen.dates import DateRange
 
@@ -118,11 +118,11 @@ class FamilyBl(Family):
 #         self.citationref_hlink = []
 
 
-class FamilyReader(DBreader):
+class FamilyReader(DbReader):
     '''
         Data reading class for Family objects with associated data.
 
-        - Use pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
+        - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
           to define the database driver and user context
 
         - Returns a Result object which includes the tems and eventuel error object.

@@ -7,7 +7,7 @@ from bp.refplace_editor.models import refplaceeapi_v1 as api
 from . import bp
 from flask import render_template, request
 
-from pe.db_writer import DBwriter
+from pe.db_writer import DbWriter
 from pe.neo4j.write_driver import Neo4jWriteDriver
 from models.jsonify import stk_jsonify
 
@@ -48,7 +48,7 @@ def mergeplaces():
     id1 = request.args.get("id1")
     id2 = request.args.get("id2")
     dbdriver = Neo4jWriteDriver(shareds.driver, tx=None)
-    writer = DBwriter(dbdriver) 
+    writer = DbWriter(dbdriver) 
     place = writer.mergeplaces(int(id1),int(id2)) 
     return stk_jsonify(place)
 
