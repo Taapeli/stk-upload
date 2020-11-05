@@ -4,7 +4,7 @@
 Created on 2.5.2017
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
-import datetime
+#import datetime
 from sys import stderr
 import traceback
 
@@ -13,11 +13,12 @@ from shareds import logger
 
 from pe.neo4j.write_driver import Neo4jWriteDriver
 from pe.db_writer import DBwriter
-from models.gen.event import Event
+from bl.event import EventBl
+#from models.gen.event import Event
 from models.cypher_gramps import Cypher_event_w_handle
 
 
-class Event_gramps(Event):
+class Event_gramps(EventBl):
     """ An Event from Gramps xml file.
 
         Tapahtuma grampsista tuotuna
@@ -38,7 +39,7 @@ class Event_gramps(Event):
 
     def __init__(self):
         """ Luo uuden event-instanssin """
-        Event.__init__(self)
+        EventBl.__init__(self)
         self.note_handles = []      # Note handles (previous noteref_hlink had
                                     # only the first one)
         self.citation_handles = []  # (previous citationref_hlink)

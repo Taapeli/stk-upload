@@ -13,7 +13,8 @@ from flask_security import roles_accepted, login_required #, current_user ,roles
 from flask_babelex import _
 
 #import shareds
-from models.gen.person_name import Name
+from bl.person_name import Name
+#from models.gen.person_name import Name
 from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
 from .models import dataupdater         # Tietojen päivitysmetodit: joinpersons
 

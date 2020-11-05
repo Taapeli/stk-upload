@@ -132,7 +132,7 @@ def estimate_dates(uid=None):
         uids=list(uid)
     else:
         uids=[]
-    message = dataupdater.set_estimated_person_dates(uids)
+    message = dataupdater.set_person_estimated_dates(uids)
     ext = _("estimated lifetime")
     return render_template("/talletettu.html", text=message, info=ext)
 
@@ -250,9 +250,9 @@ def list_uploads_all():
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
 @login_required
 @roles_accepted('admin', 'audit')
-def start_load_to_neo4j(username,xmlname):
-    uploads.initiate_background_load_to_neo4j(username,xmlname)
-    logger.info(f'-> bp.admin.routes.start_load_to_neo4j u={username} f="{xmlname}"')
+def start_load_to_stkbase(username,xmlname):
+    uploads.initiate_background_load_to_stkbase(username,xmlname)
+    logger.info(f'-> bp.admin.routes.start_load_to_stkbase u={username} f="{xmlname}"')
     flash(_('Data import from %(i)s to database has been started.', i=xmlname), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 

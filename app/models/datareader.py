@@ -16,15 +16,17 @@ from flask import session as user_session
 from flask_security import current_user #, login_required #, roles_accepted
 
 from operator import itemgetter
+
+from bl.person_name import Name
 #from models.dbutil import Datefrom
 from models.gen.event import Event
 from models.gen.event_combo import Event_combo
-from models.gen.family_combo import Family, Family_combo
+from models.gen.family_combo import Family_combo #,  Family
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import SEX_MALE #, SEX_FEMALE
+#from models.gen.person import SEX_MALE #, SEX_FEMALE
 from models.gen.person_combo import Person_combo, Person_as_member
-from models.gen.person_name import Name
+#from models.gen.person_name import Name
 #from models.gen.place import Place
 from models.gen.place_combo import Place_combo
 from models.gen.refname import Refname

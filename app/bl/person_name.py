@@ -10,8 +10,8 @@ from sys import stderr
 
 import shareds
 from bl.base import NodeObject
-from .cypher import Cypher_person
-from .cypher import Cypher_name
+#Todo: move to pe.neo4j
+from models.gen.cypher import Cypher_person, Cypher_name
 
 class Name(NodeObject):
     """ Person name.

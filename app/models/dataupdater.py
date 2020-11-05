@@ -4,15 +4,17 @@
 
 import time
 from flask_babelex import _
+from sys import stderr
 
 from bp.gramps.batchlogger import Batch
 from models.gen.user import User
 from bl.person import PersonBl
+from bl.person_name import Name
 from bl.family import FamilyBl
 
 #from models.gen.person import Person
 #from models.gen.place import Place
-from models.gen.person_name import Name
+#from models.gen.person_name import Name
 from models.gen.refname import Refname
 #from models.gen.person_combo import Person_combo
 #from models.gen.family_combo import Family_combo
@@ -42,39 +44,41 @@ def make_place_hierarchy_properties(tx=None, place=None):
         User.endTransaction(my_tx)
         
     
-def set_confidence_values(tx, uniq_id=None, batch_logger=None):
-    """ Sets a quality rate for one or all Persons.
+# def set_confidence_values(tx, uniq_id=None, batch_logger=None): --> bl.person.PersonBl.set_confidence
+#     """ Sets a quality rate for one or all Persons.
+# 
+#         Asettaa henkilölle laatuarvion.
+# 
+#         Person.confidence is mean of all Citations used for Person's Events
+#     """
+#     counter = 0
+#     t0 = time.time()
+#     print('models.dataupdater.set_confidence_values: NOT IMPLEMENTED', file=stderr)
+#     return
+#     #=======================================================
+#     result = PersonBl.get_confidence(uniq_id)
+#     for record in result:
+#         p = PersonBl()
+#         p.uniq_id = record["uniq_id"]
+#         
+#         if len(record["list"]) > 0:
+#             sumc = 0
+#             for ind in record["list"]:
+#                 sumc += int(ind)
+#                 
+#             confidence = sumc/len(record["list"])
+#             p.confidence = "%0.1f" % confidence # string with one decimal
+#         p.set_confidence(tx)
+#             
+#         counter += 1
+# 
+#     if isinstance(batch_logger, Batch):
+#         batch_logger.log_event({'title':"Confidences set", 
+#                                 'count':counter, 'elapsed':time.time()-t0})
+#     return
 
-        Asettaa henkilölle laatuarvion.
 
-        Person.confidence is mean of all Citations used for Person's Events
-    """
-    counter = 0
-    t0 = time.time()
-
-    result = PersonBl.get_confidence(uniq_id)
-    for record in result:
-        p = PersonBl()
-        p.uniq_id = record["uniq_id"]
-        
-        if len(record["list"]) > 0:
-            sumc = 0
-            for ind in record["list"]:
-                sumc += int(ind)
-                
-            confidence = sumc/len(record["list"])
-            p.confidence = "%0.1f" % confidence # string with one decimal
-        p.set_confidence(tx)
-            
-        counter += 1
-
-    if isinstance(batch_logger, Batch):
-        batch_logger.log_event({'title':"Confidences set", 
-                                'count':counter, 'elapsed':time.time()-t0})
-    return
-
-
-def set_estimated_person_dates(uids=[]):
+def set_person_estimated_dates(uids=[]):
     """ Sets an estimated lifetime in Person.dates.
 
         Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat

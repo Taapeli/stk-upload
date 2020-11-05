@@ -9,6 +9,7 @@ from models.gen.dates import DateRange
 logger = logging.getLogger('stkserver')
 
 from bl.base import Status
+from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
 from bl.family import FamilyBl
@@ -26,7 +27,7 @@ from .cypher_person import CypherPerson
 #Todo: Change Old style includes to bl classes
 #from models.gen.person_combo import Person_combo
 #from models.gen.cypher import Cypher_person
-from models.gen.person_name import Name
+#from models.gen.person_name import Name
 from models.gen.event import Event
 #from models.gen.event_combo import Event_combo
 from models.gen.note import Note

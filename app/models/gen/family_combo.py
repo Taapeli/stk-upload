@@ -7,19 +7,20 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 import  shareds
 from bl.place import PlaceBl
 from bl.person import PersonBl
+from bl.person_name import Name
 from ui.place import place_names_from_nodes
 
 from .cypher import Cypher_family, Cypher_person
 from .family import Family
 from .event_combo import Event_combo
-from .person_name import Name
+#from .person_name import Name
 from .note import Note
 from .source import Source
 from .citation import Citation
 from .repository import Repository
-from .dates import DateRange
+#from .dates import DateRange
 #from .place_combo import Place_combo
-from models.gen.person import Person
+#from models.gen.person import Person
 from ui.user_context import UserContext
 from models.gen import family
 

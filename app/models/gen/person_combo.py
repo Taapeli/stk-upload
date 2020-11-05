@@ -49,17 +49,18 @@ from sys import stderr
 import shareds
 from .dates import DateRange
 
-from bl.person import PersonBl
+from bl.person import Person, PersonBl
+from bl.person_name import Name
 from bl.event import EventBl
 
-from .person import Person
-from .person_name import Name
+#from .person import Person
+#from .person_name import Name
 
 from .event_combo import Event_combo
 #from .family_combo import Family_combo
 from .cypher import Cypher_person, Cypher_family
 #from .place import Place, Place_name
-import traceback
+#import traceback
 # from .place_combo import Place_combo
 # from .citation import Citation
 # from .note import Note

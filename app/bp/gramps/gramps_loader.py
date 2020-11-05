@@ -232,265 +232,265 @@ def analyze(username, filename):
     return(references)
                     
 
-def analyze_old2(username, filename):
-    values = analyze_xml(username, filename)
+# def analyze_old2(username, filename):
+#     values = analyze_xml(username, filename)
+# 
+#     text = []
+#     citation_cnt = values["citation_cnt"]
+#     citation_source_cnt = values["citation_source_cnt"]
+#     event_cnt = values["event_cnt"]
+#     event_citation_cnt = values["event_citation_cnt"]
+#     event_no_citation_cnt = values["event_no_citation_cnt"]
+#     family_cnt = values["family_cnt"]
+#     family_citation_cnt = values["family_citation_cnt"]
+#     note_cnt = values["note_cnt"]
+#     object_cnt = values["object_cnt"]
+#     object_citation_cnt = values["object_citation_cnt"]
+#     person_cnt = values["person_cnt"]
+#     person_citation_cnt = values["person_citation_cnt"]
+#     place_cnt = values["place_cnt"]
+#     place_citation_cnt = values["place_citation_cnt"]
+#     repository_cnt = values["repository_cnt"]
+#     source_cnt = values["source_cnt"]
+#     source_repository_cnt = values["source_repository_cnt"]
+#     e_total = values["e_total"]
+#     
+#     text.append(" ")
+#     text.append("Statistics of the xml file:")
+#     text.append(str(citation_cnt) + " Citations, which have references to: " + 
+#       str(citation_source_cnt) + " Sources,")
+#     text.append(" ")
+#     text.append(str(event_cnt) + " Events,")
+#     text.append(" ")
+#     text.append(str(event_citation_cnt) + " Citation references in Events,")
+#     text.append(" ")
+#     text.append(str(event_no_citation_cnt) + " Events, which do not have a Citation reference \
+#      (NOTE! This should be near or equal to zero),")
+#     text.append(" ")
+#     text.append(str(family_cnt) + " Families, which have references to: " +
+#       str(family_citation_cnt) + " Citations,")
+#     text.append(" ")
+#     text.append(str(note_cnt) + " Notes,")
+#     text.append(" ")
+#     text.append(str(object_cnt) + " Objects, which have references to: " +
+#       str(object_citation_cnt) + " Citations,")
+#     text.append(" ")
+#     text.append(str(person_cnt) + " Persons, which have references to: " +
+#       str(person_citation_cnt) + " Citations,")
+#     text.append(" ")
+#     text.append(str(place_cnt) + " Places, which have references to: " +
+#       str(place_citation_cnt) + " Citations,")
+#     text.append(" ")
+#     text.append(str(repository_cnt) + " Repositors and")
+#     text.append(" ")
+#     text.append(str(source_cnt) + " Sources, which have references to: " +
+#       str(source_repository_cnt) + " Repositories")
+#     text.append(" ")
+#     text.append("Estimated storing time: " + str(int(e_total)) + " seconds")
+#     
+#     return(text)
+# 
+# def analyze_old(username, filename):
+#     # Read the xml file
+#     upload_folder = get_upload_folder(username) 
+#     pathname = os.path.join(upload_folder,filename)
+#     print("Pathname: " + pathname)
+#     
+#     file_cleaned, _file_displ, _cleaning_log = file_clean(pathname)
+#     
+#     f = open(file_cleaned, "r")
+#     
+#     text = []
+#     line_cnt = 0
+#     
+#     citation_cnt = 0
+#     event_cnt = 0
+#     family_cnt = 0
+#     object_cnt = 0
+#     person_cnt = 0
+#     place_cnt = 0
+#     repository_cnt = 0
+#     source_cnt = 0
+#     
+#     event_line_cnt = 0
+#     
+#     citation_source_cnt = 0
+#     event_citation_cnt = 0
+#     family_citation_cnt = 0
+#     object_citation_cnt = 0
+#     person_citation_cnt = 0
+#     place_citation_cnt = 0
+#     source_repository_cnt = 0
+#     
+#     event_no_citation_cnt = 0 # How many events do not have any citationref?
+#     event_with_citation_cnt = 0 # How many citationrefs this event has?
+#     
+#     citation_flag = False
+#     event_flag = False
+#     family_flag = False
+#     object_flag = False
+#     person_flag = False
+#     place_flag = False
+#     repository_flag = False
+#     source_flag = False
+#     
+#     event_birth_flag = False
+#     event_birthdate_flag = False
+#     event_birth_citation_flag = False
+# 
+#     for line in f:
+#         line_cnt += 1
+#         found_private = line.find('priv="1"')
+#         if found_private > 1:
+#             fault = "Private attribute in line: " + str(line_cnt)
+#             text.append(fault)
+#             text.append(" ")
+#         word = line.split()
+#         if len(word) > 0:
+#             if word[0] == "<citation":
+#                 citation_flag = True
+#                 citation_cnt += 1
+#             elif word[0] == "</citation":
+#                 citation_flag = False
+#         
+#             elif word[0] == "<event":
+#                 event_flag = True
+#                 event_cnt += 1
+#                 event_line_cnt = line_cnt
+#                 event_with_citation_cnt = 0
+#             elif word[0] == "</event>":
+#                 event_flag = False
+#                 if event_with_citation_cnt == 0:
+#                     event_no_citation_cnt += 1
+#                 if event_birth_flag == True:
+#                     if (not event_birthdate_flag) and (not event_birth_citation_flag):
+#                         fault = "No birthdate nor citationref for a Birth event in line: " + str(event_line_cnt)
+#                         text.append(fault)
+#                         text.append(" ")
+#                     event_birth_flag = False   
+#                     event_birthdate_flag = False   
+#                     event_birth_citation_flag = False   
+#                     
+#                                      
+#             elif word[0] == "<family":
+#                 family_flag = True
+#                 family_cnt += 1
+#             elif word[0] == "</family>":
+#                 family_flag = False
+#             
+#             elif word[0] == "<object":
+#                 object_flag = True
+#                 object_cnt += 1
+#             elif word[0] == "</object>":
+#                 object_flag = False
+#             
+#             elif word[0] == "<person":
+#                 person_flag = True
+#                 person_cnt += 1
+#             elif word[0] == "</person>":
+#                 person_flag = False
+#             
+#             elif word[0] == "<placeobj":
+#                 place_flag = True
+#                 place_cnt += 1
+#             elif word[0] == "</placeobj>":
+#                 place_flag = False
+#             
+#             elif word[0] == "<repository":
+#                 repository_flag = True
+#                 repository_cnt += 1
+#             elif word[0] == "</repository>":
+#                 repository_flag = False
+#             
+#             elif word[0] == "<source":
+#                 source_flag = True
+#                 source_cnt += 1
+#             elif word[0] == "</source>":
+#                 source_flag = False
+#             
+#             
+#             elif word[0] == "<citationref":
+#                 if event_flag:
+#                     event_citation_cnt += 1
+#                     event_with_citation_cnt += 1
+#             
+#                 elif family_flag:
+#                     family_citation_cnt += 1
+#             
+#                 elif object_flag:
+#                     object_citation_cnt += 1
+#             
+#                 elif place_flag:
+#                     place_citation_cnt += 1
+#             
+#                 elif person_flag:
+#                     person_citation_cnt += 1
+#                 else:
+#                     print("Unidentified citationref in line: " + str(line_cnt))
+#             
+#             
+#             elif word[0] == "<reporef":
+#                 if source_flag:
+#                     source_repository_cnt += 1
+#             
+#             
+#             elif word[0] == "<sourceref":
+#                 if citation_flag:
+#                     citation_source_cnt += 1
+#                     
+#         if event_flag:
+#             birth_found = line.find("Birth")
+#             if event_birth_flag:
+#                 birthdate_found = line.find("dateval")
+#                 if birthdate_found > 0:
+#                     event_birthdate_flag = True
+#                 birthdate_found = line.find("daterange")
+#                 if birthdate_found > 0:
+#                     event_birthdate_flag = True
+#                 birthdate_found = line.find("datespan")
+#                 if birthdate_found > 0:
+#                     event_birthdate_flag = True
+#                 birth_citation_found = line.find("citationref")
+#                 if birth_citation_found > 0:
+#                     event_birth_citation_flag = True
+#             elif birth_found > 0:
+#                 event_birth_flag = True
+#                     
+# 
+# 
+#     text.append(" ")
+#     text.append("Statistics of the xml file:")
+#     text.append(str(citation_cnt) + " Citations, which have references to: " + 
+#       str(citation_source_cnt) + " Sources,")
+#     text.append(" ")
+#     text.append(str(event_cnt) + " Events,")
+#     text.append(" ")
+#     text.append(str(event_citation_cnt) + " Citation references in Events,")
+#     text.append(" ")
+#     text.append(str(event_no_citation_cnt) + " Events, which do not have Citation references,")
+#     text.append(" ")
+#     text.append(str(family_cnt) + " Families, which have references to: " +
+#       str(family_citation_cnt) + " Citations,")
+#     text.append(" ")
+#     text.append(str(object_cnt) + " Objects, which have references to: " +
+#       str(object_citation_cnt) + " Citations,")
+#     text.append(" ")
+#     text.append(str(person_cnt) + " Persons, which have references to: " +
+#       str(person_citation_cnt) + " Citations,")
+#     text.append(" ")
+#     text.append(str(place_cnt) + " Places, which have references to: " +
+#       str(place_citation_cnt) + " Citations,")
+#     text.append(" ")
+#     text.append(str(repository_cnt) + " Repositors and")
+#     text.append(" ")
+#     text.append(str(source_cnt) + " Sources, which have references to: " +
+#       str(source_repository_cnt) + " Repositories")
+#     
+#     f.close()
+#     
+#     return(text)
 
-    text = []
-    citation_cnt = values["citation_cnt"]
-    citation_source_cnt = values["citation_source_cnt"]
-    event_cnt = values["event_cnt"]
-    event_citation_cnt = values["event_citation_cnt"]
-    event_no_citation_cnt = values["event_no_citation_cnt"]
-    family_cnt = values["family_cnt"]
-    family_citation_cnt = values["family_citation_cnt"]
-    note_cnt = values["note_cnt"]
-    object_cnt = values["object_cnt"]
-    object_citation_cnt = values["object_citation_cnt"]
-    person_cnt = values["person_cnt"]
-    person_citation_cnt = values["person_citation_cnt"]
-    place_cnt = values["place_cnt"]
-    place_citation_cnt = values["place_citation_cnt"]
-    repository_cnt = values["repository_cnt"]
-    source_cnt = values["source_cnt"]
-    source_repository_cnt = values["source_repository_cnt"]
-    e_total = values["e_total"]
-    
-    text.append(" ")
-    text.append("Statistics of the xml file:")
-    text.append(str(citation_cnt) + " Citations, which have references to: " + 
-      str(citation_source_cnt) + " Sources,")
-    text.append(" ")
-    text.append(str(event_cnt) + " Events,")
-    text.append(" ")
-    text.append(str(event_citation_cnt) + " Citation references in Events,")
-    text.append(" ")
-    text.append(str(event_no_citation_cnt) + " Events, which do not have a Citation reference \
-     (NOTE! This should be near or equal to zero),")
-    text.append(" ")
-    text.append(str(family_cnt) + " Families, which have references to: " +
-      str(family_citation_cnt) + " Citations,")
-    text.append(" ")
-    text.append(str(note_cnt) + " Notes,")
-    text.append(" ")
-    text.append(str(object_cnt) + " Objects, which have references to: " +
-      str(object_citation_cnt) + " Citations,")
-    text.append(" ")
-    text.append(str(person_cnt) + " Persons, which have references to: " +
-      str(person_citation_cnt) + " Citations,")
-    text.append(" ")
-    text.append(str(place_cnt) + " Places, which have references to: " +
-      str(place_citation_cnt) + " Citations,")
-    text.append(" ")
-    text.append(str(repository_cnt) + " Repositors and")
-    text.append(" ")
-    text.append(str(source_cnt) + " Sources, which have references to: " +
-      str(source_repository_cnt) + " Repositories")
-    text.append(" ")
-    text.append("Estimated storing time: " + str(int(e_total)) + " seconds")
-    
-    return(text)
-
-def analyze_old(username, filename):
-    # Read the xml file
-    upload_folder = get_upload_folder(username) 
-    pathname = os.path.join(upload_folder,filename)
-    print("Pathname: " + pathname)
-    
-    file_cleaned, _file_displ, _cleaning_log = file_clean(pathname)
-    
-    f = open(file_cleaned, "r")
-    
-    text = []
-    line_cnt = 0
-    
-    citation_cnt = 0
-    event_cnt = 0
-    family_cnt = 0
-    object_cnt = 0
-    person_cnt = 0
-    place_cnt = 0
-    repository_cnt = 0
-    source_cnt = 0
-    
-    event_line_cnt = 0
-    
-    citation_source_cnt = 0
-    event_citation_cnt = 0
-    family_citation_cnt = 0
-    object_citation_cnt = 0
-    person_citation_cnt = 0
-    place_citation_cnt = 0
-    source_repository_cnt = 0
-    
-    event_no_citation_cnt = 0 # How many events do not have any citationref?
-    event_with_citation_cnt = 0 # How many citationrefs this event has?
-    
-    citation_flag = False
-    event_flag = False
-    family_flag = False
-    object_flag = False
-    person_flag = False
-    place_flag = False
-    repository_flag = False
-    source_flag = False
-    
-    event_birth_flag = False
-    event_birthdate_flag = False
-    event_birth_citation_flag = False
-
-    for line in f:
-        line_cnt += 1
-        found_private = line.find('priv="1"')
-        if found_private > 1:
-            fault = "Private attribute in line: " + str(line_cnt)
-            text.append(fault)
-            text.append(" ")
-        word = line.split()
-        if len(word) > 0:
-            if word[0] == "<citation":
-                citation_flag = True
-                citation_cnt += 1
-            elif word[0] == "</citation":
-                citation_flag = False
-        
-            elif word[0] == "<event":
-                event_flag = True
-                event_cnt += 1
-                event_line_cnt = line_cnt
-                event_with_citation_cnt = 0
-            elif word[0] == "</event>":
-                event_flag = False
-                if event_with_citation_cnt == 0:
-                    event_no_citation_cnt += 1
-                if event_birth_flag == True:
-                    if (not event_birthdate_flag) and (not event_birth_citation_flag):
-                        fault = "No birthdate nor citationref for a Birth event in line: " + str(event_line_cnt)
-                        text.append(fault)
-                        text.append(" ")
-                    event_birth_flag = False   
-                    event_birthdate_flag = False   
-                    event_birth_citation_flag = False   
-                    
-                                     
-            elif word[0] == "<family":
-                family_flag = True
-                family_cnt += 1
-            elif word[0] == "</family>":
-                family_flag = False
-            
-            elif word[0] == "<object":
-                object_flag = True
-                object_cnt += 1
-            elif word[0] == "</object>":
-                object_flag = False
-            
-            elif word[0] == "<person":
-                person_flag = True
-                person_cnt += 1
-            elif word[0] == "</person>":
-                person_flag = False
-            
-            elif word[0] == "<placeobj":
-                place_flag = True
-                place_cnt += 1
-            elif word[0] == "</placeobj>":
-                place_flag = False
-            
-            elif word[0] == "<repository":
-                repository_flag = True
-                repository_cnt += 1
-            elif word[0] == "</repository>":
-                repository_flag = False
-            
-            elif word[0] == "<source":
-                source_flag = True
-                source_cnt += 1
-            elif word[0] == "</source>":
-                source_flag = False
-            
-            
-            elif word[0] == "<citationref":
-                if event_flag:
-                    event_citation_cnt += 1
-                    event_with_citation_cnt += 1
-            
-                elif family_flag:
-                    family_citation_cnt += 1
-            
-                elif object_flag:
-                    object_citation_cnt += 1
-            
-                elif place_flag:
-                    place_citation_cnt += 1
-            
-                elif person_flag:
-                    person_citation_cnt += 1
-                else:
-                    print("Unidentified citationref in line: " + str(line_cnt))
-            
-            
-            elif word[0] == "<reporef":
-                if source_flag:
-                    source_repository_cnt += 1
-            
-            
-            elif word[0] == "<sourceref":
-                if citation_flag:
-                    citation_source_cnt += 1
-                    
-        if event_flag:
-            birth_found = line.find("Birth")
-            if event_birth_flag:
-                birthdate_found = line.find("dateval")
-                if birthdate_found > 0:
-                    event_birthdate_flag = True
-                birthdate_found = line.find("daterange")
-                if birthdate_found > 0:
-                    event_birthdate_flag = True
-                birthdate_found = line.find("datespan")
-                if birthdate_found > 0:
-                    event_birthdate_flag = True
-                birth_citation_found = line.find("citationref")
-                if birth_citation_found > 0:
-                    event_birth_citation_flag = True
-            elif birth_found > 0:
-                event_birth_flag = True
-                    
-
-
-    text.append(" ")
-    text.append("Statistics of the xml file:")
-    text.append(str(citation_cnt) + " Citations, which have references to: " + 
-      str(citation_source_cnt) + " Sources,")
-    text.append(" ")
-    text.append(str(event_cnt) + " Events,")
-    text.append(" ")
-    text.append(str(event_citation_cnt) + " Citation references in Events,")
-    text.append(" ")
-    text.append(str(event_no_citation_cnt) + " Events, which do not have Citation references,")
-    text.append(" ")
-    text.append(str(family_cnt) + " Families, which have references to: " +
-      str(family_citation_cnt) + " Citations,")
-    text.append(" ")
-    text.append(str(object_cnt) + " Objects, which have references to: " +
-      str(object_citation_cnt) + " Citations,")
-    text.append(" ")
-    text.append(str(person_cnt) + " Persons, which have references to: " +
-      str(person_citation_cnt) + " Citations,")
-    text.append(" ")
-    text.append(str(place_cnt) + " Places, which have references to: " +
-      str(place_citation_cnt) + " Citations,")
-    text.append(" ")
-    text.append(str(repository_cnt) + " Repositors and")
-    text.append(" ")
-    text.append(str(source_cnt) + " Sources, which have references to: " +
-      str(source_repository_cnt) + " Repositories")
-    
-    f.close()
-    
-    return(text)
-
-def xml_to_neo4j(pathname, userid='Taapeli'):
+def xml_to_stkbase(pathname, userid='Taapeli'):
     """ 
     Reads a Gramps xml file, and saves the information to db 
     
@@ -507,13 +507,13 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
         # Clean apostrophes
         file clean > status:"loading"
     # Käsittele tietoryhmä 1
-        models.gramps.gramps_loader.xml_to_neo4j > status:"storing" 
+        models.gramps.gramps_loader.xml_to_stkbase > status:"storing" 
     # Käsittele tietoryhmä 2 ...
     # ...
     # Käsittele henkilöt
-        models.gramps.gramps_loader.xml_to_neo4j > status:"storing"
+        models.gramps.gramps_loader.xml_to_stkbase > status:"storing"
     # Viimeistele data
-        models.gramps.gramps_loader.xml_to_neo4j > status:"storing"
+        models.gramps.gramps_loader.xml_to_stkbase > status:"storing"
     # Merkitse valmiiksi
         status:"done"
 
@@ -568,14 +568,14 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
                 
             # Set person confidence values 
             #TODO: Only for imported persons (now for all persons!)
-            dataupdater.set_confidence_values(handler.tx, batch_logger=handler.blog)
+            handler.set_person_confidence_values()
             # Set properties (for imported persons)
             #    + Refname links
             #    ? Person sortname
             #    + Person lifetime
             #    - Confidence values
             handler.set_person_calculated_attributes()
-            handler.set_estimated_person_dates()
+            handler.set_person_estimated_dates()
             
             # Copy date and name information from Person and Event nodes to Family nodes
             handler.set_family_calculated_attributes()

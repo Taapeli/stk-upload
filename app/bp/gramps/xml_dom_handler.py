@@ -10,24 +10,27 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from collections import defaultdict
+#from sys import stderr
 import re
 import time
 import os
 import xml.dom.minidom
-
 from flask_babelex import _
 
 import shareds
-from .models.person_gramps import Person_gramps
+from bl.person_gramps import PersonGramps
+from bl.person import PersonBl
+from bl.person_name import Name
+from bl.place import PlaceName
+from bl.place_coordinates import Point
+from bl.media import MediaRefResult
+
+from pe.neo4j.write_driver import Neo4jWriteDriver
+
 from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
 from .models.place_gramps import Place_gramps
-
-from bl.person import PersonBl
-from bl.place import PlaceName
-from bl.place_coordinates import Point
-from bl.media import MediaRefResult
 
 from .batchlogger import Log
 
@@ -35,8 +38,8 @@ from models.cypher_gramps import Cypher_mixed
 from models.gen.dates import Gramps_DateRange
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person_name import Name
-from models.gen.person_combo import Person_combo
+#from models.gen.person_name import Name
+#from models.gen.person_combo import Person_combo
 from models.gen.citation import Citation
 from models.gen.repository import Repository
 
@@ -116,6 +119,10 @@ class DOM_handler():
         self.file = os.path.basename(pathname) # for messages
         self.progress = defaultdict(int)    # key=object type, value=count of objects processed
 
+        # Select the update driver for current database
+        self.dbwriter = Neo4jWriteDriver(shareds.driver, self.tx)
+
+
     def begin_tx(self, session):
         self.tx = session.begin_transaction()
         print("Transaction started")
@@ -167,6 +174,8 @@ class DOM_handler():
                     batch_id=self.batch_id, path=path)
 
     def update_progress(self, key):
+        ''' Save status for displaying progress bar
+        '''
         self.progress[key] += 1
         this_thread = threading.current_thread()
         this_thread.progress = dict(self.progress)
@@ -492,7 +501,7 @@ class DOM_handler():
         for person in people:
             name_order = 0
 
-            p = Person_gramps()
+            p = PersonGramps()
             # Extract handle, change and id
             self._extract_base(person, p)
 
@@ -881,7 +890,7 @@ class DOM_handler():
         self.blog.log_event({'title':"Person sorting names", 'count':sortname_count})
 
 
-    def set_estimated_person_dates(self):
+    def set_person_estimated_dates(self):
         ''' Sets estimated dates for each Person processed in handle_people
             in transaction
             
@@ -894,6 +903,43 @@ class DOM_handler():
                             
         self.blog.log_event({'title':"Estimated person lifetimes", 
                              'count':cnt, 'elapsed':time.time()-t0}) 
+
+
+    def set_person_confidence_values(self):
+        """ Sets a quality rate for list of Persons.
+     
+            Asettaa henkilölle laatuarvion.
+     
+            Person.confidence is mean of all Citations used for Person's Events
+        """
+        counter = 0
+        t0 = time.time()
+
+        #TODO: Should use  writer = GrampsWriter(self.dbwriter, args)
+        #      writer.dr_get_person_confidence(uniq_id)
+        #      writer.dr_set_person_confidence(person?)
+
+        for uniq_id in self.person_ids:
+
+            result = PersonBl.get_confidence(uniq_id)
+            for record in result:
+                p = PersonBl()
+                p.uniq_id = record["uniq_id"]
+                 
+                if len(record["list"]) > 0:
+                    sumc = 0
+                    for ind in record["list"]:
+                        sumc += int(ind)
+                         
+                    confidence = sumc/len(record["list"])
+                    p.confidence = "%0.1f" % confidence # a string with one decimal
+                p.set_confidence(self.tx)
+                     
+                counter += 1
+     
+        self.blog.log_event({'title':"Confidences set", 
+                                'count':counter, 'elapsed':time.time()-t0})
+        return
 
     # --------------------------- DOM subtree procesors ----------------------------
 
