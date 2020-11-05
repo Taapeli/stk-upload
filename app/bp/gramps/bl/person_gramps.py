@@ -20,10 +20,11 @@ import datetime
 import shareds
 from shareds import logger
 
-from pe.neo4j.write_driver import Neo4jWriteDriver
-from pe.db_writer import DbWriter
 from bl.person import PersonBl
 #from models.gen.person import Person
+from pe.neo4j.write_driver import Neo4jWriteDriver
+from pe.db_writer import DbWriter
+
 from models.cypher_gramps import Cypher_person_w_handle
 from models.gen.note import Note
 

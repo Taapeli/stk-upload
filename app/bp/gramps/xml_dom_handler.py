@@ -18,7 +18,7 @@ import xml.dom.minidom
 from flask_babelex import _
 
 import shareds
-from bl.person_gramps import PersonGramps
+from .bl.person_gramps import PersonGramps
 from bl.person import PersonBl
 from bl.person_name import Name
 from bl.place import PlaceName
@@ -180,14 +180,14 @@ class DOM_handler():
         this_thread = threading.current_thread()
         this_thread.progress = dict(self.progress)
 
-    def save_and_link_handle(self, e, **kwargs):
+    def save_and_link_handle(self, obj, **kwargs):
         ''' Save object and store its identifiers in the dictionary by handle.
 
             Some objects may accept arguments like batch_id="2019-08-26.004" and others
         '''
-        e.save(self.tx, **kwargs)
-        self.handle_to_node[e.handle] = self.dbKeys(e.uuid, e.uniq_id)
-        self.update_progress(e.__class__.__name__)
+        obj.save(self.tx, **kwargs)
+        self.handle_to_node[obj.handle] = self.dbKeys(obj.uuid, obj.uniq_id)
+        self.update_progress(obj.__class__.__name__)
 
    
     # ---------------------   XML subtree handlers   --------------------------
