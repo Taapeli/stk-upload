@@ -160,7 +160,7 @@ def xml_download(xmlfile):
 @roles_accepted('research', 'admin')
 def batch_delete(batch_id):
 
-    from models.gen.batch_audit import Batch
+    from bl.batch_audit import Batch
 
     filename = Batch.get_filename(current_user.username,batch_id)
     metafile = filename.replace("_clean.",".") + ".meta"

@@ -304,7 +304,7 @@ def list_uploads_all(users):
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.
-# --> models.gen.batch_audit.Batch.list_empty_batches
+# --> bl.batch_audit.Batch.list_empty_batches
 
 
 def removefile(fname): 

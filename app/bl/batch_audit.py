@@ -25,8 +25,9 @@ class Batch():
         self.uniq_id = None
         self.user = userid
         self.file = None
-        self.id = None
+        self.id = None              # batch_id
         self.status = 'started'
+        self.mediapath = None       # Directory for media files
         self.timestamp = 0
     
     def __str__(self):

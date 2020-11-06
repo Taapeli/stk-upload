@@ -21,6 +21,7 @@ class Status():
     NOT_FOUND = 1
     ERROR = 2
     NOT_STARTED = 4
+    UPDATED = 4
 
 
 class StkEncoder(json.JSONEncoder):

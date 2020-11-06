@@ -222,15 +222,15 @@ OPTIONAL MATCH (person) -[:EVENT]-> (:Event) -[:CITATION]-> (c1:Citation)
 OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
 RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
-    get_confidence = """
-MATCH (person:Person) WHERE ID(person)=$id
-OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c1:Citation)
-OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
-RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
+#     get_confidence = """
+# MATCH (person:Person) WHERE ID(person)=$id
+# OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c1:Citation)
+# OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
+# RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
-    set_confidence = """
-MATCH (person:Person) WHERE ID(person)=$id
-SET person.confidence=$confidence"""
+#     set_confidence = """
+# MATCH (person:Person) WHERE ID(person)=$id
+# SET person.confidence=$confidence"""
 
     set_sortname = """
 MATCH (person:Person) WHERE ID(person) = $id

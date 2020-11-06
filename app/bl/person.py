@@ -504,18 +504,19 @@ class PersonBl(Person):
 
 
 
-    @staticmethod
-    def get_confidence (uniq_id=None):
-        """ Read Person confidence info from Person and the Event nodes.
-
-            Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
-        """
-        raise(NotImplementedError, "TODO: bl.person.PersonBl.get_confidence")
-        if uniq_id:
-            return shareds.driver.session().run(Cypher_person.get_confidence,
-                                                id=uniq_id)
-#         else:
-#             return shareds.driver.session().run(Cypher_person.get_confidences_all)
+#     @staticmethod
+#     def get_confidence (uniq_id=None): --> pe.neo4j.write_driver.Neo4jWriteDriver.dr_get_person_confidences
+#         """ Collect Person confidence from Person and the Event nodes.
+# 
+#             Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
+#         """
+#         raise(NotImplementedError, "TODO: bl.person.PersonBl.get_confidence")
+# 
+#         if uniq_id:
+#             return shareds.driver.session().run(Cypher_person.get_confidence,
+#                                                 id=uniq_id)
+# #         else:
+# #             return shareds.driver.session().run(Cypher_person.get_confidences_all)
 
     @staticmethod
     def estimate_lifetimes(tx, uids=[]): # <-- 
@@ -606,13 +607,13 @@ class PersonBl(Person):
             traceback.print_exc()
             return 0
 
-    def set_confidence (self, tx): 
-        """ Sets a quality rate to this Person
-            Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
-        """
-        raise(NotImplementedError, "TODO: bl.person.PersonBl.set_confidence")
-#         return tx.run(Cypher_person.set_confidence,
-#                       id=self.uniq_id, confidence=self.confidence)
+#     def set_confidence (self, tx): 
+#         """ Sets a quality rate to this Person
+#             Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
+#         """
+#         raise(NotImplementedError, "TODO: bl.person.PersonBl.set_confidence")
+# #         return tx.run(Cypher_person.set_confidence,
+# #                       id=self.uniq_id, confidence=self.confidence)
 
     def remove_privacy_limit_from_families(self):
         ''' Clear privacy limitations from self.person's families.

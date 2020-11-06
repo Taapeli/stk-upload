@@ -132,3 +132,17 @@ MATCH (prof:UserProfile) -[:HAS_ACCESS]-> (b:Batch) -[:OWNS]-> (person:Person)
           person.death_high >= $years[0] AND person.birth_low <= $years[1]
 OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
+
+# ---- Gramps upload -----
+
+    get_confidences = """
+MATCH (person:Person) WHERE ID(person)=$id
+OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c1:Citation)
+OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
+RETURN person.confidence AS confidence, 
+    COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
+
+    set_confidence = """
+MATCH (person:Person) WHERE ID(person)=$id
+SET person.confidence=$confidence"""
+

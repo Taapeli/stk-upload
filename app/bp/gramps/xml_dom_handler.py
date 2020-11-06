@@ -18,21 +18,24 @@ import xml.dom.minidom
 from flask_babelex import _
 
 import shareds
-from .bl.person_gramps import PersonGramps
+from bl.base import Status
 from bl.person import PersonBl
 from bl.person_name import Name
 from bl.place import PlaceName
 from bl.place_coordinates import Point
 from bl.media import MediaRefResult
 
+from pe.db_writer import DbWriter
 from pe.neo4j.write_driver import Neo4jWriteDriver
+
+from .bl.person_gramps import PersonGramps
 
 from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
 from .models.place_gramps import Place_gramps
 
-from .batchlogger import Log
+from .batchlogger import LogItem
 
 from models.cypher_gramps import Cypher_mixed
 from models.gen.dates import Gramps_DateRange
@@ -94,64 +97,51 @@ class DOM_handler():
         - collects status log
     """
 
-    class dbKeys():
-        ''' Stores the keys connecting an xml object to db node.
-        '''
-        def __init__(self, uuid=None, uniq_id=None):
-            self.uuid = uuid
-            self.uniq_id = uniq_id
-
-        def __str__(self):
-            return f'dbKeys({self.uuid[:6]},{self.uniq_id})'
-
-
     def __init__(self, infile, current_user, pathname=""):
         """ Set DOM collection and username """
         DOMTree = xml.dom.minidom.parse(open(infile, encoding='utf-8'))
         self.collection = DOMTree.documentElement    # XML documentElement
         self.username = current_user        # current username
 
-        self.handle_to_node = {}            # dbKeys(uuid, uniq_id)
+        self.handle_to_node = {}            # {handle:(uuid, uniq_id)}
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
-        self.tx = None                      # Transaction not opened
-        self.batch_id = None
+        self.batch = Batch()                # Batch node to be created
+#         self.batch_id = None
+#         self.mediapath = None               # Directory for media files
         self.file = os.path.basename(pathname) # for messages
         self.progress = defaultdict(int)    # key=object type, value=count of objects processed
 
         # Select the update driver for current database
-        self.dbwriter = Neo4jWriteDriver(shareds.driver, self.tx)
+        self.dbdriver = Neo4jWriteDriver(shareds.driver)
 
 
     def begin_tx(self, session):
-        self.tx = session.begin_transaction()
+        self.dbdriver.tx = session.begin_transaction()
         print("Transaction started")
 
     def commit(self, rollback=False):
         """ Commit or rollback transaction """
         if rollback:
-            self.tx.rollback()
+            self.dbdriver.rollback()
             print("Transaction discarded")
-            logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/rollback f="{self.file}"')
+            logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit f="{self.file}"')
             self.blog.log_event({'title': _("Database save failed"), 'level':"ERROR"})
-            return
-
-        if self.tx.closed():
-            print("Transaction already closed!")
         else:
-            try:
-                self.tx.commit()
-                logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/ok f="{self.file}"')
+            ret = self.dbdriver.dw_commit()
+            if ret == 0:
+                logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit f="{self.file}"')
                 print("Transaction committed")
-            except Exception as e:
+            else:
                 logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/fail f="{self.file}"')
                 print("Transaction failed")
-                self.blog.log_event({'title':_("Database save failed due to {} {}".\
-                                     format(e.__class__.__name__, e)), 'level':"ERROR"})
+                self.blog.log_event({'title':_("Database save failed due to {}".\
+                                     format(ret)), 'level':"ERROR"})
+
 
     def remove_handles(self):
-#         print("remove_handles NOT DONE!")
-#         return
+        ''' Remove all Gramps handles, becouse they are not needed any more.
+        '''
         total = 0
         results = self.tx.run(Cypher_mixed.remove_handles, batch_id=self.batch_id)
         for count, label in results:
@@ -170,6 +160,7 @@ class DOM_handler():
 
     def set_mediapath(self, path):
         ''' Store media files path. '''
+        self.dbdriver.dw_set_mediapath(obj,**kwargs)
         self.tx.run(Cypher_mixed.set_mediapath, 
                     batch_id=self.batch_id, path=path)
 
@@ -185,23 +176,35 @@ class DOM_handler():
 
             Some objects may accept arguments like batch_id="2019-08-26.004" and others
         '''
-        obj.save(self.tx, **kwargs)
-        self.handle_to_node[obj.handle] = self.dbKeys(obj.uuid, obj.uniq_id)
+        self.dbdriver.save_and_link_obj(obj,**kwargs)
+
+        self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
    
     # ---------------------   XML subtree handlers   --------------------------
 
-    def handle_header(self):
-        ''' Store eventuel media path from XML header to Batch node.
+    def set_header_mediapath(self):
+        ''' Pick eventuel media path from XML header to be saved in Batch node.
         '''
         for header in self.collection.getElementsByTagName("header"):
             for mediapath in header.getElementsByTagName("mediapath"):
                 if (len(mediapath.childNodes) > 0):
-                    path = mediapath.childNodes[0].data
-                    self.set_mediapath(path)
-                    return
-        self.set_mediapath("")
+                    self.mediapath = mediapath.childNodes[0].data
+        return self.mediapath
+
+
+#     def handle_header(self):
+#         ''' Store eventuel media path from XML header to Batch node.
+#         '''
+#         for header in self.collection.getElementsByTagName("header"):
+#             for mediapath in header.getElementsByTagName("mediapath"):
+#                 if (len(mediapath.childNodes) > 0):
+#                     path = mediapath.childNodes[0].data
+#                     self.dbdriver.dw_set_batch_medipath(path)
+#                     self.set_mediapath(path) ####
+#                     return
+#         self.set_mediapath("")
 
 
     def handle_citations(self):
@@ -843,7 +846,8 @@ class DOM_handler():
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
-    # -------------------------- Other process steps -------------------------------
+
+    # -------------------------- Finishing process steps -------------------------------
 
     def set_family_calculated_attributes(self):
         ''' Set sortnames and lifetime dates for each Family in the list self.family_ids.
@@ -905,41 +909,33 @@ class DOM_handler():
                              'count':cnt, 'elapsed':time.time()-t0}) 
 
 
-    def set_person_confidence_values(self):
-        """ Sets a quality rate for list of Persons.
+    def set_all_person_confidence_values(self):
+        """ Sets a quality rate for collected list of Persons.
      
             Asettaa henkilölle laatuarvion.
      
             Person.confidence is mean of all Citations used for Person's Events
         """
-        counter = 0
         t0 = time.time()
+        db = DbWriter(self.dbdriver)
 
-        #TODO: Should use  writer = GrampsWriter(self.dbwriter, args)
-        #      writer.dr_get_person_confidence(uniq_id)
-        #      writer.dr_set_person_confidence(person?)
-
-        for uniq_id in self.person_ids:
-
-            result = PersonBl.get_confidence(uniq_id)
-            for record in result:
-                p = PersonBl()
-                p.uniq_id = record["uniq_id"]
-                 
-                if len(record["list"]) > 0:
-                    sumc = 0
-                    for ind in record["list"]:
-                        sumc += int(ind)
-                         
-                    confidence = sumc/len(record["list"])
-                    p.confidence = "%0.1f" % confidence # a string with one decimal
-                p.set_confidence(self.tx)
-                     
-                counter += 1
-     
-        self.blog.log_event({'title':"Confidences set", 
-                                'count':counter, 'elapsed':time.time()-t0})
-        return
+        result = db.update_person_confidences(self.tx, self.person_ids)
+        # returns {status, count, statustext}
+        status = result.get('status')
+        count = result.get('count',0)
+        if status == Status.OK or status == Status.UPDATED:
+            self.blog.log_event({'title':"Confidences set", 
+                                 'count':count, 
+                                 'elapsed':time.time()-t0})
+            return Status.OK
+        else:
+            msg = result.get('statustext')
+            self.blog.log_event({'title':"Confidences not set", 
+                                 'count':count, 
+                                 'elapsed':time.time()-t0,
+                                 'level':"ERROR"})
+            print(f'DOM_handler.set_all_person_confidence_values: FAILED: {msg}')
+            return {'status':status, 'statustext':msg}
 
     # --------------------------- DOM subtree procesors ----------------------------
 
@@ -983,7 +979,7 @@ class DOM_handler():
                                         date_start, date_stop)
 
             elif len(obj.getElementsByTagName(tag) ) > 1:
-                self.log(Log("More than one {} tag in an event".format(tag),
+                self.log(LogItem("More than one {} tag in an event".format(tag),
                                     level="ERROR"))
 
         return None
@@ -1001,7 +997,6 @@ class DOM_handler():
             node.change = int(dom.getAttribute("change"))
         if dom.hasAttribute("id"):
             node.id = dom.getAttribute("id")
-
 
     def _extract_mediaref(self, dom_object):
         ''' Check if dom_object has media reference and extract it to p.media_refs.

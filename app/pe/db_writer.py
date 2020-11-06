@@ -10,6 +10,9 @@ Created on 23.3.2020
 '''
 import logging 
 import shareds
+
+from bl.base import Status
+#from bl.person import PersonBl
 from bl.place import PlaceBl
 logger = logging.getLogger('stkserver')
 
@@ -20,11 +23,44 @@ class DbWriter(object):
     '''
 
     def __init__(self, dbdriver):
-        ''' Create a writer/updater object with db driver and user context.
+        ''' Create a dataase write driver object.
         '''
         self.dbdriver = dbdriver
-    
+
+
+    def commit(self, rollback=False):
+        """ Commit or rollback transaction.
         
+            Returns 0 or error message, if commit failed.
+        """
+        if rollback:
+            self.dbdriver.dw_rollback()
+            print("Transaction discarded")
+            logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/rollback f="{self.file}"')
+            self.blog.log_event({'title': _("Database save failed"), 'level':"ERROR"})
+            return 0
+
+            try:
+                return self.dbdriver.dw_commit()
+                logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/ok f="{self.file}"')
+                print("Transaction committed")
+                return 0
+            except Exception as e:
+                msg = f'{e.__class__.__name__}, {e}'
+                logger.info('-> bp.gramps.xml_dom_handler.DOM_handler.commit/fail"')
+                print("pe.db_writer.DbWriter.commit: Transaction failed "+ msg)
+                self.blog.log_event({'title':_("Database save failed due to {}".\
+                                     format(msg)), 'level':"ERROR"})
+                return True
+
+    def save_and_link_obj(self, obj, **kwargs):   # batch_id=None, parent_id=None):
+        """ Saves given object to database
+            - if  obj.parent_id is given, link (parent) --> (obj)  
+            - elif obj.batch_id is given, link (batch) --> (obj)
+        """
+        obj.save(**kwargs)
+
+
     def place_set_default_names(self, place, def_names:dict):
         ''' Creates default links from Place to fi and sv PlaceNames.
         
@@ -58,3 +94,25 @@ class DbWriter(object):
                 self.place_set_default_names(place, def_names)
             return place
 
+    def update_person_confidences(self, tx, person_ids:list):
+        """ Sets a quality rate for given list of Person.uniq_ids.
+     
+            Asettaa henkilölle laatuarvion.
+     
+            Person.confidence is mean of all Citations used for Person's Events
+        """
+        counter = 0
+        for uniq_id in person_ids:
+
+            result = self.dbdriver.dw_update_person_confidence(tx, uniq_id)
+            # returns {confidence, status, statustext}
+            stat = result.get('status')
+            if stat == Status.OK:
+                pass
+            elif stat == Status.UPDATED:
+                counter += 1
+            else:
+                # Update failed
+                return {'status': stat, 'statustext':result.get('statustext')}
+
+        return {'status':Status.OK, 'count':counter}

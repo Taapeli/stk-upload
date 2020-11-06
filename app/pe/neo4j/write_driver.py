@@ -3,9 +3,13 @@ Created on 23.3.2020
 
 @author: jm
 '''
-import logging 
-from bl.place import PlaceBl, PlaceName
+import logging
 logger = logging.getLogger('stkserver')
+
+from bl.base import Status
+from bl.place import PlaceBl, PlaceName
+
+from pe.neo4j.cypher_person import CypherPerson
 
 from .cypher_place import CypherPlace
 from .cypher_gramps import CypherObjectWHandle
@@ -13,16 +17,80 @@ from .cypher_gramps import CypherObjectWHandle
 
 class Neo4jWriteDriver(object):
     '''
-    classdocs
+    This driver for Neo4j database maintains transaction and executes
+    different update functions.
     '''
 
-    def __init__(self, dbdriver, tx):
+    def __init__(self, dbdriver, tx=None):
         ''' Create a writer/updater object with db driver and user context.
         '''
         self.dbdriver = dbdriver
         self.tx = tx
-    
-        
+
+    def dw_commit(self):
+        """ Commit transaction.
+        """
+        if self.tx.closed():
+            print("Transaction already closed!")
+            return 0
+        try:
+            self.tx.commit()
+            logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/ok f="{self.file}"')
+            print("Transaction committed")
+            return 0
+        except Exception as e:
+            msg = f'{e.__class__.__name__}, {e}'
+            logger.info('-> bp.gramps.xml_dom_handler.DOM_handler.commit/fail"')
+            print("pe.db_writer.DbWriter.commit: Transaction failed "+ msg)
+            self.blog.log_event({'title':_("Database save failed due to {}".\
+                                 format(msg)), 'level':"ERROR"})
+            return msg
+
+    def dw_rollback(self):
+        """ Rollback transaction.
+        """
+        self.tx.rollback()
+        print("Transaction discarded")
+        logger.info('-> pe.neo4j.write_driver.Neo4jWriteDriver.dw_rollback')
+
+
+    # ----- Person ----
+
+    def dw_update_person_confidence(self, uniq_id:int):
+        """ Collect Person confidence from Person and Event nodes and store result in Person.
+ 
+            Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
+        """
+        sumc = 0
+        new_conf = None
+        try:
+            result = self.tx.run(CypherPerson.get_confidences, id=uniq_id)
+            for record in result:
+                # Returns person.uniq_id, COLLECT(confidence) AS list
+                orig_conf = record['confidence']
+                confs = record['list']
+                for conf in confs:
+                    sumc += int(conf)
+
+            conf_float = sumc/len(confs)
+            new_conf = "%0.1f" % conf_float # string with one decimal
+            if orig_conf != new_conf:
+                # Update confidence needed
+                tx.run(CypherPerson.set_confidence,
+                        id=self.uniq_id, confidence=new_conf)
+
+                return {'confidence':new_conf, 'status':Status.UPDATED}
+            return {'confidence':new_conf, 'status':Status.OK}
+
+        except Exception as e:
+            msg = f'Neo4jWriteDriver.dr_update_person_confidence: {e.e.__class__.__name__} {e}'
+            print(msg)
+            return {'confidence':new_conf, 'status':Status.ERROR,
+                    'statustext': msg}
+
+
+    # ----- Place -----
+
     def dw_place_set_default_names(self, place_id, fi_id, sv_id):
         ''' Creates default links from Place to fi and sv PlaceNames.
 

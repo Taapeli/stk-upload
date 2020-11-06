@@ -97,7 +97,7 @@ def start_initiate():
 @roles_accepted('research', 'admin', 'audit')
 def clear_empty_batches():
     """ Show or clear unused batches. """
-    from models.gen.batch_audit import Batch
+    from bl.batch_audit import Batch
 
     user=None
     clear=False
@@ -467,7 +467,7 @@ def fetch_users():
 @roles_accepted('admin')
 def fetch_batches():
 
-    from models.gen.batch_audit import Batch
+    from bl.batch_audit import Batch
 
     batch_list = list(Batch.get_batches())
     for b in batch_list:

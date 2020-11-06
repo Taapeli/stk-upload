@@ -1,5 +1,5 @@
 '''
-Cumulates Batch steps and stores them as a Log node
+Cumulates Batch steps and stores them as a LogItem node
 
     After a series of logical run steps, Batch has a link to each data node with
     label Person or Family.
@@ -19,7 +19,7 @@ from models.cypher_gramps import Cypher_batch
 from models import dbutil
 
 
-class Batch():
+class BatchLog():
     '''
     Creates a log of userid bach steps.
     append()  Adds a log event to log
@@ -40,16 +40,17 @@ class Batch():
             
         # Runtime variables for batch steps
         self.steps = []
-        self.totaltime = 0.0    # Sum of Log.elapsed
-        self.totalpercent = 0   # Sum of Log.percent
+        self.totaltime = 0.0    # Sum of LogItem.elapsed
+        self.totalpercent = 0   # Sum of LogItem.percent
 
 
     def start_batch(self, tx, infile):
         '''
         Creates a new Batch node with 
-        - id      a date followed by an ordinal number '2018-06-05.001'
-        - status  'started'
-        - file    input filename
+        - id        a date followed by an ordinal number '2018-06-05.001'
+        - status    'started'
+        - file      input filename
+        - mediapath media files location
         
         You may give an existing transaction tx, 
         otherwise a new transaction is created and committed
@@ -62,11 +63,12 @@ class Batch():
                 tx = session.begin_transaction()
                 local_tx = True
             
-            dbutil.aqcuire_lock(tx, 'batch_id')
+            dbutil.aqcuire_lock(tx, 'batch_id') #####
+
             # 1. Find the latest Batch id of today from the db
             base = str(date.today())
             try:
-                batch_id = tx.run(Cypher_batch.batch_find_id, 
+                batch_id = tx.run(Cypher_batch.batch_find_id, #####
                                   batch_base=base).single().value()
                 print("# Pervious batch_id={}".format(batch_id))
                 i = batch_id.rfind('.')
@@ -88,7 +90,8 @@ class Batch():
                 'user': self.userid,
                 'id': self.bid,
                 'status': 'started',
-                'file': infile
+                'file': infile,
+                'mediapath': self.mediapath
                 }
             tx.run(Cypher_batch.batch_create, file=infile, b_attr=b_attr)
             if local_tx:
@@ -112,42 +115,42 @@ class Batch():
 
 
     def log_event(self, event_dict):
-        # Add a and event dictionary as a new Log to Batch log
-        batch_event = Log(event_dict)
+        # Add a and event dictionary as a new LogItem to Batch log
+        batch_event = LogItem(event_dict)
         self.log(batch_event)
 
     def log(self, batch_event):
-        # Add a bp.gramps.batchlogger.Log to Batch log
+        # Add a bp.gramps.batchlogger.LogItem to Batch log
         self.append(batch_event)
 
 
     def append(self, obj):
         '''
-        The argument object (a Log) is added to batch Log list
+        The argument object (a LogItem) is added to batch LogItem list
         '''
-        if not isinstance(obj, Log):
-            raise AttributeError("Batch.append need a Log instance")
+        if not isinstance(obj, LogItem):
+            raise AttributeError("Batch.append need a LogItem instance")
 
         self.steps.append(obj)
-        if isinstance(obj, Log) and isinstance(obj.elapsed, float):
+        if isinstance(obj, LogItem) and isinstance(obj.elapsed, float):
             self.totaltime += obj.elapsed
             print("# " + str(obj))
             #print('# BatchLogger totaltime={:.6f}'.format(obj.elapsed))
         return None
 
     def list(self):
-        """ Gets the active Log steps as a list """
+        """ Gets the active LogItem steps as a list """
         return self.steps
 
     def str_list(self):
-        """ Gets the active Log steps as a list of strings """
+        """ Gets the active LogItem steps as a list of strings """
         li = []
         for e in self.steps:
             li.append(str(e))
         return li
 
 
-class Log():
+class LogItem():
     '''
     Creates an object for storing batch event information:
         level    str    log level: INFO, WARNING, ERROR, FATAL

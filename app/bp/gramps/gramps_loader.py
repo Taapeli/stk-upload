@@ -10,13 +10,15 @@ from os.path import basename, splitext
 from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
-from .batchlogger import Batch, Log
+from .batchlogger import BatchLog, LogItem
 #from models import dataupdater
 #from models.dataupdater import set_confidence_values
 import shareds
 import traceback
 from tarfile import TarFile
 import os
+
+from bl.batch_audit import Batch
 from bp.scene.models import media
 
 
@@ -530,14 +532,17 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
     handler = DOM_handler(file_cleaned, userid, pathname)
 
     # Initialize Run report
-    handler.blog = Batch(userid)
+    handler.blog = BatchLog(userid)
     handler.blog.log_event({'title':"Storing data from Gramps", 'level':"TITLE"})
     handler.blog.log_event({'title':"Loaded file '{}'".format(file_displ),
                             'elapsed':shareds.tdiff})
     handler.blog.log(cleaning_log)
     t0 = time.time()
 
-    handler.batch_id = handler.blog.start_batch(None, file_cleaned)
+    handler.batchnode = Batch()
+    handler.set_header_mediapath()
+    # Start transaction and create Batch node
+    handler.batch_id = handler.blog.start_batch(handler.dbdriver.tx, file_cleaned)
 
     if pathname.endswith(".gpkg"):
         extract_media(pathname,handler.batch_id)
@@ -549,7 +554,7 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
         #status_update({'percent':1})
         
         try:
-            handler.handle_header()
+            #handler.handle_header() --> get_header_mediapath()
             
             handler.handle_notes()
             handler.handle_repositories()
@@ -568,7 +573,7 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
                 
             # Set person confidence values 
             #TODO: Only for imported persons (now for all persons!)
-            handler.set_person_confidence_values()
+            handler.set_all_person_confidence_values()
             # Set properties (for imported persons)
             #    + Refname links
             #    ? Person sortname
@@ -612,7 +617,7 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
 def file_clean(pathname):
     # Decompress file and clean problematic delimiter (').
     # - build 2nd filename
-    # - create Log item in the upload log
+    # - create LogItem item in the upload log
 
     def _clean_apostrophes(file_in, file_out):
         '''
@@ -653,7 +658,7 @@ def file_clean(pathname):
                     print("Not a gzipped file")
                     counter = _clean_apostrophes(file_in, file_out)
                 msg = "Cleaned apostrophes from input lines"
-        event = Log({'title':msg, 'count':counter, 
+        event = LogItem({'title':msg, 'count':counter, 
                      'elapsed':time.time()-t0}) #, 'percent':1})
     return (file_cleaned, file_displ, event)
 

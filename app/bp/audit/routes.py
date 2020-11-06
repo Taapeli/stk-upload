@@ -21,7 +21,7 @@ from flask_security import login_required, roles_accepted, current_user
 #from flask_babelex import _
 
 import shareds
-from models.gen.batch_audit import Batch, Audit
+from bl.batch_audit import Batch, Audit
 from .models.batch_merge import Batch_merge
 #from .models.audition import Audition
 
