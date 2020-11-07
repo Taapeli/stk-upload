@@ -15,15 +15,17 @@ Created on 26.5.2018
 '''
 from datetime import date
 import shareds
-from models.cypher_gramps import Cypher_batch
-from models import dbutil
+from pe.neo4j.cypher.batch_audit import CypherBatch
+#from models.cypher_gramps import Cypher_batch
+#from models import dbutil
 
 
 class BatchLog():
     '''
     Creates a log of userid bach steps.
+
     append()  Adds a log event to log
-    list() Gets the log contenst objects 
+    list()    Gets the log contenst objects 
     '''
 
     def __init__(self, userid):
@@ -32,7 +34,6 @@ class BatchLog():
         '''
         if userid == None:
             raise AttributeError("Batch.userid must be defined")
-
         self.bid = None
         self.userid = userid
         self.status = 'started'
@@ -44,60 +45,60 @@ class BatchLog():
         self.totalpercent = 0   # Sum of LogItem.percent
 
 
-    def start_batch(self, tx, infile):
-        '''
-        Creates a new Batch node with 
-        - id        a date followed by an ordinal number '2018-06-05.001'
-        - status    'started'
-        - file      input filename
-        - mediapath media files location
-        
-        You may give an existing transaction tx, 
-        otherwise a new transaction is created and committed
-        '''
-
-        # 0. Create transaction, if not given
-        local_tx = False
-        with shareds.driver.session() as session:
-            if tx == None:
-                tx = session.begin_transaction()
-                local_tx = True
-            
-            dbutil.aqcuire_lock(tx, 'batch_id') #####
-
-            # 1. Find the latest Batch id of today from the db
-            base = str(date.today())
-            try:
-                batch_id = tx.run(Cypher_batch.batch_find_id, #####
-                                  batch_base=base).single().value()
-                print("# Pervious batch_id={}".format(batch_id))
-                i = batch_id.rfind('.')
-                ext = int(batch_id[i+1:])
-            except AttributeError as e:
-                # Normal exception: this is the first batch of day
-                #print ("Ei vanhaa arvoa {}".format(e))
-                ext = 0
-            except Exception as e:
-                print ("Poikkeus {}".format(e))
-                ext = 0
-    
-            # 2. Form a new batch id
-            self.bid = "{}.{:03d}".format(base, ext + 1)
-            print("# New batch_id='{}'".format(self.bid))
-    
-            # 3. Create a new Batch node
-            b_attr = {
-                'user': self.userid,
-                'id': self.bid,
-                'status': 'started',
-                'file': infile,
-                'mediapath': self.mediapath
-                }
-            tx.run(Cypher_batch.batch_create, file=infile, b_attr=b_attr)
-            if local_tx:
-                tx.commit()
-
-        return self.bid
+#     def start_batch(self, tx, infile, mediapath): --> bl.batch_audit.Batch.start_batch()
+#         '''
+#         Creates a new Batch node with 
+#         - id        a date followed by an ordinal number '2018-06-05.001'
+#         - status    'started'
+#         - file      input filename
+#         - mediapath media files location
+#         
+#         You may give an existing transaction tx, 
+#         otherwise a new transaction is created and committed
+#         '''
+# 
+#         # 0. Create transaction, if not given
+#         local_tx = False
+#         with shareds.driver.session() as session:
+#             if tx == None:
+#                 tx = session.begin_transaction()
+#                 local_tx = True
+#             
+#             dbutil.aqcuire_lock(tx, 'batch_id') #####
+# 
+#             # 1. Find the latest Batch id of today from the db
+#             base = str(date.today())
+#             try:
+#                 result = tx.run(Cypher_batch.batch_find_id, batch_base=base)
+#                 batch_id = result.single().value()
+#                 print("# Pervious batch_id={}".format(batch_id))
+#                 i = batch_id.rfind('.')
+#                 ext = int(batch_id[i+1:])
+#             except AttributeError as e:
+#                 # Normal exception: this is the first batch of day
+#                 #print ("Ei vanhaa arvoa {}".format(e))
+#                 ext = 0
+#             except Exception as e:
+#                 print ("Poikkeus {}".format(e))
+#                 ext = 0
+#     
+#             # 2. Form a new batch id
+#             self.bid = "{}.{:03d}".format(base, ext + 1)
+#             print("# New batch_id='{}'".format(self.bid))
+#     
+#             # 3. Create a new Batch node
+#             b_attr = {
+#                 'user': self.userid,
+#                 'id': self.bid,
+#                 'status': 'started',
+#                 'file': infile,
+#                 'mediapath': mediapath
+#                 }
+#             tx.run(Cypher_batch.batch_create, file=infile, b_attr=b_attr)
+#             if local_tx:
+#                 tx.commit()
+# 
+#         return self.bid
 
 
     def complete(self, tx=None):
@@ -109,7 +110,7 @@ class BatchLog():
                 tx = session.begin_transaction()
                 local_tx = True
             
-        return tx.run(Cypher_batch.batch_complete, user=self.userid, bid=self.bid)
+        return tx.run(CypherBatch.batch_complete, user=self.userid, bid=self.bid)
         if local_tx:
             tx.commit()
 

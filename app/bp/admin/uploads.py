@@ -21,7 +21,7 @@ from flask_babelex import _
 from models import email, util, syslog 
 from ..gramps import gramps_loader
 import shareds
-from models.gen.cypher import Cypher_batch
+from pe.neo4j.cypher.batch_audit import CypherBatch
 
 STATUS_UPLOADED     = "uploaded"
 STATUS_LOADING      = "loading"
@@ -220,7 +220,7 @@ def list_uploads(username):
     '''
     # 1. List Batches, their status and Person count
     batches = {}
-    result = shareds.driver.session().run(Cypher_batch.get_user_batch_names, 
+    result = shareds.driver.session().run(CypherBatch.get_user_batch_names, 
                                           user=username)
     for record in result:
         # <Record batch='2019-08-12.001' timestamp=None persons=1949>

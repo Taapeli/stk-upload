@@ -814,7 +814,7 @@ def gramps_verify(gramps_runner, username, xmlfile):
     rsp = defaultdict(list)
     for line in lines:
         if line[1:2] == ":":
-            msgtype, msg = line.split(",", maxsplit=1)
+            msgtype, _msg = line.split(",", maxsplit=1)
             rsp[msgtype.strip()].append(line)
     return rsp
 

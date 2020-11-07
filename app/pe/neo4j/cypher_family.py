@@ -63,6 +63,18 @@ MATCH (f) -[:NOTE]- (note:Note) WHERE ID(f) in $id_list
     OPTIONAL MATCH (f) 
 RETURN ID(f) AS src_id, note"""
 
+    get_dates_parents = """
+MATCH (family:Family) WHERE ID(family)=$id
+OPTIONAL MATCH (family)-[:PARENT {role:"father"}]-(father:Person)
+OPTIONAL MATCH (father)-[:EVENT]-(father_death:Event {type:"Death"})
+OPTIONAL MATCH (family)-[:PARENT {role:"mother"}]-(mother:Person)
+OPTIONAL MATCH (mother)-[:EVENT]-(mother_death:Event {type:"Death"})
+OPTIONAL MATCH (family)-[:EVENT]-(event:Event) WHERE event.type="Marriage"
+OPTIONAL MATCH (family)-[:EVENT]-(divorce_event:Event {type:"Divorce"})
+RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
+       mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
+       event.date1 AS marriage_date, divorce_event.date1 AS divorce_date"""
+
     obsolete_get_family_data = """
 MATCH (f:Family) WHERE ID(f) in $id_list
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
