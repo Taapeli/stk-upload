@@ -54,6 +54,26 @@ class Neo4jWriteDriver(object):
         logger.info('-> pe.neo4j.write_driver.Neo4jWriteDriver.dw_rollback')
 
 
+    # ----- Batch -----
+
+    def dw_batch_save(self, attr):
+        ''' Creates or updates Batch node.
+        '''
+        try:
+            result = self.tx.run(CypherPlace.link_name_lang_single, 
+                                 place_id=place_id, fi_id=fi_id)
+            for x, _fi, _sv in result:
+                #print(f"# Linked ({x}:Place)-['fi']->({fi}), -['sv']->({sv})")
+                pass
+
+            if not x:
+                logger.warning("eo4jWriteDriver.place_set_default_names: not created "
+                     f"Place {place_id}, names fi:{fi_id}, sv:{sv_id}")
+
+        except Exception as err:
+            logger.error(f"Neo4jWriteDriver.place_set_default_names: {err}")
+            return err
+
     # ----- Person ----
 
     def dw_update_person_confidence(self, uniq_id:int):

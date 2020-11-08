@@ -5,12 +5,14 @@ Created on 29.11.2019
 
 @author: jm
 '''
-from models.util import format_timestamp
 import shareds
-from bp.admin.models.cypher_adm import Cypher_adm
-from models.gen.cypher import Cypher_batch, Cypher_audit
-
 from datetime import date, datetime
+
+from bp.admin.models.cypher_adm import Cypher_adm
+from pe.neo4j.cypher.batch_audit import CypherBatch
+
+from models.util import format_timestamp
+from models import dbutil
 
 
 class Batch():
@@ -44,6 +46,7 @@ class Batch():
         obj.file = node.get('file', None)
         obj.id = node.get('id', None)
         obj.status = node.get('status', "")
+        obj.mediapath = node.get('mediapath')
         obj.timestamp = node.get('timestamp', 0)
         obj.upload = format_timestamp(obj.timestamp)
         obj.auditor = node.get('auditor', None)
@@ -52,20 +55,20 @@ class Batch():
     @staticmethod
     def delete_batch(username, batch_id):
         with shareds.driver.session() as session:
-            result = session.run(Cypher_batch.delete,
+            result = session.run(CypherBatch.delete,
                                  username=username, batch_id=batch_id)
             return result
                 
     @staticmethod
     def get_filename(username, batch_id):
         with shareds.driver.session() as session:
-            result = session.run(Cypher_batch.get_filename,
+            result = session.run(CypherBatch.get_filename,
                                  username=username, batch_id=batch_id).single()
             return result.get('b.file')
     
     @staticmethod
     def get_batches():
-        result = shareds.driver.session().run(Cypher_batch.list_all)
+        result = shareds.driver.session().run(CypherBatch.list_all)
         for rec in result:
             print("p",rec.get('b').items())
             yield dict(rec.get('b'))
@@ -80,7 +83,7 @@ class Batch():
         '''
         # Get your approved batches
         approved = {}
-        result = shareds.driver.session().run(Cypher_batch.get_passed, user=user)
+        result = shareds.driver.session().run(CypherBatch.get_passed, user=user)
         for node, count in result:
             # <Record batch=<Node id=435790 labels={'Audit'} 
             #    properties={'auditor': 'juha', 'id': '2020-03-24.002', 
@@ -92,7 +95,7 @@ class Batch():
         # Get current researcher batches
         titles = []
         user_data = {}
-        result = shareds.driver.session().run(Cypher_batch.get_batches, user=user)
+        result = shareds.driver.session().run(CypherBatch.get_batches, user=user)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'} 
             #    properties={ // 'mediapath': '/home/jm/my_own.media', 
@@ -144,7 +147,7 @@ class Batch():
         '''
         labels = []
         batch = None
-        result = shareds.driver.session().run(Cypher_batch.get_single_batch, 
+        result = shareds.driver.session().run(CypherBatch.get_single_batch, 
                                               batch=batch_id)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'} 
@@ -177,7 +180,7 @@ class Batch():
         batches = []
         class Upload: pass
 
-        result = shareds.driver.session().run(Cypher_batch.get_empty_batches)
+        result = shareds.driver.session().run(CypherBatch.get_empty_batches)
 
         for record in result:
             # <Node id=317098 labels={'Batch'}
@@ -200,6 +203,85 @@ class Batch():
                                               today=today).single()
         cnt = record[0]
         return cnt
+
+
+    def start_batch(self, tx, infile, mediapath):
+        '''
+        Creates a new Batch node with 
+        - id        a date followed by an ordinal number '2018-06-05.001'
+        - status    'started'
+        - file      input filename
+        - mediapath media files location
+         
+        You may give an existing transaction tx, 
+        otherwise a new transaction is created and committed
+        '''
+ 
+        # 0. Create transaction, if not given
+#         local_tx = False
+#         with shareds.driver.session() as session:
+#             if tx == None:
+#                 tx = session.begin_transaction()
+#                 local_tx = True
+             
+        dbutil.aqcuire_lock(tx, 'batch_id') #####
+        
+        # 1. Find the latest Batch id of today from the db
+        base = str(date.today())
+        try:
+            result = tx.run(CypherBatch.batch_find_id, batch_base=base)
+            batch_id = result.single().value()
+            print("# Pervious batch_id={}".format(batch_id))
+            i = batch_id.rfind('.')
+            ext = int(batch_id[i+1:])
+        except AttributeError as e:
+            # Normal exception: this is the first batch of day
+            #print ("Ei vanhaa arvoa {}".format(e))
+            ext = 0
+        except Exception as e:
+            print ("Poikkeus {}".format(e))
+            ext = 0
+        
+        # 2. Form a new batch id
+        self.bid = "{}.{:03d}".format(base, ext + 1)
+        print("# New batch_id='{}'".format(self.bid))
+        
+        # 3. Create a new Batch node
+        b_attr = {
+            'user': self.userid,
+            'id': self.bid,
+            'status': 'started',
+            'file': infile,
+            'mediapath': mediapath
+            }
+        tx.run(CypherBatch.batch_create, file=infile, b_attr=b_attr)
+        #if local_tx:
+        #   tx.commit()
+ 
+        return self.bid
+
+
+    def save(self):
+        ''' create or update Batch node.
+        '''
+        try:
+            attr = { ####
+                "order": self.order,
+                "type": self.type,
+                "firstname": self.firstname,
+                "surname": self.surname,
+                "prefix": self.prefix,
+                "suffix": self.suffix,
+                "title": self.title
+            }
+            
+            tx.run(CypherBame.####,
+                   n_attr=n_attr, parent_id=kwargs['parent_id'], 
+                   citation_handles=self.citation_handles)
+        except ConnectionError as err:
+            raise SystemExit("Stopped in Name.save: {}".format(err))
+        except Exception as err:
+            print("iError (Name.save): {0}".format(err), file=stderr)            
 
 
 class Audit():
@@ -285,7 +367,7 @@ class Audit():
         '''
         labels = []
         batch = None
-        result = shareds.driver.session().run(Cypher_batch.get_single_batch, 
+        result = shareds.driver.session().run(CypherBatch.get_single_batch, 
                                               batch=audit_id)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'} 
@@ -322,7 +404,7 @@ class Audit():
 #         '''
 #         labels = []
 #         batch = None
-#         result = shareds.driver.session().run(Cypher_batch.get_single_batch, 
+#         result = shareds.driver.session().run(CypherBatch.get_single_batch, 
 #                                               batch=batch_id)
 #         for record in result:
 #             # <Record batch=<Node id=319388 labels={'Batch'} 

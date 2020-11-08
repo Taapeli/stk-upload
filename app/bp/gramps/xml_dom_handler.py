@@ -106,7 +106,7 @@ class DOM_handler():
         self.handle_to_node = {}            # {handle:(uuid, uniq_id)}
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
-        self.batch = Batch()                # Batch node to be created
+        self.batch = None                   # Batch node to be created
 #         self.batch_id = None
 #         self.mediapath = None               # Directory for media files
         self.file = os.path.basename(pathname) # for messages
@@ -158,11 +158,11 @@ class DOM_handler():
         if counters.relationships_created:
             print(f"Created {counters.relationships_created} relations")
 
-    def set_mediapath(self, path):
-        ''' Store media files path. '''
-        self.dbdriver.dw_set_mediapath(obj,**kwargs)
-        self.tx.run(Cypher_mixed.set_mediapath, 
-                    batch_id=self.batch_id, path=path)
+#     def set_mediapath(self, path):
+#         ''' Store media files path. '''
+#         self.dbdriver.dw_set_mediapath(obj,**kwargs)
+#         self.tx.run(Cypher_mixed.set_mediapath, 
+#                     batch_id=self.batch_id, path=path)
 
     def update_progress(self, key):
         ''' Save status for displaying progress bar
@@ -184,14 +184,14 @@ class DOM_handler():
    
     # ---------------------   XML subtree handlers   --------------------------
 
-    def set_header_mediapath(self):
-        ''' Pick eventuel media path from XML header to be saved in Batch node.
-        '''
-        for header in self.collection.getElementsByTagName("header"):
-            for mediapath in header.getElementsByTagName("mediapath"):
-                if (len(mediapath.childNodes) > 0):
-                    self.mediapath = mediapath.childNodes[0].data
-        return self.mediapath
+#     def set_mediapath_from_header(self):
+#         ''' Pick eventuel media path from XML header to Batch node.
+#         '''
+#         for header in self.collection.getElementsByTagName("header"):
+#             for mediapath in header.getElementsByTagName("mediapath"):
+#                 if (len(mediapath.childNodes) > 0):
+#                     self.batch.mediapath = mediapath.childNodes[0].data
+#         return
 
 
 #     def handle_header(self):

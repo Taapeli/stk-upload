@@ -18,8 +18,10 @@ import traceback
 from tarfile import TarFile
 import os
 
-from bl.batch_audit import Batch
+#from bl.batch_audit import Batch
 from bp.scene.models import media
+from pe.neo4j.read_driver import Neo4jReadDriver
+from pe.db_writer import DbWriter
 
 
 def get_upload_folder(username): 
@@ -523,7 +525,7 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-
+    from bl.batch_audit import Batch
     ''' Uncompress and hide apostrophes for DOM handler (and save log)
     '''
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
@@ -539,13 +541,20 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
     handler.blog.log(cleaning_log)
     t0 = time.time()
 
-    handler.batchnode = Batch()
-    handler.set_header_mediapath()
-    # Start transaction and create Batch node
-    handler.batch_id = handler.blog.start_batch(handler.dbdriver.tx, file_cleaned)
+    # Initiate Batch node data
+    handler.batch = Batch()
+    handler.set_mediapath_from_header()
+    # Start transaction
+    handler.dbdriver = Neo4jReadDriver(shareds.driver)
+    handler.dbwriter = DbWriter(handler.dbwriter) 
+
+    #  Create Batch node
+    handler.start_batch(handler.dbdriver.tx, file_cleaned, handler.batch.mediapath)
+#     handler.batch.id = handler.blog.start_batch(handler.dbdriver.tx,
+#                                                 file_cleaned, handler.batch.mediapath)
 
     if pathname.endswith(".gpkg"):
-        extract_media(pathname,handler.batch_id)
+        extract_media(pathname,handler.batch.id)
     
     try:
         ''' Start DOM transaction '''
@@ -611,7 +620,7 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
 
     handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
                             'elapsed':time.time()-t0})  #, 'percent':100})
-    return handler.blog.list(), handler.batch_id
+    return handler.blog.list(), handler.batch.id
 
 
 def file_clean(pathname):

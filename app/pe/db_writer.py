@@ -19,14 +19,31 @@ logger = logging.getLogger('stkserver')
 
 class DbWriter(object):
     '''
-    classdocs
+    Enables transaction processing and offer services for accessing database.
+    
+    The dbdriver argument defines, which database is used.
+    
+    Transaction processing, see:
+    https://neo4j.com/docs/api/python-driver/current/api.html#explicit-transactions
+    
     '''
 
-    def __init__(self, dbdriver):
-        ''' Create a dataase write driver object.
+    def __init__(self, dbdriver, use_transaction=True):
+        ''' Create a database write driver object and start a transaction.
         '''
         self.dbdriver = dbdriver
+        self.use_transaction = use_transaction
+        if use_transaction:
+            self.tx = self.dbdriver.session().begin_transaction()
+        else:
+            # No transaction
+            self.tx = self.dbdriver.session()
 
+
+    def create_batch(self):
+        ''' Start transaction for writing.
+        '''
+        pass
 
     def commit(self, rollback=False):
         """ Commit or rollback transaction.
