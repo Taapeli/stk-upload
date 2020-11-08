@@ -16,13 +16,14 @@ Created on 18.10.2018
 '''
 
 import datetime
-from sys import stderr
+#from sys import stderr
 import shareds
 from shareds import logger
 
 from pe.neo4j.write_driver import Neo4jWriteDriver
 from pe.db_writer import DBwriter
-from models.gen.person import Person
+from bl.person import Person
+#from models.gen.person import Person
 from models.cypher_gramps import Cypher_person_w_handle
 from models.gen.note import Note
 

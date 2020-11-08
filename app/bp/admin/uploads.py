@@ -140,7 +140,7 @@ def background_load_to_neo4j(username,filename):
         for step in steps:
             print(step)
         if not batch_id:
-            raise RuntimeError("Run Failed, missing batch_id")
+            raise RuntimeError("Run Failed, did not create a batch in the database")
 
         if os.path.exists(metaname): 
             set_meta(username,filename,
