@@ -17,16 +17,18 @@ class DbReader:
     
         Returns a PersonResult object
     '''
-    def __init__(self, dbdriver, u_context):
+    def __init__(self, dbdriver, u_context=None):
         ''' Create a reader object with db driver and user context.
         '''
         self.dbdriver = dbdriver
-        self.user_context = u_context  
-        self.username = u_context.user
-        if u_context.context == u_context.ChoicesOfView.COMMON:
-            self.use_user = None
-        else:
-            self.use_user = u_context.user
+        if u_context:
+            # For reader only; writer has no context?
+            self.user_context = u_context
+            self.username = u_context.user
+            if u_context.context == u_context.ChoicesOfView.COMMON:
+                self.use_user = None
+            else:
+                self.use_user = u_context.user
    
 #     def get_person_list(self): # --> bl.person.PersonReader.get_person_list()
 #         ''' List person data including all data needed to Person page. '''

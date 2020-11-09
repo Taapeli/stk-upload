@@ -11,6 +11,7 @@ from bl.place import PlaceBl, PlaceName
 
 from pe.neo4j.cypher_person import CypherPerson
 
+from .cypher.batch_audit import CypherBatch
 from .cypher_place import CypherPlace
 from .cypher_gramps import CypherObjectWHandle
 
@@ -21,11 +22,17 @@ class Neo4jWriteDriver(object):
     different update functions.
     '''
 
-    def __init__(self, dbdriver, tx=None):
+    def __init__(self, dbdriver, use_transaction=True):
         ''' Create a writer/updater object with db driver and user context.
         '''
         self.dbdriver = dbdriver
-        self.tx = tx
+        self.use_transaction = use_transaction
+        if use_transaction:
+            self.tx = dbdriver.session().begin_transaction()
+        else:
+            # No transaction
+            self.tx = dbdriver.session()
+
 
     def dw_commit(self):
         """ Commit transaction.
@@ -60,19 +67,21 @@ class Neo4jWriteDriver(object):
         ''' Creates or updates Batch node.
         '''
         try:
-            result = self.tx.run(CypherPlace.link_name_lang_single, 
-                                 place_id=place_id, fi_id=fi_id)
-            for x, _fi, _sv in result:
-                #print(f"# Linked ({x}:Place)-['fi']->({fi}), -['sv']->({sv})")
-                pass
-
-            if not x:
-                logger.warning("eo4jWriteDriver.place_set_default_names: not created "
-                     f"Place {place_id}, names fi:{fi_id}, sv:{sv_id}")
-
-        except Exception as err:
-            logger.error(f"Neo4jWriteDriver.place_set_default_names: {err}")
-            return err
+            attr = {
+                "mediapath": self.mediapath,
+                "file": self.file,
+                "id": self.bid,
+                "user": self.user,
+                #timestamp": <to be set in cypher>,
+                "status": self.status
+            }            
+            self.tx.run(CypherBatch.batch_create, b_attr=attr)
+        except Exception as e:
+            print(f"pe.neo4j.write_driver.Neo4jWriteDriver.dw_batch_save failed: {e}")
+            return {'status':Status.ERROR, 
+                    'statustext':'Neo4jWriteDriver.dw_batch_save: '
+                    '{e.__class__.name} {e}'}
+        
 
     # ----- Person ----
 
@@ -96,8 +105,8 @@ class Neo4jWriteDriver(object):
             new_conf = "%0.1f" % conf_float # string with one decimal
             if orig_conf != new_conf:
                 # Update confidence needed
-                tx.run(CypherPerson.set_confidence,
-                        id=self.uniq_id, confidence=new_conf)
+                self.tx.run(CypherPerson.set_confidence,
+                            id=self.uniq_id, confidence=new_conf)
 
                 return {'confidence':new_conf, 'status':Status.UPDATED}
             return {'confidence':new_conf, 'status':Status.OK}

@@ -8,11 +8,13 @@ Created on 29.11.2019
 import shareds
 from datetime import date, datetime
 
+from pe.neo4j.cypher.batch_audit import CypherBatch ######
+
 from bp.admin.models.cypher_adm import Cypher_adm
-from pe.neo4j.cypher.batch_audit import CypherBatch
 
 from models.util import format_timestamp
 from models import dbutil
+from pe.db_writer import DbWriter
 
 
 class Batch():
@@ -205,7 +207,18 @@ class Batch():
         return cnt
 
 
-    def start_batch(self, tx, infile, mediapath):
+class BatchWriter(DbWriter):
+    '''
+        Data updeate class for Batch objects with associated data.
+
+        - Create BatchWriter(dbdriver, use_transaction=True) 
+        - Uses pe.db_writer.DbWriter.__init__(dbdriver, use_transaction=True) 
+          to define the database driver and transaction
+
+        - Returns a dict result object
+    '''    
+
+    def start_batch(self, obj):
         '''
         Creates a new Batch node with 
         - id        a date followed by an ordinal number '2018-06-05.001'
@@ -216,20 +229,16 @@ class Batch():
         You may give an existing transaction tx, 
         otherwise a new transaction is created and committed
         '''
- 
-        # 0. Create transaction, if not given
-#         local_tx = False
-#         with shareds.driver.session() as session:
-#             if tx == None:
-#                 tx = session.begin_transaction()
-#                 local_tx = True
+         
+        dbutil.aqcuire_lock(self.tx, 'batch_id') #####
              
-        dbutil.aqcuire_lock(tx, 'batch_id') #####
-        
+        ####self.dbdriver.dr_get_event_by_uuid
+
         # 1. Find the latest Batch id of today from the db
         base = str(date.today())
         try:
-            result = tx.run(CypherBatch.batch_find_id, batch_base=base)
+            result = self.dbdriver.dr_get_batch_by_base()
+            result = self.tx.run(CypherBatch.batch_find_id, batch_base=base)
             batch_id = result.single().value()
             print("# Pervious batch_id={}".format(batch_id))
             i = batch_id.rfind('.')
@@ -243,45 +252,33 @@ class Batch():
             ext = 0
         
         # 2. Form a new batch id
-        self.bid = "{}.{:03d}".format(base, ext + 1)
-        print("# New batch_id='{}'".format(self.bid))
+        obj.bid = "{}.{:03d}".format(base, ext + 1)
+        print("# New batch_id='{}'".format(obj.bid))
         
         # 3. Create a new Batch node
-        b_attr = {
-            'user': self.userid,
-            'id': self.bid,
-            'status': 'started',
-            'file': infile,
-            'mediapath': mediapath
-            }
-        tx.run(CypherBatch.batch_create, file=infile, b_attr=b_attr)
-        #if local_tx:
-        #   tx.commit()
- 
+        res = self.create_batch()
+
         return self.bid
 
 
     def save(self):
         ''' create or update Batch node.
         '''
+        
         try:
-            attr = { ####
-                "order": self.order,
-                "type": self.type,
-                "firstname": self.firstname,
-                "surname": self.surname,
-                "prefix": self.prefix,
-                "suffix": self.suffix,
-                "title": self.title
-            }
-            
-            tx.run(CypherBame.####,
-                   n_attr=n_attr, parent_id=kwargs['parent_id'], 
-                   citation_handles=self.citation_handles)
-        except ConnectionError as err:
-            raise SystemExit("Stopped in Name.save: {}".format(err))
-        except Exception as err:
-            print("iError (Name.save): {0}".format(err), file=stderr)            
+            attr = {
+                "mediapath": self.mediapath,
+                "file": self.file,
+                "id": self.bid,
+                "user": self.user,
+                #timestamp": <to be set in cypher>,
+                "status": self.status
+            }            
+            self.tx.run(CypherBatch.batch_create, b_attr=attr)
+        except ConnectionError as e:
+            raise SystemExit(f"Batch.save stopped: {e}")
+        except Exception as e:
+            print(f"Batch.save stopped: {e}")            
 
 
 class Audit():

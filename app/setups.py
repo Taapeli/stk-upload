@@ -22,8 +22,10 @@ from flask_mail import Mail
 from templates import jinja_filters
 from wtforms import SelectField, SubmitField, BooleanField
 
-from database.models.neo4jengine import Neo4jEngine 
+from pe.neo4j.neo4jengine import Neo4jEngine
+#from database.models.neo4jengine import Neo4jEngine 
 from database import adminDB
+
 import shareds
 from chkdate import Chkdate
 
@@ -157,14 +159,17 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
 #============================== Start here ====================================
 
+print('Stk server setups') 
 shareds.mail = Mail(shareds.app)
+
+# About database driver object:
+# https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
 
 shareds.user_model = User
 shareds.role_model = Role
 
-print('Stk server setups') 
 sysversion = Chkdate()  # Last application commit date or "Unknown"
 
 # Setup Flask-Security
@@ -175,11 +180,12 @@ shareds.security = Security(shareds.app, shareds.user_datastore,
 
 print('Security set up')
 
+# Check and initiate important nodes and constraints and schema fixes.
+adminDB.initialize_db() 
+
 @shareds.security.register_context_processor
 def security_register_processor():
     return {"username": _('User name'), "name": _('Name'), "language": _('Language')}
-
-adminDB.initialize_db() 
 
 
 """ 

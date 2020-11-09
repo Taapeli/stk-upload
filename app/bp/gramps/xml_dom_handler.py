@@ -112,31 +112,31 @@ class DOM_handler():
         self.file = os.path.basename(pathname) # for messages
         self.progress = defaultdict(int)    # key=object type, value=count of objects processed
 
-        # Select the update driver for current database
-        self.dbdriver = Neo4jWriteDriver(shareds.driver)
-
-
-    def begin_tx(self, session):
-        self.dbdriver.tx = session.begin_transaction()
-        print("Transaction started")
-
-    def commit(self, rollback=False):
-        """ Commit or rollback transaction """
-        if rollback:
-            self.dbdriver.rollback()
-            print("Transaction discarded")
-            logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit f="{self.file}"')
-            self.blog.log_event({'title': _("Database save failed"), 'level':"ERROR"})
-        else:
-            ret = self.dbdriver.dw_commit()
-            if ret == 0:
-                logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit f="{self.file}"')
-                print("Transaction committed")
-            else:
-                logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/fail f="{self.file}"')
-                print("Transaction failed")
-                self.blog.log_event({'title':_("Database save failed due to {}".\
-                                     format(ret)), 'level':"ERROR"})
+#         # Select the update driver for current database
+#         self.dbdriver = Neo4jWriteDriver(shareds.driver)
+# 
+# 
+#     def begin_tx(self, session):
+#         self.dbdriver.tx = session.begin_transaction()
+#         print("Transaction started")
+# 
+#     def commit(self, rollback=False):
+#         """ Commit or rollback transaction """
+#         if rollback:
+#             self.dbdriver.rollback()
+#             print("Transaction discarded")
+#             logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit f="{self.file}"')
+#             self.blog.log_event({'title': _("Database save failed"), 'level':"ERROR"})
+#         else:
+#             ret = self.dbdriver.dw_commit()
+#             if ret == 0:
+#                 logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit f="{self.file}"')
+#                 print("Transaction committed")
+#             else:
+#                 logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/fail f="{self.file}"')
+#                 print("Transaction failed")
+#                 self.blog.log_event({'title':_("Database save failed due to {}".\
+#                                      format(ret)), 'level':"ERROR"})
 
 
     def remove_handles(self):
@@ -184,14 +184,14 @@ class DOM_handler():
    
     # ---------------------   XML subtree handlers   --------------------------
 
-#     def set_mediapath_from_header(self):
-#         ''' Pick eventuel media path from XML header to Batch node.
-#         '''
-#         for header in self.collection.getElementsByTagName("header"):
-#             for mediapath in header.getElementsByTagName("mediapath"):
-#                 if (len(mediapath.childNodes) > 0):
-#                     self.batch.mediapath = mediapath.childNodes[0].data
-#         return
+    def get_mediapath_from_header(self):
+        ''' Pick eventuel media path from XML header to Batch node.
+        '''
+        for header in self.collection.getElementsByTagName("header"):
+            for mediapath in header.getElementsByTagName("mediapath"):
+                if (len(mediapath.childNodes) > 0):
+                    return mediapath.childNodes[0].data
+        return None
 
 
 #     def handle_header(self):
@@ -201,7 +201,7 @@ class DOM_handler():
 #             for mediapath in header.getElementsByTagName("mediapath"):
 #                 if (len(mediapath.childNodes) > 0):
 #                     path = mediapath.childNodes[0].data
-#                     self.dbdriver.dw_set_batch_medipath(path)
+#                     self.dbdriver.dw_set_batch_mediapath(path)
 #                     self.set_mediapath(path) ####
 #                     return
 #         self.set_mediapath("")

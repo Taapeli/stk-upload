@@ -18,9 +18,10 @@ import traceback
 from tarfile import TarFile
 import os
 
-#from bl.batch_audit import Batch
+# Defined in xml_to_db function: Batch, BatchWriter
 from bp.scene.models import media
-from pe.neo4j.read_driver import Neo4jReadDriver
+from pe.neo4j.write_driver import Neo4jWriteDriver
+#from pe.neo4j.read_driver import Neo4jReadDriver
 from pe.db_writer import DbWriter
 
 
@@ -494,7 +495,7 @@ def analyze(username, filename):
 #     
 #     return(text)
 
-def xml_to_stkbase(pathname, userid='Taapeli'):
+def xml_to_stkbase(pathname, userid):
     """ 
     Reads a Gramps xml file, and saves the information to db 
     
@@ -525,12 +526,12 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch_audit import Batch
-    ''' Uncompress and hide apostrophes for DOM handler (and save log)
-    '''
+    from bl.batch_audit import Batch, BatchWriter
+
+    # Uncompress and hide apostrophes for DOM handler (and save log)
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
 
-    ''' Get XML DOM parser and start DOM elements handler transaction '''
+    # Get XML DOM parser and start DOM elements handler transaction
     handler = DOM_handler(file_cleaned, userid, pathname)
 
     # Initialize Run report
@@ -542,14 +543,18 @@ def xml_to_stkbase(pathname, userid='Taapeli'):
     t0 = time.time()
 
     # Initiate Batch node data
-    handler.batch = Batch()
-    handler.set_mediapath_from_header()
-    # Start transaction
-    handler.dbdriver = Neo4jReadDriver(shareds.driver)
-    handler.dbwriter = DbWriter(handler.dbwriter) 
+    batch = Batch(userid)
+    batch.file = file_cleaned
+    batch.mediapath = handler.get_mediapath_from_header()
+    handler.batch = batch
+
+    # Olen database connection and start transaction
+    handler.dbdriver = Neo4jWriteDriver(shareds.driver, use_transaction=True)
 
     #  Create Batch node
-    handler.start_batch(handler.dbdriver.tx, file_cleaned, handler.batch.mediapath)
+    handler.batch_writer = BatchWriter(handler.dbdriver)
+    handler.batch_writer.create_batch(batch)
+    handler.batch_writer.start_batch()
 #     handler.batch.id = handler.blog.start_batch(handler.dbdriver.tx,
 #                                                 file_cleaned, handler.batch.mediapath)
 

@@ -66,9 +66,7 @@ class Neo4jReadDriver:
             #raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
             logger.warning(f'pe.neo4j.read_driver.Neo4jReadDriver._obj_from_node: Person or Family expexted: {list(node.labels)}')
             return None
-        obj.role = role
-        if obj.role == 'Primary':
-            obj.role = None
+        obj.role = role if role != 'Primary' else None
         return obj
 
 
