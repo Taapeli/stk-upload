@@ -33,7 +33,7 @@ def force_https():
         if host in {"localhost","127.0.0.1"}: return
         return redirect(request.url.replace('http://', 'https://'))
 
-@shareds.app.route('/')
+@shareds.app.route('/home')
 def home():
     '  Home page. '
     from routes import entry

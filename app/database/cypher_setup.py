@@ -26,7 +26,7 @@ class SetupCypher():
     """
     
     check_role_count = """
-    MATCH (a:Role) RETURN COUNT(a)
+    MATCH (a:Role) RETURN a.name
     """
     set_role_constraint = """
     CREATE CONSTRAINT ON (role:Role) 

@@ -83,19 +83,16 @@ class Neo4jUserDatastore(UserDatastore):
         self.role_model = role_model
 #       self.role_dict = self.get_roles() 
         
-    def _build_user_from_record(self, userRecord):
+    def _build_user_from_node(self, userNode):
         ''' Returns a User class based on a user type node '''
         try:
-            if userRecord is None:
+            if userNode is None:
                 return None
-            user = self.user_model(**userRecord)
-#            print(userRecord.id)
+            user = self.user_model(**userNode)
+#            print(userNode.id)
             user.id = user.username
             user.roles = self.find_UserRoles(user.email)
             
-#             user.confirmed_at = 0
-#             user.last_login_at = 0
-#             user.current_login_at = 0
             if user.confirmed_at:
                 user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
             if user.last_login_at:    
@@ -108,29 +105,30 @@ class Neo4jUserDatastore(UserDatastore):
             traceback.print_exc()
         
     def put(self, model):
+            ''' Create or update User or Role nodes. '''
             try:
-                if isinstance(model, self.user_model):
-                    userRecord = None
-                    if not model.id:    # New user to insert
-                        with self.driver.session() as session:
-                            userRecord = session.write_transaction(self._put_user, model)
-                    else:               # Old user to update
-                        with self.driver.session() as session:                        
-                            userRecord = session.write_transaction(self._update_user, model) 
-                    return(self._build_user_from_record(userRecord))                                        
-                elif isinstance(model, self.role_model):
-                    return session.write_transaction(self._put_role, model)
+                with self.driver.session() as session:
+                    if isinstance(model, self.user_model):
+                        userNode = None
+                        if not model.id:    # New user to insert
+                            userNode = session.write_transaction(self._put_user, model)
+                        else:               # Old user to update
+                            userNode = session.write_transaction(self._update_user, model) 
+                        return(self._build_user_from_node(userNode))                                        
+                    elif isinstance(model, self.role_model):
+                        return session.write_transaction(self._put_role, model)
             except ServiceUnavailable as ex:
-                logger.error(ex)            
+                logger.error(ex)
                 return None
             except Exception as ex:
-                logger.error(ex)            
+                logger.error(ex)
                 raise
             
     def _put_user (self, tx, user):    # ============ New user ==============
         if len(user.roles) == 0:
             user.roles = ["to_be_approved"] 
         user.is_active = True
+        record = None
         try:
             logger.info('_put_user new %s %s', user.username, user.roles[0:1])                
             result = tx.run(Cypher.user_register,
@@ -148,12 +146,12 @@ class Neo4jUserDatastore(UserDatastore):
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
 
-            node = result.single()
-            if node:
-                userRecord = node['user']
-                UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
+            record = result.single()
+            if record:
+                userNode = record['user']
+                UserAdmin.user_profile_add(tx, userNode['email'], userNode['username'])
                 logger.info(f'User with email address {user.email} registered') 
-                return userRecord
+                return userNode
             else:
                 logger.info(f'put_user: Cannot register user with {user.email}') 
                 raise RuntimeError(f'Could not register user with {user.email}')
@@ -163,7 +161,7 @@ class Neo4jUserDatastore(UserDatastore):
             print("error:",e)
             logging.error(f'Neo4jUserDatastore._put_user: {e.__class__.__name__}, {e}')            
             raise      
-        print("error:",node)
+        print("error:",record)
         
     def _update_user (self, tx, user):         # ============ User update ==============
 
@@ -199,7 +197,7 @@ class Neo4jUserDatastore(UserDatastore):
                 last_login_ip = user.last_login_ip,
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
-            userRecord = result.single()['user']
+            userNode = result.single()['user']
 #   Find list of previous user -> role connections
             prev_roles = [rolenode.name for rolenode in self.find_UserRoles(user.email)]
 #   Delete connections that are not in edited connection list            
@@ -216,7 +214,7 @@ class Neo4jUserDatastore(UserDatastore):
                            name = rolename)        
             logger.info('User with email address {} updated'.format(user.email))
 
-            return (userRecord)
+            return (userNode)
         
         except Exception as e:
             logging.error(f'Neo4jUserDatastore._update_user: {e.__class__.__name__}, {e}')            
@@ -248,7 +246,7 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             with self.driver.session() as session:
                 userNode = session.read_transaction(self._getUser, id_or_email)
-                return(self._build_user_from_record(userNode) if userNode else None)
+                return(self._build_user_from_node(userNode) if userNode else None)
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
             return None
@@ -290,7 +288,7 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             with self.driver.session() as session:
                 userNode = session.read_transaction(self._findUser, kwargs['id'])
-                return(self._build_user_from_record(userNode) if userNode else None)
+                return(self._build_user_from_node(userNode) if userNode else None)
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
             return None
