@@ -57,6 +57,6 @@ class Neo4jEngine():
             else:
                 return result.summary().counters
         except AttributeError as e:
-            logger.error('database.models.neo4jengine.Neo4jEngine.consume_counters:'
+            logger.error('pe.neo4j.neo4jengine.Neo4jEngine.consume_counters:'
                          f'Invalid Neo4j database version, expected {self.version}')
             raise NotImplementedError('Wrong version, expecting Neo4j v'+self.version) from e

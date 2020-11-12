@@ -11,10 +11,10 @@ class Cypher_batch():
     Cypher clauses for managing Batch nodes
     '''
 
-    batch_find_id = """
-MATCH (b:Batch) WHERE b.id STARTS WITH $batch_base
-RETURN b.id AS bid
-    ORDER BY bid DESC LIMIT 1"""
+#     batch_find_id = """
+# MATCH (b:Batch) WHERE b.id STARTS WITH $batch_base
+# RETURN b.id AS bid
+#     ORDER BY bid DESC LIMIT 1"""
 
     batch_create = """
 MATCH (u:UserProfile {username: $b_attr.user})

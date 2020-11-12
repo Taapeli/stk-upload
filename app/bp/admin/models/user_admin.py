@@ -77,7 +77,7 @@ class UserAdmin():
         return profile
 
     @classmethod         
-    def _build_user_from_record(self, userRecord):
+    def _build_user_from_node(self, userRecord):
         ''' Returns a User instance based on a user record '''
         try:
             if userRecord is None:
@@ -217,7 +217,7 @@ class UserAdmin():
                 updated_user = session.write_transaction(cls._update_user, user)
                 if updated_user is None:
                     return None
-                return(cls._build_user_from_record(updated_user))
+                return(cls._build_user_from_node(updated_user))
 
         except ServiceUnavailable as ex:
             logging.debug(ex.message)

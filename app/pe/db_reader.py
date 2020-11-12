@@ -19,6 +19,8 @@ class DbReader:
     '''
     def __init__(self, dbdriver, u_context=None):
         ''' Create a reader object with db driver and user context.
+
+            - dbdriver    Neo4jReadDriver or Neo4jWriteDriver
         '''
         self.dbdriver = dbdriver
         if u_context:
