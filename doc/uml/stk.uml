@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_GsucgCQFEeumXbq4nAS1cA" name="model">
+  <packageImport xmi:type="uml:PackageImport" xmi:id="_GvnYcCQFEeumXbq4nAS1cA">
+    <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+  </packageImport>
+  <packagedElement xmi:type="uml:Class" xmi:id="_6ZrVsCQ0Eeuky9FoxVEiMA" name="DbWriter">
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_ZBelcCQ1Eeuky9FoxVEiMA" name="save_and_link_obj"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_cAWxYCQ1Eeuky9FoxVEiMA" name="commit"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_YtgrICQ2Eeuky9FoxVEiMA" name="DbReader">
+    <generalization xmi:type="uml:Generalization" xmi:id="__X3cECQ2Eeuky9FoxVEiMA" general="_6ZrVsCQ0Eeuky9FoxVEiMA"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_mQtKYCQ2Eeuky9FoxVEiMA" name="Neo4jWriteDriver"/>
+  <packagedElement xmi:type="uml:Dependency" xmi:id="_3Mxp8CQ2Eeuky9FoxVEiMA" client="_6ZrVsCQ0Eeuky9FoxVEiMA" supplier="_mQtKYCQ2Eeuky9FoxVEiMA"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="_HVxGwCQ3Eeuky9FoxVEiMA" name="Neo4jReadDriver"/>
+  <packagedElement xmi:type="uml:Dependency" xmi:id="_TTmxwCQ3Eeuky9FoxVEiMA" client="_YtgrICQ2Eeuky9FoxVEiMA" supplier="_HVxGwCQ3Eeuky9FoxVEiMA"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="_yb0m8CQ3Eeuky9FoxVEiMA" name="GraphDatabase">
+    <interfaceRealization xmi:type="uml:InterfaceRealization" xmi:id="_K4KIECQ6Eeuky9FoxVEiMA" client="_yb0m8CQ3Eeuky9FoxVEiMA" supplier="_Ae7DYCQ6Eeuky9FoxVEiMA" contract="_Ae7DYCQ6Eeuky9FoxVEiMA"/>
+    <interfaceRealization xmi:type="uml:InterfaceRealization" xmi:id="_MoigkCQ6Eeuky9FoxVEiMA" client="_yb0m8CQ3Eeuky9FoxVEiMA" supplier="_HmimUCQ6Eeuky9FoxVEiMA" contract="_HmimUCQ6Eeuky9FoxVEiMA"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Interface" xmi:id="_Ae7DYCQ6Eeuky9FoxVEiMA" name="transaction"/>
+  <packagedElement xmi:type="uml:Interface" xmi:id="_HmimUCQ6Eeuky9FoxVEiMA" name="session"/>
+  <packagedElement xmi:type="uml:Usage" xmi:id="_PaCX0CQ6Eeuky9FoxVEiMA" client="_mQtKYCQ2Eeuky9FoxVEiMA" supplier="_Ae7DYCQ6Eeuky9FoxVEiMA"/>
+  <packagedElement xmi:type="uml:Usage" xmi:id="_QPdj8CQ6Eeuky9FoxVEiMA" name="session" client="_HVxGwCQ3Eeuky9FoxVEiMA" supplier="_HmimUCQ6Eeuky9FoxVEiMA"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="_bbMckCQ6Eeuky9FoxVEiMA" name="Batch"/>
+  <packagedElement xmi:type="uml:Usage" xmi:id="_nWGIUCQ6Eeuky9FoxVEiMA" client="_bbMckCQ6Eeuky9FoxVEiMA" supplier="_6ZrVsCQ0Eeuky9FoxVEiMA"/>
+</uml:Model>

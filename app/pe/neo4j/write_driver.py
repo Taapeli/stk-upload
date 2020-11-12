@@ -5,33 +5,36 @@ Created on 23.3.2020
 '''
 import logging
 logger = logging.getLogger('stkserver')
+from datetime import date #, datetime
 
 from bl.base import Status
 from bl.place import PlaceBl, PlaceName
 
-from pe.neo4j.cypher_person import CypherPerson
+from pe.neo4j.cypher.cy_person import CypherPerson
+from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.neo4j.cypher.cy_gramps import CypherObjectWHandle
 
-from .cypher.batch_audit import CypherBatch
-from .cypher_place import CypherPlace
-from .cypher_gramps import CypherObjectWHandle
 
-
-class Neo4jWriteDriver(object):
+class Neo4jWriteDriver:
     '''
     This driver for Neo4j database maintains transaction and executes
     different update functions.
     '''
 
-    def __init__(self, dbdriver, use_transaction=True):
+    def __init__(self, driver, use_transaction=True):
         ''' Create a writer/updater object with db driver and user context.
+        
+            - driver             neo4j.DirectDriver object
+            - use_transaction    bool
         '''
-        self.dbdriver = dbdriver
+        self.driver = driver
         self.use_transaction = use_transaction
         if use_transaction:
-            self.tx = dbdriver.session().begin_transaction()
+            self.tx = driver.session().begin_transaction()
         else:
             # No transaction
-            self.tx = dbdriver.session()
+            self.tx = driver.session()
 
 
     def dw_commit(self):
@@ -63,9 +66,46 @@ class Neo4jWriteDriver(object):
 
     # ----- Batch -----
 
+    def dw_get_new_batch_id(self):
+        ''' Find next unused Batch id.
+        
+            Returns {id, status, [statustext]}
+        '''
+        
+        # 1. Find the latest Batch id of today from the db
+        base = str(date.today())
+        ext = 0
+        try:
+            result = self.tx.run(CypherBatch.batch_find_id,
+                                 batch_base=base).single()
+            if result:
+                batch_id = result.get('bid')
+                print(f"# Pervious batch_id={batch_id}")
+                i = batch_id.rfind('.')
+                ext = int(batch_id[i+1:])
+        except AttributeError as e:
+            # Normal exception: this is the first batch of day
+            ext = 0
+        except Exception as e:
+            print(f"pe.neo4j.write_driver.Neo4jWriteDriver.dw_get_new_batch_id: {e}")
+            return {'status':Status.ERROR, 
+                    'statustext':'Neo4jWriteDriver.dw_get_new_batch_id: '
+                    '{e.__class__.name} {e}'}
+        
+        # 2. Form a new batch id
+        batch_id = "{}.{:03d}".format(base, ext + 1)
+
+        print("# New batch_id='{}'".format(batch_id))
+        return {'status':Status.OK, 'id':batch_id}
+
+
     def dw_batch_save(self, attr):
         ''' Creates or updates Batch node.
-        '''
+
+            attr = {"mediapath", "file", "id", "user", "status"}
+
+            Batch.timestamp is created in Cypher clause.
+       '''
         try:
             attr = {
                 "mediapath": self.mediapath,
@@ -74,14 +114,15 @@ class Neo4jWriteDriver(object):
                 "user": self.user,
                 #timestamp": <to be set in cypher>,
                 "status": self.status
-            }            
+            }
+            self.driver##########       
             self.tx.run(CypherBatch.batch_create, b_attr=attr)
         except Exception as e:
             print(f"pe.neo4j.write_driver.Neo4jWriteDriver.dw_batch_save failed: {e}")
             return {'status':Status.ERROR, 
                     'statustext':'Neo4jWriteDriver.dw_batch_save: '
                     '{e.__class__.name} {e}'}
-        
+
 
     # ----- Person ----
 

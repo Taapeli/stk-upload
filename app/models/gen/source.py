@@ -10,10 +10,10 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 import shareds
 from bl.base import NodeObject
-from pe.neo4j.cypher_source import CypherSource  # v0.4.1 structures
+from pe.neo4j.cypher.cy_source import CypherSource  # v0.4.1 structures
 from .cypher import Cypher_source  # obsolete v0.3 structures
-from .repository import Repository
-from .note import Note
+#from .repository import Repository
+#from .note import Note
 
 
 class Source(NodeObject): # -> bl.source.Source, bl.source.SourceBl

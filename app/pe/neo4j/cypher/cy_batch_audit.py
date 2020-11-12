@@ -77,7 +77,9 @@ DETACH DELETE b, n"""
 
 
 class CypherAudit():
-    ' Query Audit materials '
+    ''' 
+    Query Audit materials
+    '''
 
     get_my_audits = '''
 match (b:Audit {auditor: $oper})

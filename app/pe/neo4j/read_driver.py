@@ -18,11 +18,11 @@ from bl.person import PersonBl
 
 from ui.place import place_names_from_nodes
 
-from .cypher_place import CypherPlace
-from .cypher_source import CypherSource
-from .cypher_family import CypherFamily
-from .cypher_event import CypherEvent
-from .cypher_person import CypherPerson
+from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.neo4j.cypher.cy_source import CypherSource
+from pe.neo4j.cypher.cy_family import CypherFamily
+from pe.neo4j.cypher.cy_event import CypherEvent
+from pe.neo4j.cypher.cy_person import CypherPerson
 
 #Todo: Change Old style includes to bl classes
 #from models.gen.person_combo import Person_combo

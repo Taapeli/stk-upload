@@ -31,29 +31,33 @@ class DbWriter(DbReader):
     
     '''
 
-    def __init__(self, dbdriver):
-        ''' Create a database write driver object and start a transaction.
-        '''
-        DbReader(dbdriver)
-
-
-    def create_batch(self, obj):
-        ''' Start transaction for writing.
-        '''
-        from bl.batch_audit import Batch
+#     def __init__(self, dbdriver):
+#         ''' Create a database write driver object and start a transaction.
+#         '''
+#         self.dbdriver = dbdriver
+#         self.dbdriver.dw
         
-        if not isinstance(obj, Batch):
-            raise TypeError(f'pe.db_writer.DbWriter.create_batch: invalid argument')
-        attr = {
-            "id": obj.id,
-            "user": obj.user,
-            "file": obj.file,
-            "mediapath": obj.mediapath,
-            #timestamp": <to be set in cypher>,
-            #id: <uniq_id from result>,
-            "status": obj.status
-        }
-        raise(RuntimeError, f'Creating Batch {attr}')
+
+#     def create_batch(self, obj):
+#         ''' Start transaction for writing.
+#         
+#             - obj    Batch object
+#         '''
+#         from bl.batch_audit import Batch
+#         
+#         if not isinstance(obj, Batch):
+#             raise TypeError(f'pe.db_writer.DbWriter.create_batch: invalid argument')
+#         attr = {
+#             "id": obj.id,
+#             "user": obj.user,
+#             "file": obj.file,
+#             "mediapath": obj.mediapath,
+#             #timestamp": <to be set in cypher>,
+#             #id: <uniq_id from result>,
+#             "status": obj.status
+#         }
+#         res = self.dbdriver.dw_batch_save(obj)
+#         return res
 
 
     def commit(self, rollback=False):

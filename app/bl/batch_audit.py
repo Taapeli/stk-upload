@@ -8,7 +8,8 @@ Created on 29.11.2019
 import shareds
 from datetime import date, datetime
 
-from pe.neo4j.cypher.batch_audit import CypherBatch ######
+from bl.base import Status
+from pe.neo4j.cypher.cy_batch_audit import CypherBatch ######
 
 from bp.admin.models.cypher_adm import Cypher_adm
 
@@ -36,6 +37,51 @@ class Batch():
     
     def __str__(self):
         return f"{self.user} / {self.id}"
+
+    def save(self, tx):
+        ''' Create or update Batch node.
+        '''
+        try:
+            attr = {
+                "id": self.id,
+                "user": self.user,
+                "file": self.file,
+                "mediapath": self.mediapath,
+                #timestamp": <to be set in cypher>,
+                #id: <uniq_id from result>,
+                "status": self.status
+            }
+            #### call dirver?
+            self.tx.run(CypherBatch.batch_create, b_attr=attr)
+            return {'id':self.id, 'status':Status.OK}
+
+        except Exception as e:
+            return {'id':self.id, 'status':Status.ERROR, 
+                    'statustext':f'bl.batch_audit.Batch.save: {e.__class__.__name__} {e}'}
+
+    def start_batch(self):
+        ''' Creates a new unique Batch node.
+        
+        The Batch obj argument contains - 
+        - id        a date followed by a new ordinal number '2018-06-05.001'
+        - user      batch creator
+        - status    'started'
+        - file      input filename
+        - mediapath media files location
+        '''
+        dbutil.aqcuire_lock(self.dbdriver.tx, 'batch_id') #####
+
+        # 1. Find the next free Batch id
+        res = shareds.writer.dw_get_new_batch_id()
+        if res.get('status') != Status.OK:
+            # Failed to get an id
+            return res
+
+        # 2. Save the new Batch node
+        obj.id = res.get('id')
+        res = obj.save()
+
+        return res 
 
 
     @classmethod
@@ -211,74 +257,18 @@ class BatchWriter(DbWriter):
     '''
         Data updeate class for Batch objects with associated data.
 
-        - Create BatchWriter(dbdriver, use_transaction=True) 
-        - Uses pe.db_writer.DbWriter.__init__(dbdriver, use_transaction=True) 
-          to define the database driver and transaction
+        - Create:
+          BatchWriter(dbdriver, use_transaction=True), which calls
+          pe.db_writer.DbWriter.__init__(dbdriver, use_transaction=True) 
+          to define the database driver and transaction.
 
-        - Returns a dict result object
+        - Methods return a dict result object {'status':Status, ...}
     '''    
+#     def __init__(self, dbdriver, use_transaction=True):
+#         ''' Create a database write driver object and start a transaction.
+#         '''
+#         DbWriter(dbdriver, use_transaction)
 
-    def start_batch(self, obj):
-        '''
-        Creates a new Batch node with 
-        - id        a date followed by an ordinal number '2018-06-05.001'
-        - status    'started'
-        - file      input filename
-        - mediapath media files location
-         
-        You may give an existing transaction tx, 
-        otherwise a new transaction is created and committed
-        '''
-         
-        dbutil.aqcuire_lock(self.tx, 'batch_id') #####
-             
-        ####self.dbdriver.dr_get_event_by_uuid
-
-        # 1. Find the latest Batch id of today from the db
-        base = str(date.today())
-        try:
-            result = self.dbdriver.dr_get_batch_by_base()
-            result = self.tx.run(CypherBatch.batch_find_id, batch_base=base)
-            batch_id = result.single().value()
-            print("# Pervious batch_id={}".format(batch_id))
-            i = batch_id.rfind('.')
-            ext = int(batch_id[i+1:])
-        except AttributeError as e:
-            # Normal exception: this is the first batch of day
-            #print ("Ei vanhaa arvoa {}".format(e))
-            ext = 0
-        except Exception as e:
-            print ("Poikkeus {}".format(e))
-            ext = 0
-        
-        # 2. Form a new batch id
-        obj.bid = "{}.{:03d}".format(base, ext + 1)
-        print("# New batch_id='{}'".format(obj.bid))
-        
-        # 3. Create a new Batch node
-        res = self.create_batch()
-
-        return self.bid
-
-
-    def save(self):
-        ''' create or update Batch node.
-        '''
-        
-        try:
-            attr = {
-                "mediapath": self.mediapath,
-                "file": self.file,
-                "id": self.bid,
-                "user": self.user,
-                #timestamp": <to be set in cypher>,
-                "status": self.status
-            }            
-            self.tx.run(CypherBatch.batch_create, b_attr=attr)
-        except ConnectionError as e:
-            raise SystemExit(f"Batch.save stopped: {e}")
-        except Exception as e:
-            print(f"Batch.save stopped: {e}")            
 
 
 class Audit():

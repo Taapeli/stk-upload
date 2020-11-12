@@ -551,10 +551,10 @@ def xml_to_stkbase(pathname, userid):
     # Olen database connection and start transaction
     handler.dbdriver = Neo4jWriteDriver(shareds.driver, use_transaction=True)
 
-    handler.db = BatchWriter(handler.dbdriver)
+    shareds.datastore = BatchWriter(handler.dbdriver)
     #handler.batch_writer.create_batch(batch)
     # Create Batch node
-    handler.db.start_batch(batch)
+    shareds.datastore.start_batch()
 #     handler.batch.id = handler.blog.start_batch(handler.dbdriver.tx,
 #                                                 file_cleaned, handler.batch.mediapath)
 

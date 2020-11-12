@@ -18,10 +18,10 @@ logger = logging.getLogger('stkserver')
 
 from flask_babelex import _
 
+import shareds
 from models import email, util, syslog 
 from ..gramps import gramps_loader
-import shareds
-from pe.neo4j.cypher.batch_audit import CypherBatch
+from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 
 STATUS_UPLOADED     = "uploaded"
 STATUS_LOADING      = "loading"
