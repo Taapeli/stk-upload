@@ -84,7 +84,10 @@ class Neo4jUserDatastore(UserDatastore):
 #       self.role_dict = self.get_roles() 
         
     def _build_user_from_node(self, userNode):
-        ''' Returns a User class instance based on a user type Neo4j node. '''
+        ''' Returns a User class instance based on a user type Neo4j node. 
+        
+            Parameter user.roles has a list of setups.Role objects
+        '''
         try:
             if userNode is None:
                 return None
@@ -165,7 +168,7 @@ class Neo4jUserDatastore(UserDatastore):
         
     def _update_user (self, tx, user):         # ============ User update ==============
 
-#         print(user.email, user.confirmed_at)
+        #print(user.email, user.confirmed_at)
 
         confirmtime = int(user.confirmed_at.timestamp() * 1000) if user.confirmed_at else None   
  
@@ -238,6 +241,7 @@ class Neo4jUserDatastore(UserDatastore):
     
     def commit(self):
         pass
+# Do not commit, there may be multiple transactions?
 #        self.tx.commit()
  
     
@@ -302,6 +306,8 @@ class Neo4jUserDatastore(UserDatastore):
             raise      
 
     def find_UserRoles(self, email):
+        ''' Returns a list of setups.Roles objects.
+        '''
         try:
             with self.driver.session() as session:
                 userRoles = session.read_transaction(self._findUserRoles, email) 

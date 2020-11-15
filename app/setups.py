@@ -65,11 +65,10 @@ class Role(RoleMixin):
 
     @staticmethod
     def has_role(name, role_list):
-        '''
-            Check, if given role name exists in a list of Role objects
+        ''' Check, if given role name exists in a list of Role objects.
         '''
         for role in role_list:
-            if role.name == name:
+            if role == name or role.name == name:
                 return True
         return False
 
@@ -113,7 +112,13 @@ class User(UserMixin):
 
     def __str__(self):
         if self.roles:
-            return f'setups.User {self.username} {[x.name for x in self.roles]}'
+            rolelist = []
+            for i in self.roles:
+                if isinstance(i, str):
+                    rolelist.append(i)
+                elif isinstance(i, Role):
+                    rolelist.append(i.name)
+            return f'setups.User {self.username} {rolelist}'
         else:
             return f'setups.User {self.username}, no roles'
 
