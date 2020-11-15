@@ -168,6 +168,7 @@ def update_user(username):
 
     form = UpdateUserForm()
     if form.validate_on_submit(): 
+        # Create a setups.User object
         user = User(id = form.id.data,
                 email = form.email.data,
                 username = form.username.data,
@@ -180,7 +181,7 @@ def update_user(username):
                 last_login_ip = form.last_login_ip.data,                    
                 current_login_at = form.current_login_at.data,  
                 current_login_ip = form.current_login_ip.data,
-                login_count = form.login_count.data)        
+                login_count = form.login_count.data)
         updated_user = UserAdmin.update_user(user)
         if updated_user.username == current_user.username:
             session['lang'] = form.language.data
@@ -199,8 +200,10 @@ def update_user(username):
             email.email_from_admin(subject, msg, form.email.data)        
         logging.info(f"-> bp.admin.routes.update_user u={form.email.data}")
         flash(_("User updated"))
+        # Return to same page
         return redirect(url_for("admin.update_user", username=updated_user.username))
 
+    # Fill form fields by updated values
     user = shareds.user_datastore.get_user(username) 
     form.id.data = user.id  
     form.email.data = user.email
@@ -216,6 +219,7 @@ def update_user(username):
     form.current_login_ip.data = user.current_login_ip
     form.login_count.data = user.login_count
         
+    # Return to same page
     return render_template("/admin/update_user.html", username=user.username, form=form)  
 
 @bp.route('/admin/list_uploads/<username>', methods=['GET'])

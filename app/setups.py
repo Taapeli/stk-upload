@@ -186,12 +186,12 @@ shareds.security = Security(shareds.app, shareds.user_datastore,
 
 print('Security set up')
 
-# Check and initiate important nodes and constraints and schema fixes.
-adminDB.initialize_db() 
-
 @shareds.security.register_context_processor
 def security_register_processor():
     return {"username": _('User name'), "name": _('Name'), "language": _('Language')}
+
+# Check and initiate important nodes and constraints and schema fixes.
+adminDB.initialize_db() 
 
 
 """ 

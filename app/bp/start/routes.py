@@ -113,6 +113,7 @@ def join():
             researched_places = request.form.get('researched_places'),
             text_message = request.form.get('text_message'),
         )
+        # Store to UserProfile node
         UserAdmin.update_user_profile(profile)
         return redirect(url_for("thankyou"))
 
