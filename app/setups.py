@@ -111,6 +111,12 @@ class User(UserMixin):
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
 
+    def __str__(self):
+        if self.roles:
+            return f'setups.User {self.username} {[x.name for x in self.roles]}'
+        else:
+            return f'setups.User {self.username}, no roles'
+
     def is_showing_common(self):
         """ Is showing common, approved data only?
         """

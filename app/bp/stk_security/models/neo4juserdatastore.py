@@ -84,7 +84,7 @@ class Neo4jUserDatastore(UserDatastore):
 #       self.role_dict = self.get_roles() 
         
     def _build_user_from_node(self, userNode):
-        ''' Returns a User class based on a user type node '''
+        ''' Returns a User class instance based on a user type Neo4j node. '''
         try:
             if userNode is None:
                 return None
@@ -150,7 +150,7 @@ class Neo4jUserDatastore(UserDatastore):
             if record:
                 userNode = record['user']
                 UserAdmin.user_profile_add(tx, userNode['email'], userNode['username'])
-                logger.info(f'User with email address {user.email} registered') 
+                logger.info(f'New user with email address {user.email} registered') 
                 return userNode
             else:
                 logger.info(f'put_user: Cannot register user with {user.email}') 
@@ -335,7 +335,7 @@ class Neo4jUserDatastore(UserDatastore):
         
     def _findRole (self, tx, roleName):
         try:
-            return(tx.run(Cypher.role_find, name=roleName).single())
+            return(tx.run(Cypher.role_get, name=roleName).single())
         except Exception as e:
             logging.error(f'Neo4jUserDatastore._findRole: {e.__class__.__name__}, {e}')            
             raise      
@@ -358,7 +358,7 @@ class Neo4jUserDatastore(UserDatastore):
                         
     def _getRole (self, tx, rid):
         try:
-            return(tx.run(Cypher.role_get, id=rid).single())
+            return(tx.run(Cypher.role_get, name=rid).single())
         except Exception as e:
             logging.error(f'Neo4jUserDatastore._getRole: {e.__class__.__name__}, {e}')            
             raise      

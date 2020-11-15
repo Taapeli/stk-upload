@@ -160,6 +160,8 @@ def list_users():
 @login_required
 @roles_accepted('admin', 'master')
 def update_user(username):
+    ''' A User is created or approved or ...
+    '''
     #d = Domain("translations/sv/LC_MESSAGES")
     #s = d.gettext("Return")
     #print("s:",s)
