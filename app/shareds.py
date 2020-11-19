@@ -27,5 +27,6 @@ user_model = None
 role_model = None
 
 DEFAULT_ROLE = 'member'    # Value overridden with configuration in application setup
+PROGRESS_UPDATE_RATE = 60  # seconds to update progress data in UI
 
 PRIVACY_LIMIT = 0       #Todo: Use bl.person.PRIVACY_LIMIT (?)

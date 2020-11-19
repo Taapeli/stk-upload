@@ -14,7 +14,6 @@ from pe.neo4j.cypher.cy_batch_audit import CypherBatch ######
 from bp.admin.models.cypher_adm import Cypher_adm
 
 from models.util import format_timestamp
-from models import dbutil
 from pe.db_writer import DbWriter
 
 
@@ -40,6 +39,8 @@ class Batch():
 
     def save(self, tx):
         ''' Create or update Batch node.
+        
+            Returns {'id':self.id, 'status':Status.OK}
         '''
         try:
             attr = {
@@ -51,37 +52,50 @@ class Batch():
                 #id: <uniq_id from result>,
                 "status": self.status
             }
-            #### call dirver?
-            self.tx.run(CypherBatch.batch_create, b_attr=attr)
-            return {'id':self.id, 'status':Status.OK}
+            #self.tx.run(CypherBatch.batch_create, b_attr=attr)
+            res = shareds.datastore._batch_save(attr)
+            return res
 
         except Exception as e:
             return {'id':self.id, 'status':Status.ERROR, 
                     'statustext':f'bl.batch_audit.Batch.save: {e.__class__.__name__} {e}'}
 
-    def start_batch(self):
-        ''' Creates a new unique Batch node.
-        
-        The Batch obj argument contains - 
-        - id        a date followed by a new ordinal number '2018-06-05.001'
-        - user      batch creator
-        - status    'started'
-        - file      input filename
-        - mediapath media files location
-        '''
-        dbutil.aqcuire_lock(self.dbdriver.tx, 'batch_id') #####
+#     def start_batch(self):
+#         ''' Creates a new unique Batch node.
+#         
+#         The Batch obj argument contains - 
+#         - id        a date followed by a new ordinal number '2018-06-05.001'
+#         - user      batch creator
+#         - status    'started'
+#         - file      input filename
+#         - mediapath media files location
+#         '''
+#         shareds.datastore._aqcuire_lock('batch_id')
+# 
+#         # 1. Find the next free Batch id
+#         res = shareds.datastore._get_new_batch_id()
+#         if res.get('status') != Status.OK:
+#             # Failed to get an id
+#             return res
+# 
+#         # 2. Save the new Batch node
+#         self.id = res.get('id')
+#         res = self.save()
+# 
+#         return res 
 
-        # 1. Find the next free Batch id
-        res = shareds.writer.dw_get_new_batch_id()
-        if res.get('status') != Status.OK:
-            # Failed to get an id
-            return res
-
-        # 2. Save the new Batch node
-        obj.id = res.get('id')
-        res = obj.save()
-
-        return res 
+#     def get_new_batch_id(self):
+#         ''' Find next unused Batch id.
+#         
+#             Returns {id, status, [statustext]}
+#         '''
+#         res = shareds.datastore._get_new_batch_id()
+#         
+#         if res.get('status') != Status.OK:
+#             return res
+#         batch_id = res.get('batch')
+#         print("# New batch_id='{}'".format(batch_id))
+#         return res #{'status':Status.OK, 'id':batch_id}
 
 
     @classmethod
@@ -253,9 +267,9 @@ class Batch():
         return cnt
 
 
-class BatchWriter(DbWriter):
+class BatchDatastore:
     '''
-        Data updeate class for Batch objects with associated data.
+    Abstracted batch datastore.
 
         - Create:
           BatchWriter(dbdriver, use_transaction=True), which calls
@@ -263,12 +277,48 @@ class BatchWriter(DbWriter):
           to define the database driver and transaction.
 
         - Methods return a dict result object {'status':Status, ...}
-    '''    
-#     def __init__(self, dbdriver, use_transaction=True):
-#         ''' Create a database write driver object and start a transaction.
-#         '''
-#         DbWriter(dbdriver, use_transaction)
+    '''
+    # Uses classes Role, User, UserProfile from setups.py
 
+    def __init__(self, driver, dbservice):
+        ''' Initiate datastore.
+
+        :param: driver    neo4j.DirectDriver object
+        :param: dbservice pe.neo4j.write_driver.Neo4jWriteDriver
+        '''
+        self.driver = driver
+        self.dbservice = dbservice
+        self.batch  = None
+
+    def start_batch(self,userid, file, mediapath):
+        '''
+        Initiate new Batch.
+        
+        :param: userid    user
+        :param: file      input file
+        :param: mediapath media file store path
+        '''
+        # Lock db to avoid concurent Batch loads
+        self.dbservice._aqcuire_lock('batch_id')
+
+        # Find the next free Batch id
+        self.batch = Batch()
+        res = self.dbservice._get_new_batch_id()
+        if res.get('status') != Status.OK:
+            # Failed to get an id
+            #TODO shareds.datastore._remove_lock('batch_id')
+            return res
+
+        self.batch.id = res.get('id')
+        self.batch.user = userid
+        self.batch.file = file
+        self.batch.mediapath = mediapath 
+        print(f'bl.batch_audit.BatchDatastore: new Batch {self.batch.id} identity={self.batch.uniq_id}')
+    
+#         # Create Batch node
+#         handler.batch.start_batch()
+#     handler.batch.id = handler.blog.start_batch(handler.dbdriver.tx,
+#                                                 file_cleaned, handler.batch.mediapath)
 
 
 class Audit():
@@ -318,6 +368,9 @@ class Audit():
         titles = []
         labels = {}
         if auditor:
+#             #self.tx.run(CypherBatch.batch_create, b_attr=attr)
+#             res = shareds.datastore._batch_save(attr)
+
             result = shareds.driver.session().run(Cypher_audit.get_my_audits,
                                                   oper=auditor)
         else:

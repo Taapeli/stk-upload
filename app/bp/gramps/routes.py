@@ -50,6 +50,7 @@ def list_uploads():
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
     gramps_verify = gramps_runner and os.path.exists(gramps_runner)
     return render_template("/gramps/uploads.html", 
+                           interval=shareds.PROGRESS_UPDATE_RATE*1000,
                            uploads=upload_list, gramps_verify=gramps_verify)
 
 

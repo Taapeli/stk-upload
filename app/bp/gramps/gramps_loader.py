@@ -18,11 +18,12 @@ import traceback
 from tarfile import TarFile
 import os
 
+from bl.base import Status
 # Defined in xml_to_db function: Batch, BatchWriter
 from bp.scene.models import media
 from pe.neo4j.write_driver import Neo4jWriteDriver
 #from pe.neo4j.read_driver import Neo4jReadDriver
-from pe.db_writer import DbWriter
+#from pe.db_writer import DbWriter # ??
 
 
 def get_upload_folder(username): 
@@ -526,13 +527,18 @@ def xml_to_stkbase(pathname, userid):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch_audit import Batch, BatchWriter
+    from bl.batch_audit import Batch, BatchDatastore
 
-    # Uncompress and hide apostrophes for DOM handler (and save log)
+    # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
 
     # Get XML DOM parser and start DOM elements handler transaction
     handler = DOM_handler(file_cleaned, userid, pathname)
+
+    # Open database connection and start transaction
+    #  dbdriver -> Tietokantapalvelu
+    #    driver -> Tietokantatoiminnot
+    handler.dbdriver = Neo4jWriteDriver(shareds.driver)
 
     # Initialize Run report
     handler.blog = BatchLog(userid)
@@ -540,92 +546,110 @@ def xml_to_stkbase(pathname, userid):
     handler.blog.log_event({'title':"Loaded file '{}'".format(file_displ),
                             'elapsed':shareds.tdiff})
     handler.blog.log(cleaning_log)
+
+    # Initiate BatchDatastore and Batch node data
+    # datastore -> Toimialametodit
+    handler.datastore = BatchDatastore(shareds.driver, handler.dbdriver)
+    mediapath = handler.get_mediapath_from_header()
+    handler.datastore.start_batch(userid, file_cleaned, mediapath)
+    #batch = handler.datastore.batch
+    #batch = Batch()
+
     t0 = time.time()
 
-    # Initiate Batch node data
-    batch = Batch(userid)
-    batch.file = file_cleaned
-    batch.mediapath = handler.get_mediapath_from_header()
-    handler.batch = batch
+#     batch = BatchWriter()
+#     handler.batch = batch
+#     # Open database connection and start transaction
+#     handler.dbdriver = Neo4jWriteDriver(shareds.driver)
+#     # Batch 
+#     shareds.datastore = BatchWriter(handler.dbdriver, handler)
+#     if not shareds.datastore._aqcuire_lock('batch_id'):
+#         return {'status':Status.ERROR,
+#                 'statustext': f'Could not get lock="batch_id"'}
 
-    # Olen database connection and start transaction
-    handler.dbdriver = Neo4jWriteDriver(shareds.driver, use_transaction=True)
-
-    shareds.datastore = BatchWriter(handler.dbdriver)
-    #handler.batch_writer.create_batch(batch)
-    # Create Batch node
-    shareds.datastore.start_batch()
-#     handler.batch.id = handler.blog.start_batch(handler.dbdriver.tx,
-#                                                 file_cleaned, handler.batch.mediapath)
+#     # Find the next free Batch id
+#     res = handler.batch.get_new_batch_id()
+#     if res.get('status') != Status.OK:
+#         # Failed to get an id
+#         return res
+#     batch.id = res.get('id')
+# 
+#     # Create Batch node
+#     handler.batch.start_batch()
+# #     handler.batch.id = handler.blog.start_batch(handler.dbdriver.tx,
+# #                                                 file_cleaned, handler.batch.mediapath)
 
     if pathname.endswith(".gpkg"):
         extract_media(pathname,handler.batch.id)
     
+#     try:
+# #         ''' Start DOM transaction '''
+# #         handler.begin_tx(shareds.driver.session())
+#         # Create new Batch node and start
+#         #status_update({'percent':1})
+#     except ConnectionError as err:
+#         msg = f"{e.__class__.__name__} {err}"
+#         handler.blog.log_event(title=_("Database save failed due to {} {}".\
+#                                      format(err.message, err.code)), level="ERROR")
+#         return {'status':Status.ERROR,
+#                 'statustext': msg}
+#         #raise SystemExit("Stopped due to ConnectionError")    # Stop processing?
+        
     try:
-        ''' Start DOM transaction '''
-        handler.begin_tx(shareds.driver.session())
-        # Create new Batch node and start
-        #status_update({'percent':1})
-        
-        try:
-            #handler.handle_header() --> get_header_mediapath()
-            
-            handler.handle_notes()
-            handler.handle_repositories()
-            handler.handle_media()
-        
-            handler.handle_places()
-            handler.handle_sources()
-            handler.handle_citations()
-        
-            handler.handle_events()
-            handler.handle_people()
-            handler.handle_families()
-    
+        #handler.handle_header() --> get_header_mediapath()
+        handler.handle_notes()
+        handler.handle_repositories()
+        handler.handle_media()
+
+        handler.handle_places()
+        handler.handle_sources()
+        handler.handle_citations()
+
+        handler.handle_events()
+        handler.handle_people()
+        handler.handle_families()
+
 #             for k in handler.handle_to_node.keys():
 #                 print (f'\t{k} –> {handler.handle_to_node[k]}')
-                
-            # Set person confidence values 
-            #TODO: Only for imported persons (now for all persons!)
-            handler.set_all_person_confidence_values()
-            # Set properties (for imported persons)
-            #    + Refname links
-            #    ? Person sortname
-            #    + Person lifetime
-            #    - Confidence values
-            handler.set_person_calculated_attributes()
-            handler.set_person_estimated_dates()
-            
-            # Copy date and name information from Person and Event nodes to Family nodes
-            handler.set_family_calculated_attributes()
 
-            handler.remove_handles()
-            handler.add_missing_links()
+        # Set person confidence values 
+        #TODO: Only for imported persons (now for all persons!)
+        handler.set_all_person_confidence_values()
+        # Set properties (for imported persons)
+        #    + Refname links
+        #    ? Person sortname
+        #    + Person lifetime
+        #    - Confidence values
+        handler.set_person_calculated_attributes()
+        handler.set_person_estimated_dates()
+
+        # Copy date and name information from Person and Event nodes to Family nodes
+        handler.set_family_calculated_attributes()
+
+        handler.remove_handles()
+        handler.add_missing_links()
 
 # Huom. Paikkahierarkia on tehty metodissa Place_gramps.save niin että
 #       aluksi luodaan tarvittaessa viitattu ylempi paikka vajailla tiedoilla.
 #             # Make the place hierarchy
 #             handler.make_place_hierarchy()
 
-        except Exception as e:
-            traceback.print_exc()
-            msg = f"Stopped xml load due to {e}"    # Stop processing?
-            print(msg)
-            handler.commit(rollback=True)
-            return handler.blog.list(), None
+    except Exception as e:
+        traceback.print_exc()
+        msg = f"Stopped xml load due to {e}"    # Stop processing?
+        print(msg)
+        handler.commit(rollback=True)
+        return {'status':Status.ERROR,
+                'statustext': msg}
 
-        handler.blog.complete(handler.tx)
-        handler.commit()
-
-    except ConnectionError as err:
-        print("iError ConnectionError {0}".format(err))
-        handler.blog.log_event(title=_("Database save failed due to {} {}".\
-                                     format(err.message, err.code)), level="ERROR")
-        raise SystemExit("Stopped due to ConnectionError")    # Stop processing?
+    handler.blog.complete(handler.tx)
+    handler.commit()
 
     handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
                             'elapsed':time.time()-t0})  #, 'percent':100})
-    return handler.blog.list(), handler.batch.id
+    return {'status': Status.OK,
+            'steps': handler.blog.list(), 
+            'batch_id': handler.batch.id}
 
 
 def file_clean(pathname):

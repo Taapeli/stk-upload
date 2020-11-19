@@ -26,7 +26,7 @@ from bl.place_coordinates import Point
 from bl.media import MediaRefResult
 
 from pe.db_writer import DbWriter
-from pe.neo4j.write_driver import Neo4jWriteDriver
+#from pe.neo4j.write_driver import Neo4jWriteDriver
 
 from .bl.person_gramps import PersonGramps
 
@@ -106,11 +106,12 @@ class DOM_handler():
         self.handle_to_node = {}            # {handle:(uuid, uniq_id)}
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
-        self.batch = None                   # Batch node to be created
+#         self.batch = None                   # Batch node to be created
 #         self.batch_id = None
 #         self.mediapath = None               # Directory for media files
         self.file = os.path.basename(pathname) # for messages
         self.progress = defaultdict(int)    # key=object type, value=count of objects processed
+        self.datastore = None               # neo4j.DirectDriver object
 
 #         # Select the update driver for current database
 #         self.dbdriver = Neo4jWriteDriver(shareds.driver)

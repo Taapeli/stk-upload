@@ -45,7 +45,7 @@ class BatchLog():
         self.totalpercent = 0   # Sum of LogItem.percent
 
 
-#     def start_batch(self, tx, infile, mediapath): --> bl.batch_audit.Batch.start_batch()
+#     def start_batch(self, tx, infile, mediapath): --> bl.batch_audit.BatchDatastore.start_batch()
 #         '''
 #         Creates a new Batch node with 
 #         - id        a date followed by an ordinal number '2018-06-05.001'

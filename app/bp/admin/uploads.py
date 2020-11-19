@@ -19,6 +19,7 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 import shareds
+from bl.base import Status
 from models import email, util, syslog 
 from ..gramps import gramps_loader
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch
@@ -130,7 +131,7 @@ def i_am_alive(metaname,parent_thread):
         print(parent_thread.progress)
         update_metafile(metaname,
                         progress=parent_thread.progress)
-        time.sleep(10)
+        time.sleep(shareds.PROGRESS_UPDATE_RATE)
 
 def background_load_to_stkbase(username,filename):
     ''' Imports gramps xml data to database '''
@@ -149,12 +150,18 @@ def background_load_to_stkbase(username,filename):
         update_metafile(metaname,counts=counts,progress={})
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
 
-        steps,batch_id = gramps_loader.xml_to_stkbase(pathname,username)
+        #steps,batch_id
+        res = gramps_loader.xml_to_stkbase(pathname,username)
+        if res.get('status') != Status.OK:
+            return res
+        steps = res.get('steps',[])
+        batch_id = res.get('batch_id')
 
         for step in steps:
             print(step)
         if not batch_id:
-            raise RuntimeError("Run Failed: no batch created.")
+            return {'status': Status.ERROR,
+                    'statustext': "Run Failed: no batch created."}
 
         if os.path.exists(metaname): 
             set_meta(username,filename,
@@ -172,7 +179,7 @@ def background_load_to_stkbase(username,filename):
                     "Stk: Gramps XML file stored",
                     msg )
         syslog.log(type="storing to database complete",file=filename,user=username)
-    except:
+    except: # Exception as e:
         traceback.print_exc()
         res = traceback.format_exc()
         set_meta(username,filename,status=STATUS_FAILED)
