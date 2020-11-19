@@ -26,7 +26,7 @@ from bl.place_coordinates import Point
 from bl.media import MediaRefResult
 
 from pe.db_writer import DbWriter
-#from pe.neo4j.write_driver import Neo4jWriteDriver
+#from pe.neo4j.dataservice import Neo4jWriteDriver
 
 from .bl.person_gramps import PersonGramps
 
@@ -107,37 +107,10 @@ class DOM_handler():
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
 #         self.batch = None                   # Batch node to be created
-#         self.batch_id = None
 #         self.mediapath = None               # Directory for media files
         self.file = os.path.basename(pathname) # for messages
         self.progress = defaultdict(int)    # key=object type, value=count of objects processed
         self.datastore = None               # neo4j.DirectDriver object
-
-#         # Select the update driver for current database
-#         self.dbdriver = Neo4jWriteDriver(shareds.driver)
-# 
-# 
-#     def begin_tx(self, session):
-#         self.dbdriver.tx = session.begin_transaction()
-#         print("Transaction started")
-# 
-#     def commit(self, rollback=False):
-#         """ Commit or rollback transaction """
-#         if rollback:
-#             self.dbdriver.rollback()
-#             print("Transaction discarded")
-#             logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit f="{self.file}"')
-#             self.blog.log_event({'title': _("Database save failed"), 'level':"ERROR"})
-#         else:
-#             ret = self.dbdriver.dw_commit()
-#             if ret == 0:
-#                 logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit f="{self.file}"')
-#                 print("Transaction committed")
-#             else:
-#                 logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/fail f="{self.file}"')
-#                 print("Transaction failed")
-#                 self.blog.log_event({'title':_("Database save failed due to {}".\
-#                                      format(ret)), 'level':"ERROR"})
 
 
     def remove_handles(self):
@@ -150,7 +123,6 @@ class DOM_handler():
             total += count
         print (f'# --- removed handle from {total} nodes')
 
-
     def add_missing_links(self):
         ''' Link the Nodes without OWNS link to Batch
         '''
@@ -158,12 +130,6 @@ class DOM_handler():
         counters = shareds.db.consume_counters(result)
         if counters.relationships_created:
             print(f"Created {counters.relationships_created} relations")
-
-#     def set_mediapath(self, path):
-#         ''' Store media files path. '''
-#         self.dbdriver.dw_set_mediapath(obj,**kwargs)
-#         self.tx.run(Cypher_mixed.set_mediapath, 
-#                     batch_id=self.batch_id, path=path)
 
     def update_progress(self, key):
         ''' Save status for displaying progress bar
@@ -177,7 +143,8 @@ class DOM_handler():
 
             Some objects may accept arguments like batch_id="2019-08-26.004" and others
         '''
-        self.dbdriver.save_and_link_obj(obj,**kwargs)
+        self.dataservice._batch_obj_save_and_link(obj, **kwargs)
+        #self.dataservice.save_and_link_obj(obj,**kwargs)
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
@@ -202,7 +169,7 @@ class DOM_handler():
 #             for mediapath in header.getElementsByTagName("mediapath"):
 #                 if (len(mediapath.childNodes) > 0):
 #                     path = mediapath.childNodes[0].data
-#                     self.dbdriver.dw_set_batch_mediapath(path)
+#                     self.dataservice.dw_set_batch_mediapath(path)
 #                     self.set_mediapath(path) ####
 #                     return
 #         self.set_mediapath("")
@@ -451,7 +418,7 @@ class DOM_handler():
             # konvertoitaisiin heti Note-nodeiksi sopivalla node-tyypillä
             #print("iNote {}".format(n))
 
-            self.save_and_link_handle(n, batch_id=self.batch_id)
+            self.save_and_link_handle(n, batch_id=self.batch.id)
             counter += 1
 
         self.blog.log_event({'title':"Notes", 'count':counter, 
@@ -485,7 +452,7 @@ class DOM_handler():
                     o.description = obj_file.getAttribute("description")
 
             #TODO: Varmista, ettei mediassa voi olla Note
-            self.save_and_link_handle(o, batch_id=self.batch_id)
+            self.save_and_link_handle(o, batch_id=self.batch.id)
             counter += 1
 
         self.blog.log_event({'title':"Media objects", 'count':counter, 
@@ -607,7 +574,7 @@ class DOM_handler():
                     ##print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
 
             #for ref in p.media_refs: print(f'# saving Person {p.id}: media_ref {ref}')
-            self.save_and_link_handle(p, batch_id=self.batch_id)
+            self.save_and_link_handle(p, batch_id=self.batch.id)
             #print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
             # The refnames will be set for these persons 
@@ -725,7 +692,7 @@ class DOM_handler():
                 print(f'# saving Place {pl.id}: media_refs {pl.media_refs}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            self.save_and_link_handle(pl, batch_id=self.batch_id, place_keys=place_keys)
+            self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys)
             # The place_keys has been updated 
             counter += 1
             
@@ -770,7 +737,7 @@ class DOM_handler():
                 if n.url:
                     r.notes.append(n)
 
-            self.save_and_link_handle(r, batch_id=self.batch_id)
+            self.save_and_link_handle(r, batch_id=self.batch.id)
             counter += 1
 
         self.blog.log_event({'title':"Repositories", 'count':counter, 
@@ -840,8 +807,8 @@ class DOM_handler():
                 # Mostly 1 repository!
                 s.repositories.append(r)
 
-            #elf.save_and_link_handle(r, self.batch_id)
-            self.save_and_link_handle(s, batch_id=self.batch_id)
+            #elf.save_and_link_handle(r, self.batch.id)
+            self.save_and_link_handle(s, batch_id=self.batch.id)
             counter += 1
 
         self.blog.log_event({'title':"Sources", 'count':counter, 
@@ -918,7 +885,7 @@ class DOM_handler():
             Person.confidence is mean of all Citations used for Person's Events
         """
         t0 = time.time()
-        db = DbWriter(self.dbdriver)
+        db = DbWriter(self.dataservice)
 
         result = db.update_person_confidences(self.tx, self.person_ids)
         # returns {status, count, statustext}

@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import shareds
-from flask_security import roles_accepted, current_user
+from flask_security import roles_accepted #, current_user
 from bp.refplace_editor.models import refplaceeapi_v1 as api
 from . import bp
 from flask import render_template, request
 
 from pe.db_writer import DbWriter
-from pe.neo4j.write_driver import Neo4jWriteDriver
+from pe.neo4j.dataservice import Neo4jDataService
 from models.jsonify import stk_jsonify
 
 @bp.route("/refplace_editor/")
@@ -36,8 +36,8 @@ def list_subordinate_places():
 @bp.route('/refplaces/api/getplace', methods=['GET'])
 @roles_accepted('audit')
 def getplace():
-    id = request.args.get("id")
-    rsp = api.getplace(int(id)) 
+    pid = request.args.get("id")
+    rsp = api.getplace(int(pid)) 
     print(rsp)
     response = stk_jsonify(rsp)
     return response 
@@ -47,7 +47,7 @@ def getplace():
 def mergeplaces():
     id1 = request.args.get("id1")
     id2 = request.args.get("id2")
-    dbdriver = Neo4jWriteDriver(shareds.driver, tx=None)
+    dbdriver = Neo4jDataService(shareds.driver, tx=None)
     writer = DbWriter(dbdriver) 
     place = writer.mergeplaces(int(id1),int(id2)) 
     return stk_jsonify(place)
@@ -55,11 +55,11 @@ def mergeplaces():
 @bp.route('/refplaces/api/test_create', methods=['GET'])
 @roles_accepted('audit')
 def test_create():
-    rsp = api.test_create() 
+    _rsp = api.test_create() 
     return "ok" 
 
 @bp.route('/refplaces/api/test_delete', methods=['GET'])
 @roles_accepted('audit')
 def test_delete():
-    rsp = api.test_delete() 
+    _rsp = api.test_delete() 
     return "ok" 

@@ -9,12 +9,11 @@ import shareds
 from datetime import date, datetime
 
 from bl.base import Status
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch ######
-
+from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 from bp.admin.models.cypher_adm import Cypher_adm
 
 from models.util import format_timestamp
-from pe.db_writer import DbWriter
+#from pe.db_writer import DbWriter
 
 
 class Batch():
@@ -37,65 +36,29 @@ class Batch():
     def __str__(self):
         return f"{self.user} / {self.id}"
 
-    def save(self, tx):
-        ''' Create or update Batch node.
-        
-            Returns {'id':self.id, 'status':Status.OK}
-        '''
-        try:
-            attr = {
-                "id": self.id,
-                "user": self.user,
-                "file": self.file,
-                "mediapath": self.mediapath,
-                #timestamp": <to be set in cypher>,
-                #id: <uniq_id from result>,
-                "status": self.status
-            }
-            #self.tx.run(CypherBatch.batch_create, b_attr=attr)
-            res = shareds.datastore._batch_save(attr)
-            return res
-
-        except Exception as e:
-            return {'id':self.id, 'status':Status.ERROR, 
-                    'statustext':f'bl.batch_audit.Batch.save: {e.__class__.__name__} {e}'}
-
-#     def start_batch(self):
-#         ''' Creates a new unique Batch node.
+#     def save(self):
+#         ''' Create or update Batch node.
 #         
-#         The Batch obj argument contains - 
-#         - id        a date followed by a new ordinal number '2018-06-05.001'
-#         - user      batch creator
-#         - status    'started'
-#         - file      input filename
-#         - mediapath media files location
+#             Returns {'id':self.id, 'status':Status.OK}
 #         '''
-#         shareds.datastore._aqcuire_lock('batch_id')
-# 
-#         # 1. Find the next free Batch id
-#         res = shareds.datastore._get_new_batch_id()
-#         if res.get('status') != Status.OK:
-#             # Failed to get an id
+#         try:
+#             attr = {
+#                 "id": self.id,
+#                 "user": self.user,
+#                 "file": self.file,
+#                 "mediapath": self.mediapath,
+#                 #timestamp": <to be set in cypher>,
+#                 #id: <uniq_id from result>,
+#                 "status": self.status
+#             }
+#             #self.tx.run(CypherBatch.batch_create, b_attr=attr)
+#             res = shareds.datastore._batch_save(attr)
 #             return res
 # 
-#         # 2. Save the new Batch node
-#         self.id = res.get('id')
-#         res = self.save()
-# 
-#         return res 
+#         except Exception as e:
+#             return {'id':self.id, 'status':Status.ERROR, 
+#                     'statustext': f'bl.batch_audit.Batch.save: {e.__class__.__name__} {e}'}
 
-#     def get_new_batch_id(self):
-#         ''' Find next unused Batch id.
-#         
-#             Returns {id, status, [statustext]}
-#         '''
-#         res = shareds.datastore._get_new_batch_id()
-#         
-#         if res.get('status') != Status.OK:
-#             return res
-#         batch_id = res.get('batch')
-#         print("# New batch_id='{}'".format(batch_id))
-#         return res #{'status':Status.OK, 'id':batch_id}
 
 
     @classmethod
@@ -280,14 +243,14 @@ class BatchDatastore:
     '''
     # Uses classes Role, User, UserProfile from setups.py
 
-    def __init__(self, driver, dbservice):
+    def __init__(self, driver, dataservice):
         ''' Initiate datastore.
 
         :param: driver    neo4j.DirectDriver object
-        :param: dbservice pe.neo4j.write_driver.Neo4jWriteDriver
+        :param: dataservice pe.neo4j.dataservice.Neo4jWriteDriver
         '''
         self.driver = driver
-        self.dbservice = dbservice
+        self.dataservice = dataservice
         self.batch  = None
 
     def start_batch(self,userid, file, mediapath):
@@ -299,11 +262,12 @@ class BatchDatastore:
         :param: mediapath media file store path
         '''
         # Lock db to avoid concurent Batch loads
-        self.dbservice._aqcuire_lock('batch_id')
+        self.dataservice._aqcuire_lock('batch_id')
+        #TODO check res
 
         # Find the next free Batch id
         self.batch = Batch()
-        res = self.dbservice._get_new_batch_id()
+        res = self.dataservice._new_batch_id()
         if res.get('status') != Status.OK:
             # Failed to get an id
             #TODO shareds.datastore._remove_lock('batch_id')
@@ -312,166 +276,38 @@ class BatchDatastore:
         self.batch.id = res.get('id')
         self.batch.user = userid
         self.batch.file = file
-        self.batch.mediapath = mediapath 
+        self.batch.mediapath = mediapath
+        
+        res = self.batch_save(self.batch)
         print(f'bl.batch_audit.BatchDatastore: new Batch {self.batch.id} identity={self.batch.uniq_id}')
-    
-#         # Create Batch node
-#         handler.batch.start_batch()
-#     handler.batch.id = handler.blog.start_batch(handler.dbdriver.tx,
-#                                                 file_cleaned, handler.batch.mediapath)
 
+        return {'batch': self.batch, 'status': Status.OK}
 
-class Audit():
-    '''
-    Audit batch node and statistics about them. 
-    '''
-
-    def __init__(self, auditor=None):
+    def batch_save(self, batch):
+        ''' Create or update Batch node.
+        
+            Returns {'id':self.id, 'status':Status.OK}
         '''
-        Creates an Audit object.
-        '''
-        self.uniq_id = None
-        self.auditor = auditor
-        self.user = None
-        self.id = None
-        #self.status = 'started'
-        self.timestamp = 0
-        self.updated = ""   # timestamp as string
+        try:
+            attr = {
+                "id": batch.id,
+                "user": batch.user,
+                "file": batch.file,
+                "mediapath": batch.mediapath,
+                #timestamp": <to be set in cypher>,
+                #id: <uniq_id from result>,
+                "status": batch.status
+            }
+            #self.tx.run(CypherBatch.batch_create, b_attr=attr)
+            res = self.dataservice._batch_save(attr)
+            # returns {status, identity}
+            if res.get('status') != Status.OK:
+                return res
 
-    def __str__(self):
-        return f"{self.auditor} > {self.user} {self.id}"
+            batch.uniq_id = res.get('identity')
+            return res
 
-    @classmethod
-    def from_node(cls, node):
-        ''' Convert a Neo4j node to an Audit object.
-
-        <Node id=439060 labels={'Audit'}
-            properties={'auditor': 'juha', 'id': '2020-01-03.001', 
-                        'user': 'jpek', 'timestamp': 1578940247182}>
-        '''
-        obj = cls()
-        obj.uniq_id = node.id
-        obj.user = node.get('user', "")
-        obj.auditor = node.get('auditor')
-        obj.id = node.get('id', None)
-        #obj.status = node.get('status', "")
-        obj.timestamp = node.get('timestamp', 0)
-        if obj.timestamp:
-            obj.updated = format_timestamp(obj.timestamp/1000.)
-        return obj
-
-
-    @staticmethod
-    def get_auditor_stats(auditor=None):
-        ''' Get statistics of auditor's audition batch contents.
-        '''
-        titles = []
-        labels = {}
-        if auditor:
-#             #self.tx.run(CypherBatch.batch_create, b_attr=attr)
-#             res = shareds.datastore._batch_save(attr)
-
-            result = shareds.driver.session().run(Cypher_audit.get_my_audits,
-                                                  oper=auditor)
-        else:
-            result = shareds.driver.session().run(Cypher_audit.get_all_audits,
-                                                  oper=auditor)
-        for record in result:
-            # <Record
-            #    b=<Node id=439060 labels={'Audit'}
-            #        properties={'auditor': 'juha', 'id': '2020-01-03.001', 
-            #        'user': 'jpek', 'timestamp': 1578940247182}> 
-            #    label='Note'
-            #    cnt=17>
-            b = Audit.from_node(record['b'])
-            label = record['label']
-            if not label: label = ""
-            cnt = record['cnt']
-
-            # Trick: Set Person as first in sort order!
-            if label == "Person": label = " Person"
-            if label and not label in titles:
-                titles.append(label)
-
-            key = f'{b.auditor}/{b.user}/{b.id}/{b.updated}'
-            if not key in labels:
-                labels[key] = {}
-            labels[key][label] = cnt
-            #print(f'labels[{key}] {labels[key]}')
-
-        return sorted(titles), labels
-
-    @staticmethod
-    def get_stats(audit_id):
-        ''' Get statistics of given Batch contents.
-        '''
-        labels = []
-        batch = None
-        result = shareds.driver.session().run(CypherBatch.get_single_batch, 
-                                              batch=audit_id)
-        for record in result:
-            # <Record batch=<Node id=319388 labels={'Batch'} 
-            #    properties={ // 'mediapath': '/home/jm/my_own.media', 
-            #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps', 
-            #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787, 
-            #        'status': 'completed'}> 
-            #  label='Note'
-            #  cnt=2>
-
-            if not batch:
-                batch = record['batch']
-                user = batch.get('user')
-                #audit_id = batch.get('id')
-                ts = batch.get('timestamp')
-                if ts:
-                    t = float(ts)/1000.
-                    tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
-                else:
-                    tstring = ""
-            label = record['label']
-            if label == None: label = '-'
-            # Trick: Set Person as first in sort order!
-            if label == "Person": label = " Person"
-            cnt = record['cnt']
-            labels.append((label,cnt))
-
-        return user, audit_id, tstring, sorted(labels)
-
-
-#     @staticmethod
-#     def get_audit_stats(batch_id):
-#         ''' Get statistics of given Batch contents.
-#         '''
-#         labels = []
-#         batch = None
-#         result = shareds.driver.session().run(CypherBatch.get_single_batch, 
-#                                               batch=batch_id)
-#         for record in result:
-#             # <Record batch=<Node id=319388 labels={'Batch'} 
-#             #    properties={ // 'mediapath': '/home/jm/my_own.media', 
-#             #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps', 
-#             #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787, 
-#             #        'status': 'completed'}> 
-#             #  label='Note'
-#             #  cnt=2>
-# 
-#             if not batch:
-#                 batch = record['batch']
-#                 user = batch.get('user')
-#                 #batch_id = batch.get('id')
-#                 ts = batch.get('timestamp')
-#                 if ts:
-#                     t = float(ts)/1000.
-#                     tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
-#                 else:
-#                     tstring = ""
-#             label = record['label']
-#             if label == None: label = '-'
-#             # Trick: Set Person as first in sort order!
-#             if label == "Person": label = " Person"
-#             cnt = record['cnt']
-#             labels.append((label,cnt))
-# 
-#         return user, batch_id, tstring, sorted(labels)
-#  
+        except Exception as e:
+            return {'id':self.id, 'status':Status.ERROR, 
+                    'statustext': f'bl.batch_audit.Batch.save: {e.__class__.__name__} {e}'}
 

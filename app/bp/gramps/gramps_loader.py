@@ -7,7 +7,7 @@
 import time
 import gzip
 from os.path import basename, splitext
-from flask_babelex import _
+#from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
@@ -21,7 +21,7 @@ import os
 from bl.base import Status
 # Defined in xml_to_db function: Batch, BatchWriter
 from bp.scene.models import media
-from pe.neo4j.write_driver import Neo4jWriteDriver
+from pe.neo4j.dataservice import Neo4jDataService
 #from pe.neo4j.read_driver import Neo4jReadDriver
 #from pe.db_writer import DbWriter # ??
 
@@ -527,7 +527,7 @@ def xml_to_stkbase(pathname, userid):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch_audit import Batch, BatchDatastore
+    from bl.batch import BatchDatastore #,Batch
 
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
@@ -538,7 +538,7 @@ def xml_to_stkbase(pathname, userid):
     # Open database connection and start transaction
     #  dbdriver -> Tietokantapalvelu
     #    driver -> Tietokantatoiminnot
-    handler.dbdriver = Neo4jWriteDriver(shareds.driver)
+    handler.dataservice = Neo4jDataService(shareds.driver)
 
     # Initialize Run report
     handler.blog = BatchLog(userid)
@@ -549,38 +549,18 @@ def xml_to_stkbase(pathname, userid):
 
     # Initiate BatchDatastore and Batch node data
     # datastore -> Toimialametodit
-    handler.datastore = BatchDatastore(shareds.driver, handler.dbdriver)
+    handler.datastore = BatchDatastore(shareds.driver, handler.dataservice)
     mediapath = handler.get_mediapath_from_header()
-    handler.datastore.start_batch(userid, file_cleaned, mediapath)
-    #batch = handler.datastore.batch
-    #batch = Batch()
+    res = handler.datastore.start_batch(userid, file_cleaned, mediapath)
+    if res.get('status') != Status.OK:
+        #TODO rollback
+        return res
+    handler.batch = res.get('batch')
 
     t0 = time.time()
 
-#     batch = BatchWriter()
-#     handler.batch = batch
-#     # Open database connection and start transaction
-#     handler.dbdriver = Neo4jWriteDriver(shareds.driver)
-#     # Batch 
-#     shareds.datastore = BatchWriter(handler.dbdriver, handler)
-#     if not shareds.datastore._aqcuire_lock('batch_id'):
-#         return {'status':Status.ERROR,
-#                 'statustext': f'Could not get lock="batch_id"'}
-
-#     # Find the next free Batch id
-#     res = handler.batch.get_new_batch_id()
-#     if res.get('status') != Status.OK:
-#         # Failed to get an id
-#         return res
-#     batch.id = res.get('id')
-# 
-#     # Create Batch node
-#     handler.batch.start_batch()
-# #     handler.batch.id = handler.blog.start_batch(handler.dbdriver.tx,
-# #                                                 file_cleaned, handler.batch.mediapath)
-
     if pathname.endswith(".gpkg"):
-        extract_media(pathname,handler.batch.id)
+        extract_media(pathname, handler.batch.id)
     
 #     try:
 # #         ''' Start DOM transaction '''

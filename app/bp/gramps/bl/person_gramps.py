@@ -22,7 +22,7 @@ from shareds import logger
 
 from bl.person import PersonBl
 #from models.gen.person import Person
-from pe.neo4j.write_driver import Neo4jWriteDriver
+from pe.neo4j.dataservice import Neo4jDataService
 from pe.db_writer import DbWriter
 
 from models.cypher_gramps import Cypher_person_w_handle
@@ -97,7 +97,7 @@ class PersonGramps(PersonBl):
         else:
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
 
-        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+        dbdriver = Neo4jDataService(shareds.driver, tx)
         db = DbWriter(dbdriver)
         today = str(datetime.date.today())
 

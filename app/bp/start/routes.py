@@ -20,7 +20,7 @@ from models import email
 from bp.api import api
 
 from bp.start.forms import JoinForm
-from bl.batch_audit import Batch
+from bl.batch import Batch
 
 """ Application route definitions
 """

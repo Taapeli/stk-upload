@@ -179,8 +179,9 @@ def background_load_to_stkbase(username,filename):
                     "Stk: Gramps XML file stored",
                     msg )
         syslog.log(type="storing to database complete",file=filename,user=username)
-    except: # Exception as e:
-        traceback.print_exc()
+    except Exception as e:
+        #traceback.print_exc()
+        print(f'bp.admin.uploads.background_load_to_stkbase: {e.__class__.__name__} {e}')
         res = traceback.format_exc()
         set_meta(username,filename,status=STATUS_FAILED)
         msg = "{}:\nStoring the file {} from user {} to database FAILED".format(util.format_timestamp(),pathname,username)
@@ -311,7 +312,7 @@ def list_uploads_all(users):
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.
-# --> bl.batch_audit.Batch.list_empty_batches
+# --> bl.batch.Batch.list_empty_batches
 
 
 def removefile(fname): 

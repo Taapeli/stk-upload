@@ -21,7 +21,8 @@ MATCH (u:UserProfile {username: $b_attr.user})
 MERGE (u) -[:HAS_LOADED]-> (b:Batch {id: $b_attr.id})
 MERGE (u) -[:HAS_ACCESS]-> (b)
     SET b = $b_attr
-    SET b.timestamp = timestamp()"""
+    SET b.timestamp = timestamp()
+RETURN ID(b) AS id"""
 
     batch_complete = """
 MATCH (u:UserProfile {username: $user})

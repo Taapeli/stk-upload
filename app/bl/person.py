@@ -505,7 +505,7 @@ class PersonBl(Person):
 
 
 #     @staticmethod
-#     def get_confidence (uniq_id=None): --> pe.neo4j.write_driver.Neo4jWriteDriver.dr_get_person_confidences
+#     def get_confidence (uniq_id=None): --> pe.neo4j.dataservice.Neo4jWriteDriver.dr_get_person_confidences
 #         """ Collect Person confidence from Person and the Event nodes.
 # 
 #             Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta

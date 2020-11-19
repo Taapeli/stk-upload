@@ -8,7 +8,7 @@ from sys import stderr
 
 import shareds
 from bl.place import Place, PlaceBl
-from pe.neo4j.write_driver import Neo4jWriteDriver
+from pe.neo4j.dataservice import Neo4jDataService
 from pe.db_writer import DbWriter
 
 from models.gen.dates import DateRange
@@ -173,7 +173,7 @@ class Place_gramps(PlaceBl):
         # Select default names for default languages
         def_names = PlaceBl.find_default_names(self.names, ['fi', 'sv'])
         # Update default language name links
-        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+        dbdriver = Neo4jDataService(shareds.driver, tx)
         db = DbWriter(dbdriver)
         db.place_set_default_names(self, def_names)
 
@@ -238,7 +238,7 @@ class Place_gramps(PlaceBl):
             raise
 
         # Make relations to the Media nodes and their Note and Citation references
-        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+        dbdriver = Neo4jDataService(shareds.driver, tx)
         db = DbWriter(dbdriver)
         db.media_save_w_handles(self.uniq_id, self.media_refs)
             

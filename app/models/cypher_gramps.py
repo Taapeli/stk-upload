@@ -33,7 +33,7 @@ MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
 #     OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
 #         DELETE c
 #     MERGE (u) -[:CURRENT_LOAD]-> (b)
-#Moved to bl.batch_audit / 3.2.2020/JMä
+#Moved to bl.batch / 3.2.2020/JMä
 #     batch_list = """
 #     batch_list_all = """
 #     batch_delete = """

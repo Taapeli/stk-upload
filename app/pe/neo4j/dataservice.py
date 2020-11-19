@@ -16,7 +16,7 @@ from pe.neo4j.cypher.cy_place import CypherPlace
 from pe.neo4j.cypher.cy_gramps import CypherObjectWHandle
 
 
-class Neo4jWriteDriver:
+class Neo4jDataService:
     '''
     This driver for Neo4j database maintains transaction and executes
     different update functions.
@@ -56,7 +56,7 @@ class Neo4jWriteDriver:
         """
         self.tx.rollback()
         print("Transaction discarded")
-        logger.info('-> pe.neo4j.write_driver.Neo4jWriteDriver.dw_rollback')
+        logger.info('-> pe.neo4j.write_driver.Neo4jDataService.dw_rollback')
 
 
     # ----- Batch -----
@@ -69,7 +69,7 @@ class Neo4jWriteDriver:
         self.tx.run(query, lock_id=lock_id)
         return True # value > 0
 
-    def _get_new_batch_id(self):
+    def _new_batch_id(self):
         ''' Find next unused Batch id.
         
             Returns {id, status, [statustext]}
@@ -90,7 +90,7 @@ class Neo4jWriteDriver:
             # Normal exception: this is the first batch of day
             ext = 0
         except Exception as e:
-            statustext = f"pe.neo4j.write_driver.Neo4jWriteDriver.dw_get_new_batch_id: {e.__class__.name} {e}"
+            statustext = f"pe.neo4j.write_driver.Neo4jDataService.dw_get_new_batch_id: {e.__class__.name} {e}"
             print(statustext)
             return {'status':Status.ERROR, 'statustext':statustext}
         
@@ -109,12 +109,23 @@ class Neo4jWriteDriver:
             Batch.timestamp is created in Cypher clause.
        '''
         try:
-            self.tx.run(CypherBatch.batch_create, b_attr=attr)
+            result = self.tx.run(CypherBatch.batch_create, b_attr=attr)
+            uniq_id = result.single()[0]
+            return {'status': Status.OK, 'identity':uniq_id}
+
         except Exception as e:
-            statustext = "pe.neo4j.write_driver.Neo4jWriteDriver.dw_batch_save failed:"\
+            statustext = "pe.neo4j.write_driver.Neo4jDataService.dw_batch_save failed:"\
                 f" {e.__class__.name} {e}"
             return {'status': Status.ERROR, 
                     'statustext': statustext}
+
+    def _batch_obj_save_and_link(self, obj, **kwargs):   # batch_id=None, parent_id=None):
+        """ Saves given object to database
+            - if  obj.parent_id is given, link (parent) --> (obj)  
+            - elif obj.batch_id is given, link (batch) --> (obj)
+        """
+        obj.save(self.tx, **kwargs)
+
 
 
     # ----- Person ----
@@ -146,7 +157,7 @@ class Neo4jWriteDriver:
             return {'confidence':new_conf, 'status':Status.OK}
 
         except Exception as e:
-            msg = f'Neo4jWriteDriver.dr_update_person_confidence: {e.e.__class__.__name__} {e}'
+            msg = f'Neo4jDataService.dr_update_person_confidence: {e.e.__class__.__name__} {e}'
             print(msg)
             return {'confidence':new_conf, 'status':Status.ERROR,
                     'statustext': msg}
@@ -178,7 +189,7 @@ class Neo4jWriteDriver:
                      f"Place {place_id}, names fi:{fi_id}, sv:{sv_id}")
 
         except Exception as err:
-            logger.error(f"Neo4jWriteDriver.place_set_default_names: {err}")
+            logger.error(f"Neo4jDataService.place_set_default_names: {err}")
             return err
 
 
@@ -226,7 +237,7 @@ class Neo4jWriteDriver:
                                 root_id=media_uid, handle=handle)
 
         except Exception as err:
-            logger.error(f"Neo4jWriteDriver.media_save_w_handles {doing}: {err}")
+            logger.error(f"Neo4jDataService.media_save_w_handles {doing}: {err}")
 
 
     def dw_mergeplaces(self, id1, id2):

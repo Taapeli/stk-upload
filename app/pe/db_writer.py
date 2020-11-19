@@ -2,7 +2,7 @@
 
     VANHENTUNUT TOTEUTUSMALLI???
     
-    Toiminnot pitäisi siirtää pe.neo4j.write_driver.Neo4jWriteDriver -luokkaan
+    Toiminnot pitäisi siirtää pe.neo4j.dataservice.Neo4jWriteDriver -luokkaan
     
 Created on 23.3.2020
 
@@ -43,7 +43,7 @@ class DbWriter(DbReader):
 #         
 #             - obj    Batch object
 #         '''
-#         from bl.batch_audit import Batch
+#         from bl.batch import Batch
 #         
 #         if not isinstance(obj, Batch):
 #             raise TypeError(f'pe.db_writer.DbWriter.create_batch: invalid argument')
@@ -85,12 +85,12 @@ class DbWriter(DbReader):
                                      format(msg)), 'level':"ERROR"})
                 return True
 
-    def save_and_link_obj(self, obj, **kwargs):   # batch_id=None, parent_id=None):
-        """ Saves given object to database
-            - if  obj.parent_id is given, link (parent) --> (obj)  
-            - elif obj.batch_id is given, link (batch) --> (obj)
-        """
-        obj.save(**kwargs)
+#     def save_and_link_obj(self, obj, **kwargs):   # batch_id=None, parent_id=None):
+#         """ Saves given object to database
+#             - if  obj.parent_id is given, link (parent) --> (obj)  
+#             - elif obj.batch_id is given, link (batch) --> (obj)
+#         """
+#         obj.save(**kwargs)
 
 
     def place_set_default_names(self, place, def_names:dict):
