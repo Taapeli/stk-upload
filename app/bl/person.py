@@ -31,8 +31,11 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from bl.base import NodeObject, Status
+from bl.media import MediaBl
 from pe.db_reader import DbReader
+from pe.neo4j.cypher.cy_person import CypherPerson
 
+from models.gen.note import Note
 from models.source_citation_reader import get_citations_js
 
 # Privacy rule: how many years after death
@@ -493,6 +496,102 @@ class PersonBl(Person):
                                         # (previous self.objref_hlink[])
 
 
+    def save(self, tx, **kwargs):   # batch_id):
+        """ Saves the Person object and possibly the Names, Events ja Citations.
+
+            On return, the self.uniq_id is set
+            
+            @todo: Remove those referenced person names, which are not among
+                   new names (:Person) --> (:Name) 
+        """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
+
+#         dataservice = Neo4jDataService(shareds.driver, tx)
+#         db = DbWriter(dataservice)
+        #today = str(datetime.date.today())
+
+        self.uuid = self.newUuid()
+        # Save the Person node under UserProfile; all attributes are replaced
+        p_attr = {}
+        try:
+            p_attr = {
+                "uuid": self.uuid,
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "priv": self.priv,
+                "sex": self.sex,
+                "confidence":self.confidence,
+                "sortname":self.sortname
+            }
+            if self.dates:
+                p_attr.update(self.dates.for_db())
+
+            result = tx.run(CypherPerson.create_to_batch, 
+                            batch_id=batch_id, p_attr=p_attr) #, date=today)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Persons {} - {}, attr={}".format(self.id, ids, p_attr))
+                # print("Person {} ".format(self.uniq_id))
+            if self.uniq_id == None:
+                print("iWarning got no uniq_id for Person {}".format(p_attr))
+
+        except Exception as err:
+            logger.error(f"Person_gramps.save: {err} in Person {self.id} {p_attr}")
+            #print("iError: Person_gramps.save: {0} attr={1}".format(err, p_attr), file=stderr)
+
+        # Save Name nodes under the Person node
+        for name in self.names:
+            name.save(tx, parent_id=self.uniq_id)
+
+        # Save web urls as Note nodes connected under the Person
+        if self.notes:
+            Note.save_note_list(tx, self)
+
+        ''' Connect to each Event loaded from Gramps '''
+        try:
+            #for i in range(len(self.eventref_hlink)):
+            for handle_role in self.event_handle_roles:
+                # a tuple (event_handle, role)
+                tx.run(CypherPerson.link_event, 
+                       p_handle=self.handle, 
+                       e_handle=handle_role[0], 
+                       role=handle_role[1])
+        except Exception as err:
+            logger.error(f"Person_gramps.save: {err} in linking Event {self.handle} -> {self.handle_role}")
+            #print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
+
+        # Make relations to the Media nodes and it's Note and Citation references
+        MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
+
+
+        # The relations to the Family node will be created in Family.save(),
+        # because the Family object is not yet created
+
+        # Make relations to the Note nodes
+        try:
+            for handle in self.note_handles:
+                tx.run(CypherPerson.link_note,
+                       p_handle=self.handle, n_handle=handle)
+        except Exception as err:
+            logger.error(f"Person_gramps.save: {err} in linking Notes {self.handle} -> {handle}")
+
+        # Make relations to the Citation nodes
+        try:
+            for handle in self.citation_handles:
+                tx.run(CypherPerson.link_citation,
+                       p_handle=self.handle, c_handle=handle)
+        except Exception as err:
+            logger.error(f"Person_gramps.save: {err} in linking Citations {self.handle} -> {handle}")
+        return
+
+
     @staticmethod
     def set_sortname(tx, uniq_id, namenode):
         """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
@@ -536,9 +635,9 @@ class PersonBl(Person):
         from models.gen.dates import DR 
         try:
             if uids:
-                result = tx.run(Cypher_person.fetch_selected_for_lifetime_estimates, idlist=uids)
+                result = tx.run(CypherPerson.fetch_selected_for_lifetime_estimates, idlist=uids)
             else:
-                result = tx.run(Cypher_person.fetch_all_for_lifetime_estimates)
+                result = tx.run(CypherPerson.fetch_all_for_lifetime_estimates)
             personlist = []
             personmap = {}
             for rec in result:

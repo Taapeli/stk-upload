@@ -21,16 +21,17 @@ import shareds
 from bl.base import Status
 from bl.person import PersonBl
 from bl.person_name import Name
+from bl.family import FamilyBl
 from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaRefResult
+from bl.event import EventBl
 
 from pe.db_writer import DbWriter
 #from pe.neo4j.dataservice import Neo4jWriteDriver
 
-from .bl.person_gramps import PersonGramps
-
-from .models.event_gramps import Event_gramps
+#from .bl.person_gramps import PersonGramps
+#from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
 #from .models.place_gramps import Place_gramps
@@ -231,7 +232,7 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one sourceref tag in a citation",
                                      'level':"WARNING",'count':c.id})
 
-            self.save_and_link_handle(c, batch_id=self.batch_id)
+            self.save_and_link_handle(c, batch_id=self.batch.id)
             counter += 1
 
         self.blog.log_event({'title':"Citations", 'count':counter, 
@@ -249,9 +250,12 @@ class DOM_handler():
         # Print detail of each event
         for event in events:
             # Create an event with Gramps attributes
-            e = Event_gramps()
+            e = EventBl()
             # Extract handle, change and id
             self._extract_base(event, e)
+            e.place_handles = []
+            e.note_handles = []
+            e.citation_handles = []
 
             if len(event.getElementsByTagName('type') ) == 1:
                 event_type = event.getElementsByTagName('type')[0]
@@ -283,8 +287,7 @@ class DOM_handler():
             if len(event.getElementsByTagName('place') ) == 1:
                 event_place = event.getElementsByTagName('place')[0]
                 if event_place.hasAttribute("hlink"):
-                    e.place_hlink = event_place.getAttribute("hlink")
-                    ##print(f'# Event {e.id} is located in {e.place_hlink}')
+                    e.place_handles.append(event_place.getAttribute("hlink"))
             elif len(event.getElementsByTagName('place') ) > 1:
                 self.blog.log_event({'title':"More than one place tag in an event",
                                      'level':"WARNING", 'count':e.id})
@@ -308,7 +311,7 @@ class DOM_handler():
             e.media_refs = self._extract_mediaref(event)
 
             try:
-                self.save_and_link_handle(e, batch_id=self.batch_id)
+                self.save_and_link_handle(e, batch_id=self.batch.id)
                 counter += 1
             except RuntimeError as e:
                 self.blog.log_event({'title':"Events", 'count':counter, 
@@ -330,9 +333,10 @@ class DOM_handler():
         # Print detail of each family
         for family in families:
 
-            f = Family_gramps()
+            f = FamilyBl()
             # Extract handle, change and id
             self._extract_base(family, f)
+            self.event_handle_roles = []
 
             if len(family.getElementsByTagName('rel') ) == 1:
                 family_rel = family.getElementsByTagName('rel')[0]
@@ -360,12 +364,15 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one mother tag in a family",
                                      'level':"WARNING", 'count':f.id})
 
-#TODO: Yhdistä kentät eventref_hlink ja eventref_role kentiksi eventref [(handle, role)] ?
-            for ref in family.getElementsByTagName('eventref'):
-                if ref.hasAttribute("hlink"):
-                    f.eventref_hlink.append(ref.getAttribute("hlink"))
-                    f.eventref_role.append(ref.getAttribute("role"))
-                    ##print(f'# Family {f.id} has event {f.eventref_hlink[-1]}')
+            for eventref in family.getElementsByTagName('eventref'):
+                # Create a tuple (event_handle, role)
+                if eventref.hasAttribute("hlink"):
+                    e_handle = eventref.getAttribute("hlink")
+                    if eventref.hasAttribute("role"):
+                        e_role = eventref.getAttribute("role")
+                    else:
+                        e_role = None
+                    f.event_handle_roles.append((e_handle, e_role))
 
             for ref in family.getElementsByTagName('childref'):
                 if ref.hasAttribute("hlink"):
@@ -379,8 +386,8 @@ class DOM_handler():
                        
             for ref in family.getElementsByTagName('citationref'):
                 if ref.hasAttribute("hlink"):
-                    f.citationref_hlink.append(ref.getAttribute("hlink"))
-                    ##print(f'# Family {f.id} has cite {f.citationref_hlink[-1]}')
+                    f.citation_handles.append(ref.getAttribute("hlink"))
+                    ##print(f'# Family {f.id} has cite {f.citation_handles[-1]}')
 
             self.save_and_link_handle(f, batch_id=self.batch_id)
             counter += 1
@@ -472,9 +479,13 @@ class DOM_handler():
         for person in people:
             name_order = 0
 
-            p = PersonGramps()
+            p = PersonBl()
             # Extract handle, change and id
             self._extract_base(person, p)
+            p.event_handle_roles = []
+            p.note_handles = []
+            p.citation_handles = []
+            p.parentin_handles = []
 
             for person_gender in person.getElementsByTagName('gender'):
                 if p.sex:
@@ -540,12 +551,15 @@ class DOM_handler():
 
                 p.names.append(pname)
 
-#TODO Muuttaisiko p.eventref_hlink = (hlink, role). Nyt voisi mennä epätahtiin
-            for person_eventref in person.getElementsByTagName('eventref'):
-                if person_eventref.hasAttribute("hlink"):
-                    p.eventref_hlink.append(person_eventref.getAttribute("hlink"))
-                if person_eventref.hasAttribute("role"):
-                    p.eventref_role.append(person_eventref.getAttribute("role"))
+            for eventref in person.getElementsByTagName('eventref'):
+                # Create a tuple (event_handle, role)
+                if eventref.hasAttribute("hlink"):
+                    e_handle = eventref.getAttribute("hlink")
+                    if eventref.hasAttribute("role"):
+                        e_role = eventref.getAttribute("role")
+                    else:
+                        e_role = None
+                    p.event_handle_roles.append((e_handle, e_role))
 
             # Handle <objref>
             p.media_refs = self._extract_mediaref(person)
@@ -561,8 +575,8 @@ class DOM_handler():
 
             for person_parentin in person.getElementsByTagName('parentin'):
                 if person_parentin.hasAttribute("hlink"):
-                    p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
-                    ##print(f'# Person {p.id} is parent in family {p.parentin_hlink[-1]}')
+                    p.parentin_handles.append(person_parentin.getAttribute("hlink"))
+                    ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
 
             for person_noteref in person.getElementsByTagName('noteref'):
                 if person_noteref.hasAttribute("hlink"):
@@ -570,8 +584,8 @@ class DOM_handler():
 
             for person_citationref in person.getElementsByTagName('citationref'):
                 if person_citationref.hasAttribute("hlink"):
-                    p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
-                    ##print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
+                    p.citation_handles.append(person_citationref.getAttribute("hlink"))
+                    ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
             #for ref in p.media_refs: print(f'# saving Person {p.id}: media_ref {ref}')
             self.save_and_link_handle(p, batch_id=self.batch.id)

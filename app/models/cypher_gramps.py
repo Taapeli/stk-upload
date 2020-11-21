@@ -51,32 +51,32 @@ MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
     original items from the user's Gramps database
     '''
 
-class Cypher_event_w_handle():
-    """ For Event class """
-
-    create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
-MERGE (b) -[r:OWNS]-> (e:Event {handle: $e_attr.handle})
-    SET e = $e_attr
-RETURN ID(e) as uniq_id"""
-
-    link_place = """
-MATCH (n:Event) WHERE n.handle=$handle
-MATCH (m:Place) WHERE m.handle=$place_hlink
-MERGE (n)-[r:PLACE]->(m)"""
-
-    link_notes = """
-MATCH (n:Note)  WHERE n.handle IN $note_handles
-WITH n
-    MATCH (e:Event)  WHERE e.handle=$handle
-    CREATE (e) -[r:NOTE]-> (n)
-RETURN count(r) AS cnt"""
-
-    link_citations = """
-match (c:Citation) where c.handle in $citation_handles
-with c
-    match (e:Event)  where e.handle=$handle
-    merge (e) -[r:CITATION]-> (c)"""
+# class Cypher_event_w_handle():
+#     """ For Event class """
+# 
+#     create_to_batch = """
+# MATCH (b:Batch {id: $batch_id})
+# MERGE (b) -[r:OWNS]-> (e:Event {handle: $e_attr.handle})
+#     SET e = $e_attr
+# RETURN ID(e) as uniq_id"""
+# 
+#     link_place = """
+# MATCH (n:Event) WHERE n.handle=$handle
+# MATCH (m:Place) WHERE m.handle=$place_hlink
+# MERGE (n)-[r:PLACE]->(m)"""
+# 
+#     link_notes = """
+# MATCH (n:Note)  WHERE n.handle IN $note_handles
+# WITH n
+#     MATCH (e:Event)  WHERE e.handle=$handle
+#     CREATE (e) -[r:NOTE]-> (n)
+# RETURN count(r) AS cnt"""
+# 
+#     link_citations = """
+# match (c:Citation) where c.handle in $citation_handles
+# with c
+#     match (e:Event)  where e.handle=$handle
+#     merge (e) -[r:CITATION]-> (c)"""
 
 #     link_media = """
 # MATCH (e:Event {handle: $handle})
@@ -199,49 +199,49 @@ MERGE (a) -[:NOTE]-> (n:Note {handle: $n_attr.handle})
 RETURN ID(n)"""
 
 
-class Cypher_person_w_handle():
-    """ For Person class """
-
-    create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
-MERGE (p:Person {handle: $p_attr.handle})
-MERGE (b) -[r:OWNS]-> (p)
-    SET p = $p_attr
-RETURN ID(p) as uniq_id"""
-
-    link_name = """
-CREATE (n:Name) SET n = $n_attr
-WITH n
-MATCH (p:Person {handle:$p_handle})
-MERGE (p)-[r:NAME]->(n)"""
-
-    link_event_embedded = """
-MATCH (p:Person {handle: $handle}) 
-CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
-    SET e = $e_attr"""
-
-    link_event = """
-MATCH (p:Person {handle:$p_handle})
-MATCH (e:Event  {handle:$e_handle})
-MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
-
-    link_media = """
-MATCH (p:Person {handle: $p_handle})
-MATCH (m:Media  {handle: $m_handle})
-  CREATE (p) -[r:MEDIA]-> (m)
-    SET r = $r_attr"""
-
-# use models.gen.cypher.Cypher_name (there is no handle)
-
-    link_citation = """
-MATCH (p:Person   {handle: $p_handle})
-MATCH (c:Citation {handle: $c_handle})
-MERGE (p)-[r:CITATION]->(c)"""
-
-    link_note = """
-MATCH (n) WHERE n.handle=$p_handle
-MATCH (m:Note)   WHERE m.handle=$n_handle
-CREATE (n)-[r:NOTE]->(m)"""
+# class Cypher_person_w_handle():
+#     """ For Person class """
+# 
+#     create_to_batch = """
+# MATCH (b:Batch {id: $batch_id})
+# MERGE (p:Person {handle: $p_attr.handle})
+# MERGE (b) -[r:OWNS]-> (p)
+#     SET p = $p_attr
+# RETURN ID(p) as uniq_id"""
+# 
+#     link_name = """
+# CREATE (n:Name) SET n = $n_attr
+# WITH n
+# MATCH (p:Person {handle:$p_handle})
+# MERGE (p)-[r:NAME]->(n)"""
+# 
+#     link_event_embedded = """
+# MATCH (p:Person {handle: $handle}) 
+# CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
+#     SET e = $e_attr"""
+# 
+#     link_event = """
+# MATCH (p:Person {handle:$p_handle})
+# MATCH (e:Event  {handle:$e_handle})
+# MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
+# 
+#     link_media = """
+# MATCH (p:Person {handle: $p_handle})
+# MATCH (m:Media  {handle: $m_handle})
+#   CREATE (p) -[r:MEDIA]-> (m)
+#     SET r = $r_attr"""
+# 
+# # use models.gen.cypher.Cypher_name (there is no handle)
+# 
+#     link_citation = """
+# MATCH (p:Person   {handle: $p_handle})
+# MATCH (c:Citation {handle: $c_handle})
+# MERGE (p)-[r:CITATION]->(c)"""
+# 
+#     link_note = """
+# MATCH (n) WHERE n.handle=$p_handle
+# MATCH (m:Note)   WHERE m.handle=$n_handle
+# CREATE (n)-[r:NOTE]->(m)"""
 
 
 

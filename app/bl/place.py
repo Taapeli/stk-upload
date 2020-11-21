@@ -25,10 +25,11 @@ import logging
 import shareds
 
 from pe.neo4j.cypher.cy_place import CypherPlace
-from bp.stk_security.models.seccypher import Cypher
+#from bp.stk_security.models.seccypher import Cypher
 logger = logging.getLogger('stkserver')
 
 from .base import NodeObject, Status
+from .media import MediaBl
 from pe.db_reader import DbReader
 from models.gen.dates import DateRange
 
@@ -277,13 +278,13 @@ class PlaceBl(Place):
             logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
         return
 
-    def media_save_w_handles(self, uniq_id, media_refs):
-        ''' Save media object and it's Note and Citation references
-            using their Gramps handles.
-        '''
-        if media_refs:
-            ds = shareds.datastore.dataservice
-            ds._media_save_w_handles(uniq_id, media_refs)
+#     def media_save_w_handles(self, uniq_id, media_refs):
+#         ''' Save media object and it's Note and Citation references
+#             using their Gramps handles.
+#         '''
+#         if media_refs:
+#             ds = shareds.datastore.dataservice
+#             ds._media_save_w_handles(uniq_id, media_refs)
 
 
 
@@ -451,7 +452,7 @@ class PlaceBl(Place):
             raise
 
         # Make relations to the Media nodes and their Note and Citation references
-        self.media_save_w_handles(self.uniq_id, self.media_refs)
+        MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
             
         return
 

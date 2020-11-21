@@ -88,11 +88,11 @@ class FamilyBl(Family):
                 father_sortname str search key
                 mother_sortname str search key
 #             #TODO: Obsolete properties?
-#                 eventref_hlink      str tapahtuman osoite
+#                 event_handles      str tapahtuman osoite
 #                 eventref_role       str tapahtuman rooli
 #                 childref_hlink      str lapsen osoite
 #                 note_handles       str lisätiedon osoite
-#                 citationref_hlink   str lisätiedon osoite
+#                 citation_handles   str lisätiedon osoite
      """
 
     def __init__(self, uniq_id=None):
@@ -111,11 +111,11 @@ class FamilyBl(Family):
                                     # from multiple events and other objects
 
 #         #TODO Obsolete parameters???
-#         self.eventref_hlink = []
+#         self.event_handles = []
 #         self.eventref_role = []
 #         self.childref_hlink = []    # handles
 #         self.note_handles = []
-#         self.citationref_hlink = []
+#         self.citation_handles = []
 
 
 class FamilyReader(DbReader):
@@ -279,7 +279,7 @@ class FamilyReader(DbReader):
         query = """
 MATCH (family:Family)-[r:EVENT]->(event:Event)
   WHERE ID(family)=$pid
-RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
+RETURN r.role AS eventref_role, event.handle AS event_handles"""
         return  shareds.driver.session().run(query, {"pid": pid})
 
     @staticmethod

@@ -87,7 +87,7 @@ class SourceBl(Source):
         self.repositories = []
         self.citations = []
         self.notes = []
-        self.note_ref = []
+        self.note_handles = []
 
 
 

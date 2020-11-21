@@ -26,7 +26,7 @@ RETURN ID(n) AS uniq_id, n"""
 
 class Cypher_person():
     '''
-    Cypher clases for creating and accessing Places
+    Cypher clases for creating and accessing Person objects.
     '''
 # For Person_pg v3
     get_person = """MATCH (root) -[r:OWNS|PASSED]-> (p:Person {uuid:$uuid}) 
@@ -47,6 +47,7 @@ RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id,
     pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
     #        (c) --> (s:Source) --> (r:Repository)
+
 
 #For Person_pg v2
     all_nodes_query_w_apoc="""
@@ -253,20 +254,20 @@ SET person.sortname=$key"""
 #     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
 # RETURN null"""
 
-    fetch_selected_for_lifetime_estimates = """
-MATCH (p:Person) 
-    WHERE id(p) IN $idlist
-OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
-OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
-OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
-OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
-OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
-RETURN p, id(p) as pid, 
-    collect(distinct [e,r.role]) AS events,
-    collect(distinct [fam_event,r2.role]) AS fam_events,
-    collect(distinct [c,id(c)]) as children,
-    collect(distinct [parent,id(parent)]) as parents
-"""
+#     fetch_selected_for_lifetime_estimates = """
+# MATCH (p:Person) 
+#     WHERE id(p) IN $idlist
+# OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
+# OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
+# OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
+# OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
+# OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
+# RETURN p, id(p) as pid, 
+#     collect(distinct [e,r.role]) AS events,
+#     collect(distinct [fam_event,r2.role]) AS fam_events,
+#     collect(distinct [c,id(c)]) as children,
+#     collect(distinct [parent,id(parent)]) as parents
+# """
     update_lifetime_estimate = """
 MATCH (p:Person) 
     WHERE id(p) = $id
