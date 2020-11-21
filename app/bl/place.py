@@ -21,12 +21,16 @@ Todo:
 
 '''
 import traceback
-import logging 
+import logging
+import shareds
+
+from pe.neo4j.cypher.cy_place import CypherPlace
+from bp.stk_security.models.seccypher import Cypher
 logger = logging.getLogger('stkserver')
 
 from .base import NodeObject, Status
 from pe.db_reader import DbReader
-#from .place_coordinates import Point
+from models.gen.dates import DateRange
 
 
 class Place(NodeObject):
@@ -48,7 +52,7 @@ class Place(NodeObject):
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
-                noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
+                note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self, uniq_id=None):
@@ -86,63 +90,35 @@ class Place(NodeObject):
         return p
 
 
-    @staticmethod
-    def find_default_names(names:list, use_langs:list):
-        ''' Select default names for listed use_langs list.
 
-            Rules for name selection
-            - if a Place_name with given lang ('if') is found, use it
-            - else if a Place_name with no lang ('') is found, use it
-            - else use any name
+
+class PlaceDatastore:
+    '''
+    Abstracted Place datastore.
+
+    - Methods return a dict result object {'status':Status, ...}
+    '''
+    def __init__(self, driver, dataservice):
+        ''' Initiate datastore.
+
+        :param: driver        neo4j.DirectDriver object
+        :param: dataservice   pe.neo4j.dataservice.Neo4jDataService
         '''
-        if not names:
-            return None
-        selection = {}
-        #print(f'# ---- Place {names[0].name}')
-        try:
-            # 1.     find matching languages for use_langs
-            for lang in use_langs:
-                for name in names:
-                    if name.lang == lang:
-                        # A matching language
-                        #print(f'# select {lang}: {name.name} {name.uniq_id}')
-                        selection[lang] = name.uniq_id
-#                   elif lang == 'fi': print(f'#           {name}')
-            # 2. find replacing languages, if not matching
-            for lang in use_langs:
-                if not lang in selection.keys():
-                    # Maybe a missing language is found?
-                    for name in names:
-                        if name.lang == '' and not lang in selection.keys():
-                            #print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
-                            selection[lang] = name.uniq_id
-                if not lang in selection.keys():
-                    # No missing language, select any
-                    for name in names:
-                        if  not lang in selection.keys():
-                            #print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
-                            selection[lang] = name.uniq_id
-    
-            ret = {}
-            for lang in use_langs:
-                ret[lang] = selection[lang]
-            return ret
+        self.driver = driver
+        self.dataservice = dataservice
 
-        except Exception as e:
-            logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
-        return
 
-class PlaceReader(DbReader):
-    '''
-        Data reading class for Place objects with associated data.
-
-        - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
-          to define the database driver and user context
-
-        - Returns a Result object which includes the tems and eventuel error object.
-    '''
-#     def get_list(u_context):    # @staticmethod --> pe.db_reader.DbReader.place_list
-#         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
+# class PlaceReader(DbReader):
+#     '''
+#         Data reading class for Place objects with associated data.
+# 
+#         - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
+#           to define the database driver and user context
+# 
+#         - Returns a Result object which includes the tems and eventuel error object.
+#     '''
+# #     def get_list(u_context):    # @staticmethod --> pe.db_reader.DbReader.place_list
+# #         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
 
     def get_list(self):
         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
@@ -218,7 +194,7 @@ class PlaceBl(Place):
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
-                noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
+                note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self, uniq_id=None, ptype="", level=None):
@@ -239,6 +215,245 @@ class PlaceBl(Place):
         self.note_ref = []      # uniq_ids of Notes
         self.media_ref = []     # uniq_id of models.gen.media.Media
         self.ref_cnt = None     # for display: count of referencing objects
+
+
+    def set_default_names(self, def_names:dict):
+        ''' Creates default links from Place to fi and sv PlaceNames.
+        
+            The objects are referred with database id numbers.
+
+            - place         Place object
+            - - .names      PlaceName objects
+            - def_names     dict {lang, uid} uniq_id's of PlaceName objects
+        '''
+        ds = shareds.datastore.dataservice
+        ds._place_set_default_names(self.uniq_id,
+                                    def_names['fi'], def_names['sv'])
+
+
+    @staticmethod
+    def find_default_names(names:list, use_langs:list):
+        ''' Select default names for listed use_langs list.
+
+            Rules for name selection
+            - if a Place_name with given lang ('if') is found, use it
+            - else if a Place_name with no lang ('') is found, use it
+            - else use any name
+        '''
+        if not names:
+            return None
+        selection = {}
+        #print(f'# ---- Place {names[0].name}')
+        try:
+            # 1.     find matching languages for use_langs
+            for lang in use_langs:
+                for name in names:
+                    if name.lang == lang:
+                        # A matching language
+                        #print(f'# select {lang}: {name.name} {name.uniq_id}')
+                        selection[lang] = name.uniq_id
+#                   elif lang == 'fi': print(f'#           {name}')
+            # 2. find replacing languages, if not matching
+            for lang in use_langs:
+                if not lang in selection.keys():
+                    # Maybe a missing language is found?
+                    for name in names:
+                        if name.lang == '' and not lang in selection.keys():
+                            #print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
+                            selection[lang] = name.uniq_id
+                if not lang in selection.keys():
+                    # No missing language, select any
+                    for name in names:
+                        if  not lang in selection.keys():
+                            #print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
+                            selection[lang] = name.uniq_id
+    
+            ret = {}
+            for lang in use_langs:
+                ret[lang] = selection[lang]
+            return ret
+
+        except Exception as e:
+            logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
+        return
+
+    def media_save_w_handles(self, uniq_id, media_refs):
+        ''' Save media object and it's Note and Citation references
+            using their Gramps handles.
+        '''
+        if media_refs:
+            ds = shareds.datastore.dataservice
+            ds._media_save_w_handles(uniq_id, media_refs)
+
+
+
+    def save(self, tx, **kwargs):
+        """ Save Place, Place_names, Notes and connect to hierarchy.
+        
+        :param: place_keys    dict {handle: uniq_id}
+        :param: batch_id      batch id where this place is linked
+
+        The 'uniq_id's of already created nodes can be found in 'place_keys' 
+        dictionary by 'handle'.
+
+        Create node for Place self:
+        1) node exists: update its parameters and link to Batch
+        2) new node: create node and link to Batch
+
+        For each 'self.surround_ref' link to upper node:
+        3) upper node exists: create link to that node
+        4) new upper node: create and link hierarchy to Place self
+
+        Place names are always created as new 'Place_name' nodes.
+        - If place has date information, add datetype, date1 and date2 
+          parameters to NAME link
+        - Notes are linked to self using 'note_handles's (the Notes have been 
+          saved before)
+
+        NOT Raises an error, if write fails.
+        """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"bl.place.PlaceBl.save needs a batch_id for {self.id}")
+
+        # Create or update this Place
+
+        self.uuid = self.newUuid()
+        pl_attr = {}
+        try:
+
+            pl_attr = {
+                "uuid": self.uuid,
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "type": self.type,
+                "pname": self.pname}
+            if self.coord:
+                # If no coordinates, don't set coord attribute
+                pl_attr["coord"] = self.coord.get_coordinates()
+
+            # Create Place self
+
+            if 'place_keys' in kwargs:
+                # Check if this Place node is already created
+                place_keys = kwargs['place_keys']
+                plid = place_keys.get(self.handle)
+            else:
+                plid = None
+
+            if plid:
+                # 1) node has been created but not connected to Batch.
+                #    update known Place node parameters and link from Batch
+                self.uniq_id = plid
+                if self.type:
+                    #print(f"Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
+                    result = tx.run(CypherPlace.complete, #TODO
+                                    batch_id=batch_id, plid=plid, p_attr=pl_attr)
+                else:
+                    #print(f"Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
+                    pass
+            else:
+                # 2) new node: create and link from Batch
+                #print(f"Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
+                result = tx.run(CypherPlace.create, 
+                                batch_id=batch_id, p_attr=pl_attr)
+                self.uniq_id = result.single()[0]
+                place_keys[self.handle] = self.uniq_id
+
+        except Exception as err:
+            print(f"iError Place.create: {err} attr={pl_attr}") #, file=stderr)
+            raise
+
+        # Create Place_names
+
+        try:
+            for name in self.names:
+                n_attr = {"name": name.name,
+                          "lang": name.lang}
+                if name.dates:
+                    n_attr.update(name.dates.for_db())
+                result = tx.run(CypherPlace.add_name, 
+                                pid=self.uniq_id, order=name.order, n_attr=n_attr)
+                name.uniq_id = result.single()[0]
+                #print(f"# ({self.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
+        except Exception as err:
+            print("iError Place.add_name: {err}") #, file=stderr)
+            raise
+
+        # Select default names for default languages
+        def_names = PlaceBl.find_default_names(self.names, ['fi', 'sv'])
+
+        # Update default language name links
+        self.set_default_names(def_names)
+
+        # Make hierarchy relations to upper Place nodes
+
+        for ref in self.surround_ref:
+            try:
+                up_handle = ref['hlink']
+                #print(f"Pl_save-surrounding {self} -[{ref['dates']}]-> {up_handle}")
+                if 'dates' in ref and isinstance(ref['dates'], DateRange):
+                    rel_attr = ref['dates'].for_db()
+                    #_r = f"-[{ref['dates']}]->"
+                else:
+                    rel_attr = {}
+                    #_r = f"-->"
+
+                # Link to upper node
+
+                uid = place_keys.get(up_handle) if place_keys else None 
+                if uid:
+                    # 3) Link to a known upper Place
+                    #    The upper node is already created: create a link to that
+                    #    upper Place node
+                    #print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {_r} (#{uid})")
+                    result = tx.run(CypherPlace.link_hier,
+                                    plid=self.uniq_id, up_id=uid, r_attr=rel_attr)
+                else:
+                    # 4) Link to unknown place
+                    #    A new upper node: create a Place with only handle
+                    #    parameter and link hierarchy to Place self
+                    #print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {_r} {up_handle}")
+                    result = tx.run(CypherPlace.link_create_hier,
+                                    plid=self.uniq_id, r_attr=rel_attr, 
+                                    up_handle=up_handle)
+                    place_keys[up_handle] = result.single()[0]
+
+            except Exception as err:
+                print(f"iError Place.link_hier: {err} at {self.id} --> {up_handle}") #, file=stderr)
+                raise
+            
+        try:
+            for note in self.notes:
+                n_attr = {"url": note.url,
+                          "type": note.type,
+                          "text": note.text}
+                result = tx.run(CypherPlace.add_urls, 
+                                batch_id=batch_id, pid=self.uniq_id, n_attr=n_attr)
+        except Exception as err:
+            traceback.print_exc()
+            print(f"iError Place.add_urls: {err}") #, file=stderr)
+            raise
+
+        # Make the place note relations; the Notes have been stored before
+        #TODO: Voi olla useita Noteja samalla handlella! Käyttäisit uniq_id:tä!
+        try:
+            for n_handle in self.note_handles:
+                result = tx.run(CypherPlace.link_note, 
+                                pid=self.uniq_id, hlink=n_handle)
+#         except AttributeError:
+#             print('bl.place.PlaceBl.save: No notes for {self}')
+        except Exception as err:
+            logger.error(f"Place_gramps.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
+            #print(f"iError Place.link_notes {self.note_handles}: {err}", file=stderr)
+            raise
+
+        # Make relations to the Media nodes and their Note and Citation references
+        self.media_save_w_handles(self.uniq_id, self.media_refs)
+            
+        return
 
 
     @staticmethod

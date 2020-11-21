@@ -21,7 +21,7 @@ from flask_babelex import _
 
 from ui.user_context import UserContext
 from bl.base import Status, StkEncoder
-from bl.place import PlaceReader
+from bl.place import PlaceDatastore
 from bl.source import SourceReader
 from bl.family import FamilyReader
 from bl.event import EventReader

@@ -549,9 +549,9 @@ def xml_to_stkbase(pathname, userid):
 
     # Initiate BatchDatastore and Batch node data
     # datastore -> Toimialametodit
-    handler.datastore = BatchDatastore(shareds.driver, handler.dataservice)
+    shareds.datastore = BatchDatastore(shareds.driver, handler.dataservice)
     mediapath = handler.get_mediapath_from_header()
-    res = handler.datastore.start_batch(userid, file_cleaned, mediapath)
+    res = shareds.datastore.start_batch(userid, file_cleaned, mediapath)
     if res.get('status') != Status.OK:
         #TODO rollback
         return res

@@ -119,7 +119,7 @@ class Neo4jDataService:
             return {'status': Status.ERROR, 
                     'statustext': statustext}
 
-    def _batch_obj_save_and_link(self, obj, **kwargs):   # batch_id=None, parent_id=None):
+    def _obj_save_and_link(self, obj, **kwargs):   # batch_id=None, parent_id=None):
         """ Saves given object to database
             - if  obj.parent_id is given, link (parent) --> (obj)  
             - elif obj.batch_id is given, link (batch) --> (obj)
@@ -165,7 +165,7 @@ class Neo4jDataService:
 
     # ----- Place -----
 
-    def dw_place_set_default_names(self, place_id, fi_id, sv_id):
+    def _place_set_default_names(self, place_id, fi_id, sv_id):
         ''' Creates default links from Place to fi and sv PlaceNames.
 
             - place_id      Place object id
@@ -193,7 +193,7 @@ class Neo4jDataService:
             return err
 
 
-    def dw_media_save_w_handles(self, uniq_id:int, media_refs:list):
+    def _media_save_w_handles(self, uniq_id:int, media_refs:list):
         ''' Save media object and it's Note and Citation references
             using their Gramps handles.
             

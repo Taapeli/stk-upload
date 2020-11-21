@@ -15,13 +15,13 @@ import re
 import time
 import os
 import xml.dom.minidom
-from flask_babelex import _
+#from flask_babelex import _
 
 import shareds
 from bl.base import Status
 from bl.person import PersonBl
 from bl.person_name import Name
-from bl.place import PlaceName
+from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaRefResult
 
@@ -33,7 +33,7 @@ from .bl.person_gramps import PersonGramps
 from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
-from .models.place_gramps import Place_gramps
+#from .models.place_gramps import Place_gramps
 
 from .batchlogger import LogItem
 
@@ -143,7 +143,7 @@ class DOM_handler():
 
             Some objects may accept arguments like batch_id="2019-08-26.004" and others
         '''
-        self.dataservice._batch_obj_save_and_link(obj, **kwargs)
+        self.dataservice._obj_save_and_link(obj, **kwargs)
         #self.dataservice.save_and_link_obj(obj,**kwargs)
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
@@ -219,8 +219,8 @@ class DOM_handler():
 
             for citation_noteref in citation.getElementsByTagName('noteref'):
                 if citation_noteref.hasAttribute("hlink"):
-                    c.noteref_hlink.append(citation_noteref.getAttribute("hlink"))
-                    ##print(f'# Citation {c.id} has note {c.noteref_hlink[-1]}')
+                    c.note_handles.append(citation_noteref.getAttribute("hlink"))
+                    ##print(f'# Citation {c.id} has note {c.note_handles[-1]}')
 
             if len(citation.getElementsByTagName('sourceref') ) == 1:
                 citation_sourceref = citation.getElementsByTagName('sourceref')[0]
@@ -374,8 +374,8 @@ class DOM_handler():
 
             for ref in family.getElementsByTagName('noteref'):
                 if ref.hasAttribute("hlink"):
-                    f.noteref_hlink.append(ref.getAttribute("hlink"))
-                    ##print(f'# Family {f.id} has note {f.noteref_hlink[-1]}')
+                    f.note_handles.append(ref.getAttribute("hlink"))
+                    ##print(f'# Family {f.id} has note {f.note_handles[-1]}')
                        
             for ref in family.getElementsByTagName('citationref'):
                 if ref.hasAttribute("hlink"):
@@ -566,7 +566,7 @@ class DOM_handler():
 
             for person_noteref in person.getElementsByTagName('noteref'):
                 if person_noteref.hasAttribute("hlink"):
-                    p.noteref_hlink.append(person_noteref.getAttribute("hlink"))
+                    p.note_handles.append(person_noteref.getAttribute("hlink"))
 
             for person_citationref in person.getElementsByTagName('citationref'):
                 if person_citationref.hasAttribute("hlink"):
@@ -603,7 +603,9 @@ class DOM_handler():
         # Print detail of each placeobj
         for placeobj in places:
 
-            pl = Place_gramps()
+            pl = PlaceBl()
+            pl.note_handles = []
+
             # Extract handle, change and id
             self._extract_base(placeobj, pl)
             pl.type = placeobj.getAttribute("type")
@@ -682,8 +684,8 @@ class DOM_handler():
 
             for placeobj_noteref in placeobj.getElementsByTagName('noteref'):
                 if placeobj_noteref.hasAttribute("hlink"):
-                    pl.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
-                    ##print(f'# Place {pl.id} has note {pl.noteref_hlink[-1]}')
+                    pl.note_handles.append(placeobj_noteref.getAttribute("hlink"))
+                    ##print(f'# Place {pl.id} has note {pl.note_handles[-1]}')
 
             # Handle <objref>
             pl.media_refs = self._extract_mediaref(placeobj)

@@ -93,26 +93,26 @@ class DbWriter(DbReader):
 #         obj.save(**kwargs)
 
 
-    def place_set_default_names(self, place, def_names:dict):
-        ''' Creates default links from Place to fi and sv PlaceNames.
-        
-            The objects are referred with database id numbers.
+#     def place_set_default_names(self, place, def_names:dict):
+#         ''' Creates default links from Place to fi and sv PlaceNames.
+#         
+#             The objects are referred with database id numbers.
+# 
+#             - place         Place object
+#             - - .names      PlaceName objects
+#             - def_names     dict {lang, uid} uniq_id's of PlaceName objects
+#         '''
+# 
+#         self.dbdriver.dw_place_set_default_names(place.uniq_id, 
+#                                                  def_names['fi'], def_names['sv'])
 
-            - place         Place object
-            - - .names      PlaceName objects
-            - def_names     dict {lang, uid} uniq_id's of PlaceName objects
-        '''
 
-        self.dbdriver.dw_place_set_default_names(place.uniq_id, 
-                                                 def_names['fi'], def_names['sv'])
-
-
-    def media_save_w_handles(self, uniq_id, media_refs):
-        ''' Save media object and it's Note and Citation references
-            using their Gramps handles.
-        '''
-        if media_refs:
-            self.dbdriver.dw_media_save_w_handles(uniq_id, media_refs)
+#     def media_save_w_handles(self, uniq_id, media_refs):
+#         ''' Save media object and it's Note and Citation references
+#             using their Gramps handles.
+#         '''
+#         if media_refs:
+#             self.dbdriver.dw_media_save_w_handles(uniq_id, media_refs)
 
 
     def mergeplaces(self, id1, id2):

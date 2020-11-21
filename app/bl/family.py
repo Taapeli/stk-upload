@@ -91,7 +91,7 @@ class FamilyBl(Family):
 #                 eventref_hlink      str tapahtuman osoite
 #                 eventref_role       str tapahtuman rooli
 #                 childref_hlink      str lapsen osoite
-#                 noteref_hlink       str lisätiedon osoite
+#                 note_handles       str lisätiedon osoite
 #                 citationref_hlink   str lisätiedon osoite
      """
 
@@ -114,7 +114,7 @@ class FamilyBl(Family):
 #         self.eventref_hlink = []
 #         self.eventref_role = []
 #         self.childref_hlink = []    # handles
-#         self.noteref_hlink = []
+#         self.note_handles = []
 #         self.citationref_hlink = []
 
 

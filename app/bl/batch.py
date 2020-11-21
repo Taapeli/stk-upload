@@ -241,13 +241,12 @@ class BatchDatastore:
 
         - Methods return a dict result object {'status':Status, ...}
     '''
-    # Uses classes Role, User, UserProfile from setups.py
 
     def __init__(self, driver, dataservice):
         ''' Initiate datastore.
 
         :param: driver    neo4j.DirectDriver object
-        :param: dataservice pe.neo4j.dataservice.Neo4jWriteDriver
+        :param: dataservice pe.neo4j.dataservice.Neo4jDataService
         '''
         self.driver = driver
         self.dataservice = dataservice

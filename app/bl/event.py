@@ -50,7 +50,7 @@ class Event(NodeObject):
 #                 attr_type          str lisätiedon tyyppi
 #                 attr_value         str lisätiedon arvo
             For gramps_loader:
-                note_handles[]     str lisätiedon handle (ent. noteref_hlink)
+                note_handles[]     str lisätiedon handle (ent. note_handles)
             Planned from gramps_loader:
                 place_handles[]    str paikan handle (ent. place_hlink)
                 citation_handles[] str viittauksen handle (ent. citationref_hlink)
@@ -175,7 +175,7 @@ class EventBl(Event):
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
-                noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
+                note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self):         #, eid='', desc='', handle=''):

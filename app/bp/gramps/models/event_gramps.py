@@ -24,7 +24,7 @@ class Event_gramps(EventBl):
         Tapahtuma grampsista tuotuna
 
         Event properties for gramps_loader:
-                note_handles[]      str lisätiedon handle (ent. noteref_hlink)
+                note_handles[]      str lisätiedon handle (ent. note_handles)
             Planned from gramps_loader:
                 place_handles[]     str paikan handle (ent. place_hlink)
                 citation_handles[]  str viittauksen handle (ent. citationref_hlink)
@@ -40,7 +40,7 @@ class Event_gramps(EventBl):
     def __init__(self):
         """ Luo uuden event-instanssin """
         EventBl.__init__(self)
-        self.note_handles = []      # Note handles (previous noteref_hlink had
+        self.note_handles = []      # Note handles (previous note_handles had
                                     # only the first one)
         self.citation_handles = []  # (previous citationref_hlink)
 
@@ -124,8 +124,8 @@ class Event_gramps(EventBl):
 
         # Make relations to the Media nodes and their Note and Citation references
         if self.media_refs:
-            dbdriver = Neo4jDataService(shareds.driver, tx)
-            db = DbWriter(dbdriver)
+            dataservice = Neo4jDataService(shareds.driver, tx)
+            db = DbWriter(dataservice)
             db.media_save_w_handles(self.uniq_id, self.media_refs)
             
         return

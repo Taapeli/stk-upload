@@ -119,6 +119,63 @@ WITH place, name
         WHERE name is null or not n = name
 RETURN name, COLLECT(n) AS names LIMIT 15
 """
-# MATCH (l:Place)-[:NAME]->(n:Place_name) WHERE ID(l) = $locid
-# RETURN COLLECT(n) AS names LIMIT 15
+
+#-------- Save to Batch -------------
+
+    # Find the batch like '2019-02-24.006' and connect new object to that Batch
+    create = """
+MATCH (u:Batch {id:$batch_id})
+CREATE (new_pl:Place)
+    SET new_pl = $p_attr
+CREATE (u) -[:OWNS]-> (new_pl) 
+RETURN ID(new_pl) as uniq_id"""
+
+    # Set properties for an existing Place and connect it to Batch
+    complete = """
+MATCH (u:Batch {id:$batch_id})
+MATCH (pl:Place) WHERE ID(pl) = $plid
+    SET pl += $p_attr
+CREATE (u) -[:OWNS]-> (pl)"""
+
+    add_name = """
+MATCH (pl:Place) WHERE id(pl) = $pid
+CREATE (pl) -[r:NAME {order:$order}]-> (n:Place_name)
+    SET n = $n_attr
+RETURN ID(n) AS uniq_id"""
+
+    # Link to a known upper Place
+    link_hier = """
+MATCH (pl:Place) WHERE id(pl) = $plid
+MATCH (up:Place) WHERE id(up) = $up_id
+MERGE (pl) -[r:IS_INSIDE]-> (up)
+    SET r = $r_attr"""
+
+    # Link to a new dummy upper Place
+    link_create_hier = """
+MATCH (pl:Place) WHERE id(pl) = $plid
+CREATE (new_pl:Place)
+    SET new_pl.handle = $up_handle
+CREATE (pl) -[r:IS_INSIDE]-> (new_pl)
+    SET r = $r_attr
+return ID(new_pl) as uniq_id"""
+
+    add_urls = """
+MATCH (u:Batch {id:$batch_id})
+CREATE (u) -[:OWNS]-> (n:Note) 
+    SET n = $n_attr
+WITH n
+    MATCH (pl:Place) WHERE id(pl) = $pid
+    MERGE (pl) -[r:NOTE]-> (n)"""
+
+    link_note = """
+MATCH (pl:Place) WHERE id(pl) = $pid
+MATCH (n:Note)  WHERE n.handle=$hlink
+CREATE (pl) -[r:NOTE]-> (n)"""
+
+    link_media = """
+MATCH (p:Place {handle: $p_handle})
+MATCH (m:Media  {handle: $m_handle})
+  CREATE (p) -[r:MEDIA]-> (m)
+    SET r = $r_attr"""
+
 
