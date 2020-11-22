@@ -331,10 +331,12 @@ class DOM_handler():
 
             f = FamilyBl()
             f.child_handles = []
+            f.event_handle_roles = []
+            f.note_handles = []
+            f.citation_handles = []
 
             # Extract handle, change and id
             self._extract_base(family, f)
-            self.event_handle_roles = []
 
             if len(family.getElementsByTagName('rel') ) == 1:
                 family_rel = family.getElementsByTagName('rel')[0]
@@ -884,12 +886,10 @@ class DOM_handler():
         refname_count = 0
         sortname_count = 0
 
-        from models.dataupdater import set_person_name_properties
-
         for p_id in self.person_ids:
             self.update_progress('refnames')
             if p_id != None:
-                rc, sc = set_person_name_properties(tx=self.tx, uniq_id=p_id)
+                rc, sc = PersonBl.set_person_name_properties(uniq_id=p_id)
                 refname_count += rc
                 sortname_count += sc
 
@@ -910,11 +910,11 @@ class DOM_handler():
         print (f"***** {message} *****")
         t0 = time.time()
 
-        cnt = PersonBl.estimate_lifetimes(self.tx, self.person_ids)
+        count = PersonBl.estimate_lifetimes(self.tx, self.person_ids)
                             
         self.blog.log_event({'title':"Estimated person lifetimes", 
-                             'count':cnt, 'elapsed':time.time()-t0}) 
-        return {'status':status, 'message': f'{message}, {cnt} done'}
+                             'count':count, 'elapsed':time.time()-t0}) 
+        return {'status':status, 'message': f'{message}, {count} changed'}
 
 
     def set_all_person_confidence_values(self):
@@ -928,17 +928,16 @@ class DOM_handler():
         print (f"***** {message} *****")
 
         t0 = time.time()
-        db = DbWriter(self.dataservice)
 
-        res = db.update_person_confidences(self.tx, self.person_ids)
+        res = PersonBl.update_person_confidences(self.person_ids)
         # returns {status, count, statustext}
         status = res.get('status')
-        cnt = res.get('count',0)
+        count = res.get('count',0)
         if status == Status.OK or status == Status.UPDATED:
             self.blog.log_event({'title':"Confidences set", 
-                                 'count':cnt, 
+                                 'count':count, 
                                  'elapsed':time.time()-t0})
-            return {'status':status, 'message': f'{message}, {cnt} done'}
+            return {'status':status, 'message': f'{message}, {count} changed'}
         else:
             msg = res.get('statustext')
             self.blog.log_event({'title':"Confidences not set", 

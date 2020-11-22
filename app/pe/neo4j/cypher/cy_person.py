@@ -9,6 +9,13 @@ class CypherPerson():
     Cypher clauses for Person data access.
     '''
 
+# ----- Person node -----
+
+    get_person_by_uid = "MATCH (p:Person) WHERE ID(p) = $uid"
+    set_sortname = """
+MATCH (p:Person) WHERE ID(p) = $uid
+SET p.sortname=$key"""
+
 # ----- Person page -----
 
     get_person = """
@@ -42,6 +49,18 @@ RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id,
 MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
     WHERE ID(x) IN $uid_list
 RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
+
+    get_names = """
+MATCH (n) <-[r:NAME]- (p:Person)
+    where id(p) = $pid
+RETURN id(p) as pid, n as name
+ORDER BY name.order"""
+
+    get_all_persons_names = """
+MATCH (n)<-[r:NAME]-(p:Person)
+RETURN ID(p) AS pid, n as name
+ORDER BY n.order"""
+
 
 # ----- Persons listing ----
 

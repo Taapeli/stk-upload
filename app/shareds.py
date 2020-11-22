@@ -21,7 +21,7 @@ datastore = None    # pe.db_writer.DbWriter instance – stk data services
 user_datastore = None
 allowed_email_model = None
 tdiff = 0.0         # Elapsed time of previous step, if any
-current_neo4j = None # NOT USED?
+#current_neo4j = None # NOT USED?
 
 user_model = None
 role_model = None

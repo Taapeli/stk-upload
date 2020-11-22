@@ -577,52 +577,47 @@ def xml_to_stkbase(pathname, userid):
         
     try:
         #handler.handle_header() --> get_header_mediapath()
-        ret = handler.handle_notes()
-        if ret.get('status') != Status.OK:  return ret
-        ret = handler.handle_repositories()
-        if ret.get('status') != Status.OK:  return ret
-        ret = handler.handle_media()
-        if ret.get('status') != Status.OK:  return ret
+        res = handler.handle_notes()
+        if res.get('status') != Status.OK:  return res
+        res = handler.handle_repositories()
+        if res.get('status') != Status.OK:  return res
+        res = handler.handle_media()
+        if res.get('status') != Status.OK:  return res
 
-        ret = handler.handle_places()
-        if ret.get('status') != Status.OK:  return ret
-        ret = handler.handle_sources()
-        if ret.get('status') != Status.OK:  return ret
-        ret = handler.handle_citations()
-        if ret.get('status') != Status.OK:  return ret
+        res = handler.handle_places()
+        if res.get('status') != Status.OK:  return res
+        res = handler.handle_sources()
+        if res.get('status') != Status.OK:  return res
+        res = handler.handle_citations()
+        if res.get('status') != Status.OK:  return res
 
-        ret = handler.handle_events()
-        if ret.get('status') != Status.OK:  return ret
-        ret = handler.handle_people()
-        if ret.get('status') != Status.OK:  return ret
-        ret = handler.handle_families()
-        if ret.get('status') != Status.OK:  return ret
+        res = handler.handle_events()
+        if res.get('status') != Status.OK:  return res
+        res = handler.handle_people()
+        if res.get('status') != Status.OK:  return res
+        res = handler.handle_families()
+        if res.get('status') != Status.OK:  return res
 
 #             for k in handler.handle_to_node.keys():
 #                 print (f'\t{k} –> {handler.handle_to_node[k]}')
 
         # Set person confidence values 
         #TODO: Only for imported persons (now for all persons!)
-        ret = handler.set_all_person_confidence_values()
-        if ret.get('status') != Status.OK:  return ret
-        # Set properties (for imported persons)
-        #    + Refname links
-        #    ? Person sortname
-        #    + Person lifetime
-        #    - Confidence values
-        ret = handler.set_person_calculated_attributes()
-        if ret.get('status') != Status.OK:  return ret
-        ret = handler.set_person_estimated_dates()
-        if ret.get('status') != Status.OK:  return ret
+        res = handler.set_all_person_confidence_values()
+        if res.get('status') != Status.OK:  return res
+        res = handler.set_person_calculated_attributes()
+        if res.get('status') != Status.OK:  return res
+        res = handler.set_person_estimated_dates()
+        if res.get('status') != Status.OK:  return res
 
         # Copy date and name information from Person and Event nodes to Family nodes
-        ret = handler.set_family_calculated_attributes()
-        if ret.get('status') != Status.OK:  return ret
+        res = handler.set_family_calculated_attributes()
+        if res.get('status') != Status.OK:  return res
 
-        ret = handler.remove_handles()
-        if ret.get('status') != Status.OK:  return ret
-        ret = handler.add_missing_links()
-        if ret.get('status') != Status.OK:  return ret
+        res = handler.remove_handles()
+        if res.get('status') != Status.OK:  return res
+        res = handler.add_missing_links()
+        if res.get('status') != Status.OK:  return res
 
 # Huom. Paikkahierarkia on tehty metodissa Place_gramps.save niin että
 #       aluksi luodaan tarvittaessa viitattu ylempi paikka vajailla tiedoilla.

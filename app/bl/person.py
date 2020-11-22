@@ -29,6 +29,7 @@ from datetime import datetime
 from sys import stderr
 import logging 
 logger = logging.getLogger('stkserver')
+import shareds
 
 from bl.base import NodeObject, Status
 from bl.media import MediaBl
@@ -593,14 +594,57 @@ class PersonBl(Person):
 
 
     @staticmethod
-    def set_sortname(tx, uniq_id, namenode):
-        """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
-            using given default Name node
-        """
-        raise(NotImplementedError, "TODO: bl.person.PersonBl.set_sortname")
-#         key = namenode.key_surname()
-#         return tx.run(Cypher_person.set_sortname, id=uniq_id, key=key)
+    def update_person_confidences(person_ids:list):
+        """ Sets a quality rate for given list of Person.uniq_ids.
 
+            Person.confidence is calculated as a mean of confidences in
+            all Citations used for Person's Events.
+        """
+        counter = 0
+        ds = shareds.datastore.dataservice
+        for uniq_id in person_ids:
+            res = ds._update_person_confidences(uniq_id)
+            # returns {confidence, status, statustext}
+            stat = res.get('status')
+            if stat == Status.UPDATED:
+                counter += 1
+            elif stat != Status.OK:
+                # Update failed
+                return {'status': stat, 'statustext':res.get('statustext')}
+
+        return {'status':Status.OK, 'count':counter}
+
+    @staticmethod
+    def set_person_name_properties(uniq_id=None, ops=['refname', 'sortname']):
+        """ Set Refnames to all Persons or one Person with given uniq_id; 
+            also sets Person.sortname using the default name
+    
+            Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
+                        bp.admin.routes.set_all_person_refnames
+        """
+        sortname_count = 0
+        refname_count = 0
+        do_refnames = 'refname' in ops
+        do_sortname = 'sortname' in ops
+    
+        # Get each Name object (with person_uid) 
+        ds = shareds.datastore.dataservice
+        names = ds._get_personnames(uniq_id)
+
+        if do_refnames:
+            for name in names:
+                # Create links and nodes from given person: (:Person) --> (r:Refname)
+                res = ds._build_refnames(name.person_uid, name)
+                refname_count += res.get('count', 0)
+        if do_sortname:
+            for name in names:
+                if name.order == 0:
+                    # If default name, store sortname key to Person node
+                    sortname = name.key_surname()
+                    ds._set_person_sortname(name.person_uid, sortname)
+                    sortname_count += 1
+
+        return (refname_count, sortname_count)
 
 
 #     @staticmethod

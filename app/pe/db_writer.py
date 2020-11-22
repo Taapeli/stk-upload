@@ -126,25 +126,5 @@ class DbWriter(DbReader):
                 self.place_set_default_names(place, def_names)
             return place
 
-    def update_person_confidences(self, tx, person_ids:list):
-        """ Sets a quality rate for given list of Person.uniq_ids.
-     
-            Asettaa henkilölle laatuarvion.
-     
-            Person.confidence is mean of all Citations used for Person's Events
-        """
-        counter = 0
-        for uniq_id in person_ids:
-
-            result = self.dbdriver.dw_update_person_confidence(tx, uniq_id)
-            # returns {confidence, status, statustext}
-            stat = result.get('status')
-            if stat == Status.OK:
-                pass
-            elif stat == Status.UPDATED:
-                counter += 1
-            else:
-                # Update failed
-                return {'status': stat, 'statustext':result.get('statustext')}
-
-        return {'status':Status.OK, 'count':counter}
+#     def update_person_confidences(self, tx, person_ids:list): #-> bl.person.PersonBl.update_person_confidences
+#         """ Sets a quality rate for given list of Person.uniq_ids.

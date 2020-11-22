@@ -10,9 +10,13 @@ Components moved 15.5.2020 from
 '''
 import  shareds
 from templates.jinja_filters import translate
+import logging 
+logger = logging.getLogger('stkserver')
+from flask_babelex import _
 
 from .base import NodeObject, Status
 from pe.db_reader import DbReader
+from pe.neo4j.cypher.cy_family import CypherFamily
 
 from models.gen.dates import DateRange
 
@@ -110,12 +114,91 @@ class FamilyBl(Family):
         self.note_ref = []          # For a page, where same note may be referenced
                                     # from multiple events and other objects
 
-#         #TODO Obsolete parameters???
-#         self.event_handles = []
-#         self.eventref_role = []
-#         self.child_handles = []    # handles
-#         self.note_handles = []
-#         self.citation_handles = []
+    def save(self, tx, **kwargs):
+        """ Saves the family node to db with its relations.
+        
+            Connects the family to parent, child, citation and note nodes.
+        """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Family_gramps.save needs batch_id for {self.id}")
+
+        self.uuid = self.newUuid()
+        f_attr = {}
+        try:
+            f_attr = {
+                "uuid": self.uuid,
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "rel_type": self.rel_type
+            }
+            result = tx.run(CypherFamily.create_to_batch, 
+                            batch_id=batch_id, f_attr=f_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    logger.warning(f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}")
+                # print("Family {} ".format(self.uniq_id))
+        except Exception as err:
+            logger.error(f"bl.family.FamilyBl.save: {err} in #{self.uniq_id} - {f_attr}")
+            #print("iError Family.save family: {0} attr={1}".format(err, f_attr), file=stderr)
+
+        # Make father and mother relations to Person nodes
+        try:
+            if hasattr(self,'father') and self.father:
+                role = 'father'
+            elif hasattr(self,'mother') and self.mother:
+                role = 'mother'
+            else:
+                return {'status': Status.ERROR, 
+                        'statustext': f'No father or motger role in family {self.id}'}
+            tx.run(CypherFamily.link_parent, role=role,
+                   f_handle=self.handle, p_handle=self.mother)
+        except Exception as err:
+            print("bl.family.FamilyBl.save: {0} {1}".format(err, self.id)) #, file=stderr)
+
+        # Make relations to Event nodes
+        try:
+            for i in range(len(self.event_handles)):
+                tx.run(CypherFamily.link_event, 
+                       f_handle=self.handle, e_handle=self.eventref_hlink[i],
+                       role=self.eventref_role[i])
+        except Exception as err:
+            print("bl.family.FamilyBl.save events: {0} {1}".format(err, self.id)) #, file=stderr)
+  
+        # Make child relations to Person nodes
+        try:
+            for handle in self.child_handles:
+                tx.run(CypherFamily.link_child, 
+                       f_handle=self.handle, p_handle=handle)
+        except Exception as err:
+            print("bl.family.FamilyBl.save children: {0} {1}".format(err, self.id)) #, file=stderr)
+  
+        # Make relation(s) to the Note node
+        try:
+            #print(f"Family_gramps.save: linking Notes {self.handle} -> {self.note_handles}")
+            for handle in self.note_handles:
+                tx.run(CypherFamily.link_note,
+                       f_handle=self.handle, n_handle=handle)
+        except Exception as err:
+            logger.error(f"bl.family.FamilyBl.save.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
+            #print("iError Family.save notes: {0} {1}".format(err, self.id), file=stderr)
+  
+        # Make relation(s) to the Citation node
+        try:
+            #print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
+            for handle in self.citation_handles:
+                tx.run(CypherFamily.link_citation,
+                       f_handle=self.handle, c_handle=handle)
+        except Exception as err:
+            logger.error(f"bl.family.FamilyBl.save.save: {err} in linking Citations {self.handle} -> {self.citationref_hlink}")
+            #print("iError Family.save citations: {0} {1}".format(err, self.id), file=stderr)
+
+        return
 
 
 class FamilyReader(DbReader):

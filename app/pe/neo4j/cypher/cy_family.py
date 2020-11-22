@@ -106,3 +106,38 @@ OPTIONAL MATCH (person) -[:EVENT]-> (birth:Event {type:'Birth'})
 RETURN family, TYPE(r) AS type, r.role AS role, person, birth 
 ORDER BY family, person.birth_high"""
 
+# ----- Family load in Batch
+
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
+MERGE (b) -[r:OWNS]-> (f:Family {handle: $f_attr.handle}) 
+    SET f = $f_attr
+RETURN ID(f) as uniq_id"""
+
+    link_parent = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Person) WHERE m.handle=$p_handle
+MERGE (n) -[r:PARENT {role:$role}]-> (m)"""
+
+    link_event = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Event)  WHERE m.handle=$e_handle
+MERGE (n)-[r:EVENT]->(m)
+    SET r.role = $role"""
+
+    link_child = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Person) WHERE m.handle=$p_handle
+MERGE (n)-[r:CHILD]->(m)"""
+
+    link_note = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Note)   WHERE m.handle=$n_handle
+CREATE (n)-[r:NOTE]->(m)"""
+
+    link_citation = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Citation) WHERE m.handle=$c_handle
+CREATE (n)-[r:CITATION]->(m)"""
+
+

@@ -8,9 +8,11 @@ logger = logging.getLogger('stkserver')
 from datetime import date #, datetime
 
 from bl.base import Status
+from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 
 from pe.neo4j.cypher.cy_person import CypherPerson
+from pe.neo4j.cypher.cy_refname import CypherRefname
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 from pe.neo4j.cypher.cy_place import CypherPlace
 from pe.neo4j.cypher.cy_gramps import CypherObjectWHandle
@@ -68,9 +70,6 @@ class Neo4jDataService:
             SET lock.locked = true"""
         self.tx.run(query, lock_id=lock_id)
         return True # value > 0
-
-
-    # ----- Batch -----
 
     def _new_batch_id(self):
         ''' Find next unused Batch id.
@@ -249,13 +248,71 @@ class Neo4jDataService:
 
     # ----- Person -----
 
-    def dw_update_person_confidence(self, uniq_id:int):
+    def _get_personnames(self, uniq_id=None):
+        """ Picks all Name versions of this Person or all persons.
+        
+            Use optionally refnames or sortname for person selection
+        """
+        if uniq_id:
+            result = self.tx.run(CypherPerson.get_names, pid=uniq_id)
+        else:
+            result = self.tx.run(CypherPerson.get_all_persons_names)
+        names = []
+        for record in result:
+            # <Record
+            #    pid=82
+            #    name=<Node id=83 labels=frozenset({'Name'})
+            #        properties={'title': 'Sir', 'firstname': 'Jan Erik', 'surname': 'Mannerheimo',
+            #            'prefix': '', 'suffix': 'Jansson', 'type': 'Birth Name', 'order': 0}> >
+            node = record['name']
+            name = Name.from_node(node)
+            name.person_uid =  record['pid']
+            names.append(name)
+        return names
+
+
+    def _build_refnames(self, person_uid:int, name:Name):
+        """ Set Refnames to the Person with given uniq_id.
+        """
+        def link_to_refname(person_uid, nm, use):
+            result = self.tx.run(CypherRefname.link_person_to,
+                                 pid=person_uid, name=nm, use=use)
+            rid = result.single()[0]
+            if rid is None:
+                raise RuntimeError(f'Error for ({person_uid})-->({nm})')
+            return rid
+
+        count = 0
+        try:
+            # 1. firstnames
+            if name.firstname and name.firstname != 'N':
+                for nm in name.firstname.split(' '):
+                    if link_to_refname(person_uid, nm, 'firstname'):
+                        count += 1
+     
+            # 2. surname and patronyme
+            if name.surname and name.surname != 'N':
+                if link_to_refname(person_uid, name.surname, 'surname'):
+                    count += 1
+     
+            if name.suffix:
+                if link_to_refname(person_uid, name.suffix, 'patronyme'):
+                    count += 1
+
+        except Exception as e:
+            msg = f'Neo4jDataService._build_refnames: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status':Status.ERROR, 'count':count, 'statustext': msg}
+         
+        return {'status': Status.OK, 'count':count}
+
+
+    def _update_person_confidences(self, uniq_id:int):
         """ Collect Person confidence from Person and Event nodes and store result in Person.
  
             Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
         sumc = 0
-        new_conf = None
         try:
             result = self.tx.run(CypherPerson.get_confidences, id=uniq_id)
             for record in result:
@@ -265,21 +322,70 @@ class Neo4jDataService:
                 for conf in confs:
                     sumc += int(conf)
 
-            conf_float = sumc/len(confs)
-            new_conf = "%0.1f" % conf_float # string with one decimal
+            if confs:
+                conf_float = sumc/len(confs)
+                new_conf = "%0.1f" % conf_float # string with one decimal
+            else:
+                new_conf = ""
             if orig_conf != new_conf:
                 # Update confidence needed
                 self.tx.run(CypherPerson.set_confidence,
-                            id=self.uniq_id, confidence=new_conf)
+                            id=uniq_id, confidence=new_conf)
 
                 return {'confidence':new_conf, 'status':Status.UPDATED}
             return {'confidence':new_conf, 'status':Status.OK}
 
         except Exception as e:
-            msg = f'Neo4jDataService.dr_update_person_confidence: {e.e.__class__.__name__} {e}'
+            msg = f'Neo4jDataService._update_person_confidences: {e.__class__.__name__} {e}'
             print(msg)
             return {'confidence':new_conf, 'status':Status.ERROR,
                     'statustext': msg}
+
+
+    def _link_person_to_refname(self, pid, name, reftype):
+        ''' Connects a reference name of type reftype to Person(pid). 
+        '''
+        from bl.refname import REFTYPES
+
+        if not name > "":
+            logging.warning("Missing name {} for {} - not added".format(reftype, name))
+            return
+        if not (reftype in REFTYPES):
+            raise ValueError("Invalid reftype {}".format(reftype))
+            return
+
+        try:
+            _result = self.tx.run(CypherRefname.link_person_to,
+                                  pid=pid, name=name, use=reftype)
+            return {'status':Status.OK}
+
+        except Exception as e:
+            msg = f'Neo4jDataService._link_person_to_refname: person={pid}, {e.__class__.__name__}, {e}'
+            print(msg)
+            return {'status':Status.ERROR, 'statustext': msg}
+
+    # ----- Refname -----
+
+    def _get_person_by_uid(self, uniq_id:int):
+        ''' Set Person object by uniq_id.'''
+        try:
+            self.tx.run(CypherPerson.get_person_by_uid, uid=uniq_id)
+            return {'status':Status.OK}
+        except Exception as e:
+            msg = f'Neo4jDataService._get_person_by_uid: person={uniq_id}, {e.__class__.__name__}, {e}'
+            print(msg)
+            return {'status':Status.ERROR, 'statustext': msg}
+
+
+    def _set_person_sortname(self, uniq_id:int, sortname):
+        ''' Set sortname property to Person object by uniq_id.'''
+        try:
+            self.tx.run(CypherPerson.set_sortname, uid=uniq_id, key=sortname)
+            return {'status':Status.OK}
+        except Exception as e:
+            msg = f'Neo4jDataService._set_person_sortname: person={uniq_id}, {e.__class__.__name__}, {e}'
+            print(msg)
+            return {'status':Status.ERROR, 'statustext': msg}
 
 
     # ----- Family -----

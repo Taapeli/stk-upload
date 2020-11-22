@@ -163,59 +163,59 @@ def set_family_calculated_attributes(tx=None, uniq_id=None):
     return (dates_count, sortname_count)
 
 
-def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname']):
-    """ Set Refnames to all Persons or one Person with given uniq_id; 
-        also sets Person.sortname using the default name
-
-        Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
-                    bp.admin.routes.set_all_person_refnames
-
-        If handler is defined
-        - if there is transaction tx, use it, else create a new 
-    """
-    sortname_count = 0
-    refname_count = 0
-    do_refnames = 'refname' in ops
-    do_sortname = 'sortname' in ops
-
-    if tx:
-        my_tx = tx
-    else:
-        my_tx = User.beginTransaction()
-
-    # Process each name 
-    names = Name.get_personnames(my_tx, uniq_id)
-    for name in names:
-
-        if do_refnames:
-            # Build new refnames
-    
-            # 1. firstnames
-            if name.firstname and name.firstname != 'N':
-                for nm in name.firstname.split(' '):
-                    Refname.link_to_refname(my_tx, name.person_uid, nm, 'firstname')
-                    refname_count += 1
-    
-            # 2. surname and patronyme
-            if name.surname and name.surname != 'N':
-                Refname.link_to_refname(my_tx, name.person_uid, name.surname, 'surname')
-                refname_count += 1
-    
-            if name.suffix:
-                Refname.link_to_refname(my_tx, name.person_uid, name.suffix, 'patronyme')
-                refname_count += 1
-        
-        if do_sortname and name.order == 0:
-
-            # If default name, store sortname key to Person node
-            PersonBl.set_sortname(my_tx, name.person_uid, name)
-            sortname_count += 1
-    
-    if not tx:
-        # Close my self created transaction
-        User.endTransaction(my_tx)
-
-    return (refname_count, sortname_count)
+# def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname']): #-> bl.person.PersonBl.set_person_name_properties
+#     """ Set Refnames to all Persons or one Person with given uniq_id; 
+#         also sets Person.sortname using the default name
+# 
+#         Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
+#                     bp.admin.routes.set_all_person_refnames
+# 
+#         If handler is defined
+#         - if there is transaction tx, use it, else create a new 
+#     """
+#     sortname_count = 0
+#     refname_count = 0
+#     do_refnames = 'refname' in ops
+#     do_sortname = 'sortname' in ops
+# 
+#     if tx:
+#         my_tx = tx
+#     else:
+#         my_tx = User.beginTransaction()
+# 
+#     # Process each name 
+#     names = Name.get_personnames(my_tx, uniq_id)
+#     for name in names:
+# 
+#         if do_refnames:
+#             # Build new refnames
+#     
+#             # 1. firstnames
+#             if name.firstname and name.firstname != 'N':
+#                 for nm in name.firstname.split(' '):
+#                     Refname.link_to_refname(my_tx, name.person_uid, nm, 'firstname')
+#                     refname_count += 1
+#     
+#             # 2. surname and patronyme
+#             if name.surname and name.surname != 'N':
+#                 Refname.link_to_refname(my_tx, name.person_uid, name.surname, 'surname')
+#                 refname_count += 1
+#     
+#             if name.suffix:
+#                 Refname.link_to_refname(my_tx, name.person_uid, name.suffix, 'patronyme')
+#                 refname_count += 1
+#         
+#         if do_sortname and name.order == 0:
+# 
+#             # If default name, store sortname key to Person node
+#             PersonBl.set_sortname(my_tx, name.person_uid, name)
+#             sortname_count += 1
+#     
+#     if not tx:
+#         # Close my self created transaction
+#         User.endTransaction(my_tx)
+# 
+#     return (refname_count, sortname_count)
 
 
 # Moved to bp.tools.models.dataupdater.joinpersons
