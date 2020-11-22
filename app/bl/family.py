@@ -90,7 +90,7 @@ class FamilyBl(Family):
 #             #TODO: Obsolete properties?
 #                 event_handles      str tapahtuman osoite
 #                 eventref_role       str tapahtuman rooli
-#                 childref_hlink      str lapsen osoite
+#                 child_handles      str lapsen osoite
 #                 note_handles       str lisätiedon osoite
 #                 citation_handles   str lisätiedon osoite
      """
@@ -113,7 +113,7 @@ class FamilyBl(Family):
 #         #TODO Obsolete parameters???
 #         self.event_handles = []
 #         self.eventref_role = []
-#         self.childref_hlink = []    # handles
+#         self.child_handles = []    # handles
 #         self.note_handles = []
 #         self.citation_handles = []
 

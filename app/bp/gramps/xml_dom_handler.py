@@ -26,13 +26,14 @@ from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaRefResult
 from bl.event import EventBl
+from bl.source import SourceBl
 
 from pe.db_writer import DbWriter
 #from pe.neo4j.dataservice import Neo4jWriteDriver
 
 #from .bl.person_gramps import PersonGramps
 #from .models.event_gramps import Event_gramps
-from .models.family_gramps import Family_gramps
+#from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
 #from .models.place_gramps import Place_gramps
 
@@ -163,24 +164,13 @@ class DOM_handler():
         return None
 
 
-#     def handle_header(self):
-#         ''' Store eventuel media path from XML header to Batch node.
-#         '''
-#         for header in self.collection.getElementsByTagName("header"):
-#             for mediapath in header.getElementsByTagName("mediapath"):
-#                 if (len(mediapath.childNodes) > 0):
-#                     path = mediapath.childNodes[0].data
-#                     self.dataservice.dw_set_batch_mediapath(path)
-#                     self.set_mediapath(path) ####
-#                     return
-#         self.set_mediapath("")
-
-
     def handle_citations(self):
         # Get all the citations in the collection
         citations = self.collection.getElementsByTagName("citation")
+        status = Status.OK
 
-        print ("***** {} Citations *****".format(len(citations)))
+        message = f'{len(citations)} Citations'
+        print (f"***** {message} *****")
         t0 = time.time()
         counter = 0
 
@@ -237,13 +227,16 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Citations", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+        return {'status':status, 'message': message}
 
 
     def handle_events(self):
         ''' Get all the events in the collection '''
         events = self.collection.getElementsByTagName("event")
+        status = Status.OK
 
-        print ("***** {} Events *****".format(len(events)))
+        message = f'{len(events)} Events'
+        print (f"***** {message} *****")
         t0 = time.time()
         counter = 0
 
@@ -320,13 +313,16 @@ class DOM_handler():
                 
         self.blog.log_event({'title':"Events", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+        return {'status':status, 'message': message}
 
 
     def handle_families(self):
         ''' Get all the families in the collection. '''
         families = self.collection.getElementsByTagName("family")
+        status = Status.OK
 
-        print ("***** {} Families *****".format(len(families)))
+        message = f'{len(families)} Families'
+        print (f"***** {message} *****")
         t0 = time.time()
         counter = 0
 
@@ -334,6 +330,8 @@ class DOM_handler():
         for family in families:
 
             f = FamilyBl()
+            f.child_handles = []
+
             # Extract handle, change and id
             self._extract_base(family, f)
             self.event_handle_roles = []
@@ -376,8 +374,8 @@ class DOM_handler():
 
             for ref in family.getElementsByTagName('childref'):
                 if ref.hasAttribute("hlink"):
-                    f.childref_hlink.append(ref.getAttribute("hlink"))
-                    ##print(f'# Family {f.id} has child {f.childref_hlink[-1]}')
+                    f.child_handles.append(ref.getAttribute("hlink"))
+                    ##print(f'# Family {f.id} has child {f.child_handles[-1]}')
 
             for ref in family.getElementsByTagName('noteref'):
                 if ref.hasAttribute("hlink"):
@@ -389,20 +387,23 @@ class DOM_handler():
                     f.citation_handles.append(ref.getAttribute("hlink"))
                     ##print(f'# Family {f.id} has cite {f.citation_handles[-1]}')
 
-            self.save_and_link_handle(f, batch_id=self.batch_id)
+            self.save_and_link_handle(f, batch_id=self.batch.id)
             counter += 1
             # The sortnames and dates will be set for these families 
             self.family_ids.append(f.uniq_id)
 
         self.blog.log_event({'title':"Families", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+        return {'status':status, 'message': message}
 
 
     def handle_notes(self):
         ''' Get all the notes in the collection. '''
         notes = self.collection.getElementsByTagName("note")
+        status = Status.OK
 
-        print ("***** {} Notes *****".format(len(notes)))
+        message = f'{len(notes)} Notes'
+        print (f"***** {message} *****")
         t0 = time.time()
         counter = 0
 
@@ -430,13 +431,16 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Notes", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+        return {'status':status, 'message': message}
 
 
     def handle_media(self):
         ''' Get all the media in the collection (Gramps term 'object'). '''
         media = self.collection.getElementsByTagName("object")
+        status = Status.OK
 
-        print ("***** {} Media *****".format(len(media)))
+        message = f'{len(media)} Medias'
+        print (f"***** {message} *****")
         t0 = time.time()
         counter = 0
 
@@ -464,14 +468,16 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Media objects", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+        return {'status':status, 'message': message}
 
 
     def handle_people(self):
         ''' Get all the people in the collection. '''
         people = self.collection.getElementsByTagName("person")
+        status = Status.OK
 
-        person_count = len(people)
-        print ("***** {} Persons *****".format(person_count))
+        message = f'{len(people)} Persons'
+        print (f"***** {message} *****")
         t0 = time.time()
         counter = 0
 
@@ -596,6 +602,7 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Persons", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+        return {'status':status, 'message': message}
 
 
     def handle_places(self):
@@ -605,12 +612,12 @@ class DOM_handler():
             Place handles and uniq_ids created so far. The link may use
             previous node or create a new one.
         '''
-
         place_keys = {}    # place_keys[handle] = uniq_id
-
         places = self.collection.getElementsByTagName("placeobj")
+        status = Status.OK
 
-        print ("***** {} Places *****".format(len(places)))
+        message = f'{len(places)} Places'
+        print (f"***** {message} *****")
         t0 = time.time()
         counter = 0
 
@@ -714,13 +721,16 @@ class DOM_handler():
             
         self.blog.log_event({'title':"Places", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+        return {'status':status, 'message': message}
 
 
     def handle_repositories(self):
         ''' Get all the repositories in the collection. '''
         repositories = self.collection.getElementsByTagName("repository")
+        status = Status.OK
 
-        print ("***** {} Repositories *****".format(len(repositories)))
+        message = f'{len(repositories)} Repositories'
+        print (f"***** {message} *****")
         t0 = time.time()
         counter = 0
 
@@ -758,13 +768,16 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Repositories", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+        return {'status':status, 'message': message}
 
 
     def handle_sources(self):
         ''' Get all the sources in the collection. '''
         sources = self.collection.getElementsByTagName("source")
+        status = Status.OK
 
-        print ("***** {} Sources *****".format(len(sources)))
+        message = f'{len(sources)} Sources'
+        print (f"***** {message} *****")
         t0 = time.time()
         counter = 0
 
@@ -829,6 +842,7 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+        return {'status':status, 'message': message}
 
 
     # -------------------------- Finishing process steps -------------------------------
@@ -840,7 +854,10 @@ class DOM_handler():
             Family.datetype, Family.date1 and Family.date2
         '''
 
-        print ("***** {} Sortnames & dates *****".format(len(self.family_ids)))
+        status = Status.OK
+        message = f'{len(self.family_ids)} Family sortnames & dates'
+        print (f"***** {message} *****")
+
         t0 = time.time()
         dates_count = 0
         sortname_count = 0
@@ -853,13 +870,16 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Dates", 'count':dates_count, 'elapsed':time.time()-t0})
         self.blog.log_event({'title':"Family sorting names", 'count':sortname_count})
+        return {'status':status, 'message': message}
         
 
     def set_person_calculated_attributes(self):
         ''' Add links from each Person to Refnames and set Person.sortname
         '''
+        status = Status.OK
+        message = f'{len(self.person_ids)} Person refnames & sortnames'
+        print (f"***** {message} *****")
 
-        print ("***** {} Person refnames & sortnames *****".format(len(self.person_ids)))
         t0 = time.time()
         refname_count = 0
         sortname_count = 0
@@ -876,6 +896,7 @@ class DOM_handler():
         self.blog.log_event({'title':"Refname references", 
                                 'count':refname_count, 'elapsed':time.time()-t0})
         self.blog.log_event({'title':"Person sorting names", 'count':sortname_count})
+        return {'status':status, 'message': message}
 
 
     def set_person_estimated_dates(self):
@@ -884,13 +905,16 @@ class DOM_handler():
             
             Called from bp.gramps.gramps_loader.xml_to_neo4j
         '''
-        print ("***** {} Estimated lifetimes *****".format(len(self.person_ids)))
+        status = Status.OK
+        message = f'{len(self.person_ids)} Estimated lifetimes'
+        print (f"***** {message} *****")
         t0 = time.time()
 
         cnt = PersonBl.estimate_lifetimes(self.tx, self.person_ids)
                             
         self.blog.log_event({'title':"Estimated person lifetimes", 
                              'count':cnt, 'elapsed':time.time()-t0}) 
+        return {'status':status, 'message': f'{message}, {cnt} done'}
 
 
     def set_all_person_confidence_values(self):
@@ -900,20 +924,23 @@ class DOM_handler():
      
             Person.confidence is mean of all Citations used for Person's Events
         """
+        message = f'{len(self.person_ids)} Person confidence values'
+        print (f"***** {message} *****")
+
         t0 = time.time()
         db = DbWriter(self.dataservice)
 
-        result = db.update_person_confidences(self.tx, self.person_ids)
+        res = db.update_person_confidences(self.tx, self.person_ids)
         # returns {status, count, statustext}
-        status = result.get('status')
-        count = result.get('count',0)
+        status = res.get('status')
+        cnt = res.get('count',0)
         if status == Status.OK or status == Status.UPDATED:
             self.blog.log_event({'title':"Confidences set", 
-                                 'count':count, 
+                                 'count':cnt, 
                                  'elapsed':time.time()-t0})
-            return Status.OK
+            return {'status':status, 'message': f'{message}, {cnt} done'}
         else:
-            msg = result.get('statustext')
+            msg = res.get('statustext')
             self.blog.log_event({'title':"Confidences not set", 
                                  'count':count, 
                                  'elapsed':time.time()-t0,
