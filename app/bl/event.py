@@ -125,41 +125,41 @@ class EventReader(DbReader):
         '''
         statustext = ''
         res_dict = {}
-        result = self.dbdriver.dr_get_event_by_uuid(self.use_user, uuid)
-        if (result['status'] != Status.OK):
-            return {'item':None, 'status':result['status'], 
+        res = self.dbdriver.dr_get_event_by_uuid(self.use_user, uuid)
+        if Status.has_failed(res):
+            return {'item':None, 'status':res['status'], 
                     'statustext': _('The event is not accessible')}
-        event = result['item']
+        event = res['item']
         res_dict['event'] = event
 
         members= []
         if args.get('referees'):
-            result = self.dbdriver.dr_get_event_participants(event.uniq_id)
-            if (result['status'] == Status.ERROR):
-                statustext += _('Participants read error ') + result['statustext']+' '
-            members = result['items']
+            res = self.dbdriver.dr_get_event_participants(event.uniq_id)
+            if (res['status'] == Status.ERROR):
+                statustext += _('Participants read error ') + res['statustext']+' '
+            members = res['items']
             res_dict['members'] = members
         places = []
         if args.get('places'):
-            result = self.dbdriver.dr_get_event_place(event.uniq_id)
-            if (result['status'] == Status.ERROR):
-                statustext += _('Place read error ' + result['statustext']+' ')
-            places = result['items']
+            res = self.dbdriver.dr_get_event_place(event.uniq_id)
+            if (res['status'] == Status.ERROR):
+                statustext += _('Place read error ' + res['statustext']+' ')
+            places = res['items']
             res_dict['places'] = places
 
         notes = []
         medias = []
         if args.get('notes'):
-            result = self.dbdriver.dr_get_event_notes_medias(event.uniq_id)
-            if (result['status'] == Status.ERROR):
-                statustext += _('Notes read error ' + result['statustext']+' ')
-            notes = result['notes']
+            res = self.dbdriver.dr_get_event_notes_medias(event.uniq_id)
+            if (res['status'] == Status.ERROR):
+                statustext += _('Notes read error ' + res['statustext']+' ')
+            notes = res['notes']
             res_dict['notes'] = notes
-            medias = result['medias']
+            medias = res['medias']
             res_dict['medias'] = medias
 
         
-        res_dict['status'] = result['status']
+        res_dict['status'] = res['status']
         res_dict['statustext'] = f'Got {len(members)} participants, {len(notes)} notes'
         return res_dict
 

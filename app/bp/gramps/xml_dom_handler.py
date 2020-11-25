@@ -889,9 +889,11 @@ class DOM_handler():
         for p_id in self.person_ids:
             self.update_progress('refnames')
             if p_id != None:
-                rc, sc = PersonBl.set_person_name_properties(uniq_id=p_id)
-                refname_count += rc
-                sortname_count += sc
+                res = PersonBl.set_person_name_properties(uniq_id=p_id)
+                # returns {refnames, sortnames, status}
+                if Status.has_failed(res): return
+                refname_count += res.get('refnames')
+                sortname_count += res.get('sortnames')
 
         self.blog.log_event({'title':"Refname references", 
                                 'count':refname_count, 'elapsed':time.time()-t0})

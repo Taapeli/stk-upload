@@ -104,7 +104,7 @@ class SourceReader(DbReader):
     def get_source_list(self):
         context = self.user_context
         fw = context.next_name_fw()
-        kwargs = {"user": self.use_user, "fw": fw,  "count": context.count}
+        args = {"user": self.use_user, "fw": fw,  "count": context.count}
         if context.series:
             # Filtering by series (Lähdesarja)
             THEMES = {"birth": ('syntyneet','födda'),
@@ -117,8 +117,8 @@ class SourceReader(DbReader):
             kwargs["theme1"] = theme_fi 
             kwargs["theme2"] = theme_sv
         try:
-            sources = self.dbdriver.dr_get_source_list_fw(**kwargs)
-            results = {'sources':sources,'status':Status.OK}
+            sources = self.dbdriver.dr_get_source_list_fw(args)
+            #results = {'sources':sources,'status':Status.OK}
     
             # Update the page scope according to items really found 
             if sources:
@@ -143,13 +143,13 @@ class SourceReader(DbReader):
             - item.citations    Citating Persons, Events, Families and Medias
                                 as [label, object] tuples(?)
         """
-        results = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
-        if results.get('status') != Status.OK:
-            return results
-        source = results.get('item')
+        res = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
+        if res.get('status') != Status.OK:
+            return res
+        source = res.get('item')
         if not source:
-            results.statustext = f"no Source with uuid={uuid}"
-            return results
+            res.statustext = f"no Source with uuid={uuid}"
+            return res
         
         citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
 
@@ -158,9 +158,9 @@ class SourceReader(DbReader):
             # processed. 
             #TODO: Should allow citating a Source from Place, Note, Meida etc
 
-            results['status'] = Status.NOT_FOUND
-            results['statustext'] = _('No person or family has uses this source')
-            return results
+            res['status'] = Status.NOT_FOUND
+            res['statustext'] = _('No person or family has uses this source')
+            return res
 
         cit = []
         for c_id, c in citations.items():
@@ -176,6 +176,6 @@ class SourceReader(DbReader):
                     print(f'DbReader.get_source_with_references: hide {target}')
 
             cit.append(c)
-        results['citations'] = cit
+        res['citations'] = cit
 
-        return results
+        return res

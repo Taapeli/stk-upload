@@ -49,7 +49,7 @@ class Place_gramps(PlaceBl):
     def __init__(self, uniq_id=None):
         """ Creates a new Place_gramps instance for Gramps xml data upload.
         """
-
+        raise(f'bp.gramps.models.place_gramps.Place_gramps: OBOSOLETE')
         Place.__init__(self, uniq_id)
         self.uuid = self.newUuid()
         self.note_ref = []      # uniq_ids of Notes

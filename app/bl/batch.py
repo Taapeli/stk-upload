@@ -267,9 +267,9 @@ class BatchDatastore:
         # Find the next free Batch id
         self.batch = Batch()
         res = self.dataservice._new_batch_id()
-        if res.get('status') != Status.OK:
+        if Status.has_failed(res):
             # Failed to get an id
-            #TODO shareds.datastore._remove_lock('batch_id')
+            print("bl.batch.BatchDatastore.start_batch: TODO shareds.datastore._remove_lock('batch_id')")
             return res
 
         self.batch.id = res.get('id')
@@ -300,7 +300,7 @@ class BatchDatastore:
             #self.tx.run(CypherBatch.batch_create, b_attr=attr)
             res = self.dataservice._batch_save(attr)
             # returns {status, identity}
-            if res.get('status') != Status.OK:
+            if Status.has_failed(res):
                 return res
 
             batch.uniq_id = res.get('identity')

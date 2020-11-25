@@ -27,6 +27,7 @@ Created on 6.10.2020
 from flask_babelex import _
 from datetime import datetime
 from sys import stderr
+import traceback
 import logging 
 logger = logging.getLogger('stkserver')
 import shareds
@@ -201,19 +202,19 @@ class PersonReader(DbReader):
         args['fw'] = context.next_name_fw()
         args['limit'] = context.count
         
-        result = self.dbdriver.dr_get_person_list(args)
+        res = self.dbdriver.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
 
-        status = result.get('status')
+        status = res.get('status')
         if status == Status.ERROR:
-            msg = result.get("statustext")
+            msg = res.get("statustext")
             logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
             print(f'bl.person.PersonReader.get_person_search: {msg}')
             return {'items':[], 'status':status,
                     'statustext': _('No persons found')}
 
         # Update the page scope according to items really found
-        persons = result['items']
+        persons = res['items']
         if len(persons) > 0:
             context.update_session_scope('person_scope', 
                                           persons[0].sortname, persons[-1].sortname, 
@@ -238,14 +239,14 @@ class PersonReader(DbReader):
         args = {'use_user': self.use_user,
                 'fw': context.next_name_fw(),
                 'limit':context.count}
-        result = self.dbdriver.dr_get_person_list(args)
+        res = self.dbdriver.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
-        if (result['status'] != Status.OK):
-            return {'items':None, 'status':result['status'], 
+        if Status.has_failed(res):
+            return {'items':None, 'status':res['status'], 
                     'statustext': _('No persons found')}
 
         # Update the page scope according to items really found
-        persons = result['items']
+        persons = res['items']
         if len(persons) > 0:
             context.update_session_scope('person_scope', 
                                           persons[0].sortname, persons[-1].sortname, 
@@ -274,23 +275,23 @@ class PersonReader(DbReader):
             
             --> Origin from models.gen.person_combo.Person_combo.get_my_person
         '''
-        result = self.dbdriver.dr_get_person_by_uuid(uuid)
+        res = self.dbdriver.dr_get_person_by_uuid(uuid)
         # {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
 
-        if (result['status'] != Status.OK):
-            return {'item':None, 'status':result['status'], 
+        if Status.has_failed(res):
+            return {'item':None, 'status':res['status'], 
                     'statustext': _('The person is not accessible')}
-        person = result.get('item')
+        person = res.get('item')
 
 #Todo: scheck privacy
 #         if use_common and self.person.too_new: 
 #             return None, None, None
 
-        # The original researcher data in result['root']:
+        # The original researcher data in res['root']:
         # - root_type    which kind of owner link points to this object
         # - usernode     the (original) owner of this object
         # - bid          Batch id, if any
-        root = result.get('root')
+        root = res.get('root')
         root_type = root.get('root_type')
         #node = root['usernode']
         #nodeuser = node.get('user', "")
@@ -393,23 +394,23 @@ class PersonReader(DbReader):
         self.dbdriver.objs = {}
 
         # 1. Read Person p, if not denied
-        result = self.dbdriver.dr_get_person_by_uuid(uuid, user=self.use_user)
-        # result = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
-        status = result.get('status')
+        res = self.dbdriver.dr_get_person_by_uuid(uuid, user=self.use_user)
+        # res = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
+        status = res.get('status')
         if  status != Status.OK:
             # Not found, not allowd (person.too_new) or error
-            return result
-        person = result.get('item')
-        root = result.get('root')   # Batch or Audit data
+            return res
+        person = res.get('item')
+        root = res.get('root')   # Batch or Audit data
 
         # 2. (p:Person) --> (x:Name|Event)
         #person.read_person_names_events()
-        result = self.dbdriver.dr_get_person_names_events(person.uniq_id)
+        res = self.dbdriver.dr_get_person_names_events(person.uniq_id)
         # result {'names', 'events', 'cause_of_death', 'status'}
-        if  status == Status.OK:
-            person.names = result.get('names')
-            person.events = result.get('events')
-            person.cause_of_death = result.get('cause_of_death')
+        if  Status.has_failed(res):
+            person.names = res.get('names')
+            person.events = res.get('events')
+            person.cause_of_death = res.get('cause_of_death')
         else:
             print(f'get_person_data: No names or events for person {uuid}')
         # 3. (p:Person) <-- (f:Family)
@@ -418,12 +419,12 @@ class PersonReader(DbReader):
         #      (fp)--> (me:Event{type:Birth})
         #      (f) --> (fe:Event)
         #person.read_person_families()
-        result = self.dbdriver.dr_get_person_families(person.uniq_id)
-        # result {'families_as_child', 'families_as_parent', 'family_events', 'status'}
-        if  status == Status.OK:
-            person.families_as_child = result.get('families_as_child')
-            person.families_as_parent = result.get('families_as_parent')
-            person.events = person.events + result.get('family_events')
+        res = self.dbdriver.dr_get_person_families(person.uniq_id)
+        # res {'families_as_child', 'families_as_parent', 'family_events', 'status'}
+        if  Status.has_failed(res):
+            personresies_as_child = res.get('families_as_child')
+            person.families_as_parent = res.get('families_as_parent')
+            person.events = person.events + res.get('family_events')
         else:
             print(f'get_person_data: No families for person {uuid}')
 
@@ -635,6 +636,7 @@ class PersonBl(Person):
             for name in names:
                 # Create links and nodes from given person: (:Person) --> (r:Refname)
                 res = ds._build_refnames(name.person_uid, name)
+                if Status.has_failed(res): return res
                 refname_count += res.get('count', 0)
         if do_sortname:
             for name in names:
@@ -642,9 +644,12 @@ class PersonBl(Person):
                     # If default name, store sortname key to Person node
                     sortname = name.key_surname()
                     ds._set_person_sortname(name.person_uid, sortname)
+                    if Status.has_failed(res): return res
                     sortname_count += 1
+                    break
 
-        return (refname_count, sortname_count)
+        return {'refnames': refname_count, 'sortnames': sortname_count, 
+                'status':Status.OK}
 
 
 #     @staticmethod

@@ -386,19 +386,19 @@ def obsolete_show_all_persons_list(opt=''):
 #     t0 = time.time()
 #     reader = PersonReader(dbreader, u_context)
 # 
-#     results = reader.get_person_list()
-#     status = results.get('status')
+#     res = reader.get_person_list()
+#     status = res.get('status')
 #     if status != Status.OK:
-#         flash(f'{_("No persons found")}: {results.get("statustext")}','error')
+#         flash(f'{_("No persons found")}: {res.get("statustext")}','error')
 # 
 #     elapsed = time.time() - t0
-#     found = results.get('items',[])
-#     hide = results['num_hidden']
+#     found = res.get('items',[])
+#     hide = res['num_hidden']
 #     hidden = f" hide={hide}" if hide > 0 else ""
 #     stk_logger(u_context, f"-> bp.scene.routes.show_persons_all"
 #                     f" n={len(found)}{hidden} e={elapsed:.3f}")
 # #     print(f"Got {len(found)} persons"
-# #           f" with {len(found)-results.hide} hidden"
+# #           f" with {len(found)-res.hide} hidden"
 # #           f" and status {status}"
 # #           f" in {elapsed:.3f}s")
 #     return render_template("/scene/persons_list.html", persons=found,
@@ -451,8 +451,7 @@ def show_person(uid=None):
 
     result = reader.get_person_data(uid, args)
     # result {'person', 'objs', 'jscode', 'root'}
-    status = result.get('status')
-    if status != Status.OK:
+    if Status.has_failed(result):
         flash(f'{_("Person not found")}: {result.get("statustext","error")}', 'error')
     person = result.get('person')
     objs = result.get('objs',[])
@@ -487,13 +486,13 @@ def obsolete_show_event_v1(uuid):
     u_context = UserContext(user_session, current_user, request)
     reader = EventReader(dbreader, u_context) 
 
-    results = reader.get_event_data(uuid)
+    res = reader.get_event_data(uuid)
 
-    status = results.get('status')
+    status = res.get('status')
     if status != Status.OK:
-        flash(f'{_("Event not found")}: {results.get("statustext")}','error')
-    event = results.get('event', None)
-    members = results.get('members', [])
+        flash(f'{_("Event not found")}: {res.get("statustext")}','error')
+    event = res.get('event', None)
+    members = res.get('members', [])
 
     stk_logger(u_context, f"-> bp.scene.routes.show_event_page n={len(members)}")
     return render_template("/scene/event.html",
@@ -529,11 +528,11 @@ def json_get_event():
         u_context = UserContext(user_session, current_user, request)
         reader = EventReader(dbreader, u_context) 
     
-        results = reader.get_event_data(uuid, args)
+        res = reader.get_event_data(uuid, args)
     
-        status = results.get('status')
+        status = res.get('status')
         if status != Status.OK:
-            flash(f'{_("Event not found")}: {results.get("statustext")}','error')
+            flash(f'{_("Event not found")}: {res.get("statustext")}','error')
         if status == Status.NOT_FOUND:
             return jsonify({"event":None, "members":[],
                             "statusText":_('No event found'),
@@ -543,10 +542,10 @@ def json_get_event():
                             "statusText":_('No event found'),
                             "status":status})
         # Event
-        event = results.get('event', None)
+        event = res.get('event', None)
         event.type_lang = jinja_filters.translate(event.type, 'evt').title()
         # Event members
-        members = results.get('members', [])
+        members = res.get('members', [])
         for m in members:
             if m.label == "Person":
                 m.href = '/scene/person?uuid=' + m.uuid
@@ -555,7 +554,7 @@ def json_get_event():
                 m.href = '/scene/family?uuid=' + m.uuid
             m.role_lang = jinja_filters.translate(m.role, 'role') if m.role  else  ''
         # Actually there is one place and one pl.uppers
-        places = results.get('places', [])
+        places = res.get('places', [])
         for pl in places:
             pl.href = '/scene/location/uuid=' + pl.uuid
             pl.type_lang = jinja_filters.translate(pl.type, 'lt').title()
@@ -563,9 +562,9 @@ def json_get_event():
                 up.href = '/scene/location/uuid=' + up.uuid
                 up.type_lang = jinja_filters.translate(up.type, 'lt_in').title()
         # Event notes
-        notes = results.get('notes', [])
+        notes = res.get('notes', [])
         # Medias
-        medias = results.get('medias', [])
+        medias = res.get('medias', [])
         for m in medias:
             m.href = '/scene/media?uuid=' + m.uuid
 
@@ -642,15 +641,15 @@ def show_family_page(uid=None):
         u_context = UserContext(user_session, current_user, request)
         reader = FamilyReader(dbreader, u_context) 
     
-        results = reader.get_family_data(uid)
+        res = reader.get_family_data(uid)
         #family = Family_combo.get_family_data(uid, u_context)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     stk_logger(u_context, "-> bp.scene.routes.show_family_page")
-    if results['status']:
-        return redirect(url_for('virhesivu', code=1, text=results['statustext']))
-    return render_template("/scene/family.html",  menuno=3, family=results['item'],
+    if res['status']:
+        return redirect(url_for('virhesivu', code=1, text=res['statustext']))
+    return render_template("/scene/family.html",  menuno=3, family=res['item'],
                            user_context=u_context, elapsed=time.time()-t0)
 
 
@@ -678,14 +677,14 @@ def json_get_person_families():
         u_context = UserContext(user_session, current_user, request)
         reader = FamilyReader(dbreader, u_context) 
 
-        results = reader.get_person_families(uuid)
+        res = reader.get_person_families(uuid)
 
-        if results.get('status') == Status.NOT_FOUND:
+        if res.get('status') == Status.NOT_FOUND:
             return jsonify({"member":uuid, "records":[],
                             "statusText":_('No families'),
                             "status":Status.NOT_FOUND})        
 
-        items = results['items']
+        items = res['items']
         res_dict = {'records': items, 
                     "member": uuid, 
                     'statusText': f'Löytyi {len(items)} perhettä',
@@ -724,16 +723,16 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    reader = PlaceReader(dbreader, u_context) 
+    datastore = PlaceDatastore(dbreader, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
 
-    results = reader.get_list()
+    res = datastore.get_list()
 
     elapsed = time.time() - t0
-    stk_logger(u_context, f"-> bp.scene.routes.show_places n={len(results['items'])} e={elapsed:.3f}")
-    return render_template("/scene/places.html", places=results['items'], 
+    stk_logger(u_context, f"-> bp.scene.routes.show_places n={len(res['items'])} e={elapsed:.3f}")
+    return render_template("/scene/places.html", places=res['items'], 
                            menuno=4, user_context=u_context, elapsed=elapsed)
 
 
@@ -746,24 +745,24 @@ def show_place(locid):
     t0 = time.time()
     try:
         u_context = UserContext(user_session, current_user, request)
-        reader = PlaceReader(dbreader, u_context) 
+        datastore = PlaceDatastore(dbreader, u_context) 
     
-        results = reader.get_with_events(locid)
+        res = datastore.get_with_events(locid)
 
-        if results['status'] == Status.NOT_FOUND:
+        if res['status'] == Status.NOT_FOUND:
             return redirect(url_for('virhesivu', code=1, text=f'Ei löytynyt yhtään'))
-        if results['status'] != Status.OK:
+        if res['status'] != Status.OK:
             return redirect(url_for('virhesivu', code=1, text=f'Virhetilanne'))
 
     except KeyError as e:
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    stk_logger(u_context, f"-> bp.scene.routes.show_place n={len(results['events'])}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_place n={len(res['events'])}")
     return render_template("/scene/place_events.html", 
-                           place=results['place'], 
-                           pl_hierarchy=results['hierarchy'],
-                           events=results['events'],
+                           place=res['place'], 
+                           pl_hierarchy=res['hierarchy'],
+                           events=res['events'],
                            user_context=u_context, elapsed=time.time()-t0)
 
 # ------------------------------ Menu 5: Sources --------------------------------
@@ -795,16 +794,16 @@ def show_sources(series=None):
     if series:
         u_context.series = series
     try:
-        results = reader.get_source_list()
-        if results['status'] == Status.NOT_FOUND:
+        res = reader.get_source_list()
+        if res['status'] == Status.NOT_FOUND:
             return redirect(url_for('virhesivu', code=1, text=f'Ei löytynyt yhtään'))
-        if results['status'] != Status.OK:
+        if res['status'] != Status.OK:
             return redirect(url_for('virhesivu', code=1, text=f'Virhetilanne'))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     series = u_context.series if u_context.series else "all"
-    stk_logger(u_context, f"-> bp.scene.routes.show_sources/{series} n={len(results['items'])}")
-    return render_template("/scene/sources.html", sources=results['items'], 
+    stk_logger(u_context, f"-> bp.scene.routes.show_sources/{series} n={len(res['items'])}")
+    return render_template("/scene/sources.html", sources=res['items'], 
                            user_context=u_context, elapsed=time.time()-t0)
 
 
@@ -822,24 +821,24 @@ def show_source_page(sourceid=None):
     try:
         reader = SourceReader(dbreader, u_context) 
     
-        results = reader.get_source_with_references(uuid, u_context)
+        res = reader.get_source_with_references(uuid, u_context)
         
-        if results['status'] == Status.NOT_FOUND:
-            msg = results.get('statustext', _('No objects found'))
+        if res['status'] == Status.NOT_FOUND:
+            msg = res.get('statustext', _('No objects found'))
             return redirect(url_for('virhesivu', code=1, text=msg))
-        if results['status'] != Status.OK:
-            msg = results.get('statustext', _('Error'))
+        if res['status'] != Status.OK:
+            msg = res.get('statustext', _('Error'))
             return redirect(url_for('virhesivu', code=1, text=msg))
 
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    stk_logger(u_context, f"-> bp.scene.routes.show_source_page n={len(results['citations'])}")
-#     for c in results.citations:
+    stk_logger(u_context, f"-> bp.scene.routes.show_source_page n={len(res['citations'])}")
+#     for c in res.citations:
 #         for i in c.citators:
 #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
 #             else:               print(f'{c} – person {i} {i.sortname}')
-    return render_template("/scene/source_events.html", source=results['item'],
-                           citations=results['citations'], user_context=u_context)
+    return render_template("/scene/source_events.html", source=res['item'],
+                           citations=res['citations'], user_context=u_context)
 
 # ------------------------------ Menu 6: Media --------------------------------
 

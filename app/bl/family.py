@@ -92,7 +92,7 @@ class FamilyBl(Family):
                 father_sortname str search key
                 mother_sortname str search key
 #             #TODO: Obsolete properties?
-#                 event_handles      str tapahtuman osoite
+#                 event_handle_roles      str tapahtuman osoite
 #                 eventref_role       str tapahtuman rooli
 #                 child_handles      str lapsen osoite
 #                 note_handles       str lisätiedon osoite
@@ -122,7 +122,9 @@ class FamilyBl(Family):
         if 'batch_id' in kwargs:
             batch_id = kwargs['batch_id']
         else:
-            raise RuntimeError(f"Family_gramps.save needs batch_id for {self.id}")
+            return {'status': Status.ERROR, 
+                    'statustext': f"bl.family.FamilyBl.save needs batch_id for {self.id}"}
+            #raise RuntimeError(f"bl.family.FamilyBl.save needs batch_id for {self.id}")
 
         self.uuid = self.newUuid()
         f_attr = {}
@@ -142,10 +144,10 @@ class FamilyBl(Family):
                 ids.append(self.uniq_id)
                 if len(ids) > 1:
                     logger.warning(f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}")
-                # print("Family {} ".format(self.uniq_id))
         except Exception as err:
-            logger.error(f"bl.family.FamilyBl.save: {err} in #{self.uniq_id} - {f_attr}")
-            #print("iError Family.save family: {0} attr={1}".format(err, f_attr), file=stderr)
+            msg = f"bl.family.FamilyBl.save: {err} in #{self.uniq_id} - {f_attr}"
+            logger.error(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
 
         # Make father and mother relations to Person nodes
         try:
@@ -155,28 +157,36 @@ class FamilyBl(Family):
                 role = 'mother'
             else:
                 return {'status': Status.ERROR, 
-                        'statustext': f'No father or motger role in family {self.id}'}
+                        'statustext': f'No father or mother role in family {self.id}'}
             tx.run(CypherFamily.link_parent, role=role,
                    f_handle=self.handle, p_handle=self.mother)
-        except Exception as err:
-            print("bl.family.FamilyBl.save: {0} {1}".format(err, self.id)) #, file=stderr)
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
 
         # Make relations to Event nodes
         try:
-            for i in range(len(self.event_handles)):
+            for handle_role in self.event_handle_roles:
+                # a tuple (event_handle, role)
                 tx.run(CypherFamily.link_event, 
-                       f_handle=self.handle, e_handle=self.eventref_hlink[i],
-                       role=self.eventref_role[i])
-        except Exception as err:
-            print("bl.family.FamilyBl.save events: {0} {1}".format(err, self.id)) #, file=stderr)
+                       f_handle=self.handle, 
+                       e_handle=handle_role[0], 
+                       role=handle_role[1])
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save events: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
   
         # Make child relations to Person nodes
         try:
             for handle in self.child_handles:
                 tx.run(CypherFamily.link_child, 
                        f_handle=self.handle, p_handle=handle)
-        except Exception as err:
-            print("bl.family.FamilyBl.save children: {0} {1}".format(err, self.id)) #, file=stderr)
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save children: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
   
         # Make relation(s) to the Note node
         try:
@@ -184,9 +194,10 @@ class FamilyBl(Family):
             for handle in self.note_handles:
                 tx.run(CypherFamily.link_note,
                        f_handle=self.handle, n_handle=handle)
-        except Exception as err:
-            logger.error(f"bl.family.FamilyBl.save.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
-            #print("iError Family.save notes: {0} {1}".format(err, self.id), file=stderr)
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save notes: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
   
         # Make relation(s) to the Citation node
         try:
@@ -194,9 +205,10 @@ class FamilyBl(Family):
             for handle in self.citation_handles:
                 tx.run(CypherFamily.link_citation,
                        f_handle=self.handle, c_handle=handle)
-        except Exception as err:
-            logger.error(f"bl.family.FamilyBl.save.save: {err} in linking Citations {self.handle} -> {self.citationref_hlink}")
-            #print("iError Family.save citations: {0} {1}".format(err, self.id), file=stderr)
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save citations: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
 
         return
 
@@ -263,12 +275,12 @@ class FamilyReader(DbReader):
             1. Get Family node by user/common
                res is dict {item, status, statustext}
         """
-        results = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
+        res = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
         # results {'item': <bl.family.FamilyBl>, 'status': Status}
-        if results.get('status') != Status.OK:
-            return results
+        if Status.has_failed(res):
+            return res
 
-        family = results.get('item')
+        family = res.get('item')
         # The Nodes for search of Sources and Notes (Family and Events)
         src_list = [family.uniq_id]
         """

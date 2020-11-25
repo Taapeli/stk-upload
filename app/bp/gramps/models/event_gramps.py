@@ -39,6 +39,7 @@ class Event_gramps(EventBl):
 
     def __init__(self):
         """ Luo uuden event-instanssin """
+        raise(f'bp.gramps.models.event_gramps.Event_gramps: OBOSOLETE')
         EventBl.__init__(self)
         self.note_handles = []      # Note handles (previous note_handles had
                                     # only the first one)

@@ -150,12 +150,13 @@ def background_load_to_stkbase(username,filename):
         update_metafile(metaname,counts=counts,progress={})
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
 
-        #steps,batch_id
         res = gramps_loader.xml_to_stkbase(pathname,username)
-        if res.get('status') != Status.OK:
-            return res
+        #steps,batch_id
         steps = res.get('steps',[])
-        batch_id = res.get('batch_id')
+        batch_id = res.get('batch_id',"-")
+        if Status.has_failed(res):
+            print(f'background_load_to_stkbase: Error {res.get("statustext")}')
+            return res
 
         for step in steps:
             print(step)
@@ -164,9 +165,7 @@ def background_load_to_stkbase(username,filename):
                     'statustext': "Run Failed: no batch created."}
 
         if os.path.exists(metaname): 
-            set_meta(username,filename,
-                     batch_id=batch_id,
-                     status=STATUS_DONE)
+            set_meta(username,filename, batch_id=batch_id, status=STATUS_DONE)
         msg = "{}:\nStored the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
         msg += "\nBatch id: {}".format(batch_id)
         msg += "\nLog file: {}".format(logname)

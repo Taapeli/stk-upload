@@ -136,8 +136,8 @@ class PlaceDatastore:
             context.update_session_scope('place_scope', 
                                           places[0].pname, places[-1].pname, 
                                           context.count, len(places))
-        place_result = {'items':places, 'status':Status.OK}
-        return place_result
+        res = {'items':places, 'status':Status.OK}
+        return res
 
 
     def get_with_events(self, uuid):
@@ -154,9 +154,9 @@ class PlaceDatastore:
         results = {"place":place, 'status':Status.OK}
 
         if not place:
-            results = {'status':Status.ERROR, 'statustext':
+            res = {'status':Status.ERROR, 'statustext':
                        f'get_with_events:{self.use_user} - no Place with uuid={uuid}'}
-            return results
+            return res
         
         #TODO: Find Citation -> Source -> Repository for each uniq_ids
         try:
@@ -165,13 +165,11 @@ class PlaceDatastore:
 
         except AttributeError as e:
             traceback.print_exc()
-            results['status'] = Status.ERROR
-            results['statustext'] = f"Place tree for {place.uniq_id}: {e}"
-            return results
+            return {'status': Status.ERROR,
+                   'statustext': f"Place tree attr for {place.uniq_id}: {e}"}
         except ValueError as e:
-            results['status'] = Status.ERROR
-            results['statustext'] = f"Place tree for {place.uniq_id}: {e}"
-            traceback.print_exc()
+            return {'status': Status.ERROR,
+                   'statustext': f"Place tree value for {place.uniq_id}: {e}"}
 
         res = self.dbdriver.dr_get_place_events(place.uniq_id)
         results['events'] = res['items']
