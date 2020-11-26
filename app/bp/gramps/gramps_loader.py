@@ -8,11 +8,11 @@ import time
 import gzip
 from os.path import basename, splitext
 #from flask_babelex import _
+import logging 
+logger = logging.getLogger('stkserver')
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
-#from models import dataupdater
-#from models.dataupdater import set_confidence_values
 import shareds
 import traceback
 from tarfile import TarFile
@@ -22,8 +22,6 @@ from bl.base import Status
 # Defined in xml_to_db function: Batch, BatchWriter
 from bp.scene.models import media
 from pe.neo4j.dataservice import Neo4jDataService
-#from pe.neo4j.read_driver import Neo4jReadDriver
-#from pe.db_writer import DbWriter # ??
 
 
 def get_upload_folder(username): 
@@ -548,12 +546,12 @@ def xml_to_stkbase(pathname, userid):
     handler.blog.log(cleaning_log)
 
     # Initiate BatchDatastore and Batch node data
-    # datastore -> Toimialametodit
+    # datastore ~= Toimialametodit
     shareds.datastore = BatchDatastore(shareds.driver, handler.dataservice)
     mediapath = handler.get_mediapath_from_header()
-    res = shareds.datastore.start_batch(userid, file_cleaned, mediapath)
+    res = shareds.datastore.start_data_batch(userid, file_cleaned, mediapath)
     if Status.has_failed(res):
-        print('bp.gramps.gramps_loader.xml_to_stkbase TODO rollback')
+        print('bp.gramps.gramps_loader.xml_to_stkbase TODO _rollback')
         return res
     handler.batch = res.get('batch')
 
@@ -562,19 +560,6 @@ def xml_to_stkbase(pathname, userid):
     if pathname.endswith(".gpkg"):
         extract_media(pathname, handler.batch.id)
     
-#     try:
-# #         ''' Start DOM transaction '''
-# #         handler.begin_tx(shareds.driver.session())
-#         # Create new Batch node and start
-#         #status_update({'percent':1})
-#     except ConnectionError as err:
-#         msg = f"{e.__class__.__name__} {err}"
-#         handler.blog.log_event(title=_("Database save failed due to {} {}".\
-#                                      format(err.message, err.code)), level="ERROR")
-#         return {'status':Status.ERROR,
-#                 'statustext': msg}
-#         #raise SystemExit("Stopped due to ConnectionError")    # Stop processing?
-        
     try:
         #handler.handle_header() --> get_header_mediapath()
         res = handler.handle_notes()
@@ -616,27 +601,35 @@ def xml_to_stkbase(pathname, userid):
 
         res = handler.remove_handles()
         if Status.has_failed(res):  return res
-        res = handler.add_missing_links()
-        if Status.has_failed(res):  return res
-
-# Huom. Paikkahierarkia on tehty metodissa Place_gramps.save niin että
-#       aluksi luodaan tarvittaessa viitattu ylempi paikka vajailla tiedoilla.
-#             # Make the place hierarchy
-#             handler.make_place_hierarchy()
+        # The missing links counted in remove_handles
+        #res = handler.add_missing_links()
+        #if Status.has_failed(res):  return res
 
     except Exception as e:
         traceback.print_exc()
-        msg = f"Stopped xml load due to {e}"    # Stop processing?
+        msg = f"Stopped xml load due to {e}" 
         print(msg)
-        handler.commit(rollback=True)
-        return {'status':Status.ERROR,
-                'statustext': msg}
+        handler.dataservice._rollback()
+        handler.blog.log_event({'title':_("Database save failed due to {}".\
+                                 format(msg)), 'level':"ERROR"})
+        return {'status':Status.ERROR, 'statustext': msg}
 
-    handler.blog.complete(handler.tx)
-    handler.commit()
+    res = handler.batch.mark_complete(userid)
+    if Status.has_failed(res):
+        handler.dataservice._rollback()
+        handler.blog.log_event({'title':_("Database save failed due to {}".\
+                                 format(msg)), 'level':"ERROR"})
+        return {'status': res.get('status'),
+                'statustest': res.get('statustext',''),
+                'steps': handler.blog.list(), 
+                'batch_id': handler.batch.id}
+    else:
+        handler.dataservice._commit()
+        logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
 
-    handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
-                            'elapsed':time.time()-t0})  #, 'percent':100})
+        handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
+                                'elapsed':time.time()-t0})
+
     return {'status': Status.OK,
             'steps': handler.blog.list(), 
             'batch_id': handler.batch.id}

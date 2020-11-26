@@ -37,31 +37,40 @@ class Neo4jDataService:
         self.tx = driver.session().begin_transaction()
 
 
-    def dw_commit(self):
+    def _commit(self):
         """ Commit transaction.
         """
-        if self.tx.closed():
-            print("Transaction already closed!")
-            return 0
+#         if self.tx.closed():
+#             print("Transaction already closed!")
+#             return {'status':Status.OK}
         try:
             self.tx.commit()
-            logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/ok f="{self.file}"')
+
             print("Transaction committed")
-            return 0
+            return {'status':Status.OK}
         except Exception as e:
             msg = f'{e.__class__.__name__}, {e}'
-            logger.info('-> bp.gramps.xml_dom_handler.DOM_handler.commit/fail"')
-            print("pe.db_writer.DbWriter.commit: Transaction failed "+ msg)
-            self.blog.log_event({'title':_("Database save failed due to {}".\
-                                 format(msg)), 'level':"ERROR"})
-            return msg
+            logger.info('-> pe.neo4j.dataservice.Neo4jDataService._commit/fail"')
+            print("Neo4jDataService._commit: Transaction failed "+ msg)
+            return {'status':Status.ERROR, 
+                    'statustext': f'Commit failed: {msg}'}
 
-    def dw_rollback(self):
+    def _rollback(self):
         """ Rollback transaction.
         """
-        self.tx.rollback()
-        print("Transaction discarded")
-        logger.info('-> pe.neo4j.write_driver.Neo4jDataService.dw_rollback')
+        try:
+            self.tx.rollback()
+            print("Transaction discarded")
+            logger.info('-> pe.neo4j.write_driver.Neo4jDataService._rollback')
+            return {'status':Status.OK}
+        except Exception as e:
+            msg = f'{e.__class__.__name__}, {e}'
+            logger.info('-> pe.neo4j.dataservice.Neo4jDataService._rollback/fail"')
+            print("Neo4jDataService._rollback: Transaction failed "+ msg)
+            self.blog.log_event({'title':_("Database save failed due to {}".\
+                                 format(msg)), 'level':"ERROR"})
+            return {'status':Status.ERROR, 
+                    'statustext': f'Rollback failed: {msg}'}
 
 
     # ----- Batch -----
@@ -119,13 +128,11 @@ class Neo4jDataService:
             return {'status': Status.OK, 'identity':uniq_id}
 
         except Exception as e:
-            statustext = "pe.neo4j.write_driver.Neo4jDataService.dw_batch_save failed:"\
-                f" {e.__class__.name} {e}"
-            return {'status': Status.ERROR, 
-                    'statustext': statustext}
+            statustext = f"Neo4jDataService._batch_save failed: {e.__class__.name} {e}"
+            return {'status': Status.ERROR, 'statustext': statustext}
 
 
-    def _obj_save_and_link(self, obj, **kwargs):   # batch_id=None, parent_id=None):
+    def _obj_save_and_link(self, obj, **kwargs):
         """ Saves given object to database
         
         :param: batch_id    Current Batch (batch) --> (obj)
@@ -139,12 +146,40 @@ class Neo4jDataService:
         '''
         status = Status.OK
         total = 0
+        unlinked = 0
+        # Remove handles from nodes connected to given Batch
         result = self.tx.run(CypherBatch.remove_all_handles, batch_id=batch_id)
         for count, label in result:
             print(f'# - cleaned {count} {label} handles')
             total += count
-        changes = result.summary().counters.properties_set
-        return {'status':status, 'count':total, 'changes':changes}
+        #changes = result.summary().counters.properties_set
+        
+        # Find handles left: missing link (:Batch) --> (x)
+        result = self.tx.run(CypherBatch.find_unlinked_nodes)
+        for count, label in result:
+            print(f'Neo4jDataService._obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch')
+            unlinked += count
+        return {'status':status, 'count':total, 'unlinked':unlinked}
+
+
+#     def _obj_find_unlinked_handles(self, batch_id):
+#         ''' Find nodes which has handle but not linked to Batch.
+#         '''
+#         status = Status.OK
+#         total = 0
+#         # Find handles left
+#         result = self.tx.run(CypherBatch.find_unlinked_nodes)
+#         for count, label in result:
+#             print(f'# - WARNING: Found {count} {label} not linked to batch')
+#             total += count
+#         #changes = result.summary().counters.properties_set
+#         
+#         # Check handles not removed
+#         result = self.tx.run(CypherBatch.remove_all_handles, batch_id=batch_id)
+#         for count, label in result:
+#             print(f'# - cleaned {count} {label} handles')
+#             total += count
+#         return {'status':status, 'count':total} # , 'changes':changes}
 
 
     # ----- Note -----
@@ -508,8 +543,9 @@ class Neo4jDataService:
     def _set_family_dates_sortnames(self, uniq_id, dates, father_sortname, mother_sortname):
         ''' Update Family dates and parents' sortnames.
         
-        :param:    uniq_id        family identity
-        :dates:    DateRange    family date range (marriage ... death or divorce
+        :param:    uniq_id      family identity
+        :dates:    dict         representing DateRange for family 
+                                (marriage ... death or divorce
         
         Called from self._set_family_calculated_attributes only
         '''
@@ -518,7 +554,7 @@ class Neo4jDataService:
             "mother_sortname": mother_sortname
         }
         if dates:
-            f_attr.update(dates.for_db())
+            f_attr.update(dates)
 
         result = self.tx.run(CypherFamily.set_dates_sortname, id=uniq_id, f_attr=f_attr)
         cnt = result.summary().counters.properties_set

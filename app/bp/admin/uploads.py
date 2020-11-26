@@ -150,8 +150,9 @@ def background_load_to_stkbase(username,filename):
         update_metafile(metaname,counts=counts,progress={})
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
 
+        # Read the Gramps xml file, and save the information to db
         res = gramps_loader.xml_to_stkbase(pathname,username)
-        #steps,batch_id
+
         steps = res.get('steps',[])
         batch_id = res.get('batch_id',"-")
         if Status.has_failed(res):
@@ -177,17 +178,17 @@ def background_load_to_stkbase(username,filename):
         email.email_admin(
                     "Stk: Gramps XML file stored",
                     msg )
-        syslog.log(type="storing to database complete",file=filename,user=username)
+        syslog.log(type="completed save to database", file=filename, user=username)
     except Exception as e:
         #traceback.print_exc()
         print(f'bp.admin.uploads.background_load_to_stkbase: {e.__class__.__name__} {e}')
         res = traceback.format_exc()
+        print(res)
         set_meta(username,filename,status=STATUS_FAILED)
-        msg = "{}:\nStoring the file {} from user {} to database FAILED".format(util.format_timestamp(),pathname,username)
-        msg += "\nLog file: {}".format(logname)
-        msg += "\n" + res
+        msg = f"{util.format_timestamp()}:\nStoring the file {pathname} from user {username} to database FAILED"
+        msg += f"\nLog file: {logname}\n" + res
         for step in steps:
-            msg += "\n{}".format(step)
+            msg += f"\n{step}"
         msg += "\n"
         open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
@@ -244,6 +245,8 @@ def list_uploads(username):
     class Upload: pass
     for name in names:
         if name.endswith(".meta"):
+            #TODO: Tähän tarvitaan try catch, koska kaatuneen gramps-latauksen jälkeen
+            #      metatiedosto voi olla rikki tai puuttua
             fname = os.path.join(upload_folder,name)
             xmlname = name.rsplit(".",maxsplit=1)[0]
             meta = get_meta(fname)

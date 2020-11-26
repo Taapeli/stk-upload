@@ -36,30 +36,42 @@ class Batch():
     def __str__(self):
         return f"{self.user} / {self.id}"
 
-#     def save(self):
-#         ''' Create or update Batch node.
-#         
-#             Returns {'id':self.id, 'status':Status.OK}
-#         '''
-#         try:
-#             attr = {
-#                 "id": self.id,
-#                 "user": self.user,
-#                 "file": self.file,
-#                 "mediapath": self.mediapath,
-#                 #timestamp": <to be set in cypher>,
-#                 #id: <uniq_id from result>,
-#                 "status": self.status
-#             }
-#             #self.tx.run(CypherBatch.batch_create, b_attr=attr)
-#             res = shareds.datastore._batch_save(attr)
-#             return res
-# 
-#         except Exception as e:
-#             return {'id':self.id, 'status':Status.ERROR, 
-#                     'statustext': f'bl.batch_audit.Batch.save: {e.__class__.__name__} {e}'}
+    def save(self):
+        ''' Create or update Batch node.
+        
+            Returns {'id':self.id, 'status':Status.OK}
+        '''
+        try:
+            attr = {
+                "id": self.id,
+                "user": self.user,
+                "file": self.file,
+                "mediapath": self.mediapath,
+                #timestamp": <to be set in cypher>,
+                #id: <uniq_id from result>,
+                "status": self.status
+            }
+            #self.tx.run(CypherBatch.self_create, b_attr=attr)
+            res = shareds.datastore.dataservice._batch_save(attr)
+            # returns {status, identity}
+            if Status.has_failed(res):
+                return res
+
+            self.uniq_id = res.get('identity')
+            return res
+
+        except Exception as e:
+            return {'id':self.id, 'status':Status.ERROR, 
+                    'statustext': f'bl.batch_audit.Batch.save: {e.__class__.__name__} {e}'}
 
 
+    def mark_complete(self, userid):
+        ''' Mark this data batch completed '''
+        attr = {"id": self.id,
+                "user": userid,
+                "status":"completed"}
+        res = shareds.datastore.dataservice._batch_save(attr)
+        return res
 
     @classmethod
     def from_node(cls, node):
@@ -252,7 +264,7 @@ class BatchDatastore:
         self.dataservice = dataservice
         self.batch  = None
 
-    def start_batch(self,userid, file, mediapath):
+    def start_data_batch(self, userid, file, mediapath):
         '''
         Initiate new Batch.
         
@@ -269,44 +281,25 @@ class BatchDatastore:
         res = self.dataservice._new_batch_id()
         if Status.has_failed(res):
             # Failed to get an id
-            print("bl.batch.BatchDatastore.start_batch: TODO shareds.datastore._remove_lock('batch_id')")
+            print("bl.batch.BatchDatastore.start_data_batch: TODO shareds.datastore._remove_lock('batch_id')")
             return res
 
         self.batch.id = res.get('id')
         self.batch.user = userid
         self.batch.file = file
         self.batch.mediapath = mediapath
-        
-        res = self.batch_save(self.batch)
+
+        res = self.batch.save()
         print(f'bl.batch_audit.BatchDatastore: new Batch {self.batch.id} identity={self.batch.uniq_id}')
 
         return {'batch': self.batch, 'status': Status.OK}
 
-    def batch_save(self, batch):
-        ''' Create or update Batch node.
-        
-            Returns {'id':self.id, 'status':Status.OK}
-        '''
-        try:
-            attr = {
-                "id": batch.id,
-                "user": batch.user,
-                "file": batch.file,
-                "mediapath": batch.mediapath,
-                #timestamp": <to be set in cypher>,
-                #id: <uniq_id from result>,
-                "status": batch.status
-            }
-            #self.tx.run(CypherBatch.batch_create, b_attr=attr)
-            res = self.dataservice._batch_save(attr)
-            # returns {status, identity}
-            if Status.has_failed(res):
-                return res
+    def commit(self):
+        ''' Commit transaction. '''
+        self.dataservice._commit()
 
-            batch.uniq_id = res.get('identity')
-            return res
+    def rollback(self):
+        ''' Commit transaction. '''
+        self.dataservice._rollback()
 
-        except Exception as e:
-            return {'id':self.id, 'status':Status.ERROR, 
-                    'statustext': f'bl.batch_audit.Batch.save: {e.__class__.__name__} {e}'}
 

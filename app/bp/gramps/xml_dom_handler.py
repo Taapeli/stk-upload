@@ -120,7 +120,7 @@ class DOM_handler():
         '''
         res = self.dataservice._obj_remove_gramps_handles(self.batch.id)
         if Status.has_failed(res):  return res
-        print (f'# --- removed {res.get("changes")} handle from {res.get("count")} nodes')
+        print (f'# --- removed handles from {res.get("count")} nodes')
         return res
 
     def add_missing_links(self):

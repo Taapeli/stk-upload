@@ -81,6 +81,18 @@ match (b:Batch {id:$batch_id}) -[*]-> (a)
     remove a.handle
 return count(a),labels(a)[0]"""
 
+    add_missing_links = """
+match (n) where exists (n.handle)
+match (b:Batch{id:$batch_id})
+    merge (b)-[:OWNS_OTHER]->(n)
+    remove n.handle
+return count(n)"""
+
+    find_unlinked_nodes = """
+match (n) where exists (n.handle)
+return  count(n), labels(n)[0]"""
+
+
 
 class CypherAudit():
     ''' 
