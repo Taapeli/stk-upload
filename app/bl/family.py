@@ -114,6 +114,7 @@ class FamilyBl(Family):
         self.note_ref = []          # For a page, where same note may be referenced
                                     # from multiple events and other objects
 
+
     def save(self, tx, **kwargs):
         """ Saves the family node to db with its relations.
         
@@ -211,6 +212,13 @@ class FamilyBl(Family):
             return {'status': Status.ERROR, 'statustext': msg}
 
         return
+
+    @staticmethod           
+    def set_calculated_attributes(uniq_id):
+        ''' Get Family event dates and sortnames.
+        '''
+        return shareds.datastore.dataservice._set_family_calculated_attributes(uniq_id)
+        #return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
 
 
 class FamilyReader(DbReader):

@@ -4,6 +4,8 @@ Created on 23.3.2020
 @author: jm
 '''
 import logging
+import traceback
+
 logger = logging.getLogger('stkserver')
 from datetime import date #, datetime
 
@@ -11,11 +13,12 @@ from bl.base import Status
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 
-from pe.neo4j.cypher.cy_person import CypherPerson
-from pe.neo4j.cypher.cy_refname import CypherRefname
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch
-from pe.neo4j.cypher.cy_place import CypherPlace
-from pe.neo4j.cypher.cy_gramps import CypherObjectWHandle
+from .cypher.cy_batch_audit import CypherBatch
+from .cypher.cy_person import CypherPerson
+from .cypher.cy_refname import CypherRefname
+from .cypher.cy_family import CypherFamily
+from .cypher.cy_place import CypherPlace
+from .cypher.cy_gramps import CypherObjectWHandle
 
 
 class Neo4jDataService:
@@ -129,6 +132,19 @@ class Neo4jDataService:
         _param: parent_id   Parent object to link (parent) --> (obj)
         """
         obj.save(self.tx, **kwargs)
+
+
+    def _obj_remove_gramps_handles(self, batch_id):
+        ''' Remove all Gramps handles.
+        '''
+        status = Status.OK
+        total = 0
+        result = self.tx.run(CypherBatch.remove_all_handles, batch_id=batch_id)
+        for count, label in result:
+            print(f'# - cleaned {count} {label} handles')
+            total += count
+        changes = result.summary().counters.properties_set
+        return {'status':status, 'count':total, 'changes':changes}
 
 
     # ----- Note -----
@@ -271,6 +287,105 @@ class Neo4jDataService:
         return names
 
 
+    def _set_people_lifetime_estimates(self, uids=[]): 
+        """ Get estimated lifetimes to Person.dates for given person.uniq_ids.
+ 
+            :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+        """
+        from models import lifetime
+        from models.gen.dates import DR
+
+        personlist = []
+        personmap = {}
+        res = {'status': Status.OK}
+        try:
+            if uids:
+                result = self.tx.run(CypherPerson.fetch_selected_for_lifetime_estimates,
+                                     idlist=uids)
+            else:
+                result = self.tx.run(CypherPerson.fetch_all_for_lifetime_estimates)
+            # RETURN p, id(p) as pid, 
+            #     COLLECT(DISTINCT [e,r.role]) AS events,
+            #     COLLECT(DISTINCT [fam_event,r2.role]) AS fam_events,
+            #     COLLECT(DISTINCT [c,id(c)]) as children,
+            #     COLLECT(DISTINCT [parent,id(parent)]) as parents
+            for record in result:
+                # Person
+                p = lifetime.Person()
+                p.pid = record['pid']
+                p.gramps_id = record['p']['id']
+
+                # Person and family event dates
+                events = record['events']
+                fam_events = record['fam_events']
+                for e,role in events + fam_events:
+                    if e is None: continue
+                    #print("e:",e)
+                    eventtype = e['type']
+                    datetype = e['datetype']
+                    datetype1 = None
+                    datetype2 = None
+                    if datetype == DR['DATE']:
+                        datetype1 = "exact"
+                    elif datetype == DR['BEFORE']:
+                        datetype1 = "before"
+                    elif datetype == DR['AFTER']:
+                        datetype1 = "after"
+                    elif datetype == DR['BETWEEN']:
+                        datetype1 = "after"
+                        datetype2 = "before"
+                    elif datetype == DR['PERIOD']:
+                        datetype1 = "after"
+                        datetype2 = "before"
+                    date1 = e['date1']
+                    date2 = e['date2']
+                    if datetype1 and date1 is not None:
+                        year1 = date1 // 1024
+                        ev = lifetime.Event(eventtype,datetype1,year1,role)
+                        p.events.append(ev)
+                    if datetype2 and date2 is not None:
+                        year2 = date2 // 1024
+                        ev = lifetime.Event(eventtype,datetype2,year2,role)
+                        p.events.append(ev)
+
+                # List Parent and Child identities
+                p.parent_pids = []
+                for _parent,pid in record['parents']:
+                    if pid: p.parent_pids.append(pid)
+                p.child_pids = []
+                for _parent,pid in record['children']:
+                    if pid: p.child_pids.append(pid)
+
+                personlist.append(p)
+                personmap[p.pid] = p
+
+            # Add parents and children to lifetime.Person objects
+            for p in personlist:
+                for pid in p.parent_pids:
+                    p.parents.append(personmap[pid])
+                for pid in p.child_pids:
+                    p.children.append(personmap[pid])
+            lifetime.calculate_estimates(personlist)
+
+            for p in personlist:
+                result = self.tx.run(CypherPerson.update_lifetime_estimate, 
+                                     id=p.pid,
+                                     birth_low = p.birth_low.getvalue(),
+                                     death_low = p.death_low.getvalue(),
+                                     birth_high = p.birth_high.getvalue(),
+                                     death_high = p.death_high.getvalue() )
+                                  
+            res['count'] = len(personlist)
+            #print(f"Estimated lifetime for {res['count']} persons")
+            return res
+
+        except Exception as e:
+            msg = f'Neo4jDataService._set_people_lifetime_estimates: {e.__class__.__name__} {e}'
+            print(f"Error {msg}")
+            traceback.print_exc()
+            return {'status': Status.ERROR, 'statustext': msg }
+
+
     def _build_refnames(self, person_uid:int, name:Name):
         """ Set Refnames to the Person with given uniq_id.
         """
@@ -390,4 +505,96 @@ class Neo4jDataService:
 
     # ----- Family -----
 
+    def _set_family_dates_sortnames(self, uniq_id, dates, father_sortname, mother_sortname):
+        ''' Update Family dates and parents' sortnames.
+        
+        :param:    uniq_id        family identity
+        :dates:    DateRange    family date range (marriage ... death or divorce
+        
+        Called from self._set_family_calculated_attributes only
+        '''
+        f_attr = {
+            "father_sortname": father_sortname,
+            "mother_sortname": mother_sortname
+        }
+        if dates:
+            f_attr.update(dates.for_db())
+
+        result = self.tx.run(CypherFamily.set_dates_sortname, id=uniq_id, f_attr=f_attr)
+        cnt = result.summary().counters.properties_set
+        return {'status':Status.OK, 'count':cnt}
+
+
+    def _set_family_calculated_attributes(self, uniq_id=None):
+        """ Set Family sortnames and estimated marriage DateRange.
+ 
+            :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+       
+            Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes
+    
+            Set Family.father_sortname and Family.mother_sortname using the data in Person
+            Set Family.date1 using the data in marriage Event
+            Set Family.datetype and Family.date2 using the data in divorce or death Events
+        """
+        from models.gen.dates import DateRange, DR
+
+        dates_count = 0
+        sortname_count = 0
+        status = Status.OK
+
+        try:
+            # Process each family 
+            #### Todo Move and refactor to bl.FamilyBl
+            #result = Family_combo.get_dates_parents(my_tx, uniq_id)
+            result = self.tx.run(CypherFamily.get_dates_parents, id=uniq_id)
+            for record in result:
+                # RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
+                #        mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
+                #        event.date1 AS marriage_date, divorce_event.date1 AS divorce_date
+                father_death_date = record['father_death_date']
+                mother_death_date = record['mother_death_date']
+                marriage_date = record['marriage_date']
+                divorce_date = record['divorce_date']
+    
+                # Dates calculation
+                dates=None
+                end_date = None
+                if divorce_date:
+                    end_date = divorce_date
+                elif father_death_date and mother_death_date:
+                    if father_death_date < mother_death_date:
+                        end_date = father_death_date
+                    else:
+                        end_date = mother_death_date
+                elif father_death_date:
+                    end_date = father_death_date
+                elif mother_death_date:
+                    end_date = mother_death_date
+        
+                if marriage_date:
+                    if end_date:
+                        dates = DateRange(DR['PERIOD'], marriage_date, end_date)
+                    else:
+                        dates = DateRange(DR['DATE'], marriage_date)
+                elif end_date:
+                    dates = DateRange(DR['BEFORE'], end_date)
+                dates_dict = dates.for_db() if dates else None
+
+                # Save the dates from Event node and sortnames from Person nodes
+                ret = self._set_family_dates_sortnames(uniq_id, dates_dict,
+                                                       record.get('father_sortname'),
+                                                       record.get('mother_sortname'))
+                if Status.has_failed(ret):  return ret
+                print('Neo4jDataService._set_family_calculated_attributes: '
+                      f'id={uniq_id} properties_set={ret.get("count","none")}')
+                dates_count += 1
+                sortname_count += 1
+    
+            return {'status': status, 'dates':dates_count, 'sortnames': sortname_count,
+                    'statustext': ret.get('statustext','')}
+
+        except Exception as e:
+            msg = f'Neo4jDataService._set_family_calculated_attributes: person={uniq_id}, {e.__class__.__name__}, {e}'
+            print(msg)
+            return {'status':Status.ERROR, 'statustext': msg}
 

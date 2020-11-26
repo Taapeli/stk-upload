@@ -1,4 +1,9 @@
 {# _gramps/uploads.html_ #}
+<!-- See different versions:
+     ./gramps/templates/gramps/uploads.html
+     ./audit/templates/audit/batches.html
+     ./admin/templates/admin/uploads.html
+ -->
 {% extends "start/s_layout.html" %}
 {% block title %}{{ _("Uploads from Gramps") }}{% endblock %}
 {% block body %}
@@ -27,8 +32,8 @@ fileselect {
 .tooltip {
   position: relative;
   display: inline-block;
-  border-bottom: 1px dotted black;
-  background-color: green;
+  /*border-bottom: 1px dotted black;*/
+  background-color: DarkGray;
   color: white;
   padding: 0 2pt;
   border-radius: 7pt;

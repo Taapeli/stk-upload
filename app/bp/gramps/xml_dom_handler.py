@@ -26,9 +26,9 @@ from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaRefResult
 from bl.event import EventBl
-from bl.source import SourceBl
+#from bl.source import SourceBl
 
-from pe.db_writer import DbWriter
+#from pe.db_writer import DbWriter
 #from pe.neo4j.dataservice import Neo4jWriteDriver
 
 #from .bl.person_gramps import PersonGramps
@@ -48,7 +48,7 @@ from models.gen.media import Media
 from models.gen.citation import Citation
 from models.gen.repository import Repository
 
-from models import dataupdater
+#from models import dataupdater
 import threading
 
 
@@ -118,12 +118,10 @@ class DOM_handler():
     def remove_handles(self):
         ''' Remove all Gramps handles, becouse they are not needed any more.
         '''
-        total = 0
-        results = self.tx.run(Cypher_mixed.remove_handles, batch_id=self.batch_id)
-        for count, label in results:
-            print(f'# - cleaned {count} {label} handles')
-            total += count
-        print (f'# --- removed handle from {total} nodes')
+        res = self.dataservice._obj_remove_gramps_handles(self.batch.id)
+        if Status.has_failed(res):  return res
+        print (f'# --- removed {res.get("changes")} handle from {res.get("count")} nodes')
+        return res
 
     def add_missing_links(self):
         ''' Link the Nodes without OWNS link to Batch
@@ -852,8 +850,9 @@ class DOM_handler():
     def set_family_calculated_attributes(self):
         ''' Set sortnames and lifetime dates for each Family in the list self.family_ids.
 
-            For each Family set Family.father_sortname, Family.mother_sortname, 
-            Family.datetype, Family.date1 and Family.date2
+            For each Family
+            - set Family.father_sortname, Family.mother_sortname, 
+            - set Family.datetype, Family.date1 and Family.date2
         '''
 
         status = Status.OK
@@ -864,15 +863,18 @@ class DOM_handler():
         dates_count = 0
         sortname_count = 0
 
-        for p_id in self.family_ids:
-            if p_id != None:
-                dc, sc = dataupdater.set_family_calculated_attributes(tx=self.tx, uniq_id=p_id)
-                dates_count += dc
-                sortname_count += sc
+        for uniq_id in self.family_ids:
+            if uniq_id != None:
+#                 dc, sc = dataupdater.set_family_calculated_attributes(tx=self.tx, uniq_id=p_id)
+                res = FamilyBl.set_calculated_attributes(uniq_id)
+                # returns {refnames, sortnames, status}
+                if Status.has_failed(res): return res
+                dates_count += res.get('dates')
+                sortname_count += res.get('sortnames')
 
         self.blog.log_event({'title':"Dates", 'count':dates_count, 'elapsed':time.time()-t0})
         self.blog.log_event({'title':"Family sorting names", 'count':sortname_count})
-        return {'status':status, 'message': message}
+        return res
         
 
     def set_person_calculated_attributes(self):
@@ -891,7 +893,7 @@ class DOM_handler():
             if p_id != None:
                 res = PersonBl.set_person_name_properties(uniq_id=p_id)
                 # returns {refnames, sortnames, status}
-                if Status.has_failed(res): return
+                if Status.has_failed(res): return res
                 refname_count += res.get('refnames')
                 sortname_count += res.get('sortnames')
 
@@ -912,10 +914,11 @@ class DOM_handler():
         print (f"***** {message} *****")
         t0 = time.time()
 
-        count = PersonBl.estimate_lifetimes(self.tx, self.person_ids)
-                            
-        self.blog.log_event({'title':"Estimated person lifetimes", 
-                             'count':count, 'elapsed':time.time()-t0}) 
+        res = PersonBl.estimate_lifetimes(self.person_ids)
+
+        count = res.get('count')
+        message = "Estimated person lifetimes"
+        self.blog.log_event({'title': message, 'count':count, 'elapsed':time.time()-t0}) 
         return {'status':status, 'message': f'{message}, {count} changed'}
 
 

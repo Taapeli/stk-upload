@@ -76,6 +76,11 @@ MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id
 OPTIONAL MATCH (b) -[*]-> (n) 
 DETACH DELETE b, n"""
 
+    remove_all_handles = """
+match (b:Batch {id:$batch_id}) -[*]-> (a)
+    remove a.handle
+return count(a),labels(a)[0]"""
+
 
 class CypherAudit():
     ''' 

@@ -1,14 +1,12 @@
 #
 # Reading and updating Neo4j database
 #
-# See also: gramps.cypher_gramps for updates from Gramps xml file
-#
 # 12.2.2018 - 16.5.2020 / JMä
 #
 
 class CypherFamily():
     '''
-    Cypher clases for creating Families
+    Cypher classes for reading and creating Families
     '''
 
 # Get Family node by uuid
@@ -140,4 +138,7 @@ MATCH (n:Family) WHERE n.handle=$f_handle
 MATCH (m:Citation) WHERE m.handle=$c_handle
 CREATE (n)-[r:CITATION]->(m)"""
 
+    set_dates_sortname = """
+MATCH (family:Family) WHERE ID(family) = $id
+SET family += $f_attr"""
 
