@@ -130,6 +130,7 @@ class EventReader(DbReader):
             return {'item':None, 'status':res['status'], 
                     'statustext': _('The event is not accessible')}
         event = res['item']
+        event.note_ref= []
         res_dict['event'] = event
 
         members= []
@@ -191,8 +192,10 @@ class EventBl(Event):
         self.citation_ref = []
         self.place_ref = []
         self.media_ref = []
+        self.note_ref = []
         
         self.citations = []     # For creating display sets
+#       self.notes = []         # TODO: Note objects <- note_handles[]
         self.place = None       # Place node, if included
         self.person = None      # Persons names connected; for creating display
 

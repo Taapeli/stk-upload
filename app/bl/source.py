@@ -88,7 +88,7 @@ class SourceBl(Source):
         self.citations = []
         self.notes = []
         self.note_handles = []
-
+        self.note_ref = []
 
 
 class SourceReader(DbReader):

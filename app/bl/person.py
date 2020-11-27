@@ -396,8 +396,7 @@ class PersonReader(DbReader):
         # 1. Read Person p, if not denied
         res = self.dbdriver.dr_get_person_by_uuid(uuid, user=self.use_user)
         # res = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
-        status = res.get('status')
-        if  status != Status.OK:
+        if Status.has_failed(res):
             # Not found, not allowd (person.too_new) or error
             return res
         person = res.get('item')
@@ -408,11 +407,11 @@ class PersonReader(DbReader):
         res = self.dbdriver.dr_get_person_names_events(person.uniq_id)
         # result {'names', 'events', 'cause_of_death', 'status'}
         if  Status.has_failed(res):
+            print(f'get_person_data: No names or events for person {uuid}')
+        else:
             person.names = res.get('names')
             person.events = res.get('events')
             person.cause_of_death = res.get('cause_of_death')
-        else:
-            print(f'get_person_data: No names or events for person {uuid}')
         # 3. (p:Person) <-- (f:Family)
         #    for f
         #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
@@ -422,11 +421,11 @@ class PersonReader(DbReader):
         res = self.dbdriver.dr_get_person_families(person.uniq_id)
         # res {'families_as_child', 'families_as_parent', 'family_events', 'status'}
         if  Status.has_failed(res):
+            print(f'get_person_data: No families for person {uuid}')
+        else:
             person.families_as_child = res.get('families_as_child')
             person.families_as_parent = res.get('families_as_parent')
             person.events = person.events + res.get('family_events')
-        else:
-            print(f'get_person_data: No families for person {uuid}')
 
         if not self.user_context.privacy_ok(person):
             person.remove_privacy_limit_from_families()

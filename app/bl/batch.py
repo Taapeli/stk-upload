@@ -62,7 +62,7 @@ class Batch():
 
         except Exception as e:
             return {'id':self.id, 'status':Status.ERROR, 
-                    'statustext': f'bl.batch_audit.Batch.save: {e.__class__.__name__} {e}'}
+                    'statustext': f'bl.batch.Batch.save: {e.__class__.__name__} {e}'}
 
 
     def mark_complete(self, userid):
@@ -290,7 +290,7 @@ class BatchDatastore:
         self.batch.mediapath = mediapath
 
         res = self.batch.save()
-        print(f'bl.batch_audit.BatchDatastore: new Batch {self.batch.id} identity={self.batch.uniq_id}')
+        print(f'bl.batch.BatchDatastore.start_data_batch: new Batch {self.batch.id} identity={self.batch.uniq_id}')
 
         return {'batch': self.batch, 'status': Status.OK}
 

@@ -1101,7 +1101,9 @@ class Neo4jReadDriver:
                         if hasattr(x, 'note_ref'):
                             x.note_ref.append(o.uniq_id)
                         else:
-                            raise LookupError(f'dr_get_object_citation_note_media: No field for {x_label}.{y_label.lower()}_ref')            
+                            x.note_ref = [o.uniq_id]
+                            print('NOTE Neo4jReadDriver.dr_get_object_citation_note_media: '
+                                  f'Field {x_label}.{y_label.lower()}_ref created')            
     
                     elif y_label == "Media":
                         o = self.objs.get(y_uniq_id, None)

@@ -50,13 +50,14 @@ class Note(NodeObject):
         n = cls()
         n.uniq_id = node.id
         n.id = node['id'] or ''
-        n.handle = node['handle']
+        if 'handle' in node:
+            n.handle = node['handle']
         n.change = node['change']
         if 'priv' in node:
             n.priv = node['priv']
-        n.type = node['type'] or ''
-        n.text = node['text'] or ''
-        n.url = node['url'] or ''
+        n.type = node.get('type','')
+        n.text = node.get('text','')
+        n.url = node.get('url','')
         return n
 
 #     @staticmethod       
