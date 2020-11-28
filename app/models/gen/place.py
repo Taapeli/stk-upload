@@ -54,12 +54,12 @@ class Place(NodeObject):
         self.pname = ''
         self.coord = None
         
-# These are in bp.gramps.models.place_gramps.Place_gramps.__init__
+# These are in bp.gramps.models.obsolete_place_gramps.Place_gramps.__init__
 #         self.uppers = []        # Upper place objects for hirearchy display
 #         self.notes = []         # Notes connected to this place
 #         self.note_ref = []      # uniq_ids of Notes
 
-# These are in bp.gramps.models.place_gramps.Place_gramps.__init__
+# These are in bp.gramps.models.obsolete_place_gramps.Place_gramps.__init__
 #         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
 #         self.noteref_hlink = []
 
@@ -167,7 +167,7 @@ class Place(NodeObject):
 #             Palauttaa listan paikka-olioita ylimmästä alimpaan.
 
 
-#     def get_place_events(loc_id): @staticmethod --> pe.neo4j.read_driver.Neo4jDriver.dr_get_place_events
+#     def get_place_events(loc_id): @staticmethod --> pe.neo4j.readservice.Neo4jDriver.dr_get_place_events
 #         """ Haetaan paikkaan liittyvät tapahtumat sekä
 #             osallisen henkilön nimitiedot.
 

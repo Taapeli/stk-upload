@@ -97,16 +97,24 @@ class PlaceDatastore:
     '''
     Abstracted Place datastore.
 
+   Data reading class for Place objects with associated data.
+
+   - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
+     to define the database driver and user context
+
+   - Returns a Result object which includes the items and eventuel error object.
+
     - Methods return a dict result object {'status':Status, ...}
     '''
-    def __init__(self, driver, dataservice):
+    def __init__(self, readservice, u_context):
         ''' Initiate datastore.
 
-        :param: driver        neo4j.DirectDriver object
-        :param: dataservice   pe.neo4j.dataservice.Neo4jDataService
+        :param: readservice   pe.neo4j.readservice.Neo4jReadService
+        :param: u_context     ui.user_context.UserContext object
         '''
-        self.driver = driver
-        self.dataservice = dataservice
+        self.readservice = readservice
+        self.driver = readservice.driver
+        self.user_context = u_context
 
 
 # class PlaceReader(DbReader):
@@ -128,8 +136,8 @@ class PlaceDatastore:
     """
         context = self.user_context
         fw = context.next_name_fw()
-        places = self.dbdriver.dr_get_place_list_fw(self.use_user, fw, context.count, 
-                                                    lang=context.lang)
+        places = self.readservice.dr_get_place_list_fw(self.use_user, fw, context.count, 
+                                                       lang=context.lang)
 
         # Update the page scope according to items really found 
         if places:
@@ -148,20 +156,21 @@ class PlaceDatastore:
     
         """
         # Get a Place with Names, Notes and Medias
-        res = self.dbdriver.dr_get_place_w_names_notes_medias(self.use_user, uuid, 
-                                                              self.user_context.lang)
+        use_user = self.user_context.get_my_user_id()
+        lang = self.user_context.lang
+        res = self.readservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
         place = res.get("place")
         results = {"place":place, 'status':Status.OK}
 
         if not place:
             res = {'status':Status.ERROR, 'statustext':
-                       f'get_with_events:{self.use_user} - no Place with uuid={uuid}'}
+                       f'get_with_events: No Place with uuid={uuid}'}
             return res
         
         #TODO: Find Citation -> Source -> Repository for each uniq_ids
         try:
             results['hierarchy'] = \
-                self.dbdriver.dr_get_place_tree(place.uniq_id, lang=self.user_context.lang)
+                self.readservice.dr_get_place_tree(place.uniq_id, lang=lang)
 
         except AttributeError as e:
             traceback.print_exc()
@@ -171,7 +180,7 @@ class PlaceDatastore:
             return {'status': Status.ERROR,
                    'statustext': f"Place tree value for {place.uniq_id}: {e}"}
 
-        res = self.dbdriver.dr_get_place_events(place.uniq_id)
+        res = self.readservice.dr_get_place_events(place.uniq_id)
         results['events'] = res['items']
         return results
 

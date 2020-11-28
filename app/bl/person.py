@@ -509,11 +509,6 @@ class PersonBl(Person):
             batch_id = kwargs['batch_id']
         else:
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
-
-#         dataservice = Neo4jDataService(shareds.driver, tx)
-#         db = DbWriter(dataservice)
-        #today = str(datetime.date.today())
-
         self.uuid = self.newUuid()
         # Save the Person node under UserProfile; all attributes are replaced
         p_attr = {}

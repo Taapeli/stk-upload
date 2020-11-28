@@ -12,7 +12,11 @@
   </packagedElement>
   <packagedElement xmi:type="uml:Class" xmi:id="_mQtKYCQ2Eeuky9FoxVEiMA" name="Neo4jWriteDriver"/>
   <packagedElement xmi:type="uml:Dependency" xmi:id="_3Mxp8CQ2Eeuky9FoxVEiMA" client="_6ZrVsCQ0Eeuky9FoxVEiMA" supplier="_mQtKYCQ2Eeuky9FoxVEiMA"/>
-  <packagedElement xmi:type="uml:Class" xmi:id="_HVxGwCQ3Eeuky9FoxVEiMA" name="Neo4jReadDriver"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="_HVxGwCQ3Eeuky9FoxVEiMA" name="Neo4jReadDriver">
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_v7sysDFgEeuUNvObz-Yh8w" name="driver"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_7rOU4DFgEeuUNvObz-Yh8w" name="dr_get_event_data_by_uuid"/>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_-5fnsDFgEeuUNvObz-Yh8w" name="dr_get_event_participants"/>
+  </packagedElement>
   <packagedElement xmi:type="uml:Dependency" xmi:id="_TTmxwCQ3Eeuky9FoxVEiMA" client="_YtgrICQ2Eeuky9FoxVEiMA" supplier="_HVxGwCQ3Eeuky9FoxVEiMA"/>
   <packagedElement xmi:type="uml:Class" xmi:id="_yb0m8CQ3Eeuky9FoxVEiMA" name="GraphDatabase">
     <interfaceRealization xmi:type="uml:InterfaceRealization" xmi:id="_K4KIECQ6Eeuky9FoxVEiMA" client="_yb0m8CQ3Eeuky9FoxVEiMA" supplier="_Ae7DYCQ6Eeuky9FoxVEiMA" contract="_Ae7DYCQ6Eeuky9FoxVEiMA"/>

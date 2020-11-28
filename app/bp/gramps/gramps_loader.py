@@ -134,7 +134,6 @@ def analyze_xml(username, filename):
     counts["e_total"] = e_total
     return counts
                     
-
 def analyze(username, filename):
     ''' Returns a list of Analyze_row objects carrying number of items and references.
     '''

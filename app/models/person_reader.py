@@ -62,13 +62,13 @@ class PersonReader():
         self.objs[self.person.uniq_id] = self.person
 
 
-#     def read_person_names_events(self): # --> pe.neo4j.read_driver.Neo4jReadDriver.dr_get_person_names_events()
+#     def read_person_names_events(self): # --> pe.neo4j.readservice.Neo4jReadService.dr_get_person_names_events()
 #         ''' Read names and events to Person object p. '''
 
-#     def read_person_families(self): # --> pe.neo4j.read_driver.Neo4jReadDriver.dr_get_person_families
+#     def read_person_families(self): # --> pe.neo4j.readservice.Neo4jReadService.dr_get_person_families
 #         ''' Read the families, where this Person is a member. '''
 
-#     def read_object_places(self): # --> pe.neo4j.read_driver.Neo4jReadDriver.dr_get_object_places
+#     def read_object_places(self): # --> pe.neo4j.readservice.Neo4jReadService.dr_get_object_places
 #         ''' Read Place hierarchies for all objects in objs. '''
 
 #     def read_object_citation_note_media(self, active_objs=[]):

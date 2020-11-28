@@ -2,7 +2,7 @@
 
     VANHENTUNUT TOTEUTUSMALLI
     
-    Toiminnot pitäisi siirtää pe.neo4j.read_driver.Neo4jReadDriver -luokkaan
+    Toiminnot pitäisi siirtää pe.neo4j.readservice.Neo4jReadService -luokkaan
     
 Created on 17.3.2020
 
@@ -20,7 +20,7 @@ class DbReader:
     def __init__(self, dbdriver, u_context=None):
         ''' Create a reader object with db driver and user context.
 
-            - dbdriver    Neo4jReadDriver or Neo4jWriteDriver
+            - dbdriver    Neo4jReadService or Neo4jWriteDriver
         '''
         self.dbdriver = dbdriver
         if u_context:

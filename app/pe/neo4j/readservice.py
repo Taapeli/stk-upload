@@ -37,7 +37,7 @@ from models.dbtree import DbTree
 from models.gen.citation import Citation
 
 
-class Neo4jReadDriver:
+class Neo4jReadService:
     ''' Methods for accessing Neo4j database.
     '''
     def __init__(self, driver):
@@ -64,7 +64,7 @@ class Neo4jReadDriver:
             obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
         else:
             #raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
-            logger.warning(f'pe.neo4j.read_driver.Neo4jReadDriver._obj_from_node: Person or Family expexted: {list(node.labels)}')
+            logger.warning(f'pe.neo4j.read_driver.Neo4jReadService._obj_from_node: Person or Family expexted: {list(node.labels)}')
             return None
         obj.role = role if role != 'Primary' else None
         return obj
@@ -428,7 +428,7 @@ class Neo4jReadDriver:
 
     def dr_get_event_by_uuid(self, user:str, uuid:str):
         '''
-        Read an Event using uuid and user info.
+        Read an Event using uuid and username.
         
         Returns dict {item, status, statustext}
         '''
@@ -1102,7 +1102,7 @@ class Neo4jReadDriver:
                             x.note_ref.append(o.uniq_id)
                         else:
                             x.note_ref = [o.uniq_id]
-                            print('NOTE Neo4jReadDriver.dr_get_object_citation_note_media: '
+                            print('NOTE Neo4jReadService.dr_get_object_citation_note_media: '
                                   f'Field {x_label}.{y_label.lower()}_ref created')            
     
                     elif y_label == "Media":
@@ -1152,12 +1152,12 @@ class Neo4jReadDriver:
         with self.driver.session(default_access_mode='READ') as session: 
             if user == None: 
                 #1 get approved common data
-                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: approved")
+                print("pe.neo4j.read_driver.Neo4jReadService.dr_get_place_list_fw: approved")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
                                      fw=fw_from, limit=limit, lang=lang)
             else: 
                 #2 get my own
-                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: candidate")
+                print("pe.neo4j.read_driver.Neo4jReadService.dr_get_place_list_fw: candidate")
                 result = session.run(CypherPlace.get_my_name_hierarchies,
                                      user=user, fw=fw_from, limit=limit, lang=lang)
             for record in result:

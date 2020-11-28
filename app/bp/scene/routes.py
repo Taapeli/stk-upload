@@ -44,8 +44,8 @@ from models.datareader import read_persons_with_events
 #from templates.jinja_filters import translate
 
 # Select the read driver for current database
-from pe.neo4j.read_driver import Neo4jReadDriver
-dbreader = Neo4jReadDriver(shareds.driver)
+from pe.neo4j.readservice import Neo4jReadService
+readservice = Neo4jReadService(shareds.driver)
 
 
 def stk_logger(context, msg:str):
@@ -99,9 +99,9 @@ def _do_get_persons(args):
         args['rule'] = 'all'
     
     u_context.count = request.args.get('c', 100, type=int)
-    reader = PersonReader(dbreader, u_context)
+    datastore = PersonReader(readservice, u_context)
     
-    res = reader.get_person_search(args)
+    res = datastore.get_person_search(args)
 
     #print(f'Query {args} produced {len(res["items"])} persons, where {res["num_hidden"]} hidden.')
 #     if res.get('status') != Status.OK:
@@ -384,9 +384,9 @@ def obsolete_show_all_persons_list(opt=''):
 #     print(f'{request.method}: keys=-, args=-')
 # 
 #     t0 = time.time()
-#     reader = PersonReader(dbreader, u_context)
+#     datastore = PersonReader(readservice, u_context)
 # 
-#     res = reader.get_person_list()
+#     res = datastore.get_person_list()
 #     status = res.get('status')
 #     if status != Status.OK:
 #         flash(f'{_("No persons found")}: {res.get("statustext")}','error')
@@ -446,10 +446,10 @@ def show_person(uid=None):
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
 
-    reader = PersonReader(dbreader, u_context)
+    datastore = PersonReader(readservice, u_context)
     args = {}
 
-    result = reader.get_person_data(uid, args)
+    result = datastore.get_person_data(uid, args)
     # result {'person', 'objs', 'jscode', 'root'}
     if Status.has_failed(result):
         flash(f'{_("Person not found")}: {result.get("statustext","error")}', 'error')
@@ -484,9 +484,9 @@ def obsolete_show_event_v1(uuid):
         Derived from bp.tools.routes.show_baptism_data()
     """
     u_context = UserContext(user_session, current_user, request)
-    reader = EventReader(dbreader, u_context) 
+    datastore = EventReader(readservice, u_context) 
 
-    res = reader.get_event_data(uuid)
+    res = datastore.get_event_data(uuid)
 
     status = res.get('status')
     if status != Status.OK:
@@ -526,9 +526,9 @@ def json_get_event():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        reader = EventReader(dbreader, u_context) 
+        datastore = EventReader(readservice, u_context) 
     
-        res = reader.get_event_data(uuid, args)
+        res = datastore.get_event_data(uuid, args)
     
         status = res.get('status')
         if status != Status.OK:
@@ -639,9 +639,9 @@ def show_family_page(uid=None):
 
     try:
         u_context = UserContext(user_session, current_user, request)
-        reader = FamilyReader(dbreader, u_context) 
+        datastore = FamilyReader(readservice, u_context) 
     
-        res = reader.get_family_data(uid)
+        res = datastore.get_family_data(uid)
         #family = Family_combo.get_family_data(uid, u_context)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -675,9 +675,9 @@ def json_get_person_families():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        reader = FamilyReader(dbreader, u_context) 
+        datastore = FamilyReader(readservice, u_context) 
 
-        res = reader.get_person_families(uuid)
+        res = datastore.get_person_families(uuid)
 
         if res.get('status') == Status.NOT_FOUND:
             return jsonify({"member":uuid, "records":[],
@@ -723,7 +723,7 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    datastore = PlaceDatastore(dbreader, u_context) 
+    datastore = PlaceDatastore(readservice, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
@@ -743,26 +743,34 @@ def show_place(locid):
     """ Home page for a Place, shows events and place hierarchy.
     """
     t0 = time.time()
+    u_context = UserContext(user_session, current_user, request)
     try:
-        u_context = UserContext(user_session, current_user, request)
-        datastore = PlaceDatastore(dbreader, u_context) 
+        # Open database connection and start transaction
+        # readservice -> Tietokantapalvelu
+        #   datastore ~= Toimialametodit
+        readservice = Neo4jReadService(shareds.driver)
+        #shareds.datastore = PlaceDatastore(shareds.driver, dataservice, u_context)
+        datastore = PlaceDatastore(readservice, u_context) 
     
         res = datastore.get_with_events(locid)
 
         if res['status'] == Status.NOT_FOUND:
-            return redirect(url_for('virhesivu', code=1, text=f'Ei löytynyt yhtään'))
+            print(f'bp.scene.routes.show_place: {_("Place not found")}')
+            #return redirect(url_for('virhesivu', code=1, text=f'Ei löytynyt yhtään'))
         if res['status'] != Status.OK:
-            return redirect(url_for('virhesivu', code=1, text=f'Virhetilanne'))
+            print(f'bp.scene.routes.show_place: {_("Place not found")}: {res.get("statustext")}')
+            #return redirect(url_for('virhesivu', code=1, text=f'Virhetilanne'))
 
     except KeyError as e:
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    stk_logger(u_context, f"-> bp.scene.routes.show_place n={len(res['events'])}")
+    cnt = len(res.get('events')) if res.get('events',False) else 0
+    stk_logger(u_context, f"-> bp.scene.routes.show_place n={cnt}")
     return render_template("/scene/place_events.html", 
-                           place=res['place'], 
-                           pl_hierarchy=res['hierarchy'],
-                           events=res['events'],
+                           place=res.get('place'), 
+                           pl_hierarchy=res.get('hierarchy'),
+                           events=res.get('events'),
                            user_context=u_context, elapsed=time.time()-t0)
 
 # ------------------------------ Menu 5: Sources --------------------------------
@@ -790,11 +798,11 @@ def show_sources(series=None):
     u_context.set_scope_from_request(request, 'source_scope')
     u_context.count = request.args.get('c', 100, type=int)
 
-    reader = SourceReader(dbreader, u_context) 
+    datastore = SourceReader(readservice, u_context) 
     if series:
         u_context.series = series
     try:
-        res = reader.get_source_list()
+        res = datastore.get_source_list()
         if res['status'] == Status.NOT_FOUND:
             return redirect(url_for('virhesivu', code=1, text=f'Ei löytynyt yhtään'))
         if res['status'] != Status.OK:
@@ -819,9 +827,9 @@ def show_source_page(sourceid=None):
         return redirect(url_for('virhesivu', code=1, text="Missing Source key"))
     u_context = UserContext(user_session, current_user, request)
     try:
-        reader = SourceReader(dbreader, u_context) 
+        datastore = SourceReader(readservice, u_context) 
     
-        res = reader.get_source_with_references(uuid, u_context)
+        res = datastore.get_source_with_references(uuid, u_context)
         
         if res['status'] == Status.NOT_FOUND:
             msg = res.get('statustext', _('No objects found'))

@@ -136,15 +136,15 @@ class EventReader(DbReader):
         members= []
         if args.get('referees'):
             res = self.dbdriver.dr_get_event_participants(event.uniq_id)
-            if (res['status'] == Status.ERROR):
+            if Status.has_failed(res):
                 statustext += _('Participants read error ') + res['statustext']+' '
             members = res['items']
             res_dict['members'] = members
         places = []
         if args.get('places'):
             res = self.dbdriver.dr_get_event_place(event.uniq_id)
-            if (res['status'] == Status.ERROR):
-                statustext += _('Place read error ' + res['statustext']+' ')
+            if Status.has_failed(res):
+                statustext += _('Place read error ') + res['statustext']+' '
             places = res['items']
             res_dict['places'] = places
 
@@ -152,8 +152,8 @@ class EventReader(DbReader):
         medias = []
         if args.get('notes'):
             res = self.dbdriver.dr_get_event_notes_medias(event.uniq_id)
-            if (res['status'] == Status.ERROR):
-                statustext += _('Notes read error ' + res['statustext']+' ')
+            if Status.has_failed(res):
+                statustext += _('Notes read error ') + res['statustext']+' '
             notes = res['notes']
             res_dict['notes'] = notes
             medias = res['medias']
