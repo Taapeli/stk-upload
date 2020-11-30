@@ -10,7 +10,6 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from collections import defaultdict
-#from sys import stderr
 import re
 import time
 import os
@@ -26,7 +25,6 @@ from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaRefResult
 from bl.event import EventBl
-#from bl.source import SourceBl
 
 #from pe.db_writer import DbWriter
 #from pe.neo4j.dataservice import Neo4jWriteDriver
@@ -43,12 +41,9 @@ from models.cypher_gramps import Cypher_mixed
 from models.gen.dates import Gramps_DateRange
 from models.gen.note import Note
 from models.gen.media import Media
-#from models.gen.person_name import Name
-#from models.gen.person_combo import Person_combo
 from models.gen.citation import Citation
 from models.gen.repository import Repository
 
-#from models import dataupdater
 import threading
 
 
@@ -144,7 +139,6 @@ class DOM_handler():
             Some objects may accept arguments like batch_id="2019-08-26.004" and others
         '''
         self.dataservice._obj_save_and_link(obj, **kwargs)
-        #self.dataservice.save_and_link_obj(obj,**kwargs)
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
@@ -324,7 +318,6 @@ class DOM_handler():
         t0 = time.time()
         counter = 0
 
-        # Print detail of each family
         for family in families:
 
             f = FamilyBl()
@@ -362,12 +355,12 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one mother tag in a family",
                                      'level':"WARNING", 'count':f.id})
 
-            for eventref in family.getElementsByTagName('eventref'):
+            for ref in family.getElementsByTagName('eventref'):
                 # Create a tuple (event_handle, role)
-                if eventref.hasAttribute("hlink"):
-                    e_handle = eventref.getAttribute("hlink")
-                    if eventref.hasAttribute("role"):
-                        e_role = eventref.getAttribute("role")
+                if ref.hasAttribute("hlink"):
+                    e_handle = ref.getAttribute("hlink")
+                    if ref.hasAttribute("role"):
+                        e_role = ref.getAttribute("role")
                     else:
                         e_role = None
                     f.event_handle_roles.append((e_handle, e_role))
@@ -421,10 +414,6 @@ class DOM_handler():
                 n.text = note_text.childNodes[0].data
                 # Pick possible url
                 n.text, n.url = pick_url(n.text)
-
-            #TODO: 17.10.2018 suunniteltiin, että kuolinsyyt 
-            # konvertoitaisiin heti Note-nodeiksi sopivalla node-tyypillä
-            #print("iNote {}".format(n))
 
             self.save_and_link_handle(n, batch_id=self.batch.id)
             counter += 1
@@ -491,7 +480,7 @@ class DOM_handler():
             p.event_handle_roles = []
             p.note_handles = []
             p.citation_handles = []
-            p.parentin_handles = []
+            #p.parentin_handles = []
 
             for person_gender in person.getElementsByTagName('gender'):
                 if p.sex:
@@ -557,12 +546,12 @@ class DOM_handler():
 
                 p.names.append(pname)
 
-            for eventref in person.getElementsByTagName('eventref'):
+            for ref in person.getElementsByTagName('eventref'):
                 # Create a tuple (event_handle, role)
-                if eventref.hasAttribute("hlink"):
-                    e_handle = eventref.getAttribute("hlink")
-                    if eventref.hasAttribute("role"):
-                        e_role = eventref.getAttribute("role")
+                if ref.hasAttribute("hlink"):
+                    e_handle = ref.getAttribute("hlink")
+                    if ref.hasAttribute("role"):
+                        e_role = ref.getAttribute("role")
                     else:
                         e_role = None
                     p.event_handle_roles.append((e_handle, e_role))
@@ -578,11 +567,11 @@ class DOM_handler():
                 n.text = person_url.getAttribute("description")
                 if n.url:
                     p.notes.append(n)
-
-            for person_parentin in person.getElementsByTagName('parentin'):
-                if person_parentin.hasAttribute("hlink"):
-                    p.parentin_handles.append(person_parentin.getAttribute("hlink"))
-                    ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
+# Not used
+#             for person_parentin in person.getElementsByTagName('parentin'):
+#                 if person_parentin.hasAttribute("hlink"):
+#                     p.parentin_handles.append(person_parentin.getAttribute("hlink"))
+#                     ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
 
             for person_noteref in person.getElementsByTagName('noteref'):
                 if person_noteref.hasAttribute("hlink"):
@@ -621,7 +610,6 @@ class DOM_handler():
         t0 = time.time()
         counter = 0
 
-        # Print detail of each placeobj
         for placeobj in places:
 
             pl = PlaceBl()
@@ -855,7 +843,7 @@ class DOM_handler():
             - set Family.datetype, Family.date1 and Family.date2
         '''
 
-        status = Status.OK
+        #status = Status.OK
         message = f'{len(self.family_ids)} Family sortnames & dates'
         print (f"***** {message} *****")
 
@@ -865,7 +853,7 @@ class DOM_handler():
 
         for uniq_id in self.family_ids:
             if uniq_id != None:
-#                 dc, sc = dataupdater.set_family_calculated_attributes(tx=self.tx, uniq_id=p_id)
+#               dc, sc = dataupdater.set_family_calculated_attributes(tx=self.tx, uniq_id=p_id)
                 res = FamilyBl.set_calculated_attributes(uniq_id)
                 # returns {refnames, sortnames, status}
                 if Status.has_failed(res): return res

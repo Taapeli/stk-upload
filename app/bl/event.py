@@ -138,15 +138,18 @@ class EventReader(DbReader):
             res = self.dbdriver.dr_get_event_participants(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _('Participants read error ') + res['statustext']+' '
-            members = res['items']
-            res_dict['members'] = members
+                print(f'bl.event.EventReader.get_event_data: {statustext}')
+            else:
+                members = res['items']
+                res_dict['members'] = members
         places = []
         if args.get('places'):
             res = self.dbdriver.dr_get_event_place(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _('Place read error ') + res['statustext']+' '
-            places = res['items']
-            res_dict['places'] = places
+            else:
+                places = res['items']
+                res_dict['places'] = places
 
         notes = []
         medias = []
@@ -154,11 +157,11 @@ class EventReader(DbReader):
             res = self.dbdriver.dr_get_event_notes_medias(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _('Notes read error ') + res['statustext']+' '
-            notes = res['notes']
-            res_dict['notes'] = notes
-            medias = res['medias']
-            res_dict['medias'] = medias
-
+            else:
+                notes = res['notes']
+                res_dict['notes'] = notes
+                medias = res['medias']
+                res_dict['medias'] = medias
         
         res_dict['status'] = res['status']
         res_dict['statustext'] = f'Got {len(members)} participants, {len(notes)} notes'

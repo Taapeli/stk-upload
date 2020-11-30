@@ -153,14 +153,12 @@ class FamilyBl(Family):
         # Make father and mother relations to Person nodes
         try:
             if hasattr(self,'father') and self.father:
-                role = 'father'
-            elif hasattr(self,'mother') and self.mother:
-                role = 'mother'
-            else:
-                return {'status': Status.ERROR, 
-                        'statustext': f'No father or mother role in family {self.id}'}
-            tx.run(CypherFamily.link_parent, role=role,
-                   f_handle=self.handle, p_handle=self.mother)
+                tx.run(CypherFamily.link_parent, role='father',
+                       f_handle=self.handle, p_handle=self.father)
+
+            if hasattr(self,'mother') and self.mother:
+                tx.run(CypherFamily.link_parent, role='mother',
+                       f_handle=self.handle, p_handle=self.mother)
         except Exception as e:
             msg = f'bl.family.FamilyBl.save: family={self.id}: {e.__class__.__name__} {e}'
             print(msg)
@@ -283,12 +281,12 @@ class FamilyReader(DbReader):
             1. Get Family node by user/common
                res is dict {item, status, statustext}
         """
-        res = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
-        # results {'item': <bl.family.FamilyBl>, 'status': Status}
-        if Status.has_failed(res):
-            return res
+        ret_results = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
+        # ret_results {'item': <bl.family.FamilyBl>, 'status': Status}
+        if ret_results.get('status') != Status.OK:
+            return ret_results
 
-        family = res.get('item')
+        family = ret_results.get('item')
         # The Nodes for search of Sources and Notes (Family and Events)
         src_list = [family.uniq_id]
         """
@@ -344,7 +342,7 @@ class FamilyReader(DbReader):
             for s in res.get('items'):
                 family.sources.append(s)
 
-        return results
+        return ret_results
 
 
     def get_person_families(self, uuid:str):

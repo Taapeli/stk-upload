@@ -7,7 +7,6 @@
 import time
 import gzip
 from os.path import basename, splitext
-#from flask_babelex import _
 import logging 
 logger = logging.getLogger('stkserver')
 
@@ -19,7 +18,6 @@ from tarfile import TarFile
 import os
 
 from bl.base import Status
-# Defined in xml_to_db function: Batch, BatchWriter
 from bp.scene.models import media
 from pe.neo4j.dataservice import Neo4jDataService
 
@@ -533,8 +531,8 @@ def xml_to_stkbase(pathname, userid):
     handler = DOM_handler(file_cleaned, userid, pathname)
 
     # Open database connection and start transaction
-    #  dbdriver -> Tietokantapalvelu
-    #    driver -> Tietokantatoiminnot
+    # dataservice -> Tietokantapalvelu
+    #      driver -> Tietokanta-ajuri
     handler.dataservice = Neo4jDataService(shareds.driver)
 
     # Initialize Run report
@@ -545,7 +543,7 @@ def xml_to_stkbase(pathname, userid):
     handler.blog.log(cleaning_log)
 
     # Initiate BatchDatastore and Batch node data
-    # datastore ~= Toimialametodit
+    # datastore ~= Business methods / Toimialametodit
     shareds.datastore = BatchDatastore(shareds.driver, handler.dataservice)
     mediapath = handler.get_mediapath_from_header()
     res = shareds.datastore.start_data_batch(userid, file_cleaned, mediapath)
@@ -602,20 +600,19 @@ def xml_to_stkbase(pathname, userid):
         if Status.has_failed(res):  return res
         # The missing links counted in remove_handles
         #res = handler.add_missing_links()
-        #if Status.has_failed(res):  return res
 
     except Exception as e:
         traceback.print_exc()
         msg = f"Stopped xml load due to {e}" 
         print(msg)
-        handler.dataservice._rollback()
+        shareds.datastore.rollback()
         handler.blog.log_event({'title':_("Database save failed due to {}".\
                                  format(msg)), 'level':"ERROR"})
         return {'status':Status.ERROR, 'statustext': msg}
 
     res = handler.batch.mark_complete(userid)
     if Status.has_failed(res):
-        handler.dataservice._rollback()
+        shareds.datastore.rollback()
         handler.blog.log_event({'title':_("Database save failed due to {}".\
                                  format(msg)), 'level':"ERROR"})
         return {'status': res.get('status'),
@@ -623,7 +620,7 @@ def xml_to_stkbase(pathname, userid):
                 'steps': handler.blog.list(), 
                 'batch_id': handler.batch.id}
     else:
-        handler.dataservice._commit()
+        shareds.datastore.commit()
         logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
 
         handler.blog.log_event({'title':"Total time", 'level':"TITLE", 

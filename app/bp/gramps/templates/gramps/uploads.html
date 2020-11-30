@@ -217,7 +217,7 @@ function confirm_delete(subj, name) {
 					  	<p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
 					  	<p>↓ {{ _("UPLOADED") }} – {{ _("the file has been uploaded to server") }}<br>
 					  	   ↓ {{ _("STORING") }}  – {{ _("the file content is being stored to the database") }}<br>
-					  	   ↳ {{ _("STORED") }}   – {{ _("the file content has been stored to the database") }}<br>
+					  	   ↳ {{ _("STORED") }}   – {{ _("the data is stored as candidate material") }}<br>
 					  	   → {{ _("REMOVED") }}  – {{ _("Not found any more") }}<br>
 					  	   ↝ {{ _("ERROR") }} / {{ _("FAILED") }} – {{ _("there was an error") }}
 						</p>
@@ -225,6 +225,7 @@ function confirm_delete(subj, name) {
 					</div> 
 				</th>
    			</tr>
+
 	    {% for upload in uploads %}{% if upload.status != "?" %}
 	       <tr>
 	           <td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
@@ -248,6 +249,11 @@ function confirm_delete(subj, name) {
 	           </td>
 	       </tr>
 	    {% endif %}{% endfor %}
+	    {% if uploads|length == 0 %}
+	       <tr><td colspan="5" style="padding:2em">
+	              <a href="/gramps">{{ _("Start by sending your first Gramps file") }}</a></td>
+	       </tr>
+	    {% endif %}
     </table>
     <div>
       <form id="form" action="" method="get">

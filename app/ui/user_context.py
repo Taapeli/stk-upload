@@ -37,7 +37,7 @@ class UserContext():
                                           context.count, len(persons))
 
         Useful methods:
-            get_my_user_id()            Get effective user id or None
+            batch_user()            Get effective user id or None
             owner_str()                 Get owner descripition in current language
             use_owner_filter()          True, if data is filtered by owner id
             use_common()                True, if using common data
@@ -238,7 +238,7 @@ class UserContext():
         current_user.current_context=self.context
 
 
-    def get_my_user_id(self):
+    def batch_user(self):
         # Return current user id, if my candidate data is chosen
         if self.context == self.choices.OWN:
             return self.user

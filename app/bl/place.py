@@ -136,7 +136,8 @@ class PlaceDatastore:
     """
         context = self.user_context
         fw = context.next_name_fw()
-        places = self.readservice.dr_get_place_list_fw(self.use_user, fw, context.count, 
+        use_user = context.batch_user()
+        places = self.readservice.dr_get_place_list_fw(use_user, fw, context.count, 
                                                        lang=context.lang)
 
         # Update the page scope according to items really found 
@@ -156,7 +157,7 @@ class PlaceDatastore:
     
         """
         # Get a Place with Names, Notes and Medias
-        use_user = self.user_context.get_my_user_id()
+        use_user = self.user_context.batch_user()
         lang = self.user_context.lang
         res = self.readservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
         place = res.get("place")
