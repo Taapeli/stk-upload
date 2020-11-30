@@ -183,7 +183,7 @@ return s'''
 
 
 #     
-#     def get_source_list(o_context=None): # @staticmethod -> bl.source.SourceReader.get_source_list(),
+#     def get_source_list(o_context=None): # @staticmethod -> bl.source.SourceDataStore.get_source_list(),
 #                                                             pe.neo4j.readservice.Neo4jReadService.dr_get_source_list_fw()
 #         """ Read all sources with notes and repositories, optionally limited by keywords.
 #         

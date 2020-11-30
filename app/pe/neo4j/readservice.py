@@ -581,7 +581,7 @@ class Neo4jReadService:
                     result = session.run(CypherFamily.get_a_family_own, 
                                      f_uuid=uuid, user=user)
                 else:
-                    print("dr_get_source_list_fw: approved common only")
+                    print("dr_get_family_by_uuid: approved common only")
                     result = session.run(CypherFamily.get_a_family_common, 
                                      f_uuid=uuid)
                 for record in result:
@@ -1381,10 +1381,10 @@ class Neo4jReadService:
         return {'items':ret, 'status':Status.OK}
 
 
-    def dr_get_source_list_fw(self, **kwargs):
+    def dr_get_source_list_fw(self, args):
         """ Read all sources with notes and repositories, optionally limited by keywords.
          
-            used arguments:
+            used keyword arguments:
             - user        Username to select data
             - theme1      A keyword (fi) for selecting source titles
             - theme2      Another keyword (sv) for selecting source titles
@@ -1395,13 +1395,13 @@ class Neo4jReadService:
             Todo: tuloksen sivuttaminen esim. 100 kpl / sivu
         """
         sources = []
-        user = kwargs.get('user')
+        user = args.get('user')
 
         with self.driver.session(default_access_mode='READ') as session:
-            if kwargs.get('theme1'):
+            if args.get('theme1'):
                 # Filter sources by searching keywords in fi and sv langiage
-                key1 = kwargs.get('theme1')
-                key2 = kwargs.get('theme2')
+                key1 = args.get('theme1')
+                key2 = args.get('theme2')
                 if user: 
                     # Show my researcher data
                     print("dr_get_source_list_fw: my researcher data")

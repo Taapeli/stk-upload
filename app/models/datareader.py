@@ -444,7 +444,7 @@ def read_places():
     return (headings, titles, events)
 
 
-# def get_source_with_events(sourceid): # -> bl.source.SourceReader.get_source_list
+# def get_source_with_events(sourceid): # -> bl.source.SourceDataStore.get_source_list
 #     """ Reads a Source with events, citations and notes.
 
 

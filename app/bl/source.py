@@ -1,9 +1,9 @@
 '''
-    Source classes: Source, SourceBl and SourceReader.
+    Source classes: Source, SourceBl and SourceDataStore.
 
     - Source       represents Source Node in database
     - SourceBl     represents Source and connected data (was Source_combo)
-    - SourceReader has methods for reading Source and connected data
+    - SourceDataStore has methods for reading Source and connected data
                    called from ui routes.py
 
 Created on 3.5.2020
@@ -19,7 +19,7 @@ from flask_babelex import _
 
 from .base import NodeObject, Status
 from .person import Person
-from pe.db_reader import DbReader #, SourceResult
+#from pe.db_reader import DbReader #, SourceResult
 
 
 class Source(NodeObject):
@@ -91,20 +91,33 @@ class SourceBl(Source):
         self.note_ref = []
 
 
-class SourceReader(DbReader):
+class SourceDataStore:
     '''
         Data reading class for Source objects with associated data.
 
-        - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
+        - Use pe.db_reader.DbReader.__init__(readservice, u_context) 
           to define the database driver and user context
 
         - Returns a Result object which includes the tems and eventuel error object.
     '''
+    def __init__(self, readservice, u_context):
+        ''' Initiate datastore.
+
+        :param: readservice   pe.neo4j.readservice.Neo4jReadService
+        :param: u_context     ui.user_context.UserContext object
+        '''
+        self.readservice = readservice
+        self.driver = readservice.driver
+        self.user_context = u_context
+
 
     def get_source_list(self):
+        ''' Get junk of Source objects for Sources list.
+        '''
         context = self.user_context
         fw = context.next_name_fw()
-        args = {"user": self.use_user, "fw": fw,  "count": context.count}
+        use_user = context.batch_user()
+        args = {"user": use_user, "fw": fw,  "count": context.count}
         if context.series:
             # Filtering by series (Lähdesarja)
             THEMES = {"birth": ('syntyneet','födda'),
@@ -114,10 +127,10 @@ class SourceReader(DbReader):
                       "move": ('muuttaneet','flyttade')
                       }
             theme_fi, theme_sv = THEMES[context.series]
-            kwargs["theme1"] = theme_fi 
-            kwargs["theme2"] = theme_sv
+            args["theme1"] = theme_fi 
+            args["theme2"] = theme_sv
         try:
-            sources = self.dbdriver.dr_get_source_list_fw(args)
+            sources = self.readservice.dr_get_source_list_fw(args)
             #results = {'sources':sources,'status':Status.OK}
     
             # Update the page scope according to items really found 
@@ -143,7 +156,7 @@ class SourceReader(DbReader):
             - item.citations    Citating Persons, Events, Families and Medias
                                 as [label, object] tuples(?)
         """
-        res = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
+        res = self.readservice.dr_get_source_w_repository(self.use_user, uuid)
         if res.get('status') != Status.OK:
             return res
         source = res.get('item')
@@ -151,7 +164,7 @@ class SourceReader(DbReader):
             res.statustext = f"no Source with uuid={uuid}"
             return res
         
-        citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
+        citations, notes, targets = self.readservice.dr_get_source_citations(source.uniq_id)
 
         if len(targets) == 0:
             # Only Citations connected to Person Event or Family Event can be
@@ -170,7 +183,7 @@ class SourceReader(DbReader):
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
                     if isinstance(target, Person):
-                        self.dbdriver.dr_inlay_person_lifedata(target)
+                        self.readservice.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:
                     print(f'DbReader.get_source_with_references: hide {target}')

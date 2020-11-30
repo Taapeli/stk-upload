@@ -93,7 +93,7 @@ class Place(NodeObject):
 
 
 
-class PlaceDatastore:
+class PlaceDataStore:
     '''
     Abstracted Place datastore.
 
@@ -116,18 +116,6 @@ class PlaceDatastore:
         self.driver = readservice.driver
         self.user_context = u_context
 
-
-# class PlaceReader(DbReader):
-#     '''
-#         Data reading class for Place objects with associated data.
-# 
-#         - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
-#           to define the database driver and user context
-# 
-#         - Returns a Result object which includes the tems and eventuel error object.
-#     '''
-# #     def get_list(u_context):    # @staticmethod --> pe.db_reader.DbReader.place_list
-# #         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
 
     def get_list(self):
         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.

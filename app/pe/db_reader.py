@@ -17,12 +17,12 @@ class DbReader:
     
         Returns a PersonResult object
     '''
-    def __init__(self, dbdriver, u_context=None):
+    def __init__(self, readservice, u_context=None):
         ''' Create a reader object with db driver and user context.
 
-            - dbdriver    Neo4jReadService or Neo4jWriteDriver
+            - readservice    Neo4jReadService or Neo4jWriteDriver
         '''
-        self.dbdriver = dbdriver
+        self.readservice = readservice
         if u_context:
             # For reader only; writer has no context?
             self.user_context = u_context
@@ -41,7 +41,7 @@ class DbReader:
 #     def get_place_with_events(self, uuid): # --> bl.place.PlaceReader.get_with_events()
 #         """ Read the place hierarchy and events connected to this place.
 
-#     def get_source_list(self): # -> bl.source.SourceReader.get_source_list()
+#     def get_source_list(self): # -> bl.source.SourceDataStore.get_source_list()
 
 
     def get_source_with_references(self, uuid, u_context):
@@ -56,13 +56,13 @@ class DbReader:
         """
         from bl.person import Person
 
-        source = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
+        source = self.readservice.dr_get_source_w_repository(self.use_user, uuid)
         results = {'item':source, 'status':Status.OK}
         if not source:
             results = {'status':Status.NOT_FOUND, 'statustext':f"Source with uuid={uuid}"}
             return results
         
-        _citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
+        _citations, notes, targets = self.readservice.dr_get_source_citations(source.uniq_id)
 
         citations = []
         for c_id, c in citations.items():
@@ -72,7 +72,7 @@ class DbReader:
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
                     if isinstance(target, Person):
-                        self.dbdriver.dr_inlay_person_lifedata(target)
+                        self.readservice.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:
                     print(f'DbReader.get_source_with_references: hide {target}')

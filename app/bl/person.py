@@ -165,7 +165,7 @@ class PersonReader(DbReader):
     '''
         Data reading class for Person objects with associated data.
 
-        - Uses pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
+        - Uses pe.db_reader.DbReader.__init__(self, readservice, u_context) 
           to define the database driver and user context
 
         - Returns a Result object.
@@ -202,7 +202,7 @@ class PersonReader(DbReader):
         args['fw'] = context.next_name_fw()
         args['limit'] = context.count
         
-        res = self.dbdriver.dr_get_person_list(args)
+        res = self.readservice.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
 
         status = res.get('status')
@@ -239,7 +239,7 @@ class PersonReader(DbReader):
         args = {'use_user': self.use_user,
                 'fw': context.next_name_fw(),
                 'limit':context.count}
-        res = self.dbdriver.dr_get_person_list(args)
+        res = self.readservice.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
         if Status.has_failed(res):
             return {'items':None, 'status':res['status'], 
@@ -275,7 +275,7 @@ class PersonReader(DbReader):
             
             --> Origin from models.gen.person_combo.Person_combo.get_my_person
         '''
-        res = self.dbdriver.dr_get_person_by_uuid(uuid)
+        res = self.readservice.dr_get_person_by_uuid(uuid)
         # {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
 
         if Status.has_failed(res):
@@ -391,10 +391,10 @@ class PersonReader(DbReader):
         once only.
         '''
         # Objects by uniq_id, referred from current person
-        self.dbdriver.objs = {}
+        self.readservice.objs = {}
 
         # 1. Read Person p, if not denied
-        res = self.dbdriver.dr_get_person_by_uuid(uuid, user=self.use_user)
+        res = self.readservice.dr_get_person_by_uuid(uuid, user=self.use_user)
         # res = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
         if Status.has_failed(res):
             # Not found, not allowd (person.too_new) or error
@@ -404,7 +404,7 @@ class PersonReader(DbReader):
 
         # 2. (p:Person) --> (x:Name|Event)
         #person.read_person_names_events()
-        res = self.dbdriver.dr_get_person_names_events(person.uniq_id)
+        res = self.readservice.dr_get_person_names_events(person.uniq_id)
         # result {'names', 'events', 'cause_of_death', 'status'}
         if  Status.has_failed(res):
             print(f'get_person_data: No names or events for person {uuid}')
@@ -418,7 +418,7 @@ class PersonReader(DbReader):
         #      (fp)--> (me:Event{type:Birth})
         #      (f) --> (fe:Event)
         #person.read_person_families()
-        res = self.dbdriver.dr_get_person_families(person.uniq_id)
+        res = self.readservice.dr_get_person_families(person.uniq_id)
         # res {'families_as_child', 'families_as_parent', 'family_events', 'status'}
         if  Status.has_failed(res):
             print(f'get_person_data: No families for person {uuid}')
@@ -438,37 +438,37 @@ class PersonReader(DbReader):
         #      (pl) --> (pn:Place_name)
         #      (pl) --> (pi:Place)
         #      (pi) --> (pin:Place_name)
-        self.dbdriver.dr_get_object_places(person)
+        self.readservice.dr_get_object_places(person)
      
         # 5. Read their connected nodes z: Citations, Notes, Medias
         #    for y in p, x, fe, z, s, r
         #        (y) --> (z:Citation|Note|Media)
         new_objs = [-1]
-        self.dbdriver.citations = {}
+        self.readservice.citations = {}
         while len(new_objs) > 0:
-            new_objs = self.dbdriver.dr_get_object_citation_note_media(person, new_objs)
+            new_objs = self.readservice.dr_get_object_citation_note_media(person, new_objs)
 
         # Calculate the average confidence of the sources
-        if len(self.dbdriver.citations) > 0:
+        if len(self.readservice.citations) > 0:
             summa = 0
-            for cita in self.dbdriver.citations.values():
+            for cita in self.readservice.citations.values():
                 summa += int(cita.confidence)
                  
-            aver = summa / len(self.dbdriver.citations)
+            aver = summa / len(self.readservice.citations)
             person.confidence = "%0.1f" % aver # string with one decimal
      
         # 6. Read Sources s and Repositories r for all Citations
         #    for c in z:Citation
         #        (c) --> (s:Source) --> (r:Repository)
-        self.dbdriver.dr_get_object_sources_repositories()
+        self.readservice.dr_get_object_sources_repositories()
     
         # Create Javascript code to create source/citation list
-        jscode = get_citations_js(self.dbdriver.objs)
+        jscode = get_citations_js(self.readservice.objs)
     
         # Return Person with included objects,  and javascript code to create
         # Citations, Sources and Repositories with their Notes
         return {'person': person,
-                'objs': self.dbdriver.objs,
+                'objs': self.readservice.objs,
                 'jscode': jscode,
                 'root': root,
                 'status': Status.OK}

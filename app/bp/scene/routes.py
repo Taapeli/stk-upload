@@ -21,8 +21,8 @@ from flask_babelex import _
 
 from ui.user_context import UserContext
 from bl.base import Status, StkEncoder
-from bl.place import PlaceDatastore
-from bl.source import SourceReader
+from bl.place import PlaceDataStore
+from bl.source import SourceDataStore
 from bl.family import FamilyReader
 from bl.event import EventReader
 from bl.person import PersonReader
@@ -723,7 +723,7 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    datastore = PlaceDatastore(readservice, u_context) 
+    datastore = PlaceDataStore(readservice, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
@@ -749,8 +749,8 @@ def show_place(locid):
         # readservice -> Tietokantapalvelu
         #   datastore ~= Toimialametodit
         readservice = Neo4jReadService(shareds.driver)
-        #shareds.datastore = PlaceDatastore(shareds.driver, dataservice, u_context)
-        datastore = PlaceDatastore(readservice, u_context) 
+        #shareds.datastore = PlaceDataStore(shareds.driver, dataservice, u_context)
+        datastore = PlaceDataStore(readservice, u_context) 
     
         res = datastore.get_with_events(locid)
 
@@ -798,7 +798,11 @@ def show_sources(series=None):
     u_context.set_scope_from_request(request, 'source_scope')
     u_context.count = request.args.get('c', 100, type=int)
 
-    datastore = SourceReader(readservice, u_context) 
+    # readservice -> Tietokantapalvelu
+    #   datastore ~= Toimialametodit
+    readservice = Neo4jReadService(shareds.driver)
+    datastore = SourceDataStore(readservice, u_context)
+
     if series:
         u_context.series = series
     try:
@@ -827,7 +831,7 @@ def show_source_page(sourceid=None):
         return redirect(url_for('virhesivu', code=1, text="Missing Source key"))
     u_context = UserContext(user_session, current_user, request)
     try:
-        datastore = SourceReader(readservice, u_context) 
+        datastore = SourceDataStore(readservice, u_context) 
     
         res = datastore.get_source_with_references(uuid, u_context)
         
