@@ -6,6 +6,14 @@
 {% import '/scene/macros.html' as macro with context %}
 <script src="/static/infobox.js"></script>
 <style>
+label { display: inline-block; width: 66pt; }
+.search-button {
+	width: 25pt;
+	height: 25pt;
+	border-radius: 7pt;
+	border: 1pt solid darkgray;
+}
+
 div.man-man, div.wife-wife { 
     border-left: solid 3px blue; 
     padding-left: 3px;
@@ -48,7 +56,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
 	                    <input type="text" name="fw" size="8" 
 	                     title="{{ _('Starting letters of surname') }}" 
 	                     placeholder="{{ _('Surname') }}">
-	                    <input type="submit" value=" > ">
+	                    <input type="submit" value="&gt;" class="search-button">
 	                 </fieldset>
 	               </form>
 
@@ -60,7 +68,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
 	                    <input type="text" name="fw" size="8" 
 	                     title="{{ _('Starting letters of surname') }}" 
 	                     placeholder="{{ _('Surname') }}">
-	                    <input type="submit" value=" > ">
+	                    <input type="submit" value="&gt;" class="search-button">
 	                 </fieldset>
 	               </form>
 	           </div>
@@ -81,36 +89,38 @@ th span.man-man, th span.wife-wife { color: #020299;}
         {% set last = families|last %}
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
+				<li class="title">{{ _("Father") }}</li>
                 <li>{% if last %}
                      <a href="/scene/families?o=father&fw=%20"
-                        title="{{ _("Father") }} {{ _('first page') }}" 
-                        class="navlink">{{ _("Father") }}: |&lt;</a>
+                        title="{{ _('first page') }}" 
+                        class="navlink">|&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
-                <li><span class="navlink" title="edellinen sivu"
-                          style="cursor:not-allowed"> &lt; </span></li>
+                <li><span class="navlink" title="{{ _('previous page') }}"
+                          style="cursor:not-allowed">&lt;</span></li>
              	{% if next[1].startswith('>') %}
 	                <li><span class="navlink" title="{{ _('no next page') }}"
-	                          style="cursor:not-allowed"> &gt; </span></li>
+	                          style="cursor:not-allowed">&gt;</span></li>
 	            {% else %}
 	                <li><a href="/scene/families?o=father&{{ {'fw':next[1]} | urlencode }}"
-	                	title="seuraava sivu" class="navlink"> &gt; </a></li>
+	                	title="seuraava sivu" class="navlink">&gt;</a></li>
             	{% endif %}
  
+				<li class="title">{{ _("Mother") }}</li>
                 <li>{% if last %}
                      <a href="/scene/families?o=mother&fw=%20"
                         title="{{ _("Mother") }} {{ _('first page') }}"
-                        class="navlink">{{ _("Mother") }}: |&lt;</a>
+                        class="navlink">|&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu"
-                          style="cursor:not-allowed"> &lt; </span></li>
+                          style="cursor:not-allowed">&lt;</span></li>
             	{% if next[1].startswith('>') %}
 	                <li><span class="navlink" title="{{ _('no next page') }}"
-	                          style="cursor:not-allowed"> &gt; </span></li>
+	                          style="cursor:not-allowed">&gt;</span></li>
 	            {% else %}
 	                <li><a href="/scene/families?o=mother&{{ {'fw':next[1]} | urlencode }}"
-	                	title="seuraava sivu" class="navlink"> &gt; </a></li>
+	                	title="seuraava sivu" class="navlink">&gt;</a></li>
             	{% endif %}
             </ul>
         </div>

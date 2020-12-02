@@ -223,7 +223,7 @@ class FamilyReader(DbReader):
     '''
         Data reading class for Family objects with associated data.
 
-        - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
+        - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
           to define the database driver and user context
 
         - Returns a Result object which includes the tems and eventuel error object.
@@ -281,7 +281,7 @@ class FamilyReader(DbReader):
             1. Get Family node by user/common
                res is dict {item, status, statustext}
         """
-        ret_results = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
+        ret_results = self.readservice.dr_get_family_by_uuid(self.use_user, uuid)
         # ret_results {'item': <bl.family.FamilyBl>, 'status': Status}
         if ret_results.get('status') != Status.OK:
             return ret_results
@@ -294,7 +294,7 @@ class FamilyReader(DbReader):
                res is dict {items, status, statustext}
         """
         if select_parents:
-            res = self.dbdriver.dr_get_family_parents(family.uniq_id, 
+            res = self.readservice.dr_get_family_parents(family.uniq_id, 
                                                       with_name=select_names)
             for p in res.get('items'):
                 # For User's own data, no hiding for too new persons
@@ -306,7 +306,7 @@ class FamilyReader(DbReader):
                res is dict {items, status, statustext}
         """
         if select_children:
-            res = self.dbdriver.dr_get_family_children(family.uniq_id,
+            res = self.readservice.dr_get_family_children(family.uniq_id,
                                                        with_events=select_events,
                                                        with_names=select_names)
             # res {'items': [<bl.person.PersonBl>], 'status': Status}
@@ -321,7 +321,7 @@ class FamilyReader(DbReader):
                res is dict {items, status, statustext}
         """
         if select_events:
-            res = self.dbdriver.dr_get_family_events(family.uniq_id, 
+            res = self.readservice.dr_get_family_events(family.uniq_id, 
                                                      with_places=select_places)
             for e in res.get('items'):
                 family.events.append(e)
@@ -331,14 +331,14 @@ class FamilyReader(DbReader):
               optionally with Notes
         """
         if select_sources:
-            res = self.dbdriver.dr_get_family_sources(src_list)
+            res = self.readservice.dr_get_family_sources(src_list)
             for s in res.get('items'):
                 family.sources.append(s)
         """
             6 Get Notes for family and events
         """
         if select_notes:
-            res = self.dbdriver.dr_get_family_notes(src_list)
+            res = self.readservice.dr_get_family_notes(src_list)
             for s in res.get('items'):
                 family.sources.append(s)
 
@@ -348,7 +348,7 @@ class FamilyReader(DbReader):
     def get_person_families(self, uuid:str):
         """ Get all families for given person in marriage date order.
         """
-        res = self.dbdriver.dr_get_person_families_uuid(uuid)
+        res = self.readservice.dr_get_person_families_uuid(uuid)
         items = res.get('items')
         if items:
             items.sort(key=lambda x: x.dates)

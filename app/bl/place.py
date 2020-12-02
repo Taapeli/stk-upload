@@ -99,7 +99,7 @@ class PlaceDataStore:
 
    Data reading class for Place objects with associated data.
 
-   - Use pe.db_reader.DbReader.__init__(self, dbdriver, u_context) 
+   - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
      to define the database driver and user context
 
    - Returns a Result object which includes the items and eventuel error object.

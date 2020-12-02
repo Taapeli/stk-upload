@@ -24,11 +24,12 @@ from pe.neo4j.cypher.cy_family import CypherFamily
 from pe.neo4j.cypher.cy_event import CypherEvent
 from pe.neo4j.cypher.cy_person import CypherPerson
 
+from bl.event import Event
 #Todo: Change Old style includes to bl classes
 #from models.gen.person_combo import Person_combo
 #from models.gen.cypher import Cypher_person
 #from models.gen.person_name import Name
-from models.gen.event import Event
+#from models.gen.event import Event
 #from models.gen.event_combo import Event_combo
 from models.gen.note import Note
 from models.gen.media import Media

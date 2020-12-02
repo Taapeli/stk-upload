@@ -156,8 +156,9 @@ class SourceDataStore:
             - item.citations    Citating Persons, Events, Families and Medias
                                 as [label, object] tuples(?)
         """
-        res = self.readservice.dr_get_source_w_repository(self.use_user, uuid)
-        if res.get('status') != Status.OK:
+        use_user = self.user_context.batch_user()
+        res = self.readservice.dr_get_source_w_repository(use_user, uuid)
+        if Status.has_failed(res):
             return res
         source = res.get('item')
         if not source:
