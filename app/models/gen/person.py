@@ -86,7 +86,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 import shareds
 from bl.base import NodeObject
-#from .cypher import Cypher_person
+from .cypher import Cypher_person
 #from .dates import DateRange
 #from flask_babelex import _
 
@@ -207,31 +207,31 @@ class Person(NodeObject):
 #         return obj
 # 
 # 
-#     @staticmethod
-#     def set_sortname(tx, uniq_id, namenode):
-#         """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
-#             using given default Name node
-#         """
-#         key = namenode.key_surname()
-#         return tx.run(Cypher_person.set_sortname, id=uniq_id, key=key)
+    @staticmethod
+    def set_sortname(tx, uniq_id, namenode):
+        """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
+            using given default Name node
+        """
+        key = namenode.key_surname()
+        return tx.run(Cypher_person.set_sortname, id=uniq_id, key=key)
 #         
-#     @staticmethod
-#     def get_confidence (uniq_id=None):
-#         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
-#         """
-#         if uniq_id:
-#             return shareds.driver.session().run(Cypher_person.get_confidence,
-#                                                 id=uniq_id)
-#         else:
-#             return shareds.driver.session().run(Cypher_person.get_confidences_all)
+    @staticmethod
+    def get_confidence (uniq_id=None):
+        """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
+        """
+        if uniq_id:
+            return shareds.driver.session().run(Cypher_person.get_confidence,
+                                                id=uniq_id)
+        else:
+            return shareds.driver.session().run(Cypher_person.get_confidences_all)
 # 
 # 
-#     def set_confidence (self, tx):
-#         """ Sets a quality rate to this Person
-#             Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
-#         """
-#         return tx.run(Cypher_person.set_confidence,
-#                       id=self.uniq_id, confidence=self.confidence)
+    def set_confidence (self, tx):
+        """ Sets a quality rate to this Person
+            Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
+        """
+        return tx.run(Cypher_person.set_confidence,
+                      id=self.uniq_id, confidence=self.confidence)
 
 
     @staticmethod

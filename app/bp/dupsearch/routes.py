@@ -1,5 +1,5 @@
 from flask import render_template, request, jsonify #, redirect, url_for, session
-from flask_security import login_required #, roles_accepted, roles_required, current_user
+from flask_security import login_required, roles_required
 #from flask_babelex import _
 from . import bp
 
@@ -12,11 +12,13 @@ import json
 
 @bp.route('/dupsearch',  methods=['GET'])
 @login_required
+@roles_required('audit')
 def dupsearch():
     return render_template('/dupsearch.html')
 
 @bp.route('/dupsearch/batches',  methods=['GET'])
 @login_required
+@roles_required('audit')
 def batches():
     batch_list = list(Batch.get_batches())
     completed_batches = []
@@ -31,6 +33,7 @@ def batches():
 
 @bp.route('/dupsearch/generate_keys/<batchid>',  methods=['GET'])
 @login_required
+@roles_required('audit')
 def generate_keys(batchid):
     args = SimpleNamespace(for_batch=batchid)
     res = search.generate_keys(args)
@@ -38,6 +41,7 @@ def generate_keys(batchid):
 
 @bp.route('/dupsearch/remove_keys/<batchid>',  methods=['GET'])
 @login_required
+@roles_required('audit')
 def remove_keys(batchid):
     args = SimpleNamespace(from_batch=batchid)
     res = search.remove_keys(args)
@@ -45,6 +49,7 @@ def remove_keys(batchid):
 
 @bp.route('/dupsearch/search', methods=['POST'])
 @login_required
+@roles_required('audit')
 def search_dups():
     args_dict = json.loads(request.data)
     args = SimpleNamespace(**args_dict)
@@ -55,24 +60,28 @@ def search_dups():
 
 @bp.route('/dupsearch/create_index', methods=['GET'])
 @login_required
+@roles_required('audit')
 def create_index():
     res = search.create_index(None)
     return jsonify(res)
 
 @bp.route('/dupsearch/drop_index', methods=['GET'])
 @login_required
+@roles_required('audit')
 def drop_index():
     res = search.drop_index(None)
     return jsonify(res)
 
 @bp.route('/dupsearch/get_models', methods=['GET'])
 @login_required
+@roles_required('audit')
 def get_models():
     res = search.get_models()
     return jsonify(res)
 
 @bp.route('/dupsearch/upload', methods=['POST'])
 @login_required
+@roles_required('audit')
 def upload():
     file = request.files['file']
     res = search.upload(file)

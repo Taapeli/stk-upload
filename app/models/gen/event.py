@@ -78,10 +78,10 @@ class Event(NodeObject):
     def __init__(self):     #, eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
         NodeObject.__init__(self)
-        print(f'KUTSUTTU VANHENTUVAA METODIA Event.__init__()')
-        for line in traceback.format_stack():
-            if not ( '/venv/' in line or 'python' in line or '/gen/event' in line):
-                print(line.strip())
+# #         print(f'KUTSUTTU VANHENTUVAA METODIA Event.__init__()')
+# #         for line in traceback.format_stack():
+# #             if not ( '/venv/' in line or 'python' in line or '/gen/event' in line):
+# #                 print(line.strip())
 
 #         self.uuid = None        # UUID
 #         self.uniq_id = None     # Neo4j object id
