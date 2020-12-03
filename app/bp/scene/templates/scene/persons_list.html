@@ -74,7 +74,7 @@
 			         <a href="/scene/persons/all?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
 			    {% else %}<span class="navlink">|&lt;</span>
 			    {% endif %}</li>
-                <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed"> &lt; </span></li>
+                <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed">&lt;</span></li>
 
             {% for p in persons %}
                 {% set ini = p.sortname[0] %}
@@ -83,7 +83,7 @@
                 {% endif %}{% endif %}
             {% endfor %}
             {% if next[1] and next[1].startswith('>') %}
-                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
+                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed">&gt;</span></li>
             {% else %}
 	            <li><a href="/scene/persons/all?{{ {'fw':next[1]} | urlencode }}" 
 	                 title="{{ _('next page') }}" class="navlink"> &gt; </a></li>
