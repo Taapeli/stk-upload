@@ -150,7 +150,7 @@ def recreate_refnames():
 def read_cite_sour_repo(uniq_id=None):
     """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
     
-        Called from bp.tools.routes.pick_selection  -  NOT IN USE?
+        Called from bp.obsolete_tools.routes.pick_selection  -  NOT IN USE?
     """
 
     sources = []

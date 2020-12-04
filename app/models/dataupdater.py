@@ -218,7 +218,7 @@ def set_family_calculated_attributes(tx=None, uniq_id=None):
 #     return (refname_count, sortname_count)
 
 
-# Moved to bp.tools.models.dataupdater.joinpersons
+# Moved to bp.obsolete_tools.models.dataupdater.joinpersons
 # def joinpersons(base_id, join_ids):
 #     """ Yhdistetään henkilöön oid=base_id toiset henkilöt, joiden oid:t on
 #         listassa join_ids.

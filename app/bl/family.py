@@ -403,7 +403,7 @@ RETURN family"""
 #     def get_family_data_by_id(self): #see models.gen.family_combo.Family_combo.get_family_data_by_id
 #         """ Luetaan perheen tiedot. 
 #             Called from models.datareader.get_families_data_by_id 
-#                    from bp.tools.routes.show_family_data
+#                    from bp.obsolete_tools.routes.show_family_data
     
     
 #     @staticmethod           

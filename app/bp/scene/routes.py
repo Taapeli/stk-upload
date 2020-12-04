@@ -481,7 +481,7 @@ def show_person(uid=None):
 def obsolete_show_event_v1(uuid):
     """ Event page with accompanied persons and families.
 
-        Derived from bp.tools.routes.show_baptism_data()
+        Derived from bp.obsolete_tools.routes.show_baptism_data()
     """
     u_context = UserContext(user_session, current_user, request)
     datastore = EventReader(readservice, u_context) 
