@@ -308,6 +308,7 @@ def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
     logger.info(f'-> bp.admin.routes.xml_delete f="{xmlfile}"')
+    #TODO: Return to list_uploads_all, if called from there
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------

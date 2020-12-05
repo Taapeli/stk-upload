@@ -115,7 +115,7 @@ class SourceDataStore:
         ''' Get junk of Source objects for Sources list.
         '''
         context = self.user_context
-        fw = context.next_name_fw()
+        fw = context.first  # From here forward
         use_user = context.batch_user()
         args = {"user": use_user, "fw": fw,  "count": context.count}
         if context.series:
@@ -139,7 +139,7 @@ class SourceDataStore:
                                               sources[0].stitle, sources[-1].stitle, 
                                               context.count, len(sources))
             else:
-                return {'status':Status.NOT_FOUND}
+                return {'items':[], 'status':Status.NOT_FOUND}
 
             results = {'items':sources, 'status':Status.OK}
         except Exception as e:

@@ -15,7 +15,11 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 from .base import NodeObject, Status
+from .person import PersonBl
+from .person_name import Name
+
 from pe.db_reader import DbReader
+from models.gen.cypher import Cypher_family #TODO fix
 from pe.neo4j.cypher.cy_family import CypherFamily
 
 from models.gen.dates import DateRange
@@ -228,6 +232,147 @@ class FamilyReader(DbReader):
 
         - Returns a Result object which includes the tems and eventuel error object.
     '''
+    def __init__(self, readservice, u_context=None):
+        ''' Create a reader object with db driver and user context.
+
+            - readservice    Neo4jReadService or Neo4jWriteDriver
+        '''
+        self.readservice = readservice
+        if u_context:
+            # For reader only; writer has no context?
+            self.user_context = u_context
+            self.username = u_context.user
+            if u_context.context == u_context.ChoicesOfView.COMMON:
+                self.use_user = None
+            else:
+                self.use_user = u_context.user
+
+
+    def get_families(self, opt='father'):
+        """ Find families from the database 
+        
+            from /scene/families, tools: /listall/families
+        """
+
+        families = []
+        fw = self.user_context.first     # next name
+        user = self.user_context.batch_user()
+        limit = self.user_context.count
+        ustr = "user " + user if user else "no user"
+        print(f"FamilyReader.get_families: Get max {limit} persons "
+              f"for {ustr} starting at {fw!r}")
+
+        # Select a) filter by user b) show Isotammi common data (too)
+        show_by_owner = self.user_context.use_owner_filter()
+        show_approved = self.user_context.use_common()
+        
+        with shareds.driver.session() as session:
+            try:
+                if show_by_owner:
+                    if show_approved: 
+                        if opt == 'father':
+                            #1 get all with owner name for all
+                            print("_read_families_p: by owner with common")
+                            result = session.run(Cypher_family.read_families_p,
+                                                 fw=fw, limit=limit)
+                        elif opt == 'mother':
+                            #1 get all with owner name for all
+                            print("_read_families_m: by owner with common")
+                            result = session.run(Cypher_family.read_families_m,
+                                                 fwm=fw, limit=limit)
+                    else: 
+                        if opt == 'father':
+                            #2 get my own (no owner name needed)
+                            print("_read_families_p: by owner only")
+                            result = session.run(Cypher_family.read_my_families_p,
+                                                 user=user, fw=fw, limit=limit)
+                        elif opt == 'mother':
+                            #1 get all with owner name for all
+                            print("_read_families_m: by owner only")
+                            result = session.run(Cypher_family.read_my_families_m,
+                                                 user=user, fwm=fw, limit=limit)
+                else: # no show_by_owner
+                    if opt == 'father':
+                        #3 == #1 simulates common by reading all
+                        print("_read_families_p: common only")
+                        result = session.run(Cypher_family.read_families_common_p, #user=user, 
+                                             fw=fw, limit=limit)
+                    elif opt == 'mother':
+                        #1 get all with owner name for all
+                        print("_read_families_m: common only")
+                        result = session.run(Cypher_family.read_families_common_m,
+                                             fwm=fw, limit=limit)
+
+            except Exception as e:
+                print('Error _read_families_p: {} {}'.format(e.__class__.__name__, e))            
+                raise      
+
+            for record in result:
+                if record['f']:
+                    # <Node id=55577 labels={'Family'} 
+                    #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
+                    #    'id': 'F0000', 'change': 1507492602}>
+                    f_node = record['f']
+                    family = FamilyBl.from_node(f_node)
+                    family.marriage_place = record['marriage_place']
+    
+                    uniq_id = -1
+                    for role, parent_node, name_node in record['parent']:
+                        if parent_node:
+                            # <Node id=214500 labels={'Person'} 
+                            #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa', 
+                            #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496, 
+                            #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008', 
+                            #    'date2': 1997946, 'date1': 1929380}>
+                            if uniq_id != parent_node.id:
+                                # Skip person with double default name
+                                pp = PersonBl.from_node(parent_node)
+                                if role == 'father':
+                                    family.father = pp
+                                elif role == 'mother':
+                                    family.mother = pp
+    
+                            pname = Name.from_node(name_node)
+                            pp.names = [pname]
+    
+                    
+                    for ch in record['child']:
+                        # <Node id=60320 labels={'Person'} 
+                        #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19, 
+                        #    'confidence': '', 'sex': 0, 'change': 1507492602, 
+                        #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
+                        #    'date2': 1609920, 'date1': 1609920}>
+#                         child = Person_as_member()
+                        child = PersonBl.from_node(ch)
+#                         Person_as_member.__init__(child)
+#                         child.uniq_id = ch.id
+#                         child.uuid = ch['uuid']
+#                         child.sortname = ch['sortname']
+                        family.children.append(child)
+                    
+                    if record['no_of_children']:
+                        family.no_of_children = record['no_of_children']
+                    family.num_hidden_children = 0
+                    if not self.user_context.use_common():
+                        if family.father: family.father.too_new = False
+                        if family.mother: family.mother.too_new = False
+                    families.append(family)
+
+        # Update the page scope according to items really found 
+        if families:
+            if opt == 'father':
+                self.user_context.update_session_scope('person_scope', 
+                                              families[0].father_sortname, families[-1].father_sortname, 
+                                              limit, len(families))
+            else:
+                self.user_context.update_session_scope('person_scope', 
+                                              families[0].mother_sortname, families[-1].mother_sortname, 
+                                              limit, len(families))
+
+        if self.user_context.use_common():
+            families = self.hide_privacy_protected_families(families)
+        return families
+
     
     def get_family_data(self, uuid:str, wanted=[]):
         """ Read Family information including Events, Children, Notes and Sources.
@@ -414,8 +559,17 @@ RETURN family"""
 #     def set_dates_sortnames(tx, uniq_id, dates, father_sortname, mother_sortname): #see models.gen.family_combo.Family_combo
 #         ''' Update Family dates and parents' sortnames.
 
-#     @staticmethod       
-#     def hide_privacy_protected_families(families): #see models.gen.family_combo.Family_combo
+    def hide_privacy_protected_families(self, families):
+        ret_families = []
+        for fam in families:
+            if ((not fam.father or fam.father.too_new) and
+               (not fam.mother or fam.mother.too_new)):
+                continue   # do not include this family
+            ret_families.append(fam)
+            children2 = [c for c in fam.children if not c.too_new]
+            fam.num_hidden_children = len(fam.children) - len(children2)
+            fam.children = children2
+        return ret_families
 
 #     @staticmethod       
 #     def get_families(o_context, opt='father', limit=100): #see models.gen.family_combo.Family_combo

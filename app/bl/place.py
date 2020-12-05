@@ -30,7 +30,7 @@ logger = logging.getLogger('stkserver')
 
 from .base import NodeObject, Status
 from .media import MediaBl
-from pe.db_reader import DbReader
+#from pe.db_reader import DbReader
 from models.gen.dates import DateRange
 
 
@@ -82,12 +82,12 @@ class Place(NodeObject):
         p = cls()
         p.uniq_id = node.id
         p.uuid = node['uuid']
-        p.handle = node['handle']
+        p.handle = node.get('handle',None)
         p.change = node['change']
-        p.id = node['id'] or ''
-        p.type = node['type'] or ''
-        p.pname = node['pname'] or ''
-        p.coord = node['coord'] or None
+        p.id = node.get('id','')
+        p.type = node.get('type','')
+        p.pname = node.get('pname','')
+        p.coord = node.get('coord',None)
         return p
 
 
@@ -117,27 +117,32 @@ class PlaceDataStore:
         self.user_context = u_context
 
 
-    def get_list(self):
+    def get_place_list(self):
         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
         
             Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
     """
         context = self.user_context
-        fw = context.next_name_fw()
+        fw = context.first  # From here forward
         use_user = context.batch_user()
         places = self.readservice.dr_get_place_list_fw(use_user, fw, context.count, 
                                                        lang=context.lang)
 
         # Update the page scope according to items really found 
         if places:
+            print(f'PlaceDataStore.get_place_list: {len(places)} places '
+                  f'{context.direction} "{places[0].pname}" – "{places[-1].pname}"')
             context.update_session_scope('place_scope', 
                                           places[0].pname, places[-1].pname, 
                                           context.count, len(places))
-        res = {'items':places, 'status':Status.OK}
-        return res
+        else:
+            print(f'bl.place.PlaceDataStore.get_place_list: no places')
+            return {'status': Status.NOT_FOUND, 'items': [],
+                    'statustext': f'No places fw="{fw}"'}
+        return {'items':places, 'status':Status.OK}
 
 
-    def get_with_events(self, uuid):
+    def get_places_w_events(self, uuid):
         """ Read the place hierarchy and events connected to this place.
         
             Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
@@ -153,7 +158,7 @@ class PlaceDataStore:
 
         if not place:
             res = {'status':Status.ERROR, 'statustext':
-                       f'get_with_events: No Place with uuid={uuid}'}
+                       f'get_places_w_events: No Place with uuid={uuid}'}
             return res
         
         #TODO: Find Citation -> Source -> Repository for each uniq_ids

@@ -104,7 +104,8 @@ class Media(NodeObject):
             return  shareds.driver.session().run(query, id=uniq_id)
         elif o_context:
             user = o_context.user
-            fw_from = o_context.next_name_fw()     # next name
+            #fw_from = o_context.next_name('fw')     # next name
+            fw_from = o_context.first  # From here forward
             show_common = o_context.use_common()
             if show_common:
                 # Show approved common data

@@ -199,7 +199,7 @@ class PersonReader(DbReader):
 
         context = self.user_context
         args['use_user'] = self.use_user
-        args['fw'] = context.next_name_fw()
+        args['fw'] = context.first  # From here forward
         args['limit'] = context.count
         
         res = self.readservice.dr_get_person_list(args)
@@ -237,8 +237,8 @@ class PersonReader(DbReader):
         context = self.user_context
         res_dict = {}
         args = {'use_user': self.use_user,
-                'fw': context.next_name_fw(),
-                'limit':context.count}
+                'fw': context.first,  # From here forward
+               'limit':context.count}
         res = self.readservice.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
         if Status.has_failed(res):

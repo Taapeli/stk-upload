@@ -35,7 +35,7 @@ class DbReader:
 #     def get_person_list(self): # --> bl.person.PersonReader.get_person_list()
 #         ''' List person data including all data needed to Person page. '''
 
-#     def get_place_list(self): # --> bl.place.PlaceReader.get_list()
+#     def get_place_list(self): # --> bl.place.PlaceReader.get_place_list()
 #         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
 
 #     def get_place_with_events(self, uuid): # --> bl.place.PlaceReader.get_with_events()
