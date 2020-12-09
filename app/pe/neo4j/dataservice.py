@@ -557,7 +557,8 @@ class Neo4jDataService:
             f_attr.update(dates)
 
         result = self.tx.run(CypherFamily.set_dates_sortname, id=uniq_id, f_attr=f_attr)
-        cnt = result.summary().counters.properties_set
+        counters = result.consume().counters
+        cnt = counters.properties_set
         return {'status':Status.OK, 'count':cnt}
 
 

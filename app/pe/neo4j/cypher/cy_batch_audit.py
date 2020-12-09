@@ -65,7 +65,7 @@ return b.id as batch, b.timestamp as timestamp, b.status as status,
     count(r) as persons 
     order by batch'''
 
-    get_empty_batches = '''
+    TODO_get_empty_batches = '''
 MATCH (a:Batch) 
 WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
 RETURN a AS batch ORDER BY a.id DESC'''
