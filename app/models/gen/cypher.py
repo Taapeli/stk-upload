@@ -364,7 +364,7 @@ class Cypher_family():
     '''
     
     # from models.gen.family.read_families
-    read_families_p = """
+    read_families_f = """
 MATCH (f:Family) WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
@@ -376,7 +376,7 @@ RETURN f, p.pname AS marriage_place,
     COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY f.father_sortname LIMIT $limit"""
 
-    read_my_families_p = """
+    read_my_families_f = """
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
     WHERE prof.username = $user AND f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
@@ -389,7 +389,7 @@ RETURN f, p.pname AS marriage_place,
     COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY f.father_sortname LIMIT $limit"""
     
-    read_families_common_p = """
+    read_families_common_f = """
 MATCH () -[:PASSED]-> (f:Family) WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 

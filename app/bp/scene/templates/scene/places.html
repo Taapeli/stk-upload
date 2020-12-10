@@ -55,12 +55,7 @@
        
 		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="{{ _('Top') }}"><b>&uarr;</b></a></li>
-			    <li>
-	{% if user_context.at_start()  %}
-					<span class="navlink">|&lt;</span>
-	{% else %}      <a href="/scene/locations?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
-	{% endif %} </li>
-                <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed"> &lt; </span></li>
+                {{ macro.buttons_bw(user_context, "/scene/locations") }}
 
     {% for p in places %}
         {% set ini = p.pname[0]|list|first %}
@@ -69,11 +64,8 @@
                 <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
         {% endif %}
     {% endfor %}
-    {% if user_context.at_end() %}
-                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
-    {% else %}  <li><a href="/scene/locations?{{ {'fw':next_fw} | urlencode }}" 
-	                 title="{{ _('next page') }} '{{next_fw}}'" class="navlink"> &gt; </a></li>
-    {% endif %}
+ 
+                {{ macro.buttons_fw(user_context, "/scene/locations") }}
 			</ul>
 		</div>
 		<table class="IndividualList">

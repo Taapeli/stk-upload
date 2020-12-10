@@ -258,53 +258,44 @@ class FamilyReader(DbReader):
         fw = self.user_context.first     # next name
         user = self.user_context.batch_user()
         limit = self.user_context.count
+        order = self.user_context.order
         ustr = "user " + user if user else "no user"
-        print(f"FamilyReader.get_families: Get max {limit} persons "
-              f"for {ustr} starting at {fw!r}")
+        print(f"FamilyReader.get_families: Get max {limit} families "
+              f"for {ustr} starting  {order} {fw!r}")
 
-        # Select a) filter by user b) show Isotammi common data (too)
+        # Select True = filter by this user False = filter approved data
         show_by_owner = self.user_context.use_owner_filter()
-        show_approved = self.user_context.use_common()
+        #show_approved = self.user_context.use_common()
         
         with shareds.driver.session() as session:
             try:
                 if show_by_owner:
-                    if show_approved: 
-                        if opt == 'father':
-                            #1 get all with owner name for all
-                            print("_read_families_p: by owner with common")
-                            result = session.run(Cypher_family.read_families_p,
-                                                 fw=fw, limit=limit)
-                        elif opt == 'mother':
-                            #1 get all with owner name for all
-                            print("_read_families_m: by owner with common")
-                            result = session.run(Cypher_family.read_families_m,
-                                                 fwm=fw, limit=limit)
-                    else: 
-                        if opt == 'father':
-                            #2 get my own (no owner name needed)
-                            print("_read_families_p: by owner only")
-                            result = session.run(Cypher_family.read_my_families_p,
-                                                 user=user, fw=fw, limit=limit)
-                        elif opt == 'mother':
-                            #1 get all with owner name for all
-                            print("_read_families_m: by owner only")
-                            result = session.run(Cypher_family.read_my_families_m,
-                                                 user=user, fwm=fw, limit=limit)
-                else: # no show_by_owner
-                    if opt == 'father':
+                    # (u:UserProfile {username})
+                    #    -[:HAS_LOADED]-> (b:Batch)
+                    #    -[:OWNS]-> (f:Family {father_sortname})
+                    if order == 'man':
+                        print("FamilyReader.get_families: my own order by man")
+                        result = session.run(Cypher_family.read_my_families_f,
+                                             user=user, fw=fw, limit=limit)
+                    elif order == 'wife':
+                        print("FamilyReader.get_families: my own order by wife")
+                        result = session.run(Cypher_family.read_my_families_m,
+                                             user=user, fwm=fw, limit=limit)
+                else: # approved from any researcher
+                    # (:Audit) -[:PASSED]-> (f:Family {father_sortname})
+                    if order == 'man':
                         #3 == #1 simulates common by reading all
-                        print("_read_families_p: common only")
-                        result = session.run(Cypher_family.read_families_common_p, #user=user, 
+                        print("FamilyReader.get_families: approved order by man")
+                        result = session.run(Cypher_family.read_families_common_f, #user=user, 
                                              fw=fw, limit=limit)
-                    elif opt == 'mother':
+                    elif order == 'wife':
                         #1 get all with owner name for all
-                        print("_read_families_m: common only")
+                        print("FamilyReader.get_families: approved order by wife")
                         result = session.run(Cypher_family.read_families_common_m,
                                              fwm=fw, limit=limit)
 
             except Exception as e:
-                print('Error _read_families_p: {} {}'.format(e.__class__.__name__, e))            
+                print(f'FamilyReader.get_families: {e.__class__.__name__} {e}')            
                 raise      
 
             for record in result:
@@ -360,14 +351,14 @@ class FamilyReader(DbReader):
 
         # Update the page scope according to items really found 
         if families:
-            if opt == 'father':
-                self.user_context.update_session_scope('person_scope', 
-                                              families[0].father_sortname, families[-1].father_sortname, 
-                                              limit, len(families))
+            up_scope = self.user_context.update_session_scope
+            if order == 'man':
+                up_scope('person_scope', families[0].father_sortname,
+                         families[-1].father_sortname, limit, len(families))
             else:
-                self.user_context.update_session_scope('person_scope', 
-                                              families[0].mother_sortname, families[-1].mother_sortname, 
-                                              limit, len(families))
+                up_scope('person_scope', families[0].mother_sortname, 
+                         families[-1].mother_sortname, limit, len(families))
+            self.user_context.order = order
 
         if self.user_context.use_common():
             families = self.hide_privacy_protected_families(families)

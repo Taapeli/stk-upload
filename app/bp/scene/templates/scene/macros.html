@@ -100,7 +100,9 @@
     {% if user_context.at_start() -%}
                 <li><span class="navlink">|&lt;</span></li>
     {% else %}
-                <li><a href="{{base_url}}?fw=%20" title="{{ _('first page') }}"
+        {% if '?' in base_url %}{% set cat='&' %}
+        {% else %}{% set cat='?' %}{% endif %}
+                <li><a href="{{base_url}}{{cat}}fw=%20" title="{{ _('first page') }}"
                        class="navlink">|&lt;</a></li>
     {% endif %} 
     {# To previous page button "<" (to be done later) #}
@@ -110,12 +112,15 @@
 
 {% macro buttons_fw(user_context, base_url) -%}
     {# To next page button ">" -#}
+    {% set next_fw = user_context.next_name('fw') %}
     {% if user_context.at_end() %}
                     <li><span class="navlink" title="{{ _('no next page') }}"
                               style="cursor:not-allowed"> &gt; </span></li>
     {% else %}
-                    <li><a href="{{base_url}}?{{ {'fw':next_fw} | urlencode }}"
-                        title="{{ _("next page") }} '{{next_fw}}'"
+        {% if '?' in base_url %}{% set cat='&' %}
+        {% else %}{% set cat='?' %}{% endif %}
+                    <li><a href="{{base_url}}{{cat}}fw={{next_fw | urlencode }}"
+                        title="{{ _('next page starting') }} {{next_fw|replace('#', ' ')}}"
                         class="navlink"> &gt; </a></li>
     {% endif -%}
 {%- endmacro %}}
