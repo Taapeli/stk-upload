@@ -396,12 +396,15 @@ class UserContext():
         return ret
 
     def at_end(self):
-        ''' Tells, if we are at last name forwards or backwards.
+        ''' Tells, if page contains the last name of data.
         '''
-        if self.direction == 'fw':
-            if self.last.startswith(self.NEXT_END):
-                return True
-        elif self.direction == 'bw':
-            if self.first.startswith(self.NEXT_START):
-                return True
+        if self.last.startswith(self.NEXT_END):
+            return True
+        return False
+
+    def at_start(self):
+        ''' Tells, if page contains the first name of data.
+        '''
+        if self.first == '' or self.first.startswith(self.NEXT_START):
+            return True
         return False

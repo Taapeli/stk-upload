@@ -4,22 +4,13 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-{% set cnt = places|count %}
-{% set user = user_context.user %}
+{# set cnt = places|count #}
 {% set next_fw = user_context.next_name('fw') %}
 {% set next_bw = user_context.next_name('bw') %}
-{% set next_at_end = user_context.at_end() %}
-{% set ctxt = user_context.context %}
-{% if ctxt == 3 or ctxt == 5 %}{#
-	#   common_own   011 3 = 1+2 = user's data & demo
-	#   common_batch 101 5 = 1+4 = user batch & demo #}
-	{% set multi_owners = ctxt - 1 %}
-    {% set my_set = user_context.choices.as_str[ctxt-1] %}
-    {% set my_common = _('Demo-data') %}
-{% else %}
-    {% set multi_owners = 0 %}
-    {% set my_set = user_context.choices.as_str[ctxt] %}
-{% endif %}
+{# set next_at_end = user_context.at_end() #}
+
+<p>next fb = "{{next_bw}}", fw = "{{next_fw}}"; 
+   at start = "{{user_context.at_start() }}", at end = "{{user_context.at_end() }}"</p>
 
 <div id="startdiv">
     <h2>{{ _('Places List') }}</h2>
@@ -31,10 +22,10 @@
         <div id="summaryarea">
             <div class="flex-container">
 				<div id="description_box">
-                   <p>{{ _('Displaying %(num)s distinct places', num=cnt) }}
-	{% if next_fw > ' ' %}
-					   {{ _('starting <tt>%(name)s</tt>', name=user_context.first) }}.
-	{% else %}         {{ _('from begin') }}.
+                   <p>{{ _('Displaying %(num)s distinct places', num=places|count) }}
+	{% if user_context.at_start() %}
+	         		  {{ _('from begin') }}.
+	{% else %}		  {{ _('starting <tt>%(name)s</tt>', name=next_bw) }}.
 	{% endif %}
                    </p>
 	           </div>
@@ -60,17 +51,11 @@
 		        </ol>
 		{% endif %}
 	{% endwith %}
-       </div>
+        </div> <!-- summaryarea -->
        
-    {% set last = places|last %}
 		<div id="alphanav">{% set alpha = "¤" %}
-			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-			    <li>
-	{% if next_bw > ' ' %}
-			        <a href="/scene/locations?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
-	{% else %}		<span class="navlink">|&lt;</span>
-	{% endif %} </li>
-                <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed"> &lt; </span></li>
+			<ul><li><a href="#" title="{{ _('Top') }}"><b>&uarr;</b></a></li>
+                {{ macro.buttons_bw(user_context, "/scene/locations") }}
 
     {% for p in places %}
         {% set ini = p.pname[0]|list|first %}
@@ -79,12 +64,8 @@
                 <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
         {% endif %}
     {% endfor %}
-    {% if next_at_end %}
-                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
-    {% else %}
-	            <li><a href="/scene/locations?{{ {'fw':next_fw} | urlencode }}" 
-	                 title="{{ _('next page') }}" class="navlink"> &gt; </a></li>
-    {% endif %}
+ 
+                {{ macro.buttons_fw(user_context, "/scene/locations") }}
 			</ul>
 		</div>
 		<table class="IndividualList">

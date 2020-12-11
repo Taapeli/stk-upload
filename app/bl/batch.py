@@ -101,7 +101,10 @@ class Batch():
         with shareds.driver.session() as session:
             result = session.run(CypherBatch.get_filename,
                                  username=username, batch_id=batch_id).single()
-            return result.get('b.file')
+            for record in result:
+                if record:
+                    return record.get('b.file')
+            return None
     
     @staticmethod
     def get_batches():
@@ -217,7 +220,8 @@ class Batch():
         batches = []
         class Upload: pass
 
-        result = shareds.driver.session().run(CypherBatch.get_empty_batches)
+        print('Batch.list_empty_batches: #TODO Tähän aikarajoitus "vvv-kk", nyt siinä on vakio "2019-10"!')
+        result = shareds.driver.session().run(CypherBatch.TODO_get_empty_batches)
 
         for record in result:
             # <Node id=317098 labels={'Batch'}
