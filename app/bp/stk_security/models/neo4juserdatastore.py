@@ -246,13 +246,13 @@ class Neo4jUserDatastore(UserDatastore):
  
     
     def get_user(self, id_or_email):
-#        self.email = id_or_email
+        #self.email = id_or_email
         try:
             with self.driver.session() as session:
                 userNode = session.read_transaction(self._getUser, id_or_email)
                 return(self._build_user_from_node(userNode) if userNode else None)
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.error(f'Neo4jUserDatastore.get_user: {e}')            
             return None
 
     def _getUser (self, tx, pemail):
@@ -271,8 +271,8 @@ class Neo4jUserDatastore(UserDatastore):
                 if userNodes is not None:
                     return [self.user_model(**userNode) for userNode in userNodes] 
                 return []
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.error(f'Neo4jUserDatastore.get_users: {e}')            
             return []                 
 
                                                
@@ -286,17 +286,17 @@ class Neo4jUserDatastore(UserDatastore):
             logging.error(f'Neo4jUserDatastore._getUsers: {e.__class__.__name__}, {e}')            
             raise      
 
-                
+
     def find_user(self, *args, **kwargs):
-#        print('find_user ', args, ' ', kwargs)
+        #print('find_user ', args, ' ', kwargs)
         try:
             with self.driver.session() as session:
                 userNode = session.read_transaction(self._findUser, kwargs['id'])
                 return(self._build_user_from_node(userNode) if userNode else None)
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.find_user: {e}')            
             return None
-        
+
     def _findUser (self, tx, arg):
         try:
             result = tx.run(Cypher.id_find, id=arg).single()
@@ -312,11 +312,11 @@ class Neo4jUserDatastore(UserDatastore):
             with self.driver.session() as session:
                 userRoles = session.read_transaction(self._findUserRoles, email) 
                 return [self.role_model(**roleRecord) for roleRecord in userRoles] 
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.find_UserRoles: {e}')            
             raise
  
-            
+
     def _findUserRoles (self, tx, pemail):
         try:
             records = tx.run(Cypher.user_roles_find, email=pemail)
@@ -335,8 +335,8 @@ class Neo4jUserDatastore(UserDatastore):
                     role.id = str(roleRecord.id)
                     return role
                 return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.find_role: {e}')            
             return None
         
     def _findRole (self, tx, roleName):
@@ -352,14 +352,14 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             with self.driver.session() as session:
                 roleRecord = session.read_transaction(self._getRole, id) 
-#                print ('get_role ', rid, ' ', roleNode)
+                #print ('get_role ', rid, ' ', roleNode)
                 if roleRecord is not None:
                     role =  self.role_model(**roleRecord)
                     role.id = str(roleRecord.id)
                     return role
                 return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.get_role: {e}')            
             return None
                         
     def _getRole (self, tx, rid):
@@ -375,7 +375,7 @@ class Neo4jUserDatastore(UserDatastore):
             with self.driver.session() as session:
                 roles = {}
                 roleRecords = session.read_transaction(self._getRoles) 
-#                print ('get_role ', rid, ' ', roleNode)
+                #print ('get_role ', rid, ' ', roleNode)
                 if len(roleRecords) > 0:
                     for roleRecord in roleRecords:
                         role =  self.role_model(**roleRecord)
@@ -383,8 +383,8 @@ class Neo4jUserDatastore(UserDatastore):
                         roles[role.name]=role
                     return roles
                 return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.get_roles: {e}')            
             raise
                                 
     def _getRoles (self, tx):

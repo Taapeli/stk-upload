@@ -67,8 +67,8 @@ class Neo4jDataService:
             msg = f'{e.__class__.__name__}, {e}'
             logger.info('-> pe.neo4j.dataservice.Neo4jDataService._rollback/fail"')
             print("Neo4jDataService._rollback: Transaction failed "+ msg)
-            self.blog.log_event({'title':_("Database save failed due to {}".\
-                                 format(msg)), 'level':"ERROR"})
+#             self.blog.log_event({'title':_("Database save failed due to {}".\
+#                                  format(msg)), 'level':"ERROR"})
             return {'status':Status.ERROR, 
                     'statustext': f'Rollback failed: {msg}'}
 
@@ -622,8 +622,8 @@ class Neo4jDataService:
                                                        record.get('father_sortname'),
                                                        record.get('mother_sortname'))
                 if Status.has_failed(ret):  return ret
-                print('Neo4jDataService._set_family_calculated_attributes: '
-                      f'id={uniq_id} properties_set={ret.get("count","none")}')
+                #print('Neo4jDataService._set_family_calculated_attributes: '
+                #      f'id={uniq_id} properties_set={ret.get("count","none")}')
                 dates_count += 1
                 sortname_count += 1
     

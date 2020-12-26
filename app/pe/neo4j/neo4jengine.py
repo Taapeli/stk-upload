@@ -32,7 +32,7 @@ class Neo4jEngine():
             connection_timeout = 15,
             encrypted=False)
         self.version = app.config.get('NEO4J_VERSION','3.5')
-        print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connecting (v{self.version})')
+        print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connecting (v>={self.version})')
    
     def close(self):
         self.driver.close()
