@@ -474,7 +474,7 @@ def fetch_users():
 @roles_accepted('admin')
 def fetch_batches():
 
-    from bl.batch_audit import Batch
+    from bl.batch import Batch
 
     batch_list = list(Batch.get_batches())
     for b in batch_list:

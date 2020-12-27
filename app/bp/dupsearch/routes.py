@@ -4,7 +4,7 @@ from flask_security import login_required, roles_required
 from . import bp
 
 #from bp.gramps.models import batch
-from bl.batch_audit import Batch
+from bl.batch import Batch
 from bp.dupsearch.models import search
 from types import SimpleNamespace
 import json

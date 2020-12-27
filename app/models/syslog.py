@@ -88,8 +88,12 @@ def readlog(direction="backward",startid=None):
         else:
             cypher_stmt = syslog_cypher_read_from_beginning
     try:
-        recs = shareds.driver.session().run(cypher_stmt,direction=direction,startid=startid)
-        return recs.records()
+        recs = []
+        result = shareds.driver.session().run(cypher_stmt,
+                                              direction=direction, startid=startid)
+        for record in result:
+            recs.append(record)
+        return recs
     except:
         traceback.print_exc()
         return []

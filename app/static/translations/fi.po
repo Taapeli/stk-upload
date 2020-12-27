@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-12-16 16:57+0200\n"
-"PO-Revision-Date: 2020-09-22 22:15+0300\n"
+"POT-Creation-Date: 2020-12-26 19:07+0200\n"
+"PO-Revision-Date: 2020-12-16 17:20+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -1999,7 +1999,7 @@ msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Poistaa \"-X\"-merkityistä tunnisteista \"-X\" :n"
 
 #: bp/gramps/gramps_loader.py:610 bp/gramps/gramps_loader.py:617
-#: pe/db_writer.py:85 pe/neo4j/dataservice.py:71
+#: pe/db_writer.py:85
 msgid "Database save failed due to {}"
 msgstr "Tallennus tietokantaan epäonnistui, syy {}"
 
@@ -3733,13 +3733,13 @@ msgstr "Tarjokasaineistoni"
 
 #: bp/start/templates/start/index_guest.html:53
 msgid "The Demo Material"
-msgstr ""
+msgstr "Demoaineisto"
 
 #: bp/start/templates/start/index_guest.html:54
 msgid ""
 "You are on the home page of Isotammi demo. You have log in as a quest "
 "user."
-msgstr ""
+msgstr "Olet kirjautunut vierailijaksi Isotammen demo sivulle."
 
 #: bp/start/templates/start/index_guest.html:58
 #: bp/start/templates/start/index_logged.html:108
@@ -3759,12 +3759,16 @@ msgid ""
 "If you has already registered, you can log in and refine the structure of"
 " your own data."
 msgstr ""
+"Jos olet rekiströitynyt Isotammeen, niin voit kirjautua ja parantaa "
+"keräämiesi tietojen laatua."
 
 #: bp/start/templates/start/index_guest.html:64 templates/index_entry.html:73
 msgid ""
 "As a member of <i>Genealogical Society of Finland</i> you will get more "
 "services."
 msgstr ""
+"Jos olet <i>Suomen Sukututkimusseuran jäsen</i>, niin sinulla on enemmän "
+"Isotammen palveluita käytössäsi."
 
 #: bp/start/templates/start/index_logged.html:4
 msgid "Isotammi User's Start Page"
@@ -4453,7 +4457,7 @@ msgstr "Isotammi alkusivu"
 
 #: templates/index_entry.html:27
 msgid "Welcome to Isotammi Service"
-msgstr ""
+msgstr "Tervetuloa Isotammi palveluun"
 
 #: templates/index_entry.html:32
 msgid "Learn about Isotammi"
@@ -4464,6 +4468,8 @@ msgid ""
 "<i>Isotammi Service</i> is a service for co-operatively collected and "
 "validated genealogical data."
 msgstr ""
+"<i>Isotammi palvelu</i> sisältää joukkoistamalla kerättyjä ja laadukkaita"
+" sukutietoja."
 
 #: templates/index_entry.html:38
 msgid "For more info see also documents -"
@@ -4483,7 +4489,7 @@ msgstr "Sukutietojen vakiointi Gedcom-ohjelmillamme"
 
 #: templates/index_entry.html:50
 msgid "Look at the demo data"
-msgstr ""
+msgstr "Tutustu demoaineistoon"
 
 #: templates/index_entry.html:51
 msgid ""
@@ -4492,6 +4498,8 @@ msgid ""
 "\t\t\t\tit contains the relatives of the Finnish national compositor Jean"
 " Sibelius."
 msgstr ""
+"Tässä demossa on kansallissäveltäjämme, Jean Sibeliuksen, sukupuu, \n"
+"\t\t\t\tjoka noudattaa sukututkimuksen laatusääntöjä."
 
 #: templates/index_entry.html:55
 msgid "Explore demo"

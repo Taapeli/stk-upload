@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-12-16 16:57+0200\n"
+"POT-Creation-Date: 2020-12-26 19:07+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -1999,7 +1999,7 @@ msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr ""
 
 #: bp/gramps/gramps_loader.py:610 bp/gramps/gramps_loader.py:617
-#: pe/db_writer.py:85 pe/neo4j/dataservice.py:71
+#: pe/db_writer.py:85
 msgid "Database save failed due to {}"
 msgstr ""
 

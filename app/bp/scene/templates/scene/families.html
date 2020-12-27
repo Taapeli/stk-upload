@@ -119,8 +119,8 @@ th span.man-man, th span.wife-wife { color: #020299;}
             <td class="ColumnFamily">
                 <a href="/scene/family?uuid={{f.uuid}}" class="inlink"
                    title="{{ _('Go to family page') }}">&rarr; {{f.rel_type|transl('marr')}}</a>
-        {% if f.marriage_place %}{{f.marriage_place}}{% endif -%}
-        {% if f.dates %}{{f.dates}}{% endif -%}
+        {% if f.marriage_place %} {{f.marriage_place}} {% endif -%}
+        {% if f.dates %} {{f.dates}} {% endif -%}
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
