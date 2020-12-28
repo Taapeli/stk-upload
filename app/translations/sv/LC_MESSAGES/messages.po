@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-12-26 19:07+0200\n"
+"POT-Creation-Date: 2020-12-28 18:31+0200\n"
 "PO-Revision-Date: 2020-09-20 22:47+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -346,40 +346,40 @@ msgstr "Användaren uppdaterad"
 msgid "Data import from %(i)s to database has been started."
 msgstr "Data importeringen från %(i)s till databasen startad"
 
-#: bp/admin/templates/admin/uploads.html:36 bp/admin/uploads.py:258
+#: bp/admin/templates/admin/uploads.html:44 bp/admin/uploads.py:258
 #: bp/admin/uploads.py:287 bp/audit/templates/audit/batches.html:25
-#: bp/gramps/templates/gramps/uploads.html:218
+#: bp/gramps/templates/gramps/uploads.html:184
 msgid "UPLOADED"
 msgstr "LADDAD"
 
-#: bp/admin/templates/admin/uploads.html:40 bp/admin/uploads.py:260
+#: bp/admin/templates/admin/uploads.html:45 bp/admin/uploads.py:260
 #: bp/admin/uploads.py:288 bp/audit/templates/audit/batches.html:29
-#: bp/gramps/templates/gramps/uploads.html:219
+#: bp/gramps/templates/gramps/uploads.html:185
 msgid "STORING"
 msgstr "LAGRAS"
 
-#: bp/admin/templates/admin/uploads.html:44 bp/admin/uploads.py:262
+#: bp/admin/templates/admin/uploads.html:46 bp/admin/uploads.py:262
 #: bp/admin/uploads.py:273 bp/admin/uploads.py:286 bp/admin/uploads.py:302
 #: bp/audit/templates/audit/batches.html:33
-#: bp/gramps/templates/gramps/uploads.html:220
+#: bp/gramps/templates/gramps/uploads.html:186
 msgid "STORED"
 msgstr "DATA SPARADE"
 
-#: bp/admin/templates/admin/uploads.html:52 bp/admin/uploads.py:266
+#: bp/admin/templates/admin/uploads.html:48 bp/admin/uploads.py:266
 #: bp/audit/templates/audit/batches.html:41
-#: bp/gramps/templates/gramps/uploads.html:222
+#: bp/gramps/templates/gramps/uploads.html:188
 msgid "FAILED"
 msgstr "MISSLYCKADES"
 
-#: bp/admin/templates/admin/uploads.html:52 bp/admin/uploads.py:268
+#: bp/admin/templates/admin/uploads.html:48 bp/admin/uploads.py:268
 #: bp/audit/templates/audit/batches.html:41
-#: bp/gramps/templates/gramps/uploads.html:222
+#: bp/gramps/templates/gramps/uploads.html:188
 msgid "ERROR"
 msgstr "FEL"
 
-#: bp/admin/templates/admin/uploads.html:48 bp/admin/uploads.py:270
+#: bp/admin/templates/admin/uploads.html:47 bp/admin/uploads.py:270
 #: bp/admin/uploads.py:274 bp/audit/templates/audit/batches.html:37
-#: bp/gramps/templates/gramps/uploads.html:221
+#: bp/gramps/templates/gramps/uploads.html:187
 msgid "REMOVED"
 msgstr "RADERAD"
 
@@ -446,7 +446,7 @@ msgstr "Användare"
 #: bp/admin/templates/admin/access_management.html:31
 #: bp/admin/templates/admin/batch_clear.html:25
 #: bp/dupsearch/templates/dupsearch.html:24
-#: bp/gramps/templates/gramps/uploads.html:181
+#: bp/gramps/templates/gramps/uploads.html:147
 msgid "Batch"
 msgstr "Batch"
 
@@ -505,7 +505,7 @@ msgid "Delete all my imported data"
 msgstr "Tag bort allt mitt importerade data"
 
 #: bp/admin/templates/admin/admin.html:57
-#: bp/gramps/templates/gramps/uploads.html:197
+#: bp/gramps/templates/gramps/uploads.html:163
 msgid "Uploaded Candidate Materials"
 msgstr "Laddat kandidat material"
 
@@ -613,7 +613,7 @@ msgid "GEDCOMs for all users"
 msgstr "GEDCOMs av alla användare"
 
 #: bp/admin/templates/admin/gedcoms.html:29
-#: bp/admin/templates/admin/uploads.html:61
+#: bp/admin/templates/admin/uploads.html:37
 msgid "User id"
 msgstr "Användar id"
 
@@ -622,13 +622,13 @@ msgid "GEDCOM file"
 msgstr "GEDCOM fil"
 
 #: bp/admin/templates/admin/gedcoms.html:40
-#: bp/admin/templates/admin/uploads.html:100
+#: bp/admin/templates/admin/uploads.html:89
 msgid "Number of files"
 msgstr "Antal av filer"
 
 #: bp/admin/templates/admin/gedcoms.html:41
 #: bp/admin/templates/admin/message.html:59
-#: bp/admin/templates/admin/uploads.html:101
+#: bp/admin/templates/admin/uploads.html:90
 msgid "List of users"
 msgstr "Lista över användare"
 
@@ -872,97 +872,97 @@ msgstr "Användar lista"
 msgid "Uploads"
 msgstr "Uppladdningar"
 
-#: bp/admin/templates/admin/uploads.html:14
+#: bp/admin/templates/admin/uploads.html:15
 msgid "Uploads for user"
 msgstr "Uppladdningar för användare"
 
-#: bp/admin/templates/admin/uploads.html:16
+#: bp/admin/templates/admin/uploads.html:17
 #, python-format
 msgid "Uploads for %(n)s users"
 msgstr "Uppladdningar för %(n)s användare"
 
-#: bp/admin/templates/admin/uploads.html:19
+#: bp/admin/templates/admin/uploads.html:20
 msgid "Uploads for all users"
 msgstr "Uppladdningar för alla användare"
 
-#: bp/admin/templates/admin/uploads.html:33
-#: bp/audit/templates/audit/batches.html:22
-msgid "Status for differents steps in XML file upload:"
-msgstr "Status för skeden i XML-fil uppladdning:"
-
-#: bp/admin/templates/admin/uploads.html:37
-#: bp/audit/templates/audit/batches.html:26
-#: bp/gramps/templates/gramps/uploads.html:218
-msgid "the file has been uploaded to server"
-msgstr "filen har överförts till servern"
-
-#: bp/admin/templates/admin/uploads.html:41
-#: bp/audit/templates/audit/batches.html:30
-#: bp/gramps/templates/gramps/uploads.html:219
-msgid "the file content is being stored to the database"
-msgstr "filens innehåll lagras i databasen"
-
-#: bp/admin/templates/admin/uploads.html:45
-#: bp/audit/templates/audit/batches.html:34
-msgid "the file content has been stored to the database"
-msgstr "filens innehåll har lagrats i databasen"
-
-#: bp/admin/templates/admin/uploads.html:49
-#: bp/audit/templates/audit/batches.html:38
-msgid "not found any more"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:53
-#: bp/audit/templates/audit/batches.html:42
-#: bp/gramps/templates/gramps/uploads.html:222
-msgid "there was an error"
-msgstr "det uppstod ett fel"
-
-#: bp/admin/templates/admin/uploads.html:63
+#: bp/admin/templates/admin/uploads.html:39
 #: bp/audit/templates/audit/batches.html:52
 msgid "Gramps file / uploaded at"
 msgstr "Gramps fil / laddad till"
 
-#: bp/admin/templates/admin/uploads.html:64
+#: bp/admin/templates/admin/uploads.html:40
 #: bp/audit/templates/audit/batches.html:53
-#: bp/gramps/templates/gramps/uploads.html:214
+#: bp/gramps/templates/gramps/uploads.html:180
 msgid "Status"
 msgstr "Status"
 
-#: bp/admin/templates/admin/uploads.html:65
+#: bp/admin/templates/admin/uploads.html:43
+#: bp/gramps/templates/gramps/uploads.html:183
+msgid "Steps for uploading Gramps files"
+msgstr "Steg för att ladda upp Gramps-filer"
+
+#: bp/admin/templates/admin/uploads.html:44
+#: bp/audit/templates/audit/batches.html:26
+#: bp/gramps/templates/gramps/uploads.html:184
+msgid "the file has been uploaded to server"
+msgstr "filen har överförts till servern"
+
+#: bp/admin/templates/admin/uploads.html:45
+#: bp/audit/templates/audit/batches.html:30
+#: bp/gramps/templates/gramps/uploads.html:185
+msgid "the file content is being stored to the database"
+msgstr "filens innehåll lagras i databasen"
+
+#: bp/admin/templates/admin/uploads.html:46
+#: bp/gramps/templates/gramps/uploads.html:186
+msgid "the data is stored as candidate material"
+msgstr ""
+
+#: bp/admin/templates/admin/uploads.html:47
+#: bp/gramps/templates/gramps/uploads.html:187
+msgid "Not found any more"
+msgstr "Hittades inte längre"
+
+#: bp/admin/templates/admin/uploads.html:48
+#: bp/audit/templates/audit/batches.html:42
+#: bp/gramps/templates/gramps/uploads.html:188
+msgid "there was an error"
+msgstr "det uppstod ett fel"
+
+#: bp/admin/templates/admin/uploads.html:53
 #: bp/audit/templates/audit/batches.html:54
 #: bp/audit/templates/audit/index.html:16
 msgid "Operations"
 msgstr "Operationer"
 
-#: bp/admin/templates/admin/uploads.html:71
+#: bp/admin/templates/admin/uploads.html:59
 #: bp/audit/templates/audit/batches.html:61
 msgid "me"
 msgstr "mig"
 
-#: bp/admin/templates/admin/uploads.html:81
+#: bp/admin/templates/admin/uploads.html:69
 #: bp/audit/templates/audit/batches.html:73
-#: bp/gramps/templates/gramps/uploads.html:237
+#: bp/gramps/templates/gramps/uploads.html:203
 msgid "deleted from database"
 msgstr "raderad från databasen"
 
-#: bp/admin/templates/admin/uploads.html:82
+#: bp/admin/templates/admin/uploads.html:71
 #: bp/audit/templates/audit/batches.html:74
 #, python-format
 msgid "batch %(batch_id)s; %(persons)d persons"
 msgstr "batch %(batch_id)s; %(persons)d personer"
 
-#: bp/admin/templates/admin/uploads.html:89
-#: bp/gramps/templates/gramps/uploads.html:267
+#: bp/admin/templates/admin/uploads.html:78
+#: bp/gramps/templates/gramps/uploads.html:233
 msgid "Store to database"
 msgstr "Spara till databas"
 
-#: bp/admin/templates/admin/uploads.html:92
+#: bp/admin/templates/admin/uploads.html:81
 #: bp/audit/templates/audit/batches.html:79
 msgid "Show log"
 msgstr "Visa logg"
 
-#: bp/admin/templates/admin/uploads.html:94
+#: bp/admin/templates/admin/uploads.html:83
 msgid "Delete file"
 msgstr "Radera fil"
 
@@ -1015,7 +1015,7 @@ msgstr ""
 
 #: bp/audit/templates/audit/approvals.html:37
 #: bp/audit/templates/audit/move_in_1.html:20
-#: bp/gramps/templates/gramps/uploads.html:212
+#: bp/gramps/templates/gramps/uploads.html:178
 #: bp/start/templates/start/my_settings.html:98
 msgid "Batch id"
 msgstr "Batch id"
@@ -1023,6 +1023,18 @@ msgstr "Batch id"
 #: bp/audit/templates/audit/batches.html:4
 #: bp/audit/templates/audit/batches.html:8
 msgid "Batches"
+msgstr ""
+
+#: bp/audit/templates/audit/batches.html:22
+msgid "Status for differents steps in XML file upload:"
+msgstr "Status för skeden i XML-fil uppladdning:"
+
+#: bp/audit/templates/audit/batches.html:34
+msgid "the file content has been stored to the database"
+msgstr "filens innehåll har lagrats i databasen"
+
+#: bp/audit/templates/audit/batches.html:38
+msgid "not found any more"
 msgstr ""
 
 #: bp/audit/templates/audit/batches.html:67
@@ -1190,7 +1202,7 @@ msgstr "Välj"
 #: bp/dupsearch/templates/dupsearch.html:26
 #: bp/gedcom/templates/gedcom_info.html:27
 #: bp/gramps/templates/gramps/analyze_xml.html:14
-#: bp/gramps/templates/gramps/uploads.html:178
+#: bp/gramps/templates/gramps/uploads.html:144
 #: bp/start/templates/start/my_settings.html:137
 msgid "File"
 msgstr "Filen"
@@ -1345,15 +1357,15 @@ msgstr "Du har inte behörighet att visa att GEDCOM"
 msgid "That GEDCOM file does not exist on the server"
 msgstr "GEDCOM filen finns inte på servern"
 
-#: bp/gedcom/transformer.py:145
+#: bp/gedcom/transformer.py:146
 msgid "Invalid line: "
 msgstr "Felaktig rad: "
 
-#: bp/gedcom/transformer.py:211
+#: bp/gedcom/transformer.py:212
 msgid "Invalid GEDCOM at line: {}"
 msgstr "Felaktig GEDCOM vid rad: {}"
 
-#: bp/gedcom/transformer.py:214
+#: bp/gedcom/transformer.py:215
 #, python-format
 msgid "Invalid GEDCOM; no level %s lines"
 msgstr "Felaktig GEDCOM; inga nivå %s rader"
@@ -1488,7 +1500,7 @@ msgid "Statistics"
 msgstr "Statistik"
 
 #: bp/gedcom/templates/gedcom_info.html:62
-#: bp/gramps/templates/gramps/uploads.html:210
+#: bp/gramps/templates/gramps/uploads.html:176
 msgid "Upload time"
 msgstr "Uppladdad"
 
@@ -2000,7 +2012,19 @@ msgstr "Avmarkera"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Återställ markerad tag's: <tag>-X -> <tag>"
 
-#: bp/gramps/gramps_loader.py:610 bp/gramps/gramps_loader.py:617
+#: bp/gramps/gramps_loader.py:146
+msgid "Events with no references to"
+msgstr ""
+
+#: bp/gramps/gramps_loader.py:226
+msgid "Estimated time"
+msgstr ""
+
+#: bp/gramps/gramps_loader.py:229
+msgid "sec"
+msgstr ""
+
+#: bp/gramps/gramps_loader.py:611 bp/gramps/gramps_loader.py:619
 #: pe/db_writer.py:85
 msgid "Database save failed due to {}"
 msgstr ""
@@ -2098,87 +2122,75 @@ msgstr "Tid / sek"
 msgid "Uploads from Gramps"
 msgstr "Uppladdningar från Gramps"
 
-#: bp/gramps/templates/gramps/uploads.html:179
+#: bp/gramps/templates/gramps/uploads.html:145
 msgid "Are you sure you want to delete the XML file?"
 msgstr "Vill du taga bort XML filen?"
 
-#: bp/gramps/templates/gramps/uploads.html:182
+#: bp/gramps/templates/gramps/uploads.html:148
 msgid "Are you sure you want to delete this batch from database?"
 msgstr "Är du säker på att du vill taga bort denna batch från databasen?"
 
-#: bp/gramps/templates/gramps/uploads.html:211
+#: bp/gramps/templates/gramps/uploads.html:177
 msgid "Gramps file"
 msgstr "Gramps fil"
 
-#: bp/gramps/templates/gramps/uploads.html:213
+#: bp/gramps/templates/gramps/uploads.html:179
 msgid "Person count"
 msgstr "Person summering"
 
-#: bp/gramps/templates/gramps/uploads.html:217
-msgid "Steps for uploading Gramps files"
-msgstr "Steg för att ladda upp Gramps-filer"
-
 #: bp/gramps/templates/gramps/uploads.html:220
-msgid "the data is stored as candidate material"
-msgstr ""
-
-#: bp/gramps/templates/gramps/uploads.html:221
-msgid "Not found any more"
-msgstr "Hittades inte längre"
-
-#: bp/gramps/templates/gramps/uploads.html:254
 msgid "Start by sending your first Gramps file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:260
+#: bp/gramps/templates/gramps/uploads.html:226
 msgid "Operations for"
 msgstr "Åtgärder för"
 
-#: bp/gramps/templates/gramps/uploads.html:260
+#: bp/gramps/templates/gramps/uploads.html:226
 msgid "the selected file"
 msgstr "den valda filen"
 
-#: bp/gramps/templates/gramps/uploads.html:261
+#: bp/gramps/templates/gramps/uploads.html:227
 msgid "Saving data"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:262
+#: bp/gramps/templates/gramps/uploads.html:228
 msgid "Download the Gramps file"
 msgstr "Ladda ned Gramps filen"
 
-#: bp/gramps/templates/gramps/uploads.html:263
+#: bp/gramps/templates/gramps/uploads.html:229
 msgid "Analyze the Gramps file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:265
+#: bp/gramps/templates/gramps/uploads.html:231
 msgid "Execute Gramps Verify Tool"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:268
+#: bp/gramps/templates/gramps/uploads.html:234
 msgid "Show last log"
 msgstr "Visa senaste logg"
 
-#: bp/gramps/templates/gramps/uploads.html:270
+#: bp/gramps/templates/gramps/uploads.html:236
 msgid "Delete data"
 msgstr "Fösrstöra data"
 
-#: bp/gramps/templates/gramps/uploads.html:271
+#: bp/gramps/templates/gramps/uploads.html:237
 msgid "Delete the file"
 msgstr "Ta bort filen"
 
-#: bp/gramps/templates/gramps/uploads.html:272
+#: bp/gramps/templates/gramps/uploads.html:238
 msgid "Delete from database"
 msgstr "Tag bort från databasen"
 
-#: bp/gramps/templates/gramps/uploads.html:277
+#: bp/gramps/templates/gramps/uploads.html:243
 msgid "Send a new Gramps file"
 msgstr "Sänd en ny Gramps fil"
 
-#: bp/gramps/templates/gramps/uploads.html:279
+#: bp/gramps/templates/gramps/uploads.html:245
 msgid "Look at your candidate materials"
 msgstr "Titta på ditt kandidat material"
 
-#: bp/gramps/templates/gramps/uploads.html:281
+#: bp/gramps/templates/gramps/uploads.html:247
 msgid "Return to front page"
 msgstr "Tillbaka till första sidan"
 

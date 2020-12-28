@@ -27,8 +27,8 @@ RETURN ID(b) AS id"""
     batch_complete = """
 MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
-    SET b.status="completed"
-"""
+    SET b.status=$status
+RETURN ID(b) AS id"""
 
     get_filename = """
 MATCH (b:Batch {id: $batch_id, user: $username}) 

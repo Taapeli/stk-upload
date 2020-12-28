@@ -9,6 +9,7 @@ import gzip
 from os.path import basename, splitext
 import logging 
 logger = logging.getLogger('stkserver')
+from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
@@ -142,7 +143,7 @@ def analyze(username, filename):
     class Analyze_row(): pass
     
     row = Analyze_row()
-    row.individ = "Events with no references to"
+    row.individ = _("Events with no references to")
     row.number_of_individs = values["event_no_citation_cnt"]
     row.reference = "Citation"
     row.number_of_references = " "
@@ -222,10 +223,10 @@ def analyze(username, filename):
     references.append(row)
     
     row = Analyze_row()
-    row.individ = "Estimated time (sec):"
+    row.individ = _("Estimated time")
     e_total = values["e_total"]
     row.number_of_individs = " "
-    row.reference = " "
+    row.reference = _("sec")
     row.number_of_references = str(int(e_total))
     
     references.append(row)
@@ -610,13 +611,14 @@ def xml_to_stkbase(pathname, userid):
                                  format(msg)), 'level':"ERROR"})
         return {'status':Status.ERROR, 'statustext': msg}
 
-    res = handler.batch.mark_complete(userid)
+    res = shareds.datastore.mark_complete()
     if Status.has_failed(res):
+        msg = res.get('statustext', '')
         shareds.datastore.rollback()
         handler.blog.log_event({'title':_("Database save failed due to {}".\
                                  format(msg)), 'level':"ERROR"})
         return {'status': res.get('status'),
-                'statustest': res.get('statustext',''),
+                'statustest': msg,
                 'steps': handler.blog.list(), 
                 'batch_id': handler.batch.id}
     else:

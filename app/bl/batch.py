@@ -52,7 +52,7 @@ class Batch():
                 "status": self.status
             }
             #self.tx.run(CypherBatch.self_create, b_attr=attr)
-            res = shareds.datastore.dataservice._batch_save(attr)
+            res = shareds.datastore.dataservice.dw_batch_save(attr)
             # returns {status, identity}
             if Status.has_failed(res):
                 return res
@@ -64,14 +64,6 @@ class Batch():
             return {'id':self.id, 'status':Status.ERROR, 
                     'statustext': f'bl.batch.Batch.save: {e.__class__.__name__} {e}'}
 
-
-    def mark_complete(self, userid):
-        ''' Mark this data batch completed '''
-        attr = {"id": self.id,
-                "user": userid,
-                "status":"completed"}
-        res = shareds.datastore.dataservice._batch_save(attr)
-        return res
 
     @classmethod
     def from_node(cls, node):
@@ -273,8 +265,10 @@ class BatchDatastore:
         Initiate new Batch.
         
         :param: userid    user
-        :param: file      input file
+        :param: file      input file name
         :param: mediapath media file store path
+        
+        The stored Batch.file name is the original name with '_clean' removed.
         '''
         # Lock db to avoid concurent Batch loads
         self.dataservice._aqcuire_lock('batch_id')
@@ -290,13 +284,19 @@ class BatchDatastore:
 
         self.batch.id = res.get('id')
         self.batch.user = userid
-        self.batch.file = file
+        self.batch.file = file.replace('_clean.', '.')
         self.batch.mediapath = mediapath
 
         res = self.batch.save()
         print(f'bl.batch.BatchDatastore.start_data_batch: new Batch {self.batch.id} identity={self.batch.uniq_id}')
 
         return {'batch': self.batch, 'status': Status.OK}
+
+    def mark_complete(self):
+        ''' Mark this data batch completed '''
+        res = shareds.datastore.dataservice.dw_batch_set_status(self.batch, "completed")
+        return res
+
 
     def commit(self):
         ''' Commit transaction. '''

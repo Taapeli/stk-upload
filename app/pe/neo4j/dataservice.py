@@ -115,12 +115,12 @@ class Neo4jDataService:
         return {'status':Status.OK, 'id':batch_id}
 
 
-    def _batch_save(self, attr):
-        ''' Creates or updates Batch node.
+    def dw_batch_save(self, attr):
+        ''' Creates a Batch node.
 
             attr = {"mediapath", "file", "id", "user", "status"}
 
-            Batch.timestamp is created in Cypher clause.
+            Batch.timestamp is created in the Cypher clause.
        '''
         try:
             result = self.tx.run(CypherBatch.batch_create, b_attr=attr)
@@ -128,7 +128,23 @@ class Neo4jDataService:
             return {'status': Status.OK, 'identity':uniq_id}
 
         except Exception as e:
-            statustext = f"Neo4jDataService._batch_save failed: {e.__class__.name} {e}"
+            statustext = f"Neo4jDataService.dw_batch_save failed: {e.__class__.name} {e}"
+            return {'status': Status.ERROR, 'statustext': statustext}
+
+
+    def dw_batch_set_status(self, batch, status):
+        ''' Updates Batch node selected by Batch id.
+
+            Batch.timestamp is updated in the Cypher clause.
+       '''
+        try:
+            result = self.tx.run(CypherBatch.batch_complete, 
+                                 bid=batch.id, user=batch.user, status=status)
+            uniq_id = result.single()[0]
+            return {'status': Status.OK, 'identity':uniq_id}
+
+        except Exception as e:
+            statustext = f"Neo4jDataService.dw_batch_set_status failed: {e.__class__.__name__} {e}"
             return {'status': Status.ERROR, 'statustext': statustext}
 
 

@@ -700,7 +700,7 @@ class DOM_handler():
             pl.media_refs = self._extract_mediaref(placeobj)
 
             if pl.media_refs: 
-                print(f'# saving Place {pl.id}: media_refs {pl.media_refs}')
+                print(f'# saving Place {pl.id} with {len(pl.media_refs)} media_refs')
 
             # Save Place, Place_names, Notes and connect to hierarchy
             self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys)
