@@ -400,10 +400,9 @@ class PersonReader(DbReader):
             # Not found, not allowd (person.too_new) or error
             return res
         person = res.get('item')
-        root = res.get('root')   # Batch or Audit data
+        root = res.get('root')   # Info about linked Batch or Audit node
 
         # 2. (p:Person) --> (x:Name|Event)
-        #person.read_person_names_events()
         res = self.readservice.dr_get_person_names_events(person.uniq_id)
         # result {'names', 'events', 'cause_of_death', 'status'}
         if  Status.has_failed(res):
@@ -417,7 +416,6 @@ class PersonReader(DbReader):
         #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
         #      (fp)--> (me:Event{type:Birth})
         #      (f) --> (fe:Event)
-        #person.read_person_families()
         res = self.readservice.dr_get_person_families(person.uniq_id)
         # res {'families_as_child', 'families_as_parent', 'family_events', 'status'}
         if  Status.has_failed(res):
@@ -433,12 +431,14 @@ class PersonReader(DbReader):
         #    Sort all Person and family Events by date
         person.events.sort()
 
-#TODO:
+
         # 4. for pl in z:Place, ph
         #      (pl) --> (pn:Place_name)
         #      (pl) --> (pi:Place)
         #      (pi) --> (pin:Place_name)
-        self.readservice.dr_get_object_places(person)
+        ret = self.readservice.dr_get_object_places(person)
+        if  Status.has_failed(res):
+            print(f'get_person_data: Event places read error: {ret.get("statustext")}')
      
         # 5. Read their connected nodes z: Citations, Notes, Medias
         #    for y in p, x, fe, z, s, r

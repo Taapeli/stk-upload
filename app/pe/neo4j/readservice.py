@@ -116,7 +116,7 @@ class Neo4jReadService:
                 if user is None:
                     # Select person from public database
                     if root_type != "PASSED":
-                        print(f'dr_get_person_by_uuid: PASSED not allowed for person {uuid}')
+                        print(f'dr_get_person_by_uuid: person {uuid} is not in approved material')
                         return {'item': None, 'status': Status.NOT_FOUND,
                                 'statustext': 'The person is not accessible'}
                 else:
@@ -128,6 +128,8 @@ class Neo4jReadService:
     
                 node = record['p']
                 p = PersonBl.from_node(node)
+                # Add to list of all objects connected to this person
+                self.objs[p.uniq_id] = p
                 return {'item': p, 
                         'root': {'root_type':root_type, 'usernode': nodeuser, 'id':bid}, 
                         'status': Status.OK}
@@ -192,8 +194,10 @@ class Neo4jReadService:
     def dr_get_person_families(self, puid:int):
         ''' Read the families, where given Person is a member.
 
-            Also return the Family members with their birth event
-            and add family events to this person's events.
+            Returns
+            - the Families, where this person is a parent or child
+            - the Family members with their birth event
+            - the family events from families, where this person is a parent
 
             (p:Person) <-- (f:Family)
                for f
@@ -933,42 +937,31 @@ class Neo4jReadService:
 
 
     def dr_get_object_places(self, person):
-        ''' Read Place hierarchies for all objects in self.objs.
+        ''' Read Place hierarchies for all Event objects in self.objs.
         '''
         uids = list(self.objs.keys())
         with self.driver.session(default_access_mode='READ') as session:
             try:
                 results = session.run(CypherPerson.get_objs_places, uid_list=uids)
                 for record in results:
-                    # <Record
-                    #    label='Event'
-                    #    uniq_id=426916 
-                    #    pl=<Node id=306042 labels={'Place'}
-                    #        properties={'id': 'P0456', 'type': 'Parish', 'uuid': '7aeb4e26754d46d0aacfd80910fa1bb1',
-                    #            'pname': 'Helsingin seurakunnat', 'change': 1543867969}> 
+                    # <Record 
+                    #    label='Event' 
+                    #    uniq_id=17282 
+                    #    pl=<Node id=8888 labels=frozenset({'Place'}) 
+                    #        properties={'id': 'P1077', 'type': 'Parish', 'uuid': 'bc78df10a5fd47e88e11e6a80b51569d', 
+                    #            'pname': 'Loviisan srk', 'change': 1585562874}> 
                     #    pnames=[
-                    #        <Node id=306043 labels={'Place_name'}
-                    #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>, 
-                    #        <Node id=306043 labels={'Place_name'} 
-                    #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>
-                    #    ]
-                    ##    ri=<Relationship id=631695 
-                    ##        nodes=(
-                    ##            <Node id=306042 labels={'Place'} properties={'id': 'P0456', ...>, 
-                    ##            <Node id=307637 labels={'Place'} 
-                    ##                properties={'coord': [60.16664166666666, 24.94353611111111], 
-                    ##                    'id': 'P0366', 'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 
-                    ##                    'pname': 'Helsinki', 'change': 1556954884}>
-                    ##        )
-                    ##        type='IS_INSIDE' properties={}> 
-                    #    pi=<Node id=307637 labels={'Place'} 
-                    #        properties={'coord': [60.16664166666666, 24.94353611111111], 'id': 'P0366', 
-                    #            'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 'pname': 'Helsinki', 'change': 1556954884}> 
+                    #        <Node id=8889 labels=frozenset({'Place_name'}) 
+                    #            properties={'name': 'Loviisan srk', 'lang': ''}>]
+                    #    pi=<Node id=6889 labels=frozenset({'Place'}) 
+                    #        properties={'id': 'P1874', 'type': 'Organisaatio', 'uuid': 'de140aac2c8f4884a3a2422faea9a569', 
+                    #        'pname': 'Suomen ev.lut. kirkko', 'change': 1600105542}>
                     #    pinames=[
-                    #        <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
-                    #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
-                    #    ]>
-    
+                    #        <Node id=10654 labels=frozenset({'Place_name'}) 
+                    #            properties={'name': 'Suomen ev.lut. kirkko', 'lang': ''}>, 
+                    #        <Node id=10655 labels=frozenset({'Place_name'}) 
+                    #            properties={'name': 'Evangelisk-lutherska kyrkan i Finland', 'lang': 'sv'}>]
+                    # >
                     src_label = record['label']
                     if src_label != "Event":
                         raise TypeError(f'dr_get_object_places: An Event excepted, got {src_label}')
@@ -1010,7 +1003,8 @@ class Neo4jReadService:
     
             except Exception as e:
                 print(f"Could not read places for person {person.id} objects {self.objs}: {e}")
-        return
+                return {'status': Status.ERROR, 'statustext':f'{e.__class__.__name__}: {e}'}
+        return {'status': Status.OK}
 
 
     def dr_get_object_citation_note_media(self, person, active_objs=[]):
@@ -1035,6 +1029,7 @@ class Neo4jReadService:
                     # Search all (x) -[r:CITATION|NOTE|MEDIA]-> (y)
                     uids = list(self.objs.keys())
                 print(f'# Searching Citations, Notes, Medias for {len(uids)} nodes')
+                #print(f'# uniq_ids = {uids}')
 
                 results = session.run(CypherPerson.get_objs_citation_note_media,
                                       uid_list=uids)
@@ -1114,24 +1109,27 @@ class Neo4jReadService:
                             new_objs.append(o.uniq_id)
                         # Get relation properties
                         order = rel.get('order')
+
+                        # Media reference crop attributes
+                        left = rel.get('left')
+                        if left != None:
+                            upper = rel.get('upper')
+                            right = rel.get('right')
+                            lower = rel.get('lower')
+                            crop = (left, upper, right, lower)
+                        else:
+                            crop = None
                         # Store reference to referee object
                         if hasattr(x, 'media_ref'):
-                            # Add media reference crop attributes
-                            left = rel.get('left')
-                            if left != None:
-                                upper = rel.get('upper')
-                                right = rel.get('right')
-                                lower = rel.get('lower')
-                                crop = (left, upper, right, lower)
-                            else:
-                                crop = None
-                            print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
-                            x.media_ref.append((o.uniq_id,crop,order))
-                            if len(x.media_ref) > 1 and x.media_ref[-2][2] > x.media_ref[-1][2]:
-                                x.media_ref.sort(key=lambda x: x[2])
-                                print("#\tMedia sort done")
+                            x.media_ref.append((o.uniq_id, crop, order))
                         else:
-                            print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
+                            x.media_ref = [(o.uniq_id, crop, order)]
+                            print('NOTE Neo4jReadService.dr_get_object_citation_note_media: '
+                                  f'Field {x_label}.{y_label.lower()}_ref created')            
+                        print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
+                        if len(x.media_ref) > 1 and x.media_ref[-2][2] > x.media_ref[-1][2]:
+                            x.media_ref.sort(key=lambda x: x[2])
+                            print("#\tMedia sort done")
                         #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
     
                     else:
