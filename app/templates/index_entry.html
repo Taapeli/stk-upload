@@ -24,7 +24,7 @@ div.startbox { min-height: 270px;}
         <a href="/?lang=sv">🇸🇪&nbsp;På svenska</a> –
         <a href="/?lang=en">🇬🇧&nbsp;In English</a>{# [{{lang}}] #}
     </div>
-    <h2>{{ _('Welcome to Isotammi Services') }}</h2>
+    <h2>{{ _('Welcome to Isotammi Service') }}</h2>
 	<div>
 		<div class="row">
 
@@ -33,7 +33,7 @@ div.startbox { min-height: 270px;}
 				<img alt="Suomen sukututkimusseura ry" src="/static/SSS-tunnus-160.png"
 				     style="float:left; width:50%">
 				<p>
-					{{ _('<i>Isotammi Database</i> is a system for co\'operatively collect validated Finnish Genealogy data.') }} 
+					{{ _('<i>Isotammi Service</i> is a service for co-operatively collected and validated genealogical data.') }} 
 				</p>
 				<p>{{ _("For more info see also documents -") }}</p>
 				<ul class="compact">
@@ -47,31 +47,30 @@ div.startbox { min-height: 270px;}
 			</div>
 
 			<div class="startbox">
-				<h3>{{ _('Look at demo data in Isotammi Database') }}</h3>
-				<p>{{ _('Here you can see a restricted view on demo genealogical data.') }}</p>
-		    {% if config['DEMO'] %}
+				<h3>{{ _('Look at the demo data') }}</h3>
+				<p>{{ _('In this demo we have a genealogical tree which follows our quality rules and 
+				it contains the relatives of the Finnish national compositor Jean Sibelius.') }}</p>
 				<form method="get" action="/start/guest">
-			{% else %}
-				<form method="get" action={{demo_site}}>
-			{% endif %}
 					<div class="submit">
 						<button type="submit">{{ _('Explore demo') }}</button>
 					</div>
 					<input type="hidden" name="lang" value="{{ lang }}">
-		    {% if not config['DEMO'] %}
-                    <p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
-                    <div class="submit">
-                       <button type="submit" formaction="/register">{{ _('Join us') }}</button>
-                    </div>
-			{% endif %}
 				</form>
 			</div>
 
 		    {% if not config['DEMO'] %}
             <div class="startbox">
+                <h3>{{ _('Register') }}</h3>
+				<p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
+				<form method="get" action={{demo_site}}>
+					<div class="submit">
+						<button type="submit" formaction="/register">{{ _('Register') }}</button>
+					</div>
+ 					<input type="hidden" name="lang" value="{{ lang }}">
+				</form>
                 <h3>{{ _('Log in') }}</h3>
-                <p>{{ _('As a member of <i>Suomen sukututkimusseura</i>, you can log in,') }}
-                   {{ _('refine the structure of your own data and get full access to the demo database') }}.
+                <p>{{ _('If you has already registered, you can log in and refine the structure of your own data.') }}
+                   {{ _('As a member of <i>Genealogical Society of Finland</i> you will get more services.') }}.
                 </p>
                 <form method="get">
                     <div class="submit">

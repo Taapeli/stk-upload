@@ -244,7 +244,7 @@ def gedcom_update_permission(gedcom,permission):
 def gedcom_analyze(gedcom):
     filename = gedcom_utils.gedcom_fullname(gedcom)
     metadata = gedcom_utils.get_metadata(gedcom)
-    encoding = metadata['encoding']
+    encoding = metadata.get('encoding','utf-8')
     logger.info(f'-> bp.gedcom.routes.gedcom_analyze f="{gedcom}"')
     rsp = gedcom_utils.analyze(filename,encoding)
     return rsp

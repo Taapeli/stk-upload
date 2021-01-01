@@ -41,7 +41,7 @@ class Place_combo(Place):
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
-                noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
+                note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self, uniq_id=None, ptype="", level=None):

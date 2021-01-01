@@ -9,6 +9,7 @@ from models.gen.dates import DateRange
 logger = logging.getLogger('stkserver')
 
 from bl.base import Status
+from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
 from bl.family import FamilyBl
@@ -17,17 +18,18 @@ from bl.person import PersonBl
 
 from ui.place import place_names_from_nodes
 
-from .cypher_place import CypherPlace
-from .cypher_source import CypherSource
-from .cypher_family import CypherFamily
-from .cypher_event import CypherEvent
-from .cypher_person import CypherPerson
+from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.neo4j.cypher.cy_source import CypherSource
+from pe.neo4j.cypher.cy_family import CypherFamily
+from pe.neo4j.cypher.cy_event import CypherEvent
+from pe.neo4j.cypher.cy_person import CypherPerson
 
+from bl.event import Event
 #Todo: Change Old style includes to bl classes
 #from models.gen.person_combo import Person_combo
 #from models.gen.cypher import Cypher_person
-from models.gen.person_name import Name
-from models.gen.event import Event
+#from models.gen.person_name import Name
+#from models.gen.event import Event
 #from models.gen.event_combo import Event_combo
 from models.gen.note import Note
 from models.gen.media import Media
@@ -36,7 +38,7 @@ from models.dbtree import DbTree
 from models.gen.citation import Citation
 
 
-class Neo4jReadDriver:
+class Neo4jReadService:
     ''' Methods for accessing Neo4j database.
     '''
     def __init__(self, driver):
@@ -63,11 +65,9 @@ class Neo4jReadDriver:
             obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
         else:
             #raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
-            logger.warning(f'pe.neo4j.read_driver.Neo4jReadDriver._obj_from_node: Person or Family expexted: {list(node.labels)}')
+            logger.warning(f'pe.neo4j.read_driver.Neo4jReadService._obj_from_node: Person or Family expexted: {list(node.labels)}')
             return None
-        obj.role = role
-        if obj.role == 'Primary':
-            obj.role = None
+        obj.role = role if role != 'Primary' else None
         return obj
 
 
@@ -116,7 +116,7 @@ class Neo4jReadDriver:
                 if user is None:
                     # Select person from public database
                     if root_type != "PASSED":
-                        print(f'dr_get_person_by_uuid: PASSED not allowed for person {uuid}')
+                        print(f'dr_get_person_by_uuid: person {uuid} is not in approved material')
                         return {'item': None, 'status': Status.NOT_FOUND,
                                 'statustext': 'The person is not accessible'}
                 else:
@@ -128,6 +128,8 @@ class Neo4jReadDriver:
     
                 node = record['p']
                 p = PersonBl.from_node(node)
+                # Add to list of all objects connected to this person
+                self.objs[p.uniq_id] = p
                 return {'item': p, 
                         'root': {'root_type':root_type, 'usernode': nodeuser, 'id':bid}, 
                         'status': Status.OK}
@@ -192,8 +194,10 @@ class Neo4jReadDriver:
     def dr_get_person_families(self, puid:int):
         ''' Read the families, where given Person is a member.
 
-            Also return the Family members with their birth event
-            and add family events to this person's events.
+            Returns
+            - the Families, where this person is a parent or child
+            - the Family members with their birth event
+            - the family events from families, where this person is a parent
 
             (p:Person) <-- (f:Family)
                for f
@@ -429,7 +433,7 @@ class Neo4jReadDriver:
 
     def dr_get_event_by_uuid(self, user:str, uuid:str):
         '''
-        Read an Event using uuid and user info.
+        Read an Event using uuid and username.
         
         Returns dict {item, status, statustext}
         '''
@@ -582,7 +586,7 @@ class Neo4jReadDriver:
                     result = session.run(CypherFamily.get_a_family_own, 
                                      f_uuid=uuid, user=user)
                 else:
-                    print("dr_get_source_list_fw: approved common only")
+                    print("dr_get_family_by_uuid: approved common only")
                     result = session.run(CypherFamily.get_a_family_common, 
                                      f_uuid=uuid)
                 for record in result:
@@ -933,42 +937,31 @@ class Neo4jReadDriver:
 
 
     def dr_get_object_places(self, person):
-        ''' Read Place hierarchies for all objects in self.objs.
+        ''' Read Place hierarchies for all Event objects in self.objs.
         '''
         uids = list(self.objs.keys())
         with self.driver.session(default_access_mode='READ') as session:
             try:
                 results = session.run(CypherPerson.get_objs_places, uid_list=uids)
                 for record in results:
-                    # <Record
-                    #    label='Event'
-                    #    uniq_id=426916 
-                    #    pl=<Node id=306042 labels={'Place'}
-                    #        properties={'id': 'P0456', 'type': 'Parish', 'uuid': '7aeb4e26754d46d0aacfd80910fa1bb1',
-                    #            'pname': 'Helsingin seurakunnat', 'change': 1543867969}> 
+                    # <Record 
+                    #    label='Event' 
+                    #    uniq_id=17282 
+                    #    pl=<Node id=8888 labels=frozenset({'Place'}) 
+                    #        properties={'id': 'P1077', 'type': 'Parish', 'uuid': 'bc78df10a5fd47e88e11e6a80b51569d', 
+                    #            'pname': 'Loviisan srk', 'change': 1585562874}> 
                     #    pnames=[
-                    #        <Node id=306043 labels={'Place_name'}
-                    #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>, 
-                    #        <Node id=306043 labels={'Place_name'} 
-                    #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>
-                    #    ]
-                    ##    ri=<Relationship id=631695 
-                    ##        nodes=(
-                    ##            <Node id=306042 labels={'Place'} properties={'id': 'P0456', ...>, 
-                    ##            <Node id=307637 labels={'Place'} 
-                    ##                properties={'coord': [60.16664166666666, 24.94353611111111], 
-                    ##                    'id': 'P0366', 'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 
-                    ##                    'pname': 'Helsinki', 'change': 1556954884}>
-                    ##        )
-                    ##        type='IS_INSIDE' properties={}> 
-                    #    pi=<Node id=307637 labels={'Place'} 
-                    #        properties={'coord': [60.16664166666666, 24.94353611111111], 'id': 'P0366', 
-                    #            'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 'pname': 'Helsinki', 'change': 1556954884}> 
+                    #        <Node id=8889 labels=frozenset({'Place_name'}) 
+                    #            properties={'name': 'Loviisan srk', 'lang': ''}>]
+                    #    pi=<Node id=6889 labels=frozenset({'Place'}) 
+                    #        properties={'id': 'P1874', 'type': 'Organisaatio', 'uuid': 'de140aac2c8f4884a3a2422faea9a569', 
+                    #        'pname': 'Suomen ev.lut. kirkko', 'change': 1600105542}>
                     #    pinames=[
-                    #        <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
-                    #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
-                    #    ]>
-    
+                    #        <Node id=10654 labels=frozenset({'Place_name'}) 
+                    #            properties={'name': 'Suomen ev.lut. kirkko', 'lang': ''}>, 
+                    #        <Node id=10655 labels=frozenset({'Place_name'}) 
+                    #            properties={'name': 'Evangelisk-lutherska kyrkan i Finland', 'lang': 'sv'}>]
+                    # >
                     src_label = record['label']
                     if src_label != "Event":
                         raise TypeError(f'dr_get_object_places: An Event excepted, got {src_label}')
@@ -1010,7 +1003,8 @@ class Neo4jReadDriver:
     
             except Exception as e:
                 print(f"Could not read places for person {person.id} objects {self.objs}: {e}")
-        return
+                return {'status': Status.ERROR, 'statustext':f'{e.__class__.__name__}: {e}'}
+        return {'status': Status.OK}
 
 
     def dr_get_object_citation_note_media(self, person, active_objs=[]):
@@ -1035,6 +1029,7 @@ class Neo4jReadDriver:
                     # Search all (x) -[r:CITATION|NOTE|MEDIA]-> (y)
                     uids = list(self.objs.keys())
                 print(f'# Searching Citations, Notes, Medias for {len(uids)} nodes')
+                #print(f'# uniq_ids = {uids}')
 
                 results = session.run(CypherPerson.get_objs_citation_note_media,
                                       uid_list=uids)
@@ -1102,7 +1097,9 @@ class Neo4jReadDriver:
                         if hasattr(x, 'note_ref'):
                             x.note_ref.append(o.uniq_id)
                         else:
-                            raise LookupError(f'dr_get_object_citation_note_media: No field for {x_label}.{y_label.lower()}_ref')            
+                            x.note_ref = [o.uniq_id]
+                            print('NOTE Neo4jReadService.dr_get_object_citation_note_media: '
+                                  f'Field {x_label}.{y_label.lower()}_ref created')            
     
                     elif y_label == "Media":
                         o = self.objs.get(y_uniq_id, None)
@@ -1112,24 +1109,27 @@ class Neo4jReadDriver:
                             new_objs.append(o.uniq_id)
                         # Get relation properties
                         order = rel.get('order')
+
+                        # Media reference crop attributes
+                        left = rel.get('left')
+                        if left != None:
+                            upper = rel.get('upper')
+                            right = rel.get('right')
+                            lower = rel.get('lower')
+                            crop = (left, upper, right, lower)
+                        else:
+                            crop = None
                         # Store reference to referee object
                         if hasattr(x, 'media_ref'):
-                            # Add media reference crop attributes
-                            left = rel.get('left')
-                            if left != None:
-                                upper = rel.get('upper')
-                                right = rel.get('right')
-                                lower = rel.get('lower')
-                                crop = (left, upper, right, lower)
-                            else:
-                                crop = None
-                            print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
-                            x.media_ref.append((o.uniq_id,crop,order))
-                            if len(x.media_ref) > 1 and x.media_ref[-2][2] > x.media_ref[-1][2]:
-                                x.media_ref.sort(key=lambda x: x[2])
-                                print("#\tMedia sort done")
+                            x.media_ref.append((o.uniq_id, crop, order))
                         else:
-                            print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
+                            x.media_ref = [(o.uniq_id, crop, order)]
+                            print('NOTE Neo4jReadService.dr_get_object_citation_note_media: '
+                                  f'Field {x_label}.{y_label.lower()}_ref created')            
+                        print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
+                        if len(x.media_ref) > 1 and x.media_ref[-2][2] > x.media_ref[-1][2]:
+                            x.media_ref.sort(key=lambda x: x[2])
+                            print("#\tMedia sort done")
                         #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
     
                     else:
@@ -1151,12 +1151,12 @@ class Neo4jReadDriver:
         with self.driver.session(default_access_mode='READ') as session: 
             if user == None: 
                 #1 get approved common data
-                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: approved")
+                print("Neo4jReadService.dr_get_place_list_fw: approved")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
                                      fw=fw_from, limit=limit, lang=lang)
             else: 
                 #2 get my own
-                print("pe.neo4j.read_driver.Neo4jReadDriver.dr_get_place_list_fw: candidate")
+                print("Neo4jReadService.dr_get_place_list_fw: candidate")
                 result = session.run(CypherPlace.get_my_name_hierarchies,
                                      user=user, fw=fw_from, limit=limit, lang=lang)
             for record in result:
@@ -1380,10 +1380,10 @@ class Neo4jReadDriver:
         return {'items':ret, 'status':Status.OK}
 
 
-    def dr_get_source_list_fw(self, **kwargs):
+    def dr_get_source_list_fw(self, args):
         """ Read all sources with notes and repositories, optionally limited by keywords.
          
-            used arguments:
+            used keyword arguments:
             - user        Username to select data
             - theme1      A keyword (fi) for selecting source titles
             - theme2      Another keyword (sv) for selecting source titles
@@ -1394,13 +1394,13 @@ class Neo4jReadDriver:
             Todo: tuloksen sivuttaminen esim. 100 kpl / sivu
         """
         sources = []
-        user = kwargs.get('user')
+        user = args.get('user')
 
         with self.driver.session(default_access_mode='READ') as session:
-            if kwargs.get('theme1'):
+            if args.get('theme1'):
                 # Filter sources by searching keywords in fi and sv langiage
-                key1 = kwargs.get('theme1')
-                key2 = kwargs.get('theme2')
+                key1 = args.get('theme1')
+                key2 = args.get('theme2')
                 if user: 
                     # Show my researcher data
                     print("dr_get_source_list_fw: my researcher data")

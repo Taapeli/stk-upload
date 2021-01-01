@@ -7,11 +7,13 @@ Created on 10.9.2018
 @author: jpek@iki.fi
 '''
 from sys import stderr
+import logging 
+logger = logging.getLogger('stkserver')
 
 import shareds
 from bl.base import NodeObject
-from .cypher import Cypher_person
-from .cypher import Cypher_name
+#Todo: move to pe.neo4j
+from models.gen.cypher import Cypher_name
 
 class Name(NodeObject):
     """ Person name.
@@ -146,33 +148,33 @@ class Name(NodeObject):
         return ' • '.join(names)
 
 
-    @staticmethod
-    def get_personnames(tx=None, uniq_id=None):
-        """ Picks all Name versions of this Person or all persons.
-        
-            Use optionally refnames or sortname for person selection
-        """
-        if not tx:
-            tx = shareds.driver.session()
-
-        if uniq_id:
-            result = tx.run(Cypher_person.get_names, pid=uniq_id)
-        else:
-            result = tx.run(Cypher_person.get_all_persons_names)
-
-        names = []
-        for record in result:
-            # <Record
-            #    pid=82
-            #    name=<Node id=83 labels=frozenset({'Name'})
-            #        properties={'title': 'Sir', 'firstname': 'Jan Erik', 'surname': 'Mannerheimo',
-            #            'prefix': '', 'suffix': 'Jansson', 'type': 'Birth Name', 'order': 0}
-            # >  >
-            node = record['name']
-            name = Name.from_node(node)
-            name.person_uid =  record['pid']
-            names.append(name)
-        return names
+#     @staticmethod
+#     def get_personnames(tx=None, uniq_id=None):
+#         """ Picks all Name versions of this Person or all persons.
+#         
+#             Use optionally refnames or sortname for person selection
+#         """
+#         if not tx:
+#             tx = shareds.driver.session()
+# 
+#         if uniq_id:
+#             result = tx.run(Cypher_person.get_names, pid=uniq_id)
+#         else:
+#             result = tx.run(Cypher_person.get_all_persons_names)
+# 
+#         names = []
+#         for record in result:
+#             # <Record
+#             #    pid=82
+#             #    name=<Node id=83 labels=frozenset({'Name'})
+#             #        properties={'title': 'Sir', 'firstname': 'Jan Erik', 'surname': 'Mannerheimo',
+#             #            'prefix': '', 'suffix': 'Jansson', 'type': 'Birth Name', 'order': 0}
+#             # >  >
+#             node = record['name']
+#             name = Name.from_node(node)
+#             name.person_uid =  record['pid']
+#             names.append(name)
+#         return names
             
 
     @staticmethod

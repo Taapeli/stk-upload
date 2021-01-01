@@ -50,6 +50,7 @@ def list_uploads():
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
     gramps_verify = gramps_runner and os.path.exists(gramps_runner)
     return render_template("/gramps/uploads.html", 
+                           interval=shareds.PROGRESS_UPDATE_RATE*1000,
                            uploads=upload_list, gramps_verify=gramps_verify)
 
 
@@ -92,9 +93,9 @@ def upload_gramps():
 @bp.route('/gramps/start_upload/<xmlname>')
 @login_required
 @roles_accepted('research')
-def start_load_to_neo4j(xmlname):
-    uploads.initiate_background_load_to_neo4j(current_user.username,xmlname)
-    logger.info(f'-> bp.gramps.routes.start_load_to_neo4j f="{os.path.basename(xmlname)}"')
+def start_load_to_stkbase(xmlname):
+    uploads.initiate_background_load_to_stkbase(current_user.username,xmlname)
+    logger.info(f'-> bp.gramps.routes.start_load_to_stkbase f="{os.path.basename(xmlname)}"')
     flash(_("Data import from %(i)s to database has been started.", i=xmlname), 'info')
     return redirect(url_for('gramps.list_uploads'))
 
@@ -160,16 +161,18 @@ def xml_download(xmlfile):
 @roles_accepted('research', 'admin')
 def batch_delete(batch_id):
 
-    from models.gen.batch_audit import Batch
+    from bl.batch import Batch
 
-    filename = Batch.get_filename(current_user.username,batch_id)
-    metafile = filename.replace("_clean.",".") + ".meta"
-    if os.path.exists(metafile):
-        data = eval(open(metafile).read())
-        if data.get('batch_id') == batch_id:
-            del data['batch_id']
-            data['status'] = uploads.STATUS_REMOVED
-            open(metafile,"w").write(repr(data))
+    filename = Batch.get_filename(current_user.username, batch_id)
+    if filename:
+        # Remove file, if exists
+        metafile = filename.replace("_clean.",".") + ".meta"
+        if os.path.exists(metafile):
+            data = eval(open(metafile).read())
+            if data.get('batch_id') == batch_id:
+                del data['batch_id']
+                data['status'] = uploads.STATUS_REMOVED
+                open(metafile,"w").write(repr(data))
     Batch.delete_batch(current_user.username,batch_id)
     logger.info(f'-> bp.gramps.routes.batch_delete f="{batch_id}"')
     syslog.log(type="batch_id deleted",batch_id=batch_id) 

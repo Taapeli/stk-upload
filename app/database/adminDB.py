@@ -20,7 +20,7 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
          {'level':'8',  'name':'audit',    'description':'Valvoja, joka auditoi ja hyväksyy gramps- ja tarjokasaineistoja'},
          {'level':'16', 'name':'admin',    'description':'Ylläpitäjä kaikin oikeuksin'},
          {'level':'32', 'name':'master',   'description':'Tietokannan pääkäyttäjä, ei sovellusoikeuksia'},
-         {'level':'',   'name':'to_be_approved','description':'Käyttäjä joka odottaa hyväksymistä'}
+         {'level':'-1', 'name':'to_be_approved','description':'Käyttäjä joka odottaa hyväksymistä'}
 )
 
 # ====== Database schema ======
@@ -42,12 +42,16 @@ def schema_updated():
 
 def roles_exist():
     #  Tarkista roolien olemassaolo
-    print(f'Check there are {len(ROLES)} user roles')
-    num_of_roles = 0
+    print(f'Check there exist all {len(ROLES)} user roles')
+    roles_found = []
     results = shareds.driver.session().run(SetupCypher.check_role_count)
     for result in results:
-        num_of_roles = result[0]
-    return(num_of_roles == len(ROLES))
+        roles_found.append(result[0])
+    for i in ROLES:
+        if not i['name'] in roles_found:
+            print (f'role {i.get("name")} not found')
+            return False
+    return True
 
 def role_exists(name):
     # print(f'Check the existense of the {name} role')
@@ -180,36 +184,50 @@ def create_role_constraints():
 
 
 def create_user_constraints():
-    with shareds.driver.session() as session: 
-        try:  
-            session.run(SetupCypher.set_user_constraint1)
-            session.run(SetupCypher.set_user_constraint2)  
-        except ConstraintError:
-            print(f'User constraints ok')
-            return
-        except ClientError:
-            print(f'User constraints seems to be ok')
-            return
-        except Exception as e:
-            logging.error(f'database.adminDB.create_user_constraints: {e.__class__.__name__}, {e}')            
-            return
-    logger.info('User constraints created')
-    
+    ''' Unique contraint for User email and user properties
+    '''
+    cnt = 0
+    with shareds.driver.session() as session:
+        for query in [SetupCypher.set_user_constraint1, 
+                      SetupCypher.set_user_constraint2]:
+            try:  
+                session.run(query)
+                cnt += 1
+            except ConstraintError: #print(f'User constraint ok')
+                pass
+            except ClientError:     #print(f'User constraint seems to be ok')
+                pass
+            except Exception as e:
+                logging.error(f'database.adminDB.create_user_constraints: {e.__class__.__name__}, {e}')            
+                return
+    if cnt:
+        logger.info(f'{cnt} User constraints created')
+    else:
+        print(f'User constraint ok')
+
 def create_year_indexes():
     ''' Person node is indexed by two year properties.
     '''
-    with shareds.driver.session() as session: 
-        try:
-            session.run(SetupCypher.index_year_birth_low)
-            session.run(SetupCypher.index_year_death_high)  
-        except ConstraintError:
-            print(f'Person years indexes ok')
-        except Exception as e:
-            msgs = e.message.split(',')
-            print(f'database.adminDB.create_year_indexes: {e.__class__.__name__}, {msgs[0]}')            
-            return
-    logger.info('Person years indexes created')
-    
+    cnt = 0
+    with shareds.driver.session() as session:
+        for query in [SetupCypher.index_year_birth_low, 
+                      SetupCypher.index_year_death_high]:
+            try:  
+                session.run(query)
+                cnt += 1
+            except ConstraintError: #print(f'Person years index ok')
+                pass
+            except ClientError:     #print(f'Person years seems to be ok')
+                pass
+            except Exception as e:
+                msgs = e.message.split(',')
+                print(f'database.adminDB.create_year_indexes: {e.__class__.__name__}, {msgs[0]}')            
+                return
+    if cnt:
+        logger.info(f'{cnt} Person years indexes created')
+    else:
+        print(f'Person years indexes ok')
+
 
 def check_constraints(needed:dict):
     # Create missing UNIQUE constraints from given nodes and parameters.

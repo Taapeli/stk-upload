@@ -3,17 +3,27 @@ Created on 24.3.2020
 
 @author: jm
 '''
+import shareds
 from .base import NodeObject
 
-class MediaBl_todo(NodeObject):
+class MediaBl(NodeObject):
     '''
-    NOT IN USE, yet
+    TODO
     '''
     def __init__(self, params):
         '''
         Constructor
         '''
-        
+
+    @staticmethod
+    def create_and_link_by_handles(uniq_id, media_refs):
+        ''' Save media object and it's Note and Citation references
+            using their Gramps handles.
+        '''
+        if media_refs:
+            ds = shareds.datastore.dataservice
+            ds._create_link_medias_w_handles(uniq_id, media_refs)
+
 
 class MediaRefResult():
     ''' Gramps media reference result object.

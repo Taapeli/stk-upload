@@ -22,8 +22,10 @@ from flask_mail import Mail
 from templates import jinja_filters
 from wtforms import SelectField, SubmitField, BooleanField
 
-from database.models.neo4jengine import Neo4jEngine 
+from pe.neo4j.neo4jengine import Neo4jEngine
+#from database.models.neo4jengine import Neo4jEngine 
 from database import adminDB
+
 import shareds
 from chkdate import Chkdate
 
@@ -63,11 +65,10 @@ class Role(RoleMixin):
 
     @staticmethod
     def has_role(name, role_list):
-        '''
-            Check, if given role name exists in a list of Role objects
+        ''' Check, if given role name exists in a list of Role objects.
         '''
         for role in role_list:
-            if role.name == name:
+            if role == name or role.name == name:
                 return True
         return False
 
@@ -108,6 +109,18 @@ class User(UserMixin):
         self.current_login_at = kwargs.get('current_login_at')
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
+
+    def __str__(self):
+        if self.roles:
+            rolelist = []
+            for i in self.roles:
+                if isinstance(i, str):
+                    rolelist.append(i)
+                elif isinstance(i, Role):
+                    rolelist.append(i.name)
+            return f'setups.User {self.username} {rolelist}'
+        else:
+            return f'setups.User {self.username}, no roles'
 
     def is_showing_common(self):
         """ Is showing common, approved data only?
@@ -157,14 +170,17 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
 #============================== Start here ====================================
 
+print('Stk server setups') 
 shareds.mail = Mail(shareds.app)
+
+# About database driver object:
+# https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
 
 shareds.user_model = User
 shareds.role_model = Role
 
-print('Stk server setups') 
 sysversion = Chkdate()  # Last application commit date or "Unknown"
 
 # Setup Flask-Security
@@ -179,6 +195,7 @@ print('Security set up')
 def security_register_processor():
     return {"username": _('User name'), "name": _('Name'), "language": _('Language')}
 
+# Check and initiate important nodes and constraints and schema fixes.
 adminDB.initialize_db() 
 
 

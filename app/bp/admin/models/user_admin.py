@@ -77,7 +77,7 @@ class UserAdmin():
         return profile
 
     @classmethod         
-    def _build_user_from_record(self, userRecord):
+    def _build_user_from_node(self, userRecord):
         ''' Returns a User instance based on a user record '''
         try:
             if userRecord is None:
@@ -212,12 +212,16 @@ class UserAdmin():
 
     @classmethod 
     def update_user(cls, user):
+        ''' Update db User node.
+        
+            Called from /admin/update_user form
+        '''
         try:
             with shareds.driver.session() as session:
                 updated_user = session.write_transaction(cls._update_user, user)
                 if updated_user is None:
                     return None
-                return(cls._build_user_from_record(updated_user))
+                return(cls._build_user_from_node(updated_user))
 
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -232,24 +236,24 @@ class UserAdmin():
                 user.roles = ['master']
             if user.username == 'guest': 
                 user.roles = ['guest']    
-#   Identifier and history fields are not to be updated
+            # Identifier and history fields are not to be updated
             result = tx.run(Cypher_adm.user_update, 
                 email = user.email,
- #               username = user.username,
+                #username = user.username,
                 name = user.name, 
                 language = user.language,              
                 is_active = user.is_active,
                 roles = user.roles)
             if user.username not in {'master', 'guest'}:
-#   Find list of previous user -> role connections
+                # Find list of previous user -> role connections
                 prev_roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
-#   Delete connections that are not in edited connection list            
+                # Delete connections that are not in edited connection list            
                 for rolename in prev_roles:
                     if not rolename in user.roles:
                         tx.run(Cypher_adm.user_role_delete,
                                email = user.email,
                                name = rolename) 
-#   Add connections that are not in previous connection list                    
+                # Add connections that are not in previous connection list                    
                 for rolename in user.roles:
                     if not rolename in prev_roles:
                         tx.run(Cypher_adm.user_role_add, 
@@ -269,7 +273,8 @@ class UserAdmin():
             for rec in shareds.driver.session().run(Cypher_adm.list_accesses):
                 user = dict(rec.get("user"))
                 batch = dict(rec.get("batch"))
-                batch["file"] = batch["file"].split("/")[-1].\
+                file = batch.get('file','–')
+                batch["file"] = file.split("/")[-1].\
                     replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
                 #rel = dict(rec.get("r"))
                 rel_id = rec.get("rel_id")

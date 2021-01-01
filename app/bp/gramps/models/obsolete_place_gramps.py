@@ -8,8 +8,8 @@ from sys import stderr
 
 import shareds
 from bl.place import Place, PlaceBl
-from pe.neo4j.write_driver import Neo4jWriteDriver
-from pe.db_writer import DBwriter
+from pe.neo4j.dataservice import Neo4jDataService
+from pe.db_writer import DbWriter
 
 from models.gen.dates import DateRange
 #from models.gen.place import Place
@@ -49,7 +49,7 @@ class Place_gramps(PlaceBl):
     def __init__(self, uniq_id=None):
         """ Creates a new Place_gramps instance for Gramps xml data upload.
         """
-
+        raise(f'bp.gramps.models.place_gramps.Place_gramps: OBOSOLETE')
         Place.__init__(self, uniq_id)
         self.uuid = self.newUuid()
         self.note_ref = []      # uniq_ids of Notes
@@ -173,8 +173,8 @@ class Place_gramps(PlaceBl):
         # Select default names for default languages
         def_names = PlaceBl.find_default_names(self.names, ['fi', 'sv'])
         # Update default language name links
-        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
-        db = DBwriter(dbdriver)
+        dbdriver = Neo4jDataService(shareds.driver, tx)
+        db = DbWriter(dbdriver)
         db.place_set_default_names(self, def_names)
 
         # Make hierarchy relations to upper Place nodes
@@ -238,8 +238,8 @@ class Place_gramps(PlaceBl):
             raise
 
         # Make relations to the Media nodes and their Note and Citation references
-        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
-        db = DBwriter(dbdriver)
+        dbdriver = Neo4jDataService(shareds.driver, tx)
+        db = DbWriter(dbdriver)
         db.media_save_w_handles(self.uniq_id, self.media_refs)
             
         return

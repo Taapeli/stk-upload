@@ -80,13 +80,14 @@ SET user.username = $username,
     user.login_count = $login_count 
 RETURN user'''
 
-    user_to_profile_link = '''
-MATCH (user:User) 
-    WHERE user.email = $email   
-MATCH (profile:UserProfile)
-    WHERE profile.email = $email
-CREATE  (user) -[:HAS_ROLE]-> (profile) 
-RETURN user'''    
+# # Ei käytössä, rikki
+#     user_to_profile_link = '''
+# MATCH (user:User) 
+#     WHERE user.email = $email   
+# MATCH (profile:UserProfile)
+#     WHERE profile.email = $email
+# CREATE  (user) -[:HAS_ROLE]-> (profile) 
+# RETURN user'''    
         
 
     user_del = '''
@@ -102,10 +103,11 @@ CREATE (role:Role {
         time: $timestamp }
 RETURN role'''
 
-    role_find = '''
-        MATCH (role:Role) 
-            WHERE role.name = $name 
-        RETURN role'''
+# --> role_get
+#     role_find = ''' 
+# MATCH (role:Role) 
+#     WHERE role.name = $name 
+# RETURN role'''
 
     role_get = '''
 MATCH (role:Role)
@@ -127,7 +129,7 @@ MATCH (a:Role)
 RETURN COUNT(a)''' 
 
     user_roles_find = '''
-MATCH (user:User{email:$email}) -- (role:Role) 
+MATCH (user:User{email:$email}) -[:HAS_ROLE]-> (role:Role) 
 RETURN role'''
 
     user_role_add = '''         

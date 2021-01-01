@@ -40,6 +40,7 @@ def fixlines(lines,options):
     """ Clean Gedcom lines from line feed marks and fix CONT.
     """
     prevlevel = -1
+    line = ""
     for i,line in enumerate(lines):
         #line = line.strip()
 

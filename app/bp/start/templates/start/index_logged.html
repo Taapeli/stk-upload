@@ -26,10 +26,10 @@
             <div style="display: inline-block;">
             <form method="get" action="/gedcom">
                <h3>{{ _('Gedcom tools') }}</h3>
-               <p>{{ _('First before importing your data to Isotammi database, it is best to check and fix your Gedcom file using the tools we provide.') }}</p>
-               <p>{{ _('Send your gedcom files and experiment various cleanup functions') }}.</p>
+               <p>{{ _('Use these Gedcom tools to improve the quality of your own file or any file you have recieved.') }}</p>
+               <p>{{ _('Return the improved file back to your genealogy software.') }}</p>
               <div class="submit"> 
-                 <button type="submit">{{ _('My Gedcom files') }}</button>
+                 <button type="submit">{{ _('Gedcom tools') }}</button>
               </div>
             </form>
             </div>
@@ -39,12 +39,12 @@
 {% if current_user.is_authenticated and current_user.has_role('research') %}
            <div class="startbox">
              <div style="display: inline-block;">
-                <h3>{{ _('My candidate materials and files') }}</h3>
+                <h3>{{ _('Candidate materials for Isotammi') }}</h3>
                   <form action="/gramps">
-                 <p>{{ _('Send your Gramps xml file to Isotammi database and store it as a candidate material.') }}</p>
+                 <p>{{ _('Save your  Gramps xml file as Isotammi candidate material.') }}</p>
                  <p>{{ _('Manage your candidate files and materials in database.') }}</p>
                  <div class="submit"> 
-                    <input type="submit" value="{{ _('Browse and Manage') }}" />
+                    <input type="submit" value="{{ _('Candidate materials') }}" />
                  </div>
                  </form>
              </div>
@@ -77,7 +77,7 @@
 {% endif %}
 
                  <div class="submit"> 
-                    <button type="submit">{{ _('Continue') }}</button>
+                    <button type="submit">{{ _('Browse') }}</button>
                  </div>
                </form>
              </div>

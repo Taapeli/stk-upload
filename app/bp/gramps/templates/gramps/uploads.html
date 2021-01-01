@@ -1,4 +1,9 @@
 {# _gramps/uploads.html_ #}
+<!-- Note different versions:
+     ./gramps/templates/gramps/uploads.html
+     ./audit/templates/audit/batches.html
+     ./admin/templates/admin/uploads.html
+ -->
 {% extends "start/s_layout.html" %}
 {% block title %}{{ _("Uploads from Gramps") }}{% endblock %}
 {% block body %}
@@ -18,10 +23,15 @@ td {
 	left: 0;
 	z-index: -1;
 }
+fileselect {
+	border-width: 2px 3px 3px 2px; 
+	min-width: 725px;
+}
 </style>
 
 <script>
-var PROGRESS_INTERVAL = 10000;
+// Progress bar
+var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
 var selected_batch_id = '';
 
 function selectFile(sel, batch_id, xml_name) {
@@ -161,45 +171,27 @@ function confirm_delete(subj, name) {
       {% endif %}
     {% endwith %}
 
-    <div class="helptext">
-        <table class=legend>
-        <tr><td colspan="3"><b>{{ _("Steps for uploading Gramps files") }}</b></td>
-        <tr>
-        <td>1</td>
-        <td>{{ _("UPLOADED") }}</td>
-        <td>{{ _("the file has been uploaded to server") }}</td>
-        </tr>
-        <tr>
-        <td>2</td>
-        <td>{{ _("STORING") }}</td>
-        <td>{{ _("the file content is being stored to the database") }}</td>
-        </tr>
-        <tr>
-        <td>3</td>
-        <td>{{ _("STORED") }}</td>
-        <td>{{ _("the file content has been stored to the database") }}</td>
-        </tr>
-        <tr>
-        <td>4</td>
-        <td>{{ _("REMOVED") }}</td>
-        <td>{{ _("Not found any more") }}</td>
-        </tr>
-        <tr>
-        <td>5</td>
-        <td>{{ _("ERROR") }} / {{ _("FAILED") }}</td>
-        <td>{{ _("there was an error") }}</td>
-        </tr>
-        </table>
-    </div>
-
-    <table class="fileselect" style="border-width: 2px 3px 3px 2px; min-width: 725px;">
+    <table class="fileselect">
            <tr> <th></th>
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Batch id") }}</th>
                 <th>{{ _("Person count") }}</th>
-                <th>{{ _("Status") }}</th>
+                <th>{{ _("Status") }}
+					<div class="tooltip"> &#x2754;
+					  <div class="tooltiptext">
+					  	<p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
+					  	<p>↓ {{ _("UPLOADED") }} – {{ _("the file has been uploaded to server") }}<br>
+					  	   ↓ {{ _("STORING") }}  – {{ _("the file content is being stored to the database") }}<br>
+					  	   ↳ {{ _("STORED") }}   – {{ _("the data is stored as candidate material") }}<br>
+					  	   → {{ _("REMOVED") }}  – {{ _("Not found any more") }}<br>
+					  	   ↝ {{ _("ERROR") }} / {{ _("FAILED") }} – {{ _("there was an error") }}
+						</p>
+					  </div>
+					</div> 
+				</th>
    			</tr>
+
 	    {% for upload in uploads %}{% if upload.status != "?" %}
 	       <tr>
 	           <td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
@@ -223,6 +215,11 @@ function confirm_delete(subj, name) {
 	           </td>
 	       </tr>
 	    {% endif %}{% endfor %}
+	    {% if uploads|length == 0 %}
+	       <tr><td colspan="5" style="padding:2em">
+	              <a href="/gramps">{{ _("Start by sending your first Gramps file") }}</a></td>
+	       </tr>
+	    {% endif %}
     </table>
     <div>
       <form id="form" action="" method="get">
@@ -253,6 +250,16 @@ function confirm_delete(subj, name) {
   </div>
 </div>
 {% endblock %}
+<script>
+// Status help text
+var e = document.getElementById('help');
+e.onmouseover = function() {
+  document.getElementById('help_box').style.display = 'block';
+}
+e.onmouseout = function() {
+  document.getElementById('help_box').style.display = 'none';
+}
+</script>
 </body>
 </html>
 

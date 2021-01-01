@@ -1,5 +1,5 @@
 {# _admin/uploads.html_ #}
-<!-- See different versions:
+<!-- Note different versions:
      ./gramps/templates/gramps/uploads.html
      ./audit/templates/audit/batches.html
      ./admin/templates/admin/uploads.html
@@ -9,6 +9,7 @@
 {% block body %}
     {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
+    
     {% if users %}
     	{% if users|length == 1 %}
 	    	<h2>{{ _("Uploads for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h2>
@@ -28,40 +29,27 @@
         </ol>
       {% endif %}
     {% endwith %}
-    <div class="helptext">
-    	<table class=legend>
-        <tr><td colspan="3"><b>{{ _("Status for differents steps in XML file upload:") }}</b>
-    	<tr>
-    	<td>1
-    	<td>{{ _("UPLOADED") }}     
-    	<td>{{ _("the file has been uploaded to server") }}
-    	<tr>
-    	<td>2
-    	<td>{{ _("STORING") }}
-    	<td>{{ _("the file content is being stored to the database") }}
-    	<tr>
-    	<td>3
-    	<td>{{ _("STORED") }}
-    	<td>{{ _("the file content has been stored to the database") }}
-    	<tr>
-        <td>4
-        <td>{{ _("REMOVED") }}
-        <td>{{ _("not found any more") }}
-        <tr>
-    	<td>-
-    	<td>{{ _("ERROR") }} / {{ _("FAILED") }}
-    	<td>{{ _("there was an error") }}
-    	</table>
-    </div>
-    
+
     <div class="content">
-        <table>
+        <table style="width:90%">
            <tr>
 			    {% if not user %}
 	                <th>{{ _("User id") }}</th>
 			    {% endif %}
                 <th>{{ _("Gramps file / uploaded at") }}</th>
-                <th>{{ _("Status") }}</th>
+                <th>{{ _("Status") }}
+                    <div class="tooltip"> &#x2754;
+                      <div class="tooltiptext">
+                          <p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
+                          <p>↓ {{ _("UPLOADED") }} – {{ _("the file has been uploaded to server") }}<br>
+                             ↓ {{ _("STORING") }}  – {{ _("the file content is being stored to the database") }}<br>
+                             ↳ {{ _("STORED") }}   – {{ _("the data is stored as candidate material") }}<br>
+                             → {{ _("REMOVED") }}  – {{ _("Not found any more") }}<br>
+                             ↝ {{ _("ERROR") }} / {{ _("FAILED") }} – {{ _("there was an error") }}
+                        </p>
+                      </div>
+                    </div> 
+                </th>
                 <th>{{ _("Operations") }}</th>
            </tr>
 	    {% for upload in uploads %}
@@ -79,12 +67,13 @@
 	           <td class="msg_INFO">{{upload.status}}
 	           	{% if upload.batch_id %}
 	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
-	           	   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
+	           	   {% else %}<br>
+                      {{ _("batch %(batch_id)s; %(persons)d persons", batch_id=upload.batch_id, persons=upload.count) }}
 	           	   {% endif %}
 	           	{% endif %}
                </td>
 	           <td class="msg_INFO">
-{% if upload.xmlname %}
+{% if upload.xmlname and upload.status != "TIETOKANNASSA" %}
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
 {% endif %}
@@ -101,6 +90,17 @@
     <p>&rtrif; <a href="/admin/list_users">{{ _("List of users") }}</a></p>
     </div>
 {% endblock %}
+
+<script>
+// Status help text
+var e = document.getElementById('help');
+e.onmouseover = function() {
+  document.getElementById('help_box').style.display = 'block';
+}
+e.onmouseout = function() {
+  document.getElementById('help_box').style.display = 'none';
+}
+</script>
 </body>
 </html>
 

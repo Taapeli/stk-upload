@@ -84,7 +84,7 @@ def test_ownerfilter_next_item(user_env):
     #    Read data here --> got required amount
     f.update_session_scope('person_name', '##Elisabet', '#Hansson#Lars', 100, 100)
     
-    x = f.next_name_fw()
+    x = f.next_name('fw')
     assert x == '', "next fw not in the beginning"
     
     # 2. At given point
@@ -93,7 +93,7 @@ def test_ownerfilter_next_item(user_env):
     #    Read data here --> reached end
     f.update_session_scope('person_name', 'Zakrevski##Arseni', 'Östling##Carl', 50, 28)
     
-    x = f.next_name_fw()
+    x = f.next_name('fw')
     assert x == 'Zakrevski##Arseni', "next fw not at given point"
     
     # 3. At end
@@ -101,6 +101,6 @@ def test_ownerfilter_next_item(user_env):
     #    Read data here --> reached end
     f.set_scope_from_request(request, 'person_scope')
     
-    x = f.next_name_fw()
+    x = f.next_name('fw')
     assert x == '> end', "next fw not at end"
 

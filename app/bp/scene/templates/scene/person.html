@@ -267,9 +267,9 @@ u { color: DarkKhaki; text-decoration: none; }
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
 		                <ul>{% if fam.father %}
-		                        <li>{{ _("Father") }}: {{ macro.person_anon(fam.father, myid) }}</li>
+		                        <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
 		                {% endif %}{% if fam.mother %}
-		                        <li>{{ _("Mother") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
+		                        <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
 		                {% endif %}{% if fam.children|count %}
 		                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
 		                            <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
@@ -328,7 +328,7 @@ u { color: DarkKhaki; text-decoration: none; }
             <div id="sourcerefContent"></div>
         </div>
 {% else %}
-<div class="Failed">{{ _('Tietojen lukeminen onnistunut!') }}</div>
+<div class="Failed">{{ _('Failed to read the data!') }}</div>
 {% endif %}
     </div> {# content #}
 

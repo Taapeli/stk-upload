@@ -11,7 +11,8 @@ from ..gedcom.models import gedcom_utils
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, session , flash
-from flask_security import login_required, roles_accepted, current_user, utils as secutils
+from flask_security import login_required, current_user, utils as secutils
+#rom flask_security import login_required, roles_accepted, current_user, utils as secutils
 from flask_babelex import _, get_locale
 
 import shareds
@@ -19,7 +20,7 @@ from models import email
 from bp.api import api
 
 from bp.start.forms import JoinForm
-from models.gen.batch_audit import Batch
+from bl.batch import Batch
 
 """ Application route definitions
 """
@@ -32,11 +33,11 @@ def force_https():
         if host in {"localhost","127.0.0.1"}: return
         return redirect(request.url.replace('http://', 'https://'))
 
-# @shareds.app.route('/')
-#     Home page for a guest user (from login page or home button)
-#     or anonymous user (home)
-#
-#     @See: routes.entry
+@shareds.app.route('/home')
+def home():
+    '  Home page. '
+    from routes import entry
+    return redirect(entry)
 
 @shareds.app.route('/start/guest', methods=['GET', 'POST'])
 def start_guest():
@@ -112,6 +113,7 @@ def join():
             researched_places = request.form.get('researched_places'),
             text_message = request.form.get('text_message'),
         )
+        # Store to UserProfile node
         UserAdmin.update_user_profile(profile)
         return redirect(url_for("thankyou"))
 

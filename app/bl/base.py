@@ -5,6 +5,7 @@ Created on 22.8.2019
 '''
 import uuid
 import json
+import traceback
 
 class Status():
     """ Status code values for result dictionary.
@@ -21,6 +22,18 @@ class Status():
     NOT_FOUND = 1
     ERROR = 2
     NOT_STARTED = 4
+    UPDATED = 4
+
+    @staticmethod       
+    def has_failed(result:dict):
+        ''' Test, if given result dict did not succeed.
+        '''
+        if not isinstance(result,dict):
+            traceback.print_exc()
+            raise AttributeError(f'bl.base.Status.has_failed')
+        if result.get('status', -1) != Status.OK:
+            return True
+        return False
 
 
 class StkEncoder(json.JSONEncoder):

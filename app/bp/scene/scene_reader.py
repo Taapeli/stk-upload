@@ -5,14 +5,14 @@ Created on 24.9.2018
 
 @author: jm
 '''
-from models.person_reader import PersonReader
-from models.source_citation_reader import read_sources_repositories, get_citations_js
+#from models.person_reader import PersonReader
+#from models.source_citation_reader import read_sources_repositories, get_citations_js
 
 # from models.gen.from_node import get_object_from_node
 # from models.gen.person_combo import Person_combo #, Person_as_member
 #from models.gen.citation import Citation
 # from shareds import logger
-import traceback
+#import traceback
 
 
 # def get_person_full_data(uuid, owner, use_common=True): --> bl.person.PersonReader.get_person_data()

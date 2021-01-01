@@ -14,7 +14,7 @@ from .gen.repository import Repository
 from templates.jinja_filters import translate
 
      
-# def read_sources_repositories(session, objs, citations=None): # --> pe.neo4j.read_driver.dr_get_object_sources_repositories()
+# def read_sources_repositories(session, objs, citations=None): # --> pe.neo4j.readservice.dr_get_object_sources_repositories()
 #     ''' Read Source -> Repository hierarchies for given list of citations
 #                         
 #         - session       neo4j.session   for database access

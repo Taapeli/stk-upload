@@ -247,7 +247,7 @@ div.fullclear {
     color: gray;
 }
 
-/* Legend
+/* Legend and tooltip help button
 ----------------------------------------------------- */
 
 div.legend {
@@ -302,6 +302,37 @@ div.steps div.active {
 .fileselect {
 	border-width: 2px 3px 3px 2px; 
 	min-width: 725px;
+}
+
+/* Tooltip help container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  /*border-bottom: 1px dotted black;*/
+  background-color: DarkGray;
+  color: white;
+  padding: 0 2pt;
+  border-radius: 7pt;
+}
+/* Tooltip text */
+.tooltip .tooltiptext {
+  font-weight: normal;
+  visibility: hidden;
+  width: 320pt;
+  background-color: Cornsilk;
+  color: DarkSlateGray;
+  padding: 0 5pt;
+  border: 1pt solid gray;
+  border-radius: 6pt;
+  /* Position the tooltip text */
+  position: absolute;
+  top: -5px;
+  right: 105%; 
+  z-index: 1;
+}
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
 
 /* Navigation, buttons

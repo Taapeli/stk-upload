@@ -4,20 +4,13 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-{% set cnt = places|count %}
-{% set user = user_context.user %}
-{% set next = user_context.scope %}
-{% set ctxt = user_context.context %}
-{% if ctxt == 3 or ctxt == 5 %}{#
-	#   common_own   011 3 = 1+2 = user's data & demo
-	#   common_batch 101 5 = 1+4 = user batch & demo #}
-	{% set multi_owners = ctxt - 1 %}
-    {% set my_set = user_context.choices.as_str[ctxt-1] %}
-    {% set my_common = _('Demo-data') %}
-{% else %}
-    {% set multi_owners = 0 %}
-    {% set my_set = user_context.choices.as_str[ctxt] %}
-{% endif %}
+{# set cnt = places|count #}
+{% set next_fw = user_context.next_name('fw') %}
+{% set next_bw = user_context.next_name('bw') %}
+{# set next_at_end = user_context.at_end() #}
+
+<p>next fb = "{{next_bw}}", fw = "{{next_fw}}"; 
+   at start = "{{user_context.at_start() }}", at end = "{{user_context.at_end() }}"</p>
 
 <div id="startdiv">
     <h2>{{ _('Places List') }}</h2>
@@ -29,10 +22,11 @@
         <div id="summaryarea">
             <div class="flex-container">
 				<div id="description_box">
-                   <p>{{ _('Displaying %(num)s distinct places', num=cnt) }}
-                       {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }}.
-                       {% else %}{{ _('from begin') }}
-                       {% endif %}
+                   <p>{{ _('Displaying %(num)s distinct places', num=places|count) }}
+	{% if user_context.at_start() %}
+	         		  {{ _('from begin') }}.
+	{% else %}		  {{ _('starting <tt>%(name)s</tt>', name=next_bw) }}.
+	{% endif %}
                    </p>
 	           </div>
 	           <div class="SearchBox">
@@ -48,39 +42,30 @@
 		           </form>
 		       </div>
 			</div>
-		    {% with messages = get_flashed_messages(with_categories=true) %}
-		      {% if messages %}
+	{% with messages = get_flashed_messages(with_categories=true) %}
+		{% if messages %}
 		        <ol  class='flashes'>
-		        {% for category, message in messages %}
+		    {% for category, message in messages %}
 		          <li class='flash_{{category}}'>{{ message }}</li>
-		        {% endfor %}
+		    {% endfor %}
 		        </ol>
-		      {% endif %}
-		    {% endwith %}
-       </div>
+		{% endif %}
+	{% endwith %}
+        </div> <!-- summaryarea -->
        
-        {% set last = places|last %}
 		<div id="alphanav">{% set alpha = "¤" %}
-			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-			    <li>{% if next[0] > ' ' %}
-			         <a href="/scene/locations?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
-			    {% else %}<span class="navlink">|&lt;</span>
-			    {% endif %}</li>
-                <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed"> &lt; </span></li>
+			<ul><li><a href="#" title="{{ _('Top') }}"><b>&uarr;</b></a></li>
+                {{ macro.buttons_bw(user_context, "/scene/locations") }}
 
-        {% for p in places %}
-        	{% set ini = p.pname[0]|list|first %}
-            {% if loop.changed(ini) %}
+    {% for p in places %}
+        {% set ini = p.pname[0]|list|first %}
+        {% if loop.changed(ini) %}
                 <!-- li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li -->
                 <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
-            {% endif %}
-        {% endfor %}
-            {% if next[1].startswith('>') %}
-                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
-            {% else %}
-	            <li><a href="/scene/locations?{{ {'fw':next[1]} | urlencode }}" 
-	                 title="{{ _('next page') }}" class="navlink"> &gt; </a></li>
-            {% endif %}
+        {% endif %}
+    {% endfor %}
+ 
+                {{ macro.buttons_fw(user_context, "/scene/locations") }}
 			</ul>
 		</div>
 		<table class="IndividualList">
@@ -127,13 +112,17 @@
 		        {% endfor %}
 		           </ul>
 	        {% endif %}
-	        <td>{% if p.coord %}
-                <small>({{p.coord[0]|round(1)}},&nbsp;{{p.coord[1]|round(1)}})</small>
-            {% endif %}</td>
-            <td class="numbers">{% if p.ref_cnt %}{{p.ref_cnt}}{% endif %}</td>
+		        <td>{% if p.coord %}
+	                <small>({{p.coord[0]|round(1)}},&nbsp;{{p.coord[1]|round(1)}})</small>
+	            {% endif %}</td>
+	            <td class="numbers">{% if p.ref_cnt %}{{p.ref_cnt}}{% endif %}</td>
 	    {% endfor %}
-	{% endif %}
+	{% else %}
+				<tr><td colspan="4" id="lastitem_badge">
+						<i>{{ _('No places found') }}</i>
+					</td>
 				</tr>
+	{% endif %}
 			</tbody>
 		</table>
 	</div>

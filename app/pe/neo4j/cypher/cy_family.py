@@ -1,14 +1,12 @@
 #
 # Reading and updating Neo4j database
 #
-# See also: gramps.cypher_gramps for updates from Gramps xml file
-#
 # 12.2.2018 - 16.5.2020 / JMä
 #
 
 class CypherFamily():
     '''
-    Cypher clases for creating Families
+    Cypher classes for reading and creating Families
     '''
 
 # Get Family node by uuid
@@ -63,6 +61,18 @@ MATCH (f) -[:NOTE]- (note:Note) WHERE ID(f) in $id_list
     OPTIONAL MATCH (f) 
 RETURN ID(f) AS src_id, note"""
 
+    get_dates_parents = """
+MATCH (family:Family) WHERE ID(family)=$id
+OPTIONAL MATCH (family)-[:PARENT {role:"father"}]-(father:Person)
+OPTIONAL MATCH (father)-[:EVENT]-(father_death:Event {type:"Death"})
+OPTIONAL MATCH (family)-[:PARENT {role:"mother"}]-(mother:Person)
+OPTIONAL MATCH (mother)-[:EVENT]-(mother_death:Event {type:"Death"})
+OPTIONAL MATCH (family)-[:EVENT]-(event:Event) WHERE event.type="Marriage"
+OPTIONAL MATCH (family)-[:EVENT]-(divorce_event:Event {type:"Divorce"})
+RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
+       mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
+       event.date1 AS marriage_date, divorce_event.date1 AS divorce_date"""
+
     obsolete_get_family_data = """
 MATCH (f:Family) WHERE ID(f) in $id_list
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
@@ -93,4 +103,42 @@ MATCH (family) -[r]-> (person:Person)
 OPTIONAL MATCH (person) -[:EVENT]-> (birth:Event {type:'Birth'}) 
 RETURN family, TYPE(r) AS type, r.role AS role, person, birth 
 ORDER BY family, person.birth_high"""
+
+# ----- Family load in Batch
+
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
+MERGE (b) -[r:OWNS]-> (f:Family {handle: $f_attr.handle}) 
+    SET f = $f_attr
+RETURN ID(f) as uniq_id"""
+
+    link_parent = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Person) WHERE m.handle=$p_handle
+MERGE (n) -[r:PARENT {role:$role}]-> (m)"""
+
+    link_event = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Event)  WHERE m.handle=$e_handle
+MERGE (n)-[r:EVENT]->(m)
+    SET r.role = $role"""
+
+    link_child = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Person) WHERE m.handle=$p_handle
+MERGE (n)-[r:CHILD]->(m)"""
+
+    link_note = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Note)   WHERE m.handle=$n_handle
+CREATE (n)-[r:NOTE]->(m)"""
+
+    link_citation = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Citation) WHERE m.handle=$c_handle
+CREATE (n)-[r:CITATION]->(m)"""
+
+    set_dates_sortname = """
+MATCH (family:Family) WHERE ID(family) = $id
+SET family += $f_attr"""
 

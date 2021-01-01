@@ -24,3 +24,7 @@ app/static/tmp/
 
 app/messages.pot
 /media/
+
+stk_server.egg-info/
+build/
+dist/

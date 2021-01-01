@@ -30,14 +30,14 @@ syslog_cypher_write = """
 """
 
 syslog_cypher_read_from_end = """
-    match (row:Syslog) -[r:NEXT*1..10]-> (end:Syslog{sentinel:'end'})   
+    match (row:Syslog) -[r:NEXT*1..20]-> (end:Syslog{sentinel:'end'})   
     where not exists(row.sentinel)
     return row
     order by row.time
 """
 
 syslog_cypher_read_from_beginning = """
-    match (beginning:Syslog{sentinel:'start'}) -[r:NEXT*1..10]-> (row:Syslog)   
+    match (beginning:Syslog{sentinel:'start'}) -[r:NEXT*1..20]-> (row:Syslog)   
     where not exists(row.sentinel)
     return row
     order by row.time
@@ -45,7 +45,7 @@ syslog_cypher_read_from_beginning = """
 
 syslog_cypher_read_backward = """
     match(end:Syslog) where id(end) = $startid
-    match (row:Syslog) -[r:NEXT*0..10]-> (end)   
+    match (row:Syslog) -[r:NEXT*0..20]-> (end)   
     where not exists(row.sentinel)
     return row
     order by row.time
@@ -53,7 +53,7 @@ syslog_cypher_read_backward = """
 
 syslog_cypher_read_forward = """
     match(start:Syslog) where id(start) = $startid
-    match (start:Syslog) -[r:NEXT*0..10]-> (row:Syslog)   
+    match (start:Syslog) -[r:NEXT*0..20]-> (row:Syslog)   
     where not exists(row.sentinel)
     return row
     order by row.time
@@ -88,8 +88,12 @@ def readlog(direction="backward",startid=None):
         else:
             cypher_stmt = syslog_cypher_read_from_beginning
     try:
-        recs = shareds.driver.session().run(cypher_stmt,direction=direction,startid=startid)
-        return recs.records()
+        recs = []
+        result = shareds.driver.session().run(cypher_stmt,
+                                              direction=direction, startid=startid)
+        for record in result:
+            recs.append(record)
+        return recs
     except:
         traceback.print_exc()
         return []

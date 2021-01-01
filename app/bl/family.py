@@ -10,9 +10,17 @@ Components moved 15.5.2020 from
 '''
 import  shareds
 from templates.jinja_filters import translate
+import logging 
+logger = logging.getLogger('stkserver')
+from flask_babelex import _
 
 from .base import NodeObject, Status
-from pe.db_reader import DBreader
+from .person import PersonBl
+from .person_name import Name
+
+from pe.db_reader import DbReader
+from models.gen.cypher import Cypher_family #TODO fix
+from pe.neo4j.cypher.cy_family import CypherFamily
 
 from models.gen.dates import DateRange
 
@@ -88,11 +96,11 @@ class FamilyBl(Family):
                 father_sortname str search key
                 mother_sortname str search key
 #             #TODO: Obsolete properties?
-#                 eventref_hlink      str tapahtuman osoite
+#                 event_handle_roles      str tapahtuman osoite
 #                 eventref_role       str tapahtuman rooli
-#                 childref_hlink      str lapsen osoite
-#                 noteref_hlink       str lisätiedon osoite
-#                 citationref_hlink   str lisätiedon osoite
+#                 child_handles      str lapsen osoite
+#                 note_handles       str lisätiedon osoite
+#                 citation_handles   str lisätiedon osoite
      """
 
     def __init__(self, uniq_id=None):
@@ -110,23 +118,252 @@ class FamilyBl(Family):
         self.note_ref = []          # For a page, where same note may be referenced
                                     # from multiple events and other objects
 
-#         #TODO Obsolete parameters???
-#         self.eventref_hlink = []
-#         self.eventref_role = []
-#         self.childref_hlink = []    # handles
-#         self.noteref_hlink = []
-#         self.citationref_hlink = []
+
+    def save(self, tx, **kwargs):
+        """ Saves the family node to db with its relations.
+        
+            Connects the family to parent, child, citation and note nodes.
+        """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            return {'status': Status.ERROR, 
+                    'statustext': f"bl.family.FamilyBl.save needs batch_id for {self.id}"}
+            #raise RuntimeError(f"bl.family.FamilyBl.save needs batch_id for {self.id}")
+
+        self.uuid = self.newUuid()
+        f_attr = {}
+        try:
+            f_attr = {
+                "uuid": self.uuid,
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "rel_type": self.rel_type
+            }
+            result = tx.run(CypherFamily.create_to_batch, 
+                            batch_id=batch_id, f_attr=f_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    logger.warning(f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}")
+        except Exception as err:
+            msg = f"bl.family.FamilyBl.save: {err} in #{self.uniq_id} - {f_attr}"
+            logger.error(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
+
+        # Make father and mother relations to Person nodes
+        try:
+            if hasattr(self,'father') and self.father:
+                tx.run(CypherFamily.link_parent, role='father',
+                       f_handle=self.handle, p_handle=self.father)
+
+            if hasattr(self,'mother') and self.mother:
+                tx.run(CypherFamily.link_parent, role='mother',
+                       f_handle=self.handle, p_handle=self.mother)
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
+
+        # Make relations to Event nodes
+        try:
+            for handle_role in self.event_handle_roles:
+                # a tuple (event_handle, role)
+                tx.run(CypherFamily.link_event, 
+                       f_handle=self.handle, 
+                       e_handle=handle_role[0], 
+                       role=handle_role[1])
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save events: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
+  
+        # Make child relations to Person nodes
+        try:
+            for handle in self.child_handles:
+                tx.run(CypherFamily.link_child, 
+                       f_handle=self.handle, p_handle=handle)
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save children: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
+  
+        # Make relation(s) to the Note node
+        try:
+            #print(f"Family_gramps.save: linking Notes {self.handle} -> {self.note_handles}")
+            for handle in self.note_handles:
+                tx.run(CypherFamily.link_note,
+                       f_handle=self.handle, n_handle=handle)
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save notes: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
+  
+        # Make relation(s) to the Citation node
+        try:
+            #print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
+            for handle in self.citation_handles:
+                tx.run(CypherFamily.link_citation,
+                       f_handle=self.handle, c_handle=handle)
+        except Exception as e:
+            msg = f'bl.family.FamilyBl.save citations: family={self.id}: {e.__class__.__name__} {e}'
+            print(msg)
+            return {'status': Status.ERROR, 'statustext': msg}
+
+        return
+
+    @staticmethod           
+    def set_calculated_attributes(uniq_id):
+        ''' Get Family event dates and sortnames.
+        '''
+        return shareds.datastore.dataservice._set_family_calculated_attributes(uniq_id)
+        #return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
 
 
-class FamilyReader(DBreader):
+class FamilyReader(DbReader):
     '''
         Data reading class for Family objects with associated data.
 
-        - Use pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
+        - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
           to define the database driver and user context
 
         - Returns a Result object which includes the tems and eventuel error object.
     '''
+    def __init__(self, readservice, u_context=None):
+        ''' Create a reader object with db driver and user context.
+
+            - readservice    Neo4jReadService or Neo4jWriteDriver
+        '''
+        self.readservice = readservice
+        if u_context:
+            # For reader only; writer has no context?
+            self.user_context = u_context
+            self.username = u_context.user
+            if u_context.context == u_context.ChoicesOfView.COMMON:
+                self.use_user = None
+            else:
+                self.use_user = u_context.user
+
+
+    def get_families(self, opt='father'):
+        """ Find families from the database 
+        
+            from /scene/families, tools: /listall/families
+        """
+
+        families = []
+        fw = self.user_context.first     # next name
+        user = self.user_context.batch_user()
+        limit = self.user_context.count
+        order = self.user_context.order
+        ustr = "user " + user if user else "no user"
+        print(f"FamilyReader.get_families: Get max {limit} families "
+              f"for {ustr} starting  {order} {fw!r}")
+
+        # Select True = filter by this user False = filter approved data
+        show_by_owner = self.user_context.use_owner_filter()
+        #show_approved = self.user_context.use_common()
+        
+        with shareds.driver.session() as session:
+            try:
+                if show_by_owner:
+                    # (u:UserProfile {username})
+                    #    -[:HAS_LOADED]-> (b:Batch)
+                    #    -[:OWNS]-> (f:Family {father_sortname})
+                    if order == 'man':
+                        print("FamilyReader.get_families: my own order by man")
+                        result = session.run(Cypher_family.read_my_families_f,
+                                             user=user, fw=fw, limit=limit)
+                    elif order == 'wife':
+                        print("FamilyReader.get_families: my own order by wife")
+                        result = session.run(Cypher_family.read_my_families_m,
+                                             user=user, fwm=fw, limit=limit)
+                else: # approved from any researcher
+                    # (:Audit) -[:PASSED]-> (f:Family {father_sortname})
+                    if order == 'man':
+                        #3 == #1 simulates common by reading all
+                        print("FamilyReader.get_families: approved order by man")
+                        result = session.run(Cypher_family.read_families_common_f, #user=user, 
+                                             fw=fw, limit=limit)
+                    elif order == 'wife':
+                        #1 get all with owner name for all
+                        print("FamilyReader.get_families: approved order by wife")
+                        result = session.run(Cypher_family.read_families_common_m,
+                                             fwm=fw, limit=limit)
+
+            except Exception as e:
+                print(f'FamilyReader.get_families: {e.__class__.__name__} {e}')            
+                raise      
+
+            for record in result:
+                if record['f']:
+                    # <Node id=55577 labels={'Family'} 
+                    #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
+                    #    'id': 'F0000', 'change': 1507492602}>
+                    f_node = record['f']
+                    family = FamilyBl.from_node(f_node)
+                    family.marriage_place = record['marriage_place']
+    
+                    uniq_id = -1
+                    for role, parent_node, name_node in record['parent']:
+                        if parent_node:
+                            # <Node id=214500 labels={'Person'} 
+                            #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa', 
+                            #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496, 
+                            #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008', 
+                            #    'date2': 1997946, 'date1': 1929380}>
+                            if uniq_id != parent_node.id:
+                                # Skip person with double default name
+                                pp = PersonBl.from_node(parent_node)
+                                if role == 'father':
+                                    family.father = pp
+                                elif role == 'mother':
+                                    family.mother = pp
+    
+                            pname = Name.from_node(name_node)
+                            pp.names = [pname]
+    
+                    
+                    for ch in record['child']:
+                        # <Node id=60320 labels={'Person'} 
+                        #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19, 
+                        #    'confidence': '', 'sex': 0, 'change': 1507492602, 
+                        #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
+                        #    'date2': 1609920, 'date1': 1609920}>
+#                         child = Person_as_member()
+                        child = PersonBl.from_node(ch)
+#                         Person_as_member.__init__(child)
+#                         child.uniq_id = ch.id
+#                         child.uuid = ch['uuid']
+#                         child.sortname = ch['sortname']
+                        family.children.append(child)
+                    
+                    if record['no_of_children']:
+                        family.no_of_children = record['no_of_children']
+                    family.num_hidden_children = 0
+                    if not self.user_context.use_common():
+                        if family.father: family.father.too_new = False
+                        if family.mother: family.mother.too_new = False
+                    families.append(family)
+
+        # Update the page scope according to items really found 
+        if families:
+            up_scope = self.user_context.update_session_scope
+            if order == 'man':
+                up_scope('person_scope', families[0].father_sortname,
+                         families[-1].father_sortname, limit, len(families))
+            else:
+                up_scope('person_scope', families[0].mother_sortname, 
+                         families[-1].mother_sortname, limit, len(families))
+            self.user_context.order = order
+
+        if self.user_context.use_common():
+            families = self.hide_privacy_protected_families(families)
+        return families
+
     
     def get_family_data(self, uuid:str, wanted=[]):
         """ Read Family information including Events, Children, Notes and Sources.
@@ -180,12 +417,12 @@ class FamilyReader(DBreader):
             1. Get Family node by user/common
                res is dict {item, status, statustext}
         """
-        results = self.dbdriver.dr_get_family_by_uuid(self.use_user, uuid)
-        # results {'item': <bl.family.FamilyBl>, 'status': Status}
-        if results.get('status') != Status.OK:
-            return results
+        ret_results = self.readservice.dr_get_family_by_uuid(self.use_user, uuid)
+        # ret_results {'item': <bl.family.FamilyBl>, 'status': Status}
+        if ret_results.get('status') != Status.OK:
+            return ret_results
 
-        family = results.get('item')
+        family = ret_results.get('item')
         # The Nodes for search of Sources and Notes (Family and Events)
         src_list = [family.uniq_id]
         """
@@ -193,7 +430,7 @@ class FamilyReader(DBreader):
                res is dict {items, status, statustext}
         """
         if select_parents:
-            res = self.dbdriver.dr_get_family_parents(family.uniq_id, 
+            res = self.readservice.dr_get_family_parents(family.uniq_id, 
                                                       with_name=select_names)
             for p in res.get('items'):
                 # For User's own data, no hiding for too new persons
@@ -205,7 +442,7 @@ class FamilyReader(DBreader):
                res is dict {items, status, statustext}
         """
         if select_children:
-            res = self.dbdriver.dr_get_family_children(family.uniq_id,
+            res = self.readservice.dr_get_family_children(family.uniq_id,
                                                        with_events=select_events,
                                                        with_names=select_names)
             # res {'items': [<bl.person.PersonBl>], 'status': Status}
@@ -220,7 +457,7 @@ class FamilyReader(DBreader):
                res is dict {items, status, statustext}
         """
         if select_events:
-            res = self.dbdriver.dr_get_family_events(family.uniq_id, 
+            res = self.readservice.dr_get_family_events(family.uniq_id, 
                                                      with_places=select_places)
             for e in res.get('items'):
                 family.events.append(e)
@@ -230,24 +467,24 @@ class FamilyReader(DBreader):
               optionally with Notes
         """
         if select_sources:
-            res = self.dbdriver.dr_get_family_sources(src_list)
+            res = self.readservice.dr_get_family_sources(src_list)
             for s in res.get('items'):
                 family.sources.append(s)
         """
             6 Get Notes for family and events
         """
         if select_notes:
-            res = self.dbdriver.dr_get_family_notes(src_list)
+            res = self.readservice.dr_get_family_notes(src_list)
             for s in res.get('items'):
                 family.sources.append(s)
 
-        return results
+        return ret_results
 
 
     def get_person_families(self, uuid:str):
         """ Get all families for given person in marriage date order.
         """
-        res = self.dbdriver.dr_get_person_families_uuid(uuid)
+        res = self.readservice.dr_get_person_families_uuid(uuid)
         items = res.get('items')
         if items:
             items.sort(key=lambda x: x.dates)
@@ -279,7 +516,7 @@ class FamilyReader(DBreader):
         query = """
 MATCH (family:Family)-[r:EVENT]->(event:Event)
   WHERE ID(family)=$pid
-RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
+RETURN r.role AS eventref_role, event.handle AS event_handles"""
         return  shareds.driver.session().run(query, {"pid": pid})
 
     @staticmethod
@@ -302,7 +539,7 @@ RETURN family"""
 #     def get_family_data_by_id(self): #see models.gen.family_combo.Family_combo.get_family_data_by_id
 #         """ Luetaan perheen tiedot. 
 #             Called from models.datareader.get_families_data_by_id 
-#                    from bp.tools.routes.show_family_data
+#                    from bp.obsolete_tools.routes.show_family_data
     
     
 #     @staticmethod           
@@ -313,8 +550,17 @@ RETURN family"""
 #     def set_dates_sortnames(tx, uniq_id, dates, father_sortname, mother_sortname): #see models.gen.family_combo.Family_combo
 #         ''' Update Family dates and parents' sortnames.
 
-#     @staticmethod       
-#     def hide_privacy_protected_families(families): #see models.gen.family_combo.Family_combo
+    def hide_privacy_protected_families(self, families):
+        ret_families = []
+        for fam in families:
+            if ((not fam.father or fam.father.too_new) and
+               (not fam.mother or fam.mother.too_new)):
+                continue   # do not include this family
+            ret_families.append(fam)
+            children2 = [c for c in fam.children if not c.too_new]
+            fam.num_hidden_children = len(fam.children) - len(children2)
+            fam.children = children2
+        return ret_families
 
 #     @staticmethod       
 #     def get_families(o_context, opt='father', limit=100): #see models.gen.family_combo.Family_combo

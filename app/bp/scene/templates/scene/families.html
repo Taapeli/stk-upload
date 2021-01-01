@@ -6,6 +6,14 @@
 {% import '/scene/macros.html' as macro with context %}
 <script src="/static/infobox.js"></script>
 <style>
+label { display: inline-block; width: 66pt; }
+.search-button {
+	width: 25pt;
+	height: 25pt;
+	border-radius: 7pt;
+	border: 1pt solid darkgray;
+}
+
 div.man-man, div.wife-wife { 
     border-left: solid 3px blue; 
     padding-left: 3px;
@@ -19,8 +27,9 @@ div.wife-man a.inlink, div.man-wife a.inlink {
 th, td {width:30%;}
 th span.man-man, th span.wife-wife { color: #020299;}
 </style>
+
 {% set cnt = families|count %}
-{% set next = user_context.scope %}
+{% set name1 = user_context.first|replace("#", " ") %}
 
 <div id="startdiv">
 	<h2>{{ _('List of Families') }}</h2>
@@ -34,9 +43,14 @@ th span.man-man, th span.wife-wife { color: #020299;}
             <div class="flex-container">
                <div>
                    <p>{{ _('Displaying %(num)s distinct families', num=cnt) }}
-                       {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
-                       {% else %}{{ _('from begin') }}.
-                       {% endif %}
+	{% if user_context.at_start() %}
+	                   {{ _('from begin') }}
+	{% else %}         {{ _('starting <tt>%(name)s</tt>', name=name1) }}
+	{% endif %}
+	{% if user_context.order == 'man' -%}
+					   {{ _("ordered by man's name") }}.
+	{% else %}         {{ _("ordered by wife's name") }}.
+	{% endif %}
                    </p>
 	           </div>
 	           <div class="SearchBox">
@@ -48,7 +62,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
 	                    <input type="text" name="fw" size="8" 
 	                     title="{{ _('Starting letters of surname') }}" 
 	                     placeholder="{{ _('Surname') }}">
-	                    <input type="submit" value=" > ">
+	                    <input type="submit" value="&gt;" class="search-button">
 	                 </fieldset>
 	               </form>
 
@@ -60,7 +74,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
 	                    <input type="text" name="fw" size="8" 
 	                     title="{{ _('Starting letters of surname') }}" 
 	                     placeholder="{{ _('Surname') }}">
-	                    <input type="submit" value=" > ">
+	                    <input type="submit" value="&gt;" class="search-button">
 	                 </fieldset>
 	               </form>
 	           </div>
@@ -78,45 +92,20 @@ th span.man-man, th span.wife-wife { color: #020299;}
         </div>
 
 {% if cnt %}
-        {% set last = families|last %}
+    {% set last = families|last %}
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
-                <li>{% if last %}
-                     <a href="/scene/families?o=father&fw=%20"
-                        title="{{ _("Father") }} {{ _('first page') }}" 
-                        class="navlink">{{ _("Father") }}: |&lt;</a>
-                {% else %}<span class="navlink">|&lt;</span>
-                {% endif %}</li>
-                <li><span class="navlink" title="edellinen sivu"
-                          style="cursor:not-allowed"> &lt; </span></li>
-             	{% if next[1].startswith('>') %}
-	                <li><span class="navlink" title="{{ _('no next page') }}"
-	                          style="cursor:not-allowed"> &gt; </span></li>
-	            {% else %}
-	                <li><a href="/scene/families?o=father&{{ {'fw':next[1]} | urlencode }}"
-	                	title="seuraava sivu" class="navlink"> &gt; </a></li>
-            	{% endif %}
- 
-                <li>{% if last %}
-                     <a href="/scene/families?o=mother&fw=%20"
-                        title="{{ _("Mother") }} {{ _('first page') }}"
-                        class="navlink">{{ _("Mother") }}: |&lt;</a>
-                {% else %}<span class="navlink">|&lt;</span>
-                {% endif %}</li>
-                <li><span class="navlink" title="edellinen sivu"
-                          style="cursor:not-allowed"> &lt; </span></li>
-            	{% if next[1].startswith('>') %}
-	                <li><span class="navlink" title="{{ _('no next page') }}"
-	                          style="cursor:not-allowed"> &gt; </span></li>
-	            {% else %}
-	                <li><a href="/scene/families?o=mother&{{ {'fw':next[1]} | urlencode }}"
-	                	title="seuraava sivu" class="navlink"> &gt; </a></li>
-            	{% endif %}
+				<li class="title">{{ _("Father") }}</li>
+				{{ macro.buttons_bw(user_context, "/scene/families?o=father") }}
+				{{ macro.buttons_fw(user_context, "/scene/families?o=father") }}
+
+				<li class="title">{{ _("Mother") }}</li>
+				{{ macro.buttons_bw(user_context, "/scene/families?o=mother") }}
+				{{ macro.buttons_fw(user_context, "/scene/families?o=mother") }}
             </ul>
         </div>
 {% endif %}
 
-{% if cnt %}
     <table class="IndividualList">
         <tr><th>{{ _("Family") }}</th>
             <th><span class="man-{{user_context.order}}">{{ _("Man") }}</span> / 
@@ -124,89 +113,61 @@ th span.man-man, th span.wife-wife { color: #020299;}
             </th>
             <th>{{ _("Children") }}</th>
         </tr>
+
     {% for f in families %}
         <tr>
             <td class="ColumnFamily">
                 <a href="/scene/family?uuid={{f.uuid}}" class="inlink"
                    title="{{ _('Go to family page') }}">&rarr; {{f.rel_type|transl('marr')}}</a>
-                {% if f.marriage_place %}{{f.marriage_place}}{% endif %}
-                {% if f.dates %}{{f.dates}}{% endif %}
+        {% if f.marriage_place %} {{f.marriage_place}} {% endif -%}
+        {% if f.dates %} {{f.dates}} {% endif -%}
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
 
             <td class="ColumnSpouse">
                 <div class="man-{{user_context.order}}">&#9794;
-            {% if f.father.uuid %}
+        {% if f.father.uuid %}
 				{{ macro.person_names_anon(f.father, f.father.names[0:1]) }}
-            {% endif -%}
+        {% endif -%}
                 </div>
                 <div class="wife-{{user_context.order}}">&#9792;
-            {% if f.mother.uuid %}
+        {% if f.mother.uuid %}
 				{{ macro.person_names_anon(f.mother, f.mother.names[0:1]) }}
-            {% endif -%}
+        {% endif -%}
                 </div>
             </td>
 
-            <td><small>{% if f.no_of_children %}
-                {% if f.num_hidden_children > 0 %}
+            <td><small>
+        {% if f.no_of_children %}
+            {% if f.num_hidden_children > 0 %}
                 {{ ngettext('%(num)d child', '%(num)d children', f.no_of_children) }}
                 ({{ ngettext('hidden', '%(num)d hidden', f.num_hidden_children) }}):
-                {% else %}
+            {% else %}
                 {{ ngettext('%(num)d child', '%(num)d children', f.no_of_children) }}:
-                {% endif %}
             {% endif %}
-            {% for c in f.children %}<br>
+        {% endif %}
+        {% for c in f.children %}<br>
                  {{ macro.person_name_by_sortname(c) }}
-            {% endfor %}</small></td>
+        {% endfor %}</small></td>
         </tr>
     {% endfor %}
 
-    {% if next[1].startswith('>') %}
-        <tr><td colspan="4" id="lastitem_badge">
-                <i>{{ _('The last item found') }}</i>
-            </td>
-        </tr>
-    {% endif %}
+	{% if cnt == 0 %}
+		<tr><td colspan="4">
+				<p>{{ _('No one found with search keys starting "%(name)s"', name=name1) }}.</p>
+				{% if name1 %}<p>&nbsp;&#9656; <a href="?fw=%20" 
+					title="{{ _('first page') }}">{{ _("Go to the first person") }}</a></p>
+				{% endif %}
+			</td>
+		</tr>
+	{% elif user_context.at_end() %}
+		<tr><td colspan="4" id="lastitem_badge"><i>{{ _('The last item found') }}</i>
+			</td>
+		</tr>
+	{% endif %}
     </table>
 
-    <div id="alphanav">{% set alpha = "¤" %}
-        <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
-            <li>{% if last %}
-                 <a href="/scene/families?o=father&fw=%20" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}: |&lt;</a>
-            {% else %}<span class="navlink">|&lt;</span>
-            {% endif %}</li>
-            <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-            {% if next[1].startswith('>') %}
-                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
-            {% else %}
-                <li><a href="/scene/families?o=father&{{ {'fw':next[1]} | urlencode }}"
-                    title="seuraava sivu" class="navlink"> &gt; </a></li>
-            {% endif %}
-
-            <li>{% if last %}
-                 <a href="/scene/families?o=mother&fw=%20" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}: |&lt;</a>
-            {% else %}<span class="navlink">|&lt;</span>
-            {% endif %}</li>
-            <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-            {% if next[1].startswith('>') %}
-                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
-            {% else %}
-                <li><a href="/scene/families?o=mother&{{ {'fw':next[1]} | urlencode }}"
-                    title="seuraava sivu" class="navlink"> &gt; </a></li>
-            {% endif %}
-        </ul>
-    </div>
-
-{% else %}
-    <div class="NotFound">
-        <p>{{ _('No one found with search keys starting "%(name)s"', name=next[0]) }}.</p>
-        {% if next[0] %}<p>&nbsp;&#9656; <a href="?fw=%20" 
-            title="{{ _('first page') }}">{{ _("Go to the first person") }}</a></p>
-        {% endif %}
-    </div>
-{% endif %}
-
-</div>
+	</div>
 
 {% endblock %}

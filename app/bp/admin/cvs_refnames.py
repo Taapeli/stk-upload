@@ -9,7 +9,8 @@ from flask_babelex import _
 
 from models.gen.refname import Refname, REFTYPES
 #from models.gen.user import User
-from models.gen.person import Person
+from bl.person import Person
+#from models.gen.person import Person
 import shareds
 
 def load_refnames(pathname):

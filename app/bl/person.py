@@ -26,12 +26,18 @@ Created on 6.10.2020
 '''
 from flask_babelex import _
 from datetime import datetime
+from sys import stderr
+import traceback
 import logging 
 logger = logging.getLogger('stkserver')
+import shareds
 
 from bl.base import NodeObject, Status
-from pe.db_reader import DBreader
+from bl.media import MediaBl
+from pe.db_reader import DbReader
+from pe.neo4j.cypher.cy_person import CypherPerson
 
+from models.gen.note import Note
 from models.source_citation_reader import get_citations_js
 
 # Privacy rule: how many years after death
@@ -155,11 +161,11 @@ class Person(NodeObject):
         return obj
 
 
-class PersonReader(DBreader):
+class PersonReader(DbReader):
     '''
         Data reading class for Person objects with associated data.
 
-        - Uses pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
+        - Uses pe.db_reader.DbReader.__init__(self, readservice, u_context) 
           to define the database driver and user context
 
         - Returns a Result object.
@@ -188,24 +194,27 @@ class PersonReader(DBreader):
                 y2, y1 = [y1, y2]
             args['years'] = [y1, y2]
 
+#         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
+#                           'years':args.get('years')}
+
         context = self.user_context
         args['use_user'] = self.use_user
-        args['fw'] = context.next_name_fw()
+        args['fw'] = context.first  # From here forward
         args['limit'] = context.count
         
-        result = self.dbdriver.dr_get_person_list(args)
+        res = self.readservice.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
 
-        status = result.get('status')
+        status = res.get('status')
         if status == Status.ERROR:
-            msg = result.get("statustext")
+            msg = res.get("statustext")
             logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
             print(f'bl.person.PersonReader.get_person_search: {msg}')
             return {'items':[], 'status':status,
                     'statustext': _('No persons found')}
 
         # Update the page scope according to items really found
-        persons = result['items']
+        persons = res['items']
         if len(persons) > 0:
             context.update_session_scope('person_scope', 
                                           persons[0].sortname, persons[-1].sortname, 
@@ -228,16 +237,16 @@ class PersonReader(DBreader):
         context = self.user_context
         res_dict = {}
         args = {'use_user': self.use_user,
-                'fw': context.next_name_fw(),
-                'limit':context.count}
-        result = self.dbdriver.dr_get_person_list(args)
+                'fw': context.first,  # From here forward
+               'limit':context.count}
+        res = self.readservice.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
-        if (result['status'] != Status.OK):
-            return {'items':None, 'status':result['status'], 
+        if Status.has_failed(res):
+            return {'items':None, 'status':res['status'], 
                     'statustext': _('No persons found')}
 
         # Update the page scope according to items really found
-        persons = result['items']
+        persons = res['items']
         if len(persons) > 0:
             context.update_session_scope('person_scope', 
                                           persons[0].sortname, persons[-1].sortname, 
@@ -266,23 +275,23 @@ class PersonReader(DBreader):
             
             --> Origin from models.gen.person_combo.Person_combo.get_my_person
         '''
-        result = self.dbdriver.dr_get_person_by_uuid(uuid)
+        res = self.readservice.dr_get_person_by_uuid(uuid)
         # {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
 
-        if (result['status'] != Status.OK):
-            return {'item':None, 'status':result['status'], 
+        if Status.has_failed(res):
+            return {'item':None, 'status':res['status'], 
                     'statustext': _('The person is not accessible')}
-        person = result.get('item')
+        person = res.get('item')
 
 #Todo: scheck privacy
 #         if use_common and self.person.too_new: 
 #             return None, None, None
 
-        # The original researcher data in result['root']:
+        # The original researcher data in res['root']:
         # - root_type    which kind of owner link points to this object
         # - usernode     the (original) owner of this object
         # - bid          Batch id, if any
-        root = result.get('root')
+        root = res.get('root')
         root_type = root.get('root_type')
         #node = root['usernode']
         #nodeuser = node.get('user', "")
@@ -382,42 +391,39 @@ class PersonReader(DBreader):
         once only.
         '''
         # Objects by uniq_id, referred from current person
-        self.dbdriver.objs = {}
+        self.readservice.objs = {}
 
         # 1. Read Person p, if not denied
-        result = self.dbdriver.dr_get_person_by_uuid(uuid, user=self.use_user)
-        # result = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
-        status = result.get('status')
-        if  status != Status.OK:
+        res = self.readservice.dr_get_person_by_uuid(uuid, user=self.use_user)
+        # res = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
+        if Status.has_failed(res):
             # Not found, not allowd (person.too_new) or error
-            return result
-        person = result.get('item')
-        root = result.get('root')   # Batch or Audit data
+            return res
+        person = res.get('item')
+        root = res.get('root')   # Info about linked Batch or Audit node
 
         # 2. (p:Person) --> (x:Name|Event)
-        #person.read_person_names_events()
-        result = self.dbdriver.dr_get_person_names_events(person.uniq_id)
+        res = self.readservice.dr_get_person_names_events(person.uniq_id)
         # result {'names', 'events', 'cause_of_death', 'status'}
-        if  status == Status.OK:
-            person.names = result.get('names')
-            person.events = result.get('events')
-            person.cause_of_death = result.get('cause_of_death')
-        else:
+        if  Status.has_failed(res):
             print(f'get_person_data: No names or events for person {uuid}')
+        else:
+            person.names = res.get('names')
+            person.events = res.get('events')
+            person.cause_of_death = res.get('cause_of_death')
         # 3. (p:Person) <-- (f:Family)
         #    for f
         #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
         #      (fp)--> (me:Event{type:Birth})
         #      (f) --> (fe:Event)
-        #person.read_person_families()
-        result = self.dbdriver.dr_get_person_families(person.uniq_id)
-        # result {'families_as_child', 'families_as_parent', 'family_events', 'status'}
-        if  status == Status.OK:
-            person.families_as_child = result.get('families_as_child')
-            person.families_as_parent = result.get('families_as_parent')
-            person.events = person.events + result.get('family_events')
-        else:
+        res = self.readservice.dr_get_person_families(person.uniq_id)
+        # res {'families_as_child', 'families_as_parent', 'family_events', 'status'}
+        if  Status.has_failed(res):
             print(f'get_person_data: No families for person {uuid}')
+        else:
+            person.families_as_child = res.get('families_as_child')
+            person.families_as_parent = res.get('families_as_parent')
+            person.events = person.events + res.get('family_events')
 
         if not self.user_context.privacy_ok(person):
             person.remove_privacy_limit_from_families()
@@ -425,42 +431,44 @@ class PersonReader(DBreader):
         #    Sort all Person and family Events by date
         person.events.sort()
 
-#TODO:
+
         # 4. for pl in z:Place, ph
         #      (pl) --> (pn:Place_name)
         #      (pl) --> (pi:Place)
         #      (pi) --> (pin:Place_name)
-        self.dbdriver.dr_get_object_places(person)
+        ret = self.readservice.dr_get_object_places(person)
+        if  Status.has_failed(res):
+            print(f'get_person_data: Event places read error: {ret.get("statustext")}')
      
         # 5. Read their connected nodes z: Citations, Notes, Medias
         #    for y in p, x, fe, z, s, r
         #        (y) --> (z:Citation|Note|Media)
         new_objs = [-1]
-        self.dbdriver.citations = {}
+        self.readservice.citations = {}
         while len(new_objs) > 0:
-            new_objs = self.dbdriver.dr_get_object_citation_note_media(person, new_objs)
+            new_objs = self.readservice.dr_get_object_citation_note_media(person, new_objs)
 
         # Calculate the average confidence of the sources
-        if len(self.dbdriver.citations) > 0:
+        if len(self.readservice.citations) > 0:
             summa = 0
-            for cita in self.dbdriver.citations.values():
+            for cita in self.readservice.citations.values():
                 summa += int(cita.confidence)
                  
-            aver = summa / len(self.dbdriver.citations)
+            aver = summa / len(self.readservice.citations)
             person.confidence = "%0.1f" % aver # string with one decimal
      
         # 6. Read Sources s and Repositories r for all Citations
         #    for c in z:Citation
         #        (c) --> (s:Source) --> (r:Repository)
-        self.dbdriver.dr_get_object_sources_repositories()
+        self.readservice.dr_get_object_sources_repositories()
     
         # Create Javascript code to create source/citation list
-        jscode = get_citations_js(self.dbdriver.objs)
+        jscode = get_citations_js(self.readservice.objs)
     
         # Return Person with included objects,  and javascript code to create
         # Citations, Sources and Repositories with their Notes
         return {'person': person,
-                'objs': self.dbdriver.objs,
+                'objs': self.readservice.objs,
                 'jscode': jscode,
                 'root': root,
                 'status': Status.OK}
@@ -488,40 +496,194 @@ class PersonBl(Person):
         #self.media_ref = []             # uniq_ids of models.gen.media.Media
                                         # (previous self.objref_hlink[])
 
-        # Other variables
-        #self.role = ''                  # Role in Family
-        #self.families_as_child = []     # - Propably one only
-        #self.families_as_parent =[]
-        #self.parentin_hlink = []
+
+    def save(self, tx, **kwargs):   # batch_id):
+        """ Saves the Person object and possibly the Names, Events ja Citations.
+
+            On return, the self.uniq_id is set
+            
+            @todo: Remove those referenced person names, which are not among
+                   new names (:Person) --> (:Name) 
+        """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
+        self.uuid = self.newUuid()
+        # Save the Person node under UserProfile; all attributes are replaced
+        p_attr = {}
+        try:
+            p_attr = {
+                "uuid": self.uuid,
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "priv": self.priv,
+                "sex": self.sex,
+                "confidence":self.confidence,
+                "sortname":self.sortname
+            }
+            if self.dates:
+                p_attr.update(self.dates.for_db())
+
+            result = tx.run(CypherPerson.create_to_batch, 
+                            batch_id=batch_id, p_attr=p_attr) #, date=today)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Persons {} - {}, attr={}".format(self.id, ids, p_attr))
+                # print("Person {} ".format(self.uniq_id))
+            if self.uniq_id == None:
+                print("iWarning got no uniq_id for Person {}".format(p_attr))
+
+        except Exception as err:
+            logger.error(f"Person_gramps.save: {err} in Person {self.id} {p_attr}")
+            #print("iError: Person_gramps.save: {0} attr={1}".format(err, p_attr), file=stderr)
+
+        # Save Name nodes under the Person node
+        for name in self.names:
+            name.save(tx, parent_id=self.uniq_id)
+
+        # Save web urls as Note nodes connected under the Person
+        if self.notes:
+            Note.save_note_list(tx, self)
+
+        ''' Connect to each Event loaded from Gramps '''
+        try:
+            #for i in range(len(self.eventref_hlink)):
+            for handle_role in self.event_handle_roles:
+                # a tuple (event_handle, role)
+                tx.run(CypherPerson.link_event, 
+                       p_handle=self.handle, 
+                       e_handle=handle_role[0], 
+                       role=handle_role[1])
+        except Exception as err:
+            logger.error(f"Person_gramps.save: {err} in linking Event {self.handle} -> {self.handle_role}")
+            #print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
+
+        # Make relations to the Media nodes and it's Note and Citation references
+        MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
+
+
+        # The relations to the Family node will be created in Family.save(),
+        # because the Family object is not yet created
+
+        # Make relations to the Note nodes
+        try:
+            for handle in self.note_handles:
+                tx.run(CypherPerson.link_note,
+                       p_handle=self.handle, n_handle=handle)
+        except Exception as err:
+            logger.error(f"Person_gramps.save: {err} in linking Notes {self.handle} -> {handle}")
+
+        # Make relations to the Citation nodes
+        try:
+            for handle in self.citation_handles:
+                tx.run(CypherPerson.link_citation,
+                       p_handle=self.handle, c_handle=handle)
+        except Exception as err:
+            logger.error(f"Person_gramps.save: {err} in linking Citations {self.handle} -> {handle}")
+        return
+
 
     @staticmethod
-    def set_sortname(tx, uniq_id, namenode):
-        """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
-            using given default Name node
+    def update_person_confidences(person_ids:list):
+        """ Sets a quality rate for given list of Person.uniq_ids.
+
+            Person.confidence is calculated as a mean of confidences in
+            all Citations used for Person's Events.
         """
-        raise(NotImplementedError, "TODO: bl.person.PersonBl.set_sortname")
-#         key = namenode.key_surname()
-#         return tx.run(Cypher_person.set_sortname, id=uniq_id, key=key)
+        counter = 0
+        ds = shareds.datastore.dataservice
+        for uniq_id in person_ids:
+            res = ds._update_person_confidences(uniq_id)
+            # returns {confidence, status, statustext}
+            stat = res.get('status')
+            if stat == Status.UPDATED:
+                counter += 1
+            elif stat != Status.OK:
+                # Update failed
+                return {'status': stat, 'statustext':res.get('statustext')}
+
+        return {'status':Status.OK, 'count':counter}
 
     @staticmethod
-    def get_confidence (uniq_id=None):
-        """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
+    def set_person_name_properties(uniq_id=None, ops=['refname', 'sortname']):
+        """ Set Refnames to all Persons or one Person with given uniq_id; 
+            also sets Person.sortname using the default name
+    
+            Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
+                        bp.admin.routes.set_all_person_refnames
         """
-        raise(NotImplementedError, "TODO: bl.person.PersonBl.get_confidence")
+        sortname_count = 0
+        refname_count = 0
+        do_refnames = 'refname' in ops
+        do_sortname = 'sortname' in ops
+    
+        # Get each Name object (with person_uid) 
+        ds = shareds.datastore.dataservice
+        names = ds._get_personnames(uniq_id)
+
+        if do_refnames:
+            for name in names:
+                # Create links and nodes from given person: (:Person) --> (r:Refname)
+                res = ds._build_refnames(name.person_uid, name)
+                if Status.has_failed(res): return res
+                refname_count += res.get('count', 0)
+        if do_sortname:
+            for name in names:
+                if name.order == 0:
+                    # If default name, store sortname key to Person node
+                    sortname = name.key_surname()
+                    ds._set_person_sortname(name.person_uid, sortname)
+                    if Status.has_failed(res): return res
+                    sortname_count += 1
+                    break
+
+        return {'refnames': refname_count, 'sortnames': sortname_count, 
+                'status':Status.OK}
+
+
+#     @staticmethod
+#     def get_confidence (uniq_id=None): --> pe.neo4j.dataservice.Neo4jWriteDriver.dr_get_person_confidences
+#         """ Collect Person confidence from Person and the Event nodes.
+# 
+#             Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
+#         """
+#         raise(NotImplementedError, "TODO: bl.person.PersonBl.get_confidence")
+# 
 #         if uniq_id:
 #             return shareds.driver.session().run(Cypher_person.get_confidence,
 #                                                 id=uniq_id)
-#         else:
-#             return shareds.driver.session().run(Cypher_person.get_confidences_all)
+# #         else:
+# #             return shareds.driver.session().run(Cypher_person.get_confidences_all)
 
+#     def set_confidence (self, tx): 
+#         """ Sets a quality rate to this Person
+#             Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
+#         """
+#         raise(NotImplementedError, "TODO: bl.person.PersonBl.set_confidence")
+# #         return tx.run(Cypher_person.set_confidence,
+# #                       id=self.uniq_id, confidence=self.confidence)
 
-    def set_confidence (self, tx):
-        """ Sets a quality rate to this Person
-            Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
+    @staticmethod
+    def estimate_lifetimes(uids=[]): # <-- 
+        """ Sets estimated lifetimes to Person.dates for given person.uniq_ids.
+ 
+            Stores dates as Person properties: datetype, date1, and date2
+ 
+            :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+ 
+            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
+            and models.dataupdater.set_estimated_dates
         """
-        raise(NotImplementedError, "TODO: bl.person.PersonBl.set_confidence")
-#         return tx.run(Cypher_person.set_confidence,
-#                       id=self.uniq_id, confidence=self.confidence)
+        ds = shareds.datastore.dataservice
+        res = ds._set_people_lifetime_estimates(uids)
+        print(f"Estimated lifetime for {res['count']} persons")
+        return res
+
 
     def remove_privacy_limit_from_families(self):
         ''' Clear privacy limitations from self.person's families.

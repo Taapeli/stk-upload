@@ -472,18 +472,21 @@ div#alphanav ul {
 }
 div#alphanav ul li {
     float: left;
-    /* font-size: larger; / JMä */
+    margin: 1pt;
     font-weight: bold;
     background-color: #f3f3f3;
 }
-/* div#alphanav ul li:after {
-    content: " |";
-} / JMä */
-div#alphanav ul li a {
+div#alphanav ul li.title {
+	padding: 6pt;
+	margin-left: 2pt;
+}
+div#alphanav ul li a, div#alphanav ul li span {
     display: block;
     padding: 4px 8px;
     line-height: 100%;
     float: left;
+    margin: 2pt 0;
+	border-radius: 9pt;
 }
 div#alphanav ul li a:hover {
     text-decoration: none;

@@ -24,9 +24,12 @@ import logging
 logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
+#import shareds
 from .base import NodeObject, Status
+from bl.media import MediaBl
 #from .place import PlaceReader
-from pe.db_reader import DBreader
+from pe.db_reader import DbReader
+from pe.neo4j.cypher.cy_event import CypherEvent
 
 from models.gen.dates import DateRange
 #from models.gen.person_combo import Person_combo, Name
@@ -50,11 +53,10 @@ class Event(NodeObject):
 #                 attr_type          str lisätiedon tyyppi
 #                 attr_value         str lisätiedon arvo
             For gramps_loader:
-                note_handles[]     str lisätiedon handle (ent. noteref_hlink)
+                note_handles[]     str lisätiedon handle (ent. note_handles)
             Planned from gramps_loader:
                 place_handles[]    str paikan handle (ent. place_hlink)
-                citation_handles[] str viittauksen handle (ent. citationref_hlink)
-                #place_hlink       str paikan handle
+                citation_handles[] str viittauksen handle (ent. citation_handles)
                 #citation_ref      str viittauksen handle
                 #objref_hlink      str median handle
         Previous Event_combo properties:
@@ -103,11 +105,11 @@ class Event(NodeObject):
         return obj
 
 
-class EventReader(DBreader):
+class EventReader(DbReader):
     '''
         Data reading class for Event objects with associated data.
 
-        - Use pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
+        - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
           to define the database driver and user context
 
         - Returns a Result object.
@@ -123,41 +125,45 @@ class EventReader(DBreader):
         '''
         statustext = ''
         res_dict = {}
-        result = self.dbdriver.dr_get_event_by_uuid(self.use_user, uuid)
-        if (result['status'] != Status.OK):
-            return {'item':None, 'status':result['status'], 
+        res = self.readservice.dr_get_event_by_uuid(self.use_user, uuid)
+        if Status.has_failed(res):
+            return {'item':None, 'status':res['status'], 
                     'statustext': _('The event is not accessible')}
-        event = result['item']
+        event = res['item']
+        event.note_ref= []
         res_dict['event'] = event
 
         members= []
         if args.get('referees'):
-            result = self.dbdriver.dr_get_event_participants(event.uniq_id)
-            if (result['status'] == Status.ERROR):
-                statustext += _('Participants read error ') + result['statustext']+' '
-            members = result['items']
-            res_dict['members'] = members
+            res = self.readservice.dr_get_event_participants(event.uniq_id)
+            if Status.has_failed(res):
+                statustext += _('Participants read error ') + res['statustext']+' '
+                print(f'bl.event.EventReader.get_event_data: {statustext}')
+            else:
+                members = res['items']
+                res_dict['members'] = members
         places = []
         if args.get('places'):
-            result = self.dbdriver.dr_get_event_place(event.uniq_id)
-            if (result['status'] == Status.ERROR):
-                statustext += _('Place read error ' + result['statustext']+' ')
-            places = result['items']
-            res_dict['places'] = places
+            res = self.readservice.dr_get_event_place(event.uniq_id)
+            if Status.has_failed(res):
+                statustext += _('Place read error ') + res['statustext']+' '
+            else:
+                places = res['items']
+                res_dict['places'] = places
 
         notes = []
         medias = []
         if args.get('notes'):
-            result = self.dbdriver.dr_get_event_notes_medias(event.uniq_id)
-            if (result['status'] == Status.ERROR):
-                statustext += _('Notes read error ' + result['statustext']+' ')
-            notes = result['notes']
-            res_dict['notes'] = notes
-            medias = result['medias']
-            res_dict['medias'] = medias
-
+            res = self.readservice.dr_get_event_notes_medias(event.uniq_id)
+            if Status.has_failed(res):
+                statustext += _('Notes read error ') + res['statustext']+' '
+            else:
+                notes = res['notes']
+                res_dict['notes'] = notes
+                medias = res['medias']
+                res_dict['medias'] = medias
         
-        res_dict['status'] = result['status']
+        res_dict['status'] = res['status']
         res_dict['statustext'] = f'Got {len(members)} participants, {len(notes)} notes'
         return res_dict
 
@@ -175,7 +181,7 @@ class EventBl(Event):
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
-                noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
+                note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self):         #, eid='', desc='', handle=''):
@@ -185,12 +191,91 @@ class EventBl(Event):
         Event.__init__(self)
         self.role = ''          # role of event from EVENT relation, if available
         # Lists of uniq_ids:
-        self.note_ref = []
+        self.note_handles = []
         self.citation_ref = []
         self.place_ref = []
         self.media_ref = []
+        self.note_ref = []
         
         self.citations = []     # For creating display sets
+#       self.notes = []         # TODO: Note objects <- note_handles[]
         self.place = None       # Place node, if included
         self.person = None      # Persons names connected; for creating display
 
+
+    def save(self, tx, **kwargs):
+        """ Saves event to database:
+            - Creates a new db node for this Event
+            - Sets self.uniq_id
+
+            - links to existing Place, Note, Citation, Media objects
+            - Does not link it from UserProfile or Person
+        """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Event_gramps.save needs batch_id for {self.id}")
+
+        #today = str(datetime.date.today())
+        self.uuid = self.newUuid()
+        e_attr = {
+            "uuid": self.uuid,
+            "handle": self.handle,
+            "change": self.change, 
+            "id": self.id, 
+            "type": self.type,
+            "description": self.description}
+        if self.attr:
+            # Convert 'attr' dict to list for db
+            a = []
+            for key, value in self.attr.items(): 
+                a = a + [key, value]
+                e_attr.update({'attr': a})
+        if self.dates:
+            e_attr.update(self.dates.for_db())
+        try:
+            result = tx.run(CypherEvent.create_to_batch,
+                            batch_id=batch_id, e_attr=e_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Events {} - {}, attr={}".format(self.id, ids, e_attr))
+        except Exception as err:
+            #traceback.print_exc()
+            print(f"iError: Event_save: {err} attr={e_attr}") #, file=stderr)
+            raise RuntimeError(f"Could not save Event {self.id}")
+
+        try:
+            # Make relation to the Place node
+            for pl_handle in self.place_handles:
+                tx.run(CypherEvent.link_place, 
+                       handle=self.handle, place_handle=pl_handle)
+        except Exception as err:
+            print("iError: Event_link_place: {0}".format(err)) #, file=stderr)
+
+        try:
+            # Make relations to the Note nodes
+            if self.note_handles:
+                result = tx.run(CypherEvent.link_notes, handle=self.handle,
+                                note_handles=self.note_handles)
+                _cnt = result.single()["cnt"]
+                #print(f"##Luotiin {cnt} Note-yhteyttä: {self.id}->{self.note_handles}")
+        except Exception as err:
+            logger.error(f"{err}: in creating Note links: {self.id}->{self.note_handles}")
+            #print("iError: Event_link_notes: {0}".format(err), file=stderr)
+
+        try:
+            # Make relations to the Citation nodes
+            if self.citation_handles: #  citation_handles != '':
+                tx.run(CypherEvent.link_citations,
+                       handle=self.handle, citation_handles=self.citation_handles)
+        except Exception as err:
+            print("iError: Event_link_citations: {0}".format(err)) #, file=stderr)
+
+        # Make relations to the Media nodes and their Note and Citation references
+        if self.media_refs:
+            MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
+            
+        return

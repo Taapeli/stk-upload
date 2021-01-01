@@ -18,21 +18,21 @@ logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
 from flask_security import login_required, roles_accepted, roles_required, current_user
-from flask_babelex import _, Domain
+from flask_babelex import _ #, Domain
 
 import shareds
 from setups import User
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
 
-from .cvs_refnames import load_refnames
+#from .cvs_refnames import load_refnames
 from .forms import UpdateUserForm
 from . import bp
 from . import uploads
 from .. gedcom.models import gedcom_utils
 from .. import gedcom
 
-from models import dbutil, dataupdater, loadfile, datareader, util
+from models import util, dataupdater #, dbutil, loadfile, datareader
 from models import email
 from models import syslog 
 
@@ -97,7 +97,7 @@ def start_initiate():
 @roles_accepted('research', 'admin', 'audit')
 def clear_empty_batches():
     """ Show or clear unused batches. """
-    from models.gen.batch_audit import Batch
+    from bl.batch import Batch
 
     user=None
     clear=False
@@ -132,7 +132,7 @@ def estimate_dates(uid=None):
         uids=list(uid)
     else:
         uids=[]
-    message = dataupdater.set_estimated_person_dates(uids)
+    message = dataupdater.set_person_estimated_dates(uids)
     ext = _("estimated lifetime")
     return render_template("/talletettu.html", text=message, info=ext)
 
@@ -160,12 +160,15 @@ def list_users():
 @login_required
 @roles_accepted('admin', 'master')
 def update_user(username):
+    ''' A User is created or approved or ...
+    '''
     #d = Domain("translations/sv/LC_MESSAGES")
     #s = d.gettext("Return")
     #print("s:",s)
 
     form = UpdateUserForm()
     if form.validate_on_submit(): 
+        # Create a setups.User object
         user = User(id = form.id.data,
                 email = form.email.data,
                 username = form.username.data,
@@ -178,7 +181,7 @@ def update_user(username):
                 last_login_ip = form.last_login_ip.data,                    
                 current_login_at = form.current_login_at.data,  
                 current_login_ip = form.current_login_ip.data,
-                login_count = form.login_count.data)        
+                login_count = form.login_count.data)
         updated_user = UserAdmin.update_user(user)
         if updated_user.username == current_user.username:
             session['lang'] = form.language.data
@@ -197,8 +200,10 @@ def update_user(username):
             email.email_from_admin(subject, msg, form.email.data)        
         logging.info(f"-> bp.admin.routes.update_user u={form.email.data}")
         flash(_("User updated"))
+        # Return to same page
         return redirect(url_for("admin.update_user", username=updated_user.username))
 
+    # Fill form fields by updated values
     user = shareds.user_datastore.get_user(username) 
     form.id.data = user.id  
     form.email.data = user.email
@@ -214,6 +219,7 @@ def update_user(username):
     form.current_login_ip.data = user.current_login_ip
     form.login_count.data = user.login_count
         
+    # Return to same page
     return render_template("/admin/update_user.html", username=user.username, form=form)  
 
 @bp.route('/admin/list_uploads/<username>', methods=['GET'])
@@ -250,9 +256,9 @@ def list_uploads_all():
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
 @login_required
 @roles_accepted('admin', 'audit')
-def start_load_to_neo4j(username,xmlname):
-    uploads.initiate_background_load_to_neo4j(username,xmlname)
-    logger.info(f'-> bp.admin.routes.start_load_to_neo4j u={username} f="{xmlname}"')
+def start_load_to_stkbase(username,xmlname):
+    uploads.initiate_background_load_to_stkbase(username,xmlname)
+    logger.info(f'-> bp.admin.routes.start_load_to_stkbase u={username} f="{xmlname}"')
     flash(_('Data import from %(i)s to database has been started.', i=xmlname), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 
@@ -302,6 +308,7 @@ def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
     logger.info(f'-> bp.admin.routes.xml_delete f="{xmlfile}"')
+    #TODO: Return to list_uploads_all, if called from there
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------
@@ -467,7 +474,7 @@ def fetch_users():
 @roles_accepted('admin')
 def fetch_batches():
 
-    from models.gen.batch_audit import Batch
+    from bl.batch import Batch
 
     batch_list = list(Batch.get_batches())
     for b in batch_list:

@@ -58,4 +58,33 @@ RETURN  r.role AS role, p, n AS name
 #     WHERE ID(e) = $uid
 # RETURN note, properties(rn) AS rel"""
 
+
+# --- Save to Batch
+
+    #class models.cypher_gramps.Cypher_event_w_handle(): 
+
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
+MERGE (b) -[r:OWNS]-> (e:Event {handle: $e_attr.handle})
+    SET e = $e_attr
+RETURN ID(e) as uniq_id"""
+
+    link_place = """
+MATCH (n:Event) WHERE n.handle=$handle
+MATCH (m:Place) WHERE m.handle=$place_handle
+MERGE (n)-[r:PLACE]->(m)"""
+
+    link_notes = """
+MATCH (n:Note)  WHERE n.handle IN $note_handles
+WITH n
+    MATCH (e:Event)  WHERE e.handle=$handle
+    CREATE (e) -[r:NOTE]-> (n)
+RETURN count(r) AS cnt"""
+
+    link_citations = """
+match (c:Citation) where c.handle in $citation_handles
+with c
+    match (e:Event)  where e.handle=$handle
+    merge (e) -[r:CITATION]-> (c)"""
+
     

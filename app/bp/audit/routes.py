@@ -8,11 +8,9 @@ from . import bp
 import time
 
 import logging
-from bp.admin.cvs_refnames import load_refnames
-from models import dataupdater
+#from models import dataupdater
 from io import StringIO, BytesIO
 import csv
-from models.gen.person import Person
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for #, flash, send_from_directory, session, jsonify
@@ -21,7 +19,11 @@ from flask_security import login_required, roles_accepted, current_user
 #from flask_babelex import _
 
 import shareds
-from models.gen.batch_audit import Batch, Audit
+#from bl.batch_audit import Batch, Audit
+from bl.audit import Audit
+from bl.batch import Batch
+from bl.person import Person, PersonBl
+from bp.admin.cvs_refnames import load_refnames
 from .models.batch_merge import Batch_merge
 #from .models.audition import Audition
 
@@ -121,7 +123,7 @@ def refnames():
 def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
-    (refname_count, _sortname_count) = dataupdater.set_person_name_properties(ops=['refname']) or _('Done')
+    (refname_count, _sortname_count) = PersonBl.set_person_name_properties(ops=['refname']) or _('Done')
     logger.info(f"-> bp.audit.routes.set_all_person_refnames n={refname_count}")
     return render_template("/talletettu.html", uri=dburi, 
                            text=f'Updated {_sortname_count} person sortnames, {refname_count} refnames')

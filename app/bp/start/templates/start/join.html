@@ -27,7 +27,9 @@ ul li {
 ul[id] li {
 	color: black !important;
 }
-
+#GSF_membership {
+	list-style-type: none;
+}
 </style>
 
 
@@ -48,11 +50,9 @@ ul[id] li {
           <input type="hidden" name="username" value="{{ current_user.username }}">
           <input type="hidden" name="email" value="{{ current_user.email }}">
 	      {{ form.hidden_tag() }}
-	      <p>
- 
-	      <label for="name">{{ _("Name") }}</label>{{ current_user.name }}
-	      <label for="username">{{ _("User name") }}</label>{{ current_user.username }}
-	      <label for="email">{{ _("Email address") }}</label>{{ current_user.email }}
+	      <p><label for="name">{{ _("Name") }}</label>{{ current_user.name }}</p>
+	      <p><label for="username">{{ _("User name") }}</label>{{ current_user.username }}</p>
+	      <p><label for="email">{{ _("Email address") }}</label>{{ current_user.email }}</p>
 	      
    	      {{ render_field_with_errors(form.language) }}	
    	      {{ render_field_with_errors(form.GSF_membership) }}	

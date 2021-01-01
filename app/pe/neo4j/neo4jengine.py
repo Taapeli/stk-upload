@@ -32,7 +32,7 @@ class Neo4jEngine():
             connection_timeout = 15,
             encrypted=False)
         self.version = app.config.get('NEO4J_VERSION','3.5')
-        print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connecting (v{self.version})')
+        print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connecting (v>={self.version})')
    
     def close(self):
         self.driver.close()
@@ -57,6 +57,6 @@ class Neo4jEngine():
             else:
                 return result.summary().counters
         except AttributeError as e:
-            logger.error('database.models.neo4jengine.Neo4jEngine.consume_counters:'
+            logger.error('pe.neo4j.neo4jengine.Neo4jEngine.consume_counters:'
                          f'Invalid Neo4j database version, expected {self.version}')
             raise NotImplementedError('Wrong version, expecting Neo4j v'+self.version) from e

@@ -83,19 +83,19 @@ class Neo4jUserDatastore(UserDatastore):
         self.role_model = role_model
 #       self.role_dict = self.get_roles() 
         
-    def _build_user_from_record(self, userRecord):
-        ''' Returns a User class based on a user type node '''
+    def _build_user_from_node(self, userNode):
+        ''' Returns a User class instance based on a user type Neo4j node. 
+        
+            Parameter user.roles has a list of setups.Role objects
+        '''
         try:
-            if userRecord is None:
+            if userNode is None:
                 return None
-            user = self.user_model(**userRecord)
-#            print(userRecord.id)
+            user = self.user_model(**userNode)
+#            print(userNode.id)
             user.id = user.username
             user.roles = self.find_UserRoles(user.email)
             
-#             user.confirmed_at = 0
-#             user.last_login_at = 0
-#             user.current_login_at = 0
             if user.confirmed_at:
                 user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
             if user.last_login_at:    
@@ -108,29 +108,30 @@ class Neo4jUserDatastore(UserDatastore):
             traceback.print_exc()
         
     def put(self, model):
+            ''' Create or update User or Role nodes. '''
             try:
-                if isinstance(model, self.user_model):
-                    userRecord = None
-                    if not model.id:    # New user to insert
-                        with self.driver.session() as session:
-                            userRecord = session.write_transaction(self._put_user, model)
-                    else:               # Old user to update
-                        with self.driver.session() as session:                        
-                            userRecord = session.write_transaction(self._update_user, model) 
-                    return(self._build_user_from_record(userRecord))                                        
-                elif isinstance(model, self.role_model):
-                    return session.write_transaction(self._put_role, model)
+                with self.driver.session() as session:
+                    if isinstance(model, self.user_model):
+                        userNode = None
+                        if not model.id:    # New user to insert
+                            userNode = session.write_transaction(self._put_user, model)
+                        else:               # Old user to update
+                            userNode = session.write_transaction(self._update_user, model) 
+                        return(self._build_user_from_node(userNode))                                        
+                    elif isinstance(model, self.role_model):
+                        return session.write_transaction(self._put_role, model)
             except ServiceUnavailable as ex:
-                logger.error(ex)            
+                logger.error(ex)
                 return None
             except Exception as ex:
-                logger.error(ex)            
+                logger.error(ex)
                 raise
             
     def _put_user (self, tx, user):    # ============ New user ==============
         if len(user.roles) == 0:
             user.roles = ["to_be_approved"] 
         user.is_active = True
+        record = None
         try:
             logger.info('_put_user new %s %s', user.username, user.roles[0:1])                
             result = tx.run(Cypher.user_register,
@@ -148,12 +149,12 @@ class Neo4jUserDatastore(UserDatastore):
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
 
-            node = result.single()
-            if node:
-                userRecord = node['user']
-                UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
-                logger.info(f'User with email address {user.email} registered') 
-                return userRecord
+            record = result.single()
+            if record:
+                userNode = record['user']
+                UserAdmin.user_profile_add(tx, userNode['email'], userNode['username'])
+                logger.info(f'New user with email address {user.email} registered') 
+                return userNode
             else:
                 logger.info(f'put_user: Cannot register user with {user.email}') 
                 raise RuntimeError(f'Could not register user with {user.email}')
@@ -163,11 +164,11 @@ class Neo4jUserDatastore(UserDatastore):
             print("error:",e)
             logging.error(f'Neo4jUserDatastore._put_user: {e.__class__.__name__}, {e}')            
             raise      
-        print("error:",node)
+        print("error:",record)
         
     def _update_user (self, tx, user):         # ============ User update ==============
 
-#         print(user.email, user.confirmed_at)
+        #print(user.email, user.confirmed_at)
 
         confirmtime = int(user.confirmed_at.timestamp() * 1000) if user.confirmed_at else None   
  
@@ -199,7 +200,7 @@ class Neo4jUserDatastore(UserDatastore):
                 last_login_ip = user.last_login_ip,
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
-            userRecord = result.single()['user']
+            userNode = result.single()['user']
 #   Find list of previous user -> role connections
             prev_roles = [rolenode.name for rolenode in self.find_UserRoles(user.email)]
 #   Delete connections that are not in edited connection list            
@@ -216,7 +217,7 @@ class Neo4jUserDatastore(UserDatastore):
                            name = rolename)        
             logger.info('User with email address {} updated'.format(user.email))
 
-            return (userRecord)
+            return (userNode)
         
         except Exception as e:
             logging.error(f'Neo4jUserDatastore._update_user: {e.__class__.__name__}, {e}')            
@@ -240,17 +241,18 @@ class Neo4jUserDatastore(UserDatastore):
     
     def commit(self):
         pass
+# Do not commit, there may be multiple transactions?
 #        self.tx.commit()
  
     
     def get_user(self, id_or_email):
-#        self.email = id_or_email
+        #self.email = id_or_email
         try:
             with self.driver.session() as session:
                 userNode = session.read_transaction(self._getUser, id_or_email)
-                return(self._build_user_from_record(userNode) if userNode else None)
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+                return(self._build_user_from_node(userNode) if userNode else None)
+        except ServiceUnavailable as e:
+            logging.error(f'Neo4jUserDatastore.get_user: {e}')            
             return None
 
     def _getUser (self, tx, pemail):
@@ -269,8 +271,8 @@ class Neo4jUserDatastore(UserDatastore):
                 if userNodes is not None:
                     return [self.user_model(**userNode) for userNode in userNodes] 
                 return []
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.error(f'Neo4jUserDatastore.get_users: {e}')            
             return []                 
 
                                                
@@ -284,17 +286,17 @@ class Neo4jUserDatastore(UserDatastore):
             logging.error(f'Neo4jUserDatastore._getUsers: {e.__class__.__name__}, {e}')            
             raise      
 
-                
+
     def find_user(self, *args, **kwargs):
-#        print('find_user ', args, ' ', kwargs)
+        #print('find_user ', args, ' ', kwargs)
         try:
             with self.driver.session() as session:
                 userNode = session.read_transaction(self._findUser, kwargs['id'])
-                return(self._build_user_from_record(userNode) if userNode else None)
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+                return(self._build_user_from_node(userNode) if userNode else None)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.find_user: {e}')            
             return None
-        
+
     def _findUser (self, tx, arg):
         try:
             result = tx.run(Cypher.id_find, id=arg).single()
@@ -304,15 +306,17 @@ class Neo4jUserDatastore(UserDatastore):
             raise      
 
     def find_UserRoles(self, email):
+        ''' Returns a list of setups.Roles objects.
+        '''
         try:
             with self.driver.session() as session:
                 userRoles = session.read_transaction(self._findUserRoles, email) 
                 return [self.role_model(**roleRecord) for roleRecord in userRoles] 
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.find_UserRoles: {e}')            
             raise
  
-            
+
     def _findUserRoles (self, tx, pemail):
         try:
             records = tx.run(Cypher.user_roles_find, email=pemail)
@@ -331,13 +335,13 @@ class Neo4jUserDatastore(UserDatastore):
                     role.id = str(roleRecord.id)
                     return role
                 return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.find_role: {e}')            
             return None
         
     def _findRole (self, tx, roleName):
         try:
-            return(tx.run(Cypher.role_find, name=roleName).single())
+            return(tx.run(Cypher.role_get, name=roleName).single())
         except Exception as e:
             logging.error(f'Neo4jUserDatastore._findRole: {e.__class__.__name__}, {e}')            
             raise      
@@ -348,19 +352,19 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             with self.driver.session() as session:
                 roleRecord = session.read_transaction(self._getRole, id) 
-#                print ('get_role ', rid, ' ', roleNode)
+                #print ('get_role ', rid, ' ', roleNode)
                 if roleRecord is not None:
                     role =  self.role_model(**roleRecord)
                     role.id = str(roleRecord.id)
                     return role
                 return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.get_role: {e}')            
             return None
                         
     def _getRole (self, tx, rid):
         try:
-            return(tx.run(Cypher.role_get, id=rid).single())
+            return(tx.run(Cypher.role_get, name=rid).single())
         except Exception as e:
             logging.error(f'Neo4jUserDatastore._getRole: {e.__class__.__name__}, {e}')            
             raise      
@@ -371,7 +375,7 @@ class Neo4jUserDatastore(UserDatastore):
             with self.driver.session() as session:
                 roles = {}
                 roleRecords = session.read_transaction(self._getRoles) 
-#                print ('get_role ', rid, ' ', roleNode)
+                #print ('get_role ', rid, ' ', roleNode)
                 if len(roleRecords) > 0:
                     for roleRecord in roleRecords:
                         role =  self.role_model(**roleRecord)
@@ -379,8 +383,8 @@ class Neo4jUserDatastore(UserDatastore):
                         roles[role.name]=role
                     return roles
                 return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logging.debug(f'Neo4jUserDatastore.get_roles: {e}')            
             raise
                                 
     def _getRoles (self, tx):
