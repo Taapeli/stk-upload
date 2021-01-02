@@ -34,24 +34,23 @@ td { padding-right:1em;}
         <div id="summaryarea">
             <table><tbody>
                 <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="Value" colspan="2">{{macro.all_obj_ids(family)}}</td>
+                    <td class="Value" colspan="2" style="height:2.5em">{{macro.all_obj_ids(family)}}</td>
                     <td></td>
                 </tr>
                 <tr><td class="ColumnAttribute">{{ _("Relation") }}</td>
                     <td class="Value"> {{ family.rel_type|transl('marr') }}</td>
                     <td>{{ family.dates }}</td>
                 </tr>
-                <tr><td colspan="3">&nbsp;</td></tr>
-            {% for p in [family.father, family.mother]%}
+            {% for p in [family.father, family.mother] %}
                 {% if p %}
-                <tr><td class="ColumnAttribute">{{p.role|transl('role')|capitalize}}</td>
+                <tr><td class="ColumnAttribute">&nbsp;–&nbsp;{{p.role|transl('role')|capitalize}}</td>
                     <td class="Value">{{ macro.person_anon(p, uuid) }}</td>
                     <td class="Value">
                    {% if p.event_birth and p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
                    {% if p.event_death and p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
                     </td>
                 </tr>
-                {% endif %}
+                {% endif -%}
             {% endfor %}
             </tbody></table>
         </div>

@@ -95,13 +95,18 @@ th span.man-man, th span.wife-wife { color: #020299;}
     {% set last = families|last %}
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
-				<li class="title">{{ _("Father") }}</li>
+				<li class="title">
+	{% if user_context.order == "man" %}▶{% endif %}
+					{{ _("Father") }}</li>
 				{{ macro.buttons_bw(user_context, "/scene/families?o=father") }}
 				{{ macro.buttons_fw(user_context, "/scene/families?o=father") }}
 
-				<li class="title">{{ _("Mother") }}</li>
+				<li class="title">
+	{% if user_context.order == "wife" %}▶{% endif %}
+					{{ _("Mother") }}</li>
 				{{ macro.buttons_bw(user_context, "/scene/families?o=mother") }}
 				{{ macro.buttons_fw(user_context, "/scene/families?o=mother") }}
+				<li class="title">&nbsp;</li>
             </ul>
         </div>
 {% endif %}

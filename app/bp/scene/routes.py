@@ -381,16 +381,10 @@ def json_get_event():
         for m in medias:
             m.href = '/scene/media?uuid=' + m.uuid
 
-        #TODO: The auditor may edit, not user self as here
-        if u_context.user and u_context.context == u_context.choices.OWN:
-            allow_edit = True
-        else:
-            allow_edit = False
-
         res_dict = {"event": event, 'members': members, 
                     'notes':notes, 'places':places, 'medias':medias,
                     'statusText': f'Löytyi {len(members)} tapahtuman osallista',
-                    'allow_edit': allow_edit,
+                    'allow_edit': u_context.allow_edit,
                     'translations':{'myself': _('Self') }
                     }
         response = json.dumps(res_dict, cls=StkEncoder)

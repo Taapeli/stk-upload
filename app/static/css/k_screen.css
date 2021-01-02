@@ -162,7 +162,7 @@ img#logo {
 #changetime { 
 	display: block;
     position: absolute;
-    right: 0;
+    /*right: 0;*/
 	color: gray; font-size: 80%;
 }
 .owner { color: white; 
@@ -478,7 +478,8 @@ div#alphanav ul li {
 }
 div#alphanav ul li.title {
 	padding: 6pt;
-	margin-left: 2pt;
+	margin-left: 8pt;
+	border-left: solid black 1pt;
 }
 div#alphanav ul li a, div#alphanav ul li span {
     display: block;
@@ -581,6 +582,7 @@ td.Value > ul li:before {
 /*   padding-right: .5em; */
   margin-left: -1em;
 }
+TwoRows { height:2.5em }
 
 /* Surnames
 ----------------------------------------------------- */

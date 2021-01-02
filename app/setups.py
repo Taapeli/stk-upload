@@ -38,7 +38,6 @@ from ui.user_context import UserContext
 import json
 from flask_babelex import lazy_gettext as _l
 
-
 """
     Classes to create user session.
     See: database.cypher_setup.SetupCypher
@@ -126,6 +125,14 @@ class User(UserMixin):
         """ Is showing common, approved data only?
         """
         return not (self.current_context & UserContext.ChoicesOfView.OWN)
+
+    def has_role(self, role_name):
+        """ Check if user has given role
+        """
+        for r in self.roles:
+            if r.name == role_name:
+                return True
+        return False
 
 
 # class UserProfile():

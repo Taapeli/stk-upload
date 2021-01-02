@@ -51,26 +51,25 @@
             <table v-if="event">
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="ColumnValue">
+                    <td class="Value">
                         <tt title="uuid-avain">${event.uuid.substring(0,6)}</tt> /
                         <span class="gedcom_id" title="Gedcom ID">${event.id}</span> /
                         <span class="id" title="järjestysnumero kannassa">${event.uniq_id}</span>
-{#Todo:
-                        <span id="changetime" title="viimeisin muutoshetki">[muokattu 28.03.2020 17:34:59]</span>
+{#Todo:                 <span id="changetime" title="viimeisin muutoshetki">[muokattu 28.03.2020 17:34:59]</span>
 #}
                     </td>
                 </tr>
                 <tr v-if="event.description">
                     <td class="ColumnAttribute">{{ _("Description") }}</td>
-                    <td class="ColumnValue">${ event.description }</td>
+                    <td class="Value">${ event.description }</td>
                 </tr>
                 <tr v-if="event.dates">
                     <td class="ColumnAttribute">{{ _("Date") }}</td>
-                    <td class="ColumnValue">${ event.dates.as_str }</td>
+                    <td class="Value">${ event.dates.as_str }</td>
                 </tr>
                 <tr v-for="pl in places">
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
-                    <td class="ColumnValue">
+                    <td class="Value">
                         <a v-bind:href="pl.href" :uuid="pl.uuid" class="inlink">
                             ${pl.names[0].name}</a>
                         <span class="typedesc">${pl.type_lang}</span>
@@ -83,7 +82,7 @@
                 </tr>
                 <tr v-for="m in medias">
                     <td class="ColumnAttribute">{{ _("Media") }}</td>
-                    <td class="ColumnValue">
+                    <td class="Value">
                         <a v-bind:href="m.href" :uuid="m.uuid" class="inlink">
                             ${m.description}</a>
                         <span class="typedesc">${m.mime}</span>

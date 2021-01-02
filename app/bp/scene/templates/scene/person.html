@@ -66,15 +66,15 @@ u { color: DarkKhaki; text-decoration: none; }
             <table>
                 <tr>
                     <td class="ColumnAttribute" style="padding-bottom: .5em;">{{ _("Identifiers") }}</td>
-                    <td class="ColumnValue">
-                        {{macro.all_obj_ids(person)}} /
-                        <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
+                    <td class="Value" style="height:2.5em">
+                        {{macro.all_obj_ids(person)}}
+                        / <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
                     </td>
                 </tr>
 
                 {% for pname in person.names|sort(attribute='order') %}<tr>
                     <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
-                    <td class="ColumnValue">
+                    <td class="Value">
 						{% if pname.title %}<span title="titteli" class="typedesc">{{pname.title}}</span>{% endif %}
                         <span title="{{ _('first name') }}">{{pname.firstname}}</span>
                         <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
@@ -87,13 +87,13 @@ u { color: DarkKhaki; text-decoration: none; }
                    
                 {% if person.sex %}<tr>
                     <td class="ColumnAttribute">{{ _("Gender") }}</td>
-                    <td class="ColumnValue">{{ person.sex_symbol() }} {{ person.sex_str() }}</td>
+                    <td class="Value">{{ person.sex_symbol() }} {{ person.sex_str() }}</td>
                 </tr>{% endif %}
                 {% if person.priv %}<tr>
                     <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(person.priv) }}</td>
                 </tr>{% endif %}
                 <tr><td class="ColumnAttribute">{{ _('Possible years') }}</td>
-                    <td class="ColumnValue">{{ macro.lifetimes(person) }}
+                    <td class="Value">{{ macro.lifetimes(person) }}
            {% if person.death_high >= last_year_allowed %}
                         <span style="color:red">{{ _('confidential') }}!</span>
            {% endif %}
@@ -101,7 +101,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 </tr>
                <tr>
                     <td class="ColumnAttribute">{{ _("Age at death") }}</td>
-                    <td class="ColumnValue">
+                    <td class="Value">
             {% if person.death_high != person.death_low or
                   person.birth_high != person.birth_low %}
                         {{ _('at least') }}
@@ -115,7 +115,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 
                 {% if person.confidence > '' %}<tr>
                     <td class="ColumnAttribute">{{ _("Confidence of data") }}</td>
-                    <td class="ColumnValue">{{ macro.stars(person.confidence|float) }}</td>
+                    <td class="Value">{{ macro.stars(person.confidence|float) }}</td>
                 </tr>{% endif %}
    
   {% if person.note_ref %}

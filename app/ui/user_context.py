@@ -140,6 +140,7 @@ class UserContext():
         self.series = None                      # 'Source' data theme like "birth"
         self.count = 10000                      # Max count ow objects to display
         self.lang = user_session.get('lang','') # User language
+        self.allow_edit = False                 # Is data edit allowed
         
         # View range: names [first, last]
         self.session_var = None
@@ -198,6 +199,12 @@ class UserContext():
             self.context = user_session.get('user_context', self.choices.COMMON)
             print(f"UserContext: Uses same or default user_context={self.context}")
 
+        if self.user and self.context == self.choices.OWN:
+            #TODO: Needs better rule for edit permission
+            # May edit data, if user has such role
+            if self.context == self.choices.OWN:
+                self.allow_edit = current_user.has_role('audit')
+
         #   For logging of scene area pages, set User.current_context variable:
         #   are you browsing common, audited data or your own batches?
         current_user.current_context=self.context
@@ -242,7 +249,7 @@ class UserContext():
         if self.context == self.choices.OWN:
             return self.user
         else:
-            return ''
+            return None
 
     def owner_str(self):
         # Return current owner choise as text 
