@@ -116,7 +116,7 @@ table.transparent tbody tr td {
 					</td>
             {% if item['Audit'] %}
                     <td colspan="{{labels|count}}">
-                        {{ _("Approved %(n)s objects", n=item['Audit']) }}
+                        {{ _("Approved %(n)s objects", n=item['Audit']|int_thousands) }}
                     </td>
             {% else %}
                 {% for label in labels %}

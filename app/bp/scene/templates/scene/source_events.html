@@ -21,14 +21,28 @@ td.Citation div ol {padding-top:.3em;}
 	    <h3 style="position:sticky; top:0;" title="{{ _('Source') }}">{{source.stitle}}</h3>
 	        <div id="summaryarea">
 
-{% for repo in source.repositories %}
-               <p>
-                  <span class="typedesc">{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
-                  {{ _('in the repository') }} <b>{{repo.rname}}</b></p>
-{% endfor %}
             <table><tbody>
-                <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="Value">{{macro.all_obj_ids(source)}}</td>
+    {% if source.repositories %}
+        {% for repo in source.repositories %}
+                <tr><td class="ColumnAttribute">
+            {% if repo.medium %}
+                        <span class="typedesc">{{repo.medium|transl('medium')}}</span>
+            {% else %}
+                        {{ _('Archieved') }}
+            {% endif -%}
+                        {{ _('in the repository') }}
+                    </td>
+                    <td class="Value"><b>{{repo.rname}}</b></td>
+                    <td></td>
+                </tr>
+        {% endfor %}
+    {% else %}
+                <tr><td colspan="2"><i>{{ _("Note!") }} {{ _("Archieve not defined!") }}</i></td></tr>
+    {% endif %}
+                <tr><td>&nbsp;</td><td> </td></tr>
+                <tr>
+                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="Value TwoRows">{{macro.all_obj_ids(source)}}</td>
                     <td></td>
                 </tr>
                 <tr><td></td></tr>
@@ -46,7 +60,6 @@ td.Citation div ol {padding-top:.3em;}
                     <td></td>
                 </tr>
 {% endif %}
-<!--                <p>{{ _("Identifiers") }} {{macro.all_obj_ids(source)}}</p> -->
 {% if source.notes %}
 	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
                     <td class="Value"><ul>

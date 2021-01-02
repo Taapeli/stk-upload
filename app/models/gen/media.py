@@ -6,7 +6,7 @@ Created on 22.7.2017
 
 from sys import stderr
 
-from bl.base import NodeObject
+from bl.base import NodeObject, Status
 from bl.event import EventBl
 from bl.place import PlaceBl
 from bl.family import FamilyBl
@@ -72,8 +72,9 @@ class Media(NodeObject):
         """ Read Media object list using u_context.
         """
         medias = []
-        result = Media.get_medias(uniq_id=None, o_context=u_context, limit=limit)
-        for record in result: 
+        res = Media.get_medias(uniq_id=None, o_context=u_context, limit=limit)
+        #if Status.has_failed(res): return res
+        for record in res.get('recs', None): 
             # <Record o=<Node id=393949 labels={'Media'}
             #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
             #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
@@ -99,24 +100,30 @@ class Media(NodeObject):
     def get_medias(uniq_id=None, o_context=None, limit=100):
         """ Reads Media objects from user batch or common data using context. """
                         
-        if uniq_id:
-            query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
-            return  shareds.driver.session().run(query, id=uniq_id)
-        elif o_context:
-            user = o_context.user
-            #fw_from = o_context.next_name('fw')     # next name
-            fw_from = o_context.first  # From here forward
-            show_common = o_context.use_common()
-            if show_common:
-                # Show approved common data
-                return shareds.driver.session().run(Cypher_media.read_common_media,
-                                                    user=user, start_name=fw_from, limit=limit)
+        with shareds.driver.session(default_access_mode='READ') as session: 
+            if uniq_id:
+                query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
+                result = session.run(query, id=uniq_id)
+
+            elif o_context:
+                #user = o_context.user
+                user = o_context.batch_user()
+                fw_from = o_context.first  # From here forward
+                if user == None:
+                    # Show approved common data
+                    result = session.run(Cypher_media.read_common_media,
+                                         user=user, start_name=fw_from, limit=limit)
+                else:
+                    # Show user Batch
+                    result =  session.run(Cypher_media.read_my_own_media,
+                                          start_name=fw_from, user=user, limit=limit)
             else:
-                # Show user Batch
-                return  shareds.driver.session().run(Cypher_media.read_my_own_media,
-                                                     start_name=fw_from, user=user, limit=limit)
-        else:
-            return  shareds.driver.session().run(Cypher_media.get_all)
+                result = session.run(Cypher_media.get_all)
+
+            recs = []
+            for record in result: 
+                recs.append(record)
+            return {'recs':recs, 'status':Status.OK}
 
     @staticmethod
     def get_one(oid):

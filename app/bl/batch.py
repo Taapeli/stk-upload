@@ -91,11 +91,10 @@ class Batch():
     @staticmethod
     def get_filename(username, batch_id):
         with shareds.driver.session() as session:
-            result = session.run(CypherBatch.get_filename,
+            record = session.run(CypherBatch.get_filename,
                                  username=username, batch_id=batch_id).single()
-            for record in result:
-                if record:
-                    return record.get('b.file')
+            if record:
+                return record[0]
             return None
     
     @staticmethod

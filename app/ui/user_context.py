@@ -177,8 +177,7 @@ class UserContext():
                 self.years = [yi1, yi2]     # selected years [from, to]
                 print(f'UserContext: Objects between years {self.years}')
 
-            # Selected document series for Sources
-            self.series = request.args.get('series', None)
+            # Selected document series for Sources set in routes.
 
             # Use case: Selected material for display
             #    div=1 -> show approved material

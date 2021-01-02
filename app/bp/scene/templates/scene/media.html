@@ -61,10 +61,10 @@ tr > td > img {
             <table>
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="ColumnValue">{{macro.all_obj_ids(media)}}</td>
+                    <td class="Value TwoRows">{{macro.all_obj_ids(media)}}</td>
                 </tr>
 	            <tr><td><br>{{ _('Thumbnail') }}</td>
-	               <td class="value"><img alt="({{ _('Thumbnail') }})" align="left"
+	               <td class="Value"><img alt="({{ _('Thumbnail') }})" align="left"
                      src="/scene/thumbnail?id={{media.uuid}}" 
                      title="key = {{media.uuid_str()}}"/>
     
@@ -79,8 +79,7 @@ tr > td > img {
                    </td>
                </tr>
                <tr><td></td>
-                   <td>
-                   </td>
+                   <td></td>
 	            </tr>
 	        </table>
 		</div>
@@ -120,10 +119,15 @@ tr > td > img {
                     {% endif %}
 			    {% else %}{{ref.obj.id}}
 			    {% endif %}
-			    {% if ref.crop %}{{ _('cropped') }}<br>{% set cr_str = (ref.crop|join(',')) %}
-			         <img alt="({{ _('Thumbnail') }})"
-                        src="/scene/thumbnail?id={{media.uuid}}&crop={{cr_str}}" 
-                        title="{{ _('cropped') }} (%): {{ref.crop}}"/>
+			    {% if ref.crop %}
+                <div style="display:flex;">
+                    <div>{{ _('cropped') }}: &nbsp;</div>
+                    <div>{% set cr_str = (ref.crop|join(',')) %}
+    			        <img alt="({{ _('Thumbnail') }})"
+                            src="/scene/thumbnail?id={{media.uuid}}&crop={{cr_str}}" 
+                            title="{{ _('cropped') }} (%): {{ref.crop}}"/>
+                    </div>
+                </div>
 			    {% endif %}
 			  </li>
 		    {% endfor %}
