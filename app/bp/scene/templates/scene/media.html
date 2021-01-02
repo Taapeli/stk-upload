@@ -64,23 +64,24 @@ tr > td > img {
                     <td class="Value TwoRows">{{macro.all_obj_ids(media)}}</td>
                 </tr>
 	            <tr><td><br>{{ _('Thumbnail') }}</td>
-	               <td class="Value"><img alt="({{ _('Thumbnail') }})" align="left"
-                     src="/scene/thumbnail?id={{media.uuid}}" 
-                     title="key = {{media.uuid_str()}}"/>
-    
-                     <p style="nowrap;">
-                     {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
-                     {%else%}{{media.description}}
-                     {%endif%}
-                     &rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}"
-                                style="text-decoration:underline;">
-                            {{ _('Show fullscreen') }}</a>
-                     </p>
-                   </td>
+                    <td class="Value">
+                        <div style="display:flex;">
+                            <div><img alt="({{ _('Thumbnail') }})" align="left"
+                                src="/scene/thumbnail?id={{media.uuid}}" 
+                                title="key = {{media.uuid_str()}}"/></div>
+                            <div>
+                                 <p style="nowrap;">
+                                 {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
+                                 {%else%}{{media.description}}
+                                 {%endif%}
+                                 &rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}"
+                                            style="text-decoration:underline;">
+                                        {{ _('Show fullscreen') }}</a>
+                                 </p>
+                            </div>
+                        </div>
+                    </td>
                </tr>
-               <tr><td></td>
-                   <td></td>
-	            </tr>
 	        </table>
 		</div>
 
@@ -121,7 +122,7 @@ tr > td > img {
 			    {% endif %}
 			    {% if ref.crop %}
                 <div style="display:flex;">
-                    <div>{{ _('cropped') }}: &nbsp;</div>
+                    <div><br>{{ _('cropped') }}: &nbsp;</div>
                     <div>{% set cr_str = (ref.crop|join(',')) %}
     			        <img alt="({{ _('Thumbnail') }})"
                             src="/scene/thumbnail?id={{media.uuid}}&crop={{cr_str}}" 
@@ -133,7 +134,7 @@ tr > td > img {
 		    {% endfor %}
 		</ul>
 	    {% else %}
-	    -
+	    –
 		{% endif %}
 	</div>
 
