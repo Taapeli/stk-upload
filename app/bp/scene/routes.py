@@ -387,7 +387,7 @@ def json_get_event():
                     'allow_edit': u_context.allow_edit,
                     'translations':{'myself': _('Self') }
                     }
-        response = json.dumps(res_dict, cls=StkEncoder)
+        response = StkEncoder.jsonify(res_dict)
         print(response)
         t1 = time.time()-t0
         stk_logger(u_context, f"-> bp.scene.routes.json_get_event n={len(members)} e={t1:.3f}")
@@ -501,7 +501,7 @@ def json_get_person_families():
                     'translations':{'family': _('Family'), 
                                     'children': _('Children')}
                     }
-        response = json.dumps(res_dict, cls=StkEncoder)
+        response = StkEncoder.jsonify(res_dict)
 
         t1 = time.time()-t0
         stk_logger(u_context, f"-> bp.scene.routes.show_person_families_json n={len(items)} e={t1:.3f}")

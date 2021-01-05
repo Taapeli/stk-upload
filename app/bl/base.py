@@ -37,15 +37,22 @@ class Status():
 
 
 class StkEncoder(json.JSONEncoder):
-    ''' Returns Stk object hierarchy as a json string.
+    ''' Returns Stk object hierarchy as a JSON string.
 
-        Usage: json_str = json.dumps(stk_object, cls=StkEncoder)
+        Usage: json_str = StkEncoder.jsonify(stk_object_struct)
     '''
     def default(self, obj):
         if hasattr(obj, '_json_encode'):
             return obj._json_encode()
         else:
             return json.JSONEncoder.default(self, obj)
+    
+    @staticmethod
+    def jsonify(obj):
+        ''' Convert dictionary with hierarchial stk objects to JSON structure.
+        '''
+        return json.dumps(obj, cls=StkEncoder) 
+
 
 
 class NodeObject():
@@ -164,3 +171,4 @@ class NodeObject():
             Called by `json.dumps(my_stk_object, cls=StkEncoder)`
         '''
         return self.__dict__
+

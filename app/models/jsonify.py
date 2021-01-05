@@ -1,14 +1,15 @@
 import json
+from bl.base import StkEncoder
 
-class StkEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if hasattr(obj, '_json_encode'):
-            return obj._json_encode()
-        else:
-            return json.JSONEncoder.default(self, obj)
-
-def stk_jsonify(obj):
-    return json.dumps(obj, cls=StkEncoder) 
+# class StkEncoder(json.JSONEncoder): # --> bl.base.StkEncoder
+#     def default(self, obj):
+#         if hasattr(obj, '_json_encode'):
+#             return obj._json_encode()
+#         else:
+#             return json.JSONEncoder.default(self, obj)
+# 
+# def stk_jsonify(obj): # --> bl.base.StkEncoder.jsonify
+#     return json.dumps(obj, cls=StkEncoder) 
 
 
 # -- test code --
@@ -35,20 +36,20 @@ class Test2(Base):
 if __name__ == "__main__":
     test = Test()
     s = test.to_json()
-    s = stk_jsonify(test)
+    s = StkEncoder.jsonify(test)
     print(s)    
     
     test2 = Test2()
     s = test2.to_json()
-    s = stk_jsonify(test2)
+    s = StkEncoder.jsonify(test2)
     print(s)    
     
     test3 = 1
-    s = stk_jsonify(test3)
+    s = StkEncoder.jsonify(test3)
     print(s)    
     
     test4 = dict(test=test,test2=test2)
-    s = stk_jsonify(test4)
+    s = StkEncoder.jsonify(test4)
     print(s)    
     
     #s = json.dumps(test)
