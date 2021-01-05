@@ -523,7 +523,7 @@ def xml_to_stkbase(pathname, userid):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch import BatchDatastore #,Batch
+    from bl.batch import BatchDataStore #,Batch
 
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
@@ -543,9 +543,9 @@ def xml_to_stkbase(pathname, userid):
                             'elapsed':shareds.tdiff})
     handler.blog.log(cleaning_log)
 
-    # Initiate BatchDatastore and Batch node data
+    # Initiate BatchDataStore and Batch node data
     # datastore ~= Business methods / Toimialametodit
-    shareds.datastore = BatchDatastore(shareds.driver, handler.dataservice)
+    shareds.datastore = BatchDataStore(shareds.driver, handler.dataservice)
     mediapath = handler.get_mediapath_from_header()
     res = shareds.datastore.start_data_batch(userid, file_cleaned, mediapath)
     if Status.has_failed(res):

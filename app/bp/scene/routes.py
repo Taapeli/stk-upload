@@ -22,7 +22,7 @@ from flask_babelex import _
 from . import bp
 from ui.user_context import UserContext
 from bl.base import Status, StkEncoder
-from bl.place import PlaceDataStore
+from bl.place import PlaceDataReader
 from bl.source import SourceDataStore
 from bl.family import FamilyReader
 from bl.event import EventReader
@@ -533,7 +533,7 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    datastore = PlaceDataStore(readservice, u_context) 
+    datastore = PlaceDataReader(readservice, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
@@ -564,8 +564,8 @@ def show_place(locid):
         # readservice -> Tietokantapalvelu
         #   datastore ~= Toimialametodit
         readservice = Neo4jReadService(shareds.driver)
-        #shareds.datastore = PlaceDataStore(shareds.driver, dataservice, u_context)
-        datastore = PlaceDataStore(readservice, u_context) 
+        #shareds.datastore = PlaceDataReader(shareds.driver, dataservice, u_context)
+        datastore = PlaceDataReader(readservice, u_context) 
     
         res = datastore.get_places_w_events(locid)
 

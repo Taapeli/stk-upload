@@ -115,16 +115,16 @@ class DbWriter(DbReader):
 #             self.dbdriver.dw_media_save_w_handles(uniq_id, media_refs)
 
 
-    def mergeplaces(self, id1, id2):
-        with shareds.driver.session() as session:
-            self.dbdriver.tx = session
-            place, names = self.dbdriver.dw_mergeplaces(id1,id2)
-            # Select default names for default languages
-            def_names = PlaceBl.find_default_names(names, ['fi', 'sv'])
-            # Update default language name links
-            if def_names:
-                self.place_set_default_names(place, def_names)
-            return place
+#     def mergeplaces(self, id1, id2): #-> pe.neo4j.dataservice.Neo4jDataService.dw_mergeplaces
+#         with shareds.driver.session() as session:
+#             self.dbdriver.tx = session
+#             place, names = self.dbdriver.dw_mergeplaces(id1,id2)
+#             # Select default names for default languages
+#             def_names = PlaceBl.find_default_names(names, ['fi', 'sv'])
+#             # Update default language name links
+#             if def_names:
+#                 self.place_set_default_names(place, def_names)
+#             return place
 
 #     def update_person_confidences(self, tx, person_ids:list): #-> bl.person.PersonBl.update_person_confidences
 #         """ Sets a quality rate for given list of Person.uniq_ids.

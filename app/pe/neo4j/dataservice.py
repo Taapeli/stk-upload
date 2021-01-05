@@ -5,6 +5,7 @@ Created on 23.3.2020
 '''
 import logging
 import traceback
+from neo4j.exceptions import ClientError
 
 logger = logging.getLogger('stkserver')
 from datetime import date #, datetime
@@ -292,13 +293,19 @@ class Neo4jDataService:
             match (node) -[r2:NAME]-> (pn2)
             return node, collect(pn2) as names
         """
-        self.tx.run(cypher_delete_namelinks,id=id1).single()
-        rec = self.tx.run(cypher_mergeplaces,id1=id1,id2=id2).single()
-        node = rec['node']
-        place = PlaceBl.from_node(node)
-        name_nodes = rec['names']
-        name_objects = [PlaceName.from_node(n) for n in name_nodes]
-        return place, name_objects
+        try:
+            self.tx.run(cypher_delete_namelinks, id=id1)
+            record = self.tx.run(cypher_mergeplaces, id1=id1, id2=id2).single()
+            node = record['node']
+            place = PlaceBl.from_node(node)
+            name_nodes = record['names']
+            place.names = [PlaceName.from_node(n) for n in name_nodes]
+        except ClientError as e:
+            #traceback.print_exc()
+            return {'status': Status.ERROR,
+                   'statustext': f"Neo4jDataService.dw_mergeplaces {id1}<-{id2} failed: {e.__class__.__name__} {e}"}
+
+        return {'status':Status.OK, 'place':place}
 
 
     # ----- Repository -----

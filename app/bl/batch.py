@@ -237,7 +237,7 @@ class Batch():
         return cnt
 
 
-class BatchDatastore:
+class BatchDataStore:
     '''
     Abstracted batch datastore.
 
@@ -278,7 +278,7 @@ class BatchDatastore:
         res = self.dataservice._new_batch_id()
         if Status.has_failed(res):
             # Failed to get an id
-            print("bl.batch.BatchDatastore.start_data_batch: TODO shareds.datastore._remove_lock('batch_id')")
+            print("bl.batch.BatchDataStore.start_data_batch: TODO shareds.datastore._remove_lock('batch_id')")
             return res
 
         self.batch.id = res.get('id')
@@ -287,7 +287,7 @@ class BatchDatastore:
         self.batch.mediapath = mediapath
 
         res = self.batch.save()
-        print(f'bl.batch.BatchDatastore.start_data_batch: new Batch {self.batch.id} identity={self.batch.uniq_id}')
+        print(f'bl.batch.BatchDataStore.start_data_batch: new Batch {self.batch.id} identity={self.batch.uniq_id}')
 
         return {'batch': self.batch, 'status': Status.OK}
 

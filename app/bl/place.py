@@ -93,16 +93,16 @@ class Place(NodeObject):
 
 
 
-class PlaceDataStore:
+class PlaceDataReader:
     '''
-    Abstracted Place datastore.
+    Abstracted Place datastore for reading.
 
-   Data reading class for Place objects with associated data.
+    Data reading class for Place objects with associated data.
 
-   - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-     to define the database driver and user context
+    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
+      to define the database driver and user context
 
-   - Returns a Result object which includes the items and eventuel error object.
+    - Returns a Result object which includes the items and eventuel error object.
 
     - Methods return a dict result object {'status':Status, ...}
     '''
@@ -130,13 +130,13 @@ class PlaceDataStore:
 
         # Update the page scope according to items really found 
         if places:
-            print(f'PlaceDataStore.get_place_list: {len(places)} places '
+            print(f'PlaceDataReader.get_place_list: {len(places)} places '
                   f'{context.direction} "{places[0].pname}" – "{places[-1].pname}"')
             context.update_session_scope('place_scope', 
                                           places[0].pname, places[-1].pname, 
                                           context.count, len(places))
         else:
-            print(f'bl.place.PlaceDataStore.get_place_list: no places')
+            print(f'bl.place.PlaceDataReader.get_place_list: no places')
             return {'status': Status.NOT_FOUND, 'items': [],
                     'statustext': f'No places fw="{fw}"'}
         return {'items':places, 'status':Status.OK}
@@ -177,6 +177,48 @@ class PlaceDataStore:
         res = self.readservice.dr_get_place_events(place.uniq_id)
         results['events'] = res['items']
         return results
+
+
+class PlaceDataStore:
+    '''
+    Abstracted Place datastore for update.
+
+    Data update class for Place objects with associated data.
+
+    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
+      to define the database driver and user context
+
+    - Returns a Result object which includes the items and eventuel error object.
+
+    - Methods return a dict result object {'status':Status, ...}
+    '''
+
+    def __init__(self, dataservice):
+        ''' Initiate datastore.
+
+        #TODO Not needed: :param: driver    neo4j.DirectDriver object
+        :param: dataservice pe.neo4j.dataservice.Neo4jDataService
+        '''
+        self.dataservice = dataservice
+        self.driver = dataservice.driver
+
+
+    def mergeplaces(self, id1, id2):
+        ''' Merges two places
+        '''
+        ret = self.dataservice.dw_mergeplaces(id1,id2)
+        if Status.has_failed(ret):  return
+
+        place = ret.get('place')
+        # Select default names for default languages
+        def_names = PlaceBl.find_default_names(place.names, ['fi', 'sv'])
+        if def_names:
+            # Update default language name links
+            #self.place_set_default_names(place, def_names)
+            self.dataservice.dw_place_set_default_names(place.uniq_id, 
+                                                        def_names['fi'], def_names['sv'])
+
+        return place
 
 
 #     @staticmethod
