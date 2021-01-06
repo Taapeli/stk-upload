@@ -211,14 +211,15 @@ class PlaceDataStore:
 
         place = ret.get('place')
         # Select default names for default languages
-        def_names = PlaceBl.find_default_names(place.names, ['fi', 'sv'])
-        if def_names:
+        ret = PlaceBl.find_default_names(place.names, ['fi', 'sv'])
+        st = ret.get('status')
+        if st == Status.OK:
             # Update default language name links
-            #self.place_set_default_names(place, def_names)
+            def_names = ret.get('ids')
             self.dataservice.dw_place_set_default_names(place.uniq_id, 
                                                         def_names['fi'], def_names['sv'])
 
-        return place
+        return {'status':st, 'place':place}
 
 
 #     @staticmethod
@@ -271,7 +272,7 @@ class PlaceBl(Place):
             - def_names     dict {lang, uid} uniq_id's of PlaceName objects
         '''
         ds = shareds.datastore.dataservice
-        ds._place_set_default_names(self.uniq_id,
+        ds.dw_place_set_default_names(self.uniq_id,
                                     def_names['fi'], def_names['sv'])
 
 
@@ -292,11 +293,10 @@ class PlaceBl(Place):
             # 1.     find matching languages for use_langs
             for lang in use_langs:
                 for name in names:
-                    if name.lang == lang:
+                    if name.lang == lang and not lang in selection.keys():
                         # A matching language
                         #print(f'# select {lang}: {name.name} {name.uniq_id}')
                         selection[lang] = name.uniq_id
-#                   elif lang == 'fi': print(f'#           {name}')
             # 2. find replacing languages, if not matching
             for lang in use_langs:
                 if not lang in selection.keys():
@@ -315,11 +315,12 @@ class PlaceBl(Place):
             ret = {}
             for lang in use_langs:
                 ret[lang] = selection[lang]
-            return ret
+            return {'status':Status.OK, 'ids':ret}
 
         except Exception as e:
             logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
-        return
+            return {'status':Status.ERROR, 'items':selection}
+
 
 #     def media_save_w_handles(self, uniq_id, media_refs):
 #         ''' Save media object and it's Note and Citation references
@@ -427,10 +428,10 @@ class PlaceBl(Place):
             raise
 
         # Select default names for default languages
-        def_names = PlaceBl.find_default_names(self.names, ['fi', 'sv'])
-
-        # Update default language name links
-        self.set_default_names(def_names)
+        ret = PlaceBl.find_default_names(self.names, ['fi', 'sv'])
+        if ret.get('status') == Status.OK:
+            # Update default language name links
+            self.set_default_names(ret.get('ids'))
 
         # Make hierarchy relations to upper Place nodes
 

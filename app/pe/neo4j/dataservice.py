@@ -247,7 +247,7 @@ class Neo4jDataService:
 
     # ----- Place -----
 
-    def _place_set_default_names(self, place_id, fi_id, sv_id):
+    def dw_place_set_default_names(self, place_id, fi_id, sv_id):
         ''' Creates default links from Place to fi and sv PlaceNames.
 
             - place_id      Place object id
