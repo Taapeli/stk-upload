@@ -55,10 +55,11 @@ def mergeplaces():
     dataservice = Neo4jDataService(shareds.driver)
     datastore = PlaceDataStore(dataservice)
 
-    ret = datastore.mergeplaces(int(id1),int(id2))
+    ret = datastore.merge2places(int(id1),int(id2))
     if Status.has_failed(ret):
+        print(f"mergeplaces: {ret.get('statustext')}")
         return StkEncoder.jsonify(ret)
-    #TODO: Should always use original ret with place.names = ret['name_objects']
+    #TODO: Should use original ret dictionary as is
     return StkEncoder.jsonify(ret.get('place'))
 
 @bp.route('/refplaces/api/test_create', methods=['GET'])

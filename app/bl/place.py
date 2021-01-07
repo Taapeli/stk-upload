@@ -203,23 +203,36 @@ class PlaceDataStore:
         self.driver = dataservice.driver
 
 
-    def mergeplaces(self, id1, id2):
+    def merge2places(self, id1, id2):
         ''' Merges two places
         '''
-        ret = self.dataservice.dw_mergeplaces(id1,id2)
-        if Status.has_failed(ret):  return
+        # Check that given nodes are included in the same Batch or Audit node
+        ret = self.dataservice.ds_merge_check(id1, id2)
+        if Status.has_failed(ret):  return ret
+
+        # Merge nodes
+        ret = self.dataservice.ds_merge_places(id1, id2)
+        if Status.has_failed(ret):
+            self.dataservice.ds_rollback()
+            return ret
 
         place = ret.get('place')
         # Select default names for default languages
         ret = PlaceBl.find_default_names(place.names, ['fi', 'sv'])
+        if Status.has_failed(ret):
+            self.dataservice.ds_rollback()
+            return ret
         st = ret.get('status')
         if st == Status.OK:
             # Update default language name links
             def_names = ret.get('ids')
-            self.dataservice.dw_place_set_default_names(place.uniq_id, 
+            self.dataservice.ds_place_set_default_names(place.uniq_id, 
                                                         def_names['fi'], def_names['sv'])
 
-        return {'status':st, 'place':place}
+            ret = self.dataservice.ds_commit()
+            st = ret.get('status')
+            return {'status':st, 'place':place, 
+                    'statustext':ret.get('statustext', '')}
 
 
 #     @staticmethod
@@ -272,7 +285,7 @@ class PlaceBl(Place):
             - def_names     dict {lang, uid} uniq_id's of PlaceName objects
         '''
         ds = shareds.datastore.dataservice
-        ds.dw_place_set_default_names(self.uniq_id,
+        ds.ds_place_set_default_names(self.uniq_id,
                                     def_names['fi'], def_names['sv'])
 
 

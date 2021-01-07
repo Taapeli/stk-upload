@@ -66,20 +66,20 @@ class DbWriter(DbReader):
             Returns 0 or error message, if commit failed.
         """
         if rollback:
-            self.dbdriver._rollback()
+            self.dbdriver.ds_rollback()
             print("Transaction discarded")
-            logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler._commit/rollback f="{self.file}"')
+            logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.ds_commit/rollback f="{self.file}"')
             self.blog.log_event({'title': _("Database save failed"), 'level':"ERROR"})
             return 0
 
             try:
-                return self.dbdriver._commit()
+                return self.dbdriver.ds_commit()
                 logger.info(f'-> bp.gramps.xml_dom_handler.DOM_handler.commit/ok f="{self.file}"')
                 print("Transaction committed")
                 return 0
             except Exception as e:
                 msg = f'{e.__class__.__name__}, {e}'
-                logger.info('-> bp.gramps.xml_dom_handler.DOM_handler._commit/fail"')
+                logger.info('-> bp.gramps.xml_dom_handler.DOM_handler.ds_commit/fail"')
                 print("pe.db_writer.DbWriter.commit: Transaction failed "+ msg)
                 self.blog.log_event({'title':_("Database save failed due to {}".\
                                      format(msg)), 'level':"ERROR"})

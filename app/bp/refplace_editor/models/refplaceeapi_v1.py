@@ -62,11 +62,13 @@ cypher_record = """
 
 cypher_getplace = """
     match (p:Place)
-        where id(p) = $id 
-    optional match(p) -[r:NAME]-> (pn:Place_name)
+        where id(p) = $id
+    optional match (p) <-[r_root:OWNS|PASSED]- (root) 
+    optional match (p) -[r:NAME]-> (pn:Place_name)
     optional match (smallerPlace:Place)-[h2:IS_INSIDE]->(p) 
     optional match (p)-[h1:IS_INSIDE]->(largerPlace:Place) 
-    return p,id(p) as id,
+    return p,id(p) as id, 
+        labels(root)[0] as root_label, root.id as root_id,
         collect(distinct pn) as names,
         collect (distinct [h1,largerPlace,id(largerPlace)]) as largerPlaces,
         collect (distinct [h2,smallerPlace,id(smallerPlace)]) as smallerPlaces
@@ -97,7 +99,7 @@ def list_top_level_places():
     for rec in  result:
         place_node = rec['p']
         place = PlaceBl.from_node(place_node)
-        place.names = [PlaceName.from_node(pn) for (r,pn) in rec['names']]
+        place.names = [PlaceName.from_node(pn) for (_r,pn) in rec['names']]
         places.append(place) 
     return {"status":"OK",
          "statusText":"OK",
@@ -119,12 +121,18 @@ def list_subordinate_places(parent_id):
          "places":sorted(places, key=attrgetter('pname'))
     }
 
-def getplace(id):
-    print('id:',id)
-    result = shareds.driver.session().run(cypher_getplace,id=id).single()
+def getplace(id1):
+    print('id:',id1)
+    result = shareds.driver.session().run(cypher_getplace,id=id1).single()
     print('result:',result)
     if not result: return dict(status="Error",resultCount=0)
     p = result.get('p')
+    rlabel = result.get('root_label','')
+    rid = result.get('root_id','')
+    if rlabel and rid:
+        batch = rlabel+' '+rid
+    else:
+        batch = None
     largerPlaces = result['largerPlaces']
     smallerPlaces = result['smallerPlaces']
     places1 = []
@@ -168,6 +176,7 @@ def getplace(id):
     #names = [dict(name=pn['name'],lang=pn['lang']) for pn in result['names']]
     place = PlaceBl.from_node(p)
     place.names = [PlaceName.from_node(pn) for pn in result['names']]
+    place.batch = batch
     print(smallerPlaces)
     if smallerPlaces == [[None,None,None]]: smallerPlaces = []
     place.surrounds = [PlaceName.from_node(p2) for (h2,p2,id2) in smallerPlaces]

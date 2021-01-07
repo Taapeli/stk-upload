@@ -2,7 +2,7 @@
 {% extends "/audit/layout.html" %}
 {% include "security/_messages.html" %}
 {% block title %}{{ _('Auditor') }}{% endblock %}
-{% block body %}}
+{% block body %}
 {{ super() }}
 
 <style>
@@ -52,6 +52,8 @@ div.box3 {
     min-height: 200px;
     border-radius: 15px;
     background-color: #D5F5E3;
+}
+div.box3 > h2 { margin-bottom: 0;
 }
 
 th {
@@ -154,7 +156,9 @@ input {
 	<template v-for="p in to_be_merged">
 		<div class="box3">
 		        <h2>${ p.pname } (${ p.uniq_id })</h2>
-		        <div class=box2>
+                <p v-show="p.batch">Batch: ${ p.batch }</p>
+                <p v-show="!p.batch">Batch: <i>No batch!</i></p>
+		        <div class="box2">
 		        <h3>Ominaisuudet</h3>
 		        <table border>
 		            <tr><td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
@@ -223,7 +227,7 @@ var app = new Vue({
         dups: [],
         selected: [],
         names: [],
-        places: [], // {id:1234,name:"Suomi",type:"Valtio"}
+        places: [], // {id:1234,name:"Suomi",type:"Valtio",batch:"Audit 2020-12-26.001"}
         path: [],
         parentname: "",
     }, // data

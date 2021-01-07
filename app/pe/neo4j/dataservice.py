@@ -38,7 +38,7 @@ class Neo4jDataService:
         self.tx = driver.session().begin_transaction()
 
 
-    def _commit(self):
+    def ds_commit(self):
         """ Commit transaction.
         """
 #         if self.tx.closed():
@@ -51,23 +51,23 @@ class Neo4jDataService:
             return {'status':Status.OK}
         except Exception as e:
             msg = f'{e.__class__.__name__}, {e}'
-            logger.info('-> pe.neo4j.dataservice.Neo4jDataService._commit/fail"')
-            print("Neo4jDataService._commit: Transaction failed "+ msg)
+            logger.info('-> pe.neo4j.dataservice.Neo4jDataService.ds_commit/fail"')
+            print("Neo4jDataService.ds_commit: Transaction failed "+ msg)
             return {'status':Status.ERROR, 
                     'statustext': f'Commit failed: {msg}'}
 
-    def _rollback(self):
+    def ds_rollback(self):
         """ Rollback transaction.
         """
         try:
             self.tx.rollback()
             print("Transaction discarded")
-            logger.info('-> pe.neo4j.write_driver.Neo4jDataService._rollback')
+            logger.info('-> pe.neo4j.write_driver.Neo4jDataService.ds_rollback')
             return {'status':Status.OK}
         except Exception as e:
             msg = f'{e.__class__.__name__}, {e}'
-            logger.info('-> pe.neo4j.dataservice.Neo4jDataService._rollback/fail"')
-            print("Neo4jDataService._rollback: Transaction failed "+ msg)
+            logger.info('-> pe.neo4j.dataservice.Neo4jDataService.ds_rollback/fail"')
+            print("Neo4jDataService.ds_rollback: Transaction failed "+ msg)
 #             self.blog.log_event({'title':_("Database save failed due to {}".\
 #                                  format(msg)), 'level':"ERROR"})
             return {'status':Status.ERROR, 
@@ -116,7 +116,7 @@ class Neo4jDataService:
         return {'status':Status.OK, 'id':batch_id}
 
 
-    def dw_batch_save(self, attr):
+    def ds_batch_save(self, attr):
         ''' Creates a Batch node.
 
             attr = {"mediapath", "file", "id", "user", "status"}
@@ -129,11 +129,11 @@ class Neo4jDataService:
             return {'status': Status.OK, 'identity':uniq_id}
 
         except Exception as e:
-            statustext = f"Neo4jDataService.dw_batch_save failed: {e.__class__.name} {e}"
+            statustext = f"Neo4jDataService.ds_batch_save failed: {e.__class__.name} {e}"
             return {'status': Status.ERROR, 'statustext': statustext}
 
 
-    def dw_batch_set_status(self, batch, status):
+    def ds_batch_set_status(self, batch, status):
         ''' Updates Batch node selected by Batch id.
 
             Batch.timestamp is updated in the Cypher clause.
@@ -145,8 +145,12 @@ class Neo4jDataService:
             return {'status': Status.OK, 'identity':uniq_id}
 
         except Exception as e:
-            statustext = f"Neo4jDataService.dw_batch_set_status failed: {e.__class__.__name__} {e}"
+            statustext = f"Neo4jDataService.ds_batch_set_status failed: {e.__class__.__name__} {e}"
             return {'status': Status.ERROR, 'statustext': statustext}
+
+
+
+    # ----- Common objects -----
 
 
     def _obj_save_and_link(self, obj, **kwargs):
@@ -179,24 +183,65 @@ class Neo4jDataService:
         return {'status':status, 'count':total, 'unlinked':unlinked}
 
 
-#     def _obj_find_unlinked_handles(self, batch_id):
-#         ''' Find nodes which has handle but not linked to Batch.
-#         '''
-#         status = Status.OK
-#         total = 0
-#         # Find handles left
-#         result = self.tx.run(CypherBatch.find_unlinked_nodes)
-#         for count, label in result:
-#             print(f'# - WARNING: Found {count} {label} not linked to batch')
-#             total += count
-#         #changes = result.summary().counters.properties_set
-#         
-#         # Check handles not removed
-#         result = self.tx.run(CypherBatch.remove_all_handles, batch_id=batch_id)
-#         for count, label in result:
-#             print(f'# - cleaned {count} {label} handles')
-#             total += count
-#         return {'status':status, 'count':total} # , 'changes':changes}
+    def ds_merge_check(self, id1, id2):
+        ''' Check that given objects are mergeable.
+        
+            Rules:
+            - Objects have same label
+            - Both objects have the same type of end relation (OWNS or PASSED)
+        '''
+        class RefObj:
+            def __str__(self):
+                return f'{self.uniq_id}:{self.label} {self.str}'
+        cypher_merge_check = """
+MATCH (p) WHERE id(p) IN $id_list
+OPTIONAL MATCH (x) -[r:OWNS|PASSED]-> (p)
+RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str, 
+    TYPE(r) AS rel, 
+    ID(p) AS obj_id, LABELS(p)[0] AS obj_label, p.id AS obj_str
+ """
+        objs = {}
+        try:
+            result = self.tx.run(cypher_merge_check, id_list=[id1,id2])
+            #for root_id, root_str, rel, obj_id, obj_label, obj_str in result:
+            for record in result:
+                ro = RefObj()
+                ro.uniq_id = record['obj_id']
+                ro.label = record['obj_label']
+                ro.str = record['obj_str']
+                ro.root = (record.get('rel'), record.get('root_id'), record.get('root_str'))
+                #rint(f'#ds_merge_check {root_id}:{root_str} -[{rel}]-> {obj_id}:{obj_label} {obj_str}')
+                print(f'#ds_merge_check {ro.uniq_id}:{ro.label} {ro.str} in {ro.root}')
+                if ro.uniq_id in objs.keys():
+                    # Error if current uniq_id exists twice
+                    msg = f"Object {ro} has two roots {objs[ro.uniq_id].root} and {ro.root}"
+                    return {'status': Status.ERROR, 'statustext': msg}
+                for i, obj2 in objs.items():
+                    print(f"#ds_merge_check {obj2} <> {ro}")
+                    if i == ro.uniq_id:
+                        continue
+                    # Error if different labels or has different root node
+                    if obj2.label != ro.label:
+                        msg = f"Objects {obj2} and {ro} are different"
+                        return {'status': Status.ERROR, 'statustext': msg}
+                    if obj2.root[1] != ro.root[1]:
+                        msg = f"Object {ro} has different roots {obj2.root} and {ro.root}"
+                        return {'status': Status.ERROR, 'statustext': msg}
+                objs[ro.uniq_id] = ro
+
+            if len(objs) == 2:
+                print(f"ds_merge_check ok {objs}")
+                return {'status':Status.OK}
+            else:
+                msg = f"ds_merge_check failed, found {len(objs)} objects"
+                return {'status': Status.ERROR, 'statustext': msg}
+
+        except ClientError as e:
+            #traceback.print_exc()
+            return {'status': Status.ERROR,
+                   'statustext': "Neo4jDataService.ds_merge_check "\
+                                f"{id1}<-{id2} failed: {e.__class__.__name__} {e}"}
+
 
 
     # ----- Note -----
@@ -247,7 +292,7 @@ class Neo4jDataService:
 
     # ----- Place -----
 
-    def dw_place_set_default_names(self, place_id, fi_id, sv_id):
+    def ds_place_set_default_names(self, place_id, fi_id, sv_id):
         ''' Creates default links from Place to fi and sv PlaceNames.
 
             - place_id      Place object id
@@ -275,7 +320,7 @@ class Neo4jDataService:
             return err
 
 
-    def dw_mergeplaces(self, id1, id2):
+    def ds_merge_places(self, id1, id2):
         ''' Merges given two Place objects using apoc library.
         '''
         cypher_delete_namelinks = """
@@ -303,7 +348,7 @@ class Neo4jDataService:
         except ClientError as e:
             #traceback.print_exc()
             return {'status': Status.ERROR,
-                   'statustext': f"Neo4jDataService.dw_mergeplaces {id1}<-{id2} failed: {e.__class__.__name__} {e}"}
+                   'statustext': f"Neo4jDataService.ds_merge_places {id1}<-{id2} failed: {e.__class__.__name__} {e}"}
 
         return {'status':Status.OK, 'place':place}
 

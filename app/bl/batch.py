@@ -52,7 +52,7 @@ class Batch():
                 "status": self.status
             }
             #self.tx.run(CypherBatch.self_create, b_attr=attr)
-            res = shareds.datastore.dataservice.dw_batch_save(attr)
+            res = shareds.datastore.dataservice.ds_batch_save(attr)
             # returns {status, identity}
             if Status.has_failed(res):
                 return res
@@ -293,16 +293,16 @@ class BatchDataStore:
 
     def mark_complete(self):
         ''' Mark this data batch completed '''
-        res = shareds.datastore.dataservice.dw_batch_set_status(self.batch, "completed")
+        res = shareds.datastore.dataservice.ds_batch_set_status(self.batch, "completed")
         return res
 
 
     def commit(self):
         ''' Commit transaction. '''
-        self.dataservice._commit()
+        self.dataservice.ds_commit()
 
     def rollback(self):
         ''' Commit transaction. '''
-        self.dataservice._rollback()
+        self.dataservice.ds_rollback()
 
 
