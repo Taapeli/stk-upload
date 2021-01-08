@@ -11,6 +11,9 @@ class CypherBatch():
     Cypher clauses for managing Batch nodes
     '''
 
+    aquire_lock = """MERGE (lock:Lock {id:$lock_id})
+SET lock.locked = true"""
+
     batch_find_id = """
 MATCH (b:Batch) WHERE b.id STARTS WITH $batch_base
 RETURN b.id AS bid
@@ -110,4 +113,12 @@ match (b:Audit)
 optional match (b) -[:PASSED]-> (x)
 return b, labels(x)[0] as label, count(x) as cnt 
     order by b.user, b.id, label'''
+
+    merge_check = """
+MATCH (p) WHERE id(p) IN $id_list
+OPTIONAL MATCH (x) -[r:OWNS|PASSED]-> (p)
+RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str, 
+    TYPE(r) AS rel, 
+    ID(p) AS obj_id, LABELS(p)[0] AS obj_label, p.id AS obj_str
+ """
 

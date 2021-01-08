@@ -79,7 +79,7 @@ MATCH (prof:UserProfile) -[:HAS_LOADED]-> (:Batch) -[:OWNS]-> (place:Place)
     # Result indi is a Person or Family
     get_person_family_events = """
 MATCH (e:Event) -[:PLACE]-> (l:Place)
-    WHERE id(l) = $locid
+    WHERE ID(l) = $locid
 WITH e,l
     MATCH (indi) -[r]-> (e)
     OPTIONAL MATCH (indi) -[:NAME]-> (n)
@@ -87,7 +87,7 @@ RETURN indi, r.role AS role, COLLECT(DISTINCT n) AS names, e AS event
 ORDER BY e.date1"""
     get_person_events = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
-    WHERE id(l) = $locid
+    WHERE ID(l) = $locid
     MATCH (p) --> (n:Name)
     OPTIONAL MATCH (p) -[:F
 WITH p, r, e, l, n ORDER BY n.order
@@ -98,17 +98,17 @@ ORDER BY e.date1"""
     # Queries for Place page hierarcy
     read_pl_hierarchy = """
 MATCH x= (p:Place)<-[:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
-    WITH NODES(x) AS nodes, relationships(x) as r
+    WITH NODES(x) AS nodes, relationships(x) AS r
     RETURN nodes, SIZE(r) AS lv, r
     UNION
 MATCH x= (p:Place)-[:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
-    WITH NODES(x) AS nodes, relationships(x) as r
+    WITH NODES(x) AS nodes, relationships(x) AS r
     RETURN nodes, SIZE(r)*-1 AS lv, r
 """
     # Query for single Place without hierarcy
     root_query = """
 MATCH (p:Place) WHERE ID(p) = $locid
-RETURN p.type AS type, p.uuid as uuid, p.pname AS name
+RETURN p.type AS type, p.uuid AS uuid, p.pname AS name
 """
     # Query to get names for a Place with $locid, $lang
     read_pl_names="""
@@ -128,7 +128,7 @@ MATCH (u:Batch {id:$batch_id})
 CREATE (new_pl:Place)
     SET new_pl = $p_attr
 CREATE (u) -[:OWNS]-> (new_pl) 
-RETURN ID(new_pl) as uniq_id"""
+RETURN ID(new_pl) AS uniq_id"""
 
     # Set properties for an existing Place and connect it to Batch
     complete = """
@@ -138,37 +138,37 @@ MATCH (pl:Place) WHERE ID(pl) = $plid
 CREATE (u) -[:OWNS]-> (pl)"""
 
     add_name = """
-MATCH (pl:Place) WHERE id(pl) = $pid
+MATCH (pl:Place) WHERE ID(pl) = $pid
 CREATE (pl) -[r:NAME {order:$order}]-> (n:Place_name)
     SET n = $n_attr
 RETURN ID(n) AS uniq_id"""
 
     # Link to a known upper Place
     link_hier = """
-MATCH (pl:Place) WHERE id(pl) = $plid
-MATCH (up:Place) WHERE id(up) = $up_id
+MATCH (pl:Place) WHERE ID(pl) = $plid
+MATCH (up:Place) WHERE ID(up) = $up_id
 MERGE (pl) -[r:IS_INSIDE]-> (up)
     SET r = $r_attr"""
 
     # Link to a new dummy upper Place
     link_create_hier = """
-MATCH (pl:Place) WHERE id(pl) = $plid
+MATCH (pl:Place) WHERE ID(pl) = $plid
 CREATE (new_pl:Place)
     SET new_pl.handle = $up_handle
 CREATE (pl) -[r:IS_INSIDE]-> (new_pl)
     SET r = $r_attr
-return ID(new_pl) as uniq_id"""
+RETURN ID(new_pl) AS uniq_id"""
 
     add_urls = """
 MATCH (u:Batch {id:$batch_id})
 CREATE (u) -[:OWNS]-> (n:Note) 
     SET n = $n_attr
 WITH n
-    MATCH (pl:Place) WHERE id(pl) = $pid
+    MATCH (pl:Place) WHERE ID(pl) = $pid
     MERGE (pl) -[r:NOTE]-> (n)"""
 
     link_note = """
-MATCH (pl:Place) WHERE id(pl) = $pid
+MATCH (pl:Place) WHERE ID(pl) = $pid
 MATCH (n:Note)  WHERE n.handle=$hlink
 CREATE (pl) -[r:NOTE]-> (n)"""
 
@@ -178,4 +178,20 @@ MATCH (m:Media  {handle: $m_handle})
   CREATE (p) -[r:MEDIA]-> (m)
     SET r = $r_attr"""
 
+class CypherPlaceMerge:
+
+    delete_namelinks = """
+MATCH (node) -[r:NAME_LANG]-> (pn)
+WHERE ID(node) = $id
+DELETE r"""
+
+    merge_places = """
+MATCH (p1:Place)        WHERE ID(p1) = $id1 
+MATCH (p2:Place)        WHERE ID(p2) = $id2
+CALL apoc.refactor.mergeNodes([p1,p2],
+    {properties:'discard',mergeRels:true})
+YIELD node
+WITH node
+MATCH (node) -[r2:NAME]-> (pn2)
+RETURN node, collect(pn2) AS names"""
 

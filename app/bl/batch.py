@@ -270,12 +270,12 @@ class BatchDataStore:
         The stored Batch.file name is the original name with '_clean' removed.
         '''
         # Lock db to avoid concurent Batch loads
-        self.dataservice._aqcuire_lock('batch_id')
+        self.dataservice.ds_aqcuire_lock('batch_id')
         #TODO check res
 
         # Find the next free Batch id
         self.batch = Batch()
-        res = self.dataservice._new_batch_id()
+        res = self.dataservice.ds_new_batch_id()
         if Status.has_failed(res):
             # Failed to get an id
             print("bl.batch.BatchDataStore.start_data_batch: TODO shareds.datastore._remove_lock('batch_id')")

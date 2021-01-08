@@ -14,11 +14,11 @@ from bl.base import Status
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 
-from .cypher.cy_batch_audit import CypherBatch
+from .cypher.cy_batch_audit import CypherBatch, CypherAudit
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_family import CypherFamily
-from .cypher.cy_place import CypherPlace
+from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_gramps import CypherObjectWHandle
 
 
@@ -74,17 +74,16 @@ class Neo4jDataService:
                     'statustext': f'Rollback failed: {msg}'}
 
 
-    # ----- Batch -----
+    # ----- Batch Audit -----
 
-    def _aqcuire_lock(self, lock_id):
+    def ds_aqcuire_lock(self, lock_id):
         """ Create a lock
         """
-        query = """MERGE (lock:Lock {id:$lock_id})
-            SET lock.locked = true"""
-        self.tx.run(query, lock_id=lock_id)
+        self.tx.run(CypherBatch.aquire_lock, lock_id=lock_id)
         return True # value > 0
 
-    def _new_batch_id(self):
+
+    def ds_new_batch_id(self):
         ''' Find next unused Batch id.
         
             Returns {id, status, [statustext]}
@@ -105,7 +104,7 @@ class Neo4jDataService:
             # Normal exception: this is the first batch of day
             ext = 0
         except Exception as e:
-            statustext = f"pe.neo4j.write_driver.Neo4jDataService.dw_get_new_batch_id: {e.__class__.name} {e}"
+            statustext = f"Neo4jDataService.ds_new_batch_id: {e.__class__.name} {e}"
             print(statustext)
             return {'status':Status.ERROR, 'statustext':statustext}
         
@@ -149,40 +148,6 @@ class Neo4jDataService:
             return {'status': Status.ERROR, 'statustext': statustext}
 
 
-
-    # ----- Common objects -----
-
-
-    def _obj_save_and_link(self, obj, **kwargs):
-        """ Saves given object to database
-        
-        :param: batch_id    Current Batch (batch) --> (obj)
-        _param: parent_id   Parent object to link (parent) --> (obj)
-        """
-        obj.save(self.tx, **kwargs)
-
-
-    def _obj_remove_gramps_handles(self, batch_id):
-        ''' Remove all Gramps handles.
-        '''
-        status = Status.OK
-        total = 0
-        unlinked = 0
-        # Remove handles from nodes connected to given Batch
-        result = self.tx.run(CypherBatch.remove_all_handles, batch_id=batch_id)
-        for count, label in result:
-            print(f'# - cleaned {count} {label} handles')
-            total += count
-        #changes = result.summary().counters.properties_set
-        
-        # Find handles left: missing link (:Batch) --> (x)
-        result = self.tx.run(CypherBatch.find_unlinked_nodes)
-        for count, label in result:
-            print(f'Neo4jDataService._obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch')
-            unlinked += count
-        return {'status':status, 'count':total, 'unlinked':unlinked}
-
-
     def ds_merge_check(self, id1, id2):
         ''' Check that given objects are mergeable.
         
@@ -193,16 +158,9 @@ class Neo4jDataService:
         class RefObj:
             def __str__(self):
                 return f'{self.uniq_id}:{self.label} {self.str}'
-        cypher_merge_check = """
-MATCH (p) WHERE id(p) IN $id_list
-OPTIONAL MATCH (x) -[r:OWNS|PASSED]-> (p)
-RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str, 
-    TYPE(r) AS rel, 
-    ID(p) AS obj_id, LABELS(p)[0] AS obj_label, p.id AS obj_str
- """
         objs = {}
         try:
-            result = self.tx.run(cypher_merge_check, id_list=[id1,id2])
+            result = self.tx.run(CypherAudit.merge_check, id_list=[id1,id2])
             #for root_id, root_str, rel, obj_id, obj_label, obj_str in result:
             for record in result:
                 ro = RefObj()
@@ -244,12 +202,46 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
 
 
 
+    # ----- Common objects -----
+
+
+    def ds_obj_save_and_link(self, obj, **kwargs):
+        """ Saves given object to database
+        
+        :param: batch_id    Current Batch (batch) --> (obj)
+        _param: parent_id   Parent object to link (parent) --> (obj)
+        """
+        obj.save(self.tx, **kwargs)
+
+
+    def ds_obj_remove_gramps_handles(self, batch_id):
+        ''' Remove all Gramps handles.
+        '''
+        status = Status.OK
+        total = 0
+        unlinked = 0
+        # Remove handles from nodes connected to given Batch
+        result = self.tx.run(CypherBatch.remove_all_handles, batch_id=batch_id)
+        for count, label in result:
+            print(f'# - cleaned {count} {label} handles')
+            total += count
+        #changes = result.summary().counters.properties_set
+        
+        # Find handles left: missing link (:Batch) --> (x)
+        result = self.tx.run(CypherBatch.find_unlinked_nodes)
+        for count, label in result:
+            print(f'Neo4jDataService.ds_obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch')
+            unlinked += count
+        return {'status':status, 'count':total, 'unlinked':unlinked}
+
+
+
     # ----- Note -----
 
 
     # ----- Media -----
 
-    def _create_link_medias_w_handles(self, uniq_id:int, media_refs:list):
+    def ds_create_link_medias_w_handles(self, uniq_id:int, media_refs:list):
         ''' Save media object and it's Note and Citation references
             using their Gramps handles.
             
@@ -323,24 +315,9 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
     def ds_merge_places(self, id1, id2):
         ''' Merges given two Place objects using apoc library.
         '''
-        cypher_delete_namelinks = """
-            match (node) -[r:NAME_LANG]-> (pn)
-            where id(node) = $id
-            delete r
-        """
-        cypher_mergeplaces = """
-            match (p1:Place)        where id(p1) = $id1 
-            match (p2:Place)        where id(p2) = $id2
-            call apoc.refactor.mergeNodes([p1,p2],
-                {properties:'discard',mergeRels:true})
-            yield node
-            with node
-            match (node) -[r2:NAME]-> (pn2)
-            return node, collect(pn2) as names
-        """
         try:
-            self.tx.run(cypher_delete_namelinks, id=id1)
-            record = self.tx.run(cypher_mergeplaces, id1=id1, id2=id2).single()
+            self.tx.run(CypherPlaceMerge.delete_namelinks, id=id1)
+            record = self.tx.run(CypherPlaceMerge.merge_places, id1=id1, id2=id2).single()
             node = record['node']
             place = PlaceBl.from_node(node)
             name_nodes = record['names']
@@ -367,7 +344,7 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
 
     # ----- Person -----
 
-    def _get_personnames(self, uniq_id=None):
+    def ds_get_personnames(self, uniq_id=None):
         """ Picks all Name versions of this Person or all persons.
         
             Use optionally refnames or sortname for person selection
@@ -376,18 +353,13 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
             result = self.tx.run(CypherPerson.get_names, pid=uniq_id)
         else:
             result = self.tx.run(CypherPerson.get_all_persons_names)
-        names = []
-        for record in result:
-            # <Record
-            #    pid=82
-            #    name=<Node id=83 labels=frozenset({'Name'})
-            #        properties={'title': 'Sir', 'firstname': 'Jan Erik', 'surname': 'Mannerheimo',
-            #            'prefix': '', 'suffix': 'Jansson', 'type': 'Birth Name', 'order': 0}> >
-            node = record['name']
-            name = Name.from_node(node)
-            name.person_uid =  record['pid']
-            names.append(name)
-        return names
+        # <Record
+        #    pid=82
+        #    name=<Node id=83 labels=frozenset({'Name'})
+        #        properties={'title': 'Sir', 'firstname': 'Jan Erik', 'surname': 'Mannerheimo',
+        #            'prefix': '', 'suffix': 'Jansson', 'type': 'Birth Name', 'order': 0}> >
+        
+        return [(record["pid"], record["name"]) for record in result]
 
 
     def _set_people_lifetime_estimates(self, uids=[]): 
@@ -489,7 +461,7 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
             return {'status': Status.ERROR, 'statustext': msg }
 
 
-    def _build_refnames(self, person_uid:int, name:Name):
+    def ds_build_refnames(self, person_uid:int, name:Name):
         """ Set Refnames to the Person with given uniq_id.
         """
         def link_to_refname(person_uid, nm, use):
@@ -518,7 +490,7 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
                     count += 1
 
         except Exception as e:
-            msg = f'Neo4jDataService._build_refnames: {e.__class__.__name__} {e}'
+            msg = f'Neo4jDataService.ds_build_refnames: {e.__class__.__name__} {e}'
             print(msg)
             return {'status':Status.ERROR, 'count':count, 'statustext': msg}
          

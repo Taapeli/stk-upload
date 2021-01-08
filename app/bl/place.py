@@ -91,154 +91,6 @@ class Place(NodeObject):
         return p
 
 
-
-
-class PlaceDataReader:
-    '''
-    Abstracted Place datastore for reading.
-
-    Data reading class for Place objects with associated data.
-
-    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-      to define the database driver and user context
-
-    - Returns a Result object which includes the items and eventuel error object.
-
-    - Methods return a dict result object {'status':Status, ...}
-    '''
-    def __init__(self, readservice, u_context):
-        ''' Initiate datastore.
-
-        :param: readservice   pe.neo4j.readservice.Neo4jReadService
-        :param: u_context     ui.user_context.UserContext object
-        '''
-        self.readservice = readservice
-        self.driver = readservice.driver
-        self.user_context = u_context
-
-
-    def get_place_list(self):
-        """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
-        
-            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
-    """
-        context = self.user_context
-        fw = context.first  # From here forward
-        use_user = context.batch_user()
-        places = self.readservice.dr_get_place_list_fw(use_user, fw, context.count, 
-                                                       lang=context.lang)
-
-        # Update the page scope according to items really found 
-        if places:
-            print(f'PlaceDataReader.get_place_list: {len(places)} places '
-                  f'{context.direction} "{places[0].pname}" – "{places[-1].pname}"')
-            context.update_session_scope('place_scope', 
-                                          places[0].pname, places[-1].pname, 
-                                          context.count, len(places))
-        else:
-            print(f'bl.place.PlaceDataReader.get_place_list: no places')
-            return {'status': Status.NOT_FOUND, 'items': [],
-                    'statustext': f'No places fw="{fw}"'}
-        return {'items':places, 'status':Status.OK}
-
-
-    def get_places_w_events(self, uuid):
-        """ Read the place hierarchy and events connected to this place.
-        
-            Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
-            Palauttaa paikkahierarkian ja (henkilö)tapahtumat.
-    
-        """
-        # Get a Place with Names, Notes and Medias
-        use_user = self.user_context.batch_user()
-        lang = self.user_context.lang
-        res = self.readservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
-        place = res.get("place")
-        results = {"place":place, 'status':Status.OK}
-
-        if not place:
-            res = {'status':Status.ERROR, 'statustext':
-                       f'get_places_w_events: No Place with uuid={uuid}'}
-            return res
-        
-        #TODO: Find Citation -> Source -> Repository for each uniq_ids
-        try:
-            results['hierarchy'] = \
-                self.readservice.dr_get_place_tree(place.uniq_id, lang=lang)
-
-        except AttributeError as e:
-            traceback.print_exc()
-            return {'status': Status.ERROR,
-                   'statustext': f"Place tree attr for {place.uniq_id}: {e}"}
-        except ValueError as e:
-            return {'status': Status.ERROR,
-                   'statustext': f"Place tree value for {place.uniq_id}: {e}"}
-
-        res = self.readservice.dr_get_place_events(place.uniq_id)
-        results['events'] = res['items']
-        return results
-
-
-class PlaceDataStore:
-    '''
-    Abstracted Place datastore for update.
-
-    Data update class for Place objects with associated data.
-
-    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-      to define the database driver and user context
-
-    - Returns a Result object which includes the items and eventuel error object.
-
-    - Methods return a dict result object {'status':Status, ...}
-    '''
-
-    def __init__(self, dataservice):
-        ''' Initiate datastore.
-
-        #TODO Not needed: :param: driver    neo4j.DirectDriver object
-        :param: dataservice pe.neo4j.dataservice.Neo4jDataService
-        '''
-        self.dataservice = dataservice
-        self.driver = dataservice.driver
-
-
-    def merge2places(self, id1, id2):
-        ''' Merges two places
-        '''
-        # Check that given nodes are included in the same Batch or Audit node
-        ret = self.dataservice.ds_merge_check(id1, id2)
-        if Status.has_failed(ret):  return ret
-
-        # Merge nodes
-        ret = self.dataservice.ds_merge_places(id1, id2)
-        if Status.has_failed(ret):
-            self.dataservice.ds_rollback()
-            return ret
-
-        place = ret.get('place')
-        # Select default names for default languages
-        ret = PlaceBl.find_default_names(place.names, ['fi', 'sv'])
-        if Status.has_failed(ret):
-            self.dataservice.ds_rollback()
-            return ret
-        st = ret.get('status')
-        if st == Status.OK:
-            # Update default language name links
-            def_names = ret.get('ids')
-            self.dataservice.ds_place_set_default_names(place.uniq_id, 
-                                                        def_names['fi'], def_names['sv'])
-
-            ret = self.dataservice.ds_commit()
-            st = ret.get('status')
-            return {'status':st, 'place':place, 
-                    'statustext':ret.get('statustext', '')}
-
-
-#     @staticmethod
-#     def get_w_notes_places(locid): # orig: models.gen.place_combo.Place_combo.get_w_notes
-
-
 class PlaceBl(Place):
     """ Place / Paikka:
 
@@ -333,16 +185,6 @@ class PlaceBl(Place):
         except Exception as e:
             logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
             return {'status':Status.ERROR, 'items':selection}
-
-
-#     def media_save_w_handles(self, uniq_id, media_refs):
-#         ''' Save media object and it's Note and Citation references
-#             using their Gramps handles.
-#         '''
-#         if media_refs:
-#             ds = shareds.datastore.dataservice
-#             ds._media_save_w_handles(uniq_id, media_refs)
-
 
 
     def save(self, tx, **kwargs):
@@ -547,10 +389,6 @@ class PlaceBl(Place):
             p.pname = p.names[0]
         return place_list
 
-#     def set_place_names_from_nodes(self, nodes): --> ui.place.place_names_from_nodes
-#         ''' Filter user language Name objects from a list of Cypher nodes to self.names.
-#         self.names = place_names_from_nodes(nodes)
-
 
 class PlaceName(NodeObject):
     """ Paikan nimi
@@ -663,4 +501,150 @@ class PlaceName(NodeObject):
     def __ge__(self, other):        return self._lang_key(self) >= self._lang_key(other)
     def __gt__(self, other):        return self._lang_key(self) > self._lang_key(other)
     def __ne__(self, other):        return self._lang_key(self) != self._lang_key(other)
+
+
+
+
+class PlaceDataReader:
+    '''
+    Abstracted Place datastore for reading.
+
+    Data reading class for Place objects with associated data.
+
+    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
+      to define the database driver and user context
+
+    - Returns a Result object which includes the items and eventuel error object.
+
+    - Methods return a dict result object {'status':Status, ...}
+    '''
+    def __init__(self, readservice, u_context):
+        ''' Initiate datastore.
+
+        :param: readservice   pe.neo4j.readservice.Neo4jReadService
+        :param: u_context     ui.user_context.UserContext object
+        '''
+        self.readservice = readservice
+        self.driver = readservice.driver
+        self.user_context = u_context
+
+
+    def get_place_list(self):
+        """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
+        
+            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
+    """
+        context = self.user_context
+        fw = context.first  # From here forward
+        use_user = context.batch_user()
+        places = self.readservice.dr_get_place_list_fw(use_user, fw, context.count, 
+                                                       lang=context.lang)
+
+        # Update the page scope according to items really found 
+        if places:
+            print(f'PlaceDataReader.get_place_list: {len(places)} places '
+                  f'{context.direction} "{places[0].pname}" – "{places[-1].pname}"')
+            context.update_session_scope('place_scope', 
+                                          places[0].pname, places[-1].pname, 
+                                          context.count, len(places))
+        else:
+            print(f'bl.place.PlaceDataReader.get_place_list: no places')
+            return {'status': Status.NOT_FOUND, 'items': [],
+                    'statustext': f'No places fw="{fw}"'}
+        return {'items':places, 'status':Status.OK}
+
+
+    def get_places_w_events(self, uuid):
+        """ Read the place hierarchy and events connected to this place.
+        
+            Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
+            Palauttaa paikkahierarkian ja (henkilö)tapahtumat.
+    
+        """
+        # Get a Place with Names, Notes and Medias
+        use_user = self.user_context.batch_user()
+        lang = self.user_context.lang
+        res = self.readservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
+        place = res.get("place")
+        results = {"place":place, 'status':Status.OK}
+
+        if not place:
+            res = {'status':Status.ERROR, 'statustext':
+                       f'get_places_w_events: No Place with uuid={uuid}'}
+            return res
+        
+        #TODO: Find Citation -> Source -> Repository for each uniq_ids
+        try:
+            results['hierarchy'] = \
+                self.readservice.dr_get_place_tree(place.uniq_id, lang=lang)
+
+        except AttributeError as e:
+            traceback.print_exc()
+            return {'status': Status.ERROR,
+                   'statustext': f"Place tree attr for {place.uniq_id}: {e}"}
+        except ValueError as e:
+            return {'status': Status.ERROR,
+                   'statustext': f"Place tree value for {place.uniq_id}: {e}"}
+
+        res = self.readservice.dr_get_place_events(place.uniq_id)
+        results['events'] = res['items']
+        return results
+
+
+class PlaceDataStore:
+    '''
+    Abstracted Place datastore for update.
+
+    Data update class for Place objects with associated data.
+
+    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
+      to define the database driver and user context
+
+    - Returns a Result object which includes the items and eventuel error object.
+
+    - Methods return a dict result object {'status':Status, ...}
+    '''
+
+    def __init__(self, dataservice):
+        ''' Initiate datastore.
+
+        #TODO Not needed: :param: driver    neo4j.DirectDriver object
+        :param: dataservice pe.neo4j.dataservice.Neo4jDataService
+        '''
+        self.dataservice = dataservice
+        self.driver = dataservice.driver
+
+
+    def merge2places(self, id1, id2):
+        ''' Merges two places
+        '''
+        # Check that given nodes are included in the same Batch or Audit node
+        ret = self.dataservice.ds_merge_check(id1, id2)
+        if Status.has_failed(ret):
+            self.dataservice.ds_rollback()
+            return ret
+
+        # Merge nodes
+        ret = self.dataservice.ds_merge_places(id1, id2)
+        if Status.has_failed(ret):
+            self.dataservice.ds_rollback()
+            return ret
+
+        place = ret.get('place')
+        # Select default names for default languages
+        ret = PlaceBl.find_default_names(place.names, ['fi', 'sv'])
+        if Status.has_failed(ret):
+            self.dataservice.ds_rollback()
+            return ret
+        st = ret.get('status')
+        if st == Status.OK:
+            # Update default language name links
+            def_names = ret.get('ids')
+            self.dataservice.ds_place_set_default_names(place.uniq_id, 
+                                                        def_names['fi'], def_names['sv'])
+
+            ret = self.dataservice.ds_commit()
+            st = ret.get('status')
+            return {'status':st, 'place':place, 
+                    'statustext':ret.get('statustext', '')}
 

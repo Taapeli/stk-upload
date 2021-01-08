@@ -53,8 +53,8 @@ div.box3 {
     border-radius: 15px;
     background-color: #D5F5E3;
 }
-div.box3 > h2 { margin-bottom: 0;
-}
+div.box3 > h2 { margin-bottom: 0; }
+.redtext { color:red; }
 
 th {
  	position: sticky; 
@@ -156,8 +156,8 @@ input {
 	<template v-for="p in to_be_merged">
 		<div class="box3">
 		        <h2>${ p.pname } (${ p.uniq_id })</h2>
-                <p v-show="p.batch">Batch: ${ p.batch }</p>
-                <p v-show="!p.batch">Batch: <i>No batch!</i></p>
+                <p v-if="p.batch">${ p.batch }</p>
+                <p v-else><i>No batch!</i></p>
 		        <div class="box2">
 		        <h3>Ominaisuudet</h3>
 		        <table border>
@@ -186,7 +186,7 @@ input {
 		</div>
 	</template>
 	<br>
-	<input type=button value="Yhdistä" @click="mergeplaces()">
+	<input type=button value="Yhdistä" @click="mergeplaces()" v-bind:disabled="!same_batch">
 	<input type=button value="Sulje" @click="to_be_merged = []">
 	</div>
 		
@@ -223,6 +223,7 @@ var app = new Vue({
         use:"firstname",
         match:"startswith",
         to_be_merged: [],
+        same_batch: true,
         show_dups: false,
         dups: [],
         selected: [],
@@ -273,12 +274,20 @@ var app = new Vue({
         		this.fetch_namefamily(this.basename);
     	},
         merge: function() {
-        	this.to_be_merged = [];
+        	var prev_batch = null;
+        	app.to_be_merged = [];
         	this.selected.forEach( function(p) {
 	            axios.get('/refplaces/api/getplace?id=' + p.uniq_id ).
 	                then(function(rsp, status) {
 	                	var p = rsp.data.place;
 			        	app.to_be_merged.push(p);
+			        	// p.batch="Batch 2020-11-26.001" -> "Batch"
+			        	var batch_type = p.batch.split(" ")[0];
+			        	console.log('Batch type = '+ batch_type);
+			        	if (prev_batch != null && batch_type != prev_batch) {
+			        		app.same_batch = false;
+			        	}
+			        	prev_batch = batch_type;
 	                });
         	});
     	},

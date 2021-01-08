@@ -22,13 +22,14 @@ class MediaBl(NodeObject):
         '''
         if media_refs:
             ds = shareds.datastore.dataservice
-            ds._create_link_medias_w_handles(uniq_id, media_refs)
+            ds.ds_create_link_medias_w_handles(uniq_id, media_refs)
 
 
 class MediaRefResult():
     ''' Gramps media reference result object.
     
-        Includes Note and Citation references and crop data
+        Includes Note and Citation references and crop data.
+        Used in bp.gramps.xml_dom_handler.DOM_handler
     '''
     def __init__(self):
         self.media_handle = None

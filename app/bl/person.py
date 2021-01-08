@@ -26,13 +26,14 @@ Created on 6.10.2020
 '''
 from flask_babelex import _
 from datetime import datetime
-from sys import stderr
-import traceback
+#from sys import stderr
+#import traceback
 import logging 
 logger = logging.getLogger('stkserver')
 import shareds
 
 from bl.base import NodeObject, Status
+from bl.person_name import Name
 from bl.media import MediaBl
 from pe.db_reader import DbReader
 from pe.neo4j.cypher.cy_person import CypherPerson
@@ -621,15 +622,19 @@ class PersonBl(Person):
         refname_count = 0
         do_refnames = 'refname' in ops
         do_sortname = 'sortname' in ops
-    
-        # Get each Name object (with person_uid) 
+        names = []
         ds = shareds.datastore.dataservice
-        names = ds._get_personnames(uniq_id)
+
+        # Get each Name object (with person_uid) 
+        for pid, name_node in ds.ds_get_personnames(uniq_id):
+            name = Name.from_node(name_node)
+            name.person_uid =  pid
+            names.append(name)
 
         if do_refnames:
             for name in names:
                 # Create links and nodes from given person: (:Person) --> (r:Refname)
-                res = ds._build_refnames(name.person_uid, name)
+                res = ds.ds_build_refnames(name.person_uid, name)
                 if Status.has_failed(res): return res
                 refname_count += res.get('count', 0)
         if do_sortname:
@@ -681,6 +686,7 @@ class PersonBl(Person):
         """
         ds = shareds.datastore.dataservice
         res = ds._set_people_lifetime_estimates(uids)
+
         print(f"Estimated lifetime for {res['count']} persons")
         return res
 
