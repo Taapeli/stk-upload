@@ -523,7 +523,7 @@ RETURN r.role AS eventref_role, event.handle AS event_handles"""
     def find_family_for_event(event_uniq_id):
         """ Returns Family instance which has given Event.
 
-            NOT IN USE. For models.datareader.get_source_with_events
+            NOT IN USE. For models.obsolete_datareader.get_source_with_events
         """                
         query = """
 MATCH (family:Family)-[r:EVENT]->(event)
@@ -536,12 +536,6 @@ RETURN family"""
         raise LookupError(f"Family {event_uniq_id} not found")
 
 
-#     def get_family_data_by_id(self): #see models.gen.family_combo.Family_combo.get_family_data_by_id
-#         """ Luetaan perheen tiedot. 
-#             Called from models.datareader.get_families_data_by_id 
-#                    from bp.obsolete_tools.routes.show_family_data
-    
-    
 #     @staticmethod           
 #     def get_dates_parents(tx, uniq_id): #see models.gen.family_combo.Family_combo
 #         return tx.run(Cypher_family.get_dates_parents,id=uniq_id)

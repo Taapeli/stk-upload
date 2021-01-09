@@ -75,10 +75,10 @@ class Repository(NodeObject):
 
 
     @staticmethod
-    def get_repositories(uniq_id):
+    def obsolete_get_repositories(uniq_id):
         """ Reads all Repository nodes or selected Repository node from db
 
-            Now called only from models.datareader.get_repositories for 
+            OBSOLETE: called only from models.obsolete_datareader.obsolete_get_repositories for 
             "table_of_objects.html"
         """
 

@@ -36,11 +36,11 @@ from bp.scene.models import media
 #from models.gen.source import Source
 from models.gen.media import Media
 
-from models.datareader import read_persons_with_events
-#from models.datareader import get_person_data_by_id # -- vanhempi versio ---
-#from models.datareader import get_event_participants
-#from models.datareader import get_place_with_events
-#from models.datareader import get_source_with_events
+from models.obsolete_datareader import obsolete_read_persons_with_events
+#from models.obsolete_datareader import get_person_data_by_id # -- vanhempi versio ---
+#from models.obsolete_datareader import get_event_participants
+#from models.obsolete_datareader import get_place_with_events
+#from models.obsolete_datareader import get_source_with_events
 #from templates.jinja_filters import translate
 
 # Select the read driver for current database
@@ -211,7 +211,7 @@ def obsolete_show_persons_by_refname(refname, opt=""):
     if current_user.is_authenticated:
         args['user'] = current_user.username
     print(f'Obsolete! {request.method}: keys={keys}, args={args}')
-    persons = read_persons_with_events(keys, args=args)
+    persons = obsolete_read_persons_with_events(keys, args=args)
     print(persons)
     persons = []
     stk_logger(u_context, f"-> bp.scene.routes.show_persons_by_refname FAIL?") #n={len(persons)}")

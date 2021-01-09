@@ -23,12 +23,13 @@ import shareds
 from bl.audit import Audit
 from bl.batch import Batch
 from bl.person import Person, PersonBl
+from bl.refname import Refname
 from bp.admin.cvs_refnames import load_refnames
 from .models.batch_merge import Batch_merge
 #from .models.audition import Audition
 
 from bp.admin import uploads
-from models import syslog , loadfile, datareader, dbutil
+from models import syslog , loadfile, dbutil #, datareader
 
 @bp.route('/audit')
 @login_required
@@ -139,7 +140,8 @@ def download_refnames():
         writer = csv.writer(f)
         hdrs = "Name,Refname,Reftype,Gender,Source,Note".split(",")
         writer.writerow(hdrs)
-        refnames = datareader.read_refnames()
+        #refnames = datareader.read_refnames()
+        refnames = Refname.get_refnames()
         for refname in refnames:
             row = [refname.name,
                    refname.refname,
@@ -167,7 +169,9 @@ def upload_csv():
         loadfile.upload_file(infile)
         if 'destroy' in request.form and request.form['destroy'] == 'all':
             logger.info("-> bp.audit.routes.upload_csv/delete_all_Refnames")
-            datareader.recreate_refnames()
+            #datareader.recreate_refnames()
+            Refname.recreate_refnames()
+
 
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))

@@ -30,6 +30,7 @@ import logging
 logger = logging.getLogger('stkserver')
 
 import shareds
+from bl.base import NodeObject #, Status
 from pe.neo4j.cypher.cy_refname import CypherRefname
 #from .cypher import Cypher_refname
 from .person import Person, SEX_UNKOWN
@@ -37,7 +38,7 @@ from .person import Person, SEX_UNKOWN
 # Global allowed reference types in Refname.reftype field or use attribute in db
 REFTYPES = ['basename', 'firstname', 'surname', 'patronyme', 'father', 'mother']
 
-class Refname:
+class Refname(NodeObject):
     """
         ( Refname {uniq_id, nimi} ) -[reftype]-> (Refname)
                    reftype = (etunimi, sukunimi, patronyymi)
@@ -341,7 +342,6 @@ class Refname:
         """ Get all Refnames
             Returns a list of Refname objects, with referenced names, reftypes
             and count of usages.
-            [Call: datareader.read_refnames()]
 # ╒═══════╤═══════════════════════╤═══════════════════════╤═════════════╤══════╕
 # │"ID(n)"│"n"                    │"r_ref"                │"l_uses"     │"uses"│
 # ╞═══════╪═══════════════════════╪═══════════════════════╪═════════════╪══════╡
@@ -393,3 +393,30 @@ class Refname:
         except Exception as err:
             print("iError (Refname.get_refnames): {0}".format(err), file=stderr)
             return []
+
+class RefnameDataReader:
+    '''
+    NOT YET IN USE. Abstracted Reference name datastore for reading.
+
+    Data reading class for Refname objects with associated data.
+
+    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
+      to define the database driver and user context
+
+    - Returns a Result object which includes the items and eventuel error object.
+
+    - Methods return a dict result object {'status':Status, ...}
+    
+    #TODO: Should move Refname.get_refnames() here
+    '''
+    def __init__(self, readservice, u_context):
+        ''' Initiate datastore.
+
+        :param: readservice   pe.neo4j.readservice.Neo4jReadService
+        :param: u_context     ui.user_context.UserContext object
+        '''
+        self.readservice = readservice
+        self.driver = readservice.driver
+        self.user_context = u_context
+
+

@@ -257,7 +257,7 @@ class Refname:
 
 
     @staticmethod
-    def recreate_refnames():
+    def obsolete_recreate_refnames():
         # Deletes all refnames and their relations and
         # defines unique constraint for refnames
 

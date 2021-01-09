@@ -29,7 +29,7 @@ from models.gen.person_combo import Person_combo, Person_as_member
 #from models.gen.person_name import Name
 #from models.gen.place import Place
 from models.gen.place_combo import Place_combo
-from models.gen.refname import Refname
+from bl.refname import Refname
 from models.gen.citation import Citation #, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
@@ -38,8 +38,11 @@ from ui.user_context import UserContext
 #import traceback
 
 
-def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=False, order=0):
+def obsolete_read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=False, order=0):
     """ Reads Person Name and Event objects for display.
+    
+        OBSOLETE. Called from bp.scene.routes.obsolete_show_persons_by_refname
+        
         Filter persons by args['context_code'].
 
         Returns Person objects, whith included Events and Names
@@ -59,7 +62,7 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
     return (persons)
 
 
-def read_refnames():
+def obsolete_read_refnames():
     """ Reads all Refname objects for table display
         (n:Refname)-[r]->(m)
     """
@@ -70,7 +73,7 @@ def read_refnames():
 
     return (recs)
 
-def recreate_refnames():
+def obsolete_recreate_refnames():
     summary = Refname.recreate_refnames()
     return str(summary)
 
@@ -147,7 +150,7 @@ def recreate_refnames():
 #     return (namelist)
 
 
-def read_cite_sour_repo(uniq_id=None):
+def obsolete_read_cite_sour_repo(uniq_id=None):
     """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
     
         Called from bp.obsolete_tools.routes.pick_selection  -  NOT IN USE?
@@ -196,7 +199,7 @@ def read_cite_sour_repo(uniq_id=None):
     return (sources)
 
 
-def read_medias(uniq_id=None):
+def obsolete_read_medias(uniq_id=None):
     """ Lukee tietokannasta Media-objektit näytettäväksi.
     """
 
@@ -210,7 +213,7 @@ def read_medias(uniq_id=None):
     return (media)
 
 
-def get_repositories(uniq_id=None):
+def obsolete_get_repositories(uniq_id=None):
     """ Lukee tietokannasta Repository- ja Source- objektit näytettäväksi
 
         (Korvaa read_repositories()
@@ -260,7 +263,7 @@ def get_repositories(uniq_id=None):
     return (titles, repositories)
 
 
-def read_same_eventday(event_type):
+def obsolete_read_same_eventday(event_type):
     """ Lukee tietokannasta henkilötiedot, joilla on sama syntymäaika, näytettäväksi
     """
 
@@ -315,7 +318,7 @@ def read_same_eventday(event_type):
 #     return (ids)
 
 
-def read_same_name(uniq_id=None):
+def obsolete_read_same_name(uniq_id=None):
     """ Lukee tietokannasta Person-objektit, joilla on sama nimi, näytettäväksi
     """
 
@@ -327,7 +330,7 @@ def read_same_name(uniq_id=None):
     return (ids)
 
 
-def read_sources(uniq_id=None):
+def obsolete_read_sources(uniq_id=None):
     """ Lukee tietokannasta Source- ja Citation- objektit näytettäväksi
     """
 
@@ -351,12 +354,12 @@ def read_sources(uniq_id=None):
                 s.citations.append(c)
             sources.append(s)
     except Exception as err:
-        print("iError read_sources: {1} {0}".format(err, uniq_id), file=stderr)
+        print("iError obsolete_read_sources: {1} {0}".format(err, uniq_id), file=stderr)
 
     return (sources)
 
 
-def read_events_wo_cites():
+def obsolete_read_events_wo_cites():
     """ Lukee tietokannasta Event- objektit, joilta puuttuu viittaus näytettäväksi
     """
 
@@ -369,7 +372,7 @@ def read_events_wo_cites():
     return (headings, titles, events)
 
 
-def read_events_wo_place():
+def obsolete_read_events_wo_place():
     """ Lukee tietokannasta Event- objektit, joilta puuttuu paikka näytettäväksi
     """
 
@@ -382,7 +385,7 @@ def read_events_wo_place():
     return (headings, titles, events)
 
 
-def read_families():
+def obsolete_read_families():
     """ Lukee tietokannasta Family- objektit näytettäväksi
     """
 
@@ -397,7 +400,7 @@ def read_families():
     return (families)
 
 
-def read_people_wo_birth():
+def obsolete_read_people_wo_birth():
     """ Lukee tietokannasta Person- objektit, joilta puuttuu syntymätapahtuma
         näytettäväksi
     """
@@ -411,7 +414,7 @@ def read_people_wo_birth():
     return (headings, titles, people)
 
 
-def read_old_people_top():
+def obsolete_read_old_people_top():
     """ Lukee tietokannasta Person- objektit, joilla syntymä- ja kuolintapahtuma
         näytettäväksi
     """
@@ -430,7 +433,7 @@ def read_old_people_top():
     return (headings, titles, top_of_sorted_people)
 
 
-def read_places():
+def obsolete_read_places():
     """ Lukee tietokannasta Place- objektit näytettäväksi
 
     """
@@ -448,7 +451,7 @@ def read_places():
 #     """ Reads a Source with events, citations and notes.
 
 
-def read_sources_wo_cites():
+def obsolete_read_sources_wo_cites():
     """ Lukee tietokannasta Source- objektit, joilta puuttuu viittaus näytettäväksi
     """
 
@@ -461,7 +464,7 @@ def read_sources_wo_cites():
     return (headings, titles, lists)
 
 
-def read_sources_wo_repository():
+def obsolete_read_sources_wo_repository():
     """ Lukee tietokannasta Source- objektit, joilta puuttuu arkisto näytettäväksi
     """
 
@@ -474,7 +477,7 @@ def read_sources_wo_repository():
     return (headings, titles, lists)
 
 
-def get_people_by_surname(surname):
+def obsolete_get_people_by_surname(surname):
     people = []
     result = Name.get_people_with_surname(surname)
     for record in result:
@@ -486,7 +489,7 @@ def get_people_by_surname(surname):
     return (people)
 
 
-def get_person_data_by_id(pid):
+def obsolete_get_person_data_by_id(pid):
     """ Get 5 data sets:                        ---- vanhempi versio ----
 
         ###Obsolete? still used in
@@ -756,7 +759,7 @@ def get_person_data_by_id(pid):
 #     return (e, parts)
 
 
-def get_baptism_data(uniq_id):
+def obsolete_get_baptism_data(uniq_id):
     '''
         Get event data and participants.
     '''
@@ -792,10 +795,10 @@ def get_baptism_data(uniq_id):
     return (e, persons)
 
 
-def get_families_data_by_id(uniq_id):
-    # Sivua "table_families_by_id.html" varten
-    raise(NotImplementedError, "models.datareader.get_families_data_by_id poistettu 17.5.2020")
-
+# def get_families_data_by_id(uniq_id):
+#     # Sivua "table_families_by_id.html" varten
+#     raise(NotImplementedError, "models.datareader.get_families_data_by_id poistettu 17.5.2020")
+#
 #     families = []
 # 
 #     p = Person_combo()
@@ -882,7 +885,7 @@ def get_families_data_by_id(uniq_id):
 #     return (place, place_list, event_table)
 
 
-def get_note_list(uniq_id=None):
+def obsolete_get_note_list(uniq_id=None):
     """ Lukee tietokannasta Note- objektit näytettäväksi
     """
     titles, notes = Note.get_note_list(uniq_id)

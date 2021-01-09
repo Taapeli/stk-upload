@@ -9,13 +9,13 @@ from flask_babelex import _
 #from bp.gramps.batchlogger import BatchLog
 from models.gen.user import User
 from bl.person import PersonBl
-from bl.person_name import Name
+#from bl.person_name import Name
 #from bl.family import FamilyBl
 
 #from models.gen.person import Person
 #from models.gen.place import Place
 #from models.gen.person_name import Name
-from models.gen.refname import Refname
+#from models.gen.refname import Refname
 #from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
 from bl.dates import DateRange, DR
