@@ -7,7 +7,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 import  shareds
 
 from bl.base import NodeObject
-from .dates import DateRange
+from bl.dates import DateRange
 
 
 class Family(NodeObject): # -> bl.family.Family

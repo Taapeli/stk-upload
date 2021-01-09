@@ -5,7 +5,7 @@ Created on 17.3.2020
 '''
 import logging
 #from models.gen.family_combo import Family_combo
-from models.gen.dates import DateRange
+from bl.dates import DateRange
 logger = logging.getLogger('stkserver')
 
 from bl.base import Status

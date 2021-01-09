@@ -31,7 +31,7 @@ from bl.media import MediaBl
 from pe.db_reader import DbReader
 from pe.neo4j.cypher.cy_event import CypherEvent
 
-from models.gen.dates import DateRange
+from bl.dates import DateRange
 #from models.gen.person_combo import Person_combo, Name
 #from models.gen.family_combo import Family_combo
 

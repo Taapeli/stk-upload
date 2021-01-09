@@ -38,7 +38,7 @@ from .models.source_gramps import Source_gramps
 from .batchlogger import LogItem
 
 from models.cypher_gramps import Cypher_mixed
-from models.gen.dates import Gramps_DateRange
+from bl.dates import Gramps_DateRange
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.citation import Citation

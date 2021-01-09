@@ -90,7 +90,7 @@ class DateRange():
     The dates are expressed with 
     - an date range type (datetype) and 
     - one or two values (date1, date2) representing the date limits (from, to). 
-    A datetype value is one of int values from models.gen.dates.DR dictionary.
+    A datetype value is one of int values bl.dates.DR dictionary.
     The date limits are integer values coded by DateInt() from their string 
     repesentations.
 

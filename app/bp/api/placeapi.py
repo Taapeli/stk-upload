@@ -1,5 +1,5 @@
 import shareds
-from models.gen.dates import DateRange
+from bl.dates import DateRange
 """
 https://isotammi.net/api/v1/search?lookfor=Antrea
 --> {"status":"OK",

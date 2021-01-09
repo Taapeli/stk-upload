@@ -41,7 +41,7 @@ Created on 2.5.2017
 '''
 
 from bl.base import NodeObject
-from .dates import DateRange
+from bl.dates import DateRange
 import  shareds
 import traceback
 

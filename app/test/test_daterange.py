@@ -5,7 +5,7 @@ Created on 10.11.2017
 '''
 import unittest
 from datetime import date
-from models.gen.dates import DateRange, DR
+from bl.dates import DateRange, DR
 from models.gen.base import NodeObject
 
 

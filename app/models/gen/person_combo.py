@@ -47,7 +47,7 @@
 from sys import stderr
 
 import shareds
-from .dates import DateRange
+from bl.dates import DateRange
 
 from bl.person import Person, PersonBl
 from bl.person_name import Name
@@ -1088,7 +1088,7 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
 #             and models.dataupdater.set_estimated_dates
 #         """
 #         from models import lifetime
-#         from models.gen.dates import DR 
+#         from bl.dates import DR 
 #         try:
 #             if uids:
 #                 result = tx.run(Cypher_person.fetch_selected_for_lifetime_estimates, idlist=uids)

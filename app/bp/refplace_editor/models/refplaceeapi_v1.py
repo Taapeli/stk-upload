@@ -1,6 +1,6 @@
 import shareds
 from _operator import itemgetter
-from models.gen.dates import DateRange
+from bl.dates import DateRange
 #import pprint
 from bl.place import PlaceBl, PlaceName
 #from pe.neo4j.dataservice import Neo4jDataService

@@ -33,7 +33,7 @@ from models.gen.refname import Refname
 from models.gen.citation import Citation #, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
-from models.gen.dates import DateRange
+from bl.dates import DateRange
 from ui.user_context import UserContext
 #import traceback
 

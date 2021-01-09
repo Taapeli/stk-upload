@@ -9,7 +9,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 import logging 
-from models.gen.dates import DateRange
+from bl.dates import DateRange
 logger = logging.getLogger('stkserver')
 
 import shareds

@@ -22,7 +22,7 @@ from pe.db_reader import DbReader
 from models.gen.cypher import Cypher_family #TODO fix
 from pe.neo4j.cypher.cy_family import CypherFamily
 
-from models.gen.dates import DateRange
+from bl.dates import DateRange
 
 
 class Family(NodeObject):

@@ -18,7 +18,7 @@ from bl.person_name import Name
 from models.gen.refname import Refname
 #from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
-from models.gen.dates import DateRange, DR
+from bl.dates import DateRange, DR
 
 
 def make_place_hierarchy_properties(tx=None, place=None):

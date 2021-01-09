@@ -31,7 +31,7 @@ logger = logging.getLogger('stkserver')
 from .base import NodeObject, Status
 from .media import MediaBl
 #from pe.db_reader import DbReader
-from models.gen.dates import DateRange
+from bl.dates import DateRange
 
 
 class Place(NodeObject):

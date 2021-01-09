@@ -11,7 +11,7 @@ from bl.place import Place, PlaceName
 #from .place import Place, Place_name, Point
 from .note import Note
 from .media import Media
-from .dates import DateRange
+from bl.dates import DateRange
 from .cypher import Cypher_place
 #from models.dbtree import DbTree
 #from models.gen.event_combo import Event_combo

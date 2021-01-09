@@ -368,7 +368,7 @@ class Neo4jDataService:
             :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
         """
         from models import lifetime
-        from models.gen.dates import DR
+        from bl.dates import DR
 
         personlist = []
         personmap = {}
@@ -613,7 +613,7 @@ class Neo4jDataService:
             Set Family.date1 using the data in marriage Event
             Set Family.datetype and Family.date2 using the data in divorce or death Events
         """
-        from models.gen.dates import DateRange, DR
+        from bl.dates import DateRange, DR
 
         dates_count = 0
         sortname_count = 0
