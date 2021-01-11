@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-12-28 18:31+0200\n"
+"POT-Creation-Date: 2021-01-10 19:52+0200\n"
 "PO-Revision-Date: 2020-12-16 17:20+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -22,87 +22,108 @@ msgstr ""
 msgid "Undefined"
 msgstr "Määrittelemätön"
 
-#: bp/start/templates/start/my_settings.html:56 config.py:30
+#: bp/start/templates/start/my_settings.html:64 config.py:30
 #: templates/select_refcols.html:48 templates/select_refcols.html:76
 msgid "Finnish"
 msgstr "suomi"
 
-#: bp/start/templates/start/my_settings.html:58 config.py:31
+#: bp/start/templates/start/my_settings.html:66 config.py:31
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr "ruotsi"
 
-#: bp/start/templates/start/my_settings.html:60 config.py:32
+#: bp/start/templates/start/my_settings.html:68 config.py:32
 msgid "English"
 msgstr "englanti"
 
-#: setups.py:137
+#: setups.py:144
 msgid "Email or Username"
 msgstr "Sähköposti tai käyttäjätunnus"
 
-#: setups.py:138 setups.py:147
+#: setups.py:145 setups.py:154
 msgid "Password"
 msgstr "Salasana"
 
-#: setups.py:140
+#: setups.py:147
 msgid "Remember Me"
 msgstr "Muista minut"
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:141
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:148
 msgid "Login"
 msgstr "Kirjautuminen"
 
 #: bp/admin/forms.py:38 bp/admin/forms.py:89
 #: bp/admin/templates/admin/list_users.html:83
-#: bp/start/templates/start/join.html:55 setups.py:145
+#: bp/start/templates/start/join.html:55 setups.py:152
 msgid "Email address"
 msgstr "Sähköposti"
 
-#: setups.py:146
+#: setups.py:153
 msgid ""
 "I have read and agree the <a href='static/termsofuse.html'>Terms of "
 "use</a>"
 msgstr "Hyväksyn <a href='static/termsofuse.html'>käyttöehdot</a>"
 
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:149
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:156
 #: templates/index_entry.html:63 templates/index_entry.html:67
 msgid "Register"
 msgstr "Rekisteröidy"
 
-#: setups.py:153
+#: setups.py:160
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr "Olen lukenut ja hyväksynyt käyttöehdot"
 
-#: setups.py:163
+#: setups.py:170
 msgid "Username has been reserved already"
 msgstr "Tämä käyttäjätunnus on jo varattu"
 
-#: setups.py:165 templates/del_table_users.html:39
+#: setups.py:172 templates/del_table_users.html:39
 msgid "Username"
 msgstr "Käyttäjätunnus"
 
 #: bp/admin/templates/admin/list_users.html:82
-#: bp/obsolete_tools/templates/tools/person2.html:16
-#: bp/obsolete_tools/templates/tools/table_persons.html:22
-#: bp/obsolete_tools/templates/tools/table_refnames.html:32
-#: bp/start/templates/start/join.html:53 setups.py:166 setups.py:196
+#: bp/start/templates/start/join.html:53 setups.py:173 setups.py:203
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Nimi"
 
 #: bp/admin/forms.py:43 bp/admin/forms.py:46 bp/admin/forms.py:92
 #: bp/admin/forms.py:95 bp/admin/templates/admin/list_users.html:84
-#: bp/start/forms.py:20 bp/start/forms.py:24 setups.py:167 setups.py:196
+#: bp/start/forms.py:20 bp/start/forms.py:24 setups.py:174 setups.py:203
 msgid "Language"
 msgstr "Kieli"
 
-#: setups.py:169
+#: setups.py:176
 msgid "Language required"
 msgstr "Kieli on pakollinen"
 
-#: bp/admin/forms.py:40 bp/start/templates/start/join.html:54 setups.py:196
+#: bp/admin/forms.py:40 bp/start/templates/start/join.html:54 setups.py:203
 msgid "User name"
 msgstr "Käyttäjätunnus"
+
+#: bl/dates.py:221
+msgid "calculated "
+msgstr "laskettu "
+
+#: bl/dates.py:224
+msgid "estimated "
+msgstr "arvioitu "
+
+#: bl/dates.py:234
+msgid "{}till {}"
+msgstr "{}{} saakka"
+
+#: bl/dates.py:237
+msgid "{}from {}"
+msgstr "{}{} alkaen"
+
+#: bl/dates.py:242
+msgid "{}between {} … {}"
+msgstr "{}välillä {} … {}"
+
+#: bl/dates.py:245
+msgid "{}about {}"
+msgstr "{}noin {}"
 
 #: bl/event.py:131
 msgid "The event is not accessible"
@@ -128,40 +149,40 @@ msgstr "tuntematon suhde"
 msgid "This person has no families"
 msgstr "Ei perheitä"
 
-#: bl/person.py:105 bl/person.py:108 templates/jinja_filters.py:97
+#: bl/person.py:106 bl/person.py:109 templates/jinja_filters.py:97
 #: templates/jinja_filters.py:246
 msgid "Child"
 msgstr "lapsi"
 
-#: bl/person.py:106 templates/jinja_filters.py:245
+#: bl/person.py:107 templates/jinja_filters.py:245
 msgid "Son"
 msgstr "poika"
 
-#: bl/person.py:107 templates/jinja_filters.py:244
+#: bl/person.py:108 templates/jinja_filters.py:244
 msgid "Daughter"
 msgstr "tytär"
 
-#: bl/person.py:115
+#: bl/person.py:116
 msgid "sex not known"
 msgstr "tuntematon sukupuoli"
 
-#: bl/person.py:116
+#: bl/person.py:117
 msgid "male"
 msgstr "mies"
 
-#: bl/person.py:117
+#: bl/person.py:118
 msgid "female"
 msgstr "nainen"
 
-#: bl/person.py:118
+#: bl/person.py:119
 msgid "sex not applicable"
 msgstr "ei sukupuolta"
 
-#: bl/person.py:214 bl/person.py:246
+#: bl/person.py:215 bl/person.py:247
 msgid "No persons found"
 msgstr "Ketään ei löytynyt"
 
-#: bl/person.py:283
+#: bl/person.py:284
 msgid "The person is not accessible"
 msgstr "Henkilöä ei voi katsoa"
 
@@ -215,7 +236,7 @@ msgstr "Gedcom-tiedostot"
 
 #: bp/admin/forms.py:52 bp/admin/forms.py:101
 #: bp/scene/templates/scene/event.html:76
-#: bp/scene/templates/scene/event_vue.html:102
+#: bp/scene/templates/scene/event_vue.html:101
 msgid "Member"
 msgstr "Jäsen"
 
@@ -301,7 +322,7 @@ msgid "Approved / pending user"
 msgstr "Hyväksytty / odottava käyttäjä"
 
 #: bp/admin/forms.py:98 bp/scene/templates/scene/event.html:75
-#: bp/scene/templates/scene/event_vue.html:101
+#: bp/scene/templates/scene/event_vue.html:100
 msgid "Role"
 msgstr "Rooli"
 
@@ -439,7 +460,7 @@ msgstr "Voimassa olevat käyttöoikeudet"
 #: bp/dupsearch/templates/dupsearch.html:25
 #: bp/gramps/templates/gramps/index_gramps.html:36
 #: bp/start/templates/start/my_message.html:52
-#: bp/start/templates/start/my_settings.html:37
+#: bp/start/templates/start/my_settings.html:45
 msgid "User"
 msgstr "Käyttäjä"
 
@@ -659,28 +680,10 @@ msgid "The Genealogical Society of Finland"
 msgstr "Suomen Sukututkimusseura"
 
 #: bp/admin/templates/admin/layout.html:26
-#: bp/obsolete_tools/templates/tools/ng_same_name.html:13
-#: bp/obsolete_tools/templates/tools/ng_same_person.html:13
-#: bp/obsolete_tools/templates/tools/table_families.html:11
-#: bp/obsolete_tools/templates/tools/table_media.html:11
-#: bp/obsolete_tools/templates/tools/table_of_data.html:11
-#: bp/obsolete_tools/templates/tools/table_of_objects.html:19
-#: bp/obsolete_tools/templates/tools/table_persons.html:13
-#: bp/obsolete_tools/templates/tools/table_refnames.html:11
-#: bp/obsolete_tools/templates/tools/table_sources.html:11
 msgid "Change settings"
 msgstr "Muuta asetuksia"
 
 #: bp/admin/templates/admin/layout.html:26
-#: bp/obsolete_tools/templates/tools/ng_same_name.html:13
-#: bp/obsolete_tools/templates/tools/ng_same_person.html:13
-#: bp/obsolete_tools/templates/tools/table_families.html:11
-#: bp/obsolete_tools/templates/tools/table_media.html:11
-#: bp/obsolete_tools/templates/tools/table_of_data.html:11
-#: bp/obsolete_tools/templates/tools/table_of_objects.html:19
-#: bp/obsolete_tools/templates/tools/table_persons.html:13
-#: bp/obsolete_tools/templates/tools/table_refnames.html:11
-#: bp/obsolete_tools/templates/tools/table_sources.html:11
 msgid "Select displayed data"
 msgstr "Valitse näytettävät tiedot"
 
@@ -697,23 +700,6 @@ msgid "Version"
 msgstr "versio"
 
 #: bp/admin/templates/admin/list_users.html:3
-#: bp/obsolete_tools/templates/tools/ng_compare.html:3
-#: bp/obsolete_tools/templates/tools/ng_people_by_surname.html:3
-#: bp/obsolete_tools/templates/tools/ng_same_birthday.html:3
-#: bp/obsolete_tools/templates/tools/ng_same_deathday.html:3
-#: bp/obsolete_tools/templates/tools/ng_same_name.html:3
-#: bp/obsolete_tools/templates/tools/ng_same_person.html:3
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:3
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:3
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:3
-#: bp/obsolete_tools/templates/tools/table_families.html:3
-#: bp/obsolete_tools/templates/tools/table_media.html:3
-#: bp/obsolete_tools/templates/tools/table_of_data.html:3
-#: bp/obsolete_tools/templates/tools/table_of_objects.html:3
-#: bp/obsolete_tools/templates/tools/table_people_by_surname.html:3
-#: bp/obsolete_tools/templates/tools/table_persons.html:3
-#: bp/obsolete_tools/templates/tools/table_sources.html:3
-#: bp/obsolete_tools/templates/tools/table_surnames.html:3
 #: templates/_ng_table_repositories.html:3 templates/del_table_users.html:3
 #: templates/ladattu2.html:3
 msgid "Database Information"
@@ -840,8 +826,6 @@ msgid "Time"
 msgstr "Aika"
 
 #: bp/admin/templates/admin/syslog.html:15
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:11
-#: bp/obsolete_tools/templates/tools/table_families.html:24
 #: bp/scene/templates/scene/place_events.html:113
 #: templates/cite_sour_repo.html:15 templates/cite_sour_repo.html:59
 #: templates/repo_sources.html:19
@@ -966,15 +950,15 @@ msgstr "Näytä loki"
 msgid "Delete file"
 msgstr "Poista tiedosto"
 
-#: bp/audit/routes.py:126
+#: bp/audit/routes.py:127
 msgid "Done"
 msgstr "Tehty"
 
-#: bp/audit/routes.py:190
+#: bp/audit/routes.py:194
 msgid "Data type '{}' is not supported"
 msgstr "Tietotyyppiä '{}' ei tueta"
 
-#: bp/audit/routes.py:193
+#: bp/audit/routes.py:197
 msgid "Missing proper column title: "
 msgstr "Kelvollinen sarakeotsikko puuttuu:"
 
@@ -1016,7 +1000,7 @@ msgstr "Tutkija"
 #: bp/audit/templates/audit/approvals.html:37
 #: bp/audit/templates/audit/move_in_1.html:20
 #: bp/gramps/templates/gramps/uploads.html:178
-#: bp/start/templates/start/my_settings.html:98
+#: bp/start/templates/start/my_settings.html:106
 msgid "Batch id"
 msgstr "Aineistotunnus"
 
@@ -1073,7 +1057,6 @@ msgid "approved by me"
 msgstr "itse hyväksymäni"
 
 #: bp/audit/templates/audit/index.html:31
-#: bp/obsolete_tools/templates/tools/table_refnames.html:18
 #: bp/scene/templates/scene/persons_search.html:160
 #: templates/join_persons.html:74
 msgid "Reference names"
@@ -1160,28 +1143,27 @@ msgstr "Referenssinimien käsittely"
 msgid "Listings"
 msgstr "Listaukset"
 
-#: bp/audit/templates/audit/reference.html:34
-#: bp/obsolete_tools/templates/tools/tables.html:27
+#: bp/audit/templates/audit/reference.html:35
 msgid "List reference names"
 msgstr "Listaa referenssinimet"
 
-#: bp/audit/templates/audit/reference.html:35
+#: bp/audit/templates/audit/reference.html:36
 msgid "See people with reference names"
 msgstr "Katso ihmiset referenssinimineen"
 
-#: bp/audit/templates/audit/reference.html:37
+#: bp/audit/templates/audit/reference.html:38
 msgid "Set changed reference names for all people"
 msgstr "Aseta muuttuneet referenssinimet kaikille ihmisille"
 
-#: bp/audit/templates/audit/reference.html:38
+#: bp/audit/templates/audit/reference.html:39
 msgid "After removal of all refnames"
 msgstr "kaikkien ref.nimien poiston jälkeen"
 
-#: bp/audit/templates/audit/reference.html:39
+#: bp/audit/templates/audit/reference.html:40
 msgid "Reference name Editor"
 msgstr "Referenssinimien editointi"
 
-#: bp/audit/templates/audit/reference.html:40
+#: bp/audit/templates/audit/reference.html:41
 msgid "Download reference names as a CSV file"
 msgstr "Talleta CSV-referenssinimitiedosto koneellesi"
 
@@ -1191,7 +1173,7 @@ msgid "Duplicates search"
 msgstr "Duplikaattien haku"
 
 #: bp/dupsearch/templates/dupsearch.html:20
-#: bp/start/templates/start/my_settings.html:125
+#: bp/start/templates/start/my_settings.html:135
 msgid "Data Batches"
 msgstr "Tutkijan tuontierät"
 
@@ -1203,7 +1185,7 @@ msgstr "Valitse"
 #: bp/gedcom/templates/gedcom_info.html:27
 #: bp/gramps/templates/gramps/analyze_xml.html:14
 #: bp/gramps/templates/gramps/uploads.html:144
-#: bp/start/templates/start/my_settings.html:137
+#: bp/start/templates/start/my_settings.html:147
 msgid "File"
 msgstr "Tiedosto"
 
@@ -1439,7 +1421,7 @@ msgstr "Tyyppiä ei tueta: "
 #: bp/gedcom/templates/g_layout.html:25
 #: bp/scene/templates/scene/persons_list.html:105
 #: bp/scene/templates/scene/persons_search.html:141
-#: bp/scene/templates/scene/places.html:86
+#: bp/scene/templates/scene/places.html:88
 #: bp/scene/templates/scene/sources.html:64
 msgid "Back to Top"
 msgstr "Palaa alkuun"
@@ -1453,8 +1435,8 @@ msgstr "Suomen Sukututkimusseuran tietokanta"
 #: bp/gedcom/templates/gedcom_list.html:16
 #: bp/start/templates/start/index_logged.html:28
 #: bp/start/templates/start/index_logged.html:32
-#: bp/start/templates/start/my_settings.html:154
-#: bp/start/templates/start/my_settings.html:162
+#: bp/start/templates/start/my_settings.html:164
+#: bp/start/templates/start/my_settings.html:172
 msgid "Gedcom tools"
 msgstr "Gedcom-työkalut"
 
@@ -1466,12 +1448,11 @@ msgstr "käyttäjätunnus"
 #: bp/gedcom/templates/gedcom_info.html:29
 #: bp/gedcom/templates/gedcom_info.html:179
 #: bp/gedcom/templates/gedcom_list.html:42
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:16
 #: bp/scene/templates/scene/event.html:51
-#: bp/scene/templates/scene/event_vue.html:64
+#: bp/scene/templates/scene/event_vue.html:63
 #: bp/scene/templates/scene/person.html:140
 #: bp/scene/templates/scene/place_events.html:172
-#: bp/start/templates/start/my_settings.html:140
+#: bp/start/templates/start/my_settings.html:150
 msgid "Description"
 msgstr "Kuvaus"
 
@@ -1791,9 +1772,7 @@ msgstr "Luo sukunimien ketju monista nimistä"
 msgid "Process_nonstd_ALIA_lines"
 msgstr "Käsittele epästandardit ALIA-rivit"
 
-#: bp/gedcom/transforms/places.py:11
-#: bp/obsolete_tools/templates/tools/tables.html:26
-#: bp/scene/templates/scene/macros.html:66
+#: bp/gedcom/transforms/places.py:11 bp/scene/templates/scene/macros.html:66
 #: bp/scene/templates/scene/places.html:3
 msgid "Places"
 msgstr "Paikat"
@@ -2012,15 +1991,15 @@ msgstr "Poistaa \"-X\"-merkityistä tunnisteista \"-X\" :n"
 
 #: bp/gramps/gramps_loader.py:146
 msgid "Events with no references to"
-msgstr ""
+msgstr "Tapahtumaa ilman viitettä"
 
 #: bp/gramps/gramps_loader.py:226
 msgid "Estimated time"
-msgstr ""
+msgstr "Arvioitu aika"
 
 #: bp/gramps/gramps_loader.py:229
 msgid "sec"
-msgstr ""
+msgstr "sek"
 
 #: bp/gramps/gramps_loader.py:611 bp/gramps/gramps_loader.py:619
 #: pe/db_writer.py:85
@@ -2188,204 +2167,20 @@ msgstr "Katso tarjokasaineistoasi"
 msgid "Return to front page"
 msgstr "Palaa etusivulle"
 
-#: bp/obsolete_tools/routes.py:69
-msgid "Note List"
-msgstr "Huomautukset"
+#: bp/scene/routes.py:351 bp/scene/routes.py:355
+msgid "No event found"
+msgstr "Ei tapahtumia"
 
-#: bp/obsolete_tools/routes.py:69
-#, fuzzy
-msgid "Note Items"
-msgstr "Note-kohteet"
+#: bp/scene/routes.py:388 bp/scene/templates/scene/event.html:83
+#: bp/scene/templates/scene/person.html:251
+msgid "Self"
+msgstr "Itse"
 
-#: bp/obsolete_tools/routes.py:88 templates/cite_sour_repo.html:55
-msgid "Repositories"
-msgstr "Arkistot"
+#: bp/scene/routes.py:494
+msgid "No families"
+msgstr "Ei perheitä"
 
-#: bp/obsolete_tools/routes.py:88
-msgid "Repository data"
-msgstr "Arkistotiedot (repository)"
-
-#: bp/obsolete_tools/routes.py:116
-msgid "Material type"
-msgstr "Aineistotyypin"
-
-#: bp/obsolete_tools/routes.py:116
-msgid "processing still missing"
-msgstr "käsittely puuttuu vielä"
-
-#: bp/obsolete_tools/routes.py:168
-msgid "{} in Family {}/{}"
-msgstr "{} perheessä {} / {}"
-
-#: bp/obsolete_tools/routes.py:170
-msgid " Mother: {}/{} p. {}"
-msgstr "  Äiti: {} / {} s. {}"
-
-#: bp/obsolete_tools/routes.py:172
-msgid " Father: {}/{} p. {}"
-msgstr "  Isä:  {} / {} s. {}"
-
-#: bp/obsolete_tools/routes.py:175
-msgid " Child ({}): {}/{} * {}"
-msgstr "    Lapsi ({}): {} / {} *{}"
-
-#: bp/obsolete_tools/routes.py:177
-msgid "Wrong Search key"
-msgstr "Väärä hakuavain"
-
-#: bp/obsolete_tools/routes.py:266
-msgid "Only the OID can retrieve"
-msgstr "Vain avaimella voi hakea"
-
-#: bp/obsolete_tools/templates/tools/ng_compare.html:18
-#: bp/obsolete_tools/templates/tools/ng_compare.html:73
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:22
-msgid "Person data"
-msgstr "Henkilön tiedot"
-
-#: bp/obsolete_tools/templates/tools/ng_compare.html:20
-#: bp/obsolete_tools/templates/tools/ng_compare.html:76
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:26
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:21
-msgid "Names"
-msgstr "Nimet"
-
-#: bp/obsolete_tools/templates/tools/ng_compare.html:24
-#: bp/obsolete_tools/templates/tools/ng_compare.html:79
-msgid "Link to Narrated Page"
-msgstr "Linkki henkilösivulle"
-
-#: bp/obsolete_tools/templates/tools/ng_compare.html:40
-#: bp/obsolete_tools/templates/tools/ng_compare.html:95
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:54
-#: bp/obsolete_tools/templates/tools/person2.html:30
-#: bp/scene/templates/scene/person.html:133
-#: bp/scene/templates/scene/persons_list.html:90
-#: bp/scene/templates/scene/place_events.html:163
-msgid "Events"
-msgstr "Tapahtumat"
-
-#: bp/obsolete_tools/templates/tools/ng_compare.html:56
-#: bp/obsolete_tools/templates/tools/ng_compare.html:110
-#: bp/scene/templates/scene/family.html:124
-#: bp/scene/templates/scene/place_events.html:92
-#: bp/scene/templates/scene/source_events.html:51
-msgid "Notes"
-msgstr "Lisätiedot"
-
-#: bp/obsolete_tools/templates/tools/ng_people_by_surname.html:10
-#: bp/obsolete_tools/templates/tools/table_people_by_surname.html:7
-msgid "People who has the surname"
-msgstr "Henkilöt, joilla on sukunimi"
-
-#: bp/obsolete_tools/templates/tools/ng_people_by_surname.html:11
-#: bp/obsolete_tools/templates/tools/ng_same_birthday.html:12
-#: bp/obsolete_tools/templates/tools/ng_same_deathday.html:12
-#: bp/obsolete_tools/templates/tools/ng_same_name.html:19
-#: bp/obsolete_tools/templates/tools/ng_same_person.html:23
-msgid "Click on the column header to sort column"
-msgstr "Klikkaa saraketta lajitellaksesi sen suhteen"
-
-#: bp/obsolete_tools/templates/tools/ng_same_birthday.html:10
-#: bp/obsolete_tools/templates/tools/ng_same_person.html:17
-msgid "List of persons with the same birth date"
-msgstr "Luettelo henkilöistä, joilla sama syntymäaika"
-
-#: bp/obsolete_tools/templates/tools/ng_same_birthday.html:11
-#: bp/obsolete_tools/templates/tools/ng_same_deathday.html:11
-#: bp/obsolete_tools/templates/tools/ng_same_name.html:17
-#: bp/obsolete_tools/templates/tools/ng_same_person.html:21
-msgid "Showing person pairs"
-msgstr "Näytetään henkilöparit"
-
-#: bp/obsolete_tools/templates/tools/ng_same_birthday.html:16
-#: bp/obsolete_tools/templates/tools/ng_same_deathday.html:16
-#: bp/obsolete_tools/templates/tools/ng_same_person.html:22
-msgid "All/same Given name"
-msgstr "Kaikki/Sama etunimi"
-
-#: bp/obsolete_tools/templates/tools/ng_same_deathday.html:10
-#: bp/obsolete_tools/templates/tools/ng_same_person.html:19
-msgid "List of persons with the same date of death"
-msgstr "Luettelo henkilöistä, joilla sama kuolinaika"
-
-#: bp/obsolete_tools/templates/tools/ng_same_name.html:16
-msgid "List of persons with the same name"
-msgstr "Luettelo henkilöistä, joilla sama nimi"
-
-#: bp/obsolete_tools/templates/tools/ng_same_name.html:18
-msgid "All/Same Birth date"
-msgstr "KAIKKI/Sama syntymäaika"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:7
-msgid "Families data"
-msgstr "Perheiden tiedot"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:9
-msgid "Main person"
-msgstr "Keskushenkilö"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:11
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:44
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:69
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:93
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:117
-#: bp/obsolete_tools/templates/tools/table_people_by_surname.html:10
-msgid "unique id"
-msgstr "avain"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:11
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:44
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:69
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:93
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:117
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:27
-msgid "sex"
-msgstr "sukupuoli"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:11
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:44
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:69
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:93
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:117
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:27
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:22
-#: bp/obsolete_tools/templates/tools/table_people_by_surname.html:10
-msgid "firstname"
-msgstr "etunimi"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:11
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:44
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:69
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:93
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:117
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:27
-msgid "suffix"
-msgstr "jälkiosa"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:11
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:44
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:69
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:93
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:117
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:27
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:22
-#: bp/obsolete_tools/templates/tools/table_people_by_surname.html:10
-#: bp/scene/templates/scene/person.html:82
-#: bp/scene/templates/scene/person.html:254
-#: bp/scene/templates/scene/persons_search.html:7
-msgid "surname"
-msgstr "sukunimi"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:30
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:49
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:39
-msgid "No person information"
-msgstr "Ei henkilötietoja"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:37
-#: bp/obsolete_tools/templates/tools/table_families.html:19
-#: bp/scene/routes.py:507 bp/scene/templates/scene/families.html:110
+#: bp/scene/routes.py:501 bp/scene/templates/scene/families.html:115
 #: bp/scene/templates/scene/family.html:33
 #: bp/scene/templates/scene/person.html:230
 #: bp/scene/templates/scene/person.html:267 templates/jinja_filters.py:75
@@ -2393,481 +2188,18 @@ msgstr "Ei henkilötietoja"
 msgid "Family"
 msgstr "Perhe"
 
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:42
-#: templates/jinja_filters.py:98
-msgid "Spouse"
-msgstr "puoliso"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:44
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:54
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:39
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:45
-#: bp/scene/templates/scene/person.html:228
-msgid "family"
-msgstr "perhe"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:67
-#: bp/obsolete_tools/templates/tools/table_families.html:21
-#: bp/scene/templates/scene/families.html:61
-#: bp/scene/templates/scene/families.html:98 templates/jinja_filters.py:93
-msgid "Father"
-msgstr "Mies"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:91
-#: bp/obsolete_tools/templates/tools/table_families.html:23
-#: bp/scene/templates/scene/families.html:73
-#: bp/scene/templates/scene/families.html:102 templates/jinja_filters.py:94
-msgid "Mother"
-msgstr "Vaimo"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:115
-#: bp/scene/routes.py:508 bp/scene/templates/scene/families.html:114
-#: bp/scene/templates/scene/family.html:101
+#: bp/scene/routes.py:502 bp/scene/templates/scene/families.html:119
+#: bp/scene/templates/scene/family.html:100
 #: bp/scene/templates/scene/person.html:237
 #: bp/scene/templates/scene/person.html:274
 msgid "Children"
 msgstr "Lapset"
 
-#: bp/obsolete_tools/templates/tools/obsolete_table_families_by_id.html:142
-msgid "No family information"
-msgstr "Ei perhetietoja"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:11
-msgid "Picture cannot be found"
-msgstr "Kuvaa ei löydy"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:23
-msgid "Narrative Page"
-msgstr "Henkilösivu"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:27
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:56
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:22
-msgid "unique_id"
-msgstr "avain"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:27
-msgid "private"
-msgstr "ei julkinen"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:27
-msgid "link"
-msgstr "linkki"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:56
-msgid "type"
-msgstr "tyyppi"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:56
-msgid "date"
-msgstr "päiväys"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:56
-msgid "place"
-msgstr "paikka"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:56
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:86
-#: bp/obsolete_tools/templates/tools/table_media.html:21
-msgid "description"
-msgstr "kuvaus"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:56
-msgid "link to source data"
-msgstr "linkki alkuperäiseen tietoon"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:72
-#: bp/obsolete_tools/templates/tools/table_sources.html:23
-msgid "citations"
-msgstr "lainaukset"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:77
-msgid "No event information"
-msgstr "Ei tapahtumatietoja"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:84
-msgid "URLs"
-msgstr "nettiosoitteet"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:86
-msgid "priv"
-msgstr "ei julkinen"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:86
-msgid "URL"
-msgstr "Verkko-osoite"
-
-#: bp/obsolete_tools/templates/tools/obsolete_table_person_by_id.html:90
-msgid "No URL information"
-msgstr "Ei verkko-osoitetta"
-
-#: bp/obsolete_tools/templates/tools/person2.html:3
-#: bp/scene/templates/scene/person.html:18
-msgid "Person's details"
-msgstr "Henkilön tiedot"
-
-#: bp/obsolete_tools/templates/tools/person2.html:8
-#: bp/scene/templates/scene/persons_list.html:89
-#: bp/scene/templates/scene/persons_search.html:131
-#: bp/scene/templates/scene/place_events.html:169
-msgid "Person"
-msgstr "Henkilö"
-
-#: bp/obsolete_tools/templates/tools/person2.html:11
-#: bp/obsolete_tools/templates/tools/source_citations.html:11
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:10
-#: templates/cite_sour_repo.html:11 templates/cite_sour_repo.html:29
-#: templates/cite_sour_repo.html:43 templates/cite_sour_repo.html:59
-#: templates/repo_sources.html:11
-msgid "Identifier"
-msgstr "Tunniste"
-
-#: bp/obsolete_tools/templates/tools/person2.html:21
-msgid "Sort name"
-msgstr "Lajitteluavain"
-
-#: bp/obsolete_tools/templates/tools/person2.html:25
-msgid "Db handle"
-msgstr "Tietokanta-avain"
-
-#: bp/obsolete_tools/templates/tools/person2.html:34
-msgid "Identifier < br/> Type < br/> Date </div>"
-msgstr "Tunniste<br />tyyppi<br />aika</div>"
-
-#: bp/obsolete_tools/templates/tools/person2.html:43
-#: bp/obsolete_tools/templates/tools/source_citations.html:35
-#: bp/start/templates/start/my_settings.html:30
-#: templates/cite_sour_repo.html:75 templates/db_test.html:10
-#: templates/repo_sources.html:54 templates/talletettu.html:28
-#: templates/virhe_lataus.html:20
-msgid "Go back"
-msgstr "Paluu"
-
-#: bp/obsolete_tools/templates/tools/source_citations.html:3
-#: templates/cite_sour_repo.html:3
-msgid "Source Details"
-msgstr "Lähteen tiedot"
-
-#: bp/obsolete_tools/templates/tools/source_citations.html:8
-#: bp/scene/templates/scene/source_events.html:21
-#: bp/scene/templates/scene/sources.html:71
-msgid "Source"
-msgstr "Lähde"
-
-#: bp/obsolete_tools/templates/tools/source_citations.html:15
-#: bp/scene/templates/scene/medias.html:40
-#: bp/scene/templates/scene/medias.html:69
-#: bp/scene/templates/scene/place_events.html:140
-msgid "Title"
-msgstr "Otsikko"
-
-#: bp/obsolete_tools/templates/tools/source_citations.html:20
-#: bp/scene/templates/scene/media.html:88
-#: bp/scene/templates/scene/medias.html:71
-#: bp/scene/templates/scene/places.html:76
-#: bp/scene/templates/scene/sources.html:55 templates/cite_sour_repo.html:25
-msgid "References"
-msgstr "Viittauksia"
-
-#: bp/obsolete_tools/templates/tools/source_citations.html:24
-msgid "Identifier<br />Date<br />Page<br />Confidence"
-msgstr "Tunniste<br />Date<br />Page<br />Confidence"
-
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:7
-msgid "Baptism data"
-msgstr "Kasteen aikatieto"
-
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:12
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:13
-#: bp/obsolete_tools/templates/tools/table_persons.html:24
-#: bp/scene/templates/scene/event.html:55
-#: bp/scene/templates/scene/event_vue.html:68
-#: bp/scene/templates/scene/person.html:138
-#: bp/scene/templates/scene/place_events.html:171
-#: bp/start/templates/start/my_settings.html:138
-#: templates/cite_sour_repo.html:19 templates/cite_sour_repo.html:29
-msgid "Date"
-msgstr "Päivämäärä"
-
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:15
-#: bp/obsolete_tools/templates/tools/table_persons.html:25
-#: bp/scene/templates/scene/event.html:59
-#: bp/scene/templates/scene/event_vue.html:72
-#: bp/scene/templates/scene/person.html:139
-#: bp/scene/templates/scene/places.html:39 templates/select_refcols.html:37
-#: templates/select_refcols.html:65
-msgid "Place"
-msgstr "Paikka"
-
-#: bp/obsolete_tools/templates/tools/table_baptism_data.html:22
-msgid "role"
-msgstr "rooli"
-
-#: bp/obsolete_tools/templates/tools/table_families.html:14
-#: bp/scene/templates/scene/families.html:35
-msgid "List of Families"
-msgstr "Perheluettelo"
-
-#: bp/obsolete_tools/templates/tools/table_families.html:15
-msgid "Number of families:"
-msgstr "Perheiden lukumäärä:"
-
-#: bp/obsolete_tools/templates/tools/table_families.html:20
-msgid "id of Father"
-msgstr "id"
-
-#: bp/obsolete_tools/templates/tools/table_families.html:22
-msgid "id of Mother"
-msgstr "id"
-
-#: bp/obsolete_tools/templates/tools/table_families.html:25
-msgid "No of Children"
-msgstr "Lapsia"
-
-#: bp/obsolete_tools/templates/tools/table_families.html:26
-msgid "Links of Children"
-msgstr "Lapset"
-
-#: bp/obsolete_tools/templates/tools/table_families.html:55
-#: bp/obsolete_tools/templates/tools/table_persons.html:59
-msgid "No persons"
-msgstr "Ei ketään"
-
-#: bp/obsolete_tools/templates/tools/table_media.html:14
-#: bp/scene/templates/scene/person.html:288
-msgid "Media files"
-msgstr "Mediatiedostot"
-
-#: bp/obsolete_tools/templates/tools/table_media.html:18
-#: bp/obsolete_tools/templates/tools/table_sources.html:19
-msgid "uniq_id"
-msgstr "numero"
-
-#: bp/obsolete_tools/templates/tools/table_media.html:19
-msgid "src"
-msgstr "lähde"
-
-#: bp/obsolete_tools/templates/tools/table_media.html:20
-msgid "mime"
-msgstr "mime"
-
-#: bp/obsolete_tools/templates/tools/table_media.html:22
-msgid "picture"
-msgstr "kuva"
-
-#: bp/obsolete_tools/templates/tools/table_media.html:35
-#: bp/obsolete_tools/templates/tools/table_of_data.html:46
-#: bp/obsolete_tools/templates/tools/table_of_data.html:49
-#: bp/obsolete_tools/templates/tools/table_of_objects.html:49
-#: bp/obsolete_tools/templates/tools/table_of_objects.html:52
-#: bp/obsolete_tools/templates/tools/table_people_by_surname.html:29
-#: bp/obsolete_tools/templates/tools/table_sources.html:38
-#: bp/obsolete_tools/templates/tools/table_surnames.html:23
-#: templates/_ng_table_repositories.html:28 templates/del_table_users.html:32
-msgid "No data"
-msgstr "Ei tietoja"
-
-#: bp/obsolete_tools/templates/tools/table_persons.html:16
-msgid "List of Persons"
-msgstr "Henkilöluettelo"
-
-#: bp/obsolete_tools/templates/tools/table_persons.html:17
-msgid "Number of persons:"
-msgstr "Henkilömäärä:"
-
-#: bp/obsolete_tools/templates/tools/table_persons.html:21
-msgid "Links"
-msgstr "Avaimet"
-
-#: bp/obsolete_tools/templates/tools/table_persons.html:22
-msgid "Lifetime"
-msgstr "Elinaika"
-
-#: bp/obsolete_tools/templates/tools/table_persons.html:23
-msgid "Event type"
-msgstr "Tapahtuman tyyppi"
-
-#: bp/obsolete_tools/templates/tools/table_persons.html:38
-msgid "lived"
-msgstr "elänyt"
-
-#: bp/obsolete_tools/templates/tools/table_refnames.html:3
-#: templates/select_refcols.html:3
-msgid "Reference names from Database"
-msgstr "Referenssinimet kannasta"
-
-#: bp/obsolete_tools/templates/tools/table_refnames.html:19
-msgid "Included"
-msgstr "Mukana"
-
-#: bp/obsolete_tools/templates/tools/table_refnames.html:19
-#: templates/del_table_users.html:20
-msgid "name"
-msgstr "nimeä"
-
-#: bp/obsolete_tools/templates/tools/table_refnames.html:33
-msgid "Type ~ Ref. name"
-msgstr "tyyppi ~ ref.nimi"
-
-#: bp/obsolete_tools/templates/tools/table_refnames.html:36
-msgid "Name Source"
-msgstr "nimilähde"
-
-#: bp/obsolete_tools/templates/tools/table_refnames.html:37
-#: bp/scene/templates/scene/macros.html:55
-#: bp/scene/templates/scene/persons_list.html:22
-#: bp/scene/templates/scene/persons_search.html:18
-msgid "Persons"
-msgstr "Henkilöt"
-
-#: bp/obsolete_tools/templates/tools/table_sources.html:14
-#: bp/scene/templates/scene/sources.html:15
-msgid "List of Sources"
-msgstr "Lähdeluettelo"
-
-#: bp/obsolete_tools/templates/tools/table_sources.html:15
-msgid "Showing sources"
-msgstr "Näytetään lähteet"
-
-#: bp/obsolete_tools/templates/tools/table_sources.html:20
-msgid "stitle"
-msgstr "otsikko"
-
-#: bp/obsolete_tools/templates/tools/table_sources.html:21
-msgid "sauthor"
-msgstr "tekijä"
-
-#: bp/obsolete_tools/templates/tools/table_sources.html:22
-msgid "spubinfo"
-msgstr "julk."
-
-#: bp/obsolete_tools/templates/tools/table_sources.html:33
-#: bp/scene/templates/scene/source_events.html:72
-msgid "confidence"
-msgstr "luottamustaso"
-
-#: bp/obsolete_tools/templates/tools/table_surnames.html:7
-msgid "All surnames"
-msgstr "Kaikki sukunimet"
-
-#: bp/obsolete_tools/templates/tools/table_surnames.html:10
-#: bp/scene/templates/scene/families.html:64
-#: bp/scene/templates/scene/families.html:76
-#: bp/scene/templates/scene/persons_list.html:55
-#: bp/scene/templates/scene/persons_search.html:66
-msgid "Surname"
-msgstr "Sukunimi"
-
-#: bp/obsolete_tools/templates/tools/table_surnames.html:17
-msgid "(No Name)"
-msgstr "(nimetön)"
-
-#: bp/obsolete_tools/templates/tools/tables.html:3
-msgid "Data Views"
-msgstr "Taulukkonäkymiä"
-
-#: bp/obsolete_tools/templates/tools/tables.html:13
-msgid "Technical views"
-msgstr "Teknisiä näkymiä"
-
-#: bp/obsolete_tools/templates/tools/tables.html:16
-msgid "Data Views as tables"
-msgstr "Teknisiä näkymiä"
-
-#: bp/obsolete_tools/templates/tools/tables.html:18
-msgid "Show people"
-msgstr "Näytä henkilöt"
-
-#: bp/obsolete_tools/templates/tools/tables.html:19
-msgid "Show families"
-msgstr "Näytä perheet"
-
-#: bp/obsolete_tools/templates/tools/tables.html:20
-msgid "List of surnames"
-msgstr "Luettelo sukunimistä"
-
-#: bp/obsolete_tools/templates/tools/tables.html:21
-msgid "List of media files, called recordings"
-msgstr "Luettelo mediatiedostoista eli tallenteista"
-
-#: bp/obsolete_tools/templates/tools/tables.html:22
-msgid "List of repositories"
-msgstr "Luettelo arkistoista"
-
-#: bp/obsolete_tools/templates/tools/tables.html:23
-msgid "(on Repository page sources in Repository)"
-msgstr "(arkistosivulla arkiston lähteet)"
-
-#: bp/obsolete_tools/templates/tools/tables.html:24
-msgid "List of sources (references on the source page)"
-msgstr "Luettelo lähteistä (lähdesivulla viittaukset)"
-
-#: bp/obsolete_tools/templates/tools/tables.html:25
-msgid "Comments"
-msgstr "Huomautukset"
-
-#: bp/obsolete_tools/templates/tools/tables.html:31
-msgid "Find possible doubles"
-msgstr "Etsi mahdollisia tuplahenkilöitä"
-
-#: bp/obsolete_tools/templates/tools/tables.html:33
-msgid "Find people with the same name"
-msgstr "Etsi samannimiset henkilöt"
-
-#: bp/obsolete_tools/templates/tools/tables.html:34
-msgid "Find people with the same birth date"
-msgstr "Etsi henkilöt, joilla sama syntymäaika"
-
-#: bp/obsolete_tools/templates/tools/tables.html:35
-msgid "Find people with the same date of death"
-msgstr "Etsi henkilöt, joilla sama kuolinaika"
-
-#: bp/obsolete_tools/templates/tools/tables.html:39
-msgid "Problem Solving Tools"
-msgstr "Ongelmanselvitysvälineitä"
-
-#: bp/obsolete_tools/templates/tools/tables.html:41
-msgid "Persons without birth event"
-msgstr "Henkilöt ilman syntymätapahtumaa"
-
-#: bp/obsolete_tools/templates/tools/tables.html:42
-msgid "Senior Citizens, Top twenty"
-msgstr "20 vanhinta henkilöä"
-
-#: bp/obsolete_tools/templates/tools/tables.html:43
-msgid "Events without place information"
-msgstr "Paikattomat tapahtumat"
-
-#: bp/obsolete_tools/templates/tools/tables.html:44
-msgid "Unreferenced sources"
-msgstr "Viittauksettomat lähteet"
-
-#: bp/obsolete_tools/templates/tools/tables.html:45
-msgid "Sources without a repository"
-msgstr "Lähteet ilman arkistoa"
-
-#: bp/obsolete_tools/templates/tools/tables.html:46
-msgid "Unreferenced Events"
-msgstr "Viittauksettomat tapahtumat"
-
-#: bp/scene/routes.py:351 bp/scene/routes.py:355
-msgid "No event found"
-msgstr "Ei tapahtumia"
-
-#: bp/scene/routes.py:394 bp/scene/templates/scene/event.html:83
-#: bp/scene/templates/scene/person.html:251
-msgid "Self"
-msgstr "Itse"
-
-#: bp/scene/routes.py:500
-msgid "No families"
-msgstr "Ei perheitä"
-
-#: bp/scene/routes.py:660
+#: bp/scene/routes.py:654
 msgid "No objects found"
 msgstr "Ei kohteita"
 
-#: bp/scene/routes.py:663
+#: bp/scene/routes.py:657
 msgid "Error"
 msgstr "Virhe"
 
@@ -2883,17 +2215,33 @@ msgstr "Tapahtuman tietoja"
 #: bp/scene/templates/scene/media.html:63
 #: bp/scene/templates/scene/person.html:68
 #: bp/scene/templates/scene/place_events.html:83
-#: bp/scene/templates/scene/source_events.html:30
-#: bp/scene/templates/scene/source_events.html:49
+#: bp/scene/templates/scene/source_events.html:44
 msgid "Identifiers"
 msgstr "Tunnisteet"
 
+#: bp/scene/templates/scene/event.html:55
+#: bp/scene/templates/scene/event_vue.html:67
+#: bp/scene/templates/scene/person.html:138
+#: bp/scene/templates/scene/place_events.html:171
+#: bp/start/templates/start/my_settings.html:148
+#: templates/cite_sour_repo.html:19 templates/cite_sour_repo.html:29
+msgid "Date"
+msgstr "Päivämäärä"
+
+#: bp/scene/templates/scene/event.html:59
+#: bp/scene/templates/scene/event_vue.html:71
+#: bp/scene/templates/scene/person.html:139
+#: bp/scene/templates/scene/places.html:41 templates/select_refcols.html:37
+#: templates/select_refcols.html:65
+msgid "Place"
+msgstr "Paikka"
+
 #: bp/scene/templates/scene/event.html:71
-#: bp/scene/templates/scene/event_vue.html:97
+#: bp/scene/templates/scene/event_vue.html:96
 msgid "Participants"
 msgstr "Tapahtumaan osalliset"
 
-#: bp/scene/templates/scene/event_vue.html:85
+#: bp/scene/templates/scene/event_vue.html:84
 #: bp/scene/templates/scene/place_events.html:136
 msgid "Media"
 msgstr "Mediat"
@@ -2902,22 +2250,26 @@ msgstr "Mediat"
 msgid "List of families"
 msgstr "Perheluettelo"
 
+#: bp/scene/templates/scene/families.html:35
+msgid "List of Families"
+msgstr "Perheluettelo"
+
 #: bp/scene/templates/scene/families.html:45
 #, python-format
 msgid "Displaying %(num)s distinct families"
 msgstr "Näytetään %(num)s perhettä"
 
 #: bp/scene/templates/scene/families.html:47
-#: bp/scene/templates/scene/medias.html:28
+#: bp/scene/templates/scene/medias.html:30
 #: bp/scene/templates/scene/persons_list.html:36
-#: bp/scene/templates/scene/places.html:27
+#: bp/scene/templates/scene/places.html:29
 msgid "from begin"
 msgstr "alusta"
 
 #: bp/scene/templates/scene/families.html:48
-#: bp/scene/templates/scene/medias.html:29
+#: bp/scene/templates/scene/medias.html:31
 #: bp/scene/templates/scene/persons_list.html:35
-#: bp/scene/templates/scene/places.html:28
+#: bp/scene/templates/scene/places.html:30
 #, python-format
 msgid "starting <tt>%(name)s</tt>"
 msgstr "alkaen <tt>%(name)s</tt>"
@@ -2932,11 +2284,16 @@ msgstr "järjestettynä vaimon nimen mukaan"
 
 #: bp/scene/templates/scene/families.html:61
 #: bp/scene/templates/scene/families.html:73
-#: bp/scene/templates/scene/medias.html:37
+#: bp/scene/templates/scene/medias.html:39
 #: bp/scene/templates/scene/persons_list.html:52
-#: bp/scene/templates/scene/places.html:36
+#: bp/scene/templates/scene/places.html:38
 msgid "Go to"
 msgstr "Siirry"
+
+#: bp/scene/templates/scene/families.html:61
+#: bp/scene/templates/scene/families.html:100 templates/jinja_filters.py:93
+msgid "Father"
+msgstr "Mies"
 
 #: bp/scene/templates/scene/families.html:63
 #: bp/scene/templates/scene/families.html:75
@@ -2944,74 +2301,86 @@ msgstr "Siirry"
 msgid "Starting letters of surname"
 msgstr "Sukunimen alku"
 
+#: bp/scene/templates/scene/families.html:64
+#: bp/scene/templates/scene/families.html:76
+#: bp/scene/templates/scene/persons_list.html:55
+#: bp/scene/templates/scene/persons_search.html:66
+msgid "Surname"
+msgstr "Sukunimi"
+
+#: bp/scene/templates/scene/families.html:73
+#: bp/scene/templates/scene/families.html:106 templates/jinja_filters.py:94
+msgid "Mother"
+msgstr "Vaimo"
+
 #: bp/scene/templates/scene/families.html:97
 #: bp/scene/templates/scene/persons_list.html:74
 msgid "Top of page"
 msgstr "Sivun yläreunaan"
 
-#: bp/scene/templates/scene/families.html:111
+#: bp/scene/templates/scene/families.html:116
 #: bp/scene/templates/scene/person.html:233
 #: bp/scene/templates/scene/person.html:270
 msgid "Man"
 msgstr "Mies"
 
-#: bp/scene/templates/scene/families.html:112
+#: bp/scene/templates/scene/families.html:117
 #: bp/scene/templates/scene/person.html:235
 #: bp/scene/templates/scene/person.html:272 templates/jinja_filters.py:96
 msgid "Wife"
 msgstr "Vaimo"
 
-#: bp/scene/templates/scene/families.html:121
+#: bp/scene/templates/scene/families.html:126
 msgid "Go to family page"
 msgstr "Siirry perhesivulle"
 
-#: bp/scene/templates/scene/families.html:124
-#: bp/scene/templates/scene/medias.html:81
+#: bp/scene/templates/scene/families.html:129
+#: bp/scene/templates/scene/medias.html:83
 #: bp/scene/templates/scene/persons_list.html:146
 msgid "Original ID"
 msgstr "Alkuperäinen tunniste"
 
-#: bp/scene/templates/scene/families.html:125
-#: bp/scene/templates/scene/medias.html:82
+#: bp/scene/templates/scene/families.html:130
+#: bp/scene/templates/scene/medias.html:84
 msgid "Key"
 msgstr "Avain"
 
-#: bp/scene/templates/scene/families.html:144
-#: bp/scene/templates/scene/families.html:147
+#: bp/scene/templates/scene/families.html:149
+#: bp/scene/templates/scene/families.html:152
 #, python-format
 msgid "%(num)d child"
 msgid_plural "%(num)d children"
 msgstr[0] "lapsi"
 msgstr[1] "%(num)d lasta"
 
-#: bp/scene/templates/scene/families.html:145
-#: bp/scene/templates/scene/family.html:118
+#: bp/scene/templates/scene/families.html:150
+#: bp/scene/templates/scene/family.html:117
 #, python-format
 msgid "hidden"
 msgid_plural "%(num)d hidden"
 msgstr[0] "piilotettu"
 msgstr[1] "%(num)d piilotettua"
 
-#: bp/scene/templates/scene/families.html:158
+#: bp/scene/templates/scene/families.html:163
 #: bp/scene/templates/scene/persons_list.html:182
 #, python-format
 msgid "No one found with search keys starting \"%(name)s\""
 msgstr "Ketään ei löytynyt hakutiedoilla \"%(name)s\" eteenpäin"
 
-#: bp/scene/templates/scene/families.html:160
+#: bp/scene/templates/scene/families.html:165
 #: bp/scene/templates/scene/macros.html:105
-#: bp/scene/templates/scene/medias.html:112
+#: bp/scene/templates/scene/medias.html:114
 #: bp/scene/templates/scene/persons_list.html:184
 msgid "first page"
 msgstr "Ensimmäiselle sivulle"
 
-#: bp/scene/templates/scene/families.html:160
+#: bp/scene/templates/scene/families.html:165
 #: bp/scene/templates/scene/persons_list.html:184
 msgid "Go to the first person"
 msgstr "Siirry listan ensimmäiseen henkilöön"
 
-#: bp/scene/templates/scene/families.html:165
-#: bp/scene/templates/scene/medias.html:102
+#: bp/scene/templates/scene/families.html:170
+#: bp/scene/templates/scene/medias.html:104
 #: bp/scene/templates/scene/persons_list.html:174
 msgid "The last item found"
 msgstr "Viimeinen rivi"
@@ -3025,37 +2394,43 @@ msgstr "Perheen tiedot"
 msgid "Relation"
 msgstr "Parisuhde"
 
-#: bp/scene/templates/scene/family.html:60
+#: bp/scene/templates/scene/family.html:59
 msgid "Family Events"
 msgstr "Perheen tapahtumat"
 
-#: bp/scene/templates/scene/family.html:68
+#: bp/scene/templates/scene/family.html:67
 #: bp/scene/templates/scene/person.html:163
 msgid "of type"
 msgstr "Tyyppi"
 
-#: bp/scene/templates/scene/family.html:68
+#: bp/scene/templates/scene/family.html:67
 #: bp/scene/templates/scene/person.html:163
 msgid "see details of place"
 msgstr "Katso paikan tiedot"
 
-#: bp/scene/templates/scene/family.html:79
+#: bp/scene/templates/scene/family.html:78
 #: bp/scene/templates/scene/macros.html:69
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:39
 #: templates/repo_sources.html:38
 msgid "Sources"
 msgstr "Lähteet"
 
-#: bp/scene/templates/scene/family.html:84
-#: bp/scene/templates/scene/source_events.html:74
+#: bp/scene/templates/scene/family.html:83
+#: bp/scene/templates/scene/source_events.html:87
 #: templates/cite_sour_repo.html:29
 msgid "Page"
 msgstr "Sivu"
 
-#: bp/scene/templates/scene/family.html:88
-#: bp/scene/templates/scene/source_events.html:27
+#: bp/scene/templates/scene/family.html:87
+#: bp/scene/templates/scene/source_events.html:33
 msgid "in the repository"
 msgstr "arkistossa"
+
+#: bp/scene/templates/scene/family.html:123
+#: bp/scene/templates/scene/place_events.html:92
+#: bp/scene/templates/scene/source_events.html:64
+msgid "Notes"
+msgstr "Lisätiedot"
 
 #: bp/scene/templates/scene/macros.html:48
 msgid "Search for people"
@@ -3068,6 +2443,12 @@ msgstr "Haku"
 #: bp/scene/templates/scene/macros.html:55
 msgid "Person list by default name"
 msgstr "Oletusnimen mukainen henkilöluettelo"
+
+#: bp/scene/templates/scene/macros.html:55
+#: bp/scene/templates/scene/persons_list.html:22
+#: bp/scene/templates/scene/persons_search.html:18
+msgid "Persons"
+msgstr "Henkilöt"
 
 #: bp/scene/templates/scene/macros.html:63
 #: bp/scene/templates/scene/person.html:221
@@ -3160,26 +2541,33 @@ msgid "Media data"
 msgstr "Median perustiedot"
 
 #: bp/scene/templates/scene/media.html:58
-#: bp/scene/templates/scene/medias.html:70
+#: bp/scene/templates/scene/medias.html:72
 msgid "Picture"
 msgstr "Kuva"
 
 #: bp/scene/templates/scene/media.html:66
-#: bp/scene/templates/scene/media.html:67
-#: bp/scene/templates/scene/media.html:124
+#: bp/scene/templates/scene/media.html:69
+#: bp/scene/templates/scene/media.html:127
 msgid "Thumbnail"
 msgstr "Pikkukuva"
 
-#: bp/scene/templates/scene/media.html:72
+#: bp/scene/templates/scene/media.html:74
 msgid "Size"
 msgstr "Koko"
 
-#: bp/scene/templates/scene/media.html:77
+#: bp/scene/templates/scene/media.html:79
 msgid "Show fullscreen"
 msgstr "Näytä suurena"
 
+#: bp/scene/templates/scene/media.html:88
+#: bp/scene/templates/scene/medias.html:73
+#: bp/scene/templates/scene/places.html:78
+#: bp/scene/templates/scene/sources.html:55 templates/cite_sour_repo.html:25
+msgid "References"
+msgstr "Viittauksia"
+
 #: bp/scene/templates/scene/media.html:100
-#: bp/scene/templates/scene/places.html:95
+#: bp/scene/templates/scene/places.html:97
 #, python-format
 msgid "see details of place %(id)s"
 msgstr "Katso paikan %(id)s tiedot"
@@ -3194,8 +2582,8 @@ msgstr "katso tapahtuman  %(id)s tiedot"
 msgid "see details of family %(id)s"
 msgstr "katso perheen  %(id)s tiedot"
 
-#: bp/scene/templates/scene/media.html:123
-#: bp/scene/templates/scene/media.html:126
+#: bp/scene/templates/scene/media.html:125
+#: bp/scene/templates/scene/media.html:129
 msgid "cropped"
 msgstr "rajattu"
 
@@ -3203,30 +2591,36 @@ msgstr "rajattu"
 msgid "List of medias"
 msgstr "Mediatiedostot"
 
-#: bp/scene/templates/scene/medias.html:17
+#: bp/scene/templates/scene/medias.html:19
 msgid "List of Medias"
 msgstr "Mediatiedostot"
 
-#: bp/scene/templates/scene/medias.html:26
+#: bp/scene/templates/scene/medias.html:28
 #, python-format
 msgid "Displaying %(num)s distinct medias"
 msgstr "Näytetään %(num)s eri kuvaa tai mediatiedostoa"
 
-#: bp/scene/templates/scene/medias.html:39
+#: bp/scene/templates/scene/medias.html:41
 msgid "First letters of media"
 msgstr "Median alkukirjaimet"
 
-#: bp/scene/templates/scene/medias.html:73
+#: bp/scene/templates/scene/medias.html:42
+#: bp/scene/templates/scene/medias.html:71
+#: bp/scene/templates/scene/place_events.html:140
+msgid "Title"
+msgstr "Otsikko"
+
+#: bp/scene/templates/scene/medias.html:75
 msgid "User Batch"
 msgstr "Tarjokasaineisto"
 
-#: bp/scene/templates/scene/medias.html:80
-#: bp/scene/templates/scene/medias.html:87
+#: bp/scene/templates/scene/medias.html:82
+#: bp/scene/templates/scene/medias.html:89
 #: bp/scene/templates/scene/place_events.html:148
 msgid "Go to media page"
 msgstr "Siirry mediasivulle"
 
-#: bp/scene/templates/scene/medias.html:88
+#: bp/scene/templates/scene/medias.html:90
 #: bp/scene/templates/scene/person.html:32
 #: bp/scene/templates/scene/person.html:35
 #: bp/scene/templates/scene/person.html:294
@@ -3237,14 +2631,18 @@ msgstr "Siirry mediasivulle"
 msgid "Photo"
 msgstr "kuva"
 
-#: bp/scene/templates/scene/medias.html:110
+#: bp/scene/templates/scene/medias.html:112
 #, python-format
 msgid "No media found starting from \"%(name)s\""
 msgstr "Ei \"%(name)s\"-alkuista mediaa"
 
-#: bp/scene/templates/scene/medias.html:112
+#: bp/scene/templates/scene/medias.html:114
 msgid "Go to the first media"
 msgstr "Siirry ensimmäiseen mediaan"
+
+#: bp/scene/templates/scene/person.html:18
+msgid "Person's details"
+msgstr "Henkilön tiedot"
 
 #: bp/scene/templates/scene/person.html:53
 #: bp/stat/templates/stat/layout.html:42
@@ -3259,7 +2657,7 @@ msgstr "Omia tietoja"
 #: bp/scene/templates/scene/person.html:58
 #: bp/scene/templates/scene/persons_search.html:117
 #: bp/scene/templates/scene/place_events.html:56
-#: bp/scene/templates/scene/places.html:57
+#: bp/scene/templates/scene/places.html:59
 #: bp/scene/templates/scene/sources.html:40
 msgid "Top"
 msgstr "Ylös"
@@ -3279,6 +2677,12 @@ msgstr "etunimi"
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "patronymic"
 msgstr "patronyymi"
+
+#: bp/scene/templates/scene/person.html:82
+#: bp/scene/templates/scene/person.html:254
+#: bp/scene/templates/scene/persons_search.html:7
+msgid "surname"
+msgstr "sukunimi"
 
 #: bp/scene/templates/scene/person.html:89
 msgid "Gender"
@@ -3326,6 +2730,12 @@ msgstr "Ks. henkilön lisätiedot"
 msgid "See %(num)d person notes"
 msgstr "Ks. %(num)d lisätietoa"
 
+#: bp/scene/templates/scene/person.html:133
+#: bp/scene/templates/scene/persons_list.html:90
+#: bp/scene/templates/scene/place_events.html:163
+msgid "Events"
+msgstr "Tapahtumat"
+
 #: bp/scene/templates/scene/person.html:137
 #: bp/scene/templates/scene/place_events.html:170
 #: templates/cite_sour_repo.html:8
@@ -3340,6 +2750,10 @@ msgstr "Paikan lisätietoja"
 msgid "Parents' family"
 msgstr "Vanhempien perhe"
 
+#: bp/scene/templates/scene/person.html:228
+msgid "family"
+msgstr "perhe"
+
 #: bp/scene/templates/scene/person.html:248
 msgid "Central person"
 msgstr "Keskushenkilö"
@@ -3351,6 +2765,10 @@ msgstr "Omat perheet"
 #: bp/scene/templates/scene/person.html:262
 msgid "As Parent in Family"
 msgstr "Perheessä vanhempana"
+
+#: bp/scene/templates/scene/person.html:288
+msgid "Media files"
+msgstr "Mediatiedostot"
 
 #: bp/scene/templates/scene/person.html:299
 msgid "Go to photo page"
@@ -3392,11 +2810,17 @@ msgstr[1] "%(num)s mahdollisesti elävää henkilöä poistettu"
 
 #: bp/scene/templates/scene/persons_list.html:79
 #: bp/scene/templates/scene/persons_search.html:121
-#: bp/scene/templates/scene/places.html:63
-#: bp/scene/templates/scene/places.html:64
+#: bp/scene/templates/scene/places.html:65
+#: bp/scene/templates/scene/places.html:66
 #: bp/scene/templates/scene/sources.html:44
 msgid "Alphabetical Menu"
 msgstr "Aakkosvalikko"
+
+#: bp/scene/templates/scene/persons_list.html:89
+#: bp/scene/templates/scene/persons_search.html:131
+#: bp/scene/templates/scene/place_events.html:169
+msgid "Person"
+msgstr "Henkilö"
 
 #: bp/scene/templates/scene/persons_search.html:16
 msgid "Persons ordered by"
@@ -3510,7 +2934,7 @@ msgid "on Google Map"
 msgstr "Google-kartta uudella sivulla"
 
 #: bp/scene/templates/scene/place_events.html:51
-#: bp/scene/templates/scene/places.html:75
+#: bp/scene/templates/scene/places.html:77
 msgid "Location"
 msgstr "Sijainti"
 
@@ -3530,34 +2954,34 @@ msgstr "Ei tapahtumia"
 msgid "The required place was not found."
 msgstr "Pyydettyä paikkaa ei löydy!"
 
-#: bp/scene/templates/scene/places.html:16
+#: bp/scene/templates/scene/places.html:18
 msgid "Places List"
 msgstr "Paikat"
 
-#: bp/scene/templates/scene/places.html:25
+#: bp/scene/templates/scene/places.html:27
 #, python-format
 msgid "Displaying %(num)s distinct places"
 msgstr "Näytetään %(num)s paikkaa"
 
-#: bp/scene/templates/scene/places.html:38
+#: bp/scene/templates/scene/places.html:40
 msgid "Starting letters of place"
 msgstr "Paikan alkukirjain"
 
-#: bp/scene/templates/scene/places.html:74
+#: bp/scene/templates/scene/places.html:76
 msgid "Location, related places"
 msgstr "Paikka, liittyvät paikat"
 
-#: bp/scene/templates/scene/places.html:93
+#: bp/scene/templates/scene/places.html:95
 #, python-format
 msgid "No references to place %(uuid)s"
 msgstr "Paikkaan %(uuid)s ei ole viittauksia"
 
-#: bp/scene/templates/scene/places.html:102
-#: bp/scene/templates/scene/places.html:109
+#: bp/scene/templates/scene/places.html:104
+#: bp/scene/templates/scene/places.html:111
 msgid "Go to location"
 msgstr "Siirry paikkaan"
 
-#: bp/scene/templates/scene/places.html:122
+#: bp/scene/templates/scene/places.html:124
 msgid "No places found"
 msgstr "Ei paikkoja"
 
@@ -3569,25 +2993,51 @@ msgstr "Lähteeseen liitetyt tapahtumat"
 msgid "Source References"
 msgstr "Lähdeviitteet"
 
-#: bp/scene/templates/scene/source_events.html:36
+#: bp/scene/templates/scene/source_events.html:21
+#: bp/scene/templates/scene/sources.html:71
+msgid "Source"
+msgstr "Lähde"
+
+#: bp/scene/templates/scene/source_events.html:31
+msgid "Archieved"
+msgstr ""
+
+#: bp/scene/templates/scene/source_events.html:40
+#: bp/stk_security/templates/security/register_user.html:16
+msgid "Note!"
+msgstr "Huomaa!"
+
+#: bp/scene/templates/scene/source_events.html:40
+msgid "Archieve not defined!"
+msgstr ""
+
+#: bp/scene/templates/scene/source_events.html:50
 msgid "Author"
 msgstr "Tekijä"
 
-#: bp/scene/templates/scene/source_events.html:40
+#: bp/scene/templates/scene/source_events.html:54
 msgid "Publishing info"
 msgstr "Julkaisutiedot"
 
-#: bp/scene/templates/scene/source_events.html:44
+#: bp/scene/templates/scene/source_events.html:58
 msgid "Abbreviation"
 msgstr "Lyhenne"
 
-#: bp/scene/templates/scene/source_events.html:62
+#: bp/scene/templates/scene/source_events.html:75
 msgid "Source References and Events"
 msgstr "Lähdeviitteet ja tapahtumat"
 
-#: bp/scene/templates/scene/source_events.html:93
+#: bp/scene/templates/scene/source_events.html:85
+msgid "confidence"
+msgstr "luottamustaso"
+
+#: bp/scene/templates/scene/source_events.html:106
 msgid "see details of family"
 msgstr "Katso perheen tiedot"
+
+#: bp/scene/templates/scene/sources.html:15
+msgid "List of Sources"
+msgstr "Lähdeluettelo"
 
 #: bp/scene/templates/scene/sources.html:24
 #, python-format
@@ -3838,7 +3288,7 @@ msgstr "Selattava aineisto"
 #: bp/start/templates/start/index_logged.html:75
 #: bp/start/templates/start/index_scene.html:58
 msgid "You can view only approved and public material in Demo Database"
-msgstr "Voit katsella vain demoaineistoa"
+msgstr "Voit katsella vain esittelyaineistoa"
 
 #: bp/start/templates/start/index_logged.html:80
 msgid "Browse"
@@ -3945,71 +3395,78 @@ msgstr "Sulje"
 msgid "User Settings"
 msgstr "Käyttäjän asetukset"
 
-#: bp/start/templates/start/my_settings.html:27
+#: bp/start/templates/start/my_settings.html:35
 msgid "My Profile Page"
 msgstr "Profiilini"
 
-#: bp/start/templates/start/my_settings.html:46
+#: bp/start/templates/start/my_settings.html:38
+#: templates/cite_sour_repo.html:75 templates/db_test.html:10
+#: templates/repo_sources.html:54 templates/talletettu.html:28
+#: templates/virhe_lataus.html:20
+msgid "Go back"
+msgstr "Paluu"
+
+#: bp/start/templates/start/my_settings.html:54
 #: bp/start/templates/start/s_macros.html:41
 msgid "Logout"
 msgstr "Kirjaudu ulos"
 
-#: bp/start/templates/start/my_settings.html:51
+#: bp/start/templates/start/my_settings.html:59
 msgid "Change language"
 msgstr "Vaihda kieltä"
 
-#: bp/start/templates/start/my_settings.html:70
+#: bp/start/templates/start/my_settings.html:78
 msgid "Active Roles"
 msgstr "Määritellyt roolit"
 
-#: bp/start/templates/start/my_settings.html:80
+#: bp/start/templates/start/my_settings.html:88
 msgid "Ask for a new role"
 msgstr "Pyydä lisäoikeuksia"
 
-#: bp/start/templates/start/my_settings.html:82
+#: bp/start/templates/start/my_settings.html:90
 msgid "Send a message to Isotammi office to acquire permission for new steps."
 msgstr "Lähetä viesti Isotammen tukeen saadaksesi lisäoikeuksia."
 
-#: bp/start/templates/start/my_settings.html:84
+#: bp/start/templates/start/my_settings.html:92
 #: bp/start/templates/start/s_macros.html:26
 msgid "Contact administrator"
 msgstr "Ota yhteys tukeen"
 
-#: bp/start/templates/start/my_settings.html:93
+#: bp/start/templates/start/my_settings.html:101
 msgid "Candidate Materials"
 msgstr "Tarjokasaineistot"
 
-#: bp/start/templates/start/my_settings.html:94
+#: bp/start/templates/start/my_settings.html:102
 msgid "The amount of some data nodes included in your candidate data batches."
 msgstr "Tarjokasaineistosi tietojen lukumääriä"
 
-#: bp/start/templates/start/my_settings.html:109
+#: bp/start/templates/start/my_settings.html:119
 #, python-format
 msgid "Approved %(n)s objects"
 msgstr "Hyväksyttynä %(n)s erilaista kohdetta"
 
-#: bp/start/templates/start/my_settings.html:120
+#: bp/start/templates/start/my_settings.html:130
 msgid "Upload or remove a file or candidate batch"
 msgstr "Lähetä tai poista Gramps-tiedosto tai tarjokasaineisto"
 
-#: bp/start/templates/start/my_settings.html:126
+#: bp/start/templates/start/my_settings.html:136
 msgid "You have no candidate data loaded in the database."
 msgstr "Sinulla ei ole tarjokasaineistoja kannassa."
 
-#: bp/start/templates/start/my_settings.html:128
+#: bp/start/templates/start/my_settings.html:138
 msgid "Upload another file"
 msgstr "Talleta aineistojasi tästä"
 
-#: bp/start/templates/start/my_settings.html:134
-#: bp/start/templates/start/my_settings.html:159
+#: bp/start/templates/start/my_settings.html:144
+#: bp/start/templates/start/my_settings.html:169
 msgid "My Gedcom files"
 msgstr "Gedcom-tiedostot"
 
-#: bp/start/templates/start/my_settings.html:139
+#: bp/start/templates/start/my_settings.html:149
 msgid "Bytes"
 msgstr "merkkiä"
 
-#: bp/start/templates/start/my_settings.html:160
+#: bp/start/templates/start/my_settings.html:170
 msgid "You have no Gedcom files in the server."
 msgstr "Palvelimella ei ole yhtään gedcom-tiedostoasi."
 
@@ -4213,10 +3670,6 @@ msgstr "Täytä käyttäjätietolomake Isotammeen"
 msgid "Register as an user of Isotammi Service"
 msgstr "Rekisteröidy Isotammen käyttäjäksi"
 
-#: bp/stk_security/templates/security/register_user.html:16
-msgid "Note!"
-msgstr "Huomaa!"
-
 #: bp/stk_security/templates/security/register_user.html:17
 #, python-format
 msgid ""
@@ -4305,74 +3758,50 @@ msgstr "Salasanasi on nollattu"
 msgid "You can confirm your email through the link below:"
 msgstr "Vahvista tunnuksesi klikkaamalla alla olevaa linkkiä:"
 
-#: models/datareader.py:366 models/datareader.py:379 models/datareader.py:408
-#: models/datareader.py:427
-msgid "Event list"
-msgstr "Tapahtumaluettelo"
-
-#: models/datareader.py:367
-msgid "Showing events without source citation"
-msgstr "Näytetään tapahtumat joissa ei lähdelainausta"
-
-#: models/datareader.py:380
-msgid "Showing events without places"
-msgstr "Näytetään tapahtumat joissa ei paikkatietoa"
-
-#: models/datareader.py:409
-msgid "Showing persons without a birth event"
-msgstr "Näytetään henkilöt joilla ei syntymätapahtumaa"
-
-#: models/datareader.py:428
-msgid "Showing oldest persons and their age"
-msgstr "Näytetään vanhimmat henkilöt ja heidän ikänsä"
-
-#: models/datareader.py:441
-msgid "List of places"
-msgstr "Paikat-lista"
-
-#: models/datareader.py:442
-msgid "Showing places"
-msgstr "Näytetään paikat"
-
-#: models/datareader.py:458 models/datareader.py:471
-msgid "Source list"
-msgstr "Lähdeluettelo"
-
-#: models/datareader.py:459
-msgid "Showing sources without source citations"
-msgstr "Näytetään lainauksettomat lähteet"
-
-#: models/datareader.py:472
-msgid "Showing sources without a repository"
-msgstr "Näytetään lähteet ilman arkistoa"
-
 #: models/dataupdater.py:95
 msgid "Estimated {} person lifetimes"
 msgstr "Arvioitu elinaika {} henkilölle"
 
-#: models/gen/dates.py:221
-msgid "calculated "
-msgstr "laskettu "
+#: models/obsolete_datareader.py:369 models/obsolete_datareader.py:382
+#: models/obsolete_datareader.py:411 models/obsolete_datareader.py:430
+msgid "Event list"
+msgstr "Tapahtumaluettelo"
 
-#: models/gen/dates.py:224
-msgid "estimated "
-msgstr "arvioitu "
+#: models/obsolete_datareader.py:370
+msgid "Showing events without source citation"
+msgstr "Näytetään tapahtumat joissa ei lähdelainausta"
 
-#: models/gen/dates.py:234
-msgid "{}till {}"
-msgstr "{}{} saakka"
+#: models/obsolete_datareader.py:383
+msgid "Showing events without places"
+msgstr "Näytetään tapahtumat joissa ei paikkatietoa"
 
-#: models/gen/dates.py:237
-msgid "{}from {}"
-msgstr "{}{} alkaen"
+#: models/obsolete_datareader.py:412
+msgid "Showing persons without a birth event"
+msgstr "Näytetään henkilöt joilla ei syntymätapahtumaa"
 
-#: models/gen/dates.py:242
-msgid "{}between {} … {}"
-msgstr "{}välillä {} … {}"
+#: models/obsolete_datareader.py:431
+msgid "Showing oldest persons and their age"
+msgstr "Näytetään vanhimmat henkilöt ja heidän ikänsä"
 
-#: models/gen/dates.py:245
-msgid "{}about {}"
-msgstr "{}noin {}"
+#: models/obsolete_datareader.py:444
+msgid "List of places"
+msgstr "Paikat-lista"
+
+#: models/obsolete_datareader.py:445
+msgid "Showing places"
+msgstr "Näytetään paikat"
+
+#: models/obsolete_datareader.py:461 models/obsolete_datareader.py:474
+msgid "Source list"
+msgstr "Lähdeluettelo"
+
+#: models/obsolete_datareader.py:462
+msgid "Showing sources without source citations"
+msgstr "Näytetään lainauksettomat lähteet"
+
+#: models/obsolete_datareader.py:475
+msgid "Showing sources without a repository"
+msgstr "Näytetään lähteet ilman arkistoa"
 
 #: pe/db_writer.py:72
 msgid "Database save failed"
@@ -4415,6 +3844,20 @@ msgstr "Arkistot"
 msgid "Showing repositories"
 msgstr "Näytetään arkistot (repositories)"
 
+#: templates/_ng_table_repositories.html:28 templates/del_table_users.html:32
+msgid "No data"
+msgstr "Ei tietoja"
+
+#: templates/cite_sour_repo.html:3
+msgid "Source Details"
+msgstr "Lähteen tiedot"
+
+#: templates/cite_sour_repo.html:11 templates/cite_sour_repo.html:29
+#: templates/cite_sour_repo.html:43 templates/cite_sour_repo.html:59
+#: templates/repo_sources.html:11
+msgid "Identifier"
+msgstr "Tunniste"
+
 #: templates/cite_sour_repo.html:29
 msgid "Confidence"
 msgstr "luottamustaso"
@@ -4426,6 +3869,10 @@ msgstr "Otsikko"
 #: templates/cite_sour_repo.html:43
 msgid "Medium"
 msgstr "Keskiarvo"
+
+#: templates/cite_sour_repo.html:55
+msgid "Repositories"
+msgstr "Arkistot"
 
 #: templates/cite_sour_repo.html:59
 msgid "Rname"
@@ -4446,6 +3893,10 @@ msgstr "Käyttäjät"
 #: templates/del_table_users.html:20
 msgid "user id"
 msgstr "Käyttäjän ID tunnus"
+
+#: templates/del_table_users.html:20
+msgid "name"
+msgstr "nimeä"
 
 #: templates/del_table_users.html:20
 msgid "email"
@@ -4501,7 +3952,7 @@ msgstr "Sukutietojen vakiointi Gedcom-ohjelmillamme"
 
 #: templates/index_entry.html:50
 msgid "Look at the demo data"
-msgstr "Tutustu demoaineistoon"
+msgstr "Tutustu esittelyaineistoon"
 
 #: templates/index_entry.html:51
 msgid ""
@@ -4510,7 +3961,8 @@ msgid ""
 "\t\t\t\tit contains the relatives of the Finnish national compositor Jean"
 " Sibelius."
 msgstr ""
-"Tässä demossa on kansallissäveltäjämme, Jean Sibeliuksen, sukupuu, \n"
+"Tässä esittelyaineistossa on kansallissäveltäjämme Jean Sibeliuksen "
+"sukupuu, \n"
 "\t\t\t\tjoka noudattaa sukututkimuksen laatusääntöjä."
 
 #: templates/index_entry.html:55
@@ -4713,6 +4165,10 @@ msgstr "myyjänä"
 #: templates/jinja_filters.py:95
 msgid "Husband"
 msgstr "mies"
+
+#: templates/jinja_filters.py:98
+msgid "Spouse"
+msgstr "puoliso"
 
 #: templates/jinja_filters.py:99
 msgid "as a child"
@@ -5115,6 +4571,10 @@ msgstr "verkko-osoitteen kuvaus"
 #: templates/repo_sources.html:42
 msgid "Identifier < br/> Title < br/> Medium"
 msgstr "Tunniste<br>otsikko<br>kuva"
+
+#: templates/select_refcols.html:3
+msgid "Reference names from Database"
+msgstr "Referenssinimet kannasta"
 
 #: templates/select_refcols.html:11
 msgid "Selecting Reference Data"
