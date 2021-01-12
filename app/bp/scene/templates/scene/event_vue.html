@@ -65,12 +65,12 @@
 #}
                     </td>
                 </tr>
-                <tr v-if="event.description">
+                <tr>
                     <td class="ColumnAttribute">{{ _("Description") }}</td>
                     <!-- td class="Value">${ event.description }</td -->
                     <td class="Value"><editable :value="event.description" ref="description"/></td>
                 </tr>
-                <tr v-if="event.dates">
+                <tr>
                     <td class="ColumnAttribute">{{ _("Date") }}</td>
                     <td class="Value"><editable :value="event.dates.as_str" ref="date"/>
                     </td>
