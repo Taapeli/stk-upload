@@ -415,12 +415,14 @@ class DOM_handler():
                 # Pick possible url
                 n.text, n.url = pick_url(n.text)
 
-            self.save_and_link_handle(n, batch_id=self.batch.id)
+            # self.save_and_link_handle(n, batch_id=self.batch.id)
+            for_test = self.save_and_link_handle(n, batch_id=self.batch.id)
             counter += 1
 
         self.blog.log_event({'title':"Notes", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
-        return {'status':status, 'message': message}
+        # return {'status':status, 'message': message}
+        return {'status':status, 'message': message, 'for_test': for_test}
 
 
     def handle_media(self):
