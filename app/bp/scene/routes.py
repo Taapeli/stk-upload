@@ -25,7 +25,7 @@ from bl.base import Status, StkEncoder
 from bl.place import PlaceDataReader
 from bl.source import SourceDataStore
 from bl.family import FamilyReader
-from bl.event import EventReader
+from bl.event import EventReader, EventWriter
 from bl.person import PersonReader
 #from bl.media import MediaBl_todo
 from templates import jinja_filters
@@ -46,6 +46,9 @@ from models.obsolete_datareader import obsolete_read_persons_with_events
 # Select the read driver for current database
 from pe.neo4j.readservice import Neo4jReadService
 readservice = Neo4jReadService(shareds.driver)
+
+from pe.neo4j.writeservice import Neo4jWriteService
+writeservice = Neo4jWriteService(shareds.driver)
 
 
 def stk_logger(context, msg:str):
@@ -400,6 +403,40 @@ def json_get_event():
                         "member":uuid,
                         "statusText":f"Failed {e.__class__.__name__}"})
 
+
+@bp.route('/scene/update/event', methods=['POST'])
+@login_required
+@roles_accepted('audit')
+def json_update_event():
+    """ Update Event 
+    """
+    t0 = time.time()
+    try:
+        args = request.args
+        if args:
+            #print(f'got request args: {args}')
+            pass
+        else:
+            args = json.loads(request.data)
+            #print(f'got request data: {args}')
+        uuid = args.get('uuid')
+        u_context = UserContext(user_session, current_user, request)
+        datastore = EventWriter(writeservice, u_context) 
+        event = datastore.update_event(uuid, args)
+        event.type_lang = jinja_filters.translate(event.type, 'evt').title()
+        res_dict = {"status":Status.OK, "event": event} 
+        response = StkEncoder.jsonify(res_dict)
+        #print(response)
+        t1 = time.time()-t0
+        stk_logger(u_context, f"-> bp.scene.routes.json_update_event e={t1:.3f}")
+        return response
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"records":[], 
+                        "status":Status.ERROR,
+                        "member":uuid,
+                        "statusText":f"Failed: {e}"})
+    
 
 # ------------------------------ Menu 3: Families --------------------------------
 

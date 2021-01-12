@@ -27,6 +27,10 @@
 {% endwith %} 
 
 <div id="vue_app" :args="{uuid:'{{uuid}}'}">
+	<ul>
+         <li v-show="message != ''" class='flash_info'>${ message }</li>
+         <li v-show="error_message != ''" class='flash_error'>${ error_message }</li>
+    </ul>
     <div class="content" id="IndividualDetail" v-if="event">
 
         <h3 style="position:sticky; top:0;">
@@ -37,13 +41,15 @@
 
         <div id="summaryarea">
             <div v-if="allow_edit" style="background:khaki; padding:.5em;">
-                <img src="/static/image/edit-property-26.png" 
-                    v-on:click="toggle_edit_mode()"
+                <img v-if="!edit_mode" src="/static/image/edit-property-26.png" 
+                	@click="edit"
                     style="cursor: pointer;"/>
                 <span v-if="edit_mode"><br>
                     <img src="/static/image/icons8-ok-26.png"
+                    	@click="save"
                         style="cursor: pointer;" title="OK"/><br>
                     <img src="/static/image/icons8-cancel-24.png"
+                    	@click="cancel"
                         style="cursor:pointer;padding-left:1px;" title="peru"/>
                 </span>
             </div>
@@ -61,11 +67,13 @@
                 </tr>
                 <tr v-if="event.description">
                     <td class="ColumnAttribute">{{ _("Description") }}</td>
-                    <td class="Value">${ event.description }</td>
+                    <!-- td class="Value">${ event.description }</td -->
+                    <td class="Value"><editable :value="event.description" ref="description"/></td>
                 </tr>
                 <tr v-if="event.dates">
                     <td class="ColumnAttribute">{{ _("Date") }}</td>
-                    <td class="Value">${ event.dates.as_str }</td>
+                    <td class="Value"><editable :value="event.dates.as_str" ref="date"/>
+                    </td>
                 </tr>
                 <tr v-for="pl in places">
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
@@ -138,6 +146,7 @@ var vm = new Vue({
     data: {
     	args: {},
         message: 'Not yet run',
+        error_message: '',
         uuid: '?',
         event: null,
         referees: [],
@@ -176,12 +185,56 @@ var vm = new Vue({
                 vm.message = error;
             }) // axios catch
         }, // getEvent
-        toggle_edit_mode() {
-        	vm.edit_mode = !vm.edit_mode;
-        	console.log('Edit mode:'+vm.edit_mode);
+        edit: function(e) {
+            for (name in this.$refs) {
+                var ref = this.$refs[name];
+                ref.edit();
+            }
+        	vm.edit_mode = true;
+            return false;
+        },
+        save: function(e) {
+            vm.message = "";
+            vm.error_message = "";
+            var data = {uuid:vm.event.uuid};
+            for (name in this.$refs) {
+                var ref = this.$refs[name];
+                data[name] = ref.current_value;
+                //ref.save();
+            }
+        	vm.edit_mode = false;
+            console.log(data);
+            axios.post("/scene/update/event", data) 
+            .then (function(rsp) {
+            	if (rsp.data.status == 0) {
+                	vm.event = rsp.data.event;
+		            for (name in vm.$refs) {
+		                var ref = vm.$refs[name];
+		                ref.reset();
+		            }
+		        }
+            	else {
+            		console.log("error:",rsp.data.statusText); // ???
+	                vm.error_message=rsp.data.statusText;
+            		vm.cancel()
+        		}	
+            });
+            return false;
+        },
+        cancel: function(e) {
+            for (name in this.$refs) {
+                var ref = this.$refs[name];
+                ref.cancel();
+            }
+        	vm.edit_mode = false;
+            return false;
         }
+        
     } // methods
 }) // Vue vm
 </script>
+
+<script src="/static/js/components.js?16"></script>
+
 {% endblock %}
 

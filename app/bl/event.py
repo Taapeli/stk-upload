@@ -29,6 +29,7 @@ from .base import NodeObject, Status
 from bl.media import MediaBl
 #from .place import PlaceReader
 from pe.db_reader import DbReader
+from pe.db_writer import DbWriter
 from pe.neo4j.cypher.cy_event import CypherEvent
 
 from bl.dates import DateRange
@@ -279,3 +280,12 @@ class EventBl(Event):
             MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
             
         return
+
+class EventWriter:
+    def __init__(self, writeservice, u_context):
+        self.writeservice = writeservice
+        self.u_context = u_context
+    def update_event(self, uuid, args):
+        event = self.writeservice.dr_update_event(uuid,args)
+        return event
+    

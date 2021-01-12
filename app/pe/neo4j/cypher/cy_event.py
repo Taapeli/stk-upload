@@ -10,6 +10,8 @@ Created on 2.9.2020
 
 class CypherEvent(object):
 
+    
+    
     get_an_event_common = '''
 MATCH (root:Audit) -[r:PASSED]-> (e:Event {uuid:$uuid}) 
 RETURN e, type(r) AS root_type, root'''
@@ -87,4 +89,9 @@ with c
     match (e:Event)  where e.handle=$handle
     merge (e) -[r:CITATION]-> (c)"""
 
+    update_event = """
+match (e:Event{uuid:$uuid})
+set e += $attrs
+return e
+    """
     
