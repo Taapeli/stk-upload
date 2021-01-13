@@ -422,9 +422,13 @@ def json_update_event():
         uuid = args.get('uuid')
         u_context = UserContext(user_session, current_user, request)
         datastore = EventWriter(writeservice, u_context) 
-        event = datastore.update_event(uuid, args)
+        rec = datastore.update_event(uuid, args)
+        if rec.get("status") != Status.OK:
+            return rec
+        event = rec.get("item")
+        statusText = rec.get("statusText","")
         event.type_lang = jinja_filters.translate(event.type, 'evt').title()
-        res_dict = {"status":Status.OK, "event": event} 
+        res_dict = {"status":Status.OK, "event": event, "statusText": statusText} 
         response = StkEncoder.jsonify(res_dict)
         #print(response)
         t1 = time.time()-t0
