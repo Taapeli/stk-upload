@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE database PUBLIC "-//Gramps//DTD Gramps XML 1.7.1//EN"
+"http://gramps-project.org/xml/1.7.1/grampsxml.dtd">
+<database xmlns="http://gramps-project.org/xml/1.7.1/">
+   <notes>
+      <note handle="_d78f4dfe449703081a9" change="1585409708" id="N2483" type="Citation">
+      <text>Tuli kotivävyksi Sibben (esiintyy myös muodossa Sibbes) taloon. Tila jaettiin kahteen osaan 1794, jolloin Juho Matinpojasta tuli sen toisen puoliskon isäntä. http://www.sibelius.fi/suomi/suku_perhe/suku_sibelius.htm</text>
+      </note>
+   </notes>
+</database>
