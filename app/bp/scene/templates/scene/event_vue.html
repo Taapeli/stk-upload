@@ -208,6 +208,7 @@ var vm = new Vue({
             .then (function(rsp) {
             	if (rsp.data.status == 0) {
                 	vm.event = rsp.data.event;
+	                vm.message = rsp.data.statusText;
 		            for (name in vm.$refs) {
 		                var ref = vm.$refs[name];
 		                ref.reset();
@@ -215,7 +216,7 @@ var vm = new Vue({
 		        }
             	else {
             		console.log("error:",rsp.data.statusText); // ???
-	                vm.error_message=rsp.data.statusText;
+	                vm.error_message = rsp.data.statusText;
             		vm.cancel()
         		}	
             });

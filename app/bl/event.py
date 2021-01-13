@@ -286,6 +286,6 @@ class EventWriter:
         self.writeservice = writeservice
         self.u_context = u_context
     def update_event(self, uuid, args):
-        event = self.writeservice.dr_update_event(uuid,args)
-        return event
+        rec = self.writeservice.dr_update_event(uuid,args)
+        return rec
     
