@@ -67,13 +67,11 @@
                 </tr>
                 <tr>
                     <td class="ColumnAttribute">{{ _("Description") }}</td>
-                    <!-- td class="Value">${ event.description }</td -->
-                    <td class="Value"><editable :value="event.description" ref="description"/></td>
+                    <td class="Value"><editable :value="event.description" name="description"/></td>
                 </tr>
                 <tr>
                     <td class="ColumnAttribute">{{ _("Date") }}</td>
-                    <td class="Value"><editable :value="event.dates.as_str" ref="date"/>
-                    </td>
+                    <td class="Value"><editable :value="event.dates.as_str" name="date"/></td>
                 </tr>
                 <tr v-for="pl in places">
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
@@ -155,7 +153,8 @@ var vm = new Vue({
         medias: [],
         translations: {},
         allow_edit: false,
-        edit_mode: false
+        edit_mode: false,
+        editables: []
     },
     created: function () {
         // `this` points to the vm instance
@@ -186,9 +185,8 @@ var vm = new Vue({
             }) // axios catch
         }, // getEvent
         edit: function(e) {
-            for (name in this.$refs) {
-                var ref = this.$refs[name];
-                ref.edit();
+            for (let editable of this.editables) {
+                editable.edit();
             }
         	vm.edit_mode = true;
             return false;
@@ -197,21 +195,17 @@ var vm = new Vue({
             vm.message = "";
             vm.error_message = "";
             var data = {uuid:vm.event.uuid};
-            for (name in this.$refs) {
-                var ref = this.$refs[name];
-                data[name] = ref.current_value;
-                //ref.save();
+            for (let editable of vm.editables) {
+                data[editable.name] = editable.current_value;
             }
         	vm.edit_mode = false;
-            console.log(data);
             axios.post("/scene/update/event", data) 
             .then (function(rsp) {
             	if (rsp.data.status == 0) {
                 	vm.event = rsp.data.event;
 	                vm.message = rsp.data.statusText;
-		            for (name in vm.$refs) {
-		                var ref = vm.$refs[name];
-		                ref.reset();
+		            for (let editable of vm.editables) {
+		                editable.reset();
 		            }
 		        }
             	else {
@@ -223,9 +217,8 @@ var vm = new Vue({
             return false;
         },
         cancel: function(e) {
-            for (name in this.$refs) {
-                var ref = this.$refs[name];
-                ref.cancel();
+            for (let editable of vm.editables) {
+                editable.cancel();
             }
         	vm.edit_mode = false;
             return false;

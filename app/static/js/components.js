@@ -1,10 +1,10 @@
 Vue.component('editable', {
-    props: ["value"],
+    props: ["value","name"],
     data: function () {
         return {
             current_value: "",
             editing: false,
-            saved_value: undefined,
+            saved_value: "",
         }
     },
     template: `
@@ -13,12 +13,14 @@ Vue.component('editable', {
             {{ current_value }}
         </span>
         <span v-show="editing">
-            <input v-model="current_value">
+            <input v-model="current_value" :placeholder="name">
+            <br>
         </span>
     </span>
     `,
     created: function() {
         this.reset();
+        this.$root.editables.push(this);
     },
     methods: {
         reset: function() {
