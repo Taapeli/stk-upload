@@ -1,6 +1,6 @@
 #----------------------------------------------------------
 #
-# Test of the note data of the xml file
+# Test of the citation data of the xml file
 #
 # Note! the line: "from . import routes" should be commentted in gramps/__init__.py file
 #
@@ -46,24 +46,31 @@ def fixture_mock_func():
     return _mock_func
 
 
-def test_xml_with_note(mock_func):
+def test_xml_with_citation(mock_func):
     mock_patch = "bp.gramps.xml_dom_handler.DOM_handler.save_and_link_handle"
     with mock.patch(mock_patch) as mck:
         mck.side_effect = mock_func
         
-        handler = DOM_handler("testdata/xml_tests/note_test.xml", "test_user")
+        handler = DOM_handler("testdata/xml_tests/citation_test.xml", "test_user")
         handler.batch = Batch("test_user")
         handler.batch.id = "2021-01-12"
         
         handler.blog = BatchLog("test_user")
         handler.blog.log_event({"XML test"})
              
-        result = handler.handle_notes()
+        result = handler.handle_citations()
         
-        assert result['for_test'].type == "Citation"
+        # assert result['for_test'].dates == "2017-07-24"
         
-        assert result['for_test'].text == "Tuli kotivävyksi Sibben (esiintyy myös muodossa Sibbes) taloon. Tila jaettiin kahteen osaan 1794, jolloin Juho Matinpojasta tuli sen toisen puoliskon isäntä."
+        assert result['for_test'].page == "Alexander Florin 5812"
         
-        assert result['for_test'].url == "http://www.sibelius.fi/suomi/suku_perhe/suku_sibelius.htm"
+        assert result['for_test'].confidence == "2"
+        
+        assert result['for_test'].note_handles[0] == "_da691070edc6e755358a085a3"
+        
+        assert result['for_test'].source_handle == "_da3b305ab6232bd2cbf352a13a"
+        
+        
+        
         
 		

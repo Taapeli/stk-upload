@@ -214,12 +214,12 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one sourceref tag in a citation",
                                      'level':"WARNING",'count':c.id})
 
-            self.save_and_link_handle(c, batch_id=self.batch.id)
+            for_test = self.save_and_link_handle(c, batch_id=self.batch.id)
             counter += 1
 
         self.blog.log_event({'title':"Citations", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
-        return {'status':status, 'message': message}
+        return {'status':status, 'message': message, 'for_test': for_test}
 
 
     def handle_events(self):
