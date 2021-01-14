@@ -16,21 +16,14 @@
 </div>
 
 {{ macro.menu(12) }}
-{% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul  class='flashes'>
-        {% for message in messages %}
-          <li class='flash_{{category}}}'>{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-{% endwith %} 
 
 <div id="vue_app" :args="{uuid:'{{uuid}}'}">
-	<ul>
+<!-- 
+ 	<ul>
          <li v-show="message != ''" class='flash_info'>${ message }</li>
          <li v-show="error_message != ''" class='flash_error'>${ error_message }</li>
     </ul>
+ -->
     <div class="content" id="IndividualDetail" v-if="event">
 
         <h3 style="position:sticky; top:0;">
