@@ -335,40 +335,40 @@ class Neo4jReadService:
                 elif args.get('pg') == 'all':
                     # Show persons, no search form
                     if show_approved:
-                        print(f'Show approved, common data fw={fw_from}')
+                        print(f'dr_get_person_list: Show approved, common data fw={fw_from}')
                         result = session.run(CypherPerson.read_approved_persons_w_events_fw_name,
                                              start_name=fw_from, limit=limit)
                     else:
-                        print(f'Show candidate data fw={fw_from}')
+                        print(f'dr_get_person_list: Show candidate data fw={fw_from}')
                         result = session.run(CypherPerson.read_my_persons_w_events_fw_name,
                                              user=user, start_name=fw_from, limit=limit)
                 elif rule in ['surname', 'firstname', 'patronyme']:
                     # Search persons matching <rule> field to <key> value
                     if show_approved:
-                        print(f'Show approved common data {rule} ~ {key}*')
+                        print(f'dr_get_person_list: Show approved common data {rule} ~ "{key}*"')
                         result = session.run(CypherPerson.get_common_events_by_refname_use,
                                              use=rule, name=key)
                     else:
-                        print(f'Show candidate data {rule} ~ {key}*')
+                        print(f'dr_get_person_list: Show candidate data {rule} ~ "{key}*"')
                         result = session.run(CypherPerson.get_my_events_by_refname_use,
                                              use=rule, name=key, user=user)
                 elif rule == 'years':
                     # Search persons matching <years>
                     if show_approved:
-                        print(f'Show approved common data years {years}')
+                        print(f'dr_get_person_list: Show approved common data years {years}')
                         result = session.run(CypherPerson.get_common_events_by_years,
                                              years=years)
                     else:
-                        print(f'Show candidate data  years {years}')
+                        print(f'dr_get_person_list: Show candidate data  years {years}')
                         result = session.run(CypherPerson.get_my_events_by_years,
                                              years=years, user=user)
                 elif rule == 'ref':
                     # Search persons where a reference name = <key> value
                     if show_approved:
-                        print(f'TODO: Show approved common data {rule}={key}')
+                        print(f'dr_get_person_list: TODO: Show approved common data {rule}={key}')
                         #return session.run(Cypher_person.get_events_by_refname, name=key)
                     else:
-                        print(f'TODO: Show candidate data {rule}={key}')
+                        print(f'dr_get_person_list: TODO: Show candidate data {rule}={key}')
                         #return session.run(Cypher_person.get_events_by_refname, name=key)
                 else:
                     return {'items': [], 'status': Status.ERROR,

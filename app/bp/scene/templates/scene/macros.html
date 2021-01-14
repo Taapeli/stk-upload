@@ -248,11 +248,11 @@
 {%- endmacro %}
 
 {% macro lifetimes(p) -%}
-    {# Displays Person's life time estimates '1662…1709 — 1726…1819' #}
+    {# Displays Person's life time estimates 'born 1662…1709 died 1726…1819' #}
     {% if p.death_high != 9999 %}
-        {% if p.birth_low != p.birth_high %}
+        {{ _('born') }} {% if p.birth_low != p.birth_high %}
             {{p.birth_low}}…{% endif 
-        %}{{p.birth_high}} &ndash; {{p.death_low}}{%
+        %}{{p.birth_high}} {{ _('died') }}  {{p.death_low}}{%
          if p.death_low != p.death_high 
          %}…{{p.death_high}}
          {% endif %}

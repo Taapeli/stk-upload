@@ -46,7 +46,7 @@ class Name(NodeObject):
 
     def __str__(self):
         # Gedcom style key
-        return "{}/{}/{}/{}/{}".format(self.title, self.firstname, self.prefix, self.surname, self.suffix)
+        return "{} /{}/{}/{}/{}".format(self.title, self.firstname, self.prefix, self.surname, self.suffix)
 
     def key_surname(self):
         # Standard sort order key "Klick#Brita Helena#Jönsdotter"
