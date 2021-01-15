@@ -984,9 +984,9 @@ class DOM_handler():
                     date_quality = dateobj.getAttribute("quality")
                 else:
                     date_quality = None
-                logger.debug("bp.gramps.xml_dom_handler.DOM_handler._extract_daterange"
-                             f"Creating {tag}, date_type={date_type}, quality={date_quality},"
-                             f" {date_start} - {date_stop}")
+#                 logger.debug("bp.gramps.xml_dom_handler.DOM_handler._extract_daterange"
+#                              f"Creating {tag}, date_type={date_type}, quality={date_quality},"
+#                              f" {date_start} - {date_stop}")
                 return Gramps_DateRange(tag, date_type, date_quality,
                                         date_start, date_stop)
 
