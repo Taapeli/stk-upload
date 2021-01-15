@@ -162,6 +162,8 @@ def show_person_search():
     print(f'{request.method} Persons {args}')
 
     res, u_context = _do_get_persons(args)
+    if Status.has_failed(res):
+        flash(f'{_("Person not found")}: {res.get("statustext","error")}', 'error')
 
     found = res.get('items',[])
     num_hidden = res.get('num_hidden',0)
@@ -386,7 +388,6 @@ def json_get_event():
 
         res_dict = {"event": event, 'members': members, 
                     'notes':notes, 'places':places, 'medias':medias,
-                    'statusText': f'Löytyi {len(members)} tapahtuman osallista',
                     'allow_edit': u_context.allow_edit,
                     'translations':{'myself': _('Self') }
                     }

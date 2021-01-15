@@ -188,12 +188,15 @@ class PersonReader(DbReader):
                     str='y1-'   from year
         """
         if args.get('rule') == 'years':
-            lim = args['key'].split('-')
-            y1 = int(lim[0]) if lim[0] > '' else -9999
-            y2 = int(lim[-1]) if lim[-1] > '' else 9999
-            if y1 > y2:
-                y2, y1 = [y1, y2]
-            args['years'] = [y1, y2]
+            try:
+                lim = args['key'].split('-')
+                y1 = int(lim[0]) if lim[0] > '' else -9999
+                y2 = int(lim[-1]) if lim[-1] > '' else 9999
+                if y1 > y2:
+                    y2, y1 = [y1, y2]
+                args['years'] = [y1, y2]
+            except ValueError:
+                return {'statustext':_('The year or years must be numeric'), 'status': Status.ERROR}
 
 #         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
 #                           'years':args.get('years')}

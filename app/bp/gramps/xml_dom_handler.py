@@ -160,6 +160,7 @@ class DOM_handler():
         # Get all the citations in the collection
         citations = self.collection.getElementsByTagName("citation")
         status = Status.OK
+        for_test = ''
 
         message = f'{len(citations)} Citations'
         print (f"***** {message} *****")
@@ -394,6 +395,7 @@ class DOM_handler():
         ''' Get all the notes in the collection. '''
         notes = self.collection.getElementsByTagName("note")
         status = Status.OK
+        for_test = ''
 
         message = f'{len(notes)} Notes'
         print (f"***** {message} *****")
@@ -852,6 +854,8 @@ class DOM_handler():
         t0 = time.time()
         dates_count = 0
         sortname_count = 0
+        if len(self.family_ids) == 0:
+            return {'status': Status.NOT_FOUND, 'dates':dates_count, 'sortnames': sortname_count}
 
         for uniq_id in self.family_ids:
             if uniq_id != None:
@@ -877,6 +881,9 @@ class DOM_handler():
         t0 = time.time()
         refname_count = 0
         sortname_count = 0
+        if len(self.person_ids) == 0:
+            return {'refnames': refname_count, 'sortnames': sortname_count, 
+                    'status':Status.NOT_FOUND}
 
         for p_id in self.person_ids:
             self.update_progress('refnames')
