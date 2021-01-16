@@ -25,15 +25,24 @@ class Status():
     UPDATED = 4
 
     @staticmethod       
-    def has_failed(result:dict):
+    def has_failed(result:dict, strict=True):
         ''' Test, if given result dict did not succeed.
+
+            If strict, allow only OK status, else allow any no-error status
         '''
         if not isinstance(result,dict):
             traceback.print_exc()
             raise AttributeError(f'bl.base.Status.has_failed')
-        if result.get('status', -1) != Status.OK:
-            return True
-        return False
+        st = result.get('status', -1)
+
+        if st == Status.ERROR:
+            return True     # Error
+        if st == Status.OK:
+            return False    # Ok
+        if strict:
+            return True     # Not found or updated etc not allowed
+        else:
+            return False    # Not found or updated is ok
 
 
 class StkEncoder(json.JSONEncoder):

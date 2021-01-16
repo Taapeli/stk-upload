@@ -222,6 +222,14 @@ class FamilyBl(Family):
         return shareds.datastore.dataservice._set_family_calculated_attributes(uniq_id)
         #return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
 
+    def remove_privacy_limits(self):
+        if self.father:
+            self.father.too_new = False
+        if self.mother:
+            self.mother.too_new = False
+        for c in self.children:
+            c.too_new = False
+            
 
 class FamilyReader(DbReader):
     '''

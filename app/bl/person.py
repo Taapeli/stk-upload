@@ -402,6 +402,9 @@ class PersonReader(DbReader):
         # res = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
         if Status.has_failed(res):
             # Not found, not allowd (person.too_new) or error
+            if res.get('status') == Status.NOT_FOUND:
+                return {'status':Status.NOT_FOUND, 
+                        'statustext': _('Requested person not found')}
             return res
         person = res.get('item')
         root = res.get('root')   # Info about linked Batch or Audit node
@@ -429,9 +432,9 @@ class PersonReader(DbReader):
             person.families_as_parent = res.get('families_as_parent')
             person.events = person.events + res.get('family_events')
 
-        if not self.user_context.privacy_ok(person):
+        if not self.user_context.use_common():
             person.remove_privacy_limit_from_families()
-    
+
         #    Sort all Person and family Events by date
         person.events.sort()
 
@@ -699,8 +702,8 @@ class PersonBl(Person):
         
             Origin from models.person_reader
         '''
-        for family in self.person.families_as_child:
-            self.remove_privacy_limit_from_family(family)
-        for family in self.person.families_as_parent:
-            self.remove_privacy_limit_from_family(family)
+        for family in self.families_as_child:
+            family.remove_privacy_limits()
+        for family in self.families_as_parent:
+            family.remove_privacy_limits()
 
