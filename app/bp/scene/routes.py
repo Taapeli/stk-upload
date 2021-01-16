@@ -27,14 +27,14 @@ from bl.source import SourceDataStore
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
 from bl.person import PersonReader
-#from bl.media import MediaBl_todo
+from bl.media import Media, MediaReader
 from templates import jinja_filters
 
 #from bp.scene.scene_reader import get_person_full_data
 from bp.scene.models import media
 #from models.gen.family_combo import Family_combo
 #from models.gen.source import Source
-from models.gen.media import Media
+#from models.gen.media import Media
 
 from models.obsolete_datareader import obsolete_read_persons_with_events
 #from models.obsolete_datareader import get_person_data_by_id # -- vanhempi versio ---
@@ -724,11 +724,16 @@ def show_medias():
     u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
     u_context.set_scope_from_request(request, 'media_scope')
-    try:
-        medias = Media.read_my_media_list(u_context, 20)
+    u_context.count = 20
 
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    datareader = MediaReader(readservice, u_context)
+#   medias = Media.read_my_media_list(u_context, 20)
+
+    res = datareader.read_my_media_list()
+    if Status.has_failed(res, False):
+        flash(f'{res.get("statustext","error")}', 'error')
+    medias = res.get('items', [])
+
     stk_logger(u_context, f"-> bp.scene.media.show_medias fw n={len(medias)}")
     return render_template("/scene/medias.html", medias=medias, 
                            user_context=u_context, elapsed=time.time()-t0)

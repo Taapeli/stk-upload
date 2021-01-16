@@ -6,13 +6,13 @@ Created on 22.7.2017
 
 from sys import stderr
 
-from bl.base import NodeObject, Status
+from bl.base import NodeObject #, Status
 from bl.event import EventBl
 from bl.place import PlaceBl
 from bl.family import FamilyBl
 from bl.person import PersonBl
 
-from .cypher import Cypher_media
+#from .cypher import Cypher_media
 from .person import Person
 #from .place import Place
 from models.cypher_gramps import Cypher_media_in_batch
@@ -67,63 +67,63 @@ class Media(NodeObject):
         return n
 
 
-    @staticmethod
-    def read_my_media_list(u_context, limit):
-        """ Read Media object list using u_context.
-        """
-        medias = []
-        res = Media.get_medias(uniq_id=None, o_context=u_context, limit=limit)
-        #if Status.has_failed(res): return res
-        for record in res.get('recs', None): 
-            # <Record o=<Node id=393949 labels={'Media'}
-            #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
-            #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
-            #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
-            #            'id': 'O0001', 'uuid': 'b4b11fbd8c054252b51703769e7a6850'}>
-            #    credit='juha'
-            #    batch_id='2020-01-02.001'
-            #    count=1>
-            node = record['o']
-            m = Media.from_node(node)
-            m.conn = record.get('count', 0)
-            m.credit = record.get('credit')
-            m.batch = record.get('batch_id')
-            medias.append(m)
-        
-    # Update the page scope according to items really found
-        if medias:
-            u_context.update_session_scope('media_scope', 
-                medias[0].description, medias[-1].description, limit, len(medias))
-        return medias
+#     @staticmethod
+#     def read_my_media_list(u_context, limit):
+#         """ Read Media object list using u_context.
+#         """
+#         medias = []
+#         res = Media.get_medias(uniq_id=None, o_context=u_context, limit=limit)
+#         #if Status.has_failed(res): return res
+#         for record in res.get('recs', None): 
+#             # <Record o=<Node id=393949 labels={'Media'}
+#             #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
+#             #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
+#             #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
+#             #            'id': 'O0001', 'uuid': 'b4b11fbd8c054252b51703769e7a6850'}>
+#             #    credit='juha'
+#             #    batch_id='2020-01-02.001'
+#             #    count=1>
+#             node = record['o']
+#             m = Media.from_node(node)
+#             m.conn = record.get('count', 0)
+#             m.credit = record.get('credit')
+#             m.batch = record.get('batch_id')
+#             medias.append(m)
+#         
+#     # Update the page scope according to items really found
+#         if medias:
+#             u_context.update_session_scope('media_scope', 
+#                 medias[0].description, medias[-1].description, limit, len(medias))
+#         return medias
     
-    @staticmethod
-    def get_medias(uniq_id=None, o_context=None, limit=100):
-        """ Reads Media objects from user batch or common data using context. """
-                        
-        with shareds.driver.session(default_access_mode='READ') as session: 
-            if uniq_id:
-                query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
-                result = session.run(query, id=uniq_id)
-
-            elif o_context:
-                #user = o_context.user
-                user = o_context.batch_user()
-                fw_from = o_context.first  # From here forward
-                if user == None:
-                    # Show approved common data
-                    result = session.run(Cypher_media.read_common_media,
-                                         user=user, start_name=fw_from, limit=limit)
-                else:
-                    # Show user Batch
-                    result =  session.run(Cypher_media.read_my_own_media,
-                                          start_name=fw_from, user=user, limit=limit)
-            else:
-                result = session.run(Cypher_media.get_all)
-
-            recs = []
-            for record in result: 
-                recs.append(record)
-            return {'recs':recs, 'status':Status.OK}
+#     @staticmethod
+#     def get_medias(uniq_id=None, o_context=None, limit=100):
+#         """ Reads Media objects from user batch or common data using context. """
+#                         
+#         with shareds.driver.session(default_access_mode='READ') as session: 
+#             if uniq_id:
+#                 query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
+#                 result = session.run(query, id=uniq_id)
+# 
+#             elif o_context:
+#                 #user = o_context.user
+#                 user = o_context.batch_user()
+#                 fw_from = o_context.first  # From here forward
+#                 if user == None:
+#                     # Show approved common data
+#                     result = session.run(Cypher_media.read_common_media,
+#                                          user=user, start_name=fw_from, limit=limit)
+#                 else:
+#                     # Show user Batch
+#                     result =  session.run(Cypher_media.read_my_own_media,
+#                                           start_name=fw_from, user=user, limit=limit)
+#             else:
+#                 result = session.run(Cypher_media.get_all)
+# 
+#             recs = []
+#             for record in result: 
+#                 recs.append(record)
+#             return {'recs':recs, 'status':Status.OK}
 
     @staticmethod
     def get_one(oid):

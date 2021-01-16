@@ -109,10 +109,13 @@
 {% else %}
 	    <tr><td colspan="4">
 		  <div class="NotFound">
+    {% if next_bw %}
 		      <p>{{ _('No media found starting from "%(name)s"', name=next_bw) }}.</p>
-		      {% if next_bw %}<p>&nbsp;&#9656; <a href="/scene/medias?fw=%20" 
+		      <p>&nbsp;&#9656; <a href="/scene/medias?fw=%20" 
 		          title="{{ _('first page') }}">{{ _("Go to the first media") }}</a></p>
-		      {% endif %}
+    {% else %}
+              <p>{{ _('No medias found') }}.</p>
+    {% endif %}
 		  </div></td>
 	    </tr>
 {% endif %}

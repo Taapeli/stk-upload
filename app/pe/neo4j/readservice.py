@@ -23,14 +23,10 @@ from pe.neo4j.cypher.cy_source import CypherSource
 from pe.neo4j.cypher.cy_family import CypherFamily
 from pe.neo4j.cypher.cy_event import CypherEvent
 from pe.neo4j.cypher.cy_person import CypherPerson
+from pe.neo4j.cypher.cy_media import CypherMedia
 
 from bl.event import Event
 #Todo: Change Old style includes to bl classes
-#from models.gen.person_combo import Person_combo
-#from models.gen.cypher import Cypher_person
-#from models.gen.person_name import Name
-#from models.gen.event import Event
-#from models.gen.event_combo import Event_combo
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.repository import Repository
@@ -1405,7 +1401,7 @@ class Neo4jReadService:
                     # Show my researcher data
                     print("dr_get_source_list_fw: my researcher data")
                     result = session.run(CypherSource.get_own_set_selections,
-                                         key1=key1, key2=key2)
+                                         key1=key1, key2=key2, user=user)
                 else:
                     print("dr_get_source_list_fw: approved common only")
                     result = session.run(CypherSource.get_auditted_set_selections,
@@ -1415,7 +1411,7 @@ class Neo4jReadService:
                 if user: 
                     # Show my researcher data
                     print("dr_get_source_list_fw: my researcher data")
-                    result = session.run(CypherSource.get_own_sets)
+                    result = session.run(CypherSource.get_own_sets, user=user)
                 else:
                     print("dr_get_source_list_fw: approved common only")
                     result = session.run(CypherSource.get_auditted_sets)
@@ -1517,6 +1513,35 @@ class Neo4jReadService:
                 return {'item': source, 'status':Status.OK}
             return {'status':Status.NOT_FOUND,
                     'statustext': f"source uuid={uuid} not found"}
+
+
+    def dr_get_media_list(self, user, fw_from, limit):
+        """ Reads Media objects from user batch or common data using context.
+        
+            :param: user    Active user or None, if approved data is requested
+            :param: fw_from The name from which the list is requested
+            :param: limit   How many items per page
+        """
+                        
+        with self.driver.session(default_access_mode='READ') as session: 
+            if user == None:
+                # Show approved common data
+                result = session.run(CypherMedia.read_common_media,
+                                     user=user, start_name=fw_from, limit=limit)
+            else:
+                # Show user Batch
+                result =  session.run(CypherMedia.read_my_own_media,
+                                      start_name=fw_from, user=user, limit=limit)
+
+            recs = []
+            for record in result: 
+                recs.append(record)
+#             recs = [record for record in result]
+            if recs:
+                return {'recs':recs, 'status':Status.OK}
+            else:
+                return {'recs':recs, 'status':Status.NOT_FOUND}
+
 
 
     def dr_get_object_sources_repositories(self):

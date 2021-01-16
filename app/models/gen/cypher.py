@@ -756,12 +756,12 @@ return r order by r.type"""
 
 
 class Cypher_media():
-
+ 
 #     get_by_uniq_id = """
 # MATCH (obj:Media)
 #     WHERE ID(obj) = $rid
 # RETURN obj"""
-
+ 
     get_by_uuid = """
 MATCH (media:Media) <-[r:MEDIA] - (n) 
     WHERE media.uuid = $rid
@@ -769,21 +769,21 @@ OPTIONAL MATCH (n) <-[:EVENT]- (m)
 RETURN media,
     COLLECT(DISTINCT [properties(r), n]) as m_ref,
     COLLECT(DISTINCT [ID(n), m]) AS e_ref"""
-
-    get_all = "MATCH (o:Media) RETURN o"
-
-    # Media list by description with count limit
-    read_common_media = """
-MATCH (prof) -[:PASSED]-> (o:Media) <- [r:MEDIA] - () 
-WHERE o.description >= $start_name 
-RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
-    ORDER BY o.description LIMIT $limit"""
-
-    read_my_own_media = """
-MATCH (prof) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () 
-WHERE  prof.user = $user AND o.description >= $start_name
-RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
-    ORDER BY o.description LIMIT $limit"""
+# 
+#     get_all = "MATCH (o:Media) RETURN o"
+# 
+#     # Media list by description with count limit
+#     read_common_media = """
+# MATCH (prof) -[:PASSED]-> (o:Media) <- [r:MEDIA] - () 
+# WHERE o.description >= $start_name 
+# RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+#     ORDER BY o.description LIMIT $limit"""
+# 
+#     read_my_own_media = """
+# MATCH (prof) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () 
+# WHERE  prof.user = $user AND o.description >= $start_name
+# RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+#     ORDER BY o.description LIMIT $limit"""
 
 
 # class Cypher_batch():

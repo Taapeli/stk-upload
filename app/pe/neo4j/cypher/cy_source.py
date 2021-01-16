@@ -11,7 +11,9 @@ class CypherSource():
 
     # Select Source from auditted data / researcher's own data
     _match_auditted = "MATCH (s:Source) <-[owner:PASSED]- ()"
-    _match_own = "MATCH (s:Source) <-[owner:OWNS|OWNS_OTHER]- ()"
+    _match_my_access = """MATCH (s:Source) <-[owner:OWNS]- (b:Batch) 
+        <-[:HAS_ACCESS]- (u:UserProfile {username:$user})"""
+    _match_my_own = "MATCH (s:Source) <-[owner:OWNS|OWNS_OTHER]- ()"
 
     _sets = """
 WITH type(owner) as owner_type, s
@@ -59,13 +61,13 @@ order by c.id, x.id"""
     # ------------------------ Cypher clauses ------------------------
 
     get_auditted_sets = _match_auditted + _sets
-    get_own_sets = _match_own + _sets
+    get_own_sets = _match_my_access + _sets
 
     get_auditted_set_selections = _match_auditted + _set_selections
-    get_own_set_selections = _match_own + _set_selections
+    get_own_set_selections = _match_my_access + _set_selections
 
     get_auditted_set_single_selection = _match_auditted + _single_set_selection
-    get_own_set_single_selection = _match_own + _single_set_selection
+    get_own_set_single_selection = _match_my_access + _single_set_selection
 
     # Default name, birth and death
     get_person_lifedata = """

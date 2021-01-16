@@ -2656,6 +2656,10 @@ msgstr "Ei \"%(name)s\"-alkuista mediaa"
 msgid "Go to the first media"
 msgstr "Siirry ensimmäiseen mediaan"
 
+#: bp/scene/templates/scene/medias.html:117
+msgid "No medias found"
+msgstr "Ei medioita"
+
 #: bp/scene/templates/scene/person.html:18
 msgid "Person's details"
 msgstr "Henkilön tiedot"
