@@ -402,6 +402,9 @@ class PersonReader(DbReader):
         # res = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
         if Status.has_failed(res):
             # Not found, not allowd (person.too_new) or error
+            if res.get('status') == Status.NOT_FOUND:
+                return {'status':Status.NOT_FOUND, 
+                        'statustext': _('Requested person not found')}
             return res
         person = res.get('item')
         root = res.get('root')   # Info about linked Batch or Audit node

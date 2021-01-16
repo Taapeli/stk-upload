@@ -162,8 +162,8 @@ def show_person_search():
     print(f'{request.method} Persons {args}')
 
     res, u_context = _do_get_persons(args)
-    if Status.has_failed(res):
-        flash(f'{_("Person not found")}: {res.get("statustext","error")}', 'error')
+    if Status.has_failed(res, strict=False):
+        flash(f'{res.get("statustext","error")}', 'error')
 
     found = res.get('items',[])
     num_hidden = res.get('num_hidden',0)
@@ -270,7 +270,7 @@ def show_person(uid=None):
     result = datastore.get_person_data(uid, args)
     # result {'person', 'objs', 'jscode', 'root'}
     if Status.has_failed(result):
-        flash(f'{_("Person not found")}: {result.get("statustext","error")}', 'error')
+        flash(f'{result.get("statustext","error")}', 'error')
     person = result.get('person')
     objs = result.get('objs',[])
     jscode = result.get('jscode','')

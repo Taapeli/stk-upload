@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-01-13 14:25+0200\n"
+"POT-Creation-Date: 2021-01-16 12:13+0200\n"
 "PO-Revision-Date: 2020-09-20 22:47+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -178,12 +178,20 @@ msgstr "kvinna"
 msgid "sex not applicable"
 msgstr "kön inte tillämpligt"
 
-#: bl/person.py:215 bl/person.py:247
+#: bl/person.py:199
+msgid "The year or years must be numeric"
+msgstr ""
+
+#: bl/person.py:218 bl/person.py:250
 msgid "No persons found"
 msgstr ""
 
-#: bl/person.py:284
+#: bl/person.py:287
 msgid "The person is not accessible"
+msgstr ""
+
+#: bl/person.py:407
+msgid "Person not found"
 msgstr ""
 
 #: bl/source.py:176
@@ -236,7 +244,7 @@ msgstr "GEDCOM-filer"
 
 #: bp/admin/forms.py:52 bp/admin/forms.py:101
 #: bp/scene/templates/scene/event.html:76
-#: bp/scene/templates/scene/event_vue.html:109
+#: bp/scene/templates/scene/event_vue.html:100
 msgid "Member"
 msgstr "Medlem"
 
@@ -322,7 +330,7 @@ msgid "Approved / pending user"
 msgstr "Godkänd / väntande användare"
 
 #: bp/admin/forms.py:98 bp/scene/templates/scene/event.html:75
-#: bp/scene/templates/scene/event_vue.html:108
+#: bp/scene/templates/scene/event_vue.html:99
 msgid "Role"
 msgstr "Roll"
 
@@ -1449,7 +1457,7 @@ msgstr "användare"
 #: bp/gedcom/templates/gedcom_info.html:179
 #: bp/gedcom/templates/gedcom_list.html:42
 #: bp/scene/templates/scene/event.html:51
-#: bp/scene/templates/scene/event_vue.html:69
+#: bp/scene/templates/scene/event_vue.html:62
 #: bp/scene/templates/scene/person.html:140
 #: bp/scene/templates/scene/place_events.html:172
 #: bp/start/templates/start/my_settings.html:150
@@ -2173,20 +2181,20 @@ msgstr "Titta på ditt kandidat material"
 msgid "Return to front page"
 msgstr "Tillbaka till första sidan"
 
-#: bp/scene/routes.py:354 bp/scene/routes.py:358
+#: bp/scene/routes.py:356 bp/scene/routes.py:360
 msgid "No event found"
 msgstr ""
 
-#: bp/scene/routes.py:391 bp/scene/templates/scene/event.html:83
+#: bp/scene/routes.py:392 bp/scene/templates/scene/event.html:83
 #: bp/scene/templates/scene/person.html:251
 msgid "Self"
 msgstr "Själv"
 
-#: bp/scene/routes.py:531
+#: bp/scene/routes.py:536
 msgid "No families"
 msgstr "Inga familjer"
 
-#: bp/scene/routes.py:538 bp/scene/templates/scene/families.html:115
+#: bp/scene/routes.py:543 bp/scene/templates/scene/families.html:115
 #: bp/scene/templates/scene/family.html:33
 #: bp/scene/templates/scene/person.html:230
 #: bp/scene/templates/scene/person.html:267 templates/jinja_filters.py:75
@@ -2194,18 +2202,18 @@ msgstr "Inga familjer"
 msgid "Family"
 msgstr "Familj"
 
-#: bp/scene/routes.py:539 bp/scene/templates/scene/families.html:119
+#: bp/scene/routes.py:544 bp/scene/templates/scene/families.html:119
 #: bp/scene/templates/scene/family.html:100
 #: bp/scene/templates/scene/person.html:237
 #: bp/scene/templates/scene/person.html:274
 msgid "Children"
 msgstr "Barn"
 
-#: bp/scene/routes.py:691
+#: bp/scene/routes.py:696
 msgid "No objects found"
 msgstr "Ingenting funnits"
 
-#: bp/scene/routes.py:694
+#: bp/scene/routes.py:699
 msgid "Error"
 msgstr "Fel"
 
@@ -2216,7 +2224,7 @@ msgid "Event details"
 msgstr "Händelse detaljer"
 
 #: bp/scene/templates/scene/event.html:38
-#: bp/scene/templates/scene/event_vue.html:59
+#: bp/scene/templates/scene/event_vue.html:52
 #: bp/scene/templates/scene/family.html:36
 #: bp/scene/templates/scene/media.html:63
 #: bp/scene/templates/scene/person.html:68
@@ -2226,7 +2234,7 @@ msgid "Identifiers"
 msgstr "Identifierare"
 
 #: bp/scene/templates/scene/event.html:55
-#: bp/scene/templates/scene/event_vue.html:74
+#: bp/scene/templates/scene/event_vue.html:66
 #: bp/scene/templates/scene/person.html:138
 #: bp/scene/templates/scene/place_events.html:171
 #: bp/start/templates/start/my_settings.html:148
@@ -2235,7 +2243,7 @@ msgid "Date"
 msgstr "Datum"
 
 #: bp/scene/templates/scene/event.html:59
-#: bp/scene/templates/scene/event_vue.html:79
+#: bp/scene/templates/scene/event_vue.html:70
 #: bp/scene/templates/scene/person.html:139
 #: bp/scene/templates/scene/places.html:41 templates/select_refcols.html:37
 #: templates/select_refcols.html:65
@@ -2243,11 +2251,11 @@ msgid "Place"
 msgstr "Plats"
 
 #: bp/scene/templates/scene/event.html:71
-#: bp/scene/templates/scene/event_vue.html:104
+#: bp/scene/templates/scene/event_vue.html:95
 msgid "Participants"
 msgstr "Deltagare"
 
-#: bp/scene/templates/scene/event_vue.html:92
+#: bp/scene/templates/scene/event_vue.html:83
 #: bp/scene/templates/scene/place_events.html:136
 msgid "Media"
 msgstr "Media"
@@ -2538,7 +2546,7 @@ msgstr "se detaljer om person %(id)s"
 msgid "Anonymous"
 msgstr "Anonym"
 
-#: bp/scene/templates/scene/macros.html:254
+#: bp/scene/templates/scene/macros.html:253
 msgid "born"
 msgstr ""
 
