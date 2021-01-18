@@ -13,7 +13,7 @@ class CypherSource():
     _match_auditted = "MATCH (s:Source) <-[owner:PASSED]- ()"
     _match_my_access = """MATCH (s:Source) <-[owner:OWNS]- (b:Batch) 
         <-[:HAS_ACCESS]- (u:UserProfile {username:$user})"""
-    _match_my_own = "MATCH (s:Source) <-[owner:OWNS|OWNS_OTHER]- ()"
+#   _match_my_own = "MATCH (s:Source) <-[owner:OWNS|OWNS_OTHER]- ()"
 
     _sets = """
 WITH type(owner) as owner_type, s

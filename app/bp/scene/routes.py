@@ -464,7 +464,6 @@ def show_families():
     
     datastore = FamilyReader(readservice, u_context) 
 
-        
     # 'families' has Family objects
     families = datastore.get_families() #o_context=u_context, opt=opt, limit=count)
 
@@ -750,15 +749,20 @@ def show_media(uid=None):
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
     
-    try:
-        medium = Media.get_one(uid)
+    reader = MediaReader(readservice, u_context)
+    res = reader.get_one(uid)
+    # returns {item, status}
+    medium = res.get('item', None)
+    if medium:
         fullname, mimetype = media.get_fullname(medium.uuid)
-        if mimetype == "application/pdf":
-            size = 0
-        else:
-            size = media.get_image_size(fullname)
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    else:
+        flash(f'{res.get("statustext","error")}', 'error')
+        fullname = None
+        mimetype = None
+    if mimetype == "application/pdf":
+        size = 0
+    else:
+        size = media.get_image_size(fullname)
 
     stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
     return render_template("/scene/media.html", media=medium, size=size,

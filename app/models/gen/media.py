@@ -125,110 +125,110 @@ class Media(NodeObject):
 #                 recs.append(record)
 #             return {'recs':recs, 'status':Status.OK}
 
-    @staticmethod
-    def get_one(oid):
-        """ Read a Media object, selected by UUID or uniq_id.
-        
-            Luetaan tallenteen tiedot
-        """
-        class MediaReferee():
-            ''' Carrier for a referee of media object. '''
-            def __init__(self):
-                # Referencing object label, object
-                self.obj = None
-                self.label = None
-                self.crop = None
-                # If the referring object is Event, also list of:
-                # - connected objects
-                self.next_objs = []
-
-
-        if not oid:
-            return None
-
-        with shareds.driver.session(default_access_mode='READ') as session:
-            # Use UUID
-            record = session.run(Cypher_media.get_by_uuid, rid=oid).single()
-            # RETURN media,
-            #     COLLECT(DISTINCT [properties(r), n]) as m_ref, # Referring event or object
-            #     COLLECT(DISTINCT [ID(n), m]) AS e_ref          # Event Person or Family
-            if not record:
-                return None
-
-            #Record[0]: the Media object
-            # <Node id=435174 labels={'Media'}
-            #    properties={'src': 'Albumi-Silius/kuva002.jpg', 'batch_id': '2020-02-14.001',
-            #        'mime': 'image/jpeg', 'change': 1574187478, 'description': 'kuva002',
-            #        'id': 'O0024', 'uuid': 'fa2e240493434912986c2540b52a9464'}>
-            media = Media.from_node(record['media'])
-            referees = record['m_ref']
-            referees_next = record['e_ref']
-
-            # 1. If referrer is an Event, there is also secundary next objects
-            event_refs = {}
-            for referee_id, node_next in referees_next:
-                #record[2]: Indirectly referring Person and Families
-                # [  [29373, 
-                #     <Node id=29387 labels=frozenset({'Person'})
-                #        properties={'sortname': 'Silius#Carl Gustaf#', 'death_high': 1911, 
-                #            'sex': 1, 'change': 1557753049, 'confidence': '2.0', 'birth_low': 1852, 
-                #            'birth_high': 1852, 'id': 'I0036', 'uuid': '9fdcfc81bd17435e8e051325ac3e6eae', 
-                #            'death_low': 1911}>],
-                #    [29373, <Node id=30773 labels=frozenset({'Person'}) properties={...}>]
-                # ]
-                if not node_next:
-                    continue
-                if "Person" in node_next.labels:
-                    obj_next = Person.from_node(node_next)
-                    obj_next.label = "Person"
-                elif "Family" in node_next.labels:
-                    obj_next = FamilyBl.from_node(node_next)
-                    obj_next.label = "Family"
-                else:
-                    print(f'models.gen.media.Media.get_one: unknown type {list(obj_next.labels)}')
-                    continue
-                if not referee_id in event_refs.keys():
-                    # A new Event having indirect referees
-                    event_refs[referee_id] = [obj_next]
-                else:
-                    event_refs[referee_id].append(obj_next)
-
-            # 2. Gather the directly referring objects
-            media.ref = []
-            for prop, node in referees:
-                #Record[1]:
-                # [ [{'order': 0},
-                #        <Node id=29373 labels=frozenset({'Event'})
-                #            properties={'datetype': 4, 'change': 1515865582, 'description': '', 
-                #                'id': 'E0858', 'date2': 1999040, 'date1': 1928384, 
-                #                'type': 'Burial', 'uuid': '934415b2ccf4476fa9d8d9f4d93938b7'}>
-                # ] ]
-                if not node:
-                    continue
-                mref = MediaReferee()
-                mref.label, = node.labels   # Get the 1st label
-                if mref.label == 'Person':
-                    mref.obj = PersonBl.from_node(node)
-                    mref.obj.label = "Person"
-                elif mref.label == 'Place':
-                    mref.obj = PlaceBl.from_node(node)
-                    mref.obj.label = "Place"
-                elif mref.label == 'Event':
-                    mref.obj = EventBl.from_node(node)
-                    mref.obj.label = "Event"
-                # Has the relation cropping properties?
-                left = prop.get('left')
-                if left != None:
-                    upper = prop.get('upper')
-                    right = prop.get('right')
-                    lower = prop.get('lower')
-                    mref.crop = (left, upper, right, lower)
-                # Eventuel next objects for this Event
-                mref.next_objs = event_refs.get(mref.obj.uniq_id,[])
-#                 # A list [object label, object, relation properties]
-#                 media.ref.append([label,obj,crop])
-                media.ref.append(mref)
-            return media
+#     @staticmethod
+#     def get_one(oid):
+#         """ Read a Media object, selected by UUID or uniq_id.
+#         
+#             Luetaan tallenteen tiedot
+#         """
+#         class MediaReferee():
+#             ''' Carrier for a referee of media object. '''
+#             def __init__(self):
+#                 # Referencing object label, object
+#                 self.obj = None
+#                 self.label = None
+#                 self.crop = None
+#                 # If the referring object is Event, also list of:
+#                 # - connected objects
+#                 self.next_objs = []
+# 
+# 
+#         if not oid:
+#             return None
+# 
+#         with shareds.driver.session(default_access_mode='READ') as session:
+#             # Use UUID
+#             record = session.run(Cypher_media.get_by_uuid, rid=oid).single()
+#             # RETURN media,
+#             #     COLLECT(DISTINCT [properties(r), n]) as m_ref, # Referring event or object
+#             #     COLLECT(DISTINCT [ID(n), m]) AS e_ref          # Event Person or Family
+#             if not record:
+#                 return None
+# 
+#             #Record[0]: the Media object
+#             # <Node id=435174 labels={'Media'}
+#             #    properties={'src': 'Albumi-Silius/kuva002.jpg', 'batch_id': '2020-02-14.001',
+#             #        'mime': 'image/jpeg', 'change': 1574187478, 'description': 'kuva002',
+#             #        'id': 'O0024', 'uuid': 'fa2e240493434912986c2540b52a9464'}>
+#             media = Media.from_node(record['media'])
+#             referees = record['m_ref']
+#             referees_next = record['e_ref']
+# 
+#             # 1. If referrer is an Event, there is also secundary next objects
+#             event_refs = {}
+#             for referee_id, node_next in referees_next:
+#                 #record[2]: Indirectly referring Person and Families
+#                 # [  [29373, 
+#                 #     <Node id=29387 labels=frozenset({'Person'})
+#                 #        properties={'sortname': 'Silius#Carl Gustaf#', 'death_high': 1911, 
+#                 #            'sex': 1, 'change': 1557753049, 'confidence': '2.0', 'birth_low': 1852, 
+#                 #            'birth_high': 1852, 'id': 'I0036', 'uuid': '9fdcfc81bd17435e8e051325ac3e6eae', 
+#                 #            'death_low': 1911}>],
+#                 #    [29373, <Node id=30773 labels=frozenset({'Person'}) properties={...}>]
+#                 # ]
+#                 if not node_next:
+#                     continue
+#                 if "Person" in node_next.labels:
+#                     obj_next = Person.from_node(node_next)
+#                     obj_next.label = "Person"
+#                 elif "Family" in node_next.labels:
+#                     obj_next = FamilyBl.from_node(node_next)
+#                     obj_next.label = "Family"
+#                 else:
+#                     print(f'models.gen.media.Media.get_one: unknown type {list(obj_next.labels)}')
+#                     continue
+#                 if not referee_id in event_refs.keys():
+#                     # A new Event having indirect referees
+#                     event_refs[referee_id] = [obj_next]
+#                 else:
+#                     event_refs[referee_id].append(obj_next)
+# 
+#             # 2. Gather the directly referring objects
+#             media.ref = []
+#             for prop, node in referees:
+#                 #Record[1]:
+#                 # [ [{'order': 0},
+#                 #        <Node id=29373 labels=frozenset({'Event'})
+#                 #            properties={'datetype': 4, 'change': 1515865582, 'description': '', 
+#                 #                'id': 'E0858', 'date2': 1999040, 'date1': 1928384, 
+#                 #                'type': 'Burial', 'uuid': '934415b2ccf4476fa9d8d9f4d93938b7'}>
+#                 # ] ]
+#                 if not node:
+#                     continue
+#                 mref = MediaReferee()
+#                 mref.label, = node.labels   # Get the 1st label
+#                 if mref.label == 'Person':
+#                     mref.obj = PersonBl.from_node(node)
+#                     mref.obj.label = "Person"
+#                 elif mref.label == 'Place':
+#                     mref.obj = PlaceBl.from_node(node)
+#                     mref.obj.label = "Place"
+#                 elif mref.label == 'Event':
+#                     mref.obj = EventBl.from_node(node)
+#                     mref.obj.label = "Event"
+#                 # Has the relation cropping properties?
+#                 left = prop.get('left')
+#                 if left != None:
+#                     upper = prop.get('upper')
+#                     right = prop.get('right')
+#                     lower = prop.get('lower')
+#                     mref.crop = (left, upper, right, lower)
+#                 # Eventuel next objects for this Event
+#                 mref.next_objs = event_refs.get(mref.obj.uniq_id,[])
+# #                 # A list [object label, object, relation properties]
+# #                 media.ref.append([label,obj,crop])
+#                 media.ref.append(mref)
+#             return media
 
 
     @staticmethod

@@ -1526,11 +1526,11 @@ class Neo4jReadService:
         with self.driver.session(default_access_mode='READ') as session: 
             if user == None:
                 # Show approved common data
-                result = session.run(CypherMedia.read_common_media,
+                result = session.run(CypherMedia.read_approved_medias,
                                      user=user, start_name=fw_from, limit=limit)
             else:
                 # Show user Batch
-                result =  session.run(CypherMedia.read_my_own_media,
+                result =  session.run(CypherMedia.read_my_medias,
                                       start_name=fw_from, user=user, limit=limit)
 
             recs = []
@@ -1542,6 +1542,33 @@ class Neo4jReadService:
             else:
                 return {'recs':recs, 'status':Status.NOT_FOUND}
 
+
+    def dr_get_media_single(self, user, uuid):
+        """ Read a Media object, selected by UUID or uniq_id.
+        
+            :param: user    username, who has access
+            :parma: uuid    Media node uuid
+        """
+        recs = []
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                if user:
+                    result = session.run(CypherMedia.get_my_media_by_uuid, 
+                                         uuid=uuid, user=user)
+                else:
+                    result = session.run(CypherMedia.get_approved_media_by_uuid, 
+                                         uuid=uuid)
+                # RETURN media, r, ref, ref2
+                for record in result:
+                    recs.append((record['media'], record['prop'], 
+                                 record['ref'], record['ref2']))
+
+            except Exception as e:
+                return {'status':Status.ERROR, 'statutext':
+                        f'Neo4jReadService.dr_get_media_single: {e.__class__.__name__} {e}'}
+
+        status = Status.OK if recs else Status.NOT_FOUND
+        return {'status':status, 'items':recs }
 
 
     def dr_get_object_sources_repositories(self):

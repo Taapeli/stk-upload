@@ -34,7 +34,6 @@ import shareds
 
 from bl.base import NodeObject, Status
 from bl.person_name import Name
-from bl.media import MediaBl
 from pe.db_reader import DbReader
 from pe.neo4j.cypher.cy_person import CypherPerson
 
@@ -512,6 +511,8 @@ class PersonBl(Person):
             @todo: Remove those referenced person names, which are not among
                    new names (:Person) --> (:Name) 
         """
+        from bl.media import MediaWriter
+
         if 'batch_id' in kwargs:
             batch_id = kwargs['batch_id']
         else:
@@ -571,7 +572,9 @@ class PersonBl(Person):
             #print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Media nodes and it's Note and Citation references
-        MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
+        if self.media_refs:
+            writer = MediaWriter(shareds.datastore.dataservice)
+            writer.create_and_link_by_handles(self.uniq_id, self.media_refs)
 
 
         # The relations to the Family node will be created in Family.save(),

@@ -24,12 +24,10 @@ import logging
 logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
-#import shareds
+import shareds
 from .base import NodeObject, Status
-from bl.media import MediaBl
-#from .place import PlaceReader
 from pe.db_reader import DbReader
-from pe.db_writer import DbWriter
+#from pe.db_writer import DbWriter
 from pe.neo4j.cypher.cy_event import CypherEvent
 
 from bl.dates import DateRange
@@ -212,6 +210,8 @@ class EventBl(Event):
             - links to existing Place, Note, Citation, Media objects
             - Does not link it from UserProfile or Person
         """
+        from bl.media import MediaWriter
+
         if 'batch_id' in kwargs:
             batch_id = kwargs['batch_id']
         else:
@@ -277,7 +277,8 @@ class EventBl(Event):
 
         # Make relations to the Media nodes and their Note and Citation references
         if self.media_refs:
-            MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
+            writer = MediaWriter(shareds.datastore.dataservice)
+            writer.create_and_link_by_handles(self.uniq_id, self.media_refs)
             
         return
 

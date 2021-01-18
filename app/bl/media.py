@@ -8,6 +8,10 @@ import os
 import shareds
 from .base import NodeObject, Status
 from pe.db_reader import DbReader
+from bl.person import PersonBl
+from bl.family import FamilyBl
+from bl.place import PlaceBl
+from bl.event import EventBl
 
 
 class Media(NodeObject):
@@ -67,15 +71,6 @@ class MediaBl(NodeObject):
         Constructor
         '''
 
-    @staticmethod
-    def create_and_link_by_handles(uniq_id, media_refs):
-        ''' Save media object and it's Note and Citation references
-            using their Gramps handles.
-        '''
-        if media_refs:
-            ds = shareds.datastore.dataservice
-            ds.ds_create_link_medias_w_handles(uniq_id, media_refs)
-
 
 class MediaReader(DbReader):
     '''
@@ -86,7 +81,7 @@ class MediaReader(DbReader):
 
         - Returns a Result object.
     '''
-    def read_my_media_list(self, limit=20):
+    def read_my_media_list(self):
         """ Read Media object list using u_context.
         """
         medias = []
@@ -121,6 +116,114 @@ class MediaReader(DbReader):
                 medias[0].description, medias[-1].description, limit, len(medias))
             return {'status':Status.OK, 'items':medias}
         return {'status':Status.NOT_FOUND}
+
+
+    def get_one(self, oid):
+        """ Read a Media object, selected by UUID or uniq_id.
+        """
+        class MediaReferrer():
+            ''' Carrier for a referee of media object. '''
+            def __init__(self):
+                # Referencing object, label, cropping
+                self.obj = None
+                self.label = None
+                self.crop = None
+                # If the referring obj is Event, there is a list of connected objects
+                self.next_objs = []
+            def __str__(self):
+                s = ''
+                if self.obj:
+                    if self.next_objs:
+                        s = ' '.join([x.id for x in self.next_objs]) + '-> '
+                    s += f' {self.label} {self.obj.id} -{self.crop}-> (Media)'
+                return s
+
+        # Example database items: 
+        #    MATCH (media:Media) <-[r:MEDIA]- (ref) <-[:EVENT]- (ref2)
+        #  media     r (crop)             ref                           ref2
+        # (media) <-[crop()]-            (Person 'I0026' id=21532) <-- (None)
+        # (media) <-[crop(47,67,21,91)]- (Person 'I0026' id=21532) <-- (None)
+        # (media) <-[crop(20,47,22,53)]- (Person 'I0029' id=21535) <-- (None)
+        # (media) <-[crop()]-   (Event  'E9999' id=99999) <-- (Person 'I9999' id=999)
+    
+        user = self.user_context.batch_user()
+        res = self.readservice.dr_get_media_single(user, oid)
+        # returns {status, items}
+        if Status.has_failed(res): return res
+
+        media = None
+        #media_refs = []     # The nodes pointing to this Media
+        event_refs = {}     # The Person or Family nodes behind referencing Event
+        items = res.get('items')
+        for media_node, crop, ref_node, ref2_node in items:
+            # - Media node
+            # - cropping
+            # - referring Person, Family or Event
+            # - optional Person or Family behind the referring Event
+
+            if not media:
+                media = Media.from_node(media_node)
+                media.ref = []
+
+            #   The referring object
+
+            mref = MediaReferrer()
+            #mref.next_objs = []
+            mref.label, = ref_node.labels   # Get the 1st label
+            if mref.label == 'Person':
+                mref.obj = PersonBl.from_node(ref_node)
+            elif mref.label == 'Place':
+                mref.obj = PlaceBl.from_node(ref_node)
+            elif mref.label == 'Event':
+                mref.obj = EventBl.from_node(ref_node)
+            mref.obj.label = mref.label
+            media.ref.append(mref)
+
+            # Has the relation cropping properties?
+            left = crop.get('left')
+            if not left is None:
+                upper = crop.get('upper')
+                right = crop.get('right')
+                lower = crop.get('lower')
+                mref.crop = (left, upper, right, lower)
+
+            #    The next object behind the Event
+
+            if ref2_node:
+                if ref2_node.id in event_refs:
+                    obj2 = event_refs[ref2_node.id]
+                else:
+                    if "Person" in ref2_node.labels:
+                        obj2 = PersonBl.from_node(ref2_node)
+                        obj2.label = "Person"
+                    elif "Family" in ref2_node.labels:
+                        obj2 = FamilyBl.from_node(ref2_node)
+                        obj2.label = "Family"
+                    else:
+                        raise TypeError(f'MediaReader.get_one: unknown type {list(ref2_node.labels)}')
+                    event_refs[obj2.uniq_id] = obj2
+
+                mref.next_objs.append(obj2)
+
+        return {'item':media, 'status':Status.OK}
+
+
+class MediaWriter:
+    def __init__(self, writeservice, u_context=None):
+        '''
+        :param: writeservice    Neo4jDataService
+        :param: u_context       #TODO Use user information from here
+        '''
+        self.writeservice = writeservice
+        self.u_context = u_context
+
+    def create_and_link_by_handles(self, uniq_id, media_refs):
+        ''' Save media object and it's Note and Citation references
+            using their Gramps handles.
+        '''
+        if media_refs:
+            #ds = shareds.datastore.dataservice
+            self.writeservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
 
 
 
