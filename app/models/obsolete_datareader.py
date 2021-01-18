@@ -23,7 +23,7 @@ from models.gen.event import Event
 from models.gen.event_combo import Event_combo
 from models.gen.family_combo import Family_combo #,  Family
 from models.gen.note import Note
-from models.gen.media import Media
+from models.gen.obsolete_media import Media
 #from models.gen.person import SEX_MALE #, SEX_FEMALE
 from models.gen.person_combo import Person_combo, Person_as_member
 #from models.gen.person_name import Name
@@ -199,18 +199,18 @@ def obsolete_read_cite_sour_repo(uniq_id=None):
     return (sources)
 
 
-def obsolete_read_medias(uniq_id=None):
-    """ Lukee tietokannasta Media-objektit näytettäväksi.
-    """
-
-    media = []
-    result = Media.get_medias(uniq_id)
-    for record in result:
-        node = record[0]
-        o = Media.from_node(node)
-        media.append(o)
-
-    return (media)
+# def obsolete_read_medias(uniq_id=None):
+#     """ Lukee tietokannasta Media-objektit näytettäväksi.
+#     """
+# 
+#     media = []
+#     result = Media.get_medias(uniq_id)
+#     for record in result:
+#         node = record[0]
+#         o = Media.from_node(node)
+#         media.append(o)
+# 
+#     return (media)
 
 
 def obsolete_get_repositories(uniq_id=None):
@@ -496,224 +496,8 @@ def obsolete_get_person_data_by_id(pid):
         - /compare/uniq_id=311006,315556 
         - /lista/person_data/<string:uniq_id>
         - /lista/person_data/<string:uniq_id>
-
-        The given pid may be an uuid (str) or uniq_id (int).
-
-        person: Person object with name data
-            The indexes of referred objects are in variables
-                event_ref[]        str tapahtuman uniq_id, rooli eventref_role[]
-                media_ref[]        str tallenteen uniq_id
-                parentin_hlink[]   str vanhempien uniq_id
-                note_ref[]         str huomautuksen uniq_id
-                citation_ref[]     str viittauksen uniq_id
-        events[]         Event_combo  with location name and id (?)
-        photos
-        citations
-        families
     """
-    p = Person_combo()
-    if isinstance(pid, int):
-        p.uniq_id = pid
-    else:
-        p.uuid = pid
-    # Get Person and her Name properties, also Note properties
-    p.get_person_w_names()
-    # Get reference (uniq_id) and role for Events
-    # Get references to Media, Citation objects
-    # Get Persons birth family reference and role
-    p.get_hlinks_by_id()
-
-    # Person_display(Person)
-    events = []
-    citations = []
-    photos = []
-    source_cnt = 0
-    my_birth_date = ''
-
-    # Events
-
-    for i in range(len(p.event_ref)):
-        # Store Event data
-        e = Event_combo() # Event_for_template()
-        e.uniq_id = p.event_ref[i]
-        e.role = p.eventref_role[i]
-        # Read event with uniq_id's of related Place (Note, and Citation?)
-        e.get_event_combo()        # Read data to e
-        if e.type == "Birth":
-            my_birth_date = e.dates.estimate()
-
-        for ref in e.place_ref:
-            place = Place_combo.get_w_notes(ref)
-#             place.read_w_notes()
-            # Location / place name, type and reference
-            e.place = place
-#             #TODO: remove 3 lines
-#             e.location = place.pname
-#             e.locid = place.uniq_id
-#             e.ltype = place.type
-
-        if e.note_ref: # A list of uniq_ids; prev. e.noteref_hlink != '':
-            # Read the Note objects from db and store them as a member of Event
-            e.notes = Note.get_notes(e.note_ref)
-
-        events.append(e)
-
-        # Citations
-
-        for ref in e.citation_ref:  # citationref_hlink != '':
-            c = Citation()
-            c.uniq_id = ref
-            # If there is already the same citation on the list of citations,
-            # use that index
-            citation_ind = -1
-            for i in range(len(citations)):
-                if citations[i].uniq_id == c.uniq_id:
-                    citation_ind = i + 1
-                    break
-            if citation_ind > 0:
-                # Citation found; Event_combo.source = sitaatin numero
-                e.source = citation_ind
-            else:
-                # Store the new source to the list
-                # source = lähteen numero samassa listassa
-                source_cnt += 1
-                e.source = source_cnt
-
-                result = c.get_source_repo(c.uniq_id)
-                for record in result:
-                    # Citation data & list of Source, Repository and Note data
-                    #
-                    # <Record id=92127 date='2017-01-25' page='1785 Novembr 3. kaste'
-                    #    confidence='3' notetext='http://www.sukuhistoria.fi/...'
-                    #    sources=[
-                    #        [91360,
-                    #         'Lapinjärvi syntyneet 1773-1787 vol  es346',
-                    #         'Book',
-                    #         100272,
-                    #         'Lapinjärven seurakunnan arkisto',
-                    #         'Archive']
-                    #    ]
-                    #   url='http://...">
-                    c.dateval = record['date']
-                    c.page = record['page']
-                    c.confidence = record['confidence']
-                    if not record['notetext']:
-                        if c.page[:4] == "http":
-                            c.notetext = c.page
-                            c.page = ''
-                    else:
-                        c.notetext = record['notetext']
-
-                    for source in record['sources']:
-                        s = Source()
-                        s.uniq_id = source[0]
-                        s.stitle = source[1]
-                        s.sauthor = source[2]
-                        s.spubinfo = source[3]
-                        s.reporef_medium = source[4]  #Todo: Should use repository.medium
-
-                        r = Repository()
-                        r.uniq_id = source[5]
-                        r.rname = source[6]
-                        r.type = source[7]
-                        s.repositories.append(r)
-
-                        n = Note()
-                        n.url = record['url']
-                        s.notes.append(n)
-
-                        c.source = s
-
-                    print("Eve:{} {} > Cit:{} '{}' > Sour:{} '{}' '{}' '{}' > Repo:{} '{}' > Url: '{}'".\
-                          format(e.uniq_id, e.id,
-                                 c.uniq_id, c.page,
-                                 s.uniq_id, s.stitle, s.sauthor, s.spubinfo,
-                                 r.uniq_id, r.rname,
-                                 n.url,
-                          ))
-                    citations.append(c)
-
-    for uniq_id in p.media_ref:
-        o = Media.get_one(uniq_id)
-        photos.append(o)
-
-    # Families
-
-    # Returning a list of Family objects
-    # - which include a list of members (Person with 'role' attribute)
-    #   - Person includes a list of Name objects
-    families = {}
-    fid = 0
-    result = Person_combo.get_family_members(p.uniq_id)
-    for record in result:
-        # <Record family_id='F0018' f_uniq_id=217546 role='PARENT' parent_role='mother' 
-        #  m_id='I0038' uniq_id=217511 sex=2 birth_date=[0, 1892433, 1892433] 
-        #  names=[
-        #    <Node id=217512 labels={'Name'} properties={'firstname': 'Brita Kristina', 
-        #        'type': 'Birth Name', 'suffix': 'Eriksdotter', 'surname': 'Berttunen', 
-        #        'order': 0}>, 
-        #    <Node id=217513 labels={'Name'} properties={'firstname': 'Brita Kristina', 
-        #        'type': 'Married Name', 'suffix': '', 'surname': 'Silius', 
-        #        'order': 1}>]>
-        if fid != record["f_uniq_id"]:
-            fid = record["f_uniq_id"]
-            if not fid in families:
-                families[fid] = Family_combo(fid)
-                families[fid].id = record['family_id']
-
-        member = Person_as_member()    # A kind of Person
-        member.role = record["role"]
-        member.id = record["m_id"]
-        member.uniq_id = record["uniq_id"]
-        if member.uniq_id == p.uniq_id:
-            # What kind of family this is? I am a Child or Parent in family
-            if member.role == "CHILD":
-                families[fid].role = "CHILD"
-            else:
-                families[fid].role = "PARENT"
-            if my_birth_date:
-                member.birth_date = my_birth_date
-
-        if record["sex"]:
-            member.sex = record["sex"]
-        if record["birth_date"]:
-            datetype, date1, date2 = record["birth_date"]
-            if datetype != None:
-                member.birth_date = DateRange(datetype, date1, date2).estimate()
-        if record["names"]:
-            for node in record["names"]:
-                n = Name.from_node(node)
-                member.names.append(n)
-
-        if member.role == "CHILD":
-            families[fid].children.append(member)
-        elif member.role == "PARENT":
-            parent_role = record["parent_role"]
-            if parent_role == 'mother':
-                families[fid].mother = member
-            elif parent_role == 'father':
-                families[fid].father = member
-        # TODO: Remove these, obsolete
-        elif member.role == "FATHER":   
-            families[fid].father = member
-        elif member.role == "MOTHER":
-            families[fid].mother = member
-
-    family_list = list(families.values())
-
-    # Find all referenced for the nodes found so far
-
-    nodes = {p.uniq_id:p}
-    for e in events:
-        nodes[e.uniq_id] = e
-    for e in photos:
-        nodes[e.uniq_id] = e
-    for e in citations:
-        nodes[e.uniq_id] = e
-    for e in family_list:
-        nodes[e.uniq_id] = e
-
-    return (p, events, photos, citations, family_list)
+    raise NotImplementedError('models.obsolete_datareader.obsolete_get_person_data_by_id')
 
 
 # def get_event_participants(uniq_id): # --> bl.event.EventReader.get_event_data() 

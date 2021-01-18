@@ -29,7 +29,6 @@ from pe.neo4j.cypher.cy_place import CypherPlace
 logger = logging.getLogger('stkserver')
 
 from .base import NodeObject, Status
-from .media import MediaBl
 #from pe.db_reader import DbReader
 from bl.dates import DateRange
 
@@ -212,6 +211,8 @@ class PlaceBl(Place):
 
         NOT Raises an error, if write fails.
         """
+        from bl.media import MediaWriter
+
         if 'batch_id' in kwargs:
             batch_id = kwargs['batch_id']
         else:
@@ -222,7 +223,6 @@ class PlaceBl(Place):
         self.uuid = self.newUuid()
         pl_attr = {}
         try:
-
             pl_attr = {
                 "uuid": self.uuid,
                 "handle": self.handle,
@@ -351,7 +351,10 @@ class PlaceBl(Place):
             raise
 
         # Make relations to the Media nodes and their Note and Citation references
-        MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
+        #dataservice = Neo4jDataService(shareds.driver)
+        writer = MediaWriter(shareds.datastore.dataservice)
+        writer.create_and_link_by_handles(self.uniq_id, self.media_refs)
+        #MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
             
         return
 

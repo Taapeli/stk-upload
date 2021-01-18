@@ -8,10 +8,10 @@ from bl.place import PlaceBl, PlaceName
 from .citation import Citation
 from .event_combo import Event_combo
 from .family_combo import Family_combo
-from .media import Media
+from models.gen.obsolete_media import Media
 from .note import Note
 from .person_combo import Person_combo
-from .person_name import Name
+#from .person_name import Name
 #from .place import Place_name
 from .repository import Repository
 from .source import Source

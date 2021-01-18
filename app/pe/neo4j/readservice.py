@@ -15,6 +15,7 @@ from bl.source import SourceBl
 from bl.family import FamilyBl
 from bl.event import EventBl
 from bl.person import PersonBl
+from bl.media import MediaBl
 
 from ui.place import place_names_from_nodes
 
@@ -23,16 +24,12 @@ from pe.neo4j.cypher.cy_source import CypherSource
 from pe.neo4j.cypher.cy_family import CypherFamily
 from pe.neo4j.cypher.cy_event import CypherEvent
 from pe.neo4j.cypher.cy_person import CypherPerson
+from pe.neo4j.cypher.cy_media import CypherMedia
 
 from bl.event import Event
 #Todo: Change Old style includes to bl classes
-#from models.gen.person_combo import Person_combo
-#from models.gen.cypher import Cypher_person
-#from models.gen.person_name import Name
-#from models.gen.event import Event
-#from models.gen.event_combo import Event_combo
 from models.gen.note import Note
-from models.gen.media import Media
+#from models.gen.media import Media
 from models.gen.repository import Repository
 from models.dbtree import DbTree
 from models.gen.citation import Citation
@@ -562,7 +559,7 @@ class Neo4jReadService:
                     for _rel_prop, node in record['medias']:
                         # _rel_prop may be {"order":0} (not used)
                         if node:
-                            medias.append(Media.from_node(node))
+                            medias.append(MediaBl.from_node(node))
 
         except Exception as e:
             return {"status":Status.ERROR, 
@@ -1104,7 +1101,7 @@ class Neo4jReadService:
                     elif y_label == "Media":
                         o = self.objs.get(y_uniq_id, None)
                         if not o:
-                            o = Media.from_node(y_node)
+                            o = MediaBl.from_node(y_node)
                             self.objs[o.uniq_id] = o
                             new_objs.append(o.uniq_id)
                         # Get relation properties
@@ -1243,7 +1240,7 @@ class Neo4jReadService:
                     node_ids.append(pl.notes[-1].uniq_id)
 
                 for medias_node in record['medias']:
-                    m = Media.from_node(medias_node)
+                    m = MediaBl.from_node(medias_node)
                     #Todo: should replace pl.media_ref[] <-- pl.medias[]
                     pl.media_ref.append(m)
                     node_ids.append(pl.media_ref[-1].uniq_id)
@@ -1405,7 +1402,7 @@ class Neo4jReadService:
                     # Show my researcher data
                     print("dr_get_source_list_fw: my researcher data")
                     result = session.run(CypherSource.get_own_set_selections,
-                                         key1=key1, key2=key2)
+                                         key1=key1, key2=key2, user=user)
                 else:
                     print("dr_get_source_list_fw: approved common only")
                     result = session.run(CypherSource.get_auditted_set_selections,
@@ -1415,7 +1412,7 @@ class Neo4jReadService:
                 if user: 
                     # Show my researcher data
                     print("dr_get_source_list_fw: my researcher data")
-                    result = session.run(CypherSource.get_own_sets)
+                    result = session.run(CypherSource.get_own_sets, user=user)
                 else:
                     print("dr_get_source_list_fw: approved common only")
                     result = session.run(CypherSource.get_auditted_sets)
@@ -1517,6 +1514,62 @@ class Neo4jReadService:
                 return {'item': source, 'status':Status.OK}
             return {'status':Status.NOT_FOUND,
                     'statustext': f"source uuid={uuid} not found"}
+
+
+    def dr_get_media_list(self, user, fw_from, limit):
+        """ Reads Media objects from user batch or common data using context.
+        
+            :param: user    Active user or None, if approved data is requested
+            :param: fw_from The name from which the list is requested
+            :param: limit   How many items per page
+        """
+                        
+        with self.driver.session(default_access_mode='READ') as session: 
+            if user == None:
+                # Show approved common data
+                result = session.run(CypherMedia.read_approved_medias,
+                                     user=user, start_name=fw_from, limit=limit)
+            else:
+                # Show user Batch
+                result =  session.run(CypherMedia.read_my_medias,
+                                      start_name=fw_from, user=user, limit=limit)
+
+            recs = []
+            for record in result: 
+                recs.append(record)
+#             recs = [record for record in result]
+            if recs:
+                return {'recs':recs, 'status':Status.OK}
+            else:
+                return {'recs':recs, 'status':Status.NOT_FOUND}
+
+
+    def dr_get_media_single(self, user, uuid):
+        """ Read a Media object, selected by UUID or uniq_id.
+        
+            :param: user    username, who has access
+            :parma: uuid    Media node uuid
+        """
+        recs = []
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                if user:
+                    result = session.run(CypherMedia.get_my_media_by_uuid, 
+                                         uuid=uuid, user=user)
+                else:
+                    result = session.run(CypherMedia.get_approved_media_by_uuid, 
+                                         uuid=uuid)
+                # RETURN media, r, ref, ref2
+                for record in result:
+                    recs.append((record['media'], record['prop'], 
+                                 record['ref'], record['ref2']))
+
+            except Exception as e:
+                return {'status':Status.ERROR, 'statutext':
+                        f'Neo4jReadService.dr_get_media_single: {e.__class__.__name__} {e}'}
+
+        status = Status.OK if recs else Status.NOT_FOUND
+        return {'status':status, 'items':recs }
 
 
     def dr_get_object_sources_repositories(self):

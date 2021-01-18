@@ -27,14 +27,14 @@ from bl.source import SourceDataStore
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
 from bl.person import PersonReader
-#from bl.media import MediaBl_todo
+from bl.media import Media, MediaReader
 from templates import jinja_filters
 
 #from bp.scene.scene_reader import get_person_full_data
 from bp.scene.models import media
 #from models.gen.family_combo import Family_combo
 #from models.gen.source import Source
-from models.gen.media import Media
+#from models.gen.obsolete_media import Media
 
 from models.obsolete_datareader import obsolete_read_persons_with_events
 #from models.obsolete_datareader import get_person_data_by_id # -- vanhempi versio ---
@@ -464,7 +464,6 @@ def show_families():
     
     datastore = FamilyReader(readservice, u_context) 
 
-        
     # 'families' has Family objects
     families = datastore.get_families() #o_context=u_context, opt=opt, limit=count)
 
@@ -575,12 +574,12 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    datastore = PlaceDataReader(readservice, u_context) 
+    reader = PlaceDataReader(readservice, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
 
-    res = datastore.get_place_list()
+    res = reader.get_place_list()
 
     if res['status'] == Status.NOT_FOUND:
         print(f'bp.scene.routes.show_places: {_("No places found")}')
@@ -724,11 +723,16 @@ def show_medias():
     u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
     u_context.set_scope_from_request(request, 'media_scope')
-    try:
-        medias = Media.read_my_media_list(u_context, 20)
+    u_context.count = 20
 
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    datareader = MediaReader(readservice, u_context)
+#   medias = Media.read_my_media_list(u_context, 20)
+
+    res = datareader.read_my_media_list()
+    if Status.has_failed(res, False):
+        flash(f'{res.get("statustext","error")}', 'error')
+    medias = res.get('items', [])
+
     stk_logger(u_context, f"-> bp.scene.media.show_medias fw n={len(medias)}")
     return render_template("/scene/medias.html", medias=medias, 
                            user_context=u_context, elapsed=time.time()-t0)
@@ -745,15 +749,20 @@ def show_media(uid=None):
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
     
-    try:
-        medium = Media.get_one(uid)
+    reader = MediaReader(readservice, u_context)
+    res = reader.get_one(uid)
+    # returns {item, status}
+    medium = res.get('item', None)
+    if medium:
         fullname, mimetype = media.get_fullname(medium.uuid)
-        if mimetype == "application/pdf":
-            size = 0
-        else:
-            size = media.get_image_size(fullname)
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    else:
+        flash(f'{res.get("statustext","error")}', 'error')
+        fullname = None
+        mimetype = None
+    if mimetype == "application/pdf":
+        size = 0
+    else:
+        size = media.get_image_size(fullname)
 
     stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
     return render_template("/scene/media.html", media=medium, size=size,

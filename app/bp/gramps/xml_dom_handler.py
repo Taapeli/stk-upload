@@ -23,7 +23,7 @@ from bl.person_name import Name
 from bl.family import FamilyBl
 from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
-from bl.media import MediaRefResult
+from bl.media import MediaBl, MediaRefResult
 from bl.event import EventBl
 
 #from pe.db_writer import DbWriter
@@ -40,7 +40,7 @@ from .batchlogger import LogItem
 from models.cypher_gramps import Cypher_mixed
 from bl.dates import Gramps_DateRange
 from models.gen.note import Note
-from models.gen.media import Media
+#from models.gen.obsolete_media import Media
 from models.gen.citation import Citation
 from models.gen.repository import Repository
 
@@ -439,7 +439,7 @@ class DOM_handler():
 
         # Details of each media object
         for obj in media:
-            o = Media()
+            o = MediaBl()
             # Extract handle, change and id
             self._extract_base(obj, o)
 
