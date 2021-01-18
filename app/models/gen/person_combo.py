@@ -118,7 +118,7 @@ class Person_combo(Person):
         self.citation_ref = []          # models.gen.citation.Citation
         self.note_ref = []              # uniq_id of models.gen.note.Note
         self.notes = []                 # 
-        self.media_ref = []             # uniq_ids of models.gen.media.Media
+        self.media_ref = []             # uniq_ids of models.gen.obsolete_media.Media
                                         # (previous self.objref_hlink[])
 
         # Other variables

@@ -34,7 +34,7 @@ from templates import jinja_filters
 from bp.scene.models import media
 #from models.gen.family_combo import Family_combo
 #from models.gen.source import Source
-#from models.gen.media import Media
+#from models.gen.obsolete_media import Media
 
 from models.obsolete_datareader import obsolete_read_persons_with_events
 #from models.obsolete_datareader import get_person_data_by_id # -- vanhempi versio ---
@@ -574,12 +574,12 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    datastore = PlaceDataReader(readservice, u_context) 
+    reader = PlaceDataReader(readservice, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
 
-    res = datastore.get_place_list()
+    res = reader.get_place_list()
 
     if res['status'] == Status.NOT_FOUND:
         print(f'bp.scene.routes.show_places: {_("No places found")}')

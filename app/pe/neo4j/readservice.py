@@ -15,6 +15,7 @@ from bl.source import SourceBl
 from bl.family import FamilyBl
 from bl.event import EventBl
 from bl.person import PersonBl
+from bl.media import MediaBl
 
 from ui.place import place_names_from_nodes
 
@@ -28,7 +29,7 @@ from pe.neo4j.cypher.cy_media import CypherMedia
 from bl.event import Event
 #Todo: Change Old style includes to bl classes
 from models.gen.note import Note
-from models.gen.media import Media
+#from models.gen.media import Media
 from models.gen.repository import Repository
 from models.dbtree import DbTree
 from models.gen.citation import Citation
@@ -558,7 +559,7 @@ class Neo4jReadService:
                     for _rel_prop, node in record['medias']:
                         # _rel_prop may be {"order":0} (not used)
                         if node:
-                            medias.append(Media.from_node(node))
+                            medias.append(MediaBl.from_node(node))
 
         except Exception as e:
             return {"status":Status.ERROR, 
@@ -1100,7 +1101,7 @@ class Neo4jReadService:
                     elif y_label == "Media":
                         o = self.objs.get(y_uniq_id, None)
                         if not o:
-                            o = Media.from_node(y_node)
+                            o = MediaBl.from_node(y_node)
                             self.objs[o.uniq_id] = o
                             new_objs.append(o.uniq_id)
                         # Get relation properties
@@ -1239,7 +1240,7 @@ class Neo4jReadService:
                     node_ids.append(pl.notes[-1].uniq_id)
 
                 for medias_node in record['medias']:
-                    m = Media.from_node(medias_node)
+                    m = MediaBl.from_node(medias_node)
                     #Todo: should replace pl.media_ref[] <-- pl.medias[]
                     pl.media_ref.append(m)
                     node_ids.append(pl.media_ref[-1].uniq_id)
