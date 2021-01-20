@@ -27,7 +27,9 @@ ul li {
 ul[id] li {
 	color: black !important;
 }
-
+#GSF_membership {
+	list-style-type: none;
+}
 </style>
 
 
@@ -35,42 +37,23 @@ ul[id] li {
   <div>
     <h2>{{ _("Join Isotammi") }}</h2>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
-
-    <div class="steps">
-        <div class="active">1. <b>{{ _("Join us") }}</b><br>
-            {{ _("Enroll as a user on this page") }}</div>
-         –
-        <div class="exception">2. <b>{{ _("Approval") }}</b><br>
-            {{ _("You are granted to register by Office") }}</div>
-        –
-        <div>3. <b><a href="/register">{{ _("Register") }}</b></a><br>
-            {{ _("Create your user name and password") }}</div>
-        –
-        <div>4. <b>{{ _("Confirm") }}</b><br>
-            {{ _("Press Confirm button in your email and log in") }}</div>
-        
-    </div>
-
     <div class="startbox2">
         <div>
-        {{ _('To join the Isotammi project we wish that you will provide some basic information below.') }}
-        {{ _('Please let us know at least your name and email address.') }}
+        {{ _('To join the Isotammi project please provide some basic information below.') }}
         {{ _('You can also provide any comments or additional information in the message field.') }}
+        {{ _('After sending this form you will still have to wait for a confirmation email from the Isotammi team before you can access the application.') }}
         {{ _('Thank You!') }}
         </div>
+        
           <form method="post">
+          <input type="hidden" name="name" value="{{ current_user.name }}">
+          <input type="hidden" name="username" value="{{ current_user.username }}">
+          <input type="hidden" name="email" value="{{ current_user.email }}">
 	      {{ form.hidden_tag() }}
-   	      {{ render_field_with_errors(form.name) }}	
-   	      {{ render_field_with_errors(form.email) }}	
+	      <p><label for="name">{{ _("Name") }}</label>{{ current_user.name }}</p>
+	      <p><label for="username">{{ _("User name") }}</label>{{ current_user.username }}</p>
+	      <p><label for="email">{{ _("Email address") }}</label>{{ current_user.email }}</p>
+	      
    	      {{ render_field_with_errors(form.language) }}	
    	      {{ render_field_with_errors(form.GSF_membership) }}	
    	      {{ render_field_with_errors(form.research_years) }}	
@@ -85,12 +68,6 @@ ul[id] li {
          </form>
     </div>
 
-{#
-    <div class="startbox">
-        <h3>{{ _('Registeration Steps') }}</h3>
-        <p>{{ _('Here you can see a restrected view on demo genealogical data.') }}</p>
-    </div>
-#}
   </div>
 </div>
 {% endblock %}

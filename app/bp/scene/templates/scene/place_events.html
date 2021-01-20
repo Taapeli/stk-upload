@@ -81,7 +81,11 @@ div#events div.scrollbox {
             </div>
             <table><tbody>
                 <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="Value">{{macro.all_obj_ids(place)}}</td>
+        {% if place.coord -%}
+                    <td class="Value TwoRows">{{macro.all_obj_ids(place,"300px")}}</td>
+        {% else %}
+                    <td class="Value TwoRows">{{macro.all_obj_ids(place)}}</td>
+        {% endif %}
                     <td></td>
                 </tr>
     {% if place.notes %}
@@ -99,7 +103,7 @@ div#events div.scrollbox {
             </tbody></table>
         </div>
 
-    {% if place.noteref_hlink %}
+    {% if place.note_handles %}
         <div id="notes">
             <h4>{{ _('Note') }}</h4>
             <table class="infolist notelist">
@@ -111,7 +115,7 @@ div#events div.scrollbox {
                     </tr>
                 </thead>
                 <tbody>
-        {% for n in place.noteref_hlink %}
+        {% for n in place.note_handles %}
                     <tr>
                         <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(n.priv) }}</td> 
                         <td class="ColumnDescription">{{n.type|transl('notet')}}</td> 

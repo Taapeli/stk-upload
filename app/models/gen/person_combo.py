@@ -47,15 +47,20 @@
 from sys import stderr
 
 import shareds
-from .dates import DateRange
-from .person import Person
-from .person_name import Name
+from bl.dates import DateRange
+
+from bl.person import Person, PersonBl
+from bl.person_name import Name
+from bl.event import EventBl
+
+#from .person import Person
+#from .person_name import Name
 
 from .event_combo import Event_combo
 #from .family_combo import Family_combo
 from .cypher import Cypher_person, Cypher_family
 #from .place import Place, Place_name
-import traceback
+#import traceback
 # from .place_combo import Place_combo
 # from .citation import Citation
 # from .note import Note
@@ -113,7 +118,7 @@ class Person_combo(Person):
         self.citation_ref = []          # models.gen.citation.Citation
         self.note_ref = []              # uniq_id of models.gen.note.Note
         self.notes = []                 # 
-        self.media_ref = []             # uniq_ids of models.gen.media.Media
+        self.media_ref = []             # uniq_ids of models.gen.obsolete_media.Media
                                         # (previous self.objref_hlink[])
 
         # Other variables
@@ -124,7 +129,7 @@ class Person_combo(Person):
 
 
     @staticmethod
-    def get_my_person(session, uuid, user, use_common):
+    def get_my_person(session, uuid, user, use_common): # --> bl.person.PersonReader.get_a_person()
         ''' Read a person from common data or user's own Batch.
 
             -   If you have selected to use common approved data, you can read
@@ -132,6 +137,8 @@ class Person_combo(Person):
 
             -   If you havn't selected common data, you can read 
                 only your own data.
+            
+            Called only from models.gen.person_reader
         '''
         try:
 #             if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
@@ -141,27 +148,39 @@ class Person_combo(Person):
 #                 #TODO: Rule for public database is missing, taking any
             record = session.run(Cypher_person.get_person,
                                  uuid=uuid).single()
+            # <Record 
+            #    p=<Node id=25651 labels=frozenset({'Person'})
+            #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
+            #            'sex': 1, 'confidence': '', 'change': 1585409698, 'birth_low': 1783,
+            #            'birth_high': 1783, 'id': 'I1135', 'uuid': 'dc6a05ca6b2249bfbdd9708c2ee6ef2b',
+            #            'death_low': 1865}>
+            #    root_type='PASSED'
+            #    root=<Node id=31100 labels=frozenset({'Audit'})
+            #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
+            #            'timestamp': 1596463360673}>
+            # >
             if record is None:
                 raise LookupError(f"Person {uuid} not found.")
 
+            # Store original researcher data to p.root:
+            # - root_type    which kind of owner link points to this object
+            # - nodeuser     the (original) owner of this object
+            # - bid          Batch id, if any
             root_type = record['root_type']
-            if use_common or user == 'guest':
-                # Select person from public database
-                if root_type == "OWN":
-                    raise LookupError("Person {uuid} not allowed.")
-            else:
-                # Select the person only if owned by user
-                if root_type == "PASSED":
-                    pass    # Allow reading on passed persons, too (?)
-
-            node = record['p']
-            p = Person_combo.from_node(node)
-            # p = <Node id=259641 labels={'Audit'} 
-            #    properties={'id': '2020-01-03.001', 'user': 'jpek',
-            #        'auditor': 'admin_user', 'timestamp': 1578418320006}>
             node = record['root']
             nodeuser = node.get('user', "")
             bid = node.get('id', "")
+            if use_common or user == 'guest':
+                # Select person from public database
+                if root_type != "PASSED":
+                    raise LookupError("Person {uuid} not allowed.")
+            else:
+                # Select the person only if owned by user
+                if root_type != "OWNS":
+                    print('Person_combo.get_my_person: Should  we allow reading these approved persons, too?')
+
+            node = record['p']
+            p = Person_combo.from_node(node)
             p.root = (root_type, nodeuser, bid)
             return p
 
@@ -844,7 +863,7 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
                 node = record['person']
                 if node.id != p_uniq_id:
                     # The same person is not created again
-                    p = Person_combo.from_node(node)
+                    p = PersonBl.from_node(node)
                     p_uniq_id = p.uniq_id
                     if args.get('take_refnames',False) and record['refnames']:
                         refnlist = sorted(record['refnames'])
@@ -868,7 +887,7 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
                     # place = None
         
                     if event:
-                        e = Event_combo.from_node(event)
+                        e = EventBl.from_node(event)
                         e.place = place or ""
                         e.role = role or ""
                 p.events.append(e)
@@ -1054,94 +1073,94 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
 #         print("Estimated lifetime for {} persons".format(pers_count))
 #         return pers_count
 
-    @staticmethod
-    def estimate_lifetimes(tx, uids=[]):
-        """ Sets an estimated lifetime to Person.dates.
-
-            Stores it as Person properties: datetype, date1, and date2
-
-            The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
-            sets all lifetimes.
-
-            Asettaa valituille henkilölle arvioidut syntymä- ja kuolinajat
-            
-            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
-            and models.dataupdater.set_estimated_dates
-        """
-        from models import lifetime
-        from models.gen.dates import DR 
-        try:
-            if uids:
-                result = tx.run(Cypher_person.fetch_selected_for_lifetime_estimates, idlist=uids)
-            else:
-                result = tx.run(Cypher_person.fetch_all_for_lifetime_estimates)
-            personlist = []
-            personmap = {}
-            for rec in result:
-                p = lifetime.Person()
-                p.pid = rec['pid']
-                p.gramps_id = rec['p']['id']
-                events = rec['events']
-                fam_events = rec['fam_events']
-                for e,role in events + fam_events:
-                    if e is None: continue
-                    #print("e:",e)
-                    eventtype = e['type']
-                    datetype = e['datetype']
-                    datetype1 = None
-                    datetype2 = None
-                    if datetype == DR['DATE']:
-                        datetype1 = "exact"
-                    elif datetype == DR['BEFORE']:
-                        datetype1 = "before"
-                    elif datetype == DR['AFTER']:
-                        datetype1 = "after"
-                    elif datetype == DR['BETWEEN']:
-                        datetype1 = "after"
-                        datetype2 = "before"
-                    elif datetype == DR['PERIOD']:
-                        datetype1 = "after"
-                        datetype2 = "before"
-                    date1 = e['date1']
-                    date2 = e['date2']
-                    if datetype1 and date1 is not None:
-                        year1 = date1 // 1024
-                        ev = lifetime.Event(eventtype,datetype1,year1,role)
-                        p.events.append(ev)
-                    if datetype2 and date2 is not None:
-                        year2 = date2 // 1024
-                        ev = lifetime.Event(eventtype,datetype2,year2,role)
-                        p.events.append(ev)
-                p.parent_pids = []
-                for _parent,pid in rec['parents']:
-                    if pid: p.parent_pids.append(pid)
-                p.child_pids = []
-                for _parent,pid in rec['children']:
-                    if pid: p.child_pids.append(pid)
-                personlist.append(p)
-                personmap[p.pid] = p
-            for p in personlist:
-                for pid in p.parent_pids:
-                    p.parents.append(personmap[pid])
-                for pid in p.child_pids:
-                    p.children.append(personmap[pid])
-            lifetime.calculate_estimates(personlist)
-            for p in personlist:
-                result = tx.run(Cypher_person.update_lifetime_estimate, 
-                                id=p.pid,
-                                birth_low = p.birth_low.getvalue(),
-                                death_low = p.death_low.getvalue(),
-                                birth_high = p.birth_high.getvalue(),
-                                death_high = p.death_high.getvalue() )
-                                
-            pers_count = len(personlist)
-            print(f"Estimated lifetime for {pers_count} persons")
-            return pers_count
-
-        except Exception as err:
-            print("iError (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
-            traceback.print_exc()
-            return 0
+#     @staticmethod
+#     def estimate_lifetimes(tx, uids=[]):# --> bl.person.PersonBl.estimate_lifetimes()
+#         """ Sets an estimated lifetime to Person.dates.
+#  
+#             Stores it as Person properties: datetype, date1, and date2
+#  
+#             The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
+#             sets all lifetimes.
+#  
+#             Asettaa valituille henkilölle arvioidut syntymä- ja kuolinajat
+#              
+#             Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
+#             and models.dataupdater.set_estimated_dates
+#         """
+#         from models import lifetime
+#         from bl.dates import DR 
+#         try:
+#             if uids:
+#                 result = tx.run(Cypher_person.fetch_selected_for_lifetime_estimates, idlist=uids)
+#             else:
+#                 result = tx.run(Cypher_person.fetch_all_for_lifetime_estimates)
+#             personlist = []
+#             personmap = {}
+#             for rec in result:
+#                 p = lifetime.Person()
+#                 p.pid = rec['pid']
+#                 p.gramps_id = rec['p']['id']
+#                 events = rec['events']
+#                 fam_events = rec['fam_events']
+#                 for e,role in events + fam_events:
+#                     if e is None: continue
+#                     #print("e:",e)
+#                     eventtype = e['type']
+#                     datetype = e['datetype']
+#                     datetype1 = None
+#                     datetype2 = None
+#                     if datetype == DR['DATE']:
+#                         datetype1 = "exact"
+#                     elif datetype == DR['BEFORE']:
+#                         datetype1 = "before"
+#                     elif datetype == DR['AFTER']:
+#                         datetype1 = "after"
+#                     elif datetype == DR['BETWEEN']:
+#                         datetype1 = "after"
+#                         datetype2 = "before"
+#                     elif datetype == DR['PERIOD']:
+#                         datetype1 = "after"
+#                         datetype2 = "before"
+#                     date1 = e['date1']
+#                     date2 = e['date2']
+#                     if datetype1 and date1 is not None:
+#                         year1 = date1 // 1024
+#                         ev = lifetime.Event(eventtype,datetype1,year1,role)
+#                         p.events.append(ev)
+#                     if datetype2 and date2 is not None:
+#                         year2 = date2 // 1024
+#                         ev = lifetime.Event(eventtype,datetype2,year2,role)
+#                         p.events.append(ev)
+#                 p.parent_pids = []
+#                 for _parent,pid in rec['parents']:
+#                     if pid: p.parent_pids.append(pid)
+#                 p.child_pids = []
+#                 for _parent,pid in rec['children']:
+#                     if pid: p.child_pids.append(pid)
+#                 personlist.append(p)
+#                 personmap[p.pid] = p
+#             for p in personlist:
+#                 for pid in p.parent_pids:
+#                     p.parents.append(personmap[pid])
+#                 for pid in p.child_pids:
+#                     p.children.append(personmap[pid])
+#             lifetime.calculate_estimates(personlist)
+#             for p in personlist:
+#                 result = tx.run(Cypher_person.update_lifetime_estimate, 
+#                                 id=p.pid,
+#                                 birth_low = p.birth_low.getvalue(),
+#                                 death_low = p.death_low.getvalue(),
+#                                 birth_high = p.birth_high.getvalue(),
+#                                 death_high = p.death_high.getvalue() )
+#                                 
+#             pers_count = len(personlist)
+#             print(f"Estimated lifetime for {pers_count} persons")
+#             return pers_count
+# 
+#         except Exception as err:
+#             print("iError (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
+#             traceback.print_exc()
+#             return 0
 
 
     def print_compared_data(self, comp_person, print_out=True):

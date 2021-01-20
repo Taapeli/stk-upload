@@ -11,7 +11,8 @@ from ..gedcom.models import gedcom_utils
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, session , flash
-from flask_security import login_required, roles_accepted, current_user, utils as secutils
+from flask_security import login_required, current_user, utils as secutils
+#rom flask_security import login_required, roles_accepted, current_user, utils as secutils
 from flask_babelex import _, get_locale
 
 import shareds
@@ -19,7 +20,7 @@ from models import email
 from bp.api import api
 
 from bp.start.forms import JoinForm
-from models.gen.batch_audit import Batch
+from bl.batch import Batch
 
 """ Application route definitions
 """
@@ -32,11 +33,11 @@ def force_https():
         if host in {"localhost","127.0.0.1"}: return
         return redirect(request.url.replace('http://', 'https://'))
 
-# @shareds.app.route('/')
-#     Home page for a guest user (from login page or home button)
-#     or anonymous user (home)
-#
-#     @See: routes.entry
+@shareds.app.route('/home')
+def home():
+    '  Home page. '
+    from routes import entry
+    return redirect(entry)
 
 @shareds.app.route('/start/guest', methods=['GET', 'POST'])
 def start_guest():
@@ -65,6 +66,14 @@ def start_logged():
                  f" lang={get_locale().language}"
                  f" user={current_user.username}/{current_user.email}"
                  f" roles= {role_names}")
+
+    print(current_user.is_authenticated)
+    print(current_user.has_role('to_be_approved'))
+    if current_user.is_authenticated and current_user.has_role('to_be_approved'):
+        # Home page for logged in user
+        logger.info(f'-> start.routes.entry/join')
+        return redirect(url_for('join'))
+
     return render_template('/start/index_logged.html')
 
 
@@ -73,20 +82,20 @@ def thankyou():
     return render_template("/start/thankyou.html")
 
 @shareds.app.route('/join', methods=['GET', 'POST'])
+@login_required
 def join():
     from bp.admin.models.user_admin import UserProfile, UserAdmin
 
     form = JoinForm()
     logger.info('-> bp.start.routes.join')
-    msg = ""
-    for name,value in request.form.items():
-        msg += f"\n{name}: {value}"
     if form.validate_on_submit(): 
         msg = ""
+        username = request.form['username']
         for name,value in request.form.items():
             if name == "csrf_token": continue
             if name == "submit": continue
             msg += f"\n{name}: {value}"
+        msg += f"\n\nApprove user: http://{request.host}/admin/update_user/{username}"
         if email.email_admin("New user request for Isotammi", msg,
                              sender=request.form.get('email') ):
             flash(_("Join message sent"))
@@ -94,6 +103,7 @@ def join():
             flash(_("Sending join message failed"))
         profile = UserProfile(
             name=request.form.get("name"),
+            username=request.form.get("username"),
             email = request.form.get('email'),
             language = request.form.get('language'),
             GSF_membership = request.form.get('GSF_membership'),
@@ -103,7 +113,8 @@ def join():
             researched_places = request.form.get('researched_places'),
             text_message = request.form.get('text_message'),
         )
-        UserAdmin.register_applicant(profile,role=None)
+        # Store to UserProfile node
+        UserAdmin.update_user_profile(profile)
         return redirect(url_for("thankyou"))
 
     return render_template("/start/join.html", form=form)  
@@ -161,13 +172,12 @@ def my_settings():
                            batches=user_batches,
                            gedcoms=gedcoms)
 
-# Admin start page
-@shareds.app.route('/admin',  methods=['GET', 'POST'])
-@login_required
-@roles_accepted('admin', 'master')
-def admin():
-    """ Home page for administrator """    
-    logger.info("-> bp.start.routes.admin")
-    return render_template('/admin/admin.html')
-
+# # Admin start page in bp.admin
+# @shareds.app.route('/admin',  methods=['GET', 'POST'])
+# @login_required
+# @roles_accepted('admin', 'master')
+# def admin():
+#     """ Home page for administrator """    
+#     logger.info("-> bp.start.routes.admin")
+#     return render_template('/admin/admin.html')
 

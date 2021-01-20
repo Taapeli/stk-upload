@@ -65,7 +65,7 @@
       <button class="button"
             v-on:mouseover="changeFamily(index)"
             v-for="(f, index) of families" :key="f.id">
-        ${index+1}. ${f.role}</button>
+        <sup>${index+1}</sup>${f.role}</button>
     </div>
 
     <div class="pop-container">

@@ -10,8 +10,8 @@ from bl.place import Place, PlaceName
 
 #from .place import Place, Place_name, Point
 from .note import Note
-from .media import Media
-from .dates import DateRange
+from models.gen.obsolete_media import Media
+from bl.dates import DateRange
 from .cypher import Cypher_place
 #from models.dbtree import DbTree
 #from models.gen.event_combo import Event_combo
@@ -41,7 +41,7 @@ class Place_combo(Place):
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
-                noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
+                note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self, uniq_id=None, ptype="", level=None):
@@ -60,7 +60,7 @@ class Place_combo(Place):
         self.uppers = []        # Upper place objects for hirearchy display
         self.notes = []         # Notes connected to this place
         self.note_ref = []      # uniq_ids of Notes
-        self.media_ref = []     # uniq_id of models.gen.media.Media
+        self.media_ref = []     # uniq_id of models.gen.obsolete_media.Media
 
 
     def __str__(self):

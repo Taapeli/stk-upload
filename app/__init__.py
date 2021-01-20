@@ -102,8 +102,8 @@ shareds.app.register_blueprint(gedcom_bp)
 from bp.scene import bp as scene_bp
 shareds.app.register_blueprint(scene_bp)
 
-from bp.tools import bp as tools_bp
-shareds.app.register_blueprint(tools_bp)
+# from bp.tools import bp as tools_bp
+# shareds.app.register_blueprint(tools_bp)
 
 from bp.gramps import bp as gramps_bp
 shareds.app.register_blueprint(gramps_bp)
@@ -114,8 +114,8 @@ shareds.app.register_blueprint(admin_bp)
 from bp.audit import bp as audit_bp
 shareds.app.register_blueprint(audit_bp)
 
-from bp.dupsearch import bp as dupsearch_bp
-shareds.app.register_blueprint(dupsearch_bp)
+# from bp.dupsearch import bp as dupsearch_bp
+# shareds.app.register_blueprint(dupsearch_bp)
 
 from bp.api import bp as api_bp
 shareds.app.register_blueprint(api_bp)

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE database PUBLIC "-//Gramps//DTD Gramps XML 1.7.1//EN"
+"http://gramps-project.org/xml/1.7.1/grampsxml.dtd">
+<database xmlns="http://gramps-project.org/xml/1.7.1/">
+   <citations>
+      <citation handle="_da691096cab416427b3de509391" change="1585409708" id="C0003">
+         <dateval val="2017-07-24"/>
+         <page>Alexander Florin 5812</page>
+         <confidence>2</confidence>
+         <noteref hlink="_da691070edc6e755358a085a3"/>
+         <sourceref hlink="_da3b305ab6232bd2cbf352a13a"/>
+      </citation>
+   </citations>
+</database>

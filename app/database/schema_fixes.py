@@ -8,6 +8,9 @@ moved from database.adminDB.do_schema_fixes
 '''
 import logging
 logger = logging.getLogger('stkserver') 
+
+from neo4j.exceptions import ClientError #, ConstraintError
+
 import shareds
 
 
@@ -81,8 +84,10 @@ SET u.name = 'Suomi tk', u.change = timestamp()"""
                     result = session.run(f'CREATE INDEX ON :{label}(handle)')
                     counters = shareds.db.consume_counters(result)
                     created += counters.indexes_added
-#               except Exception as e:
-#                   logger.info(f"Index for {label}.handle not created: {e}")
+                except ClientError as e:
+                    msgs = e.message.split(',')
+                    print(f'Unique constraint for {label}.handle ok: {msgs[0]}')
+                    return
                 except Exception as e: 
                     logger.warning(f"do_schema_fixes Index for {label}.handle not created." 
                                    f" Failed {e.__class__.__name__} {e.message}") 

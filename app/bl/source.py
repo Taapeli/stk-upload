@@ -1,9 +1,9 @@
 '''
-    Source classes: Source, SourceBl and SourceReader.
+    Source classes: Source, SourceBl and SourceDataStore.
 
     - Source       represents Source Node in database
     - SourceBl     represents Source and connected data (was Source_combo)
-    - SourceReader has methods for reading Source and connected data
+    - SourceDataStore has methods for reading Source and connected data
                    called from ui routes.py
 
 Created on 3.5.2020
@@ -18,10 +18,8 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 from .base import NodeObject, Status
-from pe.db_reader import DBreader #, SourceResult
-
-#Todo: move gen.Person_combo to bi.PersonBl
-from models.gen.person_combo import Person_combo
+from .person import Person
+#from pe.db_reader import DbReader #, SourceResult
 
 
 class Source(NodeObject):
@@ -89,24 +87,37 @@ class SourceBl(Source):
         self.repositories = []
         self.citations = []
         self.notes = []
+        self.note_handles = []
         self.note_ref = []
 
 
-
-class SourceReader(DBreader):
+class SourceDataStore:
     '''
         Data reading class for Source objects with associated data.
 
-        - Use pe.db_reader.DBreader.__init__(self, dbdriver, u_context) 
+        - Use pe.db_reader.DbReader.__init__(readservice, u_context) 
           to define the database driver and user context
 
         - Returns a Result object which includes the tems and eventuel error object.
     '''
+    def __init__(self, readservice, u_context):
+        ''' Initiate datastore.
+
+        :param: readservice   pe.neo4j.readservice.Neo4jReadService
+        :param: u_context     ui.user_context.UserContext object
+        '''
+        self.readservice = readservice
+        self.driver = readservice.driver
+        self.user_context = u_context
+
 
     def get_source_list(self):
+        ''' Get junk of Source objects for Sources list.
+        '''
         context = self.user_context
-        fw = context.next_name_fw()
-        kwargs = {"user": self.use_user, "fw": fw,  "count": context.count}
+        fw = context.first  # From here forward
+        use_user = context.batch_user()
+        args = {"user": use_user, "fw": fw,  "count": context.count}
         if context.series:
             # Filtering by series (Lähdesarja)
             THEMES = {"birth": ('syntyneet','födda'),
@@ -116,11 +127,11 @@ class SourceReader(DBreader):
                       "move": ('muuttaneet','flyttade')
                       }
             theme_fi, theme_sv = THEMES[context.series]
-            kwargs["theme1"] = theme_fi 
-            kwargs["theme2"] = theme_sv
+            args["theme1"] = theme_fi 
+            args["theme2"] = theme_sv
         try:
-            sources = self.dbdriver.dr_get_source_list_fw(**kwargs)
-            results = {'sources':sources,'status':Status.OK}
+            sources = self.readservice.dr_get_source_list_fw(args)
+            #results = {'sources':sources,'status':Status.OK}
     
             # Update the page scope according to items really found 
             if sources:
@@ -128,7 +139,7 @@ class SourceReader(DBreader):
                                               sources[0].stitle, sources[-1].stitle, 
                                               context.count, len(sources))
             else:
-                return {'status':Status.NOT_FOUND}
+                return {'items':[], 'status':Status.NOT_FOUND}
 
             results = {'items':sources, 'status':Status.OK}
         except Exception as e:
@@ -145,22 +156,25 @@ class SourceReader(DBreader):
             - item.citations    Citating Persons, Events, Families and Medias
                                 as [label, object] tuples(?)
         """
-        source = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
-        results = {'item':source, 'status':Status.OK}
+        use_user = self.user_context.batch_user()
+        res = self.readservice.dr_get_source_w_repository(use_user, uuid)
+        if Status.has_failed(res):
+            return res
+        source = res.get('item')
         if not source:
-            results.error = f"DBreader.get_source_with_references: {self.use_user} - no Source with uuid={uuid}"
-            return results
+            res.statustext = f"no Source with uuid={uuid}"
+            return res
         
-        citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
+        citations, notes, targets = self.readservice.dr_get_source_citations(source.uniq_id)
 
         if len(targets) == 0:
             # Only Citations connected to Person Event or Family Event can be
             # processed. 
             #TODO: Should allow citating a Source from Place, Note, Meida etc
 
-            results['status'] = Status.NOT_FOUND
-            results['statustext'] = _('No person or family has uses this source')
-            return results
+            res['status'] = Status.NOT_FOUND
+            res['statustext'] = _('No person or family has uses this source')
+            return res
 
         cit = []
         for c_id, c in citations.items():
@@ -169,13 +183,13 @@ class SourceReader(DBreader):
             for target in targets[c_id]:
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
-                    if isinstance(target, Person_combo):
-                        self.dbdriver.dr_inlay_person_lifedata(target)
+                    if isinstance(target, Person):
+                        self.readservice.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:
-                    print(f'DBreader.get_source_with_references: hide {target}')
+                    print(f'DbReader.get_source_with_references: hide {target}')
 
             cit.append(c)
-        results['citations'] = cit
+        res['citations'] = cit
 
-        return results
+        return res

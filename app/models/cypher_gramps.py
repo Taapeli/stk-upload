@@ -11,10 +11,10 @@ class Cypher_batch():
     Cypher clauses for managing Batch nodes
     '''
 
-    batch_find_id = """
-MATCH (b:Batch) WHERE b.id STARTS WITH $batch_base
-RETURN b.id AS bid
-    ORDER BY bid DESC LIMIT 1"""
+#     batch_find_id = """
+# MATCH (b:Batch) WHERE b.id STARTS WITH $batch_base
+# RETURN b.id AS bid
+#     ORDER BY bid DESC LIMIT 1"""
 
     batch_create = """
 MATCH (u:UserProfile {username: $b_attr.user})
@@ -33,7 +33,7 @@ MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
 #     OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
 #         DELETE c
 #     MERGE (u) -[:CURRENT_LOAD]-> (b)
-#Moved to models.gen.batch_audit / 3.2.2020/JMä
+#Moved to bl.batch / 3.2.2020/JMä
 #     batch_list = """
 #     batch_list_all = """
 #     batch_delete = """
@@ -51,32 +51,32 @@ MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
     original items from the user's Gramps database
     '''
 
-class Cypher_event_w_handle():
-    """ For Event class """
-
-    create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
-MERGE (b) -[r:OWNS]-> (e:Event {handle: $e_attr.handle})
-    SET e = $e_attr
-RETURN ID(e) as uniq_id"""
-
-    link_place = """
-MATCH (n:Event) WHERE n.handle=$handle
-MATCH (m:Place) WHERE m.handle=$place_hlink
-MERGE (n)-[r:PLACE]->(m)"""
-
-    link_notes = """
-MATCH (n:Note)  WHERE n.handle IN $note_handles
-WITH n
-    MATCH (e:Event)  WHERE e.handle=$handle
-    CREATE (e) -[r:NOTE]-> (n)
-RETURN count(r) AS cnt"""
-
-    link_citations = """
-match (c:Citation) where c.handle in $citation_handles
-with c
-    match (e:Event)  where e.handle=$handle
-    merge (e) -[r:CITATION]-> (c)"""
+# class Cypher_event_w_handle():
+#     """ For Event class """
+# 
+#     create_to_batch = """
+# MATCH (b:Batch {id: $batch_id})
+# MERGE (b) -[r:OWNS]-> (e:Event {handle: $e_attr.handle})
+#     SET e = $e_attr
+# RETURN ID(e) as uniq_id"""
+# 
+#     link_place = """
+# MATCH (n:Event) WHERE n.handle=$handle
+# MATCH (m:Place) WHERE m.handle=$place_hlink
+# MERGE (n)-[r:PLACE]->(m)"""
+# 
+#     link_notes = """
+# MATCH (n:Note)  WHERE n.handle IN $note_handles
+# WITH n
+#     MATCH (e:Event)  WHERE e.handle=$handle
+#     CREATE (e) -[r:NOTE]-> (n)
+# RETURN count(r) AS cnt"""
+# 
+#     link_citations = """
+# match (c:Citation) where c.handle in $citation_handles
+# with c
+#     match (e:Event)  where e.handle=$handle
+#     merge (e) -[r:CITATION]-> (c)"""
 
 #     link_media = """
 # MATCH (e:Event {handle: $handle})
@@ -199,113 +199,113 @@ MERGE (a) -[:NOTE]-> (n:Note {handle: $n_attr.handle})
 RETURN ID(n)"""
 
 
-class Cypher_person_w_handle():
-    """ For Person class """
-
-    create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
-MERGE (p:Person {handle: $p_attr.handle})
-MERGE (b) -[r:OWNS]-> (p)
-    SET p = $p_attr
-RETURN ID(p) as uniq_id"""
-
-    link_name = """
-CREATE (n:Name) SET n = $n_attr
-WITH n
-MATCH (p:Person {handle:$p_handle})
-MERGE (p)-[r:NAME]->(n)"""
-
-    link_event_embedded = """
-MATCH (p:Person {handle: $handle}) 
-CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
-    SET e = $e_attr"""
-
-    link_event = """
-MATCH (p:Person {handle:$p_handle})
-MATCH (e:Event  {handle:$e_handle})
-MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
-
-    link_media = """
-MATCH (p:Person {handle: $p_handle})
-MATCH (m:Media  {handle: $m_handle})
-  CREATE (p) -[r:MEDIA]-> (m)
-    SET r = $r_attr"""
-
-# use models.gen.cypher.Cypher_name (there is no handle)
-
-    link_citation = """
-MATCH (p:Person   {handle: $p_handle})
-MATCH (c:Citation {handle: $c_handle})
-MERGE (p)-[r:CITATION]->(c)"""
-
-    link_note = """
-MATCH (n) WHERE n.handle=$p_handle
-MATCH (m:Note)   WHERE m.handle=$n_handle
-CREATE (n)-[r:NOTE]->(m)"""
+# class Cypher_person_w_handle():
+#     """ For Person class """
+# 
+#     create_to_batch = """
+# MATCH (b:Batch {id: $batch_id})
+# MERGE (p:Person {handle: $p_attr.handle})
+# MERGE (b) -[r:OWNS]-> (p)
+#     SET p = $p_attr
+# RETURN ID(p) as uniq_id"""
+# 
+#     link_name = """
+# CREATE (n:Name) SET n = $n_attr
+# WITH n
+# MATCH (p:Person {handle:$p_handle})
+# MERGE (p)-[r:NAME]->(n)"""
+# 
+#     link_event_embedded = """
+# MATCH (p:Person {handle: $handle}) 
+# CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
+#     SET e = $e_attr"""
+# 
+#     link_event = """
+# MATCH (p:Person {handle:$p_handle})
+# MATCH (e:Event  {handle:$e_handle})
+# MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
+# 
+#     link_media = """
+# MATCH (p:Person {handle: $p_handle})
+# MATCH (m:Media  {handle: $m_handle})
+#   CREATE (p) -[r:MEDIA]-> (m)
+#     SET r = $r_attr"""
+# 
+# # use models.gen.cypher.Cypher_name (there is no handle)
+# 
+#     link_citation = """
+# MATCH (p:Person   {handle: $p_handle})
+# MATCH (c:Citation {handle: $c_handle})
+# MERGE (p)-[r:CITATION]->(c)"""
+# 
+#     link_note = """
+# MATCH (n) WHERE n.handle=$p_handle
+# MATCH (m:Note)   WHERE m.handle=$n_handle
+# CREATE (n)-[r:NOTE]->(m)"""
 
 
 
 class Cypher_place_in_batch():
     """ For Place class """
 
-    # Find the batch like '2019-02-24.006' and connect new object to that Batch
-    create = """
-MATCH (u:Batch {id:$batch_id})
-CREATE (new_pl:Place)
-    SET new_pl = $p_attr
-CREATE (u) -[:OWNS]-> (new_pl) 
-RETURN ID(new_pl) as uniq_id"""
+#     # Find the batch like '2019-02-24.006' and connect new object to that Batch
+#     create = """
+# MATCH (u:Batch {id:$batch_id})
+# CREATE (new_pl:Place)
+#     SET new_pl = $p_attr
+# CREATE (u) -[:OWNS]-> (new_pl) 
+# RETURN ID(new_pl) as uniq_id"""
 
-    # Set properties for an existing Place and connect it to Batch
-    complete = """
-MATCH (u:Batch {id:$batch_id})
-MATCH (pl:Place) WHERE ID(pl) = $plid
-    SET pl += $p_attr
-CREATE (u) -[:OWNS]-> (pl)"""
+#     # Set properties for an existing Place and connect it to Batch
+#     complete = """
+# MATCH (u:Batch {id:$batch_id})
+# MATCH (pl:Place) WHERE ID(pl) = $plid
+#     SET pl += $p_attr
+# CREATE (u) -[:OWNS]-> (pl)"""
 # plid=plid, p_attr=pl_attr
 #MERGE (u) -[:OWNS]-> (pl) <-[r:IS_INSIDE]- (plu:Place {handle: $up_handle}) 
 #RETURN ID(pl) as uniq_id"""
 
-    add_name = """
-MATCH (pl:Place) WHERE id(pl) = $pid
-CREATE (pl) -[r:NAME {order:$order}]-> (n:Place_name)
-    SET n = $n_attr
-RETURN ID(n) AS uniq_id"""
+#     add_name = """
+# MATCH (pl:Place) WHERE id(pl) = $pid
+# CREATE (pl) -[r:NAME {order:$order}]-> (n:Place_name)
+#     SET n = $n_attr
+# RETURN ID(n) AS uniq_id"""
 
-    # Link to a known upper Place
-    link_hier = """
-MATCH (pl:Place) WHERE id(pl) = $plid
-MATCH (up:Place) WHERE id(up) = $up_id
-MERGE (pl) -[r:IS_INSIDE]-> (up)
-    SET r = $r_attr"""
+#     # Link to a known upper Place
+#     link_hier = """
+# MATCH (pl:Place) WHERE id(pl) = $plid
+# MATCH (up:Place) WHERE id(up) = $up_id
+# MERGE (pl) -[r:IS_INSIDE]-> (up)
+#     SET r = $r_attr"""
+# 
+#     # Link to a new dummy upper Place
+#     link_create_hier = """
+# MATCH (pl:Place) WHERE id(pl) = $plid
+# CREATE (new_pl:Place)
+#     SET new_pl.handle = $up_handle
+# CREATE (pl) -[r:IS_INSIDE]-> (new_pl)
+#     SET r = $r_attr
+# return ID(new_pl) as uniq_id"""
 
-    # Link to a new dummy upper Place
-    link_create_hier = """
-MATCH (pl:Place) WHERE id(pl) = $plid
-CREATE (new_pl:Place)
-    SET new_pl.handle = $up_handle
-CREATE (pl) -[r:IS_INSIDE]-> (new_pl)
-    SET r = $r_attr
-return ID(new_pl) as uniq_id"""
+#     add_urls = """
+# MATCH (u:Batch {id:$batch_id})
+# CREATE (u) -[:OWNS]-> (n:Note) 
+#     SET n = $n_attr
+# WITH n
+#     MATCH (pl:Place) WHERE id(pl) = $pid
+#     MERGE (pl) -[r:NOTE]-> (n)"""
 
-    add_urls = """
-MATCH (u:Batch {id:$batch_id})
-CREATE (u) -[:OWNS]-> (n:Note) 
-    SET n = $n_attr
-WITH n
-    MATCH (pl:Place) WHERE id(pl) = $pid
-    MERGE (pl) -[r:NOTE]-> (n)"""
-
-    link_note = """
-MATCH (pl:Place) WHERE id(pl) = $pid
-MATCH (n:Note)  WHERE n.handle=$hlink
-CREATE (pl) -[r:NOTE]-> (n)"""
-
-    link_media = """
-MATCH (p:Place {handle: $p_handle})
-MATCH (m:Media  {handle: $m_handle})
-  CREATE (p) -[r:MEDIA]-> (m)
-    SET r = $r_attr"""
+#     link_note = """
+# MATCH (pl:Place) WHERE id(pl) = $pid
+# MATCH (n:Note)  WHERE n.handle=$hlink
+# CREATE (pl) -[r:NOTE]-> (n)"""
+# 
+#     link_media = """
+# MATCH (p:Place {handle: $p_handle})
+# MATCH (m:Media  {handle: $m_handle})
+#   CREATE (p) -[r:MEDIA]-> (m)
+#     SET r = $r_attr"""
 
 
 # class Cypher_place_w_handle():

@@ -13,35 +13,41 @@ class SetupCypher():
     """
 
     # Missing lock means there is need for initialisation 
-    check_lock_initiated = "match (lock:Lock {id:'initiated'}) return count(lock)"
-    create_lock = "merge (lock:Lock {id:$id}) set lock.locked = $locked"
-    remove_lock_initiated = "match (lock:Lock {id:'initiated'}) delete lock"
+    check_lock_initiated = """
+    MATCH (lock:Lock {id:'initiated'}) RETURN lock.db_schema
+    """
+    update_lock = """
+    MERGE (lock:Lock {id:$id}) 
+        SET lock.locked = $locked
+        SET lock.db_schema = $db_schema
+    """
+    remove_lock_initiated = """
+    MATCH (lock:Lock {id:'initiated'}) DELETE lock
+    """
     
     check_role_count = """
-    MATCH (a:Role) RETURN COUNT(a)
+    MATCH (a:Role) RETURN a.name
     """
     set_role_constraint = """
-    CREATE CONSTRAINT ON (role:Role) ASSERT role.name IS UNIQUE
+    CREATE CONSTRAINT ON (role:Role) 
+        ASSERT role.name IS UNIQUE
     """
     role_check_existence = """
     MATCH  (role:Role) WHERE role.name = $rolename RETURN COUNT(role)
     """
     role_create = """
-    CREATE (role:Role 
-    {level: $level, name: $name, 
-    description: $description, timestamp: timestamp()})
+    CREATE (role:Role {level: $level, name: $name, 
+                       description: $description, timestamp: timestamp()})
     """
 
     user_check_existence = """
-    MATCH  (user:User) WHERE user.username = $username RETURN COUNT(user)
+    MATCH  (user:User) WHERE user.username = $username 
+    RETURN COUNT(user)
     """
     profile_check_existence = """
     MATCH  (u:UserProfile {username:$username})
     RETURN COUNT(u)
     """
-#     email_val = """
-#     MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN COUNT(a)
-#     """
 
     set_user_constraint1 = """
     CREATE CONSTRAINT ON (user:User) 
@@ -51,10 +57,9 @@ class SetupCypher():
     CREATE CONSTRAINT ON (user:User) 
         ASSERT (user.username) IS UNIQUE;
     """
-    set_allowed_email_constraint = """ 
-    CREATE CONSTRAINT ON (email:Allowed_email) 
-    ASSERT email.allowed_email IS UNIQUE
-    """  
+
+    index_year_birth_low = "CREATE INDEX ON :Person(birth_low)"
+    index_year_death_high = "CREATE INDEX ON :Person(death_high)"
 
     master_create = """
     MATCH  (role:Role) WHERE role.name = 'master'
@@ -79,21 +84,3 @@ class SetupCypher():
         SET u = $attr
     """ 
 
-#     guest_create = """
-#     MATCH  (role:Role) WHERE role.name = 'guest' 
-#     CREATE (user:User 
-#         {username : $username, 
-#         password : $password,  
-#         email : $email, 
-#         name : $name,
-#         language : $language, 
-#         is_active : $is_active,
-#         confirmed_at : timestamp(), 
-#         roles : $roles,
-#         last_login_at : timestamp(),
-#         current_login_at : timestamp(),
-#         last_login_ip : $last_login_ip,
-#         current_login_ip : $current_login_ip,
-#         login_count : $login_count} )           
-#         -[:HAS_ROLE]->(role)
-#     """ 

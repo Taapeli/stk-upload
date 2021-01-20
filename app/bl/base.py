@@ -5,6 +5,7 @@ Created on 22.8.2019
 '''
 import uuid
 import json
+import traceback
 
 class Status():
     """ Status code values for result dictionary.
@@ -20,18 +21,47 @@ class Status():
     OK = 0
     NOT_FOUND = 1
     ERROR = 2
+    NOT_STARTED = 4
+    UPDATED = 4
+
+    @staticmethod       
+    def has_failed(result:dict, strict=True):
+        ''' Test, if given result dict did not succeed.
+
+            If strict, allow only OK status, else allow any no-error status
+        '''
+        if not isinstance(result,dict):
+            traceback.print_exc()
+            raise AttributeError(f'bl.base.Status.has_failed')
+        st = result.get('status', -1)
+
+        if st == Status.ERROR:
+            return True     # Error
+        if st == Status.OK:
+            return False    # Ok
+        if strict:
+            return True     # Not found or updated etc not allowed
+        else:
+            return False    # Not found or updated is ok
 
 
 class StkEncoder(json.JSONEncoder):
-    ''' Returns Stk object hierarchy as a json string.
+    ''' Returns Stk object hierarchy as a JSON string.
 
-        Usage: json_str = json.dumps(stk_object, cls=StkEncoder)
+        Usage: json_str = StkEncoder.jsonify(stk_object_struct)
     '''
     def default(self, obj):
         if hasattr(obj, '_json_encode'):
             return obj._json_encode()
         else:
             return json.JSONEncoder.default(self, obj)
+    
+    @staticmethod
+    def jsonify(obj):
+        ''' Convert dictionary with hierarchial stk objects to JSON structure.
+        '''
+        return json.dumps(obj, cls=StkEncoder) 
+
 
 
 class NodeObject():
@@ -150,3 +180,4 @@ class NodeObject():
             Called by `json.dumps(my_stk_object, cls=StkEncoder)`
         '''
         return self.__dict__
+

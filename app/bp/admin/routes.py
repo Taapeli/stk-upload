@@ -18,21 +18,21 @@ logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
 from flask_security import login_required, roles_accepted, roles_required, current_user
-from flask_babelex import _
+from flask_babelex import _ #, Domain
 
 import shareds
-from setups import User, Allowed_email #, Role
+from setups import User
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
 
-from .cvs_refnames import load_refnames
-from .forms import AllowedEmailForm, UpdateAllowedEmailForm, UpdateUserForm
+#from .cvs_refnames import load_refnames
+from .forms import UpdateUserForm
 from . import bp
 from . import uploads
 from .. gedcom.models import gedcom_utils
 from .. import gedcom
 
-from models import dbutil, dataupdater, loadfile, datareader, util
+from models import util, dataupdater #, dbutil, loadfile, datareader
 from models import email
 from models import syslog 
 
@@ -56,7 +56,7 @@ def clear_db(opt):
         updater = DataAdmin(current_user)
         result =  updater.db_reset(opt) # dbutil.alusta_kanta()
         logger.info(f"-> bp.admin.routes.clear_db/{opt} n={result['count']}")
-        return render_template("/admin/talletettu.html", text=result['msg'])
+        return render_template("/talletettu.html", text=result['msg'])
     except Exception as e:
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, 
@@ -72,7 +72,7 @@ def clear_my_db():
         updater = DataAdmin(current_user)
         msg =  updater.db_reset('my_own') # dbutil.alusta_kanta()
         logger.info(f"-> bp.admin.routes.clear_my_db")
-        return render_template("/admin/talletettu.html", text=msg)
+        return render_template("/talletettu.html", text=msg)
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
@@ -97,7 +97,7 @@ def start_initiate():
 @roles_accepted('research', 'admin', 'audit')
 def clear_empty_batches():
     """ Show or clear unused batches. """
-    from models.gen.batch_audit import Batch
+    from bl.batch import Batch
 
     user=None
     clear=False
@@ -132,9 +132,9 @@ def estimate_dates(uid=None):
         uids=list(uid)
     else:
         uids=[]
-    message = dataupdater.set_estimated_person_dates(uids)
+    message = dataupdater.set_person_estimated_dates(uids)
     ext = _("estimated lifetime")
-    return render_template("/admin/talletettu.html", text=message, info=ext)
+    return render_template("/talletettu.html", text=message, info=ext)
 
 
 # # Ei ilmeisesti käytössä
@@ -144,53 +144,9 @@ def estimate_dates(uid=None):
 #     """ tietojen laatuarvion asettaminen henkilöille """
 #     dburi = dbutil.get_server_location()
 #     message = dataupdater.set_confidence_value()
-#     return render_template("/admin/talletettu.html", text=message, uri=dburi)
+#     return render_template("/talletettu.html", text=message, uri=dburi)
 
 
-@bp.route('/admin/allowed_emails',  methods=['GET', 'POST'])
-@login_required
-@roles_accepted('admin', 'master') 
-def list_allowed_emails():
-    form = AllowedEmailForm()
-#    if request.method == 'POST':
-    lista = UserAdmin.get_allowed_emails()
-    logging.info(f"-> bp.admin.routes.list_allowed_emails n={len(lista)}")
-    if form.validate_on_submit(): 
-# Register a new email
-        UserAdmin.register_allowed_email(form.allowed_email.data,
-                                         form.default_role.data)
-        return redirect(url_for('admin.list_allowed_emails'))
-
-    return render_template("/admin/allowed_emails.html", emails=lista, 
-                            form=form)
-    
-@bp.route('/admin/update_allowed_email/<email>', methods=['GET', 'POST'])
-@login_required
-@roles_accepted('admin', 'master')
-def update_allowed_email(email):
-    
-    form = UpdateAllowedEmailForm()
-    if form.validate_on_submit():
-        allowed_email = Allowed_email(
-                allowed_email = form.email.data,
-                default_role = form.role.data,
-                approved = form.approved.data,
-                creator = form.creator.data)
-#                 created_at = form.created.data,
-#                 confirmed_at = form.confirmed_at.data) 
-        _updated_allowed_email = UserAdmin.update_allowed_email(allowed_email)
-        logging.info(f"-> bp.admin.routes.update_allowed_email u={email}")
-        flash(_("Allowed email updated"))
-        return redirect(url_for("admin.update_allowed_email", email=form.email.data))
-
-    allowed_email = UserAdmin.find_allowed_email(email) 
-    form.email.data = allowed_email.allowed_email
-    form.approved.data = allowed_email.approved
-    form.role.data = allowed_email.default_role
-    form.creator.data = allowed_email.creator
-    form.created.data = allowed_email.created_at
-    form.confirmed_at.data = allowed_email.confirmed_at
-    return render_template("/admin/update_allowed_email.html", allowed_email=allowed_email.allowed_email, form=form)  
 
 @bp.route('/admin/list_users', methods=['GET'])
 @login_required
@@ -200,39 +156,19 @@ def list_users():
     logging.info(f"-> bp.admin.routes.list_users n={len(lista)}")
     return render_template("/admin/list_users.html", users=lista)  
 
-
-@bp.route('/admin/list_all_users', methods=['GET', 'POST'])
-@login_required
-@roles_accepted('admin', 'audit', 'master')
-def list_all_users():
-    """ List users and candidate users.
-    
-        list_allowed_emails + list_users
-    """
-    # Allowe emails
-    form = AllowedEmailForm()
-    list_emails = UserAdmin.get_allowed_emails()
-    if form.validate_on_submit(): 
-        # Register a new email
-#        lista = UserAdmin.get_allowed_emails()
-        UserAdmin.register_allowed_email(form.allowed_email.data,
-                                         form.default_role.data)
-        return redirect(url_for('admin.list_allowed_emails'))
-
-
-    list_users = shareds.user_datastore.get_users()
-    logging.info(f"-> bp.admin.routes.list_all_users n={len(list_users)}")
-    return render_template("/admin/list_users_mails.html", 
-                           users=list_users, emails=list_emails)  
-
-
 @bp.route('/admin/update_user/<username>', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'master')
 def update_user(username):
-    
+    ''' A User is created or approved or ...
+    '''
+    #d = Domain("translations/sv/LC_MESSAGES")
+    #s = d.gettext("Return")
+    #print("s:",s)
+
     form = UpdateUserForm()
     if form.validate_on_submit(): 
+        # Create a setups.User object
         user = User(id = form.id.data,
                 email = form.email.data,
                 username = form.username.data,
@@ -245,14 +181,29 @@ def update_user(username):
                 last_login_ip = form.last_login_ip.data,                    
                 current_login_at = form.current_login_at.data,  
                 current_login_ip = form.current_login_ip.data,
-                login_count = form.login_count.data)        
+                login_count = form.login_count.data)
         updated_user = UserAdmin.update_user(user)
         if updated_user.username == current_user.username:
             session['lang'] = form.language.data
+        if form.approve.data:
+            # use user's language; see https://stackoverflow.com/a/46036518
+            from flask import Flask
+            from flask_babelex import Locale
+            app = Flask("app")  
+            host = request.host # save the actual host
+            with app.test_request_context() as ctx:
+                lang = form.language.data
+                ctx.babel_locale = Locale.parse(lang)
+                subject = _("Isotammi user approved")
+                msg = _("You are now approved to use Isotammi at {server} with user name {user}.")
+                msg = msg.format(server=f"http://{host}",user=form.username.data)
+            email.email_from_admin(subject, msg, form.email.data)        
         logging.info(f"-> bp.admin.routes.update_user u={form.email.data}")
         flash(_("User updated"))
+        # Return to same page
         return redirect(url_for("admin.update_user", username=updated_user.username))
 
+    # Fill form fields by updated values
     user = shareds.user_datastore.get_user(username) 
     form.id.data = user.id  
     form.email.data = user.email
@@ -268,6 +219,7 @@ def update_user(username):
     form.current_login_ip.data = user.current_login_ip
     form.login_count.data = user.login_count
         
+    # Return to same page
     return render_template("/admin/update_user.html", username=user.username, form=form)  
 
 @bp.route('/admin/list_uploads/<username>', methods=['GET'])
@@ -304,9 +256,9 @@ def list_uploads_all():
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
 @login_required
 @roles_accepted('admin', 'audit')
-def start_load_to_neo4j(username,xmlname):
-    uploads.initiate_background_load_to_neo4j(username,xmlname)
-    logger.info(f'-> bp.admin.routes.start_load_to_neo4j u={username} f="{xmlname}"')
+def start_load_to_stkbase(username,xmlname):
+    uploads.initiate_background_load_to_stkbase(username,xmlname)
+    logger.info(f'-> bp.admin.routes.start_load_to_stkbase u={username} f="{xmlname}"')
     flash(_('Data import from %(i)s to database has been started.', i=xmlname), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 
@@ -356,6 +308,7 @@ def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
     logger.info(f'-> bp.admin.routes.xml_delete f="{xmlfile}"')
+    #TODO: Return to list_uploads_all, if called from there
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------
@@ -521,7 +474,7 @@ def fetch_users():
 @roles_accepted('admin')
 def fetch_batches():
 
-    from models.gen.batch_audit import Batch
+    from bl.batch import Batch
 
     batch_list = list(Batch.get_batches())
     for b in batch_list:

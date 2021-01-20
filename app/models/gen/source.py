@@ -10,10 +10,10 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 import shareds
 from bl.base import NodeObject
-from pe.neo4j.cypher_source import CypherSource  # v0.4.1 structures
+from pe.neo4j.cypher.cy_source import CypherSource  # v0.4.1 structures
 from .cypher import Cypher_source  # obsolete v0.3 structures
-from .repository import Repository
-from .note import Note
+#from .repository import Repository
+#from .note import Note
 
 
 class Source(NodeObject): # -> bl.source.Source, bl.source.SourceBl
@@ -183,8 +183,8 @@ return s'''
 
 
 #     
-#     def get_source_list(o_context=None): # @staticmethod -> bl.source.SourceReader.get_source_list(),
-#                                                             pe.neo4j.read_driver.Neo4jReadDriver.dr_get_source_list_fw()
+#     def get_source_list(o_context=None): # @staticmethod -> bl.source.SourceDataStore.get_source_list(),
+#                                                             pe.neo4j.readservice.Neo4jReadService.dr_get_source_list_fw()
 #         """ Read all sources with notes and repositories, optionally limited by keywords.
 #         
 #             Todo: Valinta vuosien mukaan

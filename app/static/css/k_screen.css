@@ -83,7 +83,7 @@ body > div {
     padding: 1px 2px;
 	position: absolute;
 	right: .5em;
-    top: 4.5em;
+    top: 3.5em;
 }
 #startdiv div i a {
 	color: gray;
@@ -98,6 +98,17 @@ body > div {
     float: right;
     margin: 2em 2em 0 2em;
 }
+.content div.credit {
+    position: relative;
+    top: -2.5em;
+	text-align: right;
+    padding: 5px;
+    color: #7e6b53;
+    font-size: 8pt;
+    height: 0;
+}
+
+
 .fullclear {
     clear: both;
 }
@@ -148,7 +159,12 @@ img#logo {
 .idno { color: gray; text-align:center; 
     font-family: monospace
 }
-.changetime { color: gray; font-size: 80%; }
+#changetime { 
+	display: block;
+    position: absolute;
+    /*right: 0;*/
+	color: gray; font-size: 80%;
+}
 .owner { color: white; 
     font-size: 70%; 
     background: RoyalBlue;
@@ -205,7 +221,12 @@ div.NotFound {
 	padding: 1em;
 	border: maroon solid 1pt;
 }
-
+div.Failed {
+    padding: 1em;
+	text-align: center;
+	font-size: large;
+    font-style: italic;
+}
 /* Button style link (Next - Previous) */
 .navbar { text-align: center; 
   background-color: #EEE;
@@ -241,6 +262,7 @@ a.navlink:hover, a.navlink:active {
 	margin:1px;
 	color:darkred;
 }
+.submit { text-align:right; }
 
 /* Flexbox boxes floats next to each other */
 .flex-container {
@@ -251,9 +273,35 @@ a.navlink:hover, a.navlink:active {
 .flex-container > div {
   background-color: ivory;
   width: 300px;
-  /*border: 1px solid lightgray;*/
   margin: 1em;
 }
+.flex-container2 {
+  display: flex;
+/*   width: 350px; */
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.flex-container2 > div {
+  margin: 1em;
+}
+.description_box2 {
+    width: 320px;
+}
+.SearchBox2 {
+    background: bisque;
+    margin: 1em;
+    border: 1px solid #CCC;
+    padding: 5px;
+    padding: 5px;
+    width: 320px !important;
+    min-width: 200px;
+    max-width: 430px;
+}
+.SearchBox2 fieldset {
+    border: 1px solid gray;
+    margin-bottom: .5em;
+}
+
 
 /* Styles with icon  */
 
@@ -349,16 +397,6 @@ a[href]:hover, a[href]:active {
     padding-left: 15px;
 }
 
-#searching {
-	background: bisque;
-    margin: 1em;
-    border: 1px solid #CCC;
-    padding: 5px;
-    padding: 5px;
-    width: 400px;
-    min-width: 200px;
-    max-width: 430px;
-}
 .flashes {
     color: darkblue;
     border: solid 2pt #c9ac45;
@@ -414,15 +452,6 @@ div#nav ul li.CurrentSection a {
     background-color: white;
 }
 
-.credit {
-    position: absolute;
-    top: 40px;
-    right: 10px;
-    color: #7e6b53;
-    font-size: 8pt;
-/*  border: 3px solid #73AD21; */
-}
-
 /* Alphabet Navigation
 ----------------------------------------------------- */
 div#alphanav {
@@ -443,18 +472,22 @@ div#alphanav ul {
 }
 div#alphanav ul li {
     float: left;
-    /* font-size: larger; / JMä */
+    margin: 1pt;
     font-weight: bold;
     background-color: #f3f3f3;
 }
-/* div#alphanav ul li:after {
-    content: " |";
-} / JMä */
-div#alphanav ul li a {
+div#alphanav ul li.title {
+	padding: 6pt;
+	margin-left: 8pt;
+	border-left: solid black 1pt;
+}
+div#alphanav ul li a, div#alphanav ul li span {
     display: block;
     padding: 4px 8px;
     line-height: 100%;
     float: left;
+    margin: 2pt 0;
+	border-radius: 9pt;
 }
 div#alphanav ul li a:hover {
     text-decoration: none;
@@ -516,6 +549,9 @@ td.ColumnSources {
 td.ColumnBirth, td.ColumnDeath, td.ColumnPartner, td.ColumnParents {
     font-size: 90%;
 }
+td.ColumnFamily { /* Space for leading arrow */
+	text-indent: -1em;
+}
 table.infolist tr td ol {
     margin: 0px;
 }
@@ -546,6 +582,7 @@ td.Value > ul li:before {
 /*   padding-right: .5em; */
   margin-left: -1em;
 }
+.TwoRows { height:2.5em }
 
 /* Surnames
 ----------------------------------------------------- */

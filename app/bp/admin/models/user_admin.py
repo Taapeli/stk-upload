@@ -16,22 +16,6 @@ from .cypher_adm import Cypher_adm
 
 logger = logging.getLogger('stkserver')
 
-class Allowed_email():
-    """ Object for storing an allowed user to register in """
-    allowed_email = ''
-    default_role = ''
-    approved = False
-    creator = ''
-    created_at = ''
-    confirmed_at = ''
-       
-    def __init__(self, **kwargs):
-        self.allowed_email = kwargs.get('allowed_email')
-        self.default_role = kwargs.get('default_role') 
-        self.approved = kwargs.get('approved')
-        self.creator = kwargs.get('creator')
-        self.created_at = kwargs.get('created_at')         
-        self.confirmed_at = kwargs.get('confirmed_at') 
 
 class UserProfile():
     """ Object describing dynamic user properties """
@@ -81,7 +65,7 @@ class UserAdmin():
 
     @classmethod
     def _build_profile_from_record(cls, userProfile):
-        ''' Returns an Allowed_email class instance '''
+        ''' Returns an UserProfile class instance '''
         if userProfile is None:
             return None
         profile = UserProfile(**userProfile)
@@ -92,21 +76,8 @@ class UserAdmin():
             profile.approved_at = datetime.fromtimestamp(float(profile.approved_at)/1000)        
         return profile
 
-    @classmethod
-    def _build_email_from_record(cls, emailRecord):
-        ''' Returns an Allowed_email class instance '''
-        if emailRecord is None:
-            return None
-        email = shareds.allowed_email_model(**emailRecord)
-#        email.default_role = emailRecord['default_role'] 
-        if email.created_at:
-            email.created_at = datetime.fromtimestamp(float(email.created_at)/1000) 
-        if email.confirmed_at:    
-            email.confirmed_at = datetime.fromtimestamp(float(email.confirmed_at)/1000)        
-        return email
-
     @classmethod         
-    def _build_user_from_record(self, userRecord):
+    def _build_user_from_node(self, userRecord):
         ''' Returns a User instance based on a user record '''
         try:
             if userRecord is None:
@@ -141,11 +112,6 @@ class UserAdmin():
                         researched_places = profile.researched_places,
                         text_message = profile.text_message)
                     
-                    tx.run(Cypher_adm.allowed_email_register, 
-                        email = profile.email, 
-                        role = role,
-                        approved = False, 
-                        creator = 'system')              
                     tx.commit()
             return(True)        
         except ConstraintError as ex:
@@ -156,7 +122,7 @@ class UserAdmin():
             raise      
  
     @classmethod
-    def update_applicant(cls, profile, email):
+    def update_user_profile(cls, profile):
         try:
             with shareds.driver.session() as session:
                 with session.begin_transaction() as tx:
@@ -170,129 +136,11 @@ class UserAdmin():
                         researched_names = profile.researched_names,
                         researched_places = profile.researched_places,
                         text_message = profile.text_message)
-                    
-                    tx.run(Cypher_adm.allowed_email_update, 
-                        email = email.allowed_email, 
-                        role = email.role)              
                     tx.commit()
             return(True)        
-        except ConstraintError as ex:
-            logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
-            flash(_("Given allowed email address already exists"))                            
         except Exception as e:
             logging.error(f'UserAdmin.update_applicant: {e.__class__.__name__}, {e}')          
             raise
-
-    @classmethod
-    def register_allowed_email(cls, email, role):
-        try:
-            with shareds.driver.session() as session:
-                with session.begin_transaction() as tx:
-                    tx.run(Cypher_adm.allowed_email_register, email=email, role=role, approved=True, creator=current_user.username)
-                    tx.commit()
-        except ConstraintError as ex:
-            logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
-            flash(_("Given allowed email address already exists"))                            
-        except Exception as e:
-            logging.error(f'UserAdmin.register_allowed_email: {e.__class__.__name__}, {e}')          
-            raise  
-
-    @classmethod
-    def confirm_allowed_email(cls, tx, email, confirmtime):
-        try:
-            for record in tx.run(Cypher_adm.allowed_email_confirm, email=email, confirmtime=confirmtime):
-                return(record['ae'])
-        except Exception as e:
-            logging.error(f'UserAdmin.confirm_allowed_email: {e.__class__.__name__}, {e}')          
-            raise  
- 
-    @classmethod 
-    def update_allowed_email(cls, allowed_email):
-        try:
-            with shareds.driver.session() as session:
-                updated_allowed_email = session.write_transaction(cls._update_allowed_email, allowed_email)
-                if updated_allowed_email is None:
-                    return None
-                return(cls._build_email_from_record(updated_allowed_email))
-
-        except ServiceUnavailable as ex:
-            logging.debug(ex.message)
-            return None                 
-
-    @classmethod                                              
-    def _update_allowed_email (cls, tx, allowed_email):    
-
-        try:
-            logging.debug('allowed email update' + allowed_email.allowed_email)
-#   Identifier and history fields are not to be updated
-            result = tx.run(Cypher_adm.allowed_email_update,
-                email = allowed_email.allowed_email,
-                approved = allowed_email.approved,
-                role = allowed_email.default_role,
-                creator = allowed_email.creator)
-#                 created_at = allowed_email.created_at,     
-#                 confirmed_at = allowed_email.confirmed_at)
-            logging.info('Allowed email with email address {} updated'.format(allowed_email.allowed_email)) 
-            return(result.single())
-#                      return(result.single()['allowed_email'])
-        except Exception as e:
-            logging.error(f'UserAdmin._update_allowed_email: {e.__class__.__name__}, {e}')          
-            raise  
-
-    @classmethod   
-    def get_allowed_emails(cls):
-        try:
-            with shareds.driver.session() as session:
-                emailRecords = session.read_transaction(cls._getAllowedEmails)
-                ret = []
-                for record in emailRecords:
-                    node = record['ae']
-                    # <<Node id=105651 labels={'Allowed_email'} 
-                    #    properties={'created_at': 1542095367861, 'default_role': 'member', 
-                    #        'creator': 'master', 'allowed_email': 'jpek@iki.fi', 
-                    #        'confirmed_at': 1544302717575}>
-                    ret.append(cls._build_email_from_record(node))
-                return ret
-#                 if emailRecords is not None:
-#                     return [cls._build_email_from_record(emailRecord['email']) for emailRecord in emailRecords] 
-#                 return []
-        except ServiceUnavailable as ex:
-            logging.debug(ex.message)
-            return []                 
-
-    @classmethod                                              
-    def _getAllowedEmails(cls, tx):
-        try:
-            emailRecords = [record for record in tx.run(Cypher_adm.allowed_emails_get)]    
-            return(emailRecords)       
-        except Exception as e:
-            logging.error(f'UserAdmin._getAllowedEmails: {e.__class__.__name__}, {e}')          
-            raise  
-        
-    @classmethod 
-    def find_allowed_email(cls, email):
-        try:
-            with shareds.driver.session() as session:
-                emailRecord = session.read_transaction(cls._findAllowedEmail, email)
-                if emailRecord:
-                    return cls._build_email_from_record(emailRecord['ae']) 
-                return None
-        except ServiceUnavailable as ex:
-            logging.debug(ex.message)
-            return None                 
-
-    @classmethod                                              
-    def _findAllowedEmail (cls, tx, email):
-        try:
-#            emailRecord = None
-            return(tx.run(Cypher_adm.allowed_email_find, email=email).single())
-#             if records:
-#                 for record in records:
-#                     emailRecord = record['email']
-#                     return emailNode        
-        except Exception as e:
-            logging.error(f'UserAdmin._findAllowedEmail: {e.__class__.__name__}, {e}')          
-            raise  
 
     @classmethod
     def user_profile_add(cls, tx, email, username):
@@ -364,12 +212,16 @@ class UserAdmin():
 
     @classmethod 
     def update_user(cls, user):
+        ''' Update db User node.
+        
+            Called from /admin/update_user form
+        '''
         try:
             with shareds.driver.session() as session:
                 updated_user = session.write_transaction(cls._update_user, user)
                 if updated_user is None:
                     return None
-                return(cls._build_user_from_record(updated_user))
+                return(cls._build_user_from_node(updated_user))
 
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -384,24 +236,24 @@ class UserAdmin():
                 user.roles = ['master']
             if user.username == 'guest': 
                 user.roles = ['guest']    
-#   Identifier and history fields are not to be updated
+            # Identifier and history fields are not to be updated
             result = tx.run(Cypher_adm.user_update, 
                 email = user.email,
- #               username = user.username,
+                #username = user.username,
                 name = user.name, 
                 language = user.language,              
                 is_active = user.is_active,
                 roles = user.roles)
             if user.username not in {'master', 'guest'}:
-#   Find list of previous user -> role connections
+                # Find list of previous user -> role connections
                 prev_roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
-#   Delete connections that are not in edited connection list            
+                # Delete connections that are not in edited connection list            
                 for rolename in prev_roles:
                     if not rolename in user.roles:
                         tx.run(Cypher_adm.user_role_delete,
                                email = user.email,
                                name = rolename) 
-#   Add connections that are not in previous connection list                    
+                # Add connections that are not in previous connection list                    
                 for rolename in user.roles:
                     if not rolename in prev_roles:
                         tx.run(Cypher_adm.user_role_add, 
@@ -421,7 +273,8 @@ class UserAdmin():
             for rec in shareds.driver.session().run(Cypher_adm.list_accesses):
                 user = dict(rec.get("user"))
                 batch = dict(rec.get("batch"))
-                batch["file"] = batch["file"].split("/")[-1].\
+                file = batch.get('file','–')
+                batch["file"] = file.split("/")[-1].\
                     replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
                 #rel = dict(rec.get("r"))
                 rel_id = rec.get("rel_id")

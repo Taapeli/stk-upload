@@ -46,7 +46,7 @@ def test_ownerfilter_user_selection(user_env):
             - Show all my data / div=2
             - with common data / cmp=1
 
-        <Request 'http://127.0.0.1:5000/scene/persons_all/?div=2&cmp=1' [GET]>
+        <Request 'http://127.0.0.1:5000/scene/persons/all?div=2&cmp=1' [GET]>
         <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
             'lang': 'en', 'next_person': ['', '>'], 'user_context': 2, 'user_id': 'juha'}>
     '''
@@ -69,7 +69,7 @@ def test_ownerfilter_next_item(user_env):
             - from previous next_person 'Abrahamsson##Juho Kustaa'
             - from previous next_person: end '>'
 
-        <Request 'http://127.0.0.1:5000/scene/persons_all/?div=2&cmp=1' [GET]>
+        <Request 'http://127.0.0.1:5000/scene/persons/all?div=2&cmp=1' [GET]>
         <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
             'lang': 'en', 'next_person': ['', '>'], 'user_context': 2, 'user_id': 'juha'}>
     '''
@@ -84,7 +84,7 @@ def test_ownerfilter_next_item(user_env):
     #    Read data here --> got required amount
     f.update_session_scope('person_name', '##Elisabet', '#Hansson#Lars', 100, 100)
     
-    x = f.next_name_fw()
+    x = f.next_name('fw')
     assert x == '', "next fw not in the beginning"
     
     # 2. At given point
@@ -93,7 +93,7 @@ def test_ownerfilter_next_item(user_env):
     #    Read data here --> reached end
     f.update_session_scope('person_name', 'Zakrevski##Arseni', 'Östling##Carl', 50, 28)
     
-    x = f.next_name_fw()
+    x = f.next_name('fw')
     assert x == 'Zakrevski##Arseni', "next fw not at given point"
     
     # 3. At end
@@ -101,6 +101,6 @@ def test_ownerfilter_next_item(user_env):
     #    Read data here --> reached end
     f.set_scope_from_request(request, 'person_scope')
     
-    x = f.next_name_fw()
+    x = f.next_name('fw')
     assert x == '> end', "next fw not at end"
 

@@ -8,11 +8,9 @@ from . import bp
 import time
 
 import logging
-from bp.admin.cvs_refnames import load_refnames
-from models import dataupdater
+#from models import dataupdater
 from io import StringIO, BytesIO
 import csv
-from models.gen.person import Person
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for #, flash, send_from_directory, session, jsonify
@@ -21,12 +19,17 @@ from flask_security import login_required, roles_accepted, current_user
 #from flask_babelex import _
 
 import shareds
-from models.gen.batch_audit import Batch, Audit
+#from bl.batch_audit import Batch, Audit
+from bl.audit import Audit
+from bl.batch import Batch
+from bl.person import Person, PersonBl
+from bl.refname import Refname
+from bp.admin.cvs_refnames import load_refnames
 from .models.batch_merge import Batch_merge
 #from .models.audition import Audition
 
 from bp.admin import uploads
-from models import syslog , loadfile, datareader, dbutil
+from models import syslog , loadfile, dbutil #, datareader
 
 @bp.route('/audit')
 @login_required
@@ -121,9 +124,9 @@ def refnames():
 def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
-    (refname_count, _sortname_count) = dataupdater.set_person_name_properties(ops=['refname']) or _('Done')
+    (refname_count, _sortname_count) = PersonBl.set_person_name_properties(ops=['refname']) or _('Done')
     logger.info(f"-> bp.audit.routes.set_all_person_refnames n={refname_count}")
-    return render_template("/audit/talletettu.html", uri=dburi, 
+    return render_template("/talletettu.html", uri=dburi, 
                            text=f'Updated {_sortname_count} person sortnames, {refname_count} refnames')
 
 
@@ -137,7 +140,8 @@ def download_refnames():
         writer = csv.writer(f)
         hdrs = "Name,Refname,Reftype,Gender,Source,Note".split(",")
         writer.writerow(hdrs)
-        refnames = datareader.read_refnames()
+        #refnames = datareader.read_refnames()
+        refnames = Refname.get_refnames()
         for refname in refnames:
             row = [refname.name,
                    refname.refname,
@@ -165,7 +169,9 @@ def upload_csv():
         loadfile.upload_file(infile)
         if 'destroy' in request.form and request.form['destroy'] == 'all':
             logger.info("-> bp.audit.routes.upload_csv/delete_all_Refnames")
-            datareader.recreate_refnames()
+            #datareader.recreate_refnames()
+            Refname.recreate_refnames()
+
 
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -189,4 +195,4 @@ def save_loaded_csv(filename, subj):
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
                text=_("Missing proper column title: ") + str(e))
-    return render_template("/audit/talletettu.html", text=status, uri=dburi)
+    return render_template("/talletettu.html", text=status, uri=dburi)

@@ -2,8 +2,7 @@
     Describes filtering rules for Scene pages.
 
     - active user, if any
-    - next person (forward/backwards) in Person list
-    - next in other lists (ToDo)
+    - next person (forward/backwards) in Person list etc
 
 Created on 19.1.2019
 
@@ -17,7 +16,7 @@ from flask_babelex import lazy_gettext as N_
 class UserContext():
     """ Store filter values for finding the required subset of database.
     
-        Usage:
+        Usage example:
             #    Create context with defaults from session and request (1)
             u_context = UserContext(user_session, current_user, request)
 
@@ -37,7 +36,7 @@ class UserContext():
                                           context.count, len(persons))
 
         Useful methods:
-            get_my_user_id()            Get effective user id or None
+            batch_user()                Get effective user id or None
             owner_str()                 Get owner descripition in current language
             use_owner_filter()          True, if data is filtered by owner id
             use_common()                True, if using common data
@@ -45,7 +44,7 @@ class UserContext():
                                         to hide given object
             set_scope_from_request()    update session scope by request params
             update_session_scope()      update session scope by actually found items
-            next_name_fw()              set next object forwards
+            next_name('fw')             set next object forwards / backwards
 
         Settings stored in self:
 
@@ -61,31 +60,34 @@ class UserContext():
             COMMON+OWN
             COMMON+BATCH
 
-        (2) sort key limits displayed in current page
-        - scope          list   Boundary names for current display page [from, to]
+        (2) sort key boundaries displayed in the current page
+        - first, last          str   Boundary names for current display page [from, to]
 
                                 For Persons page, the scope variable in
                                 user session is 'person_scope' and the values 
                                 are from Person.sortname field.
 
-            - Displayed scope is from scope[0] to scope[1]
-            - With forward button, show from scope[1] towards end
-            - With backward button, show from scope[0] towards top
-            
-            - Current page includes the bounding names from scope
-            - The same boundary names are included in next pages, too
-              to ensure no duplicate names are skipped.
+            1. For display, the scope tells the names found: [first, last]
+            2a. With forward button, show next from last towards end
+            2b. With backward button, show next from first towards top
 
-            scope[0] (from which name to display, forwards):
+            - Current page includes the bounding names first,last
+            - The limiting boundary name is also included in next page to ensure
+              no duplicate names are skipped.
+
+        Scope examples:
+            1. starting scope in session     ['y','z']
+            2. accessed next fw                  ['z', 'ö']  set first = old last
+            2b or accessed next bw      ['x', 'y']           set last = old first
+
+            first (from which name to display, forwards):
                 ' '              from first name of data
-                name             from a name given
-                NEXT_END '>'     bottom reached: there is nothing forwards
-            scope[1] (from which name to display, backwards):
+                name             forwards from the name given
+                NEXT_END '>'     top reached: there is nothing forwards
+            last (from which name to display, backwards):
                 NEXT_END '>'     from last name of data
-                name             from a name given
-                NEXT_START '<'   top reached: there is nothing before
-
-    #TODO self.batch_id not set or used
+                name             backwards from the name given
+                NEXT_START '<'   bottom reached: there is nothing before
     """
     NEXT_START = '<'  # from first name of data
     NEXT_END = '>'    # end reached: there is nothing forwards
@@ -122,64 +124,29 @@ class UserContext():
                 return number
             return 0
 
-    class NextStartPoint():
-        ''' For multi page object display, define next keys forwards/backwards.
-        '''
-
-        def __init__(self, session, session_var):
-            ''' Initialize session and scope. 
-            
-                - session_var    str    session variable name
-                - request        http request
-            
-                Use request arguments fw or bw, if defined.
-                Else use orifinal from session.
-            '''
-            self.session = session
-            self.session_var = session_var
-            self.scope = session.get(session_var, ['', '>'])
-    
-    
-        def set_next_from_request(self, request=None):
-            ''' Calculate scope values from request or session. 
-            
-                - session_var    str    session variable name
-                - request        http request
-            
-                Use request arguments fw or bw, if defined.
-                Else use orifinal from session.
-            '''
-            if request:
-                fw = request.args.get('fw', None)
-                bw = request.args.get('bw', None)
-                if fw == None and bw == None:
-                    # Use original session_scope as is
-                    return self.scope
-    
-                if fw != None:
-                    # Direction forward from fw parameter
-                    return [unquote_plus(fw), None]
-                else: # bw != None:
-                    # Direction backwards from bw parameter
-                    return [None, unquote_plus(bw)]
-            else:
-                # No request
-                self.session[self.session_var] = self.scope
-                print(f"UserContext: Now {self.session_var} is cleared")
-                return self.scope
+#     class ViewRange(): # NextStartPoint
+#         ''' For multi page list display, define view range.
+#         '''
 
 
     def __init__(self, user_session, current_user=None, request=None):
         '''
-            Set filtering properties from user session, request and current user.
+            Init UserContext with filtering from user session, request and current user.
         '''
         self.session = user_session
-        self.choices = self.ChoicesOfView()   # set of allowed material choices
+        self.choices = self.ChoicesOfView()     # set of allowed material choices
         self.context = self.ChoicesOfView.COMMON
         self.years = []                         # example [1800, 1899]
         self.series = None                      # 'Source' data theme like "birth"
         self.count = 10000                      # Max count ow objects to display
         self.lang = user_session.get('lang','') # User language
+        self.allow_edit = False                 # Is data edit allowed
+        
+        # View range: names [first, last]
+        self.session_var = None
+        self.first = ''
+        self.last = UserContext.NEXT_END
+        self.direction = 'fw'
 
         ''' Set active user, if any username '''
         if current_user:
@@ -196,6 +163,8 @@ class UserContext():
         """
         new_selection = 0
         if request:
+            # All args
+            self.args = request.args
             # Selected years (from-to)
             #    years=1111-2222
             years = request.args.get('years', None)
@@ -208,8 +177,7 @@ class UserContext():
                 self.years = [yi1, yi2]     # selected years [from, to]
                 print(f'UserContext: Objects between years {self.years}')
 
-            # Selected document series for Sources
-            self.series = request.args.get('series', None)
+            # Selected document series for Sources set in routes.
 
             # Use case: Selected material for display
             #    div=1 -> show approved material
@@ -230,17 +198,57 @@ class UserContext():
             self.context = user_session.get('user_context', self.choices.COMMON)
             print(f"UserContext: Uses same or default user_context={self.context}")
 
+        if self.user and self.context == self.choices.OWN:
+            #TODO: Needs better rule for edit permission
+            # May edit data, if user has such role
+            if self.context == self.choices.OWN:
+                self.allow_edit = current_user.has_role('audit')
+
         #   For logging of scene area pages, set User.current_context variable:
-        #   are you browsing common, audited data or her own batches?
+        #   are you browsing common, audited data or your own batches?
         current_user.current_context=self.context
 
+    def _set_next_from_request(self, request=None):
+        ''' Calculate scope values from request or session. 
+        
+            - session_var    str    session variable name
+            - request        http request
 
-    def get_my_user_id(self):
+            If request argument fw is defined, set scope [fw,None].
+            If request argument bw is defined, set scope [None,bw].
+            If none is present, use the original scope from session.
+
+            The missing limit will be filled by the data afterwards.
+        '''
+        if request:
+            fw = request.args.get('fw', None)
+            bw = request.args.get('bw', None)
+            if fw is None and bw is None:
+                # Use original session_scope as is
+                return [self.first, self.last]
+
+            if not fw is None:
+                # Direction forward from fw: set first = old last
+                self.direction = 'fw'
+                return [unquote_plus(fw), None]
+            else: # bw != None:
+                # Direction backwards from bw: set last = old first
+                self.direction = 'bw'
+                return [None, unquote_plus(bw)]
+        else:
+            # No request
+            if self.session_var:
+                self.session[self.session_var] = self.scope
+                print(f"UserContext: Now {self.session_var} is cleared")
+            return self.scope
+
+
+    def batch_user(self):
         # Return current user id, if my candidate data is chosen
         if self.context == self.choices.OWN:
             return self.user
         else:
-            return ''
+            return None
 
     def owner_str(self):
         # Return current owner choise as text 
@@ -296,53 +304,113 @@ class UserContext():
                 pass
         return True
 
-    def set_scope_from_request(self, request, var_name):
-        """ Eventuel request fw or bw parameters are stored in session['person_scope'].
+#     def obsolete_set_scope_from_request(self, request=None, var_name=None):
 
-            - If fw is defined, clear bw; otherwise clear bw
-            - If neither is given, person_scope is cleared
-        """
-        self.nextpoint = self.NextStartPoint(self.session, var_name)
-        self.scope = self.nextpoint.set_next_from_request(request)
-        print(f"UserContext: Now {var_name} next item={self.scope}")
+    def set_scope_from_request(self, request=None, session_var=None): #set_next_from_request:
+        ''' Calculate scope values from request or session. 
+        
+            :param: request        http request
+            :param: session_var    str    session variable name like  'person_scope'
+        
+            Use request arguments fw or bw, if defined.
+            Else use orifinal from session.
+            
+            If request is missing, try session.session_var.
+        '''
+        self.session_var = session_var
+
+        if request:
+            fw = request.args.get('fw', None)
+            bw = request.args.get('bw', None)
+            if not (fw is None and bw is None):
+                if fw is None:
+                    # Direction backwards from bw parameter
+                    self.last = unquote_plus(bw)
+                    return
+                else: # bw is None:
+                    # Direction forward from fw parameter
+                    self.first = unquote_plus(fw)
+                    return
+
+        # No request or no fw or bw in request
+        if self.session_var:
+            scope = [self.first, self.last]
+            self.session[self.session_var] = scope
+            print(f"UserContext.set_scope_from_request: {self.session_var} is cleared {scope}")
+        return
 
 
-    def update_session_scope(self, var_name, name1, name2, limit, rec_cnt):
-        """ Update the session scope according to items really found.
+    def update_session_scope(self, var_name, name_first, name_last, limit, rec_cnt):
+        """ Update the session scope according to items really found from database.
         
             var_name    str    field name in self.session
-            name1       str    the first item name got from database
-            name2       str    the last item name
+            name_first  str    the first item name got from database
+            name_last   str    the last item name
             limit       int    number of items requested
             rec_cnt     int    records actually recieved
-        """
-        print(f"update_session_scope: Got {rec_cnt} items {name1!r} – {name2!r}, "
-              f"{rec_cnt}/{limit} records")
-        scope0 = self.scope
-        if rec_cnt == limit: # Got required amount of items
-            self.scope[1] = name2
-        else:
-            self.scope[1] = '> end' # End reached
-        if self.scope[0] > ' ':
-            self.scope[0] = name1
-        if scope0 != self.scope:
-            print(f"update_session_scope: New {var_name} scope {self.scope[0]!r} – {self.scope[1]!r}")
-
-        self.session[var_name] = self.scope
-        print(f"--> {repr(self.session)}")
-
-
-    def next_name_fw(self):
-        ''' Tells the name from which the names must be read from.
-
-            scope[0] (from which name to display, forwards):
-                ' '              from first name of data
-                name             from a name given
-                NEXT_END '>'     bottom reached: there is nothing forwards
-        '''
-        if self.scope[0] == self.NEXT_END:
-            # Generic end mark
-            return '> end'
-        else:
-            return self.scope[0]
         
+            The new scope is [name_first, name_last]. If end has reached, 
+            the corresponding limit is set to endmark '> end' or '< top'.
+        """
+        print(f"UserContext.update_session_scope: Got {rec_cnt} items {name_first!r} – {name_last!r}, "
+              f"{rec_cnt} of {limit} records")
+        scope_old = (self.first, self.last)
+        # 1. starting scope in session     ['y','z']
+        # 2. accessed next fw                  ['z', 'ö']  set first = old last
+        # 2b or accessed next bw      ['x', 'y']           set last = old first
+        if self.direction == 'bw':
+            self.first = name_first if rec_cnt == limit else '< start'
+            self.last = name_last
+        else:
+            self.first = name_first
+            self.last = name_last if rec_cnt == limit else '> end'
+
+        if scope_old[0] != self.first or scope_old[1] != self.last:
+            print(f"update_session_scope: New {var_name!r} {self.first!r} – {self.last!r}")
+
+        self.session[var_name] = (self.first, self.last)
+        print(f"UserContext = {repr(self.session)}")
+
+
+    def next_name(self, direction='fw'):
+        ''' Tells the next name from which the names must be read from.
+
+            :parameter:    direction    str    forwards or backwards
+
+            If direction is fw, display next names [last - ...]
+            If direction is bw, display next names [... - first]
+            --> anyways, the next names is first.
+        '''
+        if direction == 'fw':
+            if self.last == self.NEXT_END:
+                # Generic end mark
+                ret = '> end'
+            else:
+                ret = self.last
+
+        elif direction == 'bw':
+            if self.first == self.NEXT_START:
+                # Generic start mark
+                ret = '< start'
+            else:
+                ret = self.first
+        else:
+            print(f'UserContext.next_name: invalid direction="{direction}"')
+            ret = None
+
+        print(f'UserContext.next_name: {[self.first, self.last]}, {direction} next="{ret}"')
+        return ret
+
+    def at_end(self):
+        ''' Tells, if page contains the last name of data.
+        '''
+        if self.last.startswith(self.NEXT_END):
+            return True
+        return False
+
+    def at_start(self):
+        ''' Tells, if page contains the first name of data.
+        '''
+        if self.first == '' or self.first.startswith(self.NEXT_START):
+            return True
+        return False

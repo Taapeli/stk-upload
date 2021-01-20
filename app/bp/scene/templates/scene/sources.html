@@ -88,13 +88,15 @@ td ul li p { margin: 0 0 0.3em 0; }
                         <span class="typedesc">{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
                         {{repo.rname}}</span>
             {% endif %}</td>
-{#          <td class="numbers">{% if s.cit_cnt %}{{s.cit_cnt}}{% endif %}</td>
-#}
             <td class="numbers">{% if s.ref_cnt %}{{s.ref_cnt}}{% endif %}</td>
             </tr>
 	    {% endfor %}
+    {% else %}
+            <tr><td colspan="4" id="lastitem_badge">
+                    <i>{{ _('No sources found') }}</i>
+                </td>
+            </tr>
 	{% endif %}
-				</tr>
 			</tbody>
 		</table>
 	</div>

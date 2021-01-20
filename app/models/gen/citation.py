@@ -9,7 +9,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 import logging 
-from models.gen.dates import DateRange
+from bl.dates import DateRange
 logger = logging.getLogger('stkserver')
 
 import shareds
@@ -28,7 +28,7 @@ class Citation(NodeObject):
                 dates            DateRange date
                 page             str page description
                 confidence       str confidence 0.0 - 5.0 (?)
-                note_ref         int huomautuksen osoite (ent. noteref_hlink str)
+                note_ref         int huomautuksen osoite (ent. note_handles str)
                 source_handle    str handle of source   _or_
                 source_id        int uniq_id of a Source object
                 citators         NodeRef nodes referring this citation
@@ -44,7 +44,7 @@ class Citation(NodeObject):
         self.mark = ""          # citation mark display references
         self.mark_sorter = 0    # citation grouping by source variable
 
-        self.noteref_hlink = [] # Gramps handle
+        self.note_handles = [] # Gramps handle
         self.source_handle = ''
 
         # For displaying citations in person.html
@@ -224,9 +224,9 @@ class Citation(NodeObject):
         print ("Dates: " + self.dates)
         print ("Page: " + self.page)
         print ("Confidence: " + self.confidence)
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                print ("Noteref_hlink: " + self.noteref_hlink[i])
+        if len(self.note_handles) > 0:
+            for i in range(len(self.note_handles)):
+                print ("Noteref_hlink: " + self.note_handles[i])
         if self.source_handle != '':
             print ("Sourceref_hlink: " + self.source_handle)
         return True
@@ -267,11 +267,11 @@ class Citation(NodeObject):
 
         # Make relations to the Note nodes
         try:
-            for handle in self.noteref_hlink:
+            for handle in self.note_handles:
                 tx.run(Cypher_citation_w_handle.link_note, 
                        handle=self.handle, hlink=handle)
         except Exception as err:
-            logger.error(f"Citation.save: {err} in linking Notes {self.handle} -> {self.noteref_hlink}")
+            logger.error(f"Citation.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
             print("iError: Citation.save Note hlink: {0} {1}".format(err, self.id), file=stderr)
 
         try:   

@@ -26,7 +26,7 @@ RETURN ID(n) AS uniq_id, n"""
 
 class Cypher_person():
     '''
-    Cypher clases for creating and accessing Places
+    Cypher clases for creating and accessing Person objects.
     '''
 # For Person_pg v3
     get_person = """MATCH (root) -[r:OWNS|PASSED]-> (p:Person {uuid:$uuid}) 
@@ -37,17 +37,6 @@ RETURN p, type(r) AS root_type, root"""
 # RETURN p, batch"""
 #     get_public = """MATCH (root) -[:PASSED]-> (p:Person {uuid:$uuid}) 
 # RETURN p, root"""
-    get_names_events = """
-MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
-RETURN rel, x ORDER BY x.order"""
-    get_families = """
-MATCH (p:Person) <-[rel:CHILD|PARENT]- (f:Family) WHERE ID(p) = $uid
-OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event)
-OPTIONAL MATCH (f) -[mr:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
-OPTIONAL MATCH (m) -[:EVENT]-> (me:Event {type:"Birth"})
-RETURN rel, f AS family, COLLECT(distinct fe) AS events, 
-    COLLECT(distinct [mr, m, n, me]) AS members
-    ORDER BY family.date1"""
     get_places = """
 MATCH (x) -[:PLACE]-> (pl:Place)
     WHERE ID(x) IN $uid_list
@@ -57,11 +46,8 @@ OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
 RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, 
     pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
-    get_citation_note_media = """
-MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-    WHERE ID(x) IN $uid_list
-RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
     #        (c) --> (s:Source) --> (r:Repository)
+
 
 #For Person_pg v2
     all_nodes_query_w_apoc="""
@@ -237,15 +223,15 @@ OPTIONAL MATCH (person) -[:EVENT]-> (:Event) -[:CITATION]-> (c1:Citation)
 OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
 RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
-    get_confidence = """
-MATCH (person:Person) WHERE ID(person)=$id
-OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c1:Citation)
-OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
-RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
+#     get_confidence = """
+# MATCH (person:Person) WHERE ID(person)=$id
+# OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c1:Citation)
+# OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
+# RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
-    set_confidence = """
-MATCH (person:Person) WHERE ID(person)=$id
-SET person.confidence=$confidence"""
+#     set_confidence = """
+# MATCH (person:Person) WHERE ID(person)=$id
+# SET person.confidence=$confidence"""
 
     set_sortname = """
 MATCH (person:Person) WHERE ID(person) = $id
@@ -268,20 +254,20 @@ SET person.sortname=$key"""
 #     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
 # RETURN null"""
 
-    fetch_selected_for_lifetime_estimates = """
-MATCH (p:Person) 
-    WHERE id(p) IN $idlist
-OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
-OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
-OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
-OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
-OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
-RETURN p, id(p) as pid, 
-    collect(distinct [e,r.role]) AS events,
-    collect(distinct [fam_event,r2.role]) AS fam_events,
-    collect(distinct [c,id(c)]) as children,
-    collect(distinct [parent,id(parent)]) as parents
-"""
+#     fetch_selected_for_lifetime_estimates = """
+# MATCH (p:Person) 
+#     WHERE id(p) IN $idlist
+# OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
+# OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
+# OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
+# OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
+# OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
+# RETURN p, id(p) as pid, 
+#     collect(distinct [e,r.role]) AS events,
+#     collect(distinct [fam_event,r2.role]) AS fam_events,
+#     collect(distinct [c,id(c)]) as children,
+#     collect(distinct [parent,id(parent)]) as parents
+# """
     update_lifetime_estimate = """
 MATCH (p:Person) 
     WHERE id(p) = $id
@@ -364,12 +350,12 @@ return e as event,
     collect(distinct id(c)) as citation_ref, 
     collect(distinct id(n)) as note_ref'''
 
-    get_participants_uniq_id = """
-MATCH (event:Event) <-[r:EVENT]- (p) 
-    WHERE ID(event)=$pid
-OPTIONAL MATCH (p) -[:NAME]-> (n:Name {order:0})
-RETURN  r.role AS role, p, n AS name
-    ORDER BY role"""
+#     get_participants_uniq_id = """
+# MATCH (event:Event) <-[r:EVENT]- (p) 
+#     WHERE ID(event)=$pid
+# OPTIONAL MATCH (p) -[:NAME]-> (n:Name {order:0})
+# RETURN  r.role AS role, p, n AS name
+#     ORDER BY role"""
 
 
 class Cypher_family():
@@ -378,7 +364,7 @@ class Cypher_family():
     '''
     
     # from models.gen.family.read_families
-    read_families_p = """
+    read_families_f = """
 MATCH (f:Family) WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
@@ -390,7 +376,7 @@ RETURN f, p.pname AS marriage_place,
     COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY f.father_sortname LIMIT $limit"""
 
-    read_my_families_p = """
+    read_my_families_f = """
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
     WHERE prof.username = $user AND f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
@@ -403,7 +389,7 @@ RETURN f, p.pname AS marriage_place,
     COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY f.father_sortname LIMIT $limit"""
     
-    read_families_common_p = """
+    read_families_common_f = """
 MATCH () -[:PASSED]-> (f:Family) WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
@@ -770,97 +756,100 @@ return r order by r.type"""
 
 
 class Cypher_media():
-
+ 
 #     get_by_uniq_id = """
 # MATCH (obj:Media)
 #     WHERE ID(obj) = $rid
 # RETURN obj"""
-
+ 
     get_by_uuid = """
-MATCH (obj:Media) <-[r:MEDIA] - (n) 
-    WHERE obj.uuid = $rid
-RETURN obj, COLLECT([n, properties(r)]) as ref"""
-
-    get_all = "MATCH (o:Media) RETURN o"
-
-    # Media list by description with count limit
-    read_common_media = """
-MATCH (prof) -[:PASSED]-> (o:Media) <- [r:MEDIA] - () 
-WHERE o.description >= $start_name 
-RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
-    ORDER BY o.description LIMIT $limit"""
-
-    read_my_own_media = """
-MATCH (prof) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () 
-WHERE  prof.user = $user AND o.description >= $start_name
-RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
-    ORDER BY o.description LIMIT $limit"""
-
-
-class Cypher_batch():
-    # Read information of user Batches and data connected to them
-
-    get_filename = """
-MATCH (b:Batch {id: $batch_id, user: $username}) 
-RETURN b.file"""
-
-    list_all = """
-MATCH (b:Batch) 
-RETURN b """
-
-    get_batches = '''
-match (b:Batch) 
-    where b.user = $user and b.status = "completed"
-optional match (b) -[:OWNS]-> (x)
-return b as batch,
-    labels(x)[0] as label, count(x) as cnt 
-    order by batch.user, batch.id'''
-
-    get_passed = '''
-match (b:Audit) 
-    where b.user = $user
-optional match (b) -[:PASSED]-> (x)
-return b as batch, count(x) as cnt 
-    order by batch.id'''
-
-    get_single_batch = '''
-match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
-optional match (b) -[:OWNS]-> (x)
-return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
-
-    get_user_batch_names = '''
-match (b:Batch) where b.user = $user
-optional match (b) -[r:OWNS]-> (:Person)
-return b.id as batch, b.timestamp as timestamp, b.status as status,
-    count(r) as persons 
-    order by batch'''
-
-    get_empty_batches = '''
-MATCH (a:Batch) 
-WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
-RETURN a AS batch ORDER BY a.id DESC'''
-
-    # Batch removal
-    delete = """
-MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
-OPTIONAL MATCH (b) -[*]-> (n) 
-DETACH DELETE b, n"""
+MATCH (media:Media) <-[r:MEDIA] - (n) 
+    WHERE media.uuid = $rid
+OPTIONAL MATCH (n) <-[:EVENT]- (m)
+RETURN media,
+    COLLECT(DISTINCT [properties(r), n]) as m_ref,
+    COLLECT(DISTINCT [ID(n), m]) AS e_ref"""
+# 
+#     get_all = "MATCH (o:Media) RETURN o"
+# 
+#     # Media list by description with count limit
+#     read_common_media = """
+# MATCH (prof) -[:PASSED]-> (o:Media) <- [r:MEDIA] - () 
+# WHERE o.description >= $start_name 
+# RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+#     ORDER BY o.description LIMIT $limit"""
+# 
+#     read_my_own_media = """
+# MATCH (prof) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () 
+# WHERE  prof.user = $user AND o.description >= $start_name
+# RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+#     ORDER BY o.description LIMIT $limit"""
 
 
-class Cypher_audit():
-    ' Query Audit materials '
-
-    get_my_audits = '''
-match (b:Audit {auditor: $oper})
-optional match (b) -[:PASSED]-> (x)
-return b, labels(x)[0] as label, count(x) as cnt 
-    order by b.user, b.id, label'''
-
-    get_all_audits = '''
-match (b:Audit)
-optional match (b) -[:PASSED]-> (x)
-return b, labels(x)[0] as label, count(x) as cnt 
-    order by b.user, b.id, label'''
+# class Cypher_batch():
+#     # Read information of user Batches and data connected to them
+# 
+#     get_filename = """
+# MATCH (b:Batch {id: $batch_id, user: $username}) 
+# RETURN b.file"""
+# 
+#     list_all = """
+# MATCH (b:Batch) 
+# RETURN b """
+# 
+#     get_batches = '''
+# match (b:Batch) 
+#     where b.user = $user and b.status = "completed"
+# optional match (b) -[:OWNS]-> (x)
+# return b as batch,
+#     labels(x)[0] as label, count(x) as cnt 
+#     order by batch.user, batch.id'''
+# 
+#     get_passed = '''
+# match (b:Audit) 
+#     where b.user = $user
+# optional match (b) -[:PASSED]-> (x)
+# return b as batch, count(x) as cnt 
+#     order by batch.id'''
+# 
+#     get_single_batch = '''
+# match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
+# optional match (b) -[:OWNS]-> (x)
+# return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
+# 
+#     get_user_batch_names = '''
+# match (b:Batch) where b.user = $user
+# optional match (b) -[r:OWNS]-> (:Person)
+# return b.id as batch, b.timestamp as timestamp, b.status as status,
+#     count(r) as persons 
+#     order by batch'''
+# 
+#     get_empty_batches = '''
+# MATCH (a:Batch) 
+# WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
+# RETURN a AS batch ORDER BY a.id DESC'''
+# 
+#     # Batch removal
+#     delete = """
+# MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
+# OPTIONAL MATCH (b) -[*]-> (n) 
+# DETACH DELETE b, n"""
+# 
+# 
+# class Cypher_audit():
+#     ' Query Audit materials '
+# 
+#     get_my_audits = '''
+# match (b:Audit {auditor: $oper})
+# optional match (b) -[:PASSED]-> (x)
+# return b, labels(x)[0] as label, count(x) as cnt 
+#     order by b.user, b.id, label'''
+# 
+#     get_all_audits = '''
+# match (b:Audit)
+# optional match (b) -[:PASSED]-> (x)
+# return b, labels(x)[0] as label, count(x) as cnt 
+#     order by b.user, b.id, label'''
 
 #     get_single_audit = '''
 # match (b:Audit {id:$batch}) 

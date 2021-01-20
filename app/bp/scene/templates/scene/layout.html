@@ -41,17 +41,11 @@
 
 {{ hamburger_menu((
    ) ) }}
-
-{% if root %}{# root vector like ('PASSED', 'jpek', '2020-01-03.001') #}
-	<div class='credit'>{% if root[0] == 'PASSED' %}{{ _('Origin from') }}
-	     {% else %}{{ _('User data') }}:{% endif %}
-	     <b>{{root[1]}}</b> {{person.root[2]}}</div>
-{% endif %}
 {% endblock %}
 
     <div class="fullclear"></div>
     <div id="footer">
-        <span class="copyright">© 2019 {{ _('The Genealogical Society of Finland') }}</span>
+        <span class="copyright">© 2021 {{ _('The Genealogical Society of Finland') }}</span>
         <span class="createdate">{{ config.STK_SYSNAME }} &nbsp;
             {{ _('Version') }} {{ 'app'|app_date }}
 	        {% if elapsed %}

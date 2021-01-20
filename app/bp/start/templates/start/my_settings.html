@@ -11,6 +11,14 @@
 td,th {background: white;}
 .tight {margin: 2pt;}
 .goto {margin:3pt 12pt;}
+th {
+    font-weight: normal;
+    border-bottom-width: 3pt;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: clip;
+    word-break: break-all;
+}
 table.transparent {
     background-color:inherit;
     border-width:0
@@ -92,11 +100,13 @@ table.transparent tbody tr td {
 		<div class="startbox2">
 			<h3>{{ _('Candidate Materials') }}</h3>
 			<p>{{ _('The amount of some data nodes included in your candidate data batches.') }}
-			<table width="100%">
+			<table width="597px"><!-- Must be pixels! -->
 				<tr>
-					{% set w = (100.0 / (labels|length + 3) | round(0,'floor')) | int %}
-					<th>{{ _('Batch id') }}</th> {% for label in labels %}
-					<th style="width: {{w}}">{{ _(label|trim) }}</th>{% endfor %}
+					{% set w = (597 / (labels|length + 2.5) | round(1,'floor') ) %}
+					<th>{{ _('Batch id') }}</th>
+        {% for label in labels %}
+					<th style="max-width: {{w}}px">{{ _(label|trim) | title }}</th>
+        {% endfor -%}
 				</tr>
         {% for key1,item in batches.items() %} {% set user0 = user %}
             {% set user, batch, time = key1.split('/') %}
@@ -106,7 +116,7 @@ table.transparent tbody tr td {
 					</td>
             {% if item['Audit'] %}
                     <td colspan="{{labels|count}}">
-                        {{ _("Approved %(n)s objects", n=item['Audit']) }}
+                        {{ _("Approved %(n)s objects", n=item['Audit']|int_thousands) }}
                     </td>
             {% else %}
                 {% for label in labels %}

@@ -53,7 +53,8 @@ function confirm_delete(url) {
                   {{ _('Clear the entire database') }}</a></li>
               <li><a href="#" onclick="confirm_clear('/admin/clear_db/save_users')">
                   {{ _('Clear the database but save user IDs') }}</a></li>
-              <li>{{ _('Delete all my imported data') }} ➔ <a href="/settings">{{ _("My Home Page") }}</a><br></li>
+              <li>{{ _('Delete all my imported data') }} ➔ 
+                  <a href="/gramps/uploads">{{ _("Uploaded Candidate Materials") }}</a><br></li>
            </ul>
            <li title="Tai poista node (:Lock{id:'initial'})">
               <a href="/admin/start_initiate">{{ _('Database refresh') }}</a>.
@@ -71,8 +72,6 @@ function confirm_delete(url) {
         <h3>{{ _('User and reference information management') }}</h3>
         <ul>
           <li><a href="/admin/list_users">{{ _('Usernames and uploaded materials') }}</a></li>
-          <li><a href="/admin/allowed_emails">{{ _('User candidates') }}</a></li>
-          <li><a href="/admin/list_all_users">{{ _('Active and pending users') }}</a></li>
           <li><a href="/admin/access_management">{{ _('Access management') }}</a></li>
           <li>Todo: {{ _('Users and roles table') }}</li>
           </ul>

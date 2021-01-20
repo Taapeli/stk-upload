@@ -44,14 +44,14 @@
         <div class="container">
             <ul class="menu" id="dropmenu">
                 <li{% if value == 0 %} class="CurrentSection"
-                  {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons"{% endif %}
+                  {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons/search"{% endif %}
                    title="{{ _('Search for people') }}">{{ _('Search') }}</a></li>
 {#              <li{% if value == 1 %} class="CurrentSection"
                   {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons/all"{% endif %}
                    title="{{ _('All persons') }}">{{ _('Names') }}</a></li>
 #}
                 <li{% if value == 12 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons_all/"
+                  {% endif %}><a href="/scene/persons/all"
                    title="{{ _('Person list by default name') }}">{{ _('Persons') }}</a></li>
 
             {# <li{% if value == 2 %} class="CurrentSection"
@@ -93,16 +93,51 @@
     {% endif %}
 {%- endmacro %}
 
+# 1.1 Previous/forward buttons "|<" "<", ">"
+
+{% macro buttons_bw(user_context, base_url) -%}
+    {# To first page button "|<" -#}
+    {% if user_context.at_start() -%}
+                <li><span class="navlink">|&lt;</span></li>
+    {% else %}
+        {% if '?' in base_url %}{% set cat='&' %}
+        {% else %}{% set cat='?' %}{% endif %}
+                <li><a href="{{base_url}}{{cat}}fw=%20" title="{{ _('first page') }}"
+                       class="navlink">|&lt;</a></li>
+    {% endif %} 
+    {# To previous page button "<" (to be done later) #}
+                <li><span class="navlink" title="{{ _('previous page') }}"
+                          style="cursor:not-allowed"> &lt; </span></li>
+{%- endmacro %}}
+
+{% macro buttons_fw(user_context, base_url) -%}
+    {# To next page button ">" -#}
+    {% set next_fw = user_context.next_name('fw') %}
+    {% if user_context.at_end() %}
+                    <li><span class="navlink" title="{{ _('no next page') }}"
+                              style="cursor:not-allowed"> &gt; </span></li>
+    {% else %}
+        {% if '?' in base_url %}{% set cat='&' %}
+        {% else %}{% set cat='?' %}{% endif %}
+                    <li><a href="{{base_url}}{{cat}}fw={{next_fw | urlencode }}"
+                        title="{{ _('next page starting') }} {{next_fw|replace('#', ' ')}}"
+                        class="navlink"> &gt; </a></li>
+    {% endif -%}
+{%- endmacro %}}
 
 # 2. Data display
 
-{% macro all_obj_ids(obj) -%}
-    {#  Formats object keys and timestamp for display. #}
-    <tt title="{{ _('UUID key') }}">{{obj.uuid_short()}}</tt> /
+{% macro all_obj_ids(obj, margin) -%}
+    {#  Formats object keys and timestamp for display. Positioned at right margin.
+        If 2nd arguments (like "350px") is present, leave the given rigth margin.
+     #}
+    <tt title="{{ _('UUID key') }} {{obj.uuid}}">{{obj.uuid_short()}}</tt> /
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
     {% if obj.change %}
-    <span class="changetime" title="{{ _("latest change time") }}">[{{ _("edited") }} {{obj.change_str()}}]</span>
+    <span id="changetime" title="{{ _("latest change time") }}"
+        {% if margin %}style='margin-right:{{margin}}'{% endif %}
+        >{{ _("edited") }} {{obj.change_str()}}</span>
     {% endif -%}
 {%- endmacro %}
 
@@ -166,7 +201,7 @@
     {% if p.too_new %}
         N N
     {% else %}
-        <a href="/scene/person?uuid={{p.uuid}}"
+        <a href="/scene/person?uuid={{p.uuid}}" class="inlink"
             title="{{ _("See Person's Details") }}">{{ person_name_by_sortname(p) }}</a>
      {% endif %}
 {%- endmacro %}
@@ -213,11 +248,11 @@
 {%- endmacro %}
 
 {% macro lifetimes(p) -%}
-    {# Displays Person's life time estimates '1662…1709 — 1726…1819' #}
+    {# Displays Person's life time estimates 'born 1662…1709 died 1726…1819' #}
     {% if p.death_high != 9999 %}
-        {% if p.birth_low != p.birth_high %}
+        {{ _('born') }} {% if p.birth_low != p.birth_high %}
             {{p.birth_low}}…{% endif 
-        %}{{p.birth_high}} &ndash; {{p.death_low}}{%
+        %}{{p.birth_high}} {{ _('died') }}  {{p.death_low}}{%
          if p.death_low != p.death_high 
          %}…{{p.death_high}}
          {% endif %}

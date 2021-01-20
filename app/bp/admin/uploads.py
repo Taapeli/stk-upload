@@ -18,10 +18,11 @@ logger = logging.getLogger('stkserver')
 
 from flask_babelex import _
 
+import shareds
+from bl.base import Status
 from models import email, util, syslog 
 from ..gramps import gramps_loader
-import shareds
-from models.gen.cypher import Cypher_batch
+from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 
 STATUS_UPLOADED     = "uploaded"
 STATUS_LOADING      = "loading"
@@ -33,50 +34,62 @@ STATUS_REMOVED      = "removed"
 #===============================================================================
 # Background loading of a Gramps XML file
 # 
-# 1. The user uploads an XML file using the user interface. This is handled by the function "upload_gramps". 
-#    The file is stored in the user specific folder uploads/<username>. A log file with the name <xml-file>.log
-#    is created automatically (where <xml-file> is the name of the uploaded file.
+# 1. The user uploads an XML file using the user interface. This is handled by
+#    the function "upload_gramps". The file is stored in the user specific folder
+#    uploads/<username>. A log file with the name <xml-file>.log is created
+#    automatically (where <xml-file> is the name of the uploaded file.
 # 
-# 2. The upload_gramps function redirects to "list_uploads" which shows the XML files uploaded by this user. 
+# 2. The upload_gramps function redirects to "list_uploads" which shows the XML
+#    files uploaded by this user. 
 #
-# 3. The admin user can see all users' uploads by going to the user list screen and clicking the link 'uploads' or via the
-#    link "show all uploads"
+# 3. The admin user can see all users' uploads by going to the user list screen
+#    and clicking the link 'uploads' or via the link "show all uploads".
 #
-# 4. The admin user sees a list of the uploaded files for a user but he also sees more information and is able to initiate
-#    loading of the file into the Neo4j database. This will call the function "initiate_background_load_to_neo4j"
+# 4. The admin user sees a list of the uploaded files for a user but he also sees
+#    more information and is able to initiate loading of the file into the Neo4j
+#    database called "stkbase". This will call the function 
+#    "initiate_background_load_to_stkbase".
 # 
-# 5. The function "initiate_background_load_to_neo4j" starts a background thread to do the actual database load. 
-#    The thread executes the function "background_load_to_neo4j" which calls the actual logic in
-#    "gramps_loader.xml_to_neo4j"
+# 5. The function "initiate_background_load_to_stkbase" starts a background
+#    thread to do the actual database load. The thread executes the function 
+#    "background_load_to_stkbase" which calls the actual logic in
+#    "gramps_loader.xml_to_stkbase".
 #    
-#    The folder "uploads/<userid>" also contains a "metadata" file "<xml-file>.meta" for status information. 
-#    This file contains a text form of a dictionary with keys "status" and "upload_time".
+#    The folder "uploads/<userid>" also contains a "metadata" file
+#    "<xml-file>.meta" for status information. This file contains a text form
+#    of a dictionary with keys "status" and "upload_time".
 #
-#    The status is initially set to "uploaded" while the file has been uploaded by the user. 
-#    When the load to the database is ongoing the status is "loading". After successful database load 
-#    the status is set to "done" (these values are mapped to different words in the user interface).
+#    The status is initially set to "uploaded" while the file has been uploaded
+#    by the user. When the load to the database is ongoing the status is
+#    "loading". After successful database load the status is set to "done"
+#    (these values are mapped to different words in the user interface).
 #
-#    If an exception occurs during the database load then the status is set to "failed".
+#    If an exception occurs during the database load then the status is set to 
+#    "failed".
 #    
-# 6. It is conceivable that the thread doing the load is somehow stopped without being able to rename the file
-#    to indicate a completion or failure. Then the status remains "loading" indefinitely. 
-#    This situation is noticed by the "i_am_alive" thread whose only purpose is to update the timestamp of
-#    ("touch") the log file as long as the loading thread is running. This update will happen every 10 seconds.
+# 6. It is conceivable that the thread doing the load is somehow stopped
+#    without being able to rename the file to indicate a completion or failure. 
+#    Then the status remains "loading" indefinitely. This situation is noticed
+#    by the "i_am_alive" thread whose only purpose is to update the timestamp of
+#    ("touch") the log file as long as the loading thread is running. This
+#    update will happen every 10 seconds.
 #
-#    This enables the user interface to notice that the load has failed. The status will be set to "error"
-#    if the log file is not updated (touched) for a minute.
+#    This enables the user interface to notice that the load has failed. The
+#    status will be set to "error" if the log file is not updated (touched)
+#    for a minute.
 #
-# 7. If the load completes successfully then the status is set to "done". The result of the load is 
-#    returned by the "xml_to_neo4j" function as a list of Log records. 
-#    This list is stored in text format in the log file.
-#    The user interface is then able to retrieve the Log records and display them to the user (in function
-#    upload_info).
+# 7. If the load completes successfully then the status is set to "done". The
+#    result of the load is returned by the "xml_to_stkbase" function as a
+#    list of Log records. This list is stored in text format in the log file.
+#    The user interface is then able to retrieve the Log records and display
+#    them to the user (in function upload_info).
 #
-# 8. The "uploads" function displays a list of the load operations performed by the user. This function 
-#    will display the state of the file. The list is automatically updated every 30 seconds.
+# 8. The "uploads" function displays a list of the load operations performed by
+#    the user. This function will display the state of the file. The list is
+#    automatically updated every 30 seconds.
 # 
-#    The user is redirected to this screen immediately after initiating a load operation. The user can also 
-#    go to the screen from the main display.
+#    The user is redirected to this screen immediately after initiating a load
+#    operation. The user can also go to the screen from the main display.
 #===============================================================================
    
 
@@ -108,7 +121,8 @@ def get_meta(metaname):
             stat = os.stat(metaname)
             if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
                 meta["status"] = STATUS_ERROR
-    except FileNotFoundError:
+    except Exception as e:
+        print(f'bp.admin.uploads.get_meta: error {e.__class__name__} {e}')
         meta = {}
     return meta
 
@@ -118,9 +132,9 @@ def i_am_alive(metaname,parent_thread):
         print(parent_thread.progress)
         update_metafile(metaname,
                         progress=parent_thread.progress)
-        time.sleep(10)
+        time.sleep(shareds.PROGRESS_UPDATE_RATE)
 
-def background_load_to_neo4j(username,filename):
+def background_load_to_stkbase(username,filename):
     ''' Imports gramps xml data to database '''
     upload_folder = get_upload_folder(username) 
     pathname = os.path.join(upload_folder,filename)
@@ -136,16 +150,24 @@ def background_load_to_neo4j(username,filename):
         counts = gramps_loader.analyze_xml(username, filename)
         update_metafile(metaname,counts=counts,progress={})
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
-        steps,batch_id = gramps_loader.xml_to_neo4j(pathname,username)
+
+        # Read the Gramps xml file, and save the information to db
+        res = gramps_loader.xml_to_stkbase(pathname,username)
+
+        steps = res.get('steps',[])
+        batch_id = res.get('batch_id',"-")
+        if Status.has_failed(res):
+            print(f'background_load_to_stkbase: Error {res.get("statustext")}')
+            return res
+
         for step in steps:
             print(step)
         if not batch_id:
-            raise RuntimeError("Run Failed, missing batch_id")
+            return {'status': Status.ERROR,
+                    'statustext': "Run Failed: no batch created."}
 
         if os.path.exists(metaname): 
-            set_meta(username,filename,
-                     batch_id=batch_id,
-                     status=STATUS_DONE)
+            set_meta(username,filename, batch_id=batch_id, status=STATUS_DONE)
         msg = "{}:\nStored the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
         msg += "\nBatch id: {}".format(batch_id)
         msg += "\nLog file: {}".format(logname)
@@ -157,16 +179,17 @@ def background_load_to_neo4j(username,filename):
         email.email_admin(
                     "Stk: Gramps XML file stored",
                     msg )
-        syslog.log(type="storing to database complete",file=filename,user=username)
-    except:
-        traceback.print_exc()
+        syslog.log(type="completed save to database", file=filename, user=username)
+    except Exception as e:
+        #traceback.print_exc()
+        print(f'bp.admin.uploads.background_load_to_stkbase: {e.__class__.__name__} {e}')
         res = traceback.format_exc()
+        print(res)
         set_meta(username,filename,status=STATUS_FAILED)
-        msg = "{}:\nStoring the file {} from user {} to database FAILED".format(util.format_timestamp(),pathname,username)
-        msg += "\nLog file: {}".format(logname)
-        msg += "\n" + res
+        msg = f"{util.format_timestamp()}:\nStoring the file {pathname} from user {username} to database FAILED"
+        msg += f"\nLog file: {logname}\n" + res
         for step in steps:
-            msg += "\n{}".format(step)
+            msg += f"\n{step}"
         msg += "\n"
         open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
@@ -175,8 +198,9 @@ def background_load_to_neo4j(username,filename):
         syslog.log(type="gramps store to database failed",file=filename,user=username)
 
 
-def initiate_background_load_to_neo4j(userid,filename):
-    ''' Starts gramps xml data import to database '''
+def initiate_background_load_to_stkbase(userid,filename):
+    ''' Starts gramps xml data import to database.
+    '''
     #===========================================================================
     # subprocess.Popen("PYTHONPATH=app python runload.py " 
     #                  + pathname + " " 
@@ -184,11 +208,11 @@ def initiate_background_load_to_neo4j(userid,filename):
     #                  + logname,
     #                   shell=True)
     #===========================================================================
-    def background_load_to_neo4j_thread(app):
+    def background_load_to_stkbase_thread(app):
         with app.app_context():
-            background_load_to_neo4j(userid,filename)
+            background_load_to_stkbase(userid,filename)
         
-    threading.Thread(target=background_load_to_neo4j_thread,
+    threading.Thread(target=background_load_to_stkbase_thread,
                      args=(shareds.app,),
                      name="neo4j load for " + filename).start()
     syslog.log(type="storing to database initiated",file=filename,user=userid)
@@ -205,7 +229,7 @@ def list_uploads(username):
     '''
     # 1. List Batches, their status and Person count
     batches = {}
-    result = shareds.driver.session().run(Cypher_batch.get_user_batch_names, 
+    result = shareds.driver.session().run(CypherBatch.get_user_batch_names, 
                                           user=username)
     for record in result:
         # <Record batch='2019-08-12.001' timestamp=None persons=1949>
@@ -222,6 +246,8 @@ def list_uploads(username):
     class Upload: pass
     for name in names:
         if name.endswith(".meta"):
+            #TODO: Tähän tarvitaan try catch, koska kaatuneen gramps-latauksen jälkeen
+            #      metatiedosto voi olla rikki tai puuttua
             fname = os.path.join(upload_folder,name)
             xmlname = name.rsplit(".",maxsplit=1)[0]
             meta = get_meta(fname)
@@ -289,7 +315,7 @@ def list_uploads_all(users):
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.
-# --> models.gen.batch_audit.Batch.list_empty_batches
+# --> bl.batch.Batch.list_empty_batches
 
 
 def removefile(fname): 

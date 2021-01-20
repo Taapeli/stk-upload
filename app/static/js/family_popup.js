@@ -101,10 +101,10 @@ var vm = new Vue({
 					var fam = {};
 					if (rec) {
 						fam.id = rec.id;
-						fam.rel_type = rec.as_rel_type;
+						fam.rel_type = rec.rel_type_lang;
 						fam.dates = rec.dates;
 						fam.role = rec.role;
-						fam.as_role = rec.as_role;
+						fam.role_lang = rec.role_lang;
 						fam.href = "/scene/family?uuid="+rec.uuid;
 						fam.parents = [];
 						fam.children = [];
@@ -115,7 +115,7 @@ var vm = new Vue({
 							p.uuid = parent.uuid;
 							p.is_self = (p.uuid == q_uuid);
 							p.name = parseSortname(parent.sortname);
-							p.role = parent.as_role;
+							p.role = parent.role_lang;
 							p.href = "/scene/person?uuid="+parent.uuid;
 							if (parent.event_birth) {
 								p.birth_date = parent.event_birth.dates;
@@ -128,7 +128,7 @@ var vm = new Vue({
 							c.is_self = (c.uuid == q_uuid);
 							c.name = parseSortname(child.sortname);
 							c.href = "/scene/person?uuid="+child.uuid
-							c.gender = child.as_role; // Clear text in user language
+							c.gender = child.role_lang; // Clear text in user language
 							if (child.event_birth) {
 								c.birth_date = child.event_birth.dates;
 							} else {

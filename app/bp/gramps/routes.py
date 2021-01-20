@@ -9,6 +9,7 @@ Created on 15.8.2018
 import os
 import time
 import logging 
+from bp.gramps import gramps_utils
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, jsonify
@@ -46,7 +47,12 @@ def show_upload_log(xmlfile):
 def list_uploads():
     upload_list = uploads.list_uploads(current_user.username) 
     #Not essential: logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
-    return render_template("/gramps/uploads.html", uploads=upload_list)
+    gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
+    gramps_verify = gramps_runner and os.path.exists(gramps_runner)
+    return render_template("/gramps/uploads.html", 
+                           interval=shareds.PROGRESS_UPDATE_RATE*1000,
+                           uploads=upload_list, gramps_verify=gramps_verify)
+
 
 @bp.route('/gramps/upload', methods=['POST'])
 @login_required
@@ -87,9 +93,9 @@ def upload_gramps():
 @bp.route('/gramps/start_upload/<xmlname>')
 @login_required
 @roles_accepted('research')
-def start_load_to_neo4j(xmlname):
-    uploads.initiate_background_load_to_neo4j(current_user.username,xmlname)
-    logger.info(f'-> bp.gramps.routes.start_load_to_neo4j f="{os.path.basename(xmlname)}"')
+def start_load_to_stkbase(xmlname):
+    uploads.initiate_background_load_to_stkbase(current_user.username,xmlname)
+    logger.info(f'-> bp.gramps.routes.start_load_to_stkbase f="{os.path.basename(xmlname)}"')
     flash(_("Data import from %(i)s to database has been started.", i=xmlname), 'info')
     return redirect(url_for('gramps.list_uploads'))
 
@@ -109,6 +115,26 @@ def xml_analyze(xmlfile):
     logger.info(f'bp.gramps.routes.xml_analyze f="{os.path.basename(xmlfile)}"')
     return render_template("/gramps/analyze_xml.html", 
                            references=references, file=xmlfile)
+
+@bp.route('/gramps/gramps_analyze/<xmlfile>')
+@login_required
+@roles_accepted('research', 'admin', 'audit')
+def gramps_analyze(xmlfile):
+    logger.info(f'bp.gramps.routes.gramps_analyze f="{os.path.basename(xmlfile)}"')
+    return render_template("/gramps/gramps_analyze.html",
+                           file=xmlfile)
+
+@bp.route('/gramps/gramps_analyze_json/<xmlfile>')
+@login_required
+@roles_accepted('research', 'admin', 'audit')
+def gramps_analyze_json(xmlfile):
+    gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
+    if gramps_runner:
+        msgs = gramps_utils.gramps_verify(gramps_runner, current_user.username, xmlfile)
+    else:
+        msgs = {}
+    logger.info(f'bp.gramps.routes.gramps_analyze_json f="{os.path.basename(xmlfile)}"')
+    return jsonify(msgs)
 
 @bp.route('/gramps/xml_delete/<xmlfile>')
 @login_required
@@ -135,16 +161,18 @@ def xml_download(xmlfile):
 @roles_accepted('research', 'admin')
 def batch_delete(batch_id):
 
-    from models.gen.batch_audit import Batch
+    from bl.batch import Batch
 
-    filename = Batch.get_filename(current_user.username,batch_id)
-    metafile = filename.replace("_clean.",".") + ".meta"
-    if os.path.exists(metafile):
-        data = eval(open(metafile).read())
-        if data.get('batch_id') == batch_id:
-            del data['batch_id']
-            data['status'] = uploads.STATUS_REMOVED
-            open(metafile,"w").write(repr(data))
+    filename = Batch.get_filename(current_user.username, batch_id)
+    if filename:
+        # Remove file, if exists
+        metafile = filename.replace("_clean.",".") + ".meta"
+        if os.path.exists(metafile):
+            data = eval(open(metafile).read())
+            if data.get('batch_id') == batch_id:
+                del data['batch_id']
+                data['status'] = uploads.STATUS_REMOVED
+                open(metafile,"w").write(repr(data))
     Batch.delete_batch(current_user.username,batch_id)
     logger.info(f'-> bp.gramps.routes.batch_delete f="{batch_id}"')
     syslog.log(type="batch_id deleted",batch_id=batch_id) 

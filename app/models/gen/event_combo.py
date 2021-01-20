@@ -158,13 +158,13 @@ return r.role as role, e as event,
         return events
 
 
-    def get_participants(self):
-        """ Read the persons related to this Event.
-
-            Luetaan [kaste]tapahtuman henkilöt nimineen
-        """
-        return  shareds.driver.session().run(Cypher_event.get_participants_uniq_id, 
-                                             pid=self.uniq_id)
+#     def get_participants(self):
+#         """ Read the persons related to this Event.
+# 
+#             Luetaan [kaste]tapahtuman henkilöt nimineen
+#         """
+#         return  shareds.driver.session().run(Cypher_event.get_participants_uniq_id, 
+#                                              pid=self.uniq_id)
 
 
     def get_baptism_data(self):
