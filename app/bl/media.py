@@ -66,10 +66,14 @@ class MediaBl(NodeObject):
     '''
     TODO
     '''
-    def __init__(self, params):
+    def __init__(self):
         '''
         Constructor
         '''
+        self.description = ""
+        self.src = None
+        self.mime = None
+        self.name = ""
 
 
 class MediaReader(DbReader):
