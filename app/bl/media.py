@@ -86,7 +86,6 @@ class MediaBl(NodeObject):
         """
         if not 'batch_id' in kwargs:
             raise RuntimeError(f"Media.save needs batch_id for parent {self.id}")
-        batch = kwargs['batch_id']
 
         self.uuid = self.newUuid()
         m_attr = {}
@@ -99,8 +98,9 @@ class MediaBl(NodeObject):
                 "mime": self.mime,
                 "description": self.description
             }
+            m_attr['batch_id'] = kwargs['batch_id']
             result = tx.run(CypherMedia.create_in_batch, 
-                            bid=batch, uuid=self.uuid, m_attr=m_attr)
+                            bid=kwargs['batch_id'], uuid=self.uuid, m_attr=m_attr)
             self.uniq_id = result.single()[0]
         except Exception as e:
             print(f"MediaBl.save: {e.__class__.__name__} {e}, id={self.id}")
