@@ -6,6 +6,9 @@ Created on 16.1.2021
 
 class CypherMedia():
 
+
+# Read Media data
+
     get_my_media_by_uuid = """
 MATCH (:UserProfile {username:$user}) -[:HAS_ACCESS]-> (b) -[ro:OWNS]->
       (media:Media {uuid:$uuid}) <-[r:MEDIA]- (ref)
@@ -31,3 +34,14 @@ MATCH (u:UserProfile {username:$user}) -[:HAS_ACCESS]-> (b:Batch)
 WHERE o.description >= $start_name
 RETURN o, b.username as credit, b.id as batch_id, COUNT(r) AS count
     ORDER BY o.description LIMIT $limit"""
+
+
+# Write Media data
+
+    # Find a batch like '2019-02-24.006' and connect new Media object to that Batch
+    create_in_batch = """
+MATCH (u:Batch {id:$bid})
+MERGE (u) -[:OWNS]-> (a:Media {uuid:$uuid})
+    SET a += $m_attr
+RETURN ID(a) as uniq_id"""
+
