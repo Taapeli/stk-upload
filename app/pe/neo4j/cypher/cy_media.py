@@ -32,7 +32,7 @@ RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
 MATCH (u:UserProfile {username:$user}) -[:HAS_ACCESS]-> (b:Batch)
     -[owner:OWNS]-> (o:Media) <- [r:MEDIA] - ()
 WHERE o.description >= $start_name
-RETURN o, b.username as credit, b.id as batch_id, COUNT(r) AS count
+RETURN o, b.user as credit, b.id as batch_id, COUNT(r) AS count
     ORDER BY o.description LIMIT $limit"""
 
 

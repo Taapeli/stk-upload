@@ -20,17 +20,18 @@ td { padding-right:1em;}
 {{ macro.menu(menuno) }}
     <div class="content" id="IndividualDetail">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
         <ul  class='flashes'>
         {% for category, message in messages %}
           <li class='flash_{{category}}'>{{ message }}</li>
         {% endfor %}
         </ul>
-      {% endif %}
-    {% endwith %}
+    {% endif %}
+{% endwith %}
 
         <h3>{{ _("Family")|capitalize }}</h3>
+{% if family %}
         <div id="summaryarea">
             <table><tbody>
                 <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
@@ -55,48 +56,48 @@ td { padding-right:1em;}
             </tbody></table>
         </div>
 
-{% if family.events %} 
+    {% if family.events %} 
         <h3>{{ _("Family Events") }}</h3>
         <div id="summaryarea">
             <table><tbody>
-    {% for e in family.events|sort(attribute='dates') %}
+        {% for e in family.events|sort(attribute='dates') %}
                 <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
                     <td class="ColumnDate">{{e.dates}}</td>
                     <td class="ColumnPlace">
                     <a href="/scene/location/uuid={{e.place.uuid}}" class="inlink"
                        title="{{ _('of type') }} {{e.place.type}}; {{ _('see details of place') }}">
                       {{macro.place_names_lang(e.place)}}
-        </a>{% if e.place.uppers %},
+            </a>{% if e.place.uppers %},
 		              <small>{{macro.place_names_lang(e.place.uppers[0])}}</small>
-		{% endif %}
+		    {% endif %}
 		          </td>
                 </tr>
-    {% endfor %}
+        {% endfor %}
 
- {% if family.sources %}
+        {% if family.sources %}
                 <tr><td colspan="3">&nbsp;</td></tr>
                 <tr><td class="ColumnAttribute"><b>{{ _('Sources') }}</b></td>
                     <td class="Value" colspan="2"><ul>
-        {% for s in family.sources %}
+            {% for s in family.sources %}
                         <li><a href="/scene/source?uuid={{s.uuid}}" class="inlink">{{s.stitle}}</a>, 
-            {% for c in s.citations %}
+                {% for c in s.citations %}
                             {{ _("Page") }}: {{c.page}}
-            {% endfor -%}
-            {% for repo in s.repositories %}
+                {% endfor -%}
+                {% for repo in s.repositories %}
                             <br>&nbsp;&nbsp; – {% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
                             {{ _('in the repository') }} <b>{{repo.rname}}</b>
-            {% endfor -%}
+                {% endfor -%}
                         </li>
-        {% endfor -%}
+            {% endfor -%}
                     </ul></td>
-{% endif -%}
+        {% endif -%}
                 </tr>
             </tbody></table>
 
-      </div>
-      {% endif %}
+      </div> <!-- events -->
+    {% endif %}
 
-        {% if family.children %} 
+    {% if family.children %} 
 	        <h3>{{ _("Children") }}</h3>
 	        <div id="summaryarea">
 	            <table style="margin-top:1em;"><tbody>
@@ -118,17 +119,21 @@ td { padding-right:1em;}
 		    	</table>
 	    	{% endif %}
  			</div>
-        {% endif %}
+    {% endif %}
  
-        {% if family.notes %}<h3>{{ _("Notes") }}</h3>
-            <table>
+    {% if family.notes %}
+            <h3>{{ _("Notes") }}</h3>
+            <div id="summaryarea">
+                <table>
             {% for n in family.notes %}
- 				<tr>{% if n.text %}<td>{{ n.text }}</p></td>{% endif %}
+ 				   <tr>{% if n.text %}<td>{{ n.text }}</p></td>{% endif %}
  				{% if n.url %}<td><a href="{{ n.url }}">{{ n.url }}</a></td>{% endif %}</tr>
             {% endfor %}
-            </table>
-        {% endif %}
-        <p>&nbsp;</p>
+                </table>
+            </div>
+    {% endif %}
+        <p>&nbsp;</p> <!-- family -->
+{% endif %}
     </div>
 </div>
 {% endblock %}

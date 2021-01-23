@@ -487,19 +487,19 @@ def show_family_page(uid=None):
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
     t0 = time.time()
+    u_context = UserContext(user_session, current_user, request)
+    datastore = FamilyReader(readservice, u_context) 
 
-    try:
-        u_context = UserContext(user_session, current_user, request)
-        datastore = FamilyReader(readservice, u_context) 
-    
-        res = datastore.get_family_data(uid)
-        #family = Family_combo.get_family_data(uid, u_context)
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    res = datastore.get_family_data(uid)
 
     stk_logger(u_context, "-> bp.scene.routes.show_family_page")
-    if res['status']:
-        return redirect(url_for('virhesivu', code=1, text=res['statustext']))
+    status = res.get('status')
+    if status != Status.OK:
+        if status == Status.ERROR:
+            flash(f'{res.get("statustext")}', 'error')
+        else:
+            flash(f'{ _("This item is not available") }', 'warning')
+
     return render_template("/scene/family.html",  menuno=3, family=res['item'],
                            user_context=u_context, elapsed=time.time()-t0)
 
@@ -746,15 +746,24 @@ def show_media(uid=None):
     """
     uid = request.args.get('uuid', uid)
     u_context = UserContext(user_session, current_user, request)
-    if not uid:
-        return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
-    
+#     if not uid:
+#         return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
     reader = MediaReader(readservice, u_context)
+
     res = reader.get_one(uid)
-    # returns {item, status}
+
+    status = res.get('status')
+    if status != Status.OK:
+        print(f'bp.scene.routes.show_media: error {status} {res.get("statustext")}')
+        if status == Status.ERROR:
+            flash(f'{res.get("statustext")}', 'error')
+        else:
+            flash(f'{ _("This item is not available") }', 'warning')
+
     medium = res.get('item', None)
     if medium:
         fullname, mimetype = media.get_fullname(medium.uuid)
+        stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
     else:
         flash(f'{res.get("statustext","error")}', 'error')
         fullname = None
@@ -764,7 +773,6 @@ def show_media(uid=None):
     else:
         size = media.get_image_size(fullname)
 
-    stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
     return render_template("/scene/media.html", media=medium, size=size,
                            user_context=u_context, menuno=6)
 
