@@ -9,8 +9,8 @@
 {% set cnt = medias|count %}
 {% set next_fw = user_context.next_name('fw') %}
 {% set next_bw = user_context.next_name('bw') %}
-{# set next_at_end = user_context.at_end() #}
-{#
+
+{# set next_at_end = user_context.at_end()
 <p>next fb = "{{next_bw}}", fw = "{{next_fw}}"; 
    at start = "{{user_context.at_start() }}", at end = "{{user_context.at_end() }}"</p>
 #}
@@ -71,8 +71,8 @@
     <tr><th>{{ _("Title") }}</th>
         <th style="text-align: center;">{{ _("Picture") }}</th>
         <th>{{ _("References") }}</th>
-    {% if user_context.use_common() %}
-        <th>{{ _('User Batch') }}</th>
+    {% if user_context.is_auditor %}
+        <th class="Auditor" title="{{ _('For auditor only') }}">{{ _('User Batch') }} &nbsp;</th>
     {% endif %}
     </tr>
 {% if cnt %}
@@ -93,8 +93,9 @@
 	                </a>
             </div></td>
             <td align="center">{{m.conn}}</td>
-       {% if user_context.use_common() %}
-            <td><i>{{m.credit}}</i><br>{{m.batch}}</td>
+
+       {% if user_context.is_auditor %}
+            <td class="Auditor"><i>{{m.credit}}</i><br>{{m.batch}}</td>
        {% endif %}
         </tr>
     {% endfor %}

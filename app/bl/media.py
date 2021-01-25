@@ -5,13 +5,15 @@ Created on 24.3.2020
 '''
 import os
 
-import shareds
+#import shareds
 from .base import NodeObject, Status
-from pe.db_reader import DbReader
 from bl.person import PersonBl
 from bl.family import FamilyBl
 from bl.place import PlaceBl
 from bl.event import EventBl
+
+from pe.db_reader import DbReader
+from pe.neo4j.cypher.cy_media import CypherMedia
 
 
 class Media(NodeObject):
@@ -64,12 +66,46 @@ class Media(NodeObject):
 
 class MediaBl(NodeObject):
     '''
-    TODO
+    Media file object for pictures and documents.
     '''
-    def __init__(self, params):
+    def __init__(self):
         '''
         Constructor
         '''
+        self.description = ""
+        self.src = None
+        self.mime = None
+        self.name = ""
+
+
+    def save(self, tx, **kwargs):   # batch_id=None):
+        """ Saves this new Media object to db.
+        
+            #TODO: Process also Notes for media?
+            #TODO: Use MediaWriteService
+        """
+        if not 'batch_id' in kwargs:
+            raise RuntimeError(f"Media.save needs batch_id for parent {self.id}")
+
+        self.uuid = self.newUuid()
+        m_attr = {}
+        try:
+            m_attr = {
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "src": self.src,
+                "mime": self.mime,
+                "description": self.description
+            }
+            m_attr['batch_id'] = kwargs['batch_id']
+            result = tx.run(CypherMedia.create_in_batch, 
+                            bid=kwargs['batch_id'], uuid=self.uuid, m_attr=m_attr)
+            self.uniq_id = result.single()[0]
+        except Exception as e:
+            print(f"MediaBl.save: {e.__class__.__name__} {e}, id={self.id}")
+            raise RuntimeError(f"Could not save Media {self.id}")
+        return
 
 
 class MediaReader(DbReader):

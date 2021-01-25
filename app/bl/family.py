@@ -427,7 +427,7 @@ class FamilyReader(DbReader):
         """
         ret_results = self.readservice.dr_get_family_by_uuid(self.use_user, uuid)
         # ret_results {'item': <bl.family.FamilyBl>, 'status': Status}
-        if ret_results.get('status') != Status.OK:
+        if Status.has_failed(ret_results):
             return ret_results
 
         family = ret_results.get('item')
@@ -484,7 +484,7 @@ class FamilyReader(DbReader):
         if select_notes:
             res = self.readservice.dr_get_family_notes(src_list)
             for s in res.get('items'):
-                family.sources.append(s)
+                family.notes.append(s)
 
         return ret_results
 

@@ -99,19 +99,21 @@ u { color: DarkKhaki; text-decoration: none; }
            {% endif %}
                     </td>
                 </tr>
+            {% if not (person.death_low - person.birth_high) < 0 %}
                <tr>
                     <td class="ColumnAttribute">{{ _("Age at death") }}</td>
                     <td class="Value">
-            {% if person.death_high != person.death_low or
-                  person.birth_high != person.birth_low %}
+                {% if person.death_high != person.death_low or
+                      person.birth_high != person.birth_low %}
                         {{ _('at least') }}
-            {% else %}
+                {% else %}
                         {{ _('about') }}
-            {% endif %}
+                {% endif %}
                         {{person.death_low - person.birth_high}}
                         {{ _('years') }}
                     </td>
                 </tr>
+            {% endif %}
                 
                 {% if person.confidence > '' %}<tr>
                     <td class="ColumnAttribute">{{ _("Confidence of data") }}</td>
@@ -327,8 +329,6 @@ u { color: DarkKhaki; text-decoration: none; }
                method refTable.sourceReferences() #}
             <div id="sourcerefContent"></div>
         </div>
-{% else %}
-<div class="Failed">{{ _('Failed to read the data!') }}</div>
 {% endif %}
     </div> {# content #}
 

@@ -121,11 +121,6 @@ class User(UserMixin):
         else:
             return f'setups.User {self.username}, no roles'
 
-    def is_showing_common(self):
-        """ Is showing common, approved data only?
-        """
-        return not (self.current_context & UserContext.ChoicesOfView.OWN)
-
     def has_role(self, role_name):
         """ Check if user has given role
         """
