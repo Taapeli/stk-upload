@@ -64,7 +64,7 @@ class Media(NodeObject):
         return n
 
 
-class MediaBl(NodeObject):
+class MediaBl(Media):
     '''
     Media file object for pictures and documents.
     '''
@@ -96,6 +96,7 @@ class MediaBl(NodeObject):
                 "id": self.id,
                 "src": self.src,
                 "mime": self.mime,
+                "name": self.name,
                 "description": self.description
             }
             m_attr['batch_id'] = kwargs['batch_id']

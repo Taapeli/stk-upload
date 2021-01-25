@@ -295,7 +295,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
 	                <img alt="({{ _('Photo') }} {{ord}})" 
 	                     src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
-	                     title="{{ _('Photo') }} {{ord}}, id={{photo.id}}"/>
+	                     title="{{ _('Show fullscreen') }}"/>
                 </a>
                 <p><a href="/scene/media?uuid={{photo.uuid}}" class="inlink"
                       title="{{ _('Go to photo page') }}">
@@ -333,6 +333,7 @@ u { color: DarkKhaki; text-decoration: none; }
     </div> {# content #}
 
 <script>
+/* For source references */
 {{jscode|safe}}
 var tbl = new refTable();
     {% if not debug %}
