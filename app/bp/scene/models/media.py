@@ -9,6 +9,8 @@ from PIL import Image
 import shareds
 
 media_base_folder = "media"
+cypher_get_medium = "MATCH (m:Media{uuid:$uuid}) RETURN m"
+
 
 def make_thumbnail(src_file, dst_file, crop=None):
     ''' Create a thumbnail size image from src_file to dst_file.
@@ -37,9 +39,10 @@ def get_media_thumbnails_folder(batch_id):
     return os.path.abspath(media_thumbnails_folder)
 
 def get_fullname(uuid):
-    rec = shareds.driver.session().run("match (m:Media{uuid:$uuid}) return m",uuid=uuid).single()
+    rec = shareds.driver.session(default_access_mode='READ').run(cypher_get_medium,
+                                                                 uuid=uuid).single()
     m = rec['m']
-    batch_id = m['batch_id']
+    batch_id = m.get('batch_id','no-batch')
     src = m['src']
     mimetype = m['mime']
     media_files_folder = get_media_files_folder(batch_id)
@@ -53,8 +56,8 @@ def get_thumbname(uuid, crop=None):
     if not uuid:
         raise FileNotFoundError('bp.scene.models.media.get_thumbname: no uuid')
 
-    rec = shareds.driver.session(default_access_mode='READ').\
-             run("match (m:Media{uuid:$uuid}) return m", uuid=uuid).single()
+    rec = shareds.driver.session(default_access_mode='READ').run(cypher_get_medium,
+                                                                 uuid=uuid).single()
     if rec:
         # <Record
         #    m=<Node id=29198 labels=frozenset({'Media'}) 
@@ -63,7 +66,7 @@ def get_thumbname(uuid, crop=None):
         #            'id': 'O0077', 'uuid': '33a96ff532a4467fac86af58bc80dc1a'}>
         # >
         m = rec['m']
-        batch_id = m['batch_id']
+        batch_id = m.get('batch_id','no-batch')
         src = m['src']
         mime = m['mime']
         if mime == 'application/pdf':

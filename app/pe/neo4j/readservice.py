@@ -1565,7 +1565,7 @@ class Neo4jReadService:
                                  record['ref'], record['ref2']))
 
             except Exception as e:
-                return {'status':Status.ERROR, 'statutext':
+                return {'status':Status.ERROR, 'statustext':
                         f'Neo4jReadService.dr_get_media_single: {e.__class__.__name__} {e}'}
 
         status = Status.OK if recs else Status.NOT_FOUND

@@ -141,7 +141,8 @@ class UserContext():
         self.count = 10000                      # Max count ow objects to display
         self.lang = user_session.get('lang','') # User language
         self.allow_edit = False                 # Is data edit allowed
-        
+        self.is_auditor = False
+
         # View range: names [first, last]
         self.session_var = None
         self.first = ''
@@ -152,6 +153,7 @@ class UserContext():
         if current_user:
             if current_user.is_active and current_user.is_authenticated:
                 self.user = current_user.username
+                self.is_auditor = current_user.has_role('audit')
             else:
                 self.user = None
         else:
@@ -202,7 +204,7 @@ class UserContext():
             #TODO: Needs better rule for edit permission
             # May edit data, if user has such role
             if self.context == self.choices.OWN:
-                self.allow_edit = current_user.has_role('audit')
+                self.allow_edit = self.is_auditor
 
         #   For logging of scene area pages, set User.current_context variable:
         #   are you browsing common, audited data or your own batches?
