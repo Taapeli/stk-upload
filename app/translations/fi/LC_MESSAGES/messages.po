@@ -3209,7 +3209,7 @@ msgstr "Tunnistamaton käyttäjä"
 
 #: bp/start/templates/start/index_guest.html:15
 msgid "Exploring Isotammi demo environment"
-msgstr "Selataan Isotammen esittelyaineistoa"
+msgstr "Selataan Isotammen mallisukupuuta"
 
 #: bp/start/templates/start/index_guest.html:31
 #: bp/start/templates/start/index_scene.html:31
