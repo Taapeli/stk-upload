@@ -72,7 +72,7 @@
         <th style="text-align: center;">{{ _("Picture") }}</th>
         <th>{{ _("References") }}</th>
     {% if user_context.is_auditor %}
-        <th>{{ _('User Batch') }}</th>
+        <th class="Auditor" title="{{ _('For auditor only') }}">{{ _('User Batch') }} &nbsp;</th>
     {% endif %}
     </tr>
 {% if cnt %}
@@ -95,7 +95,7 @@
             <td align="center">{{m.conn}}</td>
 
        {% if user_context.is_auditor %}
-            <td><i>{{m.credit}}</i><br>{{m.batch}}</td>
+            <td class="Auditor"><i>{{m.credit}}</i><br>{{m.batch}}</td>
        {% endif %}
         </tr>
     {% endfor %}
