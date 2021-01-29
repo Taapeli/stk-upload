@@ -25,7 +25,7 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 
 # ====== Database schema ======
 # increment this, if shcema must be updated
-DB_SCHEMA_VERSION = 1
+DB_SCHEMA_VERSION = 2
 # =============================
 
 #erase total database 
