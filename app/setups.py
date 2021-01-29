@@ -114,8 +114,10 @@ class User(UserMixin):
             rolelist = []
             for i in self.roles:
                 if isinstance(i, str):
+                    # Got a Role name
                     rolelist.append(i)
                 elif isinstance(i, Role):
+                    # Got a Role object
                     rolelist.append(i.name)
             return f'setups.User {self.username} {rolelist}'
         else:

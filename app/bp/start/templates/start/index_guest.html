@@ -51,7 +51,7 @@
 #}
      {% else %}
                 <h3>{{ _('The Demo Material') }}</h3>
-                <p>{{ _('You are on the home page of Isotammi demo. You have log in as a quest user.') }}.</p>
+                <p>{{ _('You are on the home page of Isotammi demo. You have log in as a quest user.') }}</p>
                 <input name="div" type="hidden" value="1">
      {% endif %}
                 <div class="submit"> 
@@ -59,6 +59,7 @@
                  </div>
                </form>
              </div>
+     {% if not is_demo %}
             <h3>{{ _('Log in') }}</h3>
             <p>{{ _('If you has already registered, you can log in and refine the structure of your own data.') }}
                    {{ _('As a member of <i>Genealogical Society of Finland</i> you will get more services.') }}.
@@ -68,6 +69,7 @@
 					<button type="submit" formaction="/logout">{{ _('Log in') }}</button>
 				</div>
 			</form>
+     {% endif %}
            </div>
 		</div>
   </div>

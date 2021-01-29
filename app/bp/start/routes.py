@@ -46,7 +46,8 @@ def start_guest():
     user = shareds.user_datastore.get_user('guest')
     secutils.login_user(user)
     logger.info('-> bp.start.routes.start_guest')
-    return render_template('/start/index_guest.html')
+    is_demo = shareds.app.config.get('DEMO', False)
+    return render_template('/start/index_guest.html', is_demo=is_demo)
 
 
 @shareds.app.route('/start/logged', methods=['GET', 'POST'])
