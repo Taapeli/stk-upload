@@ -50,6 +50,10 @@ function checkFileSize() {
                  <div class="submit"> 
                     <input type="submit" value="{{ _('Send') }}" onclick="checkFileSize()"/>
                  </div>
+                 <div><ul><li>{{ _('Read more') }}: <i>
+                    <a href="https://gramps-project.org/wiki/index.php/Fi:Etusivu" 
+                       title="{{ _('Manual') }}">Gramps</a></i></li></ul>
+                 </div>
                  </form>
          </div>
     
@@ -61,8 +65,6 @@ function checkFileSize() {
                     <input type="submit" value="{{ _('List my data sets') }}" />
                  </div>
 	            </form>
-<!-- 	            <ul><li><a href=/gramps/uploads>{{ _("List my uploads") }}</a> -->
-<!-- 	            </li></ul> -->
          </div>
      
      {% endif %}
