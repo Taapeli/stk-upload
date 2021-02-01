@@ -87,6 +87,8 @@ class Event(NodeObject):
                 'id': 'E0161', 'attr_type': '', 'description': ''
                 'datetype': 0, 'date1': 1754183, 'date2': 1754183}>
         '''
+        if not node:
+            return None
         if not obj:
             obj = cls()
         obj.uniq_id = node.id

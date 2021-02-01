@@ -80,11 +80,6 @@ class Neo4jReadService:
         '''
         with self.driver.session(default_access_mode='READ') as session:
             try:
-    #             if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
-    #                 record = session.run(Cypher_person.get_by_user,
-    #                                      uuid=uuid, user=user).single()
-    #             else:       # Select person from public database
-    #                 #TODO: Rule for public database is missing, taking any
                 record = session.run(CypherPerson.get_person, uuid=uuid).single()
                 # <Record 
                 #    p=<Node id=25651 labels=frozenset({'Person'})
@@ -128,7 +123,7 @@ class Neo4jReadService:
                 # Add to list of all objects connected to this person
                 self.objs[p.uniq_id] = p
                 return {'item': p, 
-                        'root': {'root_type':root_type, 'usernode': nodeuser, 'id':bid}, 
+                        'root': {'root_type':root_type, 'root_node': nodeuser, 'id':bid}, 
                         'status': Status.OK}
     
             except Exception as e:
@@ -209,18 +204,8 @@ class Neo4jReadService:
                 results = session.run(CypherPerson.get_families, uid=puid)
                 for record in results:
                     # <Record
-                    #  rel=<Relationship id=671269
-                    #     nodes=(
-                    #        <Node id=432641 labels={'Family'} 
-                    #            properties={'datetype': 3, 'father_sortname': 'Järnefelt##August Aleksander', 
-                    #                'change': 1542401728, 'rel_type': 'Married', 'mother_sortname': 'Clodt von Jürgensburg##Elisabeth', 
-                    #                'date2': 1941614, 'id': 'F0015', 'date1': 1901974, 'uuid': '90282a3cf6ee47a1b8f9a4a2c710c736'}>, 
-                    #        <Node id=427799 labels={'Person'} 
-                    #            properties={'sortname': 'Järnefelt##Aino', 'datetype': 19, 'confidence': '2.0', 
-                    #                'sex': 2, 'change': 1566323471, 'id': 'I0035', 'date2': 2016423, 'date1': 1916169, 
-                    #                'uuid': '925ea92d7dab4e8c92b53c1dcbdad36f'}>) 
-                    #    type='CHILD' 
-                    #    properties={}> 
+                    #  rel_type='CHILD'
+                    #  role=None  
                     #  family=<Node id=432641 labels={'Family'} properties={...}> 
                     #  events=[<Node id=269554 labels={'Event'} properties={'type': 'Marriage', ...}> ...]
                     #  members=[[
@@ -232,9 +217,8 @@ class Neo4jReadService:
     
                     # 1. What is the relation this Person to their Family
     
-                    relation = record['rel']
-                    rel_type = relation.type
-                    role = relation.get('role', "")
+                    rel_type = record['rel_type']
+                    role = record['role']
     
                     # 2. The Family node
     

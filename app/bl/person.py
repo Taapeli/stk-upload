@@ -279,7 +279,7 @@ class PersonReader(DbReader):
             --> Origin from models.gen.person_combo.Person_combo.get_my_person
         '''
         res = self.readservice.dr_get_person_by_uuid(uuid)
-        # {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
+        # {'item', 'root': {'root_type', 'root_user', 'id'}, 'status'}
 
         if Status.has_failed(res):
             return {'item':None, 'status':res['status'], 
@@ -292,11 +292,11 @@ class PersonReader(DbReader):
 
         # The original researcher data in res['root']:
         # - root_type    which kind of owner link points to this object
-        # - usernode     the (original) owner of this object
+        # - root_user     the (original) owner of this object
         # - bid          Batch id, if any
         root = res.get('root')
         root_type = root.get('root_type')
-        #node = root['usernode']
+        #node = root['root_user']
         #nodeuser = node.get('user', "")
         #bid = node.get('id', "")
         if self.use_user is None:
@@ -398,7 +398,7 @@ class PersonReader(DbReader):
 
         # 1. Read Person p, if not denied
         res = self.readservice.dr_get_person_by_uuid(uuid, user=self.use_user)
-        # res = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
+        # res = {'item', 'root': {'root_type', 'root_user', 'id'}, 'status'}
         if Status.has_failed(res):
             # Not found, not allowd (person.too_new) or error
             if res.get('status') == Status.NOT_FOUND:
