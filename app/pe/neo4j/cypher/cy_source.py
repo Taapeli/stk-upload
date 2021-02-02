@@ -82,6 +82,4 @@ MATCH (c:Citation) -[:SOURCE]-> (s:Source)
     WHERE ID(c) IN $uid_list
     OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
 RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
-
-
     

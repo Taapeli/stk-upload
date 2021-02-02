@@ -479,6 +479,13 @@ class PersonReader(DbReader):
                 'root': root,
                 'status': Status.OK}
 
+    def get_surname_list(self):
+        ''' 
+        List all surnames so that they can be displayed in a name cloud.
+        '''
+        surnames = self.readservice.dr_get_surname_list()
+        # [{'surname': surname, 'count': count},...]
+        return surnames
 
 class PersonBl(Person):
 

@@ -23,6 +23,7 @@ from templates import jinja_filters
 from wtforms import SelectField, SubmitField, BooleanField
 
 from pe.neo4j.neo4jengine import Neo4jEngine
+from pe.neo4j.readservice import Neo4jReadService
 #from database.models.neo4jengine import Neo4jEngine 
 from database import adminDB
 
@@ -37,6 +38,7 @@ from ui.user_context import UserContext
 
 import json
 from flask_babelex import lazy_gettext as _l
+
 
 """
     Classes to create user session.
@@ -114,8 +116,10 @@ class User(UserMixin):
             rolelist = []
             for i in self.roles:
                 if isinstance(i, str):
+                    # Got a Role name
                     rolelist.append(i)
                 elif isinstance(i, Role):
+                    # Got a Role object
                     rolelist.append(i.name)
             return f'setups.User {self.username} {rolelist}'
         else:
@@ -179,6 +183,8 @@ shareds.mail = Mail(shareds.app)
 # https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
+
+shareds.readservice = Neo4jReadService(shareds.driver)
 
 shareds.user_model = User
 shareds.role_model = Role
