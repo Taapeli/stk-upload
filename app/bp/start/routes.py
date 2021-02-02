@@ -78,18 +78,7 @@ def start_logged():
         logger.info(f'-> start.routes.entry/join')
         return redirect(url_for('join'))
 
-    datastore = PersonReader(shareds.readservice)
-    
-    minfont = 6
-    maxfont = 20
-    maxnames = 40
-    surnamestats = datastore.get_surname_list()
-    surnamestats = surnamestats[0:maxnames]
-    for i, stat in enumerate(surnamestats):
-        stat['order'] = i
-        stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
-    surnamestats.sort(key=itemgetter("surname"))
-    return render_template('/start/index_logged.html', surnamestats=surnamestats)
+    return render_template('/start/index_logged.html')
 
 
 @shareds.app.route('/thankyou')
