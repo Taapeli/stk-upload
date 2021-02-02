@@ -79,7 +79,31 @@
                  <div class="submit"> 
                     <button type="submit">{{ _('Browse') }}</button>
                  </div>
+                 
                </form>
+             </div>
+           </div>
+
+           <div class="startbox">
+             <div style="display: inline-block;">
+                 <h3>{{ _('View your own candidate material') }}</h3>
+		         <form name="surnameform" method="post" action="/scene/persons/search">
+		         	<input name="rule" type="hidden" value="surname">
+		         	<input name="key" type="hidden">
+		         	<script>
+		         		function submit_search(surname) {
+		         			document.forms.surnameform.elements.namedItem('key').value = surname;
+		         			document.forms.surnameform.submit();
+		         		}
+		         	</script>
+		             {% for stat in surnamestats %}
+		             	<span style='font-size:{{ stat.fontsize}}px'>
+		             		<a href=# onclick="submit_search('{{ stat.surname }}')">
+		             			{{ stat.surname }}                	
+		     				</a>
+		         		</span>
+		             {% endfor %}
+		         </form>
              </div>
            </div>
     
