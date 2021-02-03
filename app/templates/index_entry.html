@@ -50,7 +50,13 @@ div.startbox { min-height: 270px;}
 				<h3>{{ _('Look at the demo data') }}</h3>
 				<p>{{ _('In this demo we have a genealogical tree which follows our quality rules and 
 				it contains the relatives of the Finnish national compositor Jean Sibelius.') }}</p>
-				<form method="get" action="/start/guest">
+				
+			    {% if config['DEMO'] %}					
+					<form method="get" action="/start/guest">		
+				{% else %}	
+					<form method="get" action={{demo_site}}>	
+				{% endif %}
+							
 					<div class="submit">
 						<button type="submit">{{ _('Explore demo') }}</button>
 					</div>

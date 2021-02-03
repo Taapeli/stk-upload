@@ -36,9 +36,37 @@ WITH master,stk,r,audit limit 50
         change_Stk_name = """
 MATCH (u:UserProfile {username:'_Stk_'})
 SET u.name = 'Suomi tk', u.change = timestamp()"""
+        guest_role_removal = """
+MATCH (a:Role{name:"guest"}) <-[r:HAS_ROLE]- (u:User {username:"guest"})
+SET u.roles=""
+SET u.email = 'nobody'
+DELETE r"""
+        guest_role_adding = """
+MATCH (a:Role{name:"guest"}), (u:User {username:"guest"})
+MERGE (a) <-[r:HAS_ROLE]- (u)
+SET u.roles = 'guest'
+SET u.email = 'nobody'"""
 
         with shareds.driver.session() as session: 
             try:
+                # Name field missed
+                if shareds.app.config.get('DEMO', False):
+                    # Add guest role in demo service
+                    result = session.run(guest_role_adding)
+                    counters = shareds.db.consume_counters(result)
+                    if counters.properties_set > 0:
+                        msg = "database.schema_fixes.do_schema_fixes: guest role added to DEMO guest!"
+                        print(msg)
+                        logger.info(msg)
+                else:
+                    # Remove guest role from real services
+                    result = session.run(guest_role_removal)
+                    counters = shareds.db.consume_counters(result)
+                    if counters.properties_set > 0:
+                        msg = "database.schema_fixes.do_schema_fixes: guest role removed from guest!"
+                        print(msg)
+                        logger.info(msg)
+
                 # From (:UserProfile{'master'} -[:HAS_LOADED]-> (a:Audit)
                 #   to (:UserProfile{'_Stk_'} -[:HAS_ACCESS]-> (a:Audit) 
                 #  and OPTIONAL (b:Batch) -[AUDITED]-> (a)
@@ -56,7 +84,7 @@ SET u.name = 'Suomi tk', u.change = timestamp()"""
                                     f"Audit links {rel_deleted} removed, {rel_created} added")
 
                 # Name field missed
-                session.run(change_Stk_name)
+                result = session.run(change_Stk_name)
                 counters = shareds.db.consume_counters(result)
                 if counters.properties_set > 0:
                     logger.info("database.schema_fixes.do_schema_fixes: profile _Stk_ name set")

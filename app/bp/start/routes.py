@@ -8,6 +8,9 @@ import traceback
 from werkzeug.utils import redirect
 from flask.helpers import url_for
 from ..gedcom.models import gedcom_utils
+from bl.person import PersonReader
+from pe.neo4j.readservice import Neo4jReadService
+from operator import itemgetter
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, session , flash
@@ -46,7 +49,8 @@ def start_guest():
     user = shareds.user_datastore.get_user('guest')
     secutils.login_user(user)
     logger.info('-> bp.start.routes.start_guest')
-    return render_template('/start/index_guest.html')
+    is_demo = shareds.app.config.get('DEMO', False)
+    return render_template('/start/index_guest.html', is_demo=is_demo)
 
 
 @shareds.app.route('/start/logged', methods=['GET', 'POST'])
