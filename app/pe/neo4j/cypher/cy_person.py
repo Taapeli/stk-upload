@@ -249,3 +249,10 @@ RETURN person.confidence AS confidence,
 MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
+    get_surname_list = """
+match (p:Person) -[:NAME]-> (n:Name) 
+where n.surname <> "" and n.surname <> "N"
+return n.surname as surname, size( collect(p)) as count
+order by count desc
+limit 150
+"""

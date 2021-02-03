@@ -1744,3 +1744,12 @@ class Neo4jReadService:
         return
 
 
+    def dr_get_surname_list(self):
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(CypherPerson.get_surname_list)
+            for record in result:
+                surname = record['surname']
+                count = record['count']
+                result_list.append({"surname":surname,"count":count})
+        return result_list
