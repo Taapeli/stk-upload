@@ -198,9 +198,9 @@ class Neo4jReadServiceTx:
                         # name_node = <Node id=428884 labels={'Name'} properties={'firstname': 'Caspar Woldemar' ...}>
                         # event_node = <Node id=267935 labels={'Event'} properties={'type': 'Birth', ... }>
 
-                        member_set = {'member_node': member_node, 
+                        member_set = {'parental_role':parental_role, 
+                                      'member_node': member_node, 
                                       'name_node':name_node, 
-                                      'parental_role':parental_role, 
                                       'birth_node': event_node}
                         family_members.append(member_set)
     

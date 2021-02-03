@@ -134,25 +134,45 @@ class PersonReaderTx(DbReader):
 
         for f in res.get('families'):
             family = FamilyBl.from_node(f['family_node'])
-            #family_role = f['family_role']      # mother / father / None
-            f_events = []
+            family_role = f['family_role']          # Main person's role in family
             for event_node in f['family_events']:
                 event = EventBl.from_node(event_node)
                 if event.type == "Marriage":
                     family.marriage_dates = event.dates
-                f_events.append(event)
-            if f['family_rel'] == 'PARENT':
+                family.events.append(event)
+
+            for m in f['family_members']:
+                # Family member
+                member = PersonBl.from_node(m['member_node'])
+                name_node = m['name_node']
+                if name_node:
+                    name = Name.from_node(name_node)
+                    member.names.append(name)
+                event_node = m['birth_node']
+                if event_node:
+                    event = EventBl.from_node(event_node)
+                    member.birth_date = event.dates
+                # Add member to family
+                parental_role = m['parental_role']  # Family member's role
+                if parental_role == "father":
+                    family.father = member
+                elif parental_role == "mother":
+                    family.mother = member
+                else:       # chils
+                    family.children.append(member)
+                
+            if family_role: # main person is a father or mother
                 person.families_as_parent.append(family)
-                # For a parent, family events are person events, too
-                person.events += f_events
-            else: # CHILD
+                person.events += family.events
+            else:           # child
                 person.families_as_child.append(family)
 
-#         # 2. (p:Person) --> (x:Name|Event)
-#         res = self.readservice.dr_get_person_names_events(person.uniq_id)
-#         # result {'names', 'events', 'cause_of_death', 'status'}
-#         if  Status.has_failed(res):
-#             print(f'get_person_data: No names or events for person {uuid}')
+            if not self.user_context.use_common():
+                family.remove_privacy_limits()
+
+        #    Sort all Person and family Events by date
+        person.events.sort()
+
 #         # 3. (p:Person) <-- (f:Family)
 #         #    for f
 #         #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
@@ -163,11 +183,6 @@ class PersonReaderTx(DbReader):
 #         if  Status.has_failed(res):
 #             print(f'get_person_data: No families for person {uuid}')
 # 
-#         if not self.user_context.use_common():
-#             person.remove_privacy_limit_from_families()
-# 
-#         #    Sort all Person and family Events by date
-#         person.events.sort()
 # 
 # 
 #         # 4. for pl in z:Place, ph
