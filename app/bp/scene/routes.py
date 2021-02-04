@@ -268,6 +268,7 @@ def show_person(uuid=None):
         flash(f'{result.get("statustext","error")}', 'error')
     person = result.get('person')
     objs = result.get('objs',[])
+    print (f'# Person with {len(objs)} objects')
     jscode = result.get('jscode','')
     root = result.get('root')
 

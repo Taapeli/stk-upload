@@ -24,6 +24,15 @@ class PersonReaderTx(DbReader):
 
         - Returns a Result object.
     '''
+    def __init__(self, readservice, u_context=None):
+        DbReader.__init__(self, readservice, u_context)
+        self.objs = {}          # {uniq_id: Connected_object}
+
+    def _add_directory(self, obj):
+        ''' Collect list of objects connects to active node. '''
+        if not obj is None:
+            self.objs[obj.uniq_id] = obj
+
 
     def get_person_data(self, uuid:str): #, args:dict):
         '''
@@ -94,10 +103,6 @@ class PersonReaderTx(DbReader):
         once only.
         """
 
-        # Objects by uniq_id, referred from current person
-        self.readservice.objs = {}
-
-        # 1. Read Person p, if not denied
         res = self.readservice.tx_get_person_by_uuid(uuid, active_user=self.use_user)
         if Status.has_failed(res):
             # Not found, not allowd (person.too_new) or error
@@ -117,48 +122,62 @@ class PersonReaderTx(DbReader):
             - - - family_members = [{member_node, name_node, parental_role, birth_node}, ...]
             - - - marriage_date = {datetype, date1, date2}
         '''
+
+        # 1-2. Person, names and events
+
         person = PersonBl.from_node(res.get('person_node'))
         person.families_as_parent = []
         person.families_as_child = []
+        self._add_directory(person)
 
         # Info about linked Batch or Audit node
         root_dict = res.get('root')   # {root_type, root_user, batch_id}
         for name_node in res.get('name_nodes'):
-            person.names.append(Name.from_node(name_node))
+            name = Name.from_node(name_node)
+            person.names.append(name)
+            self._add_directory(name)
         for event_node, event_role in res.get('event_node_roles'):
             event = EventBl.from_node(event_node)
             event.role = event_role
             person.events.append(event)
-        cause_node = res.get('cause_of_death')
-        person.cause_of_death = EventBl.from_node(cause_node)
+            self._add_directory(event)
+        obj = res.get('cause_of_death')
+        person.cause_of_death = EventBl.from_node(obj)
+        self._add_directory(obj)
+
+        # 3. Person's families as child or parent
 
         for f in res.get('families'):
             family = FamilyBl.from_node(f['family_node'])
             family_role = f['family_role']          # Main person's role in family
+            self._add_directory(family)
             for event_node in f['family_events']:
                 event = EventBl.from_node(event_node)
                 if event.type == "Marriage":
                     family.marriage_dates = event.dates
                 family.events.append(event)
-
+                self._add_directory(event)
             for m in f['family_members']:
                 # Family member
                 member = PersonBl.from_node(m['member_node'])
+                self._add_directory(member)
                 name_node = m['name_node']
                 if name_node:
                     name = Name.from_node(name_node)
                     member.names.append(name)
+                    self._add_directory(name)
                 event_node = m['birth_node']
                 if event_node:
                     event = EventBl.from_node(event_node)
                     member.birth_date = event.dates
+                    #self._add_directory(event)
                 # Add member to family
                 parental_role = m['parental_role']  # Family member's role
                 if parental_role == "father":
                     family.father = member
                 elif parental_role == "mother":
                     family.mother = member
-                else:       # chils
+                else:       # children
                     family.children.append(member)
                 
             if family_role: # main person is a father or mother
@@ -173,29 +192,12 @@ class PersonReaderTx(DbReader):
         #    Sort all Person and family Events by date
         person.events.sort()
 
-#         # 3. (p:Person) <-- (f:Family)
-#         #    for f
-#         #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
-#         #      (fp)--> (me:Event{type:Birth})
-#         #      (f) --> (fe:Event)
-#         res = self.readservice.dr_get_person_families(person.uniq_id)
-#         # res {'families_as_child', 'families_as_parent', 'family_events', 'status'}
-#         if  Status.has_failed(res):
-#             print(f'get_person_data: No families for person {uuid}')
-# 
-# 
-# 
-#         # 4. for pl in z:Place, ph
-#         #      (pl) --> (pn:Place_name)
-#         #      (pl) --> (pi:Place)
-#         #      (pi) --> (pin:Place_name)
-#         ret = self.readservice.dr_get_object_places(person)
-#         if  Status.has_failed(res):
-#             print(f'get_person_data: Event places read error: {ret.get("statustext")}')
-#      
-#         # 5. Read their connected nodes z: Citations, Notes, Medias
-#         #    for y in p, x, fe, z, s, r
-#         #        (y) --> (z:Citation|Note|Media)
+        # 4. Pleces for person and each event
+
+        # 5. Read their connected nodes z: Citations, Notes, Medias
+        #    for y in p, x, fe, z, s, r
+        #        (y) --> (z:Citation|Note|Media)
+
 #         new_objs = [-1]
 #         self.readservice.citations = {}
 #         while len(new_objs) > 0:
@@ -222,7 +224,7 @@ class PersonReaderTx(DbReader):
         # Return Person with included objects,  and javascript code to create
         # Citations, Sources and Repositories with their Notes
         return {'person': person,
-                'objs': self.readservice.objs,
+                'objs': self.objs,
                 'jscode': jscode,
                 'root': root_dict,
                 'status': Status.OK}
