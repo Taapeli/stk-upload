@@ -6,7 +6,6 @@ Created on 30.1.2021
 
 from pe.neo4j.cypher.cy_person import CypherPerson
 from bl.base import Status
-from ui.place import place_names_from_nodes
 
 
 class Neo4jReadServiceTx:
@@ -43,7 +42,7 @@ class Neo4jReadServiceTx:
             #            'timestamp': 1596463360673}>
             # >
             if record is None:
-                print(f'dr_get_person_by_uuid: person={uuid} not found')
+                print(f'dx_get_person_by_uuid: person={uuid} not found')
                 res.update({'status': Status.NOT_FOUND, 'statustext': 'The person does not exist'})
                 return res
 
@@ -58,11 +57,11 @@ class Neo4jReadServiceTx:
             bid = root_node.get('id', "")
             if active_user is None:
                 if root_type != "PASSED":
-                    print(f'dr_get_person_by_uuid: person {uuid} is not in approved material')
+                    print(f'dx_get_person_by_uuid: person {uuid} is not in approved material')
                     res.update({'status': Status.NOT_FOUND, 'statustext': 'The person is not accessible'})
                     return res
             elif root_type != "OWNS":
-                    print(f'dr_get_person_by_uuid: OWNS not allowed for person {uuid}')
+                    print(f'dx_get_person_by_uuid: OWNS not allowed for person {uuid}')
                     res.update({'status': Status.NOT_FOUND, 'statustext': 'The person is not accessible'})
                     return res
 
@@ -76,7 +75,7 @@ class Neo4jReadServiceTx:
 
         except Exception as e:
             msg = f'person={uuid} {e.__class__.name} {e}'
-            print(f'dr_get_person_by_uuid: {msg}')
+            print(f'dx_get_person_by_uuid: {msg}')
             res.update({'status': Status.ERROR, 'statustext': msg})
             return res
 
@@ -121,7 +120,7 @@ class Neo4jReadServiceTx:
 
         except Exception as e:
             msg = f'person={puid} {e.__class__.__name__} {e}'
-            print(f'dr_get_person_names_events: {msg}')
+            print(f'dx_get_person_names_events: {msg}')
             res.update({'status': Status.ERROR, 'statustext': f"Could not read names and events: {msg}"})
             return res
 
@@ -204,7 +203,7 @@ class Neo4jReadServiceTx:
 
         except Exception as e:
             msg = f'person={puid} {e}' #{e.__class__.name} {e}'
-            print(f'dr_get_person_families: {msg}')
+            print(f'dx_get_person_families: {msg}')
             res.update({'status': Status.ERROR, 'statustext': f"Could not read families: {msg}"})
             return res
 
@@ -214,7 +213,7 @@ class Neo4jReadServiceTx:
 
 
     def tx_get_object_places(self, objs:dict):
-        ''' Read Place hierarchies for given objects.
+        ''' Read Place hierarchies for given Event objects.
         
         :param:    objs    {uniq_id: NodeObject}, updated!
         '''
@@ -269,137 +268,98 @@ class Neo4jReadServiceTx:
         return {'status': Status.OK, 'place_references': references}
  
  
-#     def tx_get_object_citation_note_media(self, person, active_objs=[]):
-#         ''' Read Citations, Notes, Medias for list of objects.
-# 
-#                 (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-# 
-#             First (when active_objs is empty) searches all Notes, Medias and
-#             Citations of person or it's connected objects.
-#             
-#             Returns a list of created new objects, where this search should
-#             be repeated.
-#         '''
-#         new_objs = []
-# 
-# #         with self.driver.session(default_access_mode='READ') as session:
-#         try:
-#             if active_objs and active_objs[0] > 0:
-#                 # Search next level destinations x) -[r:CITATION|NOTE|MEDIA]-> (y)
-#                 uids = active_objs
-#             else:
-#                 # Search all (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-#                 uids = list(self.objs.keys())
-#             print(f'# Searching Citations, Notes, Medias for {len(uids)} nodes')
-#             #print(f'# uniq_ids = {uids}')
-# 
-#             results = self.tx.run(CypherPerson.get_objs_citation_note_media,
-#                                   uid_list=uids)
-#             for record in results:
-#                 # <Record
-#                 #    label='Person'
-#                 #    uniq_id=327766
-#                 #    r=<Relationship id=426799
-#                 #        nodes=(
-#                 #            <Node id=327766 labels=set() properties={}>, 
-#                 #            <Node id=327770 labels={'Note'}
-#                 #                properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 
-#                 #                    'id': 'N2-I0033', 'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
-#                 #                    'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}>
-#                 #        ) 
-#                 #        type='NOTE' properties={}>
-#                 #    y=<Node id=327770 labels={'Note'}
-#                 #            properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 'id': 'N2-I0033', 
-#                 #                'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
-#                 #                'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}>
-#                 # >
-# 
-#                 # The existing object x
-#                 x_label = record['label']
-#                 x = self.objs[record['uniq_id']]
-# 
-#                 # Relation r between (x) --> (y)
-#                 rel = record['r']
-#                 #rel_type = rel.type
-#                 #rel_properties = 
-# 
-#                 # Target y is a Citation, Note or Media
-#                 y_node = record['y']    # 
-#                 y_label = list(y_node.labels)[0]
-#                 y_uniq_id = y_node.id
-#                 #print(f'# Linking ({x.uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
-#                 #for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
-#                 if y_label == "Citation":
-#                     o = self.objs.get(y_uniq_id)
-#                     if not o:
-#                         o = Citation.from_node(y_node)
-#                         if not x.uniq_id in o.citators:
-#                             # This citation is referenced by x
-#                             o.citators.append(x.uniq_id)
-#                         # The list of Citations, for further reference search
-#                         self.citations[o.uniq_id] = o
-#                         self.objs[o.uniq_id] = o
-#                         new_objs.append(o.uniq_id)
-#                     # Store reference to referee object
-#                     if hasattr(x, 'citation_ref'):
-#                         x.citation_ref.append(o.uniq_id)
-#                     else:
-#                         x.citation_ref = [o.uniq_id]
-# #                         traceback.print_exc()
-# #                         raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-#                     #print(f'# ({x_label}:{x.uniq_id}) --> (Citation:{o.id})')
-# 
-#                 elif y_label == "Note":
-#                     o = self.objs.get(y_uniq_id, None)
-#                     if not o:
-#                         o = Note.from_node(y_node)
-#                         self.objs[o.uniq_id] = o
-#                         new_objs.append(o.uniq_id)
-#                     # Store reference to referee object
-#                     if hasattr(x, 'note_ref'):
-#                         x.note_ref.append(o.uniq_id)
-#                     else:
-#                         x.note_ref = [o.uniq_id]
-#                         print('NOTE Neo4jReadService.dr_get_object_citation_note_media: '
-#                               f'Field {x_label}.{y_label.lower()}_ref created')            
-# 
-#                 elif y_label == "Media":
-#                     o = self.objs.get(y_uniq_id, None)
-#                     if not o:
-#                         o = MediaBl.from_node(y_node)
-#                         self.objs[o.uniq_id] = o
-#                         new_objs.append(o.uniq_id)
-#                     # Get relation properties
-#                     order = rel.get('order')
-# 
-#                     # Media reference crop attributes
-#                     left = rel.get('left')
-#                     if left != None:
-#                         upper = rel.get('upper')
-#                         right = rel.get('right')
-#                         lower = rel.get('lower')
-#                         crop = (left, upper, right, lower)
-#                     else:
-#                         crop = None
-#                     # Store reference to referee object
-#                     if hasattr(x, 'media_ref'):
-#                         x.media_ref.append((o.uniq_id, crop, order))
-#                     else:
-#                         x.media_ref = [(o.uniq_id, crop, order)]
-#                         print('NOTE Neo4jReadService.dr_get_object_citation_note_media: '
-#                               f'Field {x_label}.{y_label.lower()}_ref created')            
-#                     print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
-#                     if len(x.media_ref) > 1 and x.media_ref[-2][2] > x.media_ref[-1][2]:
-#                         x.media_ref.sort(key=lambda x: x[2])
-#                         print("#\tMedia sort done")
-#                     #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
-# 
-#                 else:
-#                     raise NotImplementedError(f'dr_get_object_citation_note_media: No rule for ({x_label}) --> ({y_label})')            
-#                 #print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
-# 
-#         except Exception as e:
-#             print(f"dr_get_object_citation_note_media: Could not read 'Citations, Notes, Medias': {e}")
-#             print(f"... for Person {person.uuid} objects {self.objs}: {e}")
-#         return new_objs
+    def tx_get_object_citation_note_media(self, obj_catalog:dict, active_objs=[]):
+        ''' 
+        Read Citations, Notes, Medias for list of active objects.
+ 
+        :param:    objs    {uniq_id: NodeObject}, updated!
+
+                (src) -[r:CITATION|NOTE|MEDIA]-> (target)
+ 
+        First (when active_objs is empty) searches all Notes, Medias and
+        Citations of person or it's connected objects.
+             
+        Returns {status, new_objects, references}
+        - references    Object with target_label, target_node, order and crop fields
+        - new_objects   list of created all new uniq_ids, where this search
+                        should be repeated
+        '''
+        class Reference: pass
+        
+        # Collections {src_id: [target_nodes]) - the object referred from each src node
+        coll = {}
+        # These new objects may have more Citations, Notes or Medias 
+        new_obj_ids = []
+
+        try:
+            if active_objs and active_objs[0] > 0:
+                # Search next level destinations src) -[r:CITATION|NOTE|MEDIA]-> (target)
+                uids = active_objs
+            else:
+                # Search all (src) -[r:CITATION|NOTE|MEDIA]-> (target)
+                uids = list(obj_catalog.keys())
+            print(f'# Searching Citations, Notes, Medias for {len(uids)} nodes')
+
+            results = self.tx.run(CypherPerson.get_objs_citations_notes_medias,
+                                  uid_list=uids)
+            for record in results:
+                # Returns 
+                #    - src      source node
+                #    - r        relation: CITATION|NOTE|MEDIA
+                #    - target   target object Citation|Note|Media
+
+                # Create a reference to target object including
+                # target_label, target_node, order and crop
+                ref = Reference()
+
+                # The existing object src
+                src_node = record['src']
+                src_label, = list(src_node.labels)
+                src_uniq_id = src_node.id
+                #src = obj_catalog[record['uniq_id']]
+
+                # Target is a Citation, Note or Media
+                target_node = record['target']
+                target_uniq_id = target_node.id
+                ref.target_label, = list(target_node.labels)
+                ref.target_node = target_node
+
+                # Relation r between (src_node) --> (target)
+                rel = record['r']
+                ref.order = rel.get('order')
+                if ref.target_label == "Media":
+                    # Media crop attributes used in this relation
+                    left = rel.get('left')
+                    if left != None:
+                        upper = rel.get('upper')
+                        right = rel.get('right')
+                        lower = rel.get('lower')
+                        ref.crop = (left, upper, right, lower)
+                    else:
+                        ref.crop = None
+                print(f'# - Linking ({src_uniq_id}:{src_label} {src_node["id"]}) '\
+                      f'--> ({target_uniq_id}:{ref.target_label})')
+
+                # Add current target reference to objects referred 
+                # from this src object 
+                ref_list = coll.get(src_uniq_id, None)
+                if ref_list:
+                    # There are already targets referred from src_node
+                    if not ref in ref_list:
+                        # A new target
+                        coll[src_uniq_id].append(ref)
+                else:
+                    coll[src_uniq_id] = [ref]
+
+                if not target_uniq_id in new_obj_ids:
+                    new_obj_ids.append(target_uniq_id)
+
+        except Exception as e:
+            msg = f"Could not read 'Citations, Notes, Medias': {e.__class__.__name__} {e}"
+            print(f"dx_get_object_citation_note_media: {msg}")
+            return {'status': Status.ERROR, 'statustext': msg}
+
+        return {'status': Status.OK,
+                'new_objects': new_obj_ids, 
+                'references': coll}
 

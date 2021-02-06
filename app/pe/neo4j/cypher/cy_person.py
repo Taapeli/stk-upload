@@ -46,10 +46,17 @@ RETURN LABELS(event)[0] AS label, ID(event) AS uniq_id,
     pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
 
+    get_objs_citations_notes_medias = """
+MATCH (src) -[r:CITATION|NOTE|MEDIA]-> (target)
+    WHERE ID(src) IN $uid_list
+RETURN src, r, target"""
+
+    # Older version:
     get_objs_citation_note_media = """
 MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
     WHERE ID(x) IN $uid_list
 RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
+
 
     get_names = """
 MATCH (n) <-[r:NAME]- (p:Person)

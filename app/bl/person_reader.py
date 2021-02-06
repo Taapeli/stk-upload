@@ -9,7 +9,7 @@ from bl.person import PersonBl
 from bl.person_name import Name
 from bl.event import EventBl
 from bl.family import FamilyBl
-from bl.place import PlaceBl, PlaceName
+from bl.place import PlaceBl #, PlaceName
 # Pick a PlaceName by user language
 from ui.place import place_names_from_nodes
 
@@ -31,15 +31,13 @@ class PersonReaderTx(DbReader):
     '''
     def __init__(self, readservice, u_context=None):
         DbReader.__init__(self, readservice, u_context)
-        self.objs = {}          # {uniq_id: Connected_object}
+        self.obj_catalog = {}          # {uniq_id: Connected_object}
 
     def _catalog(self, obj):
         ''' Collect list of objects connects to active node. '''
         if not obj is None:
-            self.objs[obj.uniq_id] = obj
+            self.obj_catalog[obj.uniq_id] = obj
 
-    def _get_catalog(self):
-        return self.objs
 
     def get_person_data(self, uuid:str): #, args:dict):
         '''
@@ -201,7 +199,7 @@ class PersonReaderTx(DbReader):
 
         # 4. Places for person and each event
 
-        res = self.readservice.tx_get_object_places(self._get_catalog())
+        res = self.readservice.tx_get_object_places(self.obj_catalog)
         # returns {status, place_references}
         place_references = res.get('place_references', {})
         # Got dictionary {object_id,  (place_node, (name_nodes))
@@ -225,43 +223,19 @@ class PersonReaderTx(DbReader):
                             up_place.names = place_names_from_nodes(up_name_nodes)
                             place.uppers = [up_place]
 
-#         if not src:
-#             raise LookupError(f"dr_get_object_places: Unknown Event {src_uniq_id}!?")
-# 
-#         pl = PlaceBl.from_node(record['pl'])
-#         if not pl.uniq_id in self.objs.keys():
-#             # A new place
-#             self.objs[pl.uniq_id] = pl
-#             #print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
-#             pl.names = place_names_from_nodes(record['pnames'])
-#             
-#         #else:
-#         #   print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
-#         src.place_ref.append(pl.uniq_id)
-# 
-#         # Surrounding places
-#         if record['pi']:
-#             pl_in = PlaceBl.from_node(record['pi'])
-#             ##print(f"# Hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
-#             if pl_in.uniq_id in self.objs:
-#                 pl.uppers.append(self.objs[pl_in.uniq_id])
-#                 ##print(f"# - Using a known place {objs[pl_in.uniq_id]}")
-#             else:
-#                 pl.uppers.append(pl_in)
-#                 self.objs[pl_in.uniq_id] = pl_in
-#                 pl_in.names = place_names_from_nodes(record['pinames'])
-#                 #print(f"#  ({pl_in} names {pl_in.names})")
- 
 
         # 5. Read their connected nodes z: Citations, Notes, Medias
         #    for y in p, x, fe, z, s, r
         #        (y) --> (z:Citation|Note|Media)
 
-#         new_objs = [-1]
-#         self.readservice.citations = {}
-#         while len(new_objs) > 0:
-#             new_objs = self.readservice.dr_get_object_citation_note_media(person, new_objs)
-# 
+        new_objs = [-1]
+        self.readservice.citations = {}
+        while len(new_objs) > 0:
+            res = self.readservice.tx_get_object_citation_note_media(self.obj_catalog, new_objs)
+            if Status.has_failed(res): return res
+            new_objs = res.get('new_objects', [])
+        print("TODO lisää objektit katalogiin")
+
 #         # Calculate the average confidence of the sources
 #         if len(self.readservice.citations) > 0:
 #             summa = 0
@@ -283,7 +257,7 @@ class PersonReaderTx(DbReader):
         # Return Person with included objects,  and javascript code to create
         # Citations, Sources and Repositories with their Notes
         return {'person': person,
-                'objs': self._get_catalog(),
+                'objs': self.obj_catalog,
                 'jscode': jscode,
                 'root': root_dict,
                 'status': Status.OK}
