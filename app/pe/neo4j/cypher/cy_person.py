@@ -36,13 +36,13 @@ RETURN type(rel) AS rel_type, rel.role as role,
     COLLECT(DISTINCT [mr.role, m, n, me]) AS members
     ORDER BY family.date1"""
 
-    get_objs_places = """
-MATCH (x) -[:PLACE]-> (pl:Place)
-    WHERE ID(x) IN $uid_list
+    get_event_places = """
+MATCH (event:Event) -[:PLACE]-> (pl:Place)
+    WHERE ID(event) IN $uid_list
 OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
 OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
-RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, 
+RETURN LABELS(event)[0] AS label, ID(event) AS uniq_id, 
     pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
 

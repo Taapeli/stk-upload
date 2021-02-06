@@ -923,7 +923,7 @@ class Neo4jReadService:
         uids = list(self.objs.keys())
         with self.driver.session(default_access_mode='READ') as session:
             try:
-                results = session.run(CypherPerson.get_objs_places, uid_list=uids)
+                results = session.run(CypherPerson.get_event_places, uid_list=uids)
                 for record in results:
                     # <Record 
                     #    label='Event' 

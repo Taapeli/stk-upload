@@ -6,6 +6,7 @@ Created on 30.1.2021
 
 from pe.neo4j.cypher.cy_person import CypherPerson
 from bl.base import Status
+from ui.place import place_names_from_nodes
 
 
 class Neo4jReadServiceTx:
@@ -125,9 +126,8 @@ class Neo4jReadServiceTx:
             return res
 
         # 3. Read the families, where given Person is a member
-        #
         #    orig. dr_get_person_families(self, puid:int)
-        #
+
         #             (p:Person) <-- (f:Family)
         #                for f
         #                  (f) --> (fp:Person) -[*1]-> (fpn:Name)
@@ -174,10 +174,6 @@ class Neo4jReadServiceTx:
                         event_role = "Family"
                         print(f"#3.2 ({puid}) -[:EVENT {event_role}]-> (:Event {event_node.id} {eid})")
                         family_events.append(event_node)
-#                             # Add Event to list of those events, who's Citation etc
-#                             # references must be checked
-#                             if not eid in self.objs.keys():
-#                                 self.objs[eid] = event_node
 
                 # 3.3. Family members and their birth events
 
@@ -206,11 +202,6 @@ class Neo4jReadServiceTx:
                 print(f"#3.4 ({puid}) -[:{family_rel} {family_role}]-> (:Family {family_node.id} {family_node.get('id')})")
                 families.append(family)
 
-#                 return {'families_as_child':families_as_child,
-#                         'families_as_parent': families_as_parent,
-#                         'family_events': family_events,
-#                         'status': Status.OK}
-
         except Exception as e:
             msg = f'person={puid} {e}' #{e.__class__.name} {e}'
             print(f'dr_get_person_families: {msg}')
@@ -222,78 +213,62 @@ class Neo4jReadServiceTx:
         return res
 
 
-#     def dr_get_object_places(self, person):
-#         ''' Read Place hierarchies for all Event objects in self.objs.
-#         '''
-#         uids = list(self.objs.keys())
-# #         with self.driver.session(default_access_mode='READ') as session:
-#         try:
-#             results = self.tx.run(CypherPerson.get_objs_places, uid_list=uids)
-#             for record in results:
-#                 # <Record 
-#                 #    label='Event' 
-#                 #    uniq_id=17282 
-#                 #    pl=<Node id=8888 labels=frozenset({'Place'}) 
-#                 #        properties={'id': 'P1077', 'type': 'Parish', 'uuid': 'bc78df10a5fd47e88e11e6a80b51569d', 
-#                 #            'pname': 'Loviisan srk', 'change': 1585562874}> 
-#                 #    pnames=[
-#                 #        <Node id=8889 labels=frozenset({'Place_name'}) 
-#                 #            properties={'name': 'Loviisan srk', 'lang': ''}>]
-#                 #    pi=<Node id=6889 labels=frozenset({'Place'}) 
-#                 #        properties={'id': 'P1874', 'type': 'Organisaatio', 'uuid': 'de140aac2c8f4884a3a2422faea9a569', 
-#                 #        'pname': 'Suomen ev.lut. kirkko', 'change': 1600105542}>
-#                 #    pinames=[
-#                 #        <Node id=10654 labels=frozenset({'Place_name'}) 
-#                 #            properties={'name': 'Suomen ev.lut. kirkko', 'lang': ''}>, 
-#                 #        <Node id=10655 labels=frozenset({'Place_name'}) 
-#                 #            properties={'name': 'Evangelisk-lutherska kyrkan i Finland', 'lang': 'sv'}>]
-#                 # >
-#                 src_label = record['label']
-#                 if src_label != "Event":
-#                     raise TypeError(f'dr_get_object_places: An Event excepted, got {src_label}')
-#                 src_uniq_id = record['uniq_id']
-# 
-#                 # Use the Event from Person events
-#                 src = None
-#                 for e in person.events:
-#                     if e.uniq_id == src_uniq_id:
-#                         src = e
-#                         break
-#                 if not src:
-#                     raise LookupError(f"dr_get_object_places: Unknown Event {src_uniq_id}!?")
-# 
-#                 pl = PlaceBl.from_node(record['pl'])
-#                 if not pl.uniq_id in self.objs.keys():
-#                     # A new place
-#                     self.objs[pl.uniq_id] = pl
-#                     #print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
-#                     pl.names = place_names_from_nodes(record['pnames'])
-#                     
-#                 #else:
-#                 #   print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
-#                 src.place_ref.append(pl.uniq_id)
-# 
-#                 # Surrounding places
-#                 if record['pi']:
-#                     pl_in = PlaceBl.from_node(record['pi'])
-#                     ##print(f"# Hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
-#                     if pl_in.uniq_id in self.objs:
-#                         pl.uppers.append(self.objs[pl_in.uniq_id])
-#                         ##print(f"# - Using a known place {objs[pl_in.uniq_id]}")
-#                     else:
-#                         pl.uppers.append(pl_in)
-#                         self.objs[pl_in.uniq_id] = pl_in
-#                         pl_in.names = place_names_from_nodes(record['pinames'])
-#                         #print(f"#  ({pl_in} names {pl_in.names})")
-#                 pass
-# 
-#         except Exception as e:
-#             print(f"Could not read places for person {person.id} objects {self.objs}: {e}")
-#             return {'status': Status.ERROR, 'statustext':f'{e.__class__.__name__}: {e}'}
-# 
-#         return {'status': Status.OK}
-# 
-# 
+    def tx_get_object_places(self, objs:dict):
+        ''' Read Place hierarchies for given objects.
+        
+        :param:    objs    {uniq_id: NodeObject}, updated!
+        '''
+        # Place references: {src: (place_node, [name_node, ...), ...}
+        # - src                 Event (or Place) uniq_id
+        # - place_node          connected place node
+        # - [name_node, ...]    name nodes for this place
+        references = {}
+
+        try:
+            uids = list(objs.keys())
+            results = self.tx.run(CypherPerson.get_event_places, uid_list=uids)
+            for record in results:
+                # Returns 
+                #    - label    'Event'
+                #    - uniq_id  db id of current Event
+                #    - pl       Place node
+                #    - [pn]     its Place_name objects
+                #    - pi       surrounding Place node
+                #    - [pi]     its Place_name objects
+
+                event_uniq_id = record['uniq_id']
+
+                # Place node and names linked to this event
+                place_node = record['pl']
+                place_uniq_id = place_node.id
+                if not place_uniq_id in objs.keys():
+                    # A new place
+                    objs[place_uniq_id] = place_node
+                pn_list = record['pnames']
+                for pl_name in pn_list:
+                    objs[pl_name.id] = pl_name
+                references[event_uniq_id] = (place_node, pn_list)
+
+                # Upper Place node and names linked to this Place
+                upper_place_node = record['pi']
+                if upper_place_node:
+                    if not upper_place_node.id in objs.keys():
+                        # A new place
+                        objs[upper_place_node.id] = upper_place_node
+                    pn_list = record['pinames']
+                    for pl_name in pn_list:
+                        objs[pl_name.id] = pl_name
+                    references[place_uniq_id] = (upper_place_node, pn_list)
+                pass
+ 
+        except Exception as e:
+            print(f"Could not read places for objects {objs}: {e.__class__.__name__} {e}")
+            return {'status': Status.ERROR, 'statustext':f'{e.__class__.__name__}: {e}'}
+
+        print(f'#tx_get_object_places: Got {len(references)} place references') 
+        return {'status': Status.OK, 'place_references': references}
+ 
+ 
 #     def tx_get_object_citation_note_media(self, person, active_objs=[]):
 #         ''' Read Citations, Notes, Medias for list of objects.
 # 

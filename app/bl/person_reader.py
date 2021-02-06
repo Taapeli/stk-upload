@@ -9,9 +9,14 @@ from bl.person import PersonBl
 from bl.person_name import Name
 from bl.event import EventBl
 from bl.family import FamilyBl
+from bl.place import PlaceBl, PlaceName
+# Pick a PlaceName by user language
+from ui.place import place_names_from_nodes
 
 import logging 
 logger = logging.getLogger('stkserver')
+from flask_babelex import _
+
 #from models.source_citation_reader import get_citations_js
 
 
@@ -28,11 +33,13 @@ class PersonReaderTx(DbReader):
         DbReader.__init__(self, readservice, u_context)
         self.objs = {}          # {uniq_id: Connected_object}
 
-    def _add_directory(self, obj):
+    def _catalog(self, obj):
         ''' Collect list of objects connects to active node. '''
         if not obj is None:
             self.objs[obj.uniq_id] = obj
 
+    def _get_catalog(self):
+        return self.objs
 
     def get_person_data(self, uuid:str): #, args:dict):
         '''
@@ -108,7 +115,7 @@ class PersonReaderTx(DbReader):
             # Not found, not allowd (person.too_new) or error
             if res.get('status') == Status.NOT_FOUND:
                 return {'status':Status.NOT_FOUND, 
-                        'statustext': 'Requested person not found'}
+                        'statustext': _('Requested person not found')}
             return res
         ''' 
         Got dictionary: Status and following objects:
@@ -128,49 +135,49 @@ class PersonReaderTx(DbReader):
         person = PersonBl.from_node(res.get('person_node'))
         person.families_as_parent = []
         person.families_as_child = []
-        self._add_directory(person)
+        self._catalog(person)
 
         # Info about linked Batch or Audit node
         root_dict = res.get('root')   # {root_type, root_user, batch_id}
         for name_node in res.get('name_nodes'):
             name = Name.from_node(name_node)
             person.names.append(name)
-            self._add_directory(name)
+            self._catalog(name)
         for event_node, event_role in res.get('event_node_roles'):
             event = EventBl.from_node(event_node)
             event.role = event_role
             person.events.append(event)
-            self._add_directory(event)
+            self._catalog(event)
         obj = res.get('cause_of_death')
         person.cause_of_death = EventBl.from_node(obj)
-        self._add_directory(obj)
+        self._catalog(obj)
 
         # 3. Person's families as child or parent
 
         for f in res.get('families'):
             family = FamilyBl.from_node(f['family_node'])
             family_role = f['family_role']          # Main person's role in family
-            self._add_directory(family)
+            self._catalog(family)
             for event_node in f['family_events']:
                 event = EventBl.from_node(event_node)
                 if event.type == "Marriage":
                     family.marriage_dates = event.dates
                 family.events.append(event)
-                self._add_directory(event)
+                self._catalog(event)
             for m in f['family_members']:
                 # Family member
                 member = PersonBl.from_node(m['member_node'])
-                self._add_directory(member)
+                self._catalog(member)
                 name_node = m['name_node']
                 if name_node:
                     name = Name.from_node(name_node)
                     member.names.append(name)
-                    self._add_directory(name)
+                    self._catalog(name)
                 event_node = m['birth_node']
                 if event_node:
                     event = EventBl.from_node(event_node)
                     member.birth_date = event.dates
-                    #self._add_directory(event)
+                    #self._catalog(event)
                 # Add member to family
                 parental_role = m['parental_role']  # Family member's role
                 if parental_role == "father":
@@ -192,7 +199,59 @@ class PersonReaderTx(DbReader):
         #    Sort all Person and family Events by date
         person.events.sort()
 
-        # 4. Pleces for person and each event
+        # 4. Places for person and each event
+
+        res = self.readservice.tx_get_object_places(self._get_catalog())
+        # returns {status, place_references}
+        place_references = res.get('place_references', {})
+        # Got dictionary {object_id,  (place_node, (name_nodes))
+
+        for e in person.events:
+            #src = e.uniq_id
+            if e.uniq_id in place_references.keys():
+                place_node, name_nodes = place_references[e.uniq_id]
+                if place_node:
+                    # Place and name
+                    place = PlaceBl.from_node(place_node)
+                    place.names = place_names_from_nodes(name_nodes)
+                    e.place_ref = [place.uniq_id]
+                    self._catalog(place)
+                    # Upper Place?
+                    if place.uniq_id in place_references.keys():
+                        up_place_node, up_name_nodes = place_references[place.uniq_id]
+                        if up_place_node:
+                            # Surrounding Place and name
+                            up_place = PlaceBl.from_node(up_place_node)
+                            up_place.names = place_names_from_nodes(up_name_nodes)
+                            place.uppers = [up_place]
+
+#         if not src:
+#             raise LookupError(f"dr_get_object_places: Unknown Event {src_uniq_id}!?")
+# 
+#         pl = PlaceBl.from_node(record['pl'])
+#         if not pl.uniq_id in self.objs.keys():
+#             # A new place
+#             self.objs[pl.uniq_id] = pl
+#             #print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
+#             pl.names = place_names_from_nodes(record['pnames'])
+#             
+#         #else:
+#         #   print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
+#         src.place_ref.append(pl.uniq_id)
+# 
+#         # Surrounding places
+#         if record['pi']:
+#             pl_in = PlaceBl.from_node(record['pi'])
+#             ##print(f"# Hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
+#             if pl_in.uniq_id in self.objs:
+#                 pl.uppers.append(self.objs[pl_in.uniq_id])
+#                 ##print(f"# - Using a known place {objs[pl_in.uniq_id]}")
+#             else:
+#                 pl.uppers.append(pl_in)
+#                 self.objs[pl_in.uniq_id] = pl_in
+#                 pl_in.names = place_names_from_nodes(record['pinames'])
+#                 #print(f"#  ({pl_in} names {pl_in.names})")
+ 
 
         # 5. Read their connected nodes z: Citations, Notes, Medias
         #    for y in p, x, fe, z, s, r
@@ -224,7 +283,7 @@ class PersonReaderTx(DbReader):
         # Return Person with included objects,  and javascript code to create
         # Citations, Sources and Repositories with their Notes
         return {'person': person,
-                'objs': self.objs,
+                'objs': self._get_catalog(),
                 'jscode': jscode,
                 'root': root_dict,
                 'status': Status.OK}
