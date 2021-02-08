@@ -10,6 +10,11 @@ from bl.person_name import Name
 from bl.event import EventBl
 from bl.family import FamilyBl
 from bl.place import PlaceBl #, PlaceName
+from bl.media import Media
+from models.gen.note import Note
+#TODO from bl.note import Note
+from models.gen.citation import Citation
+#TODO from bl.citation import Citation
 # Pick a PlaceName by user language
 from ui.place import place_names_from_nodes
 
@@ -133,6 +138,9 @@ class PersonReaderTx(DbReader):
         person = PersonBl.from_node(res.get('person_node'))
         person.families_as_parent = []
         person.families_as_child = []
+        person.citation_ref = []
+        person.note_ref = []
+        person.media_ref = []
         self._catalog(person)
 
         # Info about linked Batch or Audit node
@@ -147,8 +155,9 @@ class PersonReaderTx(DbReader):
             person.events.append(event)
             self._catalog(event)
         obj = res.get('cause_of_death')
-        person.cause_of_death = EventBl.from_node(obj)
-        self._catalog(obj)
+        if obj:
+            person.cause_of_death = EventBl.from_node(obj)
+            self._catalog(obj)
 
         # 3. Person's families as child or parent
 
@@ -224,32 +233,83 @@ class PersonReaderTx(DbReader):
                             place.uppers = [up_place]
 
 
-        # 5. Read their connected nodes z: Citations, Notes, Medias
-        #    for y in p, x, fe, z, s, r
-        #        (y) --> (z:Citation|Note|Media)
+        # 5. Citations, Notes, Medias
 
-        new_objs = [-1]
-        self.readservice.citations = {}
-        while len(new_objs) > 0:
-            res = self.readservice.tx_get_object_citation_note_media(self.obj_catalog, new_objs)
+        new_ids = [-1]
+        while len(new_ids) > 0:
+            # New objects
+            citations = {}
+            notes = {}
+            medias = {}
+
+            res = self.readservice.tx_get_object_citation_note_media(self.obj_catalog, new_ids)
+            # returns {status, new_objects, references}
+            # - new_objects    the objects, for which a new search shold be done
+            # - references     {source id: [ReferenceObj(node, order, crop)]}
             if Status.has_failed(res): return res
-            new_objs = res.get('new_objects', [])
-        print("TODO lisää objektit katalogiin")
+            new_ids = res.get('new_objects', [])
+            references = res.get('references')
+
+            for src_id, source in self.obj_catalog.items():
+                refs = references.get(src_id)
+                if refs:
+                    for current in refs:
+                        node = current.node
+                        order = current.order
+                        crop = current.crop
+                        label, = node.labels
+                        print (f'Link ({source.__class__.__name__} {src_id}:{source.id}) {current}')
+
+                        target_obj = None
+                        if label == "Citation":
+                            # If id is in the dictionary, return its value.
+                            # If not, insert id with a value of 2nd argument.
+                            pass
+#TODO kuha lähteetkin on tehty
+#                             target_obj = citations.setdefault(node.id, Citation.from_node(node))
+#                             if hasattr(source, 'citation_ref'):
+#                                 source.citation_ref.append((node.id, crop, order))
+#                             else:
+#                                 source.citation_ref = [(node.id, crop, order)]
+                        elif label == "Note":
+                            target_obj = notes.setdefault(node.id, Note.from_node(node))
+                            if hasattr(source, 'note_ref'):
+                                source.note_ref.append((node.id, crop, order))
+                            else:
+                                source.note_ref = [(node.id, crop, order)]
+                        elif label == "Media":
+                            target_obj = medias.setdefault(node.id, Media.from_node(node))
+                            if hasattr(source, 'media_ref'):
+                                source.media_ref.append((node.id, crop, order))
+                            else:
+                                source.media_ref = [(node.id, crop, order)]
+                        else:
+                            raise NotImplementedError("Citation, Note or Media excepted, got {label}")
+                        if target_obj:
+                            print(f'\tTarget_obj  = {target_obj}')
+#                         if target_obj:
+#                             if not target_obj.uniq_id in new_ids:
+#                                 new_ids.append(target_obj)
+
+            self.obj_catalog.update(citations)
+            self.obj_catalog.update(notes)
+            self.obj_catalog.update(medias)
 
 #         # Calculate the average confidence of the sources
-#         if len(self.readservice.citations) > 0:
+#         if len(citations) > 0:
 #             summa = 0
-#             for cita in self.readservice.citations.values():
+#             for cita in citations.values():
 #                 summa += int(cita.confidence)
 #                  
-#             aver = summa / len(self.readservice.citations)
+#             aver = summa / len(citations)
 #             person.confidence = "%0.1f" % aver # string with one decimal
-#      
+
 #         # 6. Read Sources s and Repositories r for all Citations
 #         #    for c in z:Citation
 #         #        (c) --> (s:Source) --> (r:Repository)
 #         self.readservice.dr_get_object_sources_repositories()
-#     
+
+
 #         # Create Javascript code to create source/citation list
 #         jscode = get_citations_js(self.readservice.objs)
         jscode = "/* todo */"

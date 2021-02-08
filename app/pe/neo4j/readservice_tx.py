@@ -6,7 +6,26 @@ Created on 30.1.2021
 
 from pe.neo4j.cypher.cy_person import CypherPerson
 from bl.base import Status
+from PIL.ImageOps import crop
 
+class ReferenceObj:
+    ''' Object to return reference data. '''
+    def __init__(self):
+        self.node = None
+        self.order = None
+        self.crop = []
+
+    def __str__(self):
+        if self.node:
+            label, = self.node.labels
+            id_str = f'{label} {self.node.id}:{self.node["id"]}'
+        else:
+            id_str = ""
+        if self.crop:
+            crop_str = f'[{crop}]'
+        else:
+            crop_str = ""
+        return f'-{crop_str}-> ({id_str})'
 
 class Neo4jReadServiceTx:
     ''' Methods for accessing Neo4j database.
@@ -284,7 +303,6 @@ class Neo4jReadServiceTx:
         - new_objects   list of created all new uniq_ids, where this search
                         should be repeated
         '''
-        class Reference: pass
         
         # Collections {src_id: [target_nodes]) - the object referred from each src node
         coll = {}
@@ -308,9 +326,8 @@ class Neo4jReadServiceTx:
                 #    - r        relation: CITATION|NOTE|MEDIA
                 #    - target   target object Citation|Note|Media
 
-                # Create a reference to target object including
-                # target_label, target_node, order and crop
-                ref = Reference()
+                # Create a reference to target object including node, order and crop
+                ref = ReferenceObj()
 
                 # The existing object src
                 src_node = record['src']
@@ -321,13 +338,13 @@ class Neo4jReadServiceTx:
                 # Target is a Citation, Note or Media
                 target_node = record['target']
                 target_uniq_id = target_node.id
-                ref.target_label, = list(target_node.labels)
-                ref.target_node = target_node
+                target_label, = list(target_node.labels)
+                ref.node = target_node
 
                 # Relation r between (src_node) --> (target)
                 rel = record['r']
                 ref.order = rel.get('order')
-                if ref.target_label == "Media":
+                if target_label == "Media":
                     # Media crop attributes used in this relation
                     left = rel.get('left')
                     if left != None:
@@ -337,8 +354,7 @@ class Neo4jReadServiceTx:
                         ref.crop = (left, upper, right, lower)
                     else:
                         ref.crop = None
-                print(f'# - Linking ({src_uniq_id}:{src_label} {src_node["id"]}) '\
-                      f'--> ({target_uniq_id}:{ref.target_label})')
+                #print(f'# - Found ({src_uniq_id}:{src_label} {src_node["id"]}) {ref}')
 
                 # Add current target reference to objects referred 
                 # from this src object 
@@ -351,7 +367,8 @@ class Neo4jReadServiceTx:
                 else:
                     coll[src_uniq_id] = [ref]
 
-                if not target_uniq_id in new_obj_ids:
+                if not ( target_uniq_id in new_obj_ids or \
+                         target_uniq_id in active_objs):
                     new_obj_ids.append(target_uniq_id)
 
         except Exception as e:

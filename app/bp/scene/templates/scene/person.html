@@ -72,16 +72,16 @@ u { color: DarkKhaki; text-decoration: none; }
                     </td>
                 </tr>
 
-	{% for pname in person.names|sort(attribute='order') %}<tr>
-                    <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
+	{% for p_name in person.names|sort(attribute='order') %}<tr>
+                    <td class="ColumnAttribute">{{p_name.order + 1}}. {{p_name.type|transl('nt')}}</td>
                     <td class="Value">
-						{% if pname.title %}<span title="titteli" class="typedesc">{{pname.title}}</span>{% endif %}
-                        <span title="{{ _('first name') }}">{{pname.firstname}}</span>
-                        <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
-                        {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
-                        <b title="{{ _('surname') }}">{{pname.surname}}</b>
+						{% if p_name.title %}<span title="titteli" class="typedesc">{{p_name.title}}</span>{% endif %}
+                        <span title="{{ _('first name') }}">{{p_name.firstname}}</span>
+                        <i title="{{ _('patronymic') }}">{{p_name.suffix}}</i>
+                        {% if p_name.prefix %}<span title="etuliite">{{p_name.prefix}}</span>{% endif %}
+                        <b title="{{ _('surname') }}">{{p_name.surname}}</b>
 
-	                    {{macro.citation_link(pname.citation_ref, obj)}}
+	                    {{macro.citation_link(p_name.p_name, obj)}}
                     </td>
                 </tr>
     {% endfor %}
