@@ -483,7 +483,10 @@ class PersonReader(DbReader):
         ''' 
         List all surnames so that they can be displayed in a name cloud.
         '''
-        surnames = self.readservice.dr_get_surname_list()
+        if self.use_user:
+            surnames = self.readservice.dr_get_surname_list_by_user(self.use_user)
+        else:
+            surnames = self.readservice.dr_get_surname_list_common()
         # [{'surname': surname, 'count': count},...]
         return surnames
 

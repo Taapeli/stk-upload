@@ -9,6 +9,7 @@ import traceback
 import json
 
 import logging 
+from operator import itemgetter
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
@@ -174,6 +175,21 @@ def show_person_search():
                f"-> bp.scene.routes.show_person_search/{rule}"
                f" n={len(found)}{hidden} e={elapsed:.3f}")
     print(f'Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}')
+    
+    datastore = PersonReader(readservice, u_context)
+        
+    minfont = 6
+    maxfont = 20
+    maxnames = 40
+    surnamestats = datastore.get_surname_list()
+    surnamestats = surnamestats[0:maxnames]
+    for i, stat in enumerate(surnamestats):
+        stat['order'] = i
+        stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
+    surnamestats.sort(key=itemgetter("surname"))
+    
+    #return render_template('/start/index_guest.html', is_demo=is_demo, surnamestats=surnamestats)
+    
     return render_template("/scene/persons_search.html",  menuno=0,
                            persons=found,
                            user_context=u_context, 
@@ -181,6 +197,7 @@ def show_person_search():
                            rule=rule, 
                            key=key,
                            status=status,
+                           surnamestats=surnamestats,
                            elapsed=time.time()-t0)
 
 # @bp.route('/obsolete/search', methods=['POST'])

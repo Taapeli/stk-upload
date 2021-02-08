@@ -84,9 +84,33 @@ div#description_box p {
                       <div class="submit"><input type="submit" value="Hae"></div>
                       <div id="searchHelp"></div>
                 </div>
-            </div><!-- flex-container -->
           </form>
+
+           <div class="SearchBox2">
+             <div style="display: inline-block;">
+		         <form name="surnameform" method="post" action="/scene/persons/search">
+		         	<input name="rule" type="hidden" value="surname">
+		         	<input name="key" type="hidden">
+		         	<script>
+		         		function submit_search(surname) {
+		         			document.forms.surnameform.elements.namedItem('key').value = surname;
+		         			document.forms.surnameform.submit();
+		         		}
+		         	</script>
+		             {% for stat in surnamestats %}
+		             	<span style='font-size:{{ stat.fontsize}}px'>
+		             		<a href=# onclick="submit_search('{{ stat.surname }}')">
+		             			{{ stat.surname }}                	
+		     				</a>
+		         		</span>
+		             {% endfor %}
+		         </form>
+             </div>
+           </div>
+
+            </div><!-- flex-container -->
        </div><!-- summaryarea -->
+
 <script>
 let selector = document.querySelector("#rule");
 let helpText = document.querySelector("#keydesc");

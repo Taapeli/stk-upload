@@ -3,6 +3,7 @@ Created on 17.3.2020
 
 @author: jm
 '''
+import functools
 import logging
 #from models.gen.family_combo import Family_combo
 from bl.dates import DateRange
@@ -1759,11 +1760,22 @@ class Neo4jReadService:
                         person.event_death = e
         return
 
-
-    def dr_get_surname_list(self):
+#   @functools.lru_cache
+    def dr_get_surname_list_by_user(self, username):
         result_list = []
         with self.driver.session(default_access_mode='READ') as session:
-            result = session.run(CypherPerson.get_surname_list)
+            result = session.run(CypherPerson.get_surname_list_by_username, username=username)
+            for record in result:
+                surname = record['surname']
+                count = record['count']
+                result_list.append({"surname":surname,"count":count})
+        return result_list
+
+#   @functools.lru_cache
+    def dr_get_surname_list_common(self):
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(CypherPerson.get_surname_list_common)
             for record in result:
                 surname = record['surname']
                 count = record['count']
