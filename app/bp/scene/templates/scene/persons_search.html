@@ -117,7 +117,7 @@ div#description_box p {
 		         	<input name="key" type="hidden">
 		             {% for stat in placenamestats %}
 		             	<span style='font-size:{{ stat.fontsize }}px'>
-		             		<a href="http://localhost:5000/scene/location/uuid={{ stat.uuid }}">
+		             		<a href="/scene/location/uuid={{ stat.uuid }}">
 		             			{{ stat.placename }}             
 		     				</a>
 		         		</span>
