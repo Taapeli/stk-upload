@@ -178,6 +178,21 @@ MATCH (m:Media  {handle: $m_handle})
   CREATE (p) -[r:MEDIA]-> (m)
     SET r = $r_attr"""
 
+class CypherPlaceStats:
+    get_place_list_by_username = """
+match (b:Batch{user:$username}) -[:OWNS]-> (e:Event) -[:PLACE]-> (p:Place) 
+return p as place, size(collect(e)) as count
+order by count desc
+limit 150
+"""
+
+    get_place_list_common = """
+match () -[:PASSED]-> (e:Event) -[:PLACE]-> (p:Place) 
+return p as place, size(collect(e)) as count
+order by count desc
+limit 150
+"""
+
 class CypherPlaceMerge:
 
     delete_namelinks = """

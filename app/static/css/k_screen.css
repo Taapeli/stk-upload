@@ -307,7 +307,7 @@ div#name_cloud { padding-bottom: 1em; }
 div#name_cloud div {
     background: bisque;
 	border: solid 1pt gray;
-	box-shadow: 7pt 10pt 10pt #eee;
+	box-shadow: 7pt 10pt 10pt #ccc;
 	padding: 1em 2em;
 	text-align: center;    border-radius: 2em;
     line-height: 1.6em;

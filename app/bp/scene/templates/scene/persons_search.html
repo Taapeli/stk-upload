@@ -91,6 +91,23 @@ div#description_box p {
           </form>
 
 
+           <div class="SearchBox2">
+           	<u>Yleisimmät paikannimet:</u>
+             <div style="display: inline-block;">
+		         <form name="placenameform" method="post" action="/scene/persons/search">
+		         	<input name="rule" type="hidden" value="placename">
+		         	<input name="key" type="hidden">
+		             {% for stat in placenamestats %}
+		             	<span style='font-size:{{ stat.fontsize }}px'>
+		             		<a href="/scene/location/uuid={{ stat.uuid }}">
+		             			{{ stat.placename }}             
+		     				</a>
+		         		</span>
+		             {% endfor %}
+		         </form>
+             </div>
+           </div>
+
             </div><!-- flex-container -->
        </div><!-- summaryarea -->
 

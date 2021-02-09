@@ -188,7 +188,18 @@ def show_person_search():
         stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
     surnamestats.sort(key=itemgetter("surname"))
     
-    #return render_template('/start/index_guest.html', is_demo=is_demo, surnamestats=surnamestats)
+    placereader = PlaceDataReader(readservice, u_context)
+        
+    minfont = 6
+    maxfont = 20
+    maxnames = 40
+    placenamestats = placereader.get_placename_stats()
+    placenamestats = placenamestats[0:maxnames]
+    for i, stat in enumerate(placenamestats):
+        stat['order'] = i
+        stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(placenamestats)
+    placenamestats.sort(key=itemgetter("placename"))
+
     
     return render_template("/scene/persons_search.html",  menuno=0,
                            persons=found,
@@ -198,6 +209,7 @@ def show_person_search():
                            key=key,
                            status=status,
                            surnamestats=surnamestats,
+                           placenamestats=placenamestats,
                            elapsed=time.time()-t0)
 
 # @bp.route('/obsolete/search', methods=['POST'])
