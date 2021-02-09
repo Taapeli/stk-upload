@@ -49,6 +49,9 @@ div#description_box p {
                         </li>
     {% endif %}
                     </ul>
+                    <ul>
+                    <p>▶ <a class="inlink" href="/scene/persons/search">{{ _('Most common surnames') }}</a></p>
+                    </ul>
                 </div>
 {% endif %}
 
@@ -75,38 +78,18 @@ div#description_box p {
                         {% if selection == "years" %}selected{% endif %}>{{ _('Years range') }}</option>
                           </select>
                        </h3>
+                       <div style="margin: .5em 1em;">
                        <label for="snam" id="keydesc">Descr.</label>
                        <input type="text" name="key" id="snam"
                           {% if oldkey %}value="{{oldkey}}"
                             {# else %}placeholder="{{ _('Name') }}"#}
                           {% endif %}>
-                       <br>
+                       </div>
                       <div class="submit"><input type="submit" value="Hae"></div>
                       <div id="searchHelp"></div>
                 </div>
           </form>
 
-           <div class="SearchBox2">
-             <div style="display: inline-block;">
-		         <form name="surnameform" method="post" action="/scene/persons/search">
-		         	<input name="rule" type="hidden" value="surname">
-		         	<input name="key" type="hidden">
-		         	<script>
-		         		function submit_search(surname) {
-		         			document.forms.surnameform.elements.namedItem('key').value = surname;
-		         			document.forms.surnameform.submit();
-		         		}
-		         	</script>
-		             {% for stat in surnamestats %}
-		             	<span style='font-size:{{ stat.fontsize}}px'>
-		             		<a href=# onclick="submit_search('{{ stat.surname }}')">
-		             			{{ stat.surname }}                	
-		     				</a>
-		         		</span>
-		             {% endfor %}
-		         </form>
-             </div>
-           </div>
 
             </div><!-- flex-container -->
        </div><!-- summaryarea -->
@@ -134,9 +117,7 @@ selector.addEventListener("change", () => {
 	          {% endif %}
 	        {% endwith %}
     </div>
-
 {% if status == 0 %}
-
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
 	        {% for p in persons %}
@@ -204,11 +185,36 @@ selector.addEventListener("change", () => {
 	    {% endfor %}
         </tbody>
     </table>
+
 {% elif rule %}
     <div class="NotFound">
         <p>{{ _('No one found with search keys') }}.</p>
     </div>
     <p>&nbsp;</p>
-{% endif %}
+{% else %}
+</style>
+    <div id="name_cloud">
+        <h4>{{ _('Most common surnames') }}</h4>
+        <div>
+             <form name="surnameform" method="post" action="/scene/persons/search">
+                <input name="rule" type="hidden" value="surname">
+                <input name="key" type="hidden">
+                <script>
+                    function submit_search(surname) {
+                        document.forms.surnameform.elements.namedItem('key').value = surname;
+                        document.forms.surnameform.submit();
+                    }
+                </script>
+                 {% for stat in surnamestats %}
+                    <span style='font-size:{{ stat.fontsize}}px'>
+                        <a href=# onclick="submit_search('{{ stat.surname }}')">
+                            {{ stat.surname }}                  
+                        </a>
+                    </span>
+                 {% endfor %}
+             </form>
+        </div>
+    </div>
+   {% endif %}
 </div><!-- Individuals -->
 {% endblock %}
