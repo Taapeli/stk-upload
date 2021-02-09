@@ -7,9 +7,11 @@ import logging
 import traceback
 from werkzeug.utils import redirect
 from flask.helpers import url_for
+
 from ..gedcom.models import gedcom_utils
+from ui.user_context import UserContext
 from bl.person import PersonReader
-from pe.neo4j.readservice import Neo4jReadService
+import shareds
 from operator import itemgetter
 logger = logging.getLogger('stkserver')
 
@@ -18,7 +20,6 @@ from flask_security import login_required, current_user, utils as secutils
 #rom flask_security import login_required, roles_accepted, current_user, utils as secutils
 from flask_babelex import _, get_locale
 
-import shareds
 from models import email
 from bp.api import api
 
@@ -50,6 +51,7 @@ def start_guest():
     secutils.login_user(user)
     logger.info('-> bp.start.routes.start_guest')
     is_demo = shareds.app.config.get('DEMO', False)
+
     return render_template('/start/index_guest.html', is_demo=is_demo)
 
 
@@ -78,7 +80,29 @@ def start_logged():
         logger.info(f'-> start.routes.entry/join')
         return redirect(url_for('join'))
 
-    return render_template('/start/index_logged.html')
+    surnamestats = []
+    is_demo = shareds.app.config.get('DEMO', False)
+    if is_demo:
+        # Get surname cloud data
+        from pe.neo4j.readservice import Neo4jReadService
+        readservice = Neo4jReadService(shareds.driver)
+        u_context = UserContext(session, current_user, request)
+        u_context.user = None
+
+        datastore = PersonReader(readservice, u_context)
+        minfont = 6
+        maxfont = 20
+        maxnames = 40
+        surnamestats = datastore.get_surname_list()
+        surnamestats = surnamestats[0:maxnames]
+        print(f'#start_logged DEMO: show {len(surnamestats)} surnames')
+        for i, stat in enumerate(surnamestats):
+            stat['order'] = i
+            stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
+        surnamestats.sort(key=itemgetter("surname"))
+    
+    return render_template('/start/index_logged.html', is_demo=is_demo, surnamestats=surnamestats)
+    #return render_template('/start/index_logged.html')
 
 
 @shareds.app.route('/thankyou')

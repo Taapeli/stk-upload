@@ -28,7 +28,7 @@ from bl.source import SourceDataStore
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
 from bl.person import PersonReader
-from bl.media import Media, MediaReader
+from bl.media import MediaReader # ,Media
 from templates import jinja_filters
 
 #from bp.scene.scene_reader import get_person_full_data
