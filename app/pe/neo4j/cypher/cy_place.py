@@ -181,14 +181,7 @@ MATCH (m:Media  {handle: $m_handle})
 class CypherPlaceStats:
     get_place_list_by_username = """
 match (b:Batch{user:$username}) -[:OWNS]-> (e:Event) -[:PLACE]-> (p:Place) 
-return p.pname as placename, size(collect(e)) as count
-order by count desc
-limit 150
-"""
-
-    get_place_list_common = """
-match () -[:PASSED]-> (e:Event) -[:PLACE]-> (p:Place) 
-return p.pname as placename, size(collect(e)) as count
+return p as place, size(collect(e)) as count
 order by count desc
 limit 150
 """

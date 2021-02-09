@@ -1787,20 +1787,11 @@ class Neo4jReadService:
         with self.driver.session(default_access_mode='READ') as session:
             result = session.run(CypherPlaceStats.get_place_list_by_username, username=username)
             for record in result:
-                placename = record['placename']
+                place = record['place']
+                placename = place['pname']
+                uuid = place['uuid']
                 count = record['count']
-                result_list.append({"placename":placename,"count":count})
-        return result_list
-
-#   @functools.lru_cache
-    def xxxdr_get_placename_stats_common(self):
-        result_list = []
-        with self.driver.session(default_access_mode='READ') as session:
-            result = session.run(CypherPlaceStats.get_place_list_common)
-            for record in result:
-                placename = record['placename']
-                count = record['count']
-                result_list.append({"placename":placename,"count":count})
+                result_list.append({"placename":placename,"count":count, "uuid":uuid})
         return result_list
 
     def dr_get_placename_stats_common(self):
