@@ -2901,13 +2901,9 @@ msgstr "Jokin sukunimistä (alkuosa)"
 msgid "Any firstname (beginning part)"
 msgstr "Jokin etunimistä (alkuosa)"
 
-#: bp/scene/templates/scene/persons_search.html:53
-msgid "Surname cloud"
-msgstr "Sukunimipilvi"
-
 #: bp/scene/templates/scene/persons_search.html:197
-msgid "Most common surnames"
-msgstr "Yleisimmät sukunimet"
+msgid "Most common names"
+msgstr "Yleisimmät nimet"
 
 #: bp/scene/templates/scene/persons_search.html:69
 #: templates/select_refcols.html:30 templates/select_refcols.html:58

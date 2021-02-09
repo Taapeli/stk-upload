@@ -11,6 +11,23 @@
 div#description_box p {
     margin: 0.5em;
 }
+.CloudBox {
+    margin: 1em;
+    padding: 5px;
+    padding: 5px;
+    min-width: 200px;
+    max-width: 430px;
+    padding-bottom: 1em;
+}
+div.CloudBox div {
+    background: #e3f1f2;
+    /*border: solid 2pt white;*/
+    box-shadow: 7pt 10pt 10pt #ccc;
+    padding: 1em 2em;
+    text-align: center;
+    border-radius: 3em;
+    line-height: 1.6em;
+}
 </style>
 <div id="startdiv">
 	{% if rule == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
@@ -50,7 +67,7 @@ div#description_box p {
     {% endif %}
                     </ul>
                     <ul>
-                    <p>▶ <a class="inlink" href="/scene/persons/search">{{ _('Most common surnames') }}</a></p>
+                    <p>▶ <a class="inlink" href="/scene/persons/search">{{ _('Most common names') }}</a></p>
                     </ul>
                 </div>
 {% endif %}
@@ -90,25 +107,6 @@ div#description_box p {
                 </div>
           </form>
 
-
-           <div class="SearchBox2">
-           	<u>Yleisimmät paikannimet:</u>
-             <div style="display: inline-block;">
-		         <form name="placenameform" method="post" action="/scene/persons/search">
-		         	<input name="rule" type="hidden" value="placename">
-		         	<input name="key" type="hidden">
-		             {% for stat in placenamestats %}
-		             	<span style='font-size:{{ stat.fontsize }}px'>
-		             		<a href="/scene/location/uuid={{ stat.uuid }}">
-		             			{{ stat.placename }}             
-		     				</a>
-		         		</span>
-		             {% endfor %}
-		         </form>
-             </div>
-           </div>
-
-            </div><!-- flex-container -->
        </div><!-- summaryarea -->
 
 <script>
@@ -210,28 +208,47 @@ selector.addEventListener("change", () => {
     <p>&nbsp;</p>
 {% else %}
 
-    <div id="name_cloud">
-        <h4>{{ _('Most common surnames') }}</h4>
-        <div>
-             <form name="surnameform" method="post" action="/scene/persons/search">
-                <input name="rule" type="hidden" value="surname">
-                <input name="key" type="hidden">
-                <script>
-                    function submit_search(surname) {
-                        document.forms.surnameform.elements.namedItem('key').value = surname;
-                        document.forms.surnameform.submit();
-                    }
-                </script>
-                 {% for stat in surnamestats %}
-                    <span style='font-size:{{ stat.fontsize}}px'>
-                        <a href=# onclick="submit_search('{{ stat.surname }}')">
-                            {{ stat.surname }}                  
-                        </a>
-                    </span>
-                 {% endfor %}
-             </form>
+    <h4>{{ _('Most common names') }}</h4>
+    <div class="flex-container2">
+        <div class="CloudBox" style="display: inline-block;">
+            <div>
+                 <form name="surnameform" method="post" action="/scene/persons/search">
+                    <input name="rule" type="hidden" value="surname">
+                    <input name="key" type="hidden">
+                    <script>
+                        function submit_search(surname) {
+                            document.forms.surnameform.elements.namedItem('key').value = surname;
+                            document.forms.surnameform.submit();
+                        }
+                    </script>
+                     {% for stat in surnamestats %}
+                        <span style='font-size:{{ stat.fontsize}}px'>
+                            <a href=# onclick="submit_search('{{ stat.surname }}')">
+                                {{ stat.surname }}                  
+                            </a>
+                        </span>
+                     {% endfor %}
+                 </form>
+            </div>
         </div>
-    </div>
+
+           <div class="CloudBox" style="display: inline-block;">
+             <div>
+                 <form name="placenameform" method="post" action="/scene/persons/search">
+                    <input name="rule" type="hidden" value="placename">
+                    <input name="key" type="hidden">
+                     {% for stat in placenamestats %}
+                        <span style='font-size:{{ stat.fontsize }}px'>
+                            <a href="/scene/location/uuid={{ stat.uuid }}">
+                                {{ stat.placename }}             
+                            </a>
+                        </span>
+                     {% endfor %}
+                 </form>
+             </div>
+           </div>
+
+    </div><!-- flex-container -->
    {% endif %}
 </div><!-- Individuals -->
 {% endblock %}

@@ -303,17 +303,6 @@ a.navlink:hover, a.navlink:active {
     border: 1px solid gray;
     margin-bottom: .5em;
 }
-div#name_cloud { padding-bottom: 1em; }
-div#name_cloud div {
-    background: bisque;
-	border: solid 1pt gray;
-	box-shadow: 7pt 10pt 10pt #ccc;
-	padding: 1em 2em;
-	text-align: center;    border-radius: 2em;
-    line-height: 1.6em;
-    margin: 2em 4em;
-}
-
 
 /* Styles with icon  */
 
