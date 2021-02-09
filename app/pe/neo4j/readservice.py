@@ -20,7 +20,7 @@ from bl.media import MediaBl
 
 from ui.place import place_names_from_nodes
 
-from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.neo4j.cypher.cy_place import CypherPlace, CypherPlaceStats
 from pe.neo4j.cypher.cy_source import CypherSource
 from pe.neo4j.cypher.cy_family import CypherFamily
 from pe.neo4j.cypher.cy_event import CypherEvent
@@ -1780,4 +1780,37 @@ class Neo4jReadService:
                 surname = record['surname']
                 count = record['count']
                 result_list.append({"surname":surname,"count":count})
+        return result_list
+
+    def dr_get_placename_stats_by_user(self, username):
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(CypherPlaceStats.get_place_list_by_username, username=username)
+            for record in result:
+                placename = record['placename']
+                count = record['count']
+                result_list.append({"placename":placename,"count":count})
+        return result_list
+
+#   @functools.lru_cache
+    def xxxdr_get_placename_stats_common(self):
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(CypherPlaceStats.get_place_list_common)
+            for record in result:
+                placename = record['placename']
+                count = record['count']
+                result_list.append({"placename":placename,"count":count})
+        return result_list
+
+    def dr_get_placename_stats_common(self):
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(CypherPlaceStats.get_place_list_common)
+            for record in result:
+                place = record['place']
+                placename = place['pname']
+                uuid = place['uuid']
+                count = record['count']
+                result_list.append({"placename":placename,"count":count, "uuid":uuid})
         return result_list

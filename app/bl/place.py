@@ -25,6 +25,7 @@ import logging
 import shareds
 
 from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.db_reader import DbReader
 #from bp.stk_security.models.seccypher import Cypher
 logger = logging.getLogger('stkserver')
 
@@ -508,7 +509,7 @@ class PlaceName(NodeObject):
 
 
 
-class PlaceDataReader:
+class PlaceDataReader(DbReader):
     '''
     Abstracted Place datastore for reading.
 
@@ -527,6 +528,7 @@ class PlaceDataReader:
         :param: readservice   pe.neo4j.readservice.Neo4jReadService
         :param: u_context     ui.user_context.UserContext object
         '''
+        DbReader.__init__(self, readservice, u_context)
         self.readservice = readservice
         self.driver = readservice.driver
         self.user_context = u_context
@@ -593,6 +595,15 @@ class PlaceDataReader:
         results['events'] = res['items']
         return results
 
+    def get_placename_stats(self):
+        ''' 
+        Return placename stats so that the names can be displayed in a name cloud.
+        '''
+        if self.use_user:
+            placename_stats = self.readservice.dr_get_placename_stats_by_user(self.use_user)
+        else:
+            placename_stats = self.readservice.dr_get_placename_stats_common()
+        return placename_stats
 
 class PlaceDataStore:
     '''

@@ -87,6 +87,7 @@ div#description_box p {
           </form>
 
            <div class="SearchBox2">
+           	<u>Yleisimmät sukunimet:</u>
              <div style="display: inline-block;">
 		         <form name="surnameform" method="post" action="/scene/persons/search">
 		         	<input name="rule" type="hidden" value="surname">
@@ -98,9 +99,26 @@ div#description_box p {
 		         		}
 		         	</script>
 		             {% for stat in surnamestats %}
-		             	<span style='font-size:{{ stat.fontsize}}px'>
+		             	<span style='font-size:{{ stat.fontsize }}px'>
 		             		<a href=# onclick="submit_search('{{ stat.surname }}')">
-		             			{{ stat.surname }}                	
+		             			{{ stat.surname }}           	
+		     				</a>
+		         		</span>
+		             {% endfor %}
+		         </form>
+             </div>
+           </div>
+
+           <div class="SearchBox2">
+           	<u>Yleisimmät paikannimet:</u>
+             <div style="display: inline-block;">
+		         <form name="placenameform" method="post" action="/scene/persons/search">
+		         	<input name="rule" type="hidden" value="placename">
+		         	<input name="key" type="hidden">
+		             {% for stat in placenamestats %}
+		             	<span style='font-size:{{ stat.fontsize }}px'>
+		             		<a href="http://localhost:5000/scene/location/uuid={{ stat.uuid }}">
+		             			{{ stat.placename }}             
 		     				</a>
 		         		</span>
 		             {% endfor %}
