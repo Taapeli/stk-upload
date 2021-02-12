@@ -1780,10 +1780,11 @@ class Neo4jReadService:
         return
 
 #   @functools.lru_cache
-    def dr_get_surname_list_by_user(self, username):
+    def dr_get_surname_list_by_user(self, username, count):
         result_list = []
         with self.driver.session(default_access_mode='READ') as session:
-            result = session.run(CypherPerson.get_surname_list_by_username, username=username)
+            result = session.run(CypherPerson.get_surname_list_by_username,
+                                 username=username, count=count)
             for record in result:
                 surname = record['surname']
                 count = record['count']
@@ -1791,20 +1792,22 @@ class Neo4jReadService:
         return result_list
 
 #   @functools.lru_cache
-    def dr_get_surname_list_common(self):
+    def dr_get_surname_list_common(self, count):
         result_list = []
         with self.driver.session(default_access_mode='READ') as session:
-            result = session.run(CypherPerson.get_surname_list_common)
+            result = session.run(CypherPerson.get_surname_list_common,
+                                 count=count)
             for record in result:
                 surname = record['surname']
                 count = record['count']
                 result_list.append({"surname":surname,"count":count})
         return result_list
 
-    def dr_get_placename_stats_by_user(self, username):
+    def dr_get_placename_stats_by_user(self, username, count):
         result_list = []
         with self.driver.session(default_access_mode='READ') as session:
-            result = session.run(CypherPlaceStats.get_place_list_by_username, username=username)
+            result = session.run(CypherPlaceStats.get_place_list_by_username, 
+                                 username=username, count=count)
             for record in result:
                 place = record['place']
                 placename = place['pname']
@@ -1813,10 +1816,11 @@ class Neo4jReadService:
                 result_list.append({"placename":placename,"count":count, "uuid":uuid})
         return result_list
 
-    def dr_get_placename_stats_common(self):
+    def dr_get_placename_stats_common(self, count):
         result_list = []
         with self.driver.session(default_access_mode='READ') as session:
-            result = session.run(CypherPlaceStats.get_place_list_common)
+            result = session.run(CypherPlaceStats.get_place_list_common,
+                                 count=count)
             for record in result:
                 place = record['place']
                 placename = place['pname']

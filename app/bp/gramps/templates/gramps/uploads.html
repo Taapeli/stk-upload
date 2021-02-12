@@ -242,7 +242,7 @@ function confirm_delete(subj, name) {
     
   <p>&rtrif; <a href="/gramps">{{ _("Send a new Gramps file") }}</a><br>
    {% if current_user.is_authenticated and current_user.has_role('research') %}
-	&rtrif; <a href="/scene/persons/all?div=2">{{ _('Look at your candidate materials') }}</a><br>
+	&rtrif; <a href="/scene/persons/search?div=2">{{ _('Look at your candidate materials') }}</a><br>
    {% endif %}
     &rtrif; <a href="javascript:history.back()">{{ _("Return to front page") }}</a>
   </p>

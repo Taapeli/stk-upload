@@ -614,14 +614,15 @@ class PlaceDataReader(DbReader):
         results['events'] = res['items']
         return results
 
-    def get_placename_stats(self):
+    def get_placename_stats(self, count=40):
         ''' 
         Return placename stats so that the names can be displayed in a name cloud.
         '''
         if self.use_user:
-            placename_stats = self.readservice.dr_get_placename_stats_by_user(self.use_user)
+            placename_stats = self.readservice.dr_get_placename_stats_by_user(self.use_user,
+                                                                              count=count)
         else:
-            placename_stats = self.readservice.dr_get_placename_stats_common()
+            placename_stats = self.readservice.dr_get_placename_stats_common(count=count)
         return placename_stats
 
 class PlaceDataStore:

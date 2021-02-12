@@ -270,15 +270,15 @@ SET person.confidence=$confidence"""
     get_surname_list_by_username = """
 match (b:Batch{user:$username}) -[:OWNS]-> (p:Person) -[:NAME]-> (n:Name) 
 where n.surname <> "" and n.surname <> "N"
-return n.surname as surname, size(collect(p)) as count
+return n.surname as surname, count(p) as count
 order by count desc
-limit 150
+limit $count
 """
 
     get_surname_list_common = """
 match () -[:PASSED]-> (p:Person) -[:NAME]-> (n:Name) 
 where n.surname <> "" and n.surname <> "N"
-return n.surname as surname, size(collect(p)) as count
+return n.surname as surname, count(p) as count
 order by count desc
-limit 150
+limit $count
 """

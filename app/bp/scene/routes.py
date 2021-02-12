@@ -199,9 +199,8 @@ def show_person_search():
         
     minfont = 6
     maxfont = 20
-    maxnames = 40
-    surnamestats = datastore.get_surname_list()
-    surnamestats = surnamestats[0:maxnames]
+    #maxnames = 47
+    surnamestats = datastore.get_surname_list(47)
     for i, stat in enumerate(surnamestats):
         stat['order'] = i
         stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
@@ -211,9 +210,9 @@ def show_person_search():
         
     minfont = 6
     maxfont = 20
-    maxnames = 40
-    placenamestats = placereader.get_placename_stats()
-    placenamestats = placenamestats[0:maxnames]
+    #maxnames = 40
+    placenamestats = placereader.get_placename_stats(40)
+    #placenamestats = placenamestats[0:maxnames]
     for i, stat in enumerate(placenamestats):
         stat['order'] = i
         stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(placenamestats)

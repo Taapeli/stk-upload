@@ -111,9 +111,9 @@ def start_logged():
         datastore = PersonReader(readservice, u_context)
         minfont = 6
         maxfont = 20
-        maxnames = 40
+        #maxnames = 40
         surnamestats = datastore.get_surname_list()
-        surnamestats = surnamestats[0:maxnames]
+        #surnamestats = surnamestats[0:maxnames]
         print(f'#start_logged DEMO: show {len(surnamestats)} surnames')
         for i, stat in enumerate(surnamestats):
             stat['order'] = i
