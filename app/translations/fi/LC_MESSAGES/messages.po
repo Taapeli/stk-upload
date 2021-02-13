@@ -3957,7 +3957,7 @@ msgstr "Isotammi alkusivu"
 
 #: templates/index_entry.html:27
 msgid "Welcome to Isotammi Service"
-msgstr "Tervetuloa Isotammi palveluun"
+msgstr "Tervetuloa Isotammi-palveluun"
 
 #: templates/index_entry.html:32
 msgid "Learn about Isotammi"
@@ -3968,7 +3968,7 @@ msgid ""
 "<i>Isotammi Service</i> is a service for co-operatively collected and "
 "validated genealogical data."
 msgstr ""
-"<i>Isotammi palvelu</i> sisältää joukkoistamalla kerättyjä ja laadukkaita"
+"<i>Isotammi-palvelu</i> tulee sisältämään joukkoistamalla kerättyjä ja laadukkaita"
 " sukutietoja."
 
 #: templates/index_entry.html:38

@@ -129,46 +129,5 @@
     </div>{# row #}
 
   </div>
-  
-{% if surnamestats %}
-<style>
-div#name_cloud { padding-bottom: 1em; }
-div#name_cloud div {
-    background: bisque;
-    border: 0;
-    box-shadow: 7pt 10pt 10pt bisque;
-    padding: 1em 2em;
-    margin: 1em 4em 2em 4em;
-    text-align: center;    border-radius: 2em;
-    line-height: 1.6em;
-}
-div#name_cloud a:link    { text-decoration: none; }
-div#name_cloud a:visited { text-decoration: none; }
-div#name_cloud a:hover   { text-decoration: underline; }
-</style>
-    <div id="name_cloud">
-        <h4>{{ _('Most common surnames') }}</h4>
-        <div>
-             <form name="surnameform" method="post" action="/scene/persons/search">
-                <input name="rule" type="hidden" value="surname">
-                <input name="key" type="hidden">
-                <script>
-                    function submit_search(surname) {
-                        document.forms.surnameform.elements.namedItem('key').value = surname;
-                        document.forms.surnameform.submit();
-                    }
-                </script>
-                 {% for stat in surnamestats %}
-                    <span style='font-size:{{ stat.fontsize}}px'>
-                        <a href=# onclick="submit_search('{{ stat.surname }}')">
-                            {{ stat.surname }}                  
-                        </a>
-                    </span>
-                 {% endfor %}
-             </form>
-        </div>
-    </div>
-{% endif %}
-
 </div>
 {% endblock %}

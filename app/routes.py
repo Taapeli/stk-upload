@@ -30,16 +30,18 @@ import urllib
 import logging 
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for #, g, flash
-from flask_security import login_required, logout_user, current_user # ,roles_required
+from flask import render_template, request, redirect, url_for, session
+from flask_security import login_required, logout_user, current_user
 from flask_babelex import get_locale
+from operator import itemgetter
 
 import shareds
-
 app = shareds.app
 if not app:
     raise RuntimeError("Start this application in '..' from 'run.py' or 'runssl.py'")
 
+from bl.person import PersonReader
+from ui.user_context import UserContext
 
 @app.before_request
 def before_request():
@@ -82,8 +84,30 @@ def entry():
     demo_site = f"{app.config['DEMO_URL']}"
     logger.debug(f'-> routes.entry auth={current_user.is_authenticated} demo={demo_site}')
 
+    surnamestats = []
+    is_demo = shareds.app.config.get('DEMO', False)
+    if is_demo:
+        # Get surname cloud data
+        from pe.neo4j.readservice import Neo4jReadService
+        readservice = Neo4jReadService(shareds.driver)
+        u_context = UserContext(session, current_user, request)
+        u_context.user = None
+
+        datastore = PersonReader(readservice, u_context)
+        minfont = 6
+        maxfont = 20
+        #maxnames = 40
+        surnamestats = datastore.get_surname_list(40)
+        #surnamestats = surnamestats[0:maxnames]
+        print(f'#start_logged DEMO: show {len(surnamestats)} surnames')
+        for i, stat in enumerate(surnamestats):
+            stat['order'] = i
+            stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
+        surnamestats.sort(key=itemgetter("surname"))
+    
     # If not logged in, a login page is shown here first
-    return render_template('/index_entry.html', demo_site=demo_site, lang=lang)
+    return render_template('/index_entry.html', demo_site=demo_site, 
+                           lang=lang, surnamestats=surnamestats)
 
 """ -------------------------- Yleinen virhesivu ------------------------------
 """
