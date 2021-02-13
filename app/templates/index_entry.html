@@ -109,8 +109,9 @@ div.CloudBox a:hover   { text-decoration: underline; }
 <!--             <h4>{{ _('Most common names') }}</h4> -->
             <div class="startbox CloudBox" style="display: inline-block;">
                     <div>
-                         <form name="surnameform" method="post" action="/scene/persons/search">
+                         <form name="surnameform" method="post" action="/start/persons/search">
                             <input name="rule" type="hidden" value="surname">
+					       <input name="lang" type="hidden" value="{{ lang }}">
                             <input name="key" type="hidden">
                             <script>
                                 function submit_search(surname) {

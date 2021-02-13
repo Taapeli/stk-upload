@@ -272,7 +272,9 @@ class UserContext():
             return None
 
     def owner_str(self):
-        # Return current owner choise as text 
+        # Return current owner choise as text.
+        
+        # ONly used in test_owner_filter.test_ownerfilter_nouser()
         try:
             return self.choices.as_str[self.context]
         except:
@@ -285,15 +287,15 @@ class UserContext():
         except:
             return ''
 
-    def owner_or_common(self):
-        ''' Tells, if you should select object by data owner.
-
-            Always when others but self.ChoicesOfView.OWN only are required
-        '''
-        if (self.context & 2) > 0:
-            return 'user'
-        else:
-            return 'common'
+#     def owner_or_common(self):
+#         ''' Tells, if you should select object by data owner.
+# 
+#             Always when others but self.ChoicesOfView.OWN only are required
+#         '''
+#         if (self.context & 2) > 0:
+#             return 'user'
+#         else:
+#             return 'common'
     
     def use_owner_filter(self):
         ''' Tells, if you should select object by data owner.

@@ -68,10 +68,28 @@ def start_guest():
     """
     user = shareds.user_datastore.get_user('guest')
     secutils.login_user(user)
-    logger.info('-> bp.start.routes.start_guest')
-    is_demo = shareds.app.config.get('DEMO', False)
+    lang = request.args.get('lang')
+    if lang:
+        session['lang'] = lang
 
-    return render_template('/start/index_guest.html', is_demo=is_demo)
+    logger.info(f'-> bp.start.routes.start_guest, lang={lang}')
+    return redirect('/scene/persons/search')
+    #is_demo = shareds.app.config.get('DEMO', False)
+    #return render_template('/start/index_guest.html', is_demo=is_demo)
+
+
+@shareds.app.route('/start/persons/search', methods=['GET', 'POST'])
+def start_guest_search():
+    """ Scene start page for a guest user.
+    """
+    user = shareds.user_datastore.get_user('guest')
+    secutils.login_user(user)
+    lang = request.args.get('lang')
+    if lang:
+        session['lang'] = lang
+
+    logger.info(f'-> bp.start.routes.start_guest_search, lang={lang}')
+    return redirect('/scene/persons/search', code=307)
 
 
 @shareds.app.route('/start/logged', methods=['GET', 'POST'])
