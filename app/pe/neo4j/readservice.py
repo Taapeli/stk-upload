@@ -1,8 +1,28 @@
+#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
+#
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#                            Timo Nallikari, Pekka Valta
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 '''
 Created on 17.3.2020
 
 @author: jm
 '''
+import functools
 import logging
 #from models.gen.family_combo import Family_combo
 from bl.dates import DateRange
@@ -19,7 +39,7 @@ from bl.media import MediaBl
 
 from ui.place import place_names_from_nodes
 
-from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.neo4j.cypher.cy_place import CypherPlace, CypherPlaceStats
 from pe.neo4j.cypher.cy_source import CypherSource
 from pe.neo4j.cypher.cy_family import CypherFamily
 from pe.neo4j.cypher.cy_event import CypherEvent
@@ -1759,13 +1779,52 @@ class Neo4jReadService:
                         person.event_death = e
         return
 
-
-    def dr_get_surname_list(self):
+#   @functools.lru_cache
+    def dr_get_surname_list_by_user(self, username, count):
         result_list = []
         with self.driver.session(default_access_mode='READ') as session:
-            result = session.run(CypherPerson.get_surname_list)
+            result = session.run(CypherPerson.get_surname_list_by_username,
+                                 username=username, count=count)
             for record in result:
                 surname = record['surname']
                 count = record['count']
                 result_list.append({"surname":surname,"count":count})
+        return result_list
+
+#   @functools.lru_cache
+    def dr_get_surname_list_common(self, count):
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(CypherPerson.get_surname_list_common,
+                                 count=count)
+            for record in result:
+                surname = record['surname']
+                count = record['count']
+                result_list.append({"surname":surname,"count":count})
+        return result_list
+
+    def dr_get_placename_stats_by_user(self, username, count):
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(CypherPlaceStats.get_place_list_by_username, 
+                                 username=username, count=count)
+            for record in result:
+                place = record['place']
+                placename = place['pname']
+                uuid = place['uuid']
+                count = record['count']
+                result_list.append({"placename":placename,"count":count, "uuid":uuid})
+        return result_list
+
+    def dr_get_placename_stats_common(self, count):
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(CypherPlaceStats.get_place_list_common,
+                                 count=count)
+            for record in result:
+                place = record['place']
+                placename = place['pname']
+                uuid = place['uuid']
+                count = record['count']
+                result_list.append({"placename":placename,"count":count, "uuid":uuid})
         return result_list

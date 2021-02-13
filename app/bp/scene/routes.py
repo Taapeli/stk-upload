@@ -1,3 +1,22 @@
+#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
+#
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#                            Timo Nallikari, Pekka Valta
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 '''
 Created on 12.8.2018
 
@@ -9,6 +28,7 @@ import traceback
 import json
 
 import logging 
+from operator import itemgetter
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
@@ -27,7 +47,7 @@ from bl.source import SourceDataStore
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
 from bl.person import PersonReader
-from bl.media import Media, MediaReader
+from bl.media import MediaReader # ,Media
 from templates import jinja_filters
 
 #from bp.scene.scene_reader import get_person_full_data
@@ -174,6 +194,31 @@ def show_person_search():
                f"-> bp.scene.routes.show_person_search/{rule}"
                f" n={len(found)}{hidden} e={elapsed:.3f}")
     print(f'Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}')
+    
+    datastore = PersonReader(readservice, u_context)
+        
+    minfont = 6
+    maxfont = 20
+    #maxnames = 47
+    surnamestats = datastore.get_surname_list(47)
+    for i, stat in enumerate(surnamestats):
+        stat['order'] = i
+        stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
+    surnamestats.sort(key=itemgetter("surname"))
+    
+    placereader = PlaceDataReader(readservice, u_context)
+        
+    minfont = 6
+    maxfont = 20
+    #maxnames = 40
+    placenamestats = placereader.get_placename_stats(40)
+    #placenamestats = placenamestats[0:maxnames]
+    for i, stat in enumerate(placenamestats):
+        stat['order'] = i
+        stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(placenamestats)
+    placenamestats.sort(key=itemgetter("placename"))
+
+    
     return render_template("/scene/persons_search.html",  menuno=0,
                            persons=found,
                            user_context=u_context, 
@@ -181,6 +226,8 @@ def show_person_search():
                            rule=rule, 
                            key=key,
                            status=status,
+                           surnamestats=surnamestats,
+                           placenamestats=placenamestats,
                            elapsed=time.time()-t0)
 
 # @bp.route('/obsolete/search', methods=['POST'])
