@@ -182,7 +182,7 @@ msgstr "kön inte tillämpligt"
 
 #: bl/person.py:198
 msgid "The year or years must be numeric"
-msgstr ""
+msgstr "Året måste vara numerisk"
 
 #: bl/person.py:217 bl/person.py:249
 msgid "No persons found"
@@ -194,7 +194,7 @@ msgstr "Personen är inte tillgänglig"
 
 #: bl/person.py:406
 msgid "Requested person not found"
-msgstr ""
+msgstr "Personen finns inte"
 
 #: bl/source.py:176
 msgid "No person or family has uses this source"
@@ -2382,7 +2382,7 @@ msgstr[1] "%(num)d dolda"
 #: bp/scene/templates/scene/families.html:163
 #, python-format
 msgid "No family found with search keys starting \"%(name)s\""
-msgstr ""
+msgstr "En sådan familje finns inte"
 
 #: bp/scene/templates/scene/families.html:165
 #: bp/scene/templates/scene/macros.html:105
@@ -2671,7 +2671,7 @@ msgstr "Gå till det första mediet"
 
 #: bp/scene/templates/scene/medias.html:118
 msgid "No medias found"
-msgstr ""
+msgstr "Det finns inga medier"
 
 #: bp/scene/templates/scene/person.html:18
 msgid "Person's details"
@@ -2892,7 +2892,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/persons_search.html:53
 msgid "Surname cloud"
-msgstr ""
+msgstr "Släktnamnernas moln"
 
 #: bp/scene/templates/scene/persons_search.html:65
 msgid "Search term"
@@ -2949,8 +2949,8 @@ msgid "No one found with search keys"
 msgstr "Ingen hittad med sökorden"
 
 #: bp/scene/templates/scene/persons_search.html:197
-msgid "Most common surnames"
-msgstr ""
+msgid "Most common names"
+msgstr "Vanligaste namnen"
 
 #: bp/scene/templates/scene/place_events.html:3
 #: bp/scene/templates/scene/place_events.html:27
@@ -4002,7 +4002,7 @@ msgstr "Se processen för din data"
 
 #: templates/index_entry.html:45
 msgid "Gedcom data healing services"
-msgstr "Servece för att förbätttra GEDCOM-data"
+msgstr "Servece för att förbättra Gedcom-data"
 
 #: templates/index_entry.html:50
 msgid "Look at the demo data"
