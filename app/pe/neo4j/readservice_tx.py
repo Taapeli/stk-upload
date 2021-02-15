@@ -42,7 +42,7 @@ class Neo4jReadServiceTx:
         :param: active_user str if "": read from approved data
                                 else:  read user's candidate data
          '''
-        res = {}
+        res = {'status':Status.OK}
 
         # 1. Get Person node by uuid, if that allowd for given user
         #    results: person, root
@@ -143,6 +143,19 @@ class Neo4jReadServiceTx:
             res.update({'status': Status.ERROR, 'statustext': f"Could not read names and events: {msg}"})
             return res
 
+        return res
+
+    def tx_get_person_families(self, puid:int):
+        ''' Read the families, where given Person is a member.
+            Returns
+            - the Families, where this person is a parent or child
+            - the Family members with their birth event
+            - the family events from families, where this person is a parent
+            (p:Person) <-- (f:Family)
+               for f
+                 (f) --> (fp:Person) -[*1]-> (fpn:Name)
+                 (f) --> (fe:Event)
+        '''
         # 3. Read the families, where given Person is a member
         #    orig. dr_get_person_families(self, puid:int)
 
@@ -152,11 +165,12 @@ class Neo4jReadServiceTx:
         #                  (f) --> (fe:Event)
         #  Results
         #    - family_sets   list of dict {family, family_events, member_sets}
-        #            - family_events = list of dict (node, relation_type, marriage_date)
-        #                - the family events from families, where this person is a parent
-        #            - member_sets   = list of dict {member_node, name_node, parental_role, birth_node}
-        #                - the Family members with their birth event
+        #      - family_events = list of dict (node, relation_type, marriage_date)
+        #        - the family events from families, where this person is a parent
+        #      - member_sets   = list of dict {member_node, name_node, parental_role, birth_node}
+        #        - the Family members with their birth event
 
+        res = {'status':Status.OK}
         families = []
         try:
             results = self.tx.run(CypherPerson.get_families, uid=puid)
@@ -227,7 +241,6 @@ class Neo4jReadServiceTx:
             return res
 
         res['families'] = families
-        res['status'] = Status.OK
         return res
 
 
@@ -291,7 +304,8 @@ class Neo4jReadServiceTx:
         ''' 
         Read Citations, Notes, Medias for list of active objects.
  
-        :param:    objs    {uniq_id: NodeObject}, updated!
+        :param:    obj_catalog    {uniq_id: NodeObject}, by uniq_id, updated!
+        :param:    active_objs    The src uniq_ids to check for targets
 
                 (src) -[r:CITATION|NOTE|MEDIA]-> (target)
  
@@ -299,7 +313,8 @@ class Neo4jReadServiceTx:
         Citations of person or it's connected objects.
              
         Returns {status, new_objects, references}
-        - references    Object with target_label, target_node, order and crop fields
+        - references    Object by source with target_label, target_node, order
+                        and crop fields
         - new_objects   list of created all new uniq_ids, where this search
                         should be repeated
         '''
@@ -331,8 +346,8 @@ class Neo4jReadServiceTx:
 
                 # The existing object src
                 src_node = record['src']
-                src_label, = list(src_node.labels)
                 src_uniq_id = src_node.id
+                #src_label, = list(src_node.labels)
                 #src = obj_catalog[record['uniq_id']]
 
                 # Target is a Citation, Note or Media
@@ -352,8 +367,6 @@ class Neo4jReadServiceTx:
                         right = rel.get('right')
                         lower = rel.get('lower')
                         ref.crop = (left, upper, right, lower)
-                    else:
-                        ref.crop = None
                 #print(f'# - Found ({src_uniq_id}:{src_label} {src_node["id"]}) {ref}')
 
                 # Add current target reference to objects referred 

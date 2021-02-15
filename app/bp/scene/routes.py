@@ -310,7 +310,7 @@ def show_person(uuid=None):
     reader = PersonReaderTx(readservice, u_context)
 
     result = reader.get_person_data(uuid) #, args)
-    # result {'person', 'objs', 'jscode', 'root'}
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
     person = result.get('person')
@@ -321,7 +321,6 @@ def show_person(uuid=None):
 
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
-    #for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=root,

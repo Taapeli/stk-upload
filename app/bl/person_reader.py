@@ -120,18 +120,18 @@ class PersonReaderTx(DbReader):
                 return {'status':Status.NOT_FOUND, 
                         'statustext': _('Requested person not found')}
             return res
-        ''' 
-        Got dictionary: Status and following objects:
-            - person_node, root, name_nodes, event_node_roles, cause_of_death, families
-            - - root = {root_type, root,user, batch_id}
-            - - event_node_roles = [[Event node, role], ...]
-            - - cause_of_death = Event node
-            - - families = [{family_rel, family_role, family_node, 
-                             family_events, relation_type, family_members}, ...]
-            - - - family_events = [event_node]
-            - - - family_members = [{member_node, name_node, parental_role, birth_node}, ...]
-            - - - marriage_date = {datetype, date1, date2}
-        '''
+
+        # Got dictionary: Status and following objects:
+        #     - person_node, root, name_nodes, event_node_roles, cause_of_death, families
+        #     - - root = {root_type, root,user, batch_id}
+        #     - - event_node_roles = [[Event node, role], ...]
+        #     - - cause_of_death = Event node
+        #     - - families = [{family_rel, family_role, family_node, 
+        #                      family_events, relation_type, family_members}, ...]
+        #     - - - family_events = [event_node]
+        #     - - - family_members = [{member_node, name_node, parental_role, birth_node}, ...]
+        #     - - - marriage_date = {datetype, date1, date2}
+
 
         # 1-2. Person, names and events
 
@@ -160,6 +160,12 @@ class PersonReaderTx(DbReader):
             self._catalog(obj)
 
         # 3. Person's families as child or parent
+
+        res = self.readservice.tx_get_person_families(person.uniq_id)
+        if Status.has_failed(res):
+            print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read families:'\
+                  f' {res.get("statustext")}')
+            return res
 
         for f in res.get('families'):
             family = FamilyBl.from_node(f['family_node'])
@@ -258,39 +264,35 @@ class PersonReaderTx(DbReader):
                         order = current.order
                         crop = current.crop
                         label, = node.labels
-                        print (f'Link ({source.__class__.__name__} {src_id}:{source.id}) {current}')
+                        #print (f'Link ({source.__class__.__name__} {src_id}:{source.id}) {current}')
 
                         target_obj = None
                         if label == "Citation":
                             # If id is in the dictionary, return its value.
                             # If not, insert id with a value of 2nd argument.
-                            pass
-#TODO kuha lähteetkin on tehty
-#                             target_obj = citations.setdefault(node.id, Citation.from_node(node))
-#                             if hasattr(source, 'citation_ref'):
-#                                 source.citation_ref.append((node.id, crop, order))
-#                             else:
-#                                 source.citation_ref = [(node.id, crop, order)]
+                            target_obj = citations.setdefault(node.id, Citation.from_node(node))
+                            if hasattr(source, 'citation_ref'):
+                                source.citation_ref.append(node.id)
+                            else:
+                                source.citation_ref = [node.id]
                         elif label == "Note":
                             target_obj = notes.setdefault(node.id, Note.from_node(node))
                             if hasattr(source, 'note_ref'):
-                                source.note_ref.append((node.id, crop, order))
+                                source.note_ref.append(node.id)
                             else:
-                                source.note_ref = [(node.id, crop, order)]
+                                source.note_ref = [node.id]
+                            target_obj.citation_ref = []
                         elif label == "Media":
                             target_obj = medias.setdefault(node.id, Media.from_node(node))
                             if hasattr(source, 'media_ref'):
                                 source.media_ref.append((node.id, crop, order))
                             else:
                                 source.media_ref = [(node.id, crop, order)]
+                            target_obj.citation_ref = []
                         else:
                             raise NotImplementedError("Citation, Note or Media excepted, got {label}")
-                        if target_obj:
-                            print(f'\tTarget_obj  = {target_obj}')
-#                         if target_obj:
-#                             if not target_obj.uniq_id in new_ids:
-#                                 new_ids.append(target_obj)
 
+#             print(f'# - found {len(citations)} Citatons, {len(notes)} Notes, {len(medias)} Medias')
             self.obj_catalog.update(citations)
             self.obj_catalog.update(notes)
             self.obj_catalog.update(medias)
