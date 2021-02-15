@@ -15,13 +15,13 @@ div#description_box p {
     margin: 1em;
     padding: 5px;
     padding: 5px;
-    min-width: 200px;
+    min-width: 150px;
     max-width: 430px;
     padding-bottom: 1em;
 }
 div.CloudBox div {
-    background: #e3f1f2;
-    /*border: solid 2pt white;*/
+/*     background: #e3f1f2; */
+    background-image: url("/static/image/cloud.png");
     box-shadow: 7pt 10pt 10pt #ccc;
     padding: 1em 2em;
     text-align: center;
@@ -224,8 +224,7 @@ selector.addEventListener("change", () => {
                      {% for stat in surnamestats %}
                         <span style='font-size:{{ stat.fontsize}}px'>
                             <a href=# onclick="submit_search('{{ stat.surname }}')">
-                                {{ stat.surname }}                  
-                            </a>
+                                {{ stat.surname }}</a>
                         </span>
                      {% endfor %}
                  </form>
@@ -240,8 +239,7 @@ selector.addEventListener("change", () => {
                      {% for stat in placenamestats %}
                         <span style='font-size:{{ stat.fontsize }}px'>
                             <a href="/scene/location/uuid={{ stat.uuid }}">
-                                {{ stat.placename }}             
-                            </a>
+                                {{ stat.placename }}</a>
                         </span>
                      {% endfor %}
                  </form>

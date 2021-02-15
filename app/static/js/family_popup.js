@@ -1,3 +1,8 @@
+/*  Isotammi Geneological Service for combining multiple researchers' results.
+    Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+                             Timo Nallikari, Pekka Valta
+    See the LISENCE file.
+*/
 /*!
  * Methods for displaying Family information in a popup-window
  */
