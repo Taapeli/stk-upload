@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-02-15 14:17+0200\n"
+"POT-Creation-Date: 2021-02-15 15:01+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -22,421 +22,421 @@ msgstr ""
 msgid "Undefined"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:64 config.py:30
+#: bp/start/templates/start/my_settings.html:64 config.py:37
 #: templates/select_refcols.html:48 templates/select_refcols.html:76
 msgid "Finnish"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:66 config.py:31
+#: bp/start/templates/start/my_settings.html:66 config.py:38
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:68 config.py:32
+#: bp/start/templates/start/my_settings.html:68 config.py:39
 msgid "English"
 msgstr ""
 
-#: setups.py:143
+#: setups.py:162
 msgid "Email or Username"
 msgstr ""
 
-#: setups.py:144 setups.py:153
+#: setups.py:163 setups.py:172
 msgid "Password"
 msgstr ""
 
-#: setups.py:146
+#: setups.py:165
 msgid "Remember Me"
 msgstr ""
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:147
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:166
 msgid "Login"
 msgstr ""
 
-#: bp/admin/forms.py:38 bp/admin/forms.py:89
+#: bp/admin/forms.py:57 bp/admin/forms.py:108
 #: bp/admin/templates/admin/list_users.html:83
-#: bp/start/templates/start/join.html:55 setups.py:151
+#: bp/start/templates/start/join.html:55 setups.py:170
 msgid "Email address"
 msgstr ""
 
-#: setups.py:152
+#: setups.py:171
 msgid ""
 "I have read and agree the <a href='static/termsofuse.html'>Terms of "
 "use</a>"
 msgstr ""
 
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:155
-#: templates/index_entry.html:69 templates/index_entry.html:73
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:174
+#: templates/index_entry.html:88 templates/index_entry.html:92
 msgid "Register"
 msgstr ""
 
-#: setups.py:159
+#: setups.py:178
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr ""
 
-#: setups.py:169
+#: setups.py:188
 msgid "Username has been reserved already"
 msgstr ""
 
-#: setups.py:171 templates/del_table_users.html:39
+#: setups.py:190 templates/del_table_users.html:39
 msgid "Username"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:82
-#: bp/start/templates/start/join.html:53 setups.py:172 setups.py:204
+#: bp/start/templates/start/join.html:53 setups.py:191 setups.py:223
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr ""
 
-#: bp/admin/forms.py:43 bp/admin/forms.py:46 bp/admin/forms.py:92
-#: bp/admin/forms.py:95 bp/admin/templates/admin/list_users.html:84
-#: bp/start/forms.py:20 bp/start/forms.py:24 setups.py:173 setups.py:204
+#: bp/admin/forms.py:62 bp/admin/forms.py:65 bp/admin/forms.py:111
+#: bp/admin/forms.py:114 bp/admin/templates/admin/list_users.html:84
+#: bp/start/forms.py:39 bp/start/forms.py:43 setups.py:192 setups.py:223
 msgid "Language"
 msgstr ""
 
-#: setups.py:175
+#: setups.py:194
 msgid "Language required"
 msgstr ""
 
-#: bp/admin/forms.py:40 bp/start/templates/start/join.html:54 setups.py:204
+#: bp/admin/forms.py:59 bp/start/templates/start/join.html:54 setups.py:223
 msgid "User name"
 msgstr ""
 
-#: bl/dates.py:221
+#: bl/dates.py:240
 msgid "calculated "
 msgstr ""
 
-#: bl/dates.py:224
+#: bl/dates.py:243
 msgid "estimated "
 msgstr ""
 
-#: bl/dates.py:234
+#: bl/dates.py:253
 msgid "{}till {}"
 msgstr ""
 
-#: bl/dates.py:237
+#: bl/dates.py:256
 msgid "{}from {}"
 msgstr ""
 
-#: bl/dates.py:242
+#: bl/dates.py:261
 msgid "{}between {} … {}"
 msgstr ""
 
-#: bl/dates.py:245
+#: bl/dates.py:264
 msgid "{}about {}"
 msgstr ""
 
-#: bl/event.py:130
+#: bl/event.py:149
 msgid "The event is not accessible"
 msgstr ""
 
-#: bl/event.py:139
+#: bl/event.py:158
 msgid "Participants read error "
 msgstr ""
 
-#: bl/event.py:148
+#: bl/event.py:167
 msgid "Place read error "
 msgstr ""
 
-#: bl/event.py:158
+#: bl/event.py:177
 msgid "Notes read error "
 msgstr ""
 
-#: bl/family.py:56 models/gen/family.py:45
+#: bl/family.py:75 models/gen/family.py:45
 msgid "undefined relation"
 msgstr ""
 
-#: bl/family.py:511
+#: bl/family.py:530
 msgid "This person has no families"
 msgstr ""
 
-#: bl/person.py:106 bl/person.py:109 templates/jinja_filters.py:97
-#: templates/jinja_filters.py:246
+#: bl/person.py:125 bl/person.py:128 templates/jinja_filters.py:117
+#: templates/jinja_filters.py:266
 msgid "Child"
 msgstr ""
 
-#: bl/person.py:107 templates/jinja_filters.py:245
+#: bl/person.py:126 templates/jinja_filters.py:265
 msgid "Son"
 msgstr ""
 
-#: bl/person.py:108 templates/jinja_filters.py:244
+#: bl/person.py:127 templates/jinja_filters.py:264
 msgid "Daughter"
 msgstr ""
 
-#: bl/person.py:116
+#: bl/person.py:135
 msgid "sex not known"
 msgstr ""
 
-#: bl/person.py:117
+#: bl/person.py:136
 msgid "male"
 msgstr ""
 
-#: bl/person.py:118
+#: bl/person.py:137
 msgid "female"
 msgstr ""
 
-#: bl/person.py:119
+#: bl/person.py:138
 msgid "sex not applicable"
 msgstr ""
 
-#: bl/person.py:199
+#: bl/person.py:218
 msgid "The year or years must be numeric"
 msgstr ""
 
-#: bl/person.py:218 bl/person.py:250
+#: bl/person.py:237 bl/person.py:269
 msgid "No persons found"
 msgstr ""
 
-#: bl/person.py:287
+#: bl/person.py:306
 msgid "The person is not accessible"
 msgstr ""
 
-#: bl/person.py:407
+#: bl/person.py:426
 msgid "Requested person not found"
 msgstr ""
 
-#: bl/source.py:176
+#: bl/source.py:195
 msgid "No person or family has uses this source"
 msgstr ""
 
-#: bp/admin/cvs_refnames.py:53
+#: bp/admin/cvs_refnames.py:72
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
 msgstr ""
 
-#: bp/admin/forms.py:34
+#: bp/admin/forms.py:53
 msgid "id:"
 msgstr ""
 
-#: bp/admin/forms.py:35
+#: bp/admin/forms.py:54
 msgid "Id of the user"
 msgstr ""
 
-#: bp/admin/forms.py:36 bp/admin/forms.py:87
+#: bp/admin/forms.py:55 bp/admin/forms.py:106
 msgid "Email Address:"
 msgstr ""
 
-#: bp/admin/forms.py:39
+#: bp/admin/forms.py:58
 msgid "Username:"
 msgstr ""
 
-#: bp/admin/forms.py:41 bp/admin/forms.py:90
+#: bp/admin/forms.py:60 bp/admin/forms.py:109
 msgid "Name:"
 msgstr ""
 
-#: bp/admin/forms.py:42 bp/admin/forms.py:91 bp/start/forms.py:14
+#: bp/admin/forms.py:61 bp/admin/forms.py:110 bp/start/forms.py:33
 msgid "Name of the user"
 msgstr ""
 
-#: bp/admin/forms.py:47 bp/admin/templates/admin/list_users.html:79
+#: bp/admin/forms.py:66 bp/admin/templates/admin/list_users.html:79
 msgid "Is active"
 msgstr ""
 
-#: bp/admin/forms.py:48
+#: bp/admin/forms.py:67
 msgid "Active / passive user"
 msgstr ""
 
-#: bp/admin/forms.py:49 bp/admin/templates/admin/list_users.html:85
+#: bp/admin/forms.py:68 bp/admin/templates/admin/list_users.html:85
 msgid "Roles"
 msgstr ""
 
-#: bp/admin/forms.py:51 bp/admin/forms.py:100
+#: bp/admin/forms.py:70 bp/admin/forms.py:119
 msgid "Gedcom-files"
 msgstr ""
 
-#: bp/admin/forms.py:52 bp/admin/forms.py:101
+#: bp/admin/forms.py:71 bp/admin/forms.py:120
 #: bp/scene/templates/scene/event.html:76
 #: bp/scene/templates/scene/event_htmx.html:83
 #: bp/scene/templates/scene/event_vue.html:100
 msgid "Member"
 msgstr ""
 
-#: bp/admin/forms.py:53 bp/admin/forms.py:102 templates/jinja_filters.py:131
+#: bp/admin/forms.py:72 bp/admin/forms.py:121 templates/jinja_filters.py:151
 msgid "Research"
 msgstr ""
 
-#: bp/admin/forms.py:54 bp/admin/forms.py:103
+#: bp/admin/forms.py:73 bp/admin/forms.py:122
 msgid "Audit"
 msgstr ""
 
-#: bp/admin/forms.py:55 bp/admin/forms.py:104
+#: bp/admin/forms.py:74 bp/admin/forms.py:123
 msgid "Admin"
 msgstr ""
 
-#: bp/admin/forms.py:56
+#: bp/admin/forms.py:75
 msgid "Assigned roles"
 msgstr ""
 
-#: bp/admin/forms.py:57 bp/admin/forms.py:106
+#: bp/admin/forms.py:76 bp/admin/forms.py:125
 msgid "Email confirmed time"
 msgstr ""
 
-#: bp/admin/forms.py:58
+#: bp/admin/forms.py:77
 msgid "Time of email confirmation"
 msgstr ""
 
-#: bp/admin/forms.py:59 bp/admin/templates/admin/list_users.html:80
+#: bp/admin/forms.py:78 bp/admin/templates/admin/list_users.html:80
 msgid "Last login time"
 msgstr ""
 
-#: bp/admin/forms.py:60
+#: bp/admin/forms.py:79
 msgid "Time of last login"
 msgstr ""
 
-#: bp/admin/forms.py:61
+#: bp/admin/forms.py:80
 msgid "Last login IP address"
 msgstr ""
 
-#: bp/admin/forms.py:62
+#: bp/admin/forms.py:81
 msgid "IP address of last login"
 msgstr ""
 
-#: bp/admin/forms.py:63
+#: bp/admin/forms.py:82
 msgid "Current login time"
 msgstr ""
 
-#: bp/admin/forms.py:64
+#: bp/admin/forms.py:83
 msgid "Time of current login"
 msgstr ""
 
-#: bp/admin/forms.py:65
+#: bp/admin/forms.py:84
 msgid "Current login IP address"
 msgstr ""
 
-#: bp/admin/forms.py:66
+#: bp/admin/forms.py:85
 msgid "IP address of current login"
 msgstr ""
 
-#: bp/admin/forms.py:67
+#: bp/admin/forms.py:86
 msgid "Login count"
 msgstr ""
 
-#: bp/admin/forms.py:68
+#: bp/admin/forms.py:87
 msgid "Count of logins"
 msgstr ""
 
-#: bp/admin/forms.py:70 bp/admin/templates/admin/update_user.html:4
+#: bp/admin/forms.py:89 bp/admin/templates/admin/update_user.html:4
 #: bp/admin/templates/admin/update_user.html:11
 msgid "Update user"
 msgstr ""
 
-#: bp/admin/forms.py:71
+#: bp/admin/forms.py:90
 msgid "Approve user"
 msgstr ""
 
-#: bp/admin/forms.py:96
+#: bp/admin/forms.py:115
 msgid "Approved"
 msgstr ""
 
-#: bp/admin/forms.py:97
+#: bp/admin/forms.py:116
 msgid "Approved / pending user"
 msgstr ""
 
-#: bp/admin/forms.py:98 bp/scene/templates/scene/event.html:75
+#: bp/admin/forms.py:117 bp/scene/templates/scene/event.html:75
 #: bp/scene/templates/scene/event_htmx.html:82
 #: bp/scene/templates/scene/event_vue.html:99
 msgid "Role"
 msgstr ""
 
-#: bp/admin/forms.py:105
+#: bp/admin/forms.py:124
 msgid "Assigned role choices"
 msgstr ""
 
-#: bp/admin/forms.py:107
+#: bp/admin/forms.py:126
 msgid "Time of registered email confirmation"
 msgstr ""
 
-#: bp/admin/forms.py:110
+#: bp/admin/forms.py:129
 msgid "Update allowed email"
 msgstr ""
 
-#: bp/admin/routes.py:92
+#: bp/admin/routes.py:111
 msgid "Database initial check done."
 msgstr ""
 
-#: bp/admin/routes.py:111
+#: bp/admin/routes.py:130
 msgid "No empty batches removed"
 msgstr ""
 
-#: bp/admin/routes.py:136
+#: bp/admin/routes.py:155
 msgid "estimated lifetime"
 msgstr ""
 
-#: bp/admin/routes.py:197
+#: bp/admin/routes.py:216
 msgid "Isotammi user approved"
 msgstr ""
 
-#: bp/admin/routes.py:198
+#: bp/admin/routes.py:217
 msgid "You are now approved to use Isotammi at {server} with user name {user}."
 msgstr ""
 
-#: bp/admin/routes.py:202
+#: bp/admin/routes.py:221
 msgid "User updated"
 msgstr ""
 
-#: bp/admin/routes.py:262 bp/gramps/routes.py:99
+#: bp/admin/routes.py:281 bp/gramps/routes.py:118
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:44 bp/admin/uploads.py:259
-#: bp/admin/uploads.py:288 bp/audit/templates/audit/batches.html:25
+#: bp/admin/templates/admin/uploads.html:44 bp/admin/uploads.py:278
+#: bp/admin/uploads.py:307 bp/audit/templates/audit/batches.html:25
 #: bp/gramps/templates/gramps/uploads.html:184
 msgid "UPLOADED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:45 bp/admin/uploads.py:261
-#: bp/admin/uploads.py:289 bp/audit/templates/audit/batches.html:29
+#: bp/admin/templates/admin/uploads.html:45 bp/admin/uploads.py:280
+#: bp/admin/uploads.py:308 bp/audit/templates/audit/batches.html:29
 #: bp/gramps/templates/gramps/uploads.html:185
 msgid "STORING"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:46 bp/admin/uploads.py:263
-#: bp/admin/uploads.py:274 bp/admin/uploads.py:287 bp/admin/uploads.py:303
+#: bp/admin/templates/admin/uploads.html:46 bp/admin/uploads.py:282
+#: bp/admin/uploads.py:293 bp/admin/uploads.py:306 bp/admin/uploads.py:322
 #: bp/audit/templates/audit/batches.html:33
 #: bp/gramps/templates/gramps/uploads.html:186
 msgid "STORED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:48 bp/admin/uploads.py:267
+#: bp/admin/templates/admin/uploads.html:48 bp/admin/uploads.py:286
 #: bp/audit/templates/audit/batches.html:41
 #: bp/gramps/templates/gramps/uploads.html:188
 msgid "FAILED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:48 bp/admin/uploads.py:269
+#: bp/admin/templates/admin/uploads.html:48 bp/admin/uploads.py:288
 #: bp/audit/templates/audit/batches.html:41
 #: bp/gramps/templates/gramps/uploads.html:188
 msgid "ERROR"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:47 bp/admin/uploads.py:271
-#: bp/admin/uploads.py:275 bp/audit/templates/audit/batches.html:37
+#: bp/admin/templates/admin/uploads.html:47 bp/admin/uploads.py:290
+#: bp/admin/uploads.py:294 bp/audit/templates/audit/batches.html:37
 #: bp/gramps/templates/gramps/uploads.html:187
 msgid "REMOVED"
 msgstr ""
 
-#: bp/admin/models/data_admin.py:41 bp/admin/models/user_admin.py:64
+#: bp/admin/models/data_admin.py:60 bp/admin/models/user_admin.py:83
 msgid "User {} has not admin privileges"
 msgstr ""
 
-#: bp/admin/models/data_admin.py:70
+#: bp/admin/models/data_admin.py:89
 msgid "All data is deleted. "
 msgstr ""
 
-#: bp/admin/models/data_admin.py:75
+#: bp/admin/models/data_admin.py:94
 msgid "All data but users and roles are removed."
 msgstr ""
 
-#: bp/admin/models/data_admin.py:89
+#: bp/admin/models/data_admin.py:108
 #, python-format
 msgid "All persons and event by %(un)s are removed."
 msgstr ""
 
-#: bp/admin/models/data_admin.py:93
+#: bp/admin/models/data_admin.py:112
 #, python-format
 msgid "Removed %(cnt)d nodes"
 msgstr ""
 
-#: bp/admin/models/user_admin.py:119
+#: bp/admin/models/user_admin.py:138
 msgid "Given allowed email address already exists"
 msgstr ""
 
@@ -960,28 +960,28 @@ msgstr ""
 msgid "Delete file"
 msgstr ""
 
-#: bp/audit/routes.py:127
+#: bp/audit/routes.py:146
 msgid "Done"
 msgstr ""
 
-#: bp/audit/routes.py:194
+#: bp/audit/routes.py:213
 msgid "Data type '{}' is not supported"
 msgstr ""
 
-#: bp/audit/routes.py:197
+#: bp/audit/routes.py:216
 msgid "Missing proper column title: "
 msgstr ""
 
-#: bp/audit/models/batch_merge.py:88
+#: bp/audit/models/batch_merge.py:107
 #, python-format
 msgid "moved %(new_rel)s objects to "
 msgstr ""
 
-#: bp/audit/models/batch_merge.py:89
+#: bp/audit/models/batch_merge.py:108
 msgid "Common data set"
 msgstr ""
 
-#: bp/audit/models/batch_merge.py:92
+#: bp/audit/models/batch_merge.py:111
 msgid "Transfer succeeded: "
 msgstr ""
 
@@ -1231,200 +1231,200 @@ msgstr ""
 msgid "Drop index"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:11
+#: bp/gedcom/gedcom_analyze.py:30
 msgid "GEDCOM Analyzer"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:161
+#: bp/gedcom/gedcom_analyze.py:180
 #, python-format
 msgid "count=%(num)d, line %(lines)s"
 msgid_plural "count=%(num)d, lines %(lines)s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/gedcom/gedcom_analyze.py:166 bp/gedcom/transforms/places.py:143
+#: bp/gedcom/gedcom_analyze.py:185 bp/gedcom/transforms/places.py:162
 #: bp/gramps/templates/gramps/result.html:18
 msgid "Count"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:176
+#: bp/gedcom/gedcom_analyze.py:195
 msgid "Invalid tag hierarchy"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:177
+#: bp/gedcom/gedcom_analyze.py:196
 msgid "No value"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:178
+#: bp/gedcom/gedcom_analyze.py:197
 msgid "Invalid dates"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:179
+#: bp/gedcom/gedcom_analyze.py:198
 msgid "Too many child tags"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:180
+#: bp/gedcom/gedcom_analyze.py:199
 msgid "Records for submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:181
+#: bp/gedcom/gedcom_analyze.py:200
 msgid "Families with no parents"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:188
+#: bp/gedcom/gedcom_analyze.py:207
 msgid "With sources"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:189
+#: bp/gedcom/gedcom_analyze.py:208
 msgid "Without sources"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:190
+#: bp/gedcom/gedcom_analyze.py:209
 msgid "Places without hierarchy"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:191
+#: bp/gedcom/gedcom_analyze.py:210
 msgid "Possibly invalid surnames"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:192
+#: bp/gedcom/gedcom_analyze.py:211
 msgid "Possibly invalid firstnames"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:317
+#: bp/gedcom/gedcom_analyze.py:336
 msgid "Genders"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:340
+#: bp/gedcom/gedcom_analyze.py:359
 msgid "Submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:348
+#: bp/gedcom/gedcom_analyze.py:367
 msgid "Missing paths"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:354
+#: bp/gedcom/gedcom_analyze.py:373
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:358
+#: bp/gedcom/gedcom_analyze.py:377
 msgid "Invalid pointers"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:366
+#: bp/gedcom/gedcom_analyze.py:385
 msgid "Missing records"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:374
+#: bp/gedcom/gedcom_analyze.py:393
 msgid "Unused records"
 msgstr ""
 
-#: bp/gedcom/routes.py:38
+#: bp/gedcom/routes.py:57
 msgid "Gedcoms"
 msgstr ""
 
-#: bp/gedcom/routes.py:60
+#: bp/gedcom/routes.py:79
 msgid "Current file"
 msgstr ""
 
-#: bp/gedcom/routes.py:95 bp/gedcom/routes.py:96 bp/gedcom/routes.py:112
-#: bp/gedcom/routes.py:113
+#: bp/gedcom/routes.py:114 bp/gedcom/routes.py:115 bp/gedcom/routes.py:131
+#: bp/gedcom/routes.py:132
 msgid "File {} saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:140 bp/gedcom/routes.py:146
+#: bp/gedcom/routes.py:159 bp/gedcom/routes.py:165
 msgid "Choose a GEDCOM file to upload"
 msgstr ""
 
-#: bp/gedcom/routes.py:154
+#: bp/gedcom/routes.py:173
 msgid "This GEDCOM file already exists"
 msgstr ""
 
-#: bp/gedcom/routes.py:184 bp/gedcom/routes.py:206
+#: bp/gedcom/routes.py:203 bp/gedcom/routes.py:225
 msgid "You don't have permission to view that GEDCOM"
 msgstr ""
 
-#: bp/gedcom/routes.py:199
+#: bp/gedcom/routes.py:218
 msgid "That GEDCOM file does not exist on the server"
 msgstr ""
 
-#: bp/gedcom/transformer.py:146
+#: bp/gedcom/transformer.py:165
 msgid "Invalid line: "
 msgstr ""
 
-#: bp/gedcom/transformer.py:212
+#: bp/gedcom/transformer.py:231
 msgid "Invalid GEDCOM at line: {}"
 msgstr ""
 
-#: bp/gedcom/transformer.py:215
+#: bp/gedcom/transformer.py:234
 #, python-format
 msgid "Invalid GEDCOM; no level %s lines"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:217
+#: bp/gedcom/models/gedcom_utils.py:236
 msgid "Added:"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:224
+#: bp/gedcom/models/gedcom_utils.py:243
 msgid "Deleted:"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:232
+#: bp/gedcom/models/gedcom_utils.py:251
 msgid "Replaced:"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:239
+#: bp/gedcom/models/gedcom_utils.py:258
 msgid "With:"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:44
+#: bp/gedcom/models/processor.py:63
 msgid "Transform '{}' started at {}"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:49
+#: bp/gedcom/models/processor.py:68
 msgid "Name of the input GEDCOM file"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:50
+#: bp/gedcom/models/processor.py:69
 msgid "Name of the log file"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:53 bp/gedcom/models/processor.py:240
+#: bp/gedcom/models/processor.py:72 bp/gedcom/models/processor.py:259
 msgid "Display changed rows"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:55
+#: bp/gedcom/models/processor.py:74
 msgid "Do not produce an output file"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:57
+#: bp/gedcom/models/processor.py:76
 msgid "Do not produce a log in the output file"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:60
+#: bp/gedcom/models/processor.py:79
 msgid "Encoding of the input GEDCOM"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:99
+#: bp/gedcom/models/processor.py:118
 msgid "Total {num} change"
 msgid_plural "Total {num} changes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/gedcom/models/processor.py:108 bp/gedcom/models/processor.py:113
+#: bp/gedcom/models/processor.py:127 bp/gedcom/models/processor.py:132
 msgid "File saved as {}"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:110
+#: bp/gedcom/models/processor.py:129
 msgid "Old file saved as {}"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:114
+#: bp/gedcom/models/processor.py:133
 msgid "Transform '{}' ended at {}"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:209
+#: bp/gedcom/models/processor.py:228
 msgid "Unsupported type: "
 msgstr ""
 
@@ -1691,334 +1691,334 @@ msgstr ""
 msgid "check all"
 msgstr ""
 
-#: bp/gedcom/transforms/citationsinnotes.py:117
+#: bp/gedcom/transforms/citationsinnotes.py:136
 msgid "Citations in notes"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:14
+#: bp/gedcom/transforms/dates.py:33
 msgid "Dates"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:15
+#: bp/gedcom/transforms/dates.py:34
 msgid "Correct some invalid date formats"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:25
+#: bp/gedcom/transforms/dates.py:44
 msgid "Display invalid dates"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:27
+#: bp/gedcom/transforms/dates.py:46
 msgid "Change 31.12.1999 to 31 DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:29
+#: bp/gedcom/transforms/dates.py:48
 msgid "Change 1999-12-31 to 31 DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:31
+#: bp/gedcom/transforms/dates.py:50
 msgid "Change 1999-12 to DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:33
+#: bp/gedcom/transforms/dates.py:52
 msgid "Change [00.]12.1999 to DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:35
+#: bp/gedcom/transforms/dates.py:54
 msgid "Change 00 DEC 1999 to DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:37
+#: bp/gedcom/transforms/dates.py:56
 msgid "Change 1950-[19]59 to FROM 1950 TO 1959"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:39
+#: bp/gedcom/transforms/dates.py:58
 msgid "Change 1950-/>1950 to FROM/AFT 1950"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:41
+#: bp/gedcom/transforms/dates.py:60
 msgid "Change -1950/<1950 to TO/BEF 1950"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:91
+#: bp/gedcom/transforms/dates.py:110
 msgid "Invalid dates:"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:100
+#: bp/gedcom/transforms/dates.py:119
 #, python-format
 msgid "%(date)s (line %(linkstr)s)<br>"
 msgstr ""
 
-#: bp/gedcom/transforms/kasteet.py:34
+#: bp/gedcom/transforms/kasteet.py:53
 msgid "Baptisms"
 msgstr ""
 
-#: bp/gedcom/transforms/marriages.py:45
+#: bp/gedcom/transforms/marriages.py:64
 msgid "Marriages"
 msgstr ""
 
-#: bp/gedcom/transforms/marriages.py:46
+#: bp/gedcom/transforms/marriages.py:65
 msgid "Splitting of data in PLAC of MARR"
 msgstr ""
 
-#: bp/gedcom/transforms/names.py:45 bp/gedcom/transforms/person_names.py:51
+#: bp/gedcom/transforms/names.py:64 bp/gedcom/transforms/person_names.py:70
 msgid "Personal names"
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:66
+#: bp/gedcom/transforms/person_names.py:85
 msgid "Mark missing name parts as \"N\""
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:70
+#: bp/gedcom/transforms/person_names.py:89
 msgid "Recognize_patronymes"
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:72
+#: bp/gedcom/transforms/person_names.py:91
 msgid "Call names and aliases"
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:74
+#: bp/gedcom/transforms/person_names.py:93
 msgid "Create surname history from multiple names"
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:76
+#: bp/gedcom/transforms/person_names.py:95
 msgid "Process_nonstd_ALIA_lines"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:11 bp/scene/templates/scene/macros.html:66
+#: bp/gedcom/transforms/places.py:30 bp/scene/templates/scene/macros.html:66
 #: bp/scene/templates/scene/places.html:3
 msgid "Places"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:13
+#: bp/gedcom/transforms/places.py:32
 msgid "Tries to recognize place names and order them correctly"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:48
+#: bp/gedcom/transforms/places.py:67
 msgid "Display all unique places"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:50
+#: bp/gedcom/transforms/places.py:69
 msgid "Reverse the order of places"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:52
+#: bp/gedcom/transforms/places.py:71
 msgid "Replace spaces with commas"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:54
+#: bp/gedcom/transforms/places.py:73
 msgid "Ignore lowercase words"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:56
+#: bp/gedcom/transforms/places.py:75
 msgid "Ignore numeric words"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:58
+#: bp/gedcom/transforms/places.py:77
 msgid "Ignore words shorter that minlen"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:60
+#: bp/gedcom/transforms/places.py:79
 msgid "Try to discover correct order..."
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:62
+#: bp/gedcom/transforms/places.py:81
 msgid "Try to combine certain names..."
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:64
+#: bp/gedcom/transforms/places.py:83
 msgid "Add this name at the end"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:66
+#: bp/gedcom/transforms/places.py:85
 msgid "Bypass foreign countries"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:68
+#: bp/gedcom/transforms/places.py:87
 msgid "Display unique changed places"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:70
+#: bp/gedcom/transforms/places.py:89
 msgid "Display unchanged places"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:72
+#: bp/gedcom/transforms/places.py:91
 msgid "Display ignored places"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:74
+#: bp/gedcom/transforms/places.py:93
 msgid "Only process places containing this string"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:76
+#: bp/gedcom/transforms/places.py:95
 msgid "Replace changed PLAC tags with PLAC-X"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:78
+#: bp/gedcom/transforms/places.py:97
 msgid "Replace all matching PLAC tags with PLAC-X"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:121
+#: bp/gedcom/transforms/places.py:140
 msgid "Internal error"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:128
+#: bp/gedcom/transforms/places.py:147
 msgid "All unique place names:"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:134
+#: bp/gedcom/transforms/places.py:153
 msgid "Count of all places: "
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:135
+#: bp/gedcom/transforms/places.py:154
 msgid "Count of unique places: "
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:140
+#: bp/gedcom/transforms/places.py:159
 msgid "Place names changed:"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:143
+#: bp/gedcom/transforms/places.py:162
 msgid "Old name"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:143
+#: bp/gedcom/transforms/places.py:162
 msgid "New name"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:152
+#: bp/gedcom/transforms/places.py:171
 msgid "Place names not changed:"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:286
+#: bp/gedcom/transforms/places.py:305
 msgid "ignored: "
 msgstr ""
 
-#: bp/gedcom/transforms/suku2004.py:12
+#: bp/gedcom/transforms/suku2004.py:31
 msgid "Suku2004"
 msgstr ""
 
-#: bp/gedcom/transforms/suku2004.py:14
+#: bp/gedcom/transforms/suku2004.py:33
 msgid "Fixes problems in Sukuohjelmisto 2004 Gedcoms"
 msgstr ""
 
-#: bp/gedcom/transforms/suku2004.py:26
+#: bp/gedcom/transforms/suku2004.py:45
 msgid "Change custom tags to EVENs"
 msgstr ""
 
-#: bp/gedcom/transforms/suku2004.py:28
+#: bp/gedcom/transforms/suku2004.py:47
 msgid "Change _PHOTO tags to OBJEs"
 msgstr ""
 
-#: bp/gedcom/transforms/suku2004.py:30
+#: bp/gedcom/transforms/suku2004.py:49
 msgid "Change MARR to MARB if TYPE=Kuulutus"
 msgstr ""
 
-#: bp/gedcom/transforms/suku2004.py:32
+#: bp/gedcom/transforms/suku2004.py:51
 msgid "Remove empty CONT lines under SOUR"
 msgstr ""
 
-#: bp/gedcom/transforms/suku2004.py:34
+#: bp/gedcom/transforms/suku2004.py:53
 msgid "Combine PLAC and ADDR"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:16
+#: bp/gedcom/transforms/sukujutut.py:35
 msgid "Sukujutut"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:19
+#: bp/gedcom/transforms/sukujutut.py:38
 msgid "Sukujutut transformations"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:231
+#: bp/gedcom/transforms/sukujutut.py:250
 msgid "Remove invalid DATE tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:233
+#: bp/gedcom/transforms/sukujutut.py:252
 msgid "Remove empty NOTE tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:235
+#: bp/gedcom/transforms/sukujutut.py:254
 msgid "Remove DATE AVOLIITTO tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:237
+#: bp/gedcom/transforms/sukujutut.py:256
 msgid "Remove invalid DATEs for DIV tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:239
+#: bp/gedcom/transforms/sukujutut.py:258
 msgid "Remove empty GIVN and SURN tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:241
+#: bp/gedcom/transforms/sukujutut.py:260
 msgid "Remove duplicate SOUR lines under NAME"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:243
+#: bp/gedcom/transforms/sukujutut.py:262
 msgid "Remove REFN tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:245
+#: bp/gedcom/transforms/sukujutut.py:264
 msgid "Remove STAT tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:247
+#: bp/gedcom/transforms/sukujutut.py:266
 msgid "Move level 3 NOTEs to level 2 to save them"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:249
+#: bp/gedcom/transforms/sukujutut.py:268
 msgid "Insert ADR1 tags under ADDR"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:251
+#: bp/gedcom/transforms/sukujutut.py:270
 msgid "Change PLAC tags to NOTEs under certain events"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:253
+#: bp/gedcom/transforms/sukujutut.py:272
 msgid "Change event types \"Kaksonen\" and \"Kolmonen\" to NOTEs"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:255
+#: bp/gedcom/transforms/sukujutut.py:274
 msgid "Remove trailing and multiple consecutive spaces in person and place names"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:257
+#: bp/gedcom/transforms/sukujutut.py:276
 msgid "Change EMIG to RESI"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:259
+#: bp/gedcom/transforms/sukujutut.py:278
 msgid "Move an event NOTE to citation PAGE"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:261
+#: bp/gedcom/transforms/sukujutut.py:280
 msgid "Move a SOUR under NOTE to upper level"
 msgstr ""
 
-#: bp/gedcom/transforms/unmark.py:10
+#: bp/gedcom/transforms/unmark.py:29
 msgid "Unmark"
 msgstr ""
 
-#: bp/gedcom/transforms/unmark.py:11
+#: bp/gedcom/transforms/unmark.py:30
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr ""
 
-#: bp/gramps/gramps_loader.py:146
+#: bp/gramps/gramps_loader.py:165
 msgid "Events with no references to"
 msgstr ""
 
-#: bp/gramps/gramps_loader.py:226
+#: bp/gramps/gramps_loader.py:245
 msgid "Estimated time"
 msgstr ""
 
-#: bp/gramps/gramps_loader.py:229
+#: bp/gramps/gramps_loader.py:248
 msgid "sec"
 msgstr ""
 
-#: bp/gramps/gramps_loader.py:611 bp/gramps/gramps_loader.py:619
-#: pe/db_writer.py:85
+#: bp/gramps/gramps_loader.py:630 bp/gramps/gramps_loader.py:638
+#: pe/db_writer.py:93
 msgid "Database save failed due to {}"
 msgstr ""
 
-#: bp/gramps/routes.py:179
+#: bp/gramps/routes.py:198
 #, python-format
 msgid "Batch id %(batch_id)s has been deleted"
 msgstr ""
@@ -2179,40 +2179,40 @@ msgstr ""
 msgid "Return to front page"
 msgstr ""
 
-#: bp/scene/routes.py:456 bp/scene/routes.py:460
+#: bp/scene/routes.py:474 bp/scene/routes.py:478
 msgid "No event found"
 msgstr ""
 
-#: bp/scene/routes.py:492 bp/scene/templates/scene/event.html:83
+#: bp/scene/routes.py:510 bp/scene/templates/scene/event.html:83
 #: bp/scene/templates/scene/event_htmx.html:90
 #: bp/scene/templates/scene/person.html:279
 msgid "Self"
 msgstr ""
 
-#: bp/scene/routes.py:635
+#: bp/scene/routes.py:653
 msgid "No families"
 msgstr ""
 
-#: bp/scene/routes.py:642 bp/scene/templates/scene/families.html:115
+#: bp/scene/routes.py:660 bp/scene/templates/scene/families.html:115
 #: bp/scene/templates/scene/family.html:34
 #: bp/scene/templates/scene/person.html:258
-#: bp/scene/templates/scene/person.html:295 templates/jinja_filters.py:75
-#: templates/jinja_filters.py:81
+#: bp/scene/templates/scene/person.html:295 templates/jinja_filters.py:95
+#: templates/jinja_filters.py:101
 msgid "Family"
 msgstr ""
 
-#: bp/scene/routes.py:643 bp/scene/templates/scene/families.html:119
+#: bp/scene/routes.py:661 bp/scene/templates/scene/families.html:119
 #: bp/scene/templates/scene/family.html:101
 #: bp/scene/templates/scene/person.html:265
 #: bp/scene/templates/scene/person.html:302
 msgid "Children"
 msgstr ""
 
-#: bp/scene/routes.py:795
+#: bp/scene/routes.py:813
 msgid "No objects found"
 msgstr ""
 
-#: bp/scene/routes.py:798
+#: bp/scene/routes.py:816
 msgid "Error"
 msgstr ""
 
@@ -2312,7 +2312,7 @@ msgid "Go to"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:61
-#: bp/scene/templates/scene/families.html:100 templates/jinja_filters.py:93
+#: bp/scene/templates/scene/families.html:100 templates/jinja_filters.py:113
 msgid "Father"
 msgstr ""
 
@@ -2330,7 +2330,7 @@ msgid "Surname"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:73
-#: bp/scene/templates/scene/families.html:106 templates/jinja_filters.py:94
+#: bp/scene/templates/scene/families.html:106 templates/jinja_filters.py:114
 msgid "Mother"
 msgstr ""
 
@@ -2347,7 +2347,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/families.html:117
 #: bp/scene/templates/scene/person.html:263
-#: bp/scene/templates/scene/person.html:300 templates/jinja_filters.py:96
+#: bp/scene/templates/scene/person.html:300 templates/jinja_filters.py:116
 msgid "Wife"
 msgstr ""
 
@@ -2659,7 +2659,7 @@ msgstr ""
 #: bp/scene/templates/scene/person.html:322
 #: bp/scene/templates/scene/place_events.html:141
 #: bp/scene/templates/scene/place_events.html:151
-#: templates/jinja_filters.py:172
+#: templates/jinja_filters.py:192
 msgid "Photo"
 msgstr ""
 
@@ -2904,6 +2904,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/persons_search.html:70
 #: bp/scene/templates/scene/persons_search.html:211
+#: templates/index_entry.html:109
 msgid "Most common names"
 msgstr ""
 
@@ -3147,75 +3148,75 @@ msgstr ""
 msgid "No sources found"
 msgstr ""
 
-#: bp/start/forms.py:12
+#: bp/start/forms.py:31
 msgid "Your name:"
 msgstr ""
 
-#: bp/start/forms.py:15
+#: bp/start/forms.py:34
 msgid "Your email address:"
 msgstr ""
 
-#: bp/start/forms.py:17
+#: bp/start/forms.py:36
 msgid "Maximum 100 characters"
 msgstr ""
 
-#: bp/start/forms.py:19
+#: bp/start/forms.py:38
 msgid "Enter the email address"
 msgstr ""
 
-#: bp/start/forms.py:25
+#: bp/start/forms.py:44
 msgid "Are you a member of the Genealogical Society of Finland?"
 msgstr ""
 
-#: bp/start/forms.py:28
+#: bp/start/forms.py:47
 msgid "Yes"
 msgstr ""
 
-#: bp/start/forms.py:29
+#: bp/start/forms.py:48
 msgid "No"
 msgstr ""
 
-#: bp/start/forms.py:30
+#: bp/start/forms.py:49
 msgid "Don't know"
 msgstr ""
 
-#: bp/start/forms.py:32
+#: bp/start/forms.py:51
 msgid "How many years have you been doing genealogical research?"
 msgstr ""
 
-#: bp/start/forms.py:33
+#: bp/start/forms.py:52
 msgid "What genealogy software are you mainly using?"
 msgstr ""
 
-#: bp/start/forms.py:34
+#: bp/start/forms.py:53
 msgid "Which families/surnames are you mainly researching?"
 msgstr ""
 
-#: bp/start/forms.py:35
+#: bp/start/forms.py:54
 msgid "Which places are you mainly researching?"
 msgstr ""
 
-#: bp/start/forms.py:36
+#: bp/start/forms.py:55
 msgid "Message:"
 msgstr ""
 
-#: bp/start/forms.py:38
+#: bp/start/forms.py:57
 msgid "Send request"
 msgstr ""
 
-#: bp/start/routes.py:129
+#: bp/start/routes.py:166
 msgid "Join message sent"
 msgstr ""
 
-#: bp/start/routes.py:131
+#: bp/start/routes.py:168
 msgid "Sending join message failed"
 msgstr ""
 
-#: bp/start/routes.py:181
+#: bp/start/routes.py:218
 msgid "Update did not work1"
 msgstr ""
 
-#: bp/start/routes.py:184
+#: bp/start/routes.py:221
 msgid "Update did not work"
 msgstr ""
 
@@ -3260,18 +3261,18 @@ msgstr ""
 
 #: bp/start/templates/start/index_guest.html:63
 #: bp/start/templates/start/index_guest.html:69
-#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:77
-#: templates/index_entry.html:83
+#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:96
+#: templates/index_entry.html:102
 msgid "Log in"
 msgstr ""
 
-#: bp/start/templates/start/index_guest.html:64 templates/index_entry.html:78
+#: bp/start/templates/start/index_guest.html:64 templates/index_entry.html:97
 msgid ""
 "If you has already registered, you can log in and refine the structure of"
 " your own data."
 msgstr ""
 
-#: bp/start/templates/start/index_guest.html:65 templates/index_entry.html:79
+#: bp/start/templates/start/index_guest.html:65 templates/index_entry.html:98
 msgid ""
 "As a member of <i>Genealogical Society of Finland</i> you will get more "
 "services."
@@ -3363,10 +3364,6 @@ msgstr ""
 
 #: bp/start/templates/start/index_logged.html:123
 msgid "Help page"
-msgstr ""
-
-#: bp/start/templates/start/index_logged.html:150
-msgid "Most common surnames"
 msgstr ""
 
 #: bp/start/templates/start/index_scene.html:4
@@ -3795,7 +3792,7 @@ msgstr ""
 msgid "You can confirm your email through the link below:"
 msgstr ""
 
-#: models/dataupdater.py:95
+#: models/dataupdater.py:101
 msgid "Estimated {} person lifetimes"
 msgstr ""
 
@@ -3840,36 +3837,36 @@ msgstr ""
 msgid "Showing sources without a repository"
 msgstr ""
 
-#: pe/db_writer.py:72
+#: pe/db_writer.py:80
 msgid "Database save failed"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:5
+#: static/js/gedcom_scripts.js:10
 msgid "The file is too large (max %1 MB)"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:59
+#: static/js/gedcom_scripts.js:64
 msgid "Server error"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:125
+#: static/js/gedcom_scripts.js:130
 msgid "File already exists"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:201 static/js/gedcom_scripts.js:210
+#: static/js/gedcom_scripts.js:206 static/js/gedcom_scripts.js:215
 msgid "Are you sure?"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:262 static/js/gedcom_scripts.js:263
+#: static/js/gedcom_scripts.js:267 static/js/gedcom_scripts.js:268
 msgid "Revert to %1"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:274 static/js/gedcom_scripts.js:275
-#: static/js/gedcom_scripts.js:281
+#: static/js/gedcom_scripts.js:279 static/js/gedcom_scripts.js:280
+#: static/js/gedcom_scripts.js:286
 msgid "%1 renamed to %2"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:304
+#: static/js/gedcom_scripts.js:309
 msgid "Errors:"
 msgstr ""
 
@@ -3955,41 +3952,41 @@ msgstr ""
 msgid "Isotammi Start Page"
 msgstr ""
 
-#: templates/index_entry.html:27
+#: templates/index_entry.html:46
 msgid "Welcome to Isotammi Service"
 msgstr ""
 
-#: templates/index_entry.html:32
+#: templates/index_entry.html:51
 msgid "Learn about Isotammi"
 msgstr ""
 
-#: templates/index_entry.html:36
+#: templates/index_entry.html:55
 msgid ""
 "<i>Isotammi Service</i> is a service for co-operatively collected and "
 "validated genealogical data."
 msgstr ""
 
-#: templates/index_entry.html:38
+#: templates/index_entry.html:57
 msgid "For more info see also documents -"
 msgstr ""
 
-#: templates/index_entry.html:41
+#: templates/index_entry.html:60
 msgid "Why Isotammi database"
 msgstr ""
 
-#: templates/index_entry.html:43
+#: templates/index_entry.html:62
 msgid "See the process for your data"
 msgstr ""
 
-#: templates/index_entry.html:45
+#: templates/index_entry.html:64
 msgid "Gedcom data healing services"
 msgstr ""
 
-#: templates/index_entry.html:50
+#: templates/index_entry.html:69
 msgid "Look at the demo data"
 msgstr ""
 
-#: templates/index_entry.html:51
+#: templates/index_entry.html:70
 msgid ""
 "In this demo we have a genealogical tree which follows our quality rules "
 "and \n"
@@ -3997,544 +3994,544 @@ msgid ""
 " Sibelius."
 msgstr ""
 
-#: templates/index_entry.html:61
+#: templates/index_entry.html:80
 msgid "Explore demo"
 msgstr ""
 
-#: templates/index_entry.html:70
+#: templates/index_entry.html:89
 msgid "To see the full data, you can fill the registration form here"
 msgstr ""
 
-#: templates/jinja_filters.py:36
+#: templates/jinja_filters.py:56
 msgid "Birth Name"
 msgstr ""
 
-#: templates/jinja_filters.py:37
+#: templates/jinja_filters.py:57
 msgid "Also Known As"
 msgstr ""
 
-#: templates/jinja_filters.py:38
+#: templates/jinja_filters.py:58
 msgid "Married Name"
 msgstr ""
 
-#: templates/jinja_filters.py:39 templates/jinja_filters.py:159
+#: templates/jinja_filters.py:59 templates/jinja_filters.py:179
 msgid "Unknown type"
 msgstr ""
 
-#: templates/jinja_filters.py:40
+#: templates/jinja_filters.py:60
 msgid "Aateloitu nimi"
 msgstr ""
 
-#: templates/jinja_filters.py:41
+#: templates/jinja_filters.py:61
 msgid "Aatelointinimi "
 msgstr ""
 
-#: templates/jinja_filters.py:46
+#: templates/jinja_filters.py:66
 msgid "Birth"
 msgstr ""
 
-#: templates/jinja_filters.py:47
+#: templates/jinja_filters.py:67
 msgid "Death"
 msgstr ""
 
-#: templates/jinja_filters.py:48 templates/select_refcols.html:35
+#: templates/jinja_filters.py:68 templates/select_refcols.html:35
 #: templates/select_refcols.html:63
 msgid "Occupation"
 msgstr ""
 
-#: templates/jinja_filters.py:49
+#: templates/jinja_filters.py:69
 msgid "Baptism"
 msgstr ""
 
-#: templates/jinja_filters.py:50
+#: templates/jinja_filters.py:70
 msgid "Burial"
 msgstr ""
 
-#: templates/jinja_filters.py:51
+#: templates/jinja_filters.py:71
 msgid "Marriage"
 msgstr ""
 
-#: templates/jinja_filters.py:52
+#: templates/jinja_filters.py:72
 msgid "Divorce"
 msgstr ""
 
-#: templates/jinja_filters.py:53
+#: templates/jinja_filters.py:73
 msgid "Residence"
 msgstr ""
 
-#: templates/jinja_filters.py:54 templates/jinja_filters.py:125
+#: templates/jinja_filters.py:74 templates/jinja_filters.py:145
 msgid "Cause Of Death"
 msgstr ""
 
-#: templates/jinja_filters.py:55
+#: templates/jinja_filters.py:75
 msgid "Luottamustoimi"
 msgstr ""
 
-#: templates/jinja_filters.py:56
+#: templates/jinja_filters.py:76
 msgid "Moved out"
 msgstr ""
 
-#: templates/jinja_filters.py:57
+#: templates/jinja_filters.py:77
 msgid "Moved to"
 msgstr ""
 
-#: templates/jinja_filters.py:58
+#: templates/jinja_filters.py:78
 msgid "Graduation"
 msgstr ""
 
-#: templates/jinja_filters.py:59
+#: templates/jinja_filters.py:79
 msgid "Degree"
 msgstr ""
 
-#: templates/jinja_filters.py:60
+#: templates/jinja_filters.py:80
 msgid "Ordination"
 msgstr ""
 
-#: templates/jinja_filters.py:61
+#: templates/jinja_filters.py:81
 msgid "Property"
 msgstr ""
 
-#: templates/jinja_filters.py:62
+#: templates/jinja_filters.py:82
 msgid "Education"
 msgstr ""
 
-#: templates/jinja_filters.py:63
+#: templates/jinja_filters.py:83
 msgid "War"
 msgstr ""
 
-#: templates/jinja_filters.py:64
+#: templates/jinja_filters.py:84
 msgid "Confirmation"
 msgstr ""
 
-#: templates/jinja_filters.py:65
+#: templates/jinja_filters.py:85
 msgid "First Communion"
 msgstr ""
 
-#: templates/jinja_filters.py:66
+#: templates/jinja_filters.py:86
 msgid "Military Service"
 msgstr ""
 
-#: templates/jinja_filters.py:67
+#: templates/jinja_filters.py:87
 msgid "Käräjöinti"
 msgstr ""
 
-#: templates/jinja_filters.py:68
+#: templates/jinja_filters.py:88
 msgid "Christening"
 msgstr ""
 
-#: templates/jinja_filters.py:69
+#: templates/jinja_filters.py:89
 msgid "Marriage Banns"
 msgstr ""
 
-#: templates/jinja_filters.py:70
+#: templates/jinja_filters.py:90
 msgid "Retirement"
 msgstr ""
 
-#: templates/jinja_filters.py:71
+#: templates/jinja_filters.py:91
 msgid "Nobility Title"
 msgstr ""
 
-#: templates/jinja_filters.py:72
+#: templates/jinja_filters.py:92
 msgid "Engagement"
 msgstr ""
 
-#: templates/jinja_filters.py:73
+#: templates/jinja_filters.py:93
 msgid "Immigration"
 msgstr ""
 
-#: templates/jinja_filters.py:74
+#: templates/jinja_filters.py:94
 msgid "Holy Communion"
 msgstr ""
 
-#: templates/jinja_filters.py:80
+#: templates/jinja_filters.py:100
 msgid "Primary"
 msgstr ""
 
-#: templates/jinja_filters.py:82
+#: templates/jinja_filters.py:102
 msgid "Kummi"
 msgstr ""
 
-#: templates/jinja_filters.py:83
+#: templates/jinja_filters.py:103
 msgid "Perillinen"
 msgstr ""
 
-#: templates/jinja_filters.py:84
+#: templates/jinja_filters.py:104
 msgid "kummi"
 msgstr ""
 
-#: templates/jinja_filters.py:85
+#: templates/jinja_filters.py:105
 msgid "Clergy"
 msgstr ""
 
-#: templates/jinja_filters.py:86
+#: templates/jinja_filters.py:106
 msgid "Osallinen"
 msgstr ""
 
-#: templates/jinja_filters.py:87
+#: templates/jinja_filters.py:107
 msgid "Ostaja"
 msgstr ""
 
-#: templates/jinja_filters.py:88
+#: templates/jinja_filters.py:108
 msgid "Perinnönjättäjä"
 msgstr ""
 
-#: templates/jinja_filters.py:89
+#: templates/jinja_filters.py:109
 msgid "Vihkijä"
 msgstr ""
 
-#: templates/jinja_filters.py:90
+#: templates/jinja_filters.py:110
 msgid "Pääosallinen"
 msgstr ""
 
-#: templates/jinja_filters.py:91
+#: templates/jinja_filters.py:111
 msgid "Edunsaaja"
 msgstr ""
 
-#: templates/jinja_filters.py:92
+#: templates/jinja_filters.py:112
 msgid "Myyjä"
 msgstr ""
 
-#: templates/jinja_filters.py:95
+#: templates/jinja_filters.py:115
 msgid "Husband"
 msgstr ""
 
-#: templates/jinja_filters.py:98
+#: templates/jinja_filters.py:118
 msgid "Spouse"
 msgstr ""
 
-#: templates/jinja_filters.py:99
+#: templates/jinja_filters.py:119
 msgid "as a child"
 msgstr ""
 
-#: templates/jinja_filters.py:100
+#: templates/jinja_filters.py:120
 msgid "as spouse"
 msgstr ""
 
-#: templates/jinja_filters.py:101
+#: templates/jinja_filters.py:121
 msgid "Unknown role"
 msgstr ""
 
-#: templates/jinja_filters.py:106
+#: templates/jinja_filters.py:126
 msgid "confidence 0/4"
 msgstr ""
 
-#: templates/jinja_filters.py:107
+#: templates/jinja_filters.py:127
 msgid "confidence 1/4"
 msgstr ""
 
-#: templates/jinja_filters.py:108
+#: templates/jinja_filters.py:128
 msgid "confidence 2/4"
 msgstr ""
 
-#: templates/jinja_filters.py:109
+#: templates/jinja_filters.py:129
 msgid "confidence 3/4"
 msgstr ""
 
-#: templates/jinja_filters.py:110
+#: templates/jinja_filters.py:130
 msgid "confidence 4/4"
 msgstr ""
 
-#: templates/jinja_filters.py:124
+#: templates/jinja_filters.py:144
 msgid "See"
 msgstr ""
 
-#: templates/jinja_filters.py:126 templates/jinja_filters.py:140
+#: templates/jinja_filters.py:146 templates/jinja_filters.py:160
 msgid "Citation"
 msgstr ""
 
-#: templates/jinja_filters.py:127 templates/jinja_filters.py:141
+#: templates/jinja_filters.py:147 templates/jinja_filters.py:161
 msgid "Event Note"
 msgstr ""
 
-#: templates/jinja_filters.py:128 templates/jinja_filters.py:147
+#: templates/jinja_filters.py:148 templates/jinja_filters.py:167
 msgid "Source Note"
 msgstr ""
 
-#: templates/jinja_filters.py:129 templates/jinja_filters.py:144
+#: templates/jinja_filters.py:149 templates/jinja_filters.py:164
 msgid "Person Note"
 msgstr ""
 
-#: templates/jinja_filters.py:130 templates/jinja_filters.py:145
+#: templates/jinja_filters.py:150 templates/jinja_filters.py:165
 msgid "Place Note"
 msgstr ""
 
-#: templates/jinja_filters.py:132 templates/jinja_filters.py:143
+#: templates/jinja_filters.py:152 templates/jinja_filters.py:163
 msgid "Name Note"
 msgstr ""
 
-#: templates/jinja_filters.py:133
+#: templates/jinja_filters.py:153
 msgid "To Do"
 msgstr ""
 
-#: templates/jinja_filters.py:134 templates/jinja_filters.py:142
+#: templates/jinja_filters.py:154 templates/jinja_filters.py:162
 msgid "Family Note"
 msgstr ""
 
-#: templates/jinja_filters.py:135 templates/jinja_filters.py:146
+#: templates/jinja_filters.py:155 templates/jinja_filters.py:166
 msgid "Repository Note"
 msgstr ""
 
-#: templates/jinja_filters.py:136
+#: templates/jinja_filters.py:156
 msgid "Media Reference Note"
 msgstr ""
 
-#: templates/jinja_filters.py:137
+#: templates/jinja_filters.py:157
 msgid "Media Note"
 msgstr ""
 
-#: templates/jinja_filters.py:138
+#: templates/jinja_filters.py:158
 msgid "General"
 msgstr ""
 
-#: templates/jinja_filters.py:139
+#: templates/jinja_filters.py:159
 msgid "Html code"
 msgstr ""
 
-#: templates/jinja_filters.py:148
+#: templates/jinja_filters.py:168
 msgid "Transcript"
 msgstr ""
 
-#: templates/jinja_filters.py:149
+#: templates/jinja_filters.py:169
 msgid "Web Search"
 msgstr ""
 
-#: templates/jinja_filters.py:150
+#: templates/jinja_filters.py:170
 msgid "Home Page"
 msgstr ""
 
-#: templates/jinja_filters.py:155
+#: templates/jinja_filters.py:175
 msgid "Album"
 msgstr ""
 
-#: templates/jinja_filters.py:156
+#: templates/jinja_filters.py:176
 msgid "Archive"
 msgstr ""
 
-#: templates/jinja_filters.py:157
+#: templates/jinja_filters.py:177
 msgid "Collection"
 msgstr ""
 
-#: templates/jinja_filters.py:158
+#: templates/jinja_filters.py:178
 msgid "Library"
 msgstr ""
 
-#: templates/jinja_filters.py:160
+#: templates/jinja_filters.py:180
 msgid "Web site"
 msgstr ""
 
-#: templates/jinja_filters.py:165
+#: templates/jinja_filters.py:185
 msgid "Document"
 msgstr ""
 
-#: templates/jinja_filters.py:166
+#: templates/jinja_filters.py:186
 msgid "Book"
 msgstr ""
 
-#: templates/jinja_filters.py:167
+#: templates/jinja_filters.py:187
 msgid "Electronic"
 msgstr ""
 
-#: templates/jinja_filters.py:168
+#: templates/jinja_filters.py:188
 msgid "Newspaper"
 msgstr ""
 
-#: templates/jinja_filters.py:169
+#: templates/jinja_filters.py:189
 msgid "Magazine"
 msgstr ""
 
-#: templates/jinja_filters.py:170
+#: templates/jinja_filters.py:190
 msgid "Tombstone"
 msgstr ""
 
-#: templates/jinja_filters.py:171
+#: templates/jinja_filters.py:191
 msgid "Manuscript"
 msgstr ""
 
-#: templates/jinja_filters.py:173
+#: templates/jinja_filters.py:193
 msgid "Unknown"
 msgstr ""
 
-#: templates/jinja_filters.py:178
+#: templates/jinja_filters.py:198
 msgid "Vessel"
 msgstr ""
 
-#: templates/jinja_filters.py:179
+#: templates/jinja_filters.py:199
 msgid "Borough"
 msgstr ""
 
-#: templates/jinja_filters.py:180
+#: templates/jinja_filters.py:200
 msgid "Building"
 msgstr ""
 
-#: templates/jinja_filters.py:181
+#: templates/jinja_filters.py:201
 msgid "City"
 msgstr ""
 
-#: templates/jinja_filters.py:182
+#: templates/jinja_filters.py:202
 msgid "Country"
 msgstr ""
 
-#: templates/jinja_filters.py:183
+#: templates/jinja_filters.py:203
 msgid "District"
 msgstr ""
 
-#: templates/jinja_filters.py:184 templates/jinja_filters.py:197
+#: templates/jinja_filters.py:204 templates/jinja_filters.py:217
 msgid "Farm"
 msgstr ""
 
-#: templates/jinja_filters.py:185
+#: templates/jinja_filters.py:205
 msgid "Hamlet"
 msgstr ""
 
-#: templates/jinja_filters.py:186
+#: templates/jinja_filters.py:206
 msgid "Cemetery"
 msgstr ""
 
-#: templates/jinja_filters.py:187
+#: templates/jinja_filters.py:207
 msgid "Kappeliseurakunta"
 msgstr ""
 
-#: templates/jinja_filters.py:188
+#: templates/jinja_filters.py:208
 msgid "Mansion"
 msgstr ""
 
-#: templates/jinja_filters.py:189
+#: templates/jinja_filters.py:209
 msgid "Kuntakeskus"
 msgstr ""
 
-#: templates/jinja_filters.py:190
+#: templates/jinja_filters.py:210
 msgid "Kortteli"
 msgstr ""
 
-#: templates/jinja_filters.py:191
+#: templates/jinja_filters.py:211
 msgid "Fortress"
 msgstr ""
 
-#: templates/jinja_filters.py:192
+#: templates/jinja_filters.py:212
 msgid "Locality"
 msgstr ""
 
-#: templates/jinja_filters.py:193
+#: templates/jinja_filters.py:213
 msgid "Organisation"
 msgstr ""
 
-#: templates/jinja_filters.py:194 templates/jinja_filters.py:202
+#: templates/jinja_filters.py:214 templates/jinja_filters.py:222
 msgid "Parish"
 msgstr ""
 
-#: templates/jinja_filters.py:195
+#: templates/jinja_filters.py:215
 msgid "Region"
 msgstr ""
 
-#: templates/jinja_filters.py:196
+#: templates/jinja_filters.py:216
 msgid "State"
 msgstr ""
 
-#: templates/jinja_filters.py:198
+#: templates/jinja_filters.py:218
 msgid "Tontti"
 msgstr ""
 
-#: templates/jinja_filters.py:199
+#: templates/jinja_filters.py:219
 msgid "Torppa"
 msgstr ""
 
-#: templates/jinja_filters.py:200
+#: templates/jinja_filters.py:220
 msgid "Town"
 msgstr ""
 
-#: templates/jinja_filters.py:201
+#: templates/jinja_filters.py:221
 msgid "Village"
 msgstr ""
 
-#: templates/jinja_filters.py:207
+#: templates/jinja_filters.py:227
 msgid "on vessel"
 msgstr ""
 
-#: templates/jinja_filters.py:208
+#: templates/jinja_filters.py:228
 msgid "in the borough of"
 msgstr ""
 
-#: templates/jinja_filters.py:209
+#: templates/jinja_filters.py:229
 msgid "in the building of"
 msgstr ""
 
-#: templates/jinja_filters.py:210
+#: templates/jinja_filters.py:230
 msgid "in the City"
 msgstr ""
 
-#: templates/jinja_filters.py:211
+#: templates/jinja_filters.py:231
 msgid "in the country of"
 msgstr ""
 
-#: templates/jinja_filters.py:212
+#: templates/jinja_filters.py:232
 msgid "in the district of"
 msgstr ""
 
-#: templates/jinja_filters.py:213
+#: templates/jinja_filters.py:233
 msgid "in the farm of"
 msgstr ""
 
-#: templates/jinja_filters.py:214
+#: templates/jinja_filters.py:234
 msgid "in the hamlet of"
 msgstr ""
 
-#: templates/jinja_filters.py:215
+#: templates/jinja_filters.py:235
 msgid "Hautausmaalla"
 msgstr ""
 
-#: templates/jinja_filters.py:216
+#: templates/jinja_filters.py:236
 msgid "Kappeliseurakunnassa"
 msgstr ""
 
-#: templates/jinja_filters.py:217
+#: templates/jinja_filters.py:237
 msgid "in the mansion of"
 msgstr ""
 
-#: templates/jinja_filters.py:218
+#: templates/jinja_filters.py:238
 msgid "Kuntakeskuksessa"
 msgstr ""
 
-#: templates/jinja_filters.py:219
+#: templates/jinja_filters.py:239
 msgid "in the fortress"
 msgstr ""
 
-#: templates/jinja_filters.py:220
+#: templates/jinja_filters.py:240
 msgid "at locality of"
 msgstr ""
 
-#: templates/jinja_filters.py:221
+#: templates/jinja_filters.py:241
 msgid "in the organisation of"
 msgstr ""
 
-#: templates/jinja_filters.py:222
+#: templates/jinja_filters.py:242
 msgid "in the parish"
 msgstr ""
 
-#: templates/jinja_filters.py:223
+#: templates/jinja_filters.py:243
 msgid "in the region"
 msgstr ""
 
-#: templates/jinja_filters.py:224
+#: templates/jinja_filters.py:244
 msgid "Sn the state"
 msgstr ""
 
-#: templates/jinja_filters.py:225
+#: templates/jinja_filters.py:245
 msgid "Tontilla"
 msgstr ""
 
-#: templates/jinja_filters.py:226
+#: templates/jinja_filters.py:246
 msgid "in the village of"
 msgstr ""
 
-#: templates/jinja_filters.py:227
+#: templates/jinja_filters.py:247
 msgid "in the parish of"
 msgstr ""
 
-#: templates/jinja_filters.py:237
+#: templates/jinja_filters.py:257
 msgid "Married"
 msgstr ""
 
-#: templates/jinja_filters.py:238
+#: templates/jinja_filters.py:258
 msgid "Unknown relation"
 msgstr ""
 
@@ -4748,23 +4745,23 @@ msgstr ""
 msgid "Unable to load file, code ="
 msgstr ""
 
-#: ui/user_context.py:107
+#: ui/user_context.py:126
 msgid "Approved common data"
 msgstr ""
 
-#: ui/user_context.py:108
+#: ui/user_context.py:127
 msgid "My candidate data"
 msgstr ""
 
-#: ui/user_context.py:109
+#: ui/user_context.py:128
 msgid "My selected candidate batch"
 msgstr ""
 
-#: ui/user_context.py:110
+#: ui/user_context.py:129
 msgid "My own and approved common data"
 msgstr ""
 
-#: ui/user_context.py:111
+#: ui/user_context.py:130
 msgid "My selected batch and approved common data"
 msgstr ""
 
