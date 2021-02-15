@@ -1,3 +1,22 @@
+#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
+#
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#                            Timo Nallikari, Pekka Valta
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 # coding=UTF-8
 # Flask routes program for Stk application
 # @ Sss 2016
@@ -7,9 +26,11 @@ import logging
 import traceback
 from werkzeug.utils import redirect
 from flask.helpers import url_for
+
 from ..gedcom.models import gedcom_utils
+from ui.user_context import UserContext
 from bl.person import PersonReader
-from pe.neo4j.readservice import Neo4jReadService
+import shareds
 from operator import itemgetter
 logger = logging.getLogger('stkserver')
 
@@ -18,7 +39,6 @@ from flask_security import login_required, current_user, utils as secutils
 #rom flask_security import login_required, roles_accepted, current_user, utils as secutils
 from flask_babelex import _, get_locale
 
-import shareds
 from models import email
 from bp.api import api
 
@@ -48,9 +68,29 @@ def start_guest():
     """
     user = shareds.user_datastore.get_user('guest')
     secutils.login_user(user)
-    logger.info('-> bp.start.routes.start_guest')
-    is_demo = shareds.app.config.get('DEMO', False)
-    return render_template('/start/index_guest.html', is_demo=is_demo)
+    lang = request.args.get('lang')
+    if lang:
+        session['lang'] = lang
+
+    logger.info(f'-> bp.start.routes.start_guest, lang={lang}')
+    return redirect('/scene/persons/search')
+    #is_demo = shareds.app.config.get('DEMO', False)
+    #return render_template('/start/index_guest.html', is_demo=is_demo)
+
+
+@shareds.app.route('/start/persons/search', methods=['GET', 'POST'])
+def start_guest_search():
+    """ Scene start page for a guest user.
+    """
+    user = shareds.user_datastore.get_user('guest')
+    secutils.login_user(user)
+    lang = request.args.get('lang')
+    if lang:
+        session['lang'] = lang
+
+    logger.info(f'-> bp.start.routes.start_guest_search, lang={lang}')
+    # See: https://stackoverflow.com/questions/15473626/make-a-post-request-while-redirecting-in-flask/15480983#15480983
+    return redirect('/scene/persons/search', code=307)
 
 
 @shareds.app.route('/start/logged', methods=['GET', 'POST'])
@@ -78,7 +118,29 @@ def start_logged():
         logger.info(f'-> start.routes.entry/join')
         return redirect(url_for('join'))
 
-    return render_template('/start/index_logged.html')
+    surnamestats = []
+    is_demo = shareds.app.config.get('DEMO', False)
+    if is_demo:
+        # Get surname cloud data
+        from pe.neo4j.readservice import Neo4jReadService
+        readservice = Neo4jReadService(shareds.driver)
+        u_context = UserContext(session, current_user, request)
+        u_context.user = None
+
+        datastore = PersonReader(readservice, u_context)
+        minfont = 6
+        maxfont = 20
+        #maxnames = 40
+        surnamestats = datastore.get_surname_list()
+        #surnamestats = surnamestats[0:maxnames]
+        print(f'#start_logged DEMO: show {len(surnamestats)} surnames')
+        for i, stat in enumerate(surnamestats):
+            stat['order'] = i
+            stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
+        surnamestats.sort(key=itemgetter("surname"))
+    
+    return render_template('/start/index_logged.html', is_demo=is_demo, surnamestats=surnamestats)
+    #return render_template('/start/index_logged.html')
 
 
 @shareds.app.route('/thankyou')

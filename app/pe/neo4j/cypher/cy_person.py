@@ -1,3 +1,22 @@
+#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
+#
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#                            Timo Nallikari, Pekka Valta
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 '''
 Created on 16.10.2020
 
@@ -256,10 +275,18 @@ RETURN person.confidence AS confidence,
 MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
-    get_surname_list = """
-match (p:Person) -[:NAME]-> (n:Name) 
+    get_surname_list_by_username = """
+match (b:Batch{user:$username}) -[:OWNS]-> (p:Person) -[:NAME]-> (n:Name) 
 where n.surname <> "" and n.surname <> "N"
-return n.surname as surname, size( collect(p)) as count
+return n.surname as surname, count(p) as count
 order by count desc
-limit 150
+limit $count
+"""
+
+    get_surname_list_common = """
+match () -[:PASSED]-> (p:Person) -[:NAME]-> (n:Name) 
+where n.surname <> "" and n.surname <> "N"
+return n.surname as surname, count(p) as count
+order by count desc
+limit $count
 """

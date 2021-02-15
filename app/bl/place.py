@@ -1,3 +1,22 @@
+#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
+#
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#                            Timo Nallikari, Pekka Valta
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 '''
     Placeclasses: Place, PlaceBl, SPlaceReader and PlaceName.
 
@@ -25,6 +44,7 @@ import logging
 import shareds
 
 from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.db_reader import DbReader
 #from bp.stk_security.models.seccypher import Cypher
 logger = logging.getLogger('stkserver')
 
@@ -508,7 +528,7 @@ class PlaceName(NodeObject):
 
 
 
-class PlaceDataReader:
+class PlaceDataReader(DbReader):
     '''
     Abstracted Place datastore for reading.
 
@@ -527,6 +547,7 @@ class PlaceDataReader:
         :param: readservice   pe.neo4j.readservice.Neo4jReadService
         :param: u_context     ui.user_context.UserContext object
         '''
+        DbReader.__init__(self, readservice, u_context)
         self.readservice = readservice
         self.driver = readservice.driver
         self.user_context = u_context
@@ -593,6 +614,16 @@ class PlaceDataReader:
         results['events'] = res['items']
         return results
 
+    def get_placename_stats(self, count=40):
+        ''' 
+        Return placename stats so that the names can be displayed in a name cloud.
+        '''
+        if self.use_user:
+            placename_stats = self.readservice.dr_get_placename_stats_by_user(self.use_user,
+                                                                              count=count)
+        else:
+            placename_stats = self.readservice.dr_get_placename_stats_common(count=count)
+        return placename_stats
 
 class PlaceDataStore:
     '''
