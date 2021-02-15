@@ -89,6 +89,7 @@ def start_guest_search():
         session['lang'] = lang
 
     logger.info(f'-> bp.start.routes.start_guest_search, lang={lang}')
+    # See: https://stackoverflow.com/questions/15473626/make-a-post-request-while-redirecting-in-flask/15480983#15480983
     return redirect('/scene/persons/search', code=307)
 
 
