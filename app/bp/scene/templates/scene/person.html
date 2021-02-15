@@ -55,13 +55,18 @@ u { color: DarkKhaki; text-decoration: none; }
             <b>{{root.usernode}}</b> {{root.id}}</div>
   {% endif %}
 
-        <h3 class="sticky" title="{{ _('Top') }}"><a href="#">{{person.names[0].firstname}} 
-            <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b></a>
+        <h3 class="sticky" title="{{ _('Top') }}"><a href="#">
+        <span id="primary_name">
+        	{{person.names[0].firstname}} 
+            <i>{{person.names[0].suffix}}</i>
+            {{person.names[0].prefix}}
+            <b>{{person.names[0].surname}}</b>
+        </span>
+            </a>
             {{macro.citation_link(person.citation_ref, obj)}}
         </h3>
 
         {% set myid = person.uniq_id %}
-        
         <div id="summaryarea">
             <table>
                 <tr>
@@ -71,9 +76,24 @@ u { color: DarkKhaki; text-decoration: none; }
                         / <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
                     </td>
                 </tr>
+			</table>
 
+			<form>
+			
+			<input type="hidden" name="uuid" value="{{ person.uuid }}">
+			<table>
+				<tr><td>{{ _("Names") }}
+				{%- if may_edit %}
+					 ({{ _("order by dragging") }})
+				{%- endif %}:
+				<tr><td><table>
+				<tbody id="names" 
+				{% if may_edit %}
+					hx-put="/scene/sort_names" hx-trigger="end" hx-swap="none"
+				{% endif %}:
+				>
                 {% for pname in person.names|sort(attribute='order') %}<tr>
-                    <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
+                    <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
                     <td class="Value">
 						{% if pname.title %}<span title="titteli" class="typedesc">{{pname.title}}</span>{% endif %}
                         <span title="{{ _('first name') }}">{{pname.firstname}}</span>
@@ -82,9 +102,15 @@ u { color: DarkKhaki; text-decoration: none; }
                         <b title="{{ _('surname') }}">{{pname.surname}}</b>
 
 	                    {{macro.citation_link(pname.citation_ref, obj)}}
+	                    <input type="hidden" name="order" value="{{pname.uniq_id}}">
                     </td>
                 </tr>{% endfor %}
-                   
+               	</tbody>
+				</table>
+			</table>
+			</form>
+
+			<table>
                 {% if person.sex %}<tr>
                     <td class="ColumnAttribute">{{ _("Gender") }}</td>
                     <td class="Value">{{ person.sex_symbol() }} {{ person.sex_str() }}</td>
@@ -332,6 +358,10 @@ u { color: DarkKhaki; text-decoration: none; }
 {% endif %}
     </div> {# content #}
 
+<script src="/static/js/Sortable.js"></script>
+<script src="https://unpkg.com/htmx.org@1.2.0"></script>
+<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+
 <script>
 /* For source references */
 {{jscode|safe}}
@@ -341,6 +371,12 @@ tbl.findReferences('','','');
 tbl.sourceReferences('sourcerefContent','');
 tbl.noteReferences('noteContent','');
     {% endif %}
+    
+{% if may_edit %}
+var names = document.getElementById('names');
+var sortable = Sortable.create(names);
+{% endif %}
+    
 </script>
 {% endblock %}
 

@@ -9,6 +9,10 @@ class CypherPerson():
     Cypher clauses for Person data access.
     '''
 
+    
+    
+    
+
 # ----- Person node -----
 
     get_person_by_uid = "MATCH (p:Person) WHERE ID(p) = $uid"
@@ -263,3 +267,16 @@ return n.surname as surname, size(collect(p)) as count
 order by count desc
 limit 150
 """
+
+    set_primary_name = """
+match (p:Person{uuid:$uuid})  
+match (p) -[:NAME]-> (n1:Name{order:0})
+match (p) -[:NAME]-> (n2:Name{order:$old_order})
+set n1.order = $old_order, n2.order = 0
+    """
+
+    set_name_order = """
+match (n:Name) where id(n) = $uid  
+set n.order = $order
+    """
+    

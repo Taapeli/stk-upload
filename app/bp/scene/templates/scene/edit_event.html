@@ -1,0 +1,19 @@
+            <table>
+                <tr>
+                {% if 1 or event.description %}<tr>
+                    <td class="ColumnAttribute">{{ _("Description") }}</td>
+                    <td class="ColumnValue"><input value="{{ event.description }}"></td>
+                </tr>{% endif %}
+                {% if 1 or event.dates %}<tr>
+                    <td class="ColumnAttribute">{{ _("Date") }}</td>
+                    <td class="ColumnValue"><input value="{{ event.dates }}"></td>
+                </tr>{% endif %}
+                {% if event.place %}<tr>
+                    <td class="ColumnAttribute">{{ _("Place") }}</td>
+                    <td class="ColumnValue">
+                        <a href="/scene/location/uuid={{event.place.uuid}}" class="inlink">
+                            {{event.place.pname}}</a>
+                    </td>
+                </tr>{% endif %}
+
+            </table>

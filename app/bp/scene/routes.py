@@ -27,7 +27,7 @@ from bl.place import PlaceDataReader
 from bl.source import SourceDataStore
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
-from bl.person import PersonReader
+from bl.person import PersonReader, PersonWriter
 from bl.media import MediaReader # ,Media
 from templates import jinja_filters
 
@@ -309,11 +309,63 @@ def show_person(uid=None):
 
     #for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
+    may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
+    #may_edit = 0
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=root,
                            last_year_allowed=last_year_allowed, 
-                           elapsed=time.time()-t0, user_context=u_context)
+                           elapsed=time.time()-t0, user_context=u_context,
+                           may_edit=may_edit)
 
+
+@bp.route('/scene/get_person_names/<uuid>', methods=['PUT'])
+@roles_accepted('guest','research', 'audit', 'admin')
+def get_person_names(uuid):
+    u_context = UserContext(user_session, current_user, request)
+    datastore = PersonReader(readservice, u_context)
+    args = {}
+    result = datastore.get_person_data(uuid, args)
+    if Status.has_failed(result):
+        flash(f'{result.get("statustext","error")}', 'error')
+    person = result.get('person')
+    objs = result.get('objs',[])
+    stk_logger(u_context, f"-> bp.scene.routes.set_primary_name")
+    may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
+    return render_template("/scene/person_names.html", person=person, obj=objs, may_edit=may_edit) 
+
+
+@bp.route('/scene/get_person_primary_name/<uuid>', methods=['PUT'])
+@roles_accepted('guest','research', 'audit', 'admin')
+def get_person_primary_name(uuid):
+    u_context = UserContext(user_session, current_user, request)
+    datastore = PersonReader(readservice, u_context)
+    args = {}
+    result = datastore.get_person_data(uuid, args)
+    if Status.has_failed(result):
+        flash(f'{result.get("statustext","error")}', 'error')
+    person = result.get('person')
+    stk_logger(u_context, f"-> bp.scene.routes.get_person_primary_name")
+    return render_template("/scene/person_name.html", person=person) 
+
+
+@bp.route('/scene/set_primary_name/<uuid>/<int:old_order>', methods=['PUT'])
+@roles_accepted('audit', 'admin')
+def set_primary_name(uuid, old_order):
+    u_context = UserContext(user_session, current_user, request)
+    personwriter = PersonWriter(writeservice, u_context)
+    personwriter.set_primary_name(uuid, old_order)
+    return get_person_names(uuid) 
+
+@bp.route('/scene/sort_names', methods=['PUT'])
+@roles_accepted('audit', 'admin')
+def sort_names():
+    uuid = request.form.get("uuid")
+    uid_list = request.form.getlist("order")
+    uid_list = [int(uid) for uid in uid_list]
+    u_context = UserContext(user_session, current_user, request)
+    personwriter = PersonWriter(writeservice, u_context)
+    personwriter.set_name_orders(uid_list)
+    return get_person_primary_name(uuid)
 
 # @bp.route('/scene/person/uuid=<pid>')
 # @bp.route('/scene/person=<int:pid>')
@@ -333,7 +385,7 @@ def obsolete_show_event_v1(uuid):
     u_context = UserContext(user_session, current_user, request)
     datastore = EventReader(readservice, u_context) 
 
-    res = datastore.get_event_data(uuid)
+    res = datastore.get_event_data(uuid, {})
 
     status = res.get('status')
     if status != Status.OK:
@@ -342,7 +394,26 @@ def obsolete_show_event_v1(uuid):
     members = res.get('members', [])
 
     stk_logger(u_context, f"-> bp.scene.routes.show_event_page n={len(members)}")
-    return render_template("/scene/event.html",
+    return render_template("/scene/event_htmx.html",
+                           event=event, participants=members)
+
+@bp.route('/scene/edit_event/uuid=<string:uuid>')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
+def edit_event(uuid):
+    u_context = UserContext(user_session, current_user, request)
+    datastore = EventReader(readservice, u_context) 
+
+    res = datastore.get_event_data(uuid, {})
+
+    status = res.get('status')
+    if status != Status.OK:
+        flash(f'{_("Event not found")}: {res.get("statustext")}','error')
+    event = res.get('event', None)
+    members = res.get('members', [])
+
+    stk_logger(u_context, f"-> bp.scene.routes.show_event_page n={len(members)}")
+    return render_template("/scene/edit_event.html",
                            event=event, participants=members)
 
 @bp.route('/scene/event/uuid=<string:uuid>')
