@@ -5,15 +5,16 @@ Created on 30.1.2021
 '''
 
 from pe.neo4j.cypher.cy_person import CypherPerson
+from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
-from PIL.ImageOps import crop
 
-class ReferenceObj:
-    ''' Object to return reference data. '''
+
+class MediaReference:
+    ''' Object to return media reference data. '''
     def __init__(self):
         self.node = None
         self.order = None
-        self.crop = []
+        self.crop = None
 
     def __str__(self):
         if self.node:
@@ -22,10 +23,31 @@ class ReferenceObj:
         else:
             id_str = ""
         if self.crop:
-            crop_str = f'[{crop}]'
+            crop_str = f'[{self.crop}]'
         else:
             crop_str = ""
         return f'-{crop_str}-> ({id_str})'
+
+class SourceReference:
+    ''' Object to return Source and Repocitory reference data. '''
+    def __init__(self):
+        self.source_node = None
+        self.repository_node = None
+        self.medium = ""
+
+    def __str__(self):
+        if self.source_node:
+            label, = self.source_node.labels
+            source_str = f'{label} {self.source_node.id}:{self.source_node["id"]}'
+        else:
+            source_str = ""
+        if self.repository_node:
+            label, = self.repository_node.labels
+            repo_str = f'{label} {self.repository_node.id}:{self.repository_node["id"]}'
+        else:
+            repo_str = ""
+        return f'{source_str}-{self.medium}->({repo_str})'
+
 
 class Neo4jReadServiceTx:
     ''' Methods for accessing Neo4j database.
@@ -244,19 +266,19 @@ class Neo4jReadServiceTx:
         return res
 
 
-    def tx_get_object_places(self, objs:dict):
+    def tx_get_object_places(self, base_objs:dict):
         ''' Read Place hierarchies for given Event objects.
         
-        :param:    objs    {uniq_id: NodeObject}, updated!
+        :param:    base_objs    {uniq_id: bl.base.NodeObject}, updated!
         '''
-        # Place references: {src: (place_node, [name_node, ...), ...}
+        # Place references: {src: (place_node, [name_node, ...])}
         # - src                 Event (or Place) uniq_id
         # - place_node          connected place node
         # - [name_node, ...]    name nodes for this place
         references = {}
 
         try:
-            uids = list(objs.keys())
+            uids = list(base_objs.keys())
             results = self.tx.run(CypherPerson.get_event_places, uid_list=uids)
             for record in results:
                 # Returns 
@@ -272,28 +294,18 @@ class Neo4jReadServiceTx:
                 # Place node and names linked to this event
                 place_node = record['pl']
                 place_uniq_id = place_node.id
-                if not place_uniq_id in objs.keys():
-                    # A new place
-                    objs[place_uniq_id] = place_node
-                pn_list = record['pnames']
-                for pl_name in pn_list:
-                    objs[pl_name.id] = pl_name
-                references[event_uniq_id] = (place_node, pn_list)
+                pn_nodes = record['pnames']
+                references[event_uniq_id] = (place_node, pn_nodes)
 
                 # Upper Place node and names linked to this Place
                 upper_place_node = record['pi']
                 if upper_place_node:
-                    if not upper_place_node.id in objs.keys():
-                        # A new place
-                        objs[upper_place_node.id] = upper_place_node
-                    pn_list = record['pinames']
-                    for pl_name in pn_list:
-                        objs[pl_name.id] = pl_name
-                    references[place_uniq_id] = (upper_place_node, pn_list)
+                    pn_nodes = record['pinames']
+                    references[place_uniq_id] = (upper_place_node, pn_nodes)
                 pass
  
         except Exception as e:
-            print(f"Could not read places for objects {objs}: {e.__class__.__name__} {e}")
+            print(f"Could not read places for {len(base_objs)} objects: {e.__class__.__name__} {e}")
             return {'status': Status.ERROR, 'statustext':f'{e.__class__.__name__}: {e}'}
 
         print(f'#tx_get_object_places: Got {len(references)} place references') 
@@ -326,12 +338,12 @@ class Neo4jReadServiceTx:
 
         try:
             if active_objs and active_objs[0] > 0:
-                # Search next level destinations src) -[r:CITATION|NOTE|MEDIA]-> (target)
+                # Search next level destinations (src) -[r:CITATION|NOTE|MEDIA]-> (target)
                 uids = active_objs
             else:
                 # Search all (src) -[r:CITATION|NOTE|MEDIA]-> (target)
                 uids = list(obj_catalog.keys())
-            print(f'# Searching Citations, Notes, Medias for {len(uids)} nodes')
+            #print(f'# Searching Citations, Notes, Medias for {len(uids)} nodes')
 
             results = self.tx.run(CypherPerson.get_objs_citations_notes_medias,
                                   uid_list=uids)
@@ -342,18 +354,18 @@ class Neo4jReadServiceTx:
                 #    - target   target object Citation|Note|Media
 
                 # Create a reference to target object including node, order and crop
-                ref = ReferenceObj()
+                ref = MediaReference()
 
                 # The existing object src
                 src_node = record['src']
                 src_uniq_id = src_node.id
-                #src_label, = list(src_node.labels)
+                src_label, = src_node.labels
                 #src = obj_catalog[record['uniq_id']]
 
                 # Target is a Citation, Note or Media
                 target_node = record['target']
                 target_uniq_id = target_node.id
-                target_label, = list(target_node.labels)
+                target_label, = target_node.labels
                 ref.node = target_node
 
                 # Relation r between (src_node) --> (target)
@@ -367,7 +379,7 @@ class Neo4jReadServiceTx:
                         right = rel.get('right')
                         lower = rel.get('lower')
                         ref.crop = (left, upper, right, lower)
-                #print(f'# - Found ({src_uniq_id}:{src_label} {src_node["id"]}) {ref}')
+                #print(f'# Cita/Note/Media: ({src_uniq_id}:{src_label} {src_node["id"]}) {ref}')
 
                 # Add current target reference to objects referred 
                 # from this src object 
@@ -392,4 +404,50 @@ class Neo4jReadServiceTx:
         return {'status': Status.OK,
                 'new_objects': new_obj_ids, 
                 'references': coll}
+
+    def tx_get_object_sources_repositories(self, citation_uids:list):
+        ''' Get Sources and Repositories udes by listed objects
+        
+            Read Source -> Repository hierarchies for given list of citations
+                            
+            - session       neo4j.session   for database access
+            - citations[]   list int        list of citation.uniq_ids
+            - objs{}        dict            objs[uniq_id] = NodeObject
+            
+            * The Citations mentioned must be in objs dictionary
+            * On return, the new Sources and Repositories found are added to objs{} 
+            
+            --> Origin from models.source_citation_reader.read_sources_repositories
+        '''
+        if len(citation_uids) == 0:
+            return {'status':Status.NOT_FOUND}
+        references = {} # {Citation.unid_id: SourceReference}
+
+        with self.driver.session(default_access_mode='READ') as session:
+            results = session.run(CypherSource.get_citation_sources_repositories, 
+                                  uid_list=citation_uids)
+            for record in results:
+                # <Record 
+                #    uniq_id=392761 
+                #    source=<Node id=397146 labels={'Source'} 
+                #        properties={'id': 'S1723', 'stitle': 'Hauhon seurakunnan rippikirja 1757-1764', 
+                #            'uuid': 'f704b8b90c0640efbade4332e126a294', 'spubinfo': '', 'sauthor': '', 'change': 1563727817}>
+                #    rel={'medium': 'Book'}
+                #    repo=<Node id=316903 labels={'Repository'}
+                #        properties={'id': 'R0157', 'rname': 'Hauhon seurakunnan arkisto', 'type': 'Archive', 
+                #            'uuid': '7ac1615894ea4457ba634c644e8921d6', 'change': 1563727817}>
+                # >
+
+                ref = SourceReference()
+                # 1. Citation
+                uniq_id = record['uniq_id']
+#                 cita = self.objs[uniq_id]
+
+                # 2. The Source node
+                ref.source_node = record['source']
+                ref.repository_node = record['repo']
+                ref.medium = record['rel'].get('medium', "")
+                references[uniq_id] = ref
+
+        return {'status': Status.OK, 'sources': references}
 

@@ -9,14 +9,18 @@ from bl.person import PersonBl
 from bl.person_name import Name
 from bl.event import EventBl
 from bl.family import FamilyBl
-from bl.place import PlaceBl #, PlaceName
+from bl.place import PlaceBl, PlaceName
 from bl.media import Media
+from bl.source import SourceBl
+
 from models.gen.note import Note
 #TODO from bl.note import Note
 from models.gen.citation import Citation
 #TODO from bl.citation import Citation
+from models.gen.repository import Repository
+
 # Pick a PlaceName by user language
-from ui.place import place_names_from_nodes
+from ui.place import place_names_local_from_nodes
 
 import logging 
 logger = logging.getLogger('stkserver')
@@ -39,10 +43,32 @@ class PersonReaderTx(DbReader):
         self.obj_catalog = {}          # {uniq_id: Connected_object}
 
     def _catalog(self, obj):
-        ''' Collect list of objects connects to active node. '''
-        if not obj is None:
+        ''' Add the object to collection of referenced objects. '''
+        if obj is None:
+            return
+        if not obj.uniq_id in self.obj_catalog:
             self.obj_catalog[obj.uniq_id] = obj
+        else:
+            c = self.obj_catalog[obj.uniq_id]
+            if c is obj:
+                print(f"bl.person_reader.PersonReaderTx._catalog: WARNING same objects twise: {obj}")
+                print(obj)
+                print(c)
 
+
+
+    def _extract_place_w_names(self, pl_reference):
+        ''' Create a PlaceBl node with PlaceNames from a place reference tuple.
+            :param:    src            int The object uniq_id, where this Place is linked in
+            :param:    pl_reference   tuple (Place_node, [PlaceName_node])
+            :return:   PlaceBl        created Place node
+        '''
+        place_node, name_nodes = pl_reference
+        if place_node:
+            place = self.obj_catalog[place_node.id]
+            place.names = place_names_local_from_nodes(name_nodes)
+            return place
+        return None
 
     def get_person_data(self, uuid:str): #, args:dict):
         '''
@@ -120,7 +146,6 @@ class PersonReaderTx(DbReader):
                 return {'status':Status.NOT_FOUND, 
                         'statustext': _('Requested person not found')}
             return res
-
         # Got dictionary: Status and following objects:
         #     - person_node, root, name_nodes, event_node_roles, cause_of_death, families
         #     - - root = {root_type, root,user, batch_id}
@@ -131,7 +156,6 @@ class PersonReaderTx(DbReader):
         #     - - - family_events = [event_node]
         #     - - - family_members = [{member_node, name_node, parental_role, birth_node}, ...]
         #     - - - marriage_date = {datetype, date1, date2}
-
 
         # 1-2. Person, names and events
 
@@ -149,9 +173,11 @@ class PersonReaderTx(DbReader):
             name = Name.from_node(name_node)
             person.names.append(name)
             self._catalog(name)
+        # Events
         for event_node, event_role in res.get('event_node_roles'):
             event = EventBl.from_node(event_node)
             event.role = event_role
+            event.citation_ref = []
             person.events.append(event)
             self._catalog(event)
         obj = res.get('cause_of_death')
@@ -216,33 +242,42 @@ class PersonReaderTx(DbReader):
 
         res = self.readservice.tx_get_object_places(self.obj_catalog)
         # returns {status, place_references}
+        if Status.has_failed(res):
+            print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read places:'\
+                  f' {res.get("statustext")}')
+            return res
+
         place_references = res.get('place_references', {})
         # Got dictionary {object_id,  (place_node, (name_nodes))
+        
+        # Convert nodes and store them as PlaceBl objects with PlaceNames included
+        for pl_node, pn_nodes in place_references.values():
+            place = PlaceBl.from_node(pl_node)
+            for pn_node in pn_nodes:
+                name = PlaceName.from_node(pn_node)
+                place.names.append(name)
+            self._catalog(place)
 
         for e in person.events:
             #src = e.uniq_id
             if e.uniq_id in place_references.keys():
-                place_node, name_nodes = place_references[e.uniq_id]
-                if place_node:
-                    # Place and name
-                    place = PlaceBl.from_node(place_node)
-                    place.names = place_names_from_nodes(name_nodes)
+                
+                place = self._extract_place_w_names(place_references[e.uniq_id])
+                if place:
                     e.place_ref = [place.uniq_id]
-                    self._catalog(place)
-                    # Upper Place?
-                    if place.uniq_id in place_references.keys():
-                        up_place_node, up_name_nodes = place_references[place.uniq_id]
-                        if up_place_node:
-                            # Surrounding Place and name
-                            up_place = PlaceBl.from_node(up_place_node)
-                            up_place.names = place_names_from_nodes(up_name_nodes)
+                    # Add Upper Place, if not set
+                    if place.uppers == []:  # and place.uniq_id in place_references.keys():
+                        up_place = self._extract_place_w_names(place_references[place.uniq_id])
+                        if up_place:
                             place.uppers = [up_place]
 
 
         # 5. Citations, Notes, Medias
 
         new_ids = [-1]
+        all_citations = {}
         while len(new_ids) > 0:
+            cnt = len(new_ids)
             # New objects
             citations = {}
             notes = {}
@@ -252,7 +287,10 @@ class PersonReaderTx(DbReader):
             # returns {status, new_objects, references}
             # - new_objects    the objects, for which a new search shold be done
             # - references     {source id: [ReferenceObj(node, order, crop)]}
-            if Status.has_failed(res): return res
+            if Status.has_failed(res):
+                print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read citations etc.:'\
+                      f' {res.get("statustext")}')
+                return res
             new_ids = res.get('new_objects', [])
             references = res.get('references')
 
@@ -265,7 +303,7 @@ class PersonReaderTx(DbReader):
                         crop = current.crop
                         label, = node.labels
                         #print (f'Link ({source.__class__.__name__} {src_id}:{source.id}) {current}')
-
+    
                         target_obj = None
                         if label == "Citation":
                             # If id is in the dictionary, return its value.
@@ -292,24 +330,54 @@ class PersonReaderTx(DbReader):
                         else:
                             raise NotImplementedError("Citation, Note or Media excepted, got {label}")
 
-#             print(f'# - found {len(citations)} Citatons, {len(notes)} Notes, {len(medias)} Medias')
+            print(f'# - found {len(citations)} Citatons, {len(notes)} Notes, {len(medias)} Medias from {cnt} nodes')
+            all_citations.update(citations)
             self.obj_catalog.update(citations)
             self.obj_catalog.update(notes)
             self.obj_catalog.update(medias)
 
-#         # Calculate the average confidence of the sources
-#         if len(citations) > 0:
+#         # The average confidence of the sources is already calculated
+#         if citations:
 #             summa = 0
 #             for cita in citations.values():
 #                 summa += int(cita.confidence)
-#                  
+#                   
 #             aver = summa / len(citations)
 #             person.confidence = "%0.1f" % aver # string with one decimal
 
-#         # 6. Read Sources s and Repositories r for all Citations
-#         #    for c in z:Citation
-#         #        (c) --> (s:Source) --> (r:Repository)
-#         self.readservice.dr_get_object_sources_repositories()
+
+        # 6. Read Sources s and Repositories r for all Citations
+        #    for c in z:Citation
+        #        (c) --> (s:Source) --> (r:Repository)
+
+        res = self.readservice.tx_get_object_sources_repositories(list(all_citations.keys()))
+        if Status.has_failed(res):
+            print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read repositories:'\
+                  f' {res.get("statustext")}')
+            return res
+        # returns {'status': Status.OK, 'sources': references}
+        #    - references    {Citation.unid_id: SourceReference}
+        #        - SourceReference    object with source_node, repository_node, medium
+
+        source_refs = res['sources']
+        for uniq_id, ref in source_refs.items():
+            # 1. The Citation node
+            cita = self.obj_catalog[uniq_id]
+    
+            # 2. The Source node
+            node = ref.source_node
+            source = SourceBl.from_node(node)
+            self._catalog(source)
+
+            # 3.-4. The Repository node and medium from REPOSITORY relation
+            node = ref.repository_node
+            repo = Repository.from_node(node)
+            repo.medium = ref.medium
+            self._catalog(repo)
+             
+            # Referencing a (Source, medium, Repository) tuple
+            cita.source_id = source.uniq_id
+            print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
 
 
 #         # Create Javascript code to create source/citation list

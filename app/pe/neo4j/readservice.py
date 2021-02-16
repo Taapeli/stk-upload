@@ -37,7 +37,7 @@ from bl.event import EventBl
 from bl.person import PersonBl
 from bl.media import MediaBl
 
-from ui.place import place_names_from_nodes
+from ui.place import place_names_local_from_nodes
 
 from pe.neo4j.cypher.cy_place import CypherPlace, CypherPlaceStats
 from pe.neo4j.cypher.cy_source import CypherSource
@@ -735,7 +735,7 @@ class Neo4jReadService:
                             #                properties={'name': 'Loviisan srk', 'lang': ''}>
                             #        ] 
                             e.place = PlaceBl.from_node(place_node)
-                            e.place.names = place_names_from_nodes(record['names'])
+                            e.place.names = place_names_local_from_nodes(record['names'])
                             
                         for inside_node, inside_rel, inside_names in record['inside']:
                             if inside_node:
@@ -763,7 +763,7 @@ class Neo4jReadService:
                                 if len(inside_rel._properties):
                                     pl_in.dates = DateRange.from_node(inside_rel._properties)
     
-                                pl_in.names = place_names_from_nodes(inside_names)
+                                pl_in.names = place_names_local_from_nodes(inside_names)
                                 e.place.uppers.append(pl_in)
 
                         events.append(e)
@@ -982,7 +982,7 @@ class Neo4jReadService:
                         # A new place
                         self.objs[pl.uniq_id] = pl
                         #print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
-                        pl.names = place_names_from_nodes(record['pnames'])
+                        pl.names = place_names_local_from_nodes(record['pnames'])
                         
                     #else:
                     #   print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
@@ -998,7 +998,7 @@ class Neo4jReadService:
                         else:
                             pl.uppers.append(pl_in)
                             self.objs[pl_in.uniq_id] = pl_in
-                            pl_in.names = place_names_from_nodes(record['pinames'])
+                            pl_in.names = place_names_local_from_nodes(record['pinames'])
                             #print(f"#  ({pl_in} names {pl_in.names})")
                     pass
     
