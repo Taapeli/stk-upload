@@ -54,6 +54,7 @@ import shareds
 from bl.base import NodeObject, Status
 from bl.person_name import Name
 from pe.db_reader import DbReader
+from pe.db_writer import DbWriter
 from pe.neo4j.cypher.cy_person import CypherPerson
 
 from models.gen.note import Note
@@ -322,6 +323,16 @@ class PersonReader(DbReader):
             surnames = self.readservice.dr_get_surname_list_common(count=count)
         # [{'surname': surname, 'count': count},...]
         return surnames
+
+class PersonWriter(DbWriter):
+    def __init__(self, writeservice, u_context):
+        self.writeservice = writeservice
+        self.u_context = u_context
+    def set_primary_name(self, uuid, old_order):
+        self.writeservice.dr_set_primary_name(uuid, old_order)
+    def set_name_orders(self, uid_list):
+        self.writeservice.dr_set_name_orders(uid_list)
+
 
 class PersonBl(Person):
 
