@@ -68,7 +68,7 @@ RETURN LABELS(event)[0] AS label, ID(event) AS uniq_id,
     get_objs_citations_notes_medias = """
 MATCH (src) -[r:CITATION|NOTE|MEDIA]-> (target)
     WHERE ID(src) IN $uid_list
-RETURN src, r, target"""
+RETURN src, properties(r) AS r, target"""
 
     # Older version:
     get_objs_citation_note_media = """

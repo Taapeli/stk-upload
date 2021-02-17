@@ -21,6 +21,8 @@ from models.gen.repository import Repository
 
 # Pick a PlaceName by user language
 from ui.place import place_names_local_from_nodes
+#TODO Should be somewhere else!
+from templates.jinja_filters import translate
 
 import logging 
 logger = logging.getLogger('stkserver')
@@ -56,21 +58,7 @@ class PersonReaderTx(DbReader):
                 print(c)
 
 
-
-    def _extract_place_w_names(self, pl_reference):
-        ''' Create a PlaceBl node with PlaceNames from a place reference tuple.
-            :param:    src            int The object uniq_id, where this Place is linked in
-            :param:    pl_reference   tuple (Place_node, [PlaceName_node])
-            :return:   PlaceBl        created Place node
-        '''
-        place_node, name_nodes = pl_reference
-        if place_node:
-            place = self.obj_catalog[place_node.id]
-            place.names = place_names_local_from_nodes(name_nodes)
-            return place
-        return None
-
-    def get_person_data(self, uuid:str): #, args:dict):
+    def get_person_data(self, uuid:str):
         '''
         Get a Person with all connected nodes for display in Person page as object tree.
         '''
@@ -139,6 +127,20 @@ class PersonReaderTx(DbReader):
         once only.
         """
 
+        def _extract_place_w_names(pl_reference):
+            ''' Create a PlaceBl node with PlaceNames from a place reference tuple.
+
+                :param:    pl_reference   tuple (Place_node, [PlaceName_node])
+                :return:   PlaceBl        created Place node
+            '''
+            place_node, name_nodes = pl_reference
+            if place_node:
+                place = self.obj_catalog[place_node.id]
+                place.names = place_names_local_from_nodes(name_nodes)
+                return place
+            return None
+        #---/
+
         res = self.readservice.tx_get_person_by_uuid(uuid, active_user=self.use_user)
         if Status.has_failed(res):
             # Not found, not allowd (person.too_new) or error
@@ -180,10 +182,10 @@ class PersonReaderTx(DbReader):
             event.citation_ref = []
             person.events.append(event)
             self._catalog(event)
-        obj = res.get('cause_of_death')
-        if obj:
-            person.cause_of_death = EventBl.from_node(obj)
-            self._catalog(obj)
+        node = res.get('cause_of_death')
+        if node:
+            person.cause_of_death = EventBl.from_node(node)
+            self._catalog(person.cause_of_death)
 
         # 3. Person's families as child or parent
 
@@ -248,7 +250,7 @@ class PersonReaderTx(DbReader):
             return res
 
         place_references = res.get('place_references', {})
-        # Got dictionary {object_id,  (place_node, (name_nodes))
+        # Got dictionary {object_id:  (place_node, (name_nodes))
         
         # Convert nodes and store them as PlaceBl objects with PlaceNames included
         for pl_node, pn_nodes in place_references.values():
@@ -259,17 +261,18 @@ class PersonReaderTx(DbReader):
             self._catalog(place)
 
         for e in person.events:
-            #src = e.uniq_id
             if e.uniq_id in place_references.keys():
                 
-                place = self._extract_place_w_names(place_references[e.uniq_id])
+                place = _extract_place_w_names(place_references[e.uniq_id])
                 if place:
                     e.place_ref = [place.uniq_id]
-                    # Add Upper Place, if not set
-                    if place.uppers == []:  # and place.uniq_id in place_references.keys():
-                        up_place = self._extract_place_w_names(place_references[place.uniq_id])
-                        if up_place:
-                            place.uppers = [up_place]
+                    # Add Upper Place, if not set and exists
+                    if place.uppers == [] and place.uniq_id in place_references:
+                        refs = place_references[place.uniq_id]
+                        if refs:
+                            up_place = _extract_place_w_names(refs)
+                            if up_place:
+                                place.uppers = [up_place]
 
 
         # 5. Citations, Notes, Medias
@@ -285,7 +288,7 @@ class PersonReaderTx(DbReader):
 
             res = self.readservice.tx_get_object_citation_note_media(self.obj_catalog, new_ids)
             # returns {status, new_objects, references}
-            # - new_objects    the objects, for which a new search shold be done
+            # - new_objects    the objects, for which a new search should be done
             # - references     {source id: [ReferenceObj(node, order, crop)]}
             if Status.has_failed(res):
                 print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read citations etc.:'\
@@ -294,7 +297,7 @@ class PersonReaderTx(DbReader):
             new_ids = res.get('new_objects', [])
             references = res.get('references')
 
-            for src_id, source in self.obj_catalog.items():
+            for src_id, src in self.obj_catalog.items():
                 refs = references.get(src_id)
                 if refs:
                     for current in refs:
@@ -302,31 +305,36 @@ class PersonReaderTx(DbReader):
                         order = current.order
                         crop = current.crop
                         label, = node.labels
-                        #print (f'Link ({source.__class__.__name__} {src_id}:{source.id}) {current}')
+                        #print (f'Link ({src.__class__.__name__} {src_id}:{src.id}) {current}')
     
                         target_obj = None
                         if label == "Citation":
                             # If id is in the dictionary, return its value.
                             # If not, insert id with a value of 2nd argument.
                             target_obj = citations.setdefault(node.id, Citation.from_node(node))
-                            if hasattr(source, 'citation_ref'):
-                                source.citation_ref.append(node.id)
+                            if hasattr(src, 'citation_ref'):
+                                src.citation_ref.append(node.id)
                             else:
-                                source.citation_ref = [node.id]
+                                src.citation_ref = [node.id]
                         elif label == "Note":
                             target_obj = notes.setdefault(node.id, Note.from_node(node))
-                            if hasattr(source, 'note_ref'):
-                                source.note_ref.append(node.id)
+                            if hasattr(src, 'note_ref'):
+                                src.note_ref.append(node.id)
                             else:
-                                source.note_ref = [node.id]
+                                src.note_ref = [node.id]
                             target_obj.citation_ref = []
                         elif label == "Media":
                             target_obj = medias.setdefault(node.id, Media.from_node(node))
-                            if hasattr(source, 'media_ref'):
-                                source.media_ref.append((node.id, crop, order))
+                            if hasattr(src, 'media_ref'):
+                                src.media_ref.append((node.id, crop, order))
                             else:
-                                source.media_ref = [(node.id, crop, order)]
+                                src.media_ref = [(node.id, crop, order)]
                             target_obj.citation_ref = []
+                            # Sort the Media references by order
+                            #print(f'#\tMedia ref {target_obj.uniq_id} order={order}, crop={crop}')
+                            if len(src.media_ref) > 1 and src.media_ref[-2][2] > src.media_ref[-1][2]:
+                                src.media_ref.sort(key=lambda x: x[2])
+                                #print("#\tMedia sort done")
                         else:
                             raise NotImplementedError("Citation, Note or Media excepted, got {label}")
 
@@ -336,14 +344,9 @@ class PersonReaderTx(DbReader):
             self.obj_catalog.update(notes)
             self.obj_catalog.update(medias)
 
-#         # The average confidence of the sources is already calculated
-#         if citations:
-#             summa = 0
-#             for cita in citations.values():
-#                 summa += int(cita.confidence)
-#                   
-#             aver = summa / len(citations)
-#             person.confidence = "%0.1f" % aver # string with one decimal
+
+        # The average confidence of the sources (person.confidence) has been calculated
+        # when creating (or updating) Person
 
 
         # 6. Read Sources s and Repositories r for all Citations
@@ -355,7 +358,7 @@ class PersonReaderTx(DbReader):
             print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read repositories:'\
                   f' {res.get("statustext")}')
             return res
-        # returns {'status': Status.OK, 'sources': references}
+        # res = {'status': Status.OK, 'sources': references}
         #    - references    {Citation.unid_id: SourceReference}
         #        - SourceReference    object with source_node, repository_node, medium
 
@@ -371,18 +374,19 @@ class PersonReaderTx(DbReader):
 
             # 3.-4. The Repository node and medium from REPOSITORY relation
             node = ref.repository_node
-            repo = Repository.from_node(node)
-            repo.medium = ref.medium
-            self._catalog(repo)
+            if node:
+                repo = Repository.from_node(node)
+                repo.medium = ref.medium
+                self._catalog(repo)
              
             # Referencing a (Source, medium, Repository) tuple
             cita.source_id = source.uniq_id
-            print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
+            #print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
 
 
 #         # Create Javascript code to create source/citation list
 #         jscode = get_citations_js(self.readservice.objs)
-        jscode = "/* todo */"
+        jscode = self.get_citations_js()
     
         # Return Person with included objects,  and javascript code to create
         # Citations, Sources and Repositories with their Notes
@@ -392,3 +396,66 @@ class PersonReaderTx(DbReader):
                 'root': root_dict,
                 'status': Status.OK}
 
+
+    def get_citations_js(self):
+        ''' Create code for generating Javascript objecs representing
+            Citations, Sources and Repositories with their Notes.
+            
+            js-style person[id] = {name: "John", age: 31, city: "New York"}
+        '''
+    
+        def unquote(s):
+            ''' Change quites (") to fancy quotes (“)
+                Change new lines to '¤' symbol
+            '''
+            return s.replace('"', '“').replace('\n','¤');
+    
+        notes = []
+        js  = 'var citations = {};\nvar sources = {};\n'
+        js += 'var repositories = {};\nvar notes = {};\n'
+        for o in self.obj_catalog.values():
+            if isinstance(o, Citation):
+                page = unquote(o.page)
+                js += f'citations[{o.uniq_id}] = {{ '
+                js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
+                js += f'id:"{o.id}", note_ref:{o.note_ref}, '
+                js += f'page:"{page}", source_id:{o.source_id}, uuid:"{o.uuid}" '
+                js +=  '};\n'
+                notes.extend(o.note_ref)
+    
+            elif isinstance(o, SourceBl):
+                sauthor = unquote(o.sauthor)
+                spubinfo = unquote(o.spubinfo)
+                stitle = unquote(o.stitle)
+                js += f'sources[{o.uniq_id}] = {{ '
+                js += f'id:"{o.id}", note_ref:{o.note_ref}, '
+                js += f'repositories:{o.repositories}, sauthor:"{sauthor}", '
+                js += f'spubinfo:"{spubinfo}", stitle:"{stitle}", '
+                js += f'uuid:"{o.uuid}" '
+                js +=  '};\n'
+                notes.extend(o.note_ref)
+    
+            elif isinstance(o, Repository):
+                medium = translate(o.medium, 'medium')
+                atype = translate(o.type, 'rept')
+                js += f'repositories[{o.uniq_id}] = {{ '
+                js += f'uuid:"{o.uuid}", id:"{o.id}", type:"{atype}", rname:"{o.rname}", '
+                # Media type 
+                js += f'medium:"{medium}", notes:{o.notes}, sources:{o.sources}'
+                js +=  '};\n'
+                notes.extend(o.notes)
+    
+            else:
+                continue
+    
+        # Find referenced Notes; conversion to set removes duplicates
+        for uniq_id in set(notes):
+            o = self.obj_catalog[uniq_id]
+            text = unquote(o.text)
+            url = unquote(o.url)
+            js += f'notes[{o.uniq_id}] = {{ '
+            js += f'uuid:"{o.uuid}", id:"{o.id}", type:"{o.type}", '
+            js += f'priv:"{o.priv}", text:"{text}", url:"{url}" '
+            js +=  '};\n'
+    
+        return js

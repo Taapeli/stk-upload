@@ -311,7 +311,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 </a>
                 <p><a href="/scene/media?uuid={{photo.uuid}}" class="inlink"
                       title="{{ _('Go to photo page') }}">
-                      {{photo.description}}</a> {{ macro.notelink(photo) }}
+                      ▸ {{photo.description}}</a> {{ macro.notelink(photo) }}
 	       {% if crop and not crop == "None" -%}<br>
                       <i>{{ _('crop') }} {{crop}}</i>
 	       {% endif %}

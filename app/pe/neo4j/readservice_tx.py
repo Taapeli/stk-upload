@@ -387,7 +387,6 @@ class Neo4jReadServiceTx:
                 if ref_list:
                     # There are already targets referred from src_node
                     if not ref in ref_list:
-                        # A new target
                         coll[src_uniq_id].append(ref)
                 else:
                     coll[src_uniq_id] = [ref]
@@ -437,16 +436,16 @@ class Neo4jReadServiceTx:
                 #        properties={'id': 'R0157', 'rname': 'Hauhon seurakunnan arkisto', 'type': 'Archive', 
                 #            'uuid': '7ac1615894ea4457ba634c644e8921d6', 'change': 1563727817}>
                 # >
-
                 ref = SourceReference()
+
                 # 1. Citation
                 uniq_id = record['uniq_id']
-#                 cita = self.objs[uniq_id]
 
                 # 2. The Source node
                 ref.source_node = record['source']
                 ref.repository_node = record['repo']
-                ref.medium = record['rel'].get('medium', "")
+                if ref.repository_node:
+                    ref.medium = record['rel'].get('medium', "")
                 references[uniq_id] = ref
 
         return {'status': Status.OK, 'sources': references}
