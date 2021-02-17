@@ -416,7 +416,7 @@ class Neo4jReadServiceTx:
             * The Citations mentioned must be in objs dictionary
             * On return, the new Sources and Repositories found are added to objs{} 
             
-            --> Origin from models.source_citation_reader.read_sources_repositories
+            --> Origin from models.obsolete_source_citation_reader.read_sources_repositories
         '''
         if len(citation_uids) == 0:
             return {'status':Status.NOT_FOUND}

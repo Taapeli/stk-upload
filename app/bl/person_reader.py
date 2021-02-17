@@ -28,7 +28,7 @@ import logging
 logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
-#from models.source_citation_reader import get_citations_js
+#from models.obsolete_source_citation_reader import get_citations_js
 
 
 class PersonReaderTx(DbReader):
@@ -354,7 +354,7 @@ class PersonReaderTx(DbReader):
         #        (c) --> (s:Source) --> (r:Repository)
 
         res = self.readservice.tx_get_object_sources_repositories(list(all_citations.keys()))
-        if Status.has_failed(res):
+        if Status.has_failed(res, strict=False):
             print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read repositories:'\
                   f' {res.get("statustext")}')
             return res
@@ -362,26 +362,27 @@ class PersonReaderTx(DbReader):
         #    - references    {Citation.unid_id: SourceReference}
         #        - SourceReference    object with source_node, repository_node, medium
 
-        source_refs = res['sources']
-        for uniq_id, ref in source_refs.items():
-            # 1. The Citation node
-            cita = self.obj_catalog[uniq_id]
+        source_refs = res.get('sources')
+        if source_refs:
+            for uniq_id, ref in source_refs.items():
+                # 1. The Citation node
+                cita = self.obj_catalog[uniq_id]
+        
+                # 2. The Source node
+                node = ref.source_node
+                source = SourceBl.from_node(node)
+                self._catalog(source)
     
-            # 2. The Source node
-            node = ref.source_node
-            source = SourceBl.from_node(node)
-            self._catalog(source)
-
-            # 3.-4. The Repository node and medium from REPOSITORY relation
-            node = ref.repository_node
-            if node:
-                repo = Repository.from_node(node)
-                repo.medium = ref.medium
-                self._catalog(repo)
-             
-            # Referencing a (Source, medium, Repository) tuple
-            cita.source_id = source.uniq_id
-            #print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
+                # 3.-4. The Repository node and medium from REPOSITORY relation
+                node = ref.repository_node
+                if node:
+                    repo = Repository.from_node(node)
+                    repo.medium = ref.medium
+                    self._catalog(repo)
+                 
+                # Referencing a (Source, medium, Repository) tuple
+                cita.source_id = source.uniq_id
+                #print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
 
 
 #         # Create Javascript code to create source/citation list
