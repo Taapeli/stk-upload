@@ -11,7 +11,7 @@ from .gen.repository import Repository
 #from .gen.source import Source
 
 #TODO Should be somewhere else!
-from templates.jinja_filters import translate
+from ui.jinja_filters import translate
 
      
 # def read_sources_repositories(session, objs, citations=None): # --> pe.neo4j.readservice.dr_get_object_sources_repositories()

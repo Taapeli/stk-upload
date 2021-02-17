@@ -22,7 +22,7 @@ from models.gen.repository import Repository
 # Pick a PlaceName by user language
 from ui.place import place_names_local_from_nodes
 #TODO Should be somewhere else!
-from templates.jinja_filters import translate
+from ui.jinja_filters import translate
 
 import logging 
 logger = logging.getLogger('stkserver')

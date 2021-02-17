@@ -40,26 +40,22 @@ from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
 
 from . import bp
-from ui.user_context import UserContext
 from bl.base import Status, StkEncoder
 from bl.place import PlaceDataReader
 from bl.source import SourceDataStore
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
 from bl.person import PersonReader
-from bl.media import MediaReader #, Media
-from templates import jinja_filters
+from bl.media import MediaReader
+
+from ui.user_context import UserContext
+from ui import jinja_filters
 
 from bp.scene.models import media
 #from models.gen.family_combo import Family_combo
 #from models.gen.source import Source
 #from models.gen.obsolete_media import Media
 from models.obsolete_datareader import obsolete_read_persons_with_events
-#from models.obsolete_datareader import get_person_data_by_id # -- vanhempi versio ---
-#from models.obsolete_datareader import get_event_participants
-#from models.obsolete_datareader import get_place_with_events
-#from models.obsolete_datareader import get_source_with_events
-#from templates.jinja_filters import translate
 
 # Select the read driver for current database
 from pe.neo4j.readservice import Neo4jReadService
