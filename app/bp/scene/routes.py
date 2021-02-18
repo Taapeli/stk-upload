@@ -46,7 +46,7 @@ from bl.source import SourceDataStore
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
 from bl.person import PersonReader, PersonWriter
-#TODO from bl.person_reader import PersonReaderTx
+from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
 
 from ui.user_context import UserContext
@@ -59,6 +59,7 @@ from bp.scene.models import media
 from models.obsolete_datareader import obsolete_read_persons_with_events
 
 # Select the read driver for current database
+from pe.neo4j.readservice_tx import Neo4jReadServiceTx # initiate when used
 from pe.neo4j.readservice import Neo4jReadService
 readservice = Neo4jReadService(shareds.driver)
 
@@ -115,9 +116,10 @@ def _do_get_persons(args):
     else: # pg:'all'
         u_context.set_scope_from_request(request, 'person_scope')
         args['rule'] = 'all'
-    
     u_context.count = request.args.get('c', 100, type=int)
-    reader = PersonReader(readservice, u_context)
+
+    readservice = Neo4jReadServiceTx(shareds.driver)
+    reader = PersonReaderTx(readservice, u_context)
     
     res = reader.get_person_search(args)
 
@@ -196,6 +198,7 @@ def show_person_search():
     maxfont = 20
     #maxnames = 47
     surnamestats = datastore.get_surname_list(47)
+    # {placename,count, uuid}
     for i, stat in enumerate(surnamestats):
         stat['order'] = i
         stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
@@ -299,9 +302,7 @@ def show_person(uuid=None):
     uuid = request.args.get('uuid', uuid)
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
-    #args = {}
 
-    from bl.person_reader import PersonReaderTx
     from pe.neo4j.readservice_tx import Neo4jReadServiceTx
     readservice = Neo4jReadServiceTx(shareds.driver)
     reader = PersonReaderTx(readservice, u_context)

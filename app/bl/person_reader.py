@@ -58,6 +58,105 @@ class PersonReaderTx(DbReader):
                 print(c)
 
 
+    def get_person_search(self, args):
+        """ Read Persons with Names, Events, Refnames (reference names) and Places
+            and Researcher's username.
+        
+            Search by name by args['rule'], args['key']:
+                rule=all                  all
+                rule=surname, key=name    by start of surname
+                rule=firstname, key=name  by start of the first of first names
+                rule=patronyme, key=name  by start of patronyme name
+                rule=refname, key=name    by exact refname
+                rule=years, key=str       by possible living years:
+                    str='-y2'   untill year
+                    str='y1'    single year
+                    str='y1-y2' year range
+                    str='y1-'   from year
+
+            Origin from bl.person.PersonReader.get_person_search
+            TODO: rule=refname: listing with refnames not supported
+        """
+        if args.get('rule') == 'years':
+            try:
+                lim = args['key'].split('-')
+                y1 = int(lim[0]) if lim[0] > '' else -9999
+                y2 = int(lim[-1]) if lim[-1] > '' else 9999
+                if y1 > y2:
+                    y2, y1 = [y1, y2]
+                args['years'] = [y1, y2]
+            except ValueError:
+                return {'statustext':_('The year or years must be numeric'), 'status': Status.ERROR}
+
+#         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
+#                           'years':args.get('years')}
+
+        context = self.user_context
+        args['use_user'] = self.use_user
+        args['fw'] = context.first  # From here forward
+        args['limit'] = context.count
+        
+        res = self.readservice.tx_get_person_list(args)
+
+        status = res.get('status')
+        if status == Status.NOT_FOUND:
+            msg = res.get("statustext")
+            logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
+            print(f'bl.person.PersonReader.get_person_search: {msg}')
+            return {'items':[], 'status':res.get('status'),
+                    'statustext': _('No persons found')}
+        if status != Status.OK:
+            return res
+        persons = []
+
+        # got {'items': [PersonRecord], 'status': Status.OK}
+        #    - PersonRecord = object with fields person_node, names, events_w_role, owners
+        #    -    events_w_role = list of tuples (event_node, place_name, role)
+        for p_record in res.get('items'):
+            #print(p_record)
+            node = p_record.person_node
+            p = PersonBl.from_node(node)
+
+            # if take_refnames and record['refnames']:
+            #     refnlist = sorted(record['refnames'])
+            #     p.refnames = ", ".join(refnlist)
+
+            for node in p_record.names:
+                pname = Name.from_node(node)
+                pname.initial = pname.surname[0] if pname.surname else ''
+                p.names.append(pname)
+
+            # Events 
+            for node, pname, role in p_record.events_w_role:
+                if not node is None:
+                    e = EventBl.from_node(node)
+                    e.place = pname or ""
+                    if role and role != "Primary":
+                        e.role = role
+                    p.events.append(e)
+    
+            persons.append(p)   
+    
+        return {'items': persons, 'status': Status.OK}
+
+####
+
+        # Update the page scope according to items really found
+        persons = res['items']
+        if len(persons) > 0:
+            context.update_session_scope('person_scope', 
+                                          persons[0].sortname, persons[-1].sortname, 
+                                          context.count, len(persons))
+
+        if self.use_user is None:
+            persons2 = [p for p in persons if not p.too_new]
+            num_hidden = len(persons) - len(persons2)
+        else:
+            persons2 = persons
+            num_hidden = 0
+        return {'items': persons2, 'num_hidden': num_hidden, 'status': status}
+
+
     def get_person_data(self, uuid:str):
         '''
         Get a Person with all connected nodes for display in Person page as object tree.
