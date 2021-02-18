@@ -223,8 +223,8 @@ selector.addEventListener("change", () => {
                     </script>
                      {% for stat in surnamestats %}
                         <span style='font-size:{{ stat.fontsize}}px'>
-                            <a href=# onclick="submit_search('{{ stat.surname }}')">
-                                {{ stat.surname }}</a>
+                            <a href=# onclick="submit_search('{{ stat.surname }}')"
+                               title="{{ stat.count }}">{{ stat.surname }}</a>
                         </span>
                      {% endfor %}
                  </form>
@@ -238,8 +238,8 @@ selector.addEventListener("change", () => {
                     <input name="key" type="hidden">
                      {% for stat in placenamestats %}
                         <span style='font-size:{{ stat.fontsize }}px'>
-                            <a href="/scene/location/uuid={{ stat.uuid }}">
-                                {{ stat.placename }}</a>
+                            <a href="/scene/location/uuid={{ stat.uuid }}"
+                               title="{{ stat.count }}">{{ stat.placename }}</a>
                         </span>
                      {% endfor %}
                  </form>

@@ -1,0 +1,34 @@
+{% import '/scene/macros.html' as macro with context %}
+
+ <span id="primary_name" hx-swap-oob="true">
+	{{person.names[0].firstname}} 
+	<i>{{person.names[0].suffix}}</i>
+	{{person.names[0].prefix}}
+	<b>{{person.names[0].surname}}</b>
+</span>
+  
+<table id="names">
+    {% for pname in person.names|sort(attribute='order') %}
+    	<tr>
+	{%if may_edit %}    	
+    	<td><input type="radio" name="primary_name" 
+    			   hx-put="/scene/set_primary_name/{{ person.uuid }}/{{ pname.order }}"
+    			   hx-target="#names"
+    			   {% if pname.order == 0 %}checked{% endif %}
+		   >
+        </td>
+    {% endif %}
+        <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
+        <td class="Value">
+			{% if pname.title %}<span title="titteli" class="typedesc">{{pname.title}}</span>{% endif %}
+            <span title="{{ _('first name') }}">{{pname.firstname}}</span>
+            <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
+            {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
+            <b title="{{ _('surname') }}">{{pname.surname}}</b>
+
+            {{macro.citation_link(pname.citation_ref, obj)}}
+            <input type="hidden" name="order" value="{{pname.order}}">
+        </td>
+        </tr>
+    {% endfor %}
+</table>

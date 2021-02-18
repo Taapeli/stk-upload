@@ -49,18 +49,24 @@ u { color: DarkKhaki; text-decoration: none; }
   {% endwith %}
 
 {% if person %}
-  {% if root %}{# Batch node data like {'root_type', 'usernode', 'id'} #}
+    {% if root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
         <div class='credit'>{% if root.root_type == 'PASSED' %}{{ _('Origin from') }}
             {% else %}{{ _('User data') }}:{% endif %}
-            <b>{{root.usernode}}</b> {{root.id}}</div>
-  {% endif %}
+            <b>{{root.root_user}}</b> {{root.id}}</div>
+    {% endif %}
 
-        <h3 class="sticky" title="{{ _('Top') }}"><a href="#">{{person.names[0].firstname}} 
-            <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b></a>
+        <h3 class="sticky" title="{{ _('Top') }}"><a href="#">
+        <span id="primary_name">
+        	{{person.names[0].firstname}} 
+            <i>{{person.names[0].suffix}}</i>
+            {{person.names[0].prefix}}
+            <b>{{person.names[0].surname}}</b>
+        </span>
+            </a>
             {{macro.citation_link(person.citation_ref, obj)}}
         </h3>
 
-        {% set myid = person.uniq_id %}
+    {% set myid = person.uniq_id %}
         
         <div id="summaryarea">
             <table>
@@ -71,63 +77,87 @@ u { color: DarkKhaki; text-decoration: none; }
                         / <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
                     </td>
                 </tr>
+			</table>
 
-                {% for pname in person.names|sort(attribute='order') %}<tr>
-                    <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
+			<form>
+			
+			<input type="hidden" name="uuid" value="{{ person.uuid }}">
+			<table>
+				<tr><td>{{ _("Names") }}
+				{%- if may_edit %}
+					 ({{ _("order by dragging") }})
+				{%- endif %}:
+				<tr><td><table>
+				<tbody id="names" 
+				{% if may_edit %}
+					hx-put="/scene/sort_names" hx-trigger="end" hx-swap="none"
+				{% endif %}:
+				>
+                {% for p_name in person.names|sort(attribute='order') %}<tr>
+                    <td class="ColumnAttribute">{{p_name.type|transl('nt')}}</td>
                     <td class="Value">
-						{% if pname.title %}<span title="titteli" class="typedesc">{{pname.title}}</span>{% endif %}
-                        <span title="{{ _('first name') }}">{{pname.firstname}}</span>
-                        <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
-                        {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
-                        <b title="{{ _('surname') }}">{{pname.surname}}</b>
+						{% if p_name.title %}<span title="titteli" class="typedesc">{{p_name.title}}</span>{% endif %}
+                        <span title="{{ _('first name') }}">{{p_name.firstname}}</span>
+                        <i title="{{ _('patronymic') }}">{{p_name.suffix}}</i>
+                        {% if p_name.prefix %}<span title="etuliite">{{p_name.prefix}}</span>{% endif %}
+                        <b title="{{ _('surname') }}">{{p_name.surname}}</b>
 
-	                    {{macro.citation_link(pname.citation_ref, obj)}}
+	                    {{macro.citation_link(p_name.citation_ref, obj)}}
+	                    <input type="hidden" name="order" value="{{p_name.uniq_id}}">
                     </td>
                 </tr>{% endfor %}
-                   
+               	</tbody>
+				</table>
+			</table>
+			</form>
+
+			<table>
                 {% if person.sex %}<tr>
                     <td class="ColumnAttribute">{{ _("Gender") }}</td>
                     <td class="Value">{{ person.sex_symbol() }} {{ person.sex_str() }}</td>
-                </tr>{% endif %}
-                {% if person.priv %}<tr>
+                </tr>
+    {% endif %}
+    {% if person.priv %}<tr>
                     <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(person.priv) }}</td>
-                </tr>{% endif %}
+                </tr>
+    {% endif %}
                 <tr><td class="ColumnAttribute">{{ _('Possible years') }}</td>
                     <td class="Value">{{ macro.lifetimes(person) }}
-           {% if person.death_high >= last_year_allowed %}
+    {% if person.death_high >= last_year_allowed %}
                         <span style="color:red">{{ _('confidential') }}!</span>
-           {% endif %}
+    {% endif %}
                     </td>
                 </tr>
-            {% if not (person.death_low - person.birth_high) < 0 %}
+    {% if not (person.death_low - person.birth_high) < 0 %}
                <tr>
                     <td class="ColumnAttribute">{{ _("Age at death") }}</td>
                     <td class="Value">
-                {% if person.death_high != person.death_low or
+       {% if person.death_high != person.death_low or
                       person.birth_high != person.birth_low %}
                         {{ _('at least') }}
-                {% else %}
+       {% else %}
                         {{ _('about') }}
-                {% endif %}
+       {% endif -%}
                         {{person.death_low - person.birth_high}}
                         {{ _('years') }}
                     </td>
                 </tr>
-            {% endif %}
-                
-                {% if person.confidence > '' %}<tr>
+    {% endif %}
+    {% if person.confidence > '' %}<tr>
                     <td class="ColumnAttribute">{{ _("Confidence of data") }}</td>
                     <td class="Value">{{ macro.stars(person.confidence|float) }}</td>
-                </tr>{% endif %}
-   
-  {% if person.note_ref %}
+                </tr>
+    {% endif %}
+    {% if person.note_ref %}
                 <tr><td></td>
                    <td>–► <a href="#notes" class="inlink">
-        {% if person.note_ref|count == 1 %}{{ _('See person note') }}
-        {% else %}{{ _('See %(num)d person notes', num=person.note_ref|count) }}
-        {% endif %}</a></td>
+    	{% if person.note_ref|count == 1 %}
+                       {{ _('See person note') }}
+    	{% else %}
+                       {{ _('See %(num)d person notes', num=person.note_ref|count) }}
+    	{% endif -%}</a></td>
                 </tr>
-  {% endif %}
+    {% endif %}
             </table>
         </div>
 
@@ -143,15 +173,15 @@ u { color: DarkKhaki; text-decoration: none; }
                     </tr>
                 </thead>
                 <tbody>
-  {% for e in person.events if e.type != "Cause Of Death" %}
+    {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
                         <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
                                 <a href="/scene/event/uuid={{e.uuid}}" class="inlink">
                                    {{e.type|transl('evt')}}</a>
-    {% if e.role and e.role != "Primary" %}
+        {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>
-    {% endif %}
+        {% endif -%}
                                 {{macro.citation_link(e.citation_ref, obj)}}
                             </div>
                         </td>
@@ -159,30 +189,32 @@ u { color: DarkKhaki; text-decoration: none; }
                         <td class="ColumnDate">{{e.dates}}</td>
 
                         <td class="ColumnPlace">{% set br=0 %}
-			  {% for pref in e.place_ref %}{% set pl = obj[pref] %}
-                            {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
+    	{% for pref in e.place_ref %}{% set pl = obj[pref] %}
+    	    {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
                             <a href="/scene/location/uuid={{pl.uuid}}" class="inlink"
                              title="{{ _('of type') }} {{pl.type}}; {{ _('see details of place') }}">
                               {{macro.place_names_lang(pl)}}</a
                             >{{macro.note_link(pl.note_ref, obj)}}{% if pl.uppers %},
                             <small>{{macro.place_names_lang(pl.uppers[0])}}</small>{% endif %}
-               {% endfor %}
+    	{% endfor %}
                         </td>
 
                         <td class="ColumnDescription"><div>{{e.description}}</div>
-                            <div>{% if e.type == "Death" and person.cause_of_death %}<span 
-                                    class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span>
-                                        {% if person.cause_of_death.dates %}{{person.cause_of_death.dates}}{% endif %}
+                            <div>
+        {% if e.type == "Death" and person.cause_of_death %}
+                                <span class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span>
+	       {% if person.cause_of_death.dates %}{{person.cause_of_death.dates}}
+           {% endif -%}
                                         {{person.cause_of_death.description}}
                                         {{macro.place_names_lang(person.cause_of_death)}}<br>
-                            	{% endif %}
-                            {% if e.note_ref %}
-                            	{% for ref in e.note_ref %}{% set note = obj[ref] %}
+        {% endif %}
+	    {% if e.note_ref %}
+        	{% for ref in e.note_ref %}{% set note = obj[ref] %}
 	                            	<div><span class="typedesc">{{ note.type|transl('notet') }}</span>
 				                      {{macro.citation_link(note.citation_ref, obj)}}
 	                            	  {{ macro.notelink(note) }}</div>
-	                            {% endfor %}
-                           	{% endif %}
+	        {% endfor %}
+        {% endif %}
 {#                          {% if e.place_ref %}
                                 {% for pref in e.place_ref %}
                                     {% for ref in obj[pref].note_ref %}
@@ -194,17 +226,16 @@ u { color: DarkKhaki; text-decoration: none; }
                             </div>
                         </td>
                     </tr>
-  {% endfor %}
+    {% endfor %}
                  </tbody>
             </table>
             <div id="noteContent"><p class="nodesTitle">{{ _('Place Notes') }}</p>
-            {# Place foot notes are created in /static/js/scene_scripts.js
-               method refTable.noteReferences() #}
+{# Place foot notes are created in /static/js/scene_scripts.js method refTable.noteReferences() #}
             </div>
         </div>
 
 
-  {% if debug %}
+    {% if debug %}
         <div class="subsection" id="notes" style="color:green">
             <h4>Js-testaus</h4>
             <div id="citTest">
@@ -216,81 +247,89 @@ u { color: DarkKhaki; text-decoration: none; }
                <div><table id="notTbl"><body><tr><td>Viitteet huomautuksiin</td></tr></body></table></div>
             </div>
         </div>
-  {% endif %}
+    {% endif %}
 
 
         <div class="subsection" id="families">
             <h4>{{ _("Families") }}</h4>
-  {% set myid = person.uuid %}
-  {% if person.families_as_child %}
+    {% set myid = person.uuid %}
+    {% if person.families_as_child %}
             <div class="mainbox" title="{{ _('Families') }}">
                 <p>{{ _("Parents' family") }}</p>
-            {% for fam in person.families_as_child %}{% if fam.role == "CHILD" %}
+    	{% for fam in person.families_as_child %}
                 <div class="groupbox">
 	                <div class="familybox" title="{{ _('family') }} {{fam.id}}">
-                        <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.uuid}}" class="inlink">
+                        <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
-	                    <ul>{% if fam.father %}
+	                    <ul>
+            {% if fam.father %}
 	                        <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
-	                {% endif %}{% if fam.mother %}
+    	    {% endif %}{% if fam.mother %}
 	                        <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
-	                {% endif %}{% if fam.children %}
-	                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
-	                            <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>{% endfor %}
+    	    {% endif %}{% if fam.children %}
+	                        <li>{{ _("Children") }}<ul>
+                {% for ch in fam.children|sort %}
+	                            <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
+                {% endfor -%}
 	                        </ul></li>
-	                {% endif %}
+    	    {% endif %}
 	                    </ul>
 	                </div>
                 </div>
             </div>
-            {% endif %}{% endfor %}
-  {% endif %}
+        {% endfor %}
+    {% endif %}
 
             <div class="mainbox" title="{{ _('Central person') }}">
 	            <p>{{person.names[0].firstname}} {{ _("self") }}</p>
 	            <div class="groupbox">
 		            <div class="personbox" title="{{ _('Self') }}">
 		                <span title="{{ _('first name') }}">{{person.names[0].firstname}}</span>
-		                {% if not person.names[0].surname %}<i title="{{ _('patronymic') }}">{{person.names[0].suffix}}</i>
-		                {% else %}<b title="{{ _('surname') }}">{{person.names[0].prefix}} {{person.names[0].surname}}</b>
-		                {% endif %}
+	{% if not person.names[0].surname %}
+                        <i title="{{ _('patronymic') }}">{{person.names[0].suffix}}</i>
+	{% else %}
+                        <b title="{{ _('surname') }}">{{person.names[0].prefix}} {{person.names[0].surname}}</b>
+	{% endif -%}
 		            </div>
 	            </div>
 	        </div>
 
-  {% if person.families_as_parent %}
+    {% if person.families_as_parent %}
             <div class="mainbox" title="{{ _('Own families') }}">
                 <p>{{ _("As Parent in Family") }}</p>
 	            <div class="groupbox">
-		            {% for fam in person.families_as_parent %}{% if fam.role != "CHILD" %}
+	    {% for fam in person.families_as_parent %}
 		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-		                <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.uuid}}" class="inlink">
+		                <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
-		                <ul>{% if fam.father %}
+		                <ul>
+	        {% if fam.father %}
 		                        <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
-		                {% endif %}{% if fam.mother %}
+		    {% endif %}{% if fam.mother %}
 		                        <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
-		                {% endif %}{% if fam.children|count %}
-		                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
-		                            <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
-		                         {% endfor %}</ul></li>
-		                {% endif %}
+		    {% endif %}{% if fam.children|count %}
+		                        <li>{{ _("Children") }}<ul>
+                {% for ch in fam.children|sort %}
+		                        <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
+		        {% endfor -%}
+                        </ul></li>
+		    {% endif %}
 		                    </ul>
 		            </div>
-		            {% endif %}{% endfor %}
+        {% endfor %}
 	             </div>
              </div>
-  {% endif %}
+    {% endif %}
         </div>
 
-  {% if person.media_ref %}
+    {% if person.media_ref %}
         <div class="subsection" id="indivgallery">
             <h4>{{ _("Media files") }}</h4>
-        {% for ref, crop0, ord in person.media_ref %}
-           {% set photo=obj[ref] %}
-           {% set crop=crop0|replace(" ", "") %}
+	   {% for ref, crop0, ord in person.media_ref %}
+	       {% set photo=obj[ref] %}
+	       {% set crop=crop0|replace(" ", "") %}
             <div class="thumbnail">
                 <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
 	                <img alt="({{ _('Photo') }} {{ord}})" 
@@ -299,38 +338,41 @@ u { color: DarkKhaki; text-decoration: none; }
                 </a>
                 <p><a href="/scene/media?uuid={{photo.uuid}}" class="inlink"
                       title="{{ _('Go to photo page') }}">
-                      {{photo.description}}</a> {{ macro.notelink(photo) }}
-               {% if crop and not crop == "None" -%}<br>
+                      ▸ {{photo.description}}</a> {{ macro.notelink(photo) }}
+	       {% if crop and not crop == "None" -%}<br>
                       <i>{{ _('crop') }} {{crop}}</i>
-               {% endif %}
+	       {% endif %}
                 </p>
             </div>
-        {% endfor %}
+	   {% endfor %}
             <div class="fullclear"></div>
         </div>
-  {% endif %}
+    {% endif %}
 
-  {% if person.note_ref %}
+    {% if person.note_ref %}
         <div class="subsection" id="notes">
             <h4>{{ _("Person Notes") }}</h4>
-    {% for ref in person.note_ref %}{% set note = obj[ref] %}
+        {% for ref in person.note_ref %}{% set note = obj[ref] %}
             <div class="grampsstylednote">
                  <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
                     {{macro.citation_link(note.citation_ref, obj)}}
                     {{ macro.notelink(note) }}</p>
             </div>
-    {% endfor %}
+        {% endfor %}
         </div>
-  {% endif %}
+    {% endif %}
 
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>
-            {# Reference list is created below in /static/js/scene_scripts.js
-               method refTable.sourceReferences() #}
+{# Reference list is created below in /static/js/scene_scripts.js method refTable.sourceReferences() #}
             <div id="sourcerefContent"></div>
         </div>
 {% endif %}
     </div> {# content #}
+
+<script src="/static/js/Sortable.js"></script>
+<script src="https://unpkg.com/htmx.org@1.2.0"></script>
+<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
 
 <script>
 /* For source references */
@@ -341,6 +383,12 @@ tbl.findReferences('','','');
 tbl.sourceReferences('sourcerefContent','');
 tbl.noteReferences('noteContent','');
     {% endif %}
+    
+{% if may_edit %}
+var names = document.getElementById('names');
+var sortable = Sortable.create(names);
+{% endif %}
+    
 </script>
 {% endblock %}
 

@@ -141,4 +141,4 @@ def app_help():
     return "Help for {}".format(path.path)
 
 # ------------------------------ Filters ---------------------------------------
-from templates import jinja_filters
+from ui import jinja_filters

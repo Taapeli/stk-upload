@@ -54,10 +54,11 @@ import shareds
 from bl.base import NodeObject, Status
 from bl.person_name import Name
 from pe.db_reader import DbReader
+from pe.db_writer import DbWriter
 from pe.neo4j.cypher.cy_person import CypherPerson
 
 from models.gen.note import Note
-from models.source_citation_reader import get_citations_js
+#from models.source_citation_reader import get_citations_js
 
 # Privacy rule: how many years after death
 PRIVACY_LIMIT = 0
@@ -189,7 +190,7 @@ class PersonReader(DbReader):
 
         - Returns a Result object.
     '''
-    def get_person_search(self, args):
+    def get_person_search(self, args): # --> bl.person_reader.PersonReaderTx.get_person_search
         """ Read Persons with Names, Events, Refnames (reference names) and Places
             and Researcher's username.
         
@@ -205,50 +206,51 @@ class PersonReader(DbReader):
                     str='y1-y2' year range
                     str='y1-'   from year
         """
-        if args.get('rule') == 'years':
-            try:
-                lim = args['key'].split('-')
-                y1 = int(lim[0]) if lim[0] > '' else -9999
-                y2 = int(lim[-1]) if lim[-1] > '' else 9999
-                if y1 > y2:
-                    y2, y1 = [y1, y2]
-                args['years'] = [y1, y2]
-            except ValueError:
-                return {'statustext':_('The year or years must be numeric'), 'status': Status.ERROR}
-
-#         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
-#                           'years':args.get('years')}
-
-        context = self.user_context
-        args['use_user'] = self.use_user
-        args['fw'] = context.first  # From here forward
-        args['limit'] = context.count
-        
-        res = self.readservice.dr_get_person_list(args)
-        # {'items': persons, 'status': Status.OK}
-
-        status = res.get('status')
-        if status == Status.ERROR:
-            msg = res.get("statustext")
-            logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
-            print(f'bl.person.PersonReader.get_person_search: {msg}')
-            return {'items':[], 'status':status,
-                    'statustext': _('No persons found')}
-
-        # Update the page scope according to items really found
-        persons = res['items']
-        if len(persons) > 0:
-            context.update_session_scope('person_scope', 
-                                          persons[0].sortname, persons[-1].sortname, 
-                                          context.count, len(persons))
-
-        if self.use_user is None:
-            persons2 = [p for p in persons if not p.too_new]
-            num_hidden = len(persons) - len(persons2)
-        else:
-            persons2 = persons
-            num_hidden = 0
-        return {'items': persons2, 'num_hidden': num_hidden, 'status': status}
+        raise NotImplementedError('Moved to bl.person_reader')
+#         if args.get('rule') == 'years':
+#             try:
+#                 lim = args['key'].split('-')
+#                 y1 = int(lim[0]) if lim[0] > '' else -9999
+#                 y2 = int(lim[-1]) if lim[-1] > '' else 9999
+#                 if y1 > y2:
+#                     y2, y1 = [y1, y2]
+#                 args['years'] = [y1, y2]
+#             except ValueError:
+#                 return {'statustext':_('The year or years must be numeric'), 'status': Status.ERROR}
+# 
+# #         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
+# #                           'years':args.get('years')}
+# 
+#         context = self.user_context
+#         args['use_user'] = self.use_user
+#         args['fw'] = context.first  # From here forward
+#         args['limit'] = context.count
+#         
+#         res = self.readservice.dr_get_person_list(args)
+#         # {'items': persons, 'status': Status.OK}
+# 
+#         status = res.get('status')
+#         if status == Status.ERROR:
+#             msg = res.get("statustext")
+#             logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
+#             print(f'bl.person.PersonReader.get_person_search: {msg}')
+#             return {'items':[], 'status':status,
+#                     'statustext': _('No persons found')}
+# 
+#         # Update the page scope according to items really found
+#         persons = res['items']
+#         if len(persons) > 0:
+#             context.update_session_scope('person_scope', 
+#                                           persons[0].sortname, persons[-1].sortname, 
+#                                           context.count, len(persons))
+# 
+#         if self.use_user is None:
+#             persons2 = [p for p in persons if not p.too_new]
+#             num_hidden = len(persons) - len(persons2)
+#         else:
+#             persons2 = persons
+#             num_hidden = 0
+#         return {'items': persons2, 'num_hidden': num_hidden, 'status': status}
 
 
     def get_person_list(self):
@@ -287,216 +289,29 @@ class PersonReader(DbReader):
         return res_dict
 
 
-    def get_a_person(self, uuid:str):
-        ''' Read a person from common data or user's own Batch.
-
-            a)  If you have selected to use common approved data, 
-                you can read both your own and passed data.
-            b)  If you have not selected common data,
-                you can read only your own data.
-            
-            --> Origin from models.gen.person_combo.Person_combo.get_my_person
-        '''
-        res = self.readservice.dr_get_person_by_uuid(uuid)
-        # {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
-
-        if Status.has_failed(res):
-            return {'item':None, 'status':res['status'], 
-                    'statustext': _('The person is not accessible')}
-        person = res.get('item')
-
-#Todo: scheck privacy
-#         if use_common and self.person.too_new: 
-#             return None, None, None
-
-        # The original researcher data in res['root']:
-        # - root_type    which kind of owner link points to this object
-        # - usernode     the (original) owner of this object
-        # - bid          Batch id, if any
-        root = res.get('root')
-        root_type = root.get('root_type')
-        #node = root['usernode']
-        #nodeuser = node.get('user', "")
-        #bid = node.get('id', "")
-        if self.use_user is None:
-            # Select person from public database
-            if root_type != "PASSED":
-                return {'item': None, 'status': Status.NOT_FOUND,
-                        'statustext': 'The person is not accessible'}
-        else:
-            # Select the person only if owned by user
-            if root_type != "OWNS":
-                return {'item': None, 'status': Status.NOT_FOUND,
-                        'statustext': 'The person is not accessible'}
-#             if use_common or user == 'guest':
-#                 # Select person from public database
-#                 if root_type != "PASSED":
-#                     raise LookupError("Person {uuid} not allowed.")
-#             else:
-#                 # Select the person only if owned by user
-#                 if root_type != "OWNS":
-#                     print('Person_combo.get_my_person: Should  we allow reading these approved persons, too?')
-
-            person.root = root
-            return {'item': person, 'status': Status.OK}
+#     def get_a_person(self, uuid:str):
+#         ''' Read a person from common data or user's own Batch.
+# 
+#             a)  If you have selected to use common approved data, 
+#                 you can read both your own and passed data.
+#             b)  If you have not selected common data,
+#                 you can read only your own data.
+#             
+#             --> Origin from models.gen.person_combo.Person_combo.get_my_person
+#         '''
 
 
-    def get_person_data(self, uuid:str, args:dict):
-        '''
-        Get a Person with all connected nodes for display in Person page as object tree.
-            
-            Note. The args are not yet used.
-            
-        * Origin from bp.scene.scene_reader.get_person_full_data(uuid, owner, use_common=True)
-    
-        For Person data page we must have all business objects, which has connection
-        to current Person. This is done in the following steps:
-    
-        1. (p:Person) --> (x:Name|Event)
-        2. (p:Person) <-- (f:Family)
-           for f
-           (f) --> (fp:Person) -[*1]-> (fpn:Name)
-           (f) --> (fe:Event)
-        3. for z in p, x, fe, z, s, r
-           (y) --> (z:Citation|Note|Media)
-        4. for pl in z:Place, ph
-           (pl) --> (pn:Place_name)
-           (pl) --> (ph:Place)
-        5. for c in z:Citation
-           (c) --> (s:Source) --> (r:Repository)
-        
-            p:Person
-              +-- x:Name
-              |     +-- z:Citation (2)
-              |     +-- z:Note (3)
-              |     +-- z:Media (4)
-        (1)   +-- x:Event
-              |     +-- z:Place
-              |     |     +-- pn:Place_name
-              |     |     +-- z:Place (hierarkia)
-              |     |     +-- z:Citation (2)
-              |     |     +-- z:Note (3)
-              |     |     +-- z:Media (4)
-              |     +-- z:Citation (2)
-              |     +-- z:Note (3)
-              |     +-- z:Media (4)
-              +-- f:Family
-              |     +-- fp:Person
-              |     |     +-- fpn:Name
-              |     +-- fe:Event (1)
-              |     +-- z:Citation (2)
-              |     +-- z:Note (3)
-              |     +-- z:Media (4)
-        (2)   +-- z:Citation
-              |     +-- s:Source
-              |     |     +-- r:Repository
-              |     |     |     +-- z:Citation (2)
-              |     |     |     +-- z:Note (3)
-              |     |     |     +-- z:Media (4)
-              |     |     +-- z:Citation (2)
-              |     |     +-- z:Note (3)
-              |     |     +-- z:Media (4)
-              |     +-- z:Note (3)
-              |     +-- z:Media (4)
-        (3)    +-- z:Note
-              |     +-- z:Citation (2)
-              |     +-- z:Media (4)
-        (4)   +-- z:Media
-                    +-- z:Citation (2)
-                    +-- z:Note (3)
-          
-        The objects are stored in PersonReader.person object p tree.
-        - x and f: included objects (in p.names etc)
-        - others: reference to "PersonReader.objs" dictionary (p.citation_ref[] etc)
-    
-        For ex. Sources may be referenced multiple times and we want to process them 
-        once only.
-        '''
-        # Objects by uniq_id, referred from current person
-        self.readservice.objs = {}
+#     def get_person_data(self, uuid:str, args:dict): # --> bl.person_reader.PersonReaderTx.get_person_data
+#         '''
+#         Get a Person with all connected nodes for display in Person page as object tree.
+#             
+#             Note. The args are not yet used.
+#             
+#         * Origin from bp.scene.scene_reader.get_person_full_data(uuid, owner, use_common=True)
+#     
+#         For Person data page we must have all business objects, which has connection
+#         to current Person. This is done in the following steps:
 
-        # 1. Read Person p, if not denied
-        res = self.readservice.dr_get_person_by_uuid(uuid, user=self.use_user)
-        # res = {'item', 'root': {'root_type', 'usernode', 'id'}, 'status'}
-        if Status.has_failed(res):
-            # Not found, not allowd (person.too_new) or error
-            if res.get('status') == Status.NOT_FOUND:
-                return {'status':Status.NOT_FOUND, 
-                        'statustext': _('Requested person not found')}
-            return res
-        person = res.get('item')
-        root = res.get('root')   # Info about linked Batch or Audit node
-
-        # 2. (p:Person) --> (x:Name|Event)
-        res = self.readservice.dr_get_person_names_events(person.uniq_id)
-        # result {'names', 'events', 'cause_of_death', 'status'}
-        if  Status.has_failed(res):
-            print(f'get_person_data: No names or events for person {uuid}')
-        else:
-            person.names = res.get('names')
-            person.events = res.get('events')
-            person.cause_of_death = res.get('cause_of_death')
-        # 3. (p:Person) <-- (f:Family)
-        #    for f
-        #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
-        #      (fp)--> (me:Event{type:Birth})
-        #      (f) --> (fe:Event)
-        res = self.readservice.dr_get_person_families(person.uniq_id)
-        # res {'families_as_child', 'families_as_parent', 'family_events', 'status'}
-        if  Status.has_failed(res):
-            print(f'get_person_data: No families for person {uuid}')
-        else:
-            person.families_as_child = res.get('families_as_child')
-            person.families_as_parent = res.get('families_as_parent')
-            person.events = person.events + res.get('family_events')
-
-        if not self.user_context.use_common():
-            person.remove_privacy_limit_from_families()
-
-        #    Sort all Person and family Events by date
-        person.events.sort()
-
-
-        # 4. for pl in z:Place, ph
-        #      (pl) --> (pn:Place_name)
-        #      (pl) --> (pi:Place)
-        #      (pi) --> (pin:Place_name)
-        ret = self.readservice.dr_get_object_places(person)
-        if  Status.has_failed(res):
-            print(f'get_person_data: Event places read error: {ret.get("statustext")}')
-     
-        # 5. Read their connected nodes z: Citations, Notes, Medias
-        #    for y in p, x, fe, z, s, r
-        #        (y) --> (z:Citation|Note|Media)
-        new_objs = [-1]
-        self.readservice.citations = {}
-        while len(new_objs) > 0:
-            new_objs = self.readservice.dr_get_object_citation_note_media(person, new_objs)
-
-        # Calculate the average confidence of the sources
-        if len(self.readservice.citations) > 0:
-            summa = 0
-            for cita in self.readservice.citations.values():
-                summa += int(cita.confidence)
-                 
-            aver = summa / len(self.readservice.citations)
-            person.confidence = "%0.1f" % aver # string with one decimal
-     
-        # 6. Read Sources s and Repositories r for all Citations
-        #    for c in z:Citation
-        #        (c) --> (s:Source) --> (r:Repository)
-        self.readservice.dr_get_object_sources_repositories()
-    
-        # Create Javascript code to create source/citation list
-        jscode = get_citations_js(self.readservice.objs)
-    
-        # Return Person with included objects,  and javascript code to create
-        # Citations, Sources and Repositories with their Notes
-        return {'person': person,
-                'objs': self.readservice.objs,
-                'jscode': jscode,
-                'root': root,
-                'status': Status.OK}
 
     def get_surname_list(self, count=40):
         ''' 
@@ -509,6 +324,16 @@ class PersonReader(DbReader):
             surnames = self.readservice.dr_get_surname_list_common(count=count)
         # [{'surname': surname, 'count': count},...]
         return surnames
+
+class PersonWriter(DbWriter):
+    def __init__(self, writeservice, u_context):
+        self.writeservice = writeservice
+        self.u_context = u_context
+    def set_primary_name(self, uuid, old_order):
+        self.writeservice.dr_set_primary_name(uuid, old_order)
+    def set_name_orders(self, uid_list):
+        self.writeservice.dr_set_name_orders(uid_list)
+
 
 class PersonBl(Person):
 

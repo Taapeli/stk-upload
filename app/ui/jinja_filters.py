@@ -48,7 +48,7 @@ def translate(term, var_name):
     """
 #     print("# {}[{}]".format(var_name, term))
     if not term:
-        print(f"WARNING: templates.jinja_filters.translate: missing term={term}, var_name={var_name}")
+        print(f"WARNING: ui.jinja_filters.translate: missing term={term}, var_name={var_name}")
         return "~"
     if var_name == "nt":
         # Name types

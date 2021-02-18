@@ -1,0 +1,102 @@
+{# _scene/event_baptism.html_ #}
+{% extends "/scene/layout.html" %}
+{% block title %}{{ _("Event details") }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+
+<script src="https://unpkg.com/htmx.org@1.2.0"></script>
+
+<div id="startdiv">
+    <h2>{{ _("Event details") }}</h2>
+    <div>{{ macro.show_use_case(no_change=true) }}</div>
+</div>
+
+{{ macro.menu(12) }}
+    <div class="content" id="IndividualDetail">
+
+{% if event %}
+        <h3 style="position:sticky; top:0;">
+        {% if event.description %}
+            <i>{{event.type|transl('evt')|title}}:</i> {{event.description}}
+        {% else %}
+            <i>{{event.type|transl('evt')|title}}</i>
+        {% endif %}
+        </h3>
+{% endif %}
+        <div id="summaryarea">
+    {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul  class='flashes'>
+            {% for message in messages %}
+              <li class='flash_{{category}}}'>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+    {% endwith %} 
+{% if event %}
+            <img src="/static/image/edit-property-26.png"
+	             hx-get="/scene/edit_event/uuid={{ event.uuid }}" 
+	             hx-target="#event_data" 
+    	 	> 
+
+            <table id="event_data">
+                <tr>
+                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="ColumnValue">
+                        {{macro.all_obj_ids(event)}} 
+                    </td>
+{#                  {% if event.citation_ref %}
+                    <td class="ColumnValue" rowspan="2"><small>{{ _("Source") }}:
+                        {% for cr in event.citation_ref %}
+                            <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+                        {% endfor %}</small>
+                    </td>{% endif %}
+#}              </tr>
+
+                {% if 1 or event.description %}<tr>
+                    <td class="ColumnAttribute">{{ _("Description") }}</td>
+                    <td class="ColumnValue">{{ event.description }}</td>
+                </tr>{% endif %}
+                {% if event.dates %}<tr>
+                    <td class="ColumnAttribute">{{ _("Date") }}</td>
+                    <td class="ColumnValue">{{ event.dates }}</td>
+                </tr>{% endif %}
+                {% if event.place %}<tr>
+                    <td class="ColumnAttribute">{{ _("Place") }}</td>
+                    <td class="ColumnValue">
+                        <a href="/scene/location/uuid={{event.place.uuid}}" class="inlink">
+                            {{event.place.pname}}</a>
+                    </td>
+                </tr>{% endif %}
+
+            </table>
+{% endif %}
+        </div>
+
+        <div class="subsection" id="persons">
+            <h4>{{ _("Participants") }}</h4>
+            <table class="infolist eventlist">
+                <thead>
+                    <tr>
+                        <th class="ColumnEvent">{{ _("Role") }}</th>
+                        <th class="ColumnSources">{{ _("Member") }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+	{% for p in participants %}
+			<tr>
+	    		<td>{% if not p.role %}
+	    		    <span class="myself">&nbsp;{{ _('Self') }}&nbsp;</span>
+	    		{% else %}
+	    		    {{p.role|transl('role')}}
+	    		{% endif %}</td>
+                <td>{% if p.rel_type %} {{ macro.family_name(p) }}
+                    {% else %} {{ macro.person_anon(p, None) }}
+                    {% endif %}
+                </td>
+			</tr>
+	{% endfor %}
+</table>
+</section>
+{% endblock %}

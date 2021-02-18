@@ -28,7 +28,7 @@ Components moved 15.5.2020 from
 @author: jm 
 '''
 import  shareds
-from templates.jinja_filters import translate
+from ui.jinja_filters import translate
 import logging 
 logger = logging.getLogger('stkserver')
 from flask_babelex import _
@@ -133,7 +133,7 @@ class FamilyBl(Family):
         self.events = []            # Event objects
         self.notes = []
         self.sources = []
-        self.marriage_dates = None
+        self.marriage_dates = DateRange()
         self.note_ref = []          # For a page, where same note may be referenced
                                     # from multiple events and other objects
 

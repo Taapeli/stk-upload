@@ -38,7 +38,7 @@ from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, PasswordField, ValidationError
 from flask_security.utils import _
 from flask_mail import Mail
-from templates import jinja_filters
+from ui import jinja_filters
 from wtforms import SelectField, SubmitField, BooleanField
 
 from pe.neo4j.neo4jengine import Neo4jEngine
