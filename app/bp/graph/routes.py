@@ -44,11 +44,9 @@ from . import bp
 ## from .models import logreader, utils
 
 ## from gramps.gen.plug import Gramplet
-from .models.fanchart import (FanChartWidget, FanChartGrampsGUI,
-                                         FORM_HALFCIRCLE, BACKGROUND_SCHEME1)
 from ui.user_context import UserContext
-from pe.neo4j.readservice import Neo4jReadService
-from bl.person import PersonReader
+from pe.neo4j.readservice_tx import Neo4jReadServiceTx
+from bl.person_reader import PersonReaderTx
 from bl.base import Status
 from bl.person_name import Name
 from bp.gedcom.transforms.model.person_name import PersonName
@@ -58,7 +56,7 @@ from bp.gedcom.transforms.model.person_name import PersonName
 MAX_ANCESTOR_LEVELS = 5
 MAX_DESCENDANT_LEVELS = 4
 
-readservice = Neo4jReadService(shareds.driver)
+readservice = Neo4jReadServiceTx(shareds.driver)
 
 @bp.route('/graph', methods=['GET'])
 @login_required
@@ -90,9 +88,9 @@ def graph_home(uid=None):
         """
         Database read access. Error handling needs an improvement here!
         """
-        result = datastore.get_person_data(uuid, args)
+        result = reader.get_person_data(uuid)
         if Status.has_failed(result):
-            flash(_("get_person_data returns "), result.get('status'))
+            flash(f'{result.get("statustext","error")}', 'error')
         return result.get('person')
 
     def fanchart_from(person, size, descendant):
@@ -156,8 +154,7 @@ def graph_home(uid=None):
 
             child_count = 0
             for fx in person.families_as_parent:
-                if fx.role != "CHILD":
-                    child_count += len(fx.children)
+                child_count += len(fx.children)
 
             if child_count == 0:
                 node['size'] = size     # leaf node, others should have no size
@@ -166,11 +163,10 @@ def graph_home(uid=None):
                 person.families_as_parent.sort(reverse = True,
                                                key = lambda x: x.dates.date1.value())
                 for fx in person.families_as_parent:
-                    if fx.role != "CHILD":
-                        fx.children.sort(reverse = True, key = lambda x: x.birth_low)
-                        for cx in fx.children:
-                            node['children'].append(
-                                build_children(cx.uuid, size/child_count, level + 1))
+                    fx.children.sort(reverse = True, key = lambda x: x.birth_low)
+                    for cx in fx.children:
+                        node['children'].append(
+                            build_children(cx.uuid, size/child_count, level + 1))
 
         else:
             node['size'] = size     # leaf node, others should have no size
@@ -178,16 +174,16 @@ def graph_home(uid=None):
         return node
     
     # Set up the database access.
+    uuid = request.args.get('uuid', None)
+    dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
-    datastore = PersonReader(readservice, u_context)
-    uid = request.args.get('uuid', uid)
-    args = {}
-    
+    reader = PersonReaderTx(readservice, u_context)
+
     # Gather all required data in two directions from the central person. Data structure used in both is a
     # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
     # (https://vasturiano.github.io/sunburst-chart/)
-    ancestors = build_parents(uid, 1)
-    descendants = build_children(uid, 1)
+    ancestors = build_parents(uuid, 1)
+    descendants = build_children(uuid, 1)
     
     # Merge the two sunburst chart data trees to form a single two-way fan chart.
     fanchart = ancestors
@@ -198,58 +194,3 @@ def graph_home(uid=None):
     fanchart['children'].append(fanchart['children'].pop(0))
 
     return render_template('/graph/layout.html', fanchart_data=json.dumps(fanchart))
-
-@bp.route('/graph/fanchart', methods=['GET'])
-@login_required
-@roles_accepted('audit')
-def graph_fanchart():
-    FanChartGramplet()
-    return render_template('/graph/layout.html')
-
-
-class FanChartGramplet():
-    """
-    The Gramplet code that realizes the FanChartWidget.
-    """
-
-    def __init__(self, nav_group=0):
-##        Gramplet.__init__(self, gui, nav_group)
-##        FanChartGrampsGUI.__init__(self, self.on_childmenu_changed)
-        self.maxgen = 6
-        self.background = BACKGROUND_SCHEME1
-        self.childring = True
-        self.flipupsidedownname = True
-        self.twolinename = True
-        self.radialtext = True
-        self.fonttype = 'Sans'
-        self.grad_start = '#0000FF'
-        self.grad_end = '#FF0000'
-        self.generic_filter = None
-        self.alpha_filter = 0.2
-        self.form = FORM_HALFCIRCLE
-        self.showid = False
-        self.set_fan(FanChartWidget(self.dbstate, self.uistate, self.on_popup))
-        # Replace the standard textview with the fan chart widget:
-##        self.gui.get_container_widget().remove(self.gui.textview)
-##        self.gui.get_container_widget().add(self.fan)
-        # Make sure it is visible:
-        self.fan.show()
-
-    def init(self):
-        self.set_tooltip(_("Click to expand/contract person\nRight-click for "
-                           "options\nClick and drag in open area to rotate"))
-
-    def active_changed(self, handle):
-        """
-        Method called when active person changes.
-        """
-        # Reset everything but rotation angle (leave it as is)
-        self.update()
-
-    def on_childmenu_changed(self, obj, person_handle):
-        """Callback for the pulldown menu selection, changing to the person
-           attached with menu item."""
-        dummy_obj = obj
-        self.set_active('Person', person_handle)
-        return True
-    
