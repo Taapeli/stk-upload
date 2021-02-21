@@ -53,19 +53,20 @@ from bp.gedcom.transforms.model.person_name import PersonName
 ## from gramps.gen.const import GRAMPS_LOCALE as glocale
 ## _ = glocale.translation.gettext
 
-MAX_ANCESTOR_LEVELS = 5
-MAX_DESCENDANT_LEVELS = 4
+MAX_ANCESTOR_LEVELS = 4
+MAX_DESCENDANT_LEVELS = 3
 
 readservice = Neo4jReadServiceTx(shareds.driver)
 
-@bp.route('/graph', methods=['GET'])
-@login_required
-@roles_accepted('audit')
-def graph_home(uid=None):
-
+def get_fanchart_data(uuid):
+    '''
+    Fetch data from the ancestors and descendants of the giving uuid, creating a data
+    structure that can be fed to the sunburst chart Javascript component for creating
+    a simple two-way fanchart.
+    '''
     def gender_color(sex, descendant):
         """
-        Given the gender code according to ISO 5218, returns a color for facnhart.
+        Given the gender code according to ISO 5218, returns a color for fanchart.
         """
         ancestor_colors = {
             0: 'lightgrey',         # ISO 5218: 0 = Not known
@@ -97,8 +98,10 @@ def graph_home(uid=None):
         """
         Format the data for fan/sunburst chart use.
         """
-        one_first_name = person.names[0].firstname.split()[0]
-        one_surname = person.names[0].surname.split()[0]
+        all_first_names = person.names[0].firstname.split()
+        one_first_name = all_first_names[0] if len(all_first_names) > 0 else ''
+        all_surnames = person.names[0].surname.split()
+        one_surname = all_surnames[0] if len(all_surnames) > 0 else ''
         
         if person.death_high - person.birth_low >= 110: ## TEMP: FIND OUT HOW TO GET THE YEARS!
             death = ''
@@ -174,8 +177,6 @@ def graph_home(uid=None):
         return node
     
     # Set up the database access.
-    uuid = request.args.get('uuid', None)
-    dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
     reader = PersonReaderTx(readservice, u_context)
 
@@ -187,10 +188,27 @@ def graph_home(uid=None):
     
     # Merge the two sunburst chart data trees to form a single two-way fan chart.
     fanchart = ancestors
-    fanchart['children'] = ancestors['children'] + descendants['children']
+    if 'children' in descendants.keys():
+        if 'children' in ancestors.keys():
+            fanchart['children'] = ancestors['children'] + descendants['children']
+        else:
+            fanchart['children'] = descendants['children']
+##            fanchart['children'].insert(1, {'size': 0.5, 'color': 'white'}) # If no ancestors, make empty NE quarter
+    else:
+        fanchart['children'].insert(2, {'size': 1, 'color': 'white'}) # If no descendants, make empty southern hemisphere
     
     # The sectors are drawn clockwise, starting from North. To get the ancestors to occupy the
     # Northern hemisphere, we need to move the first node on top level list (father) to end of list.
-    fanchart['children'].append(fanchart['children'].pop(0))
+    if 'children' in fanchart.keys():
+        fanchart['children'].append(fanchart['children'].pop(0))
+    
+    return fanchart
+    
 
+@bp.route('/graph', methods=['GET'])
+@login_required
+@roles_accepted('audit')
+def graph_home(uuid=None):
+    uuid = request.args.get('uuid', None)
+    fanchart = get_fanchart_data(uuid)
     return render_template('/graph/layout.html', fanchart_data=json.dumps(fanchart))

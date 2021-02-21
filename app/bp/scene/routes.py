@@ -66,6 +66,7 @@ readservice = Neo4jReadService(shareds.driver)
 from pe.neo4j.writeservice import Neo4jWriteService
 writeservice = Neo4jWriteService(shareds.driver)
 
+from bp.graph.routes import get_fanchart_data
 
 def stk_logger(context, msg:str):
     """ Emit logger info message with Use Case mark uc=<code> .
@@ -322,11 +323,12 @@ def show_person(uuid=None):
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
     #may_edit = 0
+    fanchart = get_fanchart_data(uuid)
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=root,
                            last_year_allowed=last_year_allowed, 
                            elapsed=time.time()-t0, user_context=u_context,
-                           may_edit=may_edit)
+                           may_edit=may_edit, fanchart_data=json.dumps(fanchart))
 
 
 @bp.route('/scene/get_person_names/<uuid>', methods=['PUT'])
