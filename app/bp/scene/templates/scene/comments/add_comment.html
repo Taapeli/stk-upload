@@ -1,0 +1,11 @@
+<div class="comment">
+    <div class="hdr">
+    	{{ timestamp }} by {{ user }}
+    </div>
+    <div class="content">
+    {{ comment_text }}
+	</div>
+</div>
+
+<textarea hx-swap-oob="true" id="comment_text" name="comment_text" rows="10" cols="50"></textarea>
+<span hx-swap-oob="true" id="no_comments"></span>

@@ -16,6 +16,9 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from bp.stat.models import utils
+from models import util
+from types import SimpleNamespace
 
 '''
 Created on 12.8.2018
@@ -953,3 +956,99 @@ def fetch_thumbnail():
 
     return ret
         
+@bp.route('/scene/comments')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
+def comments():
+    """ Page with comments and a field to add a new comment
+    """
+    return render_template("/scene/comments/comments.html")
+        
+@bp.route('/scene/comments/comments_header')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
+def comments_header():
+    """ Comments header
+    """
+    return render_template("/scene/comments/comments_header.html")
+
+@bp.route('/scene/comments/fetch_comments')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
+def fetch_comments():
+    """ Fetch comments
+    """
+    uniq_id = int(request.args.get("uniq_id"))
+    uuid = request.args.get("uuid")
+    if request.args.get("start"):
+        start = float(request.args.get("start"))
+    else:
+        start = None
+    args = {"uniq_id": uniq_id}
+    if start:
+        args["start"] = start
+    res = shareds.driver.session().run(
+        """
+        match (p) -[:COMMENT] -> (c:Comment)
+        where id(p) = $uniq_id 
+        {}
+        with c
+        order by c.timestamp desc
+        limit 5
+        return collect(c) as comments
+        """.format("and c.timestamp <= $start" if start else ""),
+        **args
+        ).single()
+    comments = []
+    last_timestamp = None
+    count = 0
+    for node in res['comments']:
+        count += 1
+        c = SimpleNamespace()
+        c.user = node['user']
+        c.comment_text = node['text']
+        c.timestr = node['timestr']
+        c.timestamp = node['timestamp']
+        comments.append(c)
+        last_timestamp = c.timestamp
+    if last_timestamp is None:
+        return "<span id='no_comments'>" + _("No comments") + "</span>"
+    else:
+        return render_template("/scene/comments/fetch_comments.html", 
+                           comments=comments[0:4], 
+                           last_timestamp=last_timestamp,
+                           there_is_more=len(comments) > 4)
+
+@bp.route('/scene/comments/add_comment', methods=["post"])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
+def add_comment():
+    """ Add a comment
+    """
+    uuid = request.form.get("uuid")
+    uniq_id = int(request.form.get("uniq_id"))
+    comment_text = request.form.get("comment_text")
+    if comment_text.strip() == "": return ""
+    user = current_user.username
+    timestamp = time.time()
+    timestr = util.format_timestamp(timestamp)
+    res = shareds.driver.session().run(
+        """
+        match (p) where id(p) = $uniq_id 
+        create (p) -[:COMMENT] -> 
+            (c:Comment{user:$user,text:$text,timestamp:$timestamp,timestr:$timestr})
+        return c
+        """,
+        uniq_id=uniq_id,
+        user=user, 
+        text=comment_text,
+        timestamp=timestamp,
+        timestr=timestr,
+        ).single()
+    if res:
+        return render_template("/scene/comments/add_comment.html",
+                               timestamp=timestr,
+                               user=user,
+                               comment_text=comment_text)
+    else:
+        return ""
