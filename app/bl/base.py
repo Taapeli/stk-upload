@@ -31,17 +31,17 @@ class Status():
     
         Result dictionary may have
         - item / items    data
-        - status          int code
+        - status          enumarated code
         - statustext      error message
         etc
         
         example: {"items":events, "status":Status.OK}
     """
-    OK = 0
-    NOT_FOUND = 1
-    ERROR = 2
-    NOT_STARTED = 4
-    UPDATED = 8
+    OK = 'OK'
+    NOT_FOUND = 'Not found'
+    ERROR = 'Error'
+    NOT_STARTED = 'Not started'
+    UPDATED = 'Updated'
 
     @staticmethod       
     def has_failed(result:dict, strict=True):
@@ -52,7 +52,7 @@ class Status():
         if not isinstance(result,dict):
             traceback.print_exc()
             raise AttributeError(f'bl.base.Status.has_failed')
-        st = result.get('status', -1)
+        st = result.get('status', 'undefined')
 
         if st == Status.ERROR:
             return True     # Error

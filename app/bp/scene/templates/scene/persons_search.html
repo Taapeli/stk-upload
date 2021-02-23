@@ -132,7 +132,7 @@ selector.addEventListener("change", () => {
 	          {% endif %}
 	        {% endwith %}
     </div>
-{% if status == 0 %}
+{% if status == 'OK' %}
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
 	        {% for p in persons %}

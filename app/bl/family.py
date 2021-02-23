@@ -397,10 +397,7 @@ class FamilyReader(DbReader):
 
             Returns a dict {item:Family, status=0, statustext:None}
             
-            where status code is one of
-                - Status.OK = 0
-                - Status.NOT_FOUND = 1
-                - Status.ERROR = 2
+            where status code is one of Status.OK / Status.NOT_FOUND / Status.ERROR
             
             Ther wanted parameter is a string of short keywords separated by ':'.
             
