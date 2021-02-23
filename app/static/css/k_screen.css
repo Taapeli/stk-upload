@@ -108,6 +108,16 @@ body > div {
     height: 0;
 }
 
+li.comment span {
+    .position: relative;
+    .top: -2.5em;
+	.text-align: right;
+    .padding: 1px;
+    color: #7e6b53;
+    font-size: 8pt;
+    height: 0;
+}
+
 
 .fullclear {
     clear: both;
@@ -1094,3 +1104,19 @@ body#fullyearlinked table.calendar tbody td {
 body#OneDay div.content {
     overflow: hidden;
 }
+
+div.comment {
+	border: 1px solid;
+	padding: 5px;
+	margin: 5px;
+	background: #eeeeee;
+	border-radius: 15px;
+}
+div.comment .content {
+	border: 1px solid;
+	padding: 5px;
+	margin: 5px;
+	background: lightblue;
+	border-radius: 5px;
+}
+

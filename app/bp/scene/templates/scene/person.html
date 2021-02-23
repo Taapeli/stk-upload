@@ -46,13 +46,15 @@ u { color: DarkKhaki; text-decoration: none; }
       {% endfor %}
       </ul>
     {% endif %}
-  {% endwith %}
+  {% endwith %} 
 
 {% if person %}
     {% if root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
-        <div class='credit'>{% if root.root_type == 'PASSED' %}{{ _('Origin from') }}
+        <div class='credit'>{% if root.root_type == 'PASSED' %}
+        	{{ _('Origin from') }}
             {% else %}{{ _('User data') }}:{% endif %}
-            <b>{{root.root_user}}</b> {{root.id}}</div>
+            <b>{{root.root_user}}</b> {{root.id}}
+            </div>
     {% endif %}
 
         <h3 class="sticky" title="{{ _('Top') }}"><a href="#">
@@ -158,9 +160,17 @@ u { color: DarkKhaki; text-decoration: none; }
     	{% endif -%}</a></td>
                 </tr>
     {% endif %}
+
+		
             </table>
         </div>
 
+        <form>
+			<input type="hidden" name="uniq_id" value="{{ person.uniq_id }}">
+        </form>
+
+    	<div id="comments_div" hx-get="/scene/comments/comments_header" hx-trigger="load"></div> 
+    	
         <div class="subsection" id="events">
             <h4>{{ _("Events") }}</h4>
             <table class="infolist eventlist">
@@ -370,9 +380,6 @@ u { color: DarkKhaki; text-decoration: none; }
 {% endif %}
     </div> {# content #}
 
-<script src="/static/js/Sortable.js"></script>
-<script src="https://unpkg.com/htmx.org@1.2.0"></script>
-<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
 
 <script>
 /* For source references */

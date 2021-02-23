@@ -71,6 +71,12 @@ td.Citation div ol {padding-top:.3em;}
             </tbody></table>
 	        </div>
 
+        <form>
+			<input type="hidden" name="uniq_id" value="{{ source.uniq_id }}">
+        </form>
+
+    	<div id="comments_div" hx-get="/scene/comments/comments_header" hx-trigger="load"></div> 
+
 	        <div class="subsection" id="citations">
 	            <h4>{{ _('Source References and Events') }}</h4>
 	            <table class="infolist eventlist" width="100%">
