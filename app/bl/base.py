@@ -41,7 +41,7 @@ class Status():
     NOT_FOUND = 1
     ERROR = 2
     NOT_STARTED = 4
-    UPDATED = 4
+    UPDATED = 8
 
     @staticmethod       
     def has_failed(result:dict, strict=True):

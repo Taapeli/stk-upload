@@ -56,11 +56,24 @@ from models.gen.citation import Citation
 
 
 class Neo4jReadService:
-    ''' Methods for accessing Neo4j database.
+    ''' 
+    Methods for accessing Neo4j database.
+
+    The methods __enter__() and __exit__() makes possible to use with sentence
+    (Context Manager pattern).
+
+    @See: https://www.integralist.co.uk/posts/python-context-managers/
     '''
     def __init__(self, driver):
         self.driver = driver
-    
+        print(f'#{self.__class__.__name__} init')
+
+    def __enter__(self):
+        print(f'#{self.__class__.__name__} enter')
+        return self
+
+    def __exit__(self, *args):
+        print(f'#{self.__class__.__name__} exit')
 
     def _set_birth_death(self, person, birth_node, death_node):
         '''

@@ -64,11 +64,40 @@ class SourceReference:
 
 
 class Neo4jReadServiceTx:
-    ''' Methods for accessing Neo4j database.
+    ''' 
+    Methods for accessing Neo4j database.
+
+    Methods __enter__() and __exit__() makes possible to use with sentence
+    (Context Manager pattern) like this:
+
+    ##     with Neo4jReadServiceTx(shareds.driver) as readservice:
+    ##         reader = PersonReaderTx(readservice, u_context)
+    ##         res = reader.get_person_search(args)
+
+    @See: https://www.integralist.co.uk/posts/python-context-managers/
     '''
     def __init__(self, driver):
         self.driver = driver
-        self.tx = driver.session().begin_transaction()
+        print(f'#{self.__class__.__name__} init')
+        #self.tx = driver.session().begin_transaction()
+
+    def __enter__(self):
+        self.tx = self.driver.session().begin_transaction()
+        print(f'#{self.__class__.__name__} enter')
+        return self
+
+    def __exit__(self, *args):
+        """
+        Exit the runtime context related to this object. 
+
+        @See https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
+
+        object.__exit__(self, exc_type, exc_value, traceback)
+        The parameters describe the exception that caused the context to be 
+        exited. If the context was exited without an exception, all three
+        arguments will be None.
+        """
+        print(f'#{self.__class__.__name__} exit')
 
 
     def tx_get_person_list(self, args):
