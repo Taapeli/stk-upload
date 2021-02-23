@@ -16,9 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from bp.stat.models import utils
-from models import util
-from types import SimpleNamespace
 
 '''
 Created on 12.8.2018
@@ -35,12 +32,16 @@ from operator import itemgetter
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
+from types import SimpleNamespace
 
-import shareds
+
 from flask import send_file, Response, jsonify
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
+
+import shareds
+from models import util
 
 from . import bp
 from bl.base import Status, StkEncoder
