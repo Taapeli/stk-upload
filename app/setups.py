@@ -203,8 +203,6 @@ shareds.mail = Mail(shareds.app)
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
 
-shareds.readservice = Neo4jReadService(shareds.driver)
-
 shareds.user_model = User
 shareds.role_model = Role
 

@@ -16,9 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from bp.stat.models import utils
-from models import util
-from types import SimpleNamespace
 
 '''
 Created on 12.8.2018
@@ -35,12 +32,16 @@ from operator import itemgetter
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
+from types import SimpleNamespace
 
-import shareds
+
 from flask import send_file, Response, jsonify
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
+
+import shareds
+from models import util
 
 from . import bp
 from bl.base import Status, StkEncoder
@@ -64,7 +65,7 @@ from models.obsolete_datareader import obsolete_read_persons_with_events
 # Select the read driver for current database
 from pe.neo4j.readservice_tx import Neo4jReadServiceTx # initiate when used
 from pe.neo4j.readservice import Neo4jReadService
-readservice = Neo4jReadService(shareds.driver)
+#readservice = Neo4jReadService(shareds.driver)
 
 from pe.neo4j.writeservice import Neo4jWriteService
 writeservice = Neo4jWriteService(shareds.driver)
@@ -121,10 +122,9 @@ def _do_get_persons(args):
         args['rule'] = 'all'
     u_context.count = request.args.get('c', 100, type=int)
 
-    readservice = Neo4jReadServiceTx(shareds.driver)
-    reader = PersonReaderTx(readservice, u_context)
-    
-    res = reader.get_person_search(args)
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        reader = PersonReaderTx(readservice, u_context)
+        res = reader.get_person_search(args)
 
     #print(f'Query {args} produced {len(res["items"])} persons, where {res["num_hidden"]} hidden.')
 #     if res.get('status') != Status.OK:
@@ -194,32 +194,33 @@ def show_person_search():
                f"-> bp.scene.routes.show_person_search/{rule}"
                f" n={len(found)}{hidden} e={elapsed:.3f}")
     print(f'Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}')
-    
-    datastore = PersonReader(readservice, u_context)
-        
-    minfont = 6
-    maxfont = 20
-    #maxnames = 47
-    surnamestats = datastore.get_surname_list(47)
-    # {placename,count, uuid}
-    for i, stat in enumerate(surnamestats):
-        stat['order'] = i
-        stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
-    surnamestats.sort(key=itemgetter("surname"))
-    
-    placereader = PlaceDataReader(readservice, u_context)
-        
-    minfont = 6
-    maxfont = 20
-    #maxnames = 40
-    placenamestats = placereader.get_placename_stats(40)
-    #placenamestats = placenamestats[0:maxnames]
-    for i, stat in enumerate(placenamestats):
-        stat['order'] = i
-        stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(placenamestats)
-    placenamestats.sort(key=itemgetter("placename"))
 
+    surnamestats = []
+    placenamestats = []
+    if args.get('rule') is None:
+        # Start search page: show name clouds
+        with Neo4jReadService(shareds.driver) as readservice:
+            minfont = 6
+            maxfont = 20
+            
+            # Most common surnames cloud
+            reader = PersonReader(readservice, u_context)
+            surnamestats = reader.get_surname_list(47)
+            # {name, count, uuid}
+            for i, stat in enumerate(surnamestats):
+                stat['order'] = i
+                stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
+            surnamestats.sort(key=itemgetter("surname"))
     
+            # Most common place names cloud
+            reader = PlaceDataReader(readservice, u_context)
+            placenamestats = reader.get_placename_stats(40)
+            # {name, count, uuid}
+            for i, stat in enumerate(placenamestats):
+                stat['order'] = i
+                stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(placenamestats)
+            placenamestats.sort(key=itemgetter("placename"))
+
     return render_template("/scene/persons_search.html",  menuno=0,
                            persons=found,
                            user_context=u_context, 
@@ -271,21 +272,14 @@ def obsolete_show_persons_by_refname(refname, opt=""):
     return render_template("/scene/persons_search.html", persons=persons, menuno=1, 
                            user_context=u_context, order=order, rule=keys)
 
-@bp.route('/obsolete/persons/all/<string:opt>')
-@bp.route('/obsolete/persons/all/')
-@login_required
-@roles_accepted('guest', 'research', 'audit', 'admin')
-def obsolete_show_all_persons_list(opt=''):
-    """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
-
-        Linked from admin/refnames only
-
-        The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
-        with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
-
-        TODO Should have restriction by owner's UserProfile 
-    """
-    return 'Obsolete! show_all_persons_list<br><a href="javascript:history.back()">Go Back</a>'
+# @bp.route('/obsolete/persons/all/<string:opt>')
+# @bp.route('/obsolete/persons/all/')
+# @login_required
+# @roles_accepted('guest', 'research', 'audit', 'admin')
+# def obsolete_show_all_persons_list(opt=''):
+#     """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
+# 
+#         Linked from admin/refnames only
 
 
 
@@ -306,11 +300,10 @@ def show_person(uuid=None):
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
 
-    from pe.neo4j.readservice_tx import Neo4jReadServiceTx
-    readservice = Neo4jReadServiceTx(shareds.driver)
-    reader = PersonReaderTx(readservice, u_context)
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        reader = PersonReaderTx(readservice, u_context)
+        result = reader.get_person_data(uuid) #, args)
 
-    result = reader.get_person_data(uuid) #, args)
     # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
@@ -336,9 +329,12 @@ def show_person(uuid=None):
 @roles_accepted('guest','research', 'audit', 'admin')
 def get_person_names(uuid):
     u_context = UserContext(user_session, current_user, request)
-    datastore = PersonReader(readservice, u_context)
-    args = {}
-    result = datastore.get_person_data(uuid, args)
+
+    with Neo4jReadService(shareds.driver) as readservice:
+        datastore = PersonReader(readservice, u_context)
+        args = {}
+        result = datastore.get_person_data(uuid, args)
+
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
     person = result.get('person')
@@ -352,9 +348,12 @@ def get_person_names(uuid):
 @roles_accepted('guest','research', 'audit', 'admin')
 def get_person_primary_name(uuid):
     u_context = UserContext(user_session, current_user, request)
-    datastore = PersonReader(readservice, u_context)
-    args = {}
-    result = datastore.get_person_data(uuid, args)
+
+    with Neo4jReadService(shareds.driver) as readservice:
+        datastore = PersonReader(readservice, u_context)
+        args = {}
+        result = datastore.get_person_data(uuid, args)
+
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
     person = result.get('person')
@@ -397,9 +396,10 @@ def obsolete_show_event_v1(uuid):
         Derived from bp.obsolete_tools.routes.show_baptism_data()
     """
     u_context = UserContext(user_session, current_user, request)
-    reader = EventReader(readservice, u_context) 
 
-    res = reader.get_event_data(uuid)
+    with Neo4jReadService(shareds.driver) as readservice:
+        reader = EventReader(readservice, u_context) 
+        res = reader.get_event_data(uuid)
 
     status = res.get('status')
     if status != Status.OK:
@@ -416,9 +416,10 @@ def obsolete_show_event_v1(uuid):
 @roles_accepted('guest', 'research', 'audit', 'admin')
 def edit_event(uuid):
     u_context = UserContext(user_session, current_user, request)
-    datastore = EventReader(readservice, u_context) 
 
-    res = datastore.get_event_data(uuid, {})
+    with Neo4jReadService(shareds.driver) as readservice:
+        datastore = EventReader(readservice, u_context) 
+        res = datastore.get_event_data(uuid, {})
 
     status = res.get('status')
     if status != Status.OK:
@@ -458,9 +459,9 @@ def json_get_event():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        reader = EventReader(readservice, u_context) 
-    
-        res = reader.get_event_data(uuid, args)
+        with Neo4jReadService(shareds.driver) as readservice:
+            reader = EventReader(readservice, u_context) 
+            res = reader.get_event_data(uuid, args)
     
         status = res.get('status')
         if status != Status.OK:
@@ -506,7 +507,7 @@ def json_get_event():
                     'translations':{'myself': _('Self') }
                     }
         response = StkEncoder.jsonify(res_dict)
-        print(response)
+        #print(response)
         t1 = time.time()-t0
         stk_logger(u_context, f"-> bp.scene.routes.json_get_event n={len(members)} e={t1:.3f}")
         return response
@@ -576,10 +577,10 @@ def show_families():
     u_context.count = request.args.get('c', 100, type=int)
     t0 = time.time()
     
-    reader = FamilyReader(readservice, u_context) 
-
-    # 'families' has Family objects
-    families = reader.get_families() #o_context=u_context, opt=opt, limit=count)
+    with Neo4jReadService(shareds.driver) as readservice:
+        reader = FamilyReader(readservice, u_context) 
+        # 'families' has Family objects
+        families = reader.get_families() #o_context=u_context, opt=opt, limit=count)
 
     stk_logger(u_context, f"-> bp.scene.routes.show_families/{opt} n={len(families)}")
     return render_template("/scene/families.html", families=families, 
@@ -602,9 +603,10 @@ def show_family_page(uuid=None):
         return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
     t0 = time.time()
     u_context = UserContext(user_session, current_user, request)
-    reader = FamilyReader(readservice, u_context) 
 
-    res = reader.get_family_data(uuid)
+    with Neo4jReadService(shareds.driver) as readservice:
+        reader = FamilyReader(readservice, u_context) 
+        res = reader.get_family_data(uuid)
 
     stk_logger(u_context, "-> bp.scene.routes.show_family_page")
     status = res.get('status')
@@ -640,9 +642,9 @@ def json_get_person_families():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        reader = FamilyReader(readservice, u_context) 
-
-        res = reader.get_person_families(uuid)
+        with Neo4jReadService(shareds.driver) as readservice:
+            reader = FamilyReader(readservice, u_context) 
+            res = reader.get_person_families(uuid)
 
         if res.get('status') == Status.NOT_FOUND:
             return jsonify({"member":uuid, "records":[],
@@ -688,12 +690,11 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    reader = PlaceDataReader(readservice, u_context) 
-
-    # The list has Place objects, which include also the lists of
-    # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-
-    res = reader.get_place_list()
+    with Neo4jReadService(shareds.driver) as readservice:
+        reader = PlaceDataReader(readservice, u_context) 
+        # The 'items' list has Place objects, which include also the lists of
+        # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
+        res = reader.get_place_list()
 
     if res['status'] == Status.NOT_FOUND:
         print(f'bp.scene.routes.show_places: {_("No places found")}')
@@ -800,10 +801,10 @@ def show_source_page(sourceid=None):
         return redirect(url_for('virhesivu', code=1, text="Missing Source key"))
     u_context = UserContext(user_session, current_user, request)
     try:
-        reader = SourceDataStore(readservice, u_context) 
-    
-        res = reader.get_source_with_references(uuid, u_context)
-        
+        with Neo4jReadService(shareds.driver) as readservice:
+            reader = SourceDataStore(readservice, u_context) 
+            res = reader.get_source_with_references(uuid, u_context)
+
         if res['status'] == Status.NOT_FOUND:
             msg = res.get('statustext', _('No objects found'))
             return redirect(url_for('virhesivu', code=1, text=msg))
@@ -838,10 +839,10 @@ def show_medias():
     u_context.set_scope_from_request(request, 'media_scope')
     u_context.count = 20
 
-    datareader = MediaReader(readservice, u_context)
-#   medias = Media.read_my_media_list(u_context, 20)
+    with Neo4jReadService(shareds.driver) as readservice:
+        datareader = MediaReader(readservice, u_context)
+        res = datareader.read_my_media_list()
 
-    res = datareader.read_my_media_list()
     if Status.has_failed(res, False):
         flash(f'{res.get("statustext","error")}', 'error')
     medias = res.get('items', [])
@@ -859,11 +860,9 @@ def show_media(uuid=None):
     """
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
-#     if not uuid:
-#         return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
-    reader = MediaReader(readservice, u_context)
-
-    res = reader.get_one(uuid)
+    with Neo4jReadService(shareds.driver) as readservice:
+        reader = MediaReader(readservice, u_context)
+        res = reader.get_one(uuid)
 
     status = res.get('status')
     if status != Status.OK:

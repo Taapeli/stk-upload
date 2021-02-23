@@ -194,7 +194,7 @@ var vm = new Vue({
         	vm.edit_mode = false;
             axios.post("/scene/update/event", data) 
             .then (function(rsp) {
-            	if (rsp.data.status == 0) {
+            	if (rsp.data.status == 'OK') {
                 	vm.event = rsp.data.event;
 	                vm.message = rsp.data.statusText;
 		            for (let editable of vm.editables) {
