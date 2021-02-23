@@ -174,7 +174,7 @@ def generate_keys(args):
         match 
             (b:Batch)-->(p:Person)-[:NAME]->(pn:Name{order:0})
         optional match
-            (rn:Refname)-[bn:BASENAME]->(p)
+            (rn:Refname)-[bn:REFNAME]->(p)
         optional match
             (e:Event)<-[:EVENT{role:'Primary'}]-(p)
         optional match
