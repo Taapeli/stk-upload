@@ -194,27 +194,31 @@ def show_person_search():
                f" n={len(found)}{hidden} e={elapsed:.3f}")
     print(f'Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}')
 
-    with Neo4jReadService(shareds.driver) as readservice:
-        minfont = 6
-        maxfont = 20
-        
-        # Most common surnames cloud
-        reader = PersonReader(readservice, u_context)
-        surnamestats = reader.get_surname_list(47)
-        # {name, count, uuid}
-        for i, stat in enumerate(surnamestats):
-            stat['order'] = i
-            stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
-        surnamestats.sort(key=itemgetter("surname"))
-
-        # Most common place names cloud
-        reader = PlaceDataReader(readservice, u_context)
-        placenamestats = reader.get_placename_stats(40)
-        # {name, count, uuid}
-        for i, stat in enumerate(placenamestats):
-            stat['order'] = i
-            stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(placenamestats)
-        placenamestats.sort(key=itemgetter("placename"))
+    surnamestats = []
+    placenamestats = []
+    if args.get('rule') is None:
+        # Start search page: show name clouds
+        with Neo4jReadService(shareds.driver) as readservice:
+            minfont = 6
+            maxfont = 20
+            
+            # Most common surnames cloud
+            reader = PersonReader(readservice, u_context)
+            surnamestats = reader.get_surname_list(47)
+            # {name, count, uuid}
+            for i, stat in enumerate(surnamestats):
+                stat['order'] = i
+                stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
+            surnamestats.sort(key=itemgetter("surname"))
+    
+            # Most common place names cloud
+            reader = PlaceDataReader(readservice, u_context)
+            placenamestats = reader.get_placename_stats(40)
+            # {name, count, uuid}
+            for i, stat in enumerate(placenamestats):
+                stat['order'] = i
+                stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(placenamestats)
+            placenamestats.sort(key=itemgetter("placename"))
 
     return render_template("/scene/persons_search.html",  menuno=0,
                            persons=found,
@@ -502,7 +506,7 @@ def json_get_event():
                     'translations':{'myself': _('Self') }
                     }
         response = StkEncoder.jsonify(res_dict)
-        print(response)
+        #print(response)
         t1 = time.time()-t0
         stk_logger(u_context, f"-> bp.scene.routes.json_get_event n={len(members)} e={t1:.3f}")
         return response

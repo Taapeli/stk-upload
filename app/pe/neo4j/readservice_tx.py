@@ -86,7 +86,7 @@ class Neo4jReadServiceTx:
         print(f'#{self.__class__.__name__} enter')
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type=None, exc_value=None, traceback=None):
         """
         Exit the runtime context related to this object. 
 
@@ -97,6 +97,11 @@ class Neo4jReadServiceTx:
         exited. If the context was exited without an exception, all three
         arguments will be None.
         """
+        if exc_type:
+            print(f"{self.__class__.__name__} rollback becouse of {exc_type.__class__.__name__}")
+            self.tx.rollback()
+        else:
+            self.tx.close()
         print(f'#{self.__class__.__name__} exit')
 
 
