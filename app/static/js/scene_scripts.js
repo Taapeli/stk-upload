@@ -1,7 +1,7 @@
-/*  Isotammi Geneological Service for combining multiple researchers' results.
+/*  Isotammi Genealogical Service for combining multiple researchers' results.
     Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
                              Timo Nallikari, Pekka Valta
-    See the LISENCE file.
+    See the LICENCE file.
 */
 var gt = new Gettext({domain: 'gedcom_transformations'});
 var _ = function(msgid,args) { return gt.strargs(gt.gettext(msgid),args); };

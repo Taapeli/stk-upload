@@ -1,7 +1,7 @@
-/*  Isotammi Geneological Service for combining multiple researchers' results.
+/*  Isotammi Genealogical Service for combining multiple researchers' results.
     Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
                              Timo Nallikari, Pekka Valta
-    See the LISENCE file.
+    See the LICENCE file.
 */
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
