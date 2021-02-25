@@ -137,12 +137,7 @@ class PersonReaderTx(DbReader):
     
             persons.append(p)   
     
-        return {'items': persons, 'status': Status.OK}
-
-####
-
         # Update the page scope according to items really found
-        persons = res['items']
         if len(persons) > 0:
             context.update_session_scope('person_scope', 
                                           persons[0].sortname, persons[-1].sortname, 
