@@ -69,14 +69,21 @@ table.transparent tbody tr td {
 	var fanchart_data = JSON.parse('{{ fanchart_data|safe }}');
 	
     Sunburst()
-      .data(fanchart_data)
-      .size('size')
-      .color('color')
-      .tooltipContent((d, node) => `<i>${d.tooltipContent}</i>`)
-  ////    .onClick((d, node) => location.reload(location.href + "?uuid={d.uuid}"))
-      .radiusScaleExponent(1)
-      .width(600)
-      (document.getElementById('chart'));
+        .data(fanchart_data)
+        .size('size')
+        .color('color')
+        .tooltipContent((d, node) => `<i>${d.tooltipContent}</i>`)
+        .onClick((node) => {
+            if (node.uuid != null) {
+                var searchParams = new URLSearchParams(window.location.search);
+                searchParams.set('uuid', node.uuid);
+                var newParams = searchParams.toString();
+                window.location.search = newParams
+            }
+        })
+        .radiusScaleExponent(1)
+        .width(600)
+        (document.getElementById('chart'));
   </script>
 
 <div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>

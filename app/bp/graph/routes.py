@@ -131,13 +131,13 @@ def get_fanchart_data(uuid):
             if dad:
                 dads = build_parents(dad.uuid, size/2, level + 1)
             else:
-                dads = {'color': 'white', 'size': size/2}
+                dads = {'color': 'white', 'size': size/2, 'uuid': None}
 
             mom = person.families_as_child[0].mother
             if mom:
                 moms = build_parents(mom.uuid, size/2, level + 1)
             else:
-                moms = {'color': 'white', 'size': size/2}
+                moms = {'color': 'white', 'size': size/2, 'uuid': None}
             node['children'] = [dads, moms]
 
         else:
@@ -188,16 +188,20 @@ def get_fanchart_data(uuid):
     
     # Merge the two sunburst chart data trees to form a single two-way fan chart.
     fanchart = ancestors
-    if 'children' in descendants.keys():
-        if 'children' in ancestors.keys():
+    fanchart.pop('size', None)  # make sure the root node has no size attribute (will have if no ancestors)
+    if 'children' in descendants.keys():    # has descendants?
+        if 'children' in ancestors.keys():  # has ancestors?
             fanchart['children'] = ancestors['children'] + descendants['children']
         else:
             fanchart['children'] = descendants['children']
-##            fanchart['children'].insert(1, {'size': 0.5, 'color': 'white'}) # If no ancestors, make empty NE quarter
+             # No ancestors: make empty quarters to occupy parents' slots (otherwise descendants end up in east!)
+            fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
+            fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
     else:
-        fanchart['children'].insert(2, {'size': 1, 'color': 'white'}) # If no descendants, make empty southern hemisphere
+        # If no descendants, make empty southern hemisphere
+        fanchart['children'].insert(2, {'size': 1, 'color': 'white', 'uuid': None})
     
-    # The sectors are drawn clockwise, starting from North. To get the ancestors to occupy the
+    # The sectors are drawn anticlockwise, starting from North. To get the ancestors to occupy the
     # Northern hemisphere, we need to move the first node on top level list (father) to end of list.
     if 'children' in fanchart.keys():
         fanchart['children'].append(fanchart['children'].pop(0))
