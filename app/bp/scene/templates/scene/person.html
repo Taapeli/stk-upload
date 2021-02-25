@@ -87,17 +87,20 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 			<form>
     			<input type="hidden" name="uuid" value="{{ person.uuid }}">
 				<tr><td colspan="2">{{ _("Names") }}
-                {% if may_edit %}({{ _("order by dragging") }}){% endif %}
+
+                {# Sortable name list #}
+                {% set edit_names = may_edit and (person.names|length > 1) %}
+                {% if edit_names %}({{ _("order by dragging") }}){% endif %}
                 </td></tr>
 				<tr><td colspan="2">
-                {% if may_edit %}
+                {% if edit_names %}
                     <table id="tableNames"><tbody id="names" 
 					hx-put="/scene/sort_names" hx-trigger="end" hx-swap="none">
                 {% else %}
                     <table><tbody id="names">
 				{% endif %}
                 {% for p_name in person.names|sort(attribute='order') %}
-                        <tr{% if may_edit %} class="movable"{% endif %}>
+                        <tr{% if edit_names %} class="movable"{% endif %}>
                             <td class="ColumnAttribute">{{p_name.type|transl('nt')}}</td>
                             <td class="Value" style="padding-left: 24px;">
         						{% if p_name.title %}<span title="titteli" class="typedesc">{{p_name.title}}</span>{% endif %}

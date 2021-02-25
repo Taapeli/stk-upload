@@ -316,8 +316,8 @@ def show_person(uuid=None):
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
-    may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
-    #may_edit = 0
+    may_edit = current_user.has_role('audit') or current_user.has_role('admin')
+
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=root,
                            last_year_allowed=last_year_allowed, 
@@ -954,7 +954,11 @@ def fetch_thumbnail():
         logger.debug(f"-> bp.scene.routes.fetch_thumbnail none")
 
     return ret
-        
+
+
+# ----------- Access htmx components ---------------
+
+
 @bp.route('/scene/comments')
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
@@ -978,31 +982,25 @@ def fetch_comments():
     """ Fetch comments
     """
     uniq_id = int(request.args.get("uniq_id"))
-    uuid = request.args.get("uuid")
+    #uuid = request.args.get("uuid")
     if request.args.get("start"):
         start = float(request.args.get("start"))
     else:
-        start = None
+        start = 0.0
     args = {"uniq_id": uniq_id}
     if start:
         args["start"] = start
-    res = shareds.driver.session().run(
-        """
+    
+    query = """
         match (p) -[:COMMENT] -> (c:Comment)
-        where id(p) = $uniq_id 
-        {}
-        with c
-        order by c.timestamp desc
-        limit 5
-        return collect(c) as comments
-        """.format("and c.timestamp <= $start" if start else ""),
-        **args
-        ).single()
+            where id(p) = $uniq_id and c.timestamp >= $start
+        return c as comment order by c.timestamp desc limit 5
+    """
+    result = shareds.driver.session().run(query, uniq_id=uniq_id, start=start)
     comments = []
     last_timestamp = None
-    count = 0
-    for node in res['comments']:
-        count += 1
+    for record in result:
+        node = record['comment']
         c = SimpleNamespace()
         c.user = node['user']
         c.comment_text = node['text']
@@ -1011,7 +1009,7 @@ def fetch_comments():
         comments.append(c)
         last_timestamp = c.timestamp
     if last_timestamp is None:
-        return "<span id='no_comments'>" + _("No comments") + "</span>"
+        return "<span id='no_comments'>" + _("No previous comments") + "</span>"
     else:
         return render_template("/scene/comments/fetch_comments.html", 
                            comments=comments[0:4], 
