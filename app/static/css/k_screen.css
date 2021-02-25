@@ -112,9 +112,9 @@ body > div {
     clear: both;
 }
 
-/* Stk objects
+/* Stk header
 ----------------------------------------------------- */
-h1 {
+div#Header {
     position: relative;
     color: #7e6b53; /* Darker bisque */
     background-color:bisque;
@@ -124,11 +124,12 @@ h1 {
     letter-spacing: 1px;
     padding: 2px;
     width: 100%;
+    margin: 13px 0;
 }
-h1.own { border-bottom: solid 3pt #e0bc91; }
-h1.passed { border-bottom: solid 2pt #6884be; }
+div#Header.own    { border-bottom: solid 3pt #e0bc91; }
+div#Header.passed { border-bottom: solid 2pt #6884be; }
 
-h1 div.curr_user {
+div#Header div.curr_user {
     float: right; 
     margin-right: 30px; 
     font-family: verdana, sans-serif;
@@ -136,11 +137,11 @@ h1 div.curr_user {
     font-size: 9pt;
     padding: 4px;
 }
-h1 div.curr_user a { 
+div#Header div.curr_user a { 
     text-decoration: none;     
     color: #7e6b53; /* Darker bisque */
 }
-h1 div.curr_user a:hover { text-decoration: underline; }
+div#Header div.curr_user a:hover { text-decoration: underline; }
 
 img#logo {
     width: 43px;
@@ -149,6 +150,9 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
+
+/* Stk objects
+----------------------------------------------------- */
 .gedcom_id { color: sienna; text-align: right; 
     font-family: monospace
 }
@@ -174,9 +178,6 @@ img#logo {
 
 .detail_link {
 	display: inline;
-/* 	width: 1em;  */
-/* 	margin:0 auto;  */
-/* 	text-align: center;  */
 }
 .no_detail {
 	display: inline; 
@@ -387,7 +388,7 @@ a[href]:hover, a[href]:active {
     color: #999;
 }
 
-/* Header
+/* Header from Gramps, flashes
 ----------------------------------------------------- */
 #SiteTitle {
     color: #555;
@@ -831,20 +832,22 @@ div#families table.attrlist td.ColumnType {
     border-radius: 10px;
     background: beige;
     padding: 10px; 
-    align-self: flex-start;
+/*    align-self: flex-start; */
     width: 200px;
     margin: 1em;
     font-size: 90%;
+    flex: 50%
 }
 .familybox {
 	width: 350px;
 	border: 1px solid gray; 
     border-radius: 10px;
     background: bisque;
-    flex-wrap: wrap;
-    align-self: flex-start;
+    /* flex-wrap: wrap; */
+/*    align-self: flex-start; */
     font-size: 90%;
     margin: 10px;
+    flex: 50%
 }
 .familybox p { padding-left: 1em; padding-top: 1em; }
 .familybox ul li ul { padding-left: 1.5em; }
@@ -858,6 +861,14 @@ div#families table.attrlist td.ColumnType {
 .mainbox {
     padding-left: 1em;
     padding-top: 1em;
+    flex: 50%
+}
+
+.row {
+    display: inline-flex
+}
+.column {
+    flex: 50%
 }
 
 /* Subsection : Gallery
@@ -981,118 +992,119 @@ body#FamilyMap {
 }
 
 /* Calendar Styles
-===================================================== */
-table.calendar {
-    table-layout: fixed;
-    empty-cells: show;
-}
-.calendar thead th {
-    text-align: center;
-    border-top-style: none;
-}
-.calendar thead th.monthName {
-    font-size: xx-large;
-    font-weight: normal;
-    background-color: white;
-    border-bottom-style: none;
-    padding-top: 1em;
-}
-.calendar thead th abbr {
-    border-bottom-style: none;
-}
-#CreatorInfo {
-    float: right;
-    margin: -1em 15px 0px 0px;
-    font-weight: bold;
-    color: #999;
-}
-.calendar tfoot tr td {
-    border-top: solid 4px #999;
-    vertical-align: middle;
-}
-
-/* Calendar : Date Numeral */
-.calendar div.date {
-    float: right;
-    width: 1.8em;
-    font-size: large;
-    text-align: center;
-    background-color: #CCC;
-    color: #555;
-}
-
-/* Calendar : Date Container */
-.calendar td {
-    padding: 0px 0px 0px 1ex;
-    border-width: 1px 0px 0px 1px;
-    border-style: solid;
-    border-color: #CCC;
-    background-color: #EEE;
-}
-.calendar td:first-child {
-    border-left-style: none;
-    padding: 0px 0px 0px 1ex;
-}
-.calendar tbody tr:first-child td {
-    border-top-style: none;
-}
-
-/* Calendar : Date Detail */
-.calendar td ul {
-    font-size: smaller;
-    list-style: none;
-    padding: 0px;
-}
-.calendar td ul li {
-    border-top: dashed 1px #CCC;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-}
-.calendar td ul li:first-child {
-    border-style: none;
-}
-
-/* Calendar : Birthday, Anniversary, Highlight */
-.calendar td.highlight {
-    background-color: white;
-}
-.calendar td.highlight div.date {
-    color: black;
-    background-color: #CCC;
-}
-
-/* Calendar : Previous-Next Month */
-.calendar td.previous,
-.calendar td.next,
-.calendar td.previous div.date,
-.calendar td.next div.date {
-    color: #CCC;
-    background-color: #EEE;
-}
-
-/* Calendar : Full Year */
-body#fullyearlinked div.content {
-    overflow: hidden;
-}
-body#fullyearlinked table.calendar {
-    float: left;
-    width: 33.3%;
-    height: 18em;
-    border: solid 1px black;
-}
-body#fullyearlinked table.calendar thead th {
-    height: 2em;
-}
-body#fullyearlinked table.calendar thead th.monthName {
-    font-size: large;
-    padding: 2px 0px;
-}
-body#fullyearlinked table.calendar tbody td {
-    height: 3em;
-}
-body#OneDay div.content {
-    overflow: hidden;
-}
+===================================================== **
+	table.calendar {
+	    table-layout: fixed;
+	    empty-cells: show;
+	}
+	.calendar thead th {
+	    text-align: center;
+	    border-top-style: none;
+	}
+	.calendar thead th.monthName {
+	    font-size: xx-large;
+	    font-weight: normal;
+	    background-color: white;
+	    border-bottom-style: none;
+	    padding-top: 1em;
+	}
+	.calendar thead th abbr {
+	    border-bottom-style: none;
+	}
+	#CreatorInfo {
+	    float: right;
+	    margin: -1em 15px 0px 0px;
+	    font-weight: bold;
+	    color: #999;
+	}
+	.calendar tfoot tr td {
+	    border-top: solid 4px #999;
+	    vertical-align: middle;
+	}
+	
+	/* Calendar : Date Numeral *
+	.calendar div.date {
+	    float: right;
+	    width: 1.8em;
+	    font-size: large;
+	    text-align: center;
+	    background-color: #CCC;
+	    color: #555;
+	}
+	
+	/* Calendar : Date Container *
+	.calendar td {
+	    padding: 0px 0px 0px 1ex;
+	    border-width: 1px 0px 0px 1px;
+	    border-style: solid;
+	    border-color: #CCC;
+	    background-color: #EEE;
+	}
+	.calendar td:first-child {
+	    border-left-style: none;
+	    padding: 0px 0px 0px 1ex;
+	}
+	.calendar tbody tr:first-child td {
+	    border-top-style: none;
+	}
+	
+	/* Calendar : Date Detail *
+	.calendar td ul {
+	    font-size: smaller;
+	    list-style: none;
+	    padding: 0px;
+	}
+	.calendar td ul li {
+	    border-top: dashed 1px #CCC;
+	    padding-top: 0.5em;
+	    padding-bottom: 0.5em;
+	}
+	.calendar td ul li:first-child {
+	    border-style: none;
+	}
+	
+	/* Calendar : Birthday, Anniversary, Highlight *
+	.calendar td.highlight {
+	    background-color: white;
+	}
+	.calendar td.highlight div.date {
+	    color: black;
+	    background-color: #CCC;
+	}
+	
+	/* Calendar : Previous-Next Month *
+	.calendar td.previous,
+	.calendar td.next,
+	.calendar td.previous div.date,
+	.calendar td.next div.date {
+	    color: #CCC;
+	    background-color: #EEE;
+	}
+	
+	/* Calendar : Full Year *
+	body#fullyearlinked div.content {
+	    overflow: hidden;
+	}
+	body#fullyearlinked table.calendar {
+	    float: left;
+	    width: 33.3%;
+	    height: 18em;
+	    border: solid 1px black;
+	}
+	body#fullyearlinked table.calendar thead th {
+	    height: 2em;
+	}
+	body#fullyearlinked table.calendar thead th.monthName {
+	    font-size: large;
+	    padding: 2px 0px;
+	}
+	body#fullyearlinked table.calendar tbody td {
+	    height: 3em;
+	}
+	body#OneDay div.content {
+	    overflow: hidden;
+	}
+*/
 
 div.comment {
 	border: 1px solid;

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %} - {{ config.STK_SYSNAME }}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pers.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/k_screen.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hamburger.css') }}">
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -14,12 +14,14 @@
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/static/js/help.js?40"></script>
+    
+    <script src="https://unpkg.com/sunburst-chart"></script>
 	
 	<!-- i18n for Javascript: -->
 	<link rel="gettext" type="application/x-po" href="/static/translations/{{ session.lang }}.po">
 	<script src="/static/js/gettext.js"></script>
 	<style>
-div#Header, .startbox, .startbox2 { background-color: #f9f8bf; }
+h1, .startbox, .startbox2 { background-color: #f9f8bf; }
 td,th {background: white;}
 .tight {margin: 2pt;}
 .goto {margin:3pt 12pt;}
@@ -37,11 +39,11 @@ table.transparent tbody tr td {
 
   <body>
     {% block body %}
-    <div id="Header"><a href="/"><img id="logo" src="/static/tam.png" alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
+    <h1><a href="/"><img id="logo" src="/static/tam.png" alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
              onmouseover="this.src='/static/tam1.png';" 
              onmouseout="this.src='/static/tam.png';"/></a>
         <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
-        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></div>
+        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
     <div id="paluu">
         <a href="/audit">{{ _('Audit home') }}</a>
     </div>
@@ -60,6 +62,29 @@ table.transparent tbody tr td {
         {{ _('Version') }} {{ 'app'|app_date }}</span>
     </div>
     <div class="fullclear"></div>
+    
+  <div id="chart" style="width:50%"></div>
+
+  <script>
+	var fanchart_data = JSON.parse('{{ fanchart_data|safe }}');
+	
+    Sunburst()
+        .data(fanchart_data)
+        .size('size')
+        .color('color')
+        .tooltipContent((d, node) => `<i>${d.tooltipContent}</i>`)
+        .onClick((node) => {
+            if (node.uuid != null) {
+                var searchParams = new URLSearchParams(window.location.search);
+                searchParams.set('uuid', node.uuid);
+                var newParams = searchParams.toString();
+                window.location.search = newParams
+            }
+        })
+        .radiusScaleExponent(1)
+        .width(600)
+        (document.getElementById('chart'));
+  </script>
 
 <div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>
 

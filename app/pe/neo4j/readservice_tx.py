@@ -260,7 +260,7 @@ class Neo4jReadServiceTx:
 #                 self.objs[person.uniq_id] = person
 
         except Exception as e:
-            msg = f'person={uuid} {e.__class__.name} {e}'
+            msg = f'person={uuid} {e.__class__.__name__} {e}'
             print(f'dx_get_person_by_uuid: {msg}')
             res.update({'status': Status.ERROR, 'statustext': msg})
             return res
