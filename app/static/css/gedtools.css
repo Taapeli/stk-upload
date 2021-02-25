@@ -10,9 +10,10 @@
     Gedcom tools own colors and specialities over pers.css
 */
 
-h1 {
+div#Header {
     background-color: lightsteelblue;
     color: white; 
+    margin: 13px 0;
 }
 
 div.startdiv {

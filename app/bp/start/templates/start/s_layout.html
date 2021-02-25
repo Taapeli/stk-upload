@@ -21,7 +21,7 @@
 
 <body>
 	{% block body %}
-	<h1>
+	<div id="Header">
 		<a href="/"><img id="logo" src="/static/tam.png"
 			alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
 			onmouseover="this.src='/static/tam1.png';"
@@ -35,7 +35,7 @@
             </span></a>
 		</div>
 		<i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i>
-	</h1>
+	</div>
 
 	{% endblock %}
 	<div class="fullclear"></div>

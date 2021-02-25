@@ -1,5 +1,5 @@
 {# _myapp/templates/k_persons.html_ #}
-{% extends "/scene/layout.html" %}
+{% extends "/scene/sc_layout.html" %}
 {% block title %}{{ _('List of persons') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -8,9 +8,6 @@
 {% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
 <style>
-div#description_box p {
-    margin: 0.5em;
-}
 .CloudBox {
     margin: 1em;
     padding: 5px;

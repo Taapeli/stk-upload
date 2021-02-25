@@ -98,10 +98,17 @@ def get_fanchart_data(uuid):
         """
         Format the data for fan/sunburst chart use.
         """
-        all_first_names = person.names[0].firstname.split()
-        one_first_name = all_first_names[0] if len(all_first_names) > 0 else ''
-        all_surnames = person.names[0].surname.split()
-        one_surname = all_surnames[0] if len(all_surnames) > 0 else ''
+        all_first_names = []
+        one_first_name = ''
+        all_surnames = []
+        one_surname = ''
+        if person.names:
+            if person.names[0].firstname:
+                all_first_names = person.names[0].firstname.split()
+                one_first_name = all_first_names[0]
+            if person.names[0].surname:
+                all_surnames = person.names[0].surname.split()
+                one_surname = all_surnames[0] if len(all_surnames) > 0 else ''
         
         if person.death_high - person.birth_low >= 110: ## TEMP: FIND OUT HOW TO GET THE YEARS!
             death = ''
@@ -178,13 +185,15 @@ def get_fanchart_data(uuid):
     
     # Set up the database access.
     u_context = UserContext(user_session, current_user, request)
-    reader = PersonReaderTx(readservice, u_context)
+    #reader = PersonReaderTx(readservice, u_context)
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        reader = PersonReaderTx(readservice, u_context)
 
-    # Gather all required data in two directions from the central person. Data structure used in both is a
-    # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
-    # (https://vasturiano.github.io/sunburst-chart/)
-    ancestors = build_parents(uuid, 1)
-    descendants = build_children(uuid, 1)
+        # Gather all required data in two directions from the central person. Data structure used in both is a
+        # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
+        # (https://vasturiano.github.io/sunburst-chart/)
+        ancestors = build_parents(uuid, 1)
+        descendants = build_children(uuid, 1)
     
     # Merge the two sunburst chart data trees to form a single two-way fan chart.
     fanchart = ancestors
@@ -194,7 +203,7 @@ def get_fanchart_data(uuid):
             fanchart['children'] = ancestors['children'] + descendants['children']
         else:
             fanchart['children'] = descendants['children']
-             # No ancestors: make empty quarters to occupy parents' slots (otherwise descendants end up in east!)
+            # No ancestors: make empty quarters to occupy parents' slots (otherwise descendants end up in east!)
             fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
             fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
     else:
