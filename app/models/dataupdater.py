@@ -1,9 +1,9 @@
-#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
 #                            Timo Nallikari, Pekka Valta
-#   See the LISENCE file.
+#   See the LICENCE file.
 
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 11.4.2016

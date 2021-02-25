@@ -12,6 +12,10 @@ u { color: DarkKhaki; text-decoration: none; }
 #citTest { margin:1em; }
 #citTest div { display: inline-block; }
 #citTbl td, #notTbl td { border: 2px solid brown; }
+
+#tableNames { border: solid 1pt gray; }
+#tableNames td { padding-right: 1ex; }
+tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 </style>
 
 <div id="startdiv">
@@ -79,41 +83,40 @@ u { color: DarkKhaki; text-decoration: none; }
                         / <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
                     </td>
                 </tr>
-			</table>
 
 			<form>
-			
-			<input type="hidden" name="uuid" value="{{ person.uuid }}">
-			<table>
-				<tr><td>{{ _("Names") }}
-				{%- if may_edit %}
-					 ({{ _("order by dragging") }})
-				{%- endif %}:
-				<tr><td><table>
-				<tbody id="names" 
-				{% if may_edit %}
-					hx-put="/scene/sort_names" hx-trigger="end" hx-swap="none"
-				{% endif %}:
-				>
-                {% for p_name in person.names|sort(attribute='order') %}<tr>
-                    <td class="ColumnAttribute">{{p_name.type|transl('nt')}}</td>
-                    <td class="Value">
-						{% if p_name.title %}<span title="titteli" class="typedesc">{{p_name.title}}</span>{% endif %}
-                        <span title="{{ _('first name') }}">{{p_name.firstname}}</span>
-                        <i title="{{ _('patronymic') }}">{{p_name.suffix}}</i>
-                        {% if p_name.prefix %}<span title="etuliite">{{p_name.prefix}}</span>{% endif %}
-                        <b title="{{ _('surname') }}">{{p_name.surname}}</b>
+    			<input type="hidden" name="uuid" value="{{ person.uuid }}">
+				<tr><td colspan="2">{{ _("Names") }}
 
-	                    {{macro.citation_link(p_name.citation_ref, obj)}}
-	                    <input type="hidden" name="order" value="{{p_name.uniq_id}}">
-                    </td>
-                </tr>{% endfor %}
-               	</tbody>
-				</table>
-			</table>
+                {# Sortable name list #}
+                {% set edit_names = may_edit and (person.names|length > 1) %}
+                {% if edit_names %}({{ _("order by dragging") }}){% endif %}
+                </td></tr>
+				<tr><td colspan="2">
+                {% if edit_names %}
+                    <table id="tableNames"><tbody id="names" 
+					hx-put="/scene/sort_names" hx-trigger="end" hx-swap="none">
+                {% else %}
+                    <table><tbody id="names">
+				{% endif %}
+                {% for p_name in person.names|sort(attribute='order') %}
+                        <tr{% if edit_names %} class="movable"{% endif %}>
+                            <td class="ColumnAttribute">{{p_name.type|transl('nt')}}</td>
+                            <td class="Value" style="padding-left: 24px;">
+        						{% if p_name.title %}<span title="titteli" class="typedesc">{{p_name.title}}</span>{% endif %}
+                                <span title="{{ _('first name') }}">{{p_name.firstname}}</span>
+                                <i title="{{ _('patronymic') }}">{{p_name.suffix}}</i>
+                                {% if p_name.prefix %}<span title="etuliite">{{p_name.prefix}}</span>{% endif %}
+                                <b title="{{ _('surname') }}">{{p_name.surname}}</b>
+        
+        	                    {{macro.citation_link(p_name.citation_ref, obj)}}
+        	                    <input type="hidden" name="order" value="{{p_name.uniq_id}}">
+                            </td>
+                        </tr>{% endfor %}
+               	    </tbody></table>
+                </td></tr>
 			</form>
 
-			<table>
                 {% if person.sex %}<tr>
                     <td class="ColumnAttribute">{{ _("Gender") }}</td>
                     <td class="Value">{{ person.sex_symbol() }} {{ person.sex_str() }}</td>
