@@ -332,6 +332,7 @@ def show_person_details(uuid=None):
     '''
     Content of the selected tab for the families section: family details.
     '''
+    uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
     from pe.neo4j.readservice_tx import Neo4jReadServiceTx
