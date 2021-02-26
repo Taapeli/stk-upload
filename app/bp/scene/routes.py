@@ -319,13 +319,58 @@ def show_person(uuid=None):
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
     #may_edit = 0
-    fanchart = get_fanchart_data(uuid)
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=root,
                            last_year_allowed=last_year_allowed, 
                            elapsed=time.time()-t0, user_context=u_context,
-                           may_edit=may_edit, fanchart_data=json.dumps(fanchart))
+                           may_edit=may_edit)
 
+@bp.route('/scene/person_details', methods=['GET'])
+#     @login_required
+@roles_accepted('guest','research', 'audit', 'admin')
+def show_person_details(uuid=None):
+    '''
+    Content of the selected tab for the families section: family details.
+    '''
+    u_context = UserContext(user_session, current_user, request)
+
+    from pe.neo4j.readservice_tx import Neo4jReadServiceTx
+    readservice = Neo4jReadServiceTx(shareds.driver)
+    reader = PersonReaderTx(readservice, u_context)
+
+    result = reader.get_person_data(uuid) #, args)
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    if Status.has_failed(result):
+        flash(f'{result.get("statustext","error")}', 'error')
+    person = result.get('person')
+    objs = result.get('objs',[])
+    print (f'# Person with {len(objs)} objects')
+    jscode = result.get('jscode','')
+    root = result.get('root')
+
+    stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
+
+    last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
+    may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
+    return render_template("/scene/person_details.html", person=person, obj=objs, 
+                           jscode=jscode, menuno=12, root=root,
+                           last_year_allowed=last_year_allowed, 
+                           user_context=u_context,
+                           may_edit=may_edit)
+
+@bp.route('/scene/person_fanchart', methods=['GET'])
+#     @login_required
+@roles_accepted('guest','research', 'audit', 'admin')
+def show_person_fanchart(uuid=None):
+    '''
+    Content of the selected tab for the families section: fanchart.
+    '''
+    fanchart = get_fanchart_data(uuid)
+    return render_template("/scene/person_fanchart.html", person=person, obj=objs, 
+                           jscode=jscode, menuno=12, root=root,
+                           last_year_allowed=last_year_allowed, 
+                           user_context=u_context,
+                           may_edit=may_edit, fanchart_data=json.dumps(fanchart))
 
 @bp.route('/scene/get_person_names/<uuid>', methods=['PUT'])
 @roles_accepted('guest','research', 'audit', 'admin')
