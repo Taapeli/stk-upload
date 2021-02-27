@@ -1,11 +1,13 @@
+<script src="https://unpkg.com/sunburst-chart"></script>
+
 <div class="tab-list">
-	<a hx-get="/scene/person_details">{{ _("Families in detail") }}</a>
-	<a hx-get="/scene/person_fanchart" class="selected">{{ _("Two-way fanchart") }}</a>
+	<a hx-get="/scene/person_details?uuid={{person.uuid}}"><h4>{{ _("Families") }}</h4></a>
+	<a hx-get="/scene/person_fanchart?uuid={{person.uuid}}" class="selected"><h4>{{ _("Two-way fanchart") }}</h4></a>
 </div>
 
-<div class="column">
-    <div id="fanchart"></div>
-</div>
+<div class="tab-content">
+    <div id="chart" style="width:50%"></div>
+    {{ _("Not implemented yet")}}
 
 <script>
     var fanchart_data = JSON.parse('{{ fanchart_data|safe }}');
@@ -15,9 +17,17 @@
         .size('size')
         .color('color')
         .tooltipContent((d, node) => `<i>${d.tooltipContent}</i>`)
-        ////    .onClick((d, node) => location.reload(location.href + "?uuid={d.uuid}"))
-        .radiusScaleExponent(1.2)
-        .centerRadius(0.05)
-        .width(500)
-    (document.getElementById('fanchart'));
+        .onClick((node) => {
+            if (node.uuid != null) {
+                var searchParams = new URLSearchParams(window.location.search);
+                searchParams.set('uuid', node.uuid);
+                var newParams = searchParams.toString();
+                window.location.search = newParams
+            }
+        })
+        .radiusScaleExponent(1)
+        .width(200)
+        (document.getElementById('chart'));
 </script>
+
+</div>

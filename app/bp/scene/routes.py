@@ -335,11 +335,10 @@ def show_person_details(uuid=None):
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
-    from pe.neo4j.readservice_tx import Neo4jReadServiceTx
-    readservice = Neo4jReadServiceTx(shareds.driver)
-    reader = PersonReaderTx(readservice, u_context)
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        reader = PersonReaderTx(readservice, u_context)
+        result = reader.get_person_data(uuid) #, args)
 
-    result = reader.get_person_data(uuid) #, args)
     # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
@@ -366,12 +365,21 @@ def show_person_fanchart(uuid=None):
     '''
     Content of the selected tab for the families section: fanchart.
     '''
+    uuid = request.args.get('uuid', uuid)
+    u_context = UserContext(user_session, current_user, request)
+
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        reader = PersonReaderTx(readservice, u_context)
+        result = reader.get_person_data(uuid) #, args)
+
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    if Status.has_failed(result):
+        flash(f'{result.get("statustext","error")}', 'error')
+    person = result.get('person')
+
     fanchart = get_fanchart_data(uuid)
-    return render_template("/scene/person_fanchart.html", person=person, obj=objs, 
-                           jscode=jscode, menuno=12, root=root,
-                           last_year_allowed=last_year_allowed, 
-                           user_context=u_context,
-                           may_edit=may_edit, fanchart_data=json.dumps(fanchart))
+    return render_template("/scene/person_fanchart.html", person=person,
+                            fanchart_data=json.dumps(fanchart))
 
 @bp.route('/scene/get_person_names/<uuid>', methods=['PUT'])
 @roles_accepted('guest','research', 'audit', 'admin')
