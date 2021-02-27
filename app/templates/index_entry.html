@@ -43,12 +43,12 @@ div.CloudBox a:hover   { text-decoration: underline; }
         <a href="/?lang=sv">🇸🇪&nbsp;På svenska</a> –
         <a href="/?lang=en">🇬🇧&nbsp;In English</a>
     </div>
-    <h2>{{ _('Welcome to Isotammi Service') }}</h2>
+    <h1>{{ _('Welcome to Isotammi Service') }}</h1>
 	<div>
 		<div class="row">
 
 			<div class="startbox bg_intro">
-				<h3>{{ _('Learn about Isotammi') }}</h3>
+				<h2>{{ _('Learn about Isotammi') }}</h2>
 				<img alt="Suomen sukututkimusseura ry" src="/static/SSS-tunnus-160.png"
 				     style="float:left; width:50%">
 				<p>
@@ -66,7 +66,7 @@ div.CloudBox a:hover   { text-decoration: underline; }
 			</div>
 
 			<div class="startbox">
-				<h3>{{ _('Look at the demo data') }}</h3>
+				<h2>{{ _('Look at the demo data') }}</h2>
 				<p>{{ _('In this demo we have a genealogical tree which follows our quality rules and 
 				it contains the relatives of the Finnish national compositor Jean Sibelius.') }}</p>
 				
@@ -85,7 +85,7 @@ div.CloudBox a:hover   { text-decoration: underline; }
 
 		    {% if not config['DEMO'] %}
             <div class="startbox">
-                <h3>{{ _('Register') }}</h3>
+                <h2>{{ _('Register') }}</h2>
 				<p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
 				<form method="get" action={{demo_site}}>
 					<div class="submit">
@@ -93,7 +93,7 @@ div.CloudBox a:hover   { text-decoration: underline; }
 					</div>
  					<input type="hidden" name="lang" value="{{ lang }}">
 				</form>
-                <h3>{{ _('Log in') }}</h3>
+                <h2>{{ _('Log in') }}</h2>
                 <p>{{ _('If you has already registered, you can log in and refine the structure of your own data.') }}
                    {{ _('As a member of <i>Genealogical Society of Finland</i> you will get more services.') }}.
                 </p>
@@ -106,7 +106,7 @@ div.CloudBox a:hover   { text-decoration: underline; }
 			{% endif %}
 
             {% if surnamestats %}
-<!--             <h4>{{ _('Most common names') }}</h4> -->
+<!--             <h3>{{ _('Most common names') }}</h3> -->
             <div class="startbox CloudBox" style="display: inline-block;">
                     <div>
                          <form name="surnameform" method="post" action="/start/persons/search">

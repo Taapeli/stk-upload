@@ -19,7 +19,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 </style>
 
 <div id="startdiv">
-    <h2>{{ _("Person's details") }}</h2>
+    <h1>{{ _("Person's details") }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
 </div>
 
@@ -61,7 +61,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
             </div>
     {% endif %}
 
-        <h3 class="sticky" title="{{ _('Top') }}"><a href="#">
+        <h2 class="sticky" title="{{ _('Top') }}"><a href="#">
         <span id="primary_name">
         	{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i>
@@ -70,7 +70,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
         </span>
             </a>
             {{macro.citation_link(person.citation_ref, obj)}}
-        </h3>
+        </h2>
 
     {% set myid = person.uniq_id %}  
         <div id="summaryarea">
@@ -174,7 +174,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
     	<div id="comments_div" hx-get="/scene/comments/comments_header" hx-trigger="load"></div> 
     	
         <div class="subsection" id="events">
-            <h4>{{ _("Events") }}</h4>
+            <h3>{{ _("Events") }}</h3>
             <table class="infolist eventlist">
                 <thead>
                     <tr>
@@ -249,7 +249,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 
     {% if debug %}
         <div class="subsection" id="notes" style="color:green">
-            <h4>Js-testaus</h4>
+            <h3>Js-testaus</h3>
             <div id="citTest">
                <div><button type="button" onclick="tbl.findReferences('dbug','citTbl','notTbl')">*) Etsi viitteet</button><br>
                     <button type="button" onclick="tbl.noteReferences('noteContent','citTbl')">Lisää paikkojen huomautukset</button><br>
@@ -263,7 +263,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 
 
         <div class="subsection" id="families">
-            <h4>{{ _("Families") }}</h4>
+            <h3>{{ _("Families") }}</h3>
             {% set myid = person.uuid %}
             <div class="row">
                 <div class="column">
@@ -345,7 +345,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 
     {% if person.media_ref %}
         <div class="subsection" id="indivgallery">
-            <h4>{{ _("Media files") }}</h4>
+            <h3>{{ _("Media files") }}</h3>
 	   {% for ref, crop0, ord in person.media_ref %}
 	       {% set photo=obj[ref] %}
 	       {% set crop=crop0|replace(" ", "") %}
@@ -370,7 +370,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 
     {% if person.note_ref %}
         <div class="subsection" id="notes">
-            <h4>{{ _("Person Notes") }}</h4>
+            <h3>{{ _("Person Notes") }}</h3>
         {% for ref in person.note_ref %}{% set note = obj[ref] %}
             <div class="grampsstylednote">
                  <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
@@ -382,7 +382,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
     {% endif %}
 
         <div class="subsection" id="sourcerefs">
-            <h4>{{ _("Source references") }}</h4>
+            <h3>{{ _("Source references") }}</h3>
 {# Reference list is created below in /static/js/scene_scripts.js method refTable.sourceReferences() #}
             <div id="sourcerefContent"></div>
         </div>

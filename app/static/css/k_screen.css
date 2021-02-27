@@ -60,7 +60,7 @@ the page.
 ----------------------------------------------------- */
 
 body {
-    font-family: sans-serif;
+    font-family: Arial, sans-serif;
     font-size: 90%;
     color: black;
     margin: 0px;
@@ -74,8 +74,8 @@ body > div {
     margin-left:50px;
     margin-bottom:1em;
 }
-#startdiv h2 {margin-bottom: 0;}
-/* Selected user case (material), right from h2 title */
+#startdiv h1 {margin-bottom: 0;}
+/* Selected user case (material), right from h1 title */
 #startdiv div {
 	font-size: 90%;
 	color: gray;
@@ -353,7 +353,7 @@ h3 {
     background-color: white;
     max-width: max-content;
 }
-h4 {
+h3 {
     font-size: medium;
     background-color: #CCC;
     padding-left: 15px;
@@ -908,7 +908,7 @@ div.grampsstylednote p {
     text-indent: -3em;
     text-align: justify;
 }
-/*  h4 + div.grampsstylednote, a.familymap {
+/*  h3 + div.grampsstylednote, a.familymap {
 	    margin: 1em 15px 1em ;
 	}
 	i + div.grampsstylednote p {

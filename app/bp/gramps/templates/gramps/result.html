@@ -3,7 +3,7 @@
 {% block title %}{{ _("Gramps to Neo5j log") }}{% endblock %}
 {% block body %}
     {{ super() }}
-    <h2>{{ _("Log of storing Gramps XML into database") }}{% if uri %} <i>{{uri}}</i>{% endif %}</h2>
+    <h1>{{ _("Log of storing Gramps XML into database") }}{% if uri %} <i>{{uri}}</i>{% endif %}</h1>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>

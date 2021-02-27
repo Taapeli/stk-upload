@@ -24,7 +24,7 @@ div#events div.scrollbox {
 </style>
 
 <div id="startdiv">
-    <h2>{{ _('Place events') }}</h2>
+    <h1>{{ _('Place events') }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
 </div>
 
@@ -53,8 +53,8 @@ div#events div.scrollbox {
         {% endif %}</div>
       {% endif %}
 
-    <h3 class="sticky" title="▲ {{ _('Top') }}"><a href="#">
-        {{ place.names[0].name }} ({{ place.type|transl('lt') }})</a></h3>
+    <h2 class="sticky" title="▲ {{ _('Top') }}"><a href="#">
+        {{ place.names[0].name }} ({{ place.type|transl('lt') }})</a></h2>
         <div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -110,7 +110,7 @@ div#events div.scrollbox {
 
     {% if place.note_handles %}
         <div id="notes">
-            <h4>{{ _('Note') }}</h4>
+            <h3>{{ _('Note') }}</h3>
             <table class="infolist notelist">
                 <thead>
                     <tr>
@@ -138,7 +138,7 @@ div#events div.scrollbox {
 
     {% if place.media_ref %}
         <div id="medias">
-            <h4>{{ _('Media') }}</h4>
+            <h3>{{ _('Media') }}</h3>
             <table class="infolist medialist">
                 <thead>
                     <tr>
@@ -165,7 +165,7 @@ div#events div.scrollbox {
     {% endif %}
     
         <div id="events">
-            <h4>{{ _('Events') }}</h4>
+            <h3>{{ _('Events') }}</h3>
     {% if events %}
             <div class="scrollbox">
               <table class="infolist eventlist">

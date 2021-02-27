@@ -52,7 +52,7 @@ $(document).ready( function() {
                     
 <div id="startdiv">
     <div>
-        <h2>{{ _("Active User names") }}</h2>
+        <h1>{{ _("Active User names") }}</h1>
          {% with messages = get_flashed_messages(with_categories=true) %}
 
           {% if messages %}
@@ -110,7 +110,7 @@ $(document).ready( function() {
 		        {% endif %}
 		        </table>
 		        <p>
-		        <h3>{{ _("Operations for selected users") }}</h3>
+		        <h2>{{ _("Operations for selected users") }}</h2>
 					<button id="list_uploads">{{ _("Gramps Files and Candidate Materials") }}</button>
 		        	<button id="list_gedcoms">{{ _("Uploaded GEDCOMs") }}</button>
 		        	<button id="send_email">{{ _("Send email") }}</button>

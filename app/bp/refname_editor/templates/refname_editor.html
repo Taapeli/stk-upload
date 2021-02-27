@@ -99,7 +99,7 @@ div#edit_dialog {
 
 <body>
 
-<h2>Referenssinimet</h2>
+<h1>Referenssinimet</h1>
 
 <p>
 
@@ -139,7 +139,7 @@ div#edit_dialog {
     
 	<div class="box">
 	    <form v-show="hakutulos">
-	        <h4>Hakutulos</h4>
+	        <h3>Hakutulos</h3>
 	        Nimien lukumäärä: ${ names.length }
 	        <p>
 	        <input type="button" :disabled="selected.length == 0" @click="delete_selected()" value="Poista valitut kannasta">
@@ -179,7 +179,7 @@ div#edit_dialog {
 	    
 	<div class="box" v-if="basename">
 	    <form>
-	        <h4>${ familytitle() }</h4>
+	        <h3>${ familytitle() }</h3>
 	        Kantanimi: <b>${ basename }</b>
 	        <br>
 	        <span v-show="use == 'patronyme' || use == 'matronyme'">

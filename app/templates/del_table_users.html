@@ -4,7 +4,7 @@
 {% block body %}
 {{ super() }}
 
-<h2>{{ _('Users') }}</h2>
+<h1>{{ _('Users') }}</h1>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul  class='flashes'>
@@ -34,7 +34,7 @@
 </table>
 
 <div>
-	<h3>{{ _('Create Username') }}</h3>
+	<h2>{{ _('Create Username') }}</h2>
 	<form action="/newuser" method="post">
 	    <p>{{ _('Username') }} <input type="text" name="userid" size="10"></p>
 	    <p>{{ _('Name') }} <input type="text" name="name"></p>
