@@ -7,6 +7,7 @@
 {% block title %}{{ macro.person_name_plain(person_name) }}{% endblock %}
 {% block body %}
 {{ super() }}
+<script src="https://unpkg.com/sunburst-chart"></script>
 <style>
 u { color: DarkKhaki; text-decoration: none; }
 #citTest { margin:1em; }
@@ -18,24 +19,18 @@ u { color: DarkKhaki; text-decoration: none; }
 tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 </style>
 <style>
-	#tabs > .tab-list {
-		border-bottom: solid 3px #eee;
-	}
-
-	#tabs > .tab-list a {
+	.tab-list a {
 		display: inline-block;
-		padding: 5px 10px;
-		cursor:pointer;
+		padding: 2px 5px 0px;
+		cursor: pointer;
 	}
-
-	#tabs > .tab-list a.selected {
-		background-color: #eee;
+	.tab-list a.selected {
+		background-color: #AAA;
 	}
-
-	#tabs > .tab-content {
-		padding:10px;
-		margin-bottom:100px;
-	}
+    .tab-content {
+        padding-top: 10px;
+        padding-bottom: 10 px;
+    }
 </style>
 
 <div id="startdiv">
@@ -281,7 +276,12 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
         </div>
     {% endif %}
 
-    <div id="tabs" hx-get="/scene/person_details?uuid={{person.uuid}}" hx-trigger="load after:100ms" hx-target="#tabs" hx-swap="innerHTML"></div>
+    <div id="tabs"
+         hx-get="/scene/person_{{'fanchart' if fanchart_shown else 'details'}}?uuid={{person.uuid}}"
+         hx-trigger="load after:100ms"
+         hx-target="#tabs"
+         hx-swap="innerHTML">
+    </div>
 
     {% if person.media_ref %}
         <div class="subsection" id="indivgallery">

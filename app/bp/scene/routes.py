@@ -289,15 +289,16 @@ def obsolete_show_persons_by_refname(refname, opt=""):
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('guest','research', 'audit', 'admin')
-def show_person(uuid=None):
+def show_person(uuid=None, fanchart=False):
     """ One Person with all connected nodes - NEW version 3.
 
         Arguments:
         - uuid=     persons uuid
-        - debug=1   optinal for javascript tests
+        - fanchart= by default family details shown, fanchart navigation uses this
     """
     t0 = time.time()
     uuid = request.args.get('uuid', uuid)
+    fanchart_shown = request.args.get('fanchart', fanchart)
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
 
@@ -323,7 +324,7 @@ def show_person(uuid=None):
                            jscode=jscode, menuno=12, debug=dbg, root=root,
                            last_year_allowed=last_year_allowed, 
                            elapsed=time.time()-t0, user_context=u_context,
-                           may_edit=may_edit)
+                           may_edit=may_edit, fanchart_shown=fanchart_shown)
 
 @bp.route('/scene/person_details', methods=['GET'])
 #     @login_required

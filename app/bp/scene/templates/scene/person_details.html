@@ -1,10 +1,10 @@
 {% import '/scene/macros.html' as macro with context %}
-
-<div class="tab-list">
-	<a hx-get="/scene/person_details?uuid={{person.uuid}}" class="selected"><h4>{{ _("Families") }}</h4></a>
-	<a hx-get="/scene/person_fanchart?uuid={{person.uuid}}"><h4>{{ _("Two-way fanchart") }}</h4></a>
-</div>
-
+<h4>
+    <div class="tab-list">
+        <a hx-get="/scene/person_details?uuid={{person.uuid}}" class="selected">{{ _("Families") }}</a>
+        <a hx-get="/scene/person_fanchart?uuid={{person.uuid}}">{{ _("Two-way fanchart") }}</a>
+    </div>
+</h4>
 <div class="tab-content">
     <div class="subsection" id="families">
         {% set myid = person.uuid %}
