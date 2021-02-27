@@ -17,6 +17,26 @@ u { color: DarkKhaki; text-decoration: none; }
 #tableNames td { padding-right: 1ex; }
 tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 </style>
+<style>
+	#tabs > .tab-list {
+		border-bottom: solid 3px #eee;
+	}
+
+	#tabs > .tab-list a {
+		display: inline-block;
+		padding: 5px 10px;
+		cursor:pointer;
+	}
+
+	#tabs > .tab-list a.selected {
+		background-color: #eee;
+	}
+
+	#tabs > .tab-content {
+		padding:10px;
+		margin-bottom:100px;
+	}
+</style>
 
 <div id="startdiv">
     <h2>{{ _("Person's details") }}</h2>
