@@ -125,17 +125,17 @@ def get_fanchart_data(uuid):
             if dad:
                 dads = build_parents(dad.uuid, size/2, level + 1)
             else:
-                dads = {'color': 'white', 'size': size/2, 'uuid': None}
+                dads = {'color': 'white', 'size': str(size/2), 'uuid': None}
 
             mom = person.families_as_child[0].mother
             if mom:
                 moms = build_parents(mom.uuid, size/2, level + 1)
             else:
-                moms = {'color': 'white', 'size': size/2, 'uuid': None}
+                moms = {'color': 'white', 'size': str(size/2), 'uuid': None}
             node['children'] = [dads, moms]
 
         else:
-            node['size'] = size     # leaf node, others should have no size
+            node['size'] = str(size)     # leaf node, others should have no size
             
         return node
     
@@ -154,7 +154,7 @@ def get_fanchart_data(uuid):
                 child_count += len(fx.children)
 
             if child_count == 0:
-                node['size'] = size     # leaf node, others should have no size
+                node['size'] = str(size)     # leaf node, others should have no size
             else:
                 node['children'] = []
                 person.families_as_parent.sort(reverse = True,
@@ -166,7 +166,7 @@ def get_fanchart_data(uuid):
                             build_children(cx.uuid, size/child_count, level + 1))
 
         else:
-            node['size'] = size     # leaf node, others should have no size
+            node['size'] = str(size)     # leaf node, others should have no size
 
         return node
     
@@ -191,11 +191,11 @@ def get_fanchart_data(uuid):
         else:
             fanchart['children'] = descendants['children']
             # No ancestors: make empty quarters to occupy parents' slots (otherwise descendants end up in east!)
-            fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
-            fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
+            fanchart['children'].insert(0, {'size': str(0.5), 'color': 'white', 'uuid': None})
+            fanchart['children'].insert(0, {'size': str(0.5), 'color': 'white', 'uuid': None})
     else:
         # If no descendants, make empty southern hemisphere
-        fanchart['children'].insert(2, {'size': 1, 'color': 'white', 'uuid': None})
+        fanchart['children'].insert(2, {'size': str(1), 'color': 'white', 'uuid': None})
     
     # The sectors are drawn anticlockwise, starting from North. To get the ancestors to occupy the
     # Northern hemisphere, we need to move the first node on top level list (father) to end of list.
