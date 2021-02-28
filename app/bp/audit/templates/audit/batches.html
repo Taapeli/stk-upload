@@ -5,7 +5,7 @@
 {% block body %}
     {{ super() }}
    
-	<h2>{{ _("Batches") }}</h2>
+	<h1>{{ _("Batches") }}</h1>
     
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

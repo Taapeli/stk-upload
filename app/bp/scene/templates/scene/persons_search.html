@@ -27,9 +27,9 @@ div.CloudBox div {
 }
 </style>
 <div id="startdiv">
-	{% if rule == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
-	{% elif rule == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ key }}</h2>
-	{% else %}<h2>{{ _('Persons') }}</h2>
+	{% if rule == 'all' %}<h1>{{ _('Persons ordered by') }} {{ ordname[order] }}</h1>
+	{% elif rule == 'refname' %}<h1>{{ _('Persons carrying a Name') }} {{ key }}</h1>
+	{% else %}<h1>{{ _('Persons') }}</h1>
 	{% endif %}
     <div>{{ macro.show_use_case() }}</div>
 </div>
@@ -75,7 +75,7 @@ div.CloudBox div {
 {% set oldkey = key %}
            
                 <div id="namesearch" class="SearchBox2">
-                       <h3>
+                       <h2>
                           <label for="cars">{{ _('Search term') }}</label>
                           <select id="rule" name="rule">
                             <option value="surname"
@@ -91,7 +91,7 @@ div.CloudBox div {
                                 x-desc="{{ _('A year (1750) or years range (1700-1750) where persons might live') }}"
                         {% if selection == "years" %}selected{% endif %}>{{ _('Years range') }}</option>
                           </select>
-                       </h3>
+                       </h2>
                        <div style="margin: .5em 1em;">
                        <label for="snam" id="keydesc">Descr.</label>
                        <input type="text" name="key" id="snam"
@@ -205,7 +205,7 @@ selector.addEventListener("change", () => {
     <p>&nbsp;</p>
 {% else %}
 
-    <h4>{{ _('Most common names') }}</h4>
+    <h3>{{ _('Most common names') }}</h3>
     <div class="flex-container2">
         <div class="CloudBox" style="display: inline-block;">
             <div>

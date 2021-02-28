@@ -7,9 +7,9 @@
 {{ super() }} 
 
 <div style="margin-left:50px; padding-bottom: 2em;">
-    <h2>{{ _('Ask for Validation Link') }}</h2>
+    <h1>{{ _('Ask for Validation Link') }}</h1>
 	<div class="startbox">	
-		<h3>{{ _('Submit Validation Link') }}</h3>
+		<h2>{{ _('Submit Validation Link') }}</h2>
         <p>{{ _("If you can't find the registration confirmation mail message we have sent, you can ask for a new one.")}}</p>
 		<form action="{{ url_for_security('send_confirmation') }}" method="POST" name="send_confirmation_form">
 		  {{ send_confirmation_form.hidden_tag() }}
@@ -20,7 +20,7 @@
  
         <div class="startbox"> 
             <div style="display: inline-block;"> 
-            <h3>{{ _('Other Options') }}</h3> 
+            <h2>{{ _('Other Options') }}</h2> 
 		{% include "security/_menu.html" %}
 	</div>
 </div>

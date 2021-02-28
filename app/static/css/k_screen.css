@@ -66,6 +66,8 @@ body {
     margin: 0px;
     background-color: #EEE;
 }
+h2 {font-size: large;
+}
 body > div {
     clear: both;
 }
@@ -74,8 +76,8 @@ body > div {
     margin-left:50px;
     margin-bottom:1em;
 }
-#startdiv h2 {margin-bottom: 0;}
-/* Selected user case (material), right from h2 title */
+#startdiv h1 {margin-bottom: 0;}
+/* Selected user case (material), right from h1 title */
 #startdiv div {
 	font-size: 90%;
 	color: gray;
@@ -338,27 +340,28 @@ a.navlink:hover, a.navlink:active {
 
 /* General Text
 ----------------------------------------------------- */
-/*h1 {
-    font-size: x-large;
+h1 {
+    font-size: 22px;
     font-weight: bold;
     padding-left: 15px;
-}*/
-h3 {
-    font-size: large;
+}
+h2 {
+    font-size: 18px;
     padding-left: 15px;
 }
-.sticky {  /* Stk/JMä */
+h3 {
+    font-size: 16px;
+  /*background-color: #CCC;*/
+    padding-left: 15px;
+    margin-bottom: 0.5em; /*0px;*/
+    border-bottom: solid 2px #999;
+}
+
+.sticky {
     position: sticky; 
     top: 0;
     background-color: white;
     max-width: max-content;
-}
-h4 {
-    font-size: medium;
-    background-color: #CCC;
-    padding-left: 15px;
-    margin-bottom: 0px;
-    border-bottom: solid 1px #999;
 }
 p#description {
     padding-left: 15px;
@@ -505,6 +508,7 @@ div#summaryarea > table.infolist,
 div#parents > table.infolist,
 h3 + table.infolist {
     width: auto;
+    margin: 0 5px;
 }
 div#summaryarea { /* "> p" removed 21.5.2020/JMä */
 	margin:.5em .5em .5em 2em;
@@ -512,18 +516,21 @@ div#summaryarea { /* "> p" removed 21.5.2020/JMä */
 table tr th {
     text-align: left;
     background-color: #EEE;
-    border-top: solid 1px #999;
+  /*border-top: solid 1px #999;*/
     border-bottom: solid 1px #999;
 }
+/*
 table tr th:first-child {
     border-left: solid 1px #999;
 }
 table tr th:last-child {
     border-right: solid 1px #999;
 }
+/*
 table.primobjlist tr th {
     background-color: #CCC;
 }
+*/
 table td, table th {
     vertical-align: top;
     padding-left: 1ex;
@@ -553,7 +560,7 @@ td.ColumnFamily { /* Space for leading arrow */
 	text-indent: -1em;
 }
 table.infolist tr td ol {
-    margin: 0px;
+    margin: 0 4px;
 }
 
 #summaryarea table.infolist td.ColumnAttribute,
@@ -908,7 +915,7 @@ div.grampsstylednote p {
     text-indent: -3em;
     text-align: justify;
 }
-/*  h4 + div.grampsstylednote, a.familymap {
+/*  h3 + div.grampsstylednote, a.familymap {
 	    margin: 1em 15px 1em ;
 	}
 	i + div.grampsstylednote p {

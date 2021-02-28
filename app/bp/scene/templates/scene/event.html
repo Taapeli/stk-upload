@@ -6,7 +6,7 @@
 {% import '/scene/macros.html' as macro with context %}
 
 <div id="startdiv">
-    <h2>{{ _("Event details") }}</h2>
+    <h1>{{ _("Event details") }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
 </div>
 
@@ -14,13 +14,13 @@
     <div class="content" id="IndividualDetail">
 
 {% if event %}
-        <h3 style="position:sticky; top:0;">
+        <h2 style="position:sticky; top:0;">
         {% if event.description %}
             <i>{{event.type|transl('evt')|title}}:</i> {{event.description}}
         {% else %}
             <i>{{event.type|transl('evt')|title}}</i>
         {% endif %}
-        </h3>
+        </h2>
 {% endif %}
         <div id="summaryarea">
     {% with messages = get_flashed_messages() %}
@@ -68,7 +68,7 @@
         </div>
 
         <div class="subsection" id="persons">
-            <h4>{{ _("Participants") }}</h4>
+            <h3>{{ _("Participants") }}</h3>
             <table class="infolist eventlist">
                 <thead>
                     <tr>

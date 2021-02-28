@@ -160,7 +160,7 @@ function confirm_delete(subj, name) {
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("Uploaded Candidate Materials") }}</h2>
+    <h1>{{ _("Uploaded Candidate Materials") }}</h1>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -223,7 +223,7 @@ function confirm_delete(subj, name) {
     </table>
     <div>
       <form id="form" action="" method="get">
-	    <h3>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h3>
+	    <h2>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h2>
         <div>{{ _("Saving data") }}:
             <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
             <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
