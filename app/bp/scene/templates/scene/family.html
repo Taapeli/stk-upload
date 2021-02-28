@@ -62,7 +62,7 @@ td { padding-right:1em;}
 	<div id="comments_div" hx-get="/scene/comments/comments_header" hx-trigger="load"></div> 
 
     {% if family.events %} 
-        <h2>{{ _("Family Events") }}</h2>
+        <h3>{{ _("Family Events") }}</h3>
         <div id="summaryarea">
             <table><tbody>
         {% for e in family.events|sort(attribute='dates') %}

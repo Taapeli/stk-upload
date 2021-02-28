@@ -268,9 +268,9 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
             <div class="row">
                 <div class="column">
                     {% if person.families_as_child %}
-                        <p>{{ _("Parents' family") }}</p>
                         {% for fam in person.families_as_child %}
                         <div class="mainbox">
+                            <p>{{ _("Parents' family") }}</p>
                             <div class="familybox" title="{{ _('family') }} {{fam.id}}">
                                 <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
                                         {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
