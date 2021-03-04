@@ -29,9 +29,10 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 		display: inline-block;
 		padding: 2px 5px 0px;
 		cursor: pointer;
+        z-index: 2;
 	}
 	.tab-list a.selected {
-        margin-bottom: -1px;
+        margin-bottom: -2px;
         background-color: white;
         border-radius: .5em .5em 0 0;
         border: solid 1px gray;
@@ -46,6 +47,12 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
         overflow: hidden;
         background-color: white;
     }
+#chart {
+ background: white;
+ display:flex;
+ justify-content: center;
+ padding: 1em;
+}
 </style>
 
 <div id="startdiv">
