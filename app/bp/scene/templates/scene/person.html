@@ -19,17 +19,32 @@ u { color: DarkKhaki; text-decoration: none; }
 tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 </style>
 <style>
+    .tab-bottom {
+     padding: .5em;
+     background-color: #f2f2f2;
+     margin: 0 1em;
+     border-radius: 1em;
+    }
 	.tab-list a {
 		display: inline-block;
 		padding: 2px 5px 0px;
 		cursor: pointer;
 	}
 	.tab-list a.selected {
-		background-color: #AAA;
-	}
+        margin-bottom: -1px;
+        background-color: white;
+        border-radius: .5em .5em 0 0;
+        border: solid 1px gray;
+        border-bottom: solid 1px white;
+        font-weight: bold;
+    }
     .tab-content {
-        padding-top: 10px;
-        padding-bottom: 10 px;
+        border: solid 1px gray;
+    }
+    div#families.subsection {
+        clear: both;
+        overflow: hidden;
+        background-color: white;
     }
 </style>
 
@@ -276,8 +291,9 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
         </div>
     {% endif %}
 
+<h3>{{ _("Relations") }}</h3>
     <div id="tabs"
-         hx-get="/scene/person_{{'fanchart' if fanchart_shown else 'details'}}?uuid={{person.uuid}}"
+         hx-get="/scene/person_{{'fanchart_hx' if fanchart_shown else 'famtree_hx'}}?uuid={{person.uuid}}"
          hx-trigger="load after:100ms"
          hx-target="#tabs"
          hx-swap="innerHTML">
