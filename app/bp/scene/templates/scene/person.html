@@ -90,14 +90,6 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
   {% endwith %} 
 
 {% if person %}
-    {% if root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
-        <div class='credit'>{% if root.root_type == 'PASSED' %}
-        	{{ _('Origin from') }}
-            {% else %}{{ _('User data') }}:{% endif %}
-            <b>{{root.root_user}}</b> {{root.id}}
-            </div>
-    {% endif %}
-
         <h2 class="sticky" title="{{ _('Top') }}"><a href="#">
         <span id="primary_name">
         	{{person.names[0].firstname}} 

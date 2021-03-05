@@ -313,7 +313,8 @@ def show_person(uuid=None, fanchart=False):
     objs = result.get('objs',[])
     print (f'# Person with {len(objs)} objects')
     jscode = result.get('jscode','')
-    root = result.get('root')
+    # Batch or Audit node data like {'root_type', 'root_user', 'id'}
+    person.root = result.get('root')
 
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
@@ -321,7 +322,7 @@ def show_person(uuid=None, fanchart=False):
     may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
     #may_edit = 0
     return render_template("/scene/person.html", person=person, obj=objs, 
-                           jscode=jscode, menuno=12, debug=dbg, root=root,
+                           jscode=jscode, menuno=12, debug=dbg,
                            last_year_allowed=last_year_allowed, 
                            elapsed=time.time()-t0, user_context=u_context,
                            may_edit=may_edit, fanchart_shown=fanchart_shown)
