@@ -3,7 +3,7 @@
 {% block title %}{{ _('Data stored') }}{% endblock %}
 {% block body %}
     {{ super() }}
-    <h2>{{ _('Store to Database') }}{% if info %}: <i>{{info}}</i>{% endif %}</h2>
+    <h1>{{ _('Store to Database') }}{% if info %}: <i>{{info}}</i>{% endif %}</h1>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>

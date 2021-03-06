@@ -4,17 +4,17 @@
 
      @see https://htmx.org/
  -->
-<h4><a href=# 
+<h3>▾ <a href=# 
 	hx-get="/scene/comments/comments_header"
 	hx-target="#comments_div" 
-	hx-trigger="click"> 
-{{ _("Hide comments") }}</a>
-</h4>
+	hx-trigger="click">
+{{ _("Comments (hide)") }}</a>
+</h3>
 
 <div class="flex-container">
     <div style="width:45%; min-width: 45ex;">
         <form>
-            <b>Your comment</b>
+            <b>{{ _('Your comment') }}</b>
             <br>
             <textarea id="comment_text" name="comment_text" rows=10 cols=50></textarea>
             <br>

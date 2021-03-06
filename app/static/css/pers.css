@@ -61,7 +61,7 @@ div#Header div.curr_user a {
 }
 div#Header div.curr_user a:hover { text-decoration: underline; }
 
-h4 {
+h3 {
     margin: 0.5em 0;
 }
 div#paluu {
@@ -117,7 +117,7 @@ div#paluu {
 .admin {background-color: pink;}
 .audit {background-color: #f9f8bf;} /* yellowish */
 .gedtools {background-color: lightsteelblue;}
-.startbox h3, .startbox2 h3 { margin-top: 5px; margin-bottom: 5px; }
+.startbox h2, .startbox2 h2 { margin-top: 5px; margin-bottom: 5px; font-size: 16px; }
 .startbox div, .startbox2 div { display: inline-block; width: 100%; }
 .startbox ul, .startbox2 ul {
     list-style-type: disc;

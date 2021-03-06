@@ -8,7 +8,7 @@
 <script src="/static/js/axios.min.js"></script>
 
 <div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
-  <h2>{{ _("Management of access to batches") }}</h2>
+  <h1>{{ _("Management of access to batches") }}</h1>
 
     {{ _("Add access for user") }} 
     <select v-model="user">
@@ -23,7 +23,7 @@
     </select>
     <button v-on:click="add_access()" v-bind:disabled="!user || !batch">{{ _("Add access") }}</button>
     <p>
-    <h3>{{ _("Current accesses") }}</h3>
+    <h2>{{ _("Current accesses") }}</h2>
     <table border>
         <tr>
             <td>

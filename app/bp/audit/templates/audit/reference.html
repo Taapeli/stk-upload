@@ -6,12 +6,12 @@
 
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
-    <h2>{{ _('Handling reference materials') }}</h2>
+    <h1>{{ _('Handling reference materials') }}</h1>
     <div class="row">
 
           <div class="startbox admin">
             <div style="display: inline-block;">
-               <h3>{{ _('Adding data') }}</h3>
+               <h2>{{ _('Adding data') }}</h2>
                  <form action="/audit/upload_csv" method="post"  enctype="multipart/form-data">
 	               <div style="display: inline-block;">
 	                 <input type="hidden" name="material" value="refnames">
@@ -29,7 +29,7 @@
 
        <div class="startbox admin">
           <div style="display: inline-block;">
-			<h3>{{ _('Handling reference names') }}</h3>
+			<h2>{{ _('Handling reference names') }}</h2>
 			<ul><li>{{ _('Listings') }} <i>TODO: fix</i></li>
               <ul>
 	              <li><a href="/list/refnames">{{ _('List reference names') }}</a></li>

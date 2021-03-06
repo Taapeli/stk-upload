@@ -12,7 +12,7 @@
 
 <div id="startdiv">
   <div>
-    <h2>{{ _('Exploring Isotammi Database') }}</h2>
+    <h1>{{ _('Exploring Isotammi Database') }}</h1>
 {#  {% if current_user.name %}
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
@@ -28,7 +28,7 @@
 
      {% if current_user.is_authenticated and 
         ( current_user.has_role('research') or current_user.has_role('admin') ) %}
-                <h3>{{ _('Select Material for Browsing') }}</h3>
+                <h2>{{ _('Select Material for Browsing') }}</h2>
                 <p>
         {% set ctxt = session['user_context'] %}
         {% if (not ctxt) and session['owner_filter'] %}
@@ -54,7 +54,7 @@
                 </p>
 #}
      {% else %}
-                <h3>{{ _('The Browsed Material') }}</h3>
+                <h2>{{ _('The Browsed Material') }}</h2>
                 <p>{{ _('You can view only approved and public material in Demo Database') }}.</p>
                 <input name="div" type="hidden" value="1">
      {% endif %}
@@ -69,7 +69,7 @@
     {% if current_user.is_authenticated and 
         ( current_user.has_role('audit') or current_user.has_role('admin') ) %}
      <div class="startbox audit">
-         <h3>{{ _('Table format tools') }}</h3>
+         <h2>{{ _('Table format tools') }}</h2>
          <p>{{ _('A variety of more technical listings and problem solving tools.') }}
          {{ _('The data includes accepted and candidate materials of all users.') }}
          </p>

@@ -19,22 +19,44 @@ u { color: DarkKhaki; text-decoration: none; }
 tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 </style>
 <style>
+    .tab-bottom {
+     padding: .5em;
+     background-color: #f2f2f2;
+     margin: 0 1em;
+     border-radius: 1em;
+    }
 	.tab-list a {
 		display: inline-block;
 		padding: 2px 5px 0px;
 		cursor: pointer;
+        z-index: 2;
 	}
 	.tab-list a.selected {
-		background-color: #AAA;
-	}
-    .tab-content {
-        padding-top: 10px;
-        padding-bottom: 10 px;
+        margin-bottom: -2px;
+        background-color: white;
+        border-radius: .5em .5em 0 0;
+        border: solid 1px gray;
+        border-bottom: solid 1px white;
+        font-weight: bold;
     }
+    .tab-content {
+        border: solid 1px gray;
+    }
+    div#families.subsection {
+        clear: both;
+        overflow: hidden;
+        background-color: white;
+    }
+#chart {
+ background: white;
+ display:flex;
+ justify-content: center;
+ padding: 1em;
+}
 </style>
 
 <div id="startdiv">
-    <h2>{{ _("Person's details") }}</h2>
+    <h1>{{ _("Person's details") }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
 </div>
 
@@ -68,15 +90,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
   {% endwith %} 
 
 {% if person %}
-    {% if root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
-        <div class='credit'>{% if root.root_type == 'PASSED' %}
-        	{{ _('Origin from') }}
-            {% else %}{{ _('User data') }}:{% endif %}
-            <b>{{root.root_user}}</b> {{root.id}}
-            </div>
-    {% endif %}
-
-        <h3 class="sticky" title="{{ _('Top') }}"><a href="#">
+        <h2 class="sticky" title="{{ _('Top') }}"><a href="#">
         <span id="primary_name">
         	{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i>
@@ -85,7 +99,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
         </span>
             </a>
             {{macro.citation_link(person.citation_ref, obj)}}
-        </h3>
+        </h2>
 
     {% set myid = person.uniq_id %}  
         <div id="summaryarea">
@@ -189,7 +203,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
     	<div id="comments_div" hx-get="/scene/comments/comments_header" hx-trigger="load"></div> 
     	
         <div class="subsection" id="events">
-            <h4>{{ _("Events") }}</h4>
+            <h3>{{ _("Events") }}</h3>
             <table class="infolist eventlist">
                 <thead>
                     <tr>
@@ -264,7 +278,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 
     {% if debug %}
         <div class="subsection" id="notes" style="color:green">
-            <h4>Js-testaus</h4>
+            <h3>Js-testaus</h3>
             <div id="citTest">
                <div><button type="button" onclick="tbl.findReferences('dbug','citTbl','notTbl')">*) Etsi viitteet</button><br>
                     <button type="button" onclick="tbl.noteReferences('noteContent','citTbl')">Lisää paikkojen huomautukset</button><br>
@@ -276,8 +290,9 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
         </div>
     {% endif %}
 
+<h3>{{ _("Relations") }}</h3>
     <div id="tabs"
-         hx-get="/scene/person_{{'fanchart' if fanchart_shown else 'details'}}?uuid={{person.uuid}}"
+         hx-get="/scene/person_{{'fanchart_hx' if fanchart_shown else 'famtree_hx'}}?uuid={{person.uuid}}"
          hx-trigger="load after:100ms"
          hx-target="#tabs"
          hx-swap="innerHTML">
@@ -285,7 +300,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 
     {% if person.media_ref %}
         <div class="subsection" id="indivgallery">
-            <h4>{{ _("Media files") }}</h4>
+            <h3>{{ _("Media files") }}</h3>
 	   {% for ref, crop0, ord in person.media_ref %}
 	       {% set photo=obj[ref] %}
 	       {% set crop=crop0|replace(" ", "") %}
@@ -310,7 +325,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 
     {% if person.note_ref %}
         <div class="subsection" id="notes">
-            <h4>{{ _("Person Notes") }}</h4>
+            <h3>{{ _("Person Notes") }}</h3>
         {% for ref in person.note_ref %}{% set note = obj[ref] %}
             <div class="grampsstylednote">
                  <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
@@ -322,7 +337,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
     {% endif %}
 
         <div class="subsection" id="sourcerefs">
-            <h4>{{ _("Source references") }}</h4>
+            <h3>{{ _("Source references") }}</h3>
 {# Reference list is created below in /static/js/scene_scripts.js method refTable.sourceReferences() #}
             <div id="sourcerefContent"></div>
         </div>

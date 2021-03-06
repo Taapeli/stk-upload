@@ -11,7 +11,7 @@
 }
 </style>
 <div id="startdiv">
-    <h2>{{ _("Event details") }}</h2>
+    <h1>{{ _("Event details") }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
 </div>
 
@@ -26,11 +26,11 @@
  -->
     <div class="content" id="IndividualDetail" v-if="event">
 
-        <h3 style="position:sticky; top:0;">
+        <h2 style="position:sticky; top:0;">
             <span v-if="event.description">${event.type_lang}: 
                 <i>${event.description}</i></span>
             <span v-else>${event.type_lang} </span>
-        </h3>
+        </h2>
 
         <div id="summaryarea">
             <div v-if="allow_edit" style="background:khaki; padding:.5em;">
@@ -92,7 +92,7 @@
         </div><!-- div#summaryarea -->
 
         <div class="subsection" id="persons">
-            <h4>{{ _("Participants") }}</h4>
+            <h3>{{ _("Participants") }}</h3>
             <table class="infolist eventlist" v-if="referees">
                 <thead>
                     <tr>

@@ -34,9 +34,9 @@ $(document).ready( function() {
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("Send email to users") }}: {{users}}</h2>
+    <h1>{{ _("Send email to users") }}: {{users}}</h1>
     <div>
-        <h3>{{ _('Write a message') }}</h3>
+        <h2>{{ _('Write a message') }}</h2>
          <form action="#">
 		 {% for email in emails %}
 	         <input type="hidden" name="email" value="{{email}}">

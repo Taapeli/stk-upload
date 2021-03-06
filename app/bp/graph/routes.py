@@ -197,10 +197,10 @@ def get_fanchart_data(uuid):
         # If no descendants, make empty southern hemisphere
         fanchart['children'].insert(2, {'size': str(1), 'color': 'white', 'uuid': None})
     
-    # The sectors are drawn anticlockwise, starting from North. To get the ancestors to occupy the
-    # Northern hemisphere, we need to move the first node on top level list (father) to end of list.
-    if 'children' in fanchart.keys():
-        fanchart['children'].append(fanchart['children'].pop(0))
+#     # The sectors are drawn anticlockwise, starting from North. To get the ancestors to occupy the
+#     # Northern hemisphere, we need to move the first node on top level list (father) to end of list.
+#     if 'children' in fanchart.keys():
+#         fanchart['children'].append(fanchart['children'].pop(0))
     
     return fanchart
     

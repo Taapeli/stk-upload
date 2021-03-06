@@ -95,20 +95,20 @@ div#Header {
     margin: 13px 0;
     padding:2px;
 }
-h2 {
+h1 {
     font:normal 18pt/23pt serif;
     display:inline;
     margin:0;
     padding:0;
 }
-h3 {
+h2 {
     font:normal 18pt/23pt serif;
     text-align:left;
     display:inline;
     margin:0 0 0 8pt;
     padding:0;
 }
-h4 {
+h3 {
     display:block;
     clear:both;
     font:normal 14pt/16pt serif;
@@ -116,7 +116,7 @@ h4 {
     padding:8pt 0 1pt 0;
     border-top:solid .5pt #A7A7A7
 }
-h5, h6 {
+h4, h5 {
     font:normal 14pt/16pt serif;
     font-style:italic;
     margin:0;
@@ -446,7 +446,7 @@ table.relationships tbody tr td.ColumnRowLabel a {
 
 /* Gallery
 ----------------------------------------------------- */
-#GalleryDetail h2 {
+#GalleryDetail h1 {
     display:none;
 }
 #GalleryNav {
@@ -463,7 +463,7 @@ table.relationships tbody tr td.ColumnRowLabel a {
     margin:0 auto;
     border:solid 1pt #542;
 }
-#GalleryDetail h3 {
+#GalleryDetail h2 {
     display:block;
     text-align:center;
     margin:2pt 0 8pt 0;
@@ -514,7 +514,7 @@ body#ThumbnailPreview div#references table.infolist tbody tr td.ColumnName {
     color: #000;
     text-decoration: none;
 }
-#researcher h3 {
+#researcher h2 {
     margin:0;
 }
 #researcher span {
@@ -555,7 +555,7 @@ body#ThumbnailPreview div#references table.infolist tbody tr td.ColumnName {
 
 /* Subsections : Gallery 
 ----------------------------------------------------- */
-#indivgallery h4 {
+#indivgallery h3 {
     margin-bottom:1em;
 }
 #indivgallery .thumbnail {

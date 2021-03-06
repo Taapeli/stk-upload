@@ -32,7 +32,7 @@ table.transparent tbody tr td {
 
 <div id="startdiv">
 	<div>
-		<h2>{{ _("My Profile Page") }}</h2>
+		<h1>{{ _("My Profile Page") }}</h1>
 
                 <div id="return_on_title">
                     <a href="{{ referrer }}"><button>{{ _('Go back') }}</button></a>
@@ -41,9 +41,9 @@ table.transparent tbody tr td {
 {% if current_user is defined and current_user.is_authenticated %}
 
 		<div class=startbox>
-			<h3>
+			<h2>
 				{{ _('User') }} <i>{{current_user.username}}</i>
-			</h3>
+			</h2>
 			<div>
 				<i>{{current_user.name}}</i> &lt;{{current_user.email}}&gt;
 			</div>
@@ -56,7 +56,7 @@ table.transparent tbody tr td {
 			</div>
 			{% endif %}
 
-			<h4>{{ _('Change language') }}</h4>
+			<h3>{{ _('Change language') }}</h3>
 			<div id="lang">
 				<form method="post" style="margin-left: 2em;">
 					<select name="lang" onchange="this.form.submit()">
@@ -70,12 +70,12 @@ table.transparent tbody tr td {
 				</form>
 			</div>
             {% if apikey %}
-            <h4>API Key</h4><div>{{ apikey }}</div>
+            <h3>API Key</h3><div>{{ apikey }}</div>
             {% endif %}
 		</div>
 
 		<div class=startbox>
-			<h3>{{ _('Active Roles') }}</h3>
+			<h2>{{ _('Active Roles') }}</h2>
 			<table class="transparent">
 				{% for role in roles %}
 				<tr>
@@ -85,7 +85,7 @@ table.transparent tbody tr td {
 				{% endfor %}
 			</table>
             {% if not is_guest %}
-			<h4>{{ _('Ask for a new role') }}</h4>
+			<h3>{{ _('Ask for a new role') }}</h3>
 			<div>
 				<p class="tight">{{ _('Send a message to Isotammi office to acquire permission for new steps.') }}
 				<p class="goto">
@@ -98,7 +98,7 @@ table.transparent tbody tr td {
   {% if not is_guest %}
     {% if batches %}
 		<div class="startbox2">
-			<h3>{{ _('Candidate Materials') }}</h3>
+			<h2>{{ _('Candidate Materials') }}</h2>
 			<p>{{ _('The amount of some data nodes included in your candidate data batches.') }}
 			<table width="597px"><!-- Must be pixels! -->
 				<tr>
@@ -132,7 +132,7 @@ table.transparent tbody tr td {
 		</div>
     {% else %}
 		<div class="startbox">
-			<h3>{{ _('Data Batches') }}</h3>
+			<h2>{{ _('Data Batches') }}</h2>
 			<p>{{ _('You have no candidate data loaded in the database.') }}</p>
 			<p class="goto">
 				&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
@@ -141,7 +141,7 @@ table.transparent tbody tr td {
     {% endif %}{# Batches #}
     {% if gedcoms %}
 		<div class="startbox2">
-			<h3>{{ _('My Gedcom files') }}</h3>
+			<h2>{{ _('My Gedcom files') }}</h2>
 			<table width="100%">
 				<tr>
 					<th>{{ _('File') }}</th>
@@ -166,7 +166,7 @@ table.transparent tbody tr td {
 		</div>
     {% else %}
 		<div class="startbox">
-			<h3>{{ _('My Gedcom files') }}</h3>
+			<h2>{{ _('My Gedcom files') }}</h2>
 			<p>{{ _('You have no Gedcom files in the server.') }}</p>
 			<p class="goto">
 				&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a>

@@ -1,12 +1,14 @@
-<h4>
+
+<div class="tab-bottom">
     <div class="tab-list">
-        <a hx-get="/scene/person_details?uuid={{person.uuid}}">{{ _("Families") }}</a>
-        <a hx-get="/scene/person_fanchart?uuid={{person.uuid}}" class="selected">{{ _("Two-way fanchart") }}</a>
+        <a hx-get="/scene/person_famtree_hx?uuid={{person.uuid}}">{{ _("Families") }}</a>
+        <a hx-get="/scene/person_fanchart_hx?uuid={{person.uuid}}" class="selected">{{ _("Two-way fanchart") }}</a>
     </div>
-</h4>
-<div class="tab-content">
-    <div id="chart"></div>
+    <div class="tab-content">
+        <div id="chart"></div>
+    </div>
 </div>
+
 <script type="text/javascript">
     var fanchart_data = JSON.parse('{{ fanchart_data|safe }}');
 
