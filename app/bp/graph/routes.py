@@ -212,3 +212,11 @@ def graph_home(uuid=None):
     uuid = request.args.get('uuid', None)
     fanchart = get_fanchart_data(uuid)
     return render_template('/graph/layout.html', fanchart_data=json.dumps(fanchart))
+
+
+@bp.route('/tree', methods=['GET'])
+@login_required
+@roles_accepted('audit')
+def tree_test(uuid=None):
+    uuid = request.args.get('uuid', None)
+    return render_template('/graph/tree_layout.html')
