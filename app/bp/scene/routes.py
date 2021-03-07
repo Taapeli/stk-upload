@@ -1039,19 +1039,17 @@ def comments_header():
 def fetch_comments():
     """ Fetch comments
     """
+    u_context = UserContext(user_session, current_user, request)
     uniq_id = int(request.args.get("uniq_id"))
     #uuid = request.args.get("uuid")
     if request.args.get("start"):
         start = float(request.args.get("start"))
     else:
-        start = 0.0
-    args = {"uniq_id": uniq_id}
-    if start:
-        args["start"] = start
+        start = datetime.now().timestamp()
     
     query = """
         match (p) -[:COMMENT] -> (c:Comment)
-            where id(p) = $uniq_id and c.timestamp >= $start
+            where id(p) = $uniq_id and c.timestamp <= $start
         return c as comment order by c.timestamp desc limit 5
     """
     result = shareds.driver.session().run(query, uniq_id=uniq_id, start=start)
@@ -1069,6 +1067,7 @@ def fetch_comments():
     if last_timestamp is None:
         return "<span id='no_comments'>" + _("No previous comments") + "</span>"
     else:
+        stk_logger(u_context, f"-> bp.scene.routes.fetch_comments n={len(comments)}")
         return render_template("/scene/comments/fetch_comments.html", 
                            comments=comments[0:4], 
                            last_timestamp=last_timestamp,
@@ -1080,7 +1079,8 @@ def fetch_comments():
 def add_comment():
     """ Add a comment
     """
-    uuid = request.form.get("uuid")
+    u_context = UserContext(user_session, current_user, request)
+    #uuid = request.form.get("uuid")
     uniq_id = int(request.form.get("uniq_id"))
     comment_text = request.form.get("comment_text")
     if comment_text.strip() == "": return ""
@@ -1101,6 +1101,7 @@ def add_comment():
         timestr=timestr,
         ).single()
     if res:
+        stk_logger(u_context, "-> bp.scene.routes.add_comment")
         return render_template("/scene/comments/add_comment.html",
                                timestamp=timestr,
                                user=user,

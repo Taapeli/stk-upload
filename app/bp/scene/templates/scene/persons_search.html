@@ -25,6 +25,9 @@ div.CloudBox div {
     border-radius: 3em;
     line-height: 1.6em;
 }
+div.CloudPink div {
+    background-image: url("/static/image/cloud-pink.png");
+}
 </style>
 <div id="startdiv">
 	{% if rule == 'all' %}<h1>{{ _('Persons ordered by') }} {{ ordname[order] }}</h1>
@@ -102,6 +105,7 @@ div.CloudBox div {
                       <div class="submit"><input type="submit" value="Hae"></div>
                       <div id="searchHelp"></div>
                 </div>
+            </div>
           </form>
 
        </div><!-- summaryarea -->
@@ -144,7 +148,7 @@ selector.addEventListener("change", () => {
 	<table class="IndividualList">
 		<thead>
 			<tr><th></th>
-<!--                    <th>{{ _('Owner') }}</th> -->
+{#                      <th>{{ _('Owner') }}</th> #}
                    <th>{{ _('Person') }}</th>
                    <th>{{ _("Person's events") }}</th>
 			</tr>
@@ -159,10 +163,10 @@ selector.addEventListener("change", () => {
 			{% endif %}
 				</td>
 					
-<!--			<td style="text-align:center; padding:3px;">
+{#			<td style="text-align:center; padding:3px;">
  		    {%- if p.user %}{{p.user}}{% else %} – {% endif %}
 				</td>
- -->
+ #}
 	            <td class="ColumnPerson">
                     <div>
 	                    <a href="/scene/person?uuid={{p.uuid}}"
@@ -228,7 +232,7 @@ selector.addEventListener("change", () => {
             </div>
         </div>
 
-           <div class="CloudBox" style="display: inline-block;">
+           <div class="CloudBox CloudPink" style="display: inline-block;">
              <div>
                  <form name="placenameform" method="post" action="/scene/persons/search">
                     <input name="rule" type="hidden" value="placename">

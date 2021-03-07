@@ -53,12 +53,15 @@ def translate(term, var_name):
     if var_name == "nt":
         # Name types
         tabl = {
-            "Aatelointinimi" : _("Aatelointinimi "), #"Aatelointinimi"
-            "Aateloitu nimi": _("Aateloitu nimi"), #"Aateloitu nimi"
+            "Aatelointinimi" : _("Noble Name "), #"Aatelointinimi"
+            "Aateloitu nimi": _("Noble Name"), #"Aateloitu nimi"
             "Also Known As": _("Also Known As"), #"tunnettu myös"
             "Birth Name": _("Birth Name"), #"syntymänimi"
             "Married Name": _("Married Name"), #"avionimi"
-            "Unknown": _("Unknown type"), #"määrittämätön"
+            "Sotilasnimi": _("Soldier name"), #"Sotilasnimi
+            "Taitelijanimi": _("Artist name"), #"Taiteilijanimi
+            "Vaihdettu nimi": _("Changed name"), #"Vaihdettu nimi
+            "Unknown": _("Unknown type") #"määrittämätön"
         }
     elif var_name == "evt":
         # Event types    
@@ -97,17 +100,23 @@ def translate(term, var_name):
     elif var_name == "role":
         # Event role types or member role in family
         tabl = {
-            "as_child": _("as a child"),   # Role as family member
-            "as_parent": _("as spouse"), # Role as family member
-            "child": _("Child"),     # Role as family member
-            "Clergy": _("Clergy"), #"pappina"
-            "Edunsaaja": _("Edunsaaja"), #"edunsaajana"
-            "Family": _("Family"), #"perheenä"
+            "As_child": _("as a child"),   # Role as family member
+            "As_parent": _("as spouse"), # Role as family member
+# Child roles does not exist?
+#             "child": _("Child"),     # Role as family member
+#             "Adoptio": _("Adoption"),     # Adoptiolapsi
+#             "Kasvatus": _("Foster-child"), # Kasvatuslapsi
+            "Clergy": _("Clergy"), #"pappi"
+            "Edunsaaja": _("Edunsaaja"),
+            "Family": _("Family"), #"perhe" ?
             "father": _("Father"), 
+            "Kohde": _("Concerned"),
             "kummi": _("kummi"), #"kummina"
+            "Kummi": _("kummi"), #"kummina"
             "man": _("Husband"), 
             "mother": _("Mother"),
             "Myyjä": _("Myyjä"), #"myyjänä"
+            "Opettaja": _("Teacher"),
             "Osallinen": _("Osallinen"), #"osallisena"
             "Ostaja": _("Ostaja"), #"ostajana"
             "parent": _("Spouse"),   # Role as family member
@@ -167,18 +176,18 @@ def translate(term, var_name):
             "Asiakirja": _("Document"), #"asiakirja"
             "Book": _("Book"), #"kirja"
             "Electronic": _("Electronic"), #"sähköinen"
-            'Magazine': _('Magazine'),  #"aikakauslehti"
-            'Manuscript': _('Manuscript'), #'käsikirjoitus'
+            "Magazine": _("Magazine"),  #"aikakauslehti"
+            "Manuscript": _("Manuscript"), #"käsikirjoitus"
             "Newspaper": _("Newspaper"), #"lehti"
-            'Photo': _('Photo'),
-            'Tombstone': _('Tombstone'), #'hautakivi'
+            "Photo": _("Photo"), #valokuva
+            "Tombstone": _("Tombstone"), #"hautakivi"
             "Unknown": _("Unknown") #"tuntematon"
         }
     elif var_name == "lt":
         # Location (place) types
         tabl = {
-            "Alue": _("Region"), #"alue"
-            "Alus": _("Vessel"), #"alus"
+            "Alue": _("Region"),
+            "Alus": _("Vessel"),
             "Borough": _("Borough"), #"aluehallintoyksikkö"
             "Building": _("Building"), #"rakennus tai torppa"
             "City": _("City"), #"paikkakunta"
@@ -186,7 +195,7 @@ def translate(term, var_name):
             "Department": _("Department"), #
             "District": _("District"), #"lääni"
             "Farm": _("Farm"), #"tila"
-            "Talo": _("Farm"), #"tila"
+            "Talo": _("Farm"), #"tila" !
             "Hamlet": _("Hamlet"), #"taloryhmä"
             "Hautapaikka": _("Burial Site"),
             "Hautausmaa": _("Cemetery"), #"hautausmaa"

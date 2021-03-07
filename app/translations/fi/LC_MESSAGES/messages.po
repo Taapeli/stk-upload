@@ -3195,8 +3195,8 @@ msgid "Latest comments"
 msgstr "Tuoreimmat kommentit"
 
 #: bp/scene/templates/scene/comments/comments.html:11
-msgid "Comments (hide)"
-msgstr "Kommentit (piilota)"
+msgid "Discussion (hide)"
+msgstr "Keskustelu (piilota)"
 
 #: bp/scene/templates/scene/comments/comments.html:26
 msgid "Add comment"
@@ -3206,8 +3206,8 @@ msgid "Your comment"
 msgstr "Kommenttisi"
 
 #: bp/scene/templates/scene/comments/comments_header.html:6
-msgid "Show comments"
-msgstr "Näytä kommentit"
+msgid "Show discussion"
+msgstr "Näytä keskustelu"
 
 #: bp/scene/templates/scene/comments/fetch_comments.html:23
 msgid "Load More Comments"
@@ -3447,7 +3447,7 @@ msgstr "Tutustu esittelyaineistoon"
 
 #: bp/start/templates/start/index_scene.html:39
 msgid "Approved data"
-msgstr "Yhteinen Isotammi-aineisto"
+msgstr "Yhteinen sukukanta"
 
 #: bp/start/templates/start/index_scene.html:72
 msgid "Table format tools"
