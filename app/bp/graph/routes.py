@@ -244,8 +244,7 @@ def get_treechart_data(uuid):
         else:
             death = f'{person.death_high}'
 
-        node['title'] = one_first_name
-###        node['label'] = one_first_name + one_surname + f' {person.birth_low}'
+        node['title'] = f'{one_first_name} {one_surname}'
         node['description'] = f'{person.names[0].firstname} {person.names[0].surname} {person.birth_low}-{death}'
         node['id'] = person.uuid
         node['image'] = ''
