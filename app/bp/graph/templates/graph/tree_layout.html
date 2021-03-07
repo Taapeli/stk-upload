@@ -1,0 +1,118 @@
+{# _bp/audit/templates/layout.html_ #}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fi" lang="fi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - {{ config.STK_SYSNAME }}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/k_screen.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hamburger.css') }}">
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="/static/js/help.js?40"></script>
+	
+	<!-- i18n for Javascript: -->
+	<link rel="gettext" type="application/x-po" href="/static/translations/{{ session.lang }}.po">
+	<script src="/static/js/gettext.js"></script>
+	<style>
+h1, .startbox, .startbox2 { background-color: #f9f8bf; }
+td,th {background: white;}
+.tight {margin: 2pt;}
+.goto {margin:3pt 12pt;}
+table.transparent {
+    background-color:inherit;
+    border-width:0
+}
+table.transparent tbody tr td {
+    background-color:inherit;
+    border-width:0;
+    vertical-align:top;
+}
+	</style>
+
+
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <script type="text/javascript" src="static/js/primitives.js"></script>
+    <link href="static/css/primitives.css" media="screen" rel="stylesheet" type="text/css" />
+
+    <script type='text/javascript'>
+        var control;
+        var timer = null;
+        var treechart_data = JSON.parse('{{ treechart_data|safe }}');
+
+        document.addEventListener('DOMContentLoaded', function () {
+			var options = new primitives.FamConfig();
+
+			var items = treechart_data;
+
+			options.pageFitMode = primitives.PageFitMode.None;
+			options.items = items;
+			options.cursorItem = 2;
+			options.linesWidth = 1;
+			options.linesColor = "black";
+			options.hasSelectorCheckbox = primitives.Enabled.False;
+			options.normalLevelShift = 20;
+			options.dotLevelShift = 20;
+			options.lineLevelShift = 20;
+			options.normalItemsInterval = 10;
+			options.dotItemsInterval = 10;
+			options.lineItemsInterval = 10;
+			options.arrowsDirection = primitives.GroupByType.Parents;
+			options.showExtraArrows = false;
+            options.enableMatrixLayout = true;
+            options.autoSizeMaximum = primitives.Size(2048, 768);
+            options.NeighboursSelectionMode = primitives.NeighboursSelectionMode.ParentsChildrenSiblingsAndSpouses;
+            options.Visibility = primitives.Visibility.Auto;
+            options.enablePanning = false;
+
+			control = primitives.FamDiagram(document.getElementById("basicdiagram"), options);
+        });
+
+    </script>
+
+
+</head>
+
+  <body>
+    {% block body %}
+    <h1><a href="/"><img id="logo" src="/static/tam.png" alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
+             onmouseover="this.src='/static/tam1.png';" 
+             onmouseout="this.src='/static/tam.png';"/></a>
+        <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
+        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
+    <div id="paluu">
+        <a href="/audit">{{ _('Audit home') }}</a>
+    </div>
+    {% endblock %}
+
+
+
+
+    <div id="basicdiagram" style="width: 1280px; height: 640px; border-style: dotted; border-width: 1px;"></div>
+
+
+
+    <div class="fullclear"></div>
+    <div id="footer">
+        <span id="createdate">{{ config.STK_SYSNAME }} &nbsp;
+        {% if time0 %}
+            {% set elapsed = time.time()-time0 %}
+            <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
+        {% if elapsed %}
+            <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
+        {{ _('Version') }} {{ 'app'|app_date }}</span>
+    </div>
+    <div class="fullclear"></div>
+
+    <div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>
+
+</body>
+</html>

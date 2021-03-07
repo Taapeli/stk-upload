@@ -29,6 +29,7 @@ from flask import send_file, json
 from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _ 
 
+import collections
 import shareds
 import bl.person
 
@@ -42,6 +43,9 @@ from bp.gedcom.transforms.model.person_name import PersonName
 
 MAX_ANCESTOR_LEVELS = 4
 MAX_DESCENDANT_LEVELS = 3
+
+MAX_TREE_ANCESTOR_LEVELS = 3
+MAX_TREE_DESCENDANT_LEVELS = 3
 
 readservice = Neo4jReadServiceTx(shareds.driver)
 
@@ -172,7 +176,6 @@ def get_fanchart_data(uuid):
     
     # Set up the database access.
     u_context = UserContext(user_session, current_user, request)
-    #reader = PersonReaderTx(readservice, u_context)
     with Neo4jReadServiceTx(shareds.driver) as readservice:
         reader = PersonReaderTx(readservice, u_context)
 
@@ -204,6 +207,154 @@ def get_fanchart_data(uuid):
     
     return fanchart
     
+def get_treechart_data(uuid):
+    '''
+    Get the spouse(s) and a number of ancestor and descendant generations for the given central id.
+    '''
+    def get_person_for_id(uuid):
+        """
+        Database read access. Error handling needs an improvement here!
+        """
+        result = reader.get_person_data(uuid)
+        if Status.has_failed(result):
+            flash(f'{result.get("statustext","error")}', 'error')
+        return result.get('person')
+
+    def treechart_from(items, person, spouses = True):
+        """
+        Format the data for treechart use.
+        """
+        # Create a dictionary that allows appending to non-existing keys to simplify code
+        node = collections.defaultdict(list)
+
+        all_first_names = []
+        one_first_name = ''
+        all_surnames = []
+        one_surname = ''
+        if person.names:
+            if person.names[0].firstname:
+                all_first_names = person.names[0].firstname.split()
+                one_first_name = all_first_names[0]
+            if person.names[0].surname:
+                all_surnames = person.names[0].surname.split()
+                one_surname = all_surnames[0] if len(all_surnames) > 0 else ''
+        
+        if person.death_high - person.birth_low >= 110: ## TEMP: FIND OUT HOW TO GET THE YEARS!
+            death = ''
+        else:
+            death = f'{person.death_high}'
+
+        node['title'] = one_first_name
+###        node['label'] = one_first_name + one_surname + f' {person.birth_low}'
+        node['description'] = f'{person.names[0].firstname} {person.names[0].surname} {person.birth_low}-{death}'
+        node['id'] = person.uuid
+        node['image'] = ''
+
+        # Handle the spouse(s)
+        return (items, node)
+
+    def build_parents(items, uuid, level = 1):
+        """
+        Recurse to ancestors, building a data structure for treechart.
+        """
+        person = get_person_for_id(uuid)
+        (items, node) = treechart_from(items, person)
+
+        # Check whether to continue recursion
+        if person.families_as_child and level < MAX_TREE_ANCESTOR_LEVELS:
+
+            dad = person.families_as_child[0].father
+            if dad:
+                node['parents'].append(dad.uuid)
+                dad = get_person_for_id(dad.uuid)   # get the families
+                (items, nodedad) = treechart_from(items, dad)
+                (items, nodedad, dad) = build_parents(items, dad.uuid, level + 1)
+                items.append(nodedad)
+
+            mom = person.families_as_child[0].mother
+            if mom:
+                node['parents'].append(mom.uuid)
+                mom = get_person_for_id(mom.uuid)   # get the families
+                (items, nodemom) = treechart_from(items, mom)
+                (items, nodemom, mom) = build_parents(items, mom.uuid, level + 1)
+                items.append(nodemom)
+
+        items.append(node)
+        return (items, node, person)
+    
+    def build_children(items, node, person, level = 1):
+        """
+        Recurse to descendants, building a data structure for treechart. Skip the current person.
+        """
+        # Check whether to continue recursion
+        if person.families_as_parent and level < MAX_TREE_DESCENDANT_LEVELS:
+
+            # Go through all this persons' families, sorted by marriage date
+            person.families_as_parent.sort(key = lambda x: x.dates.date1.value())
+            familycounter = 0
+            childcounter = 0
+            for fx in person.families_as_parent:
+                familycounter += 1
+                if fx.father and fx.father.uuid != person.uuid:
+                    node['spouses'].append(fx.father.uuid)      # create the linking
+                    (items, node1) = treechart_from(items, fx.father, spouses = False)  # create the (single) node
+                    if len(person.families_as_parent) > 1 and familycounter > 1:
+                        node1['placementType'] = 3   # AdviserPlacementType.Right for second husband etc.
+                    else:
+                        node1['placementType'] = 7   # AdviserPlacementType.Left
+                    node1['relativeItem'] = person.uuid
+                    node1['position'] = familycounter
+                    items.append(node1)
+
+                if fx.mother and fx.mother.uuid != person.uuid:
+                    node['spouses'].append(fx.mother.uuid)
+                    (items, node2) = treechart_from(items, fx.mother, spouses = False)
+                    if len(person.families_as_parent) > 1 and familycounter == 1:
+                        node2['placementType'] = 7   # AdviserPlacementType.Left for the first wife
+                    else:
+                        node2['placementType'] = 3   # AdviserPlacementType.Right
+                    node2['relativeItem'] = person.uuid
+                    node2['position'] = familycounter
+                    items.append(node2)
+
+                # Go through all the children, sorted by birthdate
+                fx.children.sort(key = lambda x: x.birth_low)
+                for cx in fx.children:
+
+                    # Collect this child's data and add linkage to the parents IDs
+                    child = get_person_for_id(cx.uuid)
+                    (items, node) = treechart_from(items, child)
+                    for px in child.families_as_child:
+                        node['parents'].append(px.father.uuid)
+                        node['parents'].append(px.mother.uuid)
+
+                    # Set up the fields needed for positioning siblings from oldest to youngest
+                    childcounter += 1
+                    if childcounter == 1:
+                        firstchild = cx.uuid
+                    else:
+                        node['placementType'] = 3   # AdviserPlacementType.Right
+                        node['relativeItem'] = firstchild
+                        node['position'] = childcounter
+
+                    # Append current node to the list and recurse to its children
+                    items.append(node)
+                    items = build_children(items, node, child, level + 1)
+
+        return items
+
+    # Set up the database access.
+    u_context = UserContext(user_session, current_user, request)
+
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        reader = PersonReaderTx(readservice, u_context)
+
+        # Gather all required data in two directions from the central person. Data structure used in
+        # both is a list, as defined by the BasicPrimitives diagram (https://www.basicprimitives.com/)
+        (treechart, node, person) = build_parents([], uuid)
+        treechart = build_children(treechart, node, person)
+    
+    return treechart
 
 @bp.route('/graph', methods=['GET'])
 @login_required
@@ -219,4 +370,5 @@ def graph_home(uuid=None):
 @roles_accepted('audit')
 def tree_test(uuid=None):
     uuid = request.args.get('uuid', None)
-    return render_template('/graph/tree_layout.html')
+    treechart = get_treechart_data(uuid)
+    return render_template('/graph/tree_layout.html', treechart_data=json.dumps(treechart))
