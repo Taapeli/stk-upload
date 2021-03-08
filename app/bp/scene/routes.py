@@ -411,10 +411,10 @@ def get_person_names(uuid):
 def get_person_primary_name(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadService(shareds.driver) as readservice:
-        datastore = PersonReader(readservice, u_context)
-        args = {}
-        result = datastore.get_person_data(uuid, args)
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        datastore = PersonReaderTx(readservice, u_context)
+        result = datastore.get_person_data(uuid)
+        print(result)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
