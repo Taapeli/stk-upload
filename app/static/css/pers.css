@@ -115,7 +115,10 @@ div#paluu {
 }
 
 .admin {background-color: pink;}
-.audit {background-color: #f9f8bf;} /* yellowish */
+.audit {
+	background-color: #f9f8bf; /* yellowish */
+	color: DarkGreen;
+}
 .gedtools {background-color: lightsteelblue;}
 .startbox h2, .startbox2 h2 { margin-top: 5px; margin-bottom: 5px; font-size: 16px; }
 .startbox div, .startbox2 div { display: inline-block; width: 100%; }

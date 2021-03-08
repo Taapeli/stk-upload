@@ -135,7 +135,7 @@
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
     {% if obj.change %}
-    <span id="changetime" title="{{ _("latest change time") }}"
+    <span id="changetime" title="{{ _("latest change time and contributor") }}"
         {% if margin %}style='margin-right:{{margin}}'{% endif %}
         >{{ _("edited") }} {{obj.change_str()}}
         {%- if obj.root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}

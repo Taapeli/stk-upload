@@ -45,7 +45,7 @@ gray light              #CCC
 gray very light         #EEE
 white                   #FFF
 dark blue               #006
-Auditor					SaddleBrown
+Auditor					DarkGreen
 --------------------------------------------------------------------------------------------------
 Characteristic of this style is that it uses the full width of the browser
 window and that horizontal highlighting bars extend over the full width of
@@ -176,7 +176,7 @@ img#logo {
     border-radius: 5px;
 }
 .notmy {color:blue;}
-.Auditor { color:SaddleBrown; } # Only for Auditor's eyes
+.Auditor { color:DarkGreen; } # Only for Auditor's eyes
 
 .detail_link {
 	display: inline;

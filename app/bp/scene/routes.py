@@ -367,6 +367,7 @@ def show_person_fanchart_hx(uuid=None):
     '''
     Content of the selected tab for the families section: fanchart.
     '''
+    t0 = time.time()
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
@@ -380,6 +381,9 @@ def show_person_fanchart_hx(uuid=None):
     person = result.get('person')
 
     fanchart = get_fanchart_data(uuid)
+    n = len(fanchart.get('children',[]))
+    t1 = time.time()-t0
+    stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
     return render_template("/scene/person_fanchart_hx.html", person=person,
                             fanchart_data=json.dumps(fanchart))
 
