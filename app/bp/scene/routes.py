@@ -1035,7 +1035,10 @@ def comments():
 def comments_header():
     """ Comments header
     """
-    return render_template("/scene/comments/comments_header.html")
+    if "audit" in current_user.roles:
+        return render_template("/scene/comments/comments_header.html")
+    else:
+        return ""
 
 @bp.route('/scene/comments/fetch_comments')
 @login_required
