@@ -36,7 +36,7 @@ div#events div.scrollbox {
         <div id="map">{% if '°' in place.coord %}
         {{ _('Invalid coordinates') }}: {{place.coord}}
         &mdash; {{ _('should be in decimal format') }}
-        {% else %}{% set r = 0.3 %}
+        {% else %}{% set r = 0.5 %}
             {% set y = place.coord[0] %}
             {% set x = place.coord[1] %}
            <iframe width="250" height="250" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
