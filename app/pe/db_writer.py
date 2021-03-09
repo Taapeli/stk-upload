@@ -4,7 +4,7 @@
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
 #                            Timo Nallikari, Pekka Valta
 #
-#   See the LICENSE file.
+#   See the LICENCE file.
 
 '''
 

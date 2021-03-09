@@ -1,0 +1,58 @@
+{# _audit/batches.html_ #}
+{# Copied from admin/uploads_all #}
+{% extends "/audit/layout.html" %}
+{% block title %}{{ _("Classifiers") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+
+<style>
+td {
+	padding:.33em;
+	vertical-align: top;   
+}
+</style>
+
+	<h1>{{ _("Classifiers") }}</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+      {% endif %}
+    {% endwith %}
+
+
+    <div class="content">
+        <table>
+           <tr>
+           		<th>{{ _("Key") }}
+                <th>{{ _("Database") }}</th>
+                <th>{{ _("User language") }}</th>
+                <th>{{ _("Swedish") }}</th>
+                <th>{{ _("English") }}</th>
+           </tr>
+           
+{% for name, val in data.items() %}
+	{% set desc = val[0] %}
+	{% set rows = val[1] %}
+	{% for row in rows %}
+   	       <tr>
+		{% if loop.first %}
+   	       	   <td rowspan="{{rows|count}}"><b><i>{{ desc }}</i></b><br>({{ name }})</td>
+   	    {% endif %}
+	           <td><tt>{{ row[0] }}</tt></td>
+	           <td>{{ row[1] }}</td>
+	           <td>{{ row[2] }}</td>
+	           <td>{{ row[3] }}</td>
+	       </tr>
+	{% endfor %}
+{% endfor %}
+	    </table>
+    </div>
+{% endblock %}
+</body>
+</html>
+

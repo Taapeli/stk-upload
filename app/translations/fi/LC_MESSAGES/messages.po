@@ -4729,7 +4729,7 @@ msgid "Cemetery"
 msgstr "hautausmaa"
 
 #: ui/jinja_filters.py:202
-msgid "Chappel Parish"
+msgid "Chapel Parish"
 msgstr "kappeliseurakunta"
 
 #: ui/jinja_filters.py:203
@@ -4746,7 +4746,7 @@ msgstr ""
 
 #: ui/jinja_filters.py:206
 msgid "Kuntakeskus"
-msgstr ""
+msgstr "kuntakeskus"
 
 #: ui/jinja_filters.py:207
 msgid "Fortress"
@@ -4756,13 +4756,17 @@ msgstr "linnoitus"
 msgid "Locality"
 msgstr "kulmakunta"
 
+msgid "Neighborhood"
+msgstr "kulmakunta"
+
+
 #: ui/jinja_filters.py:209
 msgid "Natural Place"
 msgstr "luonnonpaikka"
 
 #: ui/jinja_filters.py:210
 msgid "Municipality"
-msgstr "paikkakunta"
+msgstr "kunta"
 
 #: ui/jinja_filters.py:211
 msgid "Learning Institution"
@@ -4795,6 +4799,9 @@ msgstr "kaupunki"
 #: ui/jinja_filters.py:221
 msgid "Village"
 msgstr "kylä"
+
+msgid "Company"
+msgstr "yritys"
 
 #: ui/jinja_filters.py:227 ui/jinja_filters.py:249
 msgid "in the region"
@@ -4854,7 +4861,7 @@ msgstr "kartanossa"
 
 #: ui/jinja_filters.py:241
 msgid "Kuntakeskuksessa"
-msgstr ""
+msgstr "kuntakeskuksessa"
 
 #: ui/jinja_filters.py:242
 msgid "in the fortress"
@@ -4862,7 +4869,7 @@ msgstr "linnoituksessa"
 
 #: ui/jinja_filters.py:243
 msgid "at locality of"
-msgstr "kulmakuntannalla"
+msgstr "kulmakunnalla"
 
 #: ui/jinja_filters.py:244
 msgid "in a natural place of"

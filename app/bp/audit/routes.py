@@ -27,28 +27,26 @@ from . import bp
 import time
 
 import logging
-#from models import dataupdater
 from io import StringIO, BytesIO
 import csv
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for #, flash, send_from_directory, session, jsonify
+from flask import render_template, request, redirect, url_for
 from flask import send_file
 from flask_security import login_required, roles_accepted, current_user
-#from flask_babelex import _
+from flask_babelex import _
+import gettext
 
 import shareds
-#from bl.batch_audit import Batch, Audit
 from bl.audit import Audit
 from bl.batch import Batch
 from bl.person import Person, PersonBl
 from bl.refname import Refname
 from bp.admin.cvs_refnames import load_refnames
 from .models.batch_merge import Batch_merge
-#from .models.audition import Audition
 
 from bp.admin import uploads
-from models import syslog , loadfile, dbutil #, datareader
+from models import syslog, loadfile, dbutil
 
 @bp.route('/audit')
 @login_required
@@ -128,6 +126,40 @@ def audit_approvals(who=None):
 
     return render_template('/audit/approvals.html', user=auditor, total=total,
                            titles=titles, batches=batches, elapsed=time.time()-t0)
+
+# --------------------- List classifiers and refnames ----------------------------
+
+@bp.route('/audit/classifiers', methods=['GET'])
+@login_required
+def list_classifiers():
+    # List classifier values and translations
+    import ui.jinja_filters
+
+    sv = gettext.translation('messages', 'app/translations', languages=['sv'])
+    en = gettext.translation('messages', 'app/translations', languages=['en'])
+
+    key_dicts = ui.jinja_filters.list_translations()
+    data = {}
+    n = 0
+    for key, values in key_dicts.items():
+        # key: 'nt'
+        # values: ('Name types', {'Aatelointinimi': 'aateloitu nimi',  ...})
+        rows = []
+        desc = values[0]
+        for term, value in values[1].items():
+            user_lang=value
+            sve = sv.gettext(term)
+            eng = en.gettext(term)
+            row = [term, user_lang, sve, eng]
+            rows.append(row)
+        n += len(values[1])
+        data[key] = (desc, rows)
+    # >>> data['marr']
+    # ('marriage types', [['Married', 'Avioliitossa', 'Gift', 'Married'], ['Unknown', ...]])
+
+    logger.info(f"-> bp.audit.routes.list_classifiers n={n}")
+    return render_template("/audit/classifiers.html", data=data)
+
 
 # Refnames home page
 @bp.route('/audit/refnames')

@@ -31,9 +31,13 @@ from flask_babelex import _
 from models.gen.person import SEX_FEMALE, SEX_MALE, SEX_UNKOWN
 
 
-def translate(term, var_name):
+def translate(term, var_name, show_table=False):
     """ Given term is translated depending of var_name name.
-        The lang parameter is not used
+
+        # Get term translation
+        local_lang_text = translate('Birth', 'evt')
+        # Get full term translations dict
+        my_dict = translate(None, 'evt', True)
 
         'nt'   = Name types
         'evt'  = Event types
@@ -46,10 +50,6 @@ def translate(term, var_name):
         'marr' = marriage types
         'child' = child relations
     """
-#     print("# {}[{}]".format(var_name, term))
-    if not term:
-        print(f"WARNING: ui.jinja_filters.translate: missing term={term}, var_name={var_name}")
-        return "~"
     if var_name == "nt":
         # Name types
         tabl = {
@@ -171,7 +171,7 @@ def translate(term, var_name):
             "Web site": _("Web site") #"verkkopalvelu"
         }
     elif var_name == "medium":
-        # Madium types
+        # Document types
         tabl = {
             "Asiakirja": _("Document"), #"asiakirja"
             "Book": _("Book"), #"kirja"
@@ -199,18 +199,21 @@ def translate(term, var_name):
             "Hamlet": _("Hamlet"), #"taloryhmä"
             "Hautapaikka": _("Burial Site"),
             "Hautausmaa": _("Cemetery"), #"hautausmaa"
-            "Kappeliseurakunta": _("Chappel Parish"), #"kappeliseurakunta"
+            "Kappeliseurakunta": _("Chapel Parish"), #"kappeliseurakunta"
             "Kartano": _("Mansion"), #"kartano"
             "Katuosoite": _("Street Address"),
             "Kortteli": _("Kortteli"), #"kortteli"
             "Kuntakeskus": _("Kuntakeskus"), #"kuntakeskus"
+            "Laitos": _("Institute"), # laitos
             "Linnoitus": _("Fortress"), #"linnoitus"
             "Locality": _("Locality"), #"kulmakunta"
             "Luonnonpaikka": _("Natural Place"),
-            "Municipality": _("Municipality"),
+            "Municipality": _("Municipality"), #kunta
+            "Neighborhood": _("Neighborhood"), # kulmakunta
             "Oppilaitos": _("Learning Institution"), #"oppilaitos"
             "Organisaatio": _("Organisation"), #"organisaatio"
             "Parish": _("Parish"), #"seurakunta"
+            "Province": _("Province"), # provinssi
             "Region": _("Region"), #"alue"
             "srk": _("Parish"), #"seurakunta"
             "State": _("State"), #"valtio"
@@ -219,6 +222,7 @@ def translate(term, var_name):
             "Torppa": _("Torppa"), #"torppa"
             "Town": _("Town"), #"kaupunki"
             "Village": _("Village"), #"kylä"
+            "Yritys": _("Company"), # yritys
             "Unknown": _("Unknown") #"tuntematon"
         }
     elif var_name == "lt_in":
@@ -252,8 +256,9 @@ def translate(term, var_name):
             "Tontti": _("Tontilla"), #"tontilla"
             "Village": _("in the village of") #"kylässä"
         }
-        try:    
-            return tabl[term]
+        try:
+            if term:
+                return tabl[term]
         except:
             return term + ":ssa"
 
@@ -285,6 +290,33 @@ def translate(term, var_name):
         if term:
             return tabl[term]
         else:
-            return ''
+            if show_table:
+                # Return conversion table
+                return tabl
+            else:
+                print(f"WARNING: ui.jinja_filters.translate: missing term={term}, var_name={var_name}")
+                return "~"
     except:
         return "'" + term + "'"
+
+def list_translations():
+    ''' Get list of all translations '''
+    
+    return_dict = {}
+    keywords = {
+        'nt': "Name types",
+        'evt': "Event types",
+        'role': "Event role",
+        'lt': "Place types",
+        'lt_in': "Place types, inessive",
+        'notet': "Note type",
+        'rept': "Repository types",
+        'medium': "Document types",
+        'marr': "Marriage types",
+        'child': "Child by gender"
+        }
+    for key, desc in keywords.items():
+        key_dict = translate(None, key, True)
+        return_dict[key] = (desc, key_dict)
+
+    return return_dict
