@@ -411,10 +411,10 @@ def get_person_names(uuid):
 def get_person_primary_name(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadService(shareds.driver) as readservice:
-        datastore = PersonReader(readservice, u_context)
-        args = {}
-        result = datastore.get_person_data(uuid, args)
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        datastore = PersonReaderTx(readservice, u_context)
+        result = datastore.get_person_data(uuid)
+        print(result)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
@@ -1035,7 +1035,10 @@ def comments():
 def comments_header():
     """ Comments header
     """
-    return render_template("/scene/comments/comments_header.html")
+    if "audit" in current_user.roles:
+        return render_template("/scene/comments/comments_header.html")
+    else:
+        return ""
 
 @bp.route('/scene/comments/fetch_comments')
 @login_required
