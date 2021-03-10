@@ -31,8 +31,9 @@ td {
            		<th>{{ _("Key") }}
                 <th>{{ _("Database") }}</th>
                 <th>{{ _("User language") }}</th>
-                <th>{{ _("Swedish") }}</th>
+ {#             <th>{{ _("Swedish") }}</th>
                 <th>{{ _("English") }}</th>
+ #}
            </tr>
            
 {% for name, val in data.items() %}
@@ -45,7 +46,7 @@ td {
    	    {% endif %}
 	           <td><tt>{{ row[0] }}</tt></td>
 	           <td>{{ row[1] }}</td>
-		{% if name == "lt_in" %}
+{#		{% if name == "lt_in" %}
 			{% if loop.first %}
 	           <td colspan="2" rowspan="{{rows|count}}"><br>
 	           		<i>{{ _("Can't display.<br>Change user's language to see these.") }}</i>
@@ -55,6 +56,7 @@ td {
 	           <td>{{ row[2] }}</td>
 	           <td>{{ row[3] }}</td>
    	    {% endif %}
+#}
 	       </tr>
 	{% endfor %}
 {% endfor %}
