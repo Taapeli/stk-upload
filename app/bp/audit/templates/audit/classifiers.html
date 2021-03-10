@@ -45,8 +45,16 @@ td {
    	    {% endif %}
 	           <td><tt>{{ row[0] }}</tt></td>
 	           <td>{{ row[1] }}</td>
+		{% if name == "lt_in" %}
+			{% if loop.first %}
+	           <td colspan="2" rowspan="{{rows|count}}"><br>
+	           		<i>{{ _("Can't display.<br>Change user's language to see these.") }}</i>
+	           </td>
+	        {% endif %}
+   	    {% else %}
 	           <td>{{ row[2] }}</td>
 	           <td>{{ row[3] }}</td>
+   	    {% endif %}
 	       </tr>
 	{% endfor %}
 {% endfor %}

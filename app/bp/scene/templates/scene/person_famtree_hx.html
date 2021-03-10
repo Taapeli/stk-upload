@@ -2,7 +2,9 @@
 <div class="tab-bottom">
     <div class="tab-list">
         <a hx-get="/scene/person_famtree_hx?uuid={{person.uuid}}" class="selected"> {{ _("Families") }} </a>
-        <a hx-get="/scene/person_fanchart_hx?uuid={{person.uuid}}"> {{ _("Two-way fanchart") }} </a>
+{% if current_user.has_role('audit') %}
+        <a hx-get="/scene/person_fanchart_hx?uuid={{person.uuid}}" class="Auditor"> {{ _("Two-way fanchart") }} </a>
+{% endif %}
     </div>
     <div class="tab-content">
         <div class="subsection" id="families">
