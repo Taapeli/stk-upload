@@ -53,23 +53,26 @@ def translate(term, var_name, show_table=False):
     if var_name == "nt":
         # Name types
         tabl = {
-            "Aatelointinimi" : _("Noble Name "), #"Aatelointinimi"
+            "Aatelointinimi" : _("Noble Name"), #"Aatelointinimi"
             "Aateloitu nimi": _("Noble Name"), #"Aateloitu nimi"
             "Also Known As": _("Also Known As"), #"tunnettu myös"
             "Birth Name": _("Birth Name"), #"syntymänimi"
             "Married Name": _("Married Name"), #"avionimi"
-            "Sotilasnimi": _("Soldier name"), #"Sotilasnimi
-            "Taitelijanimi": _("Artist name"), #"Taiteilijanimi
-            "Vaihdettu nimi": _("Changed name"), #"Vaihdettu nimi
+            "Otettu nimi": _("Taken Name"),
+            "Sotilasnimi": _("Soldier Name"), #"Sotilasnimi
+            "Taitelijanimi": _("Artist Name"), #"Taiteilijanimi
+            "Vaihdettu nimi": _("Changed Name"), #"Vaihdettu nimi
             "Unknown": _("Unknown type") #"määrittämätön"
         }
     elif var_name == "evt":
         # Event types    
         tabl = {
+            "Arvonimi" : _("Grant Title"), # arvonimen myöntäminen
             "Baptism": _("Baptism"), #"kaste"
             "Birth": _("Birth"), #"syntymä"
             "Burial": _("Burial"), #"hautaus"
             "Cause Of Death": _("Cause Of Death"), #"kuolinsyy"
+            "Census": _("Census"), #"mainittu henkikirjassa"
             "Christening": _("Christening"), #"kristillinen kaste"
             "Confirmation": _("Confirmation"), #"ripille pääsy"
             "Death": _("Death"), #"kuolema"
@@ -77,24 +80,33 @@ def translate(term, var_name, show_table=False):
             "Divorce": _("Divorce"), #"avioero"
             "Education": _("Education"), #"koulutus"
             "Ehtoollinen": _("Holy Communion"), #"ehtoollinen"      
+            "Elected": _("Elected"), #"vaali"      
             "Engagement": _("Engagement"), #"kihlajaiset"
 #           "Family": _("Family"), #"Family event marriage etc. Not displayed"      
             "First Communion": _("First Communion"), #"ensimmäinen ehtoollinen"
             "Graduation": _("Graduation"), #"valmistuminen"
             "Immigration": _("Immigration"), #"maahanmuutto"
-            "Käräjöinti": _("Käräjöinti"), #"käräjöinti"
-            "Luottamustoimi": _("Luottamustoimi"), #"luottamustoimi"
+            "Käräjöinti": _("Lawsuit"), #"käräjöinti"
+            "Luottamustoimi": _("Public Duty"), #"luottamustoimi"
             "Lähtömuutto": _("Moved out"), #"lähtömuutto"
             "Marriage Banns": _("Marriage Banns"), #"kuulutus avioliittoon"
             "Marriage": _("Marriage"), #"avioliitto"
+            "Medical Information": _("Medical Information"), #"avioliitto"
             "Military Service": _("Military Service"), #"asepalvelus"
             "Nobility Title": _("Nobility Title"), #"aatelointi"
             "Occupation": _("Occupation"), #"ammatti"
             "Ordination": _("Ordination"), #"palkitseminen"
+            "Onnettomuus": _("Accident"),
+            "Accident": _("Accident"),
+            "Estate inventory": _("Estate Inventory"), # perunkirjoitus
             "Property": _("Property"), #"omaisuus"
             "Residence": _("Residence"), #"asuinpaikka"
             "Retirement": _("Retirement"), #"eläkkeelle siirtyminen"
             "Sota": _("War"), #"sota"
+            "Tulomuutto": _("War"), #"sota"
+            "Virkatalo": _("Official House"), # virkatalo-oikeus
+            "Yhteiskunnallinen toiminta": _("Social Activities"),
+            "Nimenmuutos": _("Name Change"),
             "Tulomuutto": _("Moved to") #"tulomuutto"
     }
     elif var_name == "role":
@@ -107,26 +119,29 @@ def translate(term, var_name, show_table=False):
 #             "Adoptio": _("Adoption"),     # Adoptiolapsi
 #             "Kasvatus": _("Foster-child"), # Kasvatuslapsi
             "Clergy": _("Clergy"), #"pappi"
-            "Edunsaaja": _("Edunsaaja"),
-            "Family": _("Family"), #"perhe" ?
+            "Edunsaaja": _("Beneficiary"),
+#             "Family": _("Family"), #"perhe" ?
             "father": _("Father"), 
+            "Kantaja": _("Plaintiff"),
             "Kohde": _("Concerned"),
-            "kummi": _("kummi"), #"kummina"
-            "Kummi": _("kummi"), #"kummina"
+            "kummi": _("Wittness"), #"kummina"
+            "Kummi": _("Wittness"), #"kummina"
             "man": _("Husband"), 
             "mother": _("Mother"),
             "Myyjä": _("Myyjä"), #"myyjänä"
             "Opettaja": _("Teacher"),
             "Osallinen": _("Osallinen"), #"osallisena"
-            "Ostaja": _("Ostaja"), #"ostajana"
+            "Ostaja": _("Buyer"), #"ostajana"
             "parent": _("Spouse"),   # Role as family member
-            "Perillinen": _("Perillinen"), #"perillisenä"
-            "Perinnönjättäjä": _("Perinnönjättäjä"), #"perinnönjättäjänä"
+            "Perillinen": _("Heir"), #"perillisenä"
+            "Perinnönjättäjä": _("Testator"), #"perinnönjättäjänä"
             "Primary": _("Primary"), #"pääosallisena"
             "Pääosallinen": _("Pääosallinen"), #"pääosallisena"
-            "Unknown": _("Unknown"), #"määräämätön"
-            "Vihkijä": _("Vihkijä"), #"vihkijänä"
-            "wife": _("Wife")
+            "Toimittaja": _("Ceremonial"),
+            "Vihkijä": _("Officiant"),  #"vihkijä"
+            "Vastaaja": _("Defendant"),
+            "wife": _("Wife"),
+            "Unknown": _("Unknown") #"määräämätön"
         }
     elif var_name == "conf":
         # Confidence levels
@@ -202,7 +217,7 @@ def translate(term, var_name, show_table=False):
             "Kappeliseurakunta": _("Chapel Parish"), #"kappeliseurakunta"
             "Kartano": _("Mansion"), #"kartano"
             "Katuosoite": _("Street Address"),
-            "Kortteli": _("Kortteli"), #"kortteli"
+            "Kortteli": _("Block"), #"kortteli"
             "Kuntakeskus": _("Kuntakeskus"), #"kuntakeskus"
             "Laitos": _("Institute"), # laitos
             "Linnoitus": _("Fortress"), #"linnoitus"
