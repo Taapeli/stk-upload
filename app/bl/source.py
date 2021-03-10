@@ -186,14 +186,14 @@ class SourceDataStore:
         
         citations, notes, targets = self.readservice.dr_get_source_citations(source.uniq_id)
 
-        if len(targets) == 0:
-            # Only Citations connected to Person Event or Family Event can be
-            # processed. 
-            #TODO: Should allow citating a Source from Place, Note, Meida etc
-
-            res['status'] = Status.NOT_FOUND
-            res['statustext'] = _('No person or family has uses this source')
-            return res
+#        if len(targets) == 0:
+#            # Only Citations connected to Person Event or Family Event can be
+#            # processed. 
+#            #TODO: Should allow citating a Source from Place, Note, Meida etc
+#
+#            res['status'] = Status.NOT_FOUND
+#            res['statustext'] = _('No person or family has uses this source')
+#            return res
 
         cit = []
         for c_id, c in citations.items():
