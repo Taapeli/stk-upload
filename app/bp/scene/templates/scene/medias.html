@@ -1,5 +1,5 @@
 {# /scene/templates/scene/medias.html_ #}
-{% extends "/scene/layout.html" %}
+{% extends "/scene/sc_layout.html" %}
 {% block title %}{{ _('List of medias') }} (scenemedias){% endblock %}
 {% block body %}
 {{ super() }}
@@ -16,7 +16,7 @@
 #}
 
 <div id="startdiv">
-	<h2>{{ _('List of Medias') }}</h2>
+	<h1>{{ _('List of Medias') }}</h1>
     <div>{{ macro.show_use_case() }}</div>
 </div>
 

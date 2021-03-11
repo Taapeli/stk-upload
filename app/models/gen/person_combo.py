@@ -128,65 +128,65 @@ class Person_combo(Person):
         self.parentin_hlink = []
 
 
-    @staticmethod
-    def get_my_person(session, uuid, user, use_common): # --> bl.person.PersonReader.get_a_person()
-        ''' Read a person from common data or user's own Batch.
-
-            -   If you have selected to use common approved data, you can read
-                both your own and passed data.
-
-            -   If you havn't selected common data, you can read 
-                only your own data.
-            
-            Called only from models.gen.person_reader
-        '''
-        try:
-#             if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
-#                 record = session.run(Cypher_person.get_by_user,
-#                                      uuid=uuid, user=user).single()
-#             else:       # Select person from public database
-#                 #TODO: Rule for public database is missing, taking any
-            record = session.run(Cypher_person.get_person,
-                                 uuid=uuid).single()
-            # <Record 
-            #    p=<Node id=25651 labels=frozenset({'Person'})
-            #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
-            #            'sex': 1, 'confidence': '', 'change': 1585409698, 'birth_low': 1783,
-            #            'birth_high': 1783, 'id': 'I1135', 'uuid': 'dc6a05ca6b2249bfbdd9708c2ee6ef2b',
-            #            'death_low': 1865}>
-            #    root_type='PASSED'
-            #    root=<Node id=31100 labels=frozenset({'Audit'})
-            #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
-            #            'timestamp': 1596463360673}>
-            # >
-            if record is None:
-                raise LookupError(f"Person {uuid} not found.")
-
-            # Store original researcher data to p.root:
-            # - root_type    which kind of owner link points to this object
-            # - nodeuser     the (original) owner of this object
-            # - bid          Batch id, if any
-            root_type = record['root_type']
-            node = record['root']
-            nodeuser = node.get('user', "")
-            bid = node.get('id', "")
-            if use_common or user == 'guest':
-                # Select person from public database
-                if root_type != "PASSED":
-                    raise LookupError("Person {uuid} not allowed.")
-            else:
-                # Select the person only if owned by user
-                if root_type != "OWNS":
-                    print('Person_combo.get_my_person: Should  we allow reading these approved persons, too?')
-
-            node = record['p']
-            p = Person_combo.from_node(node)
-            p.root = (root_type, nodeuser, bid)
-            return p
-
-        except Exception as e:
-            print(f"Could not read person: {e}")
-            return None
+#     @staticmethod
+#     def get_my_person(session, uuid, user, use_common): # --> bl.person.PersonReader.get_a_person()
+#         ''' Read a person from common data or user's own Batch.
+# 
+#             -   If you have selected to use common approved data, you can read
+#                 both your own and passed data.
+# 
+#             -   If you havn't selected common data, you can read 
+#                 only your own data.
+#             
+#             Called only from models.gen.person_reader
+#         '''
+#         try:
+# #             if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
+# #                 record = session.run(Cypher_person.get_by_user,
+# #                                      uuid=uuid, user=user).single()
+# #             else:       # Select person from public database
+# #                 #TODO: Rule for public database is missing, taking any
+#             record = session.run(Cypher_person.get_person,
+#                                  uuid=uuid).single()
+#             # <Record 
+#             #    p=<Node id=25651 labels=frozenset({'Person'})
+#             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
+#             #            'sex': 1, 'confidence': '', 'change': 1585409698, 'birth_low': 1783,
+#             #            'birth_high': 1783, 'id': 'I1135', 'uuid': 'dc6a05ca6b2249bfbdd9708c2ee6ef2b',
+#             #            'death_low': 1865}>
+#             #    root_type='PASSED'
+#             #    root=<Node id=31100 labels=frozenset({'Audit'})
+#             #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
+#             #            'timestamp': 1596463360673}>
+#             # >
+#             if record is None:
+#                 raise LookupError(f"Person {uuid} not found.")
+# 
+#             # Store original researcher data to p.root:
+#             # - root_type    which kind of owner link points to this object
+#             # - nodeuser     the (original) owner of this object
+#             # - bid          Batch id, if any
+#             root_type = record['root_type']
+#             node = record['root']
+#             nodeuser = node.get('user', "")
+#             bid = node.get('id', "")
+#             if use_common or user == 'guest':
+#                 # Select person from public database
+#                 if root_type != "PASSED":
+#                     raise LookupError("Person {uuid} not allowed.")
+#             else:
+#                 # Select the person only if owned by user
+#                 if root_type != "OWNS":
+#                     print('Person_combo.get_my_person: Should  we allow reading these approved persons, too?')
+# 
+#             node = record['p']
+#             p = Person_combo.from_node(node)
+#             p.root = (root_type, nodeuser, bid)
+#             return p
+# 
+#         except Exception as e:
+#             print(f"Could not read person: {e}")
+#             return None
 
 
 #     @staticmethod

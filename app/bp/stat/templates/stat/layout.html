@@ -26,12 +26,12 @@
   {% elif user_context.context == 2 %}{% set material_st = "own" %}
 {% endif %}{% endif %}
 {% block body %}
-    <h1 class={{material_st}}><a href="/"><img id="logo" src="/static/tam.png" 
+    <div id="Header" class={{material_st}}><a href="/"><img id="logo" src="/static/tam.png" 
              alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
              onmouseover="this.src='/static/tam1.png';" 
              onmouseout="this.src='/static/tam.png';"/></a>
         <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
-        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
+        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></div>
         
 {% from "start/s_macros.html" import hamburger_menu with context %}
 

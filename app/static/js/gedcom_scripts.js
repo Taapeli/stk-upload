@@ -1,3 +1,8 @@
+/*  Isotammi Genealogical Service for combining multiple researchers' results.
+    Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+                             Timo Nallikari, Pekka Valta
+    See the LICENCE file.
+*/
 var gt = new Gettext({domain: 'gedcom_transformations'});
 var _ = function(msgid,args) { return gt.strargs(gt.gettext(msgid),args); };
 var ngettext = function(msgid, msgid_plural, n) { return gt.ngettext(msgid, msgid_plural, n); };

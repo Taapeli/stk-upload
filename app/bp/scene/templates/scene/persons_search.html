@@ -1,5 +1,5 @@
 {# _myapp/templates/k_persons.html_ #}
-{% extends "/scene/layout.html" %}
+{% extends "/scene/sc_layout.html" %}
 {% block title %}{{ _('List of persons') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -8,14 +8,31 @@
 {% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
 <style>
-div#description_box p {
-    margin: 0.5em;
+.CloudBox {
+    margin: 1em;
+    padding: 5px;
+    padding: 5px;
+    min-width: 150px;
+    max-width: 430px;
+    padding-bottom: 1em;
+}
+div.CloudBox div {
+/*     background: #e3f1f2; */
+    background-image: url("/static/image/cloud.png");
+    box-shadow: 7pt 10pt 10pt #ccc;
+    padding: 1em 2em;
+    text-align: center;
+    border-radius: 3em;
+    line-height: 1.6em;
+}
+div.CloudPink div {
+    background-image: url("/static/image/cloud-pink.png");
 }
 </style>
 <div id="startdiv">
-	{% if rule == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
-	{% elif rule == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ key }}</h2>
-	{% else %}<h2>{{ _('Persons') }}</h2>
+	{% if rule == 'all' %}<h1>{{ _('Persons ordered by') }} {{ ordname[order] }}</h1>
+	{% elif rule == 'refname' %}<h1>{{ _('Persons carrying a Name') }} {{ key }}</h1>
+	{% else %}<h1>{{ _('Persons') }}</h1>
 	{% endif %}
     <div>{{ macro.show_use_case() }}</div>
 </div>
@@ -49,6 +66,9 @@ div#description_box p {
                         </li>
     {% endif %}
                     </ul>
+                    <ul>
+                    <p>▶ <a class="inlink" href="/scene/persons/search">{{ _('Most common names') }}</a></p>
+                    </ul>
                 </div>
 {% endif %}
 
@@ -58,7 +78,7 @@ div#description_box p {
 {% set oldkey = key %}
            
                 <div id="namesearch" class="SearchBox2">
-                       <h3>
+                       <h2>
                           <label for="cars">{{ _('Search term') }}</label>
                           <select id="rule" name="rule">
                             <option value="surname"
@@ -74,19 +94,22 @@ div#description_box p {
                                 x-desc="{{ _('A year (1750) or years range (1700-1750) where persons might live') }}"
                         {% if selection == "years" %}selected{% endif %}>{{ _('Years range') }}</option>
                           </select>
-                       </h3>
+                       </h2>
+                       <div style="margin: .5em 1em;">
                        <label for="snam" id="keydesc">Descr.</label>
                        <input type="text" name="key" id="snam"
                           {% if oldkey %}value="{{oldkey}}"
                             {# else %}placeholder="{{ _('Name') }}"#}
                           {% endif %}>
-                       <br>
+                       </div>
                       <div class="submit"><input type="submit" value="Hae"></div>
                       <div id="searchHelp"></div>
                 </div>
-            </div><!-- flex-container -->
+            </div>
           </form>
+
        </div><!-- summaryarea -->
+
 <script>
 let selector = document.querySelector("#rule");
 let helpText = document.querySelector("#keydesc");
@@ -109,10 +132,8 @@ selector.addEventListener("change", () => {
 	            </ul>
 	          {% endif %}
 	        {% endwith %}
-    </div>
-
-{% if status == 0 %}
-
+    </div> <!-- end messages -->
+{% if status == 'OK' %}
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
 	        {% for p in persons %}
@@ -127,7 +148,6 @@ selector.addEventListener("change", () => {
 	<table class="IndividualList">
 		<thead>
 			<tr><th></th>
-<!--                    <th>{{ _('Owner') }}</th> -->
                    <th>{{ _('Person') }}</th>
                    <th>{{ _("Person's events") }}</th>
 			</tr>
@@ -141,11 +161,6 @@ selector.addEventListener("change", () => {
 		            <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
 			{% endif %}
 				</td>
-					
-<!--			<td style="text-align:center; padding:3px;">
- 		    {%- if p.user %}{{p.user}}{% else %} – {% endif %}
-				</td>
- -->
 	            <td class="ColumnPerson">
                     <div>
 	                    <a href="/scene/person?uuid={{p.uuid}}"
@@ -180,11 +195,53 @@ selector.addEventListener("change", () => {
 	    {% endfor %}
         </tbody>
     </table>
+
 {% elif rule %}
     <div class="NotFound">
         <p>{{ _('No one found with search keys') }}.</p>
     </div>
     <p>&nbsp;</p>
-{% endif %}
-</div><!-- Individuals -->
+{% else %}
+
+    <h3>{{ _('Most common names') }}</h3>
+    <div class="flex-container2">
+        <div class="CloudBox" style="display: inline-block;">
+            <div>
+                 <form name="surnameform" method="post" action="/scene/persons/search">
+                    <input name="rule" type="hidden" value="surname">
+                    <input name="key" type="hidden">
+                    <script>
+                        function submit_search(surname) {
+                            document.forms.surnameform.elements.namedItem('key').value = surname;
+                            document.forms.surnameform.submit();
+                        }
+                    </script>
+                     {% for stat in surnamestats %}
+                        <span style='font-size:{{ stat.fontsize}}px'>
+                            <a href=# onclick="submit_search('{{ stat.surname }}')"
+                               title="{{ stat.count }} {{ _('persons') }}">{{ stat.surname }}</a>
+                        </span>
+                     {% endfor %}
+                 </form>
+            </div>
+        </div>
+
+           <div class="CloudBox CloudPink" style="display: inline-block;">
+             <div>
+                 <form name="placenameform" method="post" action="/scene/persons/search">
+                    <input name="rule" type="hidden" value="placename">
+                    <input name="key" type="hidden">
+                     {% for stat in placenamestats %}
+                        <span style='font-size:{{ stat.fontsize }}px'>
+                            <a href="/scene/location/uuid={{ stat.uuid }}"
+                               title="{{ stat.count }} {{ _('places') }}">{{ stat.placename }}</a>
+                        </span>
+                     {% endfor %}
+                 </form>
+             </div>
+           </div>
+
+    </div><!-- end flex-container -->
+   {% endif %}
+</div><!-- end Individuals -->
 {% endblock %}

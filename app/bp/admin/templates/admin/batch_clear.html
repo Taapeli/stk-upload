@@ -11,14 +11,14 @@
 <div id="startdiv">
     <div>
 {% if user %}
-    	<h2>{{ _("Empty batches for user") }} {{ user }}</h2>
+    	<h1>{{ _("Empty batches for user") }} {{ user }}</h1>
 {% else %}
-	    <h2>{{ _("Empty batches") }}</h2>
+	    <h1>{{ _("Empty batches") }}</h1>
 {% endif %}
  
  {% if uploads|count > 0 %}
 	<div class="startbox">
-<!-- 	    <h3>{{ _('Selected Batch') }}</h3> -->
+<!-- 	    <h2>{{ _('Selected Batch') }}</h2> -->
 	    <table width="100%">
            <tr>
 	            <th>{{ _("User") }}</th>
@@ -35,7 +35,7 @@
 {% endif %}
 
     <div class="startbox">
-        <h3>{{ _("Number of empty batches") }}: {{ uploads|count }}</h3>
+        <h2>{{ _("Number of empty batches") }}: {{ uploads|count }}</h2>
 {% if removed > 0 %}
         <p>{{ _('Removed %(n)s batches', n=removed) }}</p>
 {% endif %}

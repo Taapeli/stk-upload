@@ -17,14 +17,14 @@ var gedcom = "{{ gedcom }}";
 
 <div class="startdiv">
     <div>
-	    <h2>{{ _("Gedcom tools") }}</h2>
+	    <h1>{{ _("Gedcom tools") }}</h1>
 	    <div id="errors" class="errors"></div>
 
 	    <div class="row">
 
 	       <div class="startbox">
 	         <div style="display: inline-block;">
-				<h3>{{ _("File") }} <i>{{gedcom}}</i></h3>
+				<h2>{{ _("File") }} <i>{{gedcom}}</i></h2>
 				<p>{{ _("user") }}: <b>{{ user }}</b></p>
 				<label for="desc">{{ _("Description") }}<br></label>
 			    <input id="desc" value='{{ metadata.desc }}' style="width: 263px;">
@@ -56,7 +56,7 @@ var gedcom = "{{ gedcom }}";
           <div class="startbox gedcom" id="info">
             <div style="display: inline-block;">
     
-                <h3>{{ _("Statistics") }}</h3>
+                <h2>{{ _("Statistics") }}</h2>
 				<table>
                     {% if metadata.upload_time %}
 	                    <tr><td>{{ _('Upload time') }}
@@ -128,7 +128,7 @@ var gedcom = "{{ gedcom }}";
 	      <div class="startbox">
 	        <div style="display: inline-block;">
 	
-				<h3>{{ _("Actions") }}</h3>
+				<h2>{{ _("Actions") }}</h2>
 				    <btn id="transforms"
 				    	title='{{ _("Choose a transformation to perform for this GEDCOM") }}'>
 					    {{ _("Choose a transformation") }}
@@ -169,7 +169,7 @@ var gedcom = "{{ gedcom }}";
 	      <div class="startbox2 gedcom" id="div_transforms">
 	        <div style="display: inline-block;">
 
-		        <h3>{{ _("Transformations") }}</h3>
+		        <h2>{{ _("Transformations") }}</h2>
 		        <table>
 		        {% for transform in transforms %}
 		            <tr><td><a href="#" class="transform" 
@@ -186,7 +186,7 @@ var gedcom = "{{ gedcom }}";
 	      <div class="startbox gedcom" id="div_versions">
 	        <div style="display: inline-block;">
 	
-		        <h3>{{ _("Versions") }}</h3>
+		        <h2>{{ _("Versions") }}</h2>
 		        <table id="versions_list"></table>
                 <div class="xsubmit">
 		          <btn id="delete_old_versions">{{ _("Delete old versions") }}</btn>
@@ -199,7 +199,7 @@ var gedcom = "{{ gedcom }}";
 	      <div class="gedcom" id="div_history">
 	        <div style="display: inline-block;">
 	
-		        <h3>{{ _("Transformation history") }}</h3>
+		        <h2>{{ _("Transformation history") }}</h2>
 		        <a href="javascript:window.scroll(0,0)">
 		        <img src="/static/444-512.png" class="totop" title="Top">
 		        </a>
@@ -211,7 +211,7 @@ var gedcom = "{{ gedcom }}";
 		  </div>
 
 	      <div class="gedcom" id="div_compare">
-	        <h3>{{ _("GEDCOM comparison") }}:</h3>
+	        <h2>{{ _("GEDCOM comparison") }}:</h2>
 	        <button id="palauta1" class="palauta_button"></button>
 	        <button id="palauta2" class="palauta_button"></button>
 	        <p>
@@ -223,7 +223,7 @@ var gedcom = "{{ gedcom }}";
 		  </div>
 
 	      <div class="gedcom" id="div_results">
-	        <h3>{{ _("Results") }}:</h3>
+	        <h2>{{ _("Results") }}:</h2>
 	        <a href="javascript:window.scroll(0,0)">
 		        <img src="/static/444-512.png" class="totop" title="Top">
 	        </a>
@@ -254,11 +254,11 @@ var gedcom = "{{ gedcom }}";
 <div class="resultdiv">
    <div>
 	  <div id="output" class="gedcom">
-		<h3>{{ _("Transformation results") }}</h3>
+		<h2>{{ _("Transformation results") }}</h2>
 		<div id="div_oldname">
-		<h3>{{ _("Old version is saved as") }} 
+		<h2>{{ _("Old version is saved as") }} 
 		  <span id="oldname"></span> 
-		  (<a id="palauta" href="#">{{ _("Revert to old version") }}</a>)</h3>
+		  (<a id="palauta" href="#">{{ _("Revert to old version") }}</a>)</h2>
 		</div>
 		<div id="div_save">
 		<span class="important">{{ _("Not saved yet") }}</span>

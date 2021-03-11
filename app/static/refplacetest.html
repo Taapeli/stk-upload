@@ -20,7 +20,7 @@ table {
 
 <body>
 
-<h4>Referenssipaikat</h4>
+<h3>Referenssipaikat</h3>
 
 <p>
 
@@ -31,7 +31,7 @@ table {
 
     <p>
     <form v-show="hakutulos">
-        <h4>Hakutulos</h4>
+        <h3>Hakutulos</h3>
         <table border>
             <tr><th>Nimi</th><th>Tyyppi</th><th>Id</th></tr>
             <tr v-for="place in records">
@@ -48,7 +48,7 @@ table {
             <tr><th>Tyyppi<td>{{ current_place.type }}
             <tr><th>Id<td>{{ current_place.id }}
         </table>
-        <h4>Sisältyy</h4>
+        <h3>Sisältyy</h3>
         <table border>
             <tr><th>Nimi</th><th>Tyyppi</th><th>Id</th></tr>
             <tr v-for="place in enclosing_places">
@@ -58,7 +58,7 @@ table {
                 <td>{{ place.timespan }}
             </tr>
         </table>
-        <h4>Sisältää</h4>
+        <h3>Sisältää</h3>
         <table border>
             <tr><th>Nimi</th><th>Tyyppi</th><th>Id</th></tr>
             <tr v-for="place in enclosed_places">

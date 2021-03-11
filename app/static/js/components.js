@@ -1,3 +1,8 @@
+/*  Isotammi Genealogical Service for combining multiple researchers' results.
+    Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+                             Timo Nallikari, Pekka Valta
+    See the LICENCE file.
+*/
 Vue.component('editable', {
     props: ["value","name"],
     data: function () {

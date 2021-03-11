@@ -11,7 +11,7 @@
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("User's home page for Isotammi Services") }}</h2>
+    <h1>{{ _("User's home page for Isotammi Services") }}</h1>
 
 {#  <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
@@ -25,7 +25,7 @@
          <div class="startbox gedtools">
             <div style="display: inline-block;">
             <form method="get" action="/gedcom">
-               <h3>{{ _('Gedcom tools') }}</h3>
+               <h2>{{ _('Gedcom tools') }}</h2>
                <p>{{ _('Use these Gedcom tools to improve the quality of your own file or any file you have recieved.') }}</p>
                <p>{{ _('Return the improved file back to your genealogy software.') }}</p>
               <div class="submit"> 
@@ -39,7 +39,7 @@
 {% if current_user.is_authenticated and current_user.has_role('research') %}
            <div class="startbox">
              <div style="display: inline-block;">
-                <h3>{{ _('Candidate materials for Isotammi') }}</h3>
+                <h2>{{ _('Candidate materials for Isotammi') }}</h2>
                   <form action="/gramps">
                  <p>{{ _('Save your  Gramps xml file as Isotammi candidate material.') }}</p>
                  <p>{{ _('Manage your candidate files and materials in database.') }}</p>
@@ -53,11 +53,11 @@
 
            <div class="startbox">
              <div style="display: inline-block;">
-               <form method="get" action="/scene/persons/all">
+               <form method="get" action="/scene/persons/search">
 
 {% if current_user.is_authenticated and 
    ( current_user.has_role('research') or current_user.has_role('admin') ) %}
-                 <h3>{{ _('Browse Isotammi Database') }}</h3>
+                 <h2>{{ _('Browse Isotammi Database') }}</h2>
                  <p>{{ _('View your own candidate material or all approved common data') }}.</p>
                  <p>{% set ctxt = session['user_context'] %}
                    <input type="radio" name="div" value="1" 
@@ -71,7 +71,7 @@
 #}
                 </p>
 {% else %}
-                 <h3>{{ _('The Browsed Material') }}</h3>
+                 <h2>{{ _('The Browsed Material') }}</h2>
                  <p>{{ _('You can view only approved and public material in Demo Database') }}.</p>
                  <input name="div" type="hidden" value="1">
 {% endif %}
@@ -89,7 +89,7 @@
       <div class="startbox admin">
         <div style="display: inline-block;">
           <form method="get" action="/admin">
-            <h3>{{ _('Admin Operations') }}</h3>
+            <h2>{{ _('Admin Operations') }}</h2>
             <p>{{ _('Manage users, reference data sets and do database maintenance tasks') }}.</p>
             <div class="submit"> 
                <button type="submit">{{ _('Maintenance') }}</button>
@@ -103,7 +103,7 @@
       <div class="startbox audit">
         <div style="display: inline-block;">
           <form method="get" action="/audit">
-             <h3>{{ _('Isotammi auditor') }}</h3>
+             <h2>{{ _('Isotammi auditor') }}</h2>
              <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
              <div class="submit"> 
                 <button type="submit">{{ _('Continue') }}</button>
@@ -116,7 +116,7 @@
        <div class="startbox">
          <div style="display: inline-block;">
            <form method="get" action="http://wiki.isotammi.net/wiki/Työkaluja" target="_blank">
-              <h3>{{ _('Tools and Links') }}</h3>
+              <h2>{{ _('Tools and Links') }}</h2>
    <!--       <p>Ohjesivuitamme voit löytää hyödyllisiä varusohjelmia ja Grampsin lisätoimintoja (grampletteja).</p> -->
               <p>{{ _('Study our supplementary stand-alone and Gramps utilities in our tools page') }}.</p>
               <div class="submit"> 

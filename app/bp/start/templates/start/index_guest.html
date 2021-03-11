@@ -12,7 +12,7 @@
 
 <div id="startdiv">
   <div>
-    <h2>{{ _('Exploring Isotammi demo environment') }}</h2>
+    <h1>{{ _('Exploring Isotammi demo environment') }}</h1>
 {#  {% if current_user.name %}
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
@@ -24,11 +24,11 @@
         <div class="row">
            <div class="startbox">
              <div style="display: inline-block;">
-               <form method="get" action="/scene/persons/all">
+               <form method="get" action="/scene/persons/search">
 
      {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}
-                <h3>{{ _('Select Material for Browsing') }}</h3>
+                <h2>{{ _('Select Material for Browsing') }}</h2>
                 <p>{% set ctxt = session['user_context'] %}
 	                <input type="checkbox" name="div" value="1"
 	                    {% if ctxt == 1 or ctxt == 3 %}checked{% endif %}
@@ -50,7 +50,7 @@
                 </p>
 #}
      {% else %}
-                <h3>{{ _('The Demo Material') }}</h3>
+                <h2>{{ _('The Demo Material') }}</h2>
                 <p>{{ _('You are on the home page of Isotammi demo. You have log in as a quest user.') }}</p>
                 <input name="div" type="hidden" value="1">
      {% endif %}
@@ -60,7 +60,7 @@
                </form>
              </div>
      {% if not is_demo %}
-            <h3>{{ _('Log in') }}</h3>
+            <h2>{{ _('Log in') }}</h2>
             <p>{{ _('If you has already registered, you can log in and refine the structure of your own data.') }}
                    {{ _('As a member of <i>Genealogical Society of Finland</i> you will get more services.') }}.
             </p>

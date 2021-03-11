@@ -32,7 +32,7 @@ function checkFileSize() {
 
 <div id="startdiv">
   <div>
-    <h2>{{ _('Candidate material xml files') }}</h2>
+    <h1>{{ _('Candidate material xml files') }}</h1>
     <p>{{ _('User') }} <b>{{current_user.name}}</b></p>
 
         <div class="row">
@@ -40,7 +40,7 @@ function checkFileSize() {
     {% if current_user.is_authenticated and current_user.has_role('research') %}
     
            <div class="startbox">
-                <h3>{{ _('Send data to server') }}</h3>
+                <h2>{{ _('Send data to server') }}</h2>
                   <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
                  <div style="display: inline-block;">
                    <input type="hidden" name="material" value="xml_file">
@@ -50,19 +50,21 @@ function checkFileSize() {
                  <div class="submit"> 
                     <input type="submit" value="{{ _('Send') }}" onclick="checkFileSize()"/>
                  </div>
+                 <div><ul><li>{{ _('Read more') }}: <i>
+                    <a href="https://gramps-project.org/wiki/index.php/Fi:Etusivu" 
+                       title="{{ _('Manual') }}">Gramps</a></i></li></ul>
+                 </div>
                  </form>
          </div>
     
          <div class="startbox">
-	            <h3>{{ _('My files and materials') }}</h3>
+	            <h2>{{ _('My files and materials') }}</h2>
                 <p>{{ _('Manage your uploaded files and the candidate materials which you have stored in the database.') }}</p>
 	            <form action="/gramps/uploads">
                  <div class="submit"> 
                     <input type="submit" value="{{ _('List my data sets') }}" />
                  </div>
 	            </form>
-<!-- 	            <ul><li><a href=/gramps/uploads>{{ _("List my uploads") }}</a> -->
-<!-- 	            </li></ul> -->
          </div>
      
      {% endif %}

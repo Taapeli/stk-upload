@@ -1,12 +1,12 @@
 {# /scene/templates/scene/media.html_ #}
-{% extends "/scene/layout.html" %}
+{% extends "/scene/sc_layout.html" %}
 {% block title %}{{ _('Media data') }} (scenemedias){% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
 <script src="/static/infobox.js"></script>
 <style>
-h3 {margin-top: 1em;}
+h2 {margin-top: 1em;}
 p {margin-left:15px;}
 #flex {display: flex; /*height:75vh;*/
     flex-wrap: wrap;
@@ -42,7 +42,7 @@ tr > td > img {
 </style>
 
 <div id="startdiv">
-  <h2>{{ _('Media data') }}</h2>
+  <h1>{{ _('Media data') }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
 </div>
 
@@ -63,7 +63,7 @@ tr > td > img {
   <div id="flex">
 
     <div>
-		<h3>{{ media.description }} ({{ _("Picture")|lower }})</h3>
+		<h2>{{ media.description }} ({{ _("Picture")|lower }})</h2>
 
         <div id="summaryarea">
             <table>
@@ -92,6 +92,12 @@ tr > td > img {
                </tr>
 	        </table>
 		</div>
+
+        <form>
+			<input type="hidden" name="uniq_id" value="{{ media.uniq_id }}">
+        </form>
+
+    	<div id="comments_div" hx-get="/scene/comments/comments_header" hx-trigger="load"></div> 
 
 	    <h3>{{ _('References') }}</h3>
 		

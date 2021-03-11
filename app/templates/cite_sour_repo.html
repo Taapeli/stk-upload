@@ -5,7 +5,7 @@
 {{ super() }}
 
 {% for e in events %}
-    <h2>{{ _('Event') }}</h2>
+    <h1>{{ _('Event') }}</h1>
     <ol id="itemlist">
         <li class="itemrow">
                 <div class="col1">{{ _('Identifier') }}</div>
@@ -22,7 +22,7 @@
     </ol>
     
     {% if e.citations %}
-    <h4>{{ _('References') }}</h4>
+    <h3>{{ _('References') }}</h3>
     <ol class="num">
         {% for c in e.citations %}
         <li><div class="itemrow">
@@ -36,7 +36,7 @@
     </ol>
     
 	    {% if c.sources %}
-	    <h4>{{ _('Sources') }}</h4>
+	    <h3>{{ _('Sources') }}</h3>
 	    <ol class="num">
 	        {% for s in c.sources %}
 	        <li><div class="itemrow">
@@ -52,7 +52,7 @@
 	    </ol>
     
 		    {% if s.repositories %}
-		    <h4>{{ _('Repositories') }}</h4>
+		    <h3>{{ _('Repositories') }}</h3>
 		    <ol class="num">
 		      {% for repo in s.repositories %}
 		        <li><div class="itemrow">

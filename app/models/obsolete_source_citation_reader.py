@@ -11,7 +11,7 @@ from .gen.repository import Repository
 #from .gen.source import Source
 
 #TODO Should be somewhere else!
-from templates.jinja_filters import translate
+from ui.jinja_filters import translate
 
      
 # def read_sources_repositories(session, objs, citations=None): # --> pe.neo4j.readservice.dr_get_object_sources_repositories()
@@ -80,67 +80,67 @@ from templates.jinja_filters import translate
 #     return
 
 
-def get_citations_js(objs):
-    ''' Create code for generating Javascript objecs representing
-        Citations, Sources and Repositories with their Notes.
-        
-        js-style person[id] = {name: "John", age: 31, city: "New York"}
-    '''
-    from bl.source import Source
-
-    def unquote(s):
-        ''' Change quites (") to fancy quotes (“)
-            Change new lines to '¤' symbol
-        '''
-        return s.replace('"', '“').replace('\n','¤');
-
-    notes = []
-    js  = 'var citations = {};\nvar sources = {};\n'
-    js += 'var repositories = {};\nvar notes = {};\n'
-    for o in objs.values():
-        if isinstance(o, Citation):
-            page = unquote(o.page)
-            js += f'citations[{o.uniq_id}] = {{ '
-            js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
-            js += f'id:"{o.id}", note_ref:{o.note_ref}, '
-            js += f'page:"{page}", source_id:{o.source_id}, uuid:"{o.uuid}" '
-            js +=  '};\n'
-            notes.extend(o.note_ref)
-
-        elif isinstance(o, Source):
-            sauthor = unquote(o.sauthor)
-            spubinfo = unquote(o.spubinfo)
-            stitle = unquote(o.stitle)
-            js += f'sources[{o.uniq_id}] = {{ '
-            js += f'id:"{o.id}", note_ref:{o.note_ref}, '
-            js += f'repositories:{o.repositories}, sauthor:"{sauthor}", '
-            js += f'spubinfo:"{spubinfo}", stitle:"{stitle}", '
-            js += f'uuid:"{o.uuid}" '
-            js +=  '};\n'
-            notes.extend(o.note_ref)
-
-        elif isinstance(o, Repository):
-            medium = translate(o.medium, 'medium')
-            atype = translate(o.type, 'rept')
-            js += f'repositories[{o.uniq_id}] = {{ '
-            js += f'uuid:"{o.uuid}", id:"{o.id}", type:"{atype}", rname:"{o.rname}", '
-            # Media type 
-            js += f'medium:"{medium}", notes:{o.notes}, sources:{o.sources}'
-            js +=  '};\n'
-            notes.extend(o.notes)
-
-        else:
-            continue
-
-    # Find referenced Notes; conversion to set removes duplicates
-    for uniq_id in set(notes):
-        o = objs[uniq_id]
-        text = unquote(o.text)
-        url = unquote(o.url)
-        js += f'notes[{o.uniq_id}] = {{ '
-        js += f'uuid:"{o.uuid}", id:"{o.id}", type:"{o.type}", '
-        js += f'priv:"{o.priv}", text:"{text}", url:"{url}" '
-        js +=  '};\n'
-
-    return js
+# def get_citations_js(objs): # --> bl.person_reader.PersonReaderTx.get_citations_js
+#     ''' Create code for generating Javascript objecs representing
+#         Citations, Sources and Repositories with their Notes.
+#         
+#         js-style person[id] = {name: "John", age: 31, city: "New York"}
+#     '''
+#     from bl.source import Source
+# 
+#     def unquote(s):
+#         ''' Change quites (") to fancy quotes (“)
+#             Change new lines to '¤' symbol
+#         '''
+#         return s.replace('"', '“').replace('\n','¤');
+# 
+#     notes = []
+#     js  = 'var citations = {};\nvar sources = {};\n'
+#     js += 'var repositories = {};\nvar notes = {};\n'
+#     for o in objs.values():
+#         if isinstance(o, Citation):
+#             page = unquote(o.page)
+#             js += f'citations[{o.uniq_id}] = {{ '
+#             js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
+#             js += f'id:"{o.id}", note_ref:{o.note_ref}, '
+#             js += f'page:"{page}", source_id:{o.source_id}, uuid:"{o.uuid}" '
+#             js +=  '};\n'
+#             notes.extend(o.note_ref)
+# 
+#         elif isinstance(o, Source):
+#             sauthor = unquote(o.sauthor)
+#             spubinfo = unquote(o.spubinfo)
+#             stitle = unquote(o.stitle)
+#             js += f'sources[{o.uniq_id}] = {{ '
+#             js += f'id:"{o.id}", note_ref:{o.note_ref}, '
+#             js += f'repositories:{o.repositories}, sauthor:"{sauthor}", '
+#             js += f'spubinfo:"{spubinfo}", stitle:"{stitle}", '
+#             js += f'uuid:"{o.uuid}" '
+#             js +=  '};\n'
+#             notes.extend(o.note_ref)
+# 
+#         elif isinstance(o, Repository):
+#             medium = translate(o.medium, 'medium')
+#             atype = translate(o.type, 'rept')
+#             js += f'repositories[{o.uniq_id}] = {{ '
+#             js += f'uuid:"{o.uuid}", id:"{o.id}", type:"{atype}", rname:"{o.rname}", '
+#             # Media type 
+#             js += f'medium:"{medium}", notes:{o.notes}, sources:{o.sources}'
+#             js +=  '};\n'
+#             notes.extend(o.notes)
+# 
+#         else:
+#             continue
+# 
+#     # Find referenced Notes; conversion to set removes duplicates
+#     for uniq_id in set(notes):
+#         o = objs[uniq_id]
+#         text = unquote(o.text)
+#         url = unquote(o.url)
+#         js += f'notes[{o.uniq_id}] = {{ '
+#         js += f'uuid:"{o.uuid}", id:"{o.id}", type:"{o.type}", '
+#         js += f'priv:"{o.priv}", text:"{text}", url:"{url}" '
+#         js +=  '};\n'
+# 
+#     return js
 

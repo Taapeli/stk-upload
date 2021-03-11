@@ -1,3 +1,22 @@
+#   Isotammi Genealogical Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
+#
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#                            Timo Nallikari, Pekka Valta
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 '''
     Source classes: Source, SourceBl and SourceDataStore.
 
@@ -167,14 +186,14 @@ class SourceDataStore:
         
         citations, notes, targets = self.readservice.dr_get_source_citations(source.uniq_id)
 
-        if len(targets) == 0:
-            # Only Citations connected to Person Event or Family Event can be
-            # processed. 
-            #TODO: Should allow citating a Source from Place, Note, Meida etc
-
-            res['status'] = Status.NOT_FOUND
-            res['statustext'] = _('No person or family has uses this source')
-            return res
+#        if len(targets) == 0:
+#            # Only Citations connected to Person Event or Family Event can be
+#            # processed. 
+#            #TODO: Should allow citating a Source from Place, Note, Meida etc
+#
+#            res['status'] = Status.NOT_FOUND
+#            res['statustext'] = _('No person or family has uses this source')
+#            return res
 
         cit = []
         for c_id, c in citations.items():

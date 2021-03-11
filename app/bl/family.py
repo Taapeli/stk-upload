@@ -1,3 +1,22 @@
+#   Isotammi Genealogical Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
+#
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#                            Timo Nallikari, Pekka Valta
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 '''
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
@@ -9,7 +28,7 @@ Components moved 15.5.2020 from
 @author: jm 
 '''
 import  shareds
-from templates.jinja_filters import translate
+from ui.jinja_filters import translate
 import logging 
 logger = logging.getLogger('stkserver')
 from flask_babelex import _
@@ -114,7 +133,7 @@ class FamilyBl(Family):
         self.events = []            # Event objects
         self.notes = []
         self.sources = []
-        self.marriage_dates = None
+        self.marriage_dates = DateRange()
         self.note_ref = []          # For a page, where same note may be referenced
                                     # from multiple events and other objects
 
@@ -378,10 +397,7 @@ class FamilyReader(DbReader):
 
             Returns a dict {item:Family, status=0, statustext:None}
             
-            where status code is one of
-                - Status.OK = 0
-                - Status.NOT_FOUND = 1
-                - Status.ERROR = 2
+            where status code is one of Status.OK / Status.NOT_FOUND / Status.ERROR
             
             Ther wanted parameter is a string of short keywords separated by ':'.
             
@@ -499,7 +515,8 @@ class FamilyReader(DbReader):
             # Add translated text fields
             for family in items:
                 family.rel_type_lang = translate(family.rel_type, 'marr').lower()
-                family.role_lang = translate('as_'+family.role, 'role')
+                # As_child / As_parent
+                family.role_lang = translate('As_'+family.role, 'role')
                 for parent in family.parents:
                     parent.role_lang = translate(parent.role, 'role')
                 for child in family.children:

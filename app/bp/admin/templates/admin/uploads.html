@@ -12,12 +12,12 @@
     
     {% if users %}
     	{% if users|length == 1 %}
-	    	<h2>{{ _("Uploads for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h2>
+	    	<h1>{{ _("Uploads for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h1>
     	{% else %}
-    		<h2>{{ _("Uploads for %(n)s users", n=users|length) }}</h2>
+    		<h1>{{ _("Uploads for %(n)s users", n=users|length) }}</h1>
 		{% endif %}
     {% else %}
-	    <h2>{{ _("Uploads for all users") }}</h2>
+	    <h1>{{ _("Uploads for all users") }}</h1>
     {% endif %}
     
     {% with messages = get_flashed_messages(with_categories=true) %}

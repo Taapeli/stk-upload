@@ -1,0 +1,86 @@
+{% import '/scene/macros.html' as macro with context %}
+<div class="tab-bottom">
+    <div class="tab-list">
+        <a hx-get="/scene/person_famtree_hx?uuid={{person.uuid}}" class="selected"> {{ _("Families") }} </a>
+{% if current_user.has_role('audit') %}
+        <a hx-get="/scene/person_fanchart_hx?uuid={{person.uuid}}" class="Auditor"> {{ _("Two-way fanchart") }} </a>
+{% endif %}
+    </div>
+    <div class="tab-content">
+        <div class="subsection" id="families">
+            {% set myid = person.uuid %}
+            {% if person.families_as_child %}
+            <div class="mainbox" title="{{ _('Families') }}">
+                <p>{{ _("Parents' family") }}</p>
+                    {% for fam in person.families_as_child %}
+                    <div class="groupbox">
+                        <div class="familybox" title="{{ _('family') }} {{fam.id}}">
+                            <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
+                                    {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
+                                {{fam.marriage_dates}}</p>
+                            <ul>
+                                {% if fam.father %}
+                                <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
+                                {% endif %}{% if fam.mother %}
+                                <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
+                                {% endif %}{% if fam.children %}
+                                <li>{{ _("Children") }}<ul>
+                                        {% for ch in fam.children|sort %}
+                                        <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
+                                        {% endfor -%}
+                                    </ul>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endfor %}
+            </div>
+            {% endif %}
+    
+            <div class="mainbox" title="{{ _('Central person') }}">
+                <p>{{person.names[0].firstname}} {{ _("self") }}</p>
+                <div class="groupbox">
+                    <div class="personbox" title="{{ _('Self') }}">
+                        <span title="{{ _('first name') }}">{{person.names[0].firstname}}</span>
+                        {% if not person.names[0].surname %}
+                        <i title="{{ _('patronymic') }}">{{person.names[0].suffix}}</i>
+                        {% else %}
+                        <b title="{{ _('surname') }}">{{person.names[0].prefix}} {{person.names[0].surname}}</b>
+                        {% endif -%}
+                    </div>
+                </div>
+            </div>
+    
+            {% if person.families_as_parent %}
+                <div class="mainbox" title="{{ _('Own families') }}">
+                    <p>{{ _("As Parent in Family") }}</p>
+                    <div class="groupbox">
+                        {% for fam in person.families_as_parent %}
+                        <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
+                            <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
+                                    {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
+                                {{fam.marriage_dates}}</p>
+                            <ul>
+                                {% if fam.father %}
+                                <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
+                                {% endif %}{% if fam.mother %}
+                                <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
+                                {% endif %}{% if fam.children|count %}
+                                <li>{{ _("Children") }}<ul>
+                                        {% for ch in fam.children|sort %}
+                                        <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
+                                        {% endfor -%}
+                                    </ul>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+         </div>
+    </div>
+</div>
+

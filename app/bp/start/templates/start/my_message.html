@@ -43,11 +43,11 @@ $(document).ready( function() {
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("Contact administrators") }}</h2>
+    <h1>{{ _("Contact administrators") }}</h1>
 
     {% if current_user.is_authenticated %}
     <div>
-        <h3>{{ _('Write a message') }}</h3>
+        <h2>{{ _('Write a message') }}</h2>
           <form action="#">
 		<p>{{ _('User') }} <i>{{current_user.name}}</i> 
 		    &lt;{{current_user.email}}&gt;</p>
