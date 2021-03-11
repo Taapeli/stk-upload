@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-10 17:06+0200\n"
+"POT-Creation-Date: 2021-03-11 13:53+0200\n"
 "PO-Revision-Date: 2021-02-15 15:01+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -27,13 +27,11 @@ msgstr "Määrittelemätön"
 msgid "Finnish"
 msgstr "suomi"
 
-#: bp/audit/templates/audit/classifiers.html:34
 #: bp/start/templates/start/my_settings.html:66 config.py:38
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr "ruotsi"
 
-#: bp/audit/templates/audit/classifiers.html:35
 #: bp/start/templates/start/my_settings.html:68 config.py:39
 msgid "English"
 msgstr "englanti"
@@ -151,15 +149,15 @@ msgstr "tuntematon suhde"
 msgid "This person has no families"
 msgstr "Ei perheitä"
 
-#: bl/person.py:125 bl/person.py:128 ui/jinja_filters.py:292
+#: bl/person.py:125 bl/person.py:128 ui/jinja_filters.py:294
 msgid "Child"
 msgstr "lapsi"
 
-#: bl/person.py:126 ui/jinja_filters.py:291
+#: bl/person.py:126 ui/jinja_filters.py:293
 msgid "Son"
 msgstr "poika"
 
-#: bl/person.py:127 ui/jinja_filters.py:290
+#: bl/person.py:127 ui/jinja_filters.py:292
 msgid "Daughter"
 msgstr "tytär"
 
@@ -960,15 +958,15 @@ msgstr "Näytä loki"
 msgid "Delete file"
 msgstr "Poista tiedosto"
 
-#: bp/audit/routes.py:178
+#: bp/audit/routes.py:190
 msgid "Done"
 msgstr "Tehty"
 
-#: bp/audit/routes.py:245
+#: bp/audit/routes.py:257
 msgid "Data type '{}' is not supported"
 msgstr "Tietotyyppiä '{}' ei tueta"
 
-#: bp/audit/routes.py:248
+#: bp/audit/routes.py:260
 msgid "Missing proper column title: "
 msgstr "Kelvollinen sarakeotsikko puuttuu:"
 
@@ -1041,29 +1039,21 @@ msgid "Move to Isotammi database"
 msgstr "Siirrä yhteiseen sukukantaan"
 
 #: bp/audit/templates/audit/classifiers.html:4
-#: bp/audit/templates/audit/classifiers.html:15
+#: bp/audit/templates/audit/classifiers.html:23
 msgid "Classifiers"
 msgstr "Luokittelijat"
 
-#: bp/audit/templates/audit/classifiers.html:31
-#: bp/scene/templates/scene/families.html:130
-#: bp/scene/templates/scene/medias.html:84
-msgid "Key"
-msgstr "Avain"
-
-#: bp/audit/templates/audit/classifiers.html:32
+#: bp/audit/templates/audit/classifiers.html:60
 msgid "Database"
 msgstr "Tietokannassa"
 
-#: bp/audit/templates/audit/classifiers.html:33
-msgid "User language"
-msgstr "Käyttäjän kielellä"
+#: bp/audit/templates/audit/classifiers.html:61
+msgid "Translation"
+msgstr "Käännös"
 
-#: bp/audit/templates/audit/classifiers.html:51
-msgid "Can't display.<br>Change user's language to see these."
-msgstr ""
-"Ei voi näyttää.<br>Vaihda käyttäjän kieltä, niin näet näitä "
-"arvoja<br>'käyttäjän kielellä'-sarakkeessa."
+#: bp/audit/templates/audit/classifiers.html:63
+msgid "Inessive"
+msgstr "Inessiivi"
 
 #: bp/audit/templates/audit/index.html:3 bp/audit/templates/audit/index.html:13
 #: bp/start/templates/start/index_logged.html:106
@@ -2422,6 +2412,11 @@ msgstr "Siirry perhesivulle"
 msgid "Original ID"
 msgstr "Alkuperäinen tunniste"
 
+#: bp/scene/templates/scene/families.html:130
+#: bp/scene/templates/scene/medias.html:84
+msgid "Key"
+msgstr "Avain"
+
 #: bp/scene/templates/scene/families.html:149
 #: bp/scene/templates/scene/families.html:152
 #, python-format
@@ -3323,7 +3318,6 @@ msgid "Exploring Isotammi demo environment"
 msgstr "Selataan Isotammen mallisukupuuta"
 
 #: bp/start/templates/start/index_guest.html:31
-#: bp/start/templates/start/index_scene.html:31
 msgid "Select Material for Browsing"
 msgstr "Valitse selattava aineisto"
 
@@ -3333,7 +3327,6 @@ msgstr "Esittelyaineisto"
 
 #: bp/start/templates/start/index_guest.html:38
 #: bp/start/templates/start/index_logged.html:66
-#: bp/start/templates/start/index_scene.html:42
 msgid "My candidate material"
 msgstr "Tarjokasaineistoni"
 
@@ -3349,7 +3342,6 @@ msgstr "Olet kirjautunut vierailijana Isotammen esittelysivulle."
 
 #: bp/start/templates/start/index_guest.html:58
 #: bp/start/templates/start/index_logged.html:109
-#: bp/start/templates/start/index_scene.html:62
 msgid "Continue"
 msgstr "Jatka"
 
@@ -3425,12 +3417,10 @@ msgid "The approved Isotammi data"
 msgstr "Yhteinen sukukanta"
 
 #: bp/start/templates/start/index_logged.html:74
-#: bp/start/templates/start/index_scene.html:57
 msgid "The Browsed Material"
 msgstr "Selattava aineisto"
 
 #: bp/start/templates/start/index_logged.html:75
-#: bp/start/templates/start/index_scene.html:58
 msgid "You can view only approved and public material in Demo Database"
 msgstr "Voit katsella vain esittelyaineistoa"
 
@@ -3465,34 +3455,6 @@ msgstr "Tutustu tarjoamiimme Grampsin ja muihin työkaluihin"
 #: bp/start/templates/start/index_logged.html:123
 msgid "Help page"
 msgstr "Ohjesivulle"
-
-#: bp/start/templates/start/index_scene.html:4
-msgid "Materials"
-msgstr "Aineistot"
-
-#: bp/start/templates/start/index_scene.html:15
-msgid "Exploring Isotammi Database"
-msgstr "Tutustu esittelyaineistoon"
-
-#: bp/start/templates/start/index_scene.html:39
-msgid "Approved data"
-msgstr "Yhteinen sukukanta"
-
-#: bp/start/templates/start/index_scene.html:72
-msgid "Table format tools"
-msgstr "Taulukkonäkymiä"
-
-#: bp/start/templates/start/index_scene.html:73
-msgid "A variety of more technical listings and problem solving tools."
-msgstr "Joukko teknisiä listauksia ja ongelmanselvitysvälineitä."
-
-#: bp/start/templates/start/index_scene.html:74
-msgid "The data includes accepted and candidate materials of all users."
-msgstr "Mukana on sekä hyväksytyt tiedot että kaikki tarjokasaineistot."
-
-#: bp/start/templates/start/index_scene.html:78
-msgid "Explore the database"
-msgstr "Selaa tietokantaa"
 
 #: bp/start/templates/start/join.html:5 bp/start/templates/start/join.html:38
 msgid "Join Isotammi"
@@ -4788,7 +4750,7 @@ msgstr "lääni"
 
 #: ui/jinja_filters.py:212 ui/jinja_filters.py:213 ui/jinja_filters.py:235
 msgid "Farm"
-msgstr "tila"
+msgstr "maatila"
 
 #: ui/jinja_filters.py:214
 msgid "Hamlet"
@@ -4920,7 +4882,7 @@ msgstr "läänissä"
 
 #: ui/jinja_filters.py:254
 msgid "in the farm of"
-msgstr "tilalla"
+msgstr "maatilalla"
 
 #: ui/jinja_filters.py:255
 msgid "in the hamlet of"
@@ -4979,22 +4941,30 @@ msgid "in the parish of"
 msgstr "seurakunnassa"
 
 #: ui/jinja_filters.py:270
-msgid "In the state"
+msgid "in the state"
 msgstr "maassa"
 
 #: ui/jinja_filters.py:271
+msgid "in the farm"
+msgstr ""
+
+#: ui/jinja_filters.py:272
 msgid "Tontilla"
 msgstr "tontilla"
 
-#: ui/jinja_filters.py:272
+#: ui/jinja_filters.py:273
+msgid "in the town"
+msgstr ""
+
+#: ui/jinja_filters.py:274
 msgid "in the village of"
 msgstr "kylässä"
 
-#: ui/jinja_filters.py:283
+#: ui/jinja_filters.py:285
 msgid "Married"
 msgstr "Avioliitossa"
 
-#: ui/jinja_filters.py:284
+#: ui/jinja_filters.py:286
 msgid "Unknown relation"
 msgstr "Tuntematon suhde"
 

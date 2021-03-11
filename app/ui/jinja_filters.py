@@ -210,7 +210,7 @@ def translate(term, var_name, show_table=False):
             "Department": _("Department"), #
             "District": _("District"), #"lääni"
             "Farm": _("Farm"), #"tila"
-            "Talo": _("Farm"), #"tila" !
+            "Talo": _("Farm"), #"tila"
             "Hamlet": _("Hamlet"), #"taloryhmä"
             "Hautapaikka": _("Burial Site"),
             "Hautausmaa": _("Cemetery"), #"hautausmaa"
@@ -267,8 +267,10 @@ def translate(term, var_name, show_table=False):
             "Parish": _("in the parish"), #"seurakunnassa"
             "Region": _("in the region"), #"alueella"
             "srk": _("in the parish of"), #"seurakunnassa"
-            "State": _("In the state"), #"valtiossa"
+            "State": _("in the state"), #"valtiossa"
+            "Talo": _("in the farm"), # tilalla
             "Tontti": _("Tontilla"), #"tontilla"
+            "Town": _("in the town"), #"kaupunki"
             "Village": _("in the village of") #"kylässä"
         }
         try:

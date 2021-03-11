@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-10 17:06+0200\n"
+"POT-Creation-Date: 2021-03-11 13:53+0200\n"
 "PO-Revision-Date: 2021-01-17 13:49+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -27,13 +27,11 @@ msgstr "Odefinerad"
 msgid "Finnish"
 msgstr "Finska"
 
-#: bp/audit/templates/audit/classifiers.html:34
 #: bp/start/templates/start/my_settings.html:66 config.py:38
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr "Svenska"
 
-#: bp/audit/templates/audit/classifiers.html:35
 #: bp/start/templates/start/my_settings.html:68 config.py:39
 msgid "English"
 msgstr "Engelska"
@@ -153,15 +151,15 @@ msgstr "odefinerad relation"
 msgid "This person has no families"
 msgstr "Denna person har inga familjer"
 
-#: bl/person.py:125 bl/person.py:128 ui/jinja_filters.py:292
+#: bl/person.py:125 bl/person.py:128 ui/jinja_filters.py:294
 msgid "Child"
 msgstr "Barn"
 
-#: bl/person.py:126 ui/jinja_filters.py:291
+#: bl/person.py:126 ui/jinja_filters.py:293
 msgid "Son"
 msgstr "Son"
 
-#: bl/person.py:127 ui/jinja_filters.py:290
+#: bl/person.py:127 ui/jinja_filters.py:292
 msgid "Daughter"
 msgstr "Dotter"
 
@@ -964,15 +962,15 @@ msgstr "Visa logg"
 msgid "Delete file"
 msgstr "Radera fil"
 
-#: bp/audit/routes.py:178
+#: bp/audit/routes.py:190
 msgid "Done"
 msgstr "Färdigt"
 
-#: bp/audit/routes.py:245
+#: bp/audit/routes.py:257
 msgid "Data type '{}' is not supported"
 msgstr "Data typen '{}' stöds inte"
 
-#: bp/audit/routes.py:248
+#: bp/audit/routes.py:260
 msgid "Missing proper column title: "
 msgstr "Giltigt kolumn namn fattas: "
 
@@ -1045,27 +1043,21 @@ msgid "Move to Isotammi database"
 msgstr "Flytta till Isotammi-databas"
 
 #: bp/audit/templates/audit/classifiers.html:4
-#: bp/audit/templates/audit/classifiers.html:15
+#: bp/audit/templates/audit/classifiers.html:23
 msgid "Classifiers"
 msgstr "Klassifierande kategerier"
 
-#: bp/audit/templates/audit/classifiers.html:31
-#: bp/scene/templates/scene/families.html:130
-#: bp/scene/templates/scene/medias.html:84
-msgid "Key"
-msgstr "Nyckel"
-
-#: bp/audit/templates/audit/classifiers.html:32
+#: bp/audit/templates/audit/classifiers.html:60
 msgid "Database"
 msgstr "I databasen"
 
-#: bp/audit/templates/audit/classifiers.html:33
-msgid "User language"
-msgstr "Användarspråk"
+#: bp/audit/templates/audit/classifiers.html:61
+msgid "Translation"
+msgstr "Översättning"
 
-#: bp/audit/templates/audit/classifiers.html:51
-msgid "Can't display.<br>Change user's language to see these."
-msgstr "Visserligen syn inte här."
+#: bp/audit/templates/audit/classifiers.html:63
+msgid "Inessive"
+msgstr ""
 
 #: bp/audit/templates/audit/index.html:3 bp/audit/templates/audit/index.html:13
 #: bp/start/templates/start/index_logged.html:106
@@ -2430,6 +2422,11 @@ msgstr "Gå till familje sidan"
 msgid "Original ID"
 msgstr "Ursprungligt ID"
 
+#: bp/scene/templates/scene/families.html:130
+#: bp/scene/templates/scene/medias.html:84
+msgid "Key"
+msgstr "Nyckel"
+
 #: bp/scene/templates/scene/families.html:149
 #: bp/scene/templates/scene/families.html:152
 #, python-format
@@ -3329,7 +3326,6 @@ msgid "Exploring Isotammi demo environment"
 msgstr "Utforska Isotammi demo miljö"
 
 #: bp/start/templates/start/index_guest.html:31
-#: bp/start/templates/start/index_scene.html:31
 msgid "Select Material for Browsing"
 msgstr "Välj material för bläddring"
 
@@ -3339,7 +3335,6 @@ msgstr "Demo databas"
 
 #: bp/start/templates/start/index_guest.html:38
 #: bp/start/templates/start/index_logged.html:66
-#: bp/start/templates/start/index_scene.html:42
 msgid "My candidate material"
 msgstr "Mitt kandiderande material"
 
@@ -3357,7 +3352,6 @@ msgstr ""
 
 #: bp/start/templates/start/index_guest.html:58
 #: bp/start/templates/start/index_logged.html:109
-#: bp/start/templates/start/index_scene.html:62
 msgid "Continue"
 msgstr "Fortsätta"
 
@@ -3433,12 +3427,10 @@ msgid "The approved Isotammi data"
 msgstr "Godkänt gemensam material"
 
 #: bp/start/templates/start/index_logged.html:74
-#: bp/start/templates/start/index_scene.html:57
 msgid "The Browsed Material"
 msgstr "Det bläddrade materialet"
 
 #: bp/start/templates/start/index_logged.html:75
-#: bp/start/templates/start/index_scene.html:58
 msgid "You can view only approved and public material in Demo Database"
 msgstr "Du kan bara se godkänt och offentligt material i demobasen"
 
@@ -3477,34 +3469,6 @@ msgstr ""
 #: bp/start/templates/start/index_logged.html:123
 msgid "Help page"
 msgstr "Hjälp sida"
-
-#: bp/start/templates/start/index_scene.html:4
-msgid "Materials"
-msgstr "Materialer"
-
-#: bp/start/templates/start/index_scene.html:15
-msgid "Exploring Isotammi Database"
-msgstr "Utforskar Isotammi databas"
-
-#: bp/start/templates/start/index_scene.html:39
-msgid "Approved data"
-msgstr "Godkända data"
-
-#: bp/start/templates/start/index_scene.html:72
-msgid "Table format tools"
-msgstr "Verktyg för tabell format"
-
-#: bp/start/templates/start/index_scene.html:73
-msgid "A variety of more technical listings and problem solving tools."
-msgstr "En mängd av fler tekniska listor och verktyg för problemlösning."
-
-#: bp/start/templates/start/index_scene.html:74
-msgid "The data includes accepted and candidate materials of all users."
-msgstr "Data omfattar accepterat och kandiderande material av alla användarna."
-
-#: bp/start/templates/start/index_scene.html:78
-msgid "Explore the database"
-msgstr "Utforska databasen"
 
 #: bp/start/templates/start/join.html:5 bp/start/templates/start/join.html:38
 msgid "Join Isotammi"
@@ -5001,22 +4965,30 @@ msgid "in the parish of"
 msgstr "i församlingen av"
 
 #: ui/jinja_filters.py:270
-msgid "In the state"
+msgid "in the state"
 msgstr "i landet"
 
 #: ui/jinja_filters.py:271
-msgid "Tontilla"
-msgstr "På tomten"
+msgid "in the farm"
+msgstr "på landgården"
 
 #: ui/jinja_filters.py:272
+msgid "Tontilla"
+msgstr "på tomten"
+
+#: ui/jinja_filters.py:273
+msgid "in the town"
+msgstr "i staden"
+
+#: ui/jinja_filters.py:274
 msgid "in the village of"
 msgstr "i by av"
 
-#: ui/jinja_filters.py:283
+#: ui/jinja_filters.py:285
 msgid "Married"
 msgstr "Gift"
 
-#: ui/jinja_filters.py:284
+#: ui/jinja_filters.py:286
 msgid "Unknown relation"
 msgstr "Okänd relation"
 
