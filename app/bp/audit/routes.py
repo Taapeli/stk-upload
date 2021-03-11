@@ -135,27 +135,39 @@ def list_classifiers():
     # List classifier values and translations
     import ui.jinja_filters
 
-    sv = gettext.translation('messages', 'app/translations', languages=['sv'])
-    en = gettext.translation('messages', 'app/translations', languages=['en'])
+    #Translation is not possible, the original search kay is not known
+    # sv = gettext.translation('messages', 'app/translations', languages=['sv'])
+    # en = gettext.translation('messages', 'app/translations', languages=['en'])
 
     key_dicts = ui.jinja_filters.list_translations()
     data = {}
     n = 0
+    rows_lt = {}
     for key, values in key_dicts.items():
         # key: 'nt'
         # values: ('Name types', {'Aatelointinimi': 'aateloitu nimi',  ...})
         rows = []
         desc = values[0]
+        todo = True
         for term, value in values[1].items():
-            user_lang=value
-            sve = sv.gettext(term)
-            eng = en.gettext(term)
-            row = [term, user_lang, sve, eng]
-            rows.append(row)
+            if key == 'lt_in':
+                # Put 'lt_in' value to last column of 'lt' row 
+                for row in rows_lt:
+                    if row[0] == term:
+                        row[2] = value
+                        todo = False
+                        break
+                if todo:
+                    rows_lt.append([term, ' ', value])
+            else:
+                row = [term, value, '']
+                rows.append(row)
         n += len(values[1])
         data[key] = (desc, rows)
+        if key == 'lt':
+            rows_lt = rows
     # >>> data['marr']
-    # ('marriage types', [['Married', 'Avioliitossa', 'Gift', 'Married'], ['Unknown', ...]])
+    # ('marriage types', [['Married', 'Avioliitossa', ''], ['Unknown', ...]])
 
     logger.info(f"-> bp.audit.routes.list_classifiers n={n}")
     return render_template("/audit/classifiers.html", data=data)
