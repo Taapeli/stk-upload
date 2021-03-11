@@ -1,5 +1,5 @@
 {# _templates/scene/locations.html_ #}
-{% extends "/scene/layout.html" %}
+{% extends "/scene/sc_layout.html" %}
 {% block title %}{{ _('Places') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -15,7 +15,7 @@
 #}
 
 <div id="startdiv">
-    <h2>{{ _('Places List') }}</h2>
+    <h1>{{ _('Places List') }}</h1>
     <div>{{ macro.show_use_case() }}</div>
 </div>
 

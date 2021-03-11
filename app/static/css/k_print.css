@@ -1,5 +1,5 @@
 /*
-    Isotammi Geneological Service for combining multiple researchers' results.
+    Isotammi Genealogical Service for combining multiple researchers' results.
     Created in co-operation with the Genealogical Society of Finland.
     Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
                              Timo Nallikari, Pekka Valta
@@ -90,25 +90,25 @@ img {
 
 /* General Text
 ----------------------------------------------------- */
-h1 {
+div#Header {
     font:normal 16pt/18pt serif;
-    margin:0;
+    margin: 13px 0;
     padding:2px;
 }
-h2 {
+h1 {
     font:normal 18pt/23pt serif;
     display:inline;
     margin:0;
     padding:0;
 }
-h3 {
+h2 {
     font:normal 18pt/23pt serif;
     text-align:left;
     display:inline;
     margin:0 0 0 8pt;
     padding:0;
 }
-h4 {
+h3 {
     display:block;
     clear:both;
     font:normal 14pt/16pt serif;
@@ -116,7 +116,7 @@ h4 {
     padding:8pt 0 1pt 0;
     border-top:solid .5pt #A7A7A7
 }
-h5, h6 {
+h4, h5 {
     font:normal 14pt/16pt serif;
     font-style:italic;
     margin:0;
@@ -260,7 +260,7 @@ div#alphanav, .SearchBox, #startdiv div i, div#menuToggle {
 .detail_link {
     display: inline;
 }
-h1 div.curr_user {
+div#Header div.curr_user {
     float: right; 
     margin-right: 30px; 
     font-family: verdana, sans-serif;
@@ -446,7 +446,7 @@ table.relationships tbody tr td.ColumnRowLabel a {
 
 /* Gallery
 ----------------------------------------------------- */
-#GalleryDetail h2 {
+#GalleryDetail h1 {
     display:none;
 }
 #GalleryNav {
@@ -463,7 +463,7 @@ table.relationships tbody tr td.ColumnRowLabel a {
     margin:0 auto;
     border:solid 1pt #542;
 }
-#GalleryDetail h3 {
+#GalleryDetail h2 {
     display:block;
     text-align:center;
     margin:2pt 0 8pt 0;
@@ -514,7 +514,7 @@ body#ThumbnailPreview div#references table.infolist tbody tr td.ColumnName {
     color: #000;
     text-decoration: none;
 }
-#researcher h3 {
+#researcher h2 {
     margin:0;
 }
 #researcher span {
@@ -555,7 +555,7 @@ body#ThumbnailPreview div#references table.infolist tbody tr td.ColumnName {
 
 /* Subsections : Gallery 
 ----------------------------------------------------- */
-#indivgallery h4 {
+#indivgallery h3 {
     margin-bottom:1em;
 }
 #indivgallery .thumbnail {
@@ -771,55 +771,57 @@ p#createdate {
     display: none;
 }
 
-/* Calendar Styles 
--------------------------------------------------------------------------------------------- */
-/* Calendar : General */
-body#WebCal h1#SiteTitle {
-    float:left;
-    font-size:14pt;
-    line-height:16pt;
-    padding-bottom:.1in;
-}
-.calendar {
-    clear:both;
-    empty-cells:show;
-    width:100%;
-    font-size:14pt;
-    font-weight:normal;
-    margin:0;
-    padding:0;
-    border:none;
-    border-collapse:collapse;
-}
-.calendar thead, .calendar tbody {
-    border-style:solid;
-    border-width:2pt 2pt 2pt 2pt;
-    border-color:#000;
-}
-.calendar tbody {
-    border-top:none;
-}
-.calendar thead tr th {
-    width:12%;
-    font-family:sans-serif;
-    font-size:10pt;
-    font-weight:bold;
-    text-align:center;
-    text-transform:uppercase;
-    padding:.2em 0 .1em 0;
-}
-.calendar thead tr th.monthName {
-    width:100%;
-    font-size:20pt;
-    line-height:100%;
-    text-transform:none;
-    padding:5pt;
-    border-width:0;
-}
 #CreatorInfo {
     float:right;
     margin:0 10px 0 0;
 }
+
+/* Calendar Styles 
+-------------------------------------------------------------------------------------------- **
+/* Calendar : General *
+	body#WebCal h1#SiteTitle {
+	    float:left;
+	    font-size:14pt;
+	    line-height:16pt;
+	    padding-bottom:.1in;
+	}
+	.calendar {
+	    clear:both;
+	    empty-cells:show;
+	    width:100%;
+	    font-size:14pt;
+	    font-weight:normal;
+	    margin:0;
+	    padding:0;
+	    border:none;
+	    border-collapse:collapse;
+	}
+	.calendar thead, .calendar tbody {
+	    border-style:solid;
+	    border-width:2pt 2pt 2pt 2pt;
+	    border-color:#000;
+	}
+	.calendar tbody {
+	    border-top:none;
+	}
+	.calendar thead tr th {
+	    width:12%;
+	    font-family:sans-serif;
+	    font-size:10pt;
+	    font-weight:bold;
+	    text-align:center;
+	    text-transform:uppercase;
+	    padding:.2em 0 .1em 0;
+	}
+	.calendar thead tr th.monthName {
+	    width:100%;
+	    font-size:20pt;
+	    line-height:100%;
+	    text-transform:none;
+	    padding:5pt;
+	    border-width:0;
+	}
+
 body#WebCal a {
     text-decoration:none;
     color:#000;
@@ -833,7 +835,7 @@ body#WebCal a {
     padding:.7em 5% 1em 5%;
 }
 
-/* Calendar : Date Numeral */
+/* Calendar : Date Numeral *
 .calendar td div.date {
     float:right;
     display:block;
@@ -849,7 +851,7 @@ body#WebCal a {
     color:#F00;
 }
 
-/* Calendar : Date Container */
+/* Calendar : Date Container *
 .calendar tbody tr td {
     vertical-align:top;
     height:4em;
@@ -865,7 +867,7 @@ body#WebCal a {
     border-top:none;
 }
 
-/* Calendar : Date Detail */
+/* Calendar : Date Detail *
 .calendar tbody tr td ul {
     list-style:none;
     font-family:sans-serif;
@@ -891,7 +893,7 @@ body#WebCal a {
     color:#000;
 }
 
-/* Calendar : Previous-Next Month */
+/* Calendar : Previous-Next Month *
 .calendar tbody tr td.previous, 
 .calendar tbody tr td.next, 
 .calendar tbody tr td.previous div.date, 
@@ -900,7 +902,7 @@ body#WebCal a {
     font-size:12pt;
     color:#999;
 }
-/* Calendar : Full Year */
+/* Calendar : Full Year *
 body#fullyearlinked div.content {
     width:963px;
     margin:0 auto;
@@ -922,3 +924,4 @@ body#fullyearlinked table.calendar thead tr th.monthName {
 body#fullyearlinked table.calendar tbody tr td {
     height:3em;
 }
+*/

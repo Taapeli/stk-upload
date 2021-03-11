@@ -14,28 +14,31 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/k_print.css') }}" media="print">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hamburger.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/popup.css') }}">
-<!--
-    <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
-    <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
--->
+
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="/static/js/gettext.js"></script>
     <script src="/static/js/scene_scripts.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="/static/js/axios.min.js"></script>
+
+	<script src="/static/js/Sortable.js"></script>
+	<script src="https://unpkg.com/htmx.org@1.2.0"></script>
+	<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+	<script src="https://unpkg.com/hyperscript.org@0.0.3"></script>
+    
 </head>
-<body>
 {% if user_context %}
   {% if user_context.context == 1 %}{% set material_st = "passed" %}
   {% elif user_context.context == 2 %}{% set material_st = "own" %}
 {% endif %}{% endif %}
 {% block body %}
-    <h1 class={{material_st}}><a href="/"><img id="logo" src="/static/tam.png" 
+<body>
+    <div id="Header" class="{{material_st}}"><a href="/"><img id="logo" src="/static/tam.png" 
              alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
              onmouseover="this.src='/static/tam1.png';" 
              onmouseout="this.src='/static/tam.png';"/></a>
         <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
-        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
+        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></div>
         
 {% from "start/s_macros.html" import hamburger_menu with context %}
 

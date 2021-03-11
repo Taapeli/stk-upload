@@ -135,9 +135,18 @@
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
     {% if obj.change %}
-    <span id="changetime" title="{{ _("latest change time") }}"
+    <span id="changetime" title="{{ _("latest change time and contributor") }}"
         {% if margin %}style='margin-right:{{margin}}'{% endif %}
-        >{{ _("edited") }} {{obj.change_str()}}</span>
+        >{{ _("edited") }} {{obj.change_str()}}
+        {%- if obj.root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
+        , <span>
+        {% if obj.root.root_type == 'PASSED' %}{{ _('origin from') }}
+        {% else %}{{ _('User data') }}:
+        {% endif %}
+            <b>{{obj.root.root_user}}</b> {{obj.root.id}}
+        </span>
+        {% endif %}
+    </span>
     {% endif -%}
 {%- endmacro %}
 
@@ -229,10 +238,11 @@
     {% endif %}
 {%- endmacro %}
 
-{% macro member(ch, uniq_id, delim) -%} {# OBSOLETE, Better version: macro person #}
-    {#  Creates a Person name and link (for family tree graph). 
+{#
+  {% macro member(ch, uniq_id, delim) -%} ## OBSOLETE, Better version: macro person ##
+    ##  Creates a Person name and link (for family tree graph). 
         Optional 'delim' can be "=" for older person page
-    #}
+    ##
     {% if delim != '=' %}{% set delim="/" %} <!-- Vanha person.html -sivu -->{% endif %}
     {% if ch.uniq_id == uniq_id %}
     <span class="myself">&nbsp;(itse)&nbsp;</span>
@@ -245,7 +255,8 @@
         {% else %}{{ _('Anonymous') }}
         {% endif %}
     {% endif %}
-{%- endmacro %}
+  {%- endmacro %}
+#}
 
 {% macro lifetimes(p) -%}
     {# Displays Person's life time estimates 'born 1662…1709 died 1726…1819' #}

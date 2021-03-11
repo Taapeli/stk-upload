@@ -1,4 +1,4 @@
-#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
@@ -38,7 +38,7 @@ from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, PasswordField, ValidationError
 from flask_security.utils import _
 from flask_mail import Mail
-from templates import jinja_filters
+from ui import jinja_filters
 from wtforms import SelectField, SubmitField, BooleanField
 
 from pe.neo4j.neo4jengine import Neo4jEngine
@@ -202,8 +202,6 @@ shareds.mail = Mail(shareds.app)
 # https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
-
-shareds.readservice = Neo4jReadService(shareds.driver)
 
 shareds.user_model = User
 shareds.role_model = Role

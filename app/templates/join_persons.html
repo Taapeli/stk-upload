@@ -5,16 +5,16 @@
 {{ super() }}
 <script>
 function myFunction(oid, fn, ln) {
-    document.getElementById("tiedot").innerHTML = "<h3>Mahdollisia referenssinimiä</h3><p>Henkilö " + oid +
-            "</p><h4>Etunimi " + fn + "</h4><ul>" + 
+    document.getElementById("tiedot").innerHTML = "<h2>Mahdollisia referenssinimiä</h2><p>Henkilö " + oid +
+            "</p><h3>Etunimi " + fn + "</h3><ul>" + 
         "<li><input type='radio' name='retu' value='Aleksi' /> Demo-Aleksi</li>" +
-    "</ul><h4>Sukunimi " + ln + "</h4><ul>" + 
+    "</ul><h3>Sukunimi " + ln + "</h3><ul>" + 
         "<li><input type='radio' name='rsuku' value='Andersson' /> Demo-Andersson (sukunimi)</li>" +
         "<li><input type='radio' name='rsuku' value='Andersson:p' /> Demo-Andersson (patronyymi)</li>" +
         "<li><input type='radio' name='rsuku' value='Antinpoika:p' /> Demo-Antinpoika (patronyymi)</li>" +
     "</ul>";
 }</script>
-<h2>{{ _('Merging people') }}</h2>
+<h1>{{ _('Merging people') }}</h1>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul  class='flashes'>
@@ -71,7 +71,7 @@ function myFunction(oid, fn, ln) {
 </table>
 </div>
 <div id="tiedot">
-    <h3>{{ _('Reference names') }}</h3>
+    <h2>{{ _('Reference names') }}</h2>
     <p>&nbsp;</p>
 </div>
 </form>

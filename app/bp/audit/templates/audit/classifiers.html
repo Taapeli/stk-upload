@@ -1,0 +1,81 @@
+{# _audit/batches.html_ #}
+{# Copied from admin/uploads_all #}
+{% extends "/start/s_layout.html" %}
+{% block title %}{{ _("Classifiers") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+
+<style>
+table, tr.tit, tr.tit > td {
+	border: 0;
+}
+h4 {
+	margin: 1em 2em;
+}
+#langbox {
+	margin-left:5.5em;
+}
+#langbox a {
+	text-decoration: none;
+}
+</style>
+
+	<h1 style="margin-bottom: 5px;">{{ _("Classifiers") }}</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+      {% endif %}
+    {% endwith %}
+
+
+    <div class="content">
+	    <div id="langbox">
+	        <a href="?lang=fi">🇫🇮&nbsp;Suomeksi</a> –
+	        <a href="?lang=sv">🇸🇪&nbsp;På svenska</a> –
+	        <a href="?lang=en">🇬🇧&nbsp;In English</a>
+	    </div>
+    	<ul>
+{% for name, val in data.items() %}
+	{% if name != 'lt_in' %}
+			<li><a href="#{{name}}">{{ val[0] }}</a></li>
+	{% endif %}
+{% endfor %}
+    	</ul>
+
+        <table>
+{% for name, val in data.items() %}
+	{% set desc = val[0] %}
+	{% set rows = val[1] %}
+	{% for row in rows %}
+		{% if loop.first %}
+   	       <tr class="tit"><td colspan="3" id="{{ name }}">
+   	       <h4>{{ desc }} ({{ name }})</h4></td>
+	       </tr>
+           <tr>
+                <th>{{ _("Database") }}</th>
+                <th>{{ _("Translation") }}</th>
+           {% if name == 'lt' %}
+                <th>{{ _("Inessive") }}</th>
+           {% endif %}
+           </tr>
+   	    {% endif %}
+   	       <tr>
+	           <td><tt>{{ row[0] }}</tt></td>
+	           <td>{{ row[1] }}</td>
+           {% if name == 'lt' %}
+	           <td>{{ row[2] }}</td>
+           {% endif %}
+	       </tr>
+	{% endfor %}
+{% endfor %}
+	    </table>
+    </div>
+{% endblock %}
+</body>
+</html>
+

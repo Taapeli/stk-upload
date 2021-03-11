@@ -1,5 +1,5 @@
 {# /scene/templates/scene/families.html_ #}
-{% extends "/scene/layout.html" %}
+{% extends "/scene/sc_layout.html" %}
 {% block title %}{{ _('List of families') }} (scenefamilies){% endblock %}
 {% block body %}
 {{ super() }}
@@ -32,7 +32,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
 {% set name1 = user_context.first|replace("#", " ") %}
 
 <div id="startdiv">
-	<h2>{{ _('List of Families') }}</h2>
+	<h1>{{ _('List of Families') }}</h1>
     <div>{{ macro.show_use_case() }}</div>
 </div>
 

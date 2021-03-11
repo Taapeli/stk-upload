@@ -96,7 +96,7 @@ input {
 
 <body>
 
-<h3>Paikkojen sulautus</h3>
+<h2>Paikkojen sulautus</h2>
 
 <p>
 
@@ -106,7 +106,7 @@ input {
     
 	<div class="box" v-show="to_be_merged.length == 0">
 	    <form>
-	        <h4>Paikat</h4>
+	        <h3>Paikat</h3>
 	        Paikkojen lukumäärä: ${ places.length }
 	        <br>
             <a href="#" 
@@ -159,7 +159,7 @@ input {
                 <p v-if="p.batch">${ p.batch }</p>
                 <p v-else><i>No batch!</i></p>
 		        <div class="box2">
-		        <h3>Ominaisuudet</h3>
+		        <h2>Ominaisuudet</h2>
 		        <table border>
 		            <tr><td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
 		                <td>Tyyppi<td>${ p.type }
@@ -167,7 +167,7 @@ input {
 		                <td>Coord<td>${ p.coord }
 		            </tr>
 		        </table>
-		        <h3>Nimet</h3>
+		        <h2>Nimet</h2>
 		        <table>
 		        	<tr><th class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
 		        	<th>Nimi<th>Kieli<th>Järjestys
@@ -177,7 +177,7 @@ input {
 		        		<td>${ pname.lang }
 		        		<td>${ pname.order }
 		        </table>
-		        <h3>Sisältää</h3>
+		        <h2>Sisältää</h2>
 		        <ul>
 		        	<li v-for="subplace in p.surrounds">
 		        	${ subplace.name } (${ subplace.type })

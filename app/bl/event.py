@@ -1,4 +1,4 @@
-#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
@@ -106,6 +106,8 @@ class Event(NodeObject):
                 'id': 'E0161', 'attr_type': '', 'description': ''
                 'datetype': 0, 'date1': 1754183, 'date2': 1754183}>
         '''
+        if not node:
+            return None
         if not obj:
             obj = cls()
         obj.uniq_id = node.id

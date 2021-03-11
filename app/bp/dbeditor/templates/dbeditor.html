@@ -46,10 +46,10 @@ input.error {
 </style>
 
 <div id="dbEditor" style="margin-left:50px; padding-bottom: 2em;">
-  <h2>DB Editor</h2>
+  <h1>DB Editor</h1>
 
     <div class="box1">
-        <h3>Labels</h3>
+        <h2>Labels</h2>
         <table border xwidth="100%">
         <tr>
             <th>Label</th>
@@ -62,7 +62,7 @@ input.error {
     </div>
 
     <div class="box" v-if="listview">
-        <h3>${ label }</h3>
+        <h2>${ label }</h2>
         <a href="#" v-on:click="get_nodes(label,skip-50)">Prev 25</a>
         <a href="#" v-on:click="get_nodes(label,skip)">Next 25</a>
         <table border xwidth="100%">
@@ -102,7 +102,7 @@ input.error {
 
     <div class="box" v-if="editform">
     <div class="box2">
-        <h3>${ label }</h3>
+        <h2>${ label }</h2>
         <!--
         <a href="#" v-on:click="get_nodes(label,skip-1)">Prev</a>
         <a href="#" v-on:click="get_nodes(label,skip)">Next</a>

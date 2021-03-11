@@ -1,4 +1,4 @@
-#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
@@ -96,9 +96,15 @@ optional match (p) -[re:EVENT]-> (e:Event)
     where e.type = "Birth" or e.type = "Death"
 return n as name, collect(distinct e) as events"""
 
+#     get_citation_sources_repositories = """
+# MATCH (c:Citation) -[:SOURCE]-> (s:Source)
+#     WHERE ID(c) IN $uid_list
+#     OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
+# RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
+
     get_citation_sources_repositories = """
-MATCH (c:Citation) -[:SOURCE]-> (s:Source)
-    WHERE ID(c) IN $uid_list
-    OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
-RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
+MATCH (cita:Citation) -[:SOURCE]-> (source:Source)
+    WHERE ID(cita) IN $uid_list
+OPTIONAL MATCH (source) -[rel:REPOSITORY]-> (repo:Repository)
+RETURN ID(cita) AS uniq_id, source, properties(rel) as rel, repo"""
     

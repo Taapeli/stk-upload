@@ -1,4 +1,4 @@
-#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
@@ -25,9 +25,12 @@ Created on 13.3.2020
 from flask_security import current_user
 
 
-def place_names_from_nodes(nodes):
+def place_names_local_from_nodes(nodes):
     ''' Filter Name objects from a list of Cypher nodes.
-    
+
+        :param:     nodes     list of Neo4j Nodes
+        :return:    list of selected PlaceName objects
+
         Create a list of place_bl.names with PlaceNames by following rules:
         1. Place_names using lang == current_user.language
         2. Place_names using lang == ""

@@ -1,5 +1,5 @@
 {# _myapp/templates/table1.html_ #}
-{% extends "/scene/layout.html" %}
+{% extends "/scene/sc_layout.html" %}
 {% block title %}{{ _('Events of a Source') }}{% endblock %}
 {% import '/scene/macros.html' as macro with context %}
 {% block body %}
@@ -12,13 +12,13 @@ td.Citation div ol {padding-top:.3em;}
 
 
 <div id="startdiv">
-    <h2>{{ _('Source References') }}</h2>
+    <h1>{{ _('Source References') }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
 </div>
 
 {{ macro.menu(5) }}
     <div class="content" id="IndividualDetail">
-	    <h3 style="position:sticky; top:0;" title="{{ _('Source') }}">{{source.stitle}}</h3>
+	    <h2 style="position:sticky; top:0;" title="{{ _('Source') }}">{{source.stitle}}</h2>
 	        <div id="summaryarea">
 
             <table><tbody>
@@ -71,8 +71,14 @@ td.Citation div ol {padding-top:.3em;}
             </tbody></table>
 	        </div>
 
+        <form>
+			<input type="hidden" name="uniq_id" value="{{ source.uniq_id }}">
+        </form>
+
+    	<div id="comments_div" hx-get="/scene/comments/comments_header" hx-trigger="load"></div> 
+
 	        <div class="subsection" id="citations">
-	            <h4>{{ _('Source References and Events') }}</h4>
+	            <h3>{{ _('Source References and Events') }}</h3>
 	            <table class="infolist eventlist" width="100%">
 	                <tbody>
 

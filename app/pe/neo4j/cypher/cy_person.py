@@ -1,4 +1,4 @@
-#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
@@ -28,6 +28,10 @@ class CypherPerson():
     Cypher clauses for Person data access.
     '''
 
+    
+    
+    
+
 # ----- Person node -----
 
     get_person_by_uid = "MATCH (p:Person) WHERE ID(p) = $uid"
@@ -43,31 +47,39 @@ RETURN p, type(r) AS root_type, root"""
 
     get_names_events = """
 MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
-RETURN rel, x ORDER BY x.order"""
+RETURN type(rel) AS rel_type, x AS node, rel.role AS role ORDER BY x.order"""
 
     get_families = """
 MATCH (p:Person) <-[rel:CHILD|PARENT]- (f:Family) WHERE ID(p) = $uid
 OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event)
 OPTIONAL MATCH (f) -[mr:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
 OPTIONAL MATCH (m) -[:EVENT]-> (me:Event {type:"Birth"})
-RETURN rel, f AS family, COLLECT(DISTINCT fe) AS events, 
-    COLLECT(DISTINCT [mr, m, n, me]) AS members
+RETURN type(rel) AS rel_type, rel.role as role, 
+    f AS family, COLLECT(DISTINCT fe) AS events, 
+    COLLECT(DISTINCT [mr.role, m, n, me]) AS members
     ORDER BY family.date1"""
 
-    get_objs_places = """
-MATCH (x) -[:PLACE]-> (pl:Place)
-    WHERE ID(x) IN $uid_list
+    get_event_places = """
+MATCH (event:Event) -[:PLACE]-> (pl:Place)
+    WHERE ID(event) IN $uid_list
 OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
 OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
-RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, 
+RETURN LABELS(event)[0] AS label, ID(event) AS uniq_id, 
     pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
 
+    get_objs_citations_notes_medias = """
+MATCH (src) -[r:CITATION|NOTE|MEDIA]-> (target)
+    WHERE ID(src) IN $uid_list
+RETURN src, properties(r) AS r, target"""
+
+    # Older version:
     get_objs_citation_note_media = """
 MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
     WHERE ID(x) IN $uid_list
 RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
+
 
     get_names = """
 MATCH (n) <-[r:NAME]- (p:Person)
@@ -282,3 +294,16 @@ return n.surname as surname, count(p) as count
 order by count desc
 limit $count
 """
+
+    set_primary_name = """
+match (p:Person{uuid:$uuid})  
+match (p) -[:NAME]-> (n1:Name{order:0})
+match (p) -[:NAME]-> (n2:Name{order:$old_order})
+set n1.order = $old_order, n2.order = 0
+    """
+
+    set_name_order = """
+match (n:Name) where id(n) = $uid  
+set n.order = $order
+    """
+    

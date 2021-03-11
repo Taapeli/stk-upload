@@ -10,26 +10,35 @@
 
 <div id="startdiv">
     <div>
-        <h2>{{ _("Isotammi auditor") }}</h2>
+        <h1>{{ _("Isotammi auditor") }}</h1>
 
         <div class="startbox">
-            <h3>{{ _('Operations') }}</h3>
+            <h2>{{ _('Queries') }}</h2>
             <ul>
 {#          <li><a href="/tables">{{ _("Table format tools") }}</a>.
 	           {{ _('The data includes accepted and candidate materials of all users.') }}
 	        </li>
 #}
             <li><a href="/admin/readlog">{{ _('Display application log') }}</a></li>
-            <li><a href="/audit/list_uploads">
-                {{ _("Select a batch to be moved to Isotammi database") }}
-                </a></li>
-            <li><a href="/admin/clear_batches">{{ _("Remove empty batches") }}</a></li>
             <li>{{ _("List approved Isotammi data sets") }}:
                 <a href="/audit/approvals/all">{{ _("all") }}</a>,
                 <a href="/audit/approvals/own">{{ _("approved by me") }}</a>
             </li>
             <li><a href="/audit/refnames">{{ _('Reference names') }}</a></li>
+            <li><a href="/audit/classifiers">{{ _('Classifier values') }}</a></li>
+           </ul>
+            </p>
+        </div>
+
+        <div class="startbox">
+            <h2>{{ _('Operations') }}</h2>
+            <ul>
+            <li><a href="/audit/list_uploads">
+                {{ _("Select a batch to be moved to Isotammi database") }}
+                </a></li>
+            <li><a href="/admin/clear_batches">{{ _("Remove empty batches") }}</a></li>
             <li><a href="/refplace_editor">{{ _('Experimental place merge') }}</a></li>
+            <li><a href="/dupsearch">{{ _('Experimental duplicate person search') }}</a></li>
             </ul>
             </p>
         </div>

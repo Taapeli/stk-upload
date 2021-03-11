@@ -1,5 +1,5 @@
 {# _templates/scene/person_pg.html_ #}
-{% extends "/scene/layout.html" %}
+{% extends "/scene/sc_layout.html" %}
 {% block title %}{{ _("Family details") }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -13,7 +13,7 @@ td { padding-right:1em;}
 </style>
 
 <div id="startdiv">
-    <h2>{{ _("Family details") }}</h2>
+    <h1>{{ _("Family details") }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
 </div>
 
@@ -31,7 +31,7 @@ td { padding-right:1em;}
 {% endwith %}
 
 {% if family %}
-        <h3>{{ _("Family")|capitalize }}</h3>
+        <h2>{{ _("Family")|capitalize }}</h2>
         <div id="summaryarea">
             <table><tbody>
                 <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
@@ -55,6 +55,11 @@ td { padding-right:1em;}
             {% endfor %}
             </tbody></table>
         </div>
+
+	<form>
+		<input type="hidden" name="uniq_id" value="{{ family.uniq_id }}">
+	</form>
+	<div id="comments_div" hx-get="/scene/comments/comments_header" hx-trigger="load"></div> 
 
     {% if family.events %} 
         <h3>{{ _("Family Events") }}</h3>
@@ -122,7 +127,7 @@ td { padding-right:1em;}
     {% endif %}
  
     {% if family.notes %}
-            <h3>{{ _("Notes") }}</h3>
+            <h2>{{ _("Notes") }}</h2>
             <div id="summaryarea">
                 <table>
             {% for n in family.notes %}

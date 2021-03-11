@@ -1,6 +1,6 @@
 # coding=UTF-8
 
-#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
@@ -141,4 +141,4 @@ def app_help():
     return "Help for {}".format(path.path)
 
 # ------------------------------ Filters ---------------------------------------
-from templates import jinja_filters
+from ui import jinja_filters

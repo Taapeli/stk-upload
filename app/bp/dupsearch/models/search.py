@@ -1,4 +1,4 @@
-#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
@@ -174,7 +174,7 @@ def generate_keys(args):
         match 
             (b:Batch)-->(p:Person)-[:NAME]->(pn:Name{order:0})
         optional match
-            (rn:Refname)-[bn:BASENAME]->(p)
+            (rn:Refname)-[bn:REFNAME]->(p)
         optional match
             (e:Event)<-[:EVENT{role:'Primary'}]-(p)
         optional match

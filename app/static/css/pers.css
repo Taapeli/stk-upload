@@ -1,4 +1,4 @@
-/*  Isotammi Geneological Service for combining multiple researchers' results.
+/*  Isotammi Genealogical Service for combining multiple researchers' results.
     Created in co-operation with the Genealogical Society of Finland.
 
     Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
@@ -26,10 +26,8 @@ body {
     font-family: verdana, sans-serif;
     font-size: 10pt;
 }
-h1 {
+div#Header {
     position: relative;
-    width: 100%;
-    padding: 2px;
     height: 23px;
     font-size: 13pt;
     font-family: Georgia, "Times New Roman", times;
@@ -39,7 +37,8 @@ h1 {
     color: #7e6b53; /* Darker bisque */
     width: 100%;
     padding: 2px;
-    margin-bottom: 2px; /* murupolun kanssa */
+    margin: 13px 0;
+    /* margin-bottom: 2px; /* murupolun kanssa */
 }
 img#logo {
     width: 64px;
@@ -48,7 +47,7 @@ img#logo {
     margin: -16px 5px 0 5px;
     vertical-align: text-top;
 }
-h1 div.curr_user {
+div#Header div.curr_user {
     float: right; 
     margin-right: 30px; 
     font-family: verdana, sans-serif;
@@ -56,13 +55,13 @@ h1 div.curr_user {
     font-size: 9pt;
     padding: 4px;
 }
-h1 div.curr_user a { 
+div#Header div.curr_user a { 
 	text-decoration: none;     
     color: #7e6b53; /* Darker bisque */
 }
-h1 div.curr_user a:hover { text-decoration: underline; }
+div#Header div.curr_user a:hover { text-decoration: underline; }
 
-h4 {
+h3 {
     margin: 0.5em 0;
 }
 div#paluu {
@@ -116,9 +115,12 @@ div#paluu {
 }
 
 .admin {background-color: pink;}
-.audit {background-color: #f9f8bf;} /* yellowish */
+.audit {
+	background-color: #f9f8bf; /* yellowish */
+	color: DarkGreen;
+}
 .gedtools {background-color: lightsteelblue;}
-.startbox h3, .startbox2 h3 { margin-top: 5px; margin-bottom: 5px; }
+.startbox h2, .startbox2 h2 { margin-top: 5px; margin-bottom: 5px; font-size: 16px; }
 .startbox div, .startbox2 div { display: inline-block; width: 100%; }
 .startbox ul, .startbox2 ul {
     list-style-type: disc;

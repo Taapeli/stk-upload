@@ -3,7 +3,7 @@
 {% block title %}{{ _('Failed to load') }}{% endblock %}
 {% block body %}
     {{ super() }}
-    <h2>
+    <h1>
     {% if code == 1 %}
         {{ _('Invalid input file') }}
     {% elif code == 2 %}
@@ -13,7 +13,7 @@
     {% else %}
         {{ _('Unable to load file, code =') }}{{code}}
     {% endif %}
-    </h2>
+    </h1>
     {% if text %}
     <p>{{text}}</p>
     {% endif %}

@@ -1,4 +1,4 @@
-#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
@@ -89,6 +89,7 @@ def start_guest_search():
         session['lang'] = lang
 
     logger.info(f'-> bp.start.routes.start_guest_search, lang={lang}')
+    # See: https://stackoverflow.com/questions/15473626/make-a-post-request-while-redirecting-in-flask/15480983#15480983
     return redirect('/scene/persons/search', code=307)
 
 

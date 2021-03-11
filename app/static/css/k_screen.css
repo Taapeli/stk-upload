@@ -1,5 +1,5 @@
 /*
-    Isotammi Geneological Service for combining multiple researchers' results.
+    Isotammi Genealogical Service for combining multiple researchers' results.
     Created in co-operation with the Genealogical Society of Finland.
     Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
                              Timo Nallikari, Pekka Valta
@@ -45,7 +45,7 @@ gray light              #CCC
 gray very light         #EEE
 white                   #FFF
 dark blue               #006
-Auditor					SaddleBrown
+Auditor					DarkGreen
 --------------------------------------------------------------------------------------------------
 Characteristic of this style is that it uses the full width of the browser
 window and that horizontal highlighting bars extend over the full width of
@@ -66,6 +66,8 @@ body {
     margin: 0px;
     background-color: #EEE;
 }
+h2 {font-size: large;
+}
 body > div {
     clear: both;
 }
@@ -74,8 +76,8 @@ body > div {
     margin-left:50px;
     margin-bottom:1em;
 }
-#startdiv h2 {margin-bottom: 0;}
-/* Selected user case (material), right from h2 title */
+#startdiv h1 {margin-bottom: 0;}
+/* Selected user case (material), right from h1 title */
 #startdiv div {
 	font-size: 90%;
 	color: gray;
@@ -108,14 +110,13 @@ body > div {
     height: 0;
 }
 
-
 .fullclear {
     clear: both;
 }
 
-/* Stk objects
+/* Stk header
 ----------------------------------------------------- */
-h1 {
+div#Header {
     position: relative;
     color: #7e6b53; /* Darker bisque */
     background-color:bisque;
@@ -125,11 +126,12 @@ h1 {
     letter-spacing: 1px;
     padding: 2px;
     width: 100%;
+    margin: 13px 0;
 }
-h1.own { border-bottom: solid 3pt #e0bc91; }
-h1.passed { border-bottom: solid 2pt #6884be; }
+div#Header.own    { border-bottom: solid 3pt #e0bc91; }
+div#Header.passed { border-bottom: solid 2pt #6884be; }
 
-h1 div.curr_user {
+div#Header div.curr_user {
     float: right; 
     margin-right: 30px; 
     font-family: verdana, sans-serif;
@@ -137,11 +139,11 @@ h1 div.curr_user {
     font-size: 9pt;
     padding: 4px;
 }
-h1 div.curr_user a { 
+div#Header div.curr_user a { 
     text-decoration: none;     
     color: #7e6b53; /* Darker bisque */
 }
-h1 div.curr_user a:hover { text-decoration: underline; }
+div#Header div.curr_user a:hover { text-decoration: underline; }
 
 img#logo {
     width: 43px;
@@ -150,6 +152,9 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
+
+/* Stk objects
+----------------------------------------------------- */
 .gedcom_id { color: sienna; text-align: right; 
     font-family: monospace
 }
@@ -171,13 +176,10 @@ img#logo {
     border-radius: 5px;
 }
 .notmy {color:blue;}
-.Auditor { color:SaddleBrown; } # Only for Auditor's eyes
+.Auditor { color:DarkGreen; } # Only for Auditor's eyes
 
 .detail_link {
 	display: inline;
-/* 	width: 1em;  */
-/* 	margin:0 auto;  */
-/* 	text-align: center;  */
 }
 .no_detail {
 	display: inline; 
@@ -338,27 +340,28 @@ a.navlink:hover, a.navlink:active {
 
 /* General Text
 ----------------------------------------------------- */
-/*h1 {
-    font-size: x-large;
+h1 {
+    font-size: 22px;
     font-weight: bold;
     padding-left: 15px;
-}*/
-h3 {
-    font-size: large;
+}
+h2 {
+    font-size: 18px;
     padding-left: 15px;
 }
-.sticky {  /* Stk/JMä */
+h3 {
+    font-size: 16px;
+  /*background-color: #CCC;*/
+    padding-left: 15px;
+    margin-bottom: 0.5em; /*0px;*/
+    border-bottom: solid 2px #999;
+}
+
+.sticky {
     position: sticky; 
     top: 0;
     background-color: white;
     max-width: max-content;
-}
-h4 {
-    font-size: medium;
-    background-color: #CCC;
-    padding-left: 15px;
-    margin-bottom: 0px;
-    border-bottom: solid 1px #999;
 }
 p#description {
     padding-left: 15px;
@@ -388,7 +391,7 @@ a[href]:hover, a[href]:active {
     color: #999;
 }
 
-/* Header
+/* Header from Gramps, flashes
 ----------------------------------------------------- */
 #SiteTitle {
     color: #555;
@@ -475,6 +478,7 @@ div#alphanav ul li {
     margin: 1pt;
     font-weight: bold;
     background-color: #f3f3f3;
+    border-radius: 8px 8px 0 0;
 }
 div#alphanav ul li.title {
 	padding: 6pt;
@@ -505,6 +509,7 @@ div#summaryarea > table.infolist,
 div#parents > table.infolist,
 h3 + table.infolist {
     width: auto;
+    margin: 0 5px;
 }
 div#summaryarea { /* "> p" removed 21.5.2020/JMä */
 	margin:.5em .5em .5em 2em;
@@ -512,18 +517,21 @@ div#summaryarea { /* "> p" removed 21.5.2020/JMä */
 table tr th {
     text-align: left;
     background-color: #EEE;
-    border-top: solid 1px #999;
+  /*border-top: solid 1px #999;*/
     border-bottom: solid 1px #999;
 }
+/*
 table tr th:first-child {
     border-left: solid 1px #999;
 }
 table tr th:last-child {
     border-right: solid 1px #999;
 }
+/*
 table.primobjlist tr th {
     background-color: #CCC;
 }
+*/
 table td, table th {
     vertical-align: top;
     padding-left: 1ex;
@@ -553,7 +561,7 @@ td.ColumnFamily { /* Space for leading arrow */
 	text-indent: -1em;
 }
 table.infolist tr td ol {
-    margin: 0px;
+    margin: 0 4px;
 }
 
 #summaryarea table.infolist td.ColumnAttribute,
@@ -826,7 +834,7 @@ div#families table.fixed_subtables table.eventlist th:last-child {
 div#families table.attrlist td.ColumnType {
     color: black;
 }
-/* Stk 4.10.2017 JMä */
+/* Stk 4.10.2017..2021 JMä */
 .personbox {border: 1px solid black;
     align-content: center;
     border-radius: 10px;
@@ -836,6 +844,7 @@ div#families table.attrlist td.ColumnType {
     width: 200px;
     margin: 1em;
     font-size: 90%;
+  /*flex: 50%;*/
 }
 .familybox {
 	width: 350px;
@@ -846,6 +855,7 @@ div#families table.attrlist td.ColumnType {
     align-self: flex-start;
     font-size: 90%;
     margin: 10px;
+  /*flex: 50%;*/
 }
 .familybox p { padding-left: 1em; padding-top: 1em; }
 .familybox ul li ul { padding-left: 1.5em; }
@@ -859,6 +869,14 @@ div#families table.attrlist td.ColumnType {
 .mainbox {
     padding-left: 1em;
     padding-top: 1em;
+    flex: 50%
+}
+
+.row {
+    display: inline-flex
+}
+.column {
+    flex: 50%
 }
 
 /* Subsection : Gallery
@@ -898,7 +916,7 @@ div.grampsstylednote p {
     text-indent: -3em;
     text-align: justify;
 }
-/*  h4 + div.grampsstylednote, a.familymap {
+/*  h3 + div.grampsstylednote, a.familymap {
 	    margin: 1em 15px 1em ;
 	}
 	i + div.grampsstylednote p {
@@ -982,115 +1000,132 @@ body#FamilyMap {
 }
 
 /* Calendar Styles
-===================================================== */
-table.calendar {
-    table-layout: fixed;
-    empty-cells: show;
+===================================================== **
+	table.calendar {
+	    table-layout: fixed;
+	    empty-cells: show;
+	}
+	.calendar thead th {
+	    text-align: center;
+	    border-top-style: none;
+	}
+	.calendar thead th.monthName {
+	    font-size: xx-large;
+	    font-weight: normal;
+	    background-color: white;
+	    border-bottom-style: none;
+	    padding-top: 1em;
+	}
+	.calendar thead th abbr {
+	    border-bottom-style: none;
+	}
+	#CreatorInfo {
+	    float: right;
+	    margin: -1em 15px 0px 0px;
+	    font-weight: bold;
+	    color: #999;
+	}
+	.calendar tfoot tr td {
+	    border-top: solid 4px #999;
+	    vertical-align: middle;
+	}
+	
+	/* Calendar : Date Numeral *
+	.calendar div.date {
+	    float: right;
+	    width: 1.8em;
+	    font-size: large;
+	    text-align: center;
+	    background-color: #CCC;
+	    color: #555;
+	}
+	
+	/* Calendar : Date Container *
+	.calendar td {
+	    padding: 0px 0px 0px 1ex;
+	    border-width: 1px 0px 0px 1px;
+	    border-style: solid;
+	    border-color: #CCC;
+	    background-color: #EEE;
+	}
+	.calendar td:first-child {
+	    border-left-style: none;
+	    padding: 0px 0px 0px 1ex;
+	}
+	.calendar tbody tr:first-child td {
+	    border-top-style: none;
+	}
+	
+	/* Calendar : Date Detail *
+	.calendar td ul {
+	    font-size: smaller;
+	    list-style: none;
+	    padding: 0px;
+	}
+	.calendar td ul li {
+	    border-top: dashed 1px #CCC;
+	    padding-top: 0.5em;
+	    padding-bottom: 0.5em;
+	}
+	.calendar td ul li:first-child {
+	    border-style: none;
+	}
+	
+	/* Calendar : Birthday, Anniversary, Highlight *
+	.calendar td.highlight {
+	    background-color: white;
+	}
+	.calendar td.highlight div.date {
+	    color: black;
+	    background-color: #CCC;
+	}
+	
+	/* Calendar : Previous-Next Month *
+	.calendar td.previous,
+	.calendar td.next,
+	.calendar td.previous div.date,
+	.calendar td.next div.date {
+	    color: #CCC;
+	    background-color: #EEE;
+	}
+	
+	/* Calendar : Full Year *
+	body#fullyearlinked div.content {
+	    overflow: hidden;
+	}
+	body#fullyearlinked table.calendar {
+	    float: left;
+	    width: 33.3%;
+	    height: 18em;
+	    border: solid 1px black;
+	}
+	body#fullyearlinked table.calendar thead th {
+	    height: 2em;
+	}
+	body#fullyearlinked table.calendar thead th.monthName {
+	    font-size: large;
+	    padding: 2px 0px;
+	}
+	body#fullyearlinked table.calendar tbody td {
+	    height: 3em;
+	}
+	body#OneDay div.content {
+	    overflow: hidden;
+	}
+*/
+
+div.comment {
+	border: 1px solid;
+	padding: 5px;
+	margin: 5px;
+	background: #eeeeee;
+	border-radius: 15px;
 }
-.calendar thead th {
-    text-align: center;
-    border-top-style: none;
-}
-.calendar thead th.monthName {
-    font-size: xx-large;
-    font-weight: normal;
-    background-color: white;
-    border-bottom-style: none;
-    padding-top: 1em;
-}
-.calendar thead th abbr {
-    border-bottom-style: none;
-}
-#CreatorInfo {
-    float: right;
-    margin: -1em 15px 0px 0px;
-    font-weight: bold;
-    color: #999;
-}
-.calendar tfoot tr td {
-    border-top: solid 4px #999;
-    vertical-align: middle;
+div.comment .content {
+	/*border: 1px solid;*/
+	padding: 5px;
+	margin: 5px;
+	background: white;
+	border-radius: 5px;
 }
 
-/* Calendar : Date Numeral */
-.calendar div.date {
-    float: right;
-    width: 1.8em;
-    font-size: large;
-    text-align: center;
-    background-color: #CCC;
-    color: #555;
-}
-
-/* Calendar : Date Container */
-.calendar td {
-    padding: 0px 0px 0px 1ex;
-    border-width: 1px 0px 0px 1px;
-    border-style: solid;
-    border-color: #CCC;
-    background-color: #EEE;
-}
-.calendar td:first-child {
-    border-left-style: none;
-    padding: 0px 0px 0px 1ex;
-}
-.calendar tbody tr:first-child td {
-    border-top-style: none;
-}
-
-/* Calendar : Date Detail */
-.calendar td ul {
-    font-size: smaller;
-    list-style: none;
-    padding: 0px;
-}
-.calendar td ul li {
-    border-top: dashed 1px #CCC;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-}
-.calendar td ul li:first-child {
-    border-style: none;
-}
-
-/* Calendar : Birthday, Anniversary, Highlight */
-.calendar td.highlight {
-    background-color: white;
-}
-.calendar td.highlight div.date {
-    color: black;
-    background-color: #CCC;
-}
-
-/* Calendar : Previous-Next Month */
-.calendar td.previous,
-.calendar td.next,
-.calendar td.previous div.date,
-.calendar td.next div.date {
-    color: #CCC;
-    background-color: #EEE;
-}
-
-/* Calendar : Full Year */
-body#fullyearlinked div.content {
-    overflow: hidden;
-}
-body#fullyearlinked table.calendar {
-    float: left;
-    width: 33.3%;
-    height: 18em;
-    border: solid 1px black;
-}
-body#fullyearlinked table.calendar thead th {
-    height: 2em;
-}
-body#fullyearlinked table.calendar thead th.monthName {
-    font-size: large;
-    padding: 2px 0px;
-}
-body#fullyearlinked table.calendar tbody td {
-    height: 3em;
-}
-body#OneDay div.content {
-    overflow: hidden;
-}

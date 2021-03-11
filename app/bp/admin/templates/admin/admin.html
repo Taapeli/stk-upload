@@ -35,7 +35,7 @@ function confirm_delete(url) {
 
 <div style="margin-left:50px; padding-bottom: 2em;">
 
-    <h2>{{ _('Isotammi Database Management Operations') }}</h2>
+    <h1>{{ _('Isotammi Database Management Operations') }}</h1>
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version') }} 
@@ -46,7 +46,7 @@ function confirm_delete(url) {
    and (current_user.has_role('admin') or current_user.has_role('master'))  %}
     <div class="startbox admin">
       <div style="display: inline-block;">
-        <h3>{{ _('Database Emptyings') }}</h3>
+        <h2>{{ _('Database Emptyings') }}</h2>
         <ul><li><i>{{ _('Dangerous operations, which can not be undone!') }}</i></li>
             <ul>
               <li><a href="#" onclick="confirm_clear('/admin/clear_db/total')">
@@ -69,7 +69,7 @@ function confirm_delete(url) {
    and (current_user.has_role('admin') or current_user.has_role('master')) %}
     <div class="startbox admin">
       <div style="display: inline-block;">
-        <h3>{{ _('User and reference information management') }}</h3>
+        <h2>{{ _('User and reference information management') }}</h2>
         <ul>
           <li><a href="/admin/list_users">{{ _('Usernames and uploaded materials') }}</a></li>
           <li><a href="/admin/access_management">{{ _('Access management') }}</a></li>
@@ -83,7 +83,7 @@ function confirm_delete(url) {
    and (current_user.has_role('audit') or current_user.has_role('master')) %}
     <div class="startbox audit">
       <div style="display: inline-block;">
-        <h3>{{ _('Data maintenance') }}</h3>
+        <h2>{{ _('Data maintenance') }}</h2>
         <ul>
             <li><a href="/admin/set/estimated_dates">
                {{ _('Set the estimated birth and death dates of a person') }}</a></li>
@@ -97,7 +97,7 @@ function confirm_delete(url) {
    and (current_user.has_role('admin') or current_user.has_role('master')) %}
     <div class="startbox admin">
       <div style="display: inline-block;">
-        <h3>{{ _('Application management') }}</h3>
+        <h2>{{ _('Application management') }}</h2>
         <ul>
           <li><a href="/admin/readlog">{{ _('Display application log') }}</a></li>
           <li><a href="/admin/site-map">{{ _('List all application pages') }}</a></li>

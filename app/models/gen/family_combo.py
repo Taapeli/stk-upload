@@ -8,7 +8,7 @@ import  shareds
 from bl.place import PlaceBl
 #from bl.person import PersonBl
 from bl.person_name import Name
-from ui.place import place_names_from_nodes
+from ui.place import place_names_local_from_nodes
 
 from .cypher import Cypher_family, Cypher_person
 from .family import Family
@@ -244,10 +244,10 @@ RETURN extract(x IN relationships |
                                     # Look for surrounding place:
                                     res = session.run(Cypher_person.get_places, uid_list=[e.uniq_id])
                                     for rec in res:
-                                        e.place.names = place_names_from_nodes(rec['pnames'])
+                                        e.place.names = place_names_local_from_nodes(rec['pnames'])
                                         if rec['pi']:
                                             pl_in = PlaceBl.from_node(rec['pi'])
-                                            pl_in.names = place_names_from_nodes(rec['pinames'])
+                                            pl_in.names = place_names_local_from_nodes(rec['pinames'])
                                             e.place.uppers.append(pl_in)
 
                                 family.events.append(e)

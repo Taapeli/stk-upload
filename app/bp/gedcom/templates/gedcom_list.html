@@ -13,11 +13,11 @@ var maxsize = {{ maxsize }};  // to be used in gedcom_scripts.js
 
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
-    <h2>{{ _("Gedcom tools") }} ({{ _("user") }}: {{ user }})</h2>
+    <h1>{{ _("Gedcom tools") }} ({{ _("user") }}: {{ user }})</h1>
     <div class="row">
     
         <div class="startbox2"> 
-	            <h3>{{ _("Select your file for processing") }}</h3> 
+	            <h2>{{ _("Select your file for processing") }}</h2> 
 				<div>
 				    <table>
 					    {% for file in files %}
@@ -32,7 +32,7 @@ var maxsize = {{ maxsize }};  // to be used in gedcom_scripts.js
 		</div>
 
 	    <div class="startbox">
-	            <h3>{{ _("Upload a new GEDCOM file") }}</h3>
+	            <h2>{{ _("Upload a new GEDCOM file") }}</h2>
 				<div>
 				    <!-- form id="upload_form" method="post" enctype="multipart/form-data" action="/gedcom/upload" -->
 				    <form id="upload_form" method="post" enctype="multipart/form-data">

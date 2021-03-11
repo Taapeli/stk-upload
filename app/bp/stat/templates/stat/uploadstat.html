@@ -6,7 +6,7 @@
 {{ super() }}
 
 <div class="startdiv">
-  <h2>{{ _("Upload statistics") }}</h2>
+  <h1>{{ _("Upload statistics") }}</h1>
   <div id="errors" class="errors"></div>
   Return to <a href="/stat">statistics start page</a>
   <p>
@@ -55,7 +55,7 @@
     {% for sections in lines %}
     {# sections[0] is log file name #}
     {# sections[1] is contents from that log file #}
-    <h3>Logfile(s) <tt>{{ sections[0] }}</tt></h3>
+    <h2>Logfile(s) <tt>{{ sections[0] }}</tt></h2>
     {% for section in sections[1] %}
     {# section[0] is 'By xxx' #}
     <i> {{ section[0] }} </i>
