@@ -170,7 +170,7 @@ class PlaceBl(Place):
             - else use any name
         '''
         if not names:
-            return None
+            return {'status':Status.ERROR, 'ids':{}}
         selection = {}
         #print(f'# ---- Place {names[0].name}')
         try:
