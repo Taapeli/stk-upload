@@ -100,36 +100,13 @@ class Neo4jReadService:
         obj.role = role if role != 'Primary' else None
         return obj
 
-
+# Obsolete:
 #     def dr_get_person_by_uuid(self, uuid:str, user:str): #--> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_by_uuid
-#         ''' Read a person from common data or user's own Batch.
-# 
-#             -   If you have selected to use common approved data, you can read
-#                 both your own and passed data.
-#             -   If you havn't selected common data, you can read 
-#                 only your own data.
-# 
-#             --> Origin from models.gen.person_combo.Person_combo.get_my_person
-#         '''
-
 #     def dr_get_person_names_events(self, puid:int): #--> included in pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_by_uuid
-#         ''' Read names and events to Person object person.
-#         '''
-
-
 #     def dr_get_person_families(self, puid:int): #--> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_families
-#         ''' Read the families, where given Person is a member.
-# 
-#             Returns
-#             - the Families, where this person is a parent or child
-#             - the Family members with their birth event
-#             - the family events from families, where this person is a parent
-# 
-#             (p:Person) <-- (f:Family)
-#                for f
-#                  (f) --> (fp:Person) -[*1]-> (fpn:Name)
-#                  (f) --> (fe:Event)
-#         '''
+#     def dr_get_object_sources_repositories(self): # --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_sources_repositories
+#     def dr_get_object_places(self, person): # --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_places
+#     def dr_get_object_citation_note_media(self, person, active_objs=[]): #--> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_citation_note_media
 
 
     def dr_get_person_list(self, args):
@@ -756,24 +733,6 @@ class Neo4jReadService:
         return {"items":list(families.values()), "status":Status.OK}
 
 
-#     def dr_get_object_places(self, person): # --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_places
-#         ''' Read Place hierarchies for all Event objects in self.objs.
-#         '''
-
-
-#     def dr_get_object_citation_note_media(self, person, active_objs=[]): #--> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_citation_note_media
-#         ''' Read Citations, Notes, Medias for list of objects.
-# 
-#                 (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-# 
-#             First (when active_objs is empty) searches all Notes, Medias and
-#             Citations of person or it's connected objects.
-#             
-#             Returns a list of created new objects, where this search should
-#             be repeated.
-#         '''
-
-
     def dr_get_place_list_fw(self, user, fw_from, limit, lang='fi'):
         ''' Read place list from given start point
         '''
@@ -1205,22 +1164,6 @@ class Neo4jReadService:
 
         status = Status.OK if recs else Status.NOT_FOUND
         return {'status':status, 'items':recs }
-
-
-#     def dr_get_object_sources_repositories(self): # --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_sources_repositories
-#         ''' Get Sources and Repositories udes by listed objects
-#         
-#             Read Source -> Repository hierarchies for given list of citations
-#                             
-#             - session       neo4j.session   for database access
-#             - citations[]   list int        list of citation.uniq_ids
-#             - objs{}        dict            objs[uniq_id] = NodeObject
-#             
-#             * The Citations mentioned must be in objs dictionary
-#             * On return, the new Sources and Repositories found are added to objs{} 
-#             
-#             --> Origin from models.obsolete_source_citation_reader.read_sources_repositories
-#         '''
 
 
     def dr_get_source_citations(self, sourceid:int):

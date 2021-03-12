@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-11 13:53+0200\n"
+"POT-Creation-Date: 2021-03-12 17:39+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -235,7 +235,6 @@ msgstr ""
 
 #: bp/admin/forms.py:71 bp/admin/forms.py:120
 #: bp/scene/templates/scene/event.html:76
-#: bp/scene/templates/scene/event_htmx.html:83
 #: bp/scene/templates/scene/event_vue.html:100
 msgid "Member"
 msgstr ""
@@ -322,7 +321,6 @@ msgid "Approved / pending user"
 msgstr ""
 
 #: bp/admin/forms.py:117 bp/scene/templates/scene/event.html:75
-#: bp/scene/templates/scene/event_htmx.html:82
 #: bp/scene/templates/scene/event_vue.html:99
 msgid "Role"
 msgstr ""
@@ -1499,7 +1497,6 @@ msgstr ""
 #: bp/gedcom/templates/gedcom_list.html:42
 #: bp/scene/templates/scene/edit_event.html:4
 #: bp/scene/templates/scene/event.html:51
-#: bp/scene/templates/scene/event_htmx.html:58
 #: bp/scene/templates/scene/event_vue.html:62
 #: bp/scene/templates/scene/person.html:217
 #: bp/scene/templates/scene/place_events.html:177
@@ -2232,7 +2229,6 @@ msgid "No event found"
 msgstr ""
 
 #: bp/scene/routes.py:569 bp/scene/templates/scene/event.html:83
-#: bp/scene/templates/scene/event_htmx.html:90
 #: bp/scene/templates/scene/person_famtree_hx.html:44
 msgid "Self"
 msgstr ""
@@ -2244,7 +2240,7 @@ msgstr ""
 #: bp/scene/routes.py:720 bp/scene/templates/scene/families.html:115
 #: bp/scene/templates/scene/family.html:34
 #: bp/scene/templates/scene/person_famtree_hx.html:19
-#: bp/scene/templates/scene/person_famtree_hx.html:62
+#: bp/scene/templates/scene/person_famtree_hx.html:62 ui/jinja_filters.py:85
 msgid "Family"
 msgstr ""
 
@@ -2255,21 +2251,20 @@ msgstr ""
 msgid "Children"
 msgstr ""
 
-#: bp/scene/routes.py:871
+#: bp/scene/routes.py:872
 msgid "No objects found"
 msgstr ""
 
-#: bp/scene/routes.py:874
+#: bp/scene/routes.py:875
 msgid "Error"
 msgstr ""
 
-#: bp/scene/routes.py:1075
+#: bp/scene/routes.py:1076
 msgid "No previous comments"
 msgstr ""
 
 #: bp/scene/templates/scene/edit_event.html:8
 #: bp/scene/templates/scene/event.html:55
-#: bp/scene/templates/scene/event_htmx.html:62
 #: bp/scene/templates/scene/event_vue.html:66
 #: bp/scene/templates/scene/person.html:215
 #: bp/scene/templates/scene/place_events.html:176
@@ -2280,7 +2275,6 @@ msgstr ""
 
 #: bp/scene/templates/scene/edit_event.html:12
 #: bp/scene/templates/scene/event.html:59
-#: bp/scene/templates/scene/event_htmx.html:66
 #: bp/scene/templates/scene/event_vue.html:70
 #: bp/scene/templates/scene/person.html:216
 #: bp/scene/templates/scene/places.html:41 templates/select_refcols.html:37
@@ -2289,15 +2283,12 @@ msgid "Place"
 msgstr ""
 
 #: bp/scene/templates/scene/event.html:3 bp/scene/templates/scene/event.html:9
-#: bp/scene/templates/scene/event_htmx.html:3
-#: bp/scene/templates/scene/event_htmx.html:11
 #: bp/scene/templates/scene/event_vue.html:3
 #: bp/scene/templates/scene/event_vue.html:14
 msgid "Event details"
 msgstr ""
 
 #: bp/scene/templates/scene/event.html:38
-#: bp/scene/templates/scene/event_htmx.html:45
 #: bp/scene/templates/scene/event_vue.html:52
 #: bp/scene/templates/scene/family.html:37
 #: bp/scene/templates/scene/media.html:71
@@ -2308,7 +2299,6 @@ msgid "Identifiers"
 msgstr ""
 
 #: bp/scene/templates/scene/event.html:71
-#: bp/scene/templates/scene/event_htmx.html:78
 #: bp/scene/templates/scene/event_vue.html:95
 msgid "Participants"
 msgstr ""

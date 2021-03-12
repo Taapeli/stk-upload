@@ -781,10 +781,10 @@ def show_place(locid):
         # Open database connection and start transaction
         # readservice -> Tietokantapalvelu
         #      reader ~= Toimialametodit
-        readservice = Neo4jReadService(shareds.driver)
-        reader = PlaceDataReader(readservice, u_context) 
-    
-        res = reader.get_places_w_events(locid)
+
+        with Neo4jReadService(shareds.driver) as readservice:
+            reader = PlaceDataReader(readservice, u_context) 
+            res = reader.get_places_w_events(locid)
 
         if res['status'] == Status.NOT_FOUND:
             print(f'bp.scene.routes.show_place: {_("Place not found")}')
@@ -832,19 +832,20 @@ def show_sources(series=None):
 
     # readservice -> Tietokantapalvelu
     #      reader ~= Toimialametodit
-    readservice = Neo4jReadService(shareds.driver)
-    reader = SourceDataStore(readservice, u_context)
+    with Neo4jReadService(shareds.driver) as readservice:
+        reader = SourceDataStore(readservice, u_context)
 
-    if series:
-        u_context.series = series
-    try:
-        res = reader.get_source_list()
-        if res['status'] == Status.NOT_FOUND:
-            print('bp.scene.routes.show_sources: No sources found')
-        elif res['status'] != Status.OK:
-            print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        if series:
+            u_context.series = series
+        try:
+            res = reader.get_source_list()
+            if res['status'] == Status.NOT_FOUND:
+                print('bp.scene.routes.show_sources: No sources found')
+            elif res['status'] != Status.OK:
+                print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
+        except KeyError as e:
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
+
     series = u_context.series if u_context.series else "all"
     stk_logger(u_context, f"-> bp.scene.routes.show_sources/{series} n={len(res['items'])}")
     return render_template("/scene/sources.html", sources=res['items'], 

@@ -82,7 +82,7 @@ def translate(term, var_name, show_table=False):
             "Ehtoollinen": _("Holy Communion"), #"ehtoollinen"      
             "Elected": _("Elected"), #"vaali"      
             "Engagement": _("Engagement"), #"kihlajaiset"
-#           "Family": _("Family"), #"Family event marriage etc. Not displayed"      
+            "Family": _("Family"), #"Family event marriage etc."      
             "First Communion": _("First Communion"), #"ensimmäinen ehtoollinen"
             "Graduation": _("Graduation"), #"valmistuminen"
             "Immigration": _("Immigration"), #"maahanmuutto"
