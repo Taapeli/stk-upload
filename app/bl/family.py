@@ -515,7 +515,8 @@ class FamilyReader(DbReader):
             # Add translated text fields
             for family in items:
                 family.rel_type_lang = translate(family.rel_type, 'marr').lower()
-                family.role_lang = translate('as_'+family.role, 'role')
+                # As_child / As_parent
+                family.role_lang = translate('As_'+family.role, 'role')
                 for parent in family.parents:
                     parent.role_lang = translate(parent.role, 'role')
                 for child in family.children:

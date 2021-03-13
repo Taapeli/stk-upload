@@ -7,15 +7,54 @@
 {% block title %}{{ macro.person_name_plain(person_name) }}{% endblock %}
 {% block body %}
 {{ super() }}
+<script src="https://unpkg.com/sunburst-chart"></script>
 <style>
 u { color: DarkKhaki; text-decoration: none; }
 #citTest { margin:1em; }
 #citTest div { display: inline-block; }
 #citTbl td, #notTbl td { border: 2px solid brown; }
-
-#tableNames { border: solid 1pt gray; }
+div#comments_div h3 a {
+    color: DarkGreen;
+    text-decoration: none;
+}
+#tableNames { border: solid 1pt DarkGreen; } /* gray; } */
 #tableNames td { padding-right: 1ex; }
 tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
+
+    .tab-bottom {
+     padding: .5em;
+     background-color: #f2f2f2;
+     margin: 0 1em;
+     border-radius: 1em;
+    }
+	.tab-list a {
+		display: inline-block;
+		padding: 2px 5px 0px;
+		cursor: pointer;
+        z-index: 2;
+	}
+	.tab-list a.selected {
+        margin-bottom: -2px;
+        background-color: white;
+        border-radius: .5em .5em 0 0;
+        border: solid 1px gray;
+        border-bottom: solid 1px white;
+        font-weight: bold;
+    }
+    .tab-content {
+        border: solid 1px gray;
+    }
+    div#families.subsection {
+        clear: both;
+        overflow: hidden;
+        background-color: white;
+    }
+#chart {
+ background: white;
+ display:flex;
+ justify-content: center;
+ padding: 1em;
+}
 </style>
 
 <div id="startdiv">
@@ -53,14 +92,6 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
   {% endwith %} 
 
 {% if person %}
-    {% if root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
-        <div class='credit'>{% if root.root_type == 'PASSED' %}
-        	{{ _('Origin from') }}
-            {% else %}{{ _('User data') }}:{% endif %}
-            <b>{{root.root_user}}</b> {{root.id}}
-            </div>
-    {% endif %}
-
         <h2 class="sticky" title="{{ _('Top') }}"><a href="#">
         <span id="primary_name">
         	{{person.names[0].firstname}} 
@@ -83,8 +114,6 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
                     </td>
                 </tr>
 
-			<form>
-    			<input type="hidden" name="uuid" value="{{ person.uuid }}">
 				<tr><td colspan="2">{{ _("Names") }}
 
                 {# Sortable name list #}
@@ -92,29 +121,33 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
                 {% if edit_names %}({{ _("order by dragging") }}){% endif %}
                 </td></tr>
 				<tr><td colspan="2">
-                {% if edit_names %}
-                    <table id="tableNames"><tbody id="names" 
-					hx-put="/scene/sort_names" hx-trigger="end" hx-swap="none">
-                {% else %}
-                    <table><tbody id="names">
-				{% endif %}
-                {% for p_name in person.names|sort(attribute='order') %}
-                        <tr{% if edit_names %} class="movable"{% endif %}>
-                            <td class="ColumnAttribute">{{p_name.type|transl('nt')}}</td>
-                            <td class="Value" style="padding-left: 24px;">
-        						{% if p_name.title %}<span title="titteli" class="typedesc">{{p_name.title}}</span>{% endif %}
-                                <span title="{{ _('first name') }}">{{p_name.firstname}}</span>
-                                <i title="{{ _('patronymic') }}">{{p_name.suffix}}</i>
-                                {% if p_name.prefix %}<span title="etuliite">{{p_name.prefix}}</span>{% endif %}
-                                <b title="{{ _('surname') }}">{{p_name.surname}}</b>
-        
-        	                    {{macro.citation_link(p_name.citation_ref, obj)}}
-        	                    <input type="hidden" name="order" value="{{p_name.uniq_id}}">
-                            </td>
-                        </tr>{% endfor %}
-               	    </tbody></table>
+
+				<form>
+	    			<input type="hidden" name="uuid" value="{{ person.uuid }}">
+	    			
+	                {% if edit_names %}
+	                    <table id="tableNames"><tbody id="names" 
+						hx-put="/scene/sort_names" hx-trigger="end" hx-swap="none">
+	                {% else %}
+	                    <table><tbody id="names">
+					{% endif %}
+	                {% for p_name in person.names|sort(attribute='order') %}
+	                        <tr{% if edit_names %} class="movable"{% endif %}>
+	                            <td class="ColumnAttribute">{{p_name.type|transl('nt')}}</td>
+	                            <td class="Value" style="padding-left: 24px;">
+	        						{% if p_name.title %}<span title="titteli" class="typedesc">{{p_name.title}}</span>{% endif %}
+	                                <span title="{{ _('first name') }}">{{p_name.firstname}}</span>
+	                                <i title="{{ _('patronymic') }}">{{p_name.suffix}}</i>
+	                                {% if p_name.prefix %}<span title="etuliite">{{p_name.prefix}}</span>{% endif %}
+	                                <b title="{{ _('surname') }}">{{p_name.surname}}</b>
+	        
+	        	                    {{macro.citation_link(p_name.citation_ref, obj)}}
+	        	                    <input type="hidden" name="order" value="{{p_name.uniq_id}}">
+	                            </td>
+	                        </tr>{% endfor %}
+	               	    </tbody></table>
+				</form>
                 </td></tr>
-			</form>
 
                 {% if person.sex %}<tr>
                     <td class="ColumnAttribute">{{ _("Gender") }}</td>
@@ -261,87 +294,13 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
         </div>
     {% endif %}
 
-
-        <div class="subsection" id="families">
-            <h3>{{ _("Families") }}</h3>
-            {% set myid = person.uuid %}
-            <div class="row">
-                <div class="column">
-                    {% if person.families_as_child %}
-                        {% for fam in person.families_as_child %}
-                        <div class="mainbox">
-                            <p>{{ _("Parents' family") }}</p>
-                            <div class="familybox" title="{{ _('family') }} {{fam.id}}">
-                                <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
-                                        {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
-                                    {{fam.marriage_dates}}</p>
-                                <ul>
-                                    {% if fam.father %}
-                                    <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
-                                    {% endif %}{% if fam.mother %}
-                                    <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
-                                    {% endif %}{% if fam.children %}
-                                    <li>{{ _("Children") }}<ul>
-                                            {% for ch in fam.children|sort %}
-                                            <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
-                                            {% endfor -%}
-                                        </ul>
-                                    </li>
-                                    {% endif %}
-                                </ul>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% endif %}
-        
-                    <div class="mainbox" title="{{ _('Central person') }}">
-                        <p>{{person.names[0].firstname}} {{ _("self") }}</p>
-                        <div class="mainbox">
-                            <div class="personbox" title="{{ _('Self') }}">
-                                <span title="{{ _('first name') }}">{{person.names[0].firstname}}</span>
-                                {% if not person.names[0].surname %}
-                                <i title="{{ _('patronymic') }}">{{person.names[0].suffix}}</i>
-                                {% else %}
-                                <b title="{{ _('surname') }}">{{person.names[0].prefix}} {{person.names[0].surname}}</b>
-                                {% endif -%}
-                            </div>
-                        </div>
-                    </div>
-        
-                    {% if person.families_as_parent %}
-                        <div class="mainbox" title="{{ _('Own families') }}">
-                            <p>{{ _("As Parent in Family") }}</p>
-                            <div class="mainbox">
-                                {% for fam in person.families_as_parent %}
-                                <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-                                    <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
-                                            {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
-                                        {{fam.marriage_dates}}</p>
-                                    <ul>
-                                        {% if fam.father %}
-                                        <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
-                                        {% endif %}{% if fam.mother %}
-                                        <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
-                                        {% endif %}{% if fam.children|count %}
-                                        <li>{{ _("Children") }}<ul>
-                                                {% for ch in fam.children|sort %}
-                                                <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
-                                                {% endfor -%}
-                                            </ul>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-                <div class="column">
-                    <div id="chart"></div>
-                </div>
-            </div>
-        </div>
+<h3>{{ _("Relations") }}</h3>
+    <div id="tabs"
+         hx-get="/scene/person_{{'fanchart_hx' if fanchart_shown else 'famtree_hx'}}?uuid={{person.uuid}}"
+         hx-trigger="load after:100ms"
+         hx-target="#tabs"
+         hx-swap="innerHTML">
+    </div>
 
     {% if person.media_ref %}
         <div class="subsection" id="indivgallery">
@@ -404,19 +363,6 @@ tbl.noteReferences('noteContent','');
 var names = document.getElementById('names');
 var sortable = Sortable.create(names);
 {% endif %}
-
-var fanchart_data = JSON.parse('{{ fanchart_data|safe }}');
-
-Sunburst()
-    .data(fanchart_data)
-    .size('size')
-    .color('color')
-    .tooltipContent((d, node) => `<i>${d.tooltipContent}</i>`)
-    ////    .onClick((d, node) => location.reload(location.href + "?uuid={d.uuid}"))
-    .radiusScaleExponent(1.2)
-    .centerRadius(0.05)
-    .width(500)
-(document.getElementById('chart'));
 
 </script>
 {% endblock %}

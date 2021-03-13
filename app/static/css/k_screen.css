@@ -45,7 +45,7 @@ gray light              #CCC
 gray very light         #EEE
 white                   #FFF
 dark blue               #006
-Auditor					SaddleBrown
+Auditor					DarkGreen
 --------------------------------------------------------------------------------------------------
 Characteristic of this style is that it uses the full width of the browser
 window and that horizontal highlighting bars extend over the full width of
@@ -176,7 +176,7 @@ img#logo {
     border-radius: 5px;
 }
 .notmy {color:blue;}
-.Auditor { color:SaddleBrown; } # Only for Auditor's eyes
+.Auditor { color:DarkGreen; } # Only for Auditor's eyes
 
 .detail_link {
 	display: inline;
@@ -478,6 +478,7 @@ div#alphanav ul li {
     margin: 1pt;
     font-weight: bold;
     background-color: #f3f3f3;
+    border-radius: 8px 8px 0 0;
 }
 div#alphanav ul li.title {
 	padding: 6pt;
@@ -833,28 +834,28 @@ div#families table.fixed_subtables table.eventlist th:last-child {
 div#families table.attrlist td.ColumnType {
     color: black;
 }
-/* Stk 4.10.2017 JMä */
+/* Stk 4.10.2017..2021 JMä */
 .personbox {border: 1px solid black;
     align-content: center;
     border-radius: 10px;
     background: beige;
     padding: 10px; 
-/*    align-self: flex-start; */
+    align-self: flex-start;
     width: 200px;
     margin: 1em;
     font-size: 90%;
-    flex: 50%
+  /*flex: 50%;*/
 }
 .familybox {
 	width: 350px;
 	border: 1px solid gray; 
     border-radius: 10px;
     background: bisque;
-    /* flex-wrap: wrap; */
-/*    align-self: flex-start; */
+    flex-wrap: wrap;
+    align-self: flex-start;
     font-size: 90%;
     margin: 10px;
-    flex: 50%
+  /*flex: 50%;*/
 }
 .familybox p { padding-left: 1em; padding-top: 1em; }
 .familybox ul li ul { padding-left: 1.5em; }

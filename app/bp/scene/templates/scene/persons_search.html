@@ -25,6 +25,9 @@ div.CloudBox div {
     border-radius: 3em;
     line-height: 1.6em;
 }
+div.CloudPink div {
+    background-image: url("/static/image/cloud-pink.png");
+}
 </style>
 <div id="startdiv">
 	{% if rule == 'all' %}<h1>{{ _('Persons ordered by') }} {{ ordname[order] }}</h1>
@@ -102,6 +105,7 @@ div.CloudBox div {
                       <div class="submit"><input type="submit" value="Hae"></div>
                       <div id="searchHelp"></div>
                 </div>
+            </div>
           </form>
 
        </div><!-- summaryarea -->
@@ -128,7 +132,7 @@ selector.addEventListener("change", () => {
 	            </ul>
 	          {% endif %}
 	        {% endwith %}
-    </div>
+    </div> <!-- end messages -->
 {% if status == 'OK' %}
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
@@ -144,7 +148,6 @@ selector.addEventListener("change", () => {
 	<table class="IndividualList">
 		<thead>
 			<tr><th></th>
-<!--                    <th>{{ _('Owner') }}</th> -->
                    <th>{{ _('Person') }}</th>
                    <th>{{ _("Person's events") }}</th>
 			</tr>
@@ -158,11 +161,6 @@ selector.addEventListener("change", () => {
 		            <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
 			{% endif %}
 				</td>
-					
-<!--			<td style="text-align:center; padding:3px;">
- 		    {%- if p.user %}{{p.user}}{% else %} – {% endif %}
-				</td>
- -->
 	            <td class="ColumnPerson">
                     <div>
 	                    <a href="/scene/person?uuid={{p.uuid}}"
@@ -221,14 +219,14 @@ selector.addEventListener("change", () => {
                      {% for stat in surnamestats %}
                         <span style='font-size:{{ stat.fontsize}}px'>
                             <a href=# onclick="submit_search('{{ stat.surname }}')"
-                               title="{{ stat.count }}">{{ stat.surname }}</a>
+                               title="{{ stat.count }} {{ _('persons') }}">{{ stat.surname }}</a>
                         </span>
                      {% endfor %}
                  </form>
             </div>
         </div>
 
-           <div class="CloudBox" style="display: inline-block;">
+           <div class="CloudBox CloudPink" style="display: inline-block;">
              <div>
                  <form name="placenameform" method="post" action="/scene/persons/search">
                     <input name="rule" type="hidden" value="placename">
@@ -236,14 +234,14 @@ selector.addEventListener("change", () => {
                      {% for stat in placenamestats %}
                         <span style='font-size:{{ stat.fontsize }}px'>
                             <a href="/scene/location/uuid={{ stat.uuid }}"
-                               title="{{ stat.count }}">{{ stat.placename }}</a>
+                               title="{{ stat.count }} {{ _('places') }}">{{ stat.placename }}</a>
                         </span>
                      {% endfor %}
                  </form>
              </div>
            </div>
 
-    </div><!-- flex-container -->
+    </div><!-- end flex-container -->
    {% endif %}
-</div><!-- Individuals -->
+</div><!-- end Individuals -->
 {% endblock %}

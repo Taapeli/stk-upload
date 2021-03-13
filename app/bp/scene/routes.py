@@ -289,16 +289,52 @@ def obsolete_show_persons_by_refname(refname, opt=""):
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('guest','research', 'audit', 'admin')
-def show_person(uuid=None):
+def show_person(uuid=None, fanchart=False):
     """ One Person with all connected nodes - NEW version 3.
 
         Arguments:
         - uuid=     persons uuid
-        - debug=1   optinal for javascript tests
+        - fanchart= by default family details shown, fanchart navigation uses this
     """
     t0 = time.time()
     uuid = request.args.get('uuid', uuid)
+    fanchart_shown = request.args.get('fanchart', fanchart)
     dbg = request.args.get('debug', None)
+    u_context = UserContext(user_session, current_user, request)
+
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        reader = PersonReaderTx(readservice, u_context)
+        result = reader.get_person_data(uuid) #, args)
+
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    if Status.has_failed(result):
+        flash(f'{result.get("statustext","error")}', 'error')
+    person = result.get('person')
+    objs = result.get('objs',[])
+    print (f'# Person with {len(objs)} objects')
+    jscode = result.get('jscode','')
+    # Batch or Audit node data like {'root_type', 'root_user', 'id'}
+    person.root = result.get('root')
+
+    stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
+
+    last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
+    may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
+    #may_edit = 0
+    return render_template("/scene/person.html", person=person, obj=objs, 
+                           jscode=jscode, menuno=12, debug=dbg,
+                           last_year_allowed=last_year_allowed, 
+                           elapsed=time.time()-t0, user_context=u_context,
+                           may_edit=may_edit, fanchart_shown=fanchart_shown)
+
+@bp.route('/scene/person_famtree_hx', methods=['GET'])
+#     @login_required
+@roles_accepted('guest','research', 'audit', 'admin')
+def show_person_family_tree_hx(uuid=None):
+    '''
+    Content of the selected tab for the families section: family details.
+    '''
+    uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
     with Neo4jReadServiceTx(shareds.driver) as readservice:
@@ -318,14 +354,38 @@ def show_person(uuid=None):
 
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
-    #may_edit = 0
-    fanchart = get_fanchart_data(uuid)
-    return render_template("/scene/person.html", person=person, obj=objs, 
-                           jscode=jscode, menuno=12, debug=dbg, root=root,
+    return render_template("/scene/person_famtree_hx.html", person=person, obj=objs, 
+                           jscode=jscode, menuno=12, root=root,
                            last_year_allowed=last_year_allowed, 
-                           elapsed=time.time()-t0, user_context=u_context,
-                           may_edit=may_edit, fanchart_data=json.dumps(fanchart))
+                           user_context=u_context,
+                           may_edit=may_edit)
 
+@bp.route('/scene/person_fanchart_hx', methods=['GET'])
+#     @login_required
+@roles_accepted('guest','research', 'audit', 'admin')
+def show_person_fanchart_hx(uuid=None):
+    '''
+    Content of the selected tab for the families section: fanchart.
+    '''
+    t0 = time.time()
+    uuid = request.args.get('uuid', uuid)
+    u_context = UserContext(user_session, current_user, request)
+
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        reader = PersonReaderTx(readservice, u_context)
+        result = reader.get_person_data(uuid) #, args)
+
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    if Status.has_failed(result):
+        flash(f'{result.get("statustext","error")}', 'error')
+    person = result.get('person')
+
+    fanchart = get_fanchart_data(uuid)
+    n = len(fanchart.get('children',[]))
+    t1 = time.time()-t0
+    stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
+    return render_template("/scene/person_fanchart_hx.html", person=person,
+                            fanchart_data=json.dumps(fanchart))
 
 @bp.route('/scene/get_person_names/<uuid>', methods=['PUT'])
 @roles_accepted('guest','research', 'audit', 'admin')
@@ -351,10 +411,10 @@ def get_person_names(uuid):
 def get_person_primary_name(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadService(shareds.driver) as readservice:
-        datastore = PersonReader(readservice, u_context)
-        args = {}
-        result = datastore.get_person_data(uuid, args)
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        datastore = PersonReaderTx(readservice, u_context)
+        result = datastore.get_person_data(uuid)
+        print(result)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
@@ -721,10 +781,10 @@ def show_place(locid):
         # Open database connection and start transaction
         # readservice -> Tietokantapalvelu
         #      reader ~= Toimialametodit
-        readservice = Neo4jReadService(shareds.driver)
-        reader = PlaceDataReader(readservice, u_context) 
-    
-        res = reader.get_places_w_events(locid)
+
+        with Neo4jReadService(shareds.driver) as readservice:
+            reader = PlaceDataReader(readservice, u_context) 
+            res = reader.get_places_w_events(locid)
 
         if res['status'] == Status.NOT_FOUND:
             print(f'bp.scene.routes.show_place: {_("Place not found")}')
@@ -772,19 +832,20 @@ def show_sources(series=None):
 
     # readservice -> Tietokantapalvelu
     #      reader ~= Toimialametodit
-    readservice = Neo4jReadService(shareds.driver)
-    reader = SourceDataStore(readservice, u_context)
+    with Neo4jReadService(shareds.driver) as readservice:
+        reader = SourceDataStore(readservice, u_context)
 
-    if series:
-        u_context.series = series
-    try:
-        res = reader.get_source_list()
-        if res['status'] == Status.NOT_FOUND:
-            print('bp.scene.routes.show_sources: No sources found')
-        elif res['status'] != Status.OK:
-            print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        if series:
+            u_context.series = series
+        try:
+            res = reader.get_source_list()
+            if res['status'] == Status.NOT_FOUND:
+                print('bp.scene.routes.show_sources: No sources found')
+            elif res['status'] != Status.OK:
+                print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
+        except KeyError as e:
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
+
     series = u_context.series if u_context.series else "all"
     stk_logger(u_context, f"-> bp.scene.routes.show_sources/{series} n={len(res['items'])}")
     return render_template("/scene/sources.html", sources=res['items'], 
@@ -975,7 +1036,10 @@ def comments():
 def comments_header():
     """ Comments header
     """
-    return render_template("/scene/comments/comments_header.html")
+    if "audit" in current_user.roles:
+        return render_template("/scene/comments/comments_header.html")
+    else:
+        return ""
 
 @bp.route('/scene/comments/fetch_comments')
 @login_required
@@ -983,19 +1047,17 @@ def comments_header():
 def fetch_comments():
     """ Fetch comments
     """
+    u_context = UserContext(user_session, current_user, request)
     uniq_id = int(request.args.get("uniq_id"))
     #uuid = request.args.get("uuid")
     if request.args.get("start"):
         start = float(request.args.get("start"))
     else:
-        start = 0.0
-    args = {"uniq_id": uniq_id}
-    if start:
-        args["start"] = start
+        start = datetime.now().timestamp()
     
     query = """
         match (p) -[:COMMENT] -> (c:Comment)
-            where id(p) = $uniq_id and c.timestamp >= $start
+            where id(p) = $uniq_id and c.timestamp <= $start
         return c as comment order by c.timestamp desc limit 5
     """
     result = shareds.driver.session().run(query, uniq_id=uniq_id, start=start)
@@ -1013,6 +1075,7 @@ def fetch_comments():
     if last_timestamp is None:
         return "<span id='no_comments'>" + _("No previous comments") + "</span>"
     else:
+        stk_logger(u_context, f"-> bp.scene.routes.fetch_comments n={len(comments)}")
         return render_template("/scene/comments/fetch_comments.html", 
                            comments=comments[0:4], 
                            last_timestamp=last_timestamp,
@@ -1024,7 +1087,8 @@ def fetch_comments():
 def add_comment():
     """ Add a comment
     """
-    uuid = request.form.get("uuid")
+    u_context = UserContext(user_session, current_user, request)
+    #uuid = request.form.get("uuid")
     uniq_id = int(request.form.get("uniq_id"))
     comment_text = request.form.get("comment_text")
     if comment_text.strip() == "": return ""
@@ -1045,6 +1109,7 @@ def add_comment():
         timestr=timestr,
         ).single()
     if res:
+        stk_logger(u_context, "-> bp.scene.routes.add_comment")
         return render_template("/scene/comments/add_comment.html",
                                timestamp=timestr,
                                user=user,

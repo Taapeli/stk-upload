@@ -1,62 +1,49 @@
-# Gramps - a GTK+/GNOME based genealogy program
+#   Isotammi Geneological Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
 #
-# Copyright (C) 2001-2007  Donald N. Allingham, Martin Hawlisch
-# Copyright (C) 2009 Douglas S. Blank
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#                            Timo Nallikari, Pekka Valta
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#   Two-way fanchart using Vasco Asturiano's sunburst chart javascript module
+#   (https://github.com/vasturiano/sunburst-chart).
+#
+#   Copyright (C) 2021  Heikki Roikonen
 
-## Based on the paper:
-##   http://www.cs.utah.edu/~draperg/research/fanchart/draperg_FHT08.pdf
-## and the applet:
-##   http://www.cs.utah.edu/~draperg/research/fanchart/demo/
+#import urllib
 
-## Found by redwood:
-## http://www.gramps-project.org/bugs/view.php?id=2611
-
-#-------------------------------------------------------------------------
-#
-# Gramps modules
-#
-#-------------------------------------------------------------------------
-import urllib
-
-from flask import render_template, request, redirect, url_for, flash, session as user_session #, send_from_directory, session, jsonify
-from flask import send_file, json
+from flask import render_template, request, flash, session as user_session
+from flask import json #, send_file
 from flask_security import login_required, roles_accepted, current_user
-from flask_babelex import _ 
+#from flask_babelex import _ 
 
 import shareds
-import bl.person
+#import bl.person
 
 from . import bp
-## from .models import logreader, utils
-
-## from gramps.gen.plug import Gramplet
 from ui.user_context import UserContext
 from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 from bl.person_reader import PersonReaderTx
 from bl.base import Status
-from bl.person_name import Name
-from bp.gedcom.transforms.model.person_name import PersonName
-## from gramps.gen.const import GRAMPS_LOCALE as glocale
-## _ = glocale.translation.gettext
+#from bl.person_name import Name
+#from bp.gedcom.transforms.model.person_name import PersonName
 
 MAX_ANCESTOR_LEVELS = 4
 MAX_DESCENDANT_LEVELS = 3
 
-readservice = Neo4jReadServiceTx(shareds.driver)
+#readservice = Neo4jReadServiceTx(shareds.driver)
 
 def get_fanchart_data(uuid):
     '''

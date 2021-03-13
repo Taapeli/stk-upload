@@ -874,7 +874,7 @@ class DOM_handler():
         dates_count = 0
         sortname_count = 0
         if len(self.family_ids) == 0:
-            return {'status': Status.NOT_FOUND, 'dates':dates_count, 'sortnames': sortname_count}
+            return {'status': Status.OK, 'dates':dates_count, 'sortnames': sortname_count}
 
         for uniq_id in self.family_ids:
             if uniq_id != None:

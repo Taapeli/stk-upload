@@ -4,17 +4,17 @@
 
      @see https://htmx.org/
  -->
-<h3><a href=# 
-	hx-get="/scene/comments/comments_header"
-	hx-target="#comments_div" 
-	hx-trigger="click"> 
-{{ _("Hide comments") }}</a>
+<h3>▾ <a href=# 
+		hx-get="/scene/comments/comments_header"
+		hx-target="#comments_div" 
+		hx-trigger="click">
+	{{ _("Discussion (hide)") }}</a>
 </h3>
 
 <div class="flex-container">
     <div style="width:45%; min-width: 45ex;">
         <form>
-            <b>Your comment</b>
+            <b>{{ _('Your comment') }}</b>
             <br>
             <textarea id="comment_text" name="comment_text" rows=10 cols=50></textarea>
             <br>
@@ -23,17 +23,20 @@
                     hx-target="#comments" 
                     hx-include="form" 
                     hx-swap="afterbegin">
-            {{ _("Add comment") }}
+            	{{ _("Add comment") }}
             </button>
         </form>
     </div> <!-- Comment form -->
 
-    <div id="comments" style="width:45%">
-        <div hx-get="/scene/comments/fetch_comments"
-            hx-trigger="load" 
-            hx-include="form" 
-            hx-swap="outerHTML">
-        </div>
-    </div> <!-- comment list -->
+	<div style="width:45%">
+	    <b>{{ _("Latest comments") }}</b>
+	    <div id="comments">
+	        <div hx-get="/scene/comments/fetch_comments"
+	            hx-trigger="load" 
+	            hx-include="form" 
+	            hx-swap="outerHTML">
+	        </div>
+	    </div> <!-- comment list -->
+	</div>
 </div>
 
