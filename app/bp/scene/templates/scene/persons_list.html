@@ -68,6 +68,7 @@
 	          {% endif %}
 	        {% endwith %}
         </div>
+  <div id="hx-fam"></div>
 
     {% if cnt %}
 		<div id="alphanav">{% set alpha = "¤" %}
@@ -135,7 +136,14 @@
                                  <div class="pop-open-family" 
                                     v-on:mouseover="showPopup(uuid='{{p.uuid}}',$event)"
                                     title="Näytä perheet">👪</div>
+
+                                 <div class="pop-open-family"
+                                    hx-post="/scene/hx/families?uuid={{p.uuid}}"
+                                    hx-trigger="click"
+                                    hx-target="hx-fam"
+                                    hx-swap="outerHTML">⚡</div>
                             </div>
+                            
 	       {% endif %}
 
            

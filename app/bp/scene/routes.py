@@ -682,6 +682,51 @@ def show_family_page(uuid=None):
                            user_context=u_context, elapsed=time.time()-t0)
 
 
+@bp.route('/scene/hx/families', methods=['POST'])
+@bp.route('/scene/hx/families/uuid=<uuid>', methods=['GET'])
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
+def hx_show_person_families(uuid=None):
+    """ Draw person families pop up window.
+
+        The families are ordered by marriage time.
+    """
+    t0 = time.time()
+    try:
+        if uuid is None:
+            args = request.args
+            print(f'got request args: {args}')
+            uuid = args.get('uuid')
+        print(f'#hx_show_person_families uuid:"{uuid}"')
+        if not uuid:
+            print("bp.scene.routes.hx_show_person_families: Missing uuid")
+            return "Missing uuid"
+
+        u_context = UserContext(user_session, current_user, request)
+        with Neo4jReadService(shareds.driver) as readservice:
+            reader = FamilyReader(readservice, u_context) 
+            res = reader.get_person_families(uuid)
+
+        status = res.get('status')
+        if status != Status.OK:
+            if status == Status.ERROR:
+                flash(f'{res.get("statustext")}', 'error')
+            else:
+                flash(f'{ _("This item is not available") }', 'warning')
+
+        items = res['items']
+        t1 = time.time()-t0
+        stk_logger(u_context, f"-> bp.scene.routes.hx_show_person_families n={len(items)} e={t1:.3f}")
+
+    except Exception as e:
+        traceback.print_exc()
+        return f"{e.__class__.__name__} {e}"
+
+    return "<div style='display:block'><b>Tulos</b> tässä</div>"
+    # return render_template("/scene/family_pop_hx.html",  families=items)
+
+
+
 @bp.route('/scene/json/families', methods=['POST','GET'])
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
@@ -699,6 +744,7 @@ def json_get_person_families():
             args = json.loads(request.data)
             print(f'got request data: {args}')
         uuid = args.get('uuid')
+        print(f'#json_get_person_families uuid:"{uuid}"')
         if not uuid:
             print("bp.scene.routes.json_get_person_families: Missing uuid")
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
