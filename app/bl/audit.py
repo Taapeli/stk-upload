@@ -26,6 +26,9 @@ Created on 29.11.2019
 '''
 import shareds
 from datetime import datetime #,date
+from flask import flash
+import logging 
+logger = logging.getLogger('stkserver')
 
 from bl.base import Status
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch ######
@@ -151,6 +154,60 @@ class Audit():
 
         return user, audit_id, tstring, sorted(labels)
 
+    @staticmethod
+    def delete_audit(username, batch_id):
+        ''' Delete an audited batch having the given id.
+        '''
+        label_sets = [  # Grouped for decent size chunks in logical order
+                ["Note"],
+                ["Repository", "Media"],
+                ["Place"],
+                ["Source", "Citation"],
+                ["Event"],
+                ["Person"],
+                ["Family"]
+            ]
+
+        deleted = 0
+        msg = ''
+        try:
+            with shareds.driver.session() as session:
+                tx = session.begin_transaction()
+                result = tx.run(CypherAudit.delete_names,
+                                batch=batch_id)
+                result = tx.run(CypherAudit.delete_place_names,
+                                batch=batch_id)
+                tx.commit()
+
+                for labels in label_sets:
+                    #with session.begin_transaction() as tx:
+                    tx = session.begin_transaction()
+                    count = 0 
+                    result = tx.run(CypherAudit.delete,
+                                    batch=batch_id,
+                                    labels=labels)
+                    for record in result:
+                        count = record['count']
+                    #count = result.single().value(0)
+                    print(f'Audit.delete_audit {labels} {count}')
+                    if count:
+                        deleted += count
+                    logger.debug(f"Audit.delete_audit: deleted {count} nodes of type {labels}")
+                    tx.commit()
+
+                tx = session.begin_transaction()
+                result = tx.run(CypherAudit.delete_audit_node,
+                                batch=batch_id)
+                tx.commit()
+
+        except Exception as e:
+            msg = f'Only {deleted} objects deleted: {e.__class__.__name__} {e}'
+            print(f'Audit.delete_audit: {msg}')
+            flash(msg, "flash_error")
+            logger.error(f'{msg} {e.__class__.__name__} {e}')
+
+        return msg
+   
 
 #     @staticmethod
 #     def get_audit_stats(batch_id):

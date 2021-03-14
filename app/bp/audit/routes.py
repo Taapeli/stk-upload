@@ -32,10 +32,10 @@ from io import StringIO, BytesIO
 import csv
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for #, flash, send_from_directory, session, jsonify
+from flask import render_template, request, redirect, url_for, flash #, send_from_directory, session, jsonify
 from flask import send_file
 from flask_security import login_required, roles_accepted, current_user
-#from flask_babelex import _
+from flask_babelex import _
 
 import shareds
 #from bl.batch_audit import Batch, Audit
@@ -102,6 +102,19 @@ def move_in_2():
     syslog.log(type="batch to Common data", batch=batch_id, by=owner, msg=msg)
     return redirect(url_for('audit.move_in_1', batch_name=batch_id))
 
+# --------------------- Delete an approved data batch ----------------------------
+
+@bp.route('/audit/batch_delete/<batch_id>',  methods=['POST'])
+@login_required
+@roles_accepted('audit')
+def delete_approved(batch_id):
+    """ Confirm Batch delete """    
+    Audit.delete_audit(current_user.username,batch_id)
+    logger.info(f'-> bp.audit.routes.batch_delete f="{batch_id}"')
+    syslog.log(type="approved batch_id deleted",batch_id=batch_id) 
+    flash(_("Approved batch id %(batch_id)s has been deleted", batch_id=batch_id), 'info')
+    referrer = request.headers.get("Referer")                               
+    return redirect(referrer)
 
 # --------------------- List Approved data batches ----------------------------
 
