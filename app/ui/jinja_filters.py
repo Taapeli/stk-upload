@@ -31,9 +31,13 @@ from flask_babelex import _
 from models.gen.person import SEX_FEMALE, SEX_MALE, SEX_UNKOWN
 
 
-def translate(term, var_name):
+def translate(term, var_name, show_table=False):
     """ Given term is translated depending of var_name name.
-        The lang parameter is not used
+
+        # Get term translation
+        local_lang_text = translate('Birth', 'evt')
+        # Get full term translations dict
+        my_dict = translate(None, 'evt', True)
 
         'nt'   = Name types
         'evt'  = Event types
@@ -46,30 +50,29 @@ def translate(term, var_name):
         'marr' = marriage types
         'child' = child relations
     """
-#     print("# {}[{}]".format(var_name, term))
-    if not term:
-        print(f"WARNING: ui.jinja_filters.translate: missing term={term}, var_name={var_name}")
-        return "~"
     if var_name == "nt":
         # Name types
         tabl = {
-            "Aatelointinimi" : _("Noble Name "), #"Aatelointinimi"
+            "Aatelointinimi" : _("Noble Name"), #"Aatelointinimi"
             "Aateloitu nimi": _("Noble Name"), #"Aateloitu nimi"
             "Also Known As": _("Also Known As"), #"tunnettu myös"
             "Birth Name": _("Birth Name"), #"syntymänimi"
             "Married Name": _("Married Name"), #"avionimi"
-            "Sotilasnimi": _("Soldier name"), #"Sotilasnimi
-            "Taitelijanimi": _("Artist name"), #"Taiteilijanimi
-            "Vaihdettu nimi": _("Changed name"), #"Vaihdettu nimi
+            "Otettu nimi": _("Taken Name"),
+            "Sotilasnimi": _("Soldier Name"), #"Sotilasnimi
+            "Taitelijanimi": _("Artist Name"), #"Taiteilijanimi
+            "Vaihdettu nimi": _("Changed Name"), #"Vaihdettu nimi
             "Unknown": _("Unknown type") #"määrittämätön"
         }
     elif var_name == "evt":
         # Event types    
         tabl = {
+            "Arvonimi" : _("Grant Title"), # arvonimen myöntäminen
             "Baptism": _("Baptism"), #"kaste"
             "Birth": _("Birth"), #"syntymä"
             "Burial": _("Burial"), #"hautaus"
             "Cause Of Death": _("Cause Of Death"), #"kuolinsyy"
+            "Census": _("Census"), #"mainittu henkikirjassa"
             "Christening": _("Christening"), #"kristillinen kaste"
             "Confirmation": _("Confirmation"), #"ripille pääsy"
             "Death": _("Death"), #"kuolema"
@@ -77,24 +80,33 @@ def translate(term, var_name):
             "Divorce": _("Divorce"), #"avioero"
             "Education": _("Education"), #"koulutus"
             "Ehtoollinen": _("Holy Communion"), #"ehtoollinen"      
+            "Elected": _("Elected"), #"vaali"      
             "Engagement": _("Engagement"), #"kihlajaiset"
-#           "Family": _("Family"), #"Family event marriage etc. Not displayed"      
+            "Family": _("Family"), #"Family event marriage etc."      
             "First Communion": _("First Communion"), #"ensimmäinen ehtoollinen"
             "Graduation": _("Graduation"), #"valmistuminen"
             "Immigration": _("Immigration"), #"maahanmuutto"
-            "Käräjöinti": _("Käräjöinti"), #"käräjöinti"
-            "Luottamustoimi": _("Luottamustoimi"), #"luottamustoimi"
+            "Käräjöinti": _("Lawsuit"), #"käräjöinti"
+            "Luottamustoimi": _("Public Duty"), #"luottamustoimi"
             "Lähtömuutto": _("Moved out"), #"lähtömuutto"
             "Marriage Banns": _("Marriage Banns"), #"kuulutus avioliittoon"
             "Marriage": _("Marriage"), #"avioliitto"
+            "Medical Information": _("Medical Information"), #"avioliitto"
             "Military Service": _("Military Service"), #"asepalvelus"
             "Nobility Title": _("Nobility Title"), #"aatelointi"
             "Occupation": _("Occupation"), #"ammatti"
             "Ordination": _("Ordination"), #"palkitseminen"
+            "Onnettomuus": _("Accident"),
+            "Accident": _("Accident"),
+            "Estate inventory": _("Estate Inventory"), # perunkirjoitus
             "Property": _("Property"), #"omaisuus"
             "Residence": _("Residence"), #"asuinpaikka"
             "Retirement": _("Retirement"), #"eläkkeelle siirtyminen"
             "Sota": _("War"), #"sota"
+            "Tulomuutto": _("War"), #"sota"
+            "Virkatalo": _("Official House"), # virkatalo-oikeus
+            "Yhteiskunnallinen toiminta": _("Social Activities"),
+            "Nimenmuutos": _("Name Change"),
             "Tulomuutto": _("Moved to") #"tulomuutto"
     }
     elif var_name == "role":
@@ -107,26 +119,29 @@ def translate(term, var_name):
 #             "Adoptio": _("Adoption"),     # Adoptiolapsi
 #             "Kasvatus": _("Foster-child"), # Kasvatuslapsi
             "Clergy": _("Clergy"), #"pappi"
-            "Edunsaaja": _("Edunsaaja"),
-            "Family": _("Family"), #"perhe" ?
+            "Edunsaaja": _("Beneficiary"),
+#             "Family": _("Family"), #"perhe" ?
             "father": _("Father"), 
+            "Kantaja": _("Plaintiff"),
             "Kohde": _("Concerned"),
-            "kummi": _("kummi"), #"kummina"
-            "Kummi": _("kummi"), #"kummina"
+            "kummi": _("Wittness"), #"kummina"
+            "Kummi": _("Wittness"), #"kummina"
             "man": _("Husband"), 
             "mother": _("Mother"),
             "Myyjä": _("Myyjä"), #"myyjänä"
             "Opettaja": _("Teacher"),
             "Osallinen": _("Osallinen"), #"osallisena"
-            "Ostaja": _("Ostaja"), #"ostajana"
+            "Ostaja": _("Buyer"), #"ostajana"
             "parent": _("Spouse"),   # Role as family member
-            "Perillinen": _("Perillinen"), #"perillisenä"
-            "Perinnönjättäjä": _("Perinnönjättäjä"), #"perinnönjättäjänä"
+            "Perillinen": _("Heir"), #"perillisenä"
+            "Perinnönjättäjä": _("Testator"), #"perinnönjättäjänä"
             "Primary": _("Primary"), #"pääosallisena"
             "Pääosallinen": _("Pääosallinen"), #"pääosallisena"
-            "Unknown": _("Unknown"), #"määräämätön"
-            "Vihkijä": _("Vihkijä"), #"vihkijänä"
-            "wife": _("Wife")
+            "Toimittaja": _("Ceremonial"),
+            "Vihkijä": _("Officiant"),  #"vihkijä"
+            "Vastaaja": _("Defendant"),
+            "wife": _("Wife"),
+            "Unknown": _("Unknown") #"määräämätön"
         }
     elif var_name == "conf":
         # Confidence levels
@@ -171,7 +186,7 @@ def translate(term, var_name):
             "Web site": _("Web site") #"verkkopalvelu"
         }
     elif var_name == "medium":
-        # Madium types
+        # Document types
         tabl = {
             "Asiakirja": _("Document"), #"asiakirja"
             "Book": _("Book"), #"kirja"
@@ -195,22 +210,25 @@ def translate(term, var_name):
             "Department": _("Department"), #
             "District": _("District"), #"lääni"
             "Farm": _("Farm"), #"tila"
-            "Talo": _("Farm"), #"tila" !
+            "Talo": _("Farm"), #"tila"
             "Hamlet": _("Hamlet"), #"taloryhmä"
             "Hautapaikka": _("Burial Site"),
             "Hautausmaa": _("Cemetery"), #"hautausmaa"
-            "Kappeliseurakunta": _("Chappel Parish"), #"kappeliseurakunta"
+            "Kappeliseurakunta": _("Chapel Parish"), #"kappeliseurakunta"
             "Kartano": _("Mansion"), #"kartano"
             "Katuosoite": _("Street Address"),
-            "Kortteli": _("Kortteli"), #"kortteli"
+            "Kortteli": _("Block"), #"kortteli"
             "Kuntakeskus": _("Kuntakeskus"), #"kuntakeskus"
+            "Laitos": _("Institute"), # laitos
             "Linnoitus": _("Fortress"), #"linnoitus"
             "Locality": _("Locality"), #"kulmakunta"
             "Luonnonpaikka": _("Natural Place"),
-            "Municipality": _("Municipality"),
+            "Municipality": _("Municipality"), #kunta
+            "Neighborhood": _("Neighborhood"), # kulmakunta
             "Oppilaitos": _("Learning Institution"), #"oppilaitos"
             "Organisaatio": _("Organisation"), #"organisaatio"
             "Parish": _("Parish"), #"seurakunta"
+            "Province": _("Province"), # provinssi
             "Region": _("Region"), #"alue"
             "srk": _("Parish"), #"seurakunta"
             "State": _("State"), #"valtio"
@@ -219,6 +237,7 @@ def translate(term, var_name):
             "Torppa": _("Torppa"), #"torppa"
             "Town": _("Town"), #"kaupunki"
             "Village": _("Village"), #"kylä"
+            "Yritys": _("Company"), # yritys
             "Unknown": _("Unknown") #"tuntematon"
         }
     elif var_name == "lt_in":
@@ -248,12 +267,15 @@ def translate(term, var_name):
             "Parish": _("in the parish"), #"seurakunnassa"
             "Region": _("in the region"), #"alueella"
             "srk": _("in the parish of"), #"seurakunnassa"
-            "State": _("In the state"), #"valtiossa"
+            "State": _("in the state"), #"valtiossa"
+            "Talo": _("in the farm"), # tilalla
             "Tontti": _("Tontilla"), #"tontilla"
+            "Town": _("in the town"), #"kaupunki"
             "Village": _("in the village of") #"kylässä"
         }
-        try:    
-            return tabl[term]
+        try:
+            if term:
+                return tabl[term]
         except:
             return term + ":ssa"
 
@@ -285,6 +307,33 @@ def translate(term, var_name):
         if term:
             return tabl[term]
         else:
-            return ''
+            if show_table:
+                # Return conversion table
+                return tabl
+            else:
+                print(f"WARNING: ui.jinja_filters.translate: missing term={term}, var_name={var_name}")
+                return "~"
     except:
         return "'" + term + "'"
+
+def list_translations():
+    ''' Get list of all translations '''
+    
+    return_dict = {}
+    keywords = {
+        'nt': "Name types",
+        'evt': "Event types",
+        'role': "Event role",
+        'lt': "Place types",
+        'lt_in': "Place types, inessive",
+        'notet': "Note type",
+        'rept': "Repository types",
+        'medium': "Document types",
+        'marr': "Marriage types",
+        'child': "Child by gender"
+        }
+    for key, desc in keywords.items():
+        key_dict = translate(None, key, True)
+        return_dict[key] = (desc, key_dict)
+
+    return return_dict

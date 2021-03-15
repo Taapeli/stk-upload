@@ -22,28 +22,28 @@
 #
 #   Copyright (C) 2021  Heikki Roikonen
 
-import urllib
+#import urllib
 
-from flask import render_template, request, redirect, url_for, flash, session as user_session #, send_from_directory, session, jsonify
-from flask import send_file, json
+from flask import render_template, request, flash, session as user_session
+from flask import json #, send_file
 from flask_security import login_required, roles_accepted, current_user
-from flask_babelex import _ 
+#from flask_babelex import _ 
 
 import shareds
-import bl.person
+#import bl.person
 
 from . import bp
 from ui.user_context import UserContext
 from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 from bl.person_reader import PersonReaderTx
 from bl.base import Status
-from bl.person_name import Name
-from bp.gedcom.transforms.model.person_name import PersonName
+#from bl.person_name import Name
+#from bp.gedcom.transforms.model.person_name import PersonName
 
 MAX_ANCESTOR_LEVELS = 4
 MAX_DESCENDANT_LEVELS = 3
 
-readservice = Neo4jReadServiceTx(shareds.driver)
+#readservice = Neo4jReadServiceTx(shareds.driver)
 
 def get_fanchart_data(uuid):
     '''

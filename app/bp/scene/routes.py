@@ -367,6 +367,7 @@ def show_person_fanchart_hx(uuid=None):
     '''
     Content of the selected tab for the families section: fanchart.
     '''
+    t0 = time.time()
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
@@ -380,6 +381,9 @@ def show_person_fanchart_hx(uuid=None):
     person = result.get('person')
 
     fanchart = get_fanchart_data(uuid)
+    n = len(fanchart.get('children',[]))
+    t1 = time.time()-t0
+    stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
     return render_template("/scene/person_fanchart_hx.html", person=person,
                             fanchart_data=json.dumps(fanchart))
 
@@ -407,10 +411,10 @@ def get_person_names(uuid):
 def get_person_primary_name(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadService(shareds.driver) as readservice:
-        datastore = PersonReader(readservice, u_context)
-        args = {}
-        result = datastore.get_person_data(uuid, args)
+    with Neo4jReadServiceTx(shareds.driver) as readservice:
+        datastore = PersonReaderTx(readservice, u_context)
+        result = datastore.get_person_data(uuid)
+        print(result)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
@@ -777,10 +781,10 @@ def show_place(locid):
         # Open database connection and start transaction
         # readservice -> Tietokantapalvelu
         #      reader ~= Toimialametodit
-        readservice = Neo4jReadService(shareds.driver)
-        reader = PlaceDataReader(readservice, u_context) 
-    
-        res = reader.get_places_w_events(locid)
+
+        with Neo4jReadService(shareds.driver) as readservice:
+            reader = PlaceDataReader(readservice, u_context) 
+            res = reader.get_places_w_events(locid)
 
         if res['status'] == Status.NOT_FOUND:
             print(f'bp.scene.routes.show_place: {_("Place not found")}')
@@ -828,19 +832,20 @@ def show_sources(series=None):
 
     # readservice -> Tietokantapalvelu
     #      reader ~= Toimialametodit
-    readservice = Neo4jReadService(shareds.driver)
-    reader = SourceDataStore(readservice, u_context)
+    with Neo4jReadService(shareds.driver) as readservice:
+        reader = SourceDataStore(readservice, u_context)
 
-    if series:
-        u_context.series = series
-    try:
-        res = reader.get_source_list()
-        if res['status'] == Status.NOT_FOUND:
-            print('bp.scene.routes.show_sources: No sources found')
-        elif res['status'] != Status.OK:
-            print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        if series:
+            u_context.series = series
+        try:
+            res = reader.get_source_list()
+            if res['status'] == Status.NOT_FOUND:
+                print('bp.scene.routes.show_sources: No sources found')
+            elif res['status'] != Status.OK:
+                print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
+        except KeyError as e:
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
+
     series = u_context.series if u_context.series else "all"
     stk_logger(u_context, f"-> bp.scene.routes.show_sources/{series} n={len(res['items'])}")
     return render_template("/scene/sources.html", sources=res['items'], 
@@ -1031,7 +1036,10 @@ def comments():
 def comments_header():
     """ Comments header
     """
-    return render_template("/scene/comments/comments_header.html")
+    if "audit" in current_user.roles:
+        return render_template("/scene/comments/comments_header.html")
+    else:
+        return ""
 
 @bp.route('/scene/comments/fetch_comments')
 @login_required
