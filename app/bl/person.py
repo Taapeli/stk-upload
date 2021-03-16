@@ -404,6 +404,7 @@ class PersonBl(Person):
         except Exception as err:
             logger.error(f"Person_gramps.save: {err} in Person {self.id} {p_attr}")
             #print("iError: Person_gramps.save: {0} attr={1}".format(err, p_attr), file=stderr)
+            raise
         
         # Save Name nodes under the Person node
         for name in self.names:
