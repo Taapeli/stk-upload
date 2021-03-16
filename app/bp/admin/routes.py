@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from bp.admin.forms import UpdateUserProfileForm
 
 '''
 Created on 8.8.2018
@@ -237,9 +238,21 @@ def update_user(username):
     form.current_login_at.data = user.current_login_at
     form.current_login_ip.data = user.current_login_ip
     form.login_count.data = user.login_count
-        
+
+    userprofile = shareds.user_datastore.get_userprofile(username) 
+    form2 = UpdateUserProfileForm()
+    if userprofile:    # 'master' does not have a profile
+        form2.agreed_at.data = userprofile.agreed_at  
+        form2.GSF_membership.data = userprofile.GSF_membership  
+        form2.software.data = userprofile.software  
+        form2.research_years.data = userprofile.research_years  
+        form2.researched_names.data = userprofile.researched_names  
+        form2.researched_places.data = userprofile.researched_places  
+        form2.software.data = userprofile.software  
+        form2.software.data = userprofile.software  
+        form2.text_message.data = userprofile.text_message  
     # Return to same page
-    return render_template("/admin/update_user.html", username=user.username, form=form)  
+    return render_template("/admin/update_user.html", username=user.username, form=form, form2=form2)  
 
 @bp.route('/admin/list_uploads/<username>', methods=['GET'])
 @login_required
