@@ -16,13 +16,14 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 # coding: utf-8 
 '''
 Created on 28.9.2017
 
 @author: TimNal
 '''
+import time
+
 
 #from flask_security import current_user
 from flask_security.datastore import UserDatastore
@@ -111,7 +112,6 @@ class Neo4jUserDatastore(UserDatastore):
             if userNode is None:
                 return None
             user = self.user_model(**userNode)
-#            print(userNode.id)
             user.id = user.username
             user.roles = self.find_UserRoles(user.email)
             
@@ -151,6 +151,10 @@ class Neo4jUserDatastore(UserDatastore):
             user.roles = ["to_be_approved"] 
         user.is_active = True
         record = None
+        if user.agree:
+            agreed_at = int(datetime.utcnow().timestamp() * 1000) 
+        else:
+            agreed_at = None
         try:
             logger.info('_put_user new %s %s', user.username, user.roles[0:1])                
             result = tx.run(Cypher.user_register,
@@ -171,7 +175,9 @@ class Neo4jUserDatastore(UserDatastore):
             record = result.single()
             if record:
                 userNode = record['user']
-                UserAdmin.user_profile_add(tx, userNode['email'], userNode['username'])
+                UserAdmin.user_profile_add(tx, userNode['email'], userNode['username'],            
+                                           agreed_at=agreed_at            
+                )
                 logger.info(f'New user with email address {user.email} registered') 
                 return userNode
             else:
@@ -436,3 +442,15 @@ class Neo4jUserDatastore(UserDatastore):
             logging.error(f'Neo4jUserDatastore.password_reset: {e.__class__.__name__}, {e}')            
             raise      
         
+    def get_userprofile(self, username):
+        with self.driver.session() as session:
+            result = session.run(Cypher.get_userprofile, username=username).single()
+            if not result: return None
+            profile = result.get('p')
+            if profile:
+                p = self.user_profile_model(**profile)
+                if p.agreed_at:     
+                    p.agreed_at = datetime.fromtimestamp(float(p.agreed_at)/1000)
+                return p  
+            else:
+                return None

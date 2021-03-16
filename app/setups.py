@@ -110,6 +110,7 @@ class User(UserMixin):
     current_login_at = None
     current_login_ip = ''
     login_count = 0
+    agree = False
     # View filtering option. Stored here for logging in scene pages
     current_context = UserContext.ChoicesOfView.COMMON
 
@@ -129,6 +130,7 @@ class User(UserMixin):
         self.current_login_at = kwargs.get('current_login_at')
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
+        self.agree = kwargs.get('agree')        
 
     def __str__(self):
         if self.roles:
