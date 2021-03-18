@@ -1064,7 +1064,7 @@ msgstr ""
 
 #: bp/audit/templates/audit/index.html:23
 #: bp/graph/templates/graph/index.html:27 graph/templates/graph/index.html:27
-msgid "List approved Isotammi data sets"
+msgid "List approved common data sets"
 msgstr ""
 
 #: bp/audit/templates/audit/index.html:24

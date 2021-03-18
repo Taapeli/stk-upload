@@ -1068,8 +1068,8 @@ msgstr ""
 
 #: bp/audit/templates/audit/index.html:23
 #: bp/graph/templates/graph/index.html:27 graph/templates/graph/index.html:27
-msgid "List approved Isotammi data sets"
-msgstr "Lista godkända Isotammi satser"
+msgid "List approved common data sets"
+msgstr "Lista godkända gemensamma satser"
 
 #: bp/audit/templates/audit/index.html:24
 #: bp/graph/templates/graph/index.html:28
@@ -1088,6 +1088,12 @@ msgstr "godkänt av mig"
 #: graph/templates/graph/index.html:31 templates/join_persons.html:74
 msgid "Reference names"
 msgstr "Referens namn"
+
+msgid "No person names"
+msgstr "Inga personnamn"
+
+msgid "No places"
+msgstr "Inga platser"
 
 #: bp/audit/templates/audit/index.html:28
 msgid "Classifier values"
