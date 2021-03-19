@@ -27,7 +27,7 @@ Created on 29.11.2019
 import shareds
 from datetime import datetime #,date
 
-from bl.base import Status
+#from bl.base import Status
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch ######
 from pe.neo4j.cypher.cy_batch_audit import CypherAudit
 

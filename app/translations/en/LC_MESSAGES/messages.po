@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-12 17:39+0200\n"
+"POT-Creation-Date: 2021-03-19 19:13+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -36,68 +36,67 @@ msgstr ""
 msgid "English"
 msgstr ""
 
-#: setups.py:162
+#: setups.py:164
 msgid "Email or Username"
 msgstr ""
 
-#: setups.py:163 setups.py:172
+#: setups.py:165 setups.py:174
 msgid "Password"
 msgstr ""
 
-#: setups.py:165
+#: setups.py:167
 msgid "Remember Me"
 msgstr ""
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:166
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:168
 msgid "Login"
 msgstr ""
 
-#: bp/admin/forms.py:57 bp/admin/forms.py:108
-#: bp/admin/templates/admin/list_users.html:83
-#: bp/start/templates/start/join.html:55 setups.py:170
+#: bp/admin/forms.py:57 bp/admin/templates/admin/list_users.html:83
+#: bp/start/templates/start/join.html:55 setups.py:172
 msgid "Email address"
 msgstr ""
 
-#: setups.py:171
+#: setups.py:173
 msgid ""
 "I have read and agree the <a href='static/termsofuse.html'>Terms of "
 "use</a>"
 msgstr ""
 
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:174
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:176
 #: templates/index_entry.html:88 templates/index_entry.html:92
 msgid "Register"
 msgstr ""
 
-#: setups.py:178
+#: setups.py:180
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr ""
 
-#: setups.py:188
+#: setups.py:190
 msgid "Username has been reserved already"
 msgstr ""
 
-#: setups.py:190 templates/del_table_users.html:39
+#: setups.py:192 templates/del_table_users.html:39
 msgid "Username"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:82
-#: bp/start/templates/start/join.html:53 setups.py:191 setups.py:221
+#: bp/start/templates/start/join.html:53 setups.py:193 setups.py:223
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr ""
 
-#: bp/admin/forms.py:62 bp/admin/forms.py:65 bp/admin/forms.py:111
-#: bp/admin/forms.py:114 bp/admin/templates/admin/list_users.html:84
-#: bp/start/forms.py:39 bp/start/forms.py:43 setups.py:192 setups.py:221
+#: bp/admin/forms.py:62 bp/admin/forms.py:65
+#: bp/admin/templates/admin/list_users.html:84 bp/start/forms.py:39
+#: bp/start/forms.py:43 setups.py:194 setups.py:223
 msgid "Language"
 msgstr ""
 
-#: setups.py:194
+#: setups.py:196
 msgid "Language required"
 msgstr ""
 
-#: bp/admin/forms.py:59 bp/start/templates/start/join.html:54 setups.py:221
+#: bp/admin/forms.py:59 bp/start/templates/start/join.html:54 setups.py:223
 msgid "User name"
 msgstr ""
 
@@ -149,15 +148,16 @@ msgstr ""
 msgid "This person has no families"
 msgstr ""
 
-#: bl/person.py:125 bl/person.py:128 ui/jinja_filters.py:294
+#: bl/person.py:125 bl/person.py:128 ui/jinja_filters.py:118
+#: ui/jinja_filters.py:311
 msgid "Child"
 msgstr ""
 
-#: bl/person.py:126 ui/jinja_filters.py:293
+#: bl/person.py:126 ui/jinja_filters.py:310
 msgid "Son"
 msgstr ""
 
-#: bl/person.py:127 ui/jinja_filters.py:292
+#: bl/person.py:127 ui/jinja_filters.py:309
 msgid "Daughter"
 msgstr ""
 
@@ -201,7 +201,7 @@ msgstr ""
 msgid "Id of the user"
 msgstr ""
 
-#: bp/admin/forms.py:55 bp/admin/forms.py:106
+#: bp/admin/forms.py:55
 msgid "Email Address:"
 msgstr ""
 
@@ -209,11 +209,11 @@ msgstr ""
 msgid "Username:"
 msgstr ""
 
-#: bp/admin/forms.py:60 bp/admin/forms.py:109
+#: bp/admin/forms.py:60
 msgid "Name:"
 msgstr ""
 
-#: bp/admin/forms.py:61 bp/admin/forms.py:110 bp/start/forms.py:33
+#: bp/admin/forms.py:61 bp/start/forms.py:33
 msgid "Name of the user"
 msgstr ""
 
@@ -229,25 +229,24 @@ msgstr ""
 msgid "Roles"
 msgstr ""
 
-#: bp/admin/forms.py:70 bp/admin/forms.py:119
+#: bp/admin/forms.py:70
 msgid "Gedcom-files"
 msgstr ""
 
-#: bp/admin/forms.py:71 bp/admin/forms.py:120
-#: bp/scene/templates/scene/event.html:76
+#: bp/admin/forms.py:71 bp/scene/templates/scene/event.html:76
 #: bp/scene/templates/scene/event_vue.html:100
 msgid "Member"
 msgstr ""
 
-#: bp/admin/forms.py:72 bp/admin/forms.py:121 ui/jinja_filters.py:171
+#: bp/admin/forms.py:72 ui/jinja_filters.py:171
 msgid "Research"
 msgstr ""
 
-#: bp/admin/forms.py:73 bp/admin/forms.py:122
+#: bp/admin/forms.py:73
 msgid "Audit"
 msgstr ""
 
-#: bp/admin/forms.py:74 bp/admin/forms.py:123
+#: bp/admin/forms.py:74
 msgid "Admin"
 msgstr ""
 
@@ -255,7 +254,7 @@ msgstr ""
 msgid "Assigned roles"
 msgstr ""
 
-#: bp/admin/forms.py:76 bp/admin/forms.py:125
+#: bp/admin/forms.py:76
 msgid "Email confirmed time"
 msgstr ""
 
@@ -304,7 +303,7 @@ msgid "Count of logins"
 msgstr ""
 
 #: bp/admin/forms.py:89 bp/admin/templates/admin/update_user.html:4
-#: bp/admin/templates/admin/update_user.html:11
+#: bp/admin/templates/admin/update_user.html:18
 msgid "Update user"
 msgstr ""
 
@@ -312,56 +311,91 @@ msgstr ""
 msgid "Approve user"
 msgstr ""
 
+#: bp/admin/forms.py:99
+msgid "GSF_membership"
+msgstr ""
+
+#: bp/admin/forms.py:102 bp/start/forms.py:47
+msgid "Yes"
+msgstr ""
+
+#: bp/admin/forms.py:103 bp/start/forms.py:48
+msgid "No"
+msgstr ""
+
+#: bp/admin/forms.py:104 bp/start/forms.py:49
+msgid "Don't know"
+msgstr ""
+
+#: bp/admin/forms.py:106
+msgid "Research years:"
+msgstr ""
+
+#: bp/admin/forms.py:107
+msgid "research years"
+msgstr ""
+
+#: bp/admin/forms.py:108
+msgid "Researched names:"
+msgstr ""
+
+#: bp/admin/forms.py:109
+msgid "Researched names"
+msgstr ""
+
+#: bp/admin/forms.py:110
+msgid "Researched places:"
+msgstr ""
+
+#: bp/admin/forms.py:111
+msgid "Researched places"
+msgstr ""
+
+#: bp/admin/forms.py:112
+msgid "Software:"
+msgstr ""
+
+#: bp/admin/forms.py:113
+msgid "Genealogy software"
+msgstr ""
+
+#: bp/admin/forms.py:114 bp/start/forms.py:55
+msgid "Message:"
+msgstr ""
+
 #: bp/admin/forms.py:115
-msgid "Approved"
+msgid "Agreed to terms time"
 msgstr ""
 
 #: bp/admin/forms.py:116
-msgid "Approved / pending user"
+msgid "The time when the user agreed to the terms and conditions"
 msgstr ""
 
-#: bp/admin/forms.py:117 bp/scene/templates/scene/event.html:75
-#: bp/scene/templates/scene/event_vue.html:99
-msgid "Role"
-msgstr ""
-
-#: bp/admin/forms.py:124
-msgid "Assigned role choices"
-msgstr ""
-
-#: bp/admin/forms.py:126
-msgid "Time of registered email confirmation"
-msgstr ""
-
-#: bp/admin/forms.py:129
-msgid "Update allowed email"
-msgstr ""
-
-#: bp/admin/routes.py:111
+#: bp/admin/routes.py:112
 msgid "Database initial check done."
 msgstr ""
 
-#: bp/admin/routes.py:130
+#: bp/admin/routes.py:131
 msgid "No empty batches removed"
 msgstr ""
 
-#: bp/admin/routes.py:155
+#: bp/admin/routes.py:156
 msgid "estimated lifetime"
 msgstr ""
 
-#: bp/admin/routes.py:216
+#: bp/admin/routes.py:217
 msgid "Isotammi user approved"
 msgstr ""
 
-#: bp/admin/routes.py:217
+#: bp/admin/routes.py:218
 msgid "You are now approved to use Isotammi at {server} with user name {user}."
 msgstr ""
 
-#: bp/admin/routes.py:221
+#: bp/admin/routes.py:222
 msgid "User updated"
 msgstr ""
 
-#: bp/admin/routes.py:281 bp/gramps/routes.py:118
+#: bp/admin/routes.py:294 bp/gramps/routes.py:118
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr ""
@@ -403,7 +437,7 @@ msgstr ""
 msgid "REMOVED"
 msgstr ""
 
-#: bp/admin/models/data_admin.py:60 bp/admin/models/user_admin.py:83
+#: bp/admin/models/data_admin.py:60 bp/admin/models/user_admin.py:85
 msgid "User {} has not admin privileges"
 msgstr ""
 
@@ -425,7 +459,7 @@ msgstr ""
 msgid "Removed %(cnt)d nodes"
 msgstr ""
 
-#: bp/admin/models/user_admin.py:138
+#: bp/admin/models/user_admin.py:140
 msgid "Given allowed email address already exists"
 msgstr ""
 
@@ -662,7 +696,7 @@ msgid "Admin-Start Page"
 msgstr ""
 
 #: bp/admin/templates/admin/layout.html:20
-#: bp/audit/templates/audit/layout.html:49 bp/gedcom/templates/g_layout.html:28
+#: bp/audit/templates/audit/layout.html:57 bp/gedcom/templates/g_layout.html:28
 #: bp/graph/templates/graph/layout.html:45
 #: bp/scene/templates/scene/sc_layout.html:40
 #: bp/start/templates/start/s_layout.html:30
@@ -672,7 +706,7 @@ msgid "My profile"
 msgstr ""
 
 #: bp/admin/templates/admin/layout.html:21
-#: bp/audit/templates/audit/layout.html:50
+#: bp/audit/templates/audit/layout.html:58
 #: bp/graph/templates/graph/layout.html:46
 #: bp/scene/templates/scene/sc_layout.html:41
 #: bp/scene/templates/scene/sc_layout.html:51
@@ -695,7 +729,7 @@ msgid "Admin home"
 msgstr ""
 
 #: bp/admin/templates/admin/layout.html:39
-#: bp/audit/templates/audit/layout.html:66 bp/gedcom/templates/g_layout.html:45
+#: bp/audit/templates/audit/layout.html:74 bp/gedcom/templates/g_layout.html:45
 #: bp/graph/templates/graph/layout.html:62
 #: bp/scene/templates/scene/sc_layout.html:53
 #: bp/start/templates/start/s_layout.html:45
@@ -853,7 +887,7 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-#: bp/admin/templates/admin/update_user.html:51
+#: bp/admin/templates/admin/update_user.html:90
 msgid "User list"
 msgstr ""
 
@@ -1108,7 +1142,7 @@ msgstr ""
 msgid "Experimental duplicate person search"
 msgstr ""
 
-#: bp/audit/templates/audit/layout.html:46 bp/gedcom/templates/g_layout.html:25
+#: bp/audit/templates/audit/layout.html:54 bp/gedcom/templates/g_layout.html:25
 #: bp/graph/templates/graph/layout.html:42
 #: bp/scene/templates/scene/sc_layout.html:37
 #: bp/start/templates/start/s_layout.html:26
@@ -1118,12 +1152,12 @@ msgstr ""
 msgid "Back to Front Page"
 msgstr ""
 
-#: bp/audit/templates/audit/layout.html:52
+#: bp/audit/templates/audit/layout.html:60
 #: bp/graph/templates/graph/layout.html:48 graph/templates/graph/layout.html:48
 msgid "Audit home"
 msgstr ""
 
-#: bp/audit/templates/audit/layout.html:70 bp/gedcom/templates/g_layout.html:49
+#: bp/audit/templates/audit/layout.html:78 bp/gedcom/templates/g_layout.html:49
 #: bp/graph/templates/graph/layout.html:89
 #: bp/start/templates/start/s_layout.html:49
 #: graph/templates/graph/layout.html:82 templates/a_layout.html:41
@@ -2303,6 +2337,11 @@ msgstr ""
 msgid "Participants"
 msgstr ""
 
+#: bp/scene/templates/scene/event.html:75
+#: bp/scene/templates/scene/event_vue.html:99
+msgid "Role"
+msgstr ""
+
 #: bp/scene/templates/scene/event_vue.html:83
 #: bp/scene/templates/scene/place_events.html:141
 msgid "Media"
@@ -2398,7 +2437,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/families.html:129
 #: bp/scene/templates/scene/medias.html:83
-#: bp/scene/templates/scene/persons_list.html:146
+#: bp/scene/templates/scene/persons_list.html:144
 msgid "Original ID"
 msgstr ""
 
@@ -2431,18 +2470,18 @@ msgstr ""
 #: bp/scene/templates/scene/families.html:165
 #: bp/scene/templates/scene/macros.html:105
 #: bp/scene/templates/scene/medias.html:116
-#: bp/scene/templates/scene/persons_list.html:184
+#: bp/scene/templates/scene/persons_list.html:182
 msgid "first page"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:165
-#: bp/scene/templates/scene/persons_list.html:184
+#: bp/scene/templates/scene/persons_list.html:182
 msgid "Go to the first person"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:170
 #: bp/scene/templates/scene/medias.html:105
-#: bp/scene/templates/scene/persons_list.html:174
+#: bp/scene/templates/scene/persons_list.html:172
 msgid "The last item found"
 msgstr ""
 
@@ -2912,7 +2951,7 @@ msgstr ""
 msgid "Person"
 msgstr ""
 
-#: bp/scene/templates/scene/persons_list.html:182
+#: bp/scene/templates/scene/persons_list.html:180
 #, python-format
 msgid "No one found with search keys starting \"%(name)s\""
 msgstr ""
@@ -3005,12 +3044,20 @@ msgstr ""
 msgid "No one found with search keys"
 msgstr ""
 
-#: bp/scene/templates/scene/persons_search.html:222
+#: bp/scene/templates/scene/persons_search.html:223
 msgid "persons"
 msgstr ""
 
-#: bp/scene/templates/scene/persons_search.html:237
-msgid "places"
+#: bp/scene/templates/scene/persons_search.html:228
+msgid "No person names"
+msgstr ""
+
+#: bp/scene/templates/scene/persons_search.html:242
+msgid "references"
+msgstr ""
+
+#: bp/scene/templates/scene/persons_search.html:247
+msgid "No places"
 msgstr ""
 
 #: bp/scene/templates/scene/place_events.html:3
@@ -3243,18 +3290,6 @@ msgstr ""
 msgid "Are you a member of the Genealogical Society of Finland?"
 msgstr ""
 
-#: bp/start/forms.py:47
-msgid "Yes"
-msgstr ""
-
-#: bp/start/forms.py:48
-msgid "No"
-msgstr ""
-
-#: bp/start/forms.py:49
-msgid "Don't know"
-msgstr ""
-
 #: bp/start/forms.py:51
 msgid "How many years have you been doing genealogical research?"
 msgstr ""
@@ -3271,10 +3306,6 @@ msgstr ""
 msgid "Which places are you mainly researching?"
 msgstr ""
 
-#: bp/start/forms.py:55
-msgid "Message:"
-msgstr ""
-
 #: bp/start/forms.py:57
 msgid "Send request"
 msgstr ""
@@ -3287,11 +3318,11 @@ msgstr ""
 msgid "Sending join message failed"
 msgstr ""
 
-#: bp/start/routes.py:219
+#: bp/start/routes.py:220
 msgid "Update did not work1"
 msgstr ""
 
-#: bp/start/routes.py:222
+#: bp/start/routes.py:223
 msgid "Update did not work"
 msgstr ""
 
@@ -4466,6 +4497,14 @@ msgstr ""
 msgid "as spouse"
 msgstr ""
 
+#: ui/jinja_filters.py:119
+msgid "Adoption"
+msgstr ""
+
+#: ui/jinja_filters.py:120
+msgid "Foster-child"
+msgstr ""
+
 #: ui/jinja_filters.py:121
 msgid "Clergy"
 msgstr ""
@@ -4538,7 +4577,7 @@ msgstr ""
 msgid "Defendant"
 msgstr ""
 
-#: ui/jinja_filters.py:144 ui/jinja_filters.py:199 ui/jinja_filters.py:241
+#: ui/jinja_filters.py:144 ui/jinja_filters.py:199 ui/jinja_filters.py:246
 msgid "Unknown"
 msgstr ""
 
@@ -4678,7 +4717,7 @@ msgstr ""
 msgid "Tombstone"
 msgstr ""
 
-#: ui/jinja_filters.py:204 ui/jinja_filters.py:232
+#: ui/jinja_filters.py:204 ui/jinja_filters.py:235
 msgid "Region"
 msgstr ""
 
@@ -4695,238 +4734,306 @@ msgid "Building"
 msgstr ""
 
 #: ui/jinja_filters.py:208
-msgid "City"
+msgid "Church"
 msgstr ""
 
 #: ui/jinja_filters.py:209
-msgid "Country"
+msgid "City"
 msgstr ""
 
 #: ui/jinja_filters.py:210
-msgid "Department"
+msgid "Country"
 msgstr ""
 
 #: ui/jinja_filters.py:211
+msgid "Department"
+msgstr ""
+
+#: ui/jinja_filters.py:212
 msgid "District"
 msgstr ""
 
-#: ui/jinja_filters.py:212 ui/jinja_filters.py:213 ui/jinja_filters.py:235
+#: ui/jinja_filters.py:213 ui/jinja_filters.py:214 ui/jinja_filters.py:240
 msgid "Farm"
 msgstr ""
 
-#: ui/jinja_filters.py:214
+#: ui/jinja_filters.py:215
 msgid "Hamlet"
 msgstr ""
 
-#: ui/jinja_filters.py:215
+#: ui/jinja_filters.py:216
 msgid "Burial Site"
 msgstr ""
 
-#: ui/jinja_filters.py:216
+#: ui/jinja_filters.py:217
 msgid "Cemetery"
 msgstr ""
 
-#: ui/jinja_filters.py:217
+#: ui/jinja_filters.py:218
 msgid "Chapel Parish"
 msgstr ""
 
-#: ui/jinja_filters.py:218
+#: ui/jinja_filters.py:219
 msgid "Mansion"
 msgstr ""
 
-#: ui/jinja_filters.py:219
-msgid "Street Address"
-msgstr ""
-
 #: ui/jinja_filters.py:220
-msgid "Block"
+msgid "Denomination"
 msgstr ""
 
 #: ui/jinja_filters.py:221
-msgid "Kuntakeskus"
+msgid "Street Address"
 msgstr ""
 
 #: ui/jinja_filters.py:222
-msgid "Institute"
+msgid "Block"
 msgstr ""
 
 #: ui/jinja_filters.py:223
-msgid "Fortress"
+msgid "Kuntakeskus"
 msgstr ""
 
 #: ui/jinja_filters.py:224
-msgid "Locality"
+msgid "Governorate"
 msgstr ""
 
 #: ui/jinja_filters.py:225
-msgid "Natural Place"
+msgid "Institute"
 msgstr ""
 
 #: ui/jinja_filters.py:226
-msgid "Municipality"
+msgid "Fortress"
 msgstr ""
 
 #: ui/jinja_filters.py:227
-msgid "Neighborhood"
+msgid "Locality"
 msgstr ""
 
 #: ui/jinja_filters.py:228
-msgid "Learning Institution"
+msgid "Natural Place"
 msgstr ""
 
 #: ui/jinja_filters.py:229
-msgid "Organisation"
+msgid "Municipality"
 msgstr ""
 
-#: ui/jinja_filters.py:230 ui/jinja_filters.py:233
-msgid "Parish"
+#: ui/jinja_filters.py:230
+msgid "Neighborhood"
 msgstr ""
 
 #: ui/jinja_filters.py:231
-msgid "Province"
+msgid "Learning Institution"
+msgstr ""
+
+#: ui/jinja_filters.py:232
+msgid "Organization"
+msgstr ""
+
+#: ui/jinja_filters.py:233 ui/jinja_filters.py:236
+msgid "Parish"
 msgstr ""
 
 #: ui/jinja_filters.py:234
-msgid "State"
-msgstr ""
-
-#: ui/jinja_filters.py:236
-msgid "Tontti"
+msgid "Province"
 msgstr ""
 
 #: ui/jinja_filters.py:237
-msgid "Torppa"
+msgid "Hospital"
 msgstr ""
 
 #: ui/jinja_filters.py:238
-msgid "Town"
+msgid "State"
 msgstr ""
 
 #: ui/jinja_filters.py:239
+msgid "Seat Farm"
+msgstr ""
+
+#: ui/jinja_filters.py:241
+msgid "Tontti"
+msgstr ""
+
+#: ui/jinja_filters.py:242
+msgid "Torppa"
+msgstr ""
+
+#: ui/jinja_filters.py:243
+msgid "Town"
+msgstr ""
+
+#: ui/jinja_filters.py:244
 msgid "Village"
 msgstr ""
 
-#: ui/jinja_filters.py:240
+#: ui/jinja_filters.py:245
 msgid "Company"
 msgstr ""
 
-#: ui/jinja_filters.py:246 ui/jinja_filters.py:268
+#: ui/jinja_filters.py:251 ui/jinja_filters.py:281
 msgid "in the region"
 msgstr ""
 
-#: ui/jinja_filters.py:247
+#: ui/jinja_filters.py:252
 msgid "on vessel"
 msgstr ""
 
-#: ui/jinja_filters.py:248
+#: ui/jinja_filters.py:253
 msgid "in the borough of"
 msgstr ""
 
-#: ui/jinja_filters.py:249
+#: ui/jinja_filters.py:254
 msgid "in the building of"
 msgstr ""
 
-#: ui/jinja_filters.py:250
-msgid "in the City"
-msgstr ""
-
-#: ui/jinja_filters.py:251
-msgid "in the country of"
-msgstr ""
-
-#: ui/jinja_filters.py:252
-msgid "in the department of"
-msgstr ""
-
-#: ui/jinja_filters.py:253
-msgid "in the district of"
-msgstr ""
-
-#: ui/jinja_filters.py:254
-msgid "in the farm of"
-msgstr ""
-
 #: ui/jinja_filters.py:255
-msgid "in the hamlet of"
+msgid "in the church"
 msgstr ""
 
 #: ui/jinja_filters.py:256
-msgid "in a burial site of"
+msgid "in the City"
 msgstr ""
 
 #: ui/jinja_filters.py:257
-msgid "in the cemetery"
+msgid "in the country of"
 msgstr ""
 
 #: ui/jinja_filters.py:258
-msgid "in chapel parish"
+msgid "in the department of"
 msgstr ""
 
 #: ui/jinja_filters.py:259
-msgid "in the mansion of"
+msgid "in the district of"
 msgstr ""
 
 #: ui/jinja_filters.py:260
-msgid "Kuntakeskuksessa"
+msgid "in the farm of"
 msgstr ""
 
 #: ui/jinja_filters.py:261
-msgid "in the fortress"
+msgid "in the hamlet of"
 msgstr ""
 
 #: ui/jinja_filters.py:262
-msgid "at locality of"
+msgid "in a burial site of"
 msgstr ""
 
 #: ui/jinja_filters.py:263
-msgid "in a natural place of"
+msgid "in the cemetery"
 msgstr ""
 
 #: ui/jinja_filters.py:264
-msgid "in the municipality of"
+msgid "in chapel parish"
 msgstr ""
 
 #: ui/jinja_filters.py:265
-msgid "in the learning lnstitution"
+msgid "in the mansion of"
 msgstr ""
 
 #: ui/jinja_filters.py:266
-msgid "in the organisation of"
+msgid "in the denomination of"
 msgstr ""
 
 #: ui/jinja_filters.py:267
-msgid "in the parish"
+msgid "at street address"
+msgstr ""
+
+#: ui/jinja_filters.py:268
+msgid "in the block"
 msgstr ""
 
 #: ui/jinja_filters.py:269
-msgid "in the parish of"
+msgid "Kuntakeskuksessa"
 msgstr ""
 
 #: ui/jinja_filters.py:270
-msgid "in the state"
+msgid "in the governorate"
 msgstr ""
 
 #: ui/jinja_filters.py:271
-msgid "in the farm"
+msgid "in the nstitute"
 msgstr ""
 
 #: ui/jinja_filters.py:272
-msgid "Tontilla"
+msgid "in the fortress"
 msgstr ""
 
 #: ui/jinja_filters.py:273
-msgid "in the town"
+msgid "at locality of"
 msgstr ""
 
 #: ui/jinja_filters.py:274
-msgid "in the village of"
+msgid "in a natural place of"
+msgstr ""
+
+#: ui/jinja_filters.py:275
+msgid "in the municipality of"
+msgstr ""
+
+#: ui/jinja_filters.py:276
+msgid "in the neighborhood of"
+msgstr ""
+
+#: ui/jinja_filters.py:277
+msgid "in the learning lnstitution"
+msgstr ""
+
+#: ui/jinja_filters.py:278
+msgid "in the organization of"
+msgstr ""
+
+#: ui/jinja_filters.py:279
+msgid "in the parish"
+msgstr ""
+
+#: ui/jinja_filters.py:280
+msgid "int the province of"
+msgstr ""
+
+#: ui/jinja_filters.py:282
+msgid "at the hospital"
+msgstr ""
+
+#: ui/jinja_filters.py:283
+msgid "in the parish of"
+msgstr ""
+
+#: ui/jinja_filters.py:284
+msgid "in the state"
 msgstr ""
 
 #: ui/jinja_filters.py:285
-msgid "Married"
+msgid "in seat farm"
 msgstr ""
 
 #: ui/jinja_filters.py:286
+msgid "in the farm"
+msgstr ""
+
+#: ui/jinja_filters.py:287
+msgid "Tontilla"
+msgstr ""
+
+#: ui/jinja_filters.py:288
+msgid "in the town"
+msgstr ""
+
+#: ui/jinja_filters.py:289
+msgid "in the village of"
+msgstr ""
+
+#: ui/jinja_filters.py:290
+msgid "at the company"
+msgstr ""
+
+#: ui/jinja_filters.py:291
+msgid "in a place of unkown type"
+msgstr ""
+
+#: ui/jinja_filters.py:302
+msgid "Married"
+msgstr ""
+
+#: ui/jinja_filters.py:303
 msgid "Unknown relation"
 msgstr ""
 
