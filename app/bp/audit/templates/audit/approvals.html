@@ -24,20 +24,6 @@ function selectFile(sel, batch_id) {
         buttons[i].disabled = true;
   }
 };
-function update_progress(xmlfile) {
-	// see http://jsfiddle.net/kedctfmj/3/
-	$.get("get_progress/" + encodeURIComponent(xmlfile), (rsp) => {
-		var progress_div = $("td div.progress[data-name='"+xmlfile+"']");
-		var batch_id_column = progress_div.parent().prev().prev();
-		progress_div.css("background","lightgreen");
-		if (rsp.progress == 0) rsp.progress = 1;
-		progress_div.get(0).style.width = rsp.progress + "%";
-		if (rsp.status == "loading") 
-			setTimeout(function() {update_progress(xmlfile)}, PROGRESS_INTERVAL);
-		else 
-			location.reload();
-	});
-}
 
 $(document).ready( function() {
 
@@ -114,7 +100,7 @@ function confirm_delete(name) {
 
       <div>
         <form id="form" action="" method="post">
-        <h2>{{ _("Operations for") }} <i id="nm">({{ _('the selected batch') }})</i></h2>
+        <h2>{{ _("Operations for") }} <i id="nm">({{ _('the selected approved batch') }})</i></h2>
           <div>{{ _("Delete data") }}:
               <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
           </div>

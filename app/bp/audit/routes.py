@@ -106,11 +106,15 @@ def move_in_2():
 @login_required
 @roles_accepted('audit')
 def delete_approved(batch_id):
-    """ Confirm Batch delete """    
-    Audit.delete_audit(current_user.username,batch_id)
-##    logger.info(f'-> bp.audit.routes.batch_delete f="{batch_id}"')
-##    syslog.log(type="approved batch_id deleted",batch_id=batch_id) 
-##    flash(_("Approved batch id %(batch_id)s has been deleted", batch_id=batch_id), 'info')
+    """ Confirm approved batch delete
+    """    
+    (msg, nodes_deleted) = Audit.delete_audit(current_user.username, batch_id)
+    if msg != '':
+        logger.error(f'{msg}')
+    else:
+        logger.info(f'-> bp.audit.routes.batch_delete f="{batch_id}"')
+        syslog.log(type="approved batch_id deleted", batch_id=batch_id) 
+
     referrer = request.headers.get("Referer")                               
     return redirect(referrer)
 
