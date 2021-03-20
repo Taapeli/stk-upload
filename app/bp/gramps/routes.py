@@ -233,12 +233,12 @@ def get_progress(xmlfile):
     total += counts["repository_cnt"]
     done = 0
     done += progress.get("Citation", 0)
-    done += progress.get("Event_gramps", 0)
-    done += progress.get("Family_gramps", 0)
+    done += progress.get("EventBl", 0)
+    done += progress.get("FamilyBl", 0)
     done += progress.get("Note", 0)
-    done += progress.get("Person_gramps", 0)
-    done += progress.get("Place_gramps", 0)
-    done += progress.get("Media", 0)
+    done += progress.get("PersonBl", 0)
+    done += progress.get("PlaceBl", 0)
+    done += progress.get("MediaBl", 0)
     done += progress.get("Source_gramps", 0)
     done += progress.get("Repository", 0)
     done += progress.get("refnames", 0)

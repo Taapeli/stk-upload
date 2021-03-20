@@ -1,13 +1,13 @@
-# Swedish translations for PROJECT.
-# Copyright (C) 2018 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
+# Swedish translations for Taapeli.
+# Copyright (C) 2021 Genealogiska Samfundet i Finland
+# This file is distributed under the same license as the stk-upload project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-12 17:39+0200\n"
+"POT-Creation-Date: 2021-03-19 19:13+0200\n"
 "PO-Revision-Date: 2021-01-17 13:49+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -36,29 +36,28 @@ msgstr "Svenska"
 msgid "English"
 msgstr "Engelska"
 
-#: setups.py:162
+#: setups.py:164
 msgid "Email or Username"
-msgstr "Epost or användarnamn"
+msgstr "Epost eller användarnamn"
 
-#: setups.py:163 setups.py:172
+#: setups.py:165 setups.py:174
 msgid "Password"
 msgstr "Lösenord"
 
-#: setups.py:165
+#: setups.py:167
 msgid "Remember Me"
 msgstr "Kom ihåg mig"
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:166
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:168
 msgid "Login"
 msgstr "Logga in"
 
-#: bp/admin/forms.py:57 bp/admin/forms.py:108
-#: bp/admin/templates/admin/list_users.html:83
-#: bp/start/templates/start/join.html:55 setups.py:170
+#: bp/admin/forms.py:57 bp/admin/templates/admin/list_users.html:83
+#: bp/start/templates/start/join.html:55 setups.py:172
 msgid "Email address"
 msgstr "Epost address"
 
-#: setups.py:171
+#: setups.py:173
 msgid ""
 "I have read and agree the <a href='static/termsofuse.html'>Terms of "
 "use</a>"
@@ -66,40 +65,40 @@ msgstr ""
 "Jag har läst och <a href='static/termsofuse.html'>godkänner "
 "användarvillkoren</a>"
 
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:174
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:176
 #: templates/index_entry.html:88 templates/index_entry.html:92
 msgid "Register"
 msgstr "Registrera"
 
-#: setups.py:178
+#: setups.py:180
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr "Indikera att du har läst och godkänner användar vilkoren"
 
-#: setups.py:188
+#: setups.py:190
 msgid "Username has been reserved already"
 msgstr "Användarnamnet redan reserverat"
 
-#: setups.py:190 templates/del_table_users.html:39
+#: setups.py:192 templates/del_table_users.html:39
 msgid "Username"
 msgstr "Användarnamn"
 
 #: bp/admin/templates/admin/list_users.html:82
-#: bp/start/templates/start/join.html:53 setups.py:191 setups.py:221
+#: bp/start/templates/start/join.html:53 setups.py:193 setups.py:223
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Namn"
 
-#: bp/admin/forms.py:62 bp/admin/forms.py:65 bp/admin/forms.py:111
-#: bp/admin/forms.py:114 bp/admin/templates/admin/list_users.html:84
-#: bp/start/forms.py:39 bp/start/forms.py:43 setups.py:192 setups.py:221
+#: bp/admin/forms.py:62 bp/admin/forms.py:65
+#: bp/admin/templates/admin/list_users.html:84 bp/start/forms.py:39
+#: bp/start/forms.py:43 setups.py:194 setups.py:223
 msgid "Language"
 msgstr "Språk"
 
-#: setups.py:194
+#: setups.py:196
 msgid "Language required"
 msgstr "Språk som krävs"
 
-#: bp/admin/forms.py:59 bp/start/templates/start/join.html:54 setups.py:221
+#: bp/admin/forms.py:59 bp/start/templates/start/join.html:54 setups.py:223
 msgid "User name"
 msgstr "Användar namn"
 
@@ -151,15 +150,16 @@ msgstr "odefinerad relation"
 msgid "This person has no families"
 msgstr "Denna person har inga familjer"
 
-#: bl/person.py:125 bl/person.py:128 ui/jinja_filters.py:294
+#: bl/person.py:125 bl/person.py:128 ui/jinja_filters.py:118
+#: ui/jinja_filters.py:311
 msgid "Child"
 msgstr "Barn"
 
-#: bl/person.py:126 ui/jinja_filters.py:293
+#: bl/person.py:126 ui/jinja_filters.py:310
 msgid "Son"
 msgstr "Son"
 
-#: bl/person.py:127 ui/jinja_filters.py:292
+#: bl/person.py:127 ui/jinja_filters.py:309
 msgid "Daughter"
 msgstr "Dotter"
 
@@ -203,7 +203,7 @@ msgstr "id:"
 msgid "Id of the user"
 msgstr "Användarens id"
 
-#: bp/admin/forms.py:55 bp/admin/forms.py:106
+#: bp/admin/forms.py:55
 msgid "Email Address:"
 msgstr "Epost address:"
 
@@ -211,11 +211,11 @@ msgstr "Epost address:"
 msgid "Username:"
 msgstr "Användar namn:"
 
-#: bp/admin/forms.py:60 bp/admin/forms.py:109
+#: bp/admin/forms.py:60
 msgid "Name:"
 msgstr "Namn:"
 
-#: bp/admin/forms.py:61 bp/admin/forms.py:110 bp/start/forms.py:33
+#: bp/admin/forms.py:61 bp/start/forms.py:33
 msgid "Name of the user"
 msgstr "Användarens namn"
 
@@ -231,25 +231,24 @@ msgstr "Aktiv / inaktiv användare"
 msgid "Roles"
 msgstr "Roll"
 
-#: bp/admin/forms.py:70 bp/admin/forms.py:119
+#: bp/admin/forms.py:70
 msgid "Gedcom-files"
 msgstr "GEDCOM-filer"
 
-#: bp/admin/forms.py:71 bp/admin/forms.py:120
-#: bp/scene/templates/scene/event.html:76
+#: bp/admin/forms.py:71 bp/scene/templates/scene/event.html:76
 #: bp/scene/templates/scene/event_vue.html:100
 msgid "Member"
 msgstr "Medlem"
 
-#: bp/admin/forms.py:72 bp/admin/forms.py:121 ui/jinja_filters.py:171
+#: bp/admin/forms.py:72 ui/jinja_filters.py:171
 msgid "Research"
 msgstr "Forskare"
 
-#: bp/admin/forms.py:73 bp/admin/forms.py:122
+#: bp/admin/forms.py:73
 msgid "Audit"
 msgstr "Revision"
 
-#: bp/admin/forms.py:74 bp/admin/forms.py:123
+#: bp/admin/forms.py:74
 msgid "Admin"
 msgstr "Administratör"
 
@@ -257,7 +256,7 @@ msgstr "Administratör"
 msgid "Assigned roles"
 msgstr "Given roll"
 
-#: bp/admin/forms.py:76 bp/admin/forms.py:125
+#: bp/admin/forms.py:76
 msgid "Email confirmed time"
 msgstr "Epost konfirmations tid"
 
@@ -306,7 +305,7 @@ msgid "Count of logins"
 msgstr "Antal inloggningar"
 
 #: bp/admin/forms.py:89 bp/admin/templates/admin/update_user.html:4
-#: bp/admin/templates/admin/update_user.html:11
+#: bp/admin/templates/admin/update_user.html:18
 msgid "Update user"
 msgstr "Uppdatera användare"
 
@@ -314,56 +313,91 @@ msgstr "Uppdatera användare"
 msgid "Approve user"
 msgstr "Godkänn användare"
 
+#: bp/admin/forms.py:99
+msgid "GSF_membership"
+msgstr "Medlem i Samfundet"
+
+#: bp/admin/forms.py:102 bp/start/forms.py:47
+msgid "Yes"
+msgstr "Ja"
+
+#: bp/admin/forms.py:103 bp/start/forms.py:48
+msgid "No"
+msgstr "Nej"
+
+#: bp/admin/forms.py:104 bp/start/forms.py:49
+msgid "Don't know"
+msgstr "Vet inte"
+
+#: bp/admin/forms.py:106
+msgid "Research years:"
+msgstr ""
+
+#: bp/admin/forms.py:107
+msgid "research years"
+msgstr ""
+
+#: bp/admin/forms.py:108
+msgid "Researched names:"
+msgstr ""
+
+#: bp/admin/forms.py:109
+msgid "Researched names"
+msgstr ""
+
+#: bp/admin/forms.py:110
+msgid "Researched places:"
+msgstr ""
+
+#: bp/admin/forms.py:111
+msgid "Researched places"
+msgstr ""
+
+#: bp/admin/forms.py:112
+msgid "Software:"
+msgstr ""
+
+#: bp/admin/forms.py:113
+msgid "Genealogy software"
+msgstr ""
+
+#: bp/admin/forms.py:114 bp/start/forms.py:55
+msgid "Message:"
+msgstr "Meddelande:"
+
 #: bp/admin/forms.py:115
-msgid "Approved"
-msgstr "Godkänd"
+msgid "Agreed to terms time"
+msgstr ""
 
 #: bp/admin/forms.py:116
-msgid "Approved / pending user"
-msgstr "Godkänd/väntande användare"
+msgid "The time when the user agreed to the terms and conditions"
+msgstr ""
 
-#: bp/admin/forms.py:117 bp/scene/templates/scene/event.html:75
-#: bp/scene/templates/scene/event_vue.html:99
-msgid "Role"
-msgstr "Roll"
-
-#: bp/admin/forms.py:124
-msgid "Assigned role choices"
-msgstr "Tilldelade rollval"
-
-#: bp/admin/forms.py:126
-msgid "Time of registered email confirmation"
-msgstr "Tid när emailen konfirmerades"
-
-#: bp/admin/forms.py:129
-msgid "Update allowed email"
-msgstr "Uppdatera godkänd email"
-
-#: bp/admin/routes.py:111
+#: bp/admin/routes.py:112
 msgid "Database initial check done."
 msgstr "Databasens inledande kontroll klar."
 
-#: bp/admin/routes.py:130
+#: bp/admin/routes.py:131
 msgid "No empty batches removed"
 msgstr "Inga tomma batchar borttagna"
 
-#: bp/admin/routes.py:155
+#: bp/admin/routes.py:156
 msgid "estimated lifetime"
 msgstr "beräknad livstid"
 
-#: bp/admin/routes.py:216
+#: bp/admin/routes.py:217
 msgid "Isotammi user approved"
 msgstr "Isotammi-användare godkänd"
 
-#: bp/admin/routes.py:217
+#: bp/admin/routes.py:218
 msgid "You are now approved to use Isotammi at {server} with user name {user}."
 msgstr "Du är nu godkänd att använda Isotammi {server} med användarnamn {user}."
 
-#: bp/admin/routes.py:221
+#: bp/admin/routes.py:222
 msgid "User updated"
 msgstr "Användaren uppdaterad"
 
-#: bp/admin/routes.py:281 bp/gramps/routes.py:118
+#: bp/admin/routes.py:294 bp/gramps/routes.py:118
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr "Data importen från %(i)s till databasen har startats."
@@ -405,7 +439,7 @@ msgstr "FEL"
 msgid "REMOVED"
 msgstr "RADERAD"
 
-#: bp/admin/models/data_admin.py:60 bp/admin/models/user_admin.py:83
+#: bp/admin/models/data_admin.py:60 bp/admin/models/user_admin.py:85
 msgid "User {} has not admin privileges"
 msgstr "Användare {} har inte administratörs behörighet"
 
@@ -420,14 +454,14 @@ msgstr "All data utom användare och roller har raderats."
 #: bp/admin/models/data_admin.py:108
 #, python-format
 msgid "All persons and event by %(un)s are removed."
-msgstr "Alla personer och händelser av  %(un)s togs bort."
+msgstr "Alla personer och händelser av %(un)s togs bort."
 
 #: bp/admin/models/data_admin.py:112
 #, python-format
 msgid "Removed %(cnt)d nodes"
 msgstr "Borttagna %(cnt)d noder"
 
-#: bp/admin/models/user_admin.py:138
+#: bp/admin/models/user_admin.py:140
 msgid "Given allowed email address already exists"
 msgstr "Angiven giltig epost address finns redan"
 
@@ -666,7 +700,7 @@ msgid "Admin-Start Page"
 msgstr "Administratorns start sida"
 
 #: bp/admin/templates/admin/layout.html:20
-#: bp/audit/templates/audit/layout.html:49 bp/gedcom/templates/g_layout.html:28
+#: bp/audit/templates/audit/layout.html:57 bp/gedcom/templates/g_layout.html:28
 #: bp/graph/templates/graph/layout.html:45
 #: bp/scene/templates/scene/sc_layout.html:40
 #: bp/start/templates/start/s_layout.html:30
@@ -676,7 +710,7 @@ msgid "My profile"
 msgstr "Min profil"
 
 #: bp/admin/templates/admin/layout.html:21
-#: bp/audit/templates/audit/layout.html:50
+#: bp/audit/templates/audit/layout.html:58
 #: bp/graph/templates/graph/layout.html:46
 #: bp/scene/templates/scene/sc_layout.html:41
 #: bp/scene/templates/scene/sc_layout.html:51
@@ -699,7 +733,7 @@ msgid "Admin home"
 msgstr "Admin start"
 
 #: bp/admin/templates/admin/layout.html:39
-#: bp/audit/templates/audit/layout.html:66 bp/gedcom/templates/g_layout.html:45
+#: bp/audit/templates/audit/layout.html:74 bp/gedcom/templates/g_layout.html:45
 #: bp/graph/templates/graph/layout.html:62
 #: bp/scene/templates/scene/sc_layout.html:53
 #: bp/start/templates/start/s_layout.html:45
@@ -857,7 +891,7 @@ msgstr "Nyare händelser"
 msgid "Back"
 msgstr "Tillbaka"
 
-#: bp/admin/templates/admin/update_user.html:51
+#: bp/admin/templates/admin/update_user.html:90
 msgid "User list"
 msgstr "Användar lista"
 
@@ -1068,8 +1102,8 @@ msgstr ""
 
 #: bp/audit/templates/audit/index.html:23
 #: bp/graph/templates/graph/index.html:27 graph/templates/graph/index.html:27
-msgid "List approved Isotammi data sets"
-msgstr "Lista godkända Isotammi satser"
+msgid "List approved common data sets"
+msgstr "Lista godkända gemensamma satser"
 
 #: bp/audit/templates/audit/index.html:24
 #: bp/graph/templates/graph/index.html:28
@@ -1112,7 +1146,7 @@ msgstr "Experimental sammanslagning av platser"
 msgid "Experimental duplicate person search"
 msgstr ""
 
-#: bp/audit/templates/audit/layout.html:46 bp/gedcom/templates/g_layout.html:25
+#: bp/audit/templates/audit/layout.html:54 bp/gedcom/templates/g_layout.html:25
 #: bp/graph/templates/graph/layout.html:42
 #: bp/scene/templates/scene/sc_layout.html:37
 #: bp/start/templates/start/s_layout.html:26
@@ -1122,12 +1156,12 @@ msgstr ""
 msgid "Back to Front Page"
 msgstr "Till framsidan"
 
-#: bp/audit/templates/audit/layout.html:52
+#: bp/audit/templates/audit/layout.html:60
 #: bp/graph/templates/graph/layout.html:48 graph/templates/graph/layout.html:48
 msgid "Audit home"
 msgstr "Revision hem"
 
-#: bp/audit/templates/audit/layout.html:70 bp/gedcom/templates/g_layout.html:49
+#: bp/audit/templates/audit/layout.html:78 bp/gedcom/templates/g_layout.html:49
 #: bp/graph/templates/graph/layout.html:89
 #: bp/start/templates/start/s_layout.html:49
 #: graph/templates/graph/layout.html:82 templates/a_layout.html:41
@@ -2271,7 +2305,7 @@ msgstr "Fel"
 
 #: bp/scene/routes.py:1076
 msgid "No previous comments"
-msgstr ""
+msgstr "Inga kommentarer"
 
 #: bp/scene/templates/scene/edit_event.html:8
 #: bp/scene/templates/scene/event.html:55
@@ -2312,6 +2346,11 @@ msgstr "Identifierare"
 #: bp/scene/templates/scene/event_vue.html:95
 msgid "Participants"
 msgstr "Deltagare"
+
+#: bp/scene/templates/scene/event.html:75
+#: bp/scene/templates/scene/event_vue.html:99
+msgid "Role"
+msgstr "Roll"
 
 #: bp/scene/templates/scene/event_vue.html:83
 #: bp/scene/templates/scene/place_events.html:141
@@ -2408,7 +2447,7 @@ msgstr "Gå till familje sidan"
 
 #: bp/scene/templates/scene/families.html:129
 #: bp/scene/templates/scene/medias.html:83
-#: bp/scene/templates/scene/persons_list.html:146
+#: bp/scene/templates/scene/persons_list.html:144
 msgid "Original ID"
 msgstr "Ursprungligt ID"
 
@@ -2441,18 +2480,18 @@ msgstr "En sådan familje finns inte"
 #: bp/scene/templates/scene/families.html:165
 #: bp/scene/templates/scene/macros.html:105
 #: bp/scene/templates/scene/medias.html:116
-#: bp/scene/templates/scene/persons_list.html:184
+#: bp/scene/templates/scene/persons_list.html:182
 msgid "first page"
 msgstr "första sidan"
 
 #: bp/scene/templates/scene/families.html:165
-#: bp/scene/templates/scene/persons_list.html:184
+#: bp/scene/templates/scene/persons_list.html:182
 msgid "Go to the first person"
 msgstr "Gå till första personen"
 
 #: bp/scene/templates/scene/families.html:170
 #: bp/scene/templates/scene/medias.html:105
-#: bp/scene/templates/scene/persons_list.html:174
+#: bp/scene/templates/scene/persons_list.html:172
 msgid "The last item found"
 msgstr "Den sista föremålet"
 
@@ -2700,7 +2739,7 @@ msgstr "Titel"
 
 #: bp/scene/templates/scene/medias.html:75
 msgid "For auditor only"
-msgstr ""
+msgstr "Bara for revisorn"
 
 #: bp/scene/templates/scene/medias.html:75
 msgid "User Batch"
@@ -2922,7 +2961,7 @@ msgstr "Alfabetisk meny"
 msgid "Person"
 msgstr "Person"
 
-#: bp/scene/templates/scene/persons_list.html:182
+#: bp/scene/templates/scene/persons_list.html:180
 #, python-format
 msgid "No one found with search keys starting \"%(name)s\""
 msgstr "Ingen hittades med Sök nycklar med start \"%(name)s\""
@@ -3017,13 +3056,21 @@ msgstr "För ny för uppvisning till andra!"
 msgid "No one found with search keys"
 msgstr "Ingen hittad med sökorden"
 
-#: bp/scene/templates/scene/persons_search.html:222
+#: bp/scene/templates/scene/persons_search.html:223
 msgid "persons"
 msgstr "personer"
 
-#: bp/scene/templates/scene/persons_search.html:237
-msgid "places"
-msgstr "platser"
+#: bp/scene/templates/scene/persons_search.html:228
+msgid "No person names"
+msgstr "Inga personnamn"
+
+#: bp/scene/templates/scene/persons_search.html:242
+msgid "references"
+msgstr ""
+
+#: bp/scene/templates/scene/persons_search.html:247
+msgid "No places"
+msgstr "Inga platser"
 
 #: bp/scene/templates/scene/place_events.html:3
 #: bp/scene/templates/scene/place_events.html:27
@@ -3255,18 +3302,6 @@ msgstr "Ange epost address"
 msgid "Are you a member of the Genealogical Society of Finland?"
 msgstr "Är du medlem i Genealogiska sällskapet i Finland?"
 
-#: bp/start/forms.py:47
-msgid "Yes"
-msgstr "Ja"
-
-#: bp/start/forms.py:48
-msgid "No"
-msgstr "Nej"
-
-#: bp/start/forms.py:49
-msgid "Don't know"
-msgstr "Vet inte"
-
 #: bp/start/forms.py:51
 msgid "How many years have you been doing genealogical research?"
 msgstr "Hur många år har du idkad genealogisk forskning?"
@@ -3283,10 +3318,6 @@ msgstr "Vilka familjer/efternamn forskar du främst?"
 msgid "Which places are you mainly researching?"
 msgstr "Vilka platser forskar du främst?"
 
-#: bp/start/forms.py:55
-msgid "Message:"
-msgstr "Meddelande:"
-
 #: bp/start/forms.py:57
 msgid "Send request"
 msgstr "Skicka begäran"
@@ -3299,11 +3330,11 @@ msgstr "Meddelande om anslutning till Isotammi sent"
 msgid "Sending join message failed"
 msgstr "Sändninga av meddelandet misslyckades"
 
-#: bp/start/routes.py:219
+#: bp/start/routes.py:220
 msgid "Update did not work1"
 msgstr "Uppdateringen fungerade1 inte"
 
-#: bp/start/routes.py:222
+#: bp/start/routes.py:223
 msgid "Update did not work"
 msgstr "Uppdateringen fungerade inte"
 
@@ -4518,6 +4549,14 @@ msgstr "som barn"
 msgid "as spouse"
 msgstr "som make/maka"
 
+#: ui/jinja_filters.py:119
+msgid "Adoption"
+msgstr ""
+
+#: ui/jinja_filters.py:120
+msgid "Foster-child"
+msgstr ""
+
 #: ui/jinja_filters.py:121
 msgid "Clergy"
 msgstr "Präster"
@@ -4590,7 +4629,7 @@ msgstr "Präst"
 msgid "Defendant"
 msgstr "Svarande"
 
-#: ui/jinja_filters.py:144 ui/jinja_filters.py:199 ui/jinja_filters.py:241
+#: ui/jinja_filters.py:144 ui/jinja_filters.py:199 ui/jinja_filters.py:246
 msgid "Unknown"
 msgstr "Okänd"
 
@@ -4730,7 +4769,7 @@ msgstr "Tidning"
 msgid "Tombstone"
 msgstr "Gravsten"
 
-#: ui/jinja_filters.py:204 ui/jinja_filters.py:232
+#: ui/jinja_filters.py:204 ui/jinja_filters.py:235
 msgid "Region"
 msgstr "Region"
 
@@ -4747,238 +4786,306 @@ msgid "Building"
 msgstr "Byggnad"
 
 #: ui/jinja_filters.py:208
+msgid "Church"
+msgstr "kyrka"
+
+#: ui/jinja_filters.py:209
 msgid "City"
 msgstr "Stad"
 
-#: ui/jinja_filters.py:209
+#: ui/jinja_filters.py:210
 msgid "Country"
 msgstr "Land"
 
-#: ui/jinja_filters.py:210
-msgid "Department"
-msgstr ""
-
 #: ui/jinja_filters.py:211
+msgid "Department"
+msgstr "Avdelning"
+
+#: ui/jinja_filters.py:212
 msgid "District"
 msgstr "Distrikt"
 
-#: ui/jinja_filters.py:212 ui/jinja_filters.py:213 ui/jinja_filters.py:235
+#: ui/jinja_filters.py:213 ui/jinja_filters.py:214 ui/jinja_filters.py:240
 msgid "Farm"
 msgstr "Gård"
 
-#: ui/jinja_filters.py:214
+#: ui/jinja_filters.py:215
 msgid "Hamlet"
 msgstr "By"
 
-#: ui/jinja_filters.py:215
+#: ui/jinja_filters.py:216
 msgid "Burial Site"
 msgstr "begravningsplats"
 
-#: ui/jinja_filters.py:216
+#: ui/jinja_filters.py:217
 msgid "Cemetery"
 msgstr "Kyrkogård"
 
-#: ui/jinja_filters.py:217
+#: ui/jinja_filters.py:218
 msgid "Chapel Parish"
 msgstr "Kappelförsamling"
 
-#: ui/jinja_filters.py:218
+#: ui/jinja_filters.py:219
 msgid "Mansion"
 msgstr "Herrgård"
 
-#: ui/jinja_filters.py:219
-msgid "Street Address"
-msgstr ""
-
 #: ui/jinja_filters.py:220
+msgid "Denomination"
+msgstr "samfund"
+
+#: ui/jinja_filters.py:221
+msgid "Street Address"
+msgstr "gatuaddress"
+
+#: ui/jinja_filters.py:222
 msgid "Block"
 msgstr "Kvarter"
 
-#: ui/jinja_filters.py:221
+#: ui/jinja_filters.py:223
 msgid "Kuntakeskus"
 msgstr "Kommun centrum"
 
-#: ui/jinja_filters.py:222
+#: ui/jinja_filters.py:224
+msgid "Governorate"
+msgstr "guvernement"
+
+#: ui/jinja_filters.py:225
 msgid "Institute"
 msgstr "Anläggning"
 
-#: ui/jinja_filters.py:223
+#: ui/jinja_filters.py:226
 msgid "Fortress"
 msgstr "Fästning"
 
-#: ui/jinja_filters.py:224
+#: ui/jinja_filters.py:227
 msgid "Locality"
 msgstr "Lokalitet"
 
-#: ui/jinja_filters.py:225
+#: ui/jinja_filters.py:228
 msgid "Natural Place"
 msgstr "naturlig plats"
 
-#: ui/jinja_filters.py:226
+#: ui/jinja_filters.py:229
 msgid "Municipality"
 msgstr "Kommun"
 
-#: ui/jinja_filters.py:227
+#: ui/jinja_filters.py:230
 msgid "Neighborhood"
 msgstr ""
 
-#: ui/jinja_filters.py:228
+#: ui/jinja_filters.py:231
 msgid "Learning Institution"
 msgstr "läroanstalt"
 
-#: ui/jinja_filters.py:229
-msgid "Organisation"
+#: ui/jinja_filters.py:232
+msgid "Organization"
 msgstr "Organisation"
 
-#: ui/jinja_filters.py:230 ui/jinja_filters.py:233
+#: ui/jinja_filters.py:233 ui/jinja_filters.py:236
 msgid "Parish"
 msgstr "Församling"
 
-#: ui/jinja_filters.py:231
+#: ui/jinja_filters.py:234
 msgid "Province"
+msgstr "provins"
+
+#: ui/jinja_filters.py:237
+msgid "Hospital"
 msgstr ""
 
-#: ui/jinja_filters.py:234
+#: ui/jinja_filters.py:238
 msgid "State"
 msgstr "Delstat"
 
-#: ui/jinja_filters.py:236
+#: ui/jinja_filters.py:239
+msgid "Seat Farm"
+msgstr ""
+
+#: ui/jinja_filters.py:241
 msgid "Tontti"
 msgstr "Tomt"
 
-#: ui/jinja_filters.py:237
+#: ui/jinja_filters.py:242
 msgid "Torppa"
 msgstr "Torp"
 
-#: ui/jinja_filters.py:238
+#: ui/jinja_filters.py:243
 msgid "Town"
 msgstr "Stad"
 
-#: ui/jinja_filters.py:239
+#: ui/jinja_filters.py:244
 msgid "Village"
 msgstr "By"
 
-#: ui/jinja_filters.py:240
+#: ui/jinja_filters.py:245
 msgid "Company"
 msgstr "Företag"
 
-#: ui/jinja_filters.py:246 ui/jinja_filters.py:268
+#: ui/jinja_filters.py:251 ui/jinja_filters.py:281
 msgid "in the region"
 msgstr "i regionen"
 
-#: ui/jinja_filters.py:247
+#: ui/jinja_filters.py:252
 msgid "on vessel"
 msgstr "på fartyg"
 
-#: ui/jinja_filters.py:248
+#: ui/jinja_filters.py:253
 msgid "in the borough of"
-msgstr "i stadsdelen av"
+msgstr "i stadsdelen"
 
-#: ui/jinja_filters.py:249
+#: ui/jinja_filters.py:254
 msgid "in the building of"
-msgstr "i byggnad  av"
+msgstr "i byggnaden"
 
-#: ui/jinja_filters.py:250
+#: ui/jinja_filters.py:255
+msgid "in the church"
+msgstr "i kyrkan"
+
+#: ui/jinja_filters.py:256
 msgid "in the City"
 msgstr "i staden"
 
-#: ui/jinja_filters.py:251
+#: ui/jinja_filters.py:257
 msgid "in the country of"
-msgstr "i land av"
+msgstr "i landet"
 
-#: ui/jinja_filters.py:252
+#: ui/jinja_filters.py:258
 msgid "in the department of"
-msgstr ""
+msgstr "i avdelningen"
 
-#: ui/jinja_filters.py:253
+#: ui/jinja_filters.py:259
 msgid "in the district of"
-msgstr "i diskrit av"
+msgstr "i diskriten"
 
-#: ui/jinja_filters.py:254
+#: ui/jinja_filters.py:260
 msgid "in the farm of"
-msgstr "på gården av"
+msgstr "på gården"
 
-#: ui/jinja_filters.py:255
+#: ui/jinja_filters.py:261
 msgid "in the hamlet of"
-msgstr "i liten by av"
+msgstr "i liten by"
 
-#: ui/jinja_filters.py:256
+#: ui/jinja_filters.py:262
 msgid "in a burial site of"
 msgstr "i begravningsplatsen"
 
-#: ui/jinja_filters.py:257
+#: ui/jinja_filters.py:263
 msgid "in the cemetery"
 msgstr "i kyrkogården"
 
-#: ui/jinja_filters.py:258
+#: ui/jinja_filters.py:264
 msgid "in chapel parish"
 msgstr "i kappelförsamling"
 
-#: ui/jinja_filters.py:259
+#: ui/jinja_filters.py:265
 msgid "in the mansion of"
-msgstr "i herrgården av"
+msgstr "i herrgården"
 
-#: ui/jinja_filters.py:260
+#: ui/jinja_filters.py:266
+msgid "in the denomination of"
+msgstr ""
+
+#: ui/jinja_filters.py:267
+msgid "at street address"
+msgstr "på katuadressen"
+
+#: ui/jinja_filters.py:268
+msgid "in the block"
+msgstr "i kvarteren"
+
+#: ui/jinja_filters.py:269
 msgid "Kuntakeskuksessa"
 msgstr "I kommun centrum"
 
-#: ui/jinja_filters.py:261
+#: ui/jinja_filters.py:270
+msgid "in the governorate"
+msgstr ""
+
+#: ui/jinja_filters.py:271
+msgid "in the nstitute"
+msgstr ""
+
+#: ui/jinja_filters.py:272
 msgid "in the fortress"
 msgstr "i fästningen"
 
-#: ui/jinja_filters.py:262
+#: ui/jinja_filters.py:273
 msgid "at locality of"
 msgstr "på orten"
 
-#: ui/jinja_filters.py:263
+#: ui/jinja_filters.py:274
 msgid "in a natural place of"
 msgstr "i naturlig platsen"
 
-#: ui/jinja_filters.py:264
+#: ui/jinja_filters.py:275
 msgid "in the municipality of"
 msgstr "i kommunen"
 
-#: ui/jinja_filters.py:265
+#: ui/jinja_filters.py:276
+msgid "in the neighborhood of"
+msgstr ""
+
+#: ui/jinja_filters.py:277
 msgid "in the learning lnstitution"
 msgstr "i läroanstalten"
 
-#: ui/jinja_filters.py:266
-msgid "in the organisation of"
-msgstr "i organisation av"
+#: ui/jinja_filters.py:278
+msgid "in the organization of"
+msgstr "i organisationen"
 
-#: ui/jinja_filters.py:267
+#: ui/jinja_filters.py:279
 msgid "in the parish"
 msgstr "i församlingen"
 
-#: ui/jinja_filters.py:269
-msgid "in the parish of"
-msgstr "i församlingen av"
+#: ui/jinja_filters.py:280
+msgid "int the province of"
+msgstr "i provinsen"
 
-#: ui/jinja_filters.py:270
+#: ui/jinja_filters.py:282
+msgid "at the hospital"
+msgstr "i sjukhuset"
+
+#: ui/jinja_filters.py:283
+msgid "in the parish of"
+msgstr "i församlingen"
+
+#: ui/jinja_filters.py:284
 msgid "in the state"
 msgstr "i landet"
 
-#: ui/jinja_filters.py:271
+#: ui/jinja_filters.py:285
+msgid "in seat farm"
+msgstr "i säteri"
+
+#: ui/jinja_filters.py:286
 msgid "in the farm"
 msgstr "på landgården"
 
-#: ui/jinja_filters.py:272
+#: ui/jinja_filters.py:287
 msgid "Tontilla"
 msgstr "på tomten"
 
-#: ui/jinja_filters.py:273
+#: ui/jinja_filters.py:288
 msgid "in the town"
 msgstr "i staden"
 
-#: ui/jinja_filters.py:274
+#: ui/jinja_filters.py:289
 msgid "in the village of"
-msgstr "i by av"
+msgstr "i byn"
 
-#: ui/jinja_filters.py:285
+#: ui/jinja_filters.py:290
+msgid "at the company"
+msgstr "i företaget"
+
+#: ui/jinja_filters.py:291
+msgid "in a place of unkown type"
+msgstr "i onamnd platsen"
+
+#: ui/jinja_filters.py:302
 msgid "Married"
 msgstr "Gift"
 
-#: ui/jinja_filters.py:286
+#: ui/jinja_filters.py:303
 msgid "Unknown relation"
 msgstr "Okänd relation"
 
