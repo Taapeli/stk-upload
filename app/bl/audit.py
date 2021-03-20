@@ -26,14 +26,14 @@ Created on 29.11.2019
 '''
 import shareds
 from datetime import datetime #,date
+from flask import flash
+from flask_babelex import _
 
 #from bl.base import Status
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch ######
 from pe.neo4j.cypher.cy_batch_audit import CypherAudit
 
 from models.util import format_timestamp
-#from pe.db_writer import DbWriter
-
 
 class Audit():
     '''
@@ -151,6 +151,68 @@ class Audit():
 
         return user, audit_id, tstring, sorted(labels)
 
+    @staticmethod
+    def delete_audit(username, batch_id):
+        ''' Delete an audited batch having the given id.
+        '''
+        label_sets = [  # Grouped for decent size chunks in logical order
+                ["Note"],
+                ["Repository", "Media"],
+                ["Place"],
+                ["Source"],
+                ["Event"],
+                ["Person"],
+                ["Family"]
+            ]
+
+        msg, deleted = '', 0
+        try:
+            with shareds.driver.session() as session:
+                # Delete the node types that are not directly connected to Audit node
+                with session.begin_transaction() as tx:
+                    result = tx.run(CypherAudit.delete_names,
+                                    batch=batch_id)
+                    this_delete = result.single()[0]
+                    print(f"bl.audit.delete_audit: deleted {this_delete} name nodes")
+                    deleted += this_delete
+
+                    result = tx.run(CypherAudit.delete_place_names,
+                                    batch=batch_id)
+                    this_delete = result.single()[0]
+                    print(f"bl.audit.delete_audit: deleted {this_delete} place name nodes")
+                    deleted += this_delete
+
+                    # result = tx.run(CypherAudit.delete_citations,
+                    #                 batch=batch_id)
+                    # this_delete = result.single()[0]
+                    # print(f"bl.audit.delete_audit: deleted {this_delete} citation nodes")
+                    # deleted += this_delete
+
+                # Delee the directly connected node types as defined by the labels
+                for labels in label_sets:
+                    with session.begin_transaction() as tx:
+                        result = tx.run(CypherAudit.delete,
+                                        batch=batch_id,
+                                        labels=labels)
+                        this_delete = result.single()[0]
+                        print(f"bl.audit.delete_audit: deleted {this_delete} nodes of type {labels}")
+                        deleted += this_delete
+
+                # Finally, delete the audit node itself
+                with session.begin_transaction() as tx:
+                    result = tx.run(CypherAudit.delete_audit_node,
+                                    batch=batch_id)
+
+            flash(_("Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted",
+                batch_id=batch_id, deleted=deleted), 'info')
+                                    
+        except Exception as e:
+            msg = f'Only {deleted} objects deleted: {e.__class__.__name__} {e}'
+            print(f'Audit.delete_audit: {msg}')
+            flash(msg, "flash_error")
+
+        return msg, deleted
+   
 
 #     @staticmethod
 #     def get_audit_stats(batch_id):

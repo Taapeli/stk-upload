@@ -141,3 +141,32 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
     ID(p) AS obj_id, LABELS(p)[0] AS obj_label, p.id AS obj_str
  """
 
+    delete = '''
+MATCH (a:Audit {id: $batch}) -[:PASSED]-> (x)
+WHERE labels(x) IN [$labels]
+DETACH DELETE x
+RETURN count(x)
+'''
+
+    delete_names = '''
+MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Person) -[:NAME]-> (x:Name)
+DETACH DELETE x
+RETURN count(x)
+'''
+
+    delete_place_names = '''
+MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Place) -[:NAME]-> (x:Place_name)
+DETACH DELETE x
+RETURN count(x)
+'''
+
+#     delete_citations = '''
+# MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Place) -[:NAME]-> (x:Citation) #######
+# DETACH DELETE x
+# RETURN count(x)
+# '''
+
+    delete_audit_node = '''
+MATCH (a:Audit {id: $batch})
+DETACH DELETE a
+'''
