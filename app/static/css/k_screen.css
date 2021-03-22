@@ -1123,6 +1123,7 @@ div.comment {
 }
 div.comment .content {
 	/*border: 1px solid;*/
+	white-space: pre-wrap;
 	padding: 5px;
 	margin: 5px;
 	background: white;
