@@ -47,8 +47,8 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 DB_SCHEMA_VERSION = '2021.1.0'
 # =============================
 
-#erase total database 
 def delete_database(tx):
+    #erase total database 
     tx.run(SetupCypher.delete_database)
 
 def schema_updated():
