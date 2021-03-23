@@ -126,7 +126,7 @@ class DOM_handler():
 #         self.mediapath = None               # Directory for media files
         self.file = os.path.basename(pathname) # for messages
         self.progress = defaultdict(int)    # key=object type, value=count of objects processed
-        self.datastore = None               # neo4j.DirectDriver object
+        # self.datastore = None               # neo4j.DirectDriver object
 
 
     def remove_handles(self):

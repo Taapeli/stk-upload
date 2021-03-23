@@ -261,7 +261,7 @@ class BatchDataStore:
     Abstracted batch datastore.
 
         - Create:
-          BatchWriter(dbdriver, use_transaction=True), which calls
+          BatchDataStore(dbdriver, use_transaction=True), which calls
           pe.db_writer.DbWriter.__init__(dbdriver, use_transaction=True) 
           to define the database driver and transaction.
 

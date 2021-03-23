@@ -42,7 +42,7 @@ from ui import jinja_filters
 from wtforms import SelectField, SubmitField, BooleanField
 
 from pe.neo4j.neo4jengine import Neo4jEngine
-from pe.neo4j.readservice import Neo4jReadService
+#from pe.neo4j.readservice import Neo4jReadService
 #from database.models.neo4jengine import Neo4jEngine 
 from database import adminDB
 
