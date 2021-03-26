@@ -528,7 +528,7 @@ class PlaceName(NodeObject):
 
 
 
-class PlaceDataReader(DbReader):
+class PlaceReader(DbReader):
     '''
     Abstracted Place datastore for reading.
 
@@ -566,13 +566,13 @@ class PlaceDataReader(DbReader):
 
         # Update the page scope according to items really found 
         if places:
-            print(f'PlaceDataReader.get_place_list: {len(places)} places '
+            print(f'PlaceReader.get_place_list: {len(places)} places '
                   f'{context.direction} "{places[0].pname}" – "{places[-1].pname}"')
             context.update_session_scope('place_scope', 
                                           places[0].pname, places[-1].pname, 
                                           context.count, len(places))
         else:
-            print(f'bl.place.PlaceDataReader.get_place_list: no places')
+            print(f'bl.place.PlaceReader.get_place_list: no places')
             return {'status': Status.NOT_FOUND, 'items': [],
                     'statustext': f'No places fw="{fw}"'}
         return {'items':places, 'status':Status.OK}

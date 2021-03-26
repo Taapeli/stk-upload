@@ -102,7 +102,7 @@ def clear_my_db():
 def start_initiate():
     """ Check and initiate important nodes and constraints and schema fixes.
     """
-    from database.adminDB import re_initiate_nodes_constraints_fixes, initialize_db
+    from database.accessDB import re_initiate_nodes_constraints_fixes, initialize_db
     logger.info(f"-> bp.admin.routes.start_initiate")
 
     # Remove (:Lock{id:'initial'})

@@ -73,6 +73,7 @@ def mergeplaces():
     #dataservice = Neo4jDataService(dbdriver)
     dataservice = Neo4jDataService(shareds.driver)
     datastore = PlaceDataStore(dataservice)
+    print(f'#> bp.refplace_editor.routes.mergeplaces: datastore = {datastore}')
 
     ret = datastore.merge2places(int(id1),int(id2))
     if Status.has_failed(ret):

@@ -94,6 +94,7 @@ def entry():
         u_context.user = None
 
         datastore = PersonReader(readservice, u_context)
+        print(f'#> routes.entry: datastore = {datastore}')
         minfont = 6
         maxfont = 20
         #maxnames = 40

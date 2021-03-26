@@ -29,17 +29,18 @@ from os.path import basename, splitext
 import logging 
 logger = logging.getLogger('stkserver')
 from flask_babelex import _
-
-from .xml_dom_handler import DOM_handler
-from .batchlogger import BatchLog, LogItem
-import shareds
 import traceback
 from tarfile import TarFile
 import os
 
+from .xml_dom_handler import DOM_handler
+from .batchlogger import BatchLog, LogItem
+import shareds
 from bl.base import Status
 from bp.scene.models import media
-from pe.neo4j.dataservice import Neo4jDataService
+
+#from pe.neo4j.dataservice import Neo4jDataService
+from database.accessDB import get_dataservice
 
 
 def get_upload_folder(username): 
@@ -542,18 +543,13 @@ def xml_to_stkbase(pathname, userid):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch import BatchDataStore #,Batch
+    from bl.batch import BatchDataStore
 
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
 
     # Get XML DOM parser and start DOM elements handler transaction
     handler = DOM_handler(file_cleaned, userid, pathname)
-
-    # Open database connection and start transaction
-    # dataservice -> Tietokantapalvelu
-    #      driver -> Tietokanta-ajuri
-    handler.dataservice = Neo4jDataService(shareds.driver)
 
     # Initialize Run report
     handler.blog = BatchLog(userid)
@@ -562,9 +558,14 @@ def xml_to_stkbase(pathname, userid):
                             'elapsed':shareds.tdiff})
     handler.blog.log(cleaning_log)
 
+    # Open database connection and start transaction
+    handler.dataservice = get_dataservice()
+    #handler.dataservice = Neo4jDataService(shareds.driver)
+
     # Initiate BatchDataStore and Batch node data
     # datastore ~= Business methods / Toimialametodit
     shareds.datastore = BatchDataStore(shareds.driver, handler.dataservice)
+    print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: shareds.datastore = {shareds.datastore}')
     mediapath = handler.get_mediapath_from_header()
     res = shareds.datastore.start_data_batch(userid, file_cleaned, mediapath)
     if Status.has_failed(res):
@@ -619,7 +620,7 @@ def xml_to_stkbase(pathname, userid):
         res = handler.remove_handles()
         if Status.has_failed(res):  return res
         # The missing links counted in remove_handles
-        #res = handler.add_missing_links()
+        res = handler.add_missing_links()
 
     except Exception as e:
         traceback.print_exc()

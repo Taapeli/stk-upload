@@ -176,6 +176,7 @@ def graph_home(uid=None):
     # Set up the database access.
     u_context = UserContext(user_session, current_user, request)
     datastore = PersonReader(readservice, u_context)
+    print(f'#> graph.routes.graph_home.build_children: datastore = {datastore}')
     uid = request.args.get('uuid', uid)
     args = {}
     

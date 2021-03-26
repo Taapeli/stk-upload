@@ -45,8 +45,8 @@ from models import util
 
 from . import bp
 from bl.base import Status, StkEncoder
-from bl.place import PlaceDataReader
-from bl.source import SourceDataStore
+from bl.place import PlaceReader
+from bl.source import SourceReader
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
 from bl.person import PersonReader, PersonWriter
@@ -214,7 +214,7 @@ def show_person_search():
             surnamestats.sort(key=itemgetter("surname"))
     
             # Most common place names cloud
-            reader = PlaceDataReader(readservice, u_context)
+            reader = PlaceReader(readservice, u_context)
             placenamestats = reader.get_placename_stats(40)
             # {name, count, uuid}
             for i, stat in enumerate(placenamestats):
@@ -394,6 +394,7 @@ def get_person_names(uuid):
 
     with Neo4jReadService(shareds.driver) as readservice:
         datastore = PersonReader(readservice, u_context)
+        print(f'#> bp.scene.routes.get_person_names: datastore = {datastore}')
         args = {}
         result = datastore.get_person_data(uuid, args)
 
@@ -413,6 +414,7 @@ def get_person_primary_name(uuid):
 
     with Neo4jReadServiceTx(shareds.driver) as readservice:
         datastore = PersonReaderTx(readservice, u_context)
+        print(f'#> bp.scene.routes.get_person_primary_name: datastore = {datastore}')
         result = datastore.get_person_data(uuid)
         print(result)
 
@@ -481,6 +483,7 @@ def edit_event(uuid):
 
     with Neo4jReadService(shareds.driver) as readservice:
         datastore = EventReader(readservice, u_context) 
+        print(f'#> bp.scene.routes.edit_event: datastore = {datastore}')
         res = datastore.get_event_data(uuid, {})
 
     status = res.get('status')
@@ -753,7 +756,7 @@ def show_places():
     u_context.count = request.args.get('c', 50, type=int)
 
     with Neo4jReadService(shareds.driver) as readservice:
-        reader = PlaceDataReader(readservice, u_context) 
+        reader = PlaceReader(readservice, u_context) 
         # The 'items' list has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
         res = reader.get_place_list()
@@ -783,7 +786,7 @@ def show_place(locid):
         #      reader ~= Toimialametodit
 
         with Neo4jReadService(shareds.driver) as readservice:
-            reader = PlaceDataReader(readservice, u_context) 
+            reader = PlaceReader(readservice, u_context) 
             res = reader.get_places_w_events(locid)
 
         if res['status'] == Status.NOT_FOUND:
@@ -833,7 +836,7 @@ def show_sources(series=None):
     # readservice -> Tietokantapalvelu
     #      reader ~= Toimialametodit
     with Neo4jReadService(shareds.driver) as readservice:
-        reader = SourceDataStore(readservice, u_context)
+        reader = SourceReader(readservice, u_context)
 
         if series:
             u_context.series = series
@@ -865,7 +868,7 @@ def show_source_page(sourceid=None):
     u_context = UserContext(user_session, current_user, request)
     try:
         with Neo4jReadService(shareds.driver) as readservice:
-            reader = SourceDataStore(readservice, u_context) 
+            reader = SourceReader(readservice, u_context) 
             res = reader.get_source_with_references(uuid, u_context)
 
         if res['status'] == Status.NOT_FOUND:

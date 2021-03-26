@@ -36,7 +36,9 @@ security = None
 mail = None
 db = None           # pe.neo4j.Neo4jEngine instance
 driver = None       # = shareds.db.driver, GraphDatabase.driver instance
+dataservice = None  # pe.neo4j.dataservice.Neo4jDataService instance
 datastore = None    # pe.db_writer.DbWriter instance – stk data services
+print(f'#> shareds: datastore = {datastore}')
 user_datastore = None
 allowed_email_model = None
 tdiff = 0.0         # Elapsed time of previous step, if any
@@ -46,6 +48,6 @@ user_model = None
 role_model = None
 
 DEFAULT_ROLE = 'member'    # Value overridden with configuration in application setup
-PROGRESS_UPDATE_RATE = 15  # seconds to update progress data in UI
+PROGRESS_UPDATE_RATE = 150  # seconds to update progress data in UI
 
 PRIVACY_LIMIT = 0       #Todo: Use bl.person.PRIVACY_LIMIT (?)
