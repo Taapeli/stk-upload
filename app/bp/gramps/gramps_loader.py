@@ -620,7 +620,7 @@ def xml_to_stkbase(pathname, userid):
         res = handler.remove_handles()
         if Status.has_failed(res):  return res
         # The missing links counted in remove_handles
-        res = handler.add_missing_links()
+##TODO      res = handler.add_missing_links()
 
     except Exception as e:
         traceback.print_exc()

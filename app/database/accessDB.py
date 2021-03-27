@@ -49,6 +49,8 @@ DB_SCHEMA_VERSION = '2021.1.0'
 
 
 def get_dataservice():
+    ''' Returns Neo4jDataService (or else) from shareds.
+    '''
     return shareds.dataservice(shareds.driver)
     #return ds(shareds.driver)
 

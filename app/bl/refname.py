@@ -413,7 +413,7 @@ class Refname(NodeObject):
             print("iError (Refname.get_refnames): {0}".format(err), file=stderr)
             return []
 
-class RefnameDataReader:
+class RefnameReader:
     '''
     NOT YET IN USE. Abstracted Reference name datastore for reading.
 

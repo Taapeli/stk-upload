@@ -659,7 +659,7 @@ class PlaceDataStore:
             return ret
 
         # Merge nodes
-        ret = self.dataservice.ds_merge_places(id1, id2)
+        ret = self.dataservice.ds_places_merge(id1, id2)
         if Status.has_failed(ret):
             self.dataservice.ds_rollback()
             return ret
