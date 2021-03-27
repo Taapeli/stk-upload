@@ -148,6 +148,9 @@ class Neo4jDataService:
             return {'status': Status.ERROR, 'statustext': statustext}
 
 
+    # ----- Common objects -----
+
+
     def ds_merge_check(self, id1, id2):
         ''' Check that given objects are mergeable.
         
@@ -158,6 +161,7 @@ class Neo4jDataService:
         class RefObj:
             def __str__(self):
                 return f'{self.uniq_id}:{self.label} {self.str}'
+
         objs = {}
         try:
             result = self.tx.run(CypherAudit.merge_check, id_list=[id1,id2])
@@ -199,10 +203,6 @@ class Neo4jDataService:
             return {'status': Status.ERROR,
                    'statustext': "Neo4jDataService.ds_merge_check "\
                                 f"{id1}<-{id2} failed: {e.__class__.__name__} {e}"}
-
-
-
-    # ----- Common objects -----
 
 
     def ds_obj_save_and_link(self, obj, **kwargs):
@@ -312,7 +312,7 @@ class Neo4jDataService:
             return err
 
 
-    def ds_merge_places(self, id1, id2):
+    def ds_places_merge(self, id1, id2):
         ''' Merges given two Place objects using apoc library.
         '''
         try:
@@ -325,7 +325,7 @@ class Neo4jDataService:
         except ClientError as e:
             #traceback.print_exc()
             return {'status': Status.ERROR,
-                   'statustext': f"Neo4jDataService.ds_merge_places {id1}<-{id2} failed: {e.__class__.__name__} {e}"}
+                   'statustext': f"Neo4jDataService.ds_places_merge {id1}<-{id2} failed: {e.__class__.__name__} {e}"}
 
         return {'status':Status.OK, 'place':place}
 

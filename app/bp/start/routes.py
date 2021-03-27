@@ -128,6 +128,7 @@ def start_logged():
         u_context.user = None
 
         datastore = PersonReader(readservice, u_context)
+        print(f'#> bp.start.routes.start_logged: datastore = {datastore}')
         minfont = 6
         maxfont = 20
         #maxnames = 40

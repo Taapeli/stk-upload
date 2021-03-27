@@ -18,11 +18,11 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-    Source classes: Source, SourceBl and SourceDataStore.
+    Source classes: Source, SourceBl and SourceReader.
 
     - Source       represents Source Node in database
     - SourceBl     represents Source and connected data (was Source_combo)
-    - SourceDataStore has methods for reading Source and connected data
+    - SourceReader has methods for reading Source and connected data
                    called from ui routes.py
 
 Created on 3.5.2020
@@ -110,7 +110,7 @@ class SourceBl(Source):
         self.note_ref = []
 
 
-class SourceDataStore:
+class SourceReader:
     '''
         Data reading class for Source objects with associated data.
 

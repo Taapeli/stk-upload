@@ -283,7 +283,7 @@ class MediaWriter:
 
 
 
-class MediaRefResult():
+class MediaReferenceByHandles():
     ''' Gramps media reference result object.
     
         Includes Note and Citation references and crop data.

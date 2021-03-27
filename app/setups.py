@@ -44,7 +44,7 @@ from wtforms import SelectField, SubmitField, BooleanField
 from pe.neo4j.neo4jengine import Neo4jEngine
 #from pe.neo4j.readservice import Neo4jReadService
 #from database.models.neo4jengine import Neo4jEngine 
-from database import adminDB
+from database import accessDB
 
 import shareds
 from chkdate import Chkdate
@@ -197,33 +197,49 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
 #============================== Start here ====================================
 
+sysversion = Chkdate()  # Last application commit date or "Unknown"
+
 print('Stk server setups') 
 shareds.mail = Mail(shareds.app)
-
-# About database driver object:
-# https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
-shareds.db = Neo4jEngine(shareds.app)
-shareds.driver  = shareds.db.driver
-
 shareds.user_model = User
 shareds.role_model = Role
 
-sysversion = Chkdate()  # Last application commit date or "Unknown"
+if True:
+    #
+    #    A Neo4j database is selected as our datastore
+    #
+    # dataservice, readservice, readservice_tx -> Tietokantapalvelu
+    #      driver -> Tietokanta-ajuri
+    #
+    # About database driver object:
+    # https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
+    #
+    from pe.neo4j.dataservice import Neo4jDataService
+    from pe.neo4j.readservice import Neo4jReadService
+    from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 
-# Setup Flask-Security
-shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)
-shareds.security = Security(shareds.app, shareds.user_datastore,
-    confirm_register_form=ExtendedConfirmRegisterForm,
-    login_form=ExtendedLoginForm)
+    shareds.db = Neo4jEngine(shareds.app)
+    shareds.driver  = shareds.db.driver
 
-print('Security set up')
+    shareds.dataservice = Neo4jDataService  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
+    shareds.readservice = Neo4jReadService  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
+    shareds.readservice_tx = Neo4jReadServiceTx  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
+
+    # Setup Flask-Security
+    shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)
+    shareds.security = Security(shareds.app, shareds.user_datastore,
+                                confirm_register_form=ExtendedConfirmRegisterForm,
+                                login_form=ExtendedLoginForm)
+
+print('Neo4j and security set up')
+
 
 @shareds.security.register_context_processor
 def security_register_processor():
     return {"username": _('User name'), "name": _('Name'), "language": _('Language')}
 
 # Check and initiate important nodes and constraints and schema fixes.
-adminDB.initialize_db() 
+accessDB.initialize_db() 
 
 
 """ 

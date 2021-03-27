@@ -21,7 +21,7 @@
 Fix obsolete terms and structures in schema.
 
 Created on 6.6.2020 
-moved from database.adminDB.do_schema_fixes
+moved from database.accessDB.do_schema_fixes
 
 @author: jm
 '''
@@ -117,7 +117,7 @@ SET u.email = 'nobody'"""
 #                 cnt3 = result.single()[0]
 #                 print(f"database.schema_fixes.do_schema_fixes: fixed Refname links {cnt1} REFNAME, {cnt2} matronyme, {cnt3} patronyme")
             except Exception as e:
-                logger.error(f"{e} in database.adminDB.do_schema_fixes/Audit"
+                logger.error(f"{e} in database.accessDB.do_schema_fixes/Audit"
                              f" Failed {e.__class__.__name__} {e}") 
                 return
 

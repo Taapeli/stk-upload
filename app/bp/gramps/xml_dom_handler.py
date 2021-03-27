@@ -42,7 +42,7 @@ from bl.person_name import Name
 from bl.family import FamilyBl
 from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
-from bl.media import MediaBl, MediaRefResult
+from bl.media import MediaBl, MediaReferenceByHandles
 from bl.event import EventBl
 
 #from pe.db_writer import DbWriter
@@ -1048,7 +1048,7 @@ class DOM_handler():
         media_nr = -1
         for objref in dom_object.getElementsByTagName('objref'):
             if objref.hasAttribute("hlink"):
-                resu = MediaRefResult()
+                resu = MediaReferenceByHandles()
                 resu.media_handle = objref.getAttribute("hlink")
                 media_nr += 1
                 resu.media_order = media_nr

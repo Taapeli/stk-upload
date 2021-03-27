@@ -484,26 +484,9 @@ class PlaceName(NodeObject):
                 n_other.append(nm)
         return n_default + n_local + n_unknown + n_other
 
-#     @staticmethod
 #     def arrange_other_names(namelist:list):
 #         ''' Arrange Place_name objects by name usefullness.
-#         
-#             The default language name is processed outside this method
-#             - First local names fi, sv
-#             - Then names without lang
-#             - Last other language names
-#         '''
-#         n_local = []
-#         n_unknown = []
-#         n_other = []
-#         for nm in namelist:
-#             if nm.lang in ['fi', 'sv']:
-#                 n_local.append(nm)
-#             elif nm.lang == '':
-#                 n_unknown.append(nm)
-#             else:
-#                 n_other.append(nm)
-#         return n_local + n_unknown + n_other
+
 
     def _lang_key(self, obj):
         ''' Name comparison key by 1) language, 2) name '''
@@ -528,7 +511,7 @@ class PlaceName(NodeObject):
 
 
 
-class PlaceDataReader(DbReader):
+class PlaceReader(DbReader):
     '''
     Abstracted Place datastore for reading.
 
@@ -566,13 +549,13 @@ class PlaceDataReader(DbReader):
 
         # Update the page scope according to items really found 
         if places:
-            print(f'PlaceDataReader.get_place_list: {len(places)} places '
+            print(f'PlaceReader.get_place_list: {len(places)} places '
                   f'{context.direction} "{places[0].pname}" – "{places[-1].pname}"')
             context.update_session_scope('place_scope', 
                                           places[0].pname, places[-1].pname, 
                                           context.count, len(places))
         else:
-            print(f'bl.place.PlaceDataReader.get_place_list: no places')
+            print(f'bl.place.PlaceReader.get_place_list: no places')
             return {'status': Status.NOT_FOUND, 'items': [],
                     'statustext': f'No places fw="{fw}"'}
         return {'items':places, 'status':Status.OK}
@@ -642,7 +625,6 @@ class PlaceDataStore:
     def __init__(self, dataservice):
         ''' Initiate datastore.
 
-        #TODO Not needed: :param: driver    neo4j.DirectDriver object
         :param: dataservice pe.neo4j.dataservice.Neo4jDataService
         '''
         self.dataservice = dataservice
@@ -659,7 +641,7 @@ class PlaceDataStore:
             return ret
 
         # Merge nodes
-        ret = self.dataservice.ds_merge_places(id1, id2)
+        ret = self.dataservice.ds_places_merge(id1, id2)
         if Status.has_failed(ret):
             self.dataservice.ds_rollback()
             return ret

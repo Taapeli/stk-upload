@@ -47,6 +47,76 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 DB_SCHEMA_VERSION = '2021.1.0'
 # =============================
 
+
+def get_dataservice(opt="update"):
+    ''' Returns a data service of selected type.
+    
+        :param: opt    service selection
+            "read"     Neo4jReadService
+            "read_tx"  Neo4jReadServiceTx
+            "update"   Neo4jDataService
+    '''
+    if opt == "read":
+        return shareds.readservice(shareds.driver)
+    if opt == "read_tx":
+        return shareds.readservice_tx(shareds.driver)
+    if opt == "update":
+        return shareds.dataservice(shareds.driver)
+    #return ds(shareds.driver)
+
+
+def initialize_db():
+    '''
+    Check and initiate important nodes and constraints and schema fixes,
+    if (:Lock{id:'initiated'}) schema is not == database.accessDB.DB_SCHEMA_VERSION.
+    
+    The database connection has been established in
+    pe.neo4j.neo4jengine.Neo4jEngine called from app.setups.py
+
+    ''' 
+    if not schema_updated():
+        logger.info('database.accessDB.initialize_db: checking roles, constraints '
+                    f'and schema fixes (version {DB_SCHEMA_VERSION})' )
+
+        if not roles_exist():
+            create_role_constraints()
+            create_roles()
+            
+        if not user_exists('master'):
+            create_user_constraints()
+            create_master_user()
+            
+        if not user_exists('guest'):
+            create_guest_user()
+
+        if not profile_exists('_Stk_'):
+            create_single_profile('_Stk_')
+
+        create_lock_w_constraint()
+
+        create_year_indexes()
+
+        constr_list = {
+            "Citation":{"uuid"},
+            "Event":{"uuid"},
+            "Family":{"uuid"},
+            "Media":{"uuid"},
+            "Note":{"uuid"},
+            "Person":{"uuid"},
+            "Place":{"uuid"},
+            "Repository":{"uuid"},
+            "Role":{"name"},
+            "Source":{"uuid"},
+            "User":{"email", "username"}
+        }
+        check_constraints(constr_list)
+
+        # Fix changed schema
+        do_schema_fixes()
+
+
+# --------------  Database Administration -------------
+
 def delete_database(tx):
     #erase total database 
     tx.run(SetupCypher.delete_database)
@@ -90,7 +160,7 @@ def create_role(tx, role):
         #print(f'Role {role["name"]} exists')
         return
     except Exception as e:
-        logging.error(f'database.adminDB.create_role: {e.__class__.__name__}, {e}')            
+        logging.error(f'database.accessDB.create_role: {e.__class__.__name__}, {e}')            
         raise      
 
 def create_roles():
@@ -140,7 +210,7 @@ def create_master_user():
         try:
             session.run(SetupCypher.master_create, master_user) 
         except Exception as e:
-            logging.error(f'database.adminDB.create_master_user: {e.__class__.__name__}, {e}')            
+            logging.error(f'database.accessDB.create_master_user: {e.__class__.__name__}, {e}')            
             return
     logger.info('Master user account created')    
 
@@ -182,7 +252,7 @@ def create_single_profile(name):
         try:
             session.run(SetupCypher.single_profile_create, attr=attr)
         except Exception as e:
-            logger.error("database.adminDB.create_single_profile"
+            logger.error("database.accessDB.create_single_profile"
                          f" Failed {e.__class__.__name__} {e.message}")
             return
     logger.info(f'Profile {name} created')    
@@ -197,7 +267,7 @@ def create_role_constraints():
             print(f'Role constraint ok: {msgs[0]}')
             return
         except Exception as e:
-            logging.error(f'database.adminDB.create_role_constraints: {e.__class__.__name__}, {e}')            
+            logging.error(f'database.accessDB.create_role_constraints: {e.__class__.__name__}, {e}')            
             return
     logger.info('Role constraints created')
 
@@ -217,7 +287,7 @@ def create_user_constraints():
             except ClientError:     #print(f'User constraint seems to be ok')
                 pass
             except Exception as e:
-                logging.error(f'database.adminDB.create_user_constraints: {e.__class__.__name__}, {e}')            
+                logging.error(f'database.accessDB.create_user_constraints: {e.__class__.__name__}, {e}')            
                 return
     if cnt:
         logger.info(f'{cnt} User constraints created')
@@ -240,7 +310,7 @@ def create_year_indexes():
                 pass
             except Exception as e:
                 msgs = e.message.split(',')
-                print(f'database.adminDB.create_year_indexes: {e.__class__.__name__}, {msgs[0]}')            
+                print(f'database.accessDB.create_year_indexes: {e.__class__.__name__}, {msgs[0]}')            
                 return
     if cnt:
         logger.info(f'{cnt} Person years indexes created')
@@ -273,7 +343,7 @@ def re_initiate_nodes_constraints_fixes():
     # Remove initial lock for re-creating nodes, constraints and schema fixes
     with shareds.driver.session() as session:
         session.run(SetupCypher.remove_lock_initiated)
-        logger.info(f'database.adminDB.re_initiate_nodes_constraints_fixes: requested')
+        logger.info(f'database.accessDB.re_initiate_nodes_constraints_fixes: requested')
         print('Initial Lock removed')
         return
 
@@ -289,7 +359,7 @@ def create_unique_constraint(label, prop):
             print(f'Unique constraint for {label}.{prop} ok: {msgs[0]}')
             return
         except Exception as e:
-            logger.error(f'database.adminDB.create_unique_constraint: {e.__class__.__name__} {e}' )
+            logger.error(f'database.accessDB.create_unique_constraint: {e.__class__.__name__} {e}' )
             raise
     return
 
@@ -305,65 +375,8 @@ def create_constraint(label, prop):
             print(f'Constraint for {label}.{prop} ok: {msgs[0]}')
             return
         except Exception as e:
-            logger.error(f'database.adminDB.create_constraint: {e.__class__.__name__} {e}' )
+            logger.error(f'database.accessDB.create_constraint: {e.__class__.__name__} {e}' )
             raise
     return
 
-# def create_to_be_approved_role():
-#     stmt = "create (r:Role{name:'to_be_approved',description:'Käyttäjä joka odottaa hyväksymistä'});"
-#     try:
-#         shareds.driver.session().run(stmt)
-#         logger.info("Created Role 'to_be_approved'")
-#     except ClientError: # already exists, ok
-#         print(f"Role 'to_be_approved' already exists")
-
-#------------------------------- Start here -----------------------------------
-
-def initialize_db():
-    '''
-    Check and initiate important nodes and constraints and schema fixes,
-    if (:Lock{id:'initiated'}) schema is not == database.adminDB.DB_SCHEMA_VERSION.
-    ''' 
-    if not schema_updated():
-        logger.info('database.adminDB.initialize_db: checking roles, constraints '
-                    f'and schema fixes (version {DB_SCHEMA_VERSION})' )
-
-        if not roles_exist():
-            create_role_constraints()
-            create_roles()
-            
-        if not user_exists('master'):
-            create_user_constraints()
-            create_master_user()
-            
-        if not user_exists('guest'):
-            create_guest_user()
-
-        if not profile_exists('_Stk_'):
-            create_single_profile('_Stk_')
-
-        create_lock_w_constraint()
-
-        create_year_indexes()
-
-        constr_list = {
-            "Citation":{"uuid"},
-            "Event":{"uuid"},
-            "Family":{"uuid"},
-            "Media":{"uuid"},
-            "Note":{"uuid"},
-            "Person":{"uuid"},
-            "Place":{"uuid"},
-            "Repository":{"uuid"},
-            "Role":{"name"},
-            "Source":{"uuid"},
-            "User":{"email", "username"}
-        }
-        check_constraints(constr_list)
-
-        # Fix changed schema
-        do_schema_fixes()
-
-        # Done in database.adminDB.create_role_constraints()
-        #create_to_be_approved_role()
 
