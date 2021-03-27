@@ -20,7 +20,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import shareds
+#import shareds
 from flask_security import roles_accepted #, current_user
 from bp.refplace_editor.models import refplaceeapi_v1 as api
 from . import bp
@@ -29,9 +29,8 @@ from flask import render_template, request
 from bl.base import Status, StkEncoder
 from bl.place import PlaceDataStore
 
-#from pe.db_writer import DbWriter
-from pe.neo4j.dataservice import Neo4jDataService
-#from models.jsonify import stk_jsonify
+from database.accessDB import get_dataservice
+#from pe.neo4j.dataservice import Neo4jDataService
 
 @bp.route("/refplace_editor/")
 @roles_accepted('audit')
@@ -69,9 +68,8 @@ def getplace():
 def mergeplaces():
     id1 = request.args.get("id1")
     id2 = request.args.get("id2")
-    #writer = DbWriter(dbdriver)
-    #dataservice = Neo4jDataService(dbdriver)
-    dataservice = Neo4jDataService(shareds.driver)
+    # #dataservice = Neo4jDataService(dbdriver)
+    dataservice = get_dataservice("update")
     datastore = PlaceDataStore(dataservice)
     print(f'#> bp.refplace_editor.routes.mergeplaces: datastore = {datastore}')
 

@@ -558,8 +558,8 @@ def xml_to_stkbase(pathname, userid):
                             'elapsed':shareds.tdiff})
     handler.blog.log(cleaning_log)
 
-    # Open database connection and start transaction
-    handler.dataservice = get_dataservice()
+    # Open database connection as Neo4jDataService instance and start transaction
+    handler.dataservice = get_dataservice("update")
     #handler.dataservice = Neo4jDataService(shareds.driver)
 
     # Initiate BatchDataStore and Batch node data

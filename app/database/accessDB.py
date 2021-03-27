@@ -48,10 +48,20 @@ DB_SCHEMA_VERSION = '2021.1.0'
 # =============================
 
 
-def get_dataservice():
-    ''' Returns Neo4jDataService (or else) from shareds.
+def get_dataservice(opt="update"):
+    ''' Returns a data service of selected type.
+    
+        :param: opt    service selection
+            "read"     Neo4jReadService
+            "read_tx"  Neo4jReadServiceTx
+            "update"   Neo4jDataService
     '''
-    return shareds.dataservice(shareds.driver)
+    if opt == "read":
+        return shareds.readservice(shareds.driver)
+    if opt == "read_tx":
+        return shareds.readservice_tx(shareds.driver)
+    if opt == "update":
+        return shareds.dataservice(shareds.driver)
     #return ds(shareds.driver)
 
 

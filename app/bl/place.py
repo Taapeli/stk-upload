@@ -484,26 +484,9 @@ class PlaceName(NodeObject):
                 n_other.append(nm)
         return n_default + n_local + n_unknown + n_other
 
-#     @staticmethod
 #     def arrange_other_names(namelist:list):
 #         ''' Arrange Place_name objects by name usefullness.
-#         
-#             The default language name is processed outside this method
-#             - First local names fi, sv
-#             - Then names without lang
-#             - Last other language names
-#         '''
-#         n_local = []
-#         n_unknown = []
-#         n_other = []
-#         for nm in namelist:
-#             if nm.lang in ['fi', 'sv']:
-#                 n_local.append(nm)
-#             elif nm.lang == '':
-#                 n_unknown.append(nm)
-#             else:
-#                 n_other.append(nm)
-#         return n_local + n_unknown + n_other
+
 
     def _lang_key(self, obj):
         ''' Name comparison key by 1) language, 2) name '''
@@ -642,7 +625,6 @@ class PlaceDataStore:
     def __init__(self, dataservice):
         ''' Initiate datastore.
 
-        #TODO Not needed: :param: driver    neo4j.DirectDriver object
         :param: dataservice pe.neo4j.dataservice.Neo4jDataService
         '''
         self.dataservice = dataservice

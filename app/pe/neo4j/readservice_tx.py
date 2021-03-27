@@ -3,6 +3,7 @@ Created on 30.1.2021
 
 @author: jm
 '''
+import shareds
 
 from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
@@ -70,14 +71,19 @@ class Neo4jReadServiceTx:
     Methods __enter__() and __exit__() makes possible to use with sentence
     (Context Manager pattern) like this:
 
-    ##     with Neo4jReadServiceTx(shareds.driver) as readservice:
+    ##     with Neo4jReadServiceTx() as readservice:
     ##         reader = PersonReaderTx(readservice, u_context)
     ##         res = reader.get_person_search(args)
 
     @See: https://www.integralist.co.uk/posts/python-context-managers/
     '''
-    def __init__(self, driver):
-        self.driver = driver
+    def __init__(self, driver=None):
+        
+        if driver:
+            self.driver = driver
+        else:
+            self.driver = shareds.driver
+
         print(f'#{self.__class__.__name__} init')
         #self.tx = driver.session().begin_transaction()
 

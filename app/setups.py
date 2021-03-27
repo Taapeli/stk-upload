@@ -208,16 +208,22 @@ if True:
     #
     #    A Neo4j database is selected as our datastore
     #
-    # dataservice -> Tietokantapalvelu
+    # dataservice, readservice, readservice_tx -> Tietokantapalvelu
     #      driver -> Tietokanta-ajuri
     #
     # About database driver object:
     # https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
     #
     from pe.neo4j.dataservice import Neo4jDataService
+    from pe.neo4j.readservice import Neo4jReadService
+    from pe.neo4j.readservice_tx import Neo4jReadServiceTx
+
     shareds.db = Neo4jEngine(shareds.app)
     shareds.driver  = shareds.db.driver
+
     shareds.dataservice = Neo4jDataService  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
+    shareds.readservice = Neo4jReadService  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
+    shareds.readservice_tx = Neo4jReadServiceTx  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
 
     # Setup Flask-Security
     shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)

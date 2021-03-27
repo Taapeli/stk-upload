@@ -63,9 +63,9 @@ from bp.scene.models import media
 from models.obsolete_datareader import obsolete_read_persons_with_events
 
 # Select the read driver for current database
-from pe.neo4j.readservice_tx import Neo4jReadServiceTx # initiate when used
-from pe.neo4j.readservice import Neo4jReadService
-#readservice = Neo4jReadService(shareds.driver)
+from database.accessDB import get_dataservice
+# opt = "read_tx" --> Neo4jReadServiceTx # initiate when used
+# opt = "read" --> Neo4jReadService
 
 from pe.neo4j.writeservice import Neo4jWriteService
 writeservice = Neo4jWriteService(shareds.driver)
@@ -123,7 +123,7 @@ def _do_get_persons(args):
         args['rule'] = 'all'
     u_context.count = request.args.get('c', 100, type=int)
 
-    with Neo4jReadServiceTx(shareds.driver) as readservice:
+    with get_dataservice("read_tx") as readservice:
         reader = PersonReaderTx(readservice, u_context)
         res = reader.get_person_search(args)
 
@@ -200,7 +200,7 @@ def show_person_search():
     placenamestats = []
     if args.get('rule') is None:
         # Start search page: show name clouds
-        with Neo4jReadService(shareds.driver) as readservice:
+        with get_dataservice("read") as readservice:
             minfont = 6
             maxfont = 20
             
@@ -302,7 +302,7 @@ def show_person(uuid=None, fanchart=False):
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadServiceTx(shareds.driver) as readservice:
+    with get_dataservice("read_tx") as readservice:
         reader = PersonReaderTx(readservice, u_context)
         result = reader.get_person_data(uuid) #, args)
 
@@ -337,7 +337,7 @@ def show_person_family_tree_hx(uuid=None):
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadServiceTx(shareds.driver) as readservice:
+    with get_dataservice("read_tx") as readservice:
         reader = PersonReaderTx(readservice, u_context)
         result = reader.get_person_data(uuid) #, args)
 
@@ -371,7 +371,7 @@ def show_person_fanchart_hx(uuid=None):
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadServiceTx(shareds.driver) as readservice:
+    with get_dataservice("read_tx") as readservice:
         reader = PersonReaderTx(readservice, u_context)
         result = reader.get_person_data(uuid) #, args)
 
@@ -392,7 +392,7 @@ def show_person_fanchart_hx(uuid=None):
 def get_person_names(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadService(shareds.driver) as readservice:
+    with get_dataservice("read") as readservice:
         datastore = PersonReader(readservice, u_context)
         print(f'#> bp.scene.routes.get_person_names: datastore = {datastore}')
         args = {}
@@ -412,7 +412,7 @@ def get_person_names(uuid):
 def get_person_primary_name(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadServiceTx(shareds.driver) as readservice:
+    with get_dataservice("read_tx") as readservice:
         datastore = PersonReaderTx(readservice, u_context)
         print(f'#> bp.scene.routes.get_person_primary_name: datastore = {datastore}')
         result = datastore.get_person_data(uuid)
@@ -461,7 +461,7 @@ def obsolete_show_event_v1(uuid):
     """
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadService(shareds.driver) as readservice:
+    with get_dataservice("read") as readservice:
         reader = EventReader(readservice, u_context) 
         res = reader.get_event_data(uuid)
 
@@ -481,7 +481,7 @@ def obsolete_show_event_v1(uuid):
 def edit_event(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadService(shareds.driver) as readservice:
+    with get_dataservice("read") as readservice:
         datastore = EventReader(readservice, u_context) 
         print(f'#> bp.scene.routes.edit_event: datastore = {datastore}')
         res = datastore.get_event_data(uuid, {})
@@ -524,7 +524,7 @@ def json_get_event():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        with Neo4jReadService(shareds.driver) as readservice:
+        with get_dataservice("read") as readservice:
             reader = EventReader(readservice, u_context) 
             res = reader.get_event_data(uuid, args)
     
@@ -642,7 +642,7 @@ def show_families():
     u_context.count = request.args.get('c', 100, type=int)
     t0 = time.time()
     
-    with Neo4jReadService(shareds.driver) as readservice:
+    with get_dataservice("read") as readservice:
         reader = FamilyReader(readservice, u_context) 
         # 'families' has Family objects
         families = reader.get_families() #o_context=u_context, opt=opt, limit=count)
@@ -669,7 +669,7 @@ def show_family_page(uuid=None):
     t0 = time.time()
     u_context = UserContext(user_session, current_user, request)
 
-    with Neo4jReadService(shareds.driver) as readservice:
+    with get_dataservice("read") as readservice:
         reader = FamilyReader(readservice, u_context) 
         res = reader.get_family_data(uuid)
 
@@ -707,7 +707,7 @@ def json_get_person_families():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        with Neo4jReadService(shareds.driver) as readservice:
+        with get_dataservice("read") as readservice:
             reader = FamilyReader(readservice, u_context) 
             res = reader.get_person_families(uuid)
 
@@ -755,7 +755,7 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    with Neo4jReadService(shareds.driver) as readservice:
+    with get_dataservice("read") as readservice:
         reader = PlaceReader(readservice, u_context) 
         # The 'items' list has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
@@ -785,7 +785,7 @@ def show_place(locid):
         # readservice -> Tietokantapalvelu
         #      reader ~= Toimialametodit
 
-        with Neo4jReadService(shareds.driver) as readservice:
+        with get_dataservice("read") as readservice:
             reader = PlaceReader(readservice, u_context) 
             res = reader.get_places_w_events(locid)
 
@@ -835,7 +835,7 @@ def show_sources(series=None):
 
     # readservice -> Tietokantapalvelu
     #      reader ~= Toimialametodit
-    with Neo4jReadService(shareds.driver) as readservice:
+    with get_dataservice("read") as readservice:
         reader = SourceReader(readservice, u_context)
 
         if series:
@@ -867,7 +867,7 @@ def show_source_page(sourceid=None):
         return redirect(url_for('virhesivu', code=1, text="Missing Source key"))
     u_context = UserContext(user_session, current_user, request)
     try:
-        with Neo4jReadService(shareds.driver) as readservice:
+        with get_dataservice("read") as readservice:
             reader = SourceReader(readservice, u_context) 
             res = reader.get_source_with_references(uuid, u_context)
 
@@ -905,7 +905,7 @@ def show_medias():
     u_context.set_scope_from_request(request, 'media_scope')
     u_context.count = 20
 
-    with Neo4jReadService(shareds.driver) as readservice:
+    with get_dataservice("read") as readservice:
         datareader = MediaReader(readservice, u_context)
         res = datareader.read_my_media_list()
 
@@ -926,7 +926,7 @@ def show_media(uuid=None):
     """
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
-    with Neo4jReadService(shareds.driver) as readservice:
+    with get_dataservice("read") as readservice:
         reader = MediaReader(readservice, u_context)
         res = reader.get_one(uuid)
 
