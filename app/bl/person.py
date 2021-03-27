@@ -339,6 +339,8 @@ class PersonWriter(DbWriter):
     def set_name_orders(self, uid_list):
         self.writeservice.dr_set_name_orders(uid_list)
 
+    def set_name_type(self, uniq_id, nametype):
+        self.writeservice.dr_set_name_type(uniq_id, nametype)
 
 class PersonBl(Person):
 

@@ -306,4 +306,10 @@ set n1.order = $old_order, n2.order = 0
 match (n:Name) where id(n) = $uid  
 set n.order = $order
     """
+
+    set_name_type = """
+match (n:Name) where id(n) = $uid  
+set n.type = $nametype
+return n
+    """
     

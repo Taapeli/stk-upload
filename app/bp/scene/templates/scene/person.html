@@ -133,7 +133,13 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 					{% endif %}
 	                {% for p_name in person.names|sort(attribute='order') %}
 	                        <tr{% if edit_names %} class="movable"{% endif %}>
-	                            <td class="ColumnAttribute">{{p_name.type|transl('nt')}}</td>
+	                            <td class="ColumnAttribute">
+	                            	{% if may_edit %}
+			                            <select hx-trigger="load" hx-get="nametypes/{{p_name.uniq_id}}/{{ p_name.type }}" hx-swap="outerHTML"></select>
+		                            {% else %}
+	                            		{{p_name.type|transl('nt')}}
+                            		{% endif %}
+	                            </td>
 	                            <td class="Value" style="padding-left: 24px;">
 	        						{% if p_name.title %}<span title="titteli" class="typedesc">{{p_name.title}}</span>{% endif %}
 	                                <span title="{{ _('first name') }}">{{p_name.firstname}}</span>
@@ -297,7 +303,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 <h3>{{ _("Relations") }}</h3>
     <div id="tabs"
          hx-get="/scene/person_{{'fanchart_hx' if fanchart_shown else 'famtree_hx'}}?uuid={{person.uuid}}"
-         hx-trigger="load after:100ms"
+         hx-trigger="load delay:100ms"
          hx-target="#tabs"
          hx-swap="innerHTML">
     </div>

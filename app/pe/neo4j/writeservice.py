@@ -73,5 +73,8 @@ class Neo4jWriteService:
     def dr_set_name_orders(self, uid_order_list):
         with self.driver.session(default_access_mode='WRITE') as session:
             for order, uid in enumerate(uid_order_list): 
-                print("==>",order,uid)
                 record = session.run(CypherPerson.set_name_order, uid=uid, order=order).single()
+
+    def dr_set_name_type(self, uid, nametype):
+        with self.driver.session(default_access_mode='WRITE') as session:
+            record = session.run(CypherPerson.set_name_type, uid=uid, nametype=nametype).single()

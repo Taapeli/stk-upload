@@ -319,7 +319,7 @@ def show_person(uuid=None, fanchart=False):
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
-    may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
+    may_edit = current_user.has_role('audit') #or current_user.has_role('admin') 
     #may_edit = 0
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg,
@@ -353,7 +353,7 @@ def show_person_family_tree_hx(uuid=None):
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
-    may_edit = current_user.has_role('audit') or current_user.has_role('admin') 
+    may_edit = current_user.has_role('audit') # or current_user.has_role('admin') 
     return render_template("/scene/person_famtree_hx.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, root=root,
                            last_year_allowed=last_year_allowed, 
@@ -387,6 +387,34 @@ def show_person_fanchart_hx(uuid=None):
     return render_template("/scene/person_fanchart_hx.html", person=person,
                             fanchart_data=json.dumps(fanchart))
 
+@bp.route('/scene/nametypes/<uniq_id>/<typename>', methods=['GET'])
+@roles_accepted('audit')
+def get_person_nametypes(uniq_id, typename):
+    s = f"<select name='nametype' hx-put='changetype/{uniq_id}' hx-swap='none'>"
+    found = False
+    for t in ["Birth Name","Married Name","Also Known As","Unknown"]:
+        s += f"\n    <option value='{t}'"
+        if typename == t:
+            s += " selected"
+            found = True
+        s += ">" + _(t)
+    if not found:
+        s += f"\n    <option value='{typename}' selected>" + _(typename)
+    s += "\n</select>"
+    return s 
+
+@bp.route('/scene/changetype/<uniq_id>', methods=['PUT'])
+@roles_accepted('audit')
+def person_name_changetype(uniq_id):
+    nametype_list = request.form.getlist('nametype')
+    uid_list = request.form.getlist("order")
+    index = uid_list.index(uniq_id)
+    nametype = nametype_list[index]
+    u_context = UserContext(user_session, current_user, request)
+    personwriter = PersonWriter(writeservice, u_context)
+    personwriter.set_name_type(int(uniq_id), nametype)
+    return ""
+
 @bp.route('/scene/get_person_names/<uuid>', methods=['PUT'])
 @roles_accepted('guest','research', 'audit', 'admin')
 def get_person_names(uuid):
@@ -416,7 +444,7 @@ def get_person_primary_name(uuid):
         datastore = PersonReaderTx(readservice, u_context)
         print(f'#> bp.scene.routes.get_person_primary_name: datastore = {datastore}')
         result = datastore.get_person_data(uuid)
-        print(result)
+        #print(result)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
