@@ -53,8 +53,8 @@ import shareds
 
 from bl.base import NodeObject, Status
 from bl.person_name import Name
+from pe.dataservice import DataService
 from pe.db_reader import DbReader
-from pe.db_writer import DbWriter
 from pe.neo4j.cypher.cy_person import CypherPerson
 
 from models.gen.note import Note
@@ -263,19 +263,24 @@ class PersonReader(DbReader):
         # [{'surname': surname, 'count': count},...]
         return surnames
 
-class PersonWriter(DbWriter):
+class PersonWriter(DataService):
     '''
-    Person datastore for update.
+    Person datastore for update without transaction.
+    
+    See DataService.__init__(self, service_name:str, u_context=None)
     '''
-    def __init__(self, writeservice, u_context):
-        self.writeservice = writeservice
-        self.u_context = u_context
+    def __init__(self, service_name:str, u_context=None):
+        super().__init__(service_name, u_context)
+        self.dataservice.tx = None
 
     def set_primary_name(self, uuid, old_order):
-        self.writeservice.dr_set_primary_name(uuid, old_order)
+        self.dataservice.dr_set_primary_name(uuid, old_order)
 
     def set_name_orders(self, uid_list):
-        self.writeservice.dr_set_name_orders(uid_list)
+        self.dataservice.dr_set_name_orders(uid_list)
+
+    def set_name_type(self, uniq_id, nametype):
+        self.dataservice.dr_set_name_type(uniq_id, nametype)
 
 
 class PersonBl(Person):

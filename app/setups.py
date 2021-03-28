@@ -215,6 +215,7 @@ if True:
     # https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
     #
     from pe.neo4j.updateservice import Neo4jUpdateService
+    from pe.neo4j.writeservice import Neo4jWriteService
     from pe.neo4j.readservice import Neo4jReadService
     from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 
@@ -223,7 +224,8 @@ if True:
     shareds.dataservices = {
         "read":    Neo4jReadService,
         "read_tx": Neo4jReadServiceTx,
-        "update":  Neo4jUpdateService
+        "update":  Neo4jUpdateService,
+        "simple":  Neo4jWriteService    # Without transaction
         }
 
     # Setup Flask-Security

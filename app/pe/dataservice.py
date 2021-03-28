@@ -21,11 +21,6 @@ import shareds
 import logging 
 logger = logging.getLogger('stkserver')
 
-from bl.base import Status
-from bl.person import PersonBl
-from bl.person_name import Name
-from bl.event import EventBl
-
 
 class DataService:
     ''' Public methods for accessing active database.
@@ -47,11 +42,6 @@ class DataService:
             raise KeyError(f"pe.dataservice.DataService.__init__: name {self.service_name} not found")
         self.dataservice = service_class(shareds.driver)
         
-        # # With 'update' and 'read_tx' begin transaction
-        # if service_name != "read":
-            # self.dataservice.tx = shareds.driver.session().begin_transaction()
-            # print(f'#{self.__class__.__name__} {self.service_name} begin')
-
         if user_context:
             self.user_context = user_context
             self.username = user_context.user
@@ -63,7 +53,7 @@ class DataService:
 
     def __enter__(self):
         # With 'update' and 'read_tx' begin transaction
-        if self.service_name != "read":
+        if self.service_name == "update" or self.service_name == "read_tx":
             self.dataservice.tx = shareds.driver.session().begin_transaction()
             print(f'#{self.__class__.__name__} {self.service_name} begin')
         else:
@@ -81,12 +71,13 @@ class DataService:
         exited. If the context was exited without an exception, all three
         arguments will be None.
         """
-        if exc_type:
-            print(f"{self.__class__.__name__} rollback becouse of {exc_type.__class__.__name__}")
-            self.dataservice.tx.rollback()
-        else:
-            self.dataservice.tx.close()
-        print(f'#{self.__class__.__name__} exit')
+        if self.dataservice.tx:
+            if exc_type:
+                print(f"{self.__class__.__name__} rollback becouse of {exc_type.__class__.__name__}")
+                self.dataservice.tx.rollback()
+            else:
+                self.dataservice.tx.close()
+            print(f'#{self.__class__.__name__} exit')
 
 #===============================================================================
 #     # -------- Person methods --------
