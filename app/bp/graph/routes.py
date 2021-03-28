@@ -29,12 +29,13 @@ from flask import json #, send_file
 from flask_security import login_required, roles_accepted, current_user
 #from flask_babelex import _ 
 
-import shareds
+#import shareds
 #import bl.person
 
 from . import bp
 from ui.user_context import UserContext
-from pe.neo4j.readservice_tx import Neo4jReadServiceTx
+#from pe.neo4j.readservice_tx import Neo4jReadServiceTx
+from database.accessDB import get_dataservice
 from bl.person_reader import PersonReaderTx
 from bl.base import Status
 #from bl.person_name import Name
@@ -172,8 +173,7 @@ def get_fanchart_data(uuid):
     
     # Set up the database access.
     u_context = UserContext(user_session, current_user, request)
-    #reader = PersonReaderTx(readservice, u_context)
-    with Neo4jReadServiceTx(shareds.driver) as readservice:
+    with get_dataservice("read_tx") as readservice:
         reader = PersonReaderTx(readservice, u_context)
 
         # Gather all required data in two directions from the central person. Data structure used in both is a

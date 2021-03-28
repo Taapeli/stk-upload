@@ -17,7 +17,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# coding=UTF-8
 # Flask routes program for Stk application
 # @ Sss 2016
 # JMä 29.12.2015
@@ -122,13 +121,14 @@ def start_logged():
     is_demo = shareds.app.config.get('DEMO', False)
     if is_demo:
         # Get surname cloud data
-        from pe.neo4j.readservice import Neo4jReadService
-        readservice = Neo4jReadService(shareds.driver)
         u_context = UserContext(session, current_user, request)
         u_context.user = None
 
+        from database.accessDB import get_dataservice
+        readservice = get_dataservice("read")
         datastore = PersonReader(readservice, u_context)
         print(f'#> bp.start.routes.start_logged: datastore = {datastore}')
+
         minfont = 6
         maxfont = 20
         #maxnames = 40

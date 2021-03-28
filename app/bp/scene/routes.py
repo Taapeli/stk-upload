@@ -67,8 +67,8 @@ from database.accessDB import get_dataservice
 # opt = "read_tx" --> Neo4jReadServiceTx # initiate when used
 # opt = "read" --> Neo4jReadService
 
-from pe.neo4j.writeservice import Neo4jWriteService
-writeservice = Neo4jWriteService(shareds.driver)
+#from pe.neo4j.writeservice import Neo4jWriteService
+#writeservice = Neo4jWriteService(shareds.driver)
 
 from bp.graph.routes import get_fanchart_data
 
@@ -429,6 +429,8 @@ def get_person_primary_name(uuid):
 @roles_accepted('audit', 'admin')
 def set_primary_name(uuid, old_order):
     u_context = UserContext(user_session, current_user, request)
+
+    writeservice = get_dataservice("update")
     personwriter = PersonWriter(writeservice, u_context)
     personwriter.set_primary_name(uuid, old_order)
     return get_person_names(uuid) 
@@ -440,6 +442,8 @@ def sort_names():
     uid_list = request.form.getlist("order")
     uid_list = [int(uid) for uid in uid_list]
     u_context = UserContext(user_session, current_user, request)
+
+    writeservice = get_dataservice("update")
     personwriter = PersonWriter(writeservice, u_context)
     personwriter.set_name_orders(uid_list)
     return get_person_primary_name(uuid)
@@ -602,6 +606,8 @@ def json_update_event():
             #print(f'got request data: {args}')
         uuid = args.get('uuid')
         u_context = UserContext(user_session, current_user, request)
+
+        writeservice = get_dataservice("update")
         writer = EventWriter(writeservice, u_context) 
         rec = writer.update_event(uuid, args)
         if rec.get("status") != Status.OK:
