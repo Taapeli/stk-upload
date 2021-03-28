@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from pe.dataservice import DataService
 
 '''
 Created on 12.8.2018
@@ -28,8 +29,8 @@ import traceback
 import json
 
 import logging 
-from operator import itemgetter
 logger = logging.getLogger('stkserver')
+from operator import itemgetter
 import time
 from datetime import datetime
 from types import SimpleNamespace
@@ -57,9 +58,6 @@ from ui.user_context import UserContext
 from ui import jinja_filters
 
 from bp.scene.models import media
-#from models.gen.family_combo import Family_combo
-#from models.gen.source import Source
-#from models.gen.obsolete_media import Media
 from models.obsolete_datareader import obsolete_read_persons_with_events
 
 # Select the read driver for current database
@@ -123,13 +121,11 @@ def _do_get_persons(args):
         args['rule'] = 'all'
     u_context.count = request.args.get('c', 100, type=int)
 
-    with get_dataservice("read_tx") as readservice:
-        reader = PersonReaderTx(readservice, u_context)
-        res = reader.get_person_search(args)
-
-    #print(f'Query {args} produced {len(res["items"])} persons, where {res["num_hidden"]} hidden.')
-#     if res.get('status') != Status.OK:
-#         flash(f'{_("No persons found")}: {res.get("statustext")}','error')
+    with PersonReaderTx("read_tx", u_context) as service:
+        res = service.get_person_search(args)
+#    with get_dataservice("read_tx") as readservice:
+#        reader = PersonReaderTx(readservice, u_context)
+#        res = reader.get_person_search(args)
 
     return res, u_context
 
@@ -302,9 +298,11 @@ def show_person(uuid=None, fanchart=False):
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
 
-    with get_dataservice("read_tx") as readservice:
-        reader = PersonReaderTx(readservice, u_context)
-        result = reader.get_person_data(uuid) #, args)
+    # with get_dataservice("read_tx") as readservice:
+        # reader = PersonReaderTx(readservice, u_context)
+        # result = reader.get_person_data(uuid) #, args)
+    with PersonReaderTx("read_tx", u_context) as service:
+        result = service.get_person_data(uuid)
 
     # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
     if Status.has_failed(result):
@@ -337,9 +335,8 @@ def show_person_family_tree_hx(uuid=None):
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
-    with get_dataservice("read_tx") as readservice:
-        reader = PersonReaderTx(readservice, u_context)
-        result = reader.get_person_data(uuid) #, args)
+    with PersonReaderTx("read_tx", u_context) as service:
+        result = service.get_person_data(uuid)
 
     # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
     if Status.has_failed(result):
@@ -371,9 +368,11 @@ def show_person_fanchart_hx(uuid=None):
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
-    with get_dataservice("read_tx") as readservice:
-        reader = PersonReaderTx(readservice, u_context)
-        result = reader.get_person_data(uuid) #, args)
+    # with get_dataservice("read_tx") as readservice:
+        # reader = PersonReaderTx(readservice, u_context)
+        # result = reader.get_person_data(uuid) #, args)
+    with PersonReaderTx("read_tx", u_context) as service:
+        result = service.get_person_data(uuid)
 
     # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
     if Status.has_failed(result):
@@ -412,11 +411,13 @@ def get_person_names(uuid):
 def get_person_primary_name(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with get_dataservice("read_tx") as readservice:
-        datastore = PersonReaderTx(readservice, u_context)
-        print(f'#> bp.scene.routes.get_person_primary_name: datastore = {datastore}')
-        result = datastore.get_person_data(uuid)
-        print(result)
+    # with get_dataservice("read_tx") as readservice:
+        # datastore = PersonReaderTx(readservice, u_context)
+        # print(f'#> bp.scene.routes.get_person_primary_name: datastore = {datastore}')
+        # result = datastore.get_person_data(uuid)
+        #print(result)
+    with DataService("read_tx", u_context) as service:
+        result = service.get_person_data(uuid)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')

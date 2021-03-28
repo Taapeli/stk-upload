@@ -214,16 +214,21 @@ if True:
     # About database driver object:
     # https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
     #
-    from pe.neo4j.dataservice import Neo4jDataService
+    from pe.neo4j.update_serv import Neo4jUpdateService
     from pe.neo4j.readservice import Neo4jReadService
     from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 
     shareds.db = Neo4jEngine(shareds.app)
     shareds.driver  = shareds.db.driver
 
-    shareds.dataservice = Neo4jDataService  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
-    shareds.readservice = Neo4jReadService  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
-    shareds.readservice_tx = Neo4jReadServiceTx  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
+    # shareds.dataservice = Neo4jUpdateService  # <class 'pe.neo4j.update_serv.Neo4jUpdateService'>
+    # shareds.readservice = Neo4jReadService  # <class 'pe.neo4j.update_serv.Neo4jUpdateService'>
+    # shareds.readservice_tx = Neo4jReadServiceTx  # <class 'pe.neo4j.update_serv.Neo4jUpdateService'>
+    shareds.dataservices = {
+        "read":    Neo4jReadService,
+        "read_tx": Neo4jReadServiceTx,
+        "update":  Neo4jUpdateService
+        }
 
     # Setup Flask-Security
     shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)

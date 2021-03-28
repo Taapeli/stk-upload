@@ -30,7 +30,7 @@ from bl.base import Status, StkEncoder
 from bl.place import PlaceDataStore
 
 from database.accessDB import get_dataservice
-#from pe.neo4j.dataservice import Neo4jDataService
+#from pe.neo4j.update_serv import Neo4jDataService
 
 @bp.route("/refplace_editor/")
 @roles_accepted('audit')
