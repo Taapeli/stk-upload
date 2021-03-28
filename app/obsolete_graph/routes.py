@@ -39,7 +39,6 @@ from flask_babelex import _
 
 import shareds
 import bl.person
-
 from . import bp
 
 from ui.user_context import UserContext
@@ -56,7 +55,7 @@ MAX_DESCENDANT_LEVELS = 4
 
 readservice = Neo4jReadService(shareds.driver)
 
-@bp.route('/graph', methods=['GET'])
+@bp.route('/obsolete_graph', methods=['GET'])
 @login_required
 @roles_accepted('audit')
 def graph_home(uid=None):
@@ -176,7 +175,7 @@ def graph_home(uid=None):
     # Set up the database access.
     u_context = UserContext(user_session, current_user, request)
     datastore = PersonReader(readservice, u_context)
-    print(f'#> graph.routes.graph_home.build_children: datastore = {datastore}')
+    print(f'#> obsolete_graph.routes.graph_home.build_children: datastore = {datastore}')
     uid = request.args.get('uuid', uid)
     args = {}
     
@@ -194,14 +193,14 @@ def graph_home(uid=None):
     # Northern hemisphere, we need to move the first node on top level list (father) to end of list.
     fanchart['children'].append(fanchart['children'].pop(0))
 
-    return render_template('/graph/layout.html', fanchart_data=json.dumps(fanchart))
+    return render_template('/obsolete_graph/layout.html', fanchart_data=json.dumps(fanchart))
 
-@bp.route('/graph/fanchart', methods=['GET'])
+@bp.route('/obsolete_graph/fanchart', methods=['GET'])
 @login_required
 @roles_accepted('audit')
 def graph_fanchart():
     FanChartGramplet()
-    return render_template('/graph/layout.html')
+    return render_template('/obsolete_graph/layout.html')
 
 
 class FanChartGramplet():

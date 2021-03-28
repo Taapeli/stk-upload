@@ -294,7 +294,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
         </div>
     {% endif %}
 
-<h3>{{ _("Relations") }}</h3>
+<h3 id="relations">{{ _("Relations") }}</h3>
     <div id="tabs"
          hx-get="/scene/person_{{'fanchart_hx' if fanchart_shown else 'famtree_hx'}}?uuid={{person.uuid}}"
          hx-trigger="load after:100ms"
