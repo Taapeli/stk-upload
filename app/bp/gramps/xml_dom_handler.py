@@ -44,22 +44,13 @@ from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaBl, MediaReferenceByHandles
 from bl.event import EventBl
+from bl.dates import Gramps_DateRange
 
-#from pe.db_writer import DbWriter
-#from pe.neo4j.dataservice import Neo4jWriteDriver
-
-#from .bl.person_gramps import PersonGramps
-#from .models.event_gramps import Event_gramps
-#from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
-#from .models.place_gramps import Place_gramps
-
 from .batchlogger import LogItem
 
 from models.cypher_gramps import Cypher_mixed
-from bl.dates import Gramps_DateRange
 from models.gen.note import Note
-#from models.gen.obsolete_media import Media
 from models.gen.citation import Citation
 from models.gen.repository import Repository
 

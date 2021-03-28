@@ -190,68 +190,6 @@ class PersonReader(DbReader):
 
         - Returns a Result object.
     '''
-    def get_person_search(self, args): # --> bl.person_reader.PersonReaderTx.get_person_search
-        """ Read Persons with Names, Events, Refnames (reference names) and Places
-            and Researcher's username.
-        
-            Search by name by args['rule'], args['key']:
-                rule=all                  all
-                rule=surname, key=name    by start of surname
-                rule=firstname, key=name  by start of the first of first names
-                rule=patronyme, key=name  by start of patronyme name
-                rule=refname, key=name    by exact refname
-                rule=years, key=str       by possible living years:
-                    str='-y2'   untill year
-                    str='y1'    single year
-                    str='y1-y2' year range
-                    str='y1-'   from year
-        """
-        raise NotImplementedError('Moved to bl.person_reader')
-#         if args.get('rule') == 'years':
-#             try:
-#                 lim = args['key'].split('-')
-#                 y1 = int(lim[0]) if lim[0] > '' else -9999
-#                 y2 = int(lim[-1]) if lim[-1] > '' else 9999
-#                 if y1 > y2:
-#                     y2, y1 = [y1, y2]
-#                 args['years'] = [y1, y2]
-#             except ValueError:
-#                 return {'statustext':_('The year or years must be numeric'), 'status': Status.ERROR}
-# 
-# #         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
-# #                           'years':args.get('years')}
-# 
-#         context = self.user_context
-#         args['use_user'] = self.use_user
-#         args['fw'] = context.first  # From here forward
-#         args['limit'] = context.count
-#         
-#         res = self.readservice.dr_get_person_list(args)
-#         # {'items': persons, 'status': Status.OK}
-# 
-#         status = res.get('status')
-#         if status == Status.ERROR:
-#             msg = res.get("statustext")
-#             logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
-#             print(f'bl.person.PersonReader.get_person_search: {msg}')
-#             return {'items':[], 'status':status,
-#                     'statustext': _('No persons found')}
-# 
-#         # Update the page scope according to items really found
-#         persons = res['items']
-#         if len(persons) > 0:
-#             context.update_session_scope('person_scope', 
-#                                           persons[0].sortname, persons[-1].sortname, 
-#                                           context.count, len(persons))
-# 
-#         if self.use_user is None:
-#             persons2 = [p for p in persons if not p.too_new]
-#             num_hidden = len(persons) - len(persons2)
-#         else:
-#             persons2 = persons
-#             num_hidden = 0
-#         return {'items': persons2, 'num_hidden': num_hidden, 'status': status}
-
 
     def get_person_list(self):
         ''' List person data including all data needed to Person page.
@@ -522,7 +460,7 @@ class PersonBl(Person):
 
 
 #     @staticmethod
-#     def get_confidence (uniq_id=None): --> pe.neo4j.dataservice.Neo4jWriteDriver.dr_get_person_confidences
+#     def get_confidence (uniq_id=None): --> pe.neo4j.updateservice.Neo4jUpdateService ??
 #         """ Collect Person confidence from Person and the Event nodes.
 # 
 #             Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta

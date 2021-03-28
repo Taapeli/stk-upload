@@ -51,7 +51,7 @@ class Neo4jUpdateService:
             return {'status':Status.OK}
         except Exception as e:
             msg = f'{e.__class__.__name__}, {e}'
-            logger.info('-> pe.neo4j.update_serv.Neo4jUpdateService.ds_commit/fail"')
+            logger.info('-> pe.neo4j.updateservice.Neo4jUpdateService.ds_commit/fail"')
             print("Neo4jUpdateService.ds_commit: Transaction failed "+ msg)
             return {'status':Status.ERROR, 
                     'statustext': f'Commit failed: {msg}'}
@@ -66,7 +66,7 @@ class Neo4jUpdateService:
             return {'status':Status.OK}
         except Exception as e:
             msg = f'{e.__class__.__name__}, {e}'
-            logger.info('-> pe.neo4j.update_serv.Neo4jUpdateService.ds_rollback/fail"')
+            logger.info('-> pe.neo4j.updateservice.Neo4jUpdateService.ds_rollback/fail"')
             print("Neo4jUpdateService.ds_rollback: Transaction failed "+ msg)
 #             self.blog.log_event({'title':_("Database save failed due to {}".\
 #                                  format(msg)), 'level':"ERROR"})
