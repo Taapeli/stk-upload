@@ -69,6 +69,17 @@ table.transparent tbody tr td {
 					</select> <input type="hidden" name="referrer" value="{{ referrer }}" />
 				</form>
 			</div>
+			
+			<div>
+			<h3>Terms of use</h3>
+			{% if userprofile.agreed_at %}
+				{{ _("Agreed to the <a href='http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot'>Terms of use</a> at") }}
+				{{ userprofile.agreed_at }}
+			{% else %}
+				{{ _("<a href='http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot'>Terms of use</a>") }}
+			{% endif %}
+			
+			</div>
             {% if apikey %}
             <h3>API Key</h3><div>{{ apikey }}</div>
             {% endif %}

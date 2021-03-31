@@ -170,7 +170,7 @@ class ExtendedLoginForm(LoginForm):
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     email = StringField(_l('Email address'), validators=[Required('Email required') ])
-    agree = BooleanField( _l("I have read and agree the <a href='static/termsofuse.html'>Terms of use</a>"))
+    agree = BooleanField( _l("I have read and agree to the <a href='http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot'>Terms of use</a>"))
     password = PasswordField(_l('Password'),
                              validators=[Required('Password required')])
     submit = SubmitField(_l('Register'))
