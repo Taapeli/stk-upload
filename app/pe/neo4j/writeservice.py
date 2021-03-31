@@ -45,7 +45,9 @@ def parsedate(datestr, attrs):
         return False
 
 class Neo4jWriteService:
-    ''' Methods for accessing Neo4j database,simple mode without transaction.
+    ''' Methods for accessing Neo4j database, simple mode without transaction.
+    
+        Referenced as shareds.dataservices["simple"] class.
     '''
     def __init__(self, driver):
         self.driver = driver

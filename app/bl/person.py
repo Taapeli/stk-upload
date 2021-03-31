@@ -54,7 +54,7 @@ import shareds
 from bl.base import NodeObject, Status
 from bl.person_name import Name
 from pe.dataservice import DataService
-from pe.db_reader import DbReader
+from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_person import CypherPerson
 
 from models.gen.note import Note
@@ -181,12 +181,9 @@ class Person(NodeObject):
         return obj
 
 
-class PersonReader(DbReader):
+class PersonReader(DataService):
     '''
         Data reading class for Person objects with associated data.
-
-        - Uses pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-          to define the database driver and user context
 
         - Returns a Result object.
     '''
@@ -201,7 +198,7 @@ class PersonReader(DbReader):
         args = {'use_user': self.use_user,
                 'fw': context.first,  # From here forward
                'limit':context.count}
-        res = self.readservice.dr_get_person_list(args)
+        res = self.dataservice.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
         if Status.has_failed(res):
             return {'items':None, 'status':res['status'], 
@@ -256,18 +253,16 @@ class PersonReader(DbReader):
         List all surnames so that they can be displayed in a name cloud.
         '''
         if self.use_user:
-            surnames = self.readservice.dr_get_surname_list_by_user(self.use_user,
+            surnames = self.dataservice.dr_get_surname_list_by_user(self.use_user,
                                                                     count=count)
         else:
-            surnames = self.readservice.dr_get_surname_list_common(count=count)
+            surnames = self.dataservice.dr_get_surname_list_common(count=count)
         # [{'surname': surname, 'count': count},...]
         return surnames
 
 class PersonWriter(DataService):
     '''
     Person datastore for update without transaction.
-    
-    See DataService.__init__(self, service_name:str, u_context=None)
     '''
     def __init__(self, service_name:str, u_context=None):
         super().__init__(service_name, u_context)

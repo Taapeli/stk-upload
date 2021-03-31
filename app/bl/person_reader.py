@@ -36,9 +36,6 @@ class PersonReaderTx(DataService):
     '''
         Data reading class for Person objects with associated data.
 
-        - Uses pe.db_reader.DbReader.__init__(self, service_name, u_context) 
-          to define the database driver and user context
-
         - Returns a Result object.
     '''
     def __init__(self, service_name:str, u_context=None):

@@ -419,13 +419,8 @@ class RefnameReader:
 
     Data reading class for Refname objects with associated data.
 
-    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-      to define the database driver and user context
-
     - Returns a Result object which includes the items and eventuel error object.
 
-    - Methods return a dict result object {'status':Status, ...}
-    
     #TODO: Should move Refname.get_refnames() here
     '''
     def __init__(self, readservice, u_context):

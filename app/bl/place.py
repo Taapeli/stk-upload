@@ -44,7 +44,7 @@ import logging
 import shareds
 
 from pe.neo4j.cypher.cy_place import CypherPlace
-from pe.db_reader import DbReader
+from pe.dataservice import DataService
 #from bp.stk_security.models.seccypher import Cypher
 logger = logging.getLogger('stkserver')
 
@@ -511,30 +511,14 @@ class PlaceName(NodeObject):
 
 
 
-class PlaceReader(DbReader):
+class PlaceReader(DataService):
     '''
     Abstracted Place datastore for reading.
 
     Data reading class for Place objects with associated data.
 
-    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-      to define the database driver and user context
-
-    - Returns a Result object which includes the items and eventuel error object.
-
     - Methods return a dict result object {'status':Status, ...}
     '''
-    def __init__(self, readservice, u_context):
-        ''' Initiate datastore.
-
-        :param: readservice   pe.neo4j.readservice.Neo4jReadService
-        :param: u_context     ui.user_context.UserContext object
-        '''
-        DbReader.__init__(self, readservice, u_context)
-        self.readservice = readservice
-        self.driver = readservice.driver
-        self.user_context = u_context
-
 
     def get_place_list(self):
         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
@@ -544,7 +528,7 @@ class PlaceReader(DbReader):
         context = self.user_context
         fw = context.first  # From here forward
         use_user = context.batch_user()
-        places = self.readservice.dr_get_place_list_fw(use_user, fw, context.count, 
+        places = self.dataservice.dr_get_place_list_fw(use_user, fw, context.count, 
                                                        lang=context.lang)
 
         # Update the page scope according to items really found 
@@ -571,7 +555,7 @@ class PlaceReader(DbReader):
         # Get a Place with Names, Notes and Medias
         use_user = self.user_context.batch_user()
         lang = self.user_context.lang
-        res = self.readservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
+        res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
         place = res.get("place")
         results = {"place":place, 'status':Status.OK}
 
@@ -583,7 +567,7 @@ class PlaceReader(DbReader):
         #TODO: Find Citation -> Source -> Repository for each uniq_ids
         try:
             results['hierarchy'] = \
-                self.readservice.dr_get_place_tree(place.uniq_id, lang=lang)
+                self.dataservice.dr_get_place_tree(place.uniq_id, lang=lang)
 
         except AttributeError as e:
             traceback.print_exc()
@@ -593,7 +577,7 @@ class PlaceReader(DbReader):
             return {'status': Status.ERROR,
                    'statustext': f"Place tree value for {place.uniq_id}: {e}"}
 
-        res = self.readservice.dr_get_place_events(place.uniq_id)
+        res = self.dataservice.dr_get_place_events(place.uniq_id)
         results['events'] = res['items']
         return results
 
@@ -602,33 +586,33 @@ class PlaceReader(DbReader):
         Return placename stats so that the names can be displayed in a name cloud.
         '''
         if self.use_user:
-            placename_stats = self.readservice.dr_get_placename_stats_by_user(self.use_user,
+            placename_stats = self.dataservice.dr_get_placename_stats_by_user(self.use_user,
                                                                               count=count)
         else:
-            placename_stats = self.readservice.dr_get_placename_stats_common(count=count)
+            placename_stats = self.dataservice.dr_get_placename_stats_common(count=count)
         return placename_stats
 
-class PlaceDataStore:
+class PlaceUpdater(DataService):
     '''
-    Abstracted Place datastore for update.
+    Abstracted Place datastore for read/update with transaction.
 
     Data update class for Place objects with associated data.
-
-    - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-      to define the database driver and user context
-
-    - Returns a Result object which includes the items and eventuel error object.
 
     - Methods return a dict result object {'status':Status, ...}
     '''
 
-    def __init__(self, dataservice):
-        ''' Initiate datastore.
+    def __init__(self, service_name:str, u_context=None):
+        super().__init__(service_name, u_context)
 
-        :param: dataservice pe.neo4j.dataservice.Neo4jDataService
-        '''
-        self.dataservice = dataservice
-        self.driver = dataservice.driver
+#===============================================================================
+#     def __init__(self, dataservice_name):
+#         ''' Initiate datastore.
+# 
+#         :param: dataservice pe.neo4j.dataservice.Neo4jDataService
+#         '''
+#         self.dataservice = dataservice
+#         self.driver = dataservice.driver
+#===============================================================================
 
 
     def merge2places(self, id1, id2):

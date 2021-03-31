@@ -25,12 +25,14 @@ logger = logging.getLogger('stkserver')
 class DataService:
     ''' Public methods for accessing active database.
     
+        The database used is defined in /setups.py.
+    
         Returns a PersonResult object
     '''
     def __init__(self, service_name:str, user_context=None):
         ''' Create a reader object with db driver and user context.
 
-            :param: service_name    str - one of service names (update, read, read_tx)
+            :param: service_name    str - one of service names (update, read, read_tx, simple)
             :param: user_context    <ui.user_context.UserContext object>
 
             A new transaction is created for 'update' and 'read_tx' services
@@ -41,7 +43,7 @@ class DataService:
         if not service_class:
             raise KeyError(f"pe.dataservice.DataService.__init__: name {self.service_name} not found")
         self.dataservice = service_class(shareds.driver)
-        
+
         if user_context:
             self.user_context = user_context
             self.username = user_context.user
@@ -55,8 +57,9 @@ class DataService:
         # With 'update' and 'read_tx' begin transaction
         if self.service_name == "update" or self.service_name == "read_tx":
             self.dataservice.tx = shareds.driver.session().begin_transaction()
-            print(f'#{self.__class__.__name__} {self.service_name} begin')
+            print(f'#{self.__class__.__name__} enter {self.service_name} transaction')
         else:
+            self.dataservice.tx = None
             print(f'#{self.__class__.__name__} enter')
         return self
 
@@ -78,6 +81,8 @@ class DataService:
             else:
                 self.dataservice.tx.close()
             print(f'#{self.__class__.__name__} exit')
+        else:
+            print(f'#{self.__class__.__name__} done')
 
 #===============================================================================
 #     # -------- Person methods --------

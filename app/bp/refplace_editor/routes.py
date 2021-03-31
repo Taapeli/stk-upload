@@ -27,7 +27,7 @@ from . import bp
 from flask import render_template, request
 
 from bl.base import Status, StkEncoder
-from bl.place import PlaceDataStore
+from bl.place import PlaceUpdater
 
 from database.accessDB import get_dataservice
 #from pe.neo4j.updateservice import Neo4jDataService
@@ -69,11 +69,13 @@ def mergeplaces():
     id1 = request.args.get("id1")
     id2 = request.args.get("id2")
     # #dataservice = Neo4jDataService(dbdriver)
-    dataservice = get_dataservice("update")
-    datastore = PlaceDataStore(dataservice)
-    print(f'#> bp.refplace_editor.routes.mergeplaces: datastore = {datastore}')
+    # dataservice = get_dataservice("update")
+    # datastore = PlaceUpdater(dataservice)
+    #print(f'#> bp.refplace_editor.routes.mergeplaces: datastore = {datastore}')
 
-    ret = datastore.merge2places(int(id1),int(id2))
+    with PlaceUpdater("update") as service:
+        ret = service.merge2places(int(id1),int(id2))
+
     if Status.has_failed(ret):
         print(f"mergeplaces: {ret.get('statustext')}")
         return StkEncoder.jsonify(ret)
