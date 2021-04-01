@@ -72,7 +72,7 @@ def get_fanchart_data(uuid):
         else:
             return ancestor_colors.get(sex, 'white') # white if value is not in ISO 5218
 
-    def get_person_for_id(uuid):
+    def get_person_for_id(reader, uuid):
         """
         Database read access. Error handling needs an improvement here!
         """
@@ -111,25 +111,25 @@ def get_fanchart_data(uuid):
             'uuid': person.uuid
         }
 
-    def build_parents(uuid, size, level = 1):
+    def build_parents(reader, uuid, size, level = 1):
         """
         Recurse to ancestors, building a data structure for fanchart.
         """
         # Fill in basic data from current person
-        person = get_person_for_id(uuid)
+        person = get_person_for_id(reader, uuid)
         node = fanchart_from(person, size, descendant = False)
 
         if person.families_as_child and level < MAX_ANCESTOR_LEVELS:  # continue recursion?
 
             dad = person.families_as_child[0].father
             if dad:
-                dads = build_parents(dad.uuid, size/2, level + 1)
+                dads = build_parents(reader, dad.uuid, size/2, level + 1)
             else:
                 dads = {'color': 'white', 'size': size/2, 'uuid': None}
 
             mom = person.families_as_child[0].mother
             if mom:
-                moms = build_parents(mom.uuid, size/2, level + 1)
+                moms = build_parents(reader, mom.uuid, size/2, level + 1)
             else:
                 moms = {'color': 'white', 'size': size/2, 'uuid': None}
             node['children'] = [dads, moms]
@@ -139,12 +139,12 @@ def get_fanchart_data(uuid):
             
         return node
     
-    def build_children(uuid, size, level = 1):
+    def build_children(reader, uuid, size, level = 1):
         """
         Recurse to descendants, building a data structure for fanchart.
         """
         # Fill in basic data from current person
-        person = get_person_for_id(uuid)
+        person = get_person_for_id(reader, uuid)
         node = fanchart_from(person, size, descendant = True)
 
         if person.families_as_parent and level < MAX_DESCENDANT_LEVELS:  # continue recursion?
@@ -163,7 +163,7 @@ def get_fanchart_data(uuid):
                     fx.children.sort(reverse = True, key = lambda x: x.birth_low)
                     for cx in fx.children:
                         node['children'].append(
-                            build_children(cx.uuid, size/child_count, level + 1))
+                            build_children(reader, cx.uuid, size/child_count, level + 1))
 
         else:
             node['size'] = size     # leaf node, others should have no size
@@ -179,8 +179,8 @@ def get_fanchart_data(uuid):
         # Gather all required data in two directions from the central person. Data structure used in both is a
         # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
         # (https://vasturiano.github.io/sunburst-chart/)
-        ancestors = build_parents(uuid, 1)
-        descendants = build_children(uuid, 1)
+        ancestors = build_parents(reader, uuid, 1)
+        descendants = build_children(reader, uuid, 1)
     
     # Merge the two sunburst chart data trees to form a single two-way fan chart.
     fanchart = ancestors
