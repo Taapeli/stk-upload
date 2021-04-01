@@ -170,7 +170,7 @@ class ExtendedLoginForm(LoginForm):
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     email = StringField(_l('Email address'), validators=[Required('Email required') ])
-    agree = BooleanField( _l("I have read and agree the <a href='static/termsofuse.html'>Terms of use</a>"))
+    agree = BooleanField( _l("I have read and agree to the <a href='http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot'>Terms of use</a>"))
     password = PasswordField(_l('Password'),
                              validators=[Required('Password required')])
     submit = SubmitField(_l('Register'))
@@ -214,16 +214,19 @@ if True:
     # About database driver object:
     # https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
     #
-    from pe.neo4j.dataservice import Neo4jDataService
+    from pe.neo4j.updateservice import Neo4jUpdateService
+    from pe.neo4j.writeservice import Neo4jWriteService
     from pe.neo4j.readservice import Neo4jReadService
     from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 
     shareds.db = Neo4jEngine(shareds.app)
     shareds.driver  = shareds.db.driver
-
-    shareds.dataservice = Neo4jDataService  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
-    shareds.readservice = Neo4jReadService  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
-    shareds.readservice_tx = Neo4jReadServiceTx  # <class 'pe.neo4j.dataservice.Neo4jDataService'>
+    shareds.dataservices = {
+        "read":    Neo4jReadService,
+        "read_tx": Neo4jReadServiceTx,
+        "update":  Neo4jUpdateService,
+        "simple":  Neo4jWriteService    # Without transaction
+        }
 
     # Setup Flask-Security
     shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)

@@ -29,12 +29,13 @@ from flask import json #, send_file
 from flask_security import login_required, roles_accepted, current_user
 #from flask_babelex import _ 
 
-import shareds
+#import shareds
 #import bl.person
 
 from . import bp
 from ui.user_context import UserContext
-from pe.neo4j.readservice_tx import Neo4jReadServiceTx
+#from pe.neo4j.readservice_tx import Neo4jReadServiceTx
+#from database.accessDB import get_dataservice
 from bl.person_reader import PersonReaderTx
 from bl.base import Status
 #from bl.person_name import Name
@@ -172,9 +173,9 @@ def get_fanchart_data(uuid):
     
     # Set up the database access.
     u_context = UserContext(user_session, current_user, request)
-    #reader = PersonReaderTx(readservice, u_context)
-    with Neo4jReadServiceTx(shareds.driver) as readservice:
-        reader = PersonReaderTx(readservice, u_context)
+
+    # Start reader transaction
+    with PersonReaderTx("read_tx", u_context) as reader:
 
         # Gather all required data in two directions from the central person. Data structure used in both is a
         # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
@@ -182,26 +183,26 @@ def get_fanchart_data(uuid):
         ancestors = build_parents(reader, uuid, 1)
         descendants = build_children(reader, uuid, 1)
     
-    # Merge the two sunburst chart data trees to form a single two-way fan chart.
-    fanchart = ancestors
-    fanchart.pop('size', None)  # make sure the root node has no size attribute (will have if no ancestors)
-    if 'children' in descendants.keys():    # has descendants?
-        if 'children' in ancestors.keys():  # has ancestors?
-            fanchart['children'] = ancestors['children'] + descendants['children']
+        # Merge the two sunburst chart data trees to form a single two-way fan chart.
+        fanchart = ancestors
+        fanchart.pop('size', None)  # make sure the root node has no size attribute (will have if no ancestors)
+        if 'children' in descendants.keys():    # has descendants?
+            if 'children' in ancestors.keys():  # has ancestors?
+                fanchart['children'] = ancestors['children'] + descendants['children']
+            else:
+                fanchart['children'] = descendants['children']
+                # No ancestors: make empty quarters to occupy parents' slots (otherwise descendants end up in east!)
+                fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
+                fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
         else:
-            fanchart['children'] = descendants['children']
-            # No ancestors: make empty quarters to occupy parents' slots (otherwise descendants end up in east!)
-            fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
-            fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})
-    else:
-        # If no descendants, make empty southern hemisphere
-        fanchart['children'] = (2, {'size': 1, 'color': 'white', 'uuid': None})
-    
+            # If no descendants, make empty southern hemisphere
+            fanchart['children'] = (2, {'size': 1, 'color': 'white', 'uuid': None})
+
 #     # The sectors are drawn anticlockwise, starting from North. To get the ancestors to occupy the
 #     # Northern hemisphere, we need to move the first node on top level list (father) to end of list.
 #     if 'children' in fanchart.keys():
 #         fanchart['children'].append(fanchart['children'].pop(0))
-    
+
     return fanchart
     
 

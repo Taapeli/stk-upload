@@ -56,13 +56,8 @@ def get_dataservice(opt="update"):
             "read_tx"  Neo4jReadServiceTx
             "update"   Neo4jDataService
     '''
-    if opt == "read":
-        return shareds.readservice(shareds.driver)
-    if opt == "read_tx":
-        return shareds.readservice_tx(shareds.driver)
-    if opt == "update":
-        return shareds.dataservice(shareds.driver)
-    #return ds(shareds.driver)
+    service = shareds.dataservices[opt]
+    return service(shareds.driver)
 
 
 def initialize_db():

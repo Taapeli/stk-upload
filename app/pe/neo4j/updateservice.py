@@ -22,20 +22,22 @@ from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_gramps import CypherObjectWHandle
 
 
-class Neo4jDataService:
+class Neo4jUpdateService:
     '''
-    This driver for Neo4j database maintains transaction and executes
-    different update functions.
+    This service for Neo4j database maintains transaction and executes
+    different read/write/update functions.
+
+    Referenced as shareds.dataservices["update"] class.
     '''
 
     def __init__(self, driver):
         ''' Create a writer/updater object with db driver and user context.
         
-            - driver             neo4j.DirectDriver object
-            - use_transaction    bool
+            :param: driver             neo4j.DirectDriver object
         '''
         self.driver = driver
         self.tx = driver.session().begin_transaction()
+        print(f'#{self.__class__.__name__} init')
 
 
     def ds_commit(self):
@@ -51,8 +53,8 @@ class Neo4jDataService:
             return {'status':Status.OK}
         except Exception as e:
             msg = f'{e.__class__.__name__}, {e}'
-            logger.info('-> pe.neo4j.dataservice.Neo4jDataService.ds_commit/fail"')
-            print("Neo4jDataService.ds_commit: Transaction failed "+ msg)
+            logger.info('-> pe.neo4j.updateservice.Neo4jUpdateService.ds_commit/fail"')
+            print("Neo4jUpdateService.ds_commit: Transaction failed "+ msg)
             return {'status':Status.ERROR, 
                     'statustext': f'Commit failed: {msg}'}
 
@@ -62,12 +64,12 @@ class Neo4jDataService:
         try:
             self.tx.rollback()
             print("Transaction discarded")
-            logger.info('-> pe.neo4j.write_driver.Neo4jDataService.ds_rollback')
+            logger.info('-> pe.neo4j.write_driver.Neo4jUpdateService.ds_rollback')
             return {'status':Status.OK}
         except Exception as e:
             msg = f'{e.__class__.__name__}, {e}'
-            logger.info('-> pe.neo4j.dataservice.Neo4jDataService.ds_rollback/fail"')
-            print("Neo4jDataService.ds_rollback: Transaction failed "+ msg)
+            logger.info('-> pe.neo4j.updateservice.Neo4jUpdateService.ds_rollback/fail"')
+            print("Neo4jUpdateService.ds_rollback: Transaction failed "+ msg)
 #             self.blog.log_event({'title':_("Database save failed due to {}".\
 #                                  format(msg)), 'level':"ERROR"})
             return {'status':Status.ERROR, 
@@ -104,7 +106,7 @@ class Neo4jDataService:
             # Normal exception: this is the first batch of day
             ext = 0
         except Exception as e:
-            statustext = f"Neo4jDataService.ds_new_batch_id: {e.__class__.name} {e}"
+            statustext = f"Neo4jUpdateService.ds_new_batch_id: {e.__class__.name} {e}"
             print(statustext)
             return {'status':Status.ERROR, 'statustext':statustext}
         
@@ -128,7 +130,7 @@ class Neo4jDataService:
             return {'status': Status.OK, 'identity':uniq_id}
 
         except Exception as e:
-            statustext = f"Neo4jDataService.ds_batch_save failed: {e.__class__.name} {e}"
+            statustext = f"Neo4jUpdateService.ds_batch_save failed: {e.__class__.name} {e}"
             return {'status': Status.ERROR, 'statustext': statustext}
 
 
@@ -144,7 +146,7 @@ class Neo4jDataService:
             return {'status': Status.OK, 'identity':uniq_id}
 
         except Exception as e:
-            statustext = f"Neo4jDataService.ds_batch_set_status failed: {e.__class__.__name__} {e}"
+            statustext = f"Neo4jUpdateService.ds_batch_set_status failed: {e.__class__.__name__} {e}"
             return {'status': Status.ERROR, 'statustext': statustext}
 
 
@@ -201,7 +203,7 @@ class Neo4jDataService:
         except ClientError as e:
             #traceback.print_exc()
             return {'status': Status.ERROR,
-                   'statustext': "Neo4jDataService.ds_merge_check "\
+                   'statustext': "Neo4jUpdateService.ds_merge_check "\
                                 f"{id1}<-{id2} failed: {e.__class__.__name__} {e}"}
 
 
@@ -230,7 +232,7 @@ class Neo4jDataService:
         # Find handles left: missing link (:Batch) --> (x)
         result = self.tx.run(CypherBatch.find_unlinked_nodes)
         for count, label in result:
-            print(f'Neo4jDataService.ds_obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch')
+            print(f'Neo4jUpdateService.ds_obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch')
             unlinked += count
         return {'status':status, 'count':total, 'unlinked':unlinked}
 
@@ -279,7 +281,7 @@ class Neo4jDataService:
                                 root_id=media_uid, handle=handle)
 
         except Exception as err:
-            logger.error(f"Neo4jDataService.create_link_medias_by_handles {doing}: {err}")
+            logger.error(f"Neo4jUpdateService.create_link_medias_by_handles {doing}: {err}")
 
 
     # ----- Place -----
@@ -308,7 +310,7 @@ class Neo4jDataService:
                      f"Place {place_id}, names fi:{fi_id}, sv:{sv_id}")
 
         except Exception as err:
-            logger.error(f"Neo4jDataService.place_set_default_names: {err}")
+            logger.error(f"Neo4jUpdateService.place_set_default_names: {err}")
             return err
 
 
@@ -325,7 +327,7 @@ class Neo4jDataService:
         except ClientError as e:
             #traceback.print_exc()
             return {'status': Status.ERROR,
-                   'statustext': f"Neo4jDataService.ds_places_merge {id1}<-{id2} failed: {e.__class__.__name__} {e}"}
+                   'statustext': f"Neo4jUpdateService.ds_places_merge {id1}<-{id2} failed: {e.__class__.__name__} {e}"}
 
         return {'status':Status.OK, 'place':place}
 
@@ -455,7 +457,7 @@ class Neo4jDataService:
             return res
 
         except Exception as e:
-            msg = f'Neo4jDataService._set_people_lifetime_estimates: {e.__class__.__name__} {e}'
+            msg = f'Neo4jUpdateService._set_people_lifetime_estimates: {e.__class__.__name__} {e}'
             print(f"Error {msg}")
             traceback.print_exc()
             return {'status': Status.ERROR, 'statustext': msg }
@@ -490,7 +492,7 @@ class Neo4jDataService:
                     count += 1
 
         except Exception as e:
-            msg = f'Neo4jDataService.ds_build_refnames: {e.__class__.__name__} {e}'
+            msg = f'Neo4jUpdateService.ds_build_refnames: {e.__class__.__name__} {e}'
             print(msg)
             return {'status':Status.ERROR, 'count':count, 'statustext': msg}
          
@@ -526,7 +528,7 @@ class Neo4jDataService:
             return {'confidence':new_conf, 'status':Status.OK}
 
         except Exception as e:
-            msg = f'Neo4jDataService._update_person_confidences: {e.__class__.__name__} {e}'
+            msg = f'Neo4jUpdateService._update_person_confidences: {e.__class__.__name__} {e}'
             print(msg)
             return {'confidence':new_conf, 'status':Status.ERROR,
                     'statustext': msg}
@@ -550,7 +552,7 @@ class Neo4jDataService:
             return {'status':Status.OK}
 
         except Exception as e:
-            msg = f'Neo4jDataService._link_person_to_refname: person={pid}, {e.__class__.__name__}, {e}'
+            msg = f'Neo4jUpdateService._link_person_to_refname: person={pid}, {e.__class__.__name__}, {e}'
             print(msg)
             return {'status':Status.ERROR, 'statustext': msg}
 
@@ -562,7 +564,7 @@ class Neo4jDataService:
             self.tx.run(CypherPerson.get_person_by_uid, uid=uniq_id)
             return {'status':Status.OK}
         except Exception as e:
-            msg = f'Neo4jDataService._get_person_by_uid: person={uniq_id}, {e.__class__.__name__}, {e}'
+            msg = f'Neo4jUpdateService._get_person_by_uid: person={uniq_id}, {e.__class__.__name__}, {e}'
             print(msg)
             return {'status':Status.ERROR, 'statustext': msg}
 
@@ -573,7 +575,7 @@ class Neo4jDataService:
             self.tx.run(CypherPerson.set_sortname, uid=uniq_id, key=sortname)
             return {'status':Status.OK}
         except Exception as e:
-            msg = f'Neo4jDataService._set_person_sortname: person={uniq_id}, {e.__class__.__name__}, {e}'
+            msg = f'Neo4jUpdateService._set_person_sortname: person={uniq_id}, {e.__class__.__name__}, {e}'
             print(msg)
             return {'status':Status.ERROR, 'statustext': msg}
 
@@ -662,7 +664,7 @@ class Neo4jDataService:
                                                        record.get('father_sortname'),
                                                        record.get('mother_sortname'))
                 if Status.has_failed(ret):  return ret
-                #print('Neo4jDataService._set_family_calculated_attributes: '
+                #print('Neo4jUpdateService._set_family_calculated_attributes: '
                 #      f'id={uniq_id} properties_set={ret.get("count","none")}')
                 dates_count += 1
                 sortname_count += 1
@@ -671,7 +673,7 @@ class Neo4jDataService:
                     'statustext': ret.get('statustext','')}
 
         except Exception as e:
-            msg = f'Neo4jDataService._set_family_calculated_attributes: person={uniq_id}, {e.__class__.__name__}, {e}'
+            msg = f'Neo4jUpdateService._set_family_calculated_attributes: person={uniq_id}, {e.__class__.__name__}, {e}'
             print(msg)
             return {'status':Status.ERROR, 'statustext': msg}
 

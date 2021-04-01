@@ -5,6 +5,7 @@ Created on 30.1.2021
 '''
 import shareds
 
+from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
@@ -64,17 +65,13 @@ class SourceReference:
         return f'{source_str}-{self.medium}->({repo_str})'
 
 
-class Neo4jReadServiceTx:
+class Neo4jReadServiceTx(DataService):
     ''' 
     Methods for accessing Neo4j database.
 
-    Methods __enter__() and __exit__() makes possible to use with sentence
-    (Context Manager pattern) like this:
-
-    ##     with Neo4jReadServiceTx() as readservice:
-    ##         reader = PersonReaderTx(readservice, u_context)
-    ##         res = reader.get_person_search(args)
-
+    Referenced as shareds.dataservices["read_tx"] class.
+    
+    The DataService class enables use as Context Manager.
     @See: https://www.integralist.co.uk/posts/python-context-managers/
     '''
     def __init__(self, driver=None):
@@ -83,32 +80,7 @@ class Neo4jReadServiceTx:
             self.driver = driver
         else:
             self.driver = shareds.driver
-
         print(f'#{self.__class__.__name__} init')
-        #self.tx = driver.session().begin_transaction()
-
-    def __enter__(self):
-        self.tx = self.driver.session().begin_transaction()
-        print(f'#{self.__class__.__name__} enter')
-        return self
-
-    def __exit__(self, exc_type=None, exc_value=None, traceback=None):
-        """
-        Exit the runtime context related to this object. 
-
-        @See https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
-
-        object.__exit__(self, exc_type, exc_value, traceback)
-        The parameters describe the exception that caused the context to be 
-        exited. If the context was exited without an exception, all three
-        arguments will be None.
-        """
-        if exc_type:
-            print(f"{self.__class__.__name__} rollback becouse of {exc_type.__class__.__name__}")
-            self.tx.rollback()
-        else:
-            self.tx.close()
-        print(f'#{self.__class__.__name__} exit')
 
 
     def tx_get_person_list(self, args):

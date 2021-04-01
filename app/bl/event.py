@@ -45,7 +45,7 @@ from flask_babelex import _
 
 import shareds
 from .base import NodeObject, Status
-from pe.db_reader import DbReader
+from pe.dataservice import DataService
 #from pe.db_writer import DbWriter
 from pe.neo4j.cypher.cy_event import CypherEvent
 
@@ -125,12 +125,9 @@ class Event(NodeObject):
         return obj
 
 
-class EventReader(DbReader):
+class EventReader(DataService):
     '''
         Data reading class for Event objects with associated data.
-
-        - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-          to define the database driver and user context
 
         - Returns a Result object.
     '''
@@ -145,7 +142,7 @@ class EventReader(DbReader):
         '''
         statustext = ''
         res_dict = {}
-        res = self.readservice.dr_get_event_by_uuid(self.use_user, uuid)
+        res = self.dataservice.dr_get_event_by_uuid(self.use_user, uuid)
         if Status.has_failed(res):
             return {'item':None, 'status':res['status'], 
                     'statustext': _('The event is not accessible')}
@@ -155,7 +152,7 @@ class EventReader(DbReader):
 
         members= []
         if args.get('referees'):
-            res = self.readservice.dr_get_event_participants(event.uniq_id)
+            res = self.dataservice.dr_get_event_participants(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _('Participants read error ') + res['statustext']+' '
                 print(f'bl.event.EventReader.get_event_data: {statustext}')
@@ -164,7 +161,7 @@ class EventReader(DbReader):
                 res_dict['members'] = members
         places = []
         if args.get('places'):
-            res = self.readservice.dr_get_event_place(event.uniq_id)
+            res = self.dataservice.dr_get_event_place(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _('Place read error ') + res['statustext']+' '
             else:
@@ -174,7 +171,7 @@ class EventReader(DbReader):
         notes = []
         medias = []
         if args.get('notes'):
-            res = self.readservice.dr_get_event_notes_medias(event.uniq_id)
+            res = self.dataservice.dr_get_event_notes_medias(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _('Notes read error ') + res['statustext']+' '
             else:

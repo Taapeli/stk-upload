@@ -3,7 +3,8 @@ Created on 30.1.2021
 
 @author: jm
 '''
-from pe.db_reader import DbReader
+#from pe.db_reader import DbReader
+from pe.dataservice import DataService
 from bl.base import Status
 from bl.person import PersonBl
 from bl.person_name import Name
@@ -31,18 +32,15 @@ from flask_babelex import _
 #from models.obsolete_source_citation_reader import get_citations_js
 
 
-class PersonReaderTx(DbReader):
+class PersonReaderTx(DataService):
     '''
         Data reading class for Person objects with associated data.
 
-        - Uses pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-          to define the database driver and user context
-
         - Returns a Result object.
     '''
-    def __init__(self, readservice, u_context=None):
-        DbReader.__init__(self, readservice, u_context)
-        self.obj_catalog = {}          # {uniq_id: Connected_object}
+    def __init__(self, service_name:str, u_context=None):
+        super().__init__(service_name, u_context)
+        self.obj_catalog = {}          # dict {uniq_id: Connected_object}
 
     def _catalog(self, obj):
         ''' Add the object to collection of referenced objects. '''
@@ -61,7 +59,7 @@ class PersonReaderTx(DbReader):
     def get_person_search(self, args):
         """ Read Persons with Names, Events, Refnames (reference names) and Places
             and Researcher's username.
-        
+         
             Search by name by args['rule'], args['key']:
                 rule=all                  all
                 rule=surname, key=name    by start of surname
@@ -73,7 +71,7 @@ class PersonReaderTx(DbReader):
                     str='y1'    single year
                     str='y1-y2' year range
                     str='y1-'   from year
-
+ 
             Origin from bl.person.PersonReader.get_person_search
             TODO: rule=refname: listing with refnames not supported
         """
@@ -87,17 +85,17 @@ class PersonReaderTx(DbReader):
                 args['years'] = [y1, y2]
             except ValueError:
                 return {'statustext':_('The year or years must be numeric'), 'status': Status.ERROR}
-
+ 
 #         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
 #                           'years':args.get('years')}
-
+ 
         context = self.user_context
         args['use_user'] = self.use_user
         args['fw'] = context.first  # From here forward
         args['limit'] = context.count
-        
-        res = self.readservice.tx_get_person_list(args)
-
+         
+        res = self.dataservice.tx_get_person_list(args)
+ 
         status = res.get('status')
         if status == Status.NOT_FOUND:
             msg = res.get("statustext")
@@ -108,7 +106,7 @@ class PersonReaderTx(DbReader):
         if status != Status.OK:
             return res
         persons = []
-
+ 
         # got {'items': [PersonRecord], 'status': Status.OK}
         #    - PersonRecord = object with fields person_node, names, events_w_role, owners
         #    -    events_w_role = list of tuples (event_node, place_name, role)
@@ -116,16 +114,16 @@ class PersonReaderTx(DbReader):
             #print(p_record)
             node = p_record.person_node
             p = PersonBl.from_node(node)
-
+ 
             # if take_refnames and record['refnames']:
             #     refnlist = sorted(record['refnames'])
             #     p.refnames = ", ".join(refnlist)
-
+ 
             for node in p_record.names:
                 pname = Name.from_node(node)
                 pname.initial = pname.surname[0] if pname.surname else ''
                 p.names.append(pname)
-
+ 
             # Events 
             for node, pname, role in p_record.events_w_role:
                 if not node is None:
@@ -134,15 +132,15 @@ class PersonReaderTx(DbReader):
                     if role and role != "Primary":
                         e.role = role
                     p.events.append(e)
-    
+     
             persons.append(p)   
-    
+     
         # Update the page scope according to items really found
         if len(persons) > 0:
             context.update_session_scope('person_scope', 
                                           persons[0].sortname, persons[-1].sortname, 
                                           context.count, len(persons))
-
+ 
         if self.use_user is None:
             persons2 = [p for p in persons if not p.too_new]
             num_hidden = len(persons) - len(persons2)
@@ -235,7 +233,7 @@ class PersonReaderTx(DbReader):
             return None
         #---/
 
-        res = self.readservice.tx_get_person_by_uuid(uuid, active_user=self.use_user)
+        res = self.dataservice.tx_get_person_by_uuid(uuid, active_user=self.use_user)
         if Status.has_failed(res):
             # Not found, not allowd (person.too_new) or error
             if res.get('status') == Status.NOT_FOUND:
@@ -283,7 +281,7 @@ class PersonReaderTx(DbReader):
 
         # 3. Person's families as child or parent
 
-        res = self.readservice.tx_get_person_families(person.uniq_id)
+        res = self.dataservice.tx_get_person_families(person.uniq_id)
         if Status.has_failed(res):
             print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read families:'\
                   f' {res.get("statustext")}')
@@ -336,7 +334,7 @@ class PersonReaderTx(DbReader):
 
         # 4. Places for person and each event
 
-        res = self.readservice.tx_get_object_places(self.obj_catalog)
+        res = self.dataservice.tx_get_object_places(self.obj_catalog)
         # returns {status, place_references}
         if Status.has_failed(res):
             print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read places:'\
@@ -380,7 +378,7 @@ class PersonReaderTx(DbReader):
             notes = {}
             medias = {}
 
-            res = self.readservice.tx_get_object_citation_note_media(self.obj_catalog, new_ids)
+            res = self.dataservice.tx_get_object_citation_note_media(self.obj_catalog, new_ids)
             # returns {status, new_objects, references}
             # - new_objects    the objects, for which a new search should be done
             # - references     {source id: [ReferenceObj(node, order, crop)]}
@@ -447,7 +445,7 @@ class PersonReaderTx(DbReader):
         #    for c in z:Citation
         #        (c) --> (s:Source) --> (r:Repository)
 
-        res = self.readservice.tx_get_object_sources_repositories(list(all_citations.keys()))
+        res = self.dataservice.tx_get_object_sources_repositories(list(all_citations.keys()))
         if Status.has_failed(res, strict=False):
             print('#bl.person_reader.PersonReaderTx.get_person_data - Can not read repositories:'\
                   f' {res.get("statustext")}')
@@ -480,7 +478,7 @@ class PersonReaderTx(DbReader):
 
 
 #         # Create Javascript code to create source/citation list
-#         jscode = get_citations_js(self.readservice.objs)
+#         jscode = get_citations_js(self.dataservice.objs)
         jscode = self.get_citations_js()
     
         # Return Person with included objects,  and javascript code to create

@@ -31,7 +31,7 @@ from bl.family import FamilyBl
 from bl.place import PlaceBl
 from bl.event import EventBl
 
-from pe.db_reader import DbReader
+from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_media import CypherMedia
 
 
@@ -128,12 +128,9 @@ class MediaBl(Media):
         return
 
 
-class MediaReader(DbReader):
+class MediaReader(DataService):
     '''
         Data reading class for Event objects with associated data.
-
-        - Use pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-          to define the database driver and user context
 
         - Returns a Result object.
     '''
