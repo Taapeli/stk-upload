@@ -88,14 +88,6 @@ body {
   <div id="chart" style="width:50%"></div>
 
   <script>
-    //   .onClick((node) => {
-    //         if (node.uuid != null) {
-    //             var searchParams = new URLSearchParams(window.location.search);
-    //             searchParams.set('uuid', node.uuid);
-    //             var newParams = searchParams.toString();
-    //             window.location.search = newParams
-    //         }
-    //     })
     const width = window.innerWidth,
             height = window.innerHeight,
             maxRadius = (Math.min(width, height) / 2) - 5;
@@ -143,6 +135,15 @@ body {
             return d.data.name.length * CHAR_SPACE < perimeter;
         };
 
+        const handleClick = (d, i) => {
+            if (d.data.uuid != null) {
+                var searchParams = new URLSearchParams(window.location.search);
+                searchParams.set('uuid', d.data.uuid);
+                var newParams = searchParams.toString();
+                window.location.search = newParams
+            }
+        }
+
         const svg = d3.select('body').append('svg')
             .style('width', '100vw')
             .style('height', '100vh')
@@ -161,8 +162,10 @@ body {
         const newSlice = slice.enter()
             .append('g').attr('class', 'slice');
 
+        newSlice.on("click", handleClick);
+
         newSlice.append('title')
-            .text(d => d.data.name + '\n' + d.data.years);
+            .text(d => d.data.title);
 
         newSlice.append('path')
             .attr('class', 'main-arc')
@@ -176,7 +179,7 @@ body {
 
         // First line of text
         const text = newSlice.append('text')
-            .attr('display', d => textFits(d) ? null : 'none');
+            .attr('display', null); // d => textFits(d) ? null : 'none');
 
         // Add white contour
         text.append('textPath')
@@ -197,7 +200,7 @@ body {
 
         // Second line of text
         const text2 = newSlice.append('text')
-            .attr('display', d => textFits(d) ? null : 'none');
+            .attr('display', null); // d => textFits(d) ? null : 'none');
 
         // Add white contour
         text2.append('textPath')

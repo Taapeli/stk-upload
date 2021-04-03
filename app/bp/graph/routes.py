@@ -104,10 +104,10 @@ def get_fanchart_data(uuid):
             death = f'{person.death_high}'
         return {
             'name': one_first_name +
-                    (f' {one_surname}' if size > 0.2 else '') +
-                    (f' {person.birth_low}' if size > 0.4 else ''),
+                    (f' {one_surname}' if size > 0.2 else ''),
             'color': gender_color(person.sex, descendant),
-            'tooltipContent': f'{person.names[0].firstname} {person.names[0].surname}' +
+            'years': f'{person.birth_low}-{death}',
+            'title': f'{person.names[0].firstname} {person.names[0].surname}' +
                 f' {person.birth_low}-{death}',
             'uuid': person.uuid
         }
