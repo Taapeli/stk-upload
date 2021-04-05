@@ -379,7 +379,13 @@ def show_person_fanchart_hx(uuid=None):
 @bp.route('/scene/nametypes/<uniq_id>/<typename>', methods=['GET'])
 @roles_accepted('audit')
 def get_person_nametypes(uniq_id, typename):
-    s = f"<select name='nametype' hx-put='changetype/{uniq_id}' hx-swap='none'>"
+    s = f"""
+        <select name='nametype' 
+            id='name_{uniq_id}'
+            hx-put='changetype/{uniq_id}' 
+            hx-target='#msg_{uniq_id}' 
+            hx-swap='innerHTML settle:1s'>
+    """
     found = False
     for t in ["Birth Name","Married Name","Also Known As","Unknown"]:
         s += f"\n    <option value='{t}'"
@@ -390,20 +396,25 @@ def get_person_nametypes(uniq_id, typename):
     if not found:
         s += f"\n    <option value='{typename}' selected>" + _(typename)
     s += "\n</select>"
+    s += f"<span class='msg' id='msg_{uniq_id}'></span>"
     return s 
+
 
 @bp.route('/scene/changetype/<uniq_id>', methods=['PUT'])
 @roles_accepted('audit')
 def person_name_changetype(uniq_id):
-    nametype_list = request.form.getlist('nametype')
-    uid_list = request.form.getlist("order")
-    index = uid_list.index(uniq_id)
-    nametype = nametype_list[index]
-    u_context = UserContext(user_session, current_user, request)
-    
-    with PersonWriter('simple', u_context) as service:
-        service.set_name_type(int(uniq_id), nametype)
-    return ""
+    try:
+        nametype_list = request.form.getlist('nametype')
+        uid_list = request.form.getlist("order")
+        index = uid_list.index(uniq_id)
+        nametype = nametype_list[index]
+        u_context = UserContext(user_session, current_user, request)
+        
+        with PersonWriter('simple', u_context) as service:
+            service.set_name_type(int(uniq_id), nametype)
+        return _("type changed") # will be displayed in <span class='msg' ...>
+    except:
+        return _("type change FAILED") # will be displayed in <span class='msg' ...>
 
 @bp.route('/scene/get_person_names/<uuid>', methods=['PUT'])
 @roles_accepted('guest','research', 'audit', 'admin')

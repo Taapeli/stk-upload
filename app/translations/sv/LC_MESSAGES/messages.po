@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-04-05 10:46+0300\n"
+"POT-Creation-Date: 2021-04-05 12:30+0300\n"
 "PO-Revision-Date: 2021-01-17 13:49+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -36,77 +36,61 @@ msgstr "Svenska"
 msgid "English"
 msgstr "Engelska"
 
-#: setups.py:164
+#: setups.py:173
 msgid "Email or Username"
 msgstr "Epost eller användarnamn"
 
-#: setups.py:165 setups.py:179
+#: setups.py:174 setups.py:188
 msgid "Password"
 msgstr "Lösenord"
 
-#: setups.py:167
+#: setups.py:176
 msgid "Remember Me"
 msgstr "Kom ihåg mig"
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:168
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:177
 msgid "Login"
 msgstr "Logga in"
 
 #: bp/admin/forms.py:57 bp/admin/templates/admin/list_users.html:83
-#: bp/start/templates/start/join.html:55 setups.py:174
+#: bp/start/templates/start/join.html:55 setups.py:183
 msgid "Email address"
 msgstr "Epost address"
 
-#: setups.py:175
-msgid ""
-"I have read and agree to the <a href='{terms_of_use_url}' "
-"target='esite'>{terms_of_use}</a>"
-msgstr ""
-
-#: bp/start/templates/start/my_settings.html:77
-#: bp/start/templates/start/my_settings.html:84 setups.py:176
-msgid "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
-msgstr ""
-
-#: bp/start/templates/start/my_settings.html:78
-#: bp/start/templates/start/my_settings.html:85 setups.py:177
-msgid "Terms of use"
-msgstr ""
-
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:181
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:190
 #: templates/index_entry.html:88 templates/index_entry.html:92
 msgid "Register"
 msgstr "Registrera"
 
-#: setups.py:185
+#: setups.py:194
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr "Indikera att du har läst och godkänner användar vilkoren"
 
-#: setups.py:195
+#: setups.py:204
 msgid "Username has been reserved already"
 msgstr "Användarnamnet redan reserverat"
 
-#: setups.py:197 templates/del_table_users.html:39
+#: setups.py:206 templates/del_table_users.html:39
 msgid "Username"
 msgstr "Användarnamn"
 
 #: bp/admin/templates/admin/list_users.html:82
-#: bp/start/templates/start/join.html:53 setups.py:198 setups.py:247
+#: bp/start/templates/start/join.html:53 setups.py:207 setups.py:256
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Namn"
 
 #: bp/admin/forms.py:62 bp/admin/forms.py:65
 #: bp/admin/templates/admin/list_users.html:84 bp/start/forms.py:39
-#: bp/start/forms.py:43 setups.py:199 setups.py:247
+#: bp/start/forms.py:43 setups.py:208 setups.py:256
 msgid "Language"
 msgstr "Språk"
 
-#: setups.py:201
+#: setups.py:210
 msgid "Language required"
 msgstr "Språk som krävs"
 
-#: bp/admin/forms.py:59 bp/start/templates/start/join.html:54 setups.py:247
+#: bp/admin/forms.py:59 bp/start/templates/start/join.html:54 setups.py:256
 msgid "User name"
 msgstr "Användar namn"
 
@@ -1583,7 +1567,7 @@ msgstr "användare"
 #: bp/scene/templates/scene/edit_event.html:4
 #: bp/scene/templates/scene/event.html:51
 #: bp/scene/templates/scene/event_vue.html:62
-#: bp/scene/templates/scene/person.html:223
+#: bp/scene/templates/scene/person.html:233
 #: bp/scene/templates/scene/place_events.html:177
 #: bp/start/templates/start/my_settings.html:168
 msgid "Description"
@@ -2300,49 +2284,57 @@ msgstr "Tillbaka till första sidan"
 msgid "Isotammi graph"
 msgstr ""
 
-#: bp/scene/routes.py:553 bp/scene/routes.py:557
+#: bp/scene/routes.py:414
+msgid "type changed"
+msgstr ""
+
+#: bp/scene/routes.py:416
+msgid "type change FAILED"
+msgstr ""
+
+#: bp/scene/routes.py:563 bp/scene/routes.py:567
 msgid "No event found"
 msgstr "Inga händelser hittades"
 
-#: bp/scene/routes.py:589 bp/scene/templates/scene/event.html:83
+#: bp/scene/routes.py:599 bp/scene/templates/scene/event.html:83
 #: bp/scene/templates/scene/person_famtree_hx.html:44
 msgid "Self"
 msgstr "Själv"
 
-#: bp/scene/routes.py:734
+#: bp/scene/routes.py:744
 msgid "No families"
 msgstr "Inga familjer"
 
-#: bp/scene/routes.py:741 bp/scene/templates/scene/families.html:115
+#: bp/scene/routes.py:751 bp/scene/templates/scene/families.html:115
 #: bp/scene/templates/scene/family.html:34
 #: bp/scene/templates/scene/person_famtree_hx.html:19
 #: bp/scene/templates/scene/person_famtree_hx.html:62 ui/jinja_filters.py:85
 msgid "Family"
 msgstr "Familj"
 
-#: bp/scene/routes.py:742 bp/scene/templates/scene/families.html:119
+#: bp/scene/routes.py:752 bp/scene/templates/scene/families.html:119
 #: bp/scene/templates/scene/family.html:106
 #: bp/scene/templates/scene/person_famtree_hx.html:27
 #: bp/scene/templates/scene/person_famtree_hx.html:70
 msgid "Children"
 msgstr "Barn"
 
-#: bp/scene/routes.py:893
+#: bp/scene/routes.py:903
 msgid "No objects found"
 msgstr "Ingenting funnits"
 
-#: bp/scene/routes.py:896
+#: bp/scene/routes.py:906
 msgid "Error"
 msgstr "Fel"
 
-#: bp/scene/routes.py:1097
+#: bp/scene/routes.py:1107
 msgid "No previous comments"
 msgstr "Inga kommentarer"
 
 #: bp/scene/templates/scene/edit_event.html:8
 #: bp/scene/templates/scene/event.html:55
 #: bp/scene/templates/scene/event_vue.html:66
-#: bp/scene/templates/scene/person.html:221
+#: bp/scene/templates/scene/person.html:231
 #: bp/scene/templates/scene/place_events.html:176
 #: bp/start/templates/start/my_settings.html:166
 #: templates/cite_sour_repo.html:19 templates/cite_sour_repo.html:29
@@ -2352,7 +2344,7 @@ msgstr "Datum"
 #: bp/scene/templates/scene/edit_event.html:12
 #: bp/scene/templates/scene/event.html:59
 #: bp/scene/templates/scene/event_vue.html:70
-#: bp/scene/templates/scene/person.html:222
+#: bp/scene/templates/scene/person.html:232
 #: bp/scene/templates/scene/places.html:41 templates/select_refcols.html:37
 #: templates/select_refcols.html:65
 msgid "Place"
@@ -2368,7 +2360,7 @@ msgstr "Händelse detaljer"
 #: bp/scene/templates/scene/event_vue.html:52
 #: bp/scene/templates/scene/family.html:37
 #: bp/scene/templates/scene/media.html:71
-#: bp/scene/templates/scene/person.html:110
+#: bp/scene/templates/scene/person.html:120
 #: bp/scene/templates/scene/place_events.html:83
 #: bp/scene/templates/scene/source_events.html:44
 msgid "Identifiers"
@@ -2541,12 +2533,12 @@ msgid "Family Events"
 msgstr "Familje händelser"
 
 #: bp/scene/templates/scene/family.html:73
-#: bp/scene/templates/scene/person.html:246
+#: bp/scene/templates/scene/person.html:256
 msgid "of type"
 msgstr "av typ"
 
 #: bp/scene/templates/scene/family.html:73
-#: bp/scene/templates/scene/person.html:246
+#: bp/scene/templates/scene/person.html:256
 msgid "see details of place"
 msgstr "se detaljer om plats"
 
@@ -2714,7 +2706,7 @@ msgid "Size"
 msgstr "Storlek"
 
 #: bp/scene/templates/scene/media.html:87
-#: bp/scene/templates/scene/person.html:321
+#: bp/scene/templates/scene/person.html:331
 msgid "Show fullscreen"
 msgstr "Visa fullt utslagen"
 
@@ -2784,9 +2776,9 @@ msgid "Go to media page"
 msgstr "Gå till mediasidan"
 
 #: bp/scene/templates/scene/medias.html:90
-#: bp/scene/templates/scene/person.html:75
-#: bp/scene/templates/scene/person.html:78
-#: bp/scene/templates/scene/person.html:319
+#: bp/scene/templates/scene/person.html:85
+#: bp/scene/templates/scene/person.html:88
+#: bp/scene/templates/scene/person.html:329
 #: bp/scene/templates/scene/place_events.html:146
 #: bp/scene/templates/scene/place_events.html:156 ui/jinja_filters.py:197
 msgid "Photo"
@@ -2805,11 +2797,11 @@ msgstr "Gå till det första mediet"
 msgid "No medias found"
 msgstr "Det finns inga medier"
 
-#: bp/scene/templates/scene/person.html:61
+#: bp/scene/templates/scene/person.html:71
 msgid "Person's details"
 msgstr "Person detaljer"
 
-#: bp/scene/templates/scene/person.html:95
+#: bp/scene/templates/scene/person.html:105
 #: bp/scene/templates/scene/persons_search.html:138
 #: bp/scene/templates/scene/place_events.html:56
 #: bp/scene/templates/scene/places.html:59
@@ -2817,122 +2809,122 @@ msgstr "Person detaljer"
 msgid "Top"
 msgstr "Toppen"
 
-#: bp/scene/templates/scene/person.html:113
+#: bp/scene/templates/scene/person.html:123
 msgid "Sorting key"
 msgstr "Sorterings nyckel"
 
-#: bp/scene/templates/scene/person.html:117
+#: bp/scene/templates/scene/person.html:127
 msgid "Names"
 msgstr "Namn"
 
-#: bp/scene/templates/scene/person.html:121
+#: bp/scene/templates/scene/person.html:131
 msgid "order by dragging"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:145
+#: bp/scene/templates/scene/person.html:155
 #: bp/scene/templates/scene/person_famtree_hx.html:45
 #: bp/scene/templates/scene/person_names.html:24
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "first name"
 msgstr "förnamn"
 
-#: bp/scene/templates/scene/person.html:146
+#: bp/scene/templates/scene/person.html:156
 #: bp/scene/templates/scene/person_famtree_hx.html:47
 #: bp/scene/templates/scene/person_names.html:25
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "patronymic"
 msgstr "patronym"
 
-#: bp/scene/templates/scene/person.html:148
+#: bp/scene/templates/scene/person.html:158
 #: bp/scene/templates/scene/person_famtree_hx.html:49
 #: bp/scene/templates/scene/person_names.html:27
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "surname"
 msgstr "efternamn"
 
-#: bp/scene/templates/scene/person.html:159
+#: bp/scene/templates/scene/person.html:169
 msgid "Gender"
 msgstr "Kön"
 
-#: bp/scene/templates/scene/person.html:164
+#: bp/scene/templates/scene/person.html:174
 #: bp/scene/templates/scene/place_events.html:125
 msgid "Private data"
 msgstr "Privat data"
 
-#: bp/scene/templates/scene/person.html:167
+#: bp/scene/templates/scene/person.html:177
 msgid "Possible years"
 msgstr "Möjlika åren"
 
-#: bp/scene/templates/scene/person.html:170
+#: bp/scene/templates/scene/person.html:180
 msgid "confidential"
 msgstr "confidentiell"
 
-#: bp/scene/templates/scene/person.html:176
+#: bp/scene/templates/scene/person.html:186
 msgid "Age at death"
 msgstr "Ålder vid död"
 
-#: bp/scene/templates/scene/person.html:180
+#: bp/scene/templates/scene/person.html:190
 msgid "at least"
 msgstr "minst"
 
-#: bp/scene/templates/scene/person.html:182
+#: bp/scene/templates/scene/person.html:192
 msgid "about"
 msgstr "runt"
 
-#: bp/scene/templates/scene/person.html:185
+#: bp/scene/templates/scene/person.html:195
 msgid "years"
 msgstr "år"
 
-#: bp/scene/templates/scene/person.html:190
+#: bp/scene/templates/scene/person.html:200
 msgid "Confidence of data"
 msgstr "Konfidens av data"
 
-#: bp/scene/templates/scene/person.html:198
+#: bp/scene/templates/scene/person.html:208
 msgid "See person note"
 msgstr "Se personanteckning"
 
-#: bp/scene/templates/scene/person.html:200
+#: bp/scene/templates/scene/person.html:210
 #, python-format
 msgid "See %(num)d person notes"
 msgstr "Se %(num)d person antäckningar"
 
-#: bp/scene/templates/scene/person.html:216
+#: bp/scene/templates/scene/person.html:226
 #: bp/scene/templates/scene/persons_list.html:90
 #: bp/scene/templates/scene/place_events.html:168
 msgid "Events"
 msgstr "Händelser"
 
-#: bp/scene/templates/scene/person.html:220
+#: bp/scene/templates/scene/person.html:230
 #: bp/scene/templates/scene/place_events.html:175
 #: templates/cite_sour_repo.html:8
 msgid "Event"
 msgstr "Händelse"
 
-#: bp/scene/templates/scene/person.html:283
+#: bp/scene/templates/scene/person.html:293
 msgid "Place Notes"
 msgstr "Plats anteckningar"
 
-#: bp/scene/templates/scene/person.html:303
+#: bp/scene/templates/scene/person.html:313
 msgid "Relations"
 msgstr "Släktskap"
 
-#: bp/scene/templates/scene/person.html:313
+#: bp/scene/templates/scene/person.html:323
 msgid "Media files"
 msgstr "Media filer"
 
-#: bp/scene/templates/scene/person.html:324
+#: bp/scene/templates/scene/person.html:334
 msgid "Go to photo page"
 msgstr "Till fotosidan"
 
-#: bp/scene/templates/scene/person.html:327
+#: bp/scene/templates/scene/person.html:337
 msgid "crop"
 msgstr "beskär"
 
-#: bp/scene/templates/scene/person.html:338
+#: bp/scene/templates/scene/person.html:348
 msgid "Person Notes"
 msgstr "Person anteckningar"
 
-#: bp/scene/templates/scene/person.html:350
+#: bp/scene/templates/scene/person.html:360
 msgid "Source references"
 msgstr "Käll referens"
 
@@ -3594,6 +3586,20 @@ msgstr "Byt språk"
 msgid ""
 "Agreed to the <a href='{terms_of_use_url}' "
 "target='esite'>{terms_of_use}</a> at"
+msgstr ""
+
+#: bp/start/templates/start/my_settings.html:77
+#: bp/start/templates/start/my_settings.html:84
+msgid "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
+msgstr ""
+
+#: bp/start/templates/start/my_settings.html:78
+#: bp/start/templates/start/my_settings.html:85
+msgid "Terms of use"
+msgstr ""
+
+#: bp/start/templates/start/my_settings.html:83
+msgid "<a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"
 msgstr ""
 
 #: bp/start/templates/start/my_settings.html:96
