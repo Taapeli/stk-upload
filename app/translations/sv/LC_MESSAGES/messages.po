@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-29 16:13+0300\n"
+"POT-Creation-Date: 2021-04-05 10:46+0300\n"
 "PO-Revision-Date: 2021-01-17 13:49+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -40,7 +40,7 @@ msgstr "Engelska"
 msgid "Email or Username"
 msgstr "Epost eller användarnamn"
 
-#: setups.py:165 setups.py:174
+#: setups.py:165 setups.py:179
 msgid "Password"
 msgstr "Lösenord"
 
@@ -53,51 +53,60 @@ msgid "Login"
 msgstr "Logga in"
 
 #: bp/admin/forms.py:57 bp/admin/templates/admin/list_users.html:83
-#: bp/start/templates/start/join.html:55 setups.py:172
+#: bp/start/templates/start/join.html:55 setups.py:174
 msgid "Email address"
 msgstr "Epost address"
 
-#: setups.py:173
+#: setups.py:175
 msgid ""
-"I have read and agree to the <a "
-"href='http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot'>Terms of "
-"use</a>"
+"I have read and agree to the <a href='{terms_of_use_url}' "
+"target='esite'>{terms_of_use}</a>"
 msgstr ""
 
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:176
+#: bp/start/templates/start/my_settings.html:77
+#: bp/start/templates/start/my_settings.html:84 setups.py:176
+msgid "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
+msgstr ""
+
+#: bp/start/templates/start/my_settings.html:78
+#: bp/start/templates/start/my_settings.html:85 setups.py:177
+msgid "Terms of use"
+msgstr ""
+
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:181
 #: templates/index_entry.html:88 templates/index_entry.html:92
 msgid "Register"
 msgstr "Registrera"
 
-#: setups.py:180
+#: setups.py:185
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr "Indikera att du har läst och godkänner användar vilkoren"
 
-#: setups.py:190
+#: setups.py:195
 msgid "Username has been reserved already"
 msgstr "Användarnamnet redan reserverat"
 
-#: setups.py:192 templates/del_table_users.html:39
+#: setups.py:197 templates/del_table_users.html:39
 msgid "Username"
 msgstr "Användarnamn"
 
 #: bp/admin/templates/admin/list_users.html:82
-#: bp/start/templates/start/join.html:53 setups.py:193 setups.py:239
+#: bp/start/templates/start/join.html:53 setups.py:198 setups.py:247
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Namn"
 
 #: bp/admin/forms.py:62 bp/admin/forms.py:65
 #: bp/admin/templates/admin/list_users.html:84 bp/start/forms.py:39
-#: bp/start/forms.py:43 setups.py:194 setups.py:239
+#: bp/start/forms.py:43 setups.py:199 setups.py:247
 msgid "Language"
 msgstr "Språk"
 
-#: setups.py:196
+#: setups.py:201
 msgid "Language required"
 msgstr "Språk som krävs"
 
-#: bp/admin/forms.py:59 bp/start/templates/start/join.html:54 setups.py:239
+#: bp/admin/forms.py:59 bp/start/templates/start/join.html:54 setups.py:247
 msgid "User name"
 msgstr "Användar namn"
 
@@ -130,27 +139,27 @@ msgstr "{}mellan {} … {}"
 msgid "{}about {}"
 msgstr "{}omkring {}"
 
-#: bl/event.py:151
+#: bl/event.py:148
 msgid "The event is not accessible"
 msgstr "Händelsen är inte tillgänglig"
 
-#: bl/event.py:160
+#: bl/event.py:157
 msgid "Participants read error "
 msgstr "Läsfel av deltagare "
 
-#: bl/event.py:169
+#: bl/event.py:166
 msgid "Place read error "
 msgstr "Läsfel av platser "
 
-#: bl/event.py:179
+#: bl/event.py:176
 msgid "Notes read error "
 msgstr "Läsfel för anteckningar "
 
-#: bl/family.py:75 models/gen/family.py:45
+#: bl/family.py:76 models/gen/family.py:45
 msgid "undefined relation"
 msgstr "odefinerad relation"
 
-#: bl/family.py:528
+#: bl/family.py:525
 msgid "This person has no families"
 msgstr "Denna person har inga familjer"
 
@@ -183,15 +192,15 @@ msgstr "kvinna"
 msgid "sex not applicable"
 msgstr "kön inte tillämpligt"
 
-#: bl/person.py:270 bl/person_reader.py:107
+#: bl/person.py:205 bl/person_reader.py:105
 msgid "No persons found"
 msgstr "Inga personer hittades"
 
-#: bl/person_reader.py:89
+#: bl/person_reader.py:87
 msgid "The year or years must be numeric"
 msgstr "Året måste vara numerisk"
 
-#: bl/person_reader.py:243
+#: bl/person_reader.py:241
 msgid "Requested person not found"
 msgstr "Personen finns inte"
 
@@ -1056,7 +1065,7 @@ msgstr "Forskare"
 #: bp/audit/templates/audit/approvals.html:83
 #: bp/audit/templates/audit/move_in_1.html:20
 #: bp/gramps/templates/gramps/uploads.html:178
-#: bp/start/templates/start/my_settings.html:117
+#: bp/start/templates/start/my_settings.html:124
 msgid "Batch id"
 msgstr "Batch id"
 
@@ -1296,7 +1305,7 @@ msgid "Duplicates search"
 msgstr "Söker duplikat"
 
 #: bp/dupsearch/templates/dupsearch.html:20
-#: bp/start/templates/start/my_settings.html:146
+#: bp/start/templates/start/my_settings.html:153
 msgid "Data Batches"
 msgstr "Data Batcher"
 
@@ -1308,7 +1317,7 @@ msgstr "Välj"
 #: bp/gedcom/templates/gedcom_info.html:27
 #: bp/gramps/templates/gramps/analyze_xml.html:14
 #: bp/gramps/templates/gramps/uploads.html:144
-#: bp/start/templates/start/my_settings.html:158
+#: bp/start/templates/start/my_settings.html:165
 msgid "File"
 msgstr "Filen"
 
@@ -1558,8 +1567,8 @@ msgstr "Genealogiska Samfundet i Finland's databas"
 #: bp/gedcom/templates/gedcom_list.html:16
 #: bp/start/templates/start/index_logged.html:28
 #: bp/start/templates/start/index_logged.html:32
-#: bp/start/templates/start/my_settings.html:175
-#: bp/start/templates/start/my_settings.html:183
+#: bp/start/templates/start/my_settings.html:182
+#: bp/start/templates/start/my_settings.html:190
 msgid "Gedcom tools"
 msgstr "GEDCOM-verktyg"
 
@@ -1576,7 +1585,7 @@ msgstr "användare"
 #: bp/scene/templates/scene/event_vue.html:62
 #: bp/scene/templates/scene/person.html:223
 #: bp/scene/templates/scene/place_events.html:177
-#: bp/start/templates/start/my_settings.html:161
+#: bp/start/templates/start/my_settings.html:168
 msgid "Description"
 msgstr "Beskrivning"
 
@@ -2291,42 +2300,42 @@ msgstr "Tillbaka till första sidan"
 msgid "Isotammi graph"
 msgstr ""
 
-#: bp/scene/routes.py:564 bp/scene/routes.py:568
+#: bp/scene/routes.py:553 bp/scene/routes.py:557
 msgid "No event found"
 msgstr "Inga händelser hittades"
 
-#: bp/scene/routes.py:600 bp/scene/templates/scene/event.html:83
+#: bp/scene/routes.py:589 bp/scene/templates/scene/event.html:83
 #: bp/scene/templates/scene/person_famtree_hx.html:44
 msgid "Self"
 msgstr "Själv"
 
-#: bp/scene/routes.py:744
+#: bp/scene/routes.py:734
 msgid "No families"
 msgstr "Inga familjer"
 
-#: bp/scene/routes.py:751 bp/scene/templates/scene/families.html:115
+#: bp/scene/routes.py:741 bp/scene/templates/scene/families.html:115
 #: bp/scene/templates/scene/family.html:34
 #: bp/scene/templates/scene/person_famtree_hx.html:19
 #: bp/scene/templates/scene/person_famtree_hx.html:62 ui/jinja_filters.py:85
 msgid "Family"
 msgstr "Familj"
 
-#: bp/scene/routes.py:752 bp/scene/templates/scene/families.html:119
+#: bp/scene/routes.py:742 bp/scene/templates/scene/families.html:119
 #: bp/scene/templates/scene/family.html:106
 #: bp/scene/templates/scene/person_famtree_hx.html:27
 #: bp/scene/templates/scene/person_famtree_hx.html:70
 msgid "Children"
 msgstr "Barn"
 
-#: bp/scene/routes.py:903
+#: bp/scene/routes.py:893
 msgid "No objects found"
 msgstr "Ingenting funnits"
 
-#: bp/scene/routes.py:906
+#: bp/scene/routes.py:896
 msgid "Error"
 msgstr "Fel"
 
-#: bp/scene/routes.py:1107
+#: bp/scene/routes.py:1097
 msgid "No previous comments"
 msgstr "Inga kommentarer"
 
@@ -2335,7 +2344,7 @@ msgstr "Inga kommentarer"
 #: bp/scene/templates/scene/event_vue.html:66
 #: bp/scene/templates/scene/person.html:221
 #: bp/scene/templates/scene/place_events.html:176
-#: bp/start/templates/start/my_settings.html:159
+#: bp/start/templates/start/my_settings.html:166
 #: templates/cite_sour_repo.html:19 templates/cite_sour_repo.html:29
 msgid "Date"
 msgstr "Datum"
@@ -3583,71 +3592,64 @@ msgstr "Byt språk"
 
 #: bp/start/templates/start/my_settings.html:76
 msgid ""
-"Agreed to the <a "
-"href='http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot'>Terms of "
-"use</a> at"
+"Agreed to the <a href='{terms_of_use_url}' "
+"target='esite'>{terms_of_use}</a> at"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:79
-msgid ""
-"<a href='http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot'>Terms of "
-"use</a>"
-msgstr ""
-
-#: bp/start/templates/start/my_settings.html:89
+#: bp/start/templates/start/my_settings.html:96
 msgid "Active Roles"
 msgstr "Aktiva roller"
 
-#: bp/start/templates/start/my_settings.html:99
+#: bp/start/templates/start/my_settings.html:106
 msgid "Ask for a new role"
 msgstr "Be om en ny roll"
 
-#: bp/start/templates/start/my_settings.html:101
+#: bp/start/templates/start/my_settings.html:108
 msgid "Send a message to Isotammi office to acquire permission for new steps."
 msgstr ""
 "Skicka ett meddelande till Isotammi-kontoret för att få tillstånd för nya"
 " steg."
 
-#: bp/start/templates/start/my_settings.html:103
+#: bp/start/templates/start/my_settings.html:110
 #: bp/start/templates/start/s_macros.html:26
 msgid "Contact administrator"
 msgstr "Kontakta administratör"
 
-#: bp/start/templates/start/my_settings.html:112
+#: bp/start/templates/start/my_settings.html:119
 msgid "Candidate Materials"
 msgstr "Kandiderande material"
 
-#: bp/start/templates/start/my_settings.html:113
+#: bp/start/templates/start/my_settings.html:120
 msgid "The amount of some data nodes included in your candidate data batches."
 msgstr "Mängden av vissa datanoder som ingår i dina kandidatdatabaser."
 
-#: bp/start/templates/start/my_settings.html:130
+#: bp/start/templates/start/my_settings.html:137
 #, python-format
 msgid "Approved %(n)s objects"
 msgstr "Godkända %(n)s-objekt"
 
-#: bp/start/templates/start/my_settings.html:141
+#: bp/start/templates/start/my_settings.html:148
 msgid "Upload or remove a file or candidate batch"
 msgstr "Ladda eller tag bort en fill från kandidat batchen"
 
-#: bp/start/templates/start/my_settings.html:147
+#: bp/start/templates/start/my_settings.html:154
 msgid "You have no candidate data loaded in the database."
 msgstr "Du har ej kandidat data laddat till databasen."
 
-#: bp/start/templates/start/my_settings.html:149
+#: bp/start/templates/start/my_settings.html:156
 msgid "Upload another file"
 msgstr "Ladda en annan fil"
 
-#: bp/start/templates/start/my_settings.html:155
-#: bp/start/templates/start/my_settings.html:180
+#: bp/start/templates/start/my_settings.html:162
+#: bp/start/templates/start/my_settings.html:187
 msgid "My Gedcom files"
 msgstr "Mina GEDCOM filer"
 
-#: bp/start/templates/start/my_settings.html:160
+#: bp/start/templates/start/my_settings.html:167
 msgid "Bytes"
 msgstr "Bits"
 
-#: bp/start/templates/start/my_settings.html:181
+#: bp/start/templates/start/my_settings.html:188
 msgid "You have no Gedcom files in the server."
 msgstr "Du har ingen Gedcom fil på servern."
 
