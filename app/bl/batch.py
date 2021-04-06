@@ -26,13 +26,12 @@ Created on 29.11.2019
 '''
 import shareds
 from datetime import date, datetime
+from models.util import format_timestamp
 
 from bl.base import Status
+from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 from bp.admin.models.cypher_adm import Cypher_adm
-
-from models.util import format_timestamp
-#from pe.db_writer import DbWriter
 
 
 class Batch():
@@ -55,7 +54,7 @@ class Batch():
     def __str__(self):
         return f"{self.user} / {self.id}"
 
-    def save(self):
+    def save(self, tx=None):
         ''' Create or update Batch node.
         
             Returns {'id':self.id, 'status':Status.OK}
@@ -71,6 +70,7 @@ class Batch():
                 "status": self.status
             }
             #self.tx.run(CypherBatch.self_create, b_attr=attr)
+            print('with BatchUpdater("update", tx=)')
             res = shareds.datastore.dataservice.ds_batch_save(attr)
             # returns {status, identity}
             if Status.has_failed(res):
@@ -256,29 +256,19 @@ class Batch():
         return cnt
 
 
-class BatchDataStore:
+class BatchUpdater(DataService):
     '''
-    Abstracted batch datastore.
-
-        - Create:
-          BatchDataStore(dbdriver, use_transaction=True), which calls
-          pe.db_writer.DbWriter.__init__(dbdriver, use_transaction=True) 
-          to define the database driver and transaction.
-
-        - Methods return a dict result object {'status':Status, ...}
+    Batch datastore for write and update in transaction.
     '''
-
-    def __init__(self, driver, dataservice):
-        ''' Initiate datastore.
-
-        :param: driver    neo4j.DirectDriver object
-        :param: dataservice pe.neo4j.dataservice.Neo4jDataService
+    def __init__(self, service_name:str, u_context=None, tx=None):
         '''
-        self.driver = driver
-        self.dataservice = dataservice
+            Initiate datastore for update in given transaction or without transaction.
+        '''
+        super().__init__(service_name, user_context=u_context, tx=tx)
         self.batch  = None
 
-    def start_data_batch(self, userid, file, mediapath):
+
+    def start_data_batch(self, userid, file, mediapath, tx=None):
         '''
         Initiate new Batch.
         
@@ -288,6 +278,7 @@ class BatchDataStore:
         
         The stored Batch.file name is the original name with '_clean' removed.
         '''
+        self.tx = tx #??? === self.dataservice.tx
         # Lock db to avoid concurent Batch loads
         self.dataservice.ds_aqcuire_lock('batch_id')
         #TODO check res
@@ -297,7 +288,7 @@ class BatchDataStore:
         res = self.dataservice.ds_new_batch_id()
         if Status.has_failed(res):
             # Failed to get an id
-            print("bl.batch.BatchDataStore.start_data_batch: TODO shareds.datastore._remove_lock('batch_id')")
+            print("bl.batch.BatchUpdater.start_data_batch: TODO shareds.datastore._remove_lock('batch_id')")
             return res
 
         self.batch.id = res.get('id')
@@ -305,8 +296,8 @@ class BatchDataStore:
         self.batch.file = file.replace('_clean.', '.')
         self.batch.mediapath = mediapath
 
-        res = self.batch.save()
-        print(f'bl.batch.BatchDataStore.start_data_batch: new Batch {self.batch.id} identity={self.batch.uniq_id}')
+        res = self.batch.save(tx=self.dataservice.tx)
+        print(f'bl.batch.BatchUpdater.start_data_batch: new Batch {self.batch.id} identity={self.batch.uniq_id}')
 
         return {'batch': self.batch, 'status': Status.OK}
 

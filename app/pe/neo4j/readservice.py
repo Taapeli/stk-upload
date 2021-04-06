@@ -22,9 +22,8 @@ Created on 17.3.2020
 
 @author: jm
 '''
-import functools
+#import functools
 import logging
-#from models.gen.family_combo import Family_combo
 from bl.dates import DateRange
 logger = logging.getLogger('stkserver')
 

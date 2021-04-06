@@ -543,7 +543,7 @@ def xml_to_stkbase(pathname, userid):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch import BatchDataStore
+    from bl.batch import BatchUpdater
 
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
@@ -559,94 +559,92 @@ def xml_to_stkbase(pathname, userid):
     handler.blog.log(cleaning_log)
 
     # Open database connection as Neo4jDataService instance and start transaction
-    handler.dataservice = get_dataservice("update")
-    #handler.dataservice = Neo4jDataService(shareds.driver)
 
-    # Initiate BatchDataStore and Batch node data
-    # datastore ~= Business methods / Toimialametodit
-    shareds.datastore = BatchDataStore(shareds.driver, handler.dataservice)
-    print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: shareds.datastore = {shareds.datastore}')
-    mediapath = handler.get_mediapath_from_header()
-    res = shareds.datastore.start_data_batch(userid, file_cleaned, mediapath)
-    if Status.has_failed(res):
-        print('bp.gramps.gramps_loader.xml_to_stkbase TODO _rollback')
-        return res
-    handler.batch = res.get('batch')
-
-    t0 = time.time()
-
-    if pathname.endswith(".gpkg"):
-        extract_media(pathname, handler.batch.id)
+    # Initiate BatchUpdater and Batch node data
+    ##shareds.datastore = BatchUpdater(shareds.driver, handler.dataservice)
+    with BatchUpdater("update") as batch_service:
+        print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
+        mediapath = handler.get_mediapath_from_header()
+        res = batch_service.start_data_batch(userid, file_cleaned, mediapath, batch_service.dataservice.tx)
+        if Status.has_failed(res):
+            print('bp.gramps.gramps_loader.xml_to_stkbase TODO _rollback')
+            return res
+        handler.batch = res.get('batch')
     
-    try:
-        #handler.handle_header() --> get_header_mediapath()
-        res = handler.handle_notes()
-        if Status.has_failed(res):  return res
-        res = handler.handle_repositories()
-        if Status.has_failed(res):  return res
-        res = handler.handle_media()
-        if Status.has_failed(res):  return res
-
-        res = handler.handle_places()
-        if Status.has_failed(res):  return res
-        res = handler.handle_sources()
-        if Status.has_failed(res):  return res
-        res = handler.handle_citations()
-        if Status.has_failed(res):  return res
-
-        res = handler.handle_events()
-        if Status.has_failed(res):  return res
-        res = handler.handle_people()
-        if Status.has_failed(res):  return res
-        res = handler.handle_families()
-        if Status.has_failed(res):  return res
-
-#             for k in handler.handle_to_node.keys():
-#                 print (f'\t{k} –> {handler.handle_to_node[k]}')
-
-        # Set person confidence values 
-        #TODO: Only for imported persons (now for all persons!)
-        res = handler.set_all_person_confidence_values()
-        if Status.has_failed(res):  return res
-        res = handler.set_person_calculated_attributes()
-        if Status.has_failed(res):  return res
-        res = handler.set_person_estimated_dates()
-        if Status.has_failed(res):  return res
-
-        # Copy date and name information from Person and Event nodes to Family nodes
-        res = handler.set_family_calculated_attributes()
-        if Status.has_failed(res):  return res
-
-        res = handler.remove_handles()
-        if Status.has_failed(res):  return res
-        # The missing links counted in remove_handles
+        t0 = time.time()
+    
+        if pathname.endswith(".gpkg"):
+            extract_media(pathname, handler.batch.id)
+        
+        try:
+            #handler.handle_header() --> get_header_mediapath()
+            res = handler.handle_notes()
+            if Status.has_failed(res):  return res
+            res = handler.handle_repositories()
+            if Status.has_failed(res):  return res
+            res = handler.handle_media()
+            if Status.has_failed(res):  return res
+    
+            res = handler.handle_places()
+            if Status.has_failed(res):  return res
+            res = handler.handle_sources()
+            if Status.has_failed(res):  return res
+            res = handler.handle_citations()
+            if Status.has_failed(res):  return res
+    
+            res = handler.handle_events()
+            if Status.has_failed(res):  return res
+            res = handler.handle_people()
+            if Status.has_failed(res):  return res
+            res = handler.handle_families()
+            if Status.has_failed(res):  return res
+    
+    #       for k in handler.handle_to_node.keys():
+    #             print (f'\t{k} –> {handler.handle_to_node[k]}')
+    
+            # Set person confidence values 
+            #TODO: Only for imported persons (now for all persons!)
+            res = handler.set_all_person_confidence_values()
+            if Status.has_failed(res):  return res
+            res = handler.set_person_calculated_attributes()
+            if Status.has_failed(res):  return res
+            res = handler.set_person_estimated_dates()
+            if Status.has_failed(res):  return res
+    
+            # Copy date and name information from Person and Event nodes to Family nodes
+            res = handler.set_family_calculated_attributes()
+            if Status.has_failed(res):  return res
+    
+            res = handler.remove_handles()
+            if Status.has_failed(res):  return res
+            # The missing links counted in remove_handles
 ##TODO      res = handler.add_missing_links()
-
-    except Exception as e:
-        traceback.print_exc()
-        msg = f"Stopped xml load due to {e}" 
-        print(msg)
-        shareds.datastore.rollback()
-        handler.blog.log_event({'title':_("Database save failed due to {}".\
-                                 format(msg)), 'level':"ERROR"})
-        return {'status':Status.ERROR, 'statustext': msg}
-
-    res = shareds.datastore.mark_complete()
-    if Status.has_failed(res):
-        msg = res.get('statustext', '')
-        shareds.datastore.rollback()
-        handler.blog.log_event({'title':_("Database save failed due to {}".\
-                                 format(msg)), 'level':"ERROR"})
-        return {'status': res.get('status'),
-                'statustest': msg,
-                'steps': handler.blog.list(), 
-                'batch_id': handler.batch.id}
-    else:
-        shareds.datastore.commit()
-        logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
-
-        handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
-                                'elapsed':time.time()-t0})
+    
+        except Exception as e:
+            traceback.print_exc()
+            msg = f"Stopped xml load due to {e}" 
+            print(msg)
+            batch_service.rollback()
+            handler.blog.log_event({'title':_("Database save failed due to {}".\
+                                     format(msg)), 'level':"ERROR"})
+            return {'status':Status.ERROR, 'statustext': msg}
+    
+        res = batch_service.mark_complete()
+        if Status.has_failed(res):
+            msg = res.get('statustext', '')
+            batch_service.rollback()
+            handler.blog.log_event({'title':_("Database save failed due to {}".\
+                                     format(msg)), 'level':"ERROR"})
+            return {'status': res.get('status'),
+                    'statustest': msg,
+                    'steps': handler.blog.list(), 
+                    'batch_id': handler.batch.id}
+        else:
+            batch_service.commit()
+            logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
+    
+            handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
+                                    'elapsed':time.time()-t0})
 
     return {'status': Status.OK,
             'steps': handler.blog.list(), 

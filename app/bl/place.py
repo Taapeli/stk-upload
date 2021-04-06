@@ -268,15 +268,15 @@ class PlaceBl(Place):
                 #    update known Place node parameters and link from Batch
                 self.uniq_id = plid
                 if self.type:
-                    #print(f"Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
+                    print(f"Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
                     result = tx.run(CypherPlace.complete, #TODO
                                     batch_id=batch_id, plid=plid, p_attr=pl_attr)
                 else:
-                    #print(f"Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
+                    print(f"Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
                     pass
             else:
                 # 2) new node: create and link from Batch
-                #print(f"Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
+                print(f"Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
                 result = tx.run(CypherPlace.create, 
                                 batch_id=batch_id, p_attr=pl_attr)
                 self.uniq_id = result.single()[0]
@@ -370,12 +370,11 @@ class PlaceBl(Place):
             #print(f"iError Place.link_notes {self.note_handles}: {err}", file=stderr)
             raise
 
-        # Make relations to the Media nodes and their Note and Citation references
-        #dataservice = Neo4jDataService(shareds.driver)
-        writer = MediaWriter(shareds.datastore.dataservice)
-        writer.create_and_link_by_handles(self.uniq_id, self.media_refs)
-        #MediaBl.create_and_link_by_handles(self.uniq_id, self.media_refs)
-            
+        if self.media_refs:
+            # Make relations to the Media nodes and their Note and Citation references
+            with MediaWriter("update", tx=tx) as service:
+                service.create_and_link_by_handles(self.uniq_id, self.media_refs)
+
         return
 
 
@@ -600,20 +599,6 @@ class PlaceUpdater(DataService):
 
     - Methods return a dict result object {'status':Status, ...}
     '''
-
-    def __init__(self, service_name:str, u_context=None):
-        super().__init__(service_name, u_context)
-
-#===============================================================================
-#     def __init__(self, dataservice_name):
-#         ''' Initiate datastore.
-# 
-#         :param: dataservice pe.neo4j.dataservice.Neo4jDataService
-#         '''
-#         self.dataservice = dataservice
-#         self.driver = dataservice.driver
-#===============================================================================
-
 
     def merge2places(self, id1, id2):
         ''' Merges two places
