@@ -39,6 +39,7 @@ class PersonReaderTx(DataService):
         - Returns a Result object.
     '''
     def __init__(self, service_name:str, u_context=None):
+        #print(f'#~~{self.__class__.__name__} init')
         super().__init__(service_name, u_context)
         self.obj_catalog = {}          # dict {uniq_id: Connected_object}
 
@@ -430,7 +431,7 @@ class PersonReaderTx(DataService):
                         else:
                             raise NotImplementedError("Citation, Note or Media excepted, got {label}")
 
-            print(f'# - found {len(citations)} Citatons, {len(notes)} Notes, {len(medias)} Medias from {cnt} nodes')
+            #print(f'#+ - found {len(citations)} Citatons, {len(notes)} Notes, {len(medias)} Medias from {cnt} nodes')
             all_citations.update(citations)
             self.obj_catalog.update(citations)
             self.obj_catalog.update(notes)

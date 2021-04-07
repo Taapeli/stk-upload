@@ -76,11 +76,8 @@ class Neo4jReadServiceTx(DataService):
     '''
     def __init__(self, driver=None):
         
-        if driver:
-            self.driver = driver
-        else:
-            self.driver = shareds.driver
-        print(f'#{self.__class__.__name__} init')
+        print(f'#~~~~{self.__class__.__name__} init')
+        self.driver = driver if driver else shareds.driver
 
 
     def tx_get_person_list(self, args):
@@ -276,7 +273,7 @@ class Neo4jReadServiceTx(DataService):
                     #self.objs[x.uniq_id] = x 
                     if node.get("type") == "Cause Of Death":
                         cause_of_death = node
-                print(f"# 2  ({puid}) -[:{person_rel} {role}]-> ({node.id}:{label})")
+                #print(f"#+ 2  ({puid}) -[:{person_rel} {role}]-> ({node.id}:{label})")
 
                 res['name_nodes'] = name_nodes
                 res['event_node_roles'] = event_node_roles
@@ -349,7 +346,7 @@ class Neo4jReadServiceTx(DataService):
                     # Add family events to person events, too
                     if family_rel == "PARENT":
                         event_role = "Family"
-                        print(f"#3.2 ({puid}) -[:EVENT {event_role}]-> (:Event {event_node.id} {eid})")
+                        #print(f"#+3.2 ({puid}) -[:EVENT {event_role}]-> (:Event {event_node.id} {eid})")
                         family_events.append(event_node)
 
                 # 3.3. Family members and their birth events
@@ -376,7 +373,7 @@ class Neo4jReadServiceTx(DataService):
                           'relation_type': relation_type,
                           'family_members': family_members
                           }
-                print(f"#3.4 ({puid}) -[:{family_rel} {family_role}]-> (:Family {family_node.id} {family_node.get('id')})")
+                #print(f"#+3.4 ({puid}) -[:{family_rel} {family_role}]-> (:Family {family_node.id} {family_node.get('id')})")
                 families.append(family)
 
         except Exception as e:
@@ -431,7 +428,7 @@ class Neo4jReadServiceTx(DataService):
             print(f"Could not read places for {len(base_objs)} objects: {e.__class__.__name__} {e}")
             return {'status': Status.ERROR, 'statustext':f'{e.__class__.__name__}: {e}'}
 
-        print(f'#tx_get_object_places: Got {len(references)} place references') 
+        #print(f'#+tx_get_object_places: Got {len(references)} place references') 
         return {'status': Status.OK, 'place_references': references}
 
     def tx_get_object_citation_note_media(self, obj_catalog:dict, active_objs=[]):
