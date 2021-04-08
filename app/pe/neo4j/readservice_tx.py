@@ -5,7 +5,7 @@ Created on 30.1.2021
 '''
 import shareds
 
-from pe.dataservice import DataService
+from pe.dataservice import ConcreteService
 from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
@@ -65,7 +65,7 @@ class SourceReference:
         return f'{source_str}-{self.medium}->({repo_str})'
 
 
-class Neo4jReadServiceTx(DataService):
+class Neo4jReadServiceTx(ConcreteService):
     ''' 
     Methods for accessing Neo4j database.
 

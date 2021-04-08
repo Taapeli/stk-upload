@@ -22,7 +22,6 @@ import logging
 
 logger = logging.getLogger('stkserver')
 
-
 class DataService:
     """Public methods for accessing active database.
     The current database is defined in /setups.py.
@@ -49,7 +48,7 @@ class DataService:
                 f"pe.dataservice.DataService.__init__: name {self.service_name} not found"
             )
         self.dataservice = service_class(shareds.driver)
-        self.tx_pre_created = tx
+        self.pre_tx = tx
 
         if user_context:
             self.user_context = user_context
@@ -62,22 +61,20 @@ class DataService:
 
     def __enter__(self):
         # With 'update' and 'read_tx' begin transaction
-        if self.tx_pre_created:
+        if self.pre_tx:
             # 1. Use given transaction
-            print(f'#~~~{self.idstr} enter active tx {self.tx_pre_created}')
-            self.dataservice.tx = self.tx_pre_created
+            print(f'#~~~{self.idstr} enter active tx {self.pre_tx}')
+            self.dataservice.tx = self.pre_tx
         else:
             if self.service_name == "update" or self.service_name == "read_tx":
                 # 2. Create transaction
                 self.dataservice.tx = shareds.driver.session().begin_transaction()
-                print(
-                    f'#~~~{self.idstr} enter "{self.service_name}" transaction {self.tx_pre_created}'
-                )
-                shareds.tx = self.dataservice.tx
+                print(f'#~~~{self.idstr} enter "{self.service_name}" transaction {self.pre_tx}')
+                #shareds.tx = self.dataservice.tx
             else:
                 # 3. No transaction
                 self.dataservice.tx = None
-                print(f'#~~~{self.idstr} enter {self.tx_pre_created}')
+                print(f'#~~~{self.idstr} enter {self.pre_tx}')
         return self
 
     def __exit__(self, exc_type=None, exc_value=None, traceback=None):
@@ -91,18 +88,25 @@ class DataService:
         exited. If the context was exited without an exception, all three
         arguments will be None.
         """
-        if self.tx_pre_created:
+        if self.pre_tx:
             if self.dataservice.tx:
                 if exc_type:
+                    e = exc_type.__class__.__name__
                     print(
-                        f"--{self.idstr} rollback becouse of {exc_type.__class__.__name__} {self.tx_pre_created}"
+                        f"--{self.idstr} rollback {e} {self.pre_tx}"
                     )
                     self.dataservice.tx.rollback()
                 else:
-                    print(f'#~~~{self.idstr} exit tx {self.tx_pre_created}')
+                    print(f'#~~~{self.idstr} exit tx {self.pre_tx}')
                     self.dataservice.tx.close()
         else:
             if self.service_name == "simple":
-                print(f'#~~~{self.idstr} exit {self.tx_pre_created}')
+                print(f'#~~~{self.idstr} exit {self.pre_tx}')
             else:
-                print(f'#~~~{self.idstr} exit but continue {self.tx_pre_created}')
+                print(f'#~~~{self.idstr} exit but continue {self.pre_tx}')
+
+class ConcreteService:
+    """Base class for all concrete database service classes.
+    """
+    pass
+

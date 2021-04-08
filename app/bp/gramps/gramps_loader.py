@@ -565,7 +565,8 @@ def xml_to_stkbase(pathname, userid):
     with BatchUpdater("update") as batch_service:
         print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
         mediapath = handler.get_mediapath_from_header()
-        res = batch_service.start_data_batch(userid, file_cleaned, mediapath, batch_service.dataservice.tx)
+        res = batch_service.start_data_batch(userid, file_cleaned, mediapath,
+                                             batch_service.dataservice.tx)
         if Status.has_failed(res):
             print('bp.gramps.gramps_loader.xml_to_stkbase TODO _rollback')
             return res

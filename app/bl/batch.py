@@ -29,7 +29,7 @@ from datetime import date, datetime
 from models.util import format_timestamp
 
 from bl.base import Status
-from pe.dataservice import DataService
+from pe.dataservice import DataService, ConcreteService
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 from bp.admin.models.cypher_adm import Cypher_adm
 
@@ -54,11 +54,16 @@ class Batch():
     def __str__(self):
         return f"{self.user} / {self.id}"
 
-    def save(self, tx=None):
+    def save(self, dataservice):
         ''' Create or update Batch node.
         
             Returns {'id':self.id, 'status':Status.OK}
         '''
+        if not isinstance(dataservice, ConcreteService):
+            raise KeyError(
+                f"Batch.save: invalid ConcreteService"
+            )
+        print(f'Batch.save with {dataservice.__class__.__name__}')
         try:
             attr = {
                 "id": self.id,
@@ -70,8 +75,7 @@ class Batch():
                 "status": self.status
             }
             #self.tx.run(CypherBatch.self_create, b_attr=attr)
-            print('with BatchUpdater("update", tx=)')
-            res = shareds.datastore.dataservice.ds_batch_save(attr)
+            res = dataservice.ds_batch_save(attr)
             # returns {status, identity}
             if Status.has_failed(res):
                 return res
@@ -278,28 +282,29 @@ class BatchUpdater(DataService):
         
         The stored Batch.file name is the original name with '_clean' removed.
         '''
-        self.tx = tx #??? === self.dataservice.tx
+        self.tx = tx #??? = self.dataservice.tx
         # Lock db to avoid concurent Batch loads
         self.dataservice.ds_aqcuire_lock('batch_id')
         #TODO check res
 
         # Find the next free Batch id
-        self.batch = Batch()
+        batch = Batch()
         res = self.dataservice.ds_new_batch_id()
         if Status.has_failed(res):
             # Failed to get an id
             print("bl.batch.BatchUpdater.start_data_batch: TODO shareds.datastore._remove_lock('batch_id')")
             return res
 
-        self.batch.id = res.get('id')
-        self.batch.user = userid
-        self.batch.file = file.replace('_clean.', '.')
-        self.batch.mediapath = mediapath
+        batch.id = res.get('id')
+        batch.user = userid
+        batch.file = file.replace('_clean.', '.')
+        batch.mediapath = mediapath
 
-        res = self.batch.save(tx=self.dataservice.tx)
-        print(f'bl.batch.BatchUpdater.start_data_batch: new Batch {self.batch.id} identity={self.batch.uniq_id}')
+        res = batch.save(self.dataservice)
+        print(f'bl.batch.BatchUpdater.start_data_batch: new Batch {batch.id} identity={batch.uniq_id}')
+        self.batch = batch
 
-        return {'batch': self.batch, 'status': Status.OK}
+        return {'batch': batch, 'status': Status.OK}
 
     def mark_complete(self):
         ''' Mark this data batch completed '''

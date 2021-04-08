@@ -38,12 +38,13 @@ from bl.media import MediaBl
 
 from ui.place import place_names_local_from_nodes
 
-from pe.neo4j.cypher.cy_place import CypherPlace, CypherPlaceStats
-from pe.neo4j.cypher.cy_source import CypherSource
-from pe.neo4j.cypher.cy_family import CypherFamily
-from pe.neo4j.cypher.cy_event import CypherEvent
-from pe.neo4j.cypher.cy_person import CypherPerson
-from pe.neo4j.cypher.cy_media import CypherMedia
+from pe.dataservice import ConcreteService
+from .cypher.cy_place import CypherPlace, CypherPlaceStats
+from .cypher.cy_source import CypherSource
+from .cypher.cy_family import CypherFamily
+from .cypher.cy_event import CypherEvent
+from .cypher.cy_person import CypherPerson
+from .cypher.cy_media import CypherMedia
 
 from bl.event import Event
 #Todo: Change Old style includes to bl classes
@@ -54,7 +55,7 @@ from models.dbtree import DbTree
 from models.gen.citation import Citation
 
 
-class Neo4jReadService:
+class Neo4jReadService(ConcreteService):
     ''' 
     Methods for accessing Neo4j database.
 
