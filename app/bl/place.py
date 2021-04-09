@@ -155,7 +155,7 @@ class PlaceBl(Place):
             - - .names      PlaceName objects
             - def_names     dict {lang, uid} uniq_id's of PlaceName objects
         '''
-        ds = shareds.datastore.dataservice
+        ds = shareds.dservice
         ds.ds_place_set_default_names(self.uniq_id,
                                     def_names['fi'], def_names['sv'])
 
@@ -231,7 +231,6 @@ class PlaceBl(Place):
 
         NOT Raises an error, if write fails.
         """
-        from bl.media import MediaWriter
 
         if 'batch_id' in kwargs:
             batch_id = kwargs['batch_id']
@@ -268,15 +267,15 @@ class PlaceBl(Place):
                 #    update known Place node parameters and link from Batch
                 self.uniq_id = plid
                 if self.type:
-                    print(f"Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
+                    #print(f">Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
                     result = tx.run(CypherPlace.complete, #TODO
                                     batch_id=batch_id, plid=plid, p_attr=pl_attr)
                 else:
-                    print(f"Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
+                    #print(f">Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
                     pass
             else:
                 # 2) new node: create and link from Batch
-                print(f"Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
+                #print(f">Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
                 result = tx.run(CypherPlace.create, 
                                 batch_id=batch_id, p_attr=pl_attr)
                 self.uniq_id = result.single()[0]
@@ -363,8 +362,6 @@ class PlaceBl(Place):
             for n_handle in self.note_handles:
                 result = tx.run(CypherPlace.link_note, 
                                 pid=self.uniq_id, hlink=n_handle)
-#         except AttributeError:
-#             print('bl.place.PlaceBl.save: No notes for {self}')
         except Exception as err:
             logger.error(f"Place_gramps.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
             #print(f"iError Place.link_notes {self.note_handles}: {err}", file=stderr)
@@ -372,8 +369,7 @@ class PlaceBl(Place):
 
         if self.media_refs:
             # Make relations to the Media nodes and their Note and Citation references
-            with MediaWriter("update", tx=tx) as service:
-                service.create_and_link_by_handles(self.uniq_id, self.media_refs)
+            shareds.dservice.ds_create_link_medias_w_handles(self.uniq_id, self.media_refs)
 
         return
 
@@ -527,7 +523,7 @@ class PlaceReader(DataService):
         context = self.user_context
         fw = context.first  # From here forward
         use_user = context.batch_user()
-        places = self.dataservice.dr_get_place_list_fw(use_user, fw, context.count, 
+        places = shareds.dservice.dr_get_place_list_fw(use_user, fw, context.count, 
                                                        lang=context.lang)
 
         # Update the page scope according to items really found 
@@ -554,7 +550,7 @@ class PlaceReader(DataService):
         # Get a Place with Names, Notes and Medias
         use_user = self.user_context.batch_user()
         lang = self.user_context.lang
-        res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
+        res = shareds.dservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
         place = res.get("place")
         results = {"place":place, 'status':Status.OK}
 
@@ -566,7 +562,7 @@ class PlaceReader(DataService):
         #TODO: Find Citation -> Source -> Repository for each uniq_ids
         try:
             results['hierarchy'] = \
-                self.dataservice.dr_get_place_tree(place.uniq_id, lang=lang)
+                shareds.dservice.dr_get_place_tree(place.uniq_id, lang=lang)
 
         except AttributeError as e:
             traceback.print_exc()
@@ -576,7 +572,7 @@ class PlaceReader(DataService):
             return {'status': Status.ERROR,
                    'statustext': f"Place tree value for {place.uniq_id}: {e}"}
 
-        res = self.dataservice.dr_get_place_events(place.uniq_id)
+        res = shareds.dservice.dr_get_place_events(place.uniq_id)
         results['events'] = res['items']
         return results
 
@@ -585,10 +581,10 @@ class PlaceReader(DataService):
         Return placename stats so that the names can be displayed in a name cloud.
         '''
         if self.use_user:
-            placename_stats = self.dataservice.dr_get_placename_stats_by_user(self.use_user,
+            placename_stats = shareds.dservice.dr_get_placename_stats_by_user(self.use_user,
                                                                               count=count)
         else:
-            placename_stats = self.dataservice.dr_get_placename_stats_common(count=count)
+            placename_stats = shareds.dservice.dr_get_placename_stats_common(count=count)
         return placename_stats
 
 class PlaceUpdater(DataService):
@@ -604,31 +600,31 @@ class PlaceUpdater(DataService):
         ''' Merges two places
         '''
         # Check that given nodes are included in the same Batch or Audit node
-        ret = self.dataservice.ds_merge_check(id1, id2)
+        ret = shareds.dservice.ds_merge_check(id1, id2)
         if Status.has_failed(ret):
-            self.dataservice.ds_rollback()
+            shareds.dservice.ds_rollback()
             return ret
 
         # Merge nodes
-        ret = self.dataservice.ds_places_merge(id1, id2)
+        ret = shareds.dservice.ds_places_merge(id1, id2)
         if Status.has_failed(ret):
-            self.dataservice.ds_rollback()
+            shareds.dservice.ds_rollback()
             return ret
 
         place = ret.get('place')
         # Select default names for default languages
         ret = PlaceBl.find_default_names(place.names, ['fi', 'sv'])
         if Status.has_failed(ret):
-            self.dataservice.ds_rollback()
+            shareds.dservice.ds_rollback()
             return ret
         st = ret.get('status')
         if st == Status.OK:
             # Update default language name links
             def_names = ret.get('ids')
-            self.dataservice.ds_place_set_default_names(place.uniq_id, 
+            shareds.dservice.ds_place_set_default_names(place.uniq_id, 
                                                         def_names['fi'], def_names['sv'])
 
-            ret = self.dataservice.ds_commit()
+            ret = shareds.dservice.ds_commit()
             st = ret.get('status')
             return {'status':st, 'place':place, 
                     'statustext':ret.get('statustext', '')}

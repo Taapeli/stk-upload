@@ -383,7 +383,7 @@ def get_person_nametypes(uniq_id, typename):
         if typename == t:
             s += " selected"
             found = True
-        s += ">" + _(t)
+        s += ">" + _(t) + "</option>"
     if not found:
         s += f"\n    <option value='{typename}' selected>" + _(typename)
     s += "\n</select>"
@@ -893,14 +893,17 @@ def show_source_page(sourceid=None):
 
         if res['status'] == Status.NOT_FOUND:
             msg = res.get('statustext', _('No objects found'))
-            return redirect(url_for('virhesivu', code=1, text=msg))
+            flash(msg, 'error')
         if res['status'] != Status.OK:
-            msg = res.get('statustext', _('Error'))
-            return redirect(url_for('virhesivu', code=1, text=msg))
+            flash(f'{res.get("statustext", _("error"))}', 'error')
+ 
+        stk_logger(u_context, f"-> bp.scene.routes.show_source_page n={len(res['citations'])}")
 
     except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    stk_logger(u_context, f"-> bp.scene.routes.show_source_page n={len(res['citations'])}")
+        msg = f'bp.scene.routes.show_source_page: {e.__class__.__name__} {e}'
+        flash(f'{ _("Program error")}', 'error')
+        logger.error(msg)
+
 #     for c in res.citations:
 #         for i in c.citators:
 #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')

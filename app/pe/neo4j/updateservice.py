@@ -6,7 +6,6 @@ Created on 23.3.2020
 import logging
 import traceback
 from neo4j.exceptions import ClientError
-#from pe.dataservice import DataService
 
 logger = logging.getLogger('stkserver')
 from datetime import date #, datetime

@@ -54,16 +54,12 @@ class Batch():
     def __str__(self):
         return f"{self.user} / {self.id}"
 
-    def save(self, dataservice):
+    def save(self):
         ''' Create or update Batch node.
         
             Returns {'id':self.id, 'status':Status.OK}
         '''
-        if not isinstance(dataservice, ConcreteService):
-            raise KeyError(
-                f"Batch.save: invalid ConcreteService"
-            )
-        print(f'Batch.save with {dataservice.__class__.__name__}')
+        print(f'Batch.save with {shareds.dservice.__class__.__name__}')
         try:
             attr = {
                 "id": self.id,
@@ -74,8 +70,7 @@ class Batch():
                 #id: <uniq_id from result>,
                 "status": self.status
             }
-            #self.tx.run(CypherBatch.self_create, b_attr=attr)
-            res = dataservice.ds_batch_save(attr)
+            res = shareds.dservice.ds_batch_save(attr)
             # returns {status, identity}
             if Status.has_failed(res):
                 return res
@@ -282,14 +277,13 @@ class BatchUpdater(DataService):
         
         The stored Batch.file name is the original name with '_clean' removed.
         '''
-        self.tx = tx #??? = self.dataservice.tx
         # Lock db to avoid concurent Batch loads
-        self.dataservice.ds_aqcuire_lock('batch_id')
+        shareds.dservice.ds_aqcuire_lock('batch_id')
         #TODO check res
 
         # Find the next free Batch id
         batch = Batch()
-        res = self.dataservice.ds_new_batch_id()
+        res = shareds.dservice.ds_new_batch_id()
         if Status.has_failed(res):
             # Failed to get an id
             print("bl.batch.BatchUpdater.start_data_batch: TODO shareds.datastore._remove_lock('batch_id')")
@@ -300,24 +294,29 @@ class BatchUpdater(DataService):
         batch.file = file.replace('_clean.', '.')
         batch.mediapath = mediapath
 
-        res = batch.save(self.dataservice)
-        print(f'bl.batch.BatchUpdater.start_data_batch: new Batch {batch.id} identity={batch.uniq_id}')
+        res = batch.save()
+        print(f'bl.batch.BatchUpdater.start_data_batch: new Batch {batch.id} uniq_id={batch.uniq_id}')
         self.batch = batch
 
         return {'batch': batch, 'status': Status.OK}
 
     def mark_complete(self):
         ''' Mark this data batch completed '''
-        res = shareds.datastore.dataservice.ds_batch_set_status(self.batch, "completed")
+        res = shareds.dservice.ds_batch_set_status(self.batch, "completed")
         return res
 
 
     def commit(self):
         ''' Commit transaction. '''
-        self.dataservice.ds_commit()
+        shareds.dservice.ds_commit()
 
     def rollback(self):
         ''' Commit transaction. '''
-        self.dataservice.ds_rollback()
+        shareds.dservice.ds_rollback()
 
-
+    def media_create_and_link_by_handles(self, uniq_id, media_refs):
+        ''' Save media object and it's Note and Citation references
+            using their Gramps handles.
+        '''
+        if media_refs:
+            shareds.dservice.ds_create_link_medias_w_handles(uniq_id, media_refs)

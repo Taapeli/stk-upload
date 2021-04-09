@@ -48,16 +48,16 @@ DB_SCHEMA_VERSION = '2021.1.0'
 # =============================
 
 
-def get_dataservice(opt="update"):
-    ''' Returns a data service of selected type.
-    
-        :param: opt    service selection
-            "read"     Neo4jReadService
-            "read_tx"  Neo4jReadServiceTx
-            "update"   Neo4jDataService
-    '''
-    service = shareds.dataservices[opt]
-    return service(shareds.driver)
+# def get_dataservice(opt="update"):
+#     ''' Returns a data service of selected type.
+#     
+#         :param: opt    service selection
+#             "read"     Neo4jReadService
+#             "read_tx"  Neo4jReadServiceTx
+#             "update"   Neo4jDataService
+#     '''
+#     service = shareds.dataservices[opt]
+#     return service(shareds.driver)
 
 
 def initialize_db():

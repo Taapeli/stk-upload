@@ -111,6 +111,10 @@ td.Citation div ol {padding-top:.3em;}
                                  <a href="/scene/family?uuid={{indi.uuid}}" class="inlink"
                                     title="{{ _('see details of family') }}"> 
                                     {{ indi.clearname | replace("#", " ") }}</a>
+                          {% elif indi.id[0] == "E" %}{# _('Event') #}
+                                 <a href="/scene/event/uuid={{indi.uuid}}" class="inlink"
+                                    title="{{ _('see details of event') }}">
+                                    {{ indi.clearname | title }}
                           {% else %}
                                  {{ macro.person_name_by_sortname_anon(indi) }}
                              {% if indi.event_birth and indi.event_birth.dates %}

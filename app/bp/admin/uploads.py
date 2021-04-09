@@ -168,8 +168,7 @@ def background_load_to_stkbase(username,filename):
         this_thread.progress = {}
         counts = gramps_loader.analyze_xml(username, filename)
         update_metafile(metaname,counts=counts,progress={})
-        
-        print('threading.Thread(target=lambda: i_am_alive(metaname,this_thread), name="i_am_alive for " + filename).start()')
+        threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
 
         # Read the Gramps xml file, and save the information to db
         res = gramps_loader.xml_to_stkbase(pathname,username)

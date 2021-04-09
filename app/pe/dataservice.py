@@ -22,6 +22,7 @@ import logging
 
 logger = logging.getLogger('stkserver')
 
+
 class DataService:
     """Public methods for accessing active database.
     The current database is defined in /setups.py.
@@ -34,7 +35,7 @@ class DataService:
         :param: user_context    <ui.user_context.UserContext object>
         :param: tx              <neo4j.work.transaction.Transaction object>
 
-        - 1. if tx is given                              Use given transaction
+        - 1. if tx is given                              Use preset transaction
         - 2. if service_name is 'update' or 'read_tx'    Create transaction
         - 3. else                                        No transaction
         """
@@ -49,6 +50,12 @@ class DataService:
             )
         self.dataservice = service_class(shareds.driver)
         self.pre_tx = tx
+        # Prepare to restore the privious dataservice, if one exists
+        if shareds.dservice:
+            self.previous_dservice = shareds.dservice
+        else:
+            self.previous_dservice = None
+        shareds.dservice = self.dataservice
 
         if user_context:
             self.user_context = user_context
@@ -69,12 +76,12 @@ class DataService:
             if self.service_name == "update" or self.service_name == "read_tx":
                 # 2. Create transaction
                 self.dataservice.tx = shareds.driver.session().begin_transaction()
-                print(f'#~~~{self.idstr} enter "{self.service_name}" transaction {self.pre_tx}')
-                #shareds.tx = self.dataservice.tx
+                print(f'#~~~{self.idstr} enter "{self.service_name}" transaction') # {self.pre_tx}')
+
             else:
                 # 3. No transaction
                 self.dataservice.tx = None
-                print(f'#~~~{self.idstr} enter {self.pre_tx}')
+                print(f'#~~~{self.idstr} enter') # {self.pre_tx}')
         return self
 
     def __exit__(self, exc_type=None, exc_value=None, traceback=None):
@@ -88,22 +95,25 @@ class DataService:
         exited. If the context was exited without an exception, all three
         arguments will be None.
         """
-        if self.pre_tx:
-            if self.dataservice.tx:
-                if exc_type:
-                    e = exc_type.__class__.__name__
-                    print(
-                        f"--{self.idstr} rollback {e} {self.pre_tx}"
-                    )
-                    self.dataservice.tx.rollback()
-                else:
-                    print(f'#~~~{self.idstr} exit tx {self.pre_tx}')
-                    self.dataservice.tx.close()
-        else:
-            if self.service_name == "simple":
-                print(f'#~~~{self.idstr} exit {self.pre_tx}')
+        #print(f"--{self.idstr} exit {self.dataservice.tx} prev {self.pre_tx}")
+        if self.dataservice.tx:
+            if exc_type:
+                e = exc_type.__class__.__name__
+                print(f"--{self.idstr} exit rollback {e}")
+                self.dataservice.tx.rollback()
             else:
-                print(f'#~~~{self.idstr} exit but continue {self.pre_tx}')
+                print(f'#~~~{self.idstr} exit commit')
+                self.dataservice.tx.commit()
+        else:
+            print(f'#~~~{self.idstr} exit')
+
+        if self.previous_dservice:
+            shareds.dservice = self.previous_dservice
+            print(f"--{self.idstr} {shareds.dservice} replaced by {self.previous_dservice}")
+            self.previous_dservice = None
+        else:
+            shareds.dservice = None
+
 
 class ConcreteService:
     """Base class for all concrete database service classes.
