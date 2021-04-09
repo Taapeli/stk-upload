@@ -57,6 +57,7 @@ from ui.user_context import UserContext
 
 import json
 from flask_babelex import lazy_gettext as _l
+from speaklater import _LazyString
 
 
 """
@@ -158,7 +159,15 @@ class User(UserMixin):
 # class UserProfile():
 # See: bp.admin.models.user_admin.UserProfile
 
-     
+class LazyFormat(_LazyString):
+    """Hack to enable lazy strings in string formatting"""
+    def __init__(self, s, **params):   
+        self.s = s
+        self.params = params
+    @property
+    def value(self):
+        return _l(self.s).format(**dict((name,_l(value)) for (name,value) in self.params.items()))  
+
 class ExtendedLoginForm(LoginForm):
 
     email = StringField(_l('Email or Username'), validators=[Required('Email required') ])
@@ -167,10 +176,15 @@ class ExtendedLoginForm(LoginForm):
     remember = BooleanField(_l('Remember Me'))
     submit = SubmitField(_l('Login'))
 
+
+
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     email = StringField(_l('Email address'), validators=[Required('Email required') ])
-    agree = BooleanField( _l("I have read and agree the <a href='static/termsofuse.html'>Terms of use</a>"))
+    agree = BooleanField( LazyFormat("I have read and agree to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>",
+                                  terms_of_use_url="http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot",
+                                  terms_of_use="Terms of use",
+    ))
     password = PasswordField(_l('Password'),
                              validators=[Required('Password required')])
     submit = SubmitField(_l('Register'))

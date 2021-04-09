@@ -123,9 +123,6 @@ def _do_get_persons(args):
 
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
-#    with get_dataservice("read_tx") as readservice:
-#        reader = PersonReaderTx(readservice, u_context)
-#        res = reader.get_person_search(args)
 
     return res, u_context
 
@@ -196,22 +193,21 @@ def show_person_search():
     placenamestats = []
     if args.get('rule') is None:
         # Start search page: show name clouds
-        with get_dataservice("read") as readservice:
-            minfont = 6
-            maxfont = 20
+        minfont = 6
+        maxfont = 20
             
-            # Most common surnames cloud
-            reader = PersonReader(readservice, u_context)
-            surnamestats = reader.get_surname_list(47)
+        # Most common surnames cloud
+        with PersonReader('read', u_context) as service:
+            surnamestats = service.get_surname_list(47)
             # {name, count, uuid}
             for i, stat in enumerate(surnamestats):
                 stat['order'] = i
                 stat['fontsize'] = maxfont - i*(maxfont-minfont)/len(surnamestats)
             surnamestats.sort(key=itemgetter("surname"))
     
-            # Most common place names cloud
-            reader = PlaceReader(readservice, u_context)
-            placenamestats = reader.get_placename_stats(40)
+        # Most common place names cloud
+        with PlaceReader('read', u_context) as service:
+            placenamestats = service.get_placename_stats(40)
             # {name, count, uuid}
             for i, stat in enumerate(placenamestats):
                 stat['order'] = i
@@ -298,9 +294,6 @@ def show_person(uuid=None, fanchart=False):
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
 
-    # with get_dataservice("read_tx") as readservice:
-        # reader = PersonReaderTx(readservice, u_context)
-        # result = reader.get_person_data(uuid) #, args)
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
 
@@ -368,9 +361,6 @@ def show_person_fanchart_hx(uuid=None):
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
 
-    # with get_dataservice("read_tx") as readservice:
-        # reader = PersonReaderTx(readservice, u_context)
-        # result = reader.get_person_data(uuid) #, args)
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
 
@@ -389,7 +379,13 @@ def show_person_fanchart_hx(uuid=None):
 @bp.route('/scene/nametypes/<uniq_id>/<typename>', methods=['GET'])
 @roles_accepted('audit')
 def get_person_nametypes(uniq_id, typename):
-    s = f"<select name='nametype' hx-put='changetype/{uniq_id}' hx-swap='none'>"
+    s = f"""
+        <select name='nametype' 
+            id='name_{uniq_id}'
+            hx-put='changetype/{uniq_id}' 
+            hx-target='#msg_{uniq_id}' 
+            hx-swap='innerHTML settle:1s'>
+    """
     found = False
     for t in ["Birth Name","Married Name","Also Known As","Unknown"]:
         s += f"\n    <option value='{t}'"
@@ -400,31 +396,34 @@ def get_person_nametypes(uniq_id, typename):
     if not found:
         s += f"\n    <option value='{typename}' selected>" + _(typename)
     s += "\n</select>"
+    s += f"<span class='msg' id='msg_{uniq_id}'></span>"
     return s 
+
 
 @bp.route('/scene/changetype/<uniq_id>', methods=['PUT'])
 @roles_accepted('audit')
 def person_name_changetype(uniq_id):
-    nametype_list = request.form.getlist('nametype')
-    uid_list = request.form.getlist("order")
-    index = uid_list.index(uniq_id)
-    nametype = nametype_list[index]
-    u_context = UserContext(user_session, current_user, request)
-    
-    with PersonWriter('simple', u_context) as service:
-        service.set_name_type(int(uniq_id), nametype)
-    return ""
+    try:
+        nametype_list = request.form.getlist('nametype')
+        uid_list = request.form.getlist("order")
+        index = uid_list.index(uniq_id)
+        nametype = nametype_list[index]
+        u_context = UserContext(user_session, current_user, request)
+        
+        with PersonWriter('simple', u_context) as service:
+            service.set_name_type(int(uniq_id), nametype)
+        return _("type changed") # will be displayed in <span class='msg' ...>
+    except:
+        return _("type change FAILED") # will be displayed in <span class='msg' ...>
 
 @bp.route('/scene/get_person_names/<uuid>', methods=['PUT'])
 @roles_accepted('guest','research', 'audit', 'admin')
 def get_person_names(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with get_dataservice("read") as readservice:
-        datastore = PersonReader(readservice, u_context)
-        print(f'#> bp.scene.routes.get_person_names: datastore = {datastore}')
-        args = {}
-        result = datastore.get_person_data(uuid, args)
+    args = {}
+    with PersonReader("read", u_context) as service:
+        result = service.get_person_data(uuid, args)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', 'error')
@@ -440,12 +439,7 @@ def get_person_names(uuid):
 def get_person_primary_name(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    # with get_dataservice("read_tx") as readservice:
-        # datastore = PersonReaderTx(readservice, u_context)
-        # print(f'#> bp.scene.routes.get_person_primary_name: datastore = {datastore}')
-        # result = datastore.get_person_data(uuid)
-        #print(result)
-    with DataService("read_tx", u_context) as service:
+    with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
 
     if Status.has_failed(result):
@@ -460,9 +454,9 @@ def get_person_primary_name(uuid):
 def set_primary_name(uuid, old_order):
     u_context = UserContext(user_session, current_user, request)
 
-    writeservice = get_dataservice("update")
-    personwriter = PersonWriter(writeservice, u_context)
-    personwriter.set_primary_name(uuid, old_order)
+    #writeservice = get_dataservice("update")
+    with PersonWriter("update", u_context) as service:
+        service.set_primary_name(uuid, old_order)
     return get_person_names(uuid) 
 
 @bp.route('/scene/sort_names', methods=['PUT'])
@@ -473,9 +467,9 @@ def sort_names():
     uid_list = [int(uid) for uid in uid_list]
     u_context = UserContext(user_session, current_user, request)
 
-    writeservice = get_dataservice("update")
-    personwriter = PersonWriter(writeservice, u_context)
-    personwriter.set_name_orders(uid_list)
+    #writeservice = get_dataservice("update")
+    with PersonWriter("simple", u_context) as service:
+        service.set_name_orders(uid_list)
     return get_person_primary_name(uuid)
 
 # @bp.route('/scene/person/uuid=<pid>')
@@ -495,9 +489,9 @@ def obsolete_show_event_v1(uuid):
     """
     u_context = UserContext(user_session, current_user, request)
 
-    with get_dataservice("read") as readservice:
-        reader = EventReader(readservice, u_context) 
-        res = reader.get_event_data(uuid)
+    with EventReader("read", u_context) as service:
+        #reader = EventReader(readservice, u_context) 
+        res = service.get_event_data(uuid)
 
     status = res.get('status')
     if status != Status.OK:
@@ -515,10 +509,10 @@ def obsolete_show_event_v1(uuid):
 def edit_event(uuid):
     u_context = UserContext(user_session, current_user, request)
 
-    with get_dataservice("read") as readservice:
-        datastore = EventReader(readservice, u_context) 
-        print(f'#> bp.scene.routes.edit_event: datastore = {datastore}')
-        res = datastore.get_event_data(uuid, {})
+    with EventReader("read", u_context) as service:
+        #datastore = EventReader(readservice, u_context) 
+        print(f'#> bp.scene.routes.edit_event: with {service}')
+        res = service.get_event_data(uuid, {})
 
     status = res.get('status')
     if status != Status.OK:
@@ -558,9 +552,9 @@ def json_get_event():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        with get_dataservice("read") as readservice:
-            reader = EventReader(readservice, u_context) 
-            res = reader.get_event_data(uuid, args)
+        with EventReader("read", u_context) as service:
+            #reader = EventReader(readservice, u_context) 
+            res = service.get_event_data(uuid, args)
     
         status = res.get('status')
         if status != Status.OK:
@@ -637,9 +631,9 @@ def json_update_event():
         uuid = args.get('uuid')
         u_context = UserContext(user_session, current_user, request)
 
-        writeservice = get_dataservice("update")
-        writer = EventWriter(writeservice, u_context) 
-        rec = writer.update_event(uuid, args)
+        #writeservice = get_dataservice("update")
+        with EventWriter("update", u_context) as service:
+            rec = service.update_event(uuid, args)
         if rec.get("status") != Status.OK:
             return rec
         event = rec.get("item")
@@ -678,10 +672,9 @@ def show_families():
     u_context.count = request.args.get('c', 100, type=int)
     t0 = time.time()
     
-    with get_dataservice("read") as readservice:
-        reader = FamilyReader(readservice, u_context) 
+    with FamilyReader("read", u_context) as service:
         # 'families' has Family objects
-        families = reader.get_families() #o_context=u_context, opt=opt, limit=count)
+        families = service.get_families(opt)
 
     stk_logger(u_context, f"-> bp.scene.routes.show_families/{opt} n={len(families)}")
     return render_template("/scene/families.html", families=families, 
@@ -705,9 +698,9 @@ def show_family_page(uuid=None):
     t0 = time.time()
     u_context = UserContext(user_session, current_user, request)
 
-    with get_dataservice("read") as readservice:
-        reader = FamilyReader(readservice, u_context) 
-        res = reader.get_family_data(uuid)
+    with FamilyReader("read", u_context) as service:
+        #reader = FamilyReader(readservice, u_context) 
+        res = service.get_family_data(uuid)
 
     stk_logger(u_context, "-> bp.scene.routes.show_family_page")
     status = res.get('status')
@@ -743,9 +736,9 @@ def json_get_person_families():
             return jsonify({"records":[], "status":Status.ERROR,"statusText":"Missing uuid"})
 
         u_context = UserContext(user_session, current_user, request)
-        with get_dataservice("read") as readservice:
-            reader = FamilyReader(readservice, u_context) 
-            res = reader.get_person_families(uuid)
+        with FamilyReader("read", u_context) as service:
+            #reader = FamilyReader(readservice, u_context) 
+            res = service.get_person_families(uuid)
 
         if res.get('status') == Status.NOT_FOUND:
             return jsonify({"member":uuid, "records":[],
@@ -791,11 +784,11 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 50, type=int)
 
-    with get_dataservice("read") as readservice:
-        reader = PlaceReader(readservice, u_context) 
+    with PlaceReader("read", u_context) as service:
+        #reader = PlaceReader(readservice, u_context) 
         # The 'items' list has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        res = reader.get_place_list()
+        res = service.get_place_list()
 
     if res['status'] == Status.NOT_FOUND:
         print(f'bp.scene.routes.show_places: {_("No places found")}')
@@ -821,9 +814,9 @@ def show_place(locid):
         # readservice -> Tietokantapalvelu
         #      reader ~= Toimialametodit
 
-        with get_dataservice("read") as readservice:
-            reader = PlaceReader(readservice, u_context) 
-            res = reader.get_places_w_events(locid)
+        with PlaceReader("read", u_context) as service:
+            #reader = PlaceReader(readservice, u_context) 
+            res = service.get_places_w_events(locid)
 
         if res['status'] == Status.NOT_FOUND:
             print(f'bp.scene.routes.show_place: {_("Place not found")}')
@@ -871,19 +864,19 @@ def show_sources(series=None):
 
     # readservice -> Tietokantapalvelu
     #      reader ~= Toimialametodit
-    with get_dataservice("read") as readservice:
-        reader = SourceReader(readservice, u_context)
+    with SourceReader("read", u_context) as service:
+        #reader = SourceReader(readservice, u_context)
 
         if series:
             u_context.series = series
-        try:
-            res = reader.get_source_list()
-            if res['status'] == Status.NOT_FOUND:
-                print('bp.scene.routes.show_sources: No sources found')
-            elif res['status'] != Status.OK:
-                print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
-        except KeyError as e:
-            return redirect(url_for('virhesivu', code=1, text=str(e)))
+        # try:
+        res = service.get_source_list()
+        if res['status'] == Status.NOT_FOUND:
+            print('bp.scene.routes.show_sources: No sources found')
+        elif res['status'] != Status.OK:
+            print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
+        # except KeyError as e:
+            # return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     series = u_context.series if u_context.series else "all"
     stk_logger(u_context, f"-> bp.scene.routes.show_sources/{series} n={len(res['items'])}")
@@ -903,9 +896,9 @@ def show_source_page(sourceid=None):
         return redirect(url_for('virhesivu', code=1, text="Missing Source key"))
     u_context = UserContext(user_session, current_user, request)
     try:
-        with get_dataservice("read") as readservice:
-            reader = SourceReader(readservice, u_context) 
-            res = reader.get_source_with_references(uuid, u_context)
+        with SourceReader("read", u_context) as service:
+            #reader = SourceReader(readservice, u_context) 
+            res = service.get_source_with_references(uuid, u_context)
 
         if res['status'] == Status.NOT_FOUND:
             msg = res.get('statustext', _('No objects found'))
@@ -941,9 +934,9 @@ def show_medias():
     u_context.set_scope_from_request(request, 'media_scope')
     u_context.count = 20
 
-    with get_dataservice("read") as readservice:
-        datareader = MediaReader(readservice, u_context)
-        res = datareader.read_my_media_list()
+    with MediaReader("read", u_context) as service:
+        #datareader = MediaReader(readservice, u_context)
+        res = service.read_my_media_list()
 
     if Status.has_failed(res, False):
         flash(f'{res.get("statustext","error")}', 'error')
@@ -962,9 +955,9 @@ def show_media(uuid=None):
     """
     uuid = request.args.get('uuid', uuid)
     u_context = UserContext(user_session, current_user, request)
-    with get_dataservice("read") as readservice:
-        reader = MediaReader(readservice, u_context)
-        res = reader.get_one(uuid)
+    with MediaReader("read", u_context) as service:
+        #reader = MediaReader(readservice, u_context)
+        res = service.get_one(uuid)
 
     status = res.get('status')
     if status != Status.OK:

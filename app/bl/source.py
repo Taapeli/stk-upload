@@ -34,11 +34,12 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 import logging 
 logger = logging.getLogger('stkserver')
-from flask_babelex import _
+#from flask_babelex import _
 
 from .base import NodeObject, Status
 from .person import Person
 #from pe.db_reader import DbReader #, SourceResult
+from pe.dataservice import DataService
 
 
 class Source(NodeObject):
@@ -110,24 +111,35 @@ class SourceBl(Source):
         self.note_ref = []
 
 
-class SourceReader:
+class SourceReader(DataService):
     '''
         Data reading class for Source objects with associated data.
 
-        - Use pe.db_reader.DbReader.__init__(readservice, u_context) 
-          to define the database driver and user context
-
         - Returns a Result object which includes the tems and eventuel error object.
     '''
-    def __init__(self, readservice, u_context):
-        ''' Initiate datastore.
-
-        :param: readservice   pe.neo4j.readservice.Neo4jReadService
-        :param: u_context     ui.user_context.UserContext object
+    def __init__(self, service_name:str, u_context=None):
+        ''' Create a reader object with db driver and user context.
         '''
-        self.readservice = readservice
-        self.driver = readservice.driver
-        self.user_context = u_context
+        super().__init__(service_name, u_context)
+        if u_context:
+            # For reader only; writer has no context?
+            self.user_context = u_context
+            self.username = u_context.user
+            if u_context.context == u_context.ChoicesOfView.COMMON:
+                self.use_user = None
+            else:
+                self.use_user = u_context.user
+#===============================================================================
+#     def __init__(self, readservice, u_context):
+#         ''' Initiate datastore.
+# 
+#         :param: readservice   pe.neo4j.readservice.Neo4jReadService
+#         :param: u_context     ui.user_context.UserContext object
+#         '''
+#         self.readservice = readservice
+#         self.driver = readservice.driver
+#         self.user_context = u_context
+#===============================================================================
 
 
     def get_source_list(self):
@@ -176,7 +188,7 @@ class SourceReader:
                                 as [label, object] tuples(?)
         """
         use_user = self.user_context.batch_user()
-        res = self.readservice.dr_get_source_w_repository(use_user, uuid)
+        res = self.dataservice.dr_get_source_w_repository(use_user, uuid)
         if Status.has_failed(res):
             return res
         source = res.get('item')
@@ -184,7 +196,7 @@ class SourceReader:
             res.statustext = f"no Source with uuid={uuid}"
             return res
         
-        citations, notes, targets = self.readservice.dr_get_source_citations(source.uniq_id)
+        citations, notes, targets = self.dataservice.dr_get_source_citations(source.uniq_id)
 
 #        if len(targets) == 0:
 #            # Only Citations connected to Person Event or Family Event can be
@@ -203,7 +215,7 @@ class SourceReader:
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
                     if isinstance(target, Person):
-                        self.readservice.dr_inlay_person_lifedata(target)
+                        self.dataservice.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:
                     print(f'DbReader.get_source_with_references: hide {target}')

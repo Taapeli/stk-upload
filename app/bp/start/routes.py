@@ -229,6 +229,8 @@ def my_settings():
 
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)
     print(f'# Gedcoms {gedcoms}')
+
+    userprofile = shareds.user_datastore.get_userprofile(current_user.username) 
     
     logger.info("-> bp.start.routes.my_settings")
     return render_template("/start/my_settings.html",
@@ -238,7 +240,8 @@ def my_settings():
                            apikey=api.get_apikey(current_user),
                            labels=labels,
                            batches=user_batches,
-                           gedcoms=gedcoms)
+                           gedcoms=gedcoms,
+                           userprofile=userprofile)
 
 # # Admin start page in bp.admin
 # @shareds.app.route('/admin',  methods=['GET', 'POST'])

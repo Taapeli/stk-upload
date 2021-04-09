@@ -24,18 +24,20 @@ from .cypher.cy_gramps import CypherObjectWHandle
 
 class Neo4jUpdateService:
     '''
-    This driver for Neo4j database maintains transaction and executes
-    different update functions.
+    This service for Neo4j database maintains transaction and executes
+    different read/write/update functions.
+
+    Referenced as shareds.dataservices["update"] class.
     '''
 
     def __init__(self, driver):
         ''' Create a writer/updater object with db driver and user context.
         
-            - driver             neo4j.DirectDriver object
-            - use_transaction    bool
+            :param: driver             neo4j.DirectDriver object
         '''
         self.driver = driver
         self.tx = driver.session().begin_transaction()
+        print(f'#{self.__class__.__name__} init')
 
 
     def ds_commit(self):
