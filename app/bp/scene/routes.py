@@ -16,7 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from pe.dataservice import DataService
 
 '''
 Created on 12.8.2018
@@ -59,16 +58,8 @@ from ui import jinja_filters
 
 from bp.scene.models import media
 from models.obsolete_datareader import obsolete_read_persons_with_events
-
-# Select the read driver for current database
-from database.accessDB import get_dataservice
-# opt = "read_tx" --> Neo4jReadServiceTx # initiate when used
-# opt = "read" --> Neo4jReadService
-
-#from pe.neo4j.writeservice import Neo4jWriteService
-#writeservice = Neo4jWriteService(shareds.driver)
-
 from bp.graph.routes import get_fanchart_data
+
 
 def stk_logger(context, msg:str):
     """ Emit logger info message with Use Case mark uc=<code> .

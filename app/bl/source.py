@@ -161,7 +161,7 @@ class SourceReader(DataService):
             args["theme1"] = theme_fi 
             args["theme2"] = theme_sv
         try:
-            sources = self.readservice.dr_get_source_list_fw(args)
+            sources = self.dataservice.dr_get_source_list_fw(args)
             #results = {'sources':sources,'status':Status.OK}
     
             # Update the page scope according to items really found 

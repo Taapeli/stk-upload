@@ -372,8 +372,8 @@ class PersonBl(Person):
 
         # Make relations to the Media nodes and it's Note and Citation references
         if self.media_refs:
-            writer = MediaWriter(shareds.datastore.dataservice)
-            writer.create_and_link_by_handles(self.uniq_id, self.media_refs)
+            with MediaWriter("update", tx=tx) as service:
+                service.create_and_link_by_handles(self.uniq_id, self.media_refs)
 
 
         # The relations to the Family node will be created in Family.save(),

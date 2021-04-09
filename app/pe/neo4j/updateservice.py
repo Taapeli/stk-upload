@@ -6,6 +6,7 @@ Created on 23.3.2020
 import logging
 import traceback
 from neo4j.exceptions import ClientError
+from pe.dataservice import DataService
 
 logger = logging.getLogger('stkserver')
 from datetime import date #, datetime
@@ -22,7 +23,7 @@ from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_gramps import CypherObjectWHandle
 
 
-class Neo4jUpdateService:
+class Neo4jUpdateService(DataService):
     '''
     This service for Neo4j database maintains transaction and executes
     different read/write/update functions.
@@ -30,14 +31,14 @@ class Neo4jUpdateService:
     Referenced as shareds.dataservices["update"] class.
     '''
 
-    def __init__(self, driver):
-        ''' Create a writer/updater object with db driver and user context.
-        
-            :param: driver             neo4j.DirectDriver object
-        '''
-        self.driver = driver
-        self.tx = driver.session().begin_transaction()
-        print(f'#{self.__class__.__name__} init')
+    # def __init__(self, driver):
+    #     ''' Create a writer/updater object with db driver and user context.
+    #     
+    #         :param: driver             neo4j.DirectDriver object
+    #     '''
+    #     self.driver = driver
+    #     self.tx = driver.session().begin_transaction()
+    #     print(f'#{self.__class__.__name__} init')
 
 
     def ds_commit(self):
