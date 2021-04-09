@@ -24,10 +24,11 @@ Created on 17.3.2020
 '''
 #import functools
 import logging
-from bl.dates import DateRange
 logger = logging.getLogger('stkserver')
+from flask_babelex import _
 
 from bl.base import Status
+from bl.dates import DateRange
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
@@ -38,12 +39,13 @@ from bl.media import MediaBl
 
 from ui.place import place_names_local_from_nodes
 
-from pe.neo4j.cypher.cy_place import CypherPlace, CypherPlaceStats
-from pe.neo4j.cypher.cy_source import CypherSource
-from pe.neo4j.cypher.cy_family import CypherFamily
-from pe.neo4j.cypher.cy_event import CypherEvent
-from pe.neo4j.cypher.cy_person import CypherPerson
-from pe.neo4j.cypher.cy_media import CypherMedia
+from pe.dataservice import ConcreteService
+from .cypher.cy_place import CypherPlace, CypherPlaceStats
+from .cypher.cy_source import CypherSource
+from .cypher.cy_family import CypherFamily
+from .cypher.cy_event import CypherEvent
+from .cypher.cy_person import CypherPerson
+from .cypher.cy_media import CypherMedia
 
 from bl.event import Event
 #Todo: Change Old style includes to bl classes
@@ -54,7 +56,7 @@ from models.dbtree import DbTree
 from models.gen.citation import Citation
 
 
-class Neo4jReadService:
+class Neo4jReadService(ConcreteService):
     ''' 
     Methods for accessing Neo4j database.
 
@@ -84,10 +86,13 @@ class Neo4jReadService:
             obj = PersonBl.from_node(node)
         elif 'Family' in node.labels:
             obj = FamilyBl.from_node(node)
-            obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
+            obj.clearname = obj.father_sortname+' & '+obj.mother_sortname
+        elif 'Event' in node.labels:
+            obj = EventBl.from_node(node)
+            obj.clearname = _(obj.type) + ' ' + obj.description + str(obj.dates)
         else:
             #raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
-            logger.warning(f'pe.neo4j.read_driver.Neo4jReadService._obj_from_node: Person or Family expexted: {list(node.labels)}')
+            logger.warning(f'pe.neo4j.read_driver.Neo4jReadService._obj_from_node: {node.id} Person or Family expexted: {list(node.labels)}')
             return None
         obj.role = role if role != 'Primary' else None
         return obj
@@ -1245,7 +1250,7 @@ class Neo4jReadService:
 
 
     def dr_inlay_person_lifedata(self, person): 
-        """ Reads person's default name, bith event and death event into Person obj.
+        """ Reads person's default name, birth event and death event into Person obj.
         """
         with self.driver.session(default_access_mode='READ') as session:
             result = session.run(CypherSource.get_person_lifedata,

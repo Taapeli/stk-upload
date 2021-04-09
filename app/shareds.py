@@ -37,8 +37,8 @@ mail = None
 # Database services (default Neo4j)
 db = None           # pe.neo4j.Neo4jEngine instance
 driver = None       # = shareds.db.driver, GraphDatabase.driver instance
-dataservices = {}   # Database service instances for read, read_tx, update
-datastore = None    # pe.db_writer.DbWriter instance – stk data services
+dataservices = {}   # Database ConcreteService instances for read, read_tx, update
+dservice = None     # Active ConcreteService instance
 user_datastore = None
 
 user_model = None

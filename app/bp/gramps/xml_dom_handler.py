@@ -123,7 +123,7 @@ class DOM_handler():
     def remove_handles(self):
         ''' Remove all Gramps handles, becouse they are not needed any more.
         '''
-        res = self.dataservice.ds_obj_remove_gramps_handles(self.batch.id)
+        res = shareds.dservice.ds_obj_remove_gramps_handles(self.batch.id)
         if Status.has_failed(res):  return res
         print (f'# --- removed handles from {res.get("count")} nodes')
         return res
@@ -148,7 +148,7 @@ class DOM_handler():
 
             Some objects may accept arguments like batch_id="2019-08-26.004" and others
         '''
-        self.dataservice.ds_obj_save_and_link(obj, **kwargs)
+        shareds.dservice.ds_obj_save_and_link(obj, **kwargs)
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
@@ -713,8 +713,7 @@ class DOM_handler():
             # Handle <objref>
             pl.media_refs = self._extract_mediaref(placeobj)
 
-            if pl.media_refs: 
-                print(f'# saving Place {pl.id} with {len(pl.media_refs)} media_refs')
+            #if pl.media_refs: print(f'#> saving Place {pl.id} with {len(pl.media_refs)} media_refs')
 
             # Save Place, Place_names, Notes and connect to hierarchy
             self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys)

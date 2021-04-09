@@ -39,9 +39,6 @@ import shareds
 from bl.base import Status
 from bp.scene.models import media
 
-#from pe.neo4j.dataservice import Neo4jDataService
-from database.accessDB import get_dataservice
-
 
 def get_upload_folder(username): 
     ''' Returns upload directory for given user'''
@@ -565,7 +562,8 @@ def xml_to_stkbase(pathname, userid):
     with BatchUpdater("update") as batch_service:
         print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
         mediapath = handler.get_mediapath_from_header()
-        res = batch_service.start_data_batch(userid, file_cleaned, mediapath, batch_service.dataservice.tx)
+        res = batch_service.start_data_batch(userid, file_cleaned, mediapath,
+                                             batch_service.dataservice.tx)
         if Status.has_failed(res):
             print('bp.gramps.gramps_loader.xml_to_stkbase TODO _rollback')
             return res
@@ -639,12 +637,13 @@ def xml_to_stkbase(pathname, userid):
                     'statustest': msg,
                     'steps': handler.blog.list(), 
                     'batch_id': handler.batch.id}
-        else:
-            batch_service.commit()
-            logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
-    
-            handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
-                                    'elapsed':time.time()-t0})
+
+        # batch_service.commit()
+        logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
+
+        handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
+                                'elapsed':time.time()-t0})
+    # End with BatchUpdater transaction
 
     return {'status': Status.OK,
             'steps': handler.blog.list(), 

@@ -29,8 +29,6 @@ from flask import render_template, request
 from bl.base import Status, StkEncoder
 from bl.place import PlaceUpdater
 
-from database.accessDB import get_dataservice
-#from pe.neo4j.updateservice import Neo4jDataService
 
 @bp.route("/refplace_editor/")
 @roles_accepted('audit')
