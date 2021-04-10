@@ -119,11 +119,11 @@ class FanChart:
                 """
                 Make sure no indexing errors occur in fetching potentially missing birth year.
                 """
-                if 'events' in x and len(x['events']) > 1:
-                    birth = x['events'][0]
-                    return birth[1] if len(birth) > 1 else 0
-                else:
-                    return 0
+                if 'events' in x:
+                    for ev in x['events']:
+                        if ev[0] == 'Birth':
+                            return ev[1]
+                return 9999 # no birth year given, sort after siblings with known birth years
 
             with PersonReader("read", u_context) as service:
                 result = service.get_children(uniq_id)
