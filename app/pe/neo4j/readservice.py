@@ -1302,6 +1302,33 @@ class Neo4jReadService(ConcreteService):
                 result_list.append({"surname":surname,"count":count})
         return result_list
 
+#   @functools.lru_cache
+    def dr_get_family_members_by_id(self, id, which):
+        '''
+        Get the minimal data required for creating graphs with person labels.
+        The target depends on which = ('person', 'parents', 'children').
+        For which='person', the id should contain an uuid.
+        For 'parents' and 'children' the id should contain a database uniq_id.
+        '''
+        switcher = {
+            'person': CypherPerson.get_person_for_graph,
+            'parents': CypherPerson.get_persons_parents,
+            'children': CypherPerson.get_persons_children
+        }
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(
+                switcher.get(which),
+                ids=[id])
+            for record in result:
+                result_list.append({
+                    'uniq_id': record['uniq_id'],
+                    'uuid': record['uuid'],
+                    'sortname': record['sortname'],
+                    'gender': record['gender'],
+                    'events': record['events']})
+        return result_list
+
     def dr_get_placename_stats_by_user(self, username, count):
         result_list = []
         with self.driver.session(default_access_mode='READ') as session:

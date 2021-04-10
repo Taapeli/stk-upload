@@ -312,4 +312,24 @@ match (n:Name) where id(n) = $uid
 set n.type = $nametype
 return n
     """
-    
+
+    get_person_for_graph = """
+MATCH (n:Person)
+	WHERE n.uuid in $ids 
+OPTIONAL MATCH (n) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
+RETURN ID(n) AS uniq_id, n.uuid AS uuid, n.sortname AS sortname, 
+       n.sex as gender, COLLECT([e.type, e.date1/1024]) AS events"""
+
+    get_persons_parents = """
+MATCH (n:Person) <-[:CHILD]- (f:Family) -[:PARENT]-> (p:Person)
+	WHERE ID(n) in $ids 
+OPTIONAL MATCH (p) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
+RETURN ID(p) AS uniq_id, p.uuid AS uuid, p.sortname AS sortname, 
+       p.sex as gender, COLLECT([e.type, e.date1/1024]) AS events"""
+
+    get_persons_children = """
+MATCH (n:Person) <-[:PARENT]- (f:Family) -[:CHILD]-> (c:Person)
+	WHERE ID(n) in $ids 
+OPTIONAL MATCH (c) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
+RETURN ID(c) AS uniq_id, c.uuid AS uuid, c.sortname AS sortname, 
+       c.sex as gender, COLLECT([e.type, e.date1/1024]) AS events"""
