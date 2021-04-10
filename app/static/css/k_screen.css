@@ -491,7 +491,7 @@ div#alphanav ul li a, div#alphanav ul li span {
     line-height: 100%;
     float: left;
     margin: 2pt 0;
-	border-radius: 9pt;
+/*  border-radius: 9pt; */
 }
 div#alphanav ul li a:hover {
     text-decoration: none;

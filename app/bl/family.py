@@ -359,11 +359,9 @@ class FamilyReader(DataService):
                         #    'date2': 1609920, 'date1': 1609920}>
 #                         child = Person_as_member()
                         child = PersonBl.from_node(ch)
-#                         Person_as_member.__init__(child)
-#                         child.uniq_id = ch.id
-#                         child.uuid = ch['uuid']
-#                         child.sortname = ch['sortname']
                         family.children.append(child)
+                    family.children.sort(key=lambda x: x.birth_low)
+
                     
                     if record['no_of_children']:
                         family.no_of_children = record['no_of_children']
