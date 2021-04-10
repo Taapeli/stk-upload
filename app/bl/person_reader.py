@@ -373,7 +373,6 @@ class PersonReaderTx(DataService):
         new_ids = [-1]
         all_citations = {}
         while len(new_ids) > 0:
-            cnt = len(new_ids)
             # New objects
             citations = {}
             notes = {}
@@ -472,6 +471,9 @@ class PersonReaderTx(DataService):
                     repo = Repository.from_node(node)
                     repo.medium = ref.medium
                     self._catalog(repo)
+                    # This source is in this repository
+                    if not repo.uniq_id in source.repositories:
+                        source.repositories.append(repo.uniq_id)
                  
                 # Referencing a (Source, medium, Repository) tuple
                 cita.source_id = source.uniq_id
