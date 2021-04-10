@@ -54,7 +54,6 @@ import shareds
 from bl.base import NodeObject, Status
 from bl.person_name import Name
 from pe.dataservice import DataService
-from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_person import CypherPerson
 
 from models.gen.note import Note
@@ -183,7 +182,7 @@ class Person(NodeObject):
 
 class PersonReader(DataService):
     '''
-        Data reading class for Person objects with associated data.
+        Data reading class for Person objects with associated data without transaction.
 
         - Returns a Result object.
     '''
@@ -198,7 +197,7 @@ class PersonReader(DataService):
         args = {'use_user': self.use_user,
                 'fw': context.first,  # From here forward
                'limit':context.count}
-        res = self.dataservice.dr_get_person_list(args)
+        res = shareds.dservice.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
         if Status.has_failed(res):
             return {'items':None, 'status':res['status'], 
@@ -223,43 +222,19 @@ class PersonReader(DataService):
         res_dict['items'] = persons2
         return res_dict
 
-
-#     def get_a_person(self, uuid:str):
-#         ''' Read a person from common data or user's own Batch.
-# 
-#             a)  If you have selected to use common approved data, 
-#                 you can read both your own and passed data.
-#             b)  If you have not selected common data,
-#                 you can read only your own data.
-#             
-#             --> Origin from models.gen.person_combo.Person_combo.get_my_person
-#         '''
-
-
-#     def get_person_data(self, uuid:str, args:dict): # --> bl.person_reader.PersonReaderTx.get_person_data
-#         '''
-#         Get a Person with all connected nodes for display in Person page as object tree.
-#             
-#             Note. The args are not yet used.
-#             
-#         * Origin from bp.scene.scene_reader.get_person_full_data(uuid, owner, use_common=True)
-#     
-#         For Person data page we must have all business objects, which has connection
-#         to current Person. This is done in the following steps:
-
-
     def get_surname_list(self, count=40):
         ''' 
         List all surnames so that they can be displayed in a name cloud.
         '''
         if self.use_user:
-            surnames = self.dataservice.dr_get_surname_list_by_user(self.use_user,
+            surnames = shareds.dservice.dr_get_surname_list_by_user(self.use_user,
                                                                     count=count)
         else:
-            surnames = self.dataservice.dr_get_surname_list_common(count=count)
+            surnames = shareds.dservice.dr_get_surname_list_common(count=count)
         # [{'surname': surname, 'count': count},...]
         return surnames
 
+<<<<<<< HEAD
     def get_person_minimal(self, uuid):
         '''
         Get all parents of the person with given uuid.
@@ -280,6 +255,8 @@ class PersonReader(DataService):
         Returns a list.
         '''
         return self.dataservice.dr_get_family_members_by_id(uniq_id, which='children')
+=======
+>>>>>>> eddd86bb077ded130ba7d5c981608ba7e9bf402e
 
 class PersonWriter(DataService):
     '''
@@ -287,16 +264,16 @@ class PersonWriter(DataService):
     '''
     def __init__(self, service_name:str, u_context=None):
         super().__init__(service_name, u_context)
-        self.dataservice.tx = None
+        shareds.dservice.tx = None
 
     def set_primary_name(self, uuid, old_order):
-        self.dataservice.dr_set_primary_name(uuid, old_order)
+        shareds.dservice.dr_set_primary_name(uuid, old_order)
 
     def set_name_orders(self, uid_list):
-        self.dataservice.dr_set_name_orders(uid_list)
+        shareds.dservice.dr_set_name_orders(uid_list)
 
     def set_name_type(self, uniq_id, nametype):
-        self.dataservice.dr_set_name_type(uniq_id, nametype)
+        shareds.dservice.dr_set_name_type(uniq_id, nametype)
 
 
 class PersonBl(Person):
@@ -330,7 +307,6 @@ class PersonBl(Person):
             @todo: Remove those referenced person names, which are not among
                    new names (:Person) --> (:Name) 
         """
-        from bl.media import MediaWriter
 
         if 'batch_id' in kwargs:
             batch_id = kwargs['batch_id']
@@ -393,8 +369,7 @@ class PersonBl(Person):
 
         # Make relations to the Media nodes and it's Note and Citation references
         if self.media_refs:
-            writer = MediaWriter(shareds.datastore.dataservice)
-            writer.create_and_link_by_handles(self.uniq_id, self.media_refs)
+            shareds.dservice.ds_create_link_medias_w_handles(self.uniq_id, self.media_refs)
 
 
         # The relations to the Family node will be created in Family.save(),
@@ -426,9 +401,8 @@ class PersonBl(Person):
             all Citations used for Person's Events.
         """
         counter = 0
-        ds = shareds.datastore.dataservice
         for uniq_id in person_ids:
-            res = ds._update_person_confidences(uniq_id)
+            res = shareds.dservice._update_person_confidences(uniq_id)
             # returns {confidence, status, statustext}
             stat = res.get('status')
             if stat == Status.UPDATED:
@@ -452,10 +426,9 @@ class PersonBl(Person):
         do_refnames = 'refname' in ops
         do_sortname = 'sortname' in ops
         names = []
-        ds = shareds.datastore.dataservice
 
         # Get each Name object (with person_uid) 
-        for pid, name_node in ds.ds_get_personnames(uniq_id):
+        for pid, name_node in shareds.dservice.ds_get_personnames(uniq_id):
             name = Name.from_node(name_node)
             name.person_uid =  pid
             names.append(name)
@@ -463,7 +436,7 @@ class PersonBl(Person):
         if do_refnames:
             for name in names:
                 # Create links and nodes from given person: (:Person) --> (r:Refname)
-                res = ds.ds_build_refnames(name.person_uid, name)
+                res = shareds.dservice.ds_build_refnames(name.person_uid, name)
                 if Status.has_failed(res): return res
                 refname_count += res.get('count', 0)
         if do_sortname:
@@ -471,7 +444,7 @@ class PersonBl(Person):
                 if name.order == 0:
                     # If default name, store sortname key to Person node
                     sortname = name.key_surname()
-                    ds._set_person_sortname(name.person_uid, sortname)
+                    shareds.dservice._set_person_sortname(name.person_uid, sortname)
                     if Status.has_failed(res): return res
                     sortname_count += 1
                     break
@@ -482,25 +455,7 @@ class PersonBl(Person):
 
 #     @staticmethod
 #     def get_confidence (uniq_id=None): --> pe.neo4j.updateservice.Neo4jUpdateService ??
-#         """ Collect Person confidence from Person and the Event nodes.
-# 
-#             Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
-#         """
-#         raise(NotImplementedError, "TODO: bl.person.PersonBl.get_confidence")
-# 
-#         if uniq_id:
-#             return shareds.driver.session().run(Cypher_person.get_confidence,
-#                                                 id=uniq_id)
-# #         else:
-# #             return shareds.driver.session().run(Cypher_person.get_confidences_all)
-
 #     def set_confidence (self, tx): 
-#         """ Sets a quality rate to this Person
-#             Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
-#         """
-#         raise(NotImplementedError, "TODO: bl.person.PersonBl.set_confidence")
-# #         return tx.run(Cypher_person.set_confidence,
-# #                       id=self.uniq_id, confidence=self.confidence)
 
     @staticmethod
     def estimate_lifetimes(uids=[]): # <-- 
@@ -513,8 +468,7 @@ class PersonBl(Person):
             Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
             and models.dataupdater.set_estimated_dates
         """
-        ds = shareds.datastore.dataservice
-        res = ds._set_people_lifetime_estimates(uids)
+        res = shareds.dservice._set_people_lifetime_estimates(uids)
 
         print(f"Estimated lifetime for {res['count']} persons")
         return res

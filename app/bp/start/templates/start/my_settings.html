@@ -73,10 +73,17 @@ table.transparent tbody tr td {
 			<div>
 			<h3>Terms of use</h3>
 			{% if userprofile.agreed_at %}
-				{{ _("Agreed to the <a href='http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot'>Terms of use</a> at") }}
+				{{ _("Agreed to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a> at").format(
+			        terms_of_use_url=_("http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"),
+			        terms_of_use=_("Terms of use"),
+				) }}
+				<br>
 				{{ userprofile.agreed_at }}
 			{% else %}
-				{{ _("<a href='http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot'>Terms of use</a>") }}
+				{{ _("<a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>").format(
+			        terms_of_use_url=_("http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"),
+			        terms_of_use=_("Terms of use"),
+				) }}
 			{% endif %}
 			
 			</div>

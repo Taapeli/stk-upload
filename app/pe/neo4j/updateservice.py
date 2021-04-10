@@ -14,6 +14,7 @@ from bl.base import Status
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 
+from pe.dataservice import ConcreteService
 from .cypher.cy_batch_audit import CypherBatch, CypherAudit
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_refname import CypherRefname
@@ -22,7 +23,7 @@ from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_gramps import CypherObjectWHandle
 
 
-class Neo4jUpdateService:
+class Neo4jUpdateService(ConcreteService):
     '''
     This service for Neo4j database maintains transaction and executes
     different read/write/update functions.
@@ -32,12 +33,12 @@ class Neo4jUpdateService:
 
     def __init__(self, driver):
         ''' Create a writer/updater object with db driver and user context.
-        
+         
             :param: driver             neo4j.DirectDriver object
         '''
+        print(f'#~~~~{self.__class__.__name__} init')
         self.driver = driver
-        self.tx = driver.session().begin_transaction()
-        print(f'#{self.__class__.__name__} init')
+        #self.tx = driver.session().begin_transaction()
 
 
     def ds_commit(self):

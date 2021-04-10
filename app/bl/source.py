@@ -32,6 +32,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 
 '''
+import shareds
 import logging 
 logger = logging.getLogger('stkserver')
 #from flask_babelex import _
@@ -161,7 +162,7 @@ class SourceReader(DataService):
             args["theme1"] = theme_fi 
             args["theme2"] = theme_sv
         try:
-            sources = self.readservice.dr_get_source_list_fw(args)
+            sources = shareds.dservice.dr_get_source_list_fw(args)
             #results = {'sources':sources,'status':Status.OK}
     
             # Update the page scope according to items really found 
@@ -188,7 +189,7 @@ class SourceReader(DataService):
                                 as [label, object] tuples(?)
         """
         use_user = self.user_context.batch_user()
-        res = self.dataservice.dr_get_source_w_repository(use_user, uuid)
+        res = shareds.dservice.dr_get_source_w_repository(use_user, uuid)
         if Status.has_failed(res):
             return res
         source = res.get('item')
@@ -196,7 +197,7 @@ class SourceReader(DataService):
             res.statustext = f"no Source with uuid={uuid}"
             return res
         
-        citations, notes, targets = self.dataservice.dr_get_source_citations(source.uniq_id)
+        citations, notes, targets = shareds.dservice.dr_get_source_citations(source.uniq_id)
 
 #        if len(targets) == 0:
 #            # Only Citations connected to Person Event or Family Event can be
@@ -208,19 +209,19 @@ class SourceReader(DataService):
 #            return res
 
         cit = []
-        for c_id, c in citations.items():
+        for c_id, citation in citations.items():
             if c_id in notes:
-                c.notes = notes[c_id]
+                citation.notes = notes[c_id]
             for target in targets[c_id]:
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
                     if isinstance(target, Person):
-                        self.dataservice.dr_inlay_person_lifedata(target)
-                    c.citators.append(target)
+                        shareds.dservice.dr_inlay_person_lifedata(target)
+                    citation.citators.append(target)
                 else:
                     print(f'DbReader.get_source_with_references: hide {target}')
 
-            cit.append(c)
+            cit.append(citation)
         res['citations'] = cit
 
         return res

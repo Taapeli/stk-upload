@@ -28,19 +28,22 @@ Created on 15.8.2018
 import os
 import time
 import logging 
-from bp.gramps import gramps_utils
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, jsonify
-from flask_security import login_required, roles_accepted, current_user # ,roles_required
+#from flask import session as user_session
+from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
 
 import shareds
 from models import loadfile, email, util, syslog 
+#from ui.user_context import UserContext
+from ..admin import uploads
+
 from . import bp
 from . import gramps_loader
-from ..admin import uploads
-#from .models import batch
+from . import gramps_utils
+
 
 @bp.route('/gramps')
 @login_required
@@ -113,7 +116,10 @@ def upload_gramps():
 @login_required
 @roles_accepted('research')
 def start_load_to_stkbase(xmlname):
-    uploads.initiate_background_load_to_stkbase(current_user.username,xmlname)
+    ''' The uploaded Gramps xml file is imported to database in background process.
+        A 'i_am_alive' process for monitoring the bg prosess is also started.
+    '''
+    uploads.initiate_background_load_to_stkbase(current_user.username, xmlname)
     logger.info(f'-> bp.gramps.routes.start_load_to_stkbase f="{os.path.basename(xmlname)}"')
     flash(_("Data import from %(i)s to database has been started.", i=xmlname), 'info')
     return redirect(url_for('gramps.list_uploads'))

@@ -24,7 +24,7 @@ Created on 24.3.2020
 '''
 import os
 
-#import shareds
+import shareds
 from .base import NodeObject, Status
 from bl.person import PersonBl
 from bl.family import FamilyBl
@@ -144,7 +144,7 @@ class MediaReader(DataService):
         ustr = "for user " + user if user else "approved "
         print(f"MediaReader.read_my_media_list: Get max {limit} medias {ustr}starting {fw!r}")
 
-        res = self.readservice.dr_get_media_list(self.use_user, fw, limit)
+        res = shareds.dservice.dr_get_media_list(self.use_user, fw, limit)
         #res = Media.get_medias(uniq_id=None, o_context=self.user_context, limit=limit)
         if Status.has_failed(res): return res
         for record in res.get('recs', None): 
@@ -200,7 +200,7 @@ class MediaReader(DataService):
         # (media) <-[crop()]-   (Event  'E9999' id=99999) <-- (Person 'I9999' id=999)
     
         user = self.user_context.batch_user()
-        res = self.readservice.dr_get_media_single(user, oid)
+        res = shareds.dservice.dr_get_media_single(user, oid)
         # returns {status, items}
         if Status.has_failed(res): return res
 
@@ -261,22 +261,11 @@ class MediaReader(DataService):
         return {'item':media, 'status':Status.OK}
 
 
-class MediaWriter:
-    def __init__(self, writeservice, u_context=None):
-        '''
-        :param: writeservice    Neo4jDataService
-        :param: u_context       #TODO Use user information from here
-        '''
-        self.writeservice = writeservice
-        self.u_context = u_context
-
-    def create_and_link_by_handles(self, uniq_id, media_refs):
-        ''' Save media object and it's Note and Citation references
-            using their Gramps handles.
-        '''
-        if media_refs:
-            #ds = shareds.datastore.dataservice
-            self.writeservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
+#===============================================================================
+# class MediaWriter(DataService):
+#  def __init__(self, service_name:str, u_context=None, tx=None):
+#  def create_and_link_by_handles(): #-> bl.batch.BatchUpdater.media_create_and_link_by_handles
+#===============================================================================
 
 
 

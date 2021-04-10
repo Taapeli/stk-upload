@@ -30,6 +30,7 @@ from bl.base import Status
 from bl.dates import DateRange
 from bl.event import EventBl
 
+from pe.dataservice import ConcreteService
 from pe.neo4j.cypher.cy_event import CypherEvent
 from pe.neo4j.cypher.cy_person import CypherPerson
 
@@ -44,7 +45,7 @@ def parsedate(datestr, attrs):
         traceback.print_exc()
         return False
 
-class Neo4jWriteService:
+class Neo4jWriteService(ConcreteService):
     ''' Methods for accessing Neo4j database, simple mode without transaction.
     
         Referenced as shareds.dataservices["simple"] class.
@@ -71,13 +72,13 @@ class Neo4jWriteService:
 
     def dr_set_primary_name(self, uuid, old_order):
         with self.driver.session(default_access_mode='WRITE') as session:
-            record = session.run(CypherPerson.set_primary_name, uuid=uuid, old_order=old_order).single()
+            session.run(CypherPerson.set_primary_name, uuid=uuid, old_order=old_order).single()
 
     def dr_set_name_orders(self, uid_order_list):
         with self.driver.session(default_access_mode='WRITE') as session:
             for order, uid in enumerate(uid_order_list): 
-                record = session.run(CypherPerson.set_name_order, uid=uid, order=order).single()
+                session.run(CypherPerson.set_name_order, uid=uid, order=order).single()
 
     def dr_set_name_type(self, uid, nametype):
         with self.driver.session(default_access_mode='WRITE') as session:
-            record = session.run(CypherPerson.set_name_type, uid=uid, nametype=nametype).single()
+            session.run(CypherPerson.set_name_type, uid=uid, nametype=nametype).single()

@@ -142,7 +142,7 @@ class EventReader(DataService):
         '''
         statustext = ''
         res_dict = {}
-        res = self.dataservice.dr_get_event_by_uuid(self.use_user, uuid)
+        res = shareds.dservice.dr_get_event_by_uuid(self.use_user, uuid)
         if Status.has_failed(res):
             return {'item':None, 'status':res['status'], 
                     'statustext': _('The event is not accessible')}
@@ -152,7 +152,7 @@ class EventReader(DataService):
 
         members= []
         if args.get('referees'):
-            res = self.dataservice.dr_get_event_participants(event.uniq_id)
+            res = shareds.dservice.dr_get_event_participants(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _('Participants read error ') + res['statustext']+' '
                 print(f'bl.event.EventReader.get_event_data: {statustext}')
@@ -161,7 +161,7 @@ class EventReader(DataService):
                 res_dict['members'] = members
         places = []
         if args.get('places'):
-            res = self.dataservice.dr_get_event_place(event.uniq_id)
+            res = shareds.dservice.dr_get_event_place(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _('Place read error ') + res['statustext']+' '
             else:
@@ -171,7 +171,7 @@ class EventReader(DataService):
         notes = []
         medias = []
         if args.get('notes'):
-            res = self.dataservice.dr_get_event_notes_medias(event.uniq_id)
+            res = shareds.dservice.dr_get_event_notes_medias(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _('Notes read error ') + res['statustext']+' '
             else:
@@ -228,14 +228,12 @@ class EventBl(Event):
             - links to existing Place, Note, Citation, Media objects
             - Does not link it from UserProfile or Person
         """
-        from bl.media import MediaWriter
 
         if 'batch_id' in kwargs:
             batch_id = kwargs['batch_id']
         else:
             raise RuntimeError(f"Event_gramps.save needs batch_id for {self.id}")
 
-        #today = str(datetime.date.today())
         self.uuid = self.newUuid()
         e_attr = {
             "uuid": self.uuid,
@@ -295,9 +293,7 @@ class EventBl(Event):
 
         # Make relations to the Media nodes and their Note and Citation references
         if self.media_refs:
-            writer = MediaWriter(shareds.datastore.dataservice)
-            writer.create_and_link_by_handles(self.uniq_id, self.media_refs)
-            
+            shareds.dservice.ds_create_link_medias_w_handles(self.uniq_id, self.media_refs)
         return
 
 class EventWriter:

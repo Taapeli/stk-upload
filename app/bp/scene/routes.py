@@ -16,7 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from pe.dataservice import DataService
 
 '''
 Created on 12.8.2018
@@ -59,6 +58,7 @@ from ui import jinja_filters
 
 from bp.scene.models import media
 from models.obsolete_datareader import obsolete_read_persons_with_events
+<<<<<<< HEAD
 
 # Select the read driver for current database
 from database.accessDB import get_dataservice
@@ -69,6 +69,10 @@ from database.accessDB import get_dataservice
 #writeservice = Neo4jWriteService(shareds.driver)
 
 from bp.graph.models.fanchart import FanChart
+=======
+from bp.graph.routes import get_fanchart_data
+>>>>>>> eddd86bb077ded130ba7d5c981608ba7e9bf402e
+
 
 def stk_logger(context, msg:str):
     """ Emit logger info message with Use Case mark uc=<code> .
@@ -379,31 +383,42 @@ def show_person_fanchart_hx(uuid=None):
 @bp.route('/scene/nametypes/<uniq_id>/<typename>', methods=['GET'])
 @roles_accepted('audit')
 def get_person_nametypes(uniq_id, typename):
-    s = f"<select name='nametype' hx-put='changetype/{uniq_id}' hx-swap='none'>"
+    s = f"""
+        <select name='nametype' 
+            id='name_{uniq_id}'
+            hx-put='changetype/{uniq_id}' 
+            hx-target='#msg_{uniq_id}' 
+            hx-swap='innerHTML settle:1s'>
+    """
     found = False
     for t in ["Birth Name","Married Name","Also Known As","Unknown"]:
         s += f"\n    <option value='{t}'"
         if typename == t:
             s += " selected"
             found = True
-        s += ">" + _(t)
+        s += ">" + _(t) + "</option>"
     if not found:
         s += f"\n    <option value='{typename}' selected>" + _(typename)
     s += "\n</select>"
+    s += f"<span class='msg' id='msg_{uniq_id}'></span>"
     return s 
+
 
 @bp.route('/scene/changetype/<uniq_id>', methods=['PUT'])
 @roles_accepted('audit')
 def person_name_changetype(uniq_id):
-    nametype_list = request.form.getlist('nametype')
-    uid_list = request.form.getlist("order")
-    index = uid_list.index(uniq_id)
-    nametype = nametype_list[index]
-    u_context = UserContext(user_session, current_user, request)
-    
-    with PersonWriter('simple', u_context) as service:
-        service.set_name_type(int(uniq_id), nametype)
-    return ""
+    try:
+        nametype_list = request.form.getlist('nametype')
+        uid_list = request.form.getlist("order")
+        index = uid_list.index(uniq_id)
+        nametype = nametype_list[index]
+        u_context = UserContext(user_session, current_user, request)
+        
+        with PersonWriter('simple', u_context) as service:
+            service.set_name_type(int(uniq_id), nametype)
+        return _("type changed") # will be displayed in <span class='msg' ...>
+    except:
+        return _("type change FAILED") # will be displayed in <span class='msg' ...>
 
 @bp.route('/scene/get_person_names/<uuid>', methods=['PUT'])
 @roles_accepted('guest','research', 'audit', 'admin')
@@ -891,14 +906,17 @@ def show_source_page(sourceid=None):
 
         if res['status'] == Status.NOT_FOUND:
             msg = res.get('statustext', _('No objects found'))
-            return redirect(url_for('virhesivu', code=1, text=msg))
+            flash(msg, 'error')
         if res['status'] != Status.OK:
-            msg = res.get('statustext', _('Error'))
-            return redirect(url_for('virhesivu', code=1, text=msg))
+            flash(f'{res.get("statustext", _("error"))}', 'error')
+ 
+        stk_logger(u_context, f"-> bp.scene.routes.show_source_page n={len(res['citations'])}")
 
     except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    stk_logger(u_context, f"-> bp.scene.routes.show_source_page n={len(res['citations'])}")
+        msg = f'bp.scene.routes.show_source_page: {e.__class__.__name__} {e}'
+        flash(f'{ _("Program error")}', 'error')
+        logger.error(msg)
+
 #     for c in res.citations:
 #         for i in c.citators:
 #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
