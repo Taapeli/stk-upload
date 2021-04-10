@@ -58,7 +58,6 @@ from ui import jinja_filters
 
 from bp.scene.models import media
 from models.obsolete_datareader import obsolete_read_persons_with_events
-<<<<<<< HEAD
 
 # Select the read driver for current database
 from database.accessDB import get_dataservice
@@ -69,9 +68,6 @@ from database.accessDB import get_dataservice
 #writeservice = Neo4jWriteService(shareds.driver)
 
 from bp.graph.models.fanchart import FanChart
-=======
-from bp.graph.routes import get_fanchart_data
->>>>>>> eddd86bb077ded130ba7d5c981608ba7e9bf402e
 
 
 def stk_logger(context, msg:str):

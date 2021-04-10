@@ -234,7 +234,6 @@ class PersonReader(DataService):
         # [{'surname': surname, 'count': count},...]
         return surnames
 
-<<<<<<< HEAD
     def get_person_minimal(self, uuid):
         '''
         Get all parents of the person with given uuid.
@@ -255,8 +254,6 @@ class PersonReader(DataService):
         Returns a list.
         '''
         return self.dataservice.dr_get_family_members_by_id(uniq_id, which='children')
-=======
->>>>>>> eddd86bb077ded130ba7d5c981608ba7e9bf402e
 
 class PersonWriter(DataService):
     '''
