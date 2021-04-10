@@ -35,6 +35,9 @@
 </style>
 
 <script>
+    east = 0;
+    west = Math.PI;
+
     const
         width = window.innerWidth,
         height = window.innerHeight,
@@ -63,7 +66,7 @@
         const r = Math.max(0, (y(d.y0) + y(d.y1)) / 2);
 
         const middleAngle = (angles[1] + angles[0]) / 2;
-        const invertDirection = middleAngle > 0 && middleAngle < Math.PI; // On lower quadrants write text ccw
+        const invertDirection = middleAngle > east && middleAngle < west; // On lower quadrants write text ccw
         if (invertDirection) { angles.reverse(); }
 
         const path = d3.path();
@@ -71,15 +74,15 @@
         return path.toString();
     };
 
-    const textFits = d => {
-        const CHAR_SPACE = 6;
+    // const textFits = d => {
+    //     const CHAR_SPACE = 6;
 
-        const deltaAngle = x(d.x1) - x(d.x0);
-        const r = Math.max(0, (y(d.y0) + y(d.y1)) / 2);
-        const perimeter = r * deltaAngle;
+    //     const deltaAngle = x(d.x1) - x(d.x0);
+    //     const r = Math.max(0, (y(d.y0) + y(d.y1)) / 2);
+    //     const perimeter = r * deltaAngle;
 
-        return d.data.name.length * CHAR_SPACE < perimeter;
-    };
+    //     return d.data.name.length * CHAR_SPACE < perimeter;
+    // };
 
     const handleClick = (d, i) => {
         if (d.data.uuid != null) {
@@ -89,6 +92,69 @@
             var newParams = searchParams.toString();
             window.location.search = newParams
         }
+        d3.event.stopPropagation();
+    }
+
+    const drawFanchart = (slice) => {
+        const newSlice = slice.enter()
+            .append('g').attr('class', 'slice');
+
+        newSlice.on("click", handleClick);
+
+        newSlice.append('title')
+            .text(d => d.data.title);
+
+        newSlice.append('path')
+            .attr('class', 'main-arc')
+            .style('fill', d => d.data.color)
+            .attr('d', arc);
+
+        newSlice.append('path')
+            .attr('class', 'hidden-arc')
+            .attr('id', (_, i) => `hiddenArc${i}`)
+            .attr('d', middleArcLine);
+
+        // First line of text
+        const text = newSlice.append('text')
+            .attr('display', null); // d => textFits(d) ? null : 'none');
+
+        // Add white contour
+        text.append('textPath')
+            .attr('startOffset','50%')
+            .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
+            .append('tspan')
+            .attr('dy', '-0.4em')
+            .text(d => d.data.name)
+            .style('fill', 'none')
+            .style('stroke', '#fff')
+            .style('stroke-width', 5)
+            .style('stroke-linejoin', 'round');
+
+        text.append('textPath')
+            .attr('startOffset','50%')
+            .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
+            .text(d => d.data.name);
+
+        // Second line of text
+        const text2 = newSlice.append('text')
+            .attr('display', null); // d => textFits(d) ? null : 'none');
+
+        // Add white contour
+        text2.append('textPath')
+            .attr('startOffset','50%')
+            .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
+            .append('tspan')
+            .attr('x', 0).attr('dy', '0.8em')
+            .text(d => d.data.years)
+            .style('fill', 'none')
+            .style('stroke', '#fff')
+            .style('stroke-width', 5)
+            .style('stroke-linejoin', 'round');
+
+        text2.append('textPath')
+            .attr('startOffset','50%')
+            .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
+            .text(d => d.data.years);
     }
 
     const svg = d3.select('.tab-content').append('svg')
@@ -106,63 +172,47 @@
 
     slice.exit().remove();
 
-    const newSlice = slice.enter()
-        .append('g').attr('class', 'slice');
+    drawFanchart(slice);
 
-    newSlice.on("click", handleClick);
+    svg.on("click",function(d) {
+        east = (((east/Math.PI) + 1) % 2) * Math.PI;    // toggle between 0 and pi
+        west = (((west/Math.PI) % 2) + 1) * Math.PI;    // toggle between pi and 2*pi
+        svg.exit().remove();
+        drawFanchart(root);
+        svg.attr('transform', 'rotate(180 0 0)');
+    });
 
-    newSlice.append('title')
-        .text(d => d.data.title);
+    // // Debug: size
+    // const text3 = newSlice.append('text')
+    //     .attr('display', null);
+    
+    // text3.append('textPath')
+    //     .attr('startOffset','50%')
+    //     .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
+    //     .append('tspan')
+    //     .attr('x', 0).attr('dy', '1.6em')
+    //     .text(d => d.data.size);    
 
-    newSlice.append('path')
-        .attr('class', 'main-arc')
-        .style('fill', d => d.data.color)
-        .attr('d', arc);
+    //// SAMPLE FOR ROTATION OF CHART
+    //     text.attr('transform', 'rotate(180 0 0)');
+    //     text2.attr('transform', 'rotate(180 0 0)')
+    // //   // The amount we need to rotate:
+    //   var rotate = 180-(d)/2 / Math.PI * 180;
+    
+    //   // Transition the fanchart
+    //   newSlice.transition()
+    //     .attr("transform",  "translate(" + width / 2 + "," + height / 2 + ") rotate(" + rotate + ")")
+    //     .duration(1000);
+     
+     // Τransition the labels:
+    //  text.transition()
+    //    .attr("transform", function(dd) {
+    //      return "translate(" + label.centroid(dd) + ") rotate(" + (-rotate) + ")"; })
+    //    .duration(1000);
 
-    newSlice.append('path')
-        .attr('class', 'hidden-arc')
-        .attr('id', (_, i) => `hiddenArc${i}`)
-        .attr('d', middleArcLine);
+    // text2.transition()
+    //    .attr("transform", function(dd) {
+    //      return "translate(" + label.centroid(dd) + ") rotate(" + (-rotate) + ")"; })
+    //    .duration(1000);
 
-    // First line of text
-    const text = newSlice.append('text')
-        .attr('display', null); // d => textFits(d) ? null : 'none');
-
-    // Add white contour
-    text.append('textPath')
-        .attr('startOffset','50%')
-        .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
-        .append('tspan')
-        .attr('dy', '-0.4em')
-        .text(d => d.data.name)
-        .style('fill', 'none')
-        .style('stroke', '#fff')
-        .style('stroke-width', 5)
-        .style('stroke-linejoin', 'round');
-
-    text.append('textPath')
-        .attr('startOffset','50%')
-        .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
-        .text(d => d.data.name);
-
-    // Second line of text
-    const text2 = newSlice.append('text')
-        .attr('display', null); // d => textFits(d) ? null : 'none');
-
-    // Add white contour
-    text2.append('textPath')
-        .attr('startOffset','50%')
-        .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
-        .append('tspan')
-        .attr('x', 0).attr('dy', '0.8em')
-        .text(d => d.data.years)
-        .style('fill', 'none')
-        .style('stroke', '#fff')
-        .style('stroke-width', 5)
-        .style('stroke-linejoin', 'round');
-
-    text2.append('textPath')
-        .attr('startOffset','50%')
-        .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
-        .text(d => d.data.years);
 </script>

@@ -260,6 +260,27 @@ class PersonReader(DataService):
         # [{'surname': surname, 'count': count},...]
         return surnames
 
+    def get_person_minimal(self, uuid):
+        '''
+        Get all parents of the person with given uuid.
+        Returns a list for compatibility with get_parents and get_children.
+        '''
+        return self.dataservice.dr_get_family_members_by_id(uuid, which='person')
+
+    def get_parents(self, uniq_id):
+        '''
+        Get all parents of the person with given db uniq_id.
+        Returns a list as number of parents in database is not always 0..2.
+        '''
+        return self.dataservice.dr_get_family_members_by_id(uniq_id, which='parents')
+
+    def get_children(self, uniq_id):
+        '''
+        Get all children of the person with given db uniq_id.
+        Returns a list.
+        '''
+        return self.dataservice.dr_get_family_members_by_id(uniq_id, which='children')
+
 class PersonWriter(DataService):
     '''
     Person datastore for update without transaction.

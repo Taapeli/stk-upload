@@ -68,7 +68,7 @@ from database.accessDB import get_dataservice
 #from pe.neo4j.writeservice import Neo4jWriteService
 #writeservice = Neo4jWriteService(shareds.driver)
 
-from bp.graph.routes import get_fanchart_data
+from bp.graph.models.fanchart import FanChart
 
 def stk_logger(context, msg:str):
     """ Emit logger info message with Use Case mark uc=<code> .
@@ -369,7 +369,7 @@ def show_person_fanchart_hx(uuid=None):
         flash(f'{result.get("statustext","error")}', 'error')
     person = result.get('person')
 
-    fanchart = get_fanchart_data(uuid)
+    fanchart = FanChart().get(uuid)
     n = len(fanchart.get('children',[]))
     t1 = time.time()-t0
     stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
