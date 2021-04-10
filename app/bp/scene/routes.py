@@ -60,7 +60,7 @@ from bp.scene.models import media
 from models.obsolete_datareader import obsolete_read_persons_with_events
 
 # Select the read driver for current database
-from database.accessDB import get_dataservice
+# from database.accessDB import get_dataservice
 # opt = "read_tx" --> Neo4jReadServiceTx # initiate when used
 # opt = "read" --> Neo4jReadService
 

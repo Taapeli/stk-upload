@@ -174,20 +174,20 @@ class FanChart:
                 # If only one parent, create an empty quadrant (only needed if the root node has one parent)
                 if len(ancestors) == 1:
                     slot = 2 - ancestors[0]['gender'] # For father, yields slot 1; for mother, slot 0.
-                    fanchart['children'].insert(slot, {'size': 0.5, 'color': 'white', 'uuid': None})
+                    fanchart['children'].insert(slot, {'size': 0.5, 'color': '#f2f2f2', 'uuid': None})
             else:
                 fanchart['children'] = descendants
                 # No ancestors: make two empty quarters to occupy parents' slots (otherwise descendants end up in east!)
-                fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})   # Can't combine these two!
-                fanchart['children'].insert(0, {'size': 0.5, 'color': 'white', 'uuid': None})   # One will be moved next.
+                fanchart['children'].insert(0, {'size': 0.5, 'color': '#f2f2f2', 'uuid': None})   # Can't combine these two!
+                fanchart['children'].insert(0, {'size': 0.5, 'color': '#f2f2f2', 'uuid': None})   # One will be moved next.
         else:
             fanchart['children'] = ancestors
             # If only one parent, create an empty quadrant (only needed if the root node has one parent)
             if len(ancestors) == 1:
                 slot = 2 - ancestors[0]['gender'] # For father, yields slot 1; for mother, slot 0.
-                fanchart['children'].insert(slot, {'size': 0.5, 'color': 'white', 'uuid': None})
+                fanchart['children'].insert(slot, {'size': 0.5, 'color': '#f2f2f2', 'uuid': None})
             # No descendants, create empty southern hemisphere
-            fanchart['children'].append({'size': 1, 'color': 'white', 'uuid': None})
+            fanchart['children'].append({'size': 1, 'color': '#f2f2f2', 'uuid': None})
 
         # The sectors are drawn anticlockwise, starting from North. To get the ancestors to occupy the
         # Northern hemisphere, we need to move the first node on top level list (father) to end of list.

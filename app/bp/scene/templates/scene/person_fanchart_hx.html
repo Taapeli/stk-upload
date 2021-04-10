@@ -34,7 +34,10 @@
     }
 </style>
 
-<script>
+<script> 
+    // Adapted from Vasco Asturiano https://github.com/vasturiano/sunburst-chart
+    // Copyright (c) 2021 Isotammi project and Heikki Roikonen
+    
     east = 0;
     west = Math.PI;
 
@@ -73,16 +76,6 @@
         path.arc(0, 0, r, angles[0], angles[1], invertDirection);
         return path.toString();
     };
-
-    // const textFits = d => {
-    //     const CHAR_SPACE = 6;
-
-    //     const deltaAngle = x(d.x1) - x(d.x0);
-    //     const r = Math.max(0, (y(d.y0) + y(d.y1)) / 2);
-    //     const perimeter = r * deltaAngle;
-
-    //     return d.data.name.length * CHAR_SPACE < perimeter;
-    // };
 
     const handleClick = (d, i) => {
         if (d.data.uuid != null) {
@@ -173,46 +166,5 @@
     slice.exit().remove();
 
     drawFanchart(slice);
-
-    svg.on("click",function(d) {
-        east = (((east/Math.PI) + 1) % 2) * Math.PI;    // toggle between 0 and pi
-        west = (((west/Math.PI) % 2) + 1) * Math.PI;    // toggle between pi and 2*pi
-        svg.exit().remove();
-        drawFanchart(root);
-        svg.attr('transform', 'rotate(180 0 0)');
-    });
-
-    // // Debug: size
-    // const text3 = newSlice.append('text')
-    //     .attr('display', null);
-    
-    // text3.append('textPath')
-    //     .attr('startOffset','50%')
-    //     .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
-    //     .append('tspan')
-    //     .attr('x', 0).attr('dy', '1.6em')
-    //     .text(d => d.data.size);    
-
-    //// SAMPLE FOR ROTATION OF CHART
-    //     text.attr('transform', 'rotate(180 0 0)');
-    //     text2.attr('transform', 'rotate(180 0 0)')
-    // //   // The amount we need to rotate:
-    //   var rotate = 180-(d)/2 / Math.PI * 180;
-    
-    //   // Transition the fanchart
-    //   newSlice.transition()
-    //     .attr("transform",  "translate(" + width / 2 + "," + height / 2 + ") rotate(" + rotate + ")")
-    //     .duration(1000);
-     
-     // Τransition the labels:
-    //  text.transition()
-    //    .attr("transform", function(dd) {
-    //      return "translate(" + label.centroid(dd) + ") rotate(" + (-rotate) + ")"; })
-    //    .duration(1000);
-
-    // text2.transition()
-    //    .attr("transform", function(dd) {
-    //      return "translate(" + label.centroid(dd) + ") rotate(" + (-rotate) + ")"; })
-    //    .duration(1000);
 
 </script>
