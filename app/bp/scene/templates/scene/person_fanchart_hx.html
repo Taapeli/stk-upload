@@ -111,42 +111,22 @@
         const text = newSlice.append('text')
             .attr('display', null); // d => textFits(d) ? null : 'none');
 
-        // Add white contour
         text.append('textPath')
             .attr('startOffset','50%')
             .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
             .append('tspan')
             .attr('dy', '-0.4em')
-            .text(d => d.data.name)
-            .style('fill', 'none')
-            .style('stroke', '#fff')
-            .style('stroke-width', 5)
-            .style('stroke-linejoin', 'round');
-
-        text.append('textPath')
-            .attr('startOffset','50%')
-            .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
             .text(d => d.data.name);
 
         // Second line of text
         const text2 = newSlice.append('text')
             .attr('display', null); // d => textFits(d) ? null : 'none');
 
-        // Add white contour
         text2.append('textPath')
             .attr('startOffset','50%')
             .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
             .append('tspan')
             .attr('x', 0).attr('dy', '0.8em')
-            .text(d => d.data.years)
-            .style('fill', 'none')
-            .style('stroke', '#fff')
-            .style('stroke-width', 5)
-            .style('stroke-linejoin', 'round');
-
-        text2.append('textPath')
-            .attr('startOffset','50%')
-            .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
             .text(d => d.data.years);
     }
 
