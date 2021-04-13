@@ -110,7 +110,7 @@ def start_initiate():
 
     initialize_db()
     flash(_('Database initial check done.'))
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin.admin'))
 
 @bp.route('/admin/clear_batches', methods=['GET', 'POST'])
 @login_required

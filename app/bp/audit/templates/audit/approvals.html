@@ -59,15 +59,7 @@ function confirm_delete(name) {
         {{ _('Total <b>%(tot)s</b> objects', tot=total|int_thousands) }}
     </p>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
+{% include "flash_messages.html" %}
 
         <table>
 {% set keys = batches.keys()|sort %}

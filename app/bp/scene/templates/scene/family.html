@@ -20,15 +20,7 @@ td { padding-right:1em;}
 {{ macro.menu(menuno) }}
     <div class="content" id="IndividualDetail">
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <ul  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
+{% include "flash_messages.html" %}
 
 {% if family %}
         <h2>{{ _("Family")|capitalize }}</h2>

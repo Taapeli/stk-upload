@@ -3,7 +3,6 @@
 {% block title %}{{ _('Duplicates search') }}{% endblock %}
 {% block body %}
 {{ super() }}
-{% include "security/_messages.html" %}
 
 <script src="/static/js/vue.js"></script>
 <script src="/static/js/axios.min.js"></script>
@@ -15,6 +14,8 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 
 <div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
   <h1>{{ _('Duplicates search') }}</h1>
+
+{% include "flash_messages.html" %}
 
     <div class="startbox2">
         <h2>{{ _('Data Batches') }}</h2>

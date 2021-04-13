@@ -1,6 +1,5 @@
 {# templates/admin/start.html_ #}
 {% extends "/admin/layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _('Administrator') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -47,6 +46,8 @@ input.error {
 
 <div id="dbEditor" style="margin-left:50px; padding-bottom: 2em;">
   <h1>DB Editor</h1>
+
+{% include "flash_messages.html" %}
 
     <div class="box1">
         <h2>Labels</h2>

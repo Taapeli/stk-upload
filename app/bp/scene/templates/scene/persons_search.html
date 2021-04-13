@@ -38,10 +38,12 @@ div.CloudPink div {
 </div>
 
 {{ macro.menu(menuno) }}
-
     <div class="content" id="Individuals">
         <div id="summaryarea">
-          <form  action="/scene/persons/search" method="post">
+ 
+{% include "flash_messages.html" %}
+
+         <form  action="/scene/persons/search" method="post">
             <div class="flex-container2">
 {% if cnt + num_hidden > 0 %}
                 <div class="description_box2">
@@ -122,17 +124,7 @@ selector.addEventListener("change", () => {
 });
 </script>
 
-    <div>
-	        {% with messages = get_flashed_messages(with_categories=true) %}
-	          {% if messages %}
-	            <ul  class='flashes'>
-	            {% for category, message in messages %}
-	              <li class='flash_{{category}}'>{{ message }}</li>
-	            {% endfor %}
-	            </ul>
-	          {% endif %}
-	        {% endwith %}
-    </div> <!-- end messages -->
+
 {% if status == 'OK' %}
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>

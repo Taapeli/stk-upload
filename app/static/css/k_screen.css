@@ -401,11 +401,12 @@ a[href]:hover, a[href]:active {
 }
 
 .flashes {
+    list-style-type: square;
     color: darkblue;
     border: solid 2pt #c9ac45;
     background-color: #f9e9a3;
-    margin: 3em;
-    padding: 2em;
+    margin: 2em 3em 1em 3em;;
+    padding: 1em 2em;
     max-width: 40em;
 }
 .flash_error { color: red }

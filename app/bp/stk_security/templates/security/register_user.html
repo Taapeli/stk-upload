@@ -9,7 +9,11 @@
 <div style="margin-left:50px; padding-bottom: 2em;"> 
   <div> 
     <h1>{{ _('Fill in the User Information Form of Isotammi database Service') }}</h1> 
-    <div>{% include "security/_messages.html" %}</div> 
+    
+    <div>
+    {% include "flash_messages.html" %}
+    </div>
+
     <div class="row"> 
        <div class="startbox"> 
           <h2>{{ _('Register as an user of Isotammi Service') }}</h2> 
