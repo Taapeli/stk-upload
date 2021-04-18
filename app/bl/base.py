@@ -139,7 +139,7 @@ class NodeObject():
         Compare 
             self.dates <op> other.dates = True?
 
-        See also: models.gen.dates.DateRange.__lt__()
+        See also: bl.dates.DateRange.__lt__()
 
         - None as other.dates is always considered the 1st in order
         - None as self.dates  is always considered last in order

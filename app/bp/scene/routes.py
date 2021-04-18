@@ -674,7 +674,7 @@ def show_families():
     
     with FamilyReader("read", u_context) as service:
         # 'families' has Family objects
-        families = service.get_families(opt)
+        families = service.get_families()
 
     stk_logger(u_context, f"-> bp.scene.routes.show_families/{opt} n={len(families)}")
     return render_template("/scene/families.html", families=families, 

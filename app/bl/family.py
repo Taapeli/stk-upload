@@ -20,11 +20,6 @@
 """
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
-Components moved 15.5.2020 from 
-    - models.gen.family.Family -> Family
-    - models.gen.family_combo.Family_combo -> FamilyBl
-    - models.gen.family_combo.Family_combo -> FamilyBl, FamilyReader
-
 @author: jm 
 """
 import shareds
@@ -40,7 +35,6 @@ from .person_name import Name
 
 # from pe.db_reader import DbReader
 from pe.dataservice import DataService
-from models.gen.cypher import Cypher_family  # TODO fix
 from pe.neo4j.cypher.cy_family import CypherFamily
 
 from bl.dates import DateRange
@@ -284,119 +278,86 @@ class FamilyReader(DataService):
             else:
                 self.use_user = u_context.user
 
-    def get_families(self, opt="father"):
-        """Find families from the database
+    def get_families(self):
+        """Find families from the database.
 
-        from /scene/families, tools: /listall/families
+        Order by man's/wife's name (order = "man"/"wife").
+        Direction forward ("fw"), "bw" not implemented.
+        Get candidate material, if "use_user" is given, else approved material.
+
+        Returns "limit" families from "first" given name.
         """
-
-        families = []
-        fw = self.user_context.first  # next name
-        user = self.user_context.batch_user()
-        limit = self.user_context.count
         order = self.user_context.order
-        ustr = "user " + user if user else "no user"
+        limit = self.user_context.count
+        args = {
+            "use_user": self.use_user,
+            "direction": "fw",
+            "name": self.user_context.first,  # From here forward
+            "order": order,
+            "limit": limit,
+        }
+        ustr = "user " + args["use_user"] if args["use_user"] else "no user"
         print(
-            f"FamilyReader.get_families: Get max {limit} families "
-            f"for {ustr} starting  {order} {fw!r}"
+            f"FamilyReader.get_families: Get max {args['limit']} families "
+            f"for {ustr} starting from {args['order']}={args['name']!r}"
         )
 
-        # Select True = filter by this user False = filter approved data
-        show_by_owner = self.user_context.use_owner_filter()
-        # show_approved = self.user_context.use_common()
+        #  args = {use_user:str, direction:str="fw", name:str=None, limit:int=50, order:str"man"}
+        res = shareds.dservice.dr_get_families(args)
+        # returns {'recs':recs, 'status':Status.OK/NOT_FOUND}
+        if Status.has_failed(res, False):
+            return res
 
-        with shareds.driver.session() as session:
-            try:
-                if show_by_owner:
-                    # (u:UserProfile {username})
-                    #    -[:HAS_LOADED]-> (b:Batch)
-                    #    -[:OWNS]-> (f:Family {father_sortname})
-                    if order == "man":
-                        print("FamilyReader.get_families: my own order by man")
-                        result = session.run(
-                            Cypher_family.read_my_families_f,
-                            user=user,
-                            fw=fw,
-                            limit=limit,
-                        )
-                    elif order == "wife":
-                        print("FamilyReader.get_families: my own order by wife")
-                        result = session.run(
-                            Cypher_family.read_my_families_m,
-                            user=user,
-                            fwm=fw,
-                            limit=limit,
-                        )
-                else:  # approved from any researcher
-                    # (:Audit) -[:PASSED]-> (f:Family {father_sortname})
-                    if order == "man":
-                        # 3 == #1 simulates common by reading all
-                        print("FamilyReader.get_families: approved order by man")
-                        result = session.run(
-                            Cypher_family.read_families_common_f,  # user=user,
-                            fw=fw,
-                            limit=limit,
-                        )
-                    elif order == "wife":
-                        # 1 get all with owner name for all
-                        print("FamilyReader.get_families: approved order by wife")
-                        result = session.run(
-                            Cypher_family.read_families_common_m, fwm=fw, limit=limit
-                        )
+        families = []
+        for record in res["recs"]:
+            # record.keys() = ['f', 'marriage_place', 'parent', 'child', 'no_of_children']
+            if record["f"]:
+                # <Node id=55577 labels={'Family'}
+                #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d',
+                #    'id': 'F0000', 'change': 1507492602}>
+                f_node = record["f"]
+                family = FamilyBl.from_node(f_node)
+                family.marriage_place = record["marriage_place"]
 
-            except Exception as e:
-                print(f"FamilyReader.get_families: {e.__class__.__name__} {e}")
-                raise
+                uniq_id = -1
+                for role, parent_node, name_node in record["parent"]:
+                    if parent_node:
+                        # <Node id=214500 labels={'Person'}
+                        #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa',
+                        #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496,
+                        #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008',
+                        #    'date2': 1997946, 'date1': 1929380}>
+                        if uniq_id != parent_node.id:
+                            # Skip person with double default name
+                            pp = PersonBl.from_node(parent_node)
+                            if role == "father":
+                                family.father = pp
+                            elif role == "mother":
+                                family.mother = pp
 
-            for record in result:
-                # record.keys() = ['f', 'marriage_place', 'parent', 'child', 'no_of_children']
-                if record["f"]:
-                    # <Node id=55577 labels={'Family'}
-                    #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d',
-                    #    'id': 'F0000', 'change': 1507492602}>
-                    f_node = record["f"]
-                    family = FamilyBl.from_node(f_node)
-                    family.marriage_place = record["marriage_place"]
+                        pname = Name.from_node(name_node)
+                        pp.names = [pname]
 
-                    uniq_id = -1
-                    for role, parent_node, name_node in record["parent"]:
-                        if parent_node:
-                            # <Node id=214500 labels={'Person'}
-                            #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa',
-                            #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496,
-                            #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008',
-                            #    'date2': 1997946, 'date1': 1929380}>
-                            if uniq_id != parent_node.id:
-                                # Skip person with double default name
-                                pp = PersonBl.from_node(parent_node)
-                                if role == "father":
-                                    family.father = pp
-                                elif role == "mother":
-                                    family.mother = pp
+                for ch in record["child"]:
+                    # <Node id=60320 labels={'Person'}
+                    #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19,
+                    #    'confidence': '', 'sex': 0, 'change': 1507492602,
+                    #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001',
+                    #    'date2': 1609920, 'date1': 1609920}>
+                    #                         child = Person_as_member()
+                    child = PersonBl.from_node(ch)
+                    family.children.append(child)
+                family.children.sort(key=lambda x: x.birth_low)
 
-                            pname = Name.from_node(name_node)
-                            pp.names = [pname]
-
-                    for ch in record["child"]:
-                        # <Node id=60320 labels={'Person'}
-                        #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19,
-                        #    'confidence': '', 'sex': 0, 'change': 1507492602,
-                        #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001',
-                        #    'date2': 1609920, 'date1': 1609920}>
-                        #                         child = Person_as_member()
-                        child = PersonBl.from_node(ch)
-                        family.children.append(child)
-                    family.children.sort(key=lambda x: x.birth_low)
-
-                    if record["no_of_children"]:
-                        family.no_of_children = record["no_of_children"]
-                    family.num_hidden_children = 0
-                    if not self.user_context.use_common():
-                        if family.father:
-                            family.father.too_new = False
-                        if family.mother:
-                            family.mother.too_new = False
-                    families.append(family)
+                if record["no_of_children"]:
+                    family.no_of_children = record["no_of_children"]
+                family.num_hidden_children = 0
+                if not self.user_context.use_common():
+                    if family.father:
+                        family.father.too_new = False
+                    if family.mother:
+                        family.mother.too_new = False
+                families.append(family)
 
         # Update the page scope according to items really found
         if families:
