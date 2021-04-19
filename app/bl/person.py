@@ -259,8 +259,8 @@ class PersonWriter(DataService):
     '''
     Person datastore for update without transaction.
     '''
-    def __init__(self, service_name:str, u_context=None):
-        super().__init__(service_name, u_context)
+    def __init__(self, service_name:str, u_context=None, tx=None):
+        super().__init__(service_name, u_context, tx=tx)
         shareds.dservice.tx = None
 
     def set_primary_name(self, uuid, old_order):
@@ -271,6 +271,62 @@ class PersonWriter(DataService):
 
     def set_name_type(self, uniq_id, nametype):
         shareds.dservice.dr_set_name_type(uniq_id, nametype)
+
+
+    def set_person_name_properties(self, uniq_id=None, ops=['refname', 'sortname']):
+        """ Set Refnames to all Persons or one Person with given uniq_id; 
+            also sets Person.sortname using the default name
+    
+            Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
+                        bp.admin.routes.set_all_person_refnames
+        """
+        sortname_count = 0
+        refname_count = 0
+        do_refnames = 'refname' in ops
+        do_sortname = 'sortname' in ops
+        names = []
+
+        # Get each Name object (with person_uid) 
+        for pid, name_node in shareds.dservice.ds_get_personnames(uniq_id):
+            name = Name.from_node(name_node)
+            name.person_uid =  pid
+            names.append(name)
+
+        if do_refnames:
+            for name in names:
+                # Create links and nodes from given person: (:Person) --> (r:Refname)
+                res = shareds.dservice.ds_build_refnames(name.person_uid, name)
+                if Status.has_failed(res): return res
+                refname_count += res.get('count', 0)
+        if do_sortname:
+            for name in names:
+                if name.order == 0:
+                    # If default name, store sortname key to Person node
+                    sortname = name.key_surname()
+                    res = shareds.dservice.ds_set_person_sortname(name.person_uid, sortname)
+                    if Status.has_failed(res): return res
+                    sortname_count += 1
+                    break
+
+        return {'refnames': refname_count, 'sortnames': sortname_count, 
+                'status':Status.OK}
+
+
+    def set_estimated_lifetimes(self, uids=[]): 
+        """ Sets estimated lifetimes to Person.dates for given person.uniq_ids.
+ 
+            Stores dates as Person properties: datetype, date1, and date2
+ 
+            :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+ 
+            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
+            and models.dataupdater.set_estimated_dates
+        """
+        res = shareds.dservice.ds_set_people_lifetime_estimates(uids)
+
+        print(f"Estimated lifetime for {res['count']} persons")
+        return res
+
 
 
 class PersonBl(Person):
@@ -399,7 +455,7 @@ class PersonBl(Person):
         """
         counter = 0
         for uniq_id in person_ids:
-            res = shareds.dservice._update_person_confidences(uniq_id)
+            res = shareds.dservice.ds_update_person_confidences(uniq_id)
             # returns {confidence, status, statustext}
             stat = res.get('status')
             if stat == Status.UPDATED:
@@ -410,65 +466,15 @@ class PersonBl(Person):
 
         return {'status':Status.OK, 'count':counter}
 
-    @staticmethod
-    def set_person_name_properties(uniq_id=None, ops=['refname', 'sortname']):
-        """ Set Refnames to all Persons or one Person with given uniq_id; 
-            also sets Person.sortname using the default name
-    
-            Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
-                        bp.admin.routes.set_all_person_refnames
-        """
-        sortname_count = 0
-        refname_count = 0
-        do_refnames = 'refname' in ops
-        do_sortname = 'sortname' in ops
-        names = []
-
-        # Get each Name object (with person_uid) 
-        for pid, name_node in shareds.dservice.ds_get_personnames(uniq_id):
-            name = Name.from_node(name_node)
-            name.person_uid =  pid
-            names.append(name)
-
-        if do_refnames:
-            for name in names:
-                # Create links and nodes from given person: (:Person) --> (r:Refname)
-                res = shareds.dservice.ds_build_refnames(name.person_uid, name)
-                if Status.has_failed(res): return res
-                refname_count += res.get('count', 0)
-        if do_sortname:
-            for name in names:
-                if name.order == 0:
-                    # If default name, store sortname key to Person node
-                    sortname = name.key_surname()
-                    shareds.dservice._set_person_sortname(name.person_uid, sortname)
-                    if Status.has_failed(res): return res
-                    sortname_count += 1
-                    break
-
-        return {'refnames': refname_count, 'sortnames': sortname_count, 
-                'status':Status.OK}
 
 
-#     @staticmethod
-#     def get_confidence (uniq_id=None): --> pe.neo4j.updateservice.Neo4jUpdateService ??
+#     @staticmethod --> bl.person.PersonWriter.set_person_name_properties
+#     def set_person_name_properties(uniq_id=None, ops=['refname', 'sortname']):
+#     @staticmethod --> pe.neo4j.updateservice.Neo4jUpdateService ??
+#     def get_confidence (uniq_id=None):
 #     def set_confidence (self, tx): 
-
-    @staticmethod
-    def estimate_lifetimes(uids=[]): # <-- 
-        """ Sets estimated lifetimes to Person.dates for given person.uniq_ids.
- 
-            Stores dates as Person properties: datetype, date1, and date2
- 
-            :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
- 
-            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
-            and models.dataupdater.set_estimated_dates
-        """
-        res = shareds.dservice._set_people_lifetime_estimates(uids)
-
-        print(f"Estimated lifetime for {res['count']} persons")
-        return res
+#     @staticmethod # --> bl.person.PersonWriter.set_estimated_lifetimes
+#     def estimate_lifetimes(uids=[]):
 
 
     def remove_privacy_limit_from_families(self):

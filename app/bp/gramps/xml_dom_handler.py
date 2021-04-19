@@ -39,9 +39,9 @@ import xml.dom.minidom
 
 import shareds
 from bl.base import Status
-from bl.person import PersonBl
+from bl.person import PersonBl, PersonWriter
 from bl.person_name import Name
-from bl.family import FamilyBl
+from bl.family import FamilyBl, FamilyWriter
 from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaBl, MediaReferenceByHandles
@@ -1014,15 +1014,16 @@ class DOM_handler:
                 "sortnames": sortname_count,
             }
 
-        for uniq_id in self.family_ids:
-            if uniq_id != None:
-                #               dc, sc = dataupdater.set_family_calculated_attributes(tx=self.tx, uniq_id=p_id)
-                res = FamilyBl.set_calculated_attributes(uniq_id)
-                # returns {refnames, sortnames, status}
-                if Status.has_failed(res):
-                    return res
-                dates_count += res.get("dates")
-                sortname_count += res.get("sortnames")
+        with FamilyWriter('update', tx=shareds.dservice.tx) as service:
+            for uniq_id in self.family_ids:
+                if uniq_id is not None:
+                    #res = shareds.dservice.ds_set_people_lifetime_estimates(self.person_ids)
+                    res = service.set_family_calculated_attributes(uniq_id)
+                    # returns {refnames, sortnames, status}
+                    if Status.has_failed(res):
+                        return res
+                    dates_count += res.get("dates")
+                    sortname_count += res.get("sortnames")
 
         self.blog.log_event(
             {"title": "Dates", "count": dates_count, "elapsed": time.time() - t0}
@@ -1046,15 +1047,17 @@ class DOM_handler:
                 "status": Status.NOT_FOUND,
             }
 
-        for p_id in self.person_ids:
-            self.update_progress("refnames")
-            if p_id != None:
-                res = PersonBl.set_person_name_properties(uniq_id=p_id)
-                # returns {refnames, sortnames, status}
-                if Status.has_failed(res):
-                    return res
-                refname_count += res.get("refnames")
-                sortname_count += res.get("sortnames")
+        with PersonWriter('update', tx=shareds.dservice.tx) as service:
+            print(f"### set_person_calculated_attributes: shareds.dservice.tx = {shareds.dservice.tx}")
+            for p_id in self.person_ids:
+                self.update_progress("refnames")
+                if p_id is not None:
+                    res = service.set_person_name_properties(uniq_id=p_id)
+                    # returns {refnames, sortnames, status}
+                    if Status.has_failed(res):
+                        return res
+                    refname_count += res.get("refnames")
+                    sortname_count += res.get("sortnames")
 
         self.blog.log_event(
             {
@@ -1076,8 +1079,15 @@ class DOM_handler:
         message = f"{len(self.person_ids)} Estimated lifetimes"
         print(f"***** {message} *****")
         t0 = time.time()
+        print(f"### set_person_estimated_dates: shareds.dservice.tx = {shareds.dservice.tx}")
 
-        res = PersonBl.estimate_lifetimes(self.person_ids)
+        #res = PersonBl.estimate_lifetimes(self.person_ids)
+        res = shareds.dservice.ds_set_people_lifetime_estimates(self.person_ids)
+
+        if Status.has_failed(res):
+            msg = res.get("statustext")
+            logger.error(f"DOM_handler.set_person_estimated_dates {msg}")
+            #flash(ret.get("statustext"), "error")
 
         count = res.get("count")
         message = "Estimated person lifetimes"

@@ -373,6 +373,8 @@ def xml_to_stkbase(pathname, userid):
 
             # Copy date and name information from Person and Event nodes to Family nodes
             res = handler.set_family_calculated_attributes()
+            #res = shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
+
             if Status.has_failed(res):
                 return res
 
@@ -385,8 +387,8 @@ def xml_to_stkbase(pathname, userid):
         except Exception as e:
             traceback.print_exc()
             msg = f"Stopped xml load due to {e}"
-            print(msg)
-            batch_service.rollback()
+            print("bp.gramps.gramps_loader.xml_to_stkbase: " + msg)
+            # batch_service.rollback()
             handler.blog.log_event(
                 {
                     "title": _("Database save failed due to {}".format(msg)),

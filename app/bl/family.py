@@ -244,12 +244,6 @@ class FamilyBl(Family):
 
         return
 
-    @staticmethod
-    def set_calculated_attributes(uniq_id):
-        """Get Family event dates and sortnames."""
-        return shareds.dservice._set_family_calculated_attributes(uniq_id)
-        # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
-
     def remove_privacy_limits(self):
         if self.father:
             self.father.too_new = False
@@ -257,6 +251,21 @@ class FamilyBl(Family):
             self.mother.too_new = False
         for c in self.children:
             c.too_new = False
+
+
+class FamilyWriter(DataService):
+    '''
+    Family datastore for update with optional trasaction.
+    '''
+    def __init__(self, service_name:str, u_context=None, tx=None):
+        super().__init__(service_name, u_context, tx=tx)
+        shareds.dservice.tx = None
+        print(f"#FamilyWriter: {dir(self)}")
+
+    def set_calculated_attributes(self, uniq_id):
+        """Set Family event dates and sortnames."""
+        return shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
+        # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
 
 
 class FamilyReader(DataService):

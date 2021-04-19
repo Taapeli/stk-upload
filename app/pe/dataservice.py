@@ -70,7 +70,7 @@ class DataService:
         # With 'update' and 'read_tx' begin transaction
         if self.pre_tx:
             # 1. Use given transaction
-            print(f'#~~~{self.idstr} enter active tx {self.pre_tx}')
+            print(f'#~~~{self.idstr} enter active {self.pre_tx}')
             self.dataservice.tx = self.pre_tx
         else:
             if self.service_name == "update" or self.service_name == "read_tx":
@@ -102,8 +102,11 @@ class DataService:
                 print(f"--{self.idstr} exit rollback {e}")
                 self.dataservice.tx.rollback()
             else:
-                print(f'#~~~{self.idstr} exit commit')
-                self.dataservice.tx.commit()
+                if self.pre_tx is None:
+                    print(f'#~~~{self.idstr} exit commit')
+                    self.dataservice.tx.commit()
+                else:
+                    print(f'#~~~{self.idstr} exit continue')
         else:
             print(f'#~~~{self.idstr} exit')
 

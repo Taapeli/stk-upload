@@ -48,8 +48,8 @@ def make_place_hierarchy_properties(tx=None, place=None):
     if not tx:
         # Close my own created transaction
         User.endTransaction(my_tx)
-        
-    
+
+
 # def set_confidence_values(tx, uniq_id=None, batch_logger=None): --> bl.person.PersonBl.set_confidence
 #     """ Sets a quality rate for one or all Persons.
 # 
@@ -84,24 +84,25 @@ def make_place_hierarchy_properties(tx=None, place=None):
 #     return
 
 
-def set_person_estimated_dates(uids=[]):
-    """ Sets an estimated lifetime in Person.dates.
-
-        Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
-
-        The properties in Person node are datetype, date1, and date2.
-        With transaction, see gramps_loader.DOM_handler.set_estimated_dates_tr
-
-        Called from bp.admin.routes.estimate_dates
-    """
-    my_tx = User.beginTransaction()
-
-    cnt = PersonBl.estimate_lifetimes(my_tx, uids)
-
-    msg = _("Estimated {} person lifetimes").format(cnt)
-    User.endTransaction(my_tx)
-    
-    return msg
+#====> pe.neo4j.updateservice.Neo4jUpdateService.ds_set_people_lifetime_estimates
+# def obsolete_set_person_estimated_dates(uids=[]):
+#     """ Sets an estimated lifetime in Person.dates.
+# 
+#         Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
+# 
+#         The properties in Person node are datetype, date1, and date2.
+#         With transaction, see gramps_loader.DOM_handler.set_estimated_dates_tr
+# 
+#         Called from bp.admin.routes.estimate_dates
+#     """
+#     my_tx = User.beginTransaction()
+# 
+#     cnt = PersonBl.estimate_lifetimes(my_tx, uids)
+# 
+#     msg = _("Estimated {} person lifetimes").format(cnt)
+#     User.endTransaction(my_tx)
+#     
+#     return msg
 
 
 def set_family_calculated_attributes(tx=None, uniq_id=None):
