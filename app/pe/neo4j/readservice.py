@@ -86,7 +86,9 @@ class Neo4jReadService(ConcreteService):
             obj = PersonBl.from_node(node)
         elif 'Family' in node.labels:
             obj = FamilyBl.from_node(node)
-            obj.clearname = obj.father_sortname+' & '+obj.mother_sortname
+            fn = obj.father_sortname if obj.father_sortname else "?"
+            mn = obj.mother_sortname if obj.mother_sortname else "?"
+            obj.clearname = fn +' & '+ mn
         elif 'Event' in node.labels:
             obj = EventBl.from_node(node)
             obj.clearname = _(obj.type) + ' ' + obj.description + str(obj.dates)

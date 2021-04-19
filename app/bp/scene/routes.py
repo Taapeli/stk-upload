@@ -913,7 +913,7 @@ def show_source_page(sourceid=None):
         flash(f'{ _("Program error")}', 'error')
         logger.error(msg)
 
-#     for c in res.citations:
+#     for c in res['citations']:
 #         for i in c.citators:
 #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
 #             else:               print(f'{c} – person {i} {i.sortname}')

@@ -541,36 +541,32 @@ class FamilyReader(DataService):
                 "statustext": _("This person has no families"),
             }
 
-    # The followind may be obsolete
+#     def get_children_by_id(self):
+#         raise ("Obsolete bl.family.FamilyReader.get_children_by_id")
 
-    def get_children_by_id(self):
-        raise ("Obsolete bl.family.FamilyReader.get_children_by_id")
+#     def get_family_events(self):
+#         """ Luetaan perheen tapahtumien tiedot """
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (family:Family)-[r:EVENT]->(event:Event)
+#   WHERE ID(family)=$pid
+# RETURN r.role AS eventref_role, event.handle AS event_handles"""
+#         return shareds.driver.session().run(query, {"pid": pid})
 
-    def get_family_events(self):
-        """ Luetaan perheen tapahtumien tiedot """
-
-        pid = int(self.uniq_id)
-        query = """
-MATCH (family:Family)-[r:EVENT]->(event:Event)
-  WHERE ID(family)=$pid
-RETURN r.role AS eventref_role, event.handle AS event_handles"""
-        return shareds.driver.session().run(query, {"pid": pid})
-
-    @staticmethod
-    def find_family_for_event(event_uniq_id):
-        """Returns Family instance which has given Event.
-
-        NOT IN USE. For models.obsolete_datareader.get_source_with_events
-        """
-        query = """
-MATCH (family:Family)-[r:EVENT]->(event)
-  WHERE ID(event)=$pid
-RETURN family"""
-        result = shareds.driver.session().run(query, pid=event_uniq_id)
-        for record in result:
-            f = FamilyBl.from_node(record[0])
-            return f
-        raise LookupError(f"Family {event_uniq_id} not found")
+#     @staticmethod
+#     def find_family_for_event(event_uniq_id):
+#         """Returns Family instance which has given Event.
+#         NOT IN USE. For models.obsolete_datareader.get_source_with_events
+#         """
+#         query = """
+# MATCH (family:Family)-[r:EVENT]->(event)
+#   WHERE ID(event)=$pid
+# RETURN family"""
+#         result = shareds.driver.session().run(query, pid=event_uniq_id)
+#         for record in result:
+#             f = FamilyBl.from_node(record[0])
+#             return f
+#         raise LookupError(f"Family {event_uniq_id} not found")
 
     #     @staticmethod
     #     def get_dates_parents(tx, uniq_id): #see models.gen.family_combo.Family_combo

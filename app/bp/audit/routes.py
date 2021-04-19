@@ -35,7 +35,7 @@ from flask import render_template, request, redirect, url_for
 from flask import send_file
 from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
-import gettext
+#import gettext
 
 import shareds
 from bl.audit import Audit
@@ -46,7 +46,13 @@ from bp.admin.cvs_refnames import load_refnames
 from .models.batch_merge import Batch_merge
 
 from bp.admin import uploads
-from models import syslog, loadfile, dbutil
+from models import syslog, loadfile #, obsolete_dbutil
+
+@staticmethod
+def _get_server_location():
+    # Returns server address as a str
+    dbloc = shareds.driver.address
+    return ':'.join((dbloc[0],str(dbloc[1])))
 
 @bp.route('/audit')
 @login_required
@@ -203,7 +209,7 @@ def refnames():
 @roles_accepted('member', 'admin', 'audit')
 def set_all_person_refnames():
     """ Setting reference names for all persons """
-    dburi = dbutil.get_server_location()
+    dburi = _get_server_location()
     (refname_count, _sortname_count) = PersonBl.set_person_name_properties(ops=['refname']) or _('Done')
     logger.info(f"-> bp.audit.routes.set_all_person_refnames n={refname_count}")
     return render_template("/talletettu.html", uri=dburi, 
@@ -264,7 +270,7 @@ def upload_csv():
 def save_loaded_csv(filename, subj):
     """ Save loaded cvs data to the database """
     pathname = loadfile.fullname(filename)
-    dburi = dbutil.get_server_location()
+    dburi = _get_server_location()
     logging.info(f"-> bp.audit.routes.save_loaded_csv/{subj} f='{filename}'")
     try:
         if subj == 'refnames':    # Stores Refname objects
