@@ -3,7 +3,6 @@
 {% block title %}{{ _("User Settings") }} (start/my_settings){% endblock %}
 {% block body %}
 {{ super() }}
-{% include "security/_messages.html" %}
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 {{ hamburger_menu() }}
@@ -37,6 +36,8 @@ table.transparent tbody tr td {
                 <div id="return_on_title">
                     <a href="{{ referrer }}"><button>{{ _('Go back') }}</button></a>
                 </div>
+
+{% include "flash_messages.html" %}
 
 {% if current_user is defined and current_user.is_authenticated %}
 

@@ -3,7 +3,6 @@
 {% block title %}{{ _("Material for Isotammi database") }} 1/2{% endblock %}
 {% block body %}
 {{ super() }}
-{% include "security/_messages.html" %}
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 {{ hamburger_menu() }}
@@ -11,6 +10,8 @@
 <div id="startdiv">
     <div>
         <h1>{{ _("Moving batch to Isotammi database") }}</h1>
+
+{% include "flash_messages.html" %}
 
         <div class="startbox2">
             <h2>{{ _('Selected Batch') }}</h2>

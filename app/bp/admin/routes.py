@@ -16,7 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from bp.admin.forms import UpdateUserProfileForm
+import string
 
 '''
 Created on 8.8.2018
@@ -31,6 +31,7 @@ import os
 
 import json
 #import inspect
+from operator import attrgetter
 import traceback
 
 import logging 
@@ -42,6 +43,7 @@ from flask_babelex import _ #, Domain
 
 import shareds
 from setups import User
+from bp.admin.forms import UpdateUserProfileForm
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
 
@@ -110,7 +112,7 @@ def start_initiate():
 
     initialize_db()
     flash(_('Database initial check done.'))
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin.admin'))
 
 @bp.route('/admin/clear_batches', methods=['GET', 'POST'])
 @login_required
@@ -172,9 +174,18 @@ def estimate_dates(uid=None):
 @login_required
 @roles_accepted('admin', 'audit', 'master')
 def list_users():
+    def keyfunc(attrname):
+        def f(user):
+            return getattr(user,attrname).lower()
+        return f
+    
+    sortby = request.args.get("sortby")
     lista = shareds.user_datastore.get_users()
+    if sortby:
+        lista.sort(key=keyfunc(sortby))
+        
     logging.info(f"-> bp.admin.routes.list_users n={len(lista)}")
-    return render_template("/admin/list_users.html", users=lista)  
+    return render_template("/admin/list_users.html", users=lista, sortby=sortby)  
 
 @bp.route('/admin/update_user/<username>', methods=['GET', 'POST'])
 @login_required

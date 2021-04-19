@@ -1,6 +1,5 @@
 {# _start/join.html_ #}
 {% extends "start/s_layout.html" %}
-{% include "security/_messages.html" %}
 {% from "security/_macros.html" import render_field_with_errors, render_field %}
 {% block title %}{{ _("Join Isotammi") }} (start/my_message){% endblock %}
 {% block body %}
@@ -36,6 +35,8 @@ ul[id] li {
 <div id="startdiv">
   <div>
     <h1>{{ _("Join Isotammi") }}</h1>
+
+{% include "flash_messages.html" %}
 
     <div class="startbox2">
         <div>

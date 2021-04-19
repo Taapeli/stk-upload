@@ -58,7 +58,16 @@ from ui import jinja_filters
 
 from bp.scene.models import media
 from models.obsolete_datareader import obsolete_read_persons_with_events
-from bp.graph.routes import get_fanchart_data
+
+# Select the read driver for current database
+# from database.accessDB import get_dataservice
+# opt = "read_tx" --> Neo4jReadServiceTx # initiate when used
+# opt = "read" --> Neo4jReadService
+
+#from pe.neo4j.writeservice import Neo4jWriteService
+#writeservice = Neo4jWriteService(shareds.driver)
+
+from bp.graph.models.fanchart import FanChart
 
 
 def stk_logger(context, msg:str):
@@ -360,7 +369,7 @@ def show_person_fanchart_hx(uuid=None):
         flash(f'{result.get("statustext","error")}', 'error')
     person = result.get('person')
 
-    fanchart = get_fanchart_data(uuid)
+    fanchart = FanChart().get(uuid)
     n = len(fanchart.get('children',[]))
     t1 = time.time()-t0
     stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
@@ -665,7 +674,7 @@ def show_families():
     
     with FamilyReader("read", u_context) as service:
         # 'families' has Family objects
-        families = service.get_families(opt)
+        families = service.get_families()
 
     stk_logger(u_context, f"-> bp.scene.routes.show_families/{opt} n={len(families)}")
     return render_template("/scene/families.html", families=families, 

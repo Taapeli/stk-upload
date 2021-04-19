@@ -405,6 +405,77 @@ class Neo4jReadService(ConcreteService):
         return {"item":None, "status":Status.NOT_FOUND, "statustext":"No families found"}
 
 
+    def dr_get_families(self, args):
+        """ Read Families data ordered by parent name.
+        
+            args = dict {use_user:str, direction:str="fw", name:str=None, limit:int=50, rule:str"man"}
+        """
+        user = args.get("use_user", None)
+        direction = args.get("direction", "fw")    # "fw" forwars or "bw" backwrds
+        if direction != "fw":
+            raise NotImplementedError("Neo4jReadService.dr_get_families: Only fw implemented")
+
+        fw = args.get("name")   # first name
+        limit = args.get("limit", 50)
+        order = args.get("order", "man")    # "man" or "wife" name order
+
+        # Select True = filter by this user False = filter approved data
+        #show_candidate = self.user_context.use_owner_filter()
+        show_candidate = user is not None
+
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                if show_candidate:
+                    # (u:UserProfile {username})
+                    #    -[:HAS_LOADED]-> (b:Batch)
+                    #    -[:OWNS]-> (f:Family {father_sortname})
+                    if order == "man":
+                        print("Neo4jReadService.dr_get_families: candidate ordered by man")
+                        result = session.run(
+                            CypherFamily.get_candidate_families_f,
+                            user=user,
+                            fw=fw,
+                            limit=limit,
+                        )
+                    elif order == "wife":
+                        print("Neo4jReadService.dr_get_families: candidate ordered by wife")
+                        result = session.run(
+                            CypherFamily.get_candidate_families_m,
+                            user=user,
+                            fwm=fw,
+                            limit=limit,
+                        )
+                else:  # approved from any researcher
+                    # (:Audit) -[:PASSED]-> (f:Family {father_sortname})
+                    if order == "man":
+                        # 3 == #1 simulates common by reading all
+                        print("Neo4jReadService.dr_get_families: accepted ordered by man")
+                        result = session.run(
+                            CypherFamily.get_passed_families_f,  # user=user,
+                            fw=fw,
+                            limit=limit,
+                        )
+                    elif order == "wife":
+                        # 1 get all with owner name for all
+                        print("Neo4jReadService.dr_get_families: accepted ordered by wife")
+                        result = session.run(
+                            CypherFamily.get_passed_families_m, fwm=fw, limit=limit
+                        )
+
+            except Exception as e:
+                msg = f"{e.__class__.__name__} {e}"
+                logger.error("Neo4jReadService.dr_get_families: " + msg)
+                return {"status":Status.ERROR, "statustext":msg}
+
+            recs = []
+            for record in result: 
+                # record.keys() = ['f', 'marriage_place', 'parent', 'child', 'no_of_children']
+                recs.append(record)
+
+            status = Status.OK if recs else Status.NOT_FOUND
+            return {'recs':recs, 'status':status}
+
+
     def dr_get_family_parents(self, uniq_id:int, with_name=True):
         """
             Get Parent nodes, optionally with default Name
@@ -1300,6 +1371,33 @@ class Neo4jReadService(ConcreteService):
                 surname = record['surname']
                 count = record['count']
                 result_list.append({"surname":surname,"count":count})
+        return result_list
+
+#   @functools.lru_cache
+    def dr_get_family_members_by_id(self, id, which):
+        '''
+        Get the minimal data required for creating graphs with person labels.
+        The target depends on which = ('person', 'parents', 'children').
+        For which='person', the id should contain an uuid.
+        For 'parents' and 'children' the id should contain a database uniq_id.
+        '''
+        switcher = {
+            'person': CypherPerson.get_person_for_graph,
+            'parents': CypherPerson.get_persons_parents,
+            'children': CypherPerson.get_persons_children
+        }
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(
+                switcher.get(which),
+                ids=[id])
+            for record in result:
+                result_list.append({
+                    'uniq_id': record['uniq_id'],
+                    'uuid': record['uuid'],
+                    'sortname': record['sortname'],
+                    'gender': record['gender'],
+                    'events': record['events']})
         return result_list
 
     def dr_get_placename_stats_by_user(self, username, count):

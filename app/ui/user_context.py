@@ -379,8 +379,8 @@ class UserContext():
               f"{rec_cnt} of {limit} records")
         scope_old = (self.first, self.last)
         # 1. starting scope in session     ['y','z']
-        # 2. accessed next fw                  ['z', 'ö']  set first = old last
-        # 2b or accessed next bw      ['x', 'y']           set last = old first
+        # 2a accessed next fw              ['z', 'ö']  set first = old last
+        # 2b or accessed next bw           ['x', 'y']  set last = old first
         if self.direction == 'bw':
             self.first = name_first if rec_cnt == limit else '< start'
             self.last = name_last
@@ -389,7 +389,7 @@ class UserContext():
             self.last = name_last if rec_cnt == limit else '> end'
 
         if scope_old[0] != self.first or scope_old[1] != self.last:
-            print(f"update_session_scope: New {var_name!r} {self.first!r} – {self.last!r}")
+            print(f"UserContext.update_session_scope: New {var_name!r} {self.first!r} – {self.last!r}")
 
         self.session[var_name] = (self.first, self.last)
         print(f"UserContext = {repr(self.session)}")

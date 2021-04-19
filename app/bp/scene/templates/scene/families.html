@@ -80,15 +80,8 @@ th span.man-man, th span.wife-wife { color: #020299;}
 	           </div>
             </div>
 
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                <ul  class='flashes'>
-                {% for category, message in messages %}
-                  <li class='flash_{{category}}'>{{ message }}</li>
-                {% endfor %}
-                </ul>
-              {% endif %}
-            {% endwith %}
+{% include "flash_messages.html" %}
+
         </div>
 
 {% if cnt %}
@@ -152,8 +145,8 @@ th span.man-man, th span.wife-wife { color: #020299;}
                 {{ ngettext('%(num)d child', '%(num)d children', f.no_of_children) }}:
             {% endif %}
         {% endif %}
-        {% for c in f.children %}<br>
-                 {{ macro.person_name_by_sortname(c) }}
+        {% for c in f.children %}<br><span title="☆ ~{{c.birth_low}}">
+                 {{ macro.person_name_by_sortname(c) }}</span>
         {% endfor %}</small></td>
         </tr>
     {% endfor %}
