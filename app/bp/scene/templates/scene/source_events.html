@@ -22,7 +22,7 @@ td.Citation div ol {padding-top:.3em;}
 	        <div id="summaryarea">
 
             <table><tbody>
-    {% if source.repositories %}
+    {% if source.repositories %}{% set repo_name = source.repositories[0].rname %}
         {% for repo in source.repositories %}
                 <tr><td class="ColumnAttribute">
             {% if repo.medium %}
@@ -36,7 +36,7 @@ td.Citation div ol {padding-top:.3em;}
                     <td></td>
                 </tr>
         {% endfor %}
-    {% else %}
+    {% else %}{% set repo_name = "?" %}
                 <tr><td colspan="2"><i>{{ _("Note!") }} {{ _("Archieve not defined!") }}</i></td></tr>
     {% endif %}
                 <tr><td>&nbsp;</td><td> </td></tr>
@@ -76,7 +76,9 @@ td.Citation div ol {padding-top:.3em;}
         </form>
 
     	<div id="comments_div" hx-get="/scene/comments/comments_header" hx-trigger="load"></div> 
-
+<style>
+td.Citation > div {display: inline }
+</style>
 	        <div class="subsection" id="citations">
 	            <h3>{{ _('Source References and Events') }}</h3>
 	            <table class="infolist eventlist" width="100%">
@@ -88,9 +90,15 @@ td.Citation div ol {padding-top:.3em;}
 	        		     <span title="sitaatti {{c.id}} #{{c.uniq_id}}">{{ loop.index }}.</span> 
 	        		  </td>
 	        		  <td class="Citation">
+
+	        		    <input id="clp_{{loop.index}}" type="text" style="display:None"
+	        		       value="{{repo_name}};{{source.stitle}};{{c.page}}">
+	        		    <div class="copy-fld" onclick="toClipboard('clp_{{loop.index}}')"
+	        		          title="{{ _('Copy to clipborad') }}"> ⚓{{ _( "Page" ) }} </div>
+
 	        		    <div title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
-	   					  {{ _( "Page" ) }} <b>{{c.page}}</b> 
+	   					  <b>{{c.page}}</b> 
 	   					  {{ macro.stars(c.confidence|float) }}
 
                           {% if c.notes %}

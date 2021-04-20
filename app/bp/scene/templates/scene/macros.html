@@ -131,7 +131,9 @@
     {#  Formats object keys and timestamp for display. Positioned at right margin.
         If 2nd arguments (like "350px") is present, leave the given rigth margin.
      #}
-    <tt title="{{ _('UUID key') }} {{obj.uuid}}">{{obj.uuid_short()}}</tt> /
+    <input id="my_uuid" type="text" value="{{obj.uuid}}" style="display:None">
+    <tt title="{{ _('Copy UUID key') }}" class="copy-fld" 
+        onclick="toClipboard('my_uuid')">{{obj.uuid_short()}}</tt> /
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
     {% if obj.change %}

@@ -266,7 +266,11 @@ a.navlink:hover, a.navlink:active {
 	color:darkred;
 }
 .submit { text-align:right; }
-
+/* For function toClipboard() */
+.copy-fld {
+    cursor: copy;
+    background-color: bisque;
+}
 /* Flexbox boxes floats next to each other */
 .flex-container {
   display: flex;
