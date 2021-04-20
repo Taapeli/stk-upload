@@ -26,6 +26,21 @@ function stars(value) {
 	return ret;
 }
 
+function toClipboard(myvar) {
+	  // Copy text to clipboard. - Usage:
+	  // 1. Define the copy field by
+	  //    <span class="copy-fld" onclick="toClipboard('my_uuid')" 
+	  //          title="copy uuid value">7429e9</span>
+	  // 2. Define the copied text by
+	  //    <input id="my_uuid" type="text" value="7429e9..." style="display:None">
+	  var copyText = document.getElementById(myvar);
+	  if (copyText) {
+	    copyText.select();
+	    copyText.setSelectionRange(0, 1000)
+	    document.execCommand("copy");
+	    alert("Kopioitu leikepöydälle: " + copyText.value);
+	  } else { alert("Error: No data!"); }
+}
 
 // --------- Manage Source Citations and Notes by refTable object ----------
 
