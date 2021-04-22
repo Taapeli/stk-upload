@@ -107,9 +107,9 @@ class DOM_handler:
     """
 
     def __init__(self, infile, current_user, pathname=""):
-        """ Set DOM collection and username """
+        """ Set DOM xml_tree and username """
         DOMTree = xml.dom.minidom.parse(open(infile, encoding="utf-8"))
-        self.collection = DOMTree.documentElement  # XML documentElement
+        self.xml_tree = DOMTree.documentElement  # XML documentElement
         self.username = current_user  # current username
 
         self.handle_to_node = {}  # {handle:(uuid, uniq_id)}
@@ -149,7 +149,8 @@ class DOM_handler:
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
-        shareds.dservice.ds_obj_save_and_link(obj, **kwargs)
+        #shareds.dservice.ds_obj_save_and_link(obj, **kwargs)
+        obj.save(shareds.dservice.tx, **kwargs)
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
@@ -158,15 +159,15 @@ class DOM_handler:
 
     def get_mediapath_from_header(self):
         """Pick eventuel media path from XML header to Batch node."""
-        for header in self.collection.getElementsByTagName("header"):
+        for header in self.xml_tree.getElementsByTagName("header"):
             for mediapath in header.getElementsByTagName("mediapath"):
                 if len(mediapath.childNodes) > 0:
                     return mediapath.childNodes[0].data
         return None
 
     def handle_citations(self):
-        # Get all the citations in the collection
-        citations = self.collection.getElementsByTagName("citation")
+        # Get all the citations in the xml_tree
+        citations = self.xml_tree.getElementsByTagName("citation")
         status = Status.OK
         for_test = ""
 
@@ -247,8 +248,8 @@ class DOM_handler:
         return {"status": status, "message": message, "for_test": for_test}
 
     def handle_events(self):
-        """ Get all the events in the collection """
-        events = self.collection.getElementsByTagName("event")
+        """ Get all the events in the xml_tree """
+        events = self.xml_tree.getElementsByTagName("event")
         status = Status.OK
 
         message = f"{len(events)} Events"
@@ -354,8 +355,8 @@ class DOM_handler:
         return {"status": status, "message": message}
 
     def handle_families(self):
-        """ Get all the families in the collection. """
-        families = self.collection.getElementsByTagName("family")
+        """ Get all the families in the xml_tree. """
+        families = self.xml_tree.getElementsByTagName("family")
         status = Status.OK
 
         message = f"{len(families)} Families"
@@ -451,8 +452,8 @@ class DOM_handler:
         return {"status": status, "message": message}
 
     def handle_notes(self):
-        """ Get all the notes in the collection. """
-        notes = self.collection.getElementsByTagName("note")
+        """ Get all the notes in the xml_tree. """
+        notes = self.xml_tree.getElementsByTagName("note")
         status = Status.OK
         for_test = ""
 
@@ -487,8 +488,8 @@ class DOM_handler:
         return {"status": status, "message": message, "for_test": for_test}
 
     def handle_media(self):
-        """ Get all the media in the collection (Gramps term 'object'). """
-        media = self.collection.getElementsByTagName("object")
+        """ Get all the media in the xml_tree (Gramps term 'object'). """
+        media = self.xml_tree.getElementsByTagName("object")
         status = Status.OK
 
         message = f"{len(media)} Medias"
@@ -529,8 +530,8 @@ class DOM_handler:
         return {"status": status, "message": message}
 
     def handle_people(self):
-        """ Get all the people in the collection. """
-        people = self.collection.getElementsByTagName("person")
+        """ Get all the people in the xml_tree. """
+        people = self.xml_tree.getElementsByTagName("person")
         status = Status.OK
 
         message = f"{len(people)} Persons"
@@ -704,14 +705,14 @@ class DOM_handler:
         return {"status": status, "message": message}
 
     def handle_places(self):
-        """Get all the places in the collection.
+        """Get all the places in the xml_tree.
 
         To create place hierarchy links, there must be a dictionary of
         Place handles and uniq_ids created so far. The link may use
         previous node or create a new one.
         """
         place_keys = {}  # place_keys[handle] = uniq_id
-        places = self.collection.getElementsByTagName("placeobj")
+        places = self.xml_tree.getElementsByTagName("placeobj")
         status = Status.OK
 
         message = f"{len(places)} Places"
@@ -840,8 +841,8 @@ class DOM_handler:
         return {"status": status, "message": message}
 
     def handle_repositories(self):
-        """ Get all the repositories in the collection. """
-        repositories = self.collection.getElementsByTagName("repository")
+        """ Get all the repositories in the xml_tree. """
+        repositories = self.xml_tree.getElementsByTagName("repository")
         status = Status.OK
 
         message = f"{len(repositories)} Repositories"
@@ -897,8 +898,8 @@ class DOM_handler:
         return {"status": status, "message": message}
 
     def handle_sources(self):
-        """ Get all the sources in the collection. """
-        sources = self.collection.getElementsByTagName("source")
+        """ Get all the sources in the xml_tree. """
+        sources = self.xml_tree.getElementsByTagName("source")
         status = Status.OK
 
         message = f"{len(sources)} Sources"

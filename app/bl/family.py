@@ -259,7 +259,7 @@ class FamilyWriter(DataService):
     '''
     def __init__(self, service_name:str, u_context=None, tx=None):
         super().__init__(service_name, u_context, tx=tx)
-        shareds.dservice.tx = None
+        #shareds.dservice.tx = None # already ok
         print(f"#FamilyWriter: {dir(self)}")
 
     def set_calculated_attributes(self, uniq_id):

@@ -56,6 +56,7 @@ class Neo4jUpdateService(ConcreteService):
         '''
         print(f'#~~~~{self.__class__.__name__} init')
         self.driver = driver
+        self.tx = None  # Until started
         #self.tx = driver.session().begin_transaction()
 
 
@@ -226,13 +227,11 @@ class Neo4jUpdateService(ConcreteService):
                                 f"{id1}<-{id2} failed: {e.__class__.__name__} {e}"}
 
 
-    def ds_obj_save_and_link(self, obj, **kwargs):
-        """ Saves given object to database
-        
-        :param: batch_id    Current Batch (batch) --> (obj)
-        _param: parent_id   Parent object to link (parent) --> (obj)
-        """
-        obj.save(self.tx, **kwargs)
+    # def ds_obj_save_and_link(self, obj, **kwargs): # -> bp.gramps.xml_dom_handler.DOM_handler.save_and_link_handle
+    #     """ Saves given object to database
+    #     :param: batch_id    Current Batch (batch) --> (obj)
+    #     _param: parent_id   Parent object to link (parent) --> (obj)"""
+    #     obj.save(self.tx, **kwargs)
 
 
     def ds_obj_remove_gramps_handles(self, batch_id):
