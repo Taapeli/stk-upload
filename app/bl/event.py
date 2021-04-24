@@ -120,6 +120,7 @@ class Event(NodeObject):
             obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         else:
             obj.dates = DateRange()
+        obj.dates.calendar = node['calendar']
         obj.description = node['description'] or ''
         obj.attr = node.get('attr', dict())
         return obj

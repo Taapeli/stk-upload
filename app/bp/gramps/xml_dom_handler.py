@@ -1141,6 +1141,11 @@ class DOM_handler:
         for tag in ["dateval", "daterange", "datespan"]:
             if len(obj.getElementsByTagName(tag)) == 1:
                 dateobj = obj.getElementsByTagName(tag)[0]
+                if dateobj.hasAttribute("cformat"):
+                    calendar = dateobj.getAttribute("cformat")
+                else:
+                    calendar = None
+                print("calendar:", calendar)
                 if tag == "dateval":
                     if dateobj.hasAttribute("val"):
                         date_start = dateobj.getAttribute("val")
@@ -1163,7 +1168,7 @@ class DOM_handler:
                 #                              f"Creating {tag}, date_type={date_type}, quality={date_quality},"
                 #                              f" {date_start} - {date_stop}")
                 return Gramps_DateRange(
-                    tag, date_type, date_quality, date_start, date_stop
+                    tag, date_type, date_quality, date_start, date_stop, calendar
                 )
 
             elif len(obj.getElementsByTagName(tag)) > 1:
