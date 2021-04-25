@@ -76,9 +76,17 @@ BAPTISM = "Baptism"
 
 class Person:
     def __init__(self):
+        self.pid = None
+        self.gramps_id = None
         self.events = []
         self.parents = []
         self.children = []
+
+    def __str__(self):
+        pare = [f"{x.gramps_id}({x.pid})" for x in self.parents]
+        chdr = [f"{x.gramps_id}({x.pid})" for x in self.children]
+        return f"{self.gramps_id}({self.pid}): {len(self.events)} events, "\
+            f"parents={pare}, children={chdr}"
 
 @dataclass
 class Year:

@@ -260,13 +260,12 @@ class FamilyWriter(DataService):
     def __init__(self, service_name:str, u_context=None, tx=None):
         super().__init__(service_name, u_context, tx=tx)
         #shareds.dservice.tx = None # already ok
-        print(f"#FamilyWriter: {dir(self)}")
+        pass #print(f"#FamilyWriter: {dir(self)}")
 
-    def set_calculated_attributes(self, uniq_id):
-        """Set Family event dates and sortnames."""
-        return shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
-        # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
-
+    # def set_calculated_attributes(self, uniq_id):
+    #     """Set Family event dates and sortnames."""
+    #     return shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
+    #     # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
 
 class FamilyReader(DataService):
     """

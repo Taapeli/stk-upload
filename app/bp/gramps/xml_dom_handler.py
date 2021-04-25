@@ -1018,8 +1018,8 @@ class DOM_handler:
         with FamilyWriter('update', tx=shareds.dservice.tx) as service:
             for uniq_id in self.family_ids:
                 if uniq_id is not None:
-                    #res = shareds.dservice.ds_set_people_lifetime_estimates(self.person_ids)
-                    res = service.set_family_calculated_attributes(uniq_id)
+                    ds = service.dataservice    # <Neo4jUpdateService>
+                    res = ds.ds_set_family_calculated_attributes(uniq_id)
                     # returns {refnames, sortnames, status}
                     if Status.has_failed(res):
                         return res
@@ -1049,7 +1049,7 @@ class DOM_handler:
             }
 
         with PersonWriter('update', tx=shareds.dservice.tx) as service:
-            print(f"### set_person_calculated_attributes: shareds.dservice.tx = {shareds.dservice.tx}")
+            #print(f"### set_person_calculated_attributes: shareds.dservice.tx = {shareds.dservice.tx}")
             for p_id in self.person_ids:
                 self.update_progress("refnames")
                 if p_id is not None:
@@ -1080,7 +1080,7 @@ class DOM_handler:
         message = f"{len(self.person_ids)} Estimated lifetimes"
         print(f"***** {message} *****")
         t0 = time.time()
-        print(f"### set_person_estimated_dates: shareds.dservice.tx = {shareds.dservice.tx}")
+        #print(f"### set_person_estimated_dates: shareds.dservice.tx = {shareds.dservice.tx}")
 
         #res = PersonBl.estimate_lifetimes(self.person_ids)
         res = shareds.dservice.ds_set_people_lifetime_estimates(self.person_ids)

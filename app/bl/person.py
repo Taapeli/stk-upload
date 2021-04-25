@@ -410,12 +410,11 @@ class PersonBl(Person):
         ''' Connect to each Event loaded from Gramps '''
         try:
             #for i in range(len(self.eventref_hlink)):
-            for handle_role in self.event_handle_roles:
-                # a tuple (event_handle, role)
+            for event_handle, role in self.event_handle_roles:
                 tx.run(CypherPerson.link_event, 
                        p_handle=self.handle, 
-                       e_handle=handle_role[0], 
-                       role=handle_role[1])
+                       e_handle=event_handle, 
+                       role=role)
         except Exception as err:
             logger.error(f"Person_gramps.save: {err} in linking Event {self.handle} -> {self.handle_role}")
             #print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)

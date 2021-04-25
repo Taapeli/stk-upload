@@ -56,8 +56,7 @@ class Neo4jUpdateService(ConcreteService):
         '''
         print(f'#~~~~{self.__class__.__name__} init')
         self.driver = driver
-        self.tx = None  # Until started
-        #self.tx = driver.session().begin_transaction()
+        self.tx = None  # Until started in Dataservice.__enter__()
 
 
     def ds_commit(self):
@@ -282,11 +281,20 @@ class Neo4jUpdateService(ConcreteService):
                     r_attr['right'] = resu.crop[2]
                     r_attr['lower'] = resu.crop[3]
                 doing = f"(src:{uniq_id}) -[{r_attr}]-> Media {resu.media_handle}"
-#                 print(doing)
+                # print(doing)
                 result = self.tx.run(CypherObjectWHandle.link_media, 
                                      root_id=uniq_id, handle=resu.media_handle, 
                                      r_attr=r_attr)
-                media_uid = result.single()[0]    # for media object
+                #media_uid = result.single()[0]    # for media object
+                media_uid = None
+                for record in result:
+                    if media_uid:
+                        print (doing)
+                        print(f"ds_create_link_medias_w_handles: double link_media, "\
+                              f"replacing media_uid={media_uid} with uid={record[0]}. "\
+                              f"handle={resu.media_handle}")
+                    else:
+                        media_uid = record[0]
 
                 for handle in resu.note_handles:
                     doing = f"{media_uid}->Note {handle}"
@@ -393,7 +401,7 @@ class Neo4jUpdateService(ConcreteService):
         personlist = []
         personmap = {}
         res = {'status': Status.OK}
-        print(f"### ds_set_people_lifetime_estimates: self.tx = {self.tx}")
+        #print(f"### ds_set_people_lifetime_estimates: self.tx = {self.tx}")
         try:
             if uids:
                 result = self.tx.run(CypherPerson.fetch_selected_for_lifetime_estimates,
@@ -448,19 +456,26 @@ class Neo4jUpdateService(ConcreteService):
                 p.parent_pids = []
                 for _parent,pid in record['parents']:
                     if pid: p.parent_pids.append(pid)
+                    # else:print("#> Empty parent")
                 p.child_pids = []
                 for _parent,pid in record['children']:
                     if pid: p.child_pids.append(pid)
+                    # else:print("#> Empty child")
 
+                print(f"#> lifetime.Person {p}")
                 personlist.append(p)
                 personmap[p.pid] = p
 
             # Add parents and children to lifetime.Person objects
             for p in personlist:
                 for pid in p.parent_pids:
-                    p.parents.append(personmap[pid])
+                    xid = personmap.get(pid)
+                    if xid: p.parents.append(xid)
+                    # else: print(f"#ds_set_people_lifetime_estimates: unknown parent({xid})")
                 for pid in p.child_pids:
-                    p.children.append(personmap[pid])
+                    xid = personmap.get(pid)
+                    if xid: p.children.append(xid)
+                    # else: print(f"#ds_set_people_lifetime_estimates: unknown parent({xid})")
             lifetime.calculate_estimates(personlist)
 
             for p in personlist:
@@ -642,7 +657,7 @@ class Neo4jUpdateService(ConcreteService):
         dates_count = 0
         sortname_count = 0
         status = Status.OK
-        print(f"### ds_set_family_calculated_attributes: self.tx = {self.tx}")
+        #print(f"### ds_set_family_calculated_attributes: self.tx = {self.tx}")
         try:
             # Process the family 
             #### Todo Move and refactor to bl.FamilyBl

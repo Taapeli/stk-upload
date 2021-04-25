@@ -22,10 +22,19 @@ import logging
 
 logger = logging.getLogger('stkserver')
 
+def obj_addr(tx):
+    "Returns obj address for debug, for ex. '0x7fc585350fd0'"
+    return str(tx).split(" ", 3)[-1][:-1] if tx else 'None'
+
 
 class DataService:
     """Public methods for accessing active database.
     The current database is defined in /setups.py.
+
+    Follows Context Manager pattern allowing automatic transaction management
+    using 'with' statement.
+
+    @See https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
     """
 
     def __init__(self, service_name: str, user_context=None, tx=None):
@@ -33,9 +42,9 @@ class DataService:
 
         :param: service_name    str - one of service names (update, read, read_tx, simple)
         :param: user_context    <ui.user_context.UserContext object>
-        :param: tx              <neo4j.work.transaction.Transaction object>
+        :param: tx              None or <neo4j.work.transaction.Transaction object>
 
-        - 1. if tx is given                              Use preset transaction
+        - 1. if tx is given                              Use the given, opened transaction
         - 2. if service_name is 'update' or 'read_tx'    Create transaction
         - 3. else                                        No transaction
         """
@@ -48,14 +57,16 @@ class DataService:
             raise KeyError(
                 f"pe.dataservice.DataService.__init__: name {self.service_name} not found"
             )
+        # Initiate selected service object
         self.dataservice = service_class(shareds.driver)
-        self.pre_tx = tx
-        # Prepare to restore the privious dataservice, if one exists
+        self.old_tx = tx
+        # Prepare to return back to the privious dataservice, if one exists
         if shareds.dservice:
             self.previous_dservice = shareds.dservice
         else:
             self.previous_dservice = None
         shareds.dservice = self.dataservice
+        #print(f"#> pe.dataservice.DataService {service_name} dservice={obj_addr(self.dataservice)}")
 
         if user_context:
             self.user_context = user_context
@@ -68,58 +79,55 @@ class DataService:
 
     def __enter__(self):
         # With 'update' and 'read_tx' begin transaction
-        if self.pre_tx:
+        if self.old_tx:
             # 1. Use given transaction
-            print(f'#~~~{self.idstr} enter active {self.pre_tx}')
-            self.dataservice.tx = self.pre_tx
+            print(f'#~~~{self.idstr} enter active tx={obj_addr(self.old_tx)}')
+            self.dataservice.tx = self.old_tx
         else:
             if self.service_name == "update" or self.service_name == "read_tx":
                 # 2. Create transaction
                 self.dataservice.tx = shareds.driver.session().begin_transaction()
-                print(f'#~~~{self.idstr} enter "{self.service_name}" transaction') # {self.pre_tx}')
+                print(f'#~~~{self.idstr} enter "{self.service_name}" tx={obj_addr(self.dataservice.tx)}')
 
             else:
                 # 3. No transaction
                 self.dataservice.tx = None
-                print(f'#~~~{self.idstr} enter') # {self.pre_tx}')
+                print(f'#~~~{self.idstr} enter') # {obj_addr(self.old_tx)}')
         return self
 
     def __exit__(self, exc_type=None, exc_value=None, traceback=None):
-        """
-        Exit the runtime context related to this object.
+        """Exit the runtime context related to this object.
 
-        @See https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
-
-        object.__exit__(self, exc_type, exc_value, traceback)
         The parameters describe the exception that caused the context to be
         exited. If the context was exited without an exception, all three
         arguments will be None.
         """
-        #print(f"--{self.idstr} exit {self.dataservice.tx} prev {self.pre_tx}")
+        #print(f"--{self.idstr} exit tx={obj_addr(self.dataservice.tx)} prev {obj_addr(self.old_tx)}")
         if self.dataservice.tx:
             if exc_type:
-                e = exc_type.__class__.__name__
-                print(f"--{self.idstr} exit rollback {e}")
+                print(f"--{self.idstr} exit rollback {exc_type}")
                 self.dataservice.tx.rollback()
             else:
-                if self.pre_tx is None:
-                    print(f'#~~~{self.idstr} exit commit')
-                    self.dataservice.tx.commit()
+                if self.old_tx is None:
+                    print(f'#~~~{self.idstr} exit commit tx={obj_addr(self.dataservice.tx)}')
+                    try:
+                        self.dataservice.tx.commit()
+                    except Exception as e:
+                        print(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
                 else:
-                    print(f'#~~~{self.idstr} exit continue')
+                    print(f'#~~~{self.idstr} exit continue tx={obj_addr(self.dataservice.tx)}')
         else:
-            print(f'#~~~{self.idstr} exit')
+            print(f'#~~~{self.idstr} exit {obj_addr(self.old_tx)}')
 
         if self.previous_dservice:
+            print(f"-- {self.idstr} returning to dsrvice={obj_addr(self.previous_dservice)} from {obj_addr(shareds.dservice)}")
             shareds.dservice = self.previous_dservice
-            print(f"--{self.idstr} {shareds.dservice} replaced by {self.previous_dservice}")
             self.previous_dservice = None
         else:
             shareds.dservice = None
 
 
 class ConcreteService:
-    """Base class for all concrete database service classes.
-    """
+    "Base class for all concrete database service classes."
     pass
 
