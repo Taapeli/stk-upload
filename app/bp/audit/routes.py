@@ -31,22 +31,29 @@ from io import StringIO, BytesIO
 import csv
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, flash
 from flask import send_file
 from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
-import gettext
+#import gettext
 
 import shareds
+from bl.base import Status
 from bl.audit import Audit
 from bl.batch import Batch
-from bl.person import Person, PersonBl
+from bl.person import Person, PersonWriter
 from bl.refname import Refname
 from bp.admin.cvs_refnames import load_refnames
 from .models.batch_merge import Batch_merge
 
 from bp.admin import uploads
-from models import syslog, loadfile, dbutil
+from models import syslog, loadfile #, obsolete_dbutil
+
+@staticmethod
+def _get_server_location():
+    # Returns server address as a str
+    dbloc = shareds.driver.address
+    return ':'.join((dbloc[0],str(dbloc[1])))
 
 @bp.route('/audit')
 @login_required
@@ -108,7 +115,7 @@ def move_in_2():
 def delete_approved(batch_id):
     """ Confirm approved batch delete
     """    
-    (msg, nodes_deleted) = Audit.delete_audit(current_user.username, batch_id)
+    (msg, _nodes_deleted) = Audit.delete_audit(current_user.username, batch_id)
     if msg != '':
         logger.error(f'{msg}')
     else:
@@ -203,11 +210,20 @@ def refnames():
 @roles_accepted('member', 'admin', 'audit')
 def set_all_person_refnames():
     """ Setting reference names for all persons """
-    dburi = dbutil.get_server_location()
-    (refname_count, _sortname_count) = PersonBl.set_person_name_properties(ops=['refname']) or _('Done')
-    logger.info(f"-> bp.audit.routes.set_all_person_refnames n={refname_count}")
-    return render_template("/talletettu.html", uri=dburi, 
-                           text=f'Updated {_sortname_count} person sortnames, {refname_count} refnames')
+    #dburi = _get_server_location()
+    with PersonWriter('update') as service:
+        ret = service.set_person_name_properties(ops=['refname']) or _('Done')
+        # return {'refnames', 'sortnames', 'status'}
+        if Status.has_failed(ret):
+            flash(ret.statustext, "error")
+            logger.error(f"-> bp.audit.routes.set_all_person_refnames error {ret.get('statustext')}")
+        else:
+            refname_count = ret.get('refnames', -1)
+            sortname_count = ret.get('sortnames', -1)
+            msg = f'Updated {sortname_count} person sortnames, {refname_count} refnames'
+            flash(msg, "info")
+            logger.info(f"-> bp.audit.routes.set_all_person_refnames n={refname_count}")
+    return render_template("/audit/refnames")
 
 
 @bp.route('/audit/download/refnames')
@@ -264,7 +280,7 @@ def upload_csv():
 def save_loaded_csv(filename, subj):
     """ Save loaded cvs data to the database """
     pathname = loadfile.fullname(filename)
-    dburi = dbutil.get_server_location()
+    dburi = _get_server_location()
     logging.info(f"-> bp.audit.routes.save_loaded_csv/{subj} f='{filename}'")
     try:
         if subj == 'refnames':    # Stores Refname objects

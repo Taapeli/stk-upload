@@ -16,7 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import string
 
 '''
 Created on 8.8.2018
@@ -31,7 +30,7 @@ import os
 
 import json
 #import inspect
-from operator import attrgetter
+#from operator import attrgetter
 import traceback
 
 import logging 
@@ -41,22 +40,23 @@ from flask import render_template, request, redirect, url_for, send_from_directo
 from flask_security import login_required, roles_accepted, roles_required, current_user
 from flask_babelex import _ #, Domain
 
-import shareds
+import sharedsfrom ui.user_context import UserContext
+from bl.base import Status
+from bl.person import PersonWriter
+
 from setups import User
-from bp.admin.forms import UpdateUserProfileForm
+from bp.admin.forms import UpdateUserProfileForm, UpdateUserForm
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
 
 #from .cvs_refnames import load_refnames
-from .forms import UpdateUserForm
 from . import bp
 from . import uploads
 from .. gedcom.models import gedcom_utils
 from .. import gedcom
 
-from models import util, dataupdater #, dbutil, loadfile, datareader
-from models import email
-from models import syslog 
+#from models import util, dataupdater #, dbutil, loadfile, datareader
+from models import util, email, syslog 
 
 
 # Admin start page
@@ -149,14 +149,28 @@ def clear_empty_batches():
 @roles_required('admin')
 def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    logger.warning(f"OBSOLETE? -> bp.admin.routes.estimate_dates sel={uid}")
+    #logger.warning(f"OBSOLETE? -> bp.admin.routes.estimate_dates sel={uid}")
     if uid:
         uids=list(uid)
     else:
         uids=[]
-    message = dataupdater.set_person_estimated_dates(uids)
-    ext = _("estimated lifetime")
-    return render_template("/talletettu.html", text=message, info=ext)
+    #message = dataupdater.set_person_estimated_dates(uids)
+    # ext = _("estimated lifetime")
+    # return render_template("/talletettu.html", text=msg, info=ext)
+
+    u_context = UserContext(session, current_user, request)
+    with PersonWriter("update", u_context) as service:
+        ret = service.set_estimated_lifetimes(uids)
+
+    if Status.has_failed(ret):
+        msg = ret.get("statustext")
+        logger.error(f"bp.admin.routes.estimate_dates {msg}")
+        flash(ret.get("statustext"), "error")
+    else:
+        msg = _("Estimated {} person lifetimes").format(ret["count"])
+        flash(msg, "info")
+    print("bp.admin.routes.estimate_dates: " + msg)
+    return redirect(url_for('admin.admin'))
 
 
 # # Ei ilmeisesti käytössä

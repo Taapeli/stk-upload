@@ -69,6 +69,10 @@ from models.obsolete_datareader import obsolete_read_persons_with_events
 
 from bp.graph.models.fanchart import FanChart
 
+calendars = [ # just for translations
+    _("Julian"),
+    _("Hebrew"),
+]
 
 def stk_logger(context, msg:str):
     """ Emit logger info message with Use Case mark uc=<code> .
@@ -913,7 +917,7 @@ def show_source_page(sourceid=None):
         flash(f'{ _("Program error")}', 'error')
         logger.error(msg)
 
-#     for c in res.citations:
+#     for c in res['citations']:
 #         for i in c.citators:
 #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
 #             else:               print(f'{c} – person {i} {i.sortname}')

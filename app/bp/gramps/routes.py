@@ -71,9 +71,16 @@ def list_uploads():
     #Not essential: logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
     gramps_verify = gramps_runner and os.path.exists(gramps_runner)
+    
+    if shareds.app.config.get("USE_I_AM_ALIVE", True):
+        inter = shareds.PROGRESS_UPDATE_RATE*1000
+    else:
+        # For debugging: don't poll progress bar very much
+        inter = shareds.PROGRESS_UPDATE_RATE*10000
     return render_template("/gramps/uploads.html", 
-                           interval=shareds.PROGRESS_UPDATE_RATE*1000,
-                           uploads=upload_list, gramps_verify=gramps_verify)
+                           interval=inter,
+                           uploads=upload_list,
+                           gramps_verify=gramps_verify)
 
 
 @bp.route('/gramps/upload', methods=['POST'])

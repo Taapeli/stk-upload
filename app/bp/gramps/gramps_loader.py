@@ -80,14 +80,14 @@ def analyze_xml(username, filename):
     e_source = 3
     e_total = 0
 
-    citations = handler.collection.getElementsByTagName("citation")
+    citations = handler.xml_tree.getElementsByTagName("citation")
     citation_cnt = len(citations)
     if citation_cnt > 0:
         e_total += citation_cnt * e_citation / 1000
         for citation in citations:
             citation_source_cnt += len(citation.getElementsByTagName("sourceref"))
 
-    events = handler.collection.getElementsByTagName("event")
+    events = handler.xml_tree.getElementsByTagName("event")
     event_cnt = len(events)
     if event_cnt > 0:
         e_total += event_cnt * e_event / 1000
@@ -96,45 +96,45 @@ def analyze_xml(username, filename):
             if len(event.getElementsByTagName("citationref")) == 0:
                 event_no_citation_cnt += 1
 
-    families = handler.collection.getElementsByTagName("family")
+    families = handler.xml_tree.getElementsByTagName("family")
     family_cnt = len(families)
     if family_cnt > 0:
         e_total += family_cnt * e_family / 1000
         for family in families:
             family_citation_cnt += len(family.getElementsByTagName("citationref"))
 
-    notes = handler.collection.getElementsByTagName("note")
+    notes = handler.xml_tree.getElementsByTagName("note")
     note_cnt = len(notes)
     if note_cnt > 0:
         e_total += note_cnt * e_note / 1000
 
-    objects = handler.collection.getElementsByTagName("object")
+    objects = handler.xml_tree.getElementsByTagName("object")
     object_cnt = len(objects)
     if object_cnt > 0:
         e_total += object_cnt * e_object / 1000
         for media in objects:
             object_citation_cnt += len(media.getElementsByTagName("citationref"))
 
-    persons = handler.collection.getElementsByTagName("person")
+    persons = handler.xml_tree.getElementsByTagName("person")
     person_cnt = len(persons)
     if person_cnt > 0:
         e_total += person_cnt * e_person / 1000
         for person in persons:
             person_citation_cnt += len(person.getElementsByTagName("citationref"))
 
-    places = handler.collection.getElementsByTagName("placeobj")
+    places = handler.xml_tree.getElementsByTagName("placeobj")
     place_cnt = len(places)
     if place_cnt > 0:
         e_total += place_cnt * e_place / 1000
         for place in places:
             place_citation_cnt += len(place.getElementsByTagName("citationref"))
 
-    repositorys = handler.collection.getElementsByTagName("repository")
+    repositorys = handler.xml_tree.getElementsByTagName("repository")
     repository_cnt = len(repositorys)
     if repository_cnt > 0:
         e_total += repository_cnt * e_repository / 1000
 
-    sources = handler.collection.getElementsByTagName("source")
+    sources = handler.xml_tree.getElementsByTagName("source")
     source_cnt = len(sources)
     if source_cnt > 0:
         e_total += source_cnt * e_source / 1000
@@ -307,9 +307,7 @@ def xml_to_stkbase(pathname, userid):
     # Initiate BatchUpdater and Batch node data
     ##shareds.datastore = BatchUpdater(shareds.driver, handler.dataservice)
     with BatchUpdater("update") as batch_service:
-        print(
-            f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service'
-        )
+        # print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
         mediapath = handler.get_mediapath_from_header()
         res = batch_service.start_data_batch(
             userid, file_cleaned, mediapath, batch_service.dataservice.tx
@@ -373,6 +371,8 @@ def xml_to_stkbase(pathname, userid):
 
             # Copy date and name information from Person and Event nodes to Family nodes
             res = handler.set_family_calculated_attributes()
+            #res = shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
+
             if Status.has_failed(res):
                 return res
 
@@ -385,8 +385,8 @@ def xml_to_stkbase(pathname, userid):
         except Exception as e:
             traceback.print_exc()
             msg = f"Stopped xml load due to {e}"
-            print(msg)
-            batch_service.rollback()
+            print("bp.gramps.gramps_loader.xml_to_stkbase: " + msg)
+            # batch_service.rollback()
             handler.blog.log_event(
                 {
                     "title": _("Database save failed due to {}".format(msg)),

@@ -244,12 +244,6 @@ class FamilyBl(Family):
 
         return
 
-    @staticmethod
-    def set_calculated_attributes(uniq_id):
-        """Get Family event dates and sortnames."""
-        return shareds.dservice._set_family_calculated_attributes(uniq_id)
-        # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
-
     def remove_privacy_limits(self):
         if self.father:
             self.father.too_new = False
@@ -258,6 +252,20 @@ class FamilyBl(Family):
         for c in self.children:
             c.too_new = False
 
+
+class FamilyWriter(DataService):
+    '''
+    Family datastore for update with optional trasaction.
+    '''
+    def __init__(self, service_name:str, u_context=None, tx=None):
+        super().__init__(service_name, u_context, tx=tx)
+        #shareds.dservice.tx = None # already ok
+        pass #print(f"#FamilyWriter: {dir(self)}")
+
+    # def set_calculated_attributes(self, uniq_id):
+    #     """Set Family event dates and sortnames."""
+    #     return shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
+    #     # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
 
 class FamilyReader(DataService):
     """
@@ -532,36 +540,32 @@ class FamilyReader(DataService):
                 "statustext": _("This person has no families"),
             }
 
-    # The followind may be obsolete
+#     def get_children_by_id(self):
+#         raise ("Obsolete bl.family.FamilyReader.get_children_by_id")
 
-    def get_children_by_id(self):
-        raise ("Obsolete bl.family.FamilyReader.get_children_by_id")
+#     def get_family_events(self):
+#         """ Luetaan perheen tapahtumien tiedot """
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (family:Family)-[r:EVENT]->(event:Event)
+#   WHERE ID(family)=$pid
+# RETURN r.role AS eventref_role, event.handle AS event_handles"""
+#         return shareds.driver.session().run(query, {"pid": pid})
 
-    def get_family_events(self):
-        """ Luetaan perheen tapahtumien tiedot """
-
-        pid = int(self.uniq_id)
-        query = """
-MATCH (family:Family)-[r:EVENT]->(event:Event)
-  WHERE ID(family)=$pid
-RETURN r.role AS eventref_role, event.handle AS event_handles"""
-        return shareds.driver.session().run(query, {"pid": pid})
-
-    @staticmethod
-    def find_family_for_event(event_uniq_id):
-        """Returns Family instance which has given Event.
-
-        NOT IN USE. For models.obsolete_datareader.get_source_with_events
-        """
-        query = """
-MATCH (family:Family)-[r:EVENT]->(event)
-  WHERE ID(event)=$pid
-RETURN family"""
-        result = shareds.driver.session().run(query, pid=event_uniq_id)
-        for record in result:
-            f = FamilyBl.from_node(record[0])
-            return f
-        raise LookupError(f"Family {event_uniq_id} not found")
+#     @staticmethod
+#     def find_family_for_event(event_uniq_id):
+#         """Returns Family instance which has given Event.
+#         NOT IN USE. For models.obsolete_datareader.get_source_with_events
+#         """
+#         query = """
+# MATCH (family:Family)-[r:EVENT]->(event)
+#   WHERE ID(event)=$pid
+# RETURN family"""
+#         result = shareds.driver.session().run(query, pid=event_uniq_id)
+#         for record in result:
+#             f = FamilyBl.from_node(record[0])
+#             return f
+#         raise LookupError(f"Family {event_uniq_id} not found")
 
     #     @staticmethod
     #     def get_dates_parents(tx, uniq_id): #see models.gen.family_combo.Family_combo

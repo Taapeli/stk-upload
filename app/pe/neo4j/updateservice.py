@@ -1,3 +1,21 @@
+#   Isotammi Genealogical Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
+#
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#                            Timo Nallikari, Pekka Valta
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 Created on 23.3.2020
 
@@ -38,7 +56,7 @@ class Neo4jUpdateService(ConcreteService):
         '''
         print(f'#~~~~{self.__class__.__name__} init')
         self.driver = driver
-        #self.tx = driver.session().begin_transaction()
+        self.tx = None  # Until started in Dataservice.__enter__()
 
 
     def ds_commit(self):
@@ -208,13 +226,11 @@ class Neo4jUpdateService(ConcreteService):
                                 f"{id1}<-{id2} failed: {e.__class__.__name__} {e}"}
 
 
-    def ds_obj_save_and_link(self, obj, **kwargs):
-        """ Saves given object to database
-        
-        :param: batch_id    Current Batch (batch) --> (obj)
-        _param: parent_id   Parent object to link (parent) --> (obj)
-        """
-        obj.save(self.tx, **kwargs)
+    # def ds_obj_save_and_link(self, obj, **kwargs): # -> bp.gramps.xml_dom_handler.DOM_handler.save_and_link_handle
+    #     """ Saves given object to database
+    #     :param: batch_id    Current Batch (batch) --> (obj)
+    #     _param: parent_id   Parent object to link (parent) --> (obj)"""
+    #     obj.save(self.tx, **kwargs)
 
 
     def ds_obj_remove_gramps_handles(self, batch_id):
@@ -265,11 +281,20 @@ class Neo4jUpdateService(ConcreteService):
                     r_attr['right'] = resu.crop[2]
                     r_attr['lower'] = resu.crop[3]
                 doing = f"(src:{uniq_id}) -[{r_attr}]-> Media {resu.media_handle}"
-#                 print(doing)
+                # print(doing)
                 result = self.tx.run(CypherObjectWHandle.link_media, 
                                      root_id=uniq_id, handle=resu.media_handle, 
                                      r_attr=r_attr)
-                media_uid = result.single()[0]    # for media object
+                #media_uid = result.single()[0]    # for media object
+                media_uid = None
+                for record in result:
+                    if media_uid:
+                        print (doing)
+                        print(f"ds_create_link_medias_w_handles: double link_media, "\
+                              f"replacing media_uid={media_uid} with uid={record[0]}. "\
+                              f"handle={resu.media_handle}")
+                    else:
+                        media_uid = record[0]
 
                 for handle in resu.note_handles:
                     doing = f"{media_uid}->Note {handle}"
@@ -365,7 +390,7 @@ class Neo4jUpdateService(ConcreteService):
         return [(record["pid"], record["name"]) for record in result]
 
 
-    def _set_people_lifetime_estimates(self, uids=[]): 
+    def ds_set_people_lifetime_estimates(self, uids=[]): 
         """ Get estimated lifetimes to Person.dates for given person.uniq_ids.
  
             :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
@@ -376,6 +401,7 @@ class Neo4jUpdateService(ConcreteService):
         personlist = []
         personmap = {}
         res = {'status': Status.OK}
+        #print(f"### ds_set_people_lifetime_estimates: self.tx = {self.tx}")
         try:
             if uids:
                 result = self.tx.run(CypherPerson.fetch_selected_for_lifetime_estimates,
@@ -430,19 +456,26 @@ class Neo4jUpdateService(ConcreteService):
                 p.parent_pids = []
                 for _parent,pid in record['parents']:
                     if pid: p.parent_pids.append(pid)
+                    # else:print("#> Empty parent")
                 p.child_pids = []
                 for _parent,pid in record['children']:
                     if pid: p.child_pids.append(pid)
+                    # else:print("#> Empty child")
 
+                print(f"#> lifetime.Person {p}")
                 personlist.append(p)
                 personmap[p.pid] = p
 
             # Add parents and children to lifetime.Person objects
             for p in personlist:
                 for pid in p.parent_pids:
-                    p.parents.append(personmap[pid])
+                    xid = personmap.get(pid)
+                    if xid: p.parents.append(xid)
+                    # else: print(f"#ds_set_people_lifetime_estimates: unknown parent({xid})")
                 for pid in p.child_pids:
-                    p.children.append(personmap[pid])
+                    xid = personmap.get(pid)
+                    if xid: p.children.append(xid)
+                    # else: print(f"#ds_set_people_lifetime_estimates: unknown parent({xid})")
             lifetime.calculate_estimates(personlist)
 
             for p in personlist:
@@ -458,7 +491,7 @@ class Neo4jUpdateService(ConcreteService):
             return res
 
         except Exception as e:
-            msg = f'Neo4jUpdateService._set_people_lifetime_estimates: {e.__class__.__name__} {e}'
+            msg = f'Neo4jUpdateService.ds_set_people_lifetime_estimates: {e.__class__.__name__} {e}'
             print(f"Error {msg}")
             traceback.print_exc()
             return {'status': Status.ERROR, 'statustext': msg }
@@ -500,7 +533,7 @@ class Neo4jUpdateService(ConcreteService):
         return {'status': Status.OK, 'count':count}
 
 
-    def _update_person_confidences(self, uniq_id:int):
+    def ds_update_person_confidences(self, uniq_id:int):
         """ Collect Person confidence from Person and Event nodes and store result in Person.
  
             Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
@@ -529,13 +562,13 @@ class Neo4jUpdateService(ConcreteService):
             return {'confidence':new_conf, 'status':Status.OK}
 
         except Exception as e:
-            msg = f'Neo4jUpdateService._update_person_confidences: {e.__class__.__name__} {e}'
+            msg = f'Neo4jUpdateService.ds_update_person_confidences: {e.__class__.__name__} {e}'
             print(msg)
             return {'confidence':new_conf, 'status':Status.ERROR,
                     'statustext': msg}
 
 
-    def _link_person_to_refname(self, pid, name, reftype):
+    def ds_link_person_to_refname(self, pid, name, reftype):
         ''' Connects a reference name of type reftype to Person(pid). 
         '''
         from bl.refname import REFTYPES
@@ -553,44 +586,47 @@ class Neo4jUpdateService(ConcreteService):
             return {'status':Status.OK}
 
         except Exception as e:
-            msg = f'Neo4jUpdateService._link_person_to_refname: person={pid}, {e.__class__.__name__}, {e}'
+            msg = f'Neo4jUpdateService.ds_link_person_to_refname: person={pid}, {e.__class__.__name__}, {e}'
             print(msg)
             return {'status':Status.ERROR, 'statustext': msg}
 
     # ----- Refname -----
 
-    def _get_person_by_uid(self, uniq_id:int):
-        ''' Set Person object by uniq_id.'''
+    def ds_get_person_by_uid(self, uniq_id:int):
+        ''' Set Person object by uniq_id.
+        
+        NOT USED!
+        '''
         try:
             self.tx.run(CypherPerson.get_person_by_uid, uid=uniq_id)
             return {'status':Status.OK}
         except Exception as e:
-            msg = f'Neo4jUpdateService._get_person_by_uid: person={uniq_id}, {e.__class__.__name__}, {e}'
+            msg = f'Neo4jUpdateService.ds_get_person_by_uid: person={uniq_id}, {e.__class__.__name__}, {e}'
             print(msg)
             return {'status':Status.ERROR, 'statustext': msg}
 
 
-    def _set_person_sortname(self, uniq_id:int, sortname):
+    def ds_set_person_sortname(self, uniq_id:int, sortname):
         ''' Set sortname property to Person object by uniq_id.'''
         try:
             self.tx.run(CypherPerson.set_sortname, uid=uniq_id, key=sortname)
             return {'status':Status.OK}
         except Exception as e:
-            msg = f'Neo4jUpdateService._set_person_sortname: person={uniq_id}, {e.__class__.__name__}, {e}'
+            msg = f'Neo4jUpdateService.ds_set_person_sortname: person={uniq_id}, {e.__class__.__name__}, {e}'
             print(msg)
             return {'status':Status.ERROR, 'statustext': msg}
 
 
     # ----- Family -----
 
-    def _set_family_dates_sortnames(self, uniq_id, dates, father_sortname, mother_sortname):
+    def ds_set_family_dates_sortnames(self, uniq_id, dates, father_sortname, mother_sortname):
         ''' Update Family dates and parents' sortnames.
         
         :param:    uniq_id      family identity
         :dates:    dict         representing DateRange for family 
                                 (marriage ... death or divorce
         
-        Called from self._set_family_calculated_attributes only
+        Called from self.ds_set_family_calculated_attributes only
         '''
         f_attr = {
             "father_sortname": father_sortname,
@@ -605,7 +641,7 @@ class Neo4jUpdateService(ConcreteService):
         return {'status':Status.OK, 'count':cnt}
 
 
-    def _set_family_calculated_attributes(self, uniq_id=None):
+    def ds_set_family_calculated_attributes(self, uniq_id=None):
         """ Set Family sortnames and estimated marriage DateRange.
  
             :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
@@ -621,9 +657,9 @@ class Neo4jUpdateService(ConcreteService):
         dates_count = 0
         sortname_count = 0
         status = Status.OK
-
+        #print(f"### ds_set_family_calculated_attributes: self.tx = {self.tx}")
         try:
-            # Process each family 
+            # Process the family 
             #### Todo Move and refactor to bl.FamilyBl
             #result = Family_combo.get_dates_parents(my_tx, uniq_id)
             result = self.tx.run(CypherFamily.get_dates_parents, id=uniq_id)
@@ -661,11 +697,11 @@ class Neo4jUpdateService(ConcreteService):
                 dates_dict = dates.for_db() if dates else None
 
                 # Save the dates from Event node and sortnames from Person nodes
-                ret = self._set_family_dates_sortnames(uniq_id, dates_dict,
+                ret = self.ds_set_family_dates_sortnames(uniq_id, dates_dict,
                                                        record.get('father_sortname'),
                                                        record.get('mother_sortname'))
                 if Status.has_failed(ret):  return ret
-                #print('Neo4jUpdateService._set_family_calculated_attributes: '
+                #print('Neo4jUpdateService.ds_set_family_calculated_attributes: '
                 #      f'id={uniq_id} properties_set={ret.get("count","none")}')
                 dates_count += 1
                 sortname_count += 1
@@ -674,7 +710,7 @@ class Neo4jUpdateService(ConcreteService):
                     'statustext': ret.get('statustext','')}
 
         except Exception as e:
-            msg = f'Neo4jUpdateService._set_family_calculated_attributes: person={uniq_id}, {e.__class__.__name__}, {e}'
+            msg = f'Neo4jUpdateService.ds_set_family_calculated_attributes: person={uniq_id}, {e.__class__.__name__}, {e}'
             print(msg)
             return {'status':Status.ERROR, 'statustext': msg}
 

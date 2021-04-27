@@ -106,6 +106,9 @@ STATUS_REMOVED      = "removed"
 # 8. The "uploads" function displays a list of the load operations performed by
 #    the user. This function will display the state of the file. The list is
 #    automatically updated every 30 seconds.
+#
+#    Note. For easier Gramps upload testing you may set 'USE_I_AM_ALIVE = False'
+#          in instance/config.py, which reduces console output.
 # 
 #    The user is redirected to this screen immediately after initiating a load
 #    operation. The user can also go to the screen from the main display.
@@ -168,7 +171,10 @@ def background_load_to_stkbase(username,filename):
         this_thread.progress = {}
         counts = gramps_loader.analyze_xml(username, filename)
         update_metafile(metaname,counts=counts,progress={})
-        threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
+        # Start background process monitoring
+        if shareds.app.config.get("USE_I_AM_ALIVE", True):
+            threading.Thread(target=lambda: i_am_alive(metaname, this_thread),
+                             name="i_am_alive for " + filename).start()
 
         # Read the Gramps xml file, and save the information to db
         res = gramps_loader.xml_to_stkbase(pathname,username)
@@ -180,7 +186,7 @@ def background_load_to_stkbase(username,filename):
             return res
 
         for step in steps:
-            print(step)
+            print(f"    {step}")
         if not batch_id:
             return {'status': Status.ERROR,
                     'statustext': "Run Failed: no batch created."}
