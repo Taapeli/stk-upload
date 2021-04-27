@@ -36,6 +36,7 @@ from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
 
 import shareds
+from bl.base import Status
 from models import loadfile, email, util, syslog 
 #from ui.user_context import UserContext
 from ..admin import uploads
@@ -205,10 +206,17 @@ def batch_delete(batch_id):
                 del data['batch_id']
                 data['status'] = uploads.STATUS_REMOVED
                 open(metafile,"w").write(repr(data))
-    Batch.delete_batch(current_user.username,batch_id)
-    logger.info(f'-> bp.gramps.routes.batch_delete f="{batch_id}"')
-    syslog.log(type="batch_id deleted",batch_id=batch_id) 
-    flash(_("Batch id %(batch_id)s has been deleted", batch_id=batch_id), 'info')
+    ret = Batch.delete_batch(current_user.username, batch_id)
+    if Status.has_failed(ret):
+        flash(_("Could not delete Batch id %(batch_id)s", batch_id=batch_id), 'error')
+        logger.warning(f'bp.gramps.routes.batch_delete ERROR {ret.get("statustext")}')
+        syslog.log(type="batch_id delete FAILED",batch_id=batch_id) 
+    else:
+        n = ret.get('total')
+        logger.info(f"-> bp.gramps.routes.batch_delete f={batch_id}, n={n}")
+        syslog.log(type="batch_id deleted",batch_id=batch_id) 
+        flash(_("Batch id %(batch_id)s has been deleted, %(n)s", 
+                batch_id=batch_id, n=n), 'info')
     referrer = request.headers.get("Referer")                               
     return redirect(referrer)
 

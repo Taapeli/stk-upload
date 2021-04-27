@@ -150,6 +150,9 @@ def show_persons():
 
     res, u_context = _do_get_persons(args)
 
+    if Status.has_failed(res):
+        flash(_("Data reading failed."), 'error')
+        stk_logger(u_context, f"-> bp.scene.routes.show_persons FAILED")
     found = res.get('items',[])
     num_hidden = res.get('num_hidden',0)
     hidden = f" hide={num_hidden}" if num_hidden > 0 else ""

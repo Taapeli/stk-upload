@@ -92,11 +92,25 @@ MATCH (a:Batch)
 WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
 RETURN a AS batch ORDER BY a.id DESC'''
 
-    # Batch removal
-    delete = """
-MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
-OPTIONAL MATCH (b) -[*]-> (n) 
-DETACH DELETE b, n"""
+#   delete = """
+# MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
+# OPTIONAL MATCH (b) -[*]-> (n)
+# WITH b, n LIMIT $limit
+# DETACH DELETE b, n"""
+
+    # Safe Batch removal in reasonable chunks:
+    #    a) Nodes pointed by OWNS, 
+    #    b) following nodes by relation NAME or NOTE
+    #    c) Batch node self
+    delete_chunk = """
+MATCH (:UserProfile{username:$user}) -[:HAS_LOADED]-> (:Batch{id:$batch_id}) --> (a)
+WITH a limit 1000
+    OPTIONAL MATCH (a) -[r]-> (b) WHERE TYPE(r) = "NAME" OR TYPE(r) = "NOTE"
+    DETACH DELETE b
+    DETACH DELETE a"""
+    delete_batch_node = """
+MATCH (:UserProfile{username:$user}) -[:HAS_LOADED]-> (c:Batch{id:$batch_id})
+DETACH DELETE c"""
 
     remove_all_handles = """
 match (b:Batch {id:$batch_id}) -[*]-> (a)
