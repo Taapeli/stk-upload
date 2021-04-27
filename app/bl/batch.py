@@ -24,14 +24,17 @@ Created on 29.11.2019
 
 @author: jm
 '''
+from flask_babelex import _
 import shareds
 from datetime import date, datetime
 from models.util import format_timestamp
 
-from bl.base import Status
-from pe.dataservice import DataService #, ConcreteService
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+from bp.scene.routes import stk_logger
 from bp.admin.models.cypher_adm import Cypher_adm
+
+from bl.base import Status
+from pe.dataservice import DataService
+from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 
 
 class Batch:
@@ -102,11 +105,48 @@ class Batch:
 
     @staticmethod
     def delete_batch(username, batch_id):
-        with shareds.driver.session() as session:
-            result = session.run(
-                CypherBatch.delete, username=username, batch_id=batch_id
-            )
-            return result
+        """Delete a Batch with reasonable chunks.
+        """
+        total=0
+        try:
+            with shareds.driver.session() as session:
+                removed = -1
+                while removed != 0:
+                    result = session.run(CypherBatch.delete_chunk,
+                                         user=username, batch_id=batch_id)
+                    # Supports both Neo4j version 3 and 4:
+                    counters = shareds.db.consume_counters(result)
+                    #if counters:
+                    d1 = counters.nodes_deleted
+                    d2 = counters.relationships_deleted
+                    removed = d1+d2
+                    total += removed
+                    if removed:
+                        print(f"Batch.delete_batch: removed {d1} nodes, {d2} relations")
+                    else:
+                        # All connected nodes deleted. delete the batch node
+                        result = session.run(CypherBatch.delete_batch_node,
+                                             user=username, batch_id=batch_id)
+                        counters = shareds.db.consume_counters(result)
+                        #if counters:
+                        d1 = counters.nodes_deleted
+                        d2 = counters.relationships_deleted
+                        if d1:
+                            print(f"Batch.delete_batch: removed "\
+                                  f"{d1} batch node {batch_id}, {d2} relations")
+                            total += d1+d2
+                            removed = 0
+                        else:
+                            print(f"Batch.delete_batch: "\
+                                  f"{_('Could not delete batch')} \"{batch_id}\"")
+                            return({'status': Status.ERROR, 'statustext': "Batch not deleted"})
+
+            return {'status':Status.OK, 'total': total}
+
+        except Exception as e:
+            msg = f"{e.__class__.__name__} {e}"
+            print(f"Batch.delete_batch: ERROR {msg}")
+            return({'status': Status.ERROR, 'statustext': msg})
 
     @staticmethod
     def get_filename(username, batch_id):
