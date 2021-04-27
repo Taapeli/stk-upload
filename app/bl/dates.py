@@ -129,7 +129,7 @@ class DateRange():
     #TODO: The DateRange math is very brutal
     '''
 
-    def __init__(self, *args):
+    def __init__(self, *args, calendar=None):
         '''
         DateRange constructor can be called following ways:
             (a) DateRange(d1)
@@ -152,7 +152,7 @@ class DateRange():
             argument is assumed to be a tuple like the output of DataRange.to_list() 
             method, and the components formats are not checked.
         '''
-
+        self.calendar = None # default: Gregorian
         if len(args) == 0 or \
                 (isinstance(args[0], (list, tuple)) and args[0][0] == None):
             # Missing date value, needed for comparisons
@@ -220,10 +220,18 @@ class DateRange():
 #                     raise ValueError('Too many arguments for DateRange({}, date)'.
 #                                      format(self.datetype))
             return
-
+        
         raise ValueError("Invalid 1st argument for DateRange()")
 
-
+    @property
+    def calendar_string(self): # not used
+        from flask_babelex import lazy_gettext as _l
+        if self.calendar:
+            calendar_string = f"[{_l(self.calendar)}]"
+        else:
+            calendar_string = ""
+        return calendar_string
+    
     def __str__(self):
         """ Return DateRange in display local format like 'välillä 1700 … 9.1800'
             using babel language translations
@@ -247,21 +255,26 @@ class DateRange():
         dstr1 = self.date1.to_local()
         dstr2 = "" if self.date2 == None else self.date2.to_local()
         #print ("# dstr {} - {}".format(dstr1, dstr2))
+        if self.calendar:
+            calendar_string = f" [{_l(self.calendar)}]"
+        else:
+            calendar_string = ""
         if type_e == DR['DATE']: # Exact date d1
-            return dopt + dstr1
+            #if hasattr(self, "cformat"):
+            return dopt + dstr1 + calendar_string
         elif type_e == DR['BEFORE']:  # Date till d1
-            return _l("{}till {}").format(dopt, dstr1)
+            return _l("{}till {}").format(dopt, dstr1) + calendar_string
             #return "{}{} saakka".format(dopt, dstr1)
         elif type_e == DR['AFTER']: # Date from d1
-            return _l("{}from {}").format(dopt, dstr1)
+            return _l("{}from {}").format(dopt, dstr1) + calendar_string
             #return "{}{} alkaen".format(dopt, dstr1)
         elif type_e == DR['PERIOD']: # Date period d1-d2
-            return "{}{} – {}".format(dopt, dstr1, dstr2)
+            return "{}{} – {}".format(dopt, dstr1, dstr2) + calendar_string
         elif type_e == DR['BETWEEN']: # A date between d1 and d2
-            return _l("{}between {} … {}").format(dopt, dstr1, dstr2)
+            return _l("{}between {} … {}").format(dopt, dstr1, dstr2) + calendar_string
             #return "{}välillä {} … {}".format(dopt, dstr1, dstr2)
         elif type_e == DR['ABOUT']: # A date near d1
-            return _l("{}about {}").format(dopt, dstr1)
+            return _l("{}about {}").format(dopt, dstr1) + calendar_string
             #return "{}noin {}".format(dopt, dstr1)
 
         return "<Date type={}, {}...{}>".format(self.datetype, dstr1, dstr2)
@@ -393,6 +406,7 @@ class DateRange():
         v1 = self.date1.value()
         v2 = self.date2.value() if self.date2 != None else v1
         ret = {'datetype': self.datetype, 'date1': v1, 'date2': v2}
+        if self.calendar: ret['calendar'] = self.calendar
         return ret
 
     def add_years(self, intYears):
@@ -672,7 +686,7 @@ class Gramps_DateRange(DateRange):
     dateval   about  estimated  val        EST_ABOUT    5+16 21 arviolta noin {val}
     '''
 
-    def __init__(self, xml_tag, xml_type, quality, date1, date2=None):
+    def __init__(self, xml_tag, xml_type, quality, date1, date2=None, calendar=None):
         """ 
         Importing a DateRange from Gramps xml structure elements
         """
@@ -694,4 +708,5 @@ class Gramps_DateRange(DateRange):
             dr = 'EST_' + dr
 
         super(Gramps_DateRange, self).__init__((DR[dr], date1, date2))
+        self.calendar = calendar
 
