@@ -3207,7 +3207,7 @@ msgid "Source References and Events"
 msgstr "Lähdeviitteet ja tapahtumat"
 
 #: bp/scene/templates/scene/source_events.html:97
-msgid "Copy to clipborad"
+msgid "Copy to clipboard"
 msgstr "Kopioi leikepöydälle"
 
 #: bp/scene/templates/scene/source_events.html:99

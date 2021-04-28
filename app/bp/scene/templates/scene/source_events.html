@@ -91,10 +91,8 @@ td.Citation > div {display: inline }
 	        		  </td>
 	        		  <td class="Citation">
 
-	        		    <input id="clp_{{loop.index}}" type="text" style="display:None"
-	        		       value="{{repo_name}};{{source.stitle}};{{c.page}}">
-	        		    <div class="copy-fld" onclick="toClipboard('clp_{{loop.index}}')"
-	        		          title="{{ _('Copy to clipborad') }}"> ⚓{{ _( "Page" ) }} </div>
+            {% set ind = loop.index %}
+            {{ macro.source_clip(ind, _( "Page" ), c, source, repo_name) }}
 
 	        		    <div title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>

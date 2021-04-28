@@ -1156,7 +1156,7 @@ class DOM_handler:
                     calendar = dateobj.getAttribute("cformat")
                 else:
                     calendar = None
-                print("calendar:", calendar)
+                #print("calendar:", calendar)
                 if tag == "dateval":
                     if dateobj.hasAttribute("val"):
                         date_start = dateobj.getAttribute("val")
