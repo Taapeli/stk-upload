@@ -318,23 +318,28 @@
     {% endfor %}</sup>{% endif %}
 {%- endmacro %}
 
-{% macro source_clip(clip_index, anchor_text, cita, source, repo_name) -%}
+{% macro source_clip(clip_index, cita, source, repo_name, anchor_text, title) -%}
     {# 
         :param: clip_index  unique identifier (like runnin number)
-        :param: anchor_text link name like "Page"
         :param: cita        citation object
         :param: source      Source object
         :param: repo        Repository object
+        :param: anchor_text link name like "Page"
+        :param: title       optional title text
     #}
 
+    {% if not title %}{% set title=_('Copy to clipboard') %}
+    {% endif %}
     {% set ns = namespace(url="", page="") %}
-    {% if source.notes %}
+    {% if cita.notes %}
         {% for note in cita.notes %}
-<!--             {% if note.url %} -->
-<!--                 <a href="{{note.url}}" class="outlink"  -->
-<!--                    target="_blank">{{note.url|transl('urldomain')}}</a> – -->
-<!--             {% endif %} -->
-            {% if note.url %}{% set ns.url = "; Kansallisarkisto: " + note.url %}
+            {% if note.url %}
+                {% if "digi.narc.fi/" in note.url %}{% set ns.url = "; Kansallisarkisto: " + note.url %}
+                {% else %}
+                    {% if "sukuhistoria.fi/" in note.url %}{% set ns.url = "; SSHY: " + note.url %}
+                    {% else %}{% set ns.url = "; URL: " + note.url %}
+                    {% endif %}
+                {% endif %}
             {% endif %}
         {% endfor %}
     {% endif -%}
@@ -344,9 +349,9 @@
         {% endif -%}
     {% endif -%}
     {% set txt = repo_name + " - " + source.stitle + ns.page + ns.url -%}
-        <input id="clp_{{clip_index}}" type="text" style="display:None" value="{{txt}}">
-        <div class="copy-fld" onclick="toClipboard('clp_{{clip_index}}')"
-              title="{{ _('Copy to clipborad') }}"> ⚓{{anchor_text}} </div>
+        <input id="clp_id{{clip_index}}" type="text" style="display:None" value="{{txt}}">
+        <div class="copy-fld" onclick="toClipboard('clp_id{{clip_index}}')"
+              title="{{ title }}"> ⚓{{anchor_text}} </div>
 {%- endmacro %}
 
 
