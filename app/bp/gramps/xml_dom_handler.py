@@ -566,6 +566,7 @@ class DOM_handler:
             for person_name in person.getElementsByTagName("name"):
                 pname = Name()
                 pname.order = name_order
+                pname.citation_handles = []
                 name_order += 1
 
                 if person_name.hasAttribute("alt"):

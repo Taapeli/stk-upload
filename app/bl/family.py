@@ -22,6 +22,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 @author: jm 
 """
+# blacked
 import shareds
 from ui.jinja_filters import translate
 import logging
@@ -33,7 +34,6 @@ from .base import NodeObject, Status
 from .person import PersonBl
 from .person_name import Name
 
-# from pe.db_reader import DbReader
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_family import CypherFamily
 
@@ -102,20 +102,14 @@ class Family(NodeObject):
 class FamilyBl(Family):
     """Family business logic object carries the family and connected data.
 
-            Properties from Family:
-                    change
-                    id              esim. "F0001"
-                    uniq_id         int database key
-                    uuid            str UUID key
-                    rel_type        str "marriage" etc.
-                    father_sortname str search key
-                    mother_sortname str search key
-    #             #TODO: Obsolete properties?
-    #                 event_handle_roles      str tapahtuman osoite
-    #                 eventref_role       str tapahtuman rooli
-    #                 child_handles      str lapsen osoite
-    #                 note_handles       str lisätiedon osoite
-    #                 citation_handles   str lisätiedon osoite
+    Properties from Family:
+            change
+            id              esim. "F0001"
+            uniq_id         int database key
+            uuid            str UUID key
+            rel_type        str "marriage" etc.
+            father_sortname str search key
+            mother_sortname str search key
     """
 
     def __init__(self, uniq_id=None):
@@ -129,8 +123,9 @@ class FamilyBl(Family):
         self.notes = []
         self.sources = []
         self.marriage_dates = DateRange()
-        self.note_ref = []  # For a page, where same note may be referenced
+        # For a page, where same note may be referenced
         # from multiple events and other objects
+        self.note_ref = []
 
     def save(self, tx, **kwargs):
         """Saves the family node to db with its relations.
@@ -254,18 +249,20 @@ class FamilyBl(Family):
 
 
 class FamilyWriter(DataService):
-    '''
+    """
     Family datastore for update with optional trasaction.
-    '''
-    def __init__(self, service_name:str, u_context=None, tx=None):
+    """
+
+    def __init__(self, service_name: str, u_context=None, tx=None):
         super().__init__(service_name, u_context, tx=tx)
-        #shareds.dservice.tx = None # already ok
-        pass #print(f"#FamilyWriter: {dir(self)}")
+        # shareds.dservice.tx = None # already ok
+        pass  # print(f"#FamilyWriter: {dir(self)}")
 
     # def set_calculated_attributes(self, uniq_id):
     #     """Set Family event dates and sortnames."""
     #     return shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
     #     # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
+
 
 class FamilyReader(DataService):
     """
@@ -540,41 +537,6 @@ class FamilyReader(DataService):
                 "statustext": _("This person has no families"),
             }
 
-#     def get_children_by_id(self):
-#         raise ("Obsolete bl.family.FamilyReader.get_children_by_id")
-
-#     def get_family_events(self):
-#         """ Luetaan perheen tapahtumien tiedot """
-#         pid = int(self.uniq_id)
-#         query = """
-# MATCH (family:Family)-[r:EVENT]->(event:Event)
-#   WHERE ID(family)=$pid
-# RETURN r.role AS eventref_role, event.handle AS event_handles"""
-#         return shareds.driver.session().run(query, {"pid": pid})
-
-#     @staticmethod
-#     def find_family_for_event(event_uniq_id):
-#         """Returns Family instance which has given Event.
-#         NOT IN USE. For models.obsolete_datareader.get_source_with_events
-#         """
-#         query = """
-# MATCH (family:Family)-[r:EVENT]->(event)
-#   WHERE ID(event)=$pid
-# RETURN family"""
-#         result = shareds.driver.session().run(query, pid=event_uniq_id)
-#         for record in result:
-#             f = FamilyBl.from_node(record[0])
-#             return f
-#         raise LookupError(f"Family {event_uniq_id} not found")
-
-    #     @staticmethod
-    #     def get_dates_parents(tx, uniq_id): #see models.gen.family_combo.Family_combo
-    #         return tx.run(Cypher_family.get_dates_parents,id=uniq_id)
-
-    #     @staticmethod
-    #     def set_dates_sortnames(tx, uniq_id, dates, father_sortname, mother_sortname): #see models.gen.family_combo.Family_combo
-    #         ''' Update Family dates and parents' sortnames.
-
     def hide_privacy_protected_families(self, families):
         ret_families = []
         for fam in families:
@@ -587,22 +549,3 @@ class FamilyReader(DataService):
             fam.num_hidden_children = len(fam.children) - len(children2)
             fam.children = children2
         return ret_families
-
-
-#     @staticmethod
-#     def get_families(o_context, opt='father', limit=100): #see models.gen.family_combo.Family_combo
-#         """ Find families from the database """
-
-#     @staticmethod
-#     def get_all_families(): #see models.gen.family_combo.Family_combo
-#         """ Find all families from the database - not in use!
-
-#     @staticmethod
-#     def get_own_families(user=None): #see models.gen.family_combo.Family_combo
-#         """ Find all families from the database - not in use!
-
-#     @staticmethod
-#     def get_marriage_parent_names(event_uniq_id): #see models.gen.family_combo.Family_combo
-
-#     def get_parent_by_id(self, role='father'): #see models.gen.family_combo.Family_combo
-#         """ Luetaan perheen isän (tai äidin) tiedot """

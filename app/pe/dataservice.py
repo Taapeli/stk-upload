@@ -120,7 +120,7 @@ class DataService:
             print(f'#~~~{self.idstr} exit {obj_addr(self.old_tx)}')
 
         if self.previous_dservice:
-            print(f"-- {self.idstr} returning to dsrvice={obj_addr(self.previous_dservice)} from {obj_addr(shareds.dservice)}")
+            # print(f"-- {self.idstr} returning to dsrvice={obj_addr(self.previous_dservice)} from {obj_addr(shareds.dservice)}")
             shareds.dservice = self.previous_dservice
             self.previous_dservice = None
         else:
