@@ -23,7 +23,7 @@ import re
 import traceback
 
 from neo4j import GraphDatabase
-from models.gen.event import Event
+from bl.event import Event
 import shareds
 
 from werkzeug.utils import secure_filename

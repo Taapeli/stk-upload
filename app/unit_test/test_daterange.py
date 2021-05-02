@@ -6,7 +6,7 @@ Created on 10.11.2017
 import unittest
 from datetime import date
 from bl.dates import DateRange, DR
-from models.gen.base import NodeObject
+from bl.base import NodeObject
 
 
 class Test(unittest.TestCase):
@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
         '''
         comp = 1963405
         for s in ["1917-12-14", "1917-12-15", "1917-12", "1917-12-16"]:
-#             print(" test day {}".format(s))
+#             print(" unit_test day {}".format(s))
             val = DateRange.DateInt(s).value()
             self.assertEqual(val, comp, s)
             comp += 1
@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
         # There is a gap bewtween "1917" and "1917-07-01" ~ no problem?
         s = "1917-07-01"
         comp += 31  
-#         print(" test month {}".format(s))
+#         print(" unit_test month {}".format(s))
         val = DateRange.DateInt(s).value()
         self.assertEqual(val, comp, s)
 
