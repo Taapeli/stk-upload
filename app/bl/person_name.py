@@ -34,8 +34,8 @@ logger = logging.getLogger("stkserver")
 import shareds
 from bl.base import NodeObject
 
-# Todo: move to pe.neo4j
-from models.gen.cypher import Cypher_name
+from pe.neo4j.cypher.cy_person import CypherPerson
+#from models.gen.cypher import Cypher_name
 
 
 class Name(NodeObject):
@@ -118,7 +118,7 @@ class Name(NodeObject):
                 "title": self.title,
             }
             tx.run(
-                Cypher_name.create_as_leaf,
+                CypherPerson.create_name_as_leaf,
                 n_attr=n_attr,
                 parent_id=kwargs["parent_id"],
                 citation_handles=self.citation_handles,

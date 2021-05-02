@@ -28,10 +28,6 @@ class CypherPerson():
     Cypher clauses for Person data access.
     '''
 
-    
-    
-    
-
 # ----- Person node -----
 
     get_person_by_uid = "MATCH (p:Person) WHERE ID(p) = $uid"
@@ -199,6 +195,15 @@ CREATE (n:Name) SET n = $n_attr
 WITH n
 MATCH (p:Person {handle:$p_handle})
 MERGE (p)-[r:NAME]->(n)"""
+
+    create_name_as_leaf = """
+CREATE (n:Name) SET n = $n_attr
+WITH n
+MATCH (p:Person)    WHERE ID(p) = $parent_id
+MERGE (p)-[r:NAME]->(n)
+WITH n
+match (c:Citation) where c.handle in $citation_handles
+merge (n) -[r:CITATION]-> (c)"""
 
     link_event_embedded = """
 MATCH (p:Person {handle: $handle}) 

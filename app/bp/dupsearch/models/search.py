@@ -334,22 +334,22 @@ def search_dups(args):
         return id(p) as pid, p, collect(pn) as namenodes
     """,callback=lambda n,count,rec: __search_dups(n,count,args,rec,matches), batch_id=args.batchid1)
 
-    test_data = "kku/test_data.txt"
-    with open(test_data,"w") as f:
-        value = 0
-        for res in matches:
-            values = " ".join(["%s:%s" % (i+1,value) for (i,value) in enumerate(res['matchvector'])])
-            matchdata = "{} {}\n".format(value,values)
-            f.write(matchdata)
-            value = 1-value
-    from subprocess import Popen, PIPE
-    models_folder = "training/models"
-    model = os.path.join(models_folder,args.model)
-    output_file = "/tmp/output.txt"
-    cmd = f"{libsvm_folder}/svm-predict {test_data} {model} {output_file}"
-    f = subprocess.run(cmd, shell = True ) #, stdout = PIPE).stdout
-    for i,line in enumerate(open(output_file)):
-        matches[i]['match_value'] = int(line)
+    # test_data = "kku/test_data.txt"
+    # with open(test_data,"w") as f:
+    #     value = 0
+    #     for res in matches:
+    #         values = " ".join(["%s:%s" % (i+1,value) for (i,value) in enumerate(res['matchvector'])])
+    #         matchdata = "{} {}\n".format(value,values)
+    #         f.write(matchdata)
+    #         value = 1-value
+    # from subprocess import Popen, PIPE
+    # models_folder = "training/models"
+    # model = os.path.join(models_folder,args.model)
+    # output_file = "/tmp/output.txt"
+    # cmd = f"{libsvm_folder}/svm-predict {test_data} {model} {output_file}"
+    # f = subprocess.run(cmd, shell = True ) #, stdout = PIPE).stdout
+    # for i,line in enumerate(open(output_file)):
+    #     matches[i]['match_value'] = int(line)
 
     return sorted(matches,reverse=True,key=lambda match: match['score'])
 
