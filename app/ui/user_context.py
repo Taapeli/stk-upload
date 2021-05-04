@@ -47,7 +47,7 @@ class UserContext():
             #        Privacy limit: how many years from (calculated) death year
             u_context.privacy_limit = shareds.PRIVACY_LIMIT
 
-            #    < Execute data search here >
+            #    < Execute data search here using u_context >
 
             #    Update data scope for next search
             context.update_session_scope('person_scope', 
@@ -75,11 +75,12 @@ class UserContext():
 
             COMMON - 1          approved common data 'Isotammi'
             OWN - 2             all user's own candidate materials
-            BATCH - 3           a selected Batch set
-            COMMON+OWN
-            COMMON+BATCH
+            BATCH - 3 *         a selected Batch set
+            COMMON+OWN *
+            COMMON+BATCH *
+            *) NOTE. Not implemented, request.div2 is never currently present!
 
-        (2) sort key boundaries displayed in the current page
+        (2) sort keys displayed in the current page
         - first, last          str   Boundary names for current display page [from, to]
 
                                 For Persons page, the scope variable in
@@ -87,7 +88,7 @@ class UserContext():
                                 are from Person.sortname field.
 
             1. For display, the scope tells the names found: [first, last]
-            2a. With forward button, show next from last towards end
+            2a. With forward button, show next from last towards bottom of list
             2b. With backward button, show next from first towards top
 
             - Current page includes the bounding names first,last
@@ -165,7 +166,7 @@ class UserContext():
         # View range: names [first, last]
         self.session_var = None
         self.first = ''
-        self.last = UserContext.NEXT_END
+        self.last = self.NEXT_END
         self.direction = 'fw'
 
         ''' Set active user, if any username '''
@@ -178,9 +179,10 @@ class UserContext():
         else:
             self.user = user_session.get('username', None)
 
-        """ Stores the request parameters div=1&div2=2&cmp=1 as session
-            variable user_context.
-            Returns owner context name if detected, otherwise False
+        """
+        - Stores the request parameters div=1&div2=2&cmp=1 as session variable
+          user_context.
+        - Returns owner context name if detected, otherwise False    
         """
         new_selection = 0
         if request:
@@ -204,6 +206,8 @@ class UserContext():
             #    div=1 -> show approved material
             #    div2=2 -> show researcher's candicate material
             new_selection = int(request.args.get('div', 0)) + int(request.args.get('div2', 0))
+            # NOTE. Only div is in use implemented, 
+            #       request.div2 or cmp are never currently present!
             if new_selection:
                 # Take also common data?
                 if request.args.get('cmp', ''): 
@@ -336,7 +340,7 @@ class UserContext():
             :param: session_var    str    session variable name like  'person_scope'
         
             Use request arguments fw or bw, if defined.
-            Else use orifinal from session.
+            Else use original from session.
             
             If request is missing, try session.session_var.
         '''
@@ -355,9 +359,12 @@ class UserContext():
                     self.first = unquote_plus(fw)
                     return
 
-        # No request or no fw or bw in request
+        # No request OR no fw or bw in request
         if self.session_var:
-            scope = [self.first, self.last]
+            # Scope from session, if defined; else default
+            scope = self.session.get(self.session_var, [self.first, self.last])
+            self.first = scope[0]
+            self.last = scope[1]
             self.session[self.session_var] = scope
             print(f"UserContext.set_scope_from_request: {self.session_var} is cleared {scope}")
         return
