@@ -181,9 +181,9 @@ class ExtendedLoginForm(LoginForm):
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     email = StringField(_l('Email address'), validators=[Required('Email required') ])
-    agree = BooleanField( LazyFormat("I have read and agree to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>",
-                                  terms_of_use_url="http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot",
-                                  terms_of_use="Terms of use",
+    agree = BooleanField( LazyFormat(_("I have read and agree to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"),
+                                  terms_of_use_url=_("http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"),
+                                  terms_of_use=_("Terms of use"),
     ))
     password = PasswordField(_l('Password'),
                              validators=[Required('Password required')])
