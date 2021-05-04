@@ -344,12 +344,17 @@ def show_person(uuid=None, fanchart=False):
     # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
-    person = result.get("person")
-    objs = result.get("objs", [])
-    print(f"# Person with {len(objs)} objects")
-    jscode = result.get("jscode", "")
-    # Batch or Audit node data like {'root_type', 'root_user', 'id'}
-    person.root = result.get("root")
+        person = None
+        objs = []
+        jscode = ""
+        print(f"# No Person found!")
+    else:
+        person = result.get("person")
+        objs = result.get("objs", [])
+        print(f"# Person with {len(objs)} objects")
+        jscode = result.get("jscode", "")
+        # Batch or Audit node data like {'root_type', 'root_user', 'id'}
+        person.root = result.get("root")
 
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
