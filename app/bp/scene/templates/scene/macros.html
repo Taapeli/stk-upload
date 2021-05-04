@@ -336,7 +336,8 @@
             {% if note.url %}
                 {% if "digi.narc.fi/" in note.url %}{% set ns.url = "; Kansallisarkisto: " + note.url %}
                 {% else %}
-                    {% if "sukuhistoria.fi/" in note.url %}{% set ns.url = "; SSHY: " + note.url %}
+                    {% if "sukuhistoria.fi/" in note.url 
+                       or "digiarkisto.org/" in note.url %}{% set ns.url = "; SSHY: " + note.url %}
                     {% else %}{% set ns.url = "; URL: " + note.url %}
                     {% endif %}
                 {% endif %}
