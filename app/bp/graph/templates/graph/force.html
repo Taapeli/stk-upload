@@ -1,0 +1,198 @@
+{# _bp/audit/templates/layout.html_ #}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fi" lang="fi">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - {{ config.STK_SYSNAME }}</title>
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/k_screen.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hamburger.css') }}">
+
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script src="/static/js/help.js?40"></script>
+        <script src='https://d3js.org/d3.v4.min.js'></script>
+        
+        <!-- i18n for Javascript: -->
+        <link rel="gettext" type="application/x-po" href="/static/translations/{{ session.lang }}.po">
+        <script src="/static/js/gettext.js"></script>
+    </head>
+<body>
+    {% block body %}
+    <h1><a href="/"><img id="logo" src="/static/tam.png" alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
+             onmouseover="this.src='/static/tam1.png';" 
+             onmouseout="this.src='/static/tam.png';"/></a>
+        <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
+        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
+    <div id="paluu">
+        <a href="/audit">{{ _('Audit home') }}</a>
+    </div>
+    {% endblock %}
+
+    <div class="fullclear"></div>
+    <div id="footer">
+        <span id="createdate">{{ config.STK_SYSNAME }} &nbsp;
+        {% if time0 %}
+            {% set elapsed = time.time()-time0 %}
+            <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
+        {% if elapsed %}
+            <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
+        {{ _('Version') }} {{ 'app'|app_date }}</span>
+    </div>
+    <div class="fullclear"></div>
+
+<div id="graph" width=800></div>
+
+<style>
+    body {
+        color: blue;
+    }
+    .label {
+        fill: red;
+        font-style: normal;
+        font: 7px sans-serif;
+    }
+    .tick {
+        fill: green;
+        font-style: normal;
+        font: 8px sans-serif;
+    }
+</style>
+        
+<!-- load the d3.js library -->	
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script src="https://unpkg.com/d3-force-3d"></script>
+<script>
+
+    var data = JSON.parse('{{ famtree_data|safe }}');
+
+    const width = 800;
+    const height = 800;
+    const axisoffset = 200;
+
+    const root = d3.hierarchy(data);
+    const links = root.links();
+    const nodes = root.descendants();
+
+    var yearScale = d3.scaleLinear()
+        .domain([1380, 2020])
+        .range([-height/2, height/2]);
+
+    var yearAxis = d3.axisLeft()
+        .scale(yearScale)
+        .tickFormat(d3.format(".0f"));
+  
+    drag = simulation => {
+    
+        function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+        }
+        
+        function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+        }
+        
+        function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+        }
+        
+        return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+    }
+
+    togglechildren = d => {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+            } else {
+            d.children = d._children;
+            d._children = null;
+        }
+        update();
+    }
+
+    const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
+        .force("charge", d3.forceManyBody().strength(-300))
+        .force("x", d3.forceX());
+
+    var svg = d3.select("#graph").append("svg")
+        .attr("viewBox", [-width / 2, -height / 2, width, height])
+        .attr("transform", "translate(" + -axisoffset + ",0)")
+        .call(yearAxis);
+
+    const link = svg.append("g")
+        .attr("transform", "translate(" + axisoffset + ",0)")
+        .attr("stroke", "#999")
+        .attr("stroke-opacity", 0.6)
+    .selectAll("line")
+        .data(links)
+    .join("line")
+        .attr("y1", d => yearScale(d.source.data.birth))
+        .attr("y2", d => yearScale(d.target.data.birth));
+
+    const node = svg.append("g")
+        .attr("transform", "translate(" + axisoffset + ",0)")
+        .attr("class", "nodes")
+        .attr("fill", "#fff")
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1.5)
+    .selectAll("circle")
+        .data(nodes)
+    .join("circle")
+        .attr("fill", d => d.children ? null : "#000")
+        .attr("stroke", d => d.children ? null : "#fff")
+        .attr("r", 3.5)
+        .attr("cx", d => yearScale(d.data.birth))
+        .call(drag(simulation))
+        .on("click", togglechildren);
+
+    const personLabel = svg.append("g")
+        .attr("transform", "translate(" + axisoffset + ",0)")
+        .attr("class", "labels")
+    .selectAll("text")
+        .data(nodes)
+    .enter().append("text")
+        .attr("class", "label")
+        .attr("x", d => d.x)
+        .attr("y", d => yearScale(d.data.birth))
+        .text(d => "children" in d ? d.data.name : "");
+
+    simulation.on("tick", () => {
+    link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => yearScale(d.source.data.birth))
+        .attr("py1", d => yearScale(d.source.data.birth))
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => yearScale(d.target.data.birth))
+        .attr("py2", d => yearScale(d.target.data.birth));
+
+    node
+        .attr("cx", d => d.x)
+        .attr("cy", d => yearScale(d.data.birth))
+        .attr("py", d => yearScale(d.data.birth));
+
+    personLabel
+        .attr("x", d => d.x)
+        .attr("y", d => yearScale(d.data.birth))
+        .attr("py", d => yearScale(d.data.birth));
+    });
+
+//    invalidation.then(() => simulation.stop());
+</script>
+
+<div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>
+
+</body></html>

@@ -47,3 +47,52 @@ class Unmark(transformer.Transformation):
             item.tag = item.tag[0:-2]
             return item
         return True
+from flask import render_template, request, json
+from flask_security import login_required, roles_accepted, current_user
+from . import bp
+from bp.graph.models.fanchart import FanChart
+from bp.graph.models.famtree import FamTree
+
+@bp.route('/fanchart', methods=['GET'])
+@login_required
+@roles_accepted('audit')
+def fanchart_only(uuid=None):
+    uuid = request.args.get('uuid', None)
+    if uuid is None:
+        return render_template('/graph/layout.html', fanchart_data='')
+
+    fanchart = FanChart().get(uuid)
+    return render_template('/graph/layout.html', fanchart_data=json.dumps(fanchart))
+
+@bp.route('/famtree', methods=['GET'])
+@login_required
+@roles_accepted('audit')
+def famtree_only(uuid=None):
+    uuid = request.args.get('uuid', None)
+    if uuid is None:
+        return render_template('/graph/famtree.html', famtree_data='')
+
+    famtree = FamTree().get(uuid)
+    return render_template('/graph/famtree.html', famtree_data=json.dumps(famtree))
+
+@bp.route('/force', methods=['GET'])
+@login_required
+@roles_accepted('audit')
+def force_only(uuid=None):
+    uuid = request.args.get('uuid', None)
+    if uuid is None:
+        return render_template('/graph/force.html', famtree_data='')
+
+    famtree = FamTree().get(uuid)
+    return render_template('/graph/force.html', famtree_data=json.dumps(famtree))
+
+@bp.route('/tree', methods=['GET'])
+@login_required
+@roles_accepted('audit')
+def tree_only(uuid=None):
+    uuid = request.args.get('uuid', None)
+    if uuid is None:
+        return render_template('/graph/tree.html', famtree_data='')
+
+    famtree = FamTree().get(uuid)
+    return render_template('/graph/tree.html', famtree_data=json.dumps(famtree))

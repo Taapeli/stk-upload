@@ -64,24 +64,25 @@ class FanChart:
         """
         Format the data for fan/sunburst chart use.
         """
+        def mk_int(s):
+            """
+            Convert string to integer, empty string to zero.
+            """
+            s = s.strip()
+            return int(s) if s else 0
+
         names = person_attributes["sortname"].split("#")
-        if (
-            len(person_attributes["events"]) > 0
-            and person_attributes["events"][0][1] != None
-        ):
-            birth = f"{person_attributes['events'][0][1]}"
-        else:
-            birth = ""
-        if (
-            len(person_attributes["events"]) > 1
-            and person_attributes["events"][0][1] != None
-        ):
-            death = f"{person_attributes['events'][1][1]}"
-        else:
-            death = ""
+        birth, death = "", ""
+        for ev in person_attributes["events"]:
+            if len(ev) == 2 and ev[0] == "Birth" and ev[1] != None:
+                birth = f"{ev[1]}"
+            elif len(ev) == 2 and ev[0] == "Death" and ev[1] != None:
+                death = f"{ev[1]}"
         return {
             "name": f"{names[1]} {names[0]}",
             "color": self.gender_color(person_attributes["gender"], descendant),
+            "birth": mk_int(birth),
+            "death": mk_int(death),
             "years": f"{birth}-{death}" if birth + death != "" else "",
             "gender": person_attributes["gender"],
             "title": f"{names[1]} {names[0]}, {birth}-{death}",
