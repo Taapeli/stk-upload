@@ -17,10 +17,21 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-#   Two-way fanchart adapted from Vasco Asturiano's sunburst chart javascript module
-#   (https://github.com/vasturiano/sunburst-chart).
+# Copyright 2019–2020 Observable, Inc.
 #
-#   Copyright (C) 2021  Heikki Roikonen
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# Copyright (C) 2021  Heikki Roikonen
 
 from flask import render_template, request, flash, session as user_session
 from flask import json  # , send_file
@@ -34,10 +45,10 @@ MAX_ANCESTOR_LEVELS = 4
 MAX_DESCENDANT_LEVELS = 3
 
 
-class FanChart:
+class FamTree:
     def gender_color(self, sex, descendant):
         """
-        Given the gender code according to ISO 5218, returns a color for fanchart.
+        Given the gender code according to ISO 5218, returns a color for famtree.
         """
         if descendant:
             descendant_colors = {
@@ -60,7 +71,7 @@ class FanChart:
                 sex, "white"
             )  # white if value is not in ISO 5218
 
-    def fanchart_data(self, person_attributes, descendant):
+    def famtree_data(self, person_attributes, descendant):
         """
         Format the data for fan/sunburst chart use.
         """
@@ -89,43 +100,28 @@ class FanChart:
             "uuid": person_attributes["uuid"],
         }
 
-    def build_parents(self, u_context, uniq_id, size, level=1):
+    def build_parents(self, u_context, uniq_id, level=1):
         """
-        Recurse to ancestors, building a data structure for fanchart.
+        Recurse to ancestors, building a data structure for famtree.
         """
 
         with PersonReader("read", u_context) as service:
             result = service.get_parents(uniq_id)
 
-        par_count = max(
-            len(result), 2
-        )  # prepare for any number, but space the chart for 2
         parents = []
         result.sort(key=lambda x: x["gender"])
         for par in result:
-            node = self.fanchart_data(par, descendant=False)
-            if level >= MAX_ANCESTOR_LEVELS:  # do not continue recursion?
-                node["size"] = size / par_count  # leaf node, others must have no size
-            else:
-                ancest = self.build_parents(
-                    u_context, par["uniq_id"], size / par_count, level + 1
+            node = self.famtree_data(par, descendant=False)
+            if level < MAX_ANCESTOR_LEVELS:  # continue recursion?
+                node["parents"] = self.build_parents(
+                    u_context, par["uniq_id"], level + 1
                 )
-                if len(ancest) == 0:
-                    node["size"] = (
-                        size / par_count
-                    )  # leaf node, others must have no size
-                else:
-                    if len(ancest) == 1:  # need empty space for missing parent?
-                        node["size"] = (
-                            size / par_count / 2
-                        )  # "half-leaf" node, half the size
-                    node["children"] = ancest
             parents.append(node)
         return parents
 
-    def build_children(self, u_context, uniq_id, size, level=1):
+    def build_children(self, u_context, uniq_id, level=1):
         """
-        Recurse to descendants, building a data structure for fanchart.
+        Recurse to descendants, building a data structure for famtree.
         """
 
         def b_year(x):
@@ -143,23 +139,14 @@ class FanChart:
         with PersonReader("read", u_context) as service:
             result = service.get_children(uniq_id)
 
-        chi_count = len(result)
         children = []
         result.sort(reverse=True, key=lambda x: b_year(x))
         for chi in result:
-            node = self.fanchart_data(chi, descendant=True)
-            if level >= MAX_DESCENDANT_LEVELS:  # do not continue recursion?
-                node["size"] = size / chi_count  # leaf node, others should have no size
-            else:
-                descend = self.build_children(
-                    u_context, chi["uniq_id"], size / chi_count, level + 1
+            node = self.famtree_data(chi, descendant=True)
+            if level < MAX_DESCENDANT_LEVELS:  # continue recursion?
+                node["children"] = self.build_children(
+                    u_context, chi["uniq_id"], level + 1
                 )
-                if len(descend) == 0:
-                    node["size"] = (
-                        size / chi_count
-                    )  # leaf node, others must have no size
-                else:
-                    node["children"] = descend
             children.append(node)
         return children
 
@@ -167,7 +154,7 @@ class FanChart:
         """
         Fetch data from the ancestors and descendants of the giving uuid, creating a data
         structure that can be fed to the sunburst chart Javascript component for creating
-        a simple two-way fanchart.
+        a simple two-way famtree.
         """
         # Set up the database access.
         u_context = UserContext(user_session, current_user, request)
@@ -180,57 +167,13 @@ class FanChart:
             return ""
 
         for person in result:
-            fanchart = self.fanchart_data(person, descendant=True)
+            famtree = self.famtree_data(person, descendant=True)
             uniq_id = person["uniq_id"]
 
         # Gather all required data in two directions from the central person. Data structure used in both is a
         # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
         # (https://vasturiano.github.io/sunburst-chart/)
-        ancestors = self.build_parents(u_context, uniq_id, 1)
-        descendants = self.build_children(u_context, uniq_id, 1)
+        famtree["parents"] = self.build_parents(u_context, uniq_id)
+        famtree["children"] = self.build_children(u_context, uniq_id)
 
-        # Merge the two sunburst chart data trees to form a single two-way fan chart.
-        # This step involves handling several special cases related to the fact that the data structure (inherited
-        # from sunburst chart) does not partition the chart in two separate halves for ancestors and descendants.
-        fanchart.pop(
-            "size", None
-        )  # make sure the root node has no size attribute (will have if no ancestors)
-        if len(descendants) > 0:  # has descendants?
-            if len(ancestors) > 0:  # has ancestors?
-                fanchart["children"] = ancestors + descendants
-                # If only one parent, create an empty quadrant (only needed if the root node has one parent)
-                if len(ancestors) == 1:
-                    slot = (
-                        2 - ancestors[0]["gender"]
-                    )  # For father, yields slot 1; for mother, slot 0.
-                    fanchart["children"].insert(
-                        slot, {"size": 0.5, "color": "#f2f2f2", "uuid": None}
-                    )
-            else:
-                fanchart["children"] = descendants
-                # No ancestors: make two empty quarters to occupy parents' slots (otherwise descendants end up in east!)
-                fanchart["children"].insert(
-                    0, {"size": 0.5, "color": "#f2f2f2", "uuid": None}
-                )  # Can't combine these two!
-                fanchart["children"].insert(
-                    0, {"size": 0.5, "color": "#f2f2f2", "uuid": None}
-                )  # One will be moved next.
-        else:
-            fanchart["children"] = ancestors
-            # If only one parent, create an empty quadrant (only needed if the root node has one parent)
-            if len(ancestors) == 1:
-                slot = (
-                    2 - ancestors[0]["gender"]
-                )  # For father, yields slot 1; for mother, slot 0.
-                fanchart["children"].insert(
-                    slot, {"size": 0.5, "color": "#f2f2f2", "uuid": None}
-                )
-            # No descendants, create empty southern hemisphere
-            fanchart["children"].append({"size": 1, "color": "#f2f2f2", "uuid": None})
-
-        # The sectors are drawn anticlockwise, starting from North. To get the ancestors to occupy the
-        # Northern hemisphere, we need to move the first node on top level list (father) to end of list.
-        if "children" in fanchart.keys():
-            fanchart["children"].append(fanchart["children"].pop(0))
-
-        return fanchart
+        return famtree

@@ -1,0 +1,284 @@
+{# _bp/audit/templates/layout.html_ #}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fi" lang="fi">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - {{ config.STK_SYSNAME }}</title>
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/k_screen.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hamburger.css') }}">
+
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script src="/static/js/help.js?40"></script>
+        <script src='https://d3js.org/d3.v4.min.js'></script>
+        
+        <!-- i18n for Javascript: -->
+        <link rel="gettext" type="application/x-po" href="/static/translations/{{ session.lang }}.po">
+        <script src="/static/js/gettext.js"></script>
+    </head>
+    
+<body>
+    {% block body %}
+    <h1><a href="/"><img id="logo" src="/static/tam.png" alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
+             onmouseover="this.src='/static/tam1.png';" 
+             onmouseout="this.src='/static/tam.png';"/></a>
+        <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
+        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
+    <div id="paluu">
+        <a href="/audit">{{ _('Audit home') }}</a>
+    </div>
+    {% endblock %}
+
+    <div class="fullclear"></div>
+    <div id="footer">
+        <span id="createdate">{{ config.STK_SYSNAME }} &nbsp;
+        {% if time0 %}
+            {% set elapsed = time.time()-time0 %}
+            <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
+        {% if elapsed %}
+            <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
+        {{ _('Version') }} {{ 'app'|app_date }}</span>
+    </div>
+    <div class="fullclear"></div>
+
+<style>
+
+.node rect {
+fill: #fff;
+stroke: steelblue;
+stroke-width: 3px;
+}
+
+.node text {
+font: 12px sans-serif;
+}
+
+.link {
+fill: none;
+stroke: #ccc;
+stroke-width: 2px;
+}
+
+</style>
+
+<!-- load the d3.js library -->	
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+    var treeData = JSON.parse('{{ famtree_data|safe }}');
+
+    // Set the dimensions and margins of the diagram
+    var margin = {top: 20, right: 90, bottom: 30, left: 90},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    const RECT_WIDTH = 150;
+    const RECT_HEIGHT = 50;
+    const RECT_ROUNDING = 10;
+
+    // append the svg object to the body of the page
+    // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.right + margin.left)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform", "translate("
+            + margin.left + "," + margin.top + ")");
+
+    var i = 0,
+        duration = 750,
+        root;
+
+    // declares a tree layout and assigns the size
+    var treemap = d3.tree().size([height, width]);
+    var treemap_anc = d3.tree().size([height, -width]);
+
+    // Assigns parent, children, height, depth
+    root = d3.hierarchy(treeData, function(d) { return d.children; });
+    root.x0 = height / 2;
+    root.y0 = 0;
+    // Second root for ancestors
+    root_anc = d3.hierarchy(treeData, function(d) { return d.parents; });
+    root_anc.x0 = height / 2;
+    root_anc.y0 = width;
+
+    // Collapse after the second level
+    root.children.forEach(collapse);
+    root_anc.children.forEach(collapse);
+
+    update(root);
+    update(root_anc);
+
+    // Collapse the node and all it's children
+    function collapse(d) {
+        if(d.children) {
+            d._children = d.children
+            d._children.forEach(collapse)
+            d.children = null
+        }
+    }
+
+    function update(source) {
+
+    // Assigns the x and y position for the nodes
+    var treeData = treemap(root);
+    var treeData_anc = treemap_anc(root_anc);
+
+    // Compute the new tree layout.
+    var nodes = treeData.descendants(),
+        links = treeData.descendants().slice(1);
+    var nodes_anc = treeData_anc.descendants(),
+        links_anc = treeData_anc.descendants().slice(1);
+
+    // Normalize for fixed-depth.
+    nodes.forEach(function(d){ d.y = d.depth * 180});
+    nodes_anc.forEach(function(d){ d.y = d.depth * 180});
+
+    // ****************** Nodes section ***************************
+
+    // Update the nodes...
+    var node = svg.selectAll('g.node')
+        .data(nodes, function(d) {return d.id || (d.id = ++i); });
+
+    // Enter any new modes at the parent's previous position.
+    var nodeEnter = node.enter().append('g')
+        .attr('class', 'node')
+        .attr("transform", function(d) {
+            return "translate(" + source.y0 + "," + source.x0 + ")";
+        })
+        .on('click', click);
+
+    // Add Rectangle for the nodes
+    nodeEnter.append('rect')
+        .attr('class', 'node')
+        .attr('r', 1e-6)
+        .style("fill", function(d) {
+            return d._children ? "lightsteelblue" : "#fff";
+        });
+
+    // Add labels for the nodes
+    nodeEnter.append('text')
+        .attr("dy", ".35em")
+        .attr("text-anchor", "middle")
+        .text(function(d) { return d.data.name; });
+
+    // UPDATE
+    var nodeUpdate = nodeEnter.merge(node);
+
+    // Transition to the proper position for the node
+    nodeUpdate.transition()
+        .duration(duration)
+        .attr("transform", function(d) { 
+            return "translate(" + d.y + "," + d.x + ")";
+        });
+
+    // Update the node attributes and style for a centered rounded rectangle
+    nodeUpdate.select('rect.node')
+        .attr("rx", RECT_ROUNDING)
+        .attr("ry", RECT_ROUNDING)
+        .attr("x", -RECT_WIDTH/2)
+        .attr("y", -RECT_HEIGHT/2)
+        .attr("width", RECT_WIDTH)
+        .attr("height", RECT_HEIGHT)
+        .style("fill", function(d) {
+            return d._children ? "lightsteelblue" : "#fff";
+        })
+        .attr('cursor', 'pointer');
+
+
+    // Remove any exiting nodes
+    var nodeExit = node.exit().transition()
+        .duration(duration)
+        .attr("transform", function(d) {
+            return "translate(" + source.y + "," + source.x + ")";
+        })
+        .remove();
+
+    // On exit reduce the node rects size to 0
+    nodeExit.select('rect')
+        .attr("y", -RECT_HEIGHT/4)
+        .attr("height", RECT_HEIGHT/2)
+        .attr("width", 1e-6);
+
+    // On exit reduce the opacity of text labels
+    nodeExit.select('text')
+        .style('fill-opacity', 1e-6);
+
+    // ****************** links section ***************************
+
+    // Update the links...
+    var link = svg.selectAll('path.link')
+        .data(links, function(d) { return d.id; });
+
+    // Enter any new links at the parent's previous position.
+    var linkEnter = link.enter().insert('path', "g")
+        .attr("class", "link")
+        .attr('d', function(d){
+            var o = {x: source.x0, y: source.y0}
+            return diagonal(o, o)
+        });
+
+    // UPDATE
+    var linkUpdate = linkEnter.merge(link);
+
+    // Transition back to the parent element position
+    linkUpdate.transition()
+        .duration(duration)
+        .attr('d', function(d){
+            return diagonal(
+                {x: d.x, y: d.y - RECT_WIDTH/2},
+                {x: d.parent.x, y: d.parent.y + RECT_WIDTH/2}
+            )
+        });
+
+    // Remove any exiting links
+    var linkExit = link.exit().transition()
+        .duration(duration)
+        .attr('d', function(d) {
+            var o = {x: source.x, y: source.y}
+            return diagonal(o, o)
+        })
+        .remove();
+
+    // Store the old positions for transition.
+    nodes.forEach(function(d){
+        d.x0 = d.x;
+        d.y0 = d.y;
+    });
+
+    // Creates a curved (diagonal) path from parent to the child nodes
+    function diagonal(s, d) {
+
+        path = `M ${s.y} ${s.x}
+                C ${(s.y + d.y) / 2} ${s.x},
+                ${(s.y + d.y) / 2} ${d.x},
+                ${d.y} ${d.x}`
+
+        return path
+    }
+
+    // Toggle children on click.
+    function click(d) {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else {
+            d.children = d._children;
+            d._children = null;
+        }
+        update(d);
+    }
+    }
+
+</script>
+
+<div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>
+
+</body></html>
