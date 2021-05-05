@@ -568,6 +568,7 @@ td.ColumnFamily { /* Space for leading arrow */
 table.infolist tr td ol {
     margin: 0 4px;
 }
+.DateJulian { font-style: italic; }
 
 #summaryarea table.infolist td.ColumnAttribute,
 #parents table.infolist td.ColumnAttribute,

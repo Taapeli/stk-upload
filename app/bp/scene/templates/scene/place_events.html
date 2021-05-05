@@ -184,7 +184,7 @@ div#events div.scrollbox {
                         <td class="ColumnEvent">{{e.type|transl('evt')}}
                           {% if e.role != "Primary" and e.role != "Family" %}({{e.role|transl('role')}}){% endif %}
                         </td>
-                        <td class="ColumnDate">{{e.dates}}</td>
+                        <td class="ColumnDate {{e.dates.calendar_css()}}">{{e.dates}}</td>
                         <td class="ColumnDescription">{{e.description}}</td>
                     </tr>
          {% endfor %}

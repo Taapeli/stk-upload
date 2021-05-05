@@ -150,8 +150,12 @@
                                 <span class="evtype {{ecl}}">{{e.type|transl('evt')|lower}}</span>
                                 {{e.description}}</div>
                             <div class="col col_date">
-                                {% if e.dates %}{{e.dates}} {% endif %}
-                                {% if e.place %} | {{e.place}}{% endif %}</div>
+                    {% if e.dates %}
+                                <span class="{{e.dates.calendar_css()}}">{{e.dates}}</span> 
+                    {% endif %}
+                    {% if e.place %} | {{e.place}}
+                    {% endif %}
+                            </div>
                       </div>
               {% endfor %}
                     </div>

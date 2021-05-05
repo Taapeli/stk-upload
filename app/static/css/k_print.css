@@ -295,6 +295,8 @@ img#logo {
 .idno { color: gray; text-align:center; 
     font-family: monospace
 }
+.DateJulian { font-style: italic; }
+
 #changetime { color: gray; font-size: 80%; }
 .owner { color: white; 
     font-size: 70%; 

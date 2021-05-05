@@ -243,7 +243,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                             </div>
                         </td>
 
-                        <td class="ColumnDate">{{e.dates}}</td>
+                        <td class="ColumnDate {{e.dates.calendar_css()}}">{{e.dates}}</td>
 
                         <td class="ColumnPlace">{% set br=0 %}
     	{% for pref in e.place_ref %}{% set pl = obj[pref] %}
@@ -260,10 +260,11 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                             <div>
         {% if e.type == "Death" and person.cause_of_death %}
                                 <span class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span>
-	       {% if person.cause_of_death.dates %}{{person.cause_of_death.dates}}
+	       {% if person.cause_of_death.dates %}
+                                <span class="{{person.cause_of_death.dates.calendar_css()}}">{{person.cause_of_death.dates}}</span> 
            {% endif -%}
-                                        {{person.cause_of_death.description}}
-                                        {{macro.place_names_lang(person.cause_of_death)}}<br>
+                                {{person.cause_of_death.description}}
+                                {{macro.place_names_lang(person.cause_of_death)}}<br>
         {% endif %}
 	    {% if e.note_ref %}
         	{% for ref in e.note_ref %}{% set note = obj[ref] %}
@@ -272,14 +273,6 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	                            	  {{ macro.notelink(note) }}</div>
 	        {% endfor %}
         {% endif %}
-{#                          {% if e.place_ref %}
-                                {% for pref in e.place_ref %}
-                                    {% for ref in obj[pref].note_ref %}
-                               <div><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
-                                    {{ macro.notelink(obj[ref]) }}</div>{% endfor %}
-                                {% endfor %}
-                            {% endif %}
-#}
                             </div>
                         </td>
                     </tr>

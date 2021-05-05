@@ -152,7 +152,7 @@ class DateRange:
             argument is assumed to be a tuple like the output of DataRange.to_list()
             method, and the components formats are not checked.
         """
-        self.calendar = None  # default: Gregorian
+        self.calendar = calendar  # default: Gregorian
         if len(args) == 0 or (
             isinstance(args[0], (list, tuple)) and args[0][0] == None
         ):
@@ -232,6 +232,10 @@ class DateRange:
         else:
             calendar_string = ""
         return calendar_string
+
+    def calendar_css(self):
+        """ css class for date """
+        return "Date"+self.calendar if self.calendar else "DateGregorian"
 
     def __str__(self):
         """Return DateRange in display local format like 'välillä 1700 … 9.1800'
