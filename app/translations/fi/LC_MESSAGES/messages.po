@@ -2241,11 +2241,11 @@ msgstr "Isotammen kaavio"
 
 #: bp/scene/routes.py:81
 msgid "Julian"
-msgstr "jul."
+msgstr "juliaaninen"
 
 #: bp/scene/routes.py:82
 msgid "Hebrew"
-msgstr "juut."
+msgstr "juutalainen"
 
 #: bp/scene/routes.py:164
 msgid "Data read failed."
@@ -2447,6 +2447,11 @@ msgstr[1] "%(num)d lasta"
 msgid "hidden"
 msgid_plural "%(num)d hidden"
 msgstr[0] "piilotettu"
+msgstr[1] "%(num)d piilotettua"
+
+msgid "one hidden"
+msgid_plural "%(num)d hidden"
+msgstr[0] "yksi piilotettu"
 msgstr[1] "%(num)d piilotettua"
 
 #: bp/scene/templates/scene/families.html:156

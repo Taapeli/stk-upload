@@ -142,7 +142,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
         {% if f.no_of_children %}
             {% if f.num_hidden_children > 0 %}
                 {{ ngettext('%(num)d child', '%(num)d children', f.no_of_children) }}
-                ({{ ngettext('hidden', '%(num)d hidden', f.num_hidden_children) }}):
+                ({{ ngettext('one hidden', '%(num)d hidden', f.num_hidden_children) }}):
             {% else %}
                 {{ ngettext('%(num)d child', '%(num)d children', f.no_of_children) }}:
             {% endif %}

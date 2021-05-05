@@ -108,13 +108,12 @@ td { padding-right:1em;}
 	                    </td>
 	                </tr>
 	        {% endfor %}
+            {% if family.num_hidden_children %}
+                    <tr><td colspan="2" class="Value">
+                        ({{ ngettext("one hidden", "%(num)d hidden", family.num_hidden_children) }})
+                    </td></tr>
+            {% endif %}
 	            </tbody></table>
-	    	{% if family.num_hidden_children %}
-		        <table>
-		        	<tr><td class="Value">
-			        	({{ _("hidden") }}: {{ family.num_hidden_children }}) 
-		    	</table>
-	    	{% endif %}
  			</div>
     {% endif %}
  

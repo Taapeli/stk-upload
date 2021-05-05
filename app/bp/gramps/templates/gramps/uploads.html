@@ -1,5 +1,5 @@
 {# _gramps/uploads.html_ #}
-<!-- Note different versions:
+<!-- Note different versions (sorry):
      ./gramps/templates/gramps/uploads.html
      ./audit/templates/audit/batches.html
      ./admin/templates/admin/uploads.html
@@ -35,7 +35,7 @@ var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
 var selected_batch_id = '';
 
 function selectFile(sel, batch_id, xml_name) {
-    document.getElementById('nm').innerHTML=sel.value;
+    document.getElementById('nm').innerHTML=uri_dec = decodeURIComponent(sel.value);
     selected_batch_id = batch_id;
 
     // Button rules for selected row:

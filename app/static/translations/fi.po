@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-05-04 20:25+0300\n"
-"PO-Revision-Date: 2021-04-24 10:18+0300\n"
+"POT-Creation-Date: 2021-05-05 12:00+0300\n"
+"PO-Revision-Date: 2021-05-04 20:26+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.6.0\n"
+"Generated-By: Babel 2.8.0\n"
 
 #: chkdate.py:13
 msgid "Undefined"
@@ -62,7 +62,7 @@ msgstr "Sähköposti"
 msgid ""
 "I have read and agree to the <a href='{terms_of_use_url}' "
 "target='esite'>{terms_of_use}</a>"
-msgstr ""
+msgstr "Hyväksyn <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"
 
 #: bp/start/templates/start/my_settings.html:78
 #: bp/start/templates/start/my_settings.html:85 setups.py:185
@@ -117,27 +117,27 @@ msgstr "Käyttäjätunnus"
 msgid "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted"
 msgstr "Hyväksytty aineisto %(batch_id)s poistettu (%(deleted)d solmua)"
 
-#: bl/dates.py:249
+#: bl/dates.py:253
 msgid "calculated "
 msgstr "laskettu "
 
-#: bl/dates.py:252
+#: bl/dates.py:256
 msgid "estimated "
 msgstr "arvioitu "
 
-#: bl/dates.py:267
+#: bl/dates.py:271
 msgid "{}till {}"
 msgstr "{}{} saakka"
 
-#: bl/dates.py:270
+#: bl/dates.py:274
 msgid "{}from {}"
 msgstr "{}{} alkaen"
 
-#: bl/dates.py:275
+#: bl/dates.py:279
 msgid "{}between {} … {}"
 msgstr "{}välillä {} … {}"
 
-#: bl/dates.py:278
+#: bl/dates.py:282
 msgid "{}about {}"
 msgstr "{}noin {}"
 
@@ -2478,26 +2478,26 @@ msgstr "Vaimo"
 msgid "Go to family page"
 msgstr "Siirry perhesivulle"
 
-#: bp/scene/templates/scene/families.html:122
+#: bp/scene/templates/scene/families.html:124
 #: bp/scene/templates/scene/medias.html:76
 #: bp/scene/templates/scene/persons_list.html:138
 msgid "Original ID"
 msgstr "Alkuperäinen tunniste"
 
-#: bp/scene/templates/scene/families.html:123
+#: bp/scene/templates/scene/families.html:125
 #: bp/scene/templates/scene/medias.html:77
 msgid "Key"
 msgstr "Avain"
 
-#: bp/scene/templates/scene/families.html:142
-#: bp/scene/templates/scene/families.html:145
+#: bp/scene/templates/scene/families.html:144
+#: bp/scene/templates/scene/families.html:147
 #, python-format
 msgid "%(num)d child"
 msgid_plural "%(num)d children"
 msgstr[0] "lapsi"
 msgstr[1] "%(num)d lasta"
 
-#: bp/scene/templates/scene/families.html:143
+#: bp/scene/templates/scene/families.html:145
 #: bp/scene/templates/scene/family.html:115
 #, python-format
 msgid "hidden"
@@ -2505,26 +2505,26 @@ msgid_plural "%(num)d hidden"
 msgstr[0] "piilotettu"
 msgstr[1] "%(num)d piilotettua"
 
-#: bp/scene/templates/scene/families.html:156
+#: bp/scene/templates/scene/families.html:158
 #, python-format
 msgid "No family found with search keys starting \"%(name)s\""
 msgstr "Ei löytynyt perhettä \"%(name)s\"-alkusella hakusanalla"
 
-#: bp/scene/templates/scene/families.html:158
+#: bp/scene/templates/scene/families.html:160
 #: bp/scene/templates/scene/macros.html:105
 #: bp/scene/templates/scene/medias.html:109
-#: bp/scene/templates/scene/persons_list.html:176
+#: bp/scene/templates/scene/persons_list.html:180
 msgid "first page"
 msgstr "Ensimmäiselle sivulle"
 
-#: bp/scene/templates/scene/families.html:158
-#: bp/scene/templates/scene/persons_list.html:176
+#: bp/scene/templates/scene/families.html:160
+#: bp/scene/templates/scene/persons_list.html:180
 msgid "Go to the first person"
 msgstr "Siirry listan ensimmäiseen henkilöön"
 
-#: bp/scene/templates/scene/families.html:163
+#: bp/scene/templates/scene/families.html:165
 #: bp/scene/templates/scene/medias.html:98
-#: bp/scene/templates/scene/persons_list.html:166
+#: bp/scene/templates/scene/persons_list.html:170
 msgid "The last item found"
 msgstr "Viimeinen rivi"
 
@@ -2719,7 +2719,7 @@ msgid "Size"
 msgstr "Koko"
 
 #: bp/scene/templates/scene/media.html:79
-#: bp/scene/templates/scene/person.html:327
+#: bp/scene/templates/scene/person.html:320
 msgid "Show fullscreen"
 msgstr "Näytä suurena"
 
@@ -2791,7 +2791,7 @@ msgstr "Siirry mediasivulle"
 #: bp/scene/templates/scene/medias.html:83
 #: bp/scene/templates/scene/person.html:89
 #: bp/scene/templates/scene/person.html:92
-#: bp/scene/templates/scene/person.html:325
+#: bp/scene/templates/scene/person.html:318
 #: bp/scene/templates/scene/place_events.html:140
 #: bp/scene/templates/scene/place_events.html:150 ui/jinja_filters.py:197
 msgid "Photo"
@@ -2913,31 +2913,31 @@ msgstr "Tapahtumat"
 msgid "Event"
 msgstr "Tapahtuma"
 
-#: bp/scene/templates/scene/person.html:289
+#: bp/scene/templates/scene/person.html:282
 msgid "Place Notes"
 msgstr "Paikan lisätietoja"
 
-#: bp/scene/templates/scene/person.html:309
+#: bp/scene/templates/scene/person.html:302
 msgid "Relations"
 msgstr "Sukulaisuudet"
 
-#: bp/scene/templates/scene/person.html:319
+#: bp/scene/templates/scene/person.html:312
 msgid "Media files"
 msgstr "Mediatiedostot"
 
-#: bp/scene/templates/scene/person.html:330
+#: bp/scene/templates/scene/person.html:323
 msgid "Go to photo page"
 msgstr "kuvasivulle"
 
-#: bp/scene/templates/scene/person.html:333
+#: bp/scene/templates/scene/person.html:326
 msgid "crop"
 msgstr "rajaus"
 
-#: bp/scene/templates/scene/person.html:344
+#: bp/scene/templates/scene/person.html:337
 msgid "Person Notes"
 msgstr "Henkilön lisätietoja"
 
-#: bp/scene/templates/scene/person.html:356
+#: bp/scene/templates/scene/person.html:349
 msgid "Source references"
 msgstr "Lähdeviitteet"
 
@@ -2998,7 +2998,7 @@ msgstr "Aakkosvalikko"
 msgid "Person"
 msgstr "Henkilö"
 
-#: bp/scene/templates/scene/persons_list.html:174
+#: bp/scene/templates/scene/persons_list.html:178
 #, python-format
 msgid "No one found with search keys starting \"%(name)s\""
 msgstr "Ketään ei löytynyt nimestä \"%(name)s\" eteenpäin"
@@ -3038,7 +3038,7 @@ msgstr ""
 " pääteltynä."
 
 #: bp/scene/templates/scene/persons_search.html:72
-#: bp/scene/templates/scene/persons_search.html:198
+#: bp/scene/templates/scene/persons_search.html:200
 #: templates/index_entry.html:111
 msgid "Most common names"
 msgstr "Yleisimmät nimet"
@@ -3091,23 +3091,23 @@ msgstr "hakusanat"
 msgid "Too recent for display to others!"
 msgstr "Liian tuore näytettäväksi muille!"
 
-#: bp/scene/templates/scene/persons_search.html:193
+#: bp/scene/templates/scene/persons_search.html:195
 msgid "No one found with search keys"
 msgstr "Ketään ei löytynyt hakutiedoilla"
 
-#: bp/scene/templates/scene/persons_search.html:215
+#: bp/scene/templates/scene/persons_search.html:217
 msgid "persons"
 msgstr "henkilöä"
 
-#: bp/scene/templates/scene/persons_search.html:220
+#: bp/scene/templates/scene/persons_search.html:222
 msgid "No person names"
 msgstr "Ei henkilönimiä"
 
-#: bp/scene/templates/scene/persons_search.html:234
+#: bp/scene/templates/scene/persons_search.html:236
 msgid "references"
 msgstr "viittausta"
 
-#: bp/scene/templates/scene/persons_search.html:239
+#: bp/scene/templates/scene/persons_search.html:241
 msgid "No places"
 msgstr "Ei paikoja"
 
