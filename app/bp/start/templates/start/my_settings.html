@@ -72,7 +72,7 @@ table.transparent tbody tr td {
 			</div>
 			
 			<div>
-			<h3>Terms of use</h3>
+			<h3>{{ _("Terms of use") }}</h3>
 			{% if userprofile.agreed_at %}
 				{{ _("Agreed to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a> at").format(
 			        terms_of_use_url=_("http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"),
