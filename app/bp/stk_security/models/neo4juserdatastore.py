@@ -37,7 +37,7 @@ logger = logging.getLogger('neo4juserdatastore')
 
 driver = None
 
-from bp.admin.models.user_admin import UserAdmin
+from bl.admin.models.user_admin import UserAdmin
 
 class Neo4jUserDatastore(UserDatastore):
     """ User info database designed after a Flask-security UserDatastore and observed Flask-security behavior:

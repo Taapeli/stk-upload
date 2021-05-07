@@ -151,7 +151,7 @@ def thankyou():
 @shareds.app.route('/join', methods=['GET', 'POST'])
 @login_required
 def join():
-    from bp.admin.models.user_admin import UserProfile, UserAdmin
+    from bl.admin.models.user_admin import UserProfile, UserAdmin
 
     form = JoinForm()
     logger.info('-> bp.start.routes.join')
@@ -214,7 +214,7 @@ def my_settings():
     referrer = request.form.get("referrer",default=request.referrer)
     if lang:
         try:
-            from bp.admin.models.user_admin import UserAdmin # can't import earlier
+            from bl.admin.models.user_admin import UserAdmin # can't import earlier
             current_user.language = lang
             result = UserAdmin.update_user_language(current_user.username,lang)
             if not result:

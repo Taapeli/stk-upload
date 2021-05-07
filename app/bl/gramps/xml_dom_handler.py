@@ -122,6 +122,7 @@ class DOM_handler:
             int
         )  # key=object type, value=count of objects processed
         # self.datastore = None               # neo4j.DirectDriver object
+        self.obj_counter = 0
 
     def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
@@ -151,6 +152,11 @@ class DOM_handler:
         """
         #shareds.dservice.ds_obj_save_and_link(obj, **kwargs)
         obj.save(shareds.dservice.tx, **kwargs)
+        self.obj_counter += 1 
+        if self.obj_counter % 1000 == 0:
+            print(self.obj_counter, "Transaction restart")
+            #shareds.dservice.tx.commit()
+            #shareds.dservice.tx = shareds.driver.session().begin_transaction()
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)

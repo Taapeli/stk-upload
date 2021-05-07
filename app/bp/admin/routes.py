@@ -46,8 +46,8 @@ from bl.person import PersonWriter
 
 from setups import User
 from bp.admin.forms import UpdateUserProfileForm, UpdateUserForm
-from bp.admin.models.data_admin import DataAdmin
-from bp.admin.models.user_admin import UserAdmin
+from bl.admin.models.data_admin import DataAdmin
+from bl.admin.models.user_admin import UserAdmin
 
 #from .cvs_refnames import load_refnames
 from . import bp

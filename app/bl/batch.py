@@ -31,7 +31,7 @@ from datetime import date, datetime
 from models.util import format_timestamp
 
 # from bp.scene.routes import stk_logger
-from bp.admin.models.cypher_adm import Cypher_adm
+from bl.admin.models.cypher_adm import Cypher_adm
 
 from bl.base import Status
 from pe.dataservice import DataService

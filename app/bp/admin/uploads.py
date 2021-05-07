@@ -40,7 +40,7 @@ from flask_babelex import _
 import shareds
 from bl.base import Status
 from models import email, util, syslog 
-from ..gramps import gramps_loader
+from bl.gramps import gramps_loader
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 
 STATUS_UPLOADED     = "uploaded"
