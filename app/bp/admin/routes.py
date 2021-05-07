@@ -568,11 +568,7 @@ def add_access():
 @roles_accepted('admin')
 def delete_accesses():
     data = json.loads(request.data)
-    print(data)
-    username = data.get("username",'-')
-    batchid = data.get("batchid",'-')
-    #TODO Should log the batch owner, not batchid?
-    logger.info(f'-> bp.admin.routes.delete_accesses u={username} batch={batchid}')
+    logger.info(f'-> bp.admin.routes.delete_accesses')
     rsp = UserAdmin.delete_accesses(data)
     return jsonify(rsp)
 
