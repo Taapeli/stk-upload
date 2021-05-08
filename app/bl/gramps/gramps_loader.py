@@ -38,7 +38,7 @@ from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
 import shareds
 from bl.base import Status
-#from bp.scene.models import media
+from bp.scene.models import media
 
 
 def get_upload_folder(username):
