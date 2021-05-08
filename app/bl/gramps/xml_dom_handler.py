@@ -155,8 +155,8 @@ class DOM_handler:
         self.obj_counter += 1 
         if self.obj_counter % 1000 == 0:
             print(self.obj_counter, "Transaction restart")
-            #shareds.dservice.tx.commit()
-            #shareds.dservice.tx = shareds.driver.session().begin_transaction()
+            shareds.dservice.tx.commit()
+            shareds.dservice.tx = shareds.driver.session().begin_transaction()
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
