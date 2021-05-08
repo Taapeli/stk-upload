@@ -355,6 +355,11 @@ class BatchUpdater(DataService):
         batch.mediapath = mediapath
 
         res = batch.save()
+        if Status.has_failed(res):
+            print(
+                f"bl.batch.BatchUpdater.start_data_batch: batch.save FAILED: {res.get('statustext')}"
+            )
+            return res
         print(
             f"bl.batch.BatchUpdater.start_data_batch: new Batch {batch.id} uniq_id={batch.uniq_id}"
         )

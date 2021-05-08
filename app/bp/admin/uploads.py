@@ -144,7 +144,7 @@ def get_meta(metaname):
             if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
                 meta["status"] = STATUS_ERROR
     except Exception as e:
-        print(f'bp.admin.uploads.get_meta: error {e.__class__name__} {e}')
+        print(f'bp.admin.uploads.get_meta: error {e.__class__.__name__} {e}')
         meta = {}
     return meta
 
