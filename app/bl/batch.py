@@ -31,7 +31,7 @@ from datetime import date, datetime
 from models.util import format_timestamp
 
 # from bp.scene.routes import stk_logger
-from bp.admin.models.cypher_adm import Cypher_adm
+from bl.admin.models.cypher_adm import Cypher_adm
 
 from bl.base import Status
 from pe.dataservice import DataService
@@ -355,6 +355,11 @@ class BatchUpdater(DataService):
         batch.mediapath = mediapath
 
         res = batch.save()
+        if Status.has_failed(res):
+            print(
+                f"bl.batch.BatchUpdater.start_data_batch: batch.save FAILED: {res.get('statustext')}"
+            )
+            return res
         print(
             f"bl.batch.BatchUpdater.start_data_batch: new Batch {batch.id} uniq_id={batch.uniq_id}"
         )

@@ -29,7 +29,7 @@ from os.path import basename, splitext
 import logging
 
 logger = logging.getLogger("stkserver")
-from flask_babelex import _
+#from flask_babelex import _
 import traceback
 from tarfile import TarFile
 import os

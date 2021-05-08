@@ -40,7 +40,7 @@ from flask_babelex import _
 import shareds
 from bl.base import Status
 from models import email, util, syslog 
-from ..gramps import gramps_loader
+from bl.gramps import gramps_loader
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 
 STATUS_UPLOADED     = "uploaded"
@@ -144,7 +144,7 @@ def get_meta(metaname):
             if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
                 meta["status"] = STATUS_ERROR
     except Exception as e:
-        print(f'bp.admin.uploads.get_meta: error {e.__class__name__} {e}')
+        print(f'bp.admin.uploads.get_meta: error {e.__class__.__name__} {e}')
         meta = {}
     return meta
 

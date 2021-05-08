@@ -50,7 +50,7 @@ import shareds
 from chkdate import Chkdate
 
 from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
-from bp.admin.models.user_admin import UserProfile
+from bl.admin.models.user_admin import UserProfile
 from bl.dates import DateRange  # Aikavälit ym. määreet
 from datetime import datetime
 from ui.user_context import UserContext

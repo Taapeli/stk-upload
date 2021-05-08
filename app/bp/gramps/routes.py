@@ -53,8 +53,8 @@ from models import loadfile, email, util, syslog
 from ..admin import uploads
 
 from . import bp
-from . import gramps_loader
-from . import gramps_utils
+from bl.gramps import gramps_loader
+from bl.gramps import gramps_utils
 
 
 @bp.route("/gramps")

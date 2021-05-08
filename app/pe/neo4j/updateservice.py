@@ -118,7 +118,7 @@ class Neo4jUpdateService(ConcreteService):
             # Normal exception: this is the first batch of day
             ext = 0
         except Exception as e:
-            statustext = f"Neo4jUpdateService.ds_new_batch_id: {e.__class__.name} {e}"
+            statustext = f"Neo4jUpdateService.ds_new_batch_id: {e.__class__.__name__} {e}"
             print(statustext)
             return {"status": Status.ERROR, "statustext": statustext}
 
@@ -142,7 +142,7 @@ class Neo4jUpdateService(ConcreteService):
 
         except Exception as e:
             statustext = (
-                f"Neo4jUpdateService.ds_batch_save failed: {e.__class__.name} {e}"
+                f"Neo4jUpdateService.ds_batch_save failed: {e.__class__.__name__} {e}"
             )
             return {"status": Status.ERROR, "statustext": statustext}
 

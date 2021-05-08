@@ -46,8 +46,8 @@ from bl.person import PersonWriter
 
 from setups import User
 from bp.admin.forms import UpdateUserProfileForm, UpdateUserForm
-from bp.admin.models.data_admin import DataAdmin
-from bp.admin.models.user_admin import UserAdmin
+from bl.admin.models.data_admin import DataAdmin
+from bl.admin.models.user_admin import UserAdmin
 
 #from .cvs_refnames import load_refnames
 from . import bp
@@ -568,11 +568,7 @@ def add_access():
 @roles_accepted('admin')
 def delete_accesses():
     data = json.loads(request.data)
-    print(data)
-    username = data.get("username",'-')
-    batchid = data.get("batchid",'-')
-    #TODO Should log the batch owner, not batchid?
-    logger.info(f'-> bp.admin.routes.delete_accesses u={username} batch={batchid}')
+    logger.info(f'-> bp.admin.routes.delete_accesses')
     rsp = UserAdmin.delete_accesses(data)
     return jsonify(rsp)
 
