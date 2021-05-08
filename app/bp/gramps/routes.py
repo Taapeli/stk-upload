@@ -104,6 +104,8 @@ def list_uploads():
 @roles_accepted("research", "admin")
 def upload_gramps():
     """Load a gramps xml file to temp directory for processing in the server"""
+    from bl.batch import Batch # For status codes
+
     try:
         infile = request.files["filenm"]
         material = request.form["material"]
@@ -120,7 +122,7 @@ def upload_gramps():
         uploads.set_meta(
             current_user.username,
             infile.filename,
-            status=uploads.STATUS_UPLOADED,
+            status=Batch.BATCH_UPLOADED,
             upload_time=time.time(),
         )
         msg = f"{util.format_timestamp()}: User {current_user.name} ({current_user.username}) uploaded the file {pathname}"
@@ -236,7 +238,7 @@ def batch_delete(batch_id):
             data = eval(open(metafile).read())
             if data.get("batch_id") == batch_id:
                 del data["batch_id"]
-                data["status"] = uploads.STATUS_REMOVED
+                data["status"] = Batch.BATCH_REMOVED
                 open(metafile, "w").write(repr(data))
     ret = Batch.delete_batch(current_user.username, batch_id)
     if Status.has_failed(ret):

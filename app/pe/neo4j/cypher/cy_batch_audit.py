@@ -46,7 +46,7 @@ MERGE (u) -[:HAS_ACCESS]-> (b)
     SET b.timestamp = timestamp()
 RETURN ID(b) AS id"""
 
-    batch_complete = """
+    batch_set_status = """
 MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
     SET b.status=$status
@@ -62,7 +62,7 @@ RETURN b """
 
     get_batches = '''
 match (b:Batch) 
-    where b.user = $user and b.status = "completed"
+    where b.user = $user and b.status = $status // "completed"
 optional match (b) -[:OWNS]-> (x)
 return b as batch,
     labels(x)[0] as label, count(x) as cnt 

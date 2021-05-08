@@ -29,7 +29,7 @@ from os.path import basename, splitext
 import logging
 
 logger = logging.getLogger("stkserver")
-#from flask_babelex import _
+from flask_babelex import _
 import traceback
 from tarfile import TarFile
 import os
@@ -286,7 +286,7 @@ def xml_to_stkbase(pathname, userid):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch import BatchUpdater
+    from bl.batch import BatchUpdater, Batch
 
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
@@ -395,7 +395,7 @@ def xml_to_stkbase(pathname, userid):
             )
             return {"status": Status.ERROR, "statustext": msg}
 
-        res = batch_service.mark_complete()
+        res = batch_service.batch_mark_status(Batch.BATCH_CANDIDATE)
         if Status.has_failed(res):
             msg = res.get("statustext", "")
             batch_service.rollback()

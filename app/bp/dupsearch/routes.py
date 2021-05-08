@@ -40,12 +40,14 @@ def dupsearch():
 @login_required
 @roles_required('audit')
 def batches1():
+    from bl.batch import Batch # For status codes
+
     batch_list = list(Batch.get_batches())
     completed_batches = []
     for b in batch_list:
         file = b.get('file')
         status = b.get('status')
-        if file and status == 'completed':
+        if file and status == Batch.BATCH_CANDIDATE:
             file = file.split("/")[-1].replace("_clean.gramps",".gramps")
             file = file.split("/")[-1].replace("_clean.gpkg",".gpkg")
             b['file'] = file 
@@ -56,13 +58,15 @@ def batches1():
 @login_required
 @roles_required('audit')
 def batches():
+    from bl.batch import Batch # For status codes
+
     batch_list = search.batches()
     completed_batches = []
     for b in batch_list:
         #print(b)
         file = b.get('file')
         status = b.get('status')
-        if file and status == 'completed':
+        if file and status == Batch.BATCH_CANDIDATE:
             file = file.split("/")[-1].replace("_clean.gramps",".gramps")
             file = file.split("/")[-1].replace("_clean.gpkg",".gpkg")
             b['file'] = file 

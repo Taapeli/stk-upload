@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from bl.batch import BatchUpdater
 
 """
 Created on 5.12.2019
@@ -23,6 +24,7 @@ Created on 5.12.2019
 @author: jm
 """
 import shareds
+from bl.base import Status
 from .cypher_audit import Cypher_audit
 
 from flask_babelex import _
@@ -66,6 +68,8 @@ class Batch_merge(object):
         :param:    auditor    active auditor user id
 
         """
+        from bl.batch import Batch
+
         relationships_created = 0
         label_sets = [  # Grouped for decent size chunks in logical order
             ["Note"],
@@ -100,6 +104,17 @@ class Batch_merge(object):
                         f"Batch_merge.move_whole_batch: moved {count} nodes of type {labels}"
                     )
                     tx.commit()
+
+            # Mark as complete candidate material
+            with BatchUpdater('update') as service:
+                res = service.ds_batch_set_status(batch_id, user, Batch.BATCH_CANDIDATE)
+                if Status.has_failed(res):
+                    msg = res['statustext']
+                    print(f"Batch_merge.move_whole_batch: {msg}")
+                    flash(msg, "flash_error")
+                    logger.error(msg)
+                    return msg
+
 
         except Exception as e:
             msg = f"Only {relationships_created} objects moved: {e.__class__.__name__} {e}"

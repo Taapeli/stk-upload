@@ -146,14 +146,14 @@ class Neo4jUpdateService(ConcreteService):
             )
             return {"status": Status.ERROR, "statustext": statustext}
 
-    def ds_batch_set_status(self, batch, status):
+    def ds_batch_set_status(self, batch_id, user, status):
         """Updates Batch node selected by Batch id.
 
         Batch.timestamp is updated in the Cypher clause.
         """
         try:
             result = self.tx.run(
-                CypherBatch.batch_complete, bid=batch.id, user=batch.user, status=status
+                CypherBatch.batch_set_status, bid=batch_id, user=user, status=status
             )
             uniq_id = result.single()[0]
             return {"status": Status.OK, "identity": uniq_id}

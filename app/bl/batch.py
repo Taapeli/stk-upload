@@ -43,6 +43,21 @@ class Batch:
     User Batch node and statistics about them.
     """
 
+    # Batch status values:
+    #    1. Import file; no Batch node created
+    BATCH_LOADING = "loading"
+    BATCH_UPLOADED = "uploaded"
+    BATCH_DONE = "done"  # Obsolete
+    BATCH_FAILED = "failed"
+    BATCH_ERROR = "error"
+    BATCH_REMOVED = "removed"
+    BATCH_STORING = "storing"
+    #    2. Batch node exists
+    BATCH_STARTED = "started"
+    BATCH_CANDIDATE = "completed"  # Means candidate
+    #    3. Batch is empty
+    ST_FOR_AUDIT = "audit_request"
+
     def __init__(self, userid=None):
         """
         Creates a Batch object
@@ -51,7 +66,7 @@ class Batch:
         self.user = userid
         self.file = None
         self.id = None  # batch_id
-        self.status = "started"
+        self.status = Batch.BATCH_STARTED
         self.mediapath = None  # Directory for media files
         self.timestamp = 0
 
@@ -63,7 +78,7 @@ class Batch:
 
         Returns {'id':self.id, 'status':Status.OK}
         """
-        print(f"Batch.save with {shareds.dservice.__class__.__name__}")
+        # print(f"Batch.save with {shareds.dservice.__class__.__name__}")
         try:
             attr = {
                 "id": self.id,
@@ -179,7 +194,7 @@ class Batch:
     def get_user_stats(user):
         """Get statistics of user Batch contents.
 
-        If the Batch has been moved to an Audit batch, tis method returns
+        If the Batch has been moved to an Audit batch, this method returns
         ("Audit", count) to user_data data
         """
         # Get your approved batches
@@ -191,12 +206,17 @@ class Batch:
             #    'user': 'juha', 'timestamp': 1585070354153}>
             #  cnt=200>
             b = Batch.from_node(node)
+            if not b.status:
+                # Audit node has no status field; the material has been sent forwards
+                b.status = Batch.ST_FOR_AUDIT
             approved[b.id] = count
 
         # Get current researcher batches
         titles = []
         user_data = {}
-        result = shareds.driver.session().run(CypherBatch.get_batches, user=user)
+        result = shareds.driver.session().run(
+            CypherBatch.get_batches, user=user, status=Batch.BATCH_CANDIDATE
+        )
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'}
             #    properties={ // 'mediapath': '/home/jm/my_own.media',
@@ -229,7 +249,7 @@ class Batch:
             if audited:
                 user_data[key]["Audit"] = audited
 
-            print(f"user_data[{key}] {user_data[key]}")
+            #print(f"user_data[{key}] {user_data[key]}")
 
         return sorted(titles), user_data
 
@@ -367,9 +387,11 @@ class BatchUpdater(DataService):
 
         return {"batch": batch, "status": Status.OK}
 
-    def mark_complete(self):
-        """ Mark this data batch completed """
-        res = shareds.dservice.ds_batch_set_status(self.batch, "completed")
+    def batch_mark_status(self, b_status):
+        """ Mark this data batch status. """
+        res = shareds.dservice.ds_batch_set_status(
+            self.batch.id, self.batch.user, b_status
+        )
         return res
 
     def commit(self):
