@@ -249,26 +249,47 @@ class PersonReader(DataService):
         # [{'surname': surname, 'count': count},...]
         return surnames
 
-    def get_person_minimal(self, uuid):
+    def get_person_minimal(self, uuid, privacy):
         """
         Get all parents of the person with given uuid.
         Returns a list for compatibility with get_parents and get_children.
         """
-        return self.dataservice.dr_get_family_members_by_id(uuid, which="person")
+        last_year_allowed = datetime.now().year - PRIVACY_LIMIT
+        nodes = self.dataservice.dr_get_family_members_by_id(uuid, which="person")
+        for n in nodes:
+            n["too_new"] = n["death_high"] > last_year_allowed
+        if privacy:
+            return [n for n in nodes if not n["too_new"]]
+        else:
+            return nodes
 
-    def get_parents(self, uniq_id):
+    def get_parents(self, uniq_id, privacy):
         """
         Get all parents of the person with given db uniq_id.
         Returns a list as number of parents in database is not always 0..2.
         """
-        return self.dataservice.dr_get_family_members_by_id(uniq_id, which="parents")
+        last_year_allowed = datetime.now().year - PRIVACY_LIMIT
+        nodes = self.dataservice.dr_get_family_members_by_id(uniq_id, which="parents")
+        for n in nodes:
+            n["too_new"] = n["death_high"] > last_year_allowed
+        if privacy:
+            return [n for n in nodes if not n["too_new"]]
+        else:
+            return nodes
 
-    def get_children(self, uniq_id):
+    def get_children(self, uniq_id, privacy):
         """
         Get all children of the person with given db uniq_id.
         Returns a list.
         """
-        return self.dataservice.dr_get_family_members_by_id(uniq_id, which="children")
+        last_year_allowed = datetime.now().year - PRIVACY_LIMIT
+        nodes = self.dataservice.dr_get_family_members_by_id(uniq_id, which="children")
+        for n in nodes:
+            n["too_new"] = n["death_high"] > last_year_allowed
+        if privacy:
+            return [n for n in nodes if not n["too_new"]]
+        else:
+            return nodes
 
 
 class PersonWriter(DataService):

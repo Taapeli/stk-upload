@@ -34,7 +34,7 @@
 </style>
 
 <script> 
-    // Adapted from Vasco Asturiano https://github.com/vasturiano/sunburst-chart
+    // Adapted from Vasco Asturiano's https://github.com/vasturiano/sunburst-chart
     // Copyright (c) 2021 Isotammi project and Heikki Roikonen
     
     east = 0;
@@ -116,6 +116,7 @@
             .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
             .append('tspan')
             .attr('dy', '-0.4em')
+            .attr('fill', d => d.data.too_new ? 'red' : 'black')
             .text(d => d.data.name);
 
         // Second line of text
@@ -127,6 +128,7 @@
             .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
             .append('tspan')
             .attr('x', 0).attr('dy', '0.8em')
+            .attr('fill', d => d.data.too_new ? 'red' : 'black')
             .text(d => d.data.years);
     }
 
