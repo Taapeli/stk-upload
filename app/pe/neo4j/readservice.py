@@ -1382,6 +1382,7 @@ class Neo4jReadService(ConcreteService):
         The target depends on which = ('person', 'parents', 'children').
         For which='person', the id should contain an uuid.
         For 'parents' and 'children' the id should contain a database uniq_id.
+        The 'death_high' value is always returned for privacy checks.
         '''
         switcher = {
             'person': CypherPerson.get_person_for_graph,
@@ -1399,7 +1400,8 @@ class Neo4jReadService(ConcreteService):
                     'uuid': record['uuid'],
                     'sortname': record['sortname'],
                     'gender': record['gender'],
-                    'events': record['events']})
+                    'events': record['events'],
+                    'death_high': record['death_high']})
         return result_list
 
     def dr_get_placename_stats_by_user(self, username, count):

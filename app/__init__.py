@@ -117,9 +117,6 @@ shareds.app.register_blueprint(audit_bp)
 from bp.dupsearch import bp as dupsearch_bp
 shareds.app.register_blueprint(dupsearch_bp)
 
-from bp.graph import bp as graph_bp
-shareds.app.register_blueprint(graph_bp)
-
 from bp.api import bp as api_bp
 shareds.app.register_blueprint(api_bp)
 
