@@ -2230,7 +2230,7 @@ msgid "FOR_AUDIT"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:180
-msgid "tha data has been sent to common data"
+msgid "the data has been sent to common data"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:214

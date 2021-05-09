@@ -82,7 +82,7 @@ def show_upload_log(xmlfile):
 @roles_accepted("research", "admin")
 def list_uploads():
     upload_list = uploads.list_uploads(current_user.username)
-    # Not essential: logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
+    logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
     gramps_verify = gramps_runner and os.path.exists(gramps_runner)
 

@@ -107,7 +107,12 @@ class Batch_merge(object):
 
             # Mark as complete candidate material
             with BatchUpdater('update') as service:
-                res = service.ds_batch_set_status(batch_id, user, Batch.BATCH_CANDIDATE)
+                res = service.batch_get_one(user, batch_id)
+                # returns {"status":Status.OK, "item":batch}
+                if Status.has_failed(res):
+                    return res
+                service.batch = res.get('item')
+                res = service.batch_mark_status(Batch.BATCH_FOR_AUDIT)
                 if Status.has_failed(res):
                     msg = res['statustext']
                     print(f"Batch_merge.move_whole_batch: {msg}")

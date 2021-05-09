@@ -262,8 +262,8 @@ def list_uploads(username):
                                           user=username)
     for record in result:
         # <Record batch='2019-08-12.001' timestamp=None persons=1949>
-        batch = record['batch']
-        batches[batch] = (record['status'], record['persons'])
+        batch_id = record['batch']
+        batches[batch_id] = (record['status'], record['persons'])
 
     # 2. List uploaded files
     upload_folder = get_upload_folder(username)
@@ -280,9 +280,15 @@ def list_uploads(username):
             fname = os.path.join(upload_folder,name)
             xmlname = name.rsplit(".",maxsplit=1)[0]
             meta = get_meta(fname)
-            batch_id = ""
             status = meta["status"]
             status_text = None
+            person_count = 0
+            batch_id = meta.get('batch_id',"")
+            in_batches = batch_id in batches
+            if not in_batches:
+                batch_id = ""
+                if status == Batch.BATCH_DONE:
+                    status = Batch.BATCH_REMOVED 
 
             if status == Batch.BATCH_UPLOADED:
                 status_text = _("UPLOADED")
@@ -290,8 +296,13 @@ def list_uploads(username):
                 status_text = _("STORING") 
             elif status == Batch.BATCH_CANDIDATE or status == Batch.BATCH_DONE:
                 status_text = _("CANDIDATE")
-                if 'batch_id' in meta:
-                    batch_id = meta['batch_id']
+                # The meta file does not contain later status values
+                if in_batches:
+                    status, person_count = batches.pop(batch_id)
+                    if status == Batch.BATCH_FOR_AUDIT:
+                        status_text = _("FOR_AUDIT")
+                else:
+                    status = Batch.BATCH_REMOVED
             elif status == Batch.BATCH_FAILED:
                 status_text = _("FAILED")
             elif status == Batch.BATCH_ERROR:
@@ -299,21 +310,14 @@ def list_uploads(username):
             elif status == Batch.BATCH_REMOVED:
                 status_text = _("REMOVED")
 
-            if not batch_id in batches:
-                if status_text == _("CANDIDATE"):
-                    status_text = _("REMOVED")
-                batch_id = ""
-                person_count = 0
-            else:
-                status, person_count = batches.pop(batch_id)
-
             if status_text:
                 upload = Upload()
                 upload.xmlname = xmlname
                 upload.status = status_text
                 upload.batch_id = batch_id
                 upload.count = person_count
-                upload.done = (status_text == _("CANDIDATE"))
+                upload.done = (status_text == _("CANDIDATE") or \
+                               status_text == _("FOR_AUDIT"))
                 upload.uploaded = (status_text == _("UPLOADED"))
                 upload.loading = (status_text == _("STORING"))
                 upload.upload_time = meta["upload_time"]
@@ -326,10 +330,11 @@ def list_uploads(username):
         upload = Upload()
         upload.batch_id = batch
         status, count = item
-        if status == "started":
+        if status == Batch.BATCH_STARTED:
             upload.status = "?"
-        elif status == "completed":
-            upload.status = _("CANDIDATE")
+        elif status == Batch.BATCH_CANDIDATE: # "completed"
+            #Todo: Remove later: Old FOR_AUDIT materials are CANDIDATE, too
+            upload.status = _("CANDIDATE") + " ?"
         upload.count = count
         upload.upload_time = 0.0
         uploads.append(upload)

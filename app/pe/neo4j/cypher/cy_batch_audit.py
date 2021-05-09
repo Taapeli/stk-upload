@@ -103,8 +103,9 @@ RETURN a AS batch ORDER BY a.id DESC'''
     #    b) following nodes by relation NAME or NOTE
     #    c) Batch node self
     delete_chunk = """
-MATCH (:UserProfile{username:$user}) -[:HAS_LOADED]-> (:Batch{id:$batch_id}) --> (a)
-WITH a limit 1000
+MATCH (:UserProfile{username:$user})
+    -[:HAS_LOADED]-> (:Batch{id:$batch_id}) -[:OWNS]-> (a)
+WITH a LIMIT 1000 
     OPTIONAL MATCH (a) -[r]-> (b) WHERE TYPE(r) = "NAME" OR TYPE(r) = "NOTE"
     DETACH DELETE b
     DETACH DELETE a"""

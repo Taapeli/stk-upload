@@ -2230,8 +2230,8 @@ msgid "FOR_AUDIT"
 msgstr "LUOVUTETTU"
 
 #: bp/gramps/templates/gramps/uploads.html:180
-msgid "tha data has been sent to common data"
-msgstr "Tiedot on lähetetty yhteiseen aineistoon"
+msgid "the data has been sent to common data"
+msgstr "tiedot on lähetetty yhteiseen aineistoon"
 
 #: bp/gramps/templates/gramps/uploads.html:214
 msgid "Start by sending your first Gramps file"
@@ -2559,6 +2559,10 @@ msgstr "Lähteet"
 #: templates/cite_sour_repo.html:29
 msgid "Page"
 msgstr "Sivu"
+
+#: bp/scene/templates/scene/source_events.html:95
+msgid "Copy citation to clipboard"
+msgstr "Kopioi viite leikepöydälle"
 
 #: bp/scene/templates/scene/family.html:85
 #: bp/scene/templates/scene/source_events.html:33

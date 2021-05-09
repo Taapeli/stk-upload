@@ -56,7 +56,7 @@ class Batch:
     BATCH_STARTED = "started"
     BATCH_CANDIDATE = "completed"  # Means candidate
     #    3. Batch is empty
-    ST_FOR_AUDIT = "audit_request"
+    BATCH_FOR_AUDIT = "audit_request"
 
     def __init__(self, userid=None):
         """
@@ -208,7 +208,7 @@ class Batch:
             b = Batch.from_node(node)
             if not b.status:
                 # Audit node has no status field; the material has been sent forwards
-                b.status = Batch.ST_FOR_AUDIT
+                b.status = Batch.BATCH_FOR_AUDIT
             approved[b.id] = count
 
         # Get current researcher batches
@@ -226,9 +226,7 @@ class Batch:
             #  label='Note'
             #  cnt=2>
             b = Batch.from_node(record["batch"])
-            label = record.get("label")
-            if not label:
-                label = ""
+            label = record.get("label", "")
             cnt = record["cnt"]
 
             batch_id = b.id
@@ -249,7 +247,7 @@ class Batch:
             if audited:
                 user_data[key]["Audit"] = audited
 
-            #print(f"user_data[{key}] {user_data[key]}")
+            print(f"user_data[{key}] {user_data[key]}")
 
         return sorted(titles), user_data
 
@@ -386,6 +384,22 @@ class BatchUpdater(DataService):
         self.batch = batch
 
         return {"batch": batch, "status": Status.OK}
+
+    def batch_get_one(self, user, batch_id):
+        """Get Batch object by username and batch id. """
+        ret = shareds.dservice.ds_get_batch(user, batch_id)
+        # returns {"status":Status.OK, "node":record}
+        if Status.has_failed(ret):
+            return ret
+        try:
+            node = ret['node']
+            batch = Batch.from_node(node)
+            return {"status":Status.OK, "item":batch}
+        except Exception as e:
+            statustext = (
+                f"BatchUpdater.get_batch failed: {e.__class__.__name__} {e}"
+            )
+            return {"status": Status.ERROR, "statustext": statustext}
 
     def batch_mark_status(self, b_status):
         """ Mark this data batch status. """
