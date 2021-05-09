@@ -451,8 +451,8 @@ class Neo4jUpdateService(ConcreteService):
                         datetype1 = "after"
                         datetype2 = "before"
                     elif datetype == DR["PERIOD"]:
-                        datetype1 = "after"
-                        datetype2 = "before"
+                        datetype1 = "exact"
+                        datetype2 = "exact"
                     date1 = e["date1"]
                     date2 = e["date2"]
                     if datetype1 and date1 is not None:
