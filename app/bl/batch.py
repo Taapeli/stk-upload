@@ -56,7 +56,7 @@ class Batch:
     BATCH_STARTED = "started"
     BATCH_CANDIDATE = "completed"  # Means candidate
     #    3. Batch is empty
-    BATCH_FOR_AUDIT = "audit_request"
+    BATCH_FOR_AUDIT = "audit_requested"
 
     def __init__(self, userid=None):
         """

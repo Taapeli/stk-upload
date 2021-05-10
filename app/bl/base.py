@@ -104,7 +104,7 @@ class NodeObject:
 
         self.state = None  # Object state in process path
         # TODO Define constants for values:
-        #     candicate, audit_request, auditing, accepted,
+        #     candicate, audit_requested, auditing, accepted,
         #     mergeing, common, rejected
         self.isotammi_id = None  # Containing
         # - object type id ("I" = Person etc.)
