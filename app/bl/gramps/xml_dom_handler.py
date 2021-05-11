@@ -33,6 +33,7 @@ from collections import defaultdict
 import re
 import time
 import os
+import uuid
 import xml.dom.minidom
 
 # from flask_babelex import _
@@ -123,6 +124,7 @@ class DOM_handler:
         )  # key=object type, value=count of objects processed
         # self.datastore = None               # neo4j.DirectDriver object
         self.obj_counter = 0
+        #self.handle_suffix = "_" + uuid.uuid4().hex
 
     def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
@@ -228,13 +230,13 @@ class DOM_handler:
 
             for citation_noteref in citation.getElementsByTagName("noteref"):
                 if citation_noteref.hasAttribute("hlink"):
-                    c.note_handles.append(citation_noteref.getAttribute("hlink"))
+                    c.note_handles.append(citation_noteref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Citation {c.id} has note {c.note_handles[-1]}')
 
             if len(citation.getElementsByTagName("sourceref")) == 1:
                 citation_sourceref = citation.getElementsByTagName("sourceref")[0]
                 if citation_sourceref.hasAttribute("hlink"):
-                    c.source_handle = citation_sourceref.getAttribute("hlink")
+                    c.source_handle = citation_sourceref.getAttribute("hlink") + self.handle_suffix
                     ##print(f'# Citation {c.id} points source {c.source_handle}')
             elif len(citation.getElementsByTagName("sourceref")) > 1:
                 self.blog.log_event(
@@ -313,7 +315,7 @@ class DOM_handler:
             if len(event.getElementsByTagName("place")) == 1:
                 event_place = event.getElementsByTagName("place")[0]
                 if event_place.hasAttribute("hlink"):
-                    e.place_handles.append(event_place.getAttribute("hlink"))
+                    e.place_handles.append(event_place.getAttribute("hlink") + self.handle_suffix)
             elif len(event.getElementsByTagName("place")) > 1:
                 self.blog.log_event(
                     {
@@ -330,12 +332,12 @@ class DOM_handler:
 
             for ref in event.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
-                    e.note_handles.append(ref.getAttribute("hlink"))
+                    e.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Event {e.id} has note {e.note_handles[-1]}')
 
             for ref in event.getElementsByTagName("citationref"):
                 if ref.hasAttribute("hlink"):
-                    e.citation_handles.append(ref.getAttribute("hlink"))
+                    e.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
 
             # Handle <objref> with citations and notes
@@ -397,7 +399,7 @@ class DOM_handler:
             if len(family.getElementsByTagName("father")) == 1:
                 family_father = family.getElementsByTagName("father")[0]
                 if family_father.hasAttribute("hlink"):
-                    f.father = family_father.getAttribute("hlink")
+                    f.father = family_father.getAttribute("hlink") + self.handle_suffix
                     ##print(f'# Family {f.id} has father {f.father}')
             elif len(family.getElementsByTagName("father")) > 1:
                 self.blog.log_event(
@@ -411,7 +413,7 @@ class DOM_handler:
             if len(family.getElementsByTagName("mother")) == 1:
                 family_mother = family.getElementsByTagName("mother")[0]
                 if family_mother.hasAttribute("hlink"):
-                    f.mother = family_mother.getAttribute("hlink")
+                    f.mother = family_mother.getAttribute("hlink") + self.handle_suffix
                     ##print(f'# Family {f.id} has mother {f.mother}')
             elif len(family.getElementsByTagName("mother")) > 1:
                 self.blog.log_event(
@@ -425,7 +427,7 @@ class DOM_handler:
             for ref in family.getElementsByTagName("eventref"):
                 # Create a tuple (event_handle, role)
                 if ref.hasAttribute("hlink"):
-                    e_handle = ref.getAttribute("hlink")
+                    e_handle = ref.getAttribute("hlink") + self.handle_suffix
                     if ref.hasAttribute("role"):
                         e_role = ref.getAttribute("role")
                     else:
@@ -434,17 +436,17 @@ class DOM_handler:
 
             for ref in family.getElementsByTagName("childref"):
                 if ref.hasAttribute("hlink"):
-                    f.child_handles.append(ref.getAttribute("hlink"))
+                    f.child_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has child {f.child_handles[-1]}')
 
             for ref in family.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
-                    f.note_handles.append(ref.getAttribute("hlink"))
+                    f.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has note {f.note_handles[-1]}')
 
             for ref in family.getElementsByTagName("citationref"):
                 if ref.hasAttribute("hlink"):
-                    f.citation_handles.append(ref.getAttribute("hlink"))
+                    f.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has cite {f.citation_handles[-1]}')
 
             self.save_and_link_handle(f, batch_id=self.batch.id)
@@ -657,7 +659,7 @@ class DOM_handler:
                         )[i]
                         if person_name_citationref.hasAttribute("hlink"):
                             pname.citation_handles.append(
-                                person_name_citationref.getAttribute("hlink")
+                                person_name_citationref.getAttribute("hlink") + self.handle_suffix
                             )
                             ##print(f'# Person name for {p.id} has cite {pname.citation_handles[-1]}')
 
@@ -666,7 +668,7 @@ class DOM_handler:
             for ref in person.getElementsByTagName("eventref"):
                 # Create a tuple (event_handle, role)
                 if ref.hasAttribute("hlink"):
-                    e_handle = ref.getAttribute("hlink")
+                    e_handle = ref.getAttribute("hlink") + self.handle_suffix
                     if ref.hasAttribute("role"):
                         e_role = ref.getAttribute("role")
                     else:
@@ -687,16 +689,16 @@ class DOM_handler:
             # Not used
             #             for person_parentin in person.getElementsByTagName('parentin'):
             #                 if person_parentin.hasAttribute("hlink"):
-            #                     p.parentin_handles.append(person_parentin.getAttribute("hlink"))
+            #                     p.parentin_handles.append(person_parentin.getAttribute("hlink") + self.handle_suffix)
             #                     ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
 
             for person_noteref in person.getElementsByTagName("noteref"):
                 if person_noteref.hasAttribute("hlink"):
-                    p.note_handles.append(person_noteref.getAttribute("hlink"))
+                    p.note_handles.append(person_noteref.getAttribute("hlink") + self.handle_suffix)
 
             for person_citationref in person.getElementsByTagName("citationref"):
                 if person_citationref.hasAttribute("hlink"):
-                    p.citation_handles.append(person_citationref.getAttribute("hlink"))
+                    p.citation_handles.append(person_citationref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
             # for ref in p.media_refs: print(f'# saving Person {p.id}: media_ref {ref}')
@@ -820,7 +822,7 @@ class DOM_handler:
 
             for placeobj_placeref in placeobj.getElementsByTagName("placeref"):
                 # Traverse links to surrounding (upper) places
-                hlink = placeobj_placeref.getAttribute("hlink")
+                hlink = placeobj_placeref.getAttribute("hlink") + self.handle_suffix
                 dates = self._extract_daterange(placeobj_placeref)
                 # surround_ref elements example
                 # {'hlink': '_ddd3...', 'dates': <Gramps_DateRange object>}
@@ -829,7 +831,7 @@ class DOM_handler:
 
             for placeobj_noteref in placeobj.getElementsByTagName("noteref"):
                 if placeobj_noteref.hasAttribute("hlink"):
-                    pl.note_handles.append(placeobj_noteref.getAttribute("hlink"))
+                    pl.note_handles.append(placeobj_noteref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Place {pl.id} has note {pl.note_handles[-1]}')
 
             # Handle <objref>
@@ -976,14 +978,14 @@ class DOM_handler:
             for source_noteref in source.getElementsByTagName("noteref"):
                 # Traverse links to surrounding places
                 if source_noteref.hasAttribute("hlink"):
-                    s.note_handles.append(source_noteref.getAttribute("hlink"))
+                    s.note_handles.append(source_noteref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Source {s.id} has note {s.note_handles[-1]}')
 
             for source_reporef in source.getElementsByTagName("reporef"):
                 r = Repository()
                 if source_reporef.hasAttribute("hlink"):
-                    # s.reporef_hlink = source_reporef.getAttribute("hlink")
-                    r.handle = source_reporef.getAttribute("hlink")
+                    # s.reporef_hlink = source_reporef.getAttribute("hlink") + self.handle_suffix
+                    r.handle = source_reporef.getAttribute("hlink") + self.handle_suffix
                     r.medium = source_reporef.getAttribute("medium")
                     ##print(f'# Source {s.id} in repository {r.handle} {r.medium}')
                 # Mostly 1 repository!
@@ -1206,7 +1208,7 @@ class DOM_handler:
         node.handle = self.handle = ''    str Gramps handle
         """
         if dom.hasAttribute("handle"):
-            node.handle = dom.getAttribute("handle")
+            node.handle = dom.getAttribute("handle") + self.handle_suffix
         if dom.hasAttribute("change"):
             node.change = int(dom.getAttribute("change"))
         if dom.hasAttribute("id"):
@@ -1232,7 +1234,7 @@ class DOM_handler:
         for objref in dom_object.getElementsByTagName("objref"):
             if objref.hasAttribute("hlink"):
                 resu = MediaReferenceByHandles()
-                resu.media_handle = objref.getAttribute("hlink")
+                resu.media_handle = objref.getAttribute("hlink") + self.handle_suffix
                 media_nr += 1
                 resu.media_order = media_nr
 
@@ -1249,12 +1251,12 @@ class DOM_handler:
                 # Add note and citation references
                 for ref in objref.getElementsByTagName("noteref"):
                     if ref.hasAttribute("hlink"):
-                        resu.note_handles.append(ref.getAttribute("hlink"))
+                        resu.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                         # print(f'#_extract_mediaref: Note {resu.note_handles[-1]}')
 
                 for ref in objref.getElementsByTagName("citationref"):
                     if ref.hasAttribute("hlink"):
-                        resu.citation_handles.append(ref.getAttribute("hlink"))
+                        resu.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                         # print(f'#_extract_mediaref: Cite {resu.citation_handles[-1]}')
 
                 result_list.append(resu)

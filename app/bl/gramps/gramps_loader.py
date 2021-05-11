@@ -316,6 +316,7 @@ def xml_to_stkbase(pathname, userid):
             print("bp.gramps.gramps_loader.xml_to_stkbase TODO _rollback")
             return res
         handler.batch = res.get("batch")
+        handler.handle_suffix = "_" + handler.batch.id  
 
         t0 = time.time()
 
