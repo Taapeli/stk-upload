@@ -87,6 +87,16 @@ return b.id as batch, b.timestamp as timestamp, b.status as status,
     count(r) as persons 
     order by batch'''
 
+    get_user_batch_summary = """
+match (b:Batch) where b.user = $user
+optional match (b) -[r:OWNS]-> (:Person)
+with b, count(r) as batch_persons
+    optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
+return b.id as batch, //b.timestamp as stamp_batch, 
+    b.status as status, batch_persons, //a.timestamp as stamp_audit, 
+    count(ar) as audit_persons
+    order by batch"""
+
     TODO_get_empty_batches = '''
 MATCH (a:Batch) 
 WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
@@ -101,7 +111,7 @@ RETURN a AS batch ORDER BY a.id DESC'''
     # Safe Batch removal in reasonable chunks:
     #    a) Nodes pointed by OWNS, 
     #    b) following nodes by relation NAME or NOTE
-    #    c) Batch node self
+    #    Not Batch node self
     delete_chunk = """
 MATCH (:UserProfile{username:$user})
     -[:HAS_LOADED]-> (:Batch{id:$batch_id}) -[:OWNS]-> (a)

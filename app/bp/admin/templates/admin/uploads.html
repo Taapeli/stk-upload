@@ -58,14 +58,14 @@
 	           </td>
 	           <td class="msg_INFO">{{upload.status}}
 	           	{% if upload.batch_id %}
-	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
+	           	   {% if upload.status == _("UPLOADED") %}({{_( "deleted from database" ) }})
 	           	   {% else %}<br>
                       {{ _("batch %(batch_id)s; %(persons)d persons", batch_id=upload.batch_id, persons=upload.count) }}
 	           	   {% endif %}
 	           	{% endif %}
                </td>
 	           <td class="msg_INFO">
-{% if upload.xmlname and upload.status != "TIETOKANNASSA" %}
+{% if upload.xmlname and upload.status != _("CANDIDATE") %}
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
 {% endif %}

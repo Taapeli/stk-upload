@@ -258,12 +258,12 @@ def list_uploads(username):
 
     # 1. List Batches, their status and Person count
     batches = {}
-    result = shareds.driver.session().run(CypherBatch.get_user_batch_names, 
+    result = shareds.driver.session().run(CypherBatch.get_user_batch_summary, 
                                           user=username)
     for record in result:
-        # <Record batch='2019-08-12.001' timestamp=None persons=1949>
+        # Retuns {batch, status, batch_persons, audit_persons}
         batch_id = record['batch']
-        batches[batch_id] = (record['status'], record['persons'])
+        batches[batch_id] = (record['status'], record['batch_persons'], record["audit_persons"])
 
     # 2. List uploaded files
     upload_folder = get_upload_folder(username)
@@ -283,6 +283,7 @@ def list_uploads(username):
             status = meta["status"]
             status_text = None
             person_count = 0
+            audit_count = 0
             batch_id = meta.get('batch_id',"")
             in_batches = batch_id in batches
             if not in_batches:
@@ -298,7 +299,7 @@ def list_uploads(username):
                 status_text = _("CANDIDATE")
                 # The meta file does not contain later status values
                 if in_batches:
-                    status, person_count = batches.pop(batch_id)
+                    status, person_count, audit_count = batches.pop(batch_id)
                     if status == Batch.BATCH_FOR_AUDIT:
                         status_text = _("FOR_AUDIT")
                 else:
@@ -316,6 +317,7 @@ def list_uploads(username):
                 upload.status = status_text
                 upload.batch_id = batch_id
                 upload.count = person_count
+                upload.count_a = audit_count
                 upload.done = (status_text == _("CANDIDATE") or \
                                status_text == _("FOR_AUDIT"))
                 upload.uploaded = (status_text == _("UPLOADED"))
@@ -329,13 +331,14 @@ def list_uploads(username):
     for batch, item in batches.items():
         upload = Upload()
         upload.batch_id = batch
-        status, count = item
+        status, person_count, audit_count = item
         if status == Batch.BATCH_STARTED:
             upload.status = "?"
         elif status == Batch.BATCH_CANDIDATE: # "completed"
             #Todo: Remove later: Old FOR_AUDIT materials are CANDIDATE, too
             upload.status = _("CANDIDATE") + " ?"
-        upload.count = count
+        upload.count = person_count
+        upload.count_a = audit_count
         upload.upload_time = 0.0
         uploads.append(upload)
         

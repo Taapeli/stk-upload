@@ -422,38 +422,38 @@ msgstr "Tuonti tiedostosta %(i)s on alkanut."
 #: bp/admin/uploads.py:317 bp/audit/templates/audit/batches.html:17
 #: bp/gramps/templates/gramps/uploads.html:177
 msgid "UPLOADED"
-msgstr "LADATTU"
+msgstr "Ladattu"
 
 #: bp/admin/templates/admin/uploads.html:37 bp/admin/uploads.py:290
 #: bp/admin/uploads.py:318 bp/audit/templates/audit/batches.html:21
 #: bp/gramps/templates/gramps/uploads.html:178
 msgid "STORING"
-msgstr "MENOSSA TIETOKANTAAN"
+msgstr "Menossa tietokantaan"
 
 #: bp/admin/templates/admin/uploads.html:38 bp/admin/uploads.py:292
 #: bp/admin/uploads.py:303 bp/admin/uploads.py:316 bp/admin/uploads.py:332
 #: bp/audit/templates/audit/batches.html:25
 #: bp/gramps/templates/gramps/uploads.html:179
 msgid "CANDIDATE"
-msgstr "EHDOKASAINEISTO"
+msgstr "Ehdokasaineisto"
 
 #: bp/admin/templates/admin/uploads.html:40 bp/admin/uploads.py:296
 #: bp/audit/templates/audit/batches.html:33
 #: bp/gramps/templates/gramps/uploads.html:182
 msgid "FAILED"
-msgstr "EPÄONNISTUI"
+msgstr "Epäonnistui"
 
 #: bp/admin/templates/admin/uploads.html:40 bp/admin/uploads.py:298
 #: bp/audit/templates/audit/batches.html:33
 #: bp/gramps/templates/gramps/uploads.html:182
 msgid "ERROR"
-msgstr "VIRHE"
+msgstr "Virhe"
 
 #: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:300
 #: bp/admin/uploads.py:304 bp/audit/templates/audit/batches.html:29
 #: bp/gramps/templates/gramps/uploads.html:181
 msgid "REMOVED"
-msgstr "POISTETTU KANNASTA"
+msgstr "Poistettu kannasta"
 
 #: bp/admin/models/data_admin.py:60 bp/admin/models/user_admin.py:85
 msgid "User {} has not admin privileges"
@@ -2227,11 +2227,15 @@ msgstr "Henkilöitä"
 
 #: bp/gramps/templates/gramps/uploads.html:180
 msgid "FOR_AUDIT"
-msgstr "LUOVUTETTU"
+msgstr "Luovutettu"
 
 #: bp/gramps/templates/gramps/uploads.html:180
 msgid "the data has been sent to common data"
 msgstr "tiedot on lähetetty yhteiseen aineistoon"
+
+#: bp/gramps/templates/gramps/uploads.html:200
+msgid "The persons sent to common data"
+msgstr "Yhteiseen aineistoon lähetetyt henkilöt"
 
 #: bp/gramps/templates/gramps/uploads.html:214
 msgid "Start by sending your first Gramps file"

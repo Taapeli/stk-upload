@@ -35,29 +35,25 @@ import logging
 logger = logging.getLogger("stkserver")
 
 
-class Batch_merge(object):
+class Batch_merge:
     """
-    Methods to move User Batch items to Common Data.
+    Methods to move User Batch items to Common data.
 
     Replace the (b:Batch {id:...}) -[o:OWNS]-> (x)
                 relations with given Batch id
     with        (s:Audit {id:...}) -[:PASSED]-> (x)
                 with same id
+    end create  (b) -[:AFTER_AUDIT]-> (s).
+    
+    The b.status is updated.
+    #Todo Set also Audit.status
 
-    The Audit node should include
+    The Audit node has
     - id = b.id    User Batch id
     - user         käyttäjä
     - auditor      the user who executed the transfer
     - timestamp    viimeisin muutosaika
-    -
-    #Todo: Make decisions, which items should be moved, merged or left alone
     """
-
-    # def __init__(self):
-    #     """
-    #     Constructor
-    #     """
-    #     pass
 
     def move_whole_batch(self, batch_id, user, auditor):
         """
