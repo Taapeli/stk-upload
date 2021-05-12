@@ -132,6 +132,9 @@ shareds.app.register_blueprint(stat_bp)
 from bp.refplace_editor import bp as refplace_editor_bp
 shareds.app.register_blueprint(refplace_editor_bp)
 
+from bp.graph import bp as graph_bp
+shareds.app.register_blueprint(graph_bp)
+
 @shareds.babel.localeselector
 def get_locale():
     reqlang = request.args.get('lang')

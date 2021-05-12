@@ -98,15 +98,16 @@ class FamTree:
             "gender": person_attributes["gender"],
             "title": f"{names[1]} {names[0]}, {birth}-{death}",
             "uuid": person_attributes["uuid"],
+            "too_new": person_attributes["too_new"]
         }
 
-    def build_parents(self, u_context, uniq_id, level=1):
+    def build_parents(self, u_context, uniq_id, privacy, level=1):
         """
         Recurse to ancestors, building a data structure for famtree.
         """
 
         with PersonReader("read", u_context) as service:
-            result = service.get_parents(uniq_id)
+            result = service.get_parents(uniq_id, privacy)
 
         parents = []
         result.sort(key=lambda x: x["gender"])
@@ -114,12 +115,12 @@ class FamTree:
             node = self.famtree_data(par, descendant=False)
             if level < MAX_ANCESTOR_LEVELS:  # continue recursion?
                 node["parents"] = self.build_parents(
-                    u_context, par["uniq_id"], level + 1
+                    u_context, par["uniq_id"], privacy, level + 1
                 )
             parents.append(node)
         return parents
 
-    def build_children(self, u_context, uniq_id, level=1):
+    def build_children(self, u_context, uniq_id, privacy, level=1):
         """
         Recurse to descendants, building a data structure for famtree.
         """
@@ -137,7 +138,7 @@ class FamTree:
             )
 
         with PersonReader("read", u_context) as service:
-            result = service.get_children(uniq_id)
+            result = service.get_children(uniq_id, privacy)
 
         children = []
         result.sort(reverse=True, key=lambda x: b_year(x))
@@ -145,7 +146,7 @@ class FamTree:
             node = self.famtree_data(chi, descendant=True)
             if level < MAX_DESCENDANT_LEVELS:  # continue recursion?
                 node["children"] = self.build_children(
-                    u_context, chi["uniq_id"], level + 1
+                    u_context, chi["uniq_id"], privacy, level + 1
                 )
             children.append(node)
         return children
@@ -158,10 +159,11 @@ class FamTree:
         """
         # Set up the database access.
         u_context = UserContext(user_session, current_user, request)
+        privacy = u_context.context == u_context.ChoicesOfView.COMMON
 
         # Fill in basic data from current person
         with PersonReader("read", u_context) as service:
-            result = service.get_person_minimal(uuid)
+            result = service.get_person_minimal(uuid, privacy)
 
         if len(result) == 0:
             return ""
@@ -173,7 +175,7 @@ class FamTree:
         # Gather all required data in two directions from the central person. Data structure used in both is a
         # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
         # (https://vasturiano.github.io/sunburst-chart/)
-        famtree["parents"] = self.build_parents(u_context, uniq_id)
-        famtree["children"] = self.build_children(u_context, uniq_id)
+        famtree["parents"] = self.build_parents(u_context, uniq_id, privacy)
+        famtree["children"] = self.build_children(u_context, uniq_id, privacy)
 
         return famtree

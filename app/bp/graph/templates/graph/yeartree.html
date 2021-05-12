@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fi" lang="fi">
+<head></head>
+<!-- Heavily adapted from https://bl.ocks.org/d3noob/5537fe63086c4f100114f87f124850dd -->
+<!-- Copyright (C) 2021 GSF (https://www.genealogia.fi/) Taapeli project and Heikki Roikonen -->
+<body>
+    <style>
+        rect {
+            fill: lightgray;
+            stroke: blue;
+            opacity: 0.75;
+            stroke-width: 1;
+        }
+        text {
+            fill: brown;
+            font-style: normal;
+            font: 8px sans-serif;
+        }
+        .link {
+            fill: none;
+            stroke: green;
+            opacity: 0.75;
+            stroke-width: 1;
+        }
+    </style>    
+<!-- load the d3.js library -->	
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script>
+
+    var data = JSON.parse('{{ famtree_data|safe }}');
+
+    var margin = {top: 20, right: 90, bottom: 30, left: 90};
+    const width = 660 - margin.left - margin.right;
+    const height = 500 - margin.top - margin.bottom;
+    const axisoffset = 200 - margin.left;
+    const rect_height = 10;
+    const nudge_height = 3;
+    const link_width = 7;
+    const first_year = 1850;
+    const last_year = 2020;
+
+    var yearScale = d3.scaleLinear()
+        .domain([first_year, last_year])
+        .range([-height/2, height/2]);
+
+    var yearAxis = d3.axisBottom()
+        .scale(yearScale)
+        .tickFormat(d3.format(".0f"));
+
+    //     .attr("viewBox", [-width / 2, -height / 2, width, height])
+
+    // declares a tree layout and assigns the size
+    var treemap = d3.tree()
+        .size([height, width]);
+
+    //  assigns the data to a hierarchy using parent-child relationships
+    var nodes = d3.hierarchy(data, function(d) {
+        return d.children;
+    });
+
+    // maps the node data to the tree layout
+    nodes = treemap(nodes);
+
+    // append the svg object to the body of the page
+    // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
+    var svg = d3.select("body").append("svg")
+        // .attr("width", width + margin.left + margin.right)
+        // .attr("height", height + margin.top + margin.bottom)
+        // .call(yearAxis);
+        .attr("viewBox", [-width / 2, -height / 2, width, height])
+        .attr("transform", "translate(" + -axisoffset + ",0)")
+        // .call(yearAxis);
+
+    var g = svg.append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    // adds the links between the nodes
+    var link = g.selectAll(".link")
+        .data( nodes.descendants().slice(1))
+        .enter().append("path")
+            .attr("class", "link")
+            .attr("d", d => {
+                parent_height = d.parent.x
+                    + (d.x == d.parent.x ? rect_height/2 : 0)
+                    + (d.x > d.parent.x ? rect_height : 0)
+                    + (d.depth - 1) * nudge_height;
+                return Math.abs(d.x - d.parent.x) + nudge_height < rect_height
+                    ? null  // no connector if overlap
+                    : "M" + yearScale(d.data.birth) + "," + (d.x + rect_height/2 + d.depth*nudge_height)
+                    + "C" + (yearScale(d.data.birth) - link_width) + "," + (d.x + rect_height/2 + d.depth*nudge_height)
+                    + " " + yearScale(d.data.birth) + "," + parent_height
+                    + " " + (yearScale(d.data.birth) - link_width) + "," + parent_height
+            });
+
+    // adds each node as a group
+    var node = g.selectAll(".node")
+        .data(nodes.descendants())
+        .enter().append("g")
+            .attr("class", d => 
+                "node" + 
+                (d.children ? " node--internal" : " node--leaf")
+            )
+            .attr("transform", d => 
+                "translate(" + yearScale(d.data.birth) + "," + (d.x + d.depth*nudge_height) + ")"
+            );
+
+    // adds the circle to the node
+    node.append("rect")
+        .attr("height", rect_height)
+        .attr("width", d =>
+            d.data.death == 0
+                ? yearScale(d.data.birth + 110) - yearScale(d.data.birth)
+                : yearScale(d.data.death) - yearScale(d.data.birth)
+        );
+
+    // adds the text to the node
+    node.append("text")
+        .attr("y", "1em")
+        .text(d => d.data.name);
+
+</script>
+</body></html>

@@ -71,3 +71,14 @@ def tree_only(uuid=None):
 
     famtree = FamTree().get(uuid)
     return render_template('/graph/tree.html', famtree_data=json.dumps(famtree))
+
+@bp.route('/yeartree', methods=['GET'])
+@login_required
+@roles_accepted('audit')
+def yeartree_only(uuid=None):
+    uuid = request.args.get('uuid', None)
+    if uuid is None:
+        return render_template('/graph/yeartree.html', famtree_data='')
+
+    famtree = FamTree().get(uuid)
+    return render_template('/graph/yeartree.html', famtree_data=json.dumps(famtree))
