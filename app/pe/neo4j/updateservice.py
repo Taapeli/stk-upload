@@ -424,8 +424,17 @@ class Neo4jUpdateService(ConcreteService):
         :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
         """
         from models import lifetime
+        from models.lifetime import BIRTH, DEATH, BAPTISM, BURIAL, MARRIAGE
         from bl.dates import DR
-
+        
+        def sortkey(event): # sorts events so that BIRTH, DEATH, BAPTISM, BURIAL come first
+            if event.eventtype in (BIRTH, DEATH):
+                return 0
+            elif event.eventtype in (BAPTISM, BURIAL):
+                return 1
+            else:
+                return 2
+            
         personlist = []
         personmap = {}
         res = {"status": Status.OK}
@@ -469,8 +478,14 @@ class Neo4jUpdateService(ConcreteService):
                         datetype1 = "after"
                         datetype2 = "before"
                     elif datetype == DR["PERIOD"]:
-                        datetype1 = "exact"
-                        datetype2 = "exact"
+                        if eventtype in (BIRTH, DEATH, BAPTISM, BURIAL):
+                            # cannot be a span, must be between
+                            datetype = DR["BETWEEN"]
+                            datetype1 = "after"
+                            datetype2 = "before"
+                        else:
+                            datetype1 = "exact"
+                            datetype2 = "exact"
                     date1 = e["date1"]
                     date2 = e["date2"]
                     if datetype1 and date1 is not None:
@@ -481,6 +496,8 @@ class Neo4jUpdateService(ConcreteService):
                         year2 = date2 // 1024
                         ev = lifetime.Event(eventtype, datetype2, year2, role)
                         p.events.append(ev)
+                    p.events.sort(key=sortkey)
+                        
 
                 # List Parent and Child identities
                 p.parent_pids = []
