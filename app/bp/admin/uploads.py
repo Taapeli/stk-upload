@@ -268,12 +268,21 @@ def list_uploads(username):
     # 2. List uploaded files
     upload_folder = get_upload_folder(username)
     try:
-        names = sorted([name for name in os.listdir(upload_folder)]) 
+        names = sorted([name for name in os.listdir(upload_folder)])
     except:
         names = []
     uploads = []
+    logfile_base = ""
     class Upload: pass
+    # There may be 4 files: 
+    # - 'test.gramps',      original xml
+    # - 'test.gramps.log'   logfile from conversion to db
+    # - 'test.gramps.meta'  metafile from file conversion
+    # - 'test_clean.gramps' cleaned xml data
     for name in names:
+        name_parts = name.split(".")
+        if name.endswith(".log"):
+            (logfile_base, _x) = name.rsplit(".",1)
         if name.endswith(".meta"):
             #TODO: Tähän tarvitaan try catch, koska kaatuneen gramps-latauksen jälkeen
             #      metatiedosto voi olla rikki tai puuttua
@@ -289,7 +298,8 @@ def list_uploads(username):
             if not in_batches:
                 batch_id = ""
                 if status == Batch.BATCH_DONE:
-                    status = Batch.BATCH_REMOVED 
+                    status = Batch.BATCH_REMOVED
+            # print(f"### Batch {batch_id} {status} {name} base={logfile_base}")
 
             if status == Batch.BATCH_UPLOADED:
                 status_text = _("UPLOADED")
@@ -322,12 +332,15 @@ def list_uploads(username):
                                status_text == _("FOR_AUDIT"))
                 upload.uploaded = (status_text == _("UPLOADED"))
                 upload.loading = (status_text == _("STORING"))
+                clean_name =  os.path.join(upload_folder, name_parts[0] + "_clean." + name_parts[1])
+                upload.has_file = os.path.isfile(clean_name)
+                upload.has_log = name.startswith(logfile_base)
                 upload.upload_time = meta["upload_time"]
                 upload.upload_time_s = util.format_timestamp(upload.upload_time)
                 upload.user = username
                 uploads.append(upload)
     
-    # 3. Add batches where there is no file
+    # 3. Add batches where there is no meta file
     for batch, item in batches.items():
         upload = Upload()
         upload.batch_id = batch
@@ -337,9 +350,14 @@ def list_uploads(username):
         elif status == Batch.BATCH_CANDIDATE: # "completed"
             #Todo: Remove later: Old FOR_AUDIT materials are CANDIDATE, too
             upload.status = _("CANDIDATE") + " ?"
+        elif audit_count > 0:
+            upload.status = f"{ _('FOR_AUDIT') } {audit_count} { _('persons') }"
         upload.count = person_count
         upload.count_a = audit_count
+        upload.has_file = False
+        upload.has_log = audit_count > 0 # Rough estimate!
         upload.upload_time = 0.0
+        print(f"### Batch {batch} {status} -")
         uploads.append(upload)
         
     return sorted(uploads,key=lambda x: x.upload_time)

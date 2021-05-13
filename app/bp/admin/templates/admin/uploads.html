@@ -69,10 +69,14 @@
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
 {% endif %}
+{% if upload.xmlname and upload.has_log %}
 	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a> |
+{% endif %}
+{% if upload.xmlname %}
                     <a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
                         {{ _("Delete file") }}</a>
+{% endif %}
 	           	</td>
 	       </tr>
 	    {% endfor %}
