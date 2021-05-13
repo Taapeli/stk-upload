@@ -80,5 +80,7 @@ def yeartree_only(uuid=None):
     if uuid is None:
         return render_template('/graph/yeartree.html', famtree_data='')
 
-    famtree = FamTree().get(uuid)
-    return render_template('/graph/yeartree.html', famtree_data=json.dumps(famtree))
+    (ancestors, descendants) = FamTree().get(uuid)
+    return render_template('/graph/yeartree.html',
+        ancestors=json.dumps(ancestors),
+        descendants=json.dumps(descendants))

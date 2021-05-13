@@ -6,15 +6,33 @@
 <body>
     <style>
         rect {
-            fill: lightgray;
             stroke: blue;
             opacity: 0.75;
             stroke-width: 1;
         }
+        .unknown_birth rect {
+            rx: 5;
+            ry: 5;
+        }
+        .unknown_death rect {
+            rx: 5;
+            ry: 5;
+        }
+        .unknown_both rect {
+            rx: 5;
+            ry: 5;
+        }
         text {
-            fill: brown;
+            fill: black;
             font-style: normal;
             font: 8px sans-serif;
+            text-anchor: start;
+        }
+        .tick text {
+            fill: black;
+            font-style: normal;
+            font: 8px sans-serif;
+            text-anchor: middle;
         }
         .link {
             fill: none;
@@ -27,98 +45,133 @@
 <script src="https://d3js.org/d3.v6.min.js"></script>
 <script>
 
-    var data = JSON.parse('{{ famtree_data|safe }}');
+    var anc_data = JSON.parse('{{ ancestors|safe }}');
+    var desc_data = JSON.parse('{{ descendants|safe }}');
 
     var margin = {top: 20, right: 90, bottom: 30, left: 90};
     const width = 660 - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
-    const axisoffset = 200 - margin.left;
+    const height = 440 - margin.top - margin.bottom;
+    const axisoffset = 600;
     const rect_height = 10;
     const nudge_height = 3;
     const link_width = 7;
-    const first_year = 1850;
+    const first_year = 1650;
     const last_year = 2020;
+    const ave_age = 75;
+    const ave_gen_gap = 30;
 
     var yearScale = d3.scaleLinear()
         .domain([first_year, last_year])
-        .range([-height/2, height/2]);
+        .range([-width/2, width/2]);
 
     var yearAxis = d3.axisBottom()
         .scale(yearScale)
         .tickFormat(d3.format(".0f"));
 
-    //     .attr("viewBox", [-width / 2, -height / 2, width, height])
-
     // declares a tree layout and assigns the size
-    var treemap = d3.tree()
+    var treelayout = d3.tree()
         .size([height, width]);
 
-    //  assigns the data to a hierarchy using parent-child relationships
-    var nodes = d3.hierarchy(data, function(d) {
-        return d.children;
-    });
+    var draw = (this_data, root_node, anc) => {
+        //  assigns the data to a hierarchy using parent-child relationships
+        var nodes = d3.hierarchy(this_data, d => d.children);
 
-    // maps the node data to the tree layout
-    nodes = treemap(nodes);
+        // maps the node data to the tree layout
+        nodes = treelayout(nodes)
+            .sort((a, b) => b.data.birth - a.data.birth);
 
-    // append the svg object to the body of the page
-    // appends a 'group' element to 'svg'
-    // moves the 'group' element to the top left margin
-    var svg = d3.select("body").append("svg")
-        // .attr("width", width + margin.left + margin.right)
-        // .attr("height", height + margin.top + margin.bottom)
-        // .call(yearAxis);
-        .attr("viewBox", [-width / 2, -height / 2, width, height])
-        .attr("transform", "translate(" + -axisoffset + ",0)")
-        // .call(yearAxis);
+        // append the svg object to the body of the page
+        // appends a 'group' element to 'svg'
+        // moves the 'group' element to the top left margin
+        var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .style("fill", "lightyellow") //##### TEST #####
+            .attr("viewBox", [-width*0.3, -height*1.1, width, height*1.5])
+            // .call(yearAxis);
 
-    var g = svg.append("g")
-        .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
+        var g = svg.append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + (margin.top + axisoffset) + ")")
+            .attr("transform",
+                "translate(" + 0 + "," + -420 + ")");
 
-    // adds the links between the nodes
-    var link = g.selectAll(".link")
-        .data( nodes.descendants().slice(1))
-        .enter().append("path")
-            .attr("class", "link")
-            .attr("d", d => {
-                parent_height = d.parent.x
-                    + (d.x == d.parent.x ? rect_height/2 : 0)
-                    + (d.x > d.parent.x ? rect_height : 0)
-                    + (d.depth - 1) * nudge_height;
-                return Math.abs(d.x - d.parent.x) + nudge_height < rect_height
-                    ? null  // no connector if overlap
-                    : "M" + yearScale(d.data.birth) + "," + (d.x + rect_height/2 + d.depth*nudge_height)
-                    + "C" + (yearScale(d.data.birth) - link_width) + "," + (d.x + rect_height/2 + d.depth*nudge_height)
-                    + " " + yearScale(d.data.birth) + "," + parent_height
-                    + " " + (yearScale(d.data.birth) - link_width) + "," + parent_height
-            });
+        // adds the links between the nodes
+        var link = g.selectAll(".link")
+            .data( nodes.descendants().slice(1))
+            .enter().append("path")
+                .attr("class", "link")
+                .attr("d", d => {
+                    if (anc) {
+                        own_height = d.x + rect_height / 2
+                                + Math.sign(d.parent.x - d.x) * rect_height/2;
+                        return Math.abs(d.x - d.parent.x) + Math.sign(d.x - d.parent.x)*nudge_height < rect_height/2
+                            ? null  // no connector if overlap
+                            : "M" + yearScale(d.parent.data.birth) + "," + (d.parent.x + rect_height/2)
+                            + "C" + (yearScale(d.parent.data.birth) - link_width) + "," + (d.parent.x + rect_height/2)
+                            + " " + yearScale(d.parent.data.birth) + "," + own_height
+                            + " " + (yearScale(d.parent.data.birth) - link_width) + "," + own_height;
+                    } else {
+                        parent_height = d.parent.x
+                            + (d.x == d.parent.x ? rect_height/2 : 0)
+                            + (d.x > d.parent.x ? rect_height : 0)
+                            + (d.depth - 1) * nudge_height;
+                        return Math.abs(d.x - d.parent.x) + Math.sign(d.x - d.parent.x)*nudge_height < rect_height/2
+                            ? null  // no connector if overlap
+                            : "M" + yearScale(d.data.birth) + "," + (d.x + rect_height/2 + d.depth*nudge_height)
+                            + "C" + (yearScale(d.data.birth) - link_width) + "," + (d.x + rect_height/2 + d.depth*nudge_height)
+                            + " " + yearScale(d.data.birth) + "," + parent_height
+                            + " " + (yearScale(d.data.birth) - link_width) + "," + parent_height;
+                    }
+                });
 
-    // adds each node as a group
-    var node = g.selectAll(".node")
-        .data(nodes.descendants())
-        .enter().append("g")
-            .attr("class", d => 
-                "node" + 
-                (d.children ? " node--internal" : " node--leaf")
-            )
-            .attr("transform", d => 
-                "translate(" + yearScale(d.data.birth) + "," + (d.x + d.depth*nudge_height) + ")"
+        // adds each node as a group
+        var node = g.selectAll(".node")
+            .data(nodes.descendants())
+            .enter().append("g")
+                .attr("class", d => 
+                    "node" + 
+                    (d.children ? " node--internal" : " node--leaf")
+                )
+                .attr("transform", d => {
+                    birth = (d.data.birth == 0)
+                        ? d.parent.data.birth + ave_gen_gap * (anc ? -1 : 1)
+                        : d.data.birth;
+                    return "translate(" + yearScale(birth) + "," + (d.x + (anc ? 0 : d.depth*nudge_height)) + ")";
+                })
+                .classed("unknown_birth", d => d.data.birth == 0)
+                .classed("unknown_death", d => d.data.death == 0)
+                .classed("unknown_both", d => d.data.birth == 0 && d.data.death == 0);
+
+        // adds the rect to the node
+        node.append("rect")
+            .attr("fill", d => d.data.color)
+            .attr("height", rect_height)
+            .attr("width", d =>
+                d.data.death == 0
+                    ? yearScale(d.data.birth + ave_age) - yearScale(d.data.birth)
+                : d.data.death == d.data.birth
+                    ? 1
+                : yearScale(d.data.death) - yearScale(d.data.birth)
             );
 
-    // adds the circle to the node
-    node.append("rect")
-        .attr("height", rect_height)
-        .attr("width", d =>
-            d.data.death == 0
-                ? yearScale(d.data.birth + 110) - yearScale(d.data.birth)
-                : yearScale(d.data.death) - yearScale(d.data.birth)
-        );
+        // adds the text to the node
+        node.append("text")
+            .attr("y", "1em")
+            .attr("x", "0.3em")
+            .text(d => d.data.name);
 
-    // adds the text to the node
-    node.append("text")
-        .attr("y", "1em")
-        .text(d => d.data.name);
+        // svg.transform(
+        //     // "translate(" + (node.x - root_node.x) + ")"
+        //     "translate(0 0)"
+        // )   
+        
+        return node;
+    }
+
+    // make sure the root nodes coincide
+    root = draw(anc_data, null, anc=true);
+    root = draw(desc_data, root, anc=false);
 
 </script>
 </body></html>

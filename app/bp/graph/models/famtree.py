@@ -114,7 +114,7 @@ class FamTree:
         for par in result:
             node = self.famtree_data(par, descendant=False)
             if level < MAX_ANCESTOR_LEVELS:  # continue recursion?
-                node["parents"] = self.build_parents(
+                node["children"] = self.build_parents(  # for the tree structure, parents are "children"
                     u_context, par["uniq_id"], privacy, level + 1
                 )
             parents.append(node)
@@ -141,7 +141,7 @@ class FamTree:
             result = service.get_children(uniq_id, privacy)
 
         children = []
-        result.sort(reverse=True, key=lambda x: b_year(x))
+        result.sort(reverse=False, key=lambda x: b_year(x))
         for chi in result:
             node = self.famtree_data(chi, descendant=True)
             if level < MAX_DESCENDANT_LEVELS:  # continue recursion?
@@ -169,13 +169,14 @@ class FamTree:
             return ""
 
         for person in result:
-            famtree = self.famtree_data(person, descendant=True)
+            ancestors = self.famtree_data(person, descendant=True)      # Distinct copies
+            descendants = self.famtree_data(person, descendant=True)    # Distinct copies
             uniq_id = person["uniq_id"]
 
         # Gather all required data in two directions from the central person. Data structure used in both is a
         # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
         # (https://vasturiano.github.io/sunburst-chart/)
-        famtree["parents"] = self.build_parents(u_context, uniq_id, privacy)
-        famtree["children"] = self.build_children(u_context, uniq_id, privacy)
+        ancestors["children"] = self.build_parents(u_context, uniq_id, privacy)
+        descendants["children"] = self.build_children(u_context, uniq_id, privacy)
 
-        return famtree
+        return (ancestors, descendants)
