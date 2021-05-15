@@ -120,7 +120,7 @@ def translate(term, var_name, show_table=False):
             "Kasvatus": _("Foster-child"), # Kasvatuslapsi
             "Clergy": _("Clergy"), #"pappi"
             "Edunsaaja": _("Beneficiary"),
-#             "Family": _("Family"), #"perhe" ?
+            "Family": _("Family"), #"perhe" As participant for Family events
             "father": _("Father"), 
             "Kantaja": _("Plaintiff"),
             "Kohde": _("Concerned"),
