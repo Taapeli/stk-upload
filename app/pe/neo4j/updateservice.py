@@ -493,15 +493,21 @@ class Neo4jUpdateService(ConcreteService):
                 p.events.sort(key=sortkey)
                     
 
-            # List Parent and Child identities
+            # List Parent, Child and Spouse identities
             p.parent_pids = []
             for _parent, pid in record["parents"]:
                 if pid:
                     p.parent_pids.append(pid)
+
             p.child_pids = []
             for _parent, pid in record["children"]:
                 if pid:
                     p.child_pids.append(pid)
+
+            p.spouse_pids = []
+            for _spouse, pid in record["spouses"]:
+                if pid:
+                    p.spouse_pids.append(pid)
 
             # print(f"#> lifetime.Person {p}")
             personlist.append(p)
@@ -517,6 +523,10 @@ class Neo4jUpdateService(ConcreteService):
                 xid = personmap.get(pid)
                 if xid:
                     p.children.append(xid)
+            for pid in p.spouse_pids:
+                xid = personmap.get(pid)
+                if xid:
+                    p.spouses.append(xid)
         lifetime.calculate_estimates(personlist)
 
         for p in personlist:

@@ -55,6 +55,7 @@
     - death_high
 """
 
+import datetime
 import sys
 from dataclasses import dataclass
 
@@ -66,7 +67,6 @@ MIN_CHILD_AGE = 15
 MAX_CHILD_AGE = 65
 MAX_BAPTISM_DELAY = 1
 MAX_BURIAL_DELAY = 1
-MAX_BURIAL_DELAY = 1
 MAX_PARENT_DEATH_CHILD_BIRTH_GAP = 1
 
 BIRTH = "Birth"
@@ -75,6 +75,7 @@ MARRIAGE = "Marriage"
 BURIAL = "Burial"
 BAPTISM = "Baptism"
 
+MAX_ITERATIONS = 10 
 
 class Person:
     def __init__(self):
@@ -83,6 +84,7 @@ class Person:
         self.events = []
         self.parents = []
         self.children = []
+        self.spouses = []
 
     def __str__(self):
         # pare = [f"{x.gramps_id}({x.pid})" for x in self.parents]
@@ -182,6 +184,7 @@ def __update_range(p, eventtype, low, high):
     Update the possible range for 'eventtype'
     for person p to 'low-high'
     """
+    #print(p,eventtype,low,high)
     current_range1 = p.estimates[eventtype]
     if __empty_range(current_range1):
         # already empty, warning already given
@@ -228,7 +231,7 @@ def __calculate_estimates1(p):
     p.death_low = MIN
     p.birth_high = MAX
     p.death_high = MAX
-    p.estimates = {BIRTH: (MIN, MAX), DEATH: (MIN, MAX)}
+    p.estimates = {BIRTH: (MIN, CURRENT_YEAR), DEATH: (MIN, MAX)}
     for e in p.events:
         if e.year is None:
             continue
@@ -292,10 +295,21 @@ def __calculate_estimates_family(p):
             p, DEATH, c.birth_low - MAX_PARENT_DEATH_CHILD_BIRTH_GAP, MAX
         )  # father may have died before a child was born
 
+    for sp in p.spouses:
+        #print("spouse",p,sp)
+        __update_range(p, BIRTH, sp.birth_low - MAX_AGE + MIN_MARR_AGE, MAX)
+        __update_range(p, BIRTH, MIN, sp.birth_high + MAX_AGE - MIN_MARR_AGE)
+        __update_range(p, BIRTH, MIN, sp.death_high - MIN_MARR_AGE)
+        __update_range(p, DEATH, sp.birth_low + MIN_MARR_AGE, MAX)
+
     __update_estimates(p)
 
 
 def calculate_estimates(personlist):
+    global CURRENT_YEAR 
+    current_year = datetime.date.today().year
+    CURRENT_YEAR = Year("normal", current_year)
+
     for p in personlist:
         __calculate_estimates1(p)
     n = 0
@@ -310,9 +324,11 @@ def calculate_estimates(personlist):
                     personlist2.add(parent)
                 for c in p.children:
                     personlist2.add(c)
+                for sp in p.spouses:
+                    personlist2.add(sp)
         if len(personlist2) == 0:
             break
         personlist = personlist2
         n += 1
-        if n > 10:
+        if n > MAX_ITERATIONS:
             break  # prevent infinite loop

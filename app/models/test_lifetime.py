@@ -8,14 +8,23 @@
 # pylint: disable=too-many-branches
 # pylint: disable=no-member
 
-from lifetime import Person, Event
+from lifetime import Event
 from lifetime import calculate_estimates
 from lifetime import BIRTH, DEATH, MARRIAGE, BURIAL, BAPTISM, MIN, MAX
 import lifetime
+
 lifetime.MAX_AGE = 100
 lifetime.MAX_BAPTISM_DELAY = 0
 lifetime.MAX_BURIAL_DELAY = 0
 lifetime.MAX_PARENT_DEATH_CHILD_BIRTH_GAP = 0
+
+class Person(lifetime.Person):
+    def __init__(self, pid=None):
+        lifetime.Person.__init__(self)
+        if pid is None: pid = str(id(self))
+        self.pid = pid
+    def __str__(self):
+        return self.pid
 
 def xtest(name,*events):
     return
@@ -496,3 +505,21 @@ def test15():
     assert p1.birth_high == 1920
     assert p1.death_low == 1885
     assert p1.death_high == 2020
+
+def test16():
+    p1 = Person("p1")
+    p1.events = [
+    ]
+    p2 = Person("p2")
+    p2.events = [
+        Event(BIRTH,"exact",1900),
+        Event(DEATH,"exact",2000),
+    ]
+    p1.spouses = [p2]
+    p2.spouses = [p1]
+    persons = [p1,p2]
+    calculate_estimates(persons)
+    assert p1.birth_low == 1815
+    assert p1.birth_high == 1985
+    assert p1.death_low == 1915
+    assert p1.death_high == 2085
