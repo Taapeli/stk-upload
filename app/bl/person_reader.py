@@ -25,6 +25,7 @@ Created on 30.1.2021
 import shareds
 from pe.dataservice import DataService
 from bl.base import Status
+from bl.dates import DateRange
 from bl.person import PersonBl
 from bl.person_name import Name
 from bl.event import EventBl
@@ -350,6 +351,9 @@ class PersonReaderTx(DataService):
                 if event_node:
                     event = EventBl.from_node(event_node)
                     member.birth_date = event.dates
+                    member.dates = event.dates
+                else:
+                    member.dates = DateRange()
                     # self._catalog(event)
                 # Add member to family
                 parental_role = m["parental_role"]  # Family member's role
