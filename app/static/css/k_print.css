@@ -132,11 +132,15 @@ a:link, a:visited {
     color:black; 
     text-decoration:none;
 }
+.submit { display:none; }
+
+/* Removed 5.5.2021 / JMä
 .content a:link:after, content a:visited:after {
     font-size:70%;
     font-family:sans-serif;
     content:" (" attr(href) ") ";
 }
+*/
 .content ol li a:link {
     text-decoration:none;
 }
@@ -289,12 +293,17 @@ img#logo {
     top: 4.5em;
 }
 
-.id { color: sienna; font-size: 80%; text-align: right; 
+.id { color: sienna; font-size: 75%; text-align: right; 
     font-family: serif
 }
 .idno { color: gray; text-align:center; 
-    font-family: monospace
+    font-family: monospace; font-size: 75%; 
 }
+.DateJulian, .DateHebrew {
+    font-style: italic; 
+    font-family: Times;
+}
+
 #changetime { color: gray; font-size: 80%; }
 .owner { color: white; 
     font-size: 70%; 
@@ -312,15 +321,74 @@ img#logo {
     color: #006;
 }
 
+#footer {
+    clear: both;
+    margin-top: 10em;
+    border-top: solid 2pt #555;
+}
+#footer span.copyright {
+    display: inline-block;
+    width: 50%;
+    padding-left: 15px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-size:11pt;
+}
 #footer span.createdate {
+/*     display: inline-block; */
     margin-top: 7px;
     float: right;
     text-align: right;
     padding-right: 15px;
     width: 40%;
-    font-size: 8pt;
+    font-size:8pt;
     color: gray;
 }
+
+div#comments_div { display: none }
+
+/* Person page */
+.tab-list { display: none }
+/* Stk 4.10.2017..2021 JMä */
+.personbox {border: 2pt solid black;
+    align-content: center;
+    border-radius: 10px;
+/*     background: beige; */
+    padding: 10px; 
+    align-self: flex-start;
+    width: 200px;
+    margin: 1em;
+    font-size: 90%;
+  /*flex: 50%;*/
+}
+.familybox {
+    width: 350px;
+    border: 2pt solid gray; 
+    border-radius: 10px;
+/*     background: bisque; */
+    flex-wrap: wrap;
+    align-self: flex-start;
+    font-size: 90%;
+    margin: 10px;
+  /*flex: 50%;*/
+}
+.familybox p { padding-left: 1em; padding-top: 1em; }
+.familybox ul li ul { padding-left: 1.5em; }
+
+/* Sources and Citations list */
+div.sourceDesc { 
+    margin: .5em 3em; 
+    text-indent: -1.3em;
+    }
+div.sourceDesc::before {
+    content: "►";   /* BLACK RIGHT-POINTING POINTER */
+}
+
+div.sourceDesc div.citaDesc {
+    margin-left: 4em;
+    text-indent: -1.7em;
+}
+
 
 /* Home/ Welcome
 ----------------------------------------------------- */

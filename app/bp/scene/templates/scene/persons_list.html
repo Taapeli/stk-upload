@@ -58,15 +58,9 @@
 	               </form>
 	           </div>
             </div>
-	        {% with messages = get_flashed_messages(with_categories=true) %}
-	          {% if messages %}
-	            <ul  class='flashes'>
-	            {% for category, message in messages %}
-	              <li class='flash_{{category}}'>{{ message }}</li>
-	            {% endfor %}
-	            </ul>
-	          {% endif %}
-	        {% endwith %}
+
+{% include "flash_messages.html" %}
+
         </div>
 
     {% if cnt %}
@@ -133,14 +127,12 @@
                                 {{p.sex_symbol()}} 
                                 {{ macro.person(p) }}
                                  <div class="pop-open-family" 
-                                    v-on:click="showPopup(uuid='{{p.uuid}}',$event)"
+                                    v-on:mouseover="showPopup(uuid='{{p.uuid}}',$event)"
                                     title="Näytä perheet">👪</div>
                             </div>
 	       {% endif %}
 
            
-
-                             <br>
            {% if p.uuid %}   <span class="idno">Uuid:{{p.uuid_short()}} /</span>
 	       {% endif %}
                              <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
@@ -158,8 +150,12 @@
                                 <span class="evtype {{ecl}}">{{e.type|transl('evt')|lower}}</span>
                                 {{e.description}}</div>
                             <div class="col col_date">
-                                {% if e.dates %}{{e.dates}} {% endif %}
-                                {% if e.place %} | {{e.place}}{% endif %}</div>
+                    {% if e.dates %}
+                                <span class="{{e.dates.calendar_css()}}">{{e.dates}}</span> 
+                    {% endif %}
+                    {% if e.place %} | {{e.place}}
+                    {% endif %}
+                            </div>
                       </div>
               {% endfor %}
                     </div>
@@ -188,8 +184,8 @@
 	{% endif %}
     </div>
 
-  <div id="pop-window" v-show="isShow" v-on:click="isShow=false">
-    <div id="close-x">✕</div>
+  <div id="pop-window" v-show="isShow" v-on:mouseleave="isShow=false">
+    <!--div id="close-x">✕</div -->
     <div id="pop-buttons" v-if="families.length > 1">
       <button 
          v-on:mouseover="changeFamily(index, $event)"

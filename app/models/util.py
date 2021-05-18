@@ -1,6 +1,25 @@
+#   Isotammi Genealogical Service for combining multiple researchers' results.
+#   Created in co-operation with the Genealogical Society of Finland.
+#
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
+#                            Timo Nallikari, Pekka Valta
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import os
 import time
-from pprint import pprint
+#from pprint import pprint
 import ast
 import _ast
 import traceback
@@ -41,7 +60,7 @@ def guess_encoding(fname):
     ]
     for encoding in encodings:
         try:
-            s = open(fname,encoding=encoding).read()
+            _s = open(fname,encoding=encoding).read()
             return encoding
         except UnicodeDecodeError:
             pass
@@ -51,12 +70,12 @@ from dataclasses import dataclass
 
 
 def scan_endpoints_for_file(fname):    
-    print(f"Scanning file {fname}")
+    print(f"models.util.scan_endpoints_for_file: '{fname}'")
     endpoints = {}
     source = open(fname, encoding="utf-8").read()
     try:
         root = ast.parse(source)
-    except SyntaxError as e:
+    except SyntaxError as _e:
         traceback.print_exc()
         return endpoints
 
@@ -83,7 +102,7 @@ def scan_endpoints_for_file(fname):
                     if isinstance(call.func,_ast.Name):
                         decorator_name = call.func.id
                     arglist = [arg.s for arg in call.args]
-                    args = ",".join(arglist)
+                    #args = ",".join(arglist)
                     if decorator_name == 'route':
                         if len(arglist) != 1:
                             raise RuntimeError("Invalid route "+ arglist[0])
@@ -100,7 +119,7 @@ def scan_endpoints_for_file(fname):
 
 def scan_endpoints():
     endpoints = {}
-    for dirname,dirs,files in os.walk("app"):
+    for dirname, _dirs, files in os.walk("app"):
         for file in files:
             if file.endswith(".py"):
                 fname = os.path.join(dirname,file)

@@ -7,22 +7,59 @@
 tr.mytitle > th { color:gray; font-size: 95%; }
 </style>
 
-  <h1>{{ _("Auditions and Amount of Objects") }}</h1>
+<script>
+function selectFile(sel, batch_id) {
+  document.getElementById('nm').innerHTML=sel.value;
+  selected_batch_id = batch_id;
+
+  // Button rules for selected row:
+  //   id           disabled
+  // batch_delete if batch_id
+
+  var buttons = document.getElementsByTagName('button');
+  for (var i = 0, length = buttons.length; i < length; i++)
+  {
+    buttons[i].disabled = false;
+    if (buttons[i].id == 'batch_delete' && batch_id == '')
+        buttons[i].disabled = true;
+  }
+};
+
+$(document).ready( function() {
+
+	// On reload there may be a selection done
+	var selector = document.querySelector('input[name="sel"]:checked'); 
+	if(selector) selectFile(selector);
+
+    // The operations buttons
+    
+    $("#batch_delete").click(function(e) {
+        if (confirm_delete(selected_batch_id)) {
+	        $("#form").attr("action","/audit/batch_delete/" + selected_batch_id);
+	        $("#form").submit();
+        };
+    });
+});
+
+function confirm_delete(name) {
+    var msg = "{{ _('Batch') }}: " + name + "\n\n" + 
+      "{{ _('Are you sure you want to delete this batch from database?') }}";
+    var ok = confirm(msg);
+    if (!ok) {
+        return false;
+    }
+    return true;
+}
+</script>
+
+  <h1>{{ _("Approved batches") }}</h1>
   
   <div class="content">
     <p>
         {{ _('Total <b>%(tot)s</b> objects', tot=total|int_thousands) }}
     </p>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
+{% include "flash_messages.html" %}
 
         <table>
 {% set keys = batches.keys()|sort %}
@@ -31,14 +68,19 @@ tr.mytitle > th { color:gray; font-size: 95%; }
     {% set labels = batches[key] %}
     {% set l = key.split('/') %}
     {% if l[0] != ns.auditor %}{% set ns.auditor = l[0] %}
-           <tr><th colspan="{{ titles|length + 2 }}"><i>{{ _("Auditor") }} {{ ns.auditor }}</i></th></tr>
+           <tr><th colspan="{{ titles|length + 3 }}"><i>{{ _("Auditor") }} {{ ns.auditor }}</i></th></tr>
            <tr class="mytitle">
+                <th></th>
                 <th>{{ _("Researcher") }}</th>
                 <th>{{ _("Batch id") }}</th>
         {% for t in titles %}<th>{{ _(t) }}</th>{% endfor %}
            </tr>
 	{% endif %}
-           <tr><td class="center">{{l[1]}}</td>
+           <tr>
+             <td><input type="radio" name="sel" value="{{l[2] | urlencode}}"
+                onClick="selectFile(this,'{{l[2]}}');">
+             </td>
+             <td class="center">{{l[1]}}</td>
                <td><b>{{l[2]}}</b><br><small>{{l[3]}}</small></td>
     {% for t in titles %}
 	           <td class="right nowrap">{{ labels[t] | int_thousands }}</td>
@@ -47,6 +89,17 @@ tr.mytitle > th { color:gray; font-size: 95%; }
 {% endfor %}
             
 	    </table>
+
+      <div>
+        <form id="form" action="" method="post">
+        <h2>{{ _("Operations for") }} <i id="nm">({{ _('the selected approved batch') }})</i></h2>
+          <div>{{ _("Delete data") }}:
+              <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
+          </div>
+      </form>
+      </div>
+  
+
     <p>&rtrif; <a href="/admin/readlog">{{ _('Display application log') }}</a></p>
   </div>
 {% endblock %}

@@ -22,13 +22,13 @@ Created on 17.3.2020
 
 @author: jm
 '''
-import functools
+#import functools
 import logging
-#from models.gen.family_combo import Family_combo
-from bl.dates import DateRange
 logger = logging.getLogger('stkserver')
+from flask_babelex import _
 
 from bl.base import Status
+from bl.dates import DateRange
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
@@ -39,12 +39,13 @@ from bl.media import MediaBl
 
 from ui.place import place_names_local_from_nodes
 
-from pe.neo4j.cypher.cy_place import CypherPlace, CypherPlaceStats
-from pe.neo4j.cypher.cy_source import CypherSource
-from pe.neo4j.cypher.cy_family import CypherFamily
-from pe.neo4j.cypher.cy_event import CypherEvent
-from pe.neo4j.cypher.cy_person import CypherPerson
-from pe.neo4j.cypher.cy_media import CypherMedia
+from pe.dataservice import ConcreteService
+from .cypher.cy_place import CypherPlace, CypherPlaceStats
+from .cypher.cy_source import CypherSource
+from .cypher.cy_family import CypherFamily
+from .cypher.cy_event import CypherEvent
+from .cypher.cy_person import CypherPerson
+from .cypher.cy_media import CypherMedia
 
 from bl.event import Event
 #Todo: Change Old style includes to bl classes
@@ -55,25 +56,18 @@ from models.dbtree import DbTree
 from models.gen.citation import Citation
 
 
-class Neo4jReadService:
+class Neo4jReadService(ConcreteService):
     ''' 
     Methods for accessing Neo4j database.
 
-    The methods __enter__() and __exit__() makes possible to use with sentence
-    (Context Manager pattern).
+    Referenced as shareds.dataservices["read"] class.
 
+    The DataService class enables use as Context Manager.
     @See: https://www.integralist.co.uk/posts/python-context-managers/
     '''
     def __init__(self, driver):
         self.driver = driver
         print(f'#{self.__class__.__name__} init')
-
-    def __enter__(self):
-        print(f'#{self.__class__.__name__} enter')
-        return self
-
-    def __exit__(self, *args):
-        print(f'#{self.__class__.__name__} exit')
 
     def _set_birth_death(self, person, birth_node, death_node):
         '''
@@ -92,44 +86,26 @@ class Neo4jReadService:
             obj = PersonBl.from_node(node)
         elif 'Family' in node.labels:
             obj = FamilyBl.from_node(node)
-            obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
+            fn = obj.father_sortname if obj.father_sortname else "?"
+            mn = obj.mother_sortname if obj.mother_sortname else "?"
+            obj.clearname = fn +' & '+ mn
+        elif 'Event' in node.labels:
+            obj = EventBl.from_node(node)
+            obj.clearname = _(obj.type) + ' ' + obj.description + str(obj.dates)
         else:
             #raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
-            logger.warning(f'pe.neo4j.read_driver.Neo4jReadService._obj_from_node: Person or Family expexted: {list(node.labels)}')
+            logger.warning(f'pe.neo4j.read_driver.Neo4jReadService._obj_from_node: {node.id} Person or Family expexted: {list(node.labels)}')
             return None
         obj.role = role if role != 'Primary' else None
         return obj
 
-
+# Obsolete:
 #     def dr_get_person_by_uuid(self, uuid:str, user:str): #--> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_by_uuid
-#         ''' Read a person from common data or user's own Batch.
-# 
-#             -   If you have selected to use common approved data, you can read
-#                 both your own and passed data.
-#             -   If you havn't selected common data, you can read 
-#                 only your own data.
-# 
-#             --> Origin from models.gen.person_combo.Person_combo.get_my_person
-#         '''
-
 #     def dr_get_person_names_events(self, puid:int): #--> included in pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_by_uuid
-#         ''' Read names and events to Person object person.
-#         '''
-
-
 #     def dr_get_person_families(self, puid:int): #--> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_families
-#         ''' Read the families, where given Person is a member.
-# 
-#             Returns
-#             - the Families, where this person is a parent or child
-#             - the Family members with their birth event
-#             - the family events from families, where this person is a parent
-# 
-#             (p:Person) <-- (f:Family)
-#                for f
-#                  (f) --> (fp:Person) -[*1]-> (fpn:Name)
-#                  (f) --> (fe:Event)
-#         '''
+#     def dr_get_object_sources_repositories(self): # --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_sources_repositories
+#     def dr_get_object_places(self, person): # --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_places
+#     def dr_get_object_citation_note_media(self, person, active_objs=[]): #--> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_citation_note_media
 
 
     def dr_get_person_list(self, args):
@@ -429,6 +405,77 @@ class Neo4jReadService:
                 return {"item":None, "status":Status.ERROR, "statustext":str(e)}
 
         return {"item":None, "status":Status.NOT_FOUND, "statustext":"No families found"}
+
+
+    def dr_get_families(self, args):
+        """ Read Families data ordered by parent name.
+        
+            args = dict {use_user:str, direction:str="fw", name:str=None, limit:int=50, rule:str"man"}
+        """
+        user = args.get("use_user", None)
+        direction = args.get("direction", "fw")    # "fw" forwars or "bw" backwrds
+        if direction != "fw":
+            raise NotImplementedError("Neo4jReadService.dr_get_families: Only fw implemented")
+
+        fw = args.get("name")   # first name
+        limit = args.get("limit", 50)
+        order = args.get("order", "man")    # "man" or "wife" name order
+
+        # Select True = filter by this user False = filter approved data
+        #show_candidate = self.user_context.use_owner_filter()
+        show_candidate = user is not None
+
+        with self.driver.session(default_access_mode='READ') as session:
+            try:
+                if show_candidate:
+                    # (u:UserProfile {username})
+                    #    -[:HAS_LOADED]-> (b:Batch)
+                    #    -[:OWNS]-> (f:Family {father_sortname})
+                    if order == "man":
+                        print("Neo4jReadService.dr_get_families: candidate ordered by man")
+                        result = session.run(
+                            CypherFamily.get_candidate_families_f,
+                            user=user,
+                            fw=fw,
+                            limit=limit,
+                        )
+                    elif order == "wife":
+                        print("Neo4jReadService.dr_get_families: candidate ordered by wife")
+                        result = session.run(
+                            CypherFamily.get_candidate_families_m,
+                            user=user,
+                            fwm=fw,
+                            limit=limit,
+                        )
+                else:  # approved from any researcher
+                    # (:Audit) -[:PASSED]-> (f:Family {father_sortname})
+                    if order == "man":
+                        # 3 == #1 simulates common by reading all
+                        print("Neo4jReadService.dr_get_families: accepted ordered by man")
+                        result = session.run(
+                            CypherFamily.get_passed_families_f,  # user=user,
+                            fw=fw,
+                            limit=limit,
+                        )
+                    elif order == "wife":
+                        # 1 get all with owner name for all
+                        print("Neo4jReadService.dr_get_families: accepted ordered by wife")
+                        result = session.run(
+                            CypherFamily.get_passed_families_m, fwm=fw, limit=limit
+                        )
+
+            except Exception as e:
+                msg = f"{e.__class__.__name__} {e}"
+                logger.error("Neo4jReadService.dr_get_families: " + msg)
+                return {"status":Status.ERROR, "statustext":msg}
+
+            recs = []
+            for record in result: 
+                # record.keys() = ['f', 'marriage_place', 'parent', 'child', 'no_of_children']
+                recs.append(record)
+
+            status = Status.OK if recs else Status.NOT_FOUND
+            return {'recs':recs, 'status':status}
 
 
     def dr_get_family_parents(self, uniq_id:int, with_name=True):
@@ -754,24 +801,6 @@ class Neo4jReadService:
                         "statustext": f'Error dr_get_person_families: {e}'}     
 
         return {"items":list(families.values()), "status":Status.OK}
-
-
-#     def dr_get_object_places(self, person): # --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_places
-#         ''' Read Place hierarchies for all Event objects in self.objs.
-#         '''
-
-
-#     def dr_get_object_citation_note_media(self, person, active_objs=[]): #--> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_citation_note_media
-#         ''' Read Citations, Notes, Medias for list of objects.
-# 
-#                 (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-# 
-#             First (when active_objs is empty) searches all Notes, Medias and
-#             Citations of person or it's connected objects.
-#             
-#             Returns a list of created new objects, where this search should
-#             be repeated.
-#         '''
 
 
     def dr_get_place_list_fw(self, user, fw_from, limit, lang='fi'):
@@ -1207,22 +1236,6 @@ class Neo4jReadService:
         return {'status':status, 'items':recs }
 
 
-#     def dr_get_object_sources_repositories(self): # --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_object_sources_repositories
-#         ''' Get Sources and Repositories udes by listed objects
-#         
-#             Read Source -> Repository hierarchies for given list of citations
-#                             
-#             - session       neo4j.session   for database access
-#             - citations[]   list int        list of citation.uniq_ids
-#             - objs{}        dict            objs[uniq_id] = NodeObject
-#             
-#             * The Citations mentioned must be in objs dictionary
-#             * On return, the new Sources and Repositories found are added to objs{} 
-#             
-#             --> Origin from models.obsolete_source_citation_reader.read_sources_repositories
-#         '''
-
-
     def dr_get_source_citations(self, sourceid:int):
         """ Read Events and Person, Family and Media citating this Source.
 
@@ -1310,7 +1323,7 @@ class Neo4jReadService:
 
 
     def dr_inlay_person_lifedata(self, person): 
-        """ Reads person's default name, bith event and death event into Person obj.
+        """ Reads person's default name, birth event and death event into Person obj.
         """
         with self.driver.session(default_access_mode='READ') as session:
             result = session.run(CypherSource.get_person_lifedata,
@@ -1360,6 +1373,35 @@ class Neo4jReadService:
                 surname = record['surname']
                 count = record['count']
                 result_list.append({"surname":surname,"count":count})
+        return result_list
+
+#   @functools.lru_cache
+    def dr_get_family_members_by_id(self, id, which):
+        '''
+        Get the minimal data required for creating graphs with person labels.
+        The target depends on which = ('person', 'parents', 'children').
+        For which='person', the id should contain an uuid.
+        For 'parents' and 'children' the id should contain a database uniq_id.
+        The 'death_high' value is always returned for privacy checks.
+        '''
+        switcher = {
+            'person': CypherPerson.get_person_for_graph,
+            'parents': CypherPerson.get_persons_parents,
+            'children': CypherPerson.get_persons_children
+        }
+        result_list = []
+        with self.driver.session(default_access_mode='READ') as session:
+            result = session.run(
+                switcher.get(which),
+                ids=[id])
+            for record in result:
+                result_list.append({
+                    'uniq_id': record['uniq_id'],
+                    'uuid': record['uuid'],
+                    'sortname': record['sortname'],
+                    'gender': record['gender'],
+                    'events': record['events'],
+                    'death_high': record['death_high']})
         return result_list
 
     def dr_get_placename_stats_by_user(self, username, count):

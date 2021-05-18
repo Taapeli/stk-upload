@@ -1,6 +1,5 @@
 {# _scene/index_guest.html_ #}
 {% extends "start/s_layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _('Anonymous user') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -13,6 +12,9 @@
 <div id="startdiv">
   <div>
     <h1>{{ _('Exploring Isotammi demo environment') }}</h1>
+
+{% include "flash_messages.html" %}
+
 {#  {% if current_user.name %}
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>

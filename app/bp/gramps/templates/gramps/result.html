@@ -4,15 +4,9 @@
 {% block body %}
     {{ super() }}
     <h1>{{ _("Log of storing Gramps XML into database") }}{% if uri %} <i>{{uri}}</i>{% endif %}</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
+
+{% include "flash_messages.html" %}
+
         <table>
            <tr><th>{{ _("Operation") }}</th>
                <th>{{ _("Count") }}</th>

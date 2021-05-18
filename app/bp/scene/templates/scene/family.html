@@ -20,15 +20,7 @@ td { padding-right:1em;}
 {{ macro.menu(menuno) }}
     <div class="content" id="IndividualDetail">
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <ul  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
+{% include "flash_messages.html" %}
 
 {% if family %}
         <h2>{{ _("Family")|capitalize }}</h2>
@@ -67,7 +59,7 @@ td { padding-right:1em;}
             <table><tbody>
         {% for e in family.events|sort(attribute='dates') %}
                 <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
-                    <td class="ColumnDate">{{e.dates}}</td>
+                    <td class="ColumnDate {{e.dates.calendar_css()}}">{{e.dates}}</td>
                     <td class="ColumnPlace">
                     <a href="/scene/location/uuid={{e.place.uuid}}" class="inlink"
                        title="{{ _('of type') }} {{e.place.type}}; {{ _('see details of place') }}">
@@ -116,13 +108,12 @@ td { padding-right:1em;}
 	                    </td>
 	                </tr>
 	        {% endfor %}
+            {% if family.num_hidden_children %}
+                    <tr><td colspan="2" class="Value">
+                        ({{ ngettext("one hidden", "%(num)d hidden", family.num_hidden_children) }})
+                    </td></tr>
+            {% endif %}
 	            </tbody></table>
-	    	{% if family.num_hidden_children %}
-		        <table>
-		        	<tr><td class="Value">
-			        	({{ _("hidden") }}: {{ family.num_hidden_children }}) 
-		    	</table>
-	    	{% endif %}
  			</div>
     {% endif %}
  

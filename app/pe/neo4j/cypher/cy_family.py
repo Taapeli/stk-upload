@@ -25,10 +25,11 @@
 
 class CypherFamily():
     '''
-    Cypher classes for reading and creating Families
+    Cypher clauses for reading and creating Families
     '''
 
-# Get Family node by uuid
+# ----- Get Family node by uuid
+
     get_a_family_common = '''
 MATCH (root:Audit) -[r:PASSED]-> (f:Family {uuid:$f_uuid}) 
 RETURN f, type(r) AS root_type, root'''
@@ -52,11 +53,10 @@ OPTIONAL MATCH (f) -[:CHILD]- (pc:Person)
 RETURN pc AS person, nc AS name, cbe AS birth, cde AS death
     ORDER BY cbe.date1"""
 
-# Not in use:
-    get_family_events = """
-MATCH (f:Family) -[:EVENT]-> (fe:Event) WHERE ID(f) = $fuid
-OPTIONAL MATCH (fe) -[:PLACE]-> (fep:Place)
-RETURN fe as event, fep AS place"""
+#     get_family_events = """
+# MATCH (f:Family) -[:EVENT]-> (fe:Event) WHERE ID(f) = $fuid
+# OPTIONAL MATCH (fe) -[:PLACE]-> (fep:Place)
+# RETURN fe as event, fep AS place"""
 
     get_events_w_places = """
 MATCH (x) -[:EVENT]-> (e:Event) WHERE ID(x) = $fuid
@@ -92,36 +92,42 @@ RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_da
        mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
        event.date1 AS marriage_date, divorce_event.date1 AS divorce_date"""
 
-    obsolete_get_family_data = """
-MATCH (f:Family) WHERE ID(f) in $id_list
-OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
-    OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
-    OPTIONAL MATCH (pp) -[:EVENT]-> (pbe:Event {type:"Birth"})
-    OPTIONAL MATCH (pp) -[:EVENT]-> (pde:Event {type:"Death"})
-OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
-    OPTIONAL MATCH (pc) -[:NAME]-> (nc:Name {order:0}) 
-    OPTIONAL MATCH (pc) -[:EVENT]-> (cbe:Event {type:"Birth"})
-    OPTIONAL MATCH (pc) -[:EVENT]-> (cde:Event {type:"Death"})
-WITH f, r, pp, np, pbe, pde, pc, nc, cbe, cde ORDER BY cbe.date1
-    OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event)
-    OPTIONAL MATCH (fe) -[:PLACE]-> (fep:Place)
-    OPTIONAL MATCH (f) -[:CITATION]-> (fc:Citation) -[:SOURCE]-> (fs:Source)-[:REPOSITORY]-> (fre:Repository)
-    OPTIONAL MATCH (fe) -[:CITATION]-> (c:Citation) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
-    OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
-RETURN //f, 
-    COLLECT(DISTINCT [fe, fep]) AS family_event,
-    COLLECT(DISTINCT [r.role, pp, np, pbe, pde]) AS parent, 
-    COLLECT(DISTINCT [pc, nc, cbe, cde]) AS child, 
-    // COUNT(DISTINCT pc) AS no_of_children,
-    COLLECT(DISTINCT [re, s, c]) + COLLECT(DISTINCT [fre, fs, fc]) AS sources,
-    COLLECT(DISTINCT note) AS note"""
-    
     get_person_families = """
 MATCH (p:Person) <-- (family:Family) WHERE p.uuid = $p_uuid
 MATCH (family) -[r]-> (person:Person)
 OPTIONAL MATCH (person) -[:EVENT]-> (birth:Event {type:'Birth'}) 
 RETURN family, TYPE(r) AS type, r.role AS role, person, birth 
 ORDER BY family, person.birth_high"""
+
+
+# ----- Family data for families page
+
+    _get_families_tail = """
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.father_sortname LIMIT $limit
+"""
+    get_candidate_families_f = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
+    WHERE prof.username = $user AND f.father_sortname>=$fw""" + _get_families_tail
+
+    get_candidate_families_m = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
+    WHERE prof.username = $user AND f.mother_sortname>=$fwm""" + _get_families_tail
+
+    get_passed_families_f = """
+MATCH () -[:PASSED]-> (f:Family)
+    WHERE f.father_sortname>=$fw""" + _get_families_tail
+
+    get_passed_families_m = """
+MATCH () -[:PASSED]-> (f:Family)
+    WHERE f.mother_sortname>=$fwm""" + _get_families_tail
 
 # ----- Family load in Batch
 

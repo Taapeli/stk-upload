@@ -1,6 +1,5 @@
 {# templates/stat/anstk.html #}
 {% extends "admin/layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _(title) }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -19,6 +18,9 @@
 
 <div class="startdiv">
   <h1>{{ _(h1) }}</h1>
+
+{% include "flash_messages.html" %}
+
   <div id="errors" class="errors"></div>
 
   Return to <a href="/stat">statistics start page.</a>

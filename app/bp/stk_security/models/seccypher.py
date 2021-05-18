@@ -159,3 +159,8 @@ CREATE (u) -[:HAS_ROLE]-> (r)'''
     user_role_delete = '''
 MATCH (u:User {email: $email}) -[c:HAS_ROLE]-> (r:Role {name: $name})
 DELETE c'''
+
+    get_userprofile = '''
+MATCH (p:UserProfile {username: $username})
+RETURN p'''
+    

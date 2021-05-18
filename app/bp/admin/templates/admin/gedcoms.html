@@ -13,15 +13,7 @@
 	    <h1>{{ _("GEDCOMs for all users") }}</h1>
     {% endif %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
+{% include "flash_messages.html" %}
 
     <div class="content">
         <table>

@@ -66,6 +66,7 @@ MATCH (up:UserProfile) WHERE up.email = $email
         up.email = $email,
         up.username = $username,
         up.language = $language,
+        up.GSF_membership = $GSF_membership,
         up.research_years = $research_years,
         up.software = $software,
         up.researched_names = $researched_names,
@@ -87,7 +88,7 @@ RETURN up"""
 MATCH (u:User) 
     WHERE u.email = $email
 MERGE (p:UserProfile {email: u.email})    
-  ON CREATE SET p.name = u.name, p.username = u.username, p.language = u.language, p.created_at = timestamp()
+  ON CREATE SET p.name = u.name, p.username = u.username, p.language = u.language, p.created_at = timestamp(), p.agreed_at = $agreed_at 
   ON MATCH SET p.language = u.language, p.username = u.username
 CREATE (u) -[:SUPPLEMENTED]-> (p)'''
        

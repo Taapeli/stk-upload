@@ -7,15 +7,7 @@
    
 	<h1>{{ _("Batches") }}</h1>
     
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
+{% include "flash_messages.html" %}
 
     <div class="helptext">
     	<table class=legend>
@@ -30,10 +22,14 @@
     	<td>{{ _("the file content is being stored to the database") }}
     	<tr>
     	<td>3
-    	<td>{{ _("STORED") }}
+    	<td>{{ _("CANDIDATE") }}
     	<td>{{ _("the file content has been stored to the database") }}
-    	<tr>
+        <tr>
         <td>4
+        <td>{{ _("FOR_AUDIT") }}
+        <td>{{ _("the data has been sent to common data") }}
+        <tr>
+        <td>5
         <td>{{ _("REMOVED") }}
         <td>{{ _("not found any more") }}
         <tr>
@@ -77,8 +73,10 @@
                </td>
 	           <td><a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a><br>
-                   <a href=/audit/movein/{{upload.batch_id}}>
+	       {% if upload.status != "LUOVUTETTU" %}
+	           		<a href=/audit/movein/{{upload.batch_id}}>
                        <i>{{ _("Move to Isotammi database") }}</i></a>
+            {% endif -%}
 	           	</td>
 	       </tr>
         {% endif %}

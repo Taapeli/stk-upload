@@ -46,7 +46,7 @@ MERGE (u) -[:HAS_ACCESS]-> (b)
     SET b.timestamp = timestamp()
 RETURN ID(b) AS id"""
 
-    batch_complete = """
+    batch_set_status = """
 MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
     SET b.status=$status
@@ -62,7 +62,7 @@ RETURN b """
 
     get_batches = '''
 match (b:Batch) 
-    where b.user = $user and b.status = "completed"
+    where b.user = $user and b.status = $status // "completed"
 optional match (b) -[:OWNS]-> (x)
 return b as batch,
     labels(x)[0] as label, count(x) as cnt 
@@ -87,19 +87,46 @@ return b.id as batch, b.timestamp as timestamp, b.status as status,
     count(r) as persons 
     order by batch'''
 
+    get_user_batch_summary = """
+match (b:Batch) where b.user = $user
+optional match (b) -[r:OWNS]-> (:Person)
+with b, count(r) as batch_persons
+    optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
+return b.id as batch, //b.timestamp as stamp_batch, 
+    b.status as status, batch_persons, //a.timestamp as stamp_audit, 
+    count(ar) as audit_persons
+    order by batch"""
+
     TODO_get_empty_batches = '''
 MATCH (a:Batch) 
 WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
 RETURN a AS batch ORDER BY a.id DESC'''
 
-    # Batch removal
-    delete = """
-MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
-OPTIONAL MATCH (b) -[*]-> (n) 
-DETACH DELETE b, n"""
+#   delete = """
+# MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
+# OPTIONAL MATCH (b) -[*]-> (n)
+# WITH b, n LIMIT $limit
+# DETACH DELETE b, n"""
+
+    # Safe Batch removal in reasonable chunks:
+    #    a) Nodes pointed by OWNS, 
+    #    b) following nodes by relation NAME or NOTE
+    #    Not Batch node self
+    delete_chunk = """
+MATCH (:UserProfile{username:$user})
+    -[:HAS_LOADED]-> (:Batch{id:$batch_id}) -[:OWNS]-> (a)
+WITH a LIMIT 1000 
+    OPTIONAL MATCH (a) -[r]-> (b) WHERE TYPE(r) = "NAME" OR TYPE(r) = "NOTE"
+    DETACH DELETE b
+    DETACH DELETE a"""
+    delete_batch_node = """
+MATCH (:UserProfile{username:$user}) -[:HAS_LOADED]-> (c:Batch{id:$batch_id})
+DETACH DELETE c"""
 
     remove_all_handles = """
 match (b:Batch {id:$batch_id}) -[*]-> (a)
+where exists(a.handle)
+with distinct a
     remove a.handle
 return count(a),labels(a)[0]"""
 
@@ -141,3 +168,32 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
     ID(p) AS obj_id, LABELS(p)[0] AS obj_label, p.id AS obj_str
  """
 
+    delete = '''
+MATCH (a:Audit {id: $batch}) -[:PASSED]-> (x)
+WHERE labels(x) IN [$labels]
+DETACH DELETE x
+RETURN count(x)
+'''
+
+    delete_names = '''
+MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Person) -[:NAME]-> (x:Name)
+DETACH DELETE x
+RETURN count(x)
+'''
+
+    delete_place_names = '''
+MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Place) -[:NAME]-> (x:Place_name)
+DETACH DELETE x
+RETURN count(x)
+'''
+
+#     delete_citations = '''
+# MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Place) -[:NAME]-> (x:Citation) #######
+# DETACH DELETE x
+# RETURN count(x)
+# '''
+
+    delete_audit_node = '''
+MATCH (a:Audit {id: $batch})
+DETACH DELETE a
+'''

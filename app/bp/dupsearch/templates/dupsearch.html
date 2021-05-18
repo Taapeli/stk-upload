@@ -36,85 +36,79 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
             <td><input type=radio name=select2 v-model="batch2" v-bind:value="batch">
         </tr>
         </table>
-        <table>
-        <tr>
-        	<td>Min score: <input v-model="minscore" size=5 type=number>
-        	<td>Min items: <input v-model="minitems" size=5 type=number>
-        	<td>Name match: <input v-model="namematch" size=15>
-        </table>
-    	<p>
-        <button v-on:click="search_duplicates" v-bind:disabled="!batch1 || !batch2">
+        <button v-on:click="search_duplicates" v-bind:disabled="!batch1 || !batch2 || !batch1.has_searchkeys || !batch2.has_searchkeys">
         	{{ _('Search duplicates') }}
     	</button>
+    	{#
         Using model: <select v-model="selected_model">
         	<option v-for="model in models" v-bind:value="model">
         		${ model }
         	</option>
         </select>
+        #}
         <p>
-        <button v-on:click="generate_keys" v-bind:disabled="!batch1">
+        <table v-bind:disabled="!batch1">
+        <tr>
+        <td rowspan=2>
+        <button v-on:click="generate_keys" v-bind:disabled="!batch1 || batch1.has_searchkeys">
         	{{ _('Generate comparison keys') }}
     	</button>
-        <button v-on:click="remove_keys" v-bind:disabled="!batch1">
+		<tr><td>
+        <button v-on:click="remove_keys" v-bind:disabled="!batch1 || !batch1.has_searchkeys">
         	{{ _('Remove comparison keys') }}
     	</button>
-
-
-    	<p>
-        {{ _('Upload training data') }}: 
-        <input type="file" id="file">
-        <button v-on:click="upload_training_data">
-        	{{ _('Upload') }}
-    	</button>
-    	
-    	<p>
-        <button v-on:click="create_index">
-        	{{ _('Create index') }}
-    	</button>
-        <button v-on:click="drop_index">
-        	{{ _('Drop index') }}
-    	</button>
+        </table>
     </div>
 
     <div class="startbox2">
     	${ status }
 		<div v-if="operation == 'generate_keys'">
-			Generated keys for ${ gencount } people
 		</div>
 		<div v-if="operation == 'remove_keys'">
-			Removed keys for ${ gencount } people
 		</div>
 		<div v-if="operation == 'search_duplicates'">
 			Search result
 			<table>
 			<tr>
 				<th>Score
-				<th>Matchvector
 				<th>Person 1
 				<th>Person 2
 				<th>Names match?
-				<th>Match?
 			<tr v-for="match in matches" class="match_row">
 				<td>${ match.score.toFixed(2) }
-				<td class="matchvector">${ match.matchvector }
+				<!-- td class="matchvector">${ match.matchvector } -->
+				<!-- td><a href="#" @click=show_persons($event)>Show</a -->
 				<td><a 
 						target=_blank 
-						v-bind:href="'/scene/person=' + match.p1.pid"
+						v-bind:href="'/scene/person?uuid=' + match.p1.uuid"
 						class="plink"
 					>
-					${ match.p1.name }
+					${ match.p1.name } ${ match.p1.id }
+					{#
+					<hr>
+					${ match.p1.searchkey }
+					<br>
+					${ match.p1.birth_low }-${ match.p1.birth_high }
+					${ match.p1.death_low }-${ match.p1.death_high }
 					</a>
-					<div class="searchkey">${ match.p1.searchkey }</div> 
+					<div class="xsearchkey">${ match.p1.page }</div>
+					#} 
 				<td><a 
 						target=_blank 
-						v-bind:href="'/scene/person=' + match.p2.pid"
+						v-bind:href="'/scene/person?uuid=' + match.p2.uuid"
 						class="plink"
 					>
-					${ match.p2.name }
+					${ match.p2.name } ${ match.p2.id }
+					{#
+					<hr>
+					${ match.p2.searchkey }
+					<br>
+					${ match.p2.birth_low }-${ match.p2.birth_high }
+					${ match.p2.death_low }-${ match.p2.death_high }
 					</a> 
-					<div class="searchkey">${ match.p2.searchkey }</div> 
+					<div class="xsearchkey">${ match.p2.page }</div>
+					#} 
 				<td><span v-if="match.p1.name == match.p2.name">Same name</span>
-				<td>${ match.match_value }
 			</tr>
 			</table>
 			${ matches.length } matches
@@ -148,6 +142,7 @@ var app = new Vue({
         minitems: 5,
         selected_model:'',
         namematch: '',
+        namematch_algo: "none",
         operation:undefined,
         gencount:undefined,
         matchcount:undefined,
@@ -159,24 +154,26 @@ var app = new Vue({
     methods: {
         init: function() {
             this.fetch_batches();
-            this.get_models();
         },
 
 		generate_keys:  function(q) {
 			log("Generating");
 			//app.status = "Generating keys for " + app.batch1.id; 
+			app.status = "";
             app.operation = undefined;
+            app.operation = 'generate_keys';
 			app.done = false;
 			app.i = 0;
 			app.msg = "Generating keys for " + app.batch1.id + " ... ";
 			setTimeout(app.logger,1000);
-            axios.get('/dupsearch/generate_keys/' + app.batch1.id).
+            axios.get('/dupsearch/generate_keys/' + app.batch1.id + "/" + app.namematch_algo).
                 then(function(rsp, status) {
 					app.done = true;
                     app.gencount = rsp.data;
-					app.status += " done";
+					app.status = "Generated keys for " + app.gencount + " people";
                     app.operation = 'generate_keys';
-                    app.fetch_batches();
+                    //app.fetch_batches();
+                    app.batch1.has_searchkeys = true;
                 }, function () {
 					app.done = true;
 					app.status += " FAILED";
@@ -186,7 +183,8 @@ var app = new Vue({
 
 		remove_keys:  function(q) {
 			log("remove_keys");
-			app.status = "Removing keys for " + app.batch1.id;
+			//app.status = "Removing keys for " + app.batch1.id;
+			app.status = "";
             app.operation = undefined;
 			app.done = false;
 			app.i = 0;
@@ -196,9 +194,10 @@ var app = new Vue({
                 then(function(rsp, status) {
 					app.done = true;
                     app.gencount = rsp.data;
-					app.status += " done";
+					app.status = "Removed keys for " + app.gencount + " people";
                     app.operation = 'remove_keys';
-                    app.fetch_batches();
+                    //app.fetch_batches();
+                    app.batch1.has_searchkeys = false;
                 }, function () {
 					app.done = true;
 					app.status += " FAILED";
@@ -220,6 +219,7 @@ var app = new Vue({
 
 		search_duplicates:  function(q) {
 			log("search_duplicates");
+            app.operation = 'search_duplicates';
             app.operation = undefined;
 			app.status = "";
 			app.i = 0;
@@ -260,10 +260,11 @@ var app = new Vue({
         },
         
         create_index: function(q) {
-            axios.get('/dupsearch/create_index').
+            axios.get('/dupsearch/create_index/' + app.batch1.id).
                 then(function(rsp, status) {
                     log(rsp);
 					app.status = "Index created";
+                    app.batch1.has_index = true;
                 }).
                 catch(function(rsp, status) {
                     log(rsp);
@@ -272,10 +273,11 @@ var app = new Vue({
         },
         
         drop_index: function(q) {
-            axios.get('/dupsearch/drop_index').
+            axios.get('/dupsearch/drop_index/' + app.batch1.id).
                 then(function(rsp, status) {
                     log(rsp);
 					app.status = "Index dropped";
+                    app.batch1.has_index = false;
                 }).
                 catch(function(rsp, status) {
                     log(rsp);
@@ -283,38 +285,19 @@ var app = new Vue({
                 });
         },
 
-        get_models: function(q) {
-            axios.get('/dupsearch/get_models').
-                then(function(rsp, status) {
-                    log(rsp);
-                    app.models = rsp.data;
-                }).
-                catch(function(rsp, status) {
-                    log(rsp);
-					app.status = "Fetching models failed";
-                });
-        },
-
-        upload_training_data: function() {
-			var data = new FormData();
-			data.append('file', document.getElementById('file').files[0]);
-            axios.post('/dupsearch/upload', data ).
-                then(function(rsp, status) {
-					app.done = true;
-                    log(rsp);
-					app.status = "";
-					app.get_models();
-                }, function () {
-					app.done = true;
-					app.status = "Upload failed";
-                });
-      	}
+        person_page: function(uuid) {
+        	var url = "/scene/person?uuid=" + uuid;
+        	return url;
+    	},
+        show_persons: function(event) {
+        	log(event.target);
+        	var url = "/scene/person?uuid=" + uuid;
+        	return url;
+    	}
     } // methods
 
 });
 
 </script>
-
-
 
 {% endblock %}

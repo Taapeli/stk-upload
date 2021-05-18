@@ -1,6 +1,5 @@
 {# _start/my_message.html_ #}
 {% extends "start/s_layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _("Send email to users") }} (start/my_message){% endblock %}
 {% block body %}
 {{ super() }}
@@ -35,6 +34,9 @@ $(document).ready( function() {
 <div id="startdiv">
   <div>
     <h1>{{ _("Send email to users") }}: {{users}}</h1>
+
+{% include "flash_messages.html" %}
+
     <div>
         <h2>{{ _('Write a message') }}</h2>
          <form action="#">

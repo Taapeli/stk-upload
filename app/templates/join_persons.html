@@ -15,15 +15,9 @@ function myFunction(oid, fn, ln) {
     "</ul>";
 }</script>
 <h1>{{ _('Merging people') }}</h1>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul  class='flashes'>
-    {% for category, message in messages %}
-      <li class='flash_{{category}}}'>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+
+{% include "flash_messages.html" %}
+
 <form action="/samahenkilo" method="post" enctype="multipart/form-data">
 <div id="lista">
     <p>{{ _('People whose name begins with') }} '{{pattern}}'</p>

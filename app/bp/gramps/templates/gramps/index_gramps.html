@@ -4,7 +4,6 @@
 {% block body %}
 {{ super() }}
 
-{% include "security/_messages.html" %}
 {% import 'start/s_macros.html' as macro %}
 
 {{ macro.hamburger_menu( (
@@ -33,6 +32,9 @@ function checkFileSize() {
 <div id="startdiv">
   <div>
     <h1>{{ _('Candidate material xml files') }}</h1>
+
+{% include "flash_messages.html" %}
+
     <p>{{ _('User') }} <b>{{current_user.name}}</b></p>
 
         <div class="row">
