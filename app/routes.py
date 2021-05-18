@@ -96,7 +96,7 @@ def entry():
         u_context = UserContext(session, current_user, request)
         u_context.user = None
 
-        with PersonReader("reader", u_context) as service:
+        with PersonReader("read", u_context) as service:
             print(f"#> routes.entry: datastore = {service}")
 
             minfont = 6
