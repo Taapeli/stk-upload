@@ -3680,11 +3680,11 @@ msgstr "Hem"
 
 #: bp/start/templates/start/s_macros.html:21
 msgid "Browse database"
-msgstr ""
+msgstr "Bläddra i databasen"
 
 #: bp/start/templates/start/s_macros.html:22
-msgid "Browse data"
-msgstr ""
+msgid "Go to search page"
+msgstr "Gå till söksidan"
 
 #: bp/start/templates/start/s_macros.html:24
 msgid "Instructions for this page"

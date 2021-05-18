@@ -3675,8 +3675,8 @@ msgid "Browse database"
 msgstr "Selaa omia tai hyväksyttyjä tietoja"
 
 #: bp/start/templates/start/s_macros.html:22
-msgid "Browse data"
-msgstr "Selaa tietokantaa"
+msgid "Go to search page"
+msgstr "Siirry hakuihin"
 
 #: bp/start/templates/start/s_macros.html:24
 msgid "Instructions for this page"
