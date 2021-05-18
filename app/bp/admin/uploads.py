@@ -261,14 +261,18 @@ def list_uploads(username):
     result = shareds.driver.session().run(CypherBatch.get_user_batch_summary, 
                                           user=username)
     for record in result:
-        # Retuns {batch, status, batch_persons, audit_persons}
-        batch_id = record['batch']
-        batches[batch_id] = (record['status'], record['batch_persons'], record["audit_persons"])
+        # Returns batch, person_count, audit_count
+        batch_node = record['b']
+        b = Batch.from_node(batch_node)
+        # augment with additional data
+        b.person_count = record['person_count']
+        b.audit_count = record['audit_count']
+        batches[b.id] = b
 
     # 2. List uploaded files
     upload_folder = get_upload_folder(username)
     try:
-        names = sorted([name for name in os.listdir(upload_folder)])
+        names = os.listdir(upload_folder)
     except:
         names = []
     uploads = []
@@ -309,7 +313,11 @@ def list_uploads(username):
                 status_text = _("CANDIDATE")
                 # The meta file does not contain later status values
                 if in_batches:
-                    status, person_count, audit_count = batches.pop(batch_id)
+                    #status, person_count, audit_count = batches.pop(batch_id)
+                    b = batches.pop(batch_id)
+                    status = b.status
+                    person_count = b.person_count
+                    audit_count = b.audit_count
                     if status == Batch.BATCH_FOR_AUDIT:
                         status_text = _("FOR_AUDIT")
                 else:
@@ -338,28 +346,31 @@ def list_uploads(username):
                 upload.upload_time = meta["upload_time"]
                 upload.upload_time_s = util.format_timestamp(upload.upload_time)
                 upload.user = username
+                upload.material_type = b.material_type if in_batches else meta.get("material_type","") 
+                upload.description = b.description if in_batches else meta.get("description","") 
                 uploads.append(upload)
     
     # 3. Add batches where there is no meta file
-    for batch, item in batches.items():
+    for batch, b in batches.items():
         upload = Upload()
         upload.batch_id = batch
-        status, person_count, audit_count = item
-        if status == Batch.BATCH_STARTED:
+        if b.status == Batch.BATCH_STARTED:
             upload.status = "?"
-        elif status == Batch.BATCH_CANDIDATE: # "completed"
+        elif b.status == Batch.BATCH_CANDIDATE: # "completed"
             #Todo: Remove later: Old FOR_AUDIT materials are CANDIDATE, too
             upload.status = _("CANDIDATE") + " ?"
         elif audit_count > 0:
             upload.status = f"{ _('FOR_AUDIT') } {audit_count} { _('persons') }"
-        upload.count = person_count
-        upload.count_a = audit_count
+        upload.count = b.person_count
+        upload.count_a = b.audit_count
         upload.has_file = False
         upload.has_log = audit_count > 0 # Rough estimate!
         upload.upload_time = 0.0
+        upload.material_type = b.material_type
+        upload.description = b.description
         print(f"### Batch {batch} {status} -")
         uploads.append(upload)
-        
+    
     return sorted(uploads,key=lambda x: x.upload_time)
 
 def list_uploads_all(users):

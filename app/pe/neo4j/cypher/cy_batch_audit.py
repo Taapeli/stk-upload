@@ -87,7 +87,7 @@ return b.id as batch, b.timestamp as timestamp, b.status as status,
     count(r) as persons 
     order by batch'''
 
-    get_user_batch_summary = """
+    get_user_batch_summary_OLD = """
 match (b:Batch) where b.user = $user
 optional match (b) -[r:OWNS]-> (:Person)
 with b, count(r) as batch_persons
@@ -96,6 +96,17 @@ return b.id as batch, //b.timestamp as stamp_batch,
     b.status as status, batch_persons, //a.timestamp as stamp_audit, 
     count(ar) as audit_persons
     order by batch"""
+
+    get_user_batch_summary = """
+match (b:Batch) where b.user = $user
+optional match (b) -[r:OWNS]-> (:Person)
+with b, count(r) as person_count
+    optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
+return 
+    b, 
+    person_count,  
+    count(ar) as audit_count
+order by b.id"""
 
     TODO_get_empty_batches = '''
 MATCH (a:Batch) 

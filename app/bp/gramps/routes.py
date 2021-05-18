@@ -116,6 +116,14 @@ def upload_gramps():
         os.makedirs(upload_folder, exist_ok=True)
 
         pathname = loadfile.upload_file(infile, upload_folder)
+        isotammi_metadata = gramps_loader.get_isotammi_metadata(current_user.username, infile.filename)
+        if isotammi_metadata: 
+            material_type = isotammi_metadata[0]
+            description = isotammi_metadata[1]
+        else:
+            material_type = ""
+            description = ""
+            
         shareds.tdiff = time.time() - t0
 
         logname = pathname + ".log"
@@ -124,6 +132,8 @@ def upload_gramps():
             infile.filename,
             status=Batch.BATCH_UPLOADED,
             upload_time=time.time(),
+            material_type=material_type,
+            description=description,
         )
         msg = f"{util.format_timestamp()}: User {current_user.name} ({current_user.username}) uploaded the file {pathname}"
         open(logname, "w", encoding="utf-8").write(msg)
