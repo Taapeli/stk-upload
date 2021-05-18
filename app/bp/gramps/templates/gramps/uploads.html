@@ -1,5 +1,5 @@
 {# _gramps/uploads.html_ #}
-<!-- Note different versions:
+<!-- Note different versions (sorry):
      ./gramps/templates/gramps/uploads.html
      ./audit/templates/audit/batches.html
      ./admin/templates/admin/uploads.html
@@ -35,7 +35,7 @@ var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
 var selected_batch_id = '';
 
 function selectFile(sel, batch_id, xml_name) {
-    document.getElementById('nm').innerHTML=sel.value;
+    document.getElementById('nm').innerHTML=uri_dec = decodeURIComponent(sel.value);
     selected_batch_id = batch_id;
 
     // Button rules for selected row:
@@ -161,15 +161,8 @@ function confirm_delete(subj, name) {
 <div id="startdiv">
   <div>
     <h1>{{ _("Uploaded Candidate Materials") }}</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
+
+{% include "flash_messages.html" %}
 
     <table class="fileselect">
            <tr> <th></th>
@@ -181,11 +174,12 @@ function confirm_delete(subj, name) {
 					<div class="tooltip"> &#x2754;
 					  <div class="tooltiptext">
 					  	<p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
-					  	<p>↓ {{ _("UPLOADED") }} – {{ _("the file has been uploaded to server") }}<br>
-					  	   ↓ {{ _("STORING") }}  – {{ _("the file content is being stored to the database") }}<br>
-					  	   ↳ {{ _("STORED") }}   – {{ _("the data is stored as candidate material") }}<br>
-					  	   → {{ _("REMOVED") }}  – {{ _("Not found any more") }}<br>
-					  	   ↝ {{ _("ERROR") }} / {{ _("FAILED") }} – {{ _("there was an error") }}
+					  	<p>↓ <b>{{ _("UPLOADED") }}</b> – {{ _("the file has been uploaded to server") }}<br>
+					  	   ↓ <b>{{ _("STORING") }}</b>  – {{ _("the file content is being stored to the database") }}<br>
+                           ↳ <b>{{ _("CANDIDATE") }}</b> – {{ _("the data is stored as candidate material") }}<br>
+                           ★ <b>{{ _("FOR_AUDIT") }}</b> – {{ _("the data has been sent to common data") }}<br>
+					  	   → <b>{{ _("REMOVED") }}</b>  – {{ _("Not found any more") }}<br>
+					  	   ↝ <b>{{ _("ERROR") }} / {{ _("FAILED") }}</b> – {{ _("there was an error") }}
 						</p>
 					  </div>
 					</div> 
@@ -199,14 +193,15 @@ function confirm_delete(subj, name) {
 	           </td>
 	           <td>{{upload.upload_time_s}}</td>
 	           <td>{{upload.xmlname}}</td>
-               <td>{% if upload.batch_id %}
-                    {% if upload.status == "LADATTU" %}{{_( "deleted from database" ) }})
-                    {% else %}{{upload.batch_id}}{% endif %}
-                {% endif %}</td>
-               <td class="center">{% if upload.count %}{{upload.count}}{% endif %}</td>
+               <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}</td>
+               <td class="center">
+                {% if upload.count %}{{upload.count}}{% endif %}
+                {% if upload.count_a %}
+                    <i title="{{ _("The persons sent to common data") }}">{{upload.count_a}}</i>
+                {% endif %}
+               </td>
 	           <td>{{upload.status}}
 	           		<div class="progress" data-name='{{upload.xmlname}}'></div>
-                
                 {% if upload.loading %}
                      <script>
 	                     setTimeout( function() {update_progress('{{upload.xmlname}}')}, 1000 );

@@ -4,7 +4,7 @@
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
 #                            Timo Nallikari, Pekka Valta
 #
-#   See the LICENCE file.
+#   See the LICENSE file.
 
 '''
 
@@ -18,15 +18,15 @@ Created on 23.3.2020
 '''
 import logging 
 logger = logging.getLogger('stkserver')
-import shareds
+#import shareds
 
-from bl.base import Status
+#from bl.base import Status
 #from bl.person import PersonBl
-from bl.place import PlaceBl
-from pe.db_reader import DbReader
+#from bl.place import PlaceBl
+from pe.dataservice import DataService
 
 
-class DbWriter(DbReader):
+class DbWriter(DataService):
     '''
     Services to write business objects using transaction.
 

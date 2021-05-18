@@ -6,19 +6,21 @@
     {{ super() }}
 <style>
 label { display: inline-block; width:140pt; }
+div.container {
+	display: flex;
+	justify-content: space-between;
+}
+textarea {
+	disabled: true;
+}
 </style>
 
     <h1>{{ _("Update user") }} '{{ username }}'</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
 
+{% include "flash_messages.html" %}
+
+	<div class="container">
+	<div class="startbox2 admin">
     <form action="{{ url_for('admin.update_user', username=form.username.data) }}"  method="POST">
 	      {{ form.hidden_tag() }}
 	      <p> {{ form.email.label }}  {{ form.email(readonly=true) }} </p>
@@ -47,9 +49,41 @@ label { display: inline-block; width:140pt; }
 		  {% endif %}   
   	      		  
     </form>
+    </div>
+
+	<div class="startbox2 admin">
+    <form>
+	      <p> 
+	      {{ form2.agreed_at.label }}  {{ form2.agreed_at(readonly=true) }} </p>   	      
+
+	      {{ form2.GSF_membership.label }}  {{ form2.GSF_membership(readonly=true) }} </p>
+			<script>
+				$("ul[readonly] input").attr("disabled",true); // disable GSF_membership radio buttons
+			</script>
+
+	      {{ form2.research_years.label }}  {{ form2.research_years(readonly=true) }} </p>
+	      {{ form2.researched_names.label }}  {{ form2.researched_names(readonly=true) }} </p>
+	      {{ form2.researched_places.label }}  {{ form2.researched_places(readonly=true) }} </p>
+	      {{ form2.software.label }}  {{ form2.software(readonly=true) }} </p>
+
+   	      {{ form2.text_message.label }}
+	   	      <textarea rows="20" cols="50" readonly>
+	   	      {%- if form2.text_message.data %}
+	   	      	{{- form2.text_message.data }}
+   	      	  {% endif %}
+	   	      </textarea>
+		<script>
+			$("ul[readonly] input").attr("disabled",true); // disable GSF_membership radio buttons
+		</script>
+    </form>
+	</div>
+	
+	</div>
     
     <p>&rtrif; <a href="/admin/list_users">{{ _("User list") }}</a></p>
+
 {% endblock %}
 </body>
+
 </html>
 

@@ -17,7 +17,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# coding=UTF-8
 # Flask routes program for Stk application
 # @ Sss 2016
 # JMä 29.12.2015
@@ -122,12 +121,14 @@ def start_logged():
     is_demo = shareds.app.config.get('DEMO', False)
     if is_demo:
         # Get surname cloud data
-        from pe.neo4j.readservice import Neo4jReadService
-        readservice = Neo4jReadService(shareds.driver)
         u_context = UserContext(session, current_user, request)
         u_context.user = None
 
+        from database.accessDB import get_dataservice
+        readservice = get_dataservice("read")
         datastore = PersonReader(readservice, u_context)
+        print(f'#> bp.start.routes.start_logged: datastore = {datastore}')
+
         minfont = 6
         maxfont = 20
         #maxnames = 40
@@ -150,7 +151,7 @@ def thankyou():
 @shareds.app.route('/join', methods=['GET', 'POST'])
 @login_required
 def join():
-    from bp.admin.models.user_admin import UserProfile, UserAdmin
+    from bl.admin.models.user_admin import UserProfile, UserAdmin
 
     form = JoinForm()
     logger.info('-> bp.start.routes.join')
@@ -167,6 +168,7 @@ def join():
             flash(_("Join message sent"))
         else:
             flash(_("Sending join message failed"))
+        print("GSF_membership",request.form.get('GSF_membership'))
         profile = UserProfile(
             name=request.form.get("name"),
             username=request.form.get("username"),
@@ -212,7 +214,7 @@ def my_settings():
     referrer = request.form.get("referrer",default=request.referrer)
     if lang:
         try:
-            from bp.admin.models.user_admin import UserAdmin # can't import earlier
+            from bl.admin.models.user_admin import UserAdmin # can't import earlier
             current_user.language = lang
             result = UserAdmin.update_user_language(current_user.username,lang)
             if not result:
@@ -227,6 +229,8 @@ def my_settings():
 
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)
     print(f'# Gedcoms {gedcoms}')
+
+    userprofile = shareds.user_datastore.get_userprofile(current_user.username) 
     
     logger.info("-> bp.start.routes.my_settings")
     return render_template("/start/my_settings.html",
@@ -236,7 +240,8 @@ def my_settings():
                            apikey=api.get_apikey(current_user),
                            labels=labels,
                            batches=user_batches,
-                           gedcoms=gedcoms)
+                           gedcoms=gedcoms,
+                           userprofile=userprofile)
 
 # # Admin start page in bp.admin
 # @shareds.app.route('/admin',  methods=['GET', 'POST'])

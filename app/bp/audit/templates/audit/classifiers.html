@@ -22,16 +22,7 @@ h4 {
 
 	<h1 style="margin-bottom: 5px;">{{ _("Classifiers") }}</h1>
     
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
-
+{% include "flash_messages.html" %}
 
     <div class="content">
 	    <div id="langbox">

@@ -88,12 +88,16 @@ def entry():
     is_demo = shareds.app.config.get('DEMO', False)
     if is_demo:
         # Get surname cloud data
-        from pe.neo4j.readservice import Neo4jReadService
-        readservice = Neo4jReadService(shareds.driver)
+        #from pe.neo4j.readservice import Neo4jReadService
+        #readservice = Neo4jReadService(shareds.driver)
         u_context = UserContext(session, current_user, request)
         u_context.user = None
 
+        from database.accessDB import get_dataservice
+        readservice = get_dataservice("read")
         datastore = PersonReader(readservice, u_context)
+        print(f'#> routes.entry: datastore = {datastore}')
+
         minfont = 6
         maxfont = 20
         #maxnames = 40

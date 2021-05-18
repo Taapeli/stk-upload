@@ -3,18 +3,18 @@
 #
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
 #                            Timo Nallikari, Pekka Valta
-#   See the LICENCE file.
+#   See the LICENSE file.
 
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 11.4.2016
 
 #import time
-from flask_babelex import _
+#from flask_babelex import _
 #from sys import stderr
 
 #from bp.gramps.batchlogger import BatchLog
-from models.gen.user import User
-from bl.person import PersonBl
+#from models.gen.user import User
+#from bl.person import PersonBl
 #from bl.person_name import Name
 #from bl.family import FamilyBl
 
@@ -23,8 +23,8 @@ from bl.person import PersonBl
 #from models.gen.person_name import Name
 #from models.gen.refname import Refname
 #from models.gen.person_combo import Person_combo
-from models.gen.family_combo import Family_combo
-from bl.dates import DateRange, DR
+#from models.gen.family_combo import Family_combo
+#from bl.dates import DateRange, DR
 
 
 def make_place_hierarchy_properties(tx=None, place=None):
@@ -32,22 +32,23 @@ def make_place_hierarchy_properties(tx=None, place=None):
     
         TODO: NOT IN USE
     """
-    hierarchy_count = 0
-    
-    if tx:
-        my_tx = tx
-    else:
-        my_tx = User.beginTransaction()
-        
-    place.make_hierarchy(my_tx, place)
-    
-    hierarchy_count += 1
-
-    return (hierarchy_count)
-
-    if not tx:
-        # Close my own created transaction
-        User.endTransaction(my_tx)
+    raise NotImplementedError("models.dataupdater.make_place_hierarchy_properties")
+#     hierarchy_count = 0
+#     
+#     if tx:
+#         my_tx = tx
+#     else:
+#         my_tx = User.beginTransaction()
+#         
+#     place.make_hierarchy(my_tx, place)
+#     
+#     hierarchy_count += 1
+# 
+#     return (hierarchy_count)
+# 
+#     if not tx:
+#         # Close my own created transaction
+#         User.endTransaction(my_tx)
         
     
 # def set_confidence_values(tx, uniq_id=None, batch_logger=None): --> bl.person.PersonBl.set_confidence
@@ -94,79 +95,80 @@ def set_person_estimated_dates(uids=[]):
 
         Called from bp.admin.routes.estimate_dates
     """
-    my_tx = User.beginTransaction()
+    raise NotImplementedError("models.dataupdater.set_person_estimated_dates")
+    # my_tx = User.beginTransaction()
+    #
+    # cnt = PersonBl.estimate_lifetimes(my_tx, uids)
+    #
+    # msg = _("Estimated {} person lifetimes").format(cnt)
+    # User.endTransaction(my_tx)
+    #
+    # return msg
 
-    cnt = PersonBl.estimate_lifetimes(my_tx, uids)
 
-    msg = _("Estimated {} person lifetimes").format(cnt)
-    User.endTransaction(my_tx)
-    
-    return msg
-
-
-def set_family_calculated_attributes(tx=None, uniq_id=None):
-    """ Set Family sortnames and estimated DateRange.
-    
-        Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes
-
-        Set Family.father_sortname and Family.mother_sortname using the data in Person
-        Set Family.date1 using the data in marriage Event
-        Set Family.datetype and Family.date2 using the data in divorce or death Events
-        If handler is defined
-        - if there is transaction tx, use it, else create a new 
-    """
-    dates_count = 0
-    sortname_count = 0
-    
-    if tx:
-        my_tx = tx
-    else:
-        my_tx = User.beginTransaction()
-
-    # Process each family 
-    #### Todo Move and refactor to bl.FamilyBl
-    result = Family_combo.get_dates_parents(my_tx, uniq_id)
-    for record in result:
-        father_sortname = record['father_sortname']
-        father_death_date = record['father_death_date']
-        mother_sortname = record['mother_sortname']
-        mother_death_date = record['mother_death_date']
-        marriage_date = record['marriage_date']
-        divorce_date = record['divorce_date']
-
-        dates=None
-        end_date = None
-        if divorce_date:
-            end_date = divorce_date
-        elif father_death_date and mother_death_date:
-            if father_death_date < mother_death_date:
-                end_date = father_death_date
-            else:
-                end_date = mother_death_date
-        elif father_death_date:
-            end_date = father_death_date
-        elif mother_death_date:
-            end_date = mother_death_date
-
-        if marriage_date:
-            if end_date:
-                dates = DateRange(DR['PERIOD'], marriage_date, end_date)
-            else:
-                dates = DateRange(DR['DATE'], marriage_date)
-        elif end_date:
-            dates = DateRange(DR['BEFORE'], end_date)
-        
-        # Copy the dates from Event node and sortnames from Person nodes
-        set_family_calculated_attributes(my_tx, uniq_id, dates,
-                                         father_sortname, mother_sortname)
-        dates_count += 1
-        sortname_count += 1
-    
-    if not tx:
-        # Close my own created transaction
-        User.endTransaction(my_tx)
-
-    return (dates_count, sortname_count)
+# def set_family_calculated_attributes(tx=None, uniq_id=None):
+#     """ Set Family sortnames and estimated DateRange.
+#     
+#         Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes
+# 
+#         Set Family.father_sortname and Family.mother_sortname using the data in Person
+#         Set Family.date1 using the data in marriage Event
+#         Set Family.datetype and Family.date2 using the data in divorce or death Events
+#         If handler is defined
+#         - if there is transaction tx, use it, else create a new 
+#     """
+#     dates_count = 0
+#     sortname_count = 0
+#     
+#     if tx:
+#         my_tx = tx
+#     else:
+#         my_tx = User.beginTransaction()
+# 
+#     # Process each family 
+#     #### Todo Move and refactor to bl.FamilyBl
+#     result = Family_combo.get_dates_parents(my_tx, uniq_id)
+#     for record in result:
+#         father_sortname = record['father_sortname']
+#         father_death_date = record['father_death_date']
+#         mother_sortname = record['mother_sortname']
+#         mother_death_date = record['mother_death_date']
+#         marriage_date = record['marriage_date']
+#         divorce_date = record['divorce_date']
+# 
+#         dates=None
+#         end_date = None
+#         if divorce_date:
+#             end_date = divorce_date
+#         elif father_death_date and mother_death_date:
+#             if father_death_date < mother_death_date:
+#                 end_date = father_death_date
+#             else:
+#                 end_date = mother_death_date
+#         elif father_death_date:
+#             end_date = father_death_date
+#         elif mother_death_date:
+#             end_date = mother_death_date
+# 
+#         if marriage_date:
+#             if end_date:
+#                 dates = DateRange(DR['PERIOD'], marriage_date, end_date)
+#             else:
+#                 dates = DateRange(DR['DATE'], marriage_date)
+#         elif end_date:
+#             dates = DateRange(DR['BEFORE'], end_date)
+#         
+#         # Copy the dates from Event node and sortnames from Person nodes
+#         set_family_calculated_attributes(my_tx, uniq_id, dates,
+#                                          father_sortname, mother_sortname)
+#         dates_count += 1
+#         sortname_count += 1
+#     
+#     if not tx:
+#         # Close my own created transaction
+#         User.endTransaction(my_tx)
+# 
+#     return (dates_count, sortname_count)
 
 
 # def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname']): #-> bl.person.PersonBl.set_person_name_properties

@@ -1,6 +1,5 @@
 {# templates/refplace_editor.html_ #}
 {% extends "/audit/layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _('Auditor') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -96,7 +95,9 @@ input {
 
 <body>
 
-<h2>Paikkojen sulautus</h2>
+<h1>Paikkojen sulautus</h1>
+
+{% include "flash_messages.html" %}
 
 <p>
 

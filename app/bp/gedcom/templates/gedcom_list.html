@@ -1,6 +1,5 @@
 {# templates/gedcoms.html_ #}
 {% extends "g_layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _('Gedcom tools') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -14,6 +13,9 @@ var maxsize = {{ maxsize }};  // to be used in gedcom_scripts.js
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
     <h1>{{ _("Gedcom tools") }} ({{ _("user") }}: {{ user }})</h1>
+
+{% include "flash_messages.html" %}
+
     <div class="row">
     
         <div class="startbox2"> 

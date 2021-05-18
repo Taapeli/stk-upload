@@ -1,0 +1,17 @@
+{#
+Isotammi Genealogical Service for combining multiple researchers' results.
+Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+                         Timo Nallikari, Pekka Valta
+See the LISENCE file.
+#}
+{# use in a Flask template by 'include "flash_messages.html"' #}
+
+{%- with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul  class='flashes'>
+    {% for category, message in messages %}
+      <li class='flash_{{category}}'>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith -%}

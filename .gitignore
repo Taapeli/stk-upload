@@ -27,3 +27,4 @@ app/messages.pot
 stk_server.egg-info/
 build/
 dist/
+logs/

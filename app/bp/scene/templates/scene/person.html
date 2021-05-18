@@ -7,7 +7,7 @@
 {% block title %}{{ macro.person_name_plain(person_name) }}{% endblock %}
 {% block body %}
 {{ super() }}
-<script src="https://unpkg.com/sunburst-chart"></script>
+<script src='https://d3js.org/d3.v4.min.js'></script>
 <style>
 u { color: DarkKhaki; text-decoration: none; }
 #citTest { margin:1em; }
@@ -19,7 +19,11 @@ div#comments_div h3 a {
 }
 #tableNames { border: solid 1pt DarkGreen; } /* gray; } */
 #tableNames td { padding-right: 1ex; }
-tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
+td.ColumnAttribute select { 
+    background-color: white;
+    border: solid 1pt #91b991; 
+    border-radius: 5px; }
+tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 
     .tab-bottom {
      padding: .5em;
@@ -55,6 +59,16 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
  justify-content: center;
  padding: 1em;
 }
+
+.msg {
+  display: none;
+}
+
+.msg.htmx-settling {
+  display: inline;
+  color: white;
+  background-color: orange;
+}
 </style>
 
 <div id="startdiv">
@@ -81,15 +95,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
             </div>
         </div>{% endif %}
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul  class='flashes'>
-      {% for category, message in messages %}
-        <li class='flash_{{category}}'>{{ message }}</li>
-      {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %} 
+{% include "flash_messages.html" %}
 
 {% if person %}
         <h2 class="sticky" title="{{ _('Top') }}"><a href="#">
@@ -133,7 +139,13 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 					{% endif %}
 	                {% for p_name in person.names|sort(attribute='order') %}
 	                        <tr{% if edit_names %} class="movable"{% endif %}>
-	                            <td class="ColumnAttribute">{{p_name.type|transl('nt')}}</td>
+	                            <td class="ColumnAttribute">
+	                            	{% if may_edit %}
+			                            <select hx-trigger="load" hx-get="nametypes/{{p_name.uniq_id}}/{{ p_name.type }}" hx-swap="outerHTML"></select>
+		                            {% else %}
+	                            		{{p_name.type|transl('nt')}}
+                            		{% endif %}
+	                            </td>
 	                            <td class="Value" style="padding-left: 24px;">
 	        						{% if p_name.title %}<span title="titteli" class="typedesc">{{p_name.title}}</span>{% endif %}
 	                                <span title="{{ _('first name') }}">{{p_name.firstname}}</span>
@@ -231,7 +243,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
                             </div>
                         </td>
 
-                        <td class="ColumnDate">{{e.dates}}</td>
+                        <td class="ColumnDate {{e.dates.calendar_css()}}">{{e.dates}}</td>
 
                         <td class="ColumnPlace">{% set br=0 %}
     	{% for pref in e.place_ref %}{% set pl = obj[pref] %}
@@ -248,10 +260,11 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
                             <div>
         {% if e.type == "Death" and person.cause_of_death %}
                                 <span class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span>
-	       {% if person.cause_of_death.dates %}{{person.cause_of_death.dates}}
+	       {% if person.cause_of_death.dates %}
+                                <span class="{{person.cause_of_death.dates.calendar_css()}}">{{person.cause_of_death.dates}}</span> 
            {% endif -%}
-                                        {{person.cause_of_death.description}}
-                                        {{macro.place_names_lang(person.cause_of_death)}}<br>
+                                {{person.cause_of_death.description}}
+                                {{macro.place_names_lang(person.cause_of_death)}}<br>
         {% endif %}
 	    {% if e.note_ref %}
         	{% for ref in e.note_ref %}{% set note = obj[ref] %}
@@ -260,14 +273,6 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
 	                            	  {{ macro.notelink(note) }}</div>
 	        {% endfor %}
         {% endif %}
-{#                          {% if e.place_ref %}
-                                {% for pref in e.place_ref %}
-                                    {% for ref in obj[pref].note_ref %}
-                               <div><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
-                                    {{ macro.notelink(obj[ref]) }}</div>{% endfor %}
-                                {% endfor %}
-                            {% endif %}
-#}
                             </div>
                         </td>
                     </tr>
@@ -294,10 +299,10 @@ tr.movable:hover {background-color:#FFE4C4; cursor: grabbing;}
         </div>
     {% endif %}
 
-<h3>{{ _("Relations") }}</h3>
+<h3 id="relations">{{ _("Relations") }}</h3>
     <div id="tabs"
          hx-get="/scene/person_{{'fanchart_hx' if fanchart_shown else 'famtree_hx'}}?uuid={{person.uuid}}"
-         hx-trigger="load after:100ms"
+         hx-trigger="load delay:100ms"
          hx-target="#tabs"
          hx-swap="innerHTML">
     </div>

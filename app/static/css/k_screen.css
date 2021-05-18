@@ -266,7 +266,11 @@ a.navlink:hover, a.navlink:active {
 	color:darkred;
 }
 .submit { text-align:right; }
-
+/* For function toClipboard() */
+.copy-fld {
+    cursor: copy;
+    background-color: bisque;
+}
 /* Flexbox boxes floats next to each other */
 .flex-container {
   display: flex;
@@ -401,11 +405,12 @@ a[href]:hover, a[href]:active {
 }
 
 .flashes {
+    list-style-type: square;
     color: darkblue;
     border: solid 2pt #c9ac45;
     background-color: #f9e9a3;
-    margin: 3em;
-    padding: 2em;
+    margin: 2em 3em 1em 3em;;
+    padding: 1em 2em;
     max-width: 40em;
 }
 .flash_error { color: red }
@@ -491,7 +496,7 @@ div#alphanav ul li a, div#alphanav ul li span {
     line-height: 100%;
     float: left;
     margin: 2pt 0;
-	border-radius: 9pt;
+/*  border-radius: 9pt; */
 }
 div#alphanav ul li a:hover {
     text-decoration: none;
@@ -562,6 +567,10 @@ td.ColumnFamily { /* Space for leading arrow */
 }
 table.infolist tr td ol {
     margin: 0 4px;
+}
+.DateJulian, .DateHebrew {
+	font-style: italic; 
+	font-family: Times;
 }
 
 #summaryarea table.infolist td.ColumnAttribute,
@@ -1123,6 +1132,7 @@ div.comment {
 }
 div.comment .content {
 	/*border: 1px solid;*/
+	white-space: pre-wrap;
 	padding: 5px;
 	margin: 5px;
 	background: white;

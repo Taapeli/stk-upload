@@ -53,16 +53,9 @@ $(document).ready( function() {
 <div id="startdiv">
     <div>
         <h1>{{ _("Active User names") }}</h1>
-         {% with messages = get_flashed_messages(with_categories=true) %}
 
-          {% if messages %}
-            <ul  class='flashes'>
-            {% for category, message in messages %}
-              <li class='flash_{{category}}}'>{{ message }}</li>
-            {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
+{% include "flash_messages.html" %}
+
        <div id="errors" class="errors"></div>
         <div>
           <div><p>{{ _('Show') }}
@@ -78,9 +71,27 @@ $(document).ready( function() {
                 	<th><input type="checkbox" id="select_all"></th>
 		            <th>{{ _("Is active") }}</th>
 		            <th>{{ _("Last login time") }}</th>
-		            <th>{{ _("User") }}</th>
-		            <th>{{ _("Name") }}</th>
-		            <th>{{ _("Email address") }}</th>
+		            <th>
+		            	{% if sortby == 'username' %} 
+		            		{{ _("User") }} &darr; 
+		            	{% else %}
+		            		<a href=?sortby=username>{{ _("User") }}</a>
+		            	{% endif %}
+		            </th>
+		            <th>
+		            	{% if sortby == 'name' %} 
+		            		{{ _("Name") }} &darr; 
+		            	{% else %}
+		            		<a href=?sortby=name>{{ _("Name") }}</a>
+		            	{% endif %}
+		            </th>
+		            <th>
+		            	{% if sortby == 'email' %} 
+		            		{{ _("Email address") }} &darr; 
+		            	{% else %}
+		            		<a href=?sortby=email>{{ _("Email address") }}</a>
+		            	{% endif %}
+		            </th>
 		            <th>{{ _("Language") }}</th>
 		            <th>{{ _("Roles") }}</th>
 		            </tr>
