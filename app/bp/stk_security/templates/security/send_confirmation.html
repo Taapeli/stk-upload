@@ -1,13 +1,15 @@
 {# templates/security/send_confirmation.html  #}
 {% extends "a_layout.html" %}
 {% from "security/_macros.html" import render_field_with_errors, render_field %} 
-{% include "security/_messages.html" %}
 {% block title %}{{ _('Verifying registration') }}{% endblock %}
 {% block body %}
 {{ super() }} 
 
 <div style="margin-left:50px; padding-bottom: 2em;">
     <h1>{{ _('Ask for Validation Link') }}</h1>
+
+{% include "flash_messages.html" %}
+
 	<div class="startbox">	
 		<h2>{{ _('Submit Validation Link') }}</h2>
         <p>{{ _("If you can't find the registration confirmation mail message we have sent, you can ask for a new one.")}}</p>

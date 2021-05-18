@@ -1,6 +1,5 @@
 {# start/index.html_ #} 
 {% extends "start/s_layout.html" %} 
-{% include "security/_messages.html" %} 
 {% block title %}{{ _('Isotammi Start Page') }}{% endblock %} 
 {% block body %} 
 {{ super() }}
@@ -45,6 +44,9 @@ div.CloudBox a:hover   { text-decoration: underline; }
     </div>
     <h1>{{ _('Welcome to Isotammi Service') }}</h1>
 	<div>
+
+{% include "flash_messages.html" %}
+
 		<div class="row">
 
 			<div class="startbox bg_intro">
@@ -85,22 +87,23 @@ div.CloudBox a:hover   { text-decoration: underline; }
 
 		    {% if not config['DEMO'] %}
             <div class="startbox">
-                <h2>{{ _('Register') }}</h2>
-				<p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
-				<form method="get" action={{demo_site}}>
-					<div class="submit">
-						<button type="submit" formaction="/register">{{ _('Register') }}</button>
-					</div>
- 					<input type="hidden" name="lang" value="{{ lang }}">
-				</form>
                 <h2>{{ _('Log in') }}</h2>
                 <p>{{ _('If you has already registered, you can log in and refine the structure of your own data.') }}
-                   {{ _('As a member of <i>Genealogical Society of Finland</i> you will get more services.') }}.
+                   {{ _('As a member of <i>Genealogical Society of Finland</i> you will get more services.') }}
                 </p>
                 <form method="get">
                     <div class="submit">
                        <button type="submit" formaction="/start/logged">{{ _('Log in') }}</button>
                     </div>
+                </form>
+
+                <h2>{{ _('Register') }}</h2>
+                <p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
+                <form method="get" action={{demo_site}}>
+                    <div class="submit">
+                        <button type="submit" formaction="/register">{{ _('Register') }}</button>
+                    </div>
+                    <input type="hidden" name="lang" value="{{ lang }}">
                 </form>
             </div>
 			{% endif %}

@@ -1,7 +1,7 @@
 /*  Isotammi Genealogical Service for combining multiple researchers' results.
     Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
                              Timo Nallikari, Pekka Valta
-    See the LICENCE file.
+    See the LICENSE file.
 */
 var gt = new Gettext({domain: 'gedcom_transformations'});
 var _ = function(msgid,args) { return gt.strargs(gt.gettext(msgid),args); };
@@ -24,6 +24,34 @@ function stars(value) {
 		else 		{ ret += '☆' }
 	}
 	return ret;
+}
+
+function copyTextToClipboard(text) {
+	// Helper for toClipboard(myvar)
+	  if (!navigator.clipboard) {
+		  fallbackCopyTextToClipboard(text);
+		  return;
+	  }
+	  navigator.clipboard.writeText(text).then(function() {
+		  console.log('Async: Copying to clipboard was successful!');
+	  }, function(err) {
+		  console.error('Async: Could not copy text: ', err);
+	  });
+	}
+function toClipboard(myvar) {
+	  // Copy text to clipboard. - Usage:
+	  // 1. Define the copy field by
+	  //    <span class="copy-fld" onclick="toClipboard('my_uuid')"
+	  //          title="copy uuid value">7429e9</span>
+	  // 2. Define the copied text by
+	  //    <input id="my_uuid" type="text" value="7429e9..." style="display:None">
+	  var copyText = document.getElementById(myvar);
+	  if (copyText) {
+	  	copyTextToClipboard(copyText.value);
+	    alert("Kopioitu leikepöydälle: " + copyText.value);
+	  } else {
+	    alert("Error: No data!");
+    }
 }
 
 

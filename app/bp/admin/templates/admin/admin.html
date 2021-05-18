@@ -1,6 +1,5 @@
 {# templates/admin/start.html_ #}
 {% extends "/admin/layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _('Administrator') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -40,7 +39,9 @@ function confirm_delete(url) {
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version') }} 
           <i>{{ 'git'|app_date }}</i></span>
-   
+
+{% include "flash_messages.html" %}
+
     <div class="row">
 {% if current_user.is_authenticated 
    and (current_user.has_role('admin') or current_user.has_role('master'))  %}

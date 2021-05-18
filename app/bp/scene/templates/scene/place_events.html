@@ -56,15 +56,9 @@ div#events div.scrollbox {
     <h2 class="sticky" title="▲ {{ _('Top') }}"><a href="#">
         {{ place.names[0].name }} ({{ place.type|transl('lt') }})</a></h2>
         <div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
+
+{% include "flash_messages.html" %}
+
         </div>
 
         <div id="summaryarea">
@@ -188,9 +182,9 @@ div#events div.scrollbox {
             {% endif %}
                         </td>
                         <td class="ColumnEvent">{{e.type|transl('evt')}}
-                          {% if e.role != "Primary" %}({{e.role|transl('role')}}){% endif %}
+                          {% if e.role != "Primary" and e.role != "Family" %}({{e.role|transl('role')}}){% endif %}
                         </td>
-                        <td class="ColumnDate">{{e.dates}}</td>
+                        <td class="ColumnDate {{e.dates.calendar_css()}}">{{e.dates}}</td>
                         <td class="ColumnDescription">{{e.description}}</td>
                     </tr>
          {% endfor %}

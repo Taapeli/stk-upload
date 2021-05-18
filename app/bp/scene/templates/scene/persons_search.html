@@ -38,10 +38,12 @@ div.CloudPink div {
 </div>
 
 {{ macro.menu(menuno) }}
-
     <div class="content" id="Individuals">
         <div id="summaryarea">
-          <form  action="/scene/persons/search" method="post">
+ 
+{% include "flash_messages.html" %}
+
+         <form  action="/scene/persons/search" method="post">
             <div class="flex-container2">
 {% if cnt + num_hidden > 0 %}
                 <div class="description_box2">
@@ -122,17 +124,7 @@ selector.addEventListener("change", () => {
 });
 </script>
 
-    <div>
-	        {% with messages = get_flashed_messages(with_categories=true) %}
-	          {% if messages %}
-	            <ul  class='flashes'>
-	            {% for category, message in messages %}
-	              <li class='flash_{{category}}'>{{ message }}</li>
-	            {% endfor %}
-	            </ul>
-	          {% endif %}
-	        {% endwith %}
-    </div> <!-- end messages -->
+
 {% if status == 'OK' %}
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
@@ -167,9 +159,9 @@ selector.addEventListener("change", () => {
 	                      title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
                           {{p.names[0].firstname}} 
             {% if p.names[0].prefix %} {{p.names[0].prefix}}{% endif %}
-            {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
-            {% else %}    <i>{{p.names[0].suffix}}</i>
-            {% endif %} </a>
+            {% if p.names[0].surname %}
+                          <b>{{p.names[0].surname}}</b>{% else %}
+                          <i>{{p.names[0].suffix}}</i>{% endif -%}</a>
 		                <small class="idno">[{{ p.uuid_short() }}]</small>
 		    {% if p.refnames %}
 		                <br><small class="refname" title="{{ _('Reference names') }}">
@@ -186,7 +178,9 @@ selector.addEventListener("change", () => {
             {% if p.events %}<ul>
                 {% for e in p.events|sort(attribute='dates') %}
 		            <li><i>{{e.type|transl('evt')}}</i> {{e.description}}
-		            {% if e.dates %}{{e.dates}} {% endif %}
+		            {% if e.dates %}
+                        <span class="{{e.dates.calendar_css()}}">{{e.dates}}</span> 
+                    {% endif %}
 		            {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
 	        {% endif %}
@@ -207,6 +201,7 @@ selector.addEventListener("change", () => {
     <div class="flex-container2">
         <div class="CloudBox" style="display: inline-block;">
             <div>
+        {% if surnamestats %}
                  <form name="surnameform" method="post" action="/scene/persons/search">
                     <input name="rule" type="hidden" value="surname">
                     <input name="key" type="hidden">
@@ -223,21 +218,28 @@ selector.addEventListener("change", () => {
                         </span>
                      {% endfor %}
                  </form>
+        {% else %}
+                <i>{{ _('No person names') }}</i>
+        {% endif %}
             </div>
         </div>
 
            <div class="CloudBox CloudPink" style="display: inline-block;">
              <div>
+        {% if placenamestats %}
                  <form name="placenameform" method="post" action="/scene/persons/search">
                     <input name="rule" type="hidden" value="placename">
                     <input name="key" type="hidden">
                      {% for stat in placenamestats %}
                         <span style='font-size:{{ stat.fontsize }}px'>
                             <a href="/scene/location/uuid={{ stat.uuid }}"
-                               title="{{ stat.count }} {{ _('places') }}">{{ stat.placename }}</a>
+                               title="{{ stat.count }} {{ _('references') }}">{{ stat.placename }}</a>
                         </span>
                      {% endfor %}
                  </form>
+        {% else %}
+                <i>{{ _('No places') }}</i>
+        {% endif %}
              </div>
            </div>
 

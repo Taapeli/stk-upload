@@ -1,6 +1,5 @@
 {# templates/refname_editor.html_ #}
 {% extends "/audit/layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _('Administrator') }}{% endblock %}
 {% block body %}}
 {{ super() }}
@@ -100,6 +99,8 @@ div#edit_dialog {
 <body>
 
 <h1>Referenssinimet</h1>
+
+{% include "flash_messages.html" %}
 
 <p>
 

@@ -28,10 +28,6 @@ class CypherPerson():
     Cypher clauses for Person data access.
     '''
 
-    
-    
-    
-
 # ----- Person node -----
 
     get_person_by_uid = "MATCH (p:Person) WHERE ID(p) = $uid"
@@ -200,6 +196,15 @@ WITH n
 MATCH (p:Person {handle:$p_handle})
 MERGE (p)-[r:NAME]->(n)"""
 
+    create_name_as_leaf = """
+CREATE (n:Name) SET n = $n_attr
+WITH n
+MATCH (p:Person)    WHERE ID(p) = $parent_id
+MERGE (p)-[r:NAME]->(n)
+WITH n
+match (c:Citation) where c.handle in $citation_handles
+merge (n) -[r:CITATION]-> (c)"""
+
     link_event_embedded = """
 MATCH (p:Person {handle: $handle}) 
 CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
@@ -306,4 +311,33 @@ set n1.order = $old_order, n2.order = 0
 match (n:Name) where id(n) = $uid  
 set n.order = $order
     """
-    
+
+    set_name_type = """
+match (n:Name) where id(n) = $uid  
+set n.type = $nametype
+return n
+    """
+
+    get_person_for_graph = """
+MATCH (n:Person)
+	WHERE n.uuid in $ids 
+OPTIONAL MATCH (n) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
+RETURN ID(n) AS uniq_id, n.uuid AS uuid, n.sortname AS sortname, 
+       n.sex as gender, COLLECT([e.type, e.date1/1024]) AS events,
+       n.death_high AS death_high"""
+
+    get_persons_parents = """
+MATCH (n:Person) <-[:CHILD]- (f:Family) -[:PARENT]-> (p:Person)
+	WHERE ID(n) in $ids 
+OPTIONAL MATCH (p) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
+RETURN ID(p) AS uniq_id, p.uuid AS uuid, p.sortname AS sortname, 
+       p.sex as gender, COLLECT([e.type, e.date1/1024]) AS events,
+       p.death_high AS death_high"""
+
+    get_persons_children = """
+MATCH (n:Person) <-[:PARENT]- (f:Family) -[:CHILD]-> (c:Person)
+	WHERE ID(n) in $ids 
+OPTIONAL MATCH (c) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
+RETURN ID(c) AS uniq_id, c.uuid AS uuid, c.sortname AS sortname, 
+       c.sex as gender, COLLECT([e.type, e.date1/1024]) AS events,
+       c.death_high AS death_high"""

@@ -22,7 +22,7 @@ Created on Aug 26, 2020
 
 @author: kari
 '''
-from bp.gramps.gramps_loader import get_upload_folder
+from bl.gramps.gramps_loader import get_upload_folder
 import os
 import subprocess
 from collections import defaultdict

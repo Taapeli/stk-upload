@@ -127,7 +127,7 @@ def print_tree(t):
             print(f"({lv}){fill} {node.bpointer:6d}<-{node.identifier:6d} {node.tag} ")
 
 if __name__ == '__main__':
-    """ Run 'python test/place_tree.py 103338'
+    """ Run 'python unit_test/place_tree.py 103338'
         where the argument is uniq_id of a place
     """
     if len(sys.argv) <= 1:

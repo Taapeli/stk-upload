@@ -50,6 +50,7 @@ class UserProfile():
     text_message = ''
     created_at = None
     approved_at = None
+    agreed_at = None
 
     def __init__(self, **kwargs):
         self.username = kwargs.get('username')
@@ -62,6 +63,7 @@ class UserProfile():
         self.researched_names = kwargs.get('researched_names')
         self.researched_places = kwargs.get('researched_places')
         self.text_message = kwargs.get('text_message')
+        self.agreed_at = kwargs.get('agreed_at')        
 
 class UserAdmin():
     '''
@@ -150,6 +152,7 @@ class UserAdmin():
                         email = profile.email,
                         username = profile.username,
                         language = profile.language,
+                        GSF_membership = profile.GSF_membership,
                         research_years = profile.research_years,
                         software = profile.software,
                         researched_names = profile.researched_names,
@@ -162,10 +165,11 @@ class UserAdmin():
             raise
 
     @classmethod
-    def user_profile_add(cls, tx, email, username):
+    def user_profile_add(cls, tx, email, username, agreed_at):
 #        logging.debug('_put_role ', role)
         try:
-            tx.run(Cypher_adm.user_profile_add, email=email, username=username) 
+            tx.run(Cypher_adm.user_profile_add, 
+                   email=email, username=username, agreed_at=agreed_at) 
             return
         except Exception as e:
             logging.error(f'UserAdmin.user_profile_add: {e.__class__.__name__}, {e}')          

@@ -30,6 +30,7 @@ import os
 
 import json
 #import inspect
+#from operator import attrgetter
 import traceback
 
 import logging 
@@ -39,21 +40,23 @@ from flask import render_template, request, redirect, url_for, send_from_directo
 from flask_security import login_required, roles_accepted, roles_required, current_user
 from flask_babelex import _ #, Domain
 
-import shareds
+import sharedsfrom ui.user_context import UserContext
+from bl.base import Status
+from bl.person import PersonWriter
+
 from setups import User
-from bp.admin.models.data_admin import DataAdmin
-from bp.admin.models.user_admin import UserAdmin
+from bp.admin.forms import UpdateUserProfileForm, UpdateUserForm
+from bl.admin.models.data_admin import DataAdmin
+from bl.admin.models.user_admin import UserAdmin
 
 #from .cvs_refnames import load_refnames
-from .forms import UpdateUserForm
 from . import bp
 from . import uploads
 from .. gedcom.models import gedcom_utils
 from .. import gedcom
 
-from models import util, dataupdater #, dbutil, loadfile, datareader
-from models import email
-from models import syslog 
+#from models import util, dataupdater #, dbutil, loadfile, datareader
+from models import util, email, syslog 
 
 
 # Admin start page
@@ -101,7 +104,7 @@ def clear_my_db():
 def start_initiate():
     """ Check and initiate important nodes and constraints and schema fixes.
     """
-    from database.adminDB import re_initiate_nodes_constraints_fixes, initialize_db
+    from database.accessDB import re_initiate_nodes_constraints_fixes, initialize_db
     logger.info(f"-> bp.admin.routes.start_initiate")
 
     # Remove (:Lock{id:'initial'})
@@ -109,7 +112,7 @@ def start_initiate():
 
     initialize_db()
     flash(_('Database initial check done.'))
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin.admin'))
 
 @bp.route('/admin/clear_batches', methods=['GET', 'POST'])
 @login_required
@@ -146,14 +149,28 @@ def clear_empty_batches():
 @roles_required('admin')
 def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    logger.warning(f"OBSOLETE? -> bp.admin.routes.estimate_dates sel={uid}")
+    #logger.warning(f"OBSOLETE? -> bp.admin.routes.estimate_dates sel={uid}")
     if uid:
         uids=list(uid)
     else:
         uids=[]
-    message = dataupdater.set_person_estimated_dates(uids)
-    ext = _("estimated lifetime")
-    return render_template("/talletettu.html", text=message, info=ext)
+    #message = dataupdater.set_person_estimated_dates(uids)
+    # ext = _("estimated lifetime")
+    # return render_template("/talletettu.html", text=msg, info=ext)
+
+    u_context = UserContext(session, current_user, request)
+    with PersonWriter("update", u_context) as service:
+        ret = service.set_estimated_lifetimes(uids)
+
+    if Status.has_failed(ret):
+        msg = ret.get("statustext")
+        logger.error(f"bp.admin.routes.estimate_dates {msg}")
+        flash(ret.get("statustext"), "error")
+    else:
+        msg = _("Estimated {} person lifetimes").format(ret["count"])
+        flash(msg, "info")
+    print("bp.admin.routes.estimate_dates: " + msg)
+    return redirect(url_for('admin.admin'))
 
 
 # # Ei ilmeisesti käytössä
@@ -171,9 +188,18 @@ def estimate_dates(uid=None):
 @login_required
 @roles_accepted('admin', 'audit', 'master')
 def list_users():
+    def keyfunc(attrname):
+        def f(user):
+            return getattr(user,attrname).lower()
+        return f
+    
+    sortby = request.args.get("sortby")
     lista = shareds.user_datastore.get_users()
+    if sortby:
+        lista.sort(key=keyfunc(sortby))
+        
     logging.info(f"-> bp.admin.routes.list_users n={len(lista)}")
-    return render_template("/admin/list_users.html", users=lista)  
+    return render_template("/admin/list_users.html", users=lista, sortby=sortby)  
 
 @bp.route('/admin/update_user/<username>', methods=['GET', 'POST'])
 @login_required
@@ -237,9 +263,21 @@ def update_user(username):
     form.current_login_at.data = user.current_login_at
     form.current_login_ip.data = user.current_login_ip
     form.login_count.data = user.login_count
-        
+
+    userprofile = shareds.user_datastore.get_userprofile(username) 
+    form2 = UpdateUserProfileForm()
+    if userprofile:    # 'master' does not have a profile
+        form2.agreed_at.data = userprofile.agreed_at  
+        form2.GSF_membership.data = userprofile.GSF_membership  
+        form2.software.data = userprofile.software  
+        form2.research_years.data = userprofile.research_years  
+        form2.researched_names.data = userprofile.researched_names  
+        form2.researched_places.data = userprofile.researched_places  
+        form2.software.data = userprofile.software  
+        form2.software.data = userprofile.software  
+        form2.text_message.data = userprofile.text_message  
     # Return to same page
-    return render_template("/admin/update_user.html", username=user.username, form=form)  
+    return render_template("/admin/update_user.html", username=user.username, form=form, form2=form2)  
 
 @bp.route('/admin/list_uploads/<username>', methods=['GET'])
 @login_required
@@ -530,11 +568,7 @@ def add_access():
 @roles_accepted('admin')
 def delete_accesses():
     data = json.loads(request.data)
-    print(data)
-    username = data.get("username",'-')
-    batchid = data.get("batchid",'-')
-    #TODO Should log the batch owner, not batchid?
-    logger.info(f'-> bp.admin.routes.delete_accesses u={username} batch={batchid}')
+    logger.info(f'-> bp.admin.routes.delete_accesses')
     rsp = UserAdmin.delete_accesses(data)
     return jsonify(rsp)
 

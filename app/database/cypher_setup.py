@@ -18,7 +18,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-Moved on 14.5.2019 from database.adminDB
+Moved on 14.5.2019 from database.accessDB
 
 @author: jm
 '''

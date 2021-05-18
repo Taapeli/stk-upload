@@ -23,15 +23,9 @@
         </h2>
 {% endif %}
         <div id="summaryarea">
-    {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul  class='flashes'>
-            {% for message in messages %}
-              <li class='flash_{{category}}}'>{{ message }}</li>
-            {% endfor %}
-            </ul>
-          {% endif %}
-    {% endwith %} 
+
+{% include "flash_messages.html" %}
+
 {% if event %}
             <table>
                 <tr>

@@ -28,6 +28,11 @@ import shareds
 
 from werkzeug.utils import secure_filename
 import subprocess
+from operator import itemgetter
+from bl.refname import Refname
+import functools
+import time
+from pprint import pprint
 
 # https://neo4j.com/developer/kb/fulltext-search-in-neo4j/
 # https://neo4j.com/docs/cypher-manual/3.5/schema/index/#schema-index-fulltext-search
@@ -46,27 +51,46 @@ neo4j_driver = GraphDatabase.driver(
         connection_timeout = 15)
 
 def run(cypher,callback=None,**kwargs):
+    #print("run",cypher)
     try:
         res = neo4j_driver.session().run(cypher, kwargs)
         n = 0
         reslist = list(res)
         count = len(reslist)
+        #print("-count:",count)
         for rec in reslist:
             n += 1
-            if callback: callback(n,count,rec)
+            if callback: callback(n,count,rec, kwargs)
         return n
     except:
         traceback.print_exc()
         raise
 
-def create_index(args):
-    run("""
+def read_hiskidata():
+    hiskinames = {}
+    fname = os.path.join(os.path.dirname(__file__),"refnames.txt")
+    for line in open(fname):
+        #print(line) 
+        if line.strip() == "": continue
+        _, name, refname = line.split()
+        hiskinames[name] = refname
+    return hiskinames
+        
+#hiskinames = read_hiskidata()
+
+def index_name_from_batch_id(batch_id):
+    return "searchkey_" + batch_id.replace("-","_").replace(".","_")
+
+def create_index(batch_id):
+    index_name = index_name_from_batch_id(batch_id)
+    run(f"""
         CALL db.index.fulltext.createNodeIndex(
-        "personIndex",["Person"],["searchkey"])
+        "{index_name}",["Person"],["{index_name}"])
     """)   
 
-def drop_index(args):
-    run("CALL db.index.fulltext.drop('personIndex')") 
+def drop_index(batch_id):
+    index_name = index_name_from_batch_id(batch_id)
+    run(f"CALL db.index.fulltext.drop('{index_name}')") 
 
 def list_indexes(args):
     run("CALL db.indexes",callback=print)
@@ -76,8 +100,18 @@ def list_batches(args):
     user = 'user'
     file = 'file'
     status = 'status'
-    print(f"{id:14s} {user:16s} {file:60s} {status}")
+    #print(f"{id:14s} {user:16s} {file:60s} {status}")
     run("match (b:Batch) return b",callback=list_batch)
+
+def batches():
+    cypher = """
+        match (b:Batch) return b
+        union
+        match (b:Audit) return b
+    """
+    batchlist = []
+    run(cypher,callback=lambda n,count,rec, kwargs: batchlist.append(dict(rec.get('b'))))
+    return batchlist
 
 def list_batch(rec):
     batch = rec.get('b')
@@ -87,32 +121,40 @@ def list_batch(rec):
     status = batch.get('status')
     print(f"{id:14s} {user:16s} {file:60s} {status}")
 
-def sanitize(name):
-    return re.sub(r"[^a-z|0-9|åöä]","_",name,flags=re.IGNORECASE)
-    
-def generate_searchkey1(n,count,rec):   
+def normalize_name(name_normalizer,name,nametype):
+    name1 = name
+    name = re.sub(r"[^a-z|0-9|åöä]","_",name,flags=re.IGNORECASE)
+    if name_normalizer:
+        name = name_normalizer((nametype,name),name)
+    #print("name_normalizer",name1,"->",name)
+    return name
+
+def generate_searchkey1(name_normalizer, n,count,rec, kwargs):   
     """
     generates searchkey1 for all persons
     """
+    if n % 100 == 0: print(f"Phase 1: {n}/{count}")
     keys = []
     pid = rec.get('pid')
     refnames = rec.get('refnames')
+    #print("refnames:", refnames)
     for (rn,bn) in refnames:
+        #print(rn,bn)
         if rn is None or bn is None: continue
         if bn.get('use') == 'firstname': 
             fname = rn.get('name')
             if fname: 
-                fname = sanitize(fname)
+                fname = normalize_name(name_normalizer,fname,'firstname')
                 for n in fname.split(): keys.append("G"+n)
         if bn.get('use') == 'surname': 
             sname = rn.get('name')
             if sname: 
-                sname = sanitize(sname)
+                sname = normalize_name(name_normalizer,sname,'surname')
                 for n in sname.split(): keys.append("L"+n)
         if bn.get('use') == 'patronyme': 
             patronyme = rn.get('name')
             if patronyme: 
-                patronyme = sanitize(patronyme)
+                patronyme = normalize_name(name_normalizer,patronyme,'patronyme')
                 keys.append("X"+patronyme)
     for e,pl in rec.get('events'):
         if e is None: continue
@@ -131,18 +173,20 @@ def generate_searchkey1(n,count,rec):
                 keys.append(f"E{etype}D{edate}")
                 if len(edate) > 4: keys.append(f"E{etype}Y{edate[0:4]}")
             if eplace: 
-                eplace = sanitize(eplace)
+                eplace = normalize_name(name_normalizer,eplace,'pname')
                 eplace = eplace.replace(" ","#")
                 keys.append(f"E{etype}P{eplace}")
     searchkey1 = " ".join(sorted(keys))
+    
     #print(searchkey1)
     run("match (p:Person) where id(p) = $pid set p.searchkey1=$searchkey1 return p",
         searchkey1=searchkey1,pid=pid)
 
-def generate_searchkey(n,count,rec):   
+def generate_searchkey(n,count,rec, kwargs):   
     """
     generates searchkey for all persons
     """
+    if n % 100 == 0: print(f"Phase 2: {n}/{count}")
     pid = rec.get('pid')
     p = rec.get('p')
     searchkey1 = p.get('searchkey1')
@@ -159,8 +203,10 @@ def generate_searchkey(n,count,rec):
     psearchkey = " ".join(sorted(pkeys))
     searchkey = searchkey1 + " " + psearchkey
     
-    run("""match (p:Person) where id(p) = $pid 
-        set p.searchkey=$searchkey
+    batch_id = kwargs['batch_id']
+    index_name = index_name_from_batch_id(batch_id)
+    run(f"""match (p:Person) where id(p) = $pid 
+        set p.{index_name}=$searchkey
         return p
         """,
         searchkey=searchkey,
@@ -169,10 +215,9 @@ def generate_searchkey(n,count,rec):
 def generate_keys(args):
     cypher1 = """
         match 
-            (b:Batch)
-        where $batch_id = '' or b.id = $batch_id
+            (b:Batch{id:$batch_id})
         match 
-            (b:Batch)-->(p:Person)-[:NAME]->(pn:Name{order:0})
+            (b)-->(p:Person)-[:NAME]->(pn:Name{order:0})
         optional match
             (rn:Refname)-[bn:REFNAME]->(p)
         optional match
@@ -190,7 +235,10 @@ def generate_keys(args):
     else:
         batch_id = ''
 
-    run(cypher1, callback=generate_searchkey1, batch_id=args.for_batch)
+    refnames = get_refnames() # mapping of (nametype,name) -> refname
+    name_normalizer = refnames.get
+    run(cypher1, callback=functools.partial(generate_searchkey1, name_normalizer), 
+        batch_id=args.for_batch)
 
     cypher2 = """
         match 
@@ -201,31 +249,33 @@ def generate_keys(args):
         optional match
             (p)<-[:CHILD]-(fam:Family)-[:PARENT]->(parent:Person),
             (b) --> (fam)
-        set b.has_searchkeys = true
+        set b.has_searchkeys = true,
+            b.namematch_algo = $namematch_algo
         return 
             id(p) as pid,
             p,
             collect(distinct parent) as parents
     """
-    n = run(cypher2, callback=generate_searchkey, batch_id=args.for_batch)
-    print(f"Generated searchkeys for {n} people")
+    n = run(cypher2, callback=generate_searchkey, batch_id=args.for_batch, namematch_algo=args.namematch_algo)
+    create_index(args.for_batch)
+    print(f"Generated searchkeys and index for {n} people")
     return n
 
 def remove_keys(args):   
-    cypher = """
-        match 
-            (b:Batch)
-        where $batch_id = '' or b.id = $batch_id
-        match (b) --> (p:Person)
-        where exists(p.searchkey)  
+    index_name = index_name_from_batch_id(args.from_batch)
+    cypher = f"""
+        match (b:Batch{{id:$batch_id}}) --> (p:Person)
         remove p.searchkey 
         remove p.searchkey1 
+        remove p.{index_name} 
         remove b.has_searchkeys
         return p
     """
     n = run(cypher,batch_id=args.from_batch)
-    print(f"Removed searchkeys from {n} people")
+    drop_index(args.from_batch)
+    print(f"Removed searchkeys and index from {n} people")
     return n
+
 
 def getname(namenode):
     firstname = namenode.get("firstname")
@@ -256,7 +306,7 @@ def compute_match(searchkey1,searchkey2):
     matchvalues = []
     for prefix in (
         'G','L','X',
-        'EBirthD','EBirthY','EBirthP    '
+        'EBirthD','EBirthY','EBirthP',
         'EDeathD','EDeathY','EDeathP',
     ):
         value1 = getvalue(keys1,prefix)
@@ -270,20 +320,25 @@ def compute_match(searchkey1,searchkey2):
         matchvalues.append(value)
     return tuple(matchvalues)
         
-def display_matches(args,p,pid,pn,rec,matches):   
+def display_matches(args,p,pid,pn,rec,matches,index_name1,index_name2):   
+#     print("        display_matches",p) 
+#     print("        display_matches",rec) 
     score = rec.get('score')
     matchid = rec.get('node').get("id")
     namenodes = rec.get('namenodes') # there may be several Name nodes with order:0, pick the first
     matchname = namenodes[0]
     matchnode = rec.get('node')
     matchpid = rec.get("matchpid")
-    if score >= args.minscore:
-        matchkeys = matchnode.get('searchkey')
+    #print(p['searchkey']) 
+    #print(matchnode['searchkey'])
+    
+    if 1 or score >= args.minscore:
+        matchkeys = matchnode.get(index_name2)
         if len(matchkeys.split()) < args.minitems: return
         pdict1 = dict(p)
         pdict1['name'] = getname(pn)
         pdict1['pid'] = pid
-        pdict1['searchkey'] = p.get('searchkey')
+        pdict1['searchkey'] = p.get(index_name1)
         pdict2 = dict(matchnode)
         pdict2['name'] = getname(matchname)
         pdict2['pid'] = matchpid
@@ -293,18 +348,24 @@ def display_matches(args,p,pid,pn,rec,matches):
         matchvectorstring = "".join([str(x) for x in matchvector])
         res = dict(score=score,matchvector=matchvectorstring,p1=pdict1,p2=pdict2)
         matches.append(res)
-        
+      
     
 def __search_dups(n,count,args,rec,matches):   
-    if n % 100 == 0: print(f"Searching {n}/{count}")
+#     print()
+#     print("__search_dups",n,count,rec)
+    index_name = index_name_from_batch_id(args.batchid1)
+    index_name2 = index_name_from_batch_id(args.batchid2)
+    if n % 100 == 0: print(f"{time.time()-t0}: Searching {n}/{count}")
     pid = rec.get('pid')
     p = rec.get('p')
 
     namenodes = rec.get('namenodes') # there may be several Name nodes with order:0, pick the first
     pn = namenodes[0]
 
-    searchkey = p.get('searchkey')
-    if searchkey is None: return
+    searchkey = p.get(index_name)
+    if searchkey is None: 
+        print("searchkey not found")
+        return
     keys = searchkey.split()
     if len(keys) < args.minitems: return 
 
@@ -312,46 +373,115 @@ def __search_dups(n,count,args,rec,matches):
         name = getname(pn).lower()
         if name.find(args.namematch.lower()) < 0: return
 
-    num_matches = run("""
-        CALL db.index.fulltext.queryNodes("personIndex", $searchkey) YIELD node, score
-        where id(node) <> $pid and score >= $minscore
-        MATCH (b:Batch{id:$batch_id}) --> (node) --> (mn:Name{order:0})
+    num_matches = run(f"""
+        CALL db.index.fulltext.queryNodes("{index_name2}", $searchkey) YIELD node, score
+        where id(node) <> $pid 
+        match (node) --> (mn:Name{{order:0}})
         RETURN node, score, collect(mn) as namenodes, id(node) as matchpid   
-    """,callback=lambda n,count,rec: display_matches(args,p,pid,pn,rec,matches),
+        order by score desc
+        limit 5
+    """,callback=lambda n,count,rec,kwargs: display_matches(args,p,pid,pn,rec,matches,index_name,index_name2),
         searchkey=searchkey,
         pid=pid,
         batch_id=args.batchid2,
         minscore=args.minscore,
         )
-
+    return 
     
+
 def search_dups(args):
     print(args)
     print(args.model)
+    global t0
+    t0 = time.time()
     matches = []
     run("""
         match (b:Batch{id:$batch_id}) -[:OWNS]-> (p:Person) -[:NAME]-> (pn:Name{order:0}) 
         return id(p) as pid, p, collect(pn) as namenodes
-    """,callback=lambda n,count,rec: __search_dups(n,count,args,rec,matches), batch_id=args.batchid1)
+    """,callback=lambda n,count,rec,kwargs: __search_dups(n,count,args,rec,matches), 
+        batch_id=args.batchid1)
 
-    test_data = "kku/test_data.txt"
-    with open(test_data,"w") as f:
-        value = 0
-        for res in matches:
-            values = " ".join(["%s:%s" % (i+1,value) for (i,value) in enumerate(res['matchvector'])])
-            matchdata = "{} {}\n".format(value,values)
-            f.write(matchdata)
-            value = 1-value
-    from subprocess import Popen, PIPE
-    models_folder = "training/models"
-    model = os.path.join(models_folder,args.model)
-    output_file = "/tmp/output.txt"
-    cmd = f"{libsvm_folder}/svm-predict {test_data} {model} {output_file}"
-    f = subprocess.run(cmd, shell = True ) #, stdout = PIPE).stdout
-    for i,line in enumerate(open(output_file)):
-        matches[i]['match_value'] = int(line)
+    print("num matches:", len(matches))
+    matches = prune_matches(matches)
+    print("pruned matches:", len(matches))
+    return sorted(matches,reverse=True,key=itemgetter('score')) #[0:50]
 
-    return sorted(matches,reverse=True,key=lambda match: match['score'])
+
+def get_refnames_by_type(nametype):
+    refnames = Refname.get_refnames() 
+    namemap = {}
+    for refname in refnames:
+        if refname.reftype.find(nametype) < 0: continue
+        if refname.refname:
+            namemap[refname.name] = refname.refname
+        else:
+            namemap[refname.name] = refname.name
+    return namemap
+
+def get_refnames():
+    refnames = Refname.get_refnames() 
+    namemap = {}
+    for refname in refnames:
+        #if refname.reftype.find(nametype) < 0: continue
+        for nametype in refname.reftype.split():
+            if refname.refname:
+                namemap[(nametype,refname.name)] = refname.refname
+            else:
+                namemap[(nametype,refname.name)] = refname.name
+    return namemap
+
+def prune_matches(matches):
+    refnames = get_refnames_by_type("firstname") # mapping of name -> refname
+    pprint(refnames['Aina'])
+    def get_firstnames(key):
+        words = key.split()
+        print(words)
+        names = [refnames.get(value[1:],value[1:]) for value in words if value[0] == "G"]
+        return set(names)
+    
+    def get_firstnames(key):
+        words = key.split()
+        names = [value[1:] for value in words if value[0] == "G"]
+        return set(names)
+
+     
+    matches2 = []
+    for match in matches:
+        p1 = match['p1']
+        p2 = match['p2']
+
+        gender1 = p1['sex']
+        gender2 = p2['sex']
+        if gender1 > 0 and gender2 > 0 and gender1 != gender2: continue
+
+        birth_low1 = p1['birth_low']
+        birth_low2 = p2['birth_low']
+        birth_high1 = p1['birth_high']
+        birth_high2 = p2['birth_high']
+
+        death_low1 = p1['death_low']
+        death_low2 = p2['death_low']
+        death_high1 = p1['death_high']
+        death_high2 = p2['death_high']
+        if birth_high1 < birth_low2: continue
+        if birth_high2 < birth_low1: continue
+        if death_high1 < death_low2: continue
+        if death_high2 < death_low1: continue
+
+        key1 = p1['searchkey']
+        key2 = p2['searchkey']
+        firstnames1 = get_firstnames(key1)
+        firstnames2 = get_firstnames(key2)
+#         firstnames1 = get_firstnames(key1, refnames)
+#         firstnames2 = get_firstnames(key2, refnames)
+#         firstnames1 = set(key1.split())
+#         firstnames2 = set(key2.split())
+        common_names = firstnames1 & firstnames2
+        if len(common_names) == 0: continue
+        if common_names != firstnames1 and common_names != firstnames2: continue
+        
+        matches2.append(match)
+    return matches2
 
 def check_batch(batch_id):
     n = run("""

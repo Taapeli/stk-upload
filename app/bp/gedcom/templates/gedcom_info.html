@@ -1,6 +1,5 @@
 {# templates/gedcoms.html_ #}
 {% extends "g_layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _('Logged on user') }}{% endblock %}
 {% block body %}
 {{ super() }}
@@ -18,6 +17,9 @@ var gedcom = "{{ gedcom }}";
 <div class="startdiv">
     <div>
 	    <h1>{{ _("Gedcom tools") }}</h1>
+
+{% include "flash_messages.html" %}
+
 	    <div id="errors" class="errors"></div>
 
 	    <div class="row">

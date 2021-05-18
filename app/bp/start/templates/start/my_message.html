@@ -1,6 +1,5 @@
 {# _start/my_message.html_ #}
 {% extends "start/s_layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _("Contact administrators") }} (start/my_message){% endblock %}
 {% block body %}
 {{ super() }}
@@ -44,6 +43,8 @@ $(document).ready( function() {
 <div id="startdiv">
   <div>
     <h1>{{ _("Contact administrators") }}</h1>
+
+{% include "flash_messages.html" %}
 
     {% if current_user.is_authenticated %}
     <div>
