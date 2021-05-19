@@ -129,8 +129,6 @@ class DOM_handler:
     def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
         res = shareds.dservice.ds_obj_remove_gramps_handles(self.batch.id)
-        if Status.has_failed(res):
-            return res
         print(f'# --- removed handles from {res.get("count")} nodes')
         return res
 
@@ -1057,8 +1055,6 @@ class DOM_handler:
                     ds = service.dataservice    # <Neo4jUpdateService>
                     res = ds.ds_set_family_calculated_attributes(uniq_id)
                     # returns {refnames, sortnames, status}
-                    if Status.has_failed(res):
-                        return res
                     dates_count += res.get("dates")
                     sortname_count += res.get("sortnames")
 
@@ -1091,8 +1087,6 @@ class DOM_handler:
                 if p_id is not None:
                     res = service.set_person_name_properties(uniq_id=p_id)
                     # returns {refnames, sortnames, status}
-                    if Status.has_failed(res):
-                        return res
                     refname_count += res.get("refnames")
                     sortname_count += res.get("sortnames")
 
@@ -1120,11 +1114,6 @@ class DOM_handler:
 
         #res = PersonBl.estimate_lifetimes(self.person_ids)
         res = shareds.dservice.ds_set_people_lifetime_estimates(self.person_ids)
-
-        if Status.has_failed(res):
-            msg = res.get("statustext")
-            logger.error(f"DOM_handler.set_person_estimated_dates {msg}")
-            #flash(ret.get("statustext"), "error")
 
         count = res.get("count")
         message = "Estimated person lifetimes"

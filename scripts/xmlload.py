@@ -21,9 +21,11 @@ A default username can be stored in the instance/config.py as
 import argparse
 import sys
 from unittest.mock import Mock
+import traceback
 
 sys.path.append("../app")
 import shareds
+from bl.base import Status, IsotammiCypherError
 from bl.gramps.gramps_loader import xml_to_stkbase
 
 def load_config(configfile):
@@ -60,4 +62,14 @@ shareds.dataservices = {
     }
 
 
-xml_to_stkbase(args.xmlfilename, args.username)
+try:
+    xml_to_stkbase(args.xmlfilename, args.username)
+except IsotammiCypherError as e:
+    print("xmlload: IsotammiCypherError")
+    traceback.print_exc()
+    for arg,value in e.kwargs.items():
+        print(f"{arg} = {value}")
+except Exception as e:
+    print("xmlload: Exception")
+    traceback.print_exc()
+    

@@ -183,9 +183,6 @@ def background_load_to_stkbase(username,filename):
 
         steps = res.get('steps',[])
         batch_id = res.get('batch_id',"-")
-        if Status.has_failed(res):
-            print(f'background_load_to_stkbase: Error {res.get("statustext")}')
-            return res
 
         for step in steps:
             print(f"    {step}")

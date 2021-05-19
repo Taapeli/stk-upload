@@ -320,9 +320,6 @@ def xml_to_stkbase(pathname, userid):
         res = batch_service.start_data_batch(
             userid, file_cleaned, mediapath, batch_service.dataservice.tx
         )
-        if Status.has_failed(res):
-            print("bp.gramps.gramps_loader.xml_to_stkbase TODO _rollback")
-            return res
         handler.batch = res.get("batch")
         if metadata:
             handler.batch.material_type = metadata[0]
@@ -335,95 +332,37 @@ def xml_to_stkbase(pathname, userid):
         if pathname.endswith(".gpkg"):
             extract_media(pathname, handler.batch.id)
 
-        try:
-            # handler.handle_header() --> get_header_mediapath()
-            res = handler.handle_notes()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_repositories()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_media()
-            if Status.has_failed(res):
-                return res
+        res = handler.handle_notes()
+        res = handler.handle_repositories()
+        res = handler.handle_media()
 
-            res = handler.handle_places()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_sources()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_citations()
-            if Status.has_failed(res):
-                return res
+        res = handler.handle_places()
+        res = handler.handle_sources()
+        res = handler.handle_citations()
 
-            res = handler.handle_events()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_people()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_families()
-            if Status.has_failed(res):
-                return res
+        res = handler.handle_events()
+        res = handler.handle_people()
+        res = handler.handle_families()
 
-            #       for k in handler.handle_to_node.keys():
-            #             print (f'\t{k} –> {handler.handle_to_node[k]}')
+        #       for k in handler.handle_to_node.keys():
+        #             print (f'\t{k} –> {handler.handle_to_node[k]}')
 
-            # Set person confidence values
-            # TODO: Only for imported persons (now for all persons!)
-            res = handler.set_all_person_confidence_values()
-            if Status.has_failed(res):
-                return res
-            res = handler.set_person_calculated_attributes()
-            if Status.has_failed(res):
-                return res
-            res = handler.set_person_estimated_dates()
-            if Status.has_failed(res):
-                return res
+        # Set person confidence values
+        # TODO: Only for imported persons (now for all persons!)
+        res = handler.set_all_person_confidence_values()
+        res = handler.set_person_calculated_attributes()
+        res = handler.set_person_estimated_dates()
 
-            # Copy date and name information from Person and Event nodes to Family nodes
-            res = handler.set_family_calculated_attributes()
-            #res = shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
+        # Copy date and name information from Person and Event nodes to Family nodes
+        res = handler.set_family_calculated_attributes()
+        #res = shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
 
-            if Status.has_failed(res):
-                return res
 
-            res = handler.remove_handles()
-            if Status.has_failed(res):
-                return res
+        res = handler.remove_handles()
             # The missing links counted in remove_handles
         ##TODO      res = handler.add_missing_links()
 
-        except Exception as e:
-            traceback.print_exc()
-            msg = f"Stopped xml load due to {e}"
-            print("bp.gramps.gramps_loader.xml_to_stkbase: " + msg)
-            # batch_service.rollback()
-            handler.blog.log_event(
-                {
-                    "title": _("Database save failed due to {}".format(msg)),
-                    "level": "ERROR",
-                }
-            )
-            return {"status": Status.ERROR, "statustext": msg}
-
         res = batch_service.batch_mark_status(Batch.BATCH_CANDIDATE)
-        if Status.has_failed(res):
-            msg = res.get("statustext", "")
-            batch_service.rollback()
-            handler.blog.log_event(
-                {
-                    "title": _("Database save failed due to {}".format(msg)),
-                    "level": "ERROR",
-                }
-            )
-            return {
-                "status": res.get("status"),
-                "statustest": msg,
-                "steps": handler.blog.list(),
-                "batch_id": handler.batch.id,
-            }
 
         # batch_service.commit()
         logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')

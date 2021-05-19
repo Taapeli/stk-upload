@@ -332,8 +332,6 @@ class PersonWriter(DataService):
             for name in names:
                 # Create links and nodes from given person: (:Person) --> (r:Refname)
                 res = shareds.dservice.ds_build_refnames(name.person_uid, name)
-                if Status.has_failed(res):
-                    return res
                 refname_count += res.get("count", 0)
         if do_sortname:
             for name in names:
@@ -343,8 +341,6 @@ class PersonWriter(DataService):
                     res = shareds.dservice.ds_set_person_sortname(
                         name.person_uid, sortname
                     )
-                    if Status.has_failed(res):
-                        return res
                     sortname_count += 1
                     break
 

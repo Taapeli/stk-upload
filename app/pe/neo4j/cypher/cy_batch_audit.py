@@ -31,7 +31,9 @@ class CypherBatch():
     '''
 
     aquire_lock = """MERGE (lock:Lock {id:$lock_id})
-SET lock.locked = true"""
+SET lock.locked = true
+RETURN lock
+"""
 
     batch_find_id = """
 MATCH (b:Batch) WHERE b.id STARTS WITH $batch_base
