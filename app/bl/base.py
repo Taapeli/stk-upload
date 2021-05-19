@@ -214,3 +214,9 @@ class NodeObject:
         Called by `json.dumps(my_stk_object, cls=StkEncoder)`
         """
         return self.__dict__
+
+class IsotammiException(Exception):
+    def __init__(self, msg, **kwargs):
+        Exception.__init__(self, msg)
+        self.kwargs = kwargs
+        

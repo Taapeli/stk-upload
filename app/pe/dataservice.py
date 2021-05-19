@@ -106,7 +106,8 @@ class DataService:
         if self.dataservice.tx:
             if exc_type:
                 print(f"--{self.idstr} exit rollback {exc_type}")
-                self.dataservice.tx.rollback()
+                if self.old_tx is None:
+                    self.dataservice.tx.rollback()
             else:
                 if self.old_tx is None:
                     print(f'#~~~{self.idstr} exit commit tx={obj_addr(self.dataservice.tx)}')

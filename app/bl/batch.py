@@ -81,32 +81,23 @@ class Batch:
         Returns {'id':self.id, 'status':Status.OK}
         """
         # print(f"Batch.save with {shareds.dservice.__class__.__name__}")
-        try:
-            attr = {
-                "id": self.id,
-                "user": self.user,
-                "file": self.file,
-                "mediapath": self.mediapath,
-                # timestamp": <to be set in cypher>,
-                # id: <uniq_id from result>,
-                "status": self.status,
-                "material_type": self.material_type,
-                "description": self.description,
-            }
-            res = shareds.dservice.ds_batch_save(attr)
-            # returns {status, identity}
-            if Status.has_failed(res):
-                return res
+        attr = {
+            "id": self.id,
+            "user": self.user,
+            "file": self.file,
+            "mediapath": self.mediapath,
+            # timestamp": <to be set in cypher>,
+            # id: <uniq_id from result>,
+            "status": self.status,
+            "material_type": self.material_type,
+            "description": self.description,
+        }
+        res = shareds.dservice.ds_batch_save(attr)
+        # returns {status, identity}
 
-            self.uniq_id = res.get("identity")
-            return res
+        self.uniq_id = res.get("identity")
+        return res
 
-        except Exception as e:
-            return {
-                "id": self.id,
-                "status": Status.ERROR,
-                "statustext": f"bl.batch.Batch.save: {e.__class__.__name__} {e}",
-            }
 
     @classmethod
     def from_node(cls, node):
@@ -366,12 +357,6 @@ class BatchUpdater(DataService):
         # Find the next free Batch id
         batch = Batch()
         res = shareds.dservice.ds_new_batch_id()
-        if Status.has_failed(res):
-            # Failed to get an id
-            print(
-                "bl.batch.BatchUpdater.start_data_batch: TODO shareds.datastore._remove_lock('batch_id')"
-            )
-            return res
 
         batch.id = res.get("id")
         batch.user = userid
@@ -379,14 +364,6 @@ class BatchUpdater(DataService):
         batch.mediapath = mediapath
 
         res = batch.save()
-        if Status.has_failed(res):
-            print(
-                f"bl.batch.BatchUpdater.start_data_batch: batch.save FAILED: {res.get('statustext')}"
-            )
-            return res
-        print(
-            f"bl.batch.BatchUpdater.start_data_batch: new Batch {batch.id} uniq_id={batch.uniq_id}"
-        )
         self.batch = batch
 
         return {"batch": batch, "status": Status.OK}
@@ -395,8 +372,6 @@ class BatchUpdater(DataService):
         """Get Batch object by username and batch id. """
         ret = shareds.dservice.ds_get_batch(user, batch_id)
         # returns {"status":Status.OK, "node":record}
-        if Status.has_failed(ret):
-            return ret
         try:
             node = ret['node']
             batch = Batch.from_node(node)
