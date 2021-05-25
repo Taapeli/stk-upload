@@ -170,7 +170,7 @@ function confirm_delete(subj, name) {
                 <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Batch id") }}</th>
                 <th>{{ _("Person count") }}</th>
-                <th>{{ _("Type") }}
+                <th>{{ _("Type") }}, {{ _("Description") }}</th>
                 <th>{{ _("Status") }}
 					<div class="tooltip"> &#x2754;
 					  <div class="tooltiptext">
@@ -185,7 +185,6 @@ function confirm_delete(subj, name) {
 					  </div>
 					</div> 
 				</th>
-                <th>{{ _("Description") }}
    			</tr>
 
 	    {% for upload in uploads %}{% if upload.status != "?" %}
@@ -203,32 +202,27 @@ function confirm_delete(subj, name) {
                 {% endif %}
                </td>
 	           <td>{{upload.material_type}}
+                {% if upload.description %} 
+                    <br><i>
+                    {{ upload.description[0:15] }}
+                    {% if upload.description|length > 15  %}
+                        ... 
+                        <div class="tooltip"> 
+                        &nbsp;&#8505;&nbsp;
+                          <div class="tooltiptext">
+                            {{ upload.description }} 
+                          </div>
+                        </div> 
+                    {% endif %}
+                    </i>
+                {% endif %}
+                </td>
 	           <td>{{upload.status}}
 	           		<div class="progress" data-name='{{upload.xmlname}}'></div>
                 {% if upload.loading %}
                      <script>
 	                     setTimeout( function() {update_progress('{{upload.xmlname}}')}, 1000 );
                      </script>
-                {% endif %}
-	           </td>
-               <td>
-				{% if upload.description %} 
-				  	{{ upload.description[0:15] }} 
-					{% if upload.description|length > 15  %}
-						... 
-						<div class="tooltip"> 
-						&#8505;
-						<!--  
-						&#128712; 
-						&#9432;
-					 	&#x1f6c8;
-					 	-->
-						  <div class="tooltiptext">
-						  	{{ upload.description }} 
-							</p>
-						  </div>
-						</div> 
-	                {% endif %}
                 {% endif %}
 	           </td>
 	       </tr>

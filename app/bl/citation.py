@@ -7,6 +7,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 """
 
+# blacked 25.5.2021/JMä
 from sys import stderr
 import logging
 from bl.dates import DateRange
@@ -15,8 +16,8 @@ logger = logging.getLogger("stkserver")
 
 # import shareds
 from bl.base import NodeObject
-from models.cypher_gramps import Cypher_citation_w_handle
-
+from pe.neo4j.cypher.cy_citation import CypherCitation
+#from models.cypher_gramps import Cypher_citation_w_handle
 # from .cypher import Cypher_citation
 
 
@@ -155,7 +156,7 @@ class Citation(NodeObject):
                 c_attr.update(self.dates.for_db())
 
             result = tx.run(
-                Cypher_citation_w_handle.create_to_batch,
+                CypherCitation.create_to_batch,
                 batch_id=batch_id,
                 c_attr=c_attr,
             )
@@ -177,7 +178,7 @@ class Citation(NodeObject):
         try:
             for handle in self.note_handles:
                 tx.run(
-                    Cypher_citation_w_handle.link_note, handle=self.handle, hlink=handle
+                    CypherCitation.link_note, handle=self.handle, hlink=handle
                 )
         except Exception as err:
             logger.error(
