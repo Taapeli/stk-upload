@@ -22,6 +22,7 @@ Created on 12.8.2018
 
 @author: jm
 """
+# blacked 25.5.2021/JMä
 import io
 import os
 import traceback
@@ -65,17 +66,13 @@ from ui.user_context import UserContext
 from ui import jinja_filters
 
 from bp.scene.models import media
-#from models.obsolete_datareader import obsolete_read_persons_with_events
+from bp.graph.models.fanchart import FanChart
 
 # Select the read driver for current database
 # from database.accessDB import get_dataservice
 # opt = "read_tx" --> Neo4jReadServiceTx # initiate when used
 # opt = "read" --> Neo4jReadService
 
-# from pe.neo4j.writeservice import Neo4jWriteService
-# writeservice = Neo4jWriteService(shareds.driver)
-
-from bp.graph.models.fanchart import FanChart
 
 calendars = [  # just for translations
     _("Julian"),
@@ -256,67 +253,6 @@ def show_person_search():
         placenamestats=placenamestats,
         elapsed=time.time() - t0,
     )
-
-
-# @bp.route('/obsolete/search', methods=['POST'])
-# @bp.route('/obsolete/ref=<key>', methods=['GET'])
-# @login_required
-# @roles_accepted('guest', 'research', 'audit', 'admin')
-# def obsolete_show_person_search(selection=None):
-#     """ Show list of selected Persons for menu(1) or menu(12).
-#         GET persons [?years]
-#         GET persons/?haku [&years]
-#         POST persons form: rule, name [,years]
-
-# @bp.route('/obsolete/persons/v1', methods=['POST', 'GET'])
-# @login_required
-# @roles_accepted('guest', 'research', 'audit', 'admin')
-# def obsolete_show_person_list_v2(selection=None):
-#     """ Show list of selected Persons for menu(0). """
-
-
-@bp.route("/obsolete/persons/ref=<string:refname>")
-@bp.route("/obsolete/persons/ref=<string:refname>/<opt>")
-@login_required
-@roles_accepted("guest", "research", "audit", "admin")
-def obsolete_show_persons_by_refname(refname, opt=""):
-    """List persons by refname for menu(0). Called from /list/refnames"""
-    logger.warning(
-        "#TODO: fix material selection or remove action show_persons_by_refname"
-    )
-
-    u_context = UserContext(user_session, current_user, request)
-    keys = ("refname", refname)
-    ref = "ref" in opt
-    order = 0
-    args = {"ref": ref, "order": order}
-    if current_user.is_authenticated:
-        args["user"] = current_user.username
-    print(f"Obsolete! {request.method}: keys={keys}, args={args}")
-    persons = obsolete_read_persons_with_events(keys, args=args)
-    print(persons)
-    persons = []
-    stk_logger(
-        u_context, f"-> bp.scene.routes.show_persons_by_refname FAIL?"
-    )  # n={len(persons)}")
-    return render_template(
-        "/scene/persons_search.html",
-        persons=persons,
-        menuno=1,
-        user_context=u_context,
-        order=order,
-        rule=keys,
-    )
-
-
-# @bp.route('/obsolete/persons/all/<string:opt>')
-# @bp.route('/obsolete/persons/all/')
-# @login_required
-# @roles_accepted('guest', 'research', 'audit', 'admin')
-# def obsolete_show_all_persons_list(opt=''):
-#     """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
-#
-#         Linked from admin/refnames only
 
 
 # -------------------------- Menu 12 Persons by user ---------------------------
@@ -544,12 +480,6 @@ def sort_names():
     with PersonWriter("simple", u_context) as service:
         service.set_name_orders(uid_list)
     return get_person_primary_name(uuid)
-
-
-# @bp.route('/scene/person/uuid=<pid>')
-# @bp.route('/scene/person=<int:pid>')
-# #     @login_required
-# def obsolete_show_person_v1(pid):
 
 
 # @bp.route('/scene/event/<int:uniq_id>')
@@ -784,13 +714,6 @@ def show_families():
     )
 
 
-# @bp.route('/scene/family=<int:fid>')
-# def show_family_page(fid):
-#     """ Home page for a Family.    OBSOLETE: use show_family
-#         fid = id(Family)
-#     """
-
-
 @bp.route("/scene/family", methods=["GET"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
@@ -942,22 +865,16 @@ def show_place(locid):
     t0 = time.time()
     u_context = UserContext(user_session, current_user, request)
     try:
-        # Open database connection and start transaction
-        # readservice -> Tietokantapalvelu
-        #      reader ~= Toimialametodit
-
         with PlaceReader("read", u_context) as service:
             # reader = PlaceReader(readservice, u_context)
             res = service.get_places_w_events(locid)
 
         if res["status"] == Status.NOT_FOUND:
             print(f'bp.scene.routes.show_place: {_("Place not found")}')
-            # return redirect(url_for('virhesivu', code=1, text=f'Ei löytynyt yhtään'))
-        if res["status"] != Status.OK:
+        elif res["status"] != Status.OK:
             print(
                 f'bp.scene.routes.show_place: {_("Place not found")}: {res.get("statustext")}'
             )
-            # return redirect(url_for('virhesivu', code=1, text=f'Virhetilanne'))
 
     except KeyError as e:
         traceback.print_exc()
@@ -1001,11 +918,7 @@ def show_sources(series=None):
     u_context.set_scope_from_request(request, "source_scope")
     u_context.count = request.args.get("c", 100, type=int)
 
-    # readservice -> Tietokantapalvelu
-    #      reader ~= Toimialametodit
     with SourceReader("read", u_context) as service:
-        # reader = SourceReader(readservice, u_context)
-
         if series:
             u_context.series = series
         # try:
@@ -1041,7 +954,6 @@ def show_source_page(sourceid=None):
     u_context = UserContext(user_session, current_user, request)
     try:
         with SourceReader("read", u_context) as service:
-            # reader = SourceReader(readservice, u_context)
             res = service.get_source_with_references(uuid, u_context)
 
         if res["status"] == Status.NOT_FOUND:
@@ -1089,7 +1001,6 @@ def show_medias():
     u_context.count = 20
 
     with MediaReader("read", u_context) as service:
-        # datareader = MediaReader(readservice, u_context)
         res = service.read_my_media_list()
 
     if Status.has_failed(res, False):
@@ -1115,7 +1026,6 @@ def show_media(uuid=None):
     uuid = request.args.get("uuid", uuid)
     u_context = UserContext(user_session, current_user, request)
     with MediaReader("read", u_context) as service:
-        # reader = MediaReader(readservice, u_context)
         res = service.get_one(uuid)
 
     status = res.get("status")
