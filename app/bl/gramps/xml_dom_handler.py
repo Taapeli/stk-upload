@@ -47,13 +47,13 @@ from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaBl, MediaReferenceByHandles
 from bl.event import EventBl
+from bl.note import Note
 from bl.dates import Gramps_DateRange
 
 from .models.source_gramps import Source_gramps
 from .batchlogger import LogItem
 
 from models.cypher_gramps import Cypher_mixed
-from models.gen.note import Note
 from models.gen.citation import Citation
 from models.gen.repository import Repository
 

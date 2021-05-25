@@ -53,10 +53,9 @@ import shareds
 
 from bl.base import NodeObject, Status
 from bl.person_name import Name
+from bl.note import Note
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_person import CypherPerson
-
-from models.gen.note import Note
 
 # Privacy rule: how many years after death
 PRIVACY_LIMIT = 0
@@ -392,9 +391,8 @@ class PersonBl(Person):
                new names (:Person) --> (:Name)
         """
 
-        if "batch_id" in kwargs:
-            batch_id = kwargs["batch_id"]
-        else:
+        batch_id = kwargs.get('batch_id', None)
+        if not 'batch_id':
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
         self.uuid = self.newUuid()
         # Save the Person node under UserProfile; all attributes are replaced
@@ -441,7 +439,7 @@ class PersonBl(Person):
 
         # Save web urls as Note nodes connected under the Person
         if self.notes:
-            Note.save_note_list(tx, self)
+            Note.save_note_list(tx, parent=self, batch_id=batch_id)
 
         """ Connect to each Event loaded from Gramps """
         try:

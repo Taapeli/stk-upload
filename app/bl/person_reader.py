@@ -33,12 +33,9 @@ from bl.family import FamilyBl
 from bl.place import PlaceBl, PlaceName
 from bl.media import Media
 from bl.source import SourceBl
+from bl.note import Note
 
-from models.gen.note import Note
-
-# TODO from bl.note import Note
 from models.gen.citation import Citation
-
 # TODO from bl.citation import Citation
 from models.gen.repository import Repository
 

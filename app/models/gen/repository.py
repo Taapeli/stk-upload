@@ -11,7 +11,7 @@ from sys import stderr
 from bl.base import NodeObject
 from models.cypher_gramps import Cypher_repository_in_batch
 from .cypher import Cypher_repository
-from .note import Note
+from bl.note import Note
 import shareds
    
 
@@ -145,6 +145,7 @@ class Repository(NodeObject):
             raise RuntimeError(f"Repository.save needs batch_id for {self.id}")
 
         self.uuid = self.newUuid()
+        batch_id = kwargs.get('batch_id', None)
         r_attr = {}
         try:
             r_attr = {
@@ -157,7 +158,7 @@ class Repository(NodeObject):
             }
 #             self.uniq_id = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr).single()[0]
             result = tx.run(Cypher_repository_in_batch.create,
-                            bid=kwargs['batch_id'], r_attr=r_attr)
+                            bid=batch_id, r_attr=r_attr)
             self.uniq_id = result.single()[0]
         except Exception as err:
             print(f"iError Repository_save: {err} attr={r_attr}", file=stderr)
@@ -166,7 +167,7 @@ class Repository(NodeObject):
         try:
             # Save the notes attached to self
             if self.notes:
-                Note.save_note_list(tx, self)
+                Note.save_note_list(tx, parent=self, batch_id=batch_id)
         except Exception as err:
             print(f"iError Repository.save note: {err}", file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing
