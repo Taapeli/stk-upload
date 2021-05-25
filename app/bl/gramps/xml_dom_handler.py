@@ -33,7 +33,7 @@ from collections import defaultdict
 import re
 import time
 import os
-import uuid
+#import uuid
 import xml.dom.minidom
 
 # from flask_babelex import _
@@ -50,12 +50,12 @@ from bl.event import EventBl
 from bl.note import Note
 from bl.dates import Gramps_DateRange
 from bl.citation import Citation
+from bl.repository import Repository
 
 from .models.source_gramps import Source_gramps
 from .batchlogger import LogItem
 
 from models.cypher_gramps import Cypher_mixed
-from models.gen.repository import Repository
 
 import threading
 

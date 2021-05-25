@@ -35,8 +35,7 @@ from bl.media import Media
 from bl.source import SourceBl
 from bl.note import Note
 from bl.citation import Citation
-# TODO from bl.citation import Citation
-from models.gen.repository import Repository
+from bl.repository import Repository
 
 # Pick a PlaceName by user language
 from ui.place import place_names_local_from_nodes
