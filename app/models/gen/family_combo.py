@@ -16,7 +16,7 @@ from .event_combo import Event_combo
 #from .person_name import Name
 from .note import Note
 from .source import Source
-from .citation import Citation
+from bl.citation import Citation
 from .repository import Repository
 #from .dates import DateRange
 #from .place_combo import Place_combo

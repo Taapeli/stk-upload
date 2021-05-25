@@ -65,7 +65,7 @@ from ui.user_context import UserContext
 from ui import jinja_filters
 
 from bp.scene.models import media
-from models.obsolete_datareader import obsolete_read_persons_with_events
+#from models.obsolete_datareader import obsolete_read_persons_with_events
 
 # Select the read driver for current database
 # from database.accessDB import get_dataservice

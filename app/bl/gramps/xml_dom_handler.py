@@ -49,12 +49,12 @@ from bl.media import MediaBl, MediaReferenceByHandles
 from bl.event import EventBl
 from bl.note import Note
 from bl.dates import Gramps_DateRange
+from bl.citation import Citation
 
 from .models.source_gramps import Source_gramps
 from .batchlogger import LogItem
 
 from models.cypher_gramps import Cypher_mixed
-from models.gen.citation import Citation
 from models.gen.repository import Repository
 
 import threading

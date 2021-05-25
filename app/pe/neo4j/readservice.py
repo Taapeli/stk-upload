@@ -49,10 +49,10 @@ from .cypher.cy_media import CypherMedia
 
 from bl.event import Event
 from bl.note import Note
+from bl.citation import Citation
 #Todo: Change Old style includes to bl classes
 from models.gen.repository import Repository
 from models.dbtree import DbTree
-from models.gen.citation import Citation
 
 
 class Neo4jReadService(ConcreteService):
