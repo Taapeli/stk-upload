@@ -176,15 +176,14 @@ class Note(NodeObject):
             if self.handle: 
                 n_attr['handle'] = self.handle
             if 'parent_id' in kwargs:
-                print(f"Note_save: parent (uid={kwargs['parent_id']}) --> (id={self.id})")
-                # old: Cypher_note_in_batch.create_as_leaf, 
+                print(f"Note_save: parent (uid={kwargs['parent_id']}) --> (id={self.id})"\
+                      " [No link Batch-->Note created!]")
                 self.uniq_id = tx.run(CypherNote.create_in_batch_as_leaf, 
                                       bid=batch_id, 
                                       parent_id=kwargs['parent_id'], 
                                       n_attr=n_attr).single()[0]
             elif 'batch_id' in kwargs:
-                print(f"Note_save: batch ({kwargs['batch_id']}) --> ({self.id})")
-                # old: Cypher_note_in_batch.create, 
+                #print(f"Note_save: batch ({kwargs['batch_id']}) --> ({self.id})")
                 self.uniq_id = tx.run(CypherNote.create_in_batch,
                                       bid=batch_id,
                                       n_attr=n_attr).single()[0]
