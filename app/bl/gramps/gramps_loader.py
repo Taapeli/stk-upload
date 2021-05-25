@@ -45,6 +45,12 @@ def get_upload_folder(username):
     """ Returns upload directory for given user"""
     return os.path.join("uploads", username)
 
+def get_isotammi_metadata(username, filename):
+    upload_folder = get_upload_folder(username)
+    pathname = os.path.join(upload_folder, filename)
+    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    handler = DOM_handler(file_cleaned, username, filename)
+    return handler.get_metadata_from_header()
 
 def analyze_xml(username, filename):
     """Returns a dict of Gremp xml objec type counts."""
@@ -309,6 +315,8 @@ def xml_to_stkbase(pathname, userid):
     with BatchUpdater("update") as batch_service:
         # print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
         mediapath = handler.get_mediapath_from_header()
+        metadata = handler.get_metadata_from_header()
+        print("metadata:", metadata)
         res = batch_service.start_data_batch(
             userid, file_cleaned, mediapath, batch_service.dataservice.tx
         )
@@ -316,6 +324,10 @@ def xml_to_stkbase(pathname, userid):
             print("bp.gramps.gramps_loader.xml_to_stkbase TODO _rollback")
             return res
         handler.batch = res.get("batch")
+        if metadata:
+            handler.batch.material_type = metadata[0]
+            handler.batch.description = metadata[1]
+            handler.batch.save()
         handler.handle_suffix = "_" + handler.batch.id  
 
         t0 = time.time()

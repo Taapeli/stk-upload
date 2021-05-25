@@ -173,6 +173,33 @@ class DOM_handler:
                     return mediapath.childNodes[0].data
         return None
 
+    def get_metadata_from_header(self):
+        """Extract Isotammi metadata from XML header"""
+        for header in self.xml_tree.getElementsByTagName("header"):
+            for node in header.childNodes:
+                #print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
+                if node.nodeName == "isotammi":
+                    return self.get_isotammi_metadata(node)
+        return None
+
+    def get_isotammi_metadata(self, isotammi_node):
+        material_type = None
+        description = None
+        for node in isotammi_node.childNodes:
+            print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
+            if node.nodeName == "#text": print("- data:",node.data)
+            if node.nodeName == "#text":
+                pass
+            elif node.nodeName == "researcher-info":
+                pass
+            elif node.nodeName == "material_type":
+                material_type = node.childNodes[0].data
+            elif node.nodeName == "user_description":
+                description = node.childNodes[0].data.strip()
+            else:
+                print("Unsupported element in <isotammi>: {node.nodeName}")
+        return (material_type, description)
+        
     def handle_citations(self):
         # Get all the citations in the xml_tree
         citations = self.xml_tree.getElementsByTagName("citation")

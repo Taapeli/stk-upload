@@ -69,6 +69,8 @@ class Batch:
         self.status = Batch.BATCH_STARTED
         self.mediapath = None  # Directory for media files
         self.timestamp = 0
+        self.material_type = ""
+        self.description = ""
 
     def __str__(self):
         return f"{self.user} / {self.id}"
@@ -88,6 +90,8 @@ class Batch:
                 # timestamp": <to be set in cypher>,
                 # id: <uniq_id from result>,
                 "status": self.status,
+                "material_type": self.material_type,
+                "description": self.description,
             }
             res = shareds.dservice.ds_batch_save(attr)
             # returns {status, identity}
@@ -117,6 +121,8 @@ class Batch:
         obj.timestamp = node.get("timestamp", 0)
         obj.upload = format_timestamp(obj.timestamp)
         obj.auditor = node.get("auditor", None)
+        obj.material_type = node.get("material_type", "")
+        obj.description = node.get("description", "")
         return obj
 
     @staticmethod
