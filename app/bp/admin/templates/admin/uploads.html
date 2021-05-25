@@ -26,9 +26,10 @@
         <table style="width:90%">
            <tr>
 			    {% if not user %}
-	                <th>{{ _("User id") }}</th>
+	                <th>{{ _("User") }}</th>
 			    {% endif %}
                 <th>{{ _("Gramps file / uploaded at") }}</th>
+                <th>{{ _("Type / description") }}</th>
                 <th>{{ _("Status") }}
                     <div class="tooltip"> &#x2754;
                       <div class="tooltiptext">
@@ -56,11 +57,29 @@
     	               {{upload.xmlname}}</a>
                    <br>{{upload.upload_time_s}} 
 	           </td>
+
+               <td class="msg_INFO">
+                    <span class="typedesc">{{upload.material_type}}</span>
+                {% if upload.description %} 
+                    <br><i>{{ upload.description[0:19] }}
+                    {% if upload.description|length > 19  %}
+                        ... 
+                        <div class="tooltip"> 
+                        &nbsp;&#8505;&nbsp;
+                          <div class="tooltiptext">
+                            {{ upload.description }} 
+                          </div>
+                        </div> 
+                    {% endif %}
+                    </i>
+                {% endif %}
+               </td>
+
 	           <td class="msg_INFO">{{upload.status}}
 	           	{% if upload.batch_id %}
 	           	   {% if upload.status == _("UPLOADED") %}({{_( "deleted from database" ) }})
 	           	   {% else %}<br>
-                      {{ _("batch %(batch_id)s; %(persons)d persons", batch_id=upload.batch_id, persons=upload.count) }}
+                      {{ _("batch %(batch_id)s; %(persons)d&nbsp;persons", batch_id=upload.batch_id, persons=upload.count) }}
 	           	   {% endif %}
 	           	{% endif %}
                </td>

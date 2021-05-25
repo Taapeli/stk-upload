@@ -170,7 +170,6 @@ function confirm_delete(subj, name) {
                 <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Batch id") }}</th>
                 <th>{{ _("Person count") }}</th>
-                <th>{{ _("Type") }}, {{ _("Description") }}</th>
                 <th>{{ _("Status") }}
 					<div class="tooltip"> &#x2754;
 					  <div class="tooltiptext">
@@ -193,19 +192,14 @@ function confirm_delete(subj, name) {
 	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}');">
 	           </td>
 	           <td>{{upload.upload_time_s}}</td>
-	           <td>{{upload.xmlname}}</td>
-               <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}</td>
-               <td class="center">
-                {% if upload.count %}{{upload.count}}{% endif %}
-                {% if upload.count_a %}
-                    <i title="{{ _("The persons sent to common data") }}">{{upload.count_a}}</i>
+	           <td>{{upload.xmlname}}
+
+                {% if upload.material_type or upload.description %}
+                    <br><span class="typedesc">{{upload.material_type}}</span>
                 {% endif %}
-               </td>
-	           <td>{{upload.material_type}}
                 {% if upload.description %} 
-                    <br><i>
-                    {{ upload.description[0:15] }}
-                    {% if upload.description|length > 15  %}
+                    <i>{{ upload.description[0:19] }}
+                    {% if upload.description|length > 19  %}
                         ... 
                         <div class="tooltip"> 
                         &nbsp;&#8505;&nbsp;
@@ -216,15 +210,23 @@ function confirm_delete(subj, name) {
                     {% endif %}
                     </i>
                 {% endif %}
+
                 </td>
-	           <td>{{upload.status}}
-	           		<div class="progress" data-name='{{upload.xmlname}}'></div>
+               <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}</td>
+               <td class="center">
+                {% if upload.count %}{{upload.count}}{% endif %}
+                {% if upload.count_a %}
+                    <i title="{{ _("The persons sent to common data") }}">{{upload.count_a}}</i>
+                {% endif %}
+               </td>
+               <td>{{upload.status}}
+                    <div class="progress" data-name='{{upload.xmlname}}'></div>
                 {% if upload.loading %}
                      <script>
-	                     setTimeout( function() {update_progress('{{upload.xmlname}}')}, 1000 );
+                         setTimeout( function() {update_progress('{{upload.xmlname}}')}, 1000 );
                      </script>
                 {% endif %}
-	           </td>
+               </td>
 	       </tr>
 	    {% endif %}{% endfor %}
 	    {% if uploads|length == 0 %}
