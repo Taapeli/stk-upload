@@ -38,7 +38,7 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 import shareds
-from bl.base import Status
+from bl.base import Status, IsotammiException
 from models import email, util, syslog 
 from bl.gramps import gramps_loader
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch
@@ -215,6 +215,9 @@ def background_load_to_stkbase(username,filename):
         for step in steps:
             msg += f"\n{step}"
         msg += "\n"
+        if isinstance(e, IsotammiException):
+            pprint.pprint(e.kwargs)
+            msg += pprint.pformat(e.kwargs)
         open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
                     "Stk: Gramps XML file storing FAILED",
