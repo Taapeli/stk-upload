@@ -25,7 +25,7 @@ import traceback
 
 sys.path.append("../app")
 import shareds
-from bl.base import Status, IsotammiCypherError
+from bl.base import Status, IsotammiException
 from bl.gramps.gramps_loader import xml_to_stkbase
 
 def load_config(configfile):
@@ -64,8 +64,8 @@ shareds.dataservices = {
 
 try:
     xml_to_stkbase(args.xmlfilename, args.username)
-except IsotammiCypherError as e:
-    print("xmlload: IsotammiCypherError")
+except IsotammiException as e:
+    print("xmlload: IsotammiException")
     traceback.print_exc()
     for arg,value in e.kwargs.items():
         print(f"{arg} = {value}")
