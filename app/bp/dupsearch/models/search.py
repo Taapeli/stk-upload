@@ -22,14 +22,14 @@ import os
 import re
 import traceback
 
-from neo4j import GraphDatabase
-from models.gen.event import Event
+from bl.event import Event
+from bl.refname import Refname
 import shareds
 
+from neo4j import GraphDatabase
 from werkzeug.utils import secure_filename
 import subprocess
 from operator import itemgetter
-from bl.refname import Refname
 import functools
 import time
 from pprint import pprint
@@ -439,10 +439,12 @@ def prune_matches(matches):
         names = [refnames.get(value[1:],value[1:]) for value in words if value[0] == "G"]
         return set(names)
     
-    def get_firstnames(key):
-        words = key.split()
-        names = [value[1:] for value in words if value[0] == "G"]
-        return set(names)
+    #====== Duplicate!? =======================================================
+    # def get_firstnames(key):
+    #     words = key.split()
+    #     names = [value[1:] for value in words if value[0] == "G"]
+    #     return set(names)
+    #==========================================================================
 
      
     matches2 = []
