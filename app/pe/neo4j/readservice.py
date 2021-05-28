@@ -47,6 +47,7 @@ from .cypher.cy_family import CypherFamily
 from .cypher.cy_event import CypherEvent
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_media import CypherMedia
+from .cypher.cy_comment import CypherComment
 
 from bl.event import Event
 from bl.note import Note
@@ -1324,6 +1325,41 @@ class Neo4jReadService(ConcreteService):
 
         status = Status.OK if recs else Status.NOT_FOUND
         return {"status": status, "items": recs}
+
+    def dr_get_comment_list(self, user, fw_from, limit):
+        """Reads Comment objects from user batch or common data using context.
+
+        :param: user    Active user or None, if approved data is requested
+        :param: fw_from The name from which the list is requested
+        :param: limit   How many items per page
+        """
+
+        with self.driver.session(default_access_mode="READ") as session:
+            if user == None:
+                # Show approved common data
+                result = session.run(
+                    CypherComment.read_approved_comments,
+                    user=user,
+                    start_name=fw_from,
+                    limit=limit,
+                )
+            else:
+                # Show user Batch
+                result = session.run(
+                    CypherComment.read_my_comments,
+                    start_name=fw_from,
+                    user=user,
+                    limit=limit,
+                )
+
+            recs = []
+            for record in result:
+                recs.append(record)
+            #             recs = [record for record in result]
+            if recs:
+                return {"recs": recs, "status": Status.OK}
+            else:
+                return {"recs": recs, "status": Status.NOT_FOUND}
 
     def dr_get_source_citations(self, sourceid: int):
         """Read Events and Person, Family and Media citating this Source.
