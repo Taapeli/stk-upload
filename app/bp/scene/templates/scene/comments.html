@@ -33,7 +33,7 @@
 {% if cnt %}
     {% for m in comments %}
         <tr>
-            <td>{{m.user}}</td>
+            <td>{{m.credit}}</td>
             <td><a href="/scene/person?uuid={{m.uuid}}" class="inlink"
                    title="{{ _('Go to comment page') }}">{{ m.uuid }}</a>
             </td>

@@ -1079,7 +1079,7 @@ def show_comments():
         flash(f'{res.get("statustext","error")}', "error")
     comments = res.get("items", [])
 
-    stk_logger(u_context, f"-> bp.scene.media.show_comments fw n={len(comments)}")
+    stk_logger(u_context, f"-> bp.scene.comment.show_comments fw n={len(comments)}")
     return render_template(
         "/scene/comments.html",
         comments=comments,

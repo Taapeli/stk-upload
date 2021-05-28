@@ -105,7 +105,7 @@ class CommentReader(DataService):
             #    count=1>
             node = record["o"]
             m = Comment.from_node(node)
-            m.conn = record.get("count", 0)
+            m.count = record.get("count", 0)
             m.credit = record.get("credit")
             m.batch = record.get("batch_id")
             comments.append(m)
