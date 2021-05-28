@@ -28,6 +28,7 @@ Created on 15.8.2018
 import os
 import time
 import logging
+import traceback
 
 logger = logging.getLogger("stkserver")
 
@@ -144,6 +145,7 @@ def upload_gramps():
             f" e={shareds.tdiff:.3f}sek"
         )
     except Exception as e:
+        traceback.print_exc()
         return redirect(url_for("gramps.error_page", code=1, text=str(e)))
 
     return redirect(url_for("gramps.list_uploads"))
