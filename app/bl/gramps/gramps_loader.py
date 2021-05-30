@@ -48,7 +48,7 @@ def get_upload_folder(username):
 def get_isotammi_metadata(username, filename):
     upload_folder = get_upload_folder(username)
     pathname = os.path.join(upload_folder, filename)
-    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
     handler = DOM_handler(file_cleaned, username, filename)
     return handler.get_metadata_from_header()
 
@@ -295,7 +295,7 @@ def xml_to_stkbase(pathname, userid):
     from bl.batch import BatchUpdater, Batch
 
     # Uncompress and hide apostrophes (and save log)
-    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
 
     # Get XML DOM parser and start DOM elements handler transaction
     handler = DOM_handler(file_cleaned, userid, pathname)
@@ -329,7 +329,7 @@ def xml_to_stkbase(pathname, userid):
 
         t0 = time.time()
 
-        if pathname.endswith(".gpkg"):
+        if is_gpkg:
             extract_media(pathname, handler.batch.id)
 
         res = handler.handle_notes()
@@ -406,33 +406,47 @@ def file_clean(pathname):
     file_displ = basename(pathname)
     with open(file_cleaned, "w", encoding="utf-8") as file_out:
         # Creates the output file and closes it
-        if (
-            ext == ".gpkg"
-        ):  # gzipped tar file with embedded gzipped 'data.gramps' xml file
+
+        try:  # .gpkg: gzipped tar file with embedded gzipped 'data.gramps' xml file
             with gzip.open(
                 TarFile(fileobj=gzip.GzipFile(pathname)).extractfile("data.gramps"),
                 mode="rt",
                 encoding="utf-8",
             ) as file_in:
                 counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned apostrophes from .gpkg input file"  # Try to read a gzipped file
-        else:  # .gramps: either gzipped or plain xml file
-            try:
-                with gzip.open(
-                    pathname, mode="rt", encoding="utf-8", compresslevel=9
-                ) as file_in:
-                    # print("A gzipped file")
-                    counter = _clean_apostrophes(file_in, file_out)
-                msg = "Cleaned apostrophes from packed input lines"  # Try to read a gzipped file
-            except OSError:  # Not gzipped; Read as an ordinary file
-                with open(pathname, mode="rt", encoding="utf-8") as file_in:
-                    print("Not a gzipped file")
-                    counter = _clean_apostrophes(file_in, file_out)
-                msg = "Cleaned apostrophes from input lines"
-        event = LogItem(
-            {"title": msg, "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-    return (file_cleaned, file_displ, event)
+            msg = "Cleaned apostrophes from .gpkg input file"  
+            event = LogItem(
+                {"title": msg, "count": counter, "elapsed": time.time() - t0}
+            )
+            return (file_cleaned, file_displ, event, True)
+        except: 
+            pass
+
+        try: # .gramps:  gzipped xml file
+            with gzip.open(
+                pathname, mode="rt", encoding="utf-8", compresslevel=9
+            ) as file_in:
+                # print("A gzipped file")
+                counter = _clean_apostrophes(file_in, file_out)
+            msg = "Cleaned apostrophes from packed input lines"
+            event = LogItem(
+                {"title": msg, "count": counter, "elapsed": time.time() - t0}
+            )
+            return (file_cleaned, file_displ, event, False)
+        except:
+            pass
+
+        try: # .gramps:  plain xml file
+            with open(pathname, mode="rt", encoding="utf-8") as file_in:
+                print("Not a gzipped file")
+                counter = _clean_apostrophes(file_in, file_out)
+            msg = "Cleaned apostrophes from input lines"
+            event = LogItem(
+                {"title": msg, "count": counter, "elapsed": time.time() - t0}
+            )
+            return (file_cleaned, file_displ, event, False)
+        except:
+            raise RuntimeError(_("Unable to open Gramps file"))
 
 
 def extract_media(pathname, batch_id):
