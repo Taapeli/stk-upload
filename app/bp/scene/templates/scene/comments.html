@@ -24,6 +24,7 @@
 
   <table id="comments">
     <tr><th>{{ _("User") }}</th>
+        <th>{{ _("Label") }}</th>
         <th>{{ _("Uuid") }}</th>
         <th>{{ _("Counter") }}</th>
     {% if user_context.is_auditor %}
@@ -34,9 +35,24 @@
     {% for m in comments %}
         <tr>
             <td>{{m.credit}}</td>
-            <td><a href="/scene/person?uuid={{m.uuid}}" class="inlink"
+            <td>{{m.label[0]}}</td>
+            {% if m.label[0] == 'Person' %}
+            	<td><a href="/scene/person?uuid={{m.uuid}}" class="inlink"
                    title="{{ _('Go to comment page') }}">{{ m.uuid }}</a>
-            </td>
+            	</td>
+            {% elif m.label[0] == 'Place' %}
+            	<td><a href="/scene/location/uuid={{m.uuid}}" class="inlink"
+                   title="{{ _('Go to comment page') }}">{{ m.uuid }}</a>
+            	</td>
+            {% elif m.label[0] == 'Family' %}
+            	<td><a href="/scene/family?uuid={{m.uuid}}" class="inlink"
+                   title="{{ _('Go to comment page') }}">{{ m.uuid }}</a>
+            	</td>
+            {% elif m.label[0] == 'Source' %}
+            	<td><a href="/scene/source?uuid={{m.uuid}}" class="inlink"
+                   title="{{ _('Go to comment page') }}">{{ m.uuid }}</a>
+            	</td>
+     		{% endif %}
             <td>{{m.count}}</td>
 
        {% if user_context.is_auditor %}
