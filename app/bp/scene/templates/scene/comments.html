@@ -1,0 +1,87 @@
+{# /scene/templates/scene/comments.html_ #}
+{% extends "/scene/sc_layout.html" %}
+{% block title %}{{ _('List of comments') }} (scenecomments){% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+<script src="/static/infobox.js"></script>
+
+{% set cnt = comments|count %}
+
+<div id="startdiv">
+	<h1>{{ _('List of Comments') }}</h1>
+    <div>{{ macro.show_use_case() }}</div>
+</div>
+
+{{ macro.menu(7) }}
+    <div class="content" id="Comments">
+        <div id="summaryarea">
+            <div class="flex-container">
+               <div id="description_box">
+                   <p>{{ _('Displaying %(num)s distinct comments', num=cnt) }}
+
+<section id="lista">
+
+  <table id="comments">
+    <tr><th>{{ _("User") }}</th>
+        <th>{{ _("Label") }}</th>
+        <th>{{ _("Uuid") }}</th>
+        <th>{{ _("Counter") }}</th>
+    {% if user_context.is_auditor %}
+        <th class="Auditor" title="{{ _('For auditor only') }}">{{ _('User Batch') }} &nbsp;</th>
+    {% endif %}
+    </tr>
+{% if cnt %}
+    {% for m in comments %}
+        <tr>
+            <td>{{m.credit}}</td>
+            <td>{{m.label[0]}}</td>
+            {% if m.label[0] == 'Person' %}
+            	<td><a href="/scene/person?uuid={{m.uuid}}" class="inlink"
+                   title="{{ _('Go to comment page') }}">{{ m.uuid }}</a>
+            	</td>
+            {% elif m.label[0] == 'Place' %}
+            	<td><a href="/scene/location/uuid={{m.uuid}}" class="inlink"
+                   title="{{ _('Go to comment page') }}">{{ m.uuid }}</a>
+            	</td>
+            {% elif m.label[0] == 'Family' %}
+            	<td><a href="/scene/family?uuid={{m.uuid}}" class="inlink"
+                   title="{{ _('Go to comment page') }}">{{ m.uuid }}</a>
+            	</td>
+            {% elif m.label[0] == 'Source' %}
+            	<td><a href="/scene/source?uuid={{m.uuid}}" class="inlink"
+                   title="{{ _('Go to comment page') }}">{{ m.uuid }}</a>
+            	</td>
+     		{% endif %}
+            <td>{{m.count}}</td>
+
+       {% if user_context.is_auditor %}
+            <td class="Auditor"><i>{{m.credit}}</i><br>{{m.batch}}</td>
+       {% endif %}
+        </tr>
+    {% endfor %}
+
+    {% if next_fw == None or next_at_end %}
+        <tr><td colspan="4" id="lastitem_badge">
+                <i>{{ _('The last item found') }}</i>
+            </td>
+        </tr>
+    {% endif %}
+
+{% else %}
+	    <tr><td colspan="4">
+		  <div class="NotFound">
+    {% if next_bw %}
+		      <p>{{ _('No comment found starting from "%(name)s"', name=next_bw) }}.</p>
+		      <p>&nbsp;&#9656; <a href="/scene/comments?fw=%20" 
+		          title="{{ _('first page') }}">{{ _("Go to the first comment") }}</a></p>
+    {% else %}
+              <p>{{ _('No comments found') }}.</p>
+    {% endif %}
+		  </div></td>
+	    </tr>
+{% endif %}
+  </table>
+</section>
+
+{% endblock %}

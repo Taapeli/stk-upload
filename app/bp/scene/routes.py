@@ -61,6 +61,7 @@ from bl.event import EventReader, EventWriter
 from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
+from bl.comment import CommentReader
 
 from ui.user_context import UserContext
 from ui import jinja_filters
@@ -990,7 +991,7 @@ def show_source_page(sourceid=None):
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_medias():
-    """List of Medias for menu(5)"""
+    """List of Medias for menu(6)"""
     t0 = time.time()
     print(f"--- {request}")
     print(f"--- {user_session}")
@@ -1125,6 +1126,39 @@ def fetch_thumbnail():
         logger.debug(f"-> bp.scene.routes.fetch_thumbnail none")
 
     return ret
+
+
+# ------------------------------ Menu 7: Comment --------------------------------
+
+
+@bp.route("/scene/batch_comments")
+@login_required
+@roles_accepted("guest", "research", "audit", "admin")
+def show_comments():
+    """List of Comments for menu(7)"""
+    t0 = time.time()
+    print(f"--- {request}")
+    print(f"--- {user_session}")
+    # Set context by owner and the data selections
+    u_context = UserContext(user_session, current_user, request)
+    # Which range of data is shown
+    u_context.set_scope_from_request(request, "media_scope")
+    u_context.count = 20
+
+    with CommentReader("read", u_context) as service:
+        res = service.read_my_comment_list()
+
+    if Status.has_failed(res, False):
+        flash(f'{res.get("statustext","error")}', "error")
+    comments = res.get("items", [])
+
+    stk_logger(u_context, f"-> bp.scene.comment.show_comments fw n={len(comments)}")
+    return render_template(
+        "/scene/comments.html",
+        comments=comments,
+        user_context=u_context,
+        elapsed=time.time() - t0,
+    )
 
 
 # ----------- Access htmx components ---------------
