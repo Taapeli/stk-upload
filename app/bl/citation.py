@@ -193,7 +193,7 @@ class Citation(NodeObject):
             # Make relation to the Source node
             if self.source_handle != "":
                 tx.run(
-                    Cypher_citation_w_handle.link_source,
+                    CypherCitation.link_source,
                     handle=self.handle,
                     hlink=self.source_handle,
                 )

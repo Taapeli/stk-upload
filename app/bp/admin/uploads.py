@@ -293,7 +293,7 @@ def list_uploads(username):
             fname = os.path.join(upload_folder,name)
             xmlname = name.rsplit(".",maxsplit=1)[0]
             meta = get_meta(fname)
-            status = meta["status"]
+            status = meta.get("status",Batch.BATCH_UPLOADED)
             status_text = None
             person_count = 0
             audit_count = 0

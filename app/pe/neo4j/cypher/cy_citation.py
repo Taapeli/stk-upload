@@ -32,6 +32,11 @@ MERGE (b) -[r:OWNS]-> (c:Citation {handle: $c_attr.handle})
     SET c = $c_attr
 RETURN ID(c) as uniq_id"""
 
+    link_source = """
+MERGE (n:Citation {handle: $handle})
+MERGE (m:Source   {handle: $hlink})
+MERGE (n) -[r:SOURCE]-> (m)"""
+
     # Create Note node and link (Citation) --> (Note)
     link_note = """
 MERGE (n:Citation {handle: $handle})

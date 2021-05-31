@@ -152,6 +152,7 @@ class DOM_handler:
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
+        #print(f"DOM_handler.save_and_link_handle: {obj} {kwargs}")
         #shareds.dservice.ds_obj_save_and_link(obj, **kwargs)
         obj.save(shareds.dservice.tx, **kwargs)
         self.obj_counter += 1 
