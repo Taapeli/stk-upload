@@ -533,7 +533,7 @@ def edit_event(uuid):
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_event_vue(uuid):
-    """ Show Event page template which marchals data by Vue. """
+    """ Show Event page template which marshals data by Vue. """
     u_context = UserContext(user_session, current_user, request)
     return render_template("/scene/event_vue.html", uuid=uuid, user_context=u_context)
 
@@ -905,7 +905,7 @@ def show_sources(series=None):
 
     Possible args example: ?years=1800-1899&series=birth
     - source years (#todo)
-    - series, one of {"birth", "babtism", "wedding", "death", "move"}
+    - series, one of {"birth", "baptism", "wedding", "death", "move"}
     Missing series or years = all
     Theme may also be expressed in url path
 

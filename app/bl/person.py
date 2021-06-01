@@ -485,7 +485,7 @@ class PersonBl(Person):
 
     @staticmethod
     def update_person_confidences(person_ids: list):
-        """Sets a quality rate for given list of Person.uniq_ids.
+        """Sets a quality rating for given list of Person.uniq_ids.
 
         Person.confidence is calculated as a mean of confidences in
         all Citations used for Person's Events.

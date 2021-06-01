@@ -56,7 +56,7 @@ class Source_gramps(Source):
         # From gramps xml elements
         self.note_handles = []  # allow multiple; prev. noteref_hlink = ''
         self.repositories = []  # list of Repository objects, containing 
-                                # prev. repocitory_id, reporef_hlink and reporef_medium
+                                # prev. repository_id, reporef_hlink and reporef_medium
 
 
     def save(self, tx, **kwargs):

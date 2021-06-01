@@ -101,7 +101,7 @@ class SourceBl(Source):
     def __init__(self, uniq_id=None):
         """Creates a new PlaceBl instance.
 
-        You may also give for printout eventuell hierarhy level
+        You may also give for printout eventual hierarchy level
         """
         Source.__init__(self, uniq_id)
 
@@ -118,7 +118,7 @@ class SourceReader(DataService):
     """
     Data reading class for Source objects with associated data.
 
-    - Returns a Result object which includes the tems and eventuel error object.
+    - Returns a Result object which includes the items and eventual error object.
     """
 
     def __init__(self, service_name: str, u_context=None):
@@ -175,7 +175,7 @@ class SourceReader(DataService):
     def get_source_with_references(self, uuid, u_context):
         """Read the source, repository and events etc referencing this source.
 
-        Returns a dicitonary, where items = Source object.
+        Returns a dictionary, where items = Source object.
         - item.notes[]      Notes connected to Source
         - item.repositories Repositories for Source
         - item.citations    Citating Persons, Events, Families and Medias

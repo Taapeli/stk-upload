@@ -73,7 +73,7 @@ class PersonReaderTx(DataService):
             c = self.obj_catalog[obj.uniq_id]
             if c is obj:
                 print(
-                    f"bl.person_reader.PersonReaderTx._catalog: WARNING same objects twise: {obj}"
+                    f"bl.person_reader.PersonReaderTx._catalog: WARNING same object twice: {obj}"
                 )
                 print(obj)
                 print(c)
@@ -267,7 +267,7 @@ class PersonReaderTx(DataService):
 
         res = shareds.dservice.tx_get_person_by_uuid(uuid, active_user=self.use_user)
         if Status.has_failed(res):
-            # Not found, not allowd (person.too_new) or error
+            # Not found, not allowed (person.too_new) or error
             if res.get("status") == Status.NOT_FOUND:
                 return {
                     "status": Status.NOT_FOUND,
@@ -482,7 +482,7 @@ class PersonReaderTx(DataService):
                                 "Citation, Note or Media excepted, got {label}"
                             )
 
-            # print(f'#+ - found {len(citations)} Citatons, {len(notes)} Notes, {len(medias)} Medias from {cnt} nodes')
+            # print(f'#+ - found {len(citations)} Citations, {len(notes)} Notes, {len(medias)} Medias from {cnt} nodes')
             all_citations.update(citations)
             self.obj_catalog.update(citations)
             self.obj_catalog.update(notes)
@@ -548,7 +548,7 @@ class PersonReaderTx(DataService):
         }
 
     def get_citations_js(self):
-        """Create code for generating Javascript objecs representing
+        """Create code for generating Javascript objects representing
         Citations, Sources and Repositories with their Notes.
 
         js-style person[id] = {name: "John", age: 31, city: "New York"}

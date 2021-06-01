@@ -53,7 +53,7 @@ def get_isotammi_metadata(username, filename):
     return handler.get_metadata_from_header()
 
 def analyze_xml(username, filename):
-    """Returns a dict of Gremp xml objec type counts."""
+    """Returns a dict of Gramps xml object type counts."""
     # Read the xml file
     upload_folder = get_upload_folder(username)
     pathname = os.path.join(upload_folder, filename)

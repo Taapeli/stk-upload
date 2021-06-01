@@ -52,7 +52,7 @@ def make_place_hierarchy_properties(tx=None, place=None):
         
     
 # def set_confidence_values(tx, uniq_id=None, batch_logger=None): --> bl.person.PersonBl.set_confidence
-#     """ Sets a quality rate for one or all Persons.
+#     """ Sets a quality rating for one or all Persons.
 # 
 #         Asettaa henkilölle laatuarvion.
 # 

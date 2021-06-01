@@ -268,7 +268,7 @@ def create_role_constraints():
 
 
 def create_user_constraints():
-    ''' Unique contraint for User email and user properties
+    ''' Unique constraint for User email and user properties
     '''
     cnt = 0
     with shareds.driver.session() as session:
@@ -325,7 +325,7 @@ def check_constraints(needed:dict):
 def create_lock_w_constraint():
     # Initial lock with schema version.
     with shareds.driver.session() as session:
-        # Create first Lock node and contraint
+        # Create first Lock node and constraint
         session.run(SetupCypher.update_lock, 
                     id="initiated", 
                     db_schema=DB_SCHEMA_VERSION, 
@@ -343,7 +343,7 @@ def re_initiate_nodes_constraints_fixes():
         return
 
 def create_unique_constraint(label, prop):
-    ' Create given contraint for given label and property.'
+    ' Create given constraint for given label and property.'
     with shareds.driver.session() as session:
         query = f"create constraint on (n:{label}) assert n.{prop} is unique"
         try:  
@@ -359,7 +359,7 @@ def create_unique_constraint(label, prop):
     return
 
 def create_constraint(label, prop):
-    ' Create given contraint for given label and property.'
+    ' Create given constraint for given label and property.'
     with shareds.driver.session() as session:
         query = f"create constraint on (n:{label})"
         try:  

@@ -28,7 +28,7 @@ class CypherSource():
 
     # ------------------------ Cypher fragments ------------------------
 
-    # Select Source from auditted data / researcher's own data
+    # Select Source from audited data / researcher's own data
     _match_auditted = "MATCH (s:Source) <-[owner:PASSED]- ()"
     _match_my_access = """MATCH (s:Source) <-[owner:OWNS]- (b:Batch) 
         <-[:HAS_ACCESS]- (u:UserProfile {username:$user})"""

@@ -81,7 +81,7 @@ from ui.jinja_filters import translate
 
 
 # def get_citations_js(objs): # --> bl.person_reader.PersonReaderTx.get_citations_js
-#     ''' Create code for generating Javascript objecs representing
+#     ''' Create code for generating Javascript objects representing
 #         Citations, Sources and Repositories with their Notes.
 #         
 #         js-style person[id] = {name: "John", age: 31, city: "New York"}

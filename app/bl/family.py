@@ -268,7 +268,7 @@ class FamilyReader(DataService):
     """
     Data reading class for Family objects with associated data.
 
-    - Returns a Result object which includes the items and eventuel error object.
+    - Returns a Result object which includes the items and eventual error object.
     """
 
     def __init__(self, service_name: str, u_context=None):
@@ -396,7 +396,7 @@ class FamilyReader(DataService):
 
         where status code is one of Status.OK / Status.NOT_FOUND / Status.ERROR
 
-        Ther wanted parameter is a string of short keywords separated by ':'.
+        The 'wanted' parameter is a string of short keywords separated by ':'.
 
         Operations path
         1) read
@@ -417,7 +417,7 @@ class FamilyReader(DataService):
             FamilyBl.father, .names, event_birth, event_death
             FamilyBl.events
             FamilyBl.notes
-            FamilyBl.sources / citation -> source -> repocitory ?
+            FamilyBl.sources / citation -> source -> repository ?
             FamilyBl.children, .names, event_birth, event_death
         """
 

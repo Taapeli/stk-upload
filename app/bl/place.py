@@ -126,7 +126,7 @@ class PlaceBl(Place):
     def __init__(self, uniq_id=None, ptype="", level=None):
         """Creates a new PlaceBl instance.
 
-        You may also give for printout eventuell hierarhy level
+        You may also give for printout eventual hierarchy level
         """
         Place.__init__(self, uniq_id)
 
@@ -136,7 +136,7 @@ class PlaceBl(Place):
         if level != None:
             self.level = level
 
-        self.uppers = []  # Upper place objects for hirearchy display
+        self.uppers = []  # Upper place objects for hierarchy display
         self.notes = []  # Notes connected to this place
         self.note_ref = []  # uniq_ids of Notes
         self.media_ref = []  # uniq_id of models.gen.media.Media
@@ -543,7 +543,7 @@ class PlaceReader(DataService):
     """
 
     def get_place_list(self):
-        """Get a list on PlaceBl objects with nearest heirarchy neighbours.
+        """Get a list on PlaceBl objects with nearest hierarchy neighbors.
 
         Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
         """
@@ -579,7 +579,7 @@ class PlaceReader(DataService):
     def get_places_w_events(self, uuid):
         """Read the place hierarchy and events connected to this place.
 
-        Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
+        Luetaan annettuun paikkaan liittyvä hierarkia ja tapahtumat
         Palauttaa paikkahierarkian ja (henkilö)tapahtumat.
 
         """

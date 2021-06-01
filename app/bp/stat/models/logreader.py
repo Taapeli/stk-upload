@@ -57,7 +57,7 @@ def number_to_string(float_or_int, decimals=2):
     return str(float_or_int)
 
 def is_wanted(target, matcher, want_if_match):
-    """Return True if TARGET is matched by MATCER if WANT_IF_MATCH is True.
+    """Return True if TARGET is matched by MATCHER if WANT_IF_MATCH is True.
 
     If want_if_match is False return True is not matched.
     But if MATCHER is None, return always True.

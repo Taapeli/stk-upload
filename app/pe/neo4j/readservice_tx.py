@@ -45,7 +45,7 @@ class MediaReference:
         return f'-{crop_str}-> ({id_str})'
 
 class SourceReference:
-    ''' Object to return Source and Repocitory reference data. '''
+    ''' Object to return Source and Repository reference data. '''
     def __init__(self):
         self.source_node = None
         self.repository_node = None
@@ -186,7 +186,7 @@ class Neo4jReadServiceTx(ConcreteService):
          '''
         res = {'status':Status.OK}
 
-        # 1. Get Person node by uuid, if that allowd for given user
+        # 1. Get Person node by uuid, if that allowed for given user
         #    results: person, root
 
         try:

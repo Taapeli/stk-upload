@@ -41,7 +41,7 @@ II. Between Refnames there can be different references:
         (r:Refname {name:'Persson'}) -[b:PARENTNAME]-> (s:Refname {name:'Per'})
 
 The I links are created, when new Person nodes are inserted.
-The II links are created, when reference names are added from a cvs file.
+The II links are created, when reference names are added from a csv file.
 """
 # blacked 2021-05-01 JMä
 from sys import stderr
@@ -363,7 +363,7 @@ class RefnameReader:
 
     Data reading class for Refname objects with associated data.
 
-    - Returns a Result object which includes the items and eventuel error object.
+    - Returns a Result object which includes the items and eventual error object.
 
     #TODO: Should move Refname.get_refnames() here
     """

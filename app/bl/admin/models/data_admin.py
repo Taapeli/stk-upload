@@ -62,7 +62,7 @@ class DataAdmin():
 
 
     def _remove_chuncks(self, cypher_clause, user=None):
-        ''' Execute Delete cypher clause in appropiate chuncks. '''
+        ''' Execute Delete cypher clause in appropriate chunks. '''
         LIMIT=2000
         cnt_all = 0
         cnt_nodes = -1

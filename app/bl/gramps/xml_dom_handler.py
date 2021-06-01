@@ -165,7 +165,7 @@ class DOM_handler:
     # ---------------------   XML subtree handlers   --------------------------
 
     def get_mediapath_from_header(self):
-        """Pick eventuel media path from XML header to Batch node."""
+        """Pick eventual media path from XML header to Batch node."""
         for header in self.xml_tree.getElementsByTagName("header"):
             for mediapath in header.getElementsByTagName("mediapath"):
                 if len(mediapath.childNodes) > 0:
@@ -1124,9 +1124,9 @@ class DOM_handler:
         return {"status": status, "message": f"{message}, {count} changed"}
 
     def set_all_person_confidence_values(self):
-        """Sets a quality rate for collected list of Persons.
+        """Sets a quality ratings for collected list of Persons.
 
-        Asettaa henkilölle laatuarvion.
+        Asettaa henkilöille laatuarvion.
 
         Person.confidence is mean of all Citations used for Person's Events
         """

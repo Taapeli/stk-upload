@@ -255,7 +255,7 @@ def download_refnames():
 @login_required
 @roles_accepted('audit')
 def upload_csv():
-    """ Load a cvs file to temp directory for processing in the server
+    """ Load a csv file to temp directory for processing in the server
     """
     try:
         infile = request.files['filenm']
@@ -278,7 +278,7 @@ def upload_csv():
 @login_required
 @roles_accepted('audit')
 def save_loaded_csv(filename, subj):
-    """ Save loaded cvs data to the database """
+    """ Save loaded csv data to the database """
     pathname = loadfile.fullname(filename)
     dburi = _get_server_location()
     logging.info(f"-> bp.audit.routes.save_loaded_csv/{subj} f='{filename}'")

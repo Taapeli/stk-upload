@@ -50,7 +50,7 @@ class DataService:
         """
         self.idstr = f"{self.__class__.__name__}>DataService"
         print(f'#~~~{self.idstr} init')
-        # Find <class 'pe.neo4j.*service'> and initilialize it
+        # Find <class 'pe.neo4j.*service'> and initialize it
         self.service_name = service_name
         service_class = shareds.dataservices.get(self.service_name)
         if not service_class:
@@ -60,7 +60,7 @@ class DataService:
         # Initiate selected service object
         self.dataservice = service_class(shareds.driver)
         self.old_tx = tx
-        # Prepare to return back to the privious dataservice, if one exists
+        # Prepare to return back to the previous dataservice, if one exists
         if shareds.dservice:
             self.previous_dservice = shareds.dservice
         else:
@@ -121,7 +121,7 @@ class DataService:
             print(f'#~~~{self.idstr} exit {obj_addr(self.old_tx)}')
 
         if self.previous_dservice:
-            # print(f"-- {self.idstr} returning to dsrvice={obj_addr(self.previous_dservice)} from {obj_addr(shareds.dservice)}")
+            # print(f"-- {self.idstr} returning to dservice={obj_addr(self.previous_dservice)} from {obj_addr(shareds.dservice)}")
             shareds.dservice = self.previous_dservice
             self.previous_dservice = None
         else:

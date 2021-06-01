@@ -114,7 +114,7 @@ RETURN p AS person, r.role AS role,
     COLLECT(n) AS names, e AS event
 ORDER BY e.date1"""
 
-    # Queries for Place page hierarcy
+    # Queries for Place page hierarchy
     read_pl_hierarchy = """
 MATCH x= (p:Place)<-[:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
     WITH NODES(x) AS nodes, relationships(x) AS r
@@ -124,7 +124,7 @@ MATCH x= (p:Place)-[:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
     WITH NODES(x) AS nodes, relationships(x) AS r
     RETURN nodes, SIZE(r)*-1 AS lv, r
 """
-    # Query for single Place without hierarcy
+    # Query for single Place without hierarchy
     root_query = """
 MATCH (p:Place) WHERE ID(p) = $locid
 RETURN p.type AS type, p.uuid AS uuid, p.pname AS name
