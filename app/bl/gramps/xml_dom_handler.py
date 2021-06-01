@@ -156,7 +156,7 @@ class DOM_handler:
         obj.save(shareds.dservice.tx, **kwargs)
         self.obj_counter += 1 
         if self.obj_counter % 1000 == 0:
-            print(self.obj_counter, "Transaction restart")
+            #print(self.obj_counter, "Transaction restart")
             shareds.dservice.tx.commit()
             shareds.dservice.tx = shareds.driver.session().begin_transaction()
 
