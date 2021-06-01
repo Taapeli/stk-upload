@@ -53,7 +53,7 @@
 #}
      {% else %}
                 <h2>{{ _('The Demo Material') }}</h2>
-                <p>{{ _('You are on the home page of Isotammi demo. You have log in as a quest user.') }}</p>
+                <p>{{ _('You are on the home page of Isotammi demo. You have log in as a guest user.') }}</p>
                 <input name="div" type="hidden" value="1">
      {% endif %}
                 <div class="submit"> 
@@ -63,7 +63,7 @@
              </div>
      {% if not is_demo %}
             <h2>{{ _('Log in') }}</h2>
-            <p>{{ _('If you has already registered, you can log in and refine the structure of your own data.') }}
+            <p>{{ _('If you have already registered, you can log in and refine the structure of your own data.') }}
                    {{ _('As a member of <i>Genealogical Society of Finland</i> you will get more services.') }}.
             </p>
             <form method="get">

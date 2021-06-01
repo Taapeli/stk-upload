@@ -53,7 +53,7 @@ logger = logging.getLogger("stkserver")
 import shareds
 from bl.base import NodeObject  # , Status
 from pe.neo4j.cypher.cy_refname import CypherRefname
-from .person import Person, SEX_UNKOWN
+from .person import Person, SEX_UNKNOWN 
 
 # Global allowed reference types in Refname.reftype field or use attribute in db
 REFTYPES = ["basename", "firstname", "surname", "patronyme", "father", "mother"]
@@ -145,7 +145,7 @@ class Refname(NodeObject):
         if "sex" in node:
             n.sex = node["sex"]
         else:
-            n.sex = SEX_UNKOWN
+            n.sex = SEX_UNKNOWN
 
         return n
 

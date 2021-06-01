@@ -29,8 +29,6 @@ Created on 8.8.2018
 import os
 
 import json
-#import inspect
-#from operator import attrgetter
 import traceback
 
 import logging 
@@ -38,7 +36,7 @@ logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
 from flask_security import login_required, roles_accepted, roles_required, current_user
-from flask_babelex import _ #, Domain
+from flask_babelex import _ 
 
 import sharedsfrom ui.user_context import UserContext
 from bl.base import Status
@@ -49,13 +47,11 @@ from bp.admin.forms import UpdateUserProfileForm, UpdateUserForm
 from bl.admin.models.data_admin import DataAdmin
 from bl.admin.models.user_admin import UserAdmin
 
-#from .cvs_refnames import load_refnames
 from . import bp
 from . import uploads
 from .. gedcom.models import gedcom_utils
 from .. import gedcom
 
-#from models import util, dataupdater #, dbutil, loadfile, datareader
 from models import util, email, syslog 
 
 

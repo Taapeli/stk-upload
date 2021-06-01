@@ -143,7 +143,7 @@ class SourceReader(DataService):
             # Filtering by series (Lähdesarja)
             THEMES = {
                 "birth": ("syntyneet", "födda"),
-                "babtism": ("kastetut", "döpta"),
+                "baptism": ("kastetut", "döpta"),
                 "wedding": ("vihityt", "vigda"),
                 "death": ("kuolleet", "döda"),
                 "move": ("muuttaneet", "flyttade"),

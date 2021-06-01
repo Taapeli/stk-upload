@@ -43,7 +43,7 @@ from bl.audit import Audit
 from bl.batch import Batch
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
-from bp.admin.cvs_refnames import load_refnames
+from bp.admin.csv_refnames import load_refnames
 from .models.batch_merge import Batch_merge
 
 from bp.admin import uploads

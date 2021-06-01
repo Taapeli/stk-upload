@@ -30,7 +30,7 @@ class CypherBatch():
     Cypher clauses for managing Batch nodes
     '''
 
-    aquire_lock = """MERGE (lock:Lock {id:$lock_id})
+    acquire_lock = """MERGE (lock:Lock {id:$lock_id})
 SET lock.locked = true
 RETURN lock
 """

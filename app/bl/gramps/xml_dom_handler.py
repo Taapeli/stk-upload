@@ -589,7 +589,7 @@ class DOM_handler:
                 if p.sex:
                     self.blog.log_event(
                         {
-                            "title": "More than one sexes in a person",
+                            "title": "A person has more than one gender",
                             "level": "WARNING",
                             "count": p.id,
                         }

@@ -98,7 +98,7 @@ class Neo4jUpdateService(ConcreteService):
 
     def ds_aqcuire_lock(self, lock_id):
         """Create a lock"""
-        self.tx.run(CypherBatch.aquire_lock, lock_id=lock_id).single()
+        self.tx.run(CypherBatch.acquire_lock, lock_id=lock_id).single()
         return True  # value > 0
 
     def ds_new_batch_id(self):

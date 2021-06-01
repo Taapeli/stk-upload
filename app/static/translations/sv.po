@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-06-01 15:21+0300\n"
-"PO-Revision-Date: 2021-06-01 15:21+0300\n"
+"POT-Creation-Date: 2021-06-01 15:59+0300\n"
+"PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
 "Language-Team: sv <LL@li.org>\n"
@@ -253,7 +253,7 @@ msgstr "sek"
 msgid "Unable to open Gramps file"
 msgstr ""
 
-#: bp/admin/cvs_refnames.py:72
+#: bp/admin/csv_refnames.py:72
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
 msgstr "Inte giltiga fält namn \"namn, Refname, refType, källa, kön\" {}"
 
@@ -435,31 +435,31 @@ msgstr ""
 msgid "The time when the user agreed to the terms and conditions"
 msgstr ""
 
-#: bp/admin/routes.py:114
+#: bp/admin/routes.py:110
 msgid "Database initial check done."
 msgstr "Databasens inledande kontroll klar."
 
-#: bp/admin/routes.py:133
+#: bp/admin/routes.py:129
 msgid "No empty batches removed"
 msgstr "Inga tomma batchar borttagna"
 
-#: bp/admin/routes.py:170
+#: bp/admin/routes.py:166
 msgid "Estimated {} person lifetimes"
 msgstr "Beräknade {} person livstider"
 
-#: bp/admin/routes.py:242
+#: bp/admin/routes.py:238
 msgid "Isotammi user approved"
 msgstr "Isotammi-användare godkänd"
 
-#: bp/admin/routes.py:243
+#: bp/admin/routes.py:239
 msgid "You are now approved to use Isotammi at {server} with user name {user}."
 msgstr "Du är nu godkänd att använda Isotammi {server} med användarnamn {user}."
 
-#: bp/admin/routes.py:247
+#: bp/admin/routes.py:243
 msgid "User updated"
 msgstr "Användaren uppdaterad"
 
-#: bp/admin/routes.py:319 bp/gramps/routes.py:166
+#: bp/admin/routes.py:315 bp/gramps/routes.py:166
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr "Data importen från %(i)s till databasen har startats."
@@ -3317,7 +3317,7 @@ msgid "birth"
 msgstr "födelse"
 
 #: bp/scene/templates/scene/sources.html:29
-msgid "babtism"
+msgid "baptism"
 msgstr "dop"
 
 #: bp/scene/templates/scene/sources.html:30
@@ -3469,7 +3469,7 @@ msgstr "Demomaterialet"
 
 #: bp/start/templates/start/index_guest.html:56
 msgid ""
-"You are on the home page of Isotammi demo. You have log in as a quest "
+"You are on the home page of Isotammi demo. You have log in as a guest "
 "user."
 msgstr ""
 "Du är på hemsidan för Isotammi demo. Du har loggats in som en besökande "
@@ -3489,8 +3489,8 @@ msgstr "Logga in"
 
 #: bp/start/templates/start/index_guest.html:66 templates/index_entry.html:91
 msgid ""
-"If you has already registered, you can log in and refine the structure of"
-" your own data."
+"If you have already registered, you can log in and refine the structure "
+"of your own data."
 msgstr ""
 "Om du redan har registrerat dig kan du logga in och förfina strukturen på"
 " dina egna data."
@@ -4182,7 +4182,7 @@ msgstr "Se processen för din data"
 
 #: templates/index_entry.html:66
 msgid "Gedcom data healing services"
-msgstr "Servece för att förbättra Gedcom-data"
+msgstr "Service för att förbättra Gedcom-data"
 
 #: templates/index_entry.html:71
 msgid "Look at the demo data"

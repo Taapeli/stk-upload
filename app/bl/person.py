@@ -61,7 +61,7 @@ from pe.neo4j.cypher.cy_person import CypherPerson
 PRIVACY_LIMIT = 0
 
 # Sex code values
-SEX_UNKOWN = 0
+SEX_UNKNOWN = 0
 SEX_MALE = 1
 SEX_FEMALE = 2
 SEX_NOT_APPLICABLE = 9
@@ -91,7 +91,7 @@ class Person(NodeObject):
         """ Creates a new Person instance. """
         NodeObject.__init__(self)
         self.priv = None
-        self.sex = SEX_UNKOWN
+        self.sex = SEX_UNKNOWN
         self.confidence = ""
         self.sortname = ""
         self.dates = None  # Daterange: Estimated datetype, date1, date2
@@ -112,7 +112,7 @@ class Person(NodeObject):
     def sex_symbol(self):
         " Returns person's sex as string"
         symbols = {
-            SEX_UNKOWN: "",
+            SEX_UNKNOWN: "",
             SEX_MALE: "♂",
             SEX_FEMALE: "♀",
             SEX_NOT_APPLICABLE: "-",
@@ -122,7 +122,7 @@ class Person(NodeObject):
     def child_by_sex(self):
         " Returns person's sex as string"
         ch = {
-            SEX_UNKOWN: _("Child"),
+            SEX_UNKNOWN: _("Child"),
             SEX_MALE: _("Son"),
             SEX_FEMALE: _("Daughter"),
             SEX_NOT_APPLICABLE: _("Child"),
@@ -134,7 +134,7 @@ class Person(NodeObject):
         " Returns sex code as string"
 
         sexstrings = {
-            SEX_UNKOWN: _("sex not known"),
+            SEX_UNKNOWN: _("sex not known"),
             SEX_MALE: _("male"),
             SEX_FEMALE: _("female"),
             SEX_NOT_APPLICABLE: _("sex not applicable"),

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-06-01 15:21+0300\n"
+"POT-Creation-Date: 2021-06-01 15:59+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -253,7 +253,7 @@ msgstr ""
 msgid "Unable to open Gramps file"
 msgstr ""
 
-#: bp/admin/cvs_refnames.py:72
+#: bp/admin/csv_refnames.py:72
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
 msgstr ""
 
@@ -435,31 +435,31 @@ msgstr ""
 msgid "The time when the user agreed to the terms and conditions"
 msgstr ""
 
-#: bp/admin/routes.py:114
+#: bp/admin/routes.py:110
 msgid "Database initial check done."
 msgstr ""
 
-#: bp/admin/routes.py:133
+#: bp/admin/routes.py:129
 msgid "No empty batches removed"
 msgstr ""
 
-#: bp/admin/routes.py:170
+#: bp/admin/routes.py:166
 msgid "Estimated {} person lifetimes"
 msgstr ""
 
-#: bp/admin/routes.py:242
+#: bp/admin/routes.py:238
 msgid "Isotammi user approved"
 msgstr ""
 
-#: bp/admin/routes.py:243
+#: bp/admin/routes.py:239
 msgid "You are now approved to use Isotammi at {server} with user name {user}."
 msgstr ""
 
-#: bp/admin/routes.py:247
+#: bp/admin/routes.py:243
 msgid "User updated"
 msgstr ""
 
-#: bp/admin/routes.py:319 bp/gramps/routes.py:166
+#: bp/admin/routes.py:315 bp/gramps/routes.py:166
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr ""
@@ -3307,7 +3307,7 @@ msgid "birth"
 msgstr ""
 
 #: bp/scene/templates/scene/sources.html:29
-msgid "babtism"
+msgid "baptism"
 msgstr ""
 
 #: bp/scene/templates/scene/sources.html:30
@@ -3459,7 +3459,7 @@ msgstr ""
 
 #: bp/start/templates/start/index_guest.html:56
 msgid ""
-"You are on the home page of Isotammi demo. You have log in as a quest "
+"You are on the home page of Isotammi demo. You have log in as a guest "
 "user."
 msgstr ""
 
@@ -3477,8 +3477,8 @@ msgstr ""
 
 #: bp/start/templates/start/index_guest.html:66 templates/index_entry.html:91
 msgid ""
-"If you has already registered, you can log in and refine the structure of"
-" your own data."
+"If you have already registered, you can log in and refine the structure "
+"of your own data."
 msgstr ""
 
 #: bp/start/templates/start/index_guest.html:67 templates/index_entry.html:92

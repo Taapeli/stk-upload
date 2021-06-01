@@ -1147,7 +1147,7 @@ class Neo4jReadService(ConcreteService):
                 else:
                     print("dr_get_source_list_fw: approved common only")
                     result = session.run(
-                        CypherSource.get_auditted_set_selections, key1=key1, key2=key2
+                        CypherSource.get_audited_set_selections, key1=key1, key2=key2
                     )
             else:
                 # Show all themes
@@ -1157,7 +1157,7 @@ class Neo4jReadService(ConcreteService):
                     result = session.run(CypherSource.get_own_sets, user=user)
                 else:
                     print("dr_get_source_list_fw: approved common only")
-                    result = session.run(CypherSource.get_auditted_sets)
+                    result = session.run(CypherSource.get_audited_sets)
 
             for record in result:
                 # <Record
@@ -1219,7 +1219,7 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             if user == None:
                 result = session.run(
-                    CypherSource.get_auditted_set_single_selection, uuid=uuid
+                    CypherSource.get_audited_set_single_selection, uuid=uuid
                 )
             else:
                 result = session.run(

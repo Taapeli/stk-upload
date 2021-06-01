@@ -28,7 +28,7 @@ Created on 4.1.2018
 '''
 from urllib.parse import urlparse
 from flask_babelex import _
-from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKOWN
+from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKNOWN
 
 
 def translate(term, var_name, show_table=False):
@@ -308,7 +308,7 @@ def translate(term, var_name, show_table=False):
         tabl = {
             SEX_FEMALE: _("Daughter"),
             SEX_MALE: _("Son"),
-            SEX_UNKOWN: _("Child")
+            SEX_UNKNOWN: _("Child")
         }
 
     elif var_name == "handle":

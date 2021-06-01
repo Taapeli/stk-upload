@@ -29,7 +29,7 @@ class CypherSource():
     # ------------------------ Cypher fragments ------------------------
 
     # Select Source from audited data / researcher's own data
-    _match_auditted = "MATCH (s:Source) <-[owner:PASSED]- ()"
+    _match_audited = "MATCH (s:Source) <-[owner:PASSED]- ()"
     _match_my_access = """MATCH (s:Source) <-[owner:OWNS]- (b:Batch) 
         <-[:HAS_ACCESS]- (u:UserProfile {username:$user})"""
 #   _match_my_own = "MATCH (s:Source) <-[owner:OWNS|OWNS_OTHER]- ()"
@@ -79,13 +79,13 @@ order by c.id, x.id"""
 
     # ------------------------ Cypher clauses ------------------------
 
-    get_auditted_sets = _match_auditted + _sets
+    get_audited_sets = _match_audited + _sets
     get_own_sets = _match_my_access + _sets
 
-    get_auditted_set_selections = _match_auditted + _set_selections
+    get_audited_set_selections = _match_audited + _set_selections
     get_own_set_selections = _match_my_access + _set_selections
 
-    get_auditted_set_single_selection = _match_auditted + _single_set_selection
+    get_audited_set_single_selection = _match_audited + _single_set_selection
     get_own_set_single_selection = _match_my_access + _single_set_selection
 
     # Default name, birth and death

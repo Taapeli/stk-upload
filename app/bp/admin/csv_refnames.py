@@ -80,9 +80,9 @@ def load_refnames(pathname):
                 if reftype in REFTYPES:
                     r.refname = refname
                     r.reftype = reftype
-                    logging.debug("cvs_refnames: {0} --> {1}".format(nimi, refname))
+                    logging.debug("csv_refnames: {0} --> {1}".format(nimi, refname))
                 else:
-                    logging.warning('cvs_refnames: Invalid reference {} discarded. '.\
+                    logging.warning('csv_refnames: Invalid reference {} discarded. '.\
                                     format(reftype))
             if sex:
                 r.sex = sex
