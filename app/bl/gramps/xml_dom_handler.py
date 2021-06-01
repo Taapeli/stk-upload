@@ -51,11 +51,12 @@ from bl.note import Note
 from bl.dates import Gramps_DateRange
 from bl.citation import Citation
 from bl.repository import Repository
+from bl.source import SourceBl
 
-from .models.source_gramps import Source_gramps
+from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+#from models.cypher_gramps import Cypher_mixed
 from .batchlogger import LogItem
 
-from models.cypher_gramps import Cypher_mixed
 
 import threading
 
@@ -134,7 +135,7 @@ class DOM_handler:
 
     def add_missing_links(self):
         """Link the Nodes without OWNS link to Batch"""
-        result = self.tx.run(Cypher_mixed.add_links, batch_id=self.batch_id)
+        result = self.tx.run(CypherBatch.add_missing_links, batch_id=self.batch_id)
         counters = shareds.db.consume_counters(result)
         if counters.relationships_created:
             print(f"Created {counters.relationships_created} relations")
@@ -945,7 +946,11 @@ class DOM_handler:
         # Print detail of each source
         for source in sources:
 
-            s = Source_gramps()
+            s = SourceBl()
+            s.note_handles = []  # allow multiple; prev. noteref_hlink = ''
+            s.repositories = []  # list of Repository objects, containing 
+                                # prev. repository_id, reporef_hlink and reporef_medium
+
             # Extract handle, change and id
             self._extract_base(source, s)
 

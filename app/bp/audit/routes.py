@@ -47,7 +47,7 @@ from bp.admin.csv_refnames import load_refnames
 from .models.batch_merge import Batch_merge
 
 from bp.admin import uploads
-from models import syslog, loadfile #, obsolete_dbutil
+from models import syslog, loadfile
 
 @staticmethod
 def _get_server_location():

@@ -45,10 +45,14 @@ def generate_name(name):
     return os.path.join(dirname,newname)
 
 def format_timestamp(ts=None):
+    """Converts the ts (seconds since the Epoch) to string like '23.05.2021 15:10'.
+    """
     if ts is None: ts = time.time()
     return time.strftime("%d.%m.%Y %H:%M", time.localtime(ts))
 
 def format_date(ts=None):
+    """Converts the ts (seconds since the Epoch) to ISO date string like '2021-05-23'.
+    """
     if ts is None: ts = time.time()
     return time.strftime("%Y-%m-%d", time.localtime(ts))
 

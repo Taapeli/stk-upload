@@ -181,8 +181,6 @@ WITH person, name""" + _get_events_tail + _get_events_surname
 
 # ---- Person with Gramps handle -----
 
-    # class models.cypher_gramps.Cypher_person_w_handle():
-
     create_to_batch = """
 MATCH (b:Batch {id: $batch_id})
 MERGE (p:Person {handle: $p_attr.handle})

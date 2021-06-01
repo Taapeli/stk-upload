@@ -10,10 +10,11 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from sys import stderr
 
 from bl.base import NodeObject
-from models.cypher_gramps import Cypher_repository_in_batch
-#from models.gen.cypher import Cypher_repository
+from pe.neo4j.cypher.cy_repository import CypherRepository
+
+# from models.cypher_gramps import Cypher_repository_in_batch
+# from models.gen.cypher import Cypher_repository
 from bl.note import Note
-#import shareds
 
 
 class Repository(NodeObject):
@@ -141,9 +142,10 @@ class Repository(NodeObject):
                 "rname": self.rname,
                 "type": self.type,
             }
-            #             self.uniq_id = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr).single()[0]
             result = tx.run(
-                Cypher_repository_in_batch.create, bid=batch_id, r_attr=r_attr
+                CypherRepository.create_in_batch,
+                bid=batch_id,
+                r_attr=r_attr
             )
             self.uniq_id = result.single()[0]
         except Exception as err:

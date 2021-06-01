@@ -107,4 +107,24 @@ MATCH (cita:Citation) -[:SOURCE]-> (source:Source)
     WHERE ID(cita) IN $uid_list
 OPTIONAL MATCH (source) -[rel:REPOSITORY]-> (repo:Repository)
 RETURN ID(cita) AS uniq_id, source, properties(rel) as rel, repo"""
-    
+
+
+class CypherSourceByHandle():
+    """ For Source class """
+
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
+MERGE (b) -[r:OWNS]-> (s:Source {handle: $s_attr.handle}) 
+    SET s = $s_attr
+RETURN ID(s) as uniq_id"""
+
+    link_note = """
+MATCH (n:Source) WHERE n.handle=$handle
+MATCH (m:Note)   WHERE m.handle=$hlink
+CREATE (n) -[r:NOTE]-> (m)"""
+
+    link_repository = """
+MATCH (n:Source) WHERE n.handle=$handle
+MATCH (m:Repository) WHERE m.handle=$hlink
+MERGE (n) -[r:REPOSITORY {medium:$medium}]-> (m)"""
+
