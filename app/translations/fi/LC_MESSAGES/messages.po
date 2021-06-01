@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2021-06-01 12:26+0300\n"
-"PO-Revision-Date: 2021-06-01 12:27+0300\n"
+"PO-Revision-Date: 2021-06-01 12:32+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -377,7 +377,7 @@ msgstr "Hyväksy käyttäjä"
 
 #: bp/admin/forms.py:99
 msgid "GSF_membership"
-msgstr "Seuran jäsenmyys"
+msgstr "Seuran jäsenyys"
 
 #: bp/admin/forms.py:102 bp/start/forms.py:47
 msgid "Yes"
@@ -3016,7 +3016,7 @@ msgid ""
 "Under person's name there are the estimated possible life years determined by "
 "person data."
 msgstr ""
-"Henkilön nimen alla on mahdolliset elinvuodet henkilötietojen perusteellä "
+"Henkilön nimen alla on mahdolliset elinvuodet henkilötietojen perusteella "
 "pääteltynä."
 
 #: bp/scene/templates/scene/persons_search.html:72
@@ -3090,7 +3090,7 @@ msgstr "viittausta"
 
 #: bp/scene/templates/scene/persons_search.html:241
 msgid "No places"
-msgstr "Ei paikoja"
+msgstr "Ei paikkoja"
 
 #: bp/scene/templates/scene/place_events.html:3
 #: bp/scene/templates/scene/place_events.html:27
@@ -3410,7 +3410,7 @@ msgid ""
 "If you has already registered, you can log in and refine the structure of your "
 "own data."
 msgstr ""
-"Jos olet rekiströitynyt Isotammeen, niin voit kirjautua ja parantaa keräämiesi "
+"Jos olet rekisteröitynyt Isotammeen, niin voit kirjautua ja parantaa keräämiesi "
 "tietojen laatua."
 
 #: bp/start/templates/start/index_guest.html:67 templates/index_entry.html:92
@@ -3418,7 +3418,7 @@ msgid ""
 "As a member of <i>Genealogical Society of Finland</i> you will get more services."
 msgstr ""
 "Jos olet <i>Suomen Sukututkimusseuran</i> jäsen, niin saat lisää Isotammen "
-"palveluita käytöösi."
+"palveluita käyttöösi."
 
 #: bp/start/templates/start/index_logged.html:3
 msgid "Isotammi User's Start Page"
