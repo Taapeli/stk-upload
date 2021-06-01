@@ -59,7 +59,7 @@ def analyze_xml(username, filename):
     pathname = os.path.join(upload_folder, filename)
     print("bp.gramps.gramps_loader.analyze_xml Pathname: " + pathname)
 
-    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
 
     """ Get XML DOM parser and start DOM elements handler transaction """
     handler = DOM_handler(file_cleaned, username, filename)
