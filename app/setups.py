@@ -196,7 +196,9 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
             return True 
 
     def validate_email(self, field):
-        return True
+        user = shareds.user_datastore.get_user(field.data)
+        if user:
+            raise ValidationError(_l('Email has been reserved already'))
 
     def validate_username(self, field):
         user = shareds.user_datastore.get_user(field.data)
