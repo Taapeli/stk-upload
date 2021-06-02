@@ -75,10 +75,7 @@ from bp.graph.models.fanchart import FanChart
 # opt = "read" --> Neo4jReadService
 
 
-calendars = [  # just for translations
-    _("Julian"),
-    _("Hebrew"),
-]
+calendars = [_("Julian"), _("Hebrew")]  # just for translations
 
 
 def stk_logger(context, msg: str):

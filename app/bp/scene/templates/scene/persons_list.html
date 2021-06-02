@@ -129,19 +129,11 @@
                                 {{ macro.person(p) }}
                                  <div class="pop-open-family" 
                                     v-on:mouseover="showPopup(uuid='{{p.uuid}}',$event)"
-                                    title="Näytä perheet">👪</div>
-
-                                 <div class="pop-open-family"
-                                    hx-post="/scene/hx/families?uuid={{p.uuid}}"
-                                    hx-trigger="click"
-                                    hx-target="hx-fam"
-                                    hx-swap="outerHTML">⚡</div>
-                            </div>
-                            
+                                    title="Näytä perheet">👪</div>                            
 	       {% endif %}
 
            
-           {% if p.uuid %}   <span class="idno">Uuid:{{p.uuid_short()}} /</span>
+           {% if p.uuid %}   <br><span class="idno">uuid:{{p.uuid_short()}} /</span>
 	       {% endif %}
                              <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
 	                    </div>
