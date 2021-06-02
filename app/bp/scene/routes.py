@@ -1142,7 +1142,7 @@ def show_comments():
     # Set context by owner and the data selections
     u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    u_context.set_scope_from_request(request, "media_scope")
+    u_context.set_scope_from_request(request, "comment_scope")
     u_context.count = 20
 
     with CommentReader("read", u_context) as service:
