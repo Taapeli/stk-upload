@@ -31,14 +31,12 @@ class CypherComment():
     # Comment list by description with count limit
     read_approved_comments = """
 MATCH (prof) -[:PASSED]-> (o) - [r:COMMENT] -> () 
-WHERE prof.id >= $start_name 
 RETURN labels(o) as label, o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
     ORDER BY batch_id, label LIMIT $limit"""
 
     read_my_comments = """
 MATCH (u:UserProfile {username:$user}) -[:HAS_ACCESS]-> (b:Batch)
     -[owner:OWNS]-> (o) - [r:COMMENT] -> ()
-WHERE b.id >= $start_name
 RETURN labels(o) as label, o, b.user as credit, b.id as batch_id, COUNT(r) AS count
     ORDER BY batch_id, label LIMIT $limit"""
 
