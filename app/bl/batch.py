@@ -184,7 +184,6 @@ class Batch:
     def get_batches():
         result = shareds.driver.session().run(CypherBatch.list_all)
         for rec in result:
-            print("p", rec.get("b").items())
             yield dict(rec.get("b"))
 
     @staticmethod
