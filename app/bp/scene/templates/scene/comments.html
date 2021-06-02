@@ -18,7 +18,13 @@
         <div id="summaryarea">
             <div class="flex-container">
                <div id="description_box">
-                   <p>{{ _('Displaying %(num)s distinct comments', num=cnt) }}
+                   <p>{{ _('Displaying %(num)s distinct comments', num=cnt) }}</p>
+			   </div>
+		    </div>
+
+{% include "flash_messages.html" %}
+
+        </div> {# summaryarea #}
 
 <section id="lista">
 
