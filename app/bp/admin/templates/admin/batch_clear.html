@@ -3,7 +3,6 @@
 {% block title %}{{ _("Empty batches") }}{% endblock %}
 {% block body %}
 {{ super() }}
-{% include "security/_messages.html" %}
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 {{ hamburger_menu() }}
@@ -15,6 +14,8 @@
 {% else %}
 	    <h1>{{ _("Empty batches") }}</h1>
 {% endif %}
+
+{% include "flash_messages.html" %}
  
  {% if uploads|count > 0 %}
 	<div class="startbox">

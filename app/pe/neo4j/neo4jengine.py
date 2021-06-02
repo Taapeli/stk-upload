@@ -57,6 +57,8 @@ class Neo4jEngine():
         self.driver.close()
 
     def execute(self, cypher, **kwargs):
+        ''' Execute a Cypher write phrase returning a single value.
+        '''
         with self.driver.session() as session:
             session.write_transaction(self._execute, cypher, kwargs)
         

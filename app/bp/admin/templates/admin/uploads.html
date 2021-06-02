@@ -20,30 +20,23 @@
 	    <h1>{{ _("Uploads for all users") }}</h1>
     {% endif %}
     
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
+{% include "flash_messages.html" %}
 
     <div class="content">
         <table style="width:90%">
            <tr>
 			    {% if not user %}
-	                <th>{{ _("User id") }}</th>
+	                <th>{{ _("User") }}</th>
 			    {% endif %}
                 <th>{{ _("Gramps file / uploaded at") }}</th>
+                <th>{{ _("Type / description") }}</th>
                 <th>{{ _("Status") }}
                     <div class="tooltip"> &#x2754;
                       <div class="tooltiptext">
                           <p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
                           <p>↓ {{ _("UPLOADED") }} – {{ _("the file has been uploaded to server") }}<br>
                              ↓ {{ _("STORING") }}  – {{ _("the file content is being stored to the database") }}<br>
-                             ↳ {{ _("STORED") }}   – {{ _("the data is stored as candidate material") }}<br>
+                             ↳ {{ _("CANDIDATE") }}   – {{ _("the data is stored as candidate material") }}<br>
                              → {{ _("REMOVED") }}  – {{ _("Not found any more") }}<br>
                              ↝ {{ _("ERROR") }} / {{ _("FAILED") }} – {{ _("there was an error") }}
                         </p>
@@ -64,23 +57,45 @@
     	               {{upload.xmlname}}</a>
                    <br>{{upload.upload_time_s}} 
 	           </td>
+
+               <td class="msg_INFO">
+                    <span class="typedesc">{{upload.material_type}}</span>
+                {% if upload.description %} 
+                    <br><i>{{ upload.description[0:19] }}
+                    {% if upload.description|length > 19  %}
+                        ... 
+                        <div class="tooltip"> 
+                        &nbsp;&#8505;&nbsp;
+                          <div class="tooltiptext">
+                            {{ upload.description }} 
+                          </div>
+                        </div> 
+                    {% endif %}
+                    </i>
+                {% endif %}
+               </td>
+
 	           <td class="msg_INFO">{{upload.status}}
 	           	{% if upload.batch_id %}
-	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
+	           	   {% if upload.status == _("UPLOADED") %}({{_( "deleted from database" ) }})
 	           	   {% else %}<br>
-                      {{ _("batch %(batch_id)s; %(persons)d persons", batch_id=upload.batch_id, persons=upload.count) }}
+                      {{ _("batch %(batch_id)s; %(persons)d&nbsp;persons", batch_id=upload.batch_id, persons=upload.count) }}
 	           	   {% endif %}
 	           	{% endif %}
                </td>
 	           <td class="msg_INFO">
-{% if upload.xmlname and upload.status != "TIETOKANNASSA" %}
+{% if upload.xmlname and upload.status != _("CANDIDATE") %}
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
 {% endif %}
+{% if upload.xmlname and upload.has_log %}
 	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a> |
+{% endif %}
+{% if upload.xmlname %}
                     <a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
                         {{ _("Delete file") }}</a>
+{% endif %}
 	           	</td>
 	       </tr>
 	    {% endfor %}

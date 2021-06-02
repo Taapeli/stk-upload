@@ -113,7 +113,7 @@ def update():
     print(request.data)
     data = json.loads(request.data.decode("utf-8"))
     print(data)
-    #id = int(data['id'])
+    uid = int(data['id'])
     label = data['label']
     attr = data['attr']
     value = data.get('value','')
@@ -125,10 +125,7 @@ def update():
             value = int(value)
         else:
             value = float(value)
-    res = runcypher(f"match (n:{label}) where id(n) = $id set n.{attr} = $value",id=id,value=value)
-    print(dir(res.summary()))
-    #rsp = res.summary().counters["properties_set"]
-    #print(rsp)
+    res = runcypher(f"match (n:{label}) where id(n) = $id set n.{attr} = $value",id=uid,value=value)
     rsp = "ok"
     return jsonify(rsp)
 

@@ -42,21 +42,22 @@ from ui import jinja_filters
 from wtforms import SelectField, SubmitField, BooleanField
 
 from pe.neo4j.neo4jengine import Neo4jEngine
-from pe.neo4j.readservice import Neo4jReadService
+#from pe.neo4j.readservice import Neo4jReadService
 #from database.models.neo4jengine import Neo4jEngine 
-from database import adminDB
+from database import accessDB
 
 import shareds
 from chkdate import Chkdate
 
 from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
-from bp.admin.models.user_admin import UserProfile
+from bl.admin.models.user_admin import UserProfile
 from bl.dates import DateRange  # Aikavälit ym. määreet
 from datetime import datetime
 from ui.user_context import UserContext
 
 import json
 from flask_babelex import lazy_gettext as _l
+from speaklater import _LazyString
 
 
 """
@@ -110,6 +111,7 @@ class User(UserMixin):
     current_login_at = None
     current_login_ip = ''
     login_count = 0
+    agree = False
     # View filtering option. Stored here for logging in scene pages
     current_context = UserContext.ChoicesOfView.COMMON
 
@@ -129,6 +131,7 @@ class User(UserMixin):
         self.current_login_at = kwargs.get('current_login_at')
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
+        self.agree = kwargs.get('agree')        
 
     def __str__(self):
         if self.roles:
@@ -156,7 +159,15 @@ class User(UserMixin):
 # class UserProfile():
 # See: bp.admin.models.user_admin.UserProfile
 
-     
+class LazyFormat(_LazyString):
+    """Hack to enable lazy strings in string formatting"""
+    def __init__(self, s, **params):   
+        self.s = s
+        self.params = params
+    @property
+    def value(self):
+        return _l(self.s).format(**dict((name,_l(value)) for (name,value) in self.params.items()))  
+
 class ExtendedLoginForm(LoginForm):
 
     email = StringField(_l('Email or Username'), validators=[Required('Email required') ])
@@ -165,10 +176,15 @@ class ExtendedLoginForm(LoginForm):
     remember = BooleanField(_l('Remember Me'))
     submit = SubmitField(_l('Login'))
 
+
+
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     email = StringField(_l('Email address'), validators=[Required('Email required') ])
-    agree = BooleanField( _l("I have read and agree the <a href='static/termsofuse.html'>Terms of use</a>"))
+    agree = BooleanField( LazyFormat(_("I have read and agree to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"),
+                                  terms_of_use_url=_("http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"),
+                                  terms_of_use=_("Terms of use"),
+    ))
     password = PasswordField(_l('Password'),
                              validators=[Required('Password required')])
     submit = SubmitField(_l('Register'))
@@ -180,7 +196,9 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
             return True 
 
     def validate_email(self, field):
-        return True
+        user = shareds.user_datastore.get_user(field.data)
+        if user:
+            raise ValidationError(_l('Email has been reserved already'))
 
     def validate_username(self, field):
         user = shareds.user_datastore.get_user(field.data)
@@ -195,33 +213,52 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
 #============================== Start here ====================================
 
+sysversion = Chkdate()  # Last application commit date or "Unknown"
+
 print('Stk server setups') 
 shareds.mail = Mail(shareds.app)
-
-# About database driver object:
-# https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
-shareds.db = Neo4jEngine(shareds.app)
-shareds.driver  = shareds.db.driver
-
 shareds.user_model = User
 shareds.role_model = Role
 
-sysversion = Chkdate()  # Last application commit date or "Unknown"
+if True:
+    #
+    #    A Neo4j database is selected as our datastore
+    #
+    # dataservice, readservice, readservice_tx -> Tietokantapalvelu
+    #      driver -> Tietokanta-ajuri
+    #
+    # About database driver object:
+    # https://neo4j.com/docs/api/python-driver/current/api.html#driver-object-lifetime
+    #
+    from pe.neo4j.updateservice import Neo4jUpdateService
+    from pe.neo4j.writeservice import Neo4jWriteService
+    from pe.neo4j.readservice import Neo4jReadService
+    from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 
-# Setup Flask-Security
-shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)
-shareds.security = Security(shareds.app, shareds.user_datastore,
-    confirm_register_form=ExtendedConfirmRegisterForm,
-    login_form=ExtendedLoginForm)
+    shareds.db = Neo4jEngine(shareds.app)
+    shareds.driver  = shareds.db.driver
+    shareds.dataservices = {
+        "read":    Neo4jReadService,
+        "read_tx": Neo4jReadServiceTx,
+        "update":  Neo4jUpdateService,
+        "simple":  Neo4jWriteService    # Without transaction
+        }
 
-print('Security set up')
+    # Setup Flask-Security
+    shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)
+    shareds.security = Security(shareds.app, shareds.user_datastore,
+                                confirm_register_form=ExtendedConfirmRegisterForm,
+                                login_form=ExtendedLoginForm)
+
+print('Neo4j and security set up')
+
 
 @shareds.security.register_context_processor
 def security_register_processor():
     return {"username": _('User name'), "name": _('Name'), "language": _('Language')}
 
 # Check and initiate important nodes and constraints and schema fixes.
-adminDB.initialize_db() 
+accessDB.initialize_db() 
 
 
 """ 

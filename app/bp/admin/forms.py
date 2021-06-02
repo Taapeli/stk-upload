@@ -23,7 +23,7 @@ Created on 3.1.2018
 @author: TimNal
 '''
 
-from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, BooleanField, DateTimeField, IntegerField, HiddenField
+from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, BooleanField, DateTimeField, IntegerField, HiddenField, TextAreaField, RadioField
 from wtforms.validators import InputRequired, Optional, Email, Length
 from flask_wtf import FlaskForm
 from flask_babelex import _
@@ -91,40 +91,28 @@ class UpdateUserForm(FlaskForm):
     
 
         
-class UpdateUserProfilelForm(FlaskForm):
+class UpdateUserProfileForm(FlaskForm):
     
     """
-    email = ''
-    name = ''
-    language = ''
-    default_role = ''
-    approved = False
-    confirmed_at = None
     """
 
-    strip_filter = lambda x: x.strip() if x else None
-    email = StringField(_('Email Address:'), 
-        filters = [strip_filter],
-        description = _('Email address'))
-    name = StringField(_('Name:'), 
-        description = _('Name of the user'))      
-    language = SelectField( _('Language'), [Optional()],
-            choices=shareds.app.config.get('LANGUAGES'),
-            default=2,
-            description = _('Language')) 
-    approved = BooleanField(_('Approved'), [Optional()],
-        description = _('Approved / pending user')) 
-    role = SelectField(_('Role'), 
-                choices=[
-                   ("gedcom",_("Gedcom-files")),
-                   ("member",_("Member")),
-                   ("research",_("Research")),
-                   ("audit",_("Audit")),                      
-                   ("admin",_("Admin")) ],
-                description = _('Assigned role choices')) 
-    confirmed_at = DateTimeField(_('Email confirmed time'), [Optional()],
-        description = _('Time of registered email confirmation'))        
-
-
-    submit = SubmitField(_('Update allowed email'))
+    GSF_membership = RadioField(_l('GSF_membership'), 
+                        [Optional()],
+                        choices=[
+                            ("yes",_l("Yes")),
+                            ("no",_l("No")),
+                            ("dontknow",_l("Don't know")),
+                        ])
+    research_years = StringField(_('Research years:'), 
+        description = _('research years'))      
+    researched_names = StringField(_('Researched names:'), 
+        description = _('Researched names'))      
+    researched_places = StringField(_('Researched places:'), 
+        description = _('Researched places'))      
+    software = StringField(_('Software:'), 
+        description = _('Genealogy software'))      
+    text_message = TextAreaField(_l("Message:"))
+    agreed_at = DateTimeField(_l('Agreed to terms time'), [Optional()],
+        description = _('The time when the user agreed to the terms and conditions'))        
+    #submit = SubmitField(_('Update allowed email'))
                 

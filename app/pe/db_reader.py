@@ -4,7 +4,7 @@
 #   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
 #                            Timo Nallikari, Pekka Valta
 #
-#   See the LICENCE file.
+#   See the LICENSE file.
 
 '''
 
@@ -44,12 +44,12 @@ class DbReader:
 #         ''' List person data including all data needed to Person page. '''
 
 #     def get_place_list(self): # --> bl.place.PlaceReader.get_place_list()
-#         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
+#         """ Get a list on PlaceBl objects with nearest hierarchy neighbors.
 
 #     def get_place_with_events(self, uuid): # --> bl.place.PlaceReader.get_with_events()
 #         """ Read the place hierarchy and events connected to this place.
 
-#     def get_source_list(self): # -> bl.source.SourceDataStore.get_source_list()
+#     def get_source_list(self): # -> bl.source.SourceReader.get_source_list()
 
 
     def get_source_with_references(self, uuid, u_context):

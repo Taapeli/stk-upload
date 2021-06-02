@@ -20,8 +20,6 @@
 '''
 Reading and updating Neo4j database
 
-See also: gramps.cypher_gramps for updates from Gramps xml file
-
 Created on 2.9.2020
 
 @author: JMä
@@ -29,8 +27,6 @@ Created on 2.9.2020
 
 class CypherEvent(object):
 
-    
-    
     get_an_event_common = '''
 MATCH (root:Audit) -[r:PASSED]-> (e:Event {uuid:$uuid}) 
 RETURN e, type(r) AS root_type, root'''
@@ -81,8 +77,6 @@ RETURN  r.role AS role, p, n AS name
 
 
 # --- Save to Batch
-
-    #class models.cypher_gramps.Cypher_event_w_handle(): 
 
     create_to_batch = """
 MATCH (b:Batch {id: $batch_id})

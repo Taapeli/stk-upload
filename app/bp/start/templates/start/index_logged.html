@@ -1,6 +1,5 @@
 {# start/index_logged.html_ #}
 {% extends "start/s_layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _("Isotammi User's Start Page") }}{% endblock %}
 {% block body %}
   {{ super() }}
@@ -12,6 +11,8 @@
 <div id="startdiv">
   <div>
     <h1>{{ _("User's home page for Isotammi Services") }}</h1>
+
+{% include "flash_messages.html" %}
 
 {#  <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>

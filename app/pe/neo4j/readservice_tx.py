@@ -3,7 +3,9 @@ Created on 30.1.2021
 
 @author: jm
 '''
+import shareds
 
+from pe.dataservice import ConcreteService
 from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
@@ -43,7 +45,7 @@ class MediaReference:
         return f'-{crop_str}-> ({id_str})'
 
 class SourceReference:
-    ''' Object to return Source and Repocitory reference data. '''
+    ''' Object to return Source and Repository reference data. '''
     def __init__(self):
         self.source_node = None
         self.repository_node = None
@@ -63,46 +65,19 @@ class SourceReference:
         return f'{source_str}-{self.medium}->({repo_str})'
 
 
-class Neo4jReadServiceTx:
+class Neo4jReadServiceTx(ConcreteService):
     ''' 
     Methods for accessing Neo4j database.
 
-    Methods __enter__() and __exit__() makes possible to use with sentence
-    (Context Manager pattern) like this:
-
-    ##     with Neo4jReadServiceTx(shareds.driver) as readservice:
-    ##         reader = PersonReaderTx(readservice, u_context)
-    ##         res = reader.get_person_search(args)
-
+    Referenced as shareds.dataservices["read_tx"] class.
+    
+    The DataService class enables use as Context Manager.
     @See: https://www.integralist.co.uk/posts/python-context-managers/
     '''
-    def __init__(self, driver):
-        self.driver = driver
-        print(f'#{self.__class__.__name__} init')
-        #self.tx = driver.session().begin_transaction()
-
-    def __enter__(self):
-        self.tx = self.driver.session().begin_transaction()
-        print(f'#{self.__class__.__name__} enter')
-        return self
-
-    def __exit__(self, exc_type=None, exc_value=None, traceback=None):
-        """
-        Exit the runtime context related to this object. 
-
-        @See https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
-
-        object.__exit__(self, exc_type, exc_value, traceback)
-        The parameters describe the exception that caused the context to be 
-        exited. If the context was exited without an exception, all three
-        arguments will be None.
-        """
-        if exc_type:
-            print(f"{self.__class__.__name__} rollback becouse of {exc_type.__class__.__name__}")
-            self.tx.rollback()
-        else:
-            self.tx.close()
-        print(f'#{self.__class__.__name__} exit')
+    def __init__(self, driver=None):
+        
+        print(f'#~~~~{self.__class__.__name__} init')
+        self.driver = driver if driver else shareds.driver
 
 
     def tx_get_person_list(self, args):
@@ -211,7 +186,7 @@ class Neo4jReadServiceTx:
          '''
         res = {'status':Status.OK}
 
-        # 1. Get Person node by uuid, if that allowd for given user
+        # 1. Get Person node by uuid, if that allowed for given user
         #    results: person, root
 
         try:
@@ -298,7 +273,7 @@ class Neo4jReadServiceTx:
                     #self.objs[x.uniq_id] = x 
                     if node.get("type") == "Cause Of Death":
                         cause_of_death = node
-                print(f"# 2  ({puid}) -[:{person_rel} {role}]-> ({node.id}:{label})")
+                #print(f"#+ 2  ({puid}) -[:{person_rel} {role}]-> ({node.id}:{label})")
 
                 res['name_nodes'] = name_nodes
                 res['event_node_roles'] = event_node_roles
@@ -371,7 +346,7 @@ class Neo4jReadServiceTx:
                     # Add family events to person events, too
                     if family_rel == "PARENT":
                         event_role = "Family"
-                        print(f"#3.2 ({puid}) -[:EVENT {event_role}]-> (:Event {event_node.id} {eid})")
+                        #print(f"#+3.2 ({puid}) -[:EVENT {event_role}]-> (:Event {event_node.id} {eid})")
                         family_events.append(event_node)
 
                 # 3.3. Family members and their birth events
@@ -398,7 +373,7 @@ class Neo4jReadServiceTx:
                           'relation_type': relation_type,
                           'family_members': family_members
                           }
-                print(f"#3.4 ({puid}) -[:{family_rel} {family_role}]-> (:Family {family_node.id} {family_node.get('id')})")
+                #print(f"#+3.4 ({puid}) -[:{family_rel} {family_role}]-> (:Family {family_node.id} {family_node.get('id')})")
                 families.append(family)
 
         except Exception as e:
@@ -453,7 +428,7 @@ class Neo4jReadServiceTx:
             print(f"Could not read places for {len(base_objs)} objects: {e.__class__.__name__} {e}")
             return {'status': Status.ERROR, 'statustext':f'{e.__class__.__name__}: {e}'}
 
-        print(f'#tx_get_object_places: Got {len(references)} place references') 
+        #print(f'#+tx_get_object_places: Got {len(references)} place references') 
         return {'status': Status.OK, 'place_references': references}
 
     def tx_get_object_citation_note_media(self, obj_catalog:dict, active_objs=[]):

@@ -58,15 +58,9 @@
 	               </form>
 	           </div>
             </div>
-	        {% with messages = get_flashed_messages(with_categories=true) %}
-	          {% if messages %}
-	            <ul  class='flashes'>
-	            {% for category, message in messages %}
-	              <li class='flash_{{category}}'>{{ message }}</li>
-	            {% endfor %}
-	            </ul>
-	          {% endif %}
-	        {% endwith %}
+
+{% include "flash_messages.html" %}
+
         </div>
   <div id="hx-fam"></div>
 
@@ -164,8 +158,12 @@
                                 <span class="evtype {{ecl}}">{{e.type|transl('evt')|lower}}</span>
                                 {{e.description}}</div>
                             <div class="col col_date">
-                                {% if e.dates %}{{e.dates}} {% endif %}
-                                {% if e.place %} | {{e.place}}{% endif %}</div>
+                    {% if e.dates %}
+                                <span class="{{e.dates.calendar_css()}}">{{e.dates}}</span> 
+                    {% endif %}
+                    {% if e.place %} | {{e.place}}
+                    {% endif %}
+                            </div>
                       </div>
               {% endfor %}
                     </div>

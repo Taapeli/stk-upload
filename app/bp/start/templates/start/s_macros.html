@@ -1,7 +1,7 @@
 {# start/s_macros.html #}
 
 {% macro hamburger_menu(items) -%}
-    {# Hamburger menu in top rigth corner.
+    {# Hamburger menu in top right corner.
         You may adjust position by by re-defining css top and right values of
         #menuToggle top and right and #menu margin-top.
     #}
@@ -16,7 +16,10 @@
 	    <input type="checkbox" />
 	    <span></span><span></span><span></span>
 	    <ul id="menu">
-	      <a href="/" title="{{ _('Start page') }}"><li>{{ _('Home') }}</li></a>
+          <a href="/" title="{{ _('Start page') }}"><li>{{ _('Home') }}</li></a>
+
+          <a href="/scene/persons/search" title="{{ _('Browse database') }}">
+            <li>{{ _('Go to search page') }}</li></a>
 
 	      <a id="help" href="#" title="{{ _('Instructions for this page') }}" 
 	      	language="{{ session.lang }}" target="_blank">

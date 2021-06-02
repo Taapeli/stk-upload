@@ -28,7 +28,7 @@ Created on 4.1.2018
 '''
 from urllib.parse import urlparse
 from flask_babelex import _
-from models.gen.person import SEX_FEMALE, SEX_MALE, SEX_UNKOWN
+from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKNOWN
 
 
 def translate(term, var_name, show_table=False):
@@ -112,15 +112,15 @@ def translate(term, var_name, show_table=False):
     elif var_name == "role":
         # Event role types or member role in family
         tabl = {
-            "As_child": _("as a child"),   # Role as family member
-            "As_parent": _("as spouse"), # Role as family member
-# Child roles does not exist?
-#             "child": _("Child"),     # Role as family member
-#             "Adoptio": _("Adoption"),     # Adoptiolapsi
-#             "Kasvatus": _("Foster-child"), # Kasvatuslapsi
+            "As_child": _("as a child"),  # Role as family member
+            "As_parent": _("as spouse"),  # Role as family member
+# Roles between parent and child doesn't currently exist in our data model?
+            "child": _("Child"),          # Role as family member
+            "Adoptio": _("Adoption"),     # Adoptiolapsi
+            "Kasvatus": _("Foster-child"), # Kasvatuslapsi
             "Clergy": _("Clergy"), #"pappi"
             "Edunsaaja": _("Beneficiary"),
-#             "Family": _("Family"), #"perhe" ?
+            "Family": _("Family"), #"perhe" As participant for Family events
             "father": _("Father"), 
             "Kantaja": _("Plaintiff"),
             "Kohde": _("Concerned"),
@@ -205,6 +205,7 @@ def translate(term, var_name, show_table=False):
             "Alus": _("Vessel"),
             "Borough": _("Borough"), #"aluehallintoyksikkö"
             "Building": _("Building"), #"rakennus tai torppa"
+            "Church": _("Church"), #"kirkko" (rakennus)
             "City": _("City"), #"paikkakunta"
             "Country": _("Country"), #"maa"
             "Department": _("Department"), #
@@ -216,9 +217,11 @@ def translate(term, var_name, show_table=False):
             "Hautausmaa": _("Cemetery"), #"hautausmaa"
             "Kappeliseurakunta": _("Chapel Parish"), #"kappeliseurakunta"
             "Kartano": _("Mansion"), #"kartano"
+            "Kirkkokunta": _("Denomination"), #"kirkkokunta"
             "Katuosoite": _("Street Address"),
             "Kortteli": _("Block"), #"kortteli"
             "Kuntakeskus": _("Kuntakeskus"), #"kuntakeskus"
+            "Kuvernementti": _("Governorate"), # kuvernementti
             "Laitos": _("Institute"), # laitos
             "Linnoitus": _("Fortress"), #"linnoitus"
             "Locality": _("Locality"), #"kulmakunta"
@@ -226,13 +229,15 @@ def translate(term, var_name, show_table=False):
             "Municipality": _("Municipality"), #kunta
             "Neighborhood": _("Neighborhood"), # kulmakunta
             "Oppilaitos": _("Learning Institution"), #"oppilaitos"
-            "Organisaatio": _("Organisation"), #"organisaatio"
+            "Organisaatio": _("Organization"), #"organisaatio"
             "Parish": _("Parish"), #"seurakunta"
             "Province": _("Province"), # provinssi
             "Region": _("Region"), #"alue"
             "srk": _("Parish"), #"seurakunta"
+            "Sairaala": _("Hospital"),
             "State": _("State"), #"valtio"
-            "Tila": _("Farm"), #"tila"
+            "Säteri": _("Seat Farm"), 
+            "Tila": _("Farm"), #"maatila"
             "Tontti": _("Tontti"), #"tontti"
             "Torppa": _("Torppa"), #"torppa"
             "Town": _("Town"), #"kaupunki"
@@ -247,6 +252,7 @@ def translate(term, var_name, show_table=False):
             "Alus": _("on vessel"), #"aluksessa"
             "Borough": _("in the borough of"), #"aluehallintoyksikössä"
             "Building": _("in the building of"), #"rakennuksessa tai torpassa"
+            "Church": _("in the church"), # kirkossa
             "City": _("in the City"), #"paikassa"
             "Country": _("in the country of"), #"maassa"
             "Department": _("in the department of"), #"
@@ -257,21 +263,32 @@ def translate(term, var_name, show_table=False):
             "Hautausmaa": _("in the cemetery"), #"hautausmaalla"
             "Kappeliseurakunta": _("in chapel parish"), #"kappeliseurakunnassa"
             "Kartano": _("in the mansion of"), #"kartanossa"
+            "Kirkkokunta": _("in the denomination of"), #"kirkkokunta"
+            "Katuosoite": _("at street address"),
+            "Kortteli": _("in the block"), #"kortteli"
             "Kuntakeskus": _("Kuntakeskuksessa"), #"kuntakeskuksessa"
+            "Kuvernementti": _("in the governorate"), # kuvernementti
+            "Laitos": _("in the nstitute"), # laitos
             "Linnoitus": _("in the fortress"), #"linnoituksessa"
             "Locality": _("at locality of"), #"kulmakuntannassa"
             "Luonnonpaikka": _("in a natural place of"),
             "Municipality": _("in the municipality of"),
+            "Neighborhood": _("in the neighborhood of"), # kulmakunta
             "Oppilaitos": _("in the learning lnstitution"), #"oppilaitos"
-            "Organisaatio": _("in the organisation of"), #"organisaatiossa"
+            "Organisaatio": _("in the organization of"), #"organisaatiossa"
             "Parish": _("in the parish"), #"seurakunnassa"
+            "Province": _("int the province of"), # provinssi
             "Region": _("in the region"), #"alueella"
+            "Sairaala": _("at the hospital"),
             "srk": _("in the parish of"), #"seurakunnassa"
             "State": _("in the state"), #"valtiossa"
+            "Säteri": _("in seat farm"), 
             "Talo": _("in the farm"), # tilalla
             "Tontti": _("Tontilla"), #"tontilla"
             "Town": _("in the town"), #"kaupunki"
-            "Village": _("in the village of") #"kylässä"
+            "Village": _("in the village of"), #"kylässä"
+            "Yritys": _("at the company"), # yritys
+            "Unknown": _("in a place of unkown type") #"tuntematon"
         }
         try:
             if term:
@@ -291,7 +308,7 @@ def translate(term, var_name, show_table=False):
         tabl = {
             SEX_FEMALE: _("Daughter"),
             SEX_MALE: _("Son"),
-            SEX_UNKOWN: _("Child")
+            SEX_UNKNOWN: _("Child")
         }
 
     elif var_name == "handle":

@@ -17,6 +17,10 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
+import time
+from types import SimpleNamespace
+
 from flask import render_template, request, jsonify #, redirect, url_for, session
 from flask_security import login_required, roles_required
 #from flask_babelex import _
@@ -25,9 +29,6 @@ from . import bp
 #from bp.gramps.models import batch
 from bl.batch import Batch
 from bp.dupsearch.models import search
-from types import SimpleNamespace
-import json
-
 
 @bp.route('/dupsearch',  methods=['GET'])
 @login_required
@@ -35,26 +36,48 @@ import json
 def dupsearch():
     return render_template('/dupsearch.html')
 
-@bp.route('/dupsearch/batches',  methods=['GET'])
+@bp.route('/dupsearch/batches1',  methods=['GET'])
 @login_required
 @roles_required('audit')
-def batches():
+def batches1():
+    from bl.batch import Batch # For status codes
+
     batch_list = list(Batch.get_batches())
     completed_batches = []
     for b in batch_list:
         file = b.get('file')
         status = b.get('status')
-        if file and status == 'completed':
+        if file and status == Batch.BATCH_CANDIDATE:
             file = file.split("/")[-1].replace("_clean.gramps",".gramps")
+            file = file.split("/")[-1].replace("_clean.gpkg",".gpkg")
             b['file'] = file 
             completed_batches.append(b)
     return jsonify(completed_batches)
 
-@bp.route('/dupsearch/generate_keys/<batchid>',  methods=['GET'])
+@bp.route('/dupsearch/batches',  methods=['GET'])
 @login_required
 @roles_required('audit')
-def generate_keys(batchid):
-    args = SimpleNamespace(for_batch=batchid)
+def batches():
+    from bl.batch import Batch # For status codes
+
+    batch_list = search.batches()
+    completed_batches = []
+    for b in batch_list:
+        #print(b)
+        file = b.get('file')
+        status = b.get('status')
+        if file and status == Batch.BATCH_CANDIDATE:
+            file = file.split("/")[-1].replace("_clean.gramps",".gramps")
+            file = file.split("/")[-1].replace("_clean.gpkg",".gpkg")
+            b['file'] = file 
+            completed_batches.append(b)
+    return jsonify(completed_batches)
+
+@bp.route('/dupsearch/generate_keys/<batchid>/<namematch_algo>',  methods=['GET'])
+@login_required
+@roles_required('audit')
+def generate_keys(batchid,namematch_algo):
+    args = SimpleNamespace(for_batch=batchid, namematch_algo=namematch_algo)
     res = search.generate_keys(args)
     return jsonify(res)
 
@@ -74,21 +97,24 @@ def search_dups():
     args = SimpleNamespace(**args_dict)
     args.minscore = float(args.minscore)
     args.minitems = int(args.minitems)
+    t1 = time.time()
     res = search.search_dups(args)
+    t2 = time.time()
+    print(f"Elapsed: {t2-t1}s")
     return jsonify(res)
 
-@bp.route('/dupsearch/create_index', methods=['GET'])
+@bp.route('/dupsearch/create_index/<batch_id>', methods=['GET'])
 @login_required
 @roles_required('audit')
-def create_index():
-    res = search.create_index(None)
+def create_index(batch_id):
+    res = search.create_index(batch_id)
     return jsonify(res)
 
-@bp.route('/dupsearch/drop_index', methods=['GET'])
+@bp.route('/dupsearch/drop_index/<batch_id>', methods=['GET'])
 @login_required
 @roles_required('audit')
-def drop_index():
-    res = search.drop_index(None)
+def drop_index(batch_id):
+    res = search.drop_index(batch_id)
     return jsonify(res)
 
 @bp.route('/dupsearch/get_models', methods=['GET'])

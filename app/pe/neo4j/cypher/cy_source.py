@@ -28,8 +28,8 @@ class CypherSource():
 
     # ------------------------ Cypher fragments ------------------------
 
-    # Select Source from auditted data / researcher's own data
-    _match_auditted = "MATCH (s:Source) <-[owner:PASSED]- ()"
+    # Select Source from audited data / researcher's own data
+    _match_audited = "MATCH (s:Source) <-[owner:PASSED]- ()"
     _match_my_access = """MATCH (s:Source) <-[owner:OWNS]- (b:Batch) 
         <-[:HAS_ACCESS]- (u:UserProfile {username:$user})"""
 #   _match_my_own = "MATCH (s:Source) <-[owner:OWNS|OWNS_OTHER]- ()"
@@ -79,13 +79,13 @@ order by c.id, x.id"""
 
     # ------------------------ Cypher clauses ------------------------
 
-    get_auditted_sets = _match_auditted + _sets
+    get_audited_sets = _match_audited + _sets
     get_own_sets = _match_my_access + _sets
 
-    get_auditted_set_selections = _match_auditted + _set_selections
+    get_audited_set_selections = _match_audited + _set_selections
     get_own_set_selections = _match_my_access + _set_selections
 
-    get_auditted_set_single_selection = _match_auditted + _single_set_selection
+    get_audited_set_single_selection = _match_audited + _single_set_selection
     get_own_set_single_selection = _match_my_access + _single_set_selection
 
     # Default name, birth and death
@@ -107,4 +107,24 @@ MATCH (cita:Citation) -[:SOURCE]-> (source:Source)
     WHERE ID(cita) IN $uid_list
 OPTIONAL MATCH (source) -[rel:REPOSITORY]-> (repo:Repository)
 RETURN ID(cita) AS uniq_id, source, properties(rel) as rel, repo"""
-    
+
+
+class CypherSourceByHandle():
+    """ For Source class """
+
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
+MERGE (b) -[r:OWNS]-> (s:Source {handle: $s_attr.handle}) 
+    SET s = $s_attr
+RETURN ID(s) as uniq_id"""
+
+    link_note = """
+MATCH (n:Source) WHERE n.handle=$handle
+MATCH (m:Note)   WHERE m.handle=$hlink
+CREATE (n) -[r:NOTE]-> (m)"""
+
+    link_repository = """
+MATCH (n:Source) WHERE n.handle=$handle
+MATCH (m:Repository) WHERE m.handle=$hlink
+MERGE (n) -[r:REPOSITORY {medium:$medium}]-> (m)"""
+

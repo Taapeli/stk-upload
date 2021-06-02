@@ -70,8 +70,11 @@
                 <li{% if value == 6 %} class="CurrentSection"
                   {% endif %}><a href="/scene/medias" class="CurrentSection"
                    title="{{ _('Thumbnails') }}">{{ _('Pictures') }}</a></li>
+                <li{% if value == 7 %} class="CurrentSection"
+                  {% endif %}><a href="/scene/batch_comments" class="CurrentSection"
+                   title="{{ _('Comments') }}">{{ _('Comments') }}</a></li>
         {% if not current_user or not current_user.is_authenticated %}
-                <li id="loginpadge"><a href="/login"
+                <li id="loginpage"><a href="/login"
                      title="{{ _('Get more info') }}">{{ _('Log in to Isotammi') }}!</a></li>
         {% endif %}
             </ul>
@@ -129,9 +132,11 @@
 
 {% macro all_obj_ids(obj, margin) -%}
     {#  Formats object keys and timestamp for display. Positioned at right margin.
-        If 2nd arguments (like "350px") is present, leave the given rigth margin.
+        If 2nd arguments (like "350px") is present, leave the given right margin.
      #}
-    <tt title="{{ _('UUID key') }} {{obj.uuid}}">{{obj.uuid_short()}}</tt> /
+    <input id="my_uuid" type="text" value="{{obj.uuid}}" style="display:None">
+    <tt title="{{ _('Copy UUID key') }}" class="copy-fld" 
+        onclick="toClipboard('my_uuid')">{{obj.uuid_short()}}</tt> /
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
     {% if obj.change %}
@@ -238,26 +243,6 @@
     {% endif %}
 {%- endmacro %}
 
-{#
-  {% macro member(ch, uniq_id, delim) -%} ## OBSOLETE, Better version: macro person ##
-    ##  Creates a Person name and link (for family tree graph). 
-        Optional 'delim' can be "=" for older person page
-    ##
-    {% if delim != '=' %}{% set delim="/" %} <!-- Vanha person.html -sivu -->{% endif %}
-    {% if ch.uniq_id == uniq_id %}
-    <span class="myself">&nbsp;(itse)&nbsp;</span>
-    {% else %}
-    <a href="/scene/person?uuid={{ch.uuid}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=ch.id) }}">
-        {% if ch.names|length %}
-        {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> {{ch.names[0].prefix}} <b>{{ch.names[0].surname}}</b></a>
-        {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}
-        {% else %}{{ _('Anonymous') }}
-        {% endif %}
-    {% endif %}
-  {%- endmacro %}
-#}
-
 {% macro lifetimes(p) -%}
     {# Displays Person's life time estimates 'born 1662…1709 died 1726…1819' #}
     {% if p.death_high != 9999 %}
@@ -269,6 +254,7 @@
          {% endif %}
     {% endif %}
 {%- endmacro %}
+
 
 # 2.2 Family
 
@@ -286,8 +272,7 @@
 {%- endmacro %}
 
 
-
-# 2.3 Note and citation
+# 2.3 Note
 
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
@@ -313,6 +298,19 @@
     <td>{% for l in list1 %}{{ l }} {% endfor %}</td>
 {%- endmacro %}
 
+{% macro note_link(note_list, obj) -%}{#
+       Creates template <sup>note link</sup> for each citation.
+       - note_list  list of note uniq_ids
+       - obj        dict of objects: obj[uniq_id] = Note object
+
+#}{% if note_list %}<sup>{% for cr in note_list %}{%set note = obj[cr] %}
+       <a id="N{{note.uniq_id}}"><b>{{note.type|transl('notet')}}</b> {{note.url}}
+         <i>{{note.text}}</i></a>{% endfor %}</sup>{% endif 
+%}{%- endmacro %}
+
+
+# 2.3 Source, citation, reference
+
 {% macro citation_link(cit_list, obj) -%}
     {# Creates template <sup>citation link</sup> for each citation.
        - cit_list   list of citation uniq_ids
@@ -323,15 +321,42 @@
     {% endfor %}</sup>{% endif %}
 {%- endmacro %}
 
-{% macro note_link(note_list, obj) -%}{#
-       Creates template <sup>note link</sup> for each citation.
-       - note_list  list of note uniq_ids
-       - obj        dict of objects: obj[uniq_id] = Note object
+{% macro source_clip(clip_index, cita, source, repo_name, anchor_text, title) -%}
+    {# 
+        :param: clip_index  unique identifier (like runnin number)
+        :param: cita        citation object
+        :param: source      Source object
+        :param: repo        Repository object
+        :param: anchor_text link name like "Page"
+        :param: title       optional title text
+    #}
 
-#}{% if note_list %}<sup>{% for cr in note_list %}{%set note = obj[cr] %}
-       <a id="N{{note.uniq_id}}"><b>{{note.type|transl('notet')}}</b> {{note.url}}
-         <i>{{note.text}}</i></a>{% endfor %}</sup>{% endif 
-%}{%- endmacro %}
+    {% if not title %}{% set title=_('Copy to clipboard') %}
+    {% endif %}
+    {% set ns = namespace(url="", page="") %}
+    {% if cita.notes %}
+        {% for note in cita.notes %}
+            {% if note.url %}
+                {% if "digi.narc.fi/" in note.url %}{% set ns.url = "; Kansallisarkisto: " + note.url %}
+                {% else %}
+                    {% if "sukuhistoria.fi/" in note.url 
+                       or "digiarkisto.org/" in note.url %}{% set ns.url = "; SSHY: " + note.url %}
+                    {% else %}{% set ns.url = "; URL: " + note.url %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif -%}
+    {% if cita.page %}
+        {% if 'sivu' in cita.page %}{% set ns.page = ", " + cita.page %}
+        {% else %}{% set ns.page = ", sivu " + cita.page %}
+        {% endif -%}
+    {% endif -%}
+    {% set txt = repo_name + " - " + source.stitle + ns.page + ns.url -%}
+        <input id="clp_id{{clip_index}}" type="text" style="display:None" value="{{txt}}">
+        <div class="copy-fld" onclick="toClipboard('clp_id{{clip_index}}')"
+              title="{{ title }}"> ⚓{{anchor_text}} </div>
+{%- endmacro %}
 
 
 # 2.4 Place

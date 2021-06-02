@@ -1,7 +1,7 @@
 #   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
-#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
 #                            Timo Nallikari, Pekka Valta
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-'''
+"""
     Person and Name classes
 
     Person hierarkiasuunnitelma 10.9.2018/JMä
@@ -42,62 +42,59 @@
 Created on 6.10.2020
 
 @author: jm
-'''
+"""
+#blacked 2021-05-01 JMä
 from flask_babelex import _
 from datetime import datetime
-#from sys import stderr
-#import traceback
-import logging 
-logger = logging.getLogger('stkserver')
+import logging
+
+logger = logging.getLogger("stkserver")
 import shareds
 
 from bl.base import NodeObject, Status
 from bl.person_name import Name
-from pe.db_reader import DbReader
-from pe.db_writer import DbWriter
+from bl.note import Note
+from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_person import CypherPerson
-
-from models.gen.note import Note
-#from models.source_citation_reader import get_citations_js
 
 # Privacy rule: how many years after death
 PRIVACY_LIMIT = 0
 
 # Sex code values
-SEX_UNKOWN = 0 
+SEX_UNKNOWN = 0
 SEX_MALE = 1
 SEX_FEMALE = 2
 SEX_NOT_APPLICABLE = 9
 
 
 class Person(NodeObject):
-    """ Person object
+    """Person object
 
-         - uniq_id                int database key
-         - Node properties: {
-            handle                str "_dd2c613026e7528c1a21f78da8a"
-            id                    str "I0000"
-            priv                  int 1 = merkitty yksityiseksi
-            sex                   str "1", "2", "0" sukupuoli
-            confidence            float "2.0" tietojen luotettavuus
-            sortname              str default name as "surname#suffix#firstname"
-            datetype,date1,date2  DateRange dates # estimated life time
-            birth_low             int lifetime years estimate limits like 1720
-            death_low             int
-            birth_high            int
-            death_high            int
-            change                int 1536324580
-           }
-     """
+    - uniq_id                int database key
+    - Node properties: {
+       handle                str "_dd2c613026e7528c1a21f78da8a"
+       id                    str "I0000"
+       priv                  int 1 = merkitty yksityiseksi
+       sex                   str "1", "2", "0" sukupuoli
+       confidence            float "2.0" tietojen luotettavuus
+       sortname              str default name as "surname#suffix#firstname"
+       datetype,date1,date2  DateRange dates # estimated life time
+       birth_low             int lifetime years estimate limits like 1720
+       death_low             int
+       birth_high            int
+       death_high            int
+       change                int 1536324580
+      }
+    """
 
     def __init__(self):
         """ Creates a new Person instance. """
         NodeObject.__init__(self)
         self.priv = None
-        self.sex = SEX_UNKOWN
-        self.confidence = ''
-        self.sortname = ''
-        self.dates = None    # Daterange: Estimated datetype, date1, date2
+        self.sex = SEX_UNKNOWN
+        self.confidence = ""
+        self.sortname = ""
+        self.dates = None  # Daterange: Estimated datetype, date1, date2
 
         self.birth_low = None
         self.death_low = None
@@ -105,7 +102,7 @@ class Person(NodeObject):
         self.death_high = None
 
     def __str__(self):
-        dates = self.dates if self.dates else ''
+        dates = self.dates if self.dates else ""
         return "{} {} {}".format(self.sex_str(), self.id, dates)
 
     def sex_str(self):
@@ -114,167 +111,117 @@ class Person(NodeObject):
 
     def sex_symbol(self):
         " Returns person's sex as string"
-        symbols = {SEX_UNKOWN:'', 
-                   SEX_MALE:'♂',
-                   SEX_FEMALE:'♀',
-                   SEX_NOT_APPLICABLE:'-'}
-        return symbols.get(self.sex, '?')
+        symbols = {
+            SEX_UNKNOWN: "",
+            SEX_MALE: "♂",
+            SEX_FEMALE: "♀",
+            SEX_NOT_APPLICABLE: "-",
+        }
+        return symbols.get(self.sex, "?")
 
     def child_by_sex(self):
         " Returns person's sex as string"
-        ch = {SEX_UNKOWN:_('Child'), 
-              SEX_MALE:_('Son'),
-              SEX_FEMALE:_('Daughter'),
-              SEX_NOT_APPLICABLE:_('Child')}
-        return ch.get(self.sex, '?')
+        ch = {
+            SEX_UNKNOWN: _("Child"),
+            SEX_MALE: _("Son"),
+            SEX_FEMALE: _("Daughter"),
+            SEX_NOT_APPLICABLE: _("Child"),
+        }
+        return ch.get(self.sex, "?")
 
     @staticmethod
     def convert_sex_to_str(sex):
         " Returns sex code as string"
 
-        sexstrings = {SEX_UNKOWN:_('sex not known'), 
-                      SEX_MALE:_('male'),
-                      SEX_FEMALE:_('female'),
-                      SEX_NOT_APPLICABLE:_('sex not applicable')}
-        return sexstrings.get(sex, '?')
+        sexstrings = {
+            SEX_UNKNOWN: _("sex not known"),
+            SEX_MALE: _("male"),
+            SEX_FEMALE: _("female"),
+            SEX_NOT_APPLICABLE: _("sex not applicable"),
+        }
+        return sexstrings.get(sex, "?")
 
     @staticmethod
     def sex_from_str(s):
         # Converts gender strings to ISO/IEC 5218 codes
         ss = s[:1].upper()
-        if ss == 'M' or  ss == str(SEX_MALE):
+        if ss == "M" or ss == str(SEX_MALE):
             return SEX_MALE
-        if ss == 'F' or ss == 'N' or ss == str(SEX_FEMALE):
+        if ss == "F" or ss == "N" or ss == str(SEX_FEMALE):
             return SEX_FEMALE
         return 0
-        
+
     @classmethod
     def from_node(cls, node, obj=None):
-        '''
+        """
         Transforms a db node to an object of type Person.
 
-        Youc can create a Person or Person_node instance. (cls is the class 
+        Youc can create a Person or Person_node instance. (cls is the class
         where we are, either Person or PersonBl)
 
-        <Node id=80307 labels={'Person'} 
-            properties={'id': 'I0119', 'confidence': '2.5', 'sex': '2', 'change': 1507492602, 
+        <Node id=80307 labels={'Person'}
+            properties={'id': 'I0119', 'confidence': '2.5', 'sex': '2', 'change': 1507492602,
             'handle': '_da692a09bac110d27fa326f0a7', 'priv': 1}>
-        '''
+        """
         if not obj:
             obj = cls()
-        obj.uuid = node.get('uuid')
+        obj.uuid = node.get("uuid")
         obj.uniq_id = node.id
-        obj.id = node['id']
-        obj.sex = node.get('sex', 'UNKNOWN')
-        obj.change = node['change']
-        obj.confidence = node.get('confidence', '')
-        obj.sortname = node['sortname']
-        obj.priv = node['priv']
-        obj.birth_low = node['birth_low']
-        obj.birth_high = node['birth_high']
-        obj.death_low = node['death_low']
-        obj.death_high = node['death_high']
+        obj.id = node["id"]
+        obj.sex = node.get("sex", "UNKNOWN")
+        obj.change = node["change"]
+        obj.confidence = node.get("confidence", "")
+        obj.sortname = node["sortname"]
+        obj.priv = node["priv"]
+        obj.birth_low = node["birth_low"]
+        obj.birth_high = node["birth_high"]
+        obj.death_low = node["death_low"]
+        obj.death_high = node["death_high"]
         last_year_allowed = datetime.now().year - PRIVACY_LIMIT
-#         if obj.death_high < 9999:
-#             print('ok? uniq_id=',obj.uniq_id,obj.death_high)
+        #         if obj.death_high < 9999:
+        #             print('ok? uniq_id=',obj.uniq_id,obj.death_high)
         obj.too_new = obj.death_high > last_year_allowed
         return obj
 
 
-class PersonReader(DbReader):
-    '''
-        Data reading class for Person objects with associated data.
+class PersonReader(DataService):
+    """
+    Data reading class for Person objects with associated data without transaction.
 
-        - Uses pe.db_reader.DbReader.__init__(self, readservice, u_context) 
-          to define the database driver and user context
-
-        - Returns a Result object.
-    '''
-    def get_person_search(self, args): # --> bl.person_reader.PersonReaderTx.get_person_search
-        """ Read Persons with Names, Events, Refnames (reference names) and Places
-            and Researcher's username.
-        
-            Search by name by args['rule'], args['key']:
-                rule=all                  all
-                rule=surname, key=name    by start of surname
-                rule=firstname, key=name  by start of the first of first names
-                rule=patronyme, key=name  by start of patronyme name
-                rule=refname, key=name    by exact refname
-                rule=years, key=str       by possible living years:
-                    str='-y2'   untill year
-                    str='y1'    single year
-                    str='y1-y2' year range
-                    str='y1-'   from year
-        """
-        raise NotImplementedError('Moved to bl.person_reader')
-#         if args.get('rule') == 'years':
-#             try:
-#                 lim = args['key'].split('-')
-#                 y1 = int(lim[0]) if lim[0] > '' else -9999
-#                 y2 = int(lim[-1]) if lim[-1] > '' else 9999
-#                 if y1 > y2:
-#                     y2, y1 = [y1, y2]
-#                 args['years'] = [y1, y2]
-#             except ValueError:
-#                 return {'statustext':_('The year or years must be numeric'), 'status': Status.ERROR}
-# 
-# #         planned_search = {'rule':args.get('rule'), 'key':args.get('key'), 
-# #                           'years':args.get('years')}
-# 
-#         context = self.user_context
-#         args['use_user'] = self.use_user
-#         args['fw'] = context.first  # From here forward
-#         args['limit'] = context.count
-#         
-#         res = self.readservice.dr_get_person_list(args)
-#         # {'items': persons, 'status': Status.OK}
-# 
-#         status = res.get('status')
-#         if status == Status.ERROR:
-#             msg = res.get("statustext")
-#             logger.error(f'bl.person.PersonReader.get_person_search: {msg}')
-#             print(f'bl.person.PersonReader.get_person_search: {msg}')
-#             return {'items':[], 'status':status,
-#                     'statustext': _('No persons found')}
-# 
-#         # Update the page scope according to items really found
-#         persons = res['items']
-#         if len(persons) > 0:
-#             context.update_session_scope('person_scope', 
-#                                           persons[0].sortname, persons[-1].sortname, 
-#                                           context.count, len(persons))
-# 
-#         if self.use_user is None:
-#             persons2 = [p for p in persons if not p.too_new]
-#             num_hidden = len(persons) - len(persons2)
-#         else:
-#             persons2 = persons
-#             num_hidden = 0
-#         return {'items': persons2, 'num_hidden': num_hidden, 'status': status}
-
+    - Returns a Result object.
+    """
 
     def get_person_list(self):
-        ''' List person data including all data needed to Person page.
-        
-            Calls Neo4jDriver.dr_get_person_list(user, fw_from, limit)
-        '''
+        """List person data including all data needed to Person page.
+
+        Calls Neo4jDriver.dr_get_person_list(user, fw_from, limit)
+        """
         context = self.user_context
         res_dict = {}
-        args = {'use_user': self.use_user,
-                'fw': context.first,  # From here forward
-               'limit':context.count}
-        res = self.readservice.dr_get_person_list(args)
+        args = {
+            "use_user": self.use_user,
+            "fw": context.first,  # From here forward
+            "limit": context.count,
+        }
+        res = shareds.dservice.dr_get_person_list(args)
         # {'items': persons, 'status': Status.OK}
         if Status.has_failed(res):
-            return {'items':None, 'status':res['status'], 
-                    'statustext': _('No persons found')}
+            return {
+                "items": None,
+                "status": res["status"],
+                "statustext": _("No persons found"),
+            }
 
         # Update the page scope according to items really found
-        persons = res['items']
+        persons = res["items"]
         if len(persons) > 0:
-            context.update_session_scope('person_scope', 
-                                          persons[0].sortname, persons[-1].sortname, 
-                                          context.count, len(persons))
+            context.update_session_scope(
+                "person_scope",
+                persons[0].sortname,
+                persons[-1].sortname,
+                context.count,
+                len(persons),
+            )
 
         if self.use_user is None:
             persons2 = [p for p in persons if not p.too_new]
@@ -282,95 +229,166 @@ class PersonReader(DbReader):
         else:
             persons2 = persons
             num_hidden = 0
-        res_dict['status'] = Status.OK
+        res_dict["status"] = Status.OK
 
-        res_dict['num_hidden'] = num_hidden
-        res_dict['items'] = persons2
+        res_dict["num_hidden"] = num_hidden
+        res_dict["items"] = persons2
         return res_dict
 
-
-#     def get_a_person(self, uuid:str):
-#         ''' Read a person from common data or user's own Batch.
-# 
-#             a)  If you have selected to use common approved data, 
-#                 you can read both your own and passed data.
-#             b)  If you have not selected common data,
-#                 you can read only your own data.
-#             
-#             --> Origin from models.gen.person_combo.Person_combo.get_my_person
-#         '''
-
-
-#     def get_person_data(self, uuid:str, args:dict): # --> bl.person_reader.PersonReaderTx.get_person_data
-#         '''
-#         Get a Person with all connected nodes for display in Person page as object tree.
-#             
-#             Note. The args are not yet used.
-#             
-#         * Origin from bp.scene.scene_reader.get_person_full_data(uuid, owner, use_common=True)
-#     
-#         For Person data page we must have all business objects, which has connection
-#         to current Person. This is done in the following steps:
-
-
     def get_surname_list(self, count=40):
-        ''' 
+        """
         List all surnames so that they can be displayed in a name cloud.
-        '''
+        """
         if self.use_user:
-            surnames = self.readservice.dr_get_surname_list_by_user(self.use_user,
-                                                                    count=count)
+            surnames = shareds.dservice.dr_get_surname_list_by_user(
+                self.use_user, count=count
+            )
         else:
-            surnames = self.readservice.dr_get_surname_list_common(count=count)
+            surnames = shareds.dservice.dr_get_surname_list_common(count=count)
         # [{'surname': surname, 'count': count},...]
         return surnames
 
-class PersonWriter(DbWriter):
-    def __init__(self, writeservice, u_context):
-        self.writeservice = writeservice
-        self.u_context = u_context
+    def get_person_minimal(self, uuid, privacy):
+        """
+        Get all parents of the person with given uuid.
+        Returns a list for compatibility with get_parents and get_children.
+        """
+        last_year_allowed = datetime.now().year - PRIVACY_LIMIT
+        nodes = self.dataservice.dr_get_family_members_by_id(uuid, which="person")
+        for n in nodes:
+            n["too_new"] = n["death_high"] > last_year_allowed
+        if privacy:
+            return [n for n in nodes if not n["too_new"]]
+        else:
+            return nodes
+
+    def get_parents(self, uniq_id, privacy):
+        """
+        Get all parents of the person with given db uniq_id.
+        Returns a list as number of parents in database is not always 0..2.
+        """
+        last_year_allowed = datetime.now().year - PRIVACY_LIMIT
+        nodes = self.dataservice.dr_get_family_members_by_id(uniq_id, which="parents")
+        for n in nodes:
+            n["too_new"] = n["death_high"] > last_year_allowed
+        if privacy:
+            return [n for n in nodes if not n["too_new"]]
+        else:
+            return nodes
+
+    def get_children(self, uniq_id, privacy):
+        """
+        Get all children of the person with given db uniq_id.
+        Returns a list.
+        """
+        last_year_allowed = datetime.now().year - PRIVACY_LIMIT
+        nodes = self.dataservice.dr_get_family_members_by_id(uniq_id, which="children")
+        for n in nodes:
+            n["too_new"] = n["death_high"] > last_year_allowed
+        if privacy:
+            return [n for n in nodes if not n["too_new"]]
+        else:
+            return nodes
+
+
+class PersonWriter(DataService):
+    """
+    Person datastore for update without transaction.
+    """
+
+    def __init__(self, service_name: str, u_context=None, tx=None):
+        super().__init__(service_name, u_context, tx=tx)
+        shareds.dservice.tx = None
+
     def set_primary_name(self, uuid, old_order):
-        self.writeservice.dr_set_primary_name(uuid, old_order)
+        shareds.dservice.dr_set_primary_name(uuid, old_order)
+
     def set_name_orders(self, uid_list):
-        self.writeservice.dr_set_name_orders(uid_list)
+        shareds.dservice.dr_set_name_orders(uid_list)
+
+    def set_name_type(self, uniq_id, nametype):
+        shareds.dservice.dr_set_name_type(uniq_id, nametype)
+
+    def set_person_name_properties(self, uniq_id=None, ops=["refname", "sortname"]):
+        """Set Refnames to all Persons or one Person with given uniq_id;
+        also sets Person.sortname using the default name
+
+        Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
+                    bp.admin.routes.set_all_person_refnames
+        """
+        sortname_count = 0
+        refname_count = 0
+        do_refnames = "refname" in ops
+        do_sortname = "sortname" in ops
+        names = []
+
+        # Get each Name object (with person_uid)
+        for pid, name_node in shareds.dservice.ds_get_personnames(uniq_id):
+            name = Name.from_node(name_node)
+            name.person_uid = pid
+            names.append(name)
+
+        if do_refnames:
+            for name in names:
+                # Create links and nodes from given person: (:Person) --> (r:Refname)
+                res = shareds.dservice.ds_build_refnames(name.person_uid, name)
+                refname_count += res.get("count", 0)
+        if do_sortname:
+            for name in names:
+                if name.order == 0:
+                    # If default name, store sortname key to Person node
+                    sortname = name.key_surname()
+                    res = shareds.dservice.ds_set_person_sortname(
+                        name.person_uid, sortname
+                    )
+                    sortname_count += 1
+                    break
+
+        return {
+            "refnames": refname_count,
+            "sortnames": sortname_count,
+            "status": Status.OK,
+        }
+
+    def set_estimated_lifetimes(self, uids=[]):
+        """Sets estimated lifetimes to Person.dates for given person.uniq_ids.
+
+        Stores dates as Person properties: datetype, date1, and date2
+
+        :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+
+        Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
+        and models.dataupdater.set_estimated_dates
+        """
+        res = shareds.dservice.ds_set_people_lifetime_estimates(uids)
+
+        print(f"Estimated lifetime for {res['count']} persons")
+        return res
 
 
 class PersonBl(Person):
-
     def __init__(self):
-        '''
-        Constructor creates a new PersonBl intance.
-        '''
-        Person.__init__(self)
-        self.user = None                # Researcher batch owner, if any
-        self.names = []                 # models.gen.person_name.Name
-
-        self.events = []                # bl.event.EventBl
-        #self.event_ref = []             # Event uniq_ids # Gramps event handles (?)
-        #self.eventref_role = []         # ... and roles
-        #self.event_birth = None         # For birth ans death events
-        #self.event_death = None
-
-        #self.citation_ref = []          # models.gen.citation.Citation
-        #self.note_ref = []              # uniq_id of models.gen.note.Note
-        self.notes = []                 # 
-        #self.media_ref = []             # uniq_ids of models.gen.media.Media
-                                        # (previous self.objref_hlink[])
-
-
-    def save(self, tx, **kwargs):   # batch_id):
-        """ Saves the Person object and possibly the Names, Events ja Citations.
-
-            On return, the self.uniq_id is set
-            
-            @todo: Remove those referenced person names, which are not among
-                   new names (:Person) --> (:Name) 
         """
-        from bl.media import MediaWriter
+        Constructor creates a new PersonBl intance.
+        """
+        Person.__init__(self)
+        self.user = None  # Researcher batch owner, if any
+        self.names = []  # models.gen.person_name.Name
 
-        if 'batch_id' in kwargs:
-            batch_id = kwargs['batch_id']
-        else:
+        self.events = []  # bl.event.EventBl
+        self.notes = []  #
+
+    def save(self, tx, **kwargs):  # batch_id):
+        """Saves the Person object and possibly the Names, Events ja Citations.
+
+        On return, the self.uniq_id is set
+
+        @todo: Remove those referenced person names, which are not among
+               new names (:Person) --> (:Name)
+        """
+
+        batch_id = kwargs.get('batch_id', None)
+        if not 'batch_id':
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
         self.uuid = self.newUuid()
         # Save the Person node under UserProfile; all attributes are replaced
@@ -383,27 +401,33 @@ class PersonBl(Person):
                 "id": self.id,
                 "priv": self.priv,
                 "sex": self.sex,
-                "confidence":self.confidence,
-                "sortname":self.sortname
+                "confidence": self.confidence,
+                "sortname": self.sortname,
             }
             if self.dates:
                 p_attr.update(self.dates.for_db())
 
-            result = tx.run(CypherPerson.create_to_batch, 
-                            batch_id=batch_id, p_attr=p_attr) #, date=today)
+            result = tx.run(
+                CypherPerson.create_to_batch, batch_id=batch_id, p_attr=p_attr
+            )  # , date=today)
             ids = []
             for record in result:
                 self.uniq_id = record[0]
                 ids.append(self.uniq_id)
                 if len(ids) > 1:
-                    print("iError updated multiple Persons {} - {}, attr={}".format(self.id, ids, p_attr))
+                    print(
+                        "iError updated multiple Persons {} - {}, attr={}".format(
+                            self.id, ids, p_attr
+                        )
+                    )
                 # print("Person {} ".format(self.uniq_id))
             if self.uniq_id == None:
                 print("iWarning got no uniq_id for Person {}".format(p_attr))
 
         except Exception as err:
             logger.error(f"Person_gramps.save: {err} in Person {self.id} {p_attr}")
-            #print("iError: Person_gramps.save: {0} attr={1}".format(err, p_attr), file=stderr)
+            # print("iError: Person_gramps.save: {0} attr={1}".format(err, p_attr), file=stderr)
+            raise
 
         # Save Name nodes under the Person node
         for name in self.names:
@@ -411,26 +435,29 @@ class PersonBl(Person):
 
         # Save web urls as Note nodes connected under the Person
         if self.notes:
-            Note.save_note_list(tx, self)
+            Note.save_note_list(tx, parent=self, batch_id=batch_id)
 
-        ''' Connect to each Event loaded from Gramps '''
+        """ Connect to each Event loaded from Gramps """
         try:
-            #for i in range(len(self.eventref_hlink)):
-            for handle_role in self.event_handle_roles:
-                # a tuple (event_handle, role)
-                tx.run(CypherPerson.link_event, 
-                       p_handle=self.handle, 
-                       e_handle=handle_role[0], 
-                       role=handle_role[1])
+            # for i in range(len(self.eventref_hlink)):
+            for event_handle, role in self.event_handle_roles:
+                tx.run(
+                    CypherPerson.link_event,
+                    p_handle=self.handle,
+                    e_handle=event_handle,
+                    role=role,
+                )
         except Exception as err:
-            logger.error(f"Person_gramps.save: {err} in linking Event {self.handle} -> {self.handle_role}")
-            #print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
+            logger.error(
+                f"Person_gramps.save: {err} in linking Event {self.handle} -> {self.handle_role}"
+            )
+            # print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Media nodes and it's Note and Citation references
         if self.media_refs:
-            writer = MediaWriter(shareds.datastore.dataservice)
-            writer.create_and_link_by_handles(self.uniq_id, self.media_refs)
-
+            shareds.dservice.ds_create_link_medias_w_handles(
+                self.uniq_id, self.media_refs
+            )
 
         # The relations to the Family node will be created in Family.save(),
         # because the Family object is not yet created
@@ -438,130 +465,58 @@ class PersonBl(Person):
         # Make relations to the Note nodes
         try:
             for handle in self.note_handles:
-                tx.run(CypherPerson.link_note,
-                       p_handle=self.handle, n_handle=handle)
+                tx.run(CypherPerson.link_note, p_handle=self.handle, n_handle=handle)
         except Exception as err:
-            logger.error(f"Person_gramps.save: {err} in linking Notes {self.handle} -> {handle}")
+            logger.error(
+                f"Person_gramps.save: {err} in linking Notes {self.handle} -> {handle}"
+            )
 
         # Make relations to the Citation nodes
         try:
             for handle in self.citation_handles:
-                tx.run(CypherPerson.link_citation,
-                       p_handle=self.handle, c_handle=handle)
+                tx.run(
+                    CypherPerson.link_citation, p_handle=self.handle, c_handle=handle
+                )
         except Exception as err:
-            logger.error(f"Person_gramps.save: {err} in linking Citations {self.handle} -> {handle}")
+            logger.error(
+                f"Person_gramps.save: {err} in linking Citations {self.handle} -> {handle}"
+            )
         return
 
-
     @staticmethod
-    def update_person_confidences(person_ids:list):
-        """ Sets a quality rate for given list of Person.uniq_ids.
+    def update_person_confidences(person_ids: list):
+        """Sets a quality rating for given list of Person.uniq_ids.
 
-            Person.confidence is calculated as a mean of confidences in
-            all Citations used for Person's Events.
+        Person.confidence is calculated as a mean of confidences in
+        all Citations used for Person's Events.
         """
         counter = 0
-        ds = shareds.datastore.dataservice
         for uniq_id in person_ids:
-            res = ds._update_person_confidences(uniq_id)
+            res = shareds.dservice.ds_update_person_confidences(uniq_id)
             # returns {confidence, status, statustext}
-            stat = res.get('status')
+            stat = res.get("status")
             if stat == Status.UPDATED:
                 counter += 1
             elif stat != Status.OK:
                 # Update failed
-                return {'status': stat, 'statustext':res.get('statustext')}
+                return {"status": stat, "statustext": res.get("statustext")}
 
-        return {'status':Status.OK, 'count':counter}
+        return {"status": Status.OK, "count": counter}
 
-    @staticmethod
-    def set_person_name_properties(uniq_id=None, ops=['refname', 'sortname']):
-        """ Set Refnames to all Persons or one Person with given uniq_id; 
-            also sets Person.sortname using the default name
-    
-            Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
-                        bp.admin.routes.set_all_person_refnames
-        """
-        sortname_count = 0
-        refname_count = 0
-        do_refnames = 'refname' in ops
-        do_sortname = 'sortname' in ops
-        names = []
-        ds = shareds.datastore.dataservice
-
-        # Get each Name object (with person_uid) 
-        for pid, name_node in ds.ds_get_personnames(uniq_id):
-            name = Name.from_node(name_node)
-            name.person_uid =  pid
-            names.append(name)
-
-        if do_refnames:
-            for name in names:
-                # Create links and nodes from given person: (:Person) --> (r:Refname)
-                res = ds.ds_build_refnames(name.person_uid, name)
-                if Status.has_failed(res): return res
-                refname_count += res.get('count', 0)
-        if do_sortname:
-            for name in names:
-                if name.order == 0:
-                    # If default name, store sortname key to Person node
-                    sortname = name.key_surname()
-                    ds._set_person_sortname(name.person_uid, sortname)
-                    if Status.has_failed(res): return res
-                    sortname_count += 1
-                    break
-
-        return {'refnames': refname_count, 'sortnames': sortname_count, 
-                'status':Status.OK}
-
-
-#     @staticmethod
-#     def get_confidence (uniq_id=None): --> pe.neo4j.dataservice.Neo4jWriteDriver.dr_get_person_confidences
-#         """ Collect Person confidence from Person and the Event nodes.
-# 
-#             Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
-#         """
-#         raise(NotImplementedError, "TODO: bl.person.PersonBl.get_confidence")
-# 
-#         if uniq_id:
-#             return shareds.driver.session().run(Cypher_person.get_confidence,
-#                                                 id=uniq_id)
-# #         else:
-# #             return shareds.driver.session().run(Cypher_person.get_confidences_all)
-
-#     def set_confidence (self, tx): 
-#         """ Sets a quality rate to this Person
-#             Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
-#         """
-#         raise(NotImplementedError, "TODO: bl.person.PersonBl.set_confidence")
-# #         return tx.run(Cypher_person.set_confidence,
-# #                       id=self.uniq_id, confidence=self.confidence)
-
-    @staticmethod
-    def estimate_lifetimes(uids=[]): # <-- 
-        """ Sets estimated lifetimes to Person.dates for given person.uniq_ids.
- 
-            Stores dates as Person properties: datetype, date1, and date2
- 
-            :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
- 
-            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
-            and models.dataupdater.set_estimated_dates
-        """
-        ds = shareds.datastore.dataservice
-        res = ds._set_people_lifetime_estimates(uids)
-
-        print(f"Estimated lifetime for {res['count']} persons")
-        return res
-
+    #     @staticmethod --> bl.person.PersonWriter.set_person_name_properties
+    #     def set_person_name_properties(uniq_id=None, ops=['refname', 'sortname']):
+    #     @staticmethod --> pe.neo4j.updateservice.Neo4jUpdateService ??
+    #     def get_confidence (uniq_id=None):
+    #     def set_confidence (self, tx):
+    #     @staticmethod # --> bl.person.PersonWriter.set_estimated_lifetimes
+    #     def estimate_lifetimes(uids=[]):
 
     def remove_privacy_limit_from_families(self):
-        ''' Clear privacy limitations from self.person's families.
-        
-            Origin from models.person_reader
-        '''
+        """Clear privacy limitations from self.person's families.
+
+        Origin from models.person_reader
+        """
         for family in self.families_as_child:
             family.remove_privacy_limits()
         for family in self.families_as_parent:
             family.remove_privacy_limits()
-
