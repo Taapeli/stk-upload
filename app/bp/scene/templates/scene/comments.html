@@ -23,9 +23,8 @@
 <section id="lista">
 
   <table id="comments">
-    <tr><th>{{ _("Commentator") }}</th>
-        <th>{{ _("Timestamp") }}</th>
-        <th>{{ _("Label") }}</th>
+    <tr><th>{{ _("Date") }}</th>
+        <th>{{ _("Node") }}</th>
         <th>{{ _("Name") }}</th>
         <th>{{ _("Counter") }}</th>
     {% if user_context.is_auditor %}
@@ -35,8 +34,7 @@
 {% if cnt %}
     {% for c in comments %}
         <tr>
-            <td>{{c.user}}</td>
-            <td>{{c.timestamp}}</td>
+            <td>{{c.timestr}}/{{c.user}}</td>
             <td>{{c.label[0]}}</td>
             {% if c.label[0] == 'Person' %}
             	<td><a href="/scene/person?uuid={{c.object.uuid}}" class="inlink"
