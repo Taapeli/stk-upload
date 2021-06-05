@@ -37,7 +37,9 @@ def do_schema_fixes():
     """ Search current obsolete terms and structures in schema and fix them.
     
         @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
-    
+
+        Set a new DB_SCHEMA_VERSION value in database.accessDB to activate this method.
+
         #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
     """
 
@@ -49,81 +51,83 @@ def do_schema_fixes():
             # Change (:Batch {"material_type":"Family Tree", "status":"completed"})
             # to     (:Root  {material:'Family Tree', state:'Candidate'})
             change_Batch_to_Root = """
-                MATCH (b:Batch) where b.id="2021-05-03.003"
+                MATCH (b:Batch) WITH b LIMIT 2
                 SET b:Root
-                SET b.material=coalesce(b.material_type, "Family Tree")
-                SET b.state="candidate"
-                REMOVE b.Batch, b.status, b.material_type"""
+                SET b.material=coalesce(b.material_type, $default_material)
+                SET b.state=$default_state
+                REMOVE b:Batch, b.status, b.material_type"""
             result = session.run(change_Batch_to_Root,
                                  default_state=State.ROOT_CANDIDATE,
                                  default_material="Family Tree")
             counters = shareds.db.consume_counters(result)
-            labels_added = counters.labels_added
+            labels_added = counters.labels_added 
+            #properties_set = counters.properties_set
             print(f"do_schema_fixes: change {labels_added} Batch nodes to Root")
 
-            # 2. Change (:Root) -[:OWNS]-> (:Label) 
+            # 2. Change OWNS links to distinct OBJ_* links
+            #
+            #    Change (:Root) -[:OWNS]-> (:Label) 
             #    to     (:Root) -[:OBJ_LABEL]-> (:Label)
             #    using root_relations dictionary
             root_relations = {          # {object_label: relation_type}
                 ":Person": ":OBJ_PERSON",
                 ":Family": ":OBJ_FAMILY",
                 ":Place": ":OBJ_PLACE",
+                ":Source": ":OBJ_SOURCE",
                 "" : ":OBJ_OTHER"
                 }
             OWNS_to_OBJ_x = """
                 MATCH (b:Root) -[r:OWNS]-> (x{label})
-                WITH b,r,x CREATE (b) -[{rtype}]-> (x), DELETE r"""
+                WITH b,r,x
+                    CREATE (b) -[{rtype}]-> (x)
+                    DELETE r"""
             for label, rtype in root_relations.items():
-                cypher = OWNS_to_OBJ_x.format(label=":Person", rtype=":OBJ_PERSON")
+                cypher = OWNS_to_OBJ_x.format(label=label, rtype=rtype)
                 result = session.run(cypher)
                 counters = shareds.db.consume_counters(result)
                 relationships_created = counters.relationships_created
                 print(f"do_schema_fixes: created {relationships_created} links (:Root) -[{rtype}]-> ({label})")
 
-            # for record in result:
-            #     # If any found, get the counters of changes
-            #     _cnt = record[0]
-            #     counters = shareds.db.consume_counters(result)
-            #     #print(counters)
-            #     rel_created = counters.relationships_created
-            #     rel_deleted = counters.relationships_deleted
-            #     print(f"do_schema_fixes: Audit links {rel_deleted} removed, {rel_created} added")
-            #     if rel_created + rel_deleted > 0:
-            #         logger.info(f"database.schema_fixes.do_schema_fixes: "
-            #                     f"Audit links {rel_deleted} removed, {rel_created} added")
-
-            # # Name field missed
-            # result = session.run(change_Stk_name)
-            # counters = shareds.db.consume_counters(result)
-            # if counters.properties_set > 0:
-            #     logger.info("database.schema_fixes.do_schema_fixes: profile _Stk_ name set")
-
         except Exception as e:
-            logger.error(f"{e} in database.schema_fixes.do_schema_fixes"
+            logger.error(f"do_schema_fixes: {e} in database.schema_fixes.do_schema_fixes"
                          f" Failed {e.__class__.__name__} {e}") 
             return
 
+        # 3. Create index fot Root.material, Root.state
+        #
+        try:
+            result = session.run(f'CREATE INDEX FOR (b:Root) ON (b.material, b.state)')
+            counters = shareds.db.consume_counters(result)
+            indexes_added = counters.indexes_added
+            print(f"do_schema_fixes: created {indexes_added} indexes for (:Root)")
+        except ClientError as e:
+            msgs = e.message.split(',')
+            print(f'do_schema_fixes: New index for Root ok: {msgs[0]}')
+            return
+        except Exception as e: 
+            logger.warning(f"do_schema_fixes: Indexes for Root not created." 
+                           f" Failed {e.__class__.__name__} {e.message}") 
 
-        dropped=0
-        created=0
-        for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
-                      'Note', 'Person', 'Place', 'Place_name', 'Repository',
-                      'Source']:
-            try:
-                result = session.run(f'CREATE INDEX ON :{label}(handle)')
-                counters = shareds.db.consume_counters(result)
-                created += counters.indexes_added
-            except ClientError as e:
-                msgs = e.message.split(',')
-                print(f'Unique constraint for {label}.handle ok: {msgs[0]}')
-                return
-            except Exception as e: 
-                logger.warning(f"do_schema_fixes Index for {label}.handle not created." 
-                               f" Failed {e.__class__.__name__} {e.message}") 
-        return 
-
-        print(f"database.schema_fixes.do_schema_fixes: index updates: {dropped} removed, {created} created")
-
+# Removed 5.6.2021
+# dropped=0
+# created=0
+# for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
+#               'Note', 'Person', 'Place', 'Place_name', 'Repository',
+#               'Source']:
+#     try:
+#         result = session.run(f'CREATE INDEX ON :{label}(handle)')
+#         counters = shareds.db.consume_counters(result)
+#         created += counters.indexes_added
+#     except ClientError as e:
+#         msgs = e.message.split(',')
+#         print(f'Unique constraint for {label}.handle ok: {msgs[0]}')
+#         return
+#     except Exception as e: 
+#         logger.warning(f"do_schema_fixes Index for {label}.handle not created." 
+#                        f" Failed {e.__class__.__name__} {e.message}") 
+# return 
+#
+# print(f"database.schema_fixes.do_schema_fixes: index updates: {dropped} removed, {created} created")
 
 
 #Removed 6.5.2020

@@ -43,8 +43,8 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 )
 
 # ====== Database schema ======
-# increment this, if shcema must be updated
-DB_SCHEMA_VERSION = '2021.1.0'
+# Change (icrement) this, if shcema must be updated
+DB_SCHEMA_VERSION = '2021.2.0a'
 # =============================
 
 
