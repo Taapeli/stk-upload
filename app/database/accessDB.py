@@ -69,7 +69,7 @@ def initialize_db():
     pe.neo4j.neo4jengine.Neo4jEngine called from app.setups.py
 
     ''' 
-    if not schema_updated():
+    if schema_updated():
         logger.info('database.accessDB.initialize_db: checking roles, constraints '
                     f'and schema fixes (version {DB_SCHEMA_VERSION})' )
 
@@ -122,7 +122,7 @@ def schema_updated():
     active_version = 0
     for record in result:
         active_version = record[0]
-    return active_version == DB_SCHEMA_VERSION
+    return active_version != DB_SCHEMA_VERSION
 
 def roles_exist():
     #  Tarkista roolien olemassaolo

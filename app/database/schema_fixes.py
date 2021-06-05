@@ -31,119 +31,99 @@ logger = logging.getLogger('stkserver')
 from neo4j.exceptions import ClientError #, ConstraintError
 
 import shareds
-
+from bl.batch import State
 
 def do_schema_fixes():
     """ Search current obsolete terms and structures in schema and fix them.
     
+        @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
+    
         #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
     """
-    if True:
-        # // Fix master HAS_LOADED => Stk HAS_ACCESS
-        # // and Add (:Batch) -[:AFTER_AUDIT]-> (:Audit) 
-        change_master_HAS_LOADED_to_Stk_HAS_AUDITED = """
-MATCH (stk:UserProfile{username:"_Stk_"})
-WITH stk
-    MATCH (master:UserProfile{username:"master"})-[r:HAS_LOADED]->(audit:Audit)
-WITH master,stk,r,audit limit 50
-    DELETE r
-    MERGE (stk)-[:HAS_ACCESS]->(audit)
-    WITH audit
-        MATCH (b:Batch) WHERE b.id = audit.id
-        MERGE (b)-[:AFTER_AUDIT]->(audit)
-    RETURN count(audit)"""
-        change_Stk_name = """
-MATCH (u:UserProfile {username:'_Stk_'})
-SET u.name = 'Suomi tk', u.change = timestamp()"""
-        guest_role_removal = """
-MATCH (a:Role{name:"guest"}) <-[r:HAS_ROLE]- (u:User {username:"guest"})
-SET u.roles=""
-SET u.email = 'nobody'
-DELETE r"""
-        guest_role_adding = """
-MATCH (a:Role{name:"guest"}), (u:User {username:"guest"})
-MERGE (a) <-[r:HAS_ROLE]- (u)
-SET u.roles = 'guest'
-SET u.email = 'nobody'"""
 
-        with shareds.driver.session() as session: 
-            try:
-                # Name field missed
-                if shareds.app.config.get('DEMO', False):
-                    # Add guest role in demo service
-                    result = session.run(guest_role_adding)
-                    counters = shareds.db.consume_counters(result)
-                    if counters.properties_set > 0:
-                        msg = "database.schema_fixes.do_schema_fixes: guest role added to DEMO guest!"
-                        print(msg)
-                        logger.info(msg)
-                else:
-                    # Remove guest role from real services
-                    result = session.run(guest_role_removal)
-                    counters = shareds.db.consume_counters(result)
-                    if counters.properties_set > 0:
-                        msg = "database.schema_fixes.do_schema_fixes: guest role removed from guest!"
-                        print(msg)
-                        logger.info(msg)
 
-                # From (:UserProfile{'master'} -[:HAS_LOADED]-> (a:Audit)
-                #   to (:UserProfile{'_Stk_'} -[:HAS_ACCESS]-> (a:Audit) 
-                #  and OPTIONAL (b:Batch) -[AUDITED]-> (a)
-                result = session.run(change_master_HAS_LOADED_to_Stk_HAS_AUDITED)
-                for record in result:
-                    # If any found, get the counters of changes
-                    _cnt = record[0]
-                    counters = shareds.db.consume_counters(result)
-                    #print(counters)
-                    rel_created = counters.relationships_created
-                    rel_deleted = counters.relationships_deleted
-                    print(f"do_schema_fixes: Audit links {rel_deleted} removed, {rel_created} added")
-                    if rel_created + rel_deleted > 0:
-                        logger.info(f"database.schema_fixes.do_schema_fixes: "
-                                    f"Audit links {rel_deleted} removed, {rel_created} added")
+    with shareds.driver.session() as session: 
+        try:
+            # 1. Change Batch label to Root
+            #
+            # Change (:Batch {"material_type":"Family Tree", "status":"completed"})
+            # to     (:Root  {material:'Family Tree', state:'Candidate'})
+            change_Batch_to_Root = """
+                MATCH (b:Batch) where b.id="2021-05-03.003"
+                SET b:Root
+                SET b.material=coalesce(b.material_type, "Family Tree")
+                SET b.state="candidate"
+                REMOVE b.Batch, b.status, b.material_type"""
+            result = session.run(change_Batch_to_Root,
+                                 default_state=State.ROOT_CANDIDATE,
+                                 default_material="Family Tree")
+            counters = shareds.db.consume_counters(result)
+            labels_added = counters.labels_added
+            print(f"do_schema_fixes: change {labels_added} Batch nodes to Root")
 
-                # Name field missed
-                result = session.run(change_Stk_name)
+            # 2. Change (:Root) -[:OWNS]-> (:Label) 
+            #    to     (:Root) -[:OBJ_LABEL]-> (:Label)
+            #    using root_relations dictionary
+            root_relations = {          # {object_label: relation_type}
+                ":Person": ":OBJ_PERSON",
+                ":Family": ":OBJ_FAMILY",
+                ":Place": ":OBJ_PLACE",
+                "" : ":OBJ_OTHER"
+                }
+            OWNS_to_OBJ_x = """
+                MATCH (b:Root) -[r:OWNS]-> (x{label})
+                WITH b,r,x CREATE (b) -[{rtype}]-> (x), DELETE r"""
+            for label, rtype in root_relations.items():
+                cypher = OWNS_to_OBJ_x.format(label=":Person", rtype=":OBJ_PERSON")
+                result = session.run(cypher)
                 counters = shareds.db.consume_counters(result)
-                if counters.properties_set > 0:
-                    logger.info("database.schema_fixes.do_schema_fixes: profile _Stk_ name set")
+                relationships_created = counters.relationships_created
+                print(f"do_schema_fixes: created {relationships_created} links (:Root) -[{rtype}]-> ({label})")
 
-#                 cnt1 = result.single()[0]
-#                 result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
-#                                      use0="matronyme", use1="mother")
-#                 cnt2 = result.single()[0]
-#                 result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
-#                                      use0="patronyme", use1="father")
-#                 cnt3 = result.single()[0]
-#                 print(f"database.schema_fixes.do_schema_fixes: fixed Refname links {cnt1} REFNAME, {cnt2} matronyme, {cnt3} patronyme")
-            except Exception as e:
-                logger.error(f"{e} in database.accessDB.do_schema_fixes/Audit"
-                             f" Failed {e.__class__.__name__} {e}") 
+            # for record in result:
+            #     # If any found, get the counters of changes
+            #     _cnt = record[0]
+            #     counters = shareds.db.consume_counters(result)
+            #     #print(counters)
+            #     rel_created = counters.relationships_created
+            #     rel_deleted = counters.relationships_deleted
+            #     print(f"do_schema_fixes: Audit links {rel_deleted} removed, {rel_created} added")
+            #     if rel_created + rel_deleted > 0:
+            #         logger.info(f"database.schema_fixes.do_schema_fixes: "
+            #                     f"Audit links {rel_deleted} removed, {rel_created} added")
+
+            # # Name field missed
+            # result = session.run(change_Stk_name)
+            # counters = shareds.db.consume_counters(result)
+            # if counters.properties_set > 0:
+            #     logger.info("database.schema_fixes.do_schema_fixes: profile _Stk_ name set")
+
+        except Exception as e:
+            logger.error(f"{e} in database.schema_fixes.do_schema_fixes"
+                         f" Failed {e.__class__.__name__} {e}") 
+            return
+
+
+        dropped=0
+        created=0
+        for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
+                      'Note', 'Person', 'Place', 'Place_name', 'Repository',
+                      'Source']:
+            try:
+                result = session.run(f'CREATE INDEX ON :{label}(handle)')
+                counters = shareds.db.consume_counters(result)
+                created += counters.indexes_added
+            except ClientError as e:
+                msgs = e.message.split(',')
+                print(f'Unique constraint for {label}.handle ok: {msgs[0]}')
                 return
+            except Exception as e: 
+                logger.warning(f"do_schema_fixes Index for {label}.handle not created." 
+                               f" Failed {e.__class__.__name__} {e.message}") 
+        return 
 
+        print(f"database.schema_fixes.do_schema_fixes: index updates: {dropped} removed, {created} created")
 
-            dropped=0
-            created=0
-            for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
-                          'Note', 'Person', 'Place', 'Place_name', 'Repository',
-                          'Source']:
-                try:
-                    result = session.run(f'CREATE INDEX ON :{label}(handle)')
-                    counters = shareds.db.consume_counters(result)
-                    created += counters.indexes_added
-                except ClientError as e:
-                    msgs = e.message.split(',')
-                    print(f'Unique constraint for {label}.handle ok: {msgs[0]}')
-                    return
-                except Exception as e: 
-                    logger.warning(f"do_schema_fixes Index for {label}.handle not created." 
-                                   f" Failed {e.__class__.__name__} {e.message}") 
-            return 
-
-            print(f"database.schema_fixes.do_schema_fixes: index updates: {dropped} removed, {created} created")
-
-    else:
-        print("database.schema_fixes.do_schema_fixes: No schema changes tried")
 
 
 #Removed 6.5.2020

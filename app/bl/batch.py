@@ -18,7 +18,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-    Data Batch node to connect business nodes to UserProfile.
+    Data Root node to connect business nodes to UserProfile.
 
 Created on 29.11.2019
 
@@ -37,6 +37,49 @@ from bl.base import Status
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 
+class State:
+    """File and Material state and Object state
+    """
+    FILE_LOADING = "Loading"
+    FILE_LOAD_FAILED = "Load Failed"
+    FILE_UPLOADED = ROOT_REMOVED = "File"   # old BATCH_UPLOADED = "uploaded", BATCH_REMOVED = "removed"
+    ROOT_STORING = "Storing"                # old BATCH_STARTED  = "started"
+    ROOT_CANDIDATE = OBJECT_CANDICATE = "Candidate" # old BATCH_CANDIDATE  = "completed"
+    ROOT_FOR_AUDIT = "Requested"            # Old BATCH_FOR_AUDIT = "audit_requested"
+    ROOT_AUDITING = "Auditing"
+    ROOT_ACCEPTED = OBJECT_ACCEPTED = "Accepted"
+    OBJECT_MERGED = "Merged"
+    ROOT_REJECTED = OBJECT_REJECTED = "Rejected"
+
+    # Mikäli Kohteiden näkyminen Isotammen hyväksyttynä aineistona osoittautuu
+    # ongelmaksi, lisätään Kohteille auditoinnin aikaisiksi tilat 
+    # - OBJECT_REJECTED_IN_AUDIT = "Audit Rejected"
+    # - OBJECT_ACCEPTED_IN_AUDIT = "Audit Accepted"
+    # ja siirretään ne varsinaisiksi Rejected ja Accepted -tiloiksi vasta
+    # auditoinnin valmistuessa.
+
+class Root:
+    """
+    Data Root node for candidate, auditing and approved material chuncks.
+    """
+
+    def __init__(self, userid=None):
+        """
+        Creates a Root object
+        """
+        self.uniq_id = None
+        self.user = userid
+        self.file = None
+        self.id = None  # batch_id
+        self.material = ""      # Material type "Family Tree" or other
+        self.state = State.FILE_LOADING
+        self.mediapath = None  # Directory for media files
+        self.timestamp = 0
+        self.description = ""
+
+    def __str__(self):
+        return f"Root {self.user} / {self.id} {self.material}({self.state})"
+
 
 class Batch:
     """
@@ -47,11 +90,11 @@ class Batch:
     #    1. Import file; no Batch node created
     BATCH_LOADING = "loading"
     BATCH_UPLOADED = "uploaded"
-    BATCH_DONE = "done"  # Obsolete
-    BATCH_FAILED = "failed"
-    BATCH_ERROR = "error"
+    BATCH_DONE = "done"         # Obsolete
+    BATCH_FAILED = "failed"     # in bp.admin.uploads
+    BATCH_ERROR = "error"       # in bp.admin.uploads
     BATCH_REMOVED = "removed"
-    BATCH_STORING = "storing"
+    BATCH_STORING = "storing"   # NOT IN USE
     #    2. Batch node exists
     BATCH_STARTED = "started"
     BATCH_CANDIDATE = "completed"  # Means candidate
