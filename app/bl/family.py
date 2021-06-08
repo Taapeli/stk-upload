@@ -278,7 +278,7 @@ class FamilyReader(DataService):
             # For reader only; writer has no context?
             self.user_context = u_context
             self.username = u_context.user
-            if u_context.context == u_context.ChoicesOfView.COMMON:
+            if u_context.context_code == u_context.ChoicesOfView.COMMON:
                 self.use_user = None
             else:
                 self.use_user = u_context.user

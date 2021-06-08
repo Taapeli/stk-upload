@@ -9,7 +9,7 @@
 {% set next_fw = user_context.next_name('fw') %}
 {% set next_bw = user_context.next_name('bw') %}
 {% set next_at_end = user_context.at_end() %}
-{% set ctxt = user_context.context %}
+{% set ctxt = user_context.context_code %}
 {% if ctxt == 3 or ctxt == 5 %}{#
 	#   common_own   011 3 = 1+2 = user's data & common
 	#   common_batch 101 5 = 1+4 = user batch & common #}

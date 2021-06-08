@@ -87,7 +87,7 @@
     {#  call show_use_case(no_change=true) if you want to deny change. #}
     {% if user_context and not config['DEMO'] %}{{ user_context.owner_str() }}
        {% if user_context.user %}
-           {% if user_context.context == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
+           {% if user_context.context_code == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
            {%endif%}
            {% if not no_change %}
             <i>(<a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a>)</i>
