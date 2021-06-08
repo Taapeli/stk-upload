@@ -31,6 +31,7 @@ from bl.person import PersonBl
 from bl.family import FamilyBl
 from bl.place import PlaceBl
 from bl.event import EventBl
+from bl.source import SourceBl
 
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_comment import CypherComment
@@ -103,20 +104,36 @@ class CommentReader(DataService):
             #    credit='juha'
             #    batch_id='2020-01-02.001'
             #    count=1>
-            node = record["o"]
-            m = Comment.from_node(node)
-            m.label = record.get("label")
-            m.count = record.get("count", 0)
-            m.credit = record.get("credit")
-            m.batch = record.get("batch_id")
-            comments.append(m)
+
+            cnode = record["c"]
+            c = Comment.from_node(cnode)
+            c.label = record.get("label")
+            c.count = record.get("count", 0)
+            c.credit = record.get("credit")
+            c.batch = record.get("batch_id")
+            
+            onode = record["o"]
+            if c.label[0] == "Family":
+                o = FamilyBl.from_node(onode)
+                c.object = o
+            if c.label[0] == "Person":
+                o = PersonBl.from_node(onode)
+                c.object = o
+            if c.label[0] == "Place":
+                o = PlaceBl.from_node(onode)
+                c.object = o
+            if c.label[0] == "Source":
+                o = SourceBl.from_node(onode)
+                c.object = o
+
+            comments.append(c)
 
         # Update the page scope according to items really found
         if comments:
             self.user_context.update_session_scope(
                 "comment_scope",
-                comments[0].text,
-                comments[-1].text,
+                comments[0].object.uuid,
+                comments[-1].object.uuid,
                 limit,
                 len(comments),
             )

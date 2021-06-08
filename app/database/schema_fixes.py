@@ -35,62 +35,81 @@ from bl.batch import State
 
 def do_schema_fixes():
     """ Search current obsolete terms and structures in schema and fix them.
-    
-        @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
 
         Set a new DB_SCHEMA_VERSION value in database.accessDB to activate this method.
-
         #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
+
+        @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
     """
 
+    # Batch: Root.state depends on b.status; Root.material = b.material_type
+    change_Batch_to_Root = """
+        MATCH (b:Batch) WITH b LIMIT 1
+        SET b:Root
+        SET b.material=coalesce(b.material_type, $default_material)
+        SET b.state=CASE
+                WHEN b.status = 'started' THEN '"""+State.ROOT_STORING+"""'
+                WHEN b.status = 'completed' THEN '"""+State.ROOT_CANDIDATE+"""'
+                WHEN b.status = 'audit_requested' THEN '"""+State.ROOT_FOR_AUDIT+"""'
+                ELSE '"""+State.ROOT_REMOVED+"""'
+            END
+        REMOVE b:Batch, b.status, b.material_type"""
+    # Audit: Root.state = "Requested"; Root.material = "Family Tree"
+    change_Audit_to_Root = """
+        MATCH (b:Audit) WITH b LIMIT 1
+        SET b:Root
+        SET b.material=coalesce(b.material_type, $default_material)
+        SET b.state='"""+State.ROOT_FOR_AUDIT+"""'
+        REMOVE b:Audit, b.status, b.material_type"""
+    # {object_label: relation_type}
+    root_relations = {
+        ":Person": ":OBJ_PERSON",
+        ":Family": ":OBJ_FAMILY",
+        ":Place": ":OBJ_PLACE",
+        ":Source": ":OBJ_SOURCE",
+        "" : ":OBJ_OTHER"
+        }
+    # Root relation to objects (types OWNS or PASSED) are split to types
+    # OBJ_PERSON, OBJ_FAMILY, OBJ_PLACE, OBJ_SOURCE" and OBJ_OTHER
+    OWNS_to_OBJ_x = """
+        MATCH (b:Root) -[r{old_type}]-> (x{label})
+        WITH b,r,x
+            CREATE (b) -[{new_type}]-> (x)
+            DELETE r"""
 
     with shareds.driver.session() as session: 
         try:
-            # 1. Change Batch label to Root
-            #
-            # Change (:Batch {"material_type":"Family Tree", "status":"completed"})
-            # to     (:Root  {material:'Family Tree', state:'Candidate'})
-            change_Batch_to_Root = """
-                MATCH (b:Batch) WITH b LIMIT 2
-                SET b:Root
-                SET b.material=coalesce(b.material_type, $default_material)
-                SET b.state=$default_state
-                REMOVE b:Batch, b.status, b.material_type"""
-            result = session.run(change_Batch_to_Root,
-                                 default_state=State.ROOT_CANDIDATE,
-                                 default_material="Family Tree")
-            counters = shareds.db.consume_counters(result)
-            labels_added = counters.labels_added 
-            #properties_set = counters.properties_set
-            print(f"do_schema_fixes: change {labels_added} Batch nodes to Root")
-
-            # 2. Change OWNS links to distinct OBJ_* links
-            #
-            #    Change (:Root) -[:OWNS]-> (:Label) 
-            #    to     (:Root) -[:OBJ_LABEL]-> (:Label)
-            #    using root_relations dictionary
-            root_relations = {          # {object_label: relation_type}
-                ":Person": ":OBJ_PERSON",
-                ":Family": ":OBJ_FAMILY",
-                ":Place": ":OBJ_PLACE",
-                ":Source": ":OBJ_SOURCE",
-                "" : ":OBJ_OTHER"
-                }
-            OWNS_to_OBJ_x = """
-                MATCH (b:Root) -[r:OWNS]-> (x{label})
-                WITH b,r,x
-                    CREATE (b) -[{rtype}]-> (x)
-                    DELETE r"""
-            for label, rtype in root_relations.items():
-                cypher = OWNS_to_OBJ_x.format(label=label, rtype=rtype)
-                result = session.run(cypher)
-                counters = shareds.db.consume_counters(result)
-                relationships_created = counters.relationships_created
-                print(f"do_schema_fixes: created {relationships_created} links (:Root) -[{rtype}]-> ({label})")
+            for old_root, cypher_to_root, old_type in [
+                ("Batch", change_Batch_to_Root, ":OWNS"), 
+                ("Audit", change_Audit_to_Root, ":PASSED")]:
+                # 1. Change Batch label to Root
+                #
+                # Change (:Batch {"material_type":"Family Tree", "status":"completed"})
+                # to     (:Root  {material:'Family Tree', state:'Candidate'}) etc
+                labels_added = -1 
+                while labels_added != 0:
+                    result = session.run(cypher_to_root, default_material="Family Tree")
+                    counters = shareds.db.consume_counters(result)
+                    labels_added = counters.labels_added 
+                    #properties_set = counters.properties_set
+                    print(f"do_schema_fixes: change {labels_added} {old_root} nodes to Root")
+    
+                    # 2. Change OWNS OR PASSED links to distinct OBJ_* links
+                    #
+                    #    Change (:Root) -[r]-> (:Label) 
+                    #    to     (:Root) -[:OBJ_LABEL]-> (:Label)
+                    #    using root_relations dictionary
+                    for label, rtype in root_relations.items():
+                        cypher = OWNS_to_OBJ_x.format(label=label, old_type=old_type, new_type=rtype)
+                        result = session.run(cypher)
+                        counters = shareds.db.consume_counters(result)
+                        relationships_created = counters.relationships_created
+                        if relationships_created:
+                            print(f" -- created {relationships_created} links (:Root) -[{rtype}]-> ({label})")
 
         except Exception as e:
             logger.error(f"do_schema_fixes: {e} in database.schema_fixes.do_schema_fixes"
-                         f" Failed {e.__class__.__name__} {e}") 
+                         f" Failed {e.__class__.__name__} {e}")
             return
 
         # 3. Create index fot Root.material, Root.state

@@ -241,11 +241,13 @@ OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
 OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
 OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
 OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
+OPTIONAL MATCH (spouse) <-[:PARENT]- (fam1:Family) where id(spouse) <> id(p)
 RETURN p, id(p) as pid, 
     COLLECT(DISTINCT [e,r.role]) AS events,
     COLLECT(DISTINCT [fam_event,r2.role]) AS fam_events,
     COLLECT(DISTINCT [c,id(c)]) as children,
-    COLLECT(DISTINCT [parent,id(parent)]) as parents
+    COLLECT(DISTINCT [parent,id(parent)]) as parents,
+    collect(distinct [spouse,id(spouse)]) as spouses
 """
 
     fetch_all_for_lifetime_estimates = """
@@ -255,11 +257,13 @@ OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
 OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
 OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
 OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
+OPTIONAL MATCH (spouse) <-[:PARENT]- (fam1:Family) where id(spouse) <> id(p)
 RETURN p, id(p) as pid, 
     collect(distinct [e,r.role]) AS events,
     collect(distinct [fam_event,r2.role]) AS fam_events,
     collect(distinct [c,id(c)]) as children,
-    collect(distinct [parent,id(parent)]) as parents
+    collect(distinct [parent,id(parent)]) as parents,
+    collect(distinct [spouse,id(spouse)]) as spouses
 """
 
     update_lifetime_estimate = """
