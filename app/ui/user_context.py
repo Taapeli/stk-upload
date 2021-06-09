@@ -227,7 +227,7 @@ class UserContext():
             if self.context_code == self.choices.OWN:
                 self.allow_edit = self.is_auditor
 
-        """ Batch selection by material and state """
+        """ Batch selection by state and material """
 
         self.material = user_session.get("material", self.DEFAULT_MATERIAL)
         self.state = user_session.get("state", None)

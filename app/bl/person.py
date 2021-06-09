@@ -242,7 +242,7 @@ class PersonReader(DataService):
         If self.use_user is defined, filter by user.
         """
         surnames = shareds.dservice.dr_get_surname_list(self.use_user, count)
-        # [{'surname': surname, 'count': count},...]
+        # Returns [{'surname': surname, 'count': count},...]
 
         # if self.use_user:
         #     surnames = shareds.dservice.dr_get_surname_list_by_user(

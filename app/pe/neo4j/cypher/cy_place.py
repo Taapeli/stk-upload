@@ -199,18 +199,29 @@ MATCH (m:Media  {handle: $m_handle})
 
 class CypherPlaceStats:
     get_place_list_by_username = """
-match (b:Batch{user:$username}) -[:OWNS]-> (e:Event) -[:PLACE]-> (p:Place) 
+match (b:Root{user:$username, material:$material, state:$state})
+    -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
 return p as place, count(p) as count
 order by count desc
-limit $count
-"""
+limit $count"""
 
     get_place_list_common = """
-match () -[:PASSED]-> (e:Event) -[:PLACE]-> (p:Place) 
+match (b:Root{material:$material, state:$state})
+    -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
 return p as place, count(p) as count
 order by count desc
-limit $count
-"""
+limit $count"""
+
+#     get_place_list_by_username = """
+# match (b:Batch{user:$username}) -[:OWNS]-> (e:Event) -[:PLACE]-> (p:Place) 
+# return p as place, count(p) as count
+# order by count desc
+# limit $count"""
+#     get_place_list_common = """
+# match () -[:PASSED]-> (e:Event) -[:PLACE]-> (p:Place) 
+# return p as place, count(p) as count
+# order by count desc
+# limit $count"""
 
 class CypherPlaceMerge:
 

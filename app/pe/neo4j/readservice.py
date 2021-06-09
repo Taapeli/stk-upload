@@ -784,6 +784,36 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": notes, "status": Status.OK}
 
+    #   @functools.lru_cache
+    def dr_get_family_members_by_id(self, oid, which):
+        """
+        Get the minimal data required for creating graphs with person labels.
+        The target depends on which = ('person', 'parents', 'children').
+        For which='person', the oid should contain an uuid.
+        For 'parents' and 'children' the oid should contain a database uniq_id.
+        The 'death_high' value is always returned for privacy checks.
+        """
+        switcher = {
+            "person": CypherPerson.get_person_for_graph,
+            "parents": CypherPerson.get_persons_parents,
+            "children": CypherPerson.get_persons_children,
+        }
+        result_list = []
+        with self.driver.session(default_access_mode="READ") as session:
+            result = session.run(switcher.get(which), ids=[oid])
+            for record in result:
+                result_list.append(
+                    {
+                        "uniq_id": record["uniq_id"],
+                        "uuid": record["uuid"],
+                        "sortname": record["sortname"],
+                        "gender": record["gender"],
+                        "events": record["events"],
+                        "death_high": record["death_high"],
+                    }
+                )
+        return result_list
+
     def dr_get_person_families_uuid(self, uuid):
         """
         Get the Families where Person is a member (parent or child).
@@ -1520,41 +1550,15 @@ class Neo4jReadService(ConcreteService):
     #             result_list.append({"surname": surname, "count": count})
     #     return result_list
 
-    #   @functools.lru_cache
-    def dr_get_family_members_by_id(self, oid, which):
-        """
-        Get the minimal data required for creating graphs with person labels.
-        The target depends on which = ('person', 'parents', 'children').
-        For which='person', the oid should contain an uuid.
-        For 'parents' and 'children' the oid should contain a database uniq_id.
-        The 'death_high' value is always returned for privacy checks.
-        """
-        switcher = {
-            "person": CypherPerson.get_person_for_graph,
-            "parents": CypherPerson.get_persons_parents,
-            "children": CypherPerson.get_persons_children,
-        }
+    def dr_get_placename_list(self, username, count):
         result_list = []
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(switcher.get(which), ids=[oid])
-            for record in result:
-                result_list.append(
-                    {
-                        "uniq_id": record["uniq_id"],
-                        "uuid": record["uuid"],
-                        "sortname": record["sortname"],
-                        "gender": record["gender"],
-                        "events": record["events"],
-                        "death_high": record["death_high"],
-                    }
-                )
-        return result_list
-
-    def dr_get_placename_stats_by_user(self, username, count):
-        result_list = []
-        with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(
-                CypherPlaceStats.get_place_list_by_username,
+            # Select Batches user, if defined
+            cypher = CypherPlaceStats.get_place_list_by_username \
+                if username \
+                else CypherPlaceStats.get_place_list_common
+            result = session.run(cypher,
+                material=self.material, state=self.state,
                 username=username,
                 count=count,
             )
@@ -1568,16 +1572,34 @@ class Neo4jReadService(ConcreteService):
                 )
         return result_list
 
-    def dr_get_placename_stats_common(self, count):
-        result_list = []
-        with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(CypherPlaceStats.get_place_list_common, count=count)
-            for record in result:
-                place = record["place"]
-                placename = place["pname"]
-                uuid = place["uuid"]
-                count = record["count"]
-                result_list.append(
-                    {"placename": placename, "count": count, "uuid": uuid}
-                )
-        return result_list
+    # def dr_get_placename_stats_by_user(self, username, count):
+    #     result_list = []
+    #     with self.driver.session(default_access_mode="READ") as session:
+    #         result = session.run(
+    #             CypherPlaceStats.get_place_list_by_username,
+    #             username=username,
+    #             count=count,
+    #         )
+    #         for record in result:
+    #             place = record["place"]
+    #             placename = place["pname"]
+    #             uuid = place["uuid"]
+    #             count = record["count"]
+    #             result_list.append(
+    #                 {"placename": placename, "count": count, "uuid": uuid}
+    #             )
+    #     return result_list
+    #
+    # def dr_get_placename_stats_common(self, count):
+    #     result_list = []
+    #     with self.driver.session(default_access_mode="READ") as session:
+    #         result = session.run(CypherPlaceStats.get_place_list_common, count=count)
+    #         for record in result:
+    #             place = record["place"]
+    #             placename = place["pname"]
+    #             uuid = place["uuid"]
+    #             count = record["count"]
+    #             result_list.append(
+    #                 {"placename": placename, "count": count, "uuid": uuid}
+    #             )
+    #     return result_list
