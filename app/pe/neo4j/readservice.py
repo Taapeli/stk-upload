@@ -1476,11 +1476,15 @@ class Neo4jReadService(ConcreteService):
         return
 
     #   @functools.lru_cache
-    def dr_get_surname_list_by_user(self, username, count):
+    def dr_get_surname_list(self, username, count):
         result_list = []
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(
-                CypherPerson.get_surname_list_by_username,
+            # Select Batches user, if defined
+            cypher = CypherPerson.get_surname_list_by_username \
+                if username \
+                else CypherPerson.get_surname_list_common
+            result = session.run(cypher,
+                material=self.material, state=self.state,
                 username=username,
                 count=count,
             )
@@ -1490,16 +1494,31 @@ class Neo4jReadService(ConcreteService):
                 result_list.append({"surname": surname, "count": count})
         return result_list
 
-    #   @functools.lru_cache
-    def dr_get_surname_list_common(self, count):
-        result_list = []
-        with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(CypherPerson.get_surname_list_common, count=count)
-            for record in result:
-                surname = record["surname"]
-                count = record["count"]
-                result_list.append({"surname": surname, "count": count})
-        return result_list
+    # #   @functools.lru_cache
+    # def dr_get_surname_list_by_user(self, username, count):
+    #     result_list = []
+    #     with self.driver.session(default_access_mode="READ") as session:
+    #         result = session.run(
+    #             CypherPerson.get_surname_list_by_username,
+    #             username=username,
+    #             count=count,
+    #         )
+    #         for record in result:
+    #             surname = record["surname"]
+    #             count = record["count"]
+    #             result_list.append({"surname": surname, "count": count})
+    #     return result_list
+
+    # #   @functools.lru_cache
+    # def dr_get_surname_list_common(self, count):
+    #     result_list = []
+    #     with self.driver.session(default_access_mode="READ") as session:
+    #         result = session.run(CypherPerson.get_surname_list_common, count=count)
+    #         for record in result:
+    #             surname = record["surname"]
+    #             count = record["count"]
+    #             result_list.append({"surname": surname, "count": count})
+    #     return result_list
 
     #   @functools.lru_cache
     def dr_get_family_members_by_id(self, oid, which):

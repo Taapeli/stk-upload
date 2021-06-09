@@ -88,8 +88,6 @@ class Neo4jReadServiceTx(ConcreteService):
         material = shareds.dservice.material
         state = shareds.dservice.state
         
-        user = args.get('use_user')
-        #show_approved = (user is None)
         rule = args.get('rule')
         key = args.get('key')
         fw_from = args.get('fw','')
@@ -106,33 +104,19 @@ class Neo4jReadServiceTx(ConcreteService):
                 # Show persons, no search form
                 print(f'tx_get_person_list: Show {state} {material} fw={fw_from}')
                 result = self.tx.run(CypherPerson.read_persons_w_events_fw_name,
-                                     material=material,state=state,
+                                     material=material, state=state,
                                      start_name=fw_from, limit=limit)
-                # if show_approved:
-                #     print(f'tx_get_person_list: Show approved, common data fw={fw_from}')
-                #     result = self.tx.run(CypherPerson.read_approved_persons_w_events_fw_name,
-                #                          start_name=fw_from, limit=limit)
-                # else:
-                #     print(f'tx_get_person_list: Show candidate data fw={fw_from}')
-                #     result = self.tx.run(CypherPerson.read_my_persons_w_events_fw_name,
-                #                          user=user, start_name=fw_from, limit=limit)
             elif rule in ['surname', 'firstname', 'patronyme']:
                 # Search persons matching <rule> field to <key> value
-                print(f'tx_get_person_list: Show approved common data {rule} ~ "{key}*"')
-                result = self.tx.run(CypherPerson.get_common_events_by_refname_use,
+                print(f'tx_get_person_list: Show {state} {material} data, {rule} ~ "{key}*"')
+                result = self.tx.run(CypherPerson.get_events_by_refname_use,
+                                     material=material, state=state,
                                      use=rule, name=key)
-                # if show_approved:
-                #     print(f'tx_get_person_list: Show approved common data {rule} ~ "{key}*"')
-                #     result = self.tx.run(CypherPerson.get_common_events_by_refname_use,
-                #                          use=rule, name=key)
-                # else:
-                #     print(f'tx_get_person_list: Show candidate data {rule} ~ "{key}*"')
-                #     result = self.tx.run(CypherPerson.get_my_events_by_refname_use,
-                #                          use=rule, name=key, user=user)
             elif rule == 'years':
                 # Search persons matching <years>
-                print(f'tx_get_person_list: Show approved common data years {years}')
-                result = self.tx.run(CypherPerson.get_common_events_by_years,
+                print(f'tx_get_person_list: Show {state} {material}, years {years}')
+                result = self.tx.run(CypherPerson.get_events_by_years,
+                                     material=material, state=state,
                                      years=years)
                 # if show_approved:
                 #     print(f'tx_get_person_list: Show approved common data years {years}')

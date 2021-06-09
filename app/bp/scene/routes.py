@@ -191,7 +191,7 @@ def show_person_search():
     key = rq.get("key")
     if key:
         args["key"] = key
-    print(f"{request.method} Persons {args}")
+    print(f"show_person_search {request.method} Persons {args}")
 
     res, u_context = _do_get_persons(args)
     if Status.has_failed(res, strict=False):

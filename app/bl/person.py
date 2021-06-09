@@ -238,14 +238,18 @@ class PersonReader(DataService):
     def get_surname_list(self, count=40):
         """
         List all surnames so that they can be displayed in a name cloud.
+        
+        If self.use_user is defined, filter by user.
         """
-        if self.use_user:
-            surnames = shareds.dservice.dr_get_surname_list_by_user(
-                self.use_user, count=count
-            )
-        else:
-            surnames = shareds.dservice.dr_get_surname_list_common(count=count)
+        surnames = shareds.dservice.dr_get_surname_list(self.use_user, count)
         # [{'surname': surname, 'count': count},...]
+
+        # if self.use_user:
+        #     surnames = shareds.dservice.dr_get_surname_list_by_user(
+        #         self.use_user, count=count
+        #     )
+        # else:
+        #     surnames = shareds.dservice.dr_get_surname_list_common(count=count)
         return surnames
 
     def get_person_minimal(self, uuid, privacy):
