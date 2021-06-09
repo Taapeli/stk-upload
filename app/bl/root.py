@@ -1,8 +1,8 @@
 #   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
-#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
-#                            Timo Nallikari, Pekka Valta
+#   Copyright (C) 2021       Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
+#                            Ismo Peltonen, Pekka Valta
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,9 +18,11 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-    Data Root node to connect business nodes to UserProfile.
+    Data Root node to access Batch data sets.
 
-Created on 29.11.2019
+    Derived from bl.batch.Batch, bl.audit.Audit
+
+Created on 9.6.2021
 
 @author: jm
 """
@@ -37,46 +39,107 @@ from bl.base import Status
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 
-# class State: --> bl.root.State
-# class Root: --> bl.root.Root
+class State:
+    """File, Material or Object state.
 
+    State value    File state          Root state          Object state *
+    -----------    ----------          ----------          ------------
+    Loading        FILE_LOADING
+    File           FILE_UPLOADED       ROOT_REMOVED
+    Load Failed    FILE_LOAD_FAILED
+    Storing                            ROOT_STORING
+    Candidate                          ROOT_CANDIDATE     OBJECT_CANDICATE
 
-class Batch:
+    Requested                          ROOT_FOR_AUDIT
+    Auditing                           ROOT_AUDITING
+    Accepted                           ROOT_ACCEPTED      OBJECT_ACCEPTED
+    Merged                                                OBJECT_MERGED
+    Rejected                           ROOT_REJECTED      OBJECT_REJECTED
+    
+    *)  Mikäli Kohteiden näkyminen Isotammen hyväksyttynä aineistona osoittautuu
+        ongelmaksi, lisätään Kohteille auditoinnin aikaisiksi tilat / Ismo
+        - OBJECT_REJECTED_IN_AUDIT = "Audit Rejected"
+        - OBJECT_ACCEPTED_IN_AUDIT = "Audit Accepted"
+        ja siirretään ne varsinaisiksi Rejected ja Accepted -tiloiksi vasta
+        auditoinnin valmistuessa.
+    
     """
-    User Batch node and statistics about them.
-    """
+    FILE_LOADING = "Loading"
+    FILE_LOAD_FAILED = "Load Failed"
+    FILE_UPLOADED = "File"          # old BATCH_UPLOADED = "uploaded", BATCH_REMOVED = "removed"
 
-    # Batch status values:
-    #    1. Import file; no Batch node created
-    BATCH_LOADING = "loading"
-    BATCH_UPLOADED = "uploaded"
-    BATCH_DONE = "done"         # Obsolete
-    BATCH_FAILED = "failed"     # in bp.admin.uploads
-    BATCH_ERROR = "error"       # in bp.admin.uploads
-    BATCH_REMOVED = "removed"
-    BATCH_STORING = "storing"   # NOT IN USE
-    #    2. Batch node exists
-    BATCH_STARTED = "started"
-    BATCH_CANDIDATE = "completed"  # Means candidate
-    #    3. Batch is empty
-    BATCH_FOR_AUDIT = "audit_requested"
+    ROOT_REMOVED = "File"           # old BATCH_UPLOADED = "uploaded", BATCH_REMOVED = "removed"
+    ROOT_STORING = "Storing"        # old BATCH_STARTED  = "started"
+    ROOT_CANDIDATE = "Candidate"    # old BATCH_CANDIDATE  = "completed"
+    ROOT_FOR_AUDIT = "Requested"    # Old BATCH_FOR_AUDIT = "audit_requested"
+    ROOT_AUDITING = "Auditing"
+    ROOT_ACCEPTED = "Accepted"
+    ROOT_REJECTED = "Rejected"
+
+    OBJECT_CANDICATE = "Candidate"  # old BATCH_CANDIDATE  = "completed"
+    OBJECT_ACCEPTED = "Accepted"
+    OBJECT_MERGED = "Merged"
+    OBJECT_REJECTED = "Rejected"
+
+
+class Root:
+    """
+    Data Root node for candidate, auditing and approved material chuncks.
+    """
 
     def __init__(self, userid=None):
         """
-        Creates a Batch object
+        Creates a Root object
         """
         self.uniq_id = None
         self.user = userid
         self.file = None
         self.id = None  # batch_id
-        self.status = Batch.BATCH_STARTED
+        self.material = ""      # Material type "Family Tree" or other
+        self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
         self.timestamp = 0
-        self.material_type = ""
         self.description = ""
 
     def __str__(self):
-        return f"{self.user} / {self.id}"
+        return f"Root {self.user} / {self.id} {self.material}({self.state})"
+
+
+#===============================================================================
+# class Batch:
+#     """
+#     User Batch node and statistics about them.
+#     """
+# 
+#     # Batch status values:
+#     #    1. Import file; no Batch node created
+#     BATCH_LOADING = "loading"
+#     BATCH_UPLOADED = "uploaded"
+#     BATCH_DONE = "done"         # Obsolete
+#     BATCH_FAILED = "failed"     # in bp.admin.uploads
+#     BATCH_ERROR = "error"       # in bp.admin.uploads
+#     BATCH_REMOVED = "removed"
+#     BATCH_STORING = "storing"   # NOT IN USE
+#     #    2. Batch node exists
+#     BATCH_STARTED = "started"
+#     BATCH_CANDIDATE = "completed"  # Means candidate
+#     #    3. Batch is empty
+#     BATCH_FOR_AUDIT = "audit_requested"
+# 
+#     def __init__(self, userid=None):
+#         """
+#         Creates a Batch object
+#         """
+#         self.uniq_id = None
+#         self.user = userid
+#         self.file = None
+#         self.id = None  # batch_id
+#         self.status = Batch.BATCH_STARTED
+#         self.mediapath = None  # Directory for media files
+#         self.timestamp = 0
+#         self.material_type = ""
+#         self.description = ""
+#===============================================================================
 
     def save(self):
         """Create or update Batch node.
@@ -91,10 +154,11 @@ class Batch:
             "mediapath": self.mediapath,
             # timestamp": <to be set in cypher>,
             # id: <uniq_id from result>,
-            "status": self.status,
-            "material_type": self.material_type,
+            "state": self.state,
+            "material": self.material,
             "description": self.description,
         }
+        #TODO Create new root_save()
         res = shareds.dservice.ds_batch_save(attr)
         # returns {status, identity}
 
@@ -104,24 +168,24 @@ class Batch:
 
     @classmethod
     def from_node(cls, node):
-        """Convert a Neo4j node to Batch object."""
+        """Convert a Neo4j node to Root object."""
         obj = cls()
         obj.uniq_id = node.id
         obj.user = node.get("user", "")
         obj.file = node.get("file", None)
         obj.id = node.get("id", None)
-        obj.status = node.get("status", "")
+        obj.state = node.get("state", "")
         obj.mediapath = node.get("mediapath")
         obj.timestamp = node.get("timestamp", 0)
         obj.upload = format_timestamp(obj.timestamp)
         obj.auditor = node.get("auditor", None)
-        obj.material_type = node.get("material_type", "")
+        obj.material = node.get("material", "")
         obj.description = node.get("description", "")
         return obj
 
     @staticmethod
     def delete_batch(username, batch_id):
-        """Delete a Batch with reasonable chunks."""
+        """Delete a Root batch with reasonable chunks."""
         total = 0
         try:
             with shareds.driver.session() as session:
@@ -137,7 +201,7 @@ class Batch:
                     removed = d1 + d2
                     total += removed
                     if removed:
-                        print(f"Batch.delete_batch: removed {d1} nodes, {d2} relations")
+                        print(f"Root.delete_batch: removed {d1} nodes, {d2} relations")
                     else:
                         # All connected nodes deleted. delete the batch node
                         result = session.run(
@@ -151,14 +215,14 @@ class Batch:
                         d2 = counters.relationships_deleted
                         if d1:
                             print(
-                                f"Batch.delete_batch: removed "
+                                f"Root.delete_batch: removed "
                                 f"{d1} batch node {batch_id}, {d2} relations"
                             )
                             total += d1 + d2
                             removed = 0
                         else:
                             print(
-                                f"Batch.delete_batch: "
+                                f"Root.delete_batch: "
                                 f"{_('Could not delete batch')} \"{batch_id}\""
                             )
                             return {
@@ -170,7 +234,7 @@ class Batch:
 
         except Exception as e:
             msg = f"{e.__class__.__name__} {e}"
-            print(f"Batch.delete_batch: ERROR {msg}")
+            print(f"Root.delete_batch: ERROR {msg}")
             return {"status": Status.ERROR, "statustext": msg}
 
     @staticmethod
@@ -204,17 +268,17 @@ class Batch:
             #    properties={'auditor': 'juha', 'id': '2020-03-24.002',
             #    'user': 'juha', 'timestamp': 1585070354153}>
             #  cnt=200>
-            b = Batch.from_node(node)
+            b = Root.from_node(node)
             if not b.status:
                 # Audit node has no status field; the material has been sent forwards
-                b.status = Batch.BATCH_FOR_AUDIT
+                b.state = State.ROOT_FOR_AUDIT  # Batch.BATCH_FOR_AUDIT
             approved[b.id] = count
 
         # Get current researcher batches
         titles = []
         user_data = {}
         result = shareds.driver.session().run(
-            CypherBatch.get_batches, user=user, status=Batch.BATCH_CANDIDATE
+            CypherBatch.get_batches, user=user, status=State.ROOT_CANDIDATE # Batch.BATCH_CANDIDATE
         )
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'}
@@ -224,12 +288,12 @@ class Batch:
             #        'status': 'completed'}>
             #  label='Note'
             #  cnt=2>
-            b = Batch.from_node(record["batch"])
+            b = Root.from_node(record["batch"])
             label = record.get("label", "")
             cnt = record["cnt"]
 
             batch_id = b.id
-            tstring = Batch.timestamp_to_str(b.timestamp)
+            tstring = Root.timestamp_to_str(b.timestamp)
 
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -282,7 +346,7 @@ class Batch:
                 user = batch.get("user")
                 # batch_id = batch.get('id')
                 ts = batch.get("timestamp")
-                tstring = Batch.timestamp_to_str(ts)
+                tstring = Root.timestamp_to_str(ts)
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -312,7 +376,7 @@ class Batch:
             #        'timestamp': 1569586423509}>
 
             node = record["batch"]
-            batch = Batch.from_node(node)
+            batch = Root.from_node(node)
             batches.append(batch)
 
         return batches
@@ -332,7 +396,7 @@ class Batch:
 
 class BatchUpdater(DataService):
     """
-    Batch datastore for write and update in transaction.
+    Root datastore for write and update in transaction.
     """
 
     def __init__(self, service_name: str, u_context=None, tx=None):
@@ -357,7 +421,7 @@ class BatchUpdater(DataService):
         # TODO check res
 
         # Find the next free Batch id
-        batch = Batch()
+        batch = Root()
         res = shareds.dservice.ds_new_batch_id()
 
         batch.id = res.get("id")
@@ -371,12 +435,12 @@ class BatchUpdater(DataService):
         return {"batch": batch, "status": Status.OK}
 
     def batch_get_one(self, user, batch_id):
-        """Get Batch object by username and batch id. """
+        """Get Root object by username and batch id. """
         ret = shareds.dservice.ds_get_batch(user, batch_id)
         # returns {"status":Status.OK, "node":record}
         try:
             node = ret['node']
-            batch = Batch.from_node(node)
+            batch = Root.from_node(node)
             return {"status":Status.OK, "item":batch}
         except Exception as e:
             statustext = (

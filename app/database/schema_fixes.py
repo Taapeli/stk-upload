@@ -31,7 +31,7 @@ logger = logging.getLogger('stkserver')
 from neo4j.exceptions import ClientError #, ConstraintError
 
 import shareds
-from bl.batch import State
+from bl.root import State
 
 def do_schema_fixes():
     """ Search current obsolete terms and structures in schema and fix them.

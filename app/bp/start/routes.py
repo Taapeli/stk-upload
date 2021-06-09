@@ -82,7 +82,7 @@ def start_guest():
     logger.info(f"-> bp.start.routes.start_guest, lang={lang}")
     return redirect("/scene/persons/search")
     # is_demo = shareds.app.config.get('DEMO', False)
-    # return render_template('/start/index_guest.html', is_demo=is_demo)
+    # return render_template('/start/osolete_index_guest.html', is_demo=is_demo)
 
 
 @shareds.app.route("/start/persons/search", methods=["GET", "POST"])

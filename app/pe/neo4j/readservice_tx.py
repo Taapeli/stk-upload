@@ -85,8 +85,11 @@ class Neo4jReadServiceTx(ConcreteService):
         
             args = dict {use_user, fw, limit, rule, key, years}
         """
+        material = shareds.dservice.material
+        state = shareds.dservice.state
+        
         user = args.get('use_user')
-        show_approved = (user is None)
+        #show_approved = (user is None)
         rule = args.get('rule')
         key = args.get('key')
         fw_from = args.get('fw','')
@@ -101,42 +104,54 @@ class Neo4jReadServiceTx(ConcreteService):
                 return {'items': [], 'status': Status.NOT_STARTED }
             elif args.get('pg') == 'all':
                 # Show persons, no search form
-                if show_approved:
-                    print(f'tx_get_person_list: Show approved, common data fw={fw_from}')
-                    result = self.tx.run(CypherPerson.read_approved_persons_w_events_fw_name,
-                                         start_name=fw_from, limit=limit)
-                else:
-                    print(f'tx_get_person_list: Show candidate data fw={fw_from}')
-                    result = self.tx.run(CypherPerson.read_my_persons_w_events_fw_name,
-                                         user=user, start_name=fw_from, limit=limit)
+                print(f'tx_get_person_list: Show {state} {material} fw={fw_from}')
+                result = self.tx.run(CypherPerson.read_persons_w_events_fw_name,
+                                     material=material,state=state,
+                                     start_name=fw_from, limit=limit)
+                # if show_approved:
+                #     print(f'tx_get_person_list: Show approved, common data fw={fw_from}')
+                #     result = self.tx.run(CypherPerson.read_approved_persons_w_events_fw_name,
+                #                          start_name=fw_from, limit=limit)
+                # else:
+                #     print(f'tx_get_person_list: Show candidate data fw={fw_from}')
+                #     result = self.tx.run(CypherPerson.read_my_persons_w_events_fw_name,
+                #                          user=user, start_name=fw_from, limit=limit)
             elif rule in ['surname', 'firstname', 'patronyme']:
                 # Search persons matching <rule> field to <key> value
-                if show_approved:
-                    print(f'tx_get_person_list: Show approved common data {rule} ~ "{key}*"')
-                    result = self.tx.run(CypherPerson.get_common_events_by_refname_use,
-                                         use=rule, name=key)
-                else:
-                    print(f'tx_get_person_list: Show candidate data {rule} ~ "{key}*"')
-                    result = self.tx.run(CypherPerson.get_my_events_by_refname_use,
-                                         use=rule, name=key, user=user)
+                print(f'tx_get_person_list: Show approved common data {rule} ~ "{key}*"')
+                result = self.tx.run(CypherPerson.get_common_events_by_refname_use,
+                                     use=rule, name=key)
+                # if show_approved:
+                #     print(f'tx_get_person_list: Show approved common data {rule} ~ "{key}*"')
+                #     result = self.tx.run(CypherPerson.get_common_events_by_refname_use,
+                #                          use=rule, name=key)
+                # else:
+                #     print(f'tx_get_person_list: Show candidate data {rule} ~ "{key}*"')
+                #     result = self.tx.run(CypherPerson.get_my_events_by_refname_use,
+                #                          use=rule, name=key, user=user)
             elif rule == 'years':
                 # Search persons matching <years>
-                if show_approved:
-                    print(f'tx_get_person_list: Show approved common data years {years}')
-                    result = self.tx.run(CypherPerson.get_common_events_by_years,
-                                         years=years)
-                else:
-                    print(f'tx_get_person_list: Show candidate data  years {years}')
-                    result = self.tx.run(CypherPerson.get_my_events_by_years,
-                                         years=years, user=user)
+                print(f'tx_get_person_list: Show approved common data years {years}')
+                result = self.tx.run(CypherPerson.get_common_events_by_years,
+                                     years=years)
+                # if show_approved:
+                #     print(f'tx_get_person_list: Show approved common data years {years}')
+                #     result = self.tx.run(CypherPerson.get_common_events_by_years,
+                #                          years=years)
+                # else:
+                #     print(f'tx_get_person_list: Show candidate data  years {years}')
+                #     result = self.tx.run(CypherPerson.get_my_events_by_years,
+                #                          years=years, user=user)
             elif rule == 'ref':
-                # Search persons where a reference name = <key> value
-                if show_approved:
-                    print(f'tx_get_person_list: TODO: Show approved common data {rule}={key}')
-                    #return session.run(Cypher_person.get_events_by_refname, name=key)
-                else:
-                    print(f'tx_get_person_list: TODO: Show candidate data {rule}={key}')
-                    #return session.run(Cypher_person.get_events_by_refname, name=key)
+                #TODO: Search persons where a reference name = <key> value
+                print(f'tx_get_person_list: TODO: Show approved common data {rule}={key}')
+                #return session.run(Cypher_person.get_events_by_refname, name=key)
+                # if show_approved:
+                #     print(f'tx_get_person_list: TODO: Show approved common data {rule}={key}')
+                #     #return session.run(Cypher_person.get_events_by_refname, name=key)
+                # else:
+                #     print(f'tx_get_person_list: TODO: Show candidate data {rule}={key}')
+                #     #return session.run(Cypher_person.get_events_by_refname, name=key)
             else:
                 return {'items': [], 'status': Status.ERROR,
                         'statustext': 'tx_get_person_list: Invalid rule'}

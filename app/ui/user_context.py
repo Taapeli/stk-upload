@@ -30,12 +30,12 @@ Created on 19.1.2019
 
 from urllib.parse import unquote_plus
 from flask_babelex import lazy_gettext as N_
-
+from bl.root import State
 
 class UserContext():
     """ Store filter values for finding the required subset of database.
     
-        Usage example:
+        Usage examples:
             #    Create context with defaults from session and request (1)
             u_context = UserContext(user_session, current_user, request)
 
@@ -70,7 +70,7 @@ class UserContext():
         (1) user context: username and which material to display
         - user          str     Username from current_user, if any
         - user_context  int     Code expressing filter method by data owners
-                                from request.div+div2 or session.user_context.
+                                from request.div or session.user_context.
                                 Default = 1 (common) if neither present
 
             COMMON - 1          approved common data 'Isotammi'
@@ -78,7 +78,7 @@ class UserContext():
             BATCH - 3 *         a selected Batch set
             COMMON+OWN *
             COMMON+BATCH *
-            *) NOTE. Not implemented, request.div2 is never currently present!
+            *) NOTE. Not implemented!
 
         (2) sort keys displayed in the current page
         - first, last          str   Boundary names for current display page [from, to]
@@ -111,6 +111,7 @@ class UserContext():
     """
     NEXT_START = '<'  # from first name of data
     NEXT_END = '>'    # end reached: there is nothing forwards
+    DEFAULT_MATERIAL = "Family Tree"
 
 
     class ChoicesOfView():
@@ -155,11 +156,12 @@ class UserContext():
         '''
         self.session = user_session
         self.choices = self.ChoicesOfView()     # set of allowed material choices
-        self.context = self.ChoicesOfView.COMMON
+        self.context_code = self.ChoicesOfView.COMMON
+        self.lang = user_session.get('lang','') # User language
+
         self.years = []                         # example [1800, 1899]
         self.series = None                      # 'Source' data theme like "birth"
         self.count = 10000                      # Max count ow objects to display
-        self.lang = user_session.get('lang','') # User language
         self.allow_edit = False                 # Is data edit allowed
         self.is_auditor = False
 
@@ -169,7 +171,7 @@ class UserContext():
         self.last = self.NEXT_END
         self.direction = 'fw'
 
-        ''' Set active user, if any username '''
+        """ Set active user, if any username """
         if current_user:
             if current_user.is_active and current_user.is_authenticated:
                 self.user = current_user.username
@@ -180,8 +182,7 @@ class UserContext():
             self.user = user_session.get('username', None)
 
         """
-        - Stores the request parameters div=1&div2=2&cmp=1 as session variable
-          user_context.
+        - Stores the request parameter div=1 as session variable user_context.
         - Returns owner context name if detected, otherwise False    
         """
         new_selection = 0
@@ -200,38 +201,47 @@ class UserContext():
                 self.years = [yi1, yi2]     # selected years [from, to]
                 print(f'UserContext: Objects between years {self.years}')
 
-            # Selected document series for Sources set in routes.
+
+            """ Selected document series for Sources set in routes. """
 
             # Use case: Selected material for display
             #    div=1 -> show approved material
-            #    div2=2 -> show researcher's candicate material
-            new_selection = int(request.args.get('div', 0)) + int(request.args.get('div2', 0))
-            # NOTE. Only div is in use implemented, 
-            #       request.div2 or cmp are never currently present!
+            #   [div2=2 -> show researcher's candicate material, too]
+            # NOTE. Only div is in use, request.div2 or cmp are never present!
+            new_selection = int(request.args.get('div', 0)) #+ int(request.args.get('div2', 0))
             if new_selection:
-                # Take also common data?
-                if request.args.get('cmp', ''): 
-                    new_selection = new_selection | 1
                 # Got new material selection?
-                self.context = self.choices.get_valid_number(new_selection)
-                if self.context:
-                    self.session['user_context'] = self.context
-                    print(f"UserContext: Now user_context={self.context}")
+                self.context_code = self.choices.get_valid_number(new_selection)
+                if self.context_code:
+                    self.session['user_context'] = self.context_code
+                    print(f"UserContext: Now user_context={self.context_code}")
 
         if new_selection == 0:
             # If got no request user_context, use session value or 1
-            self.context = user_session.get('user_context', self.choices.COMMON)
-            print(f"UserContext: Uses same or default user_context={self.context}")
+            self.context_code = user_session.get('user_context', self.choices.COMMON)
+            print(f"UserContext: Uses same or default user_context={self.context_code}")
 
-        if self.user and self.context == self.choices.OWN:
+        if self.user and self.context_code == self.choices.OWN:
             #TODO: Needs better rule for edit permission
             # May edit data, if user has such role
-            if self.context == self.choices.OWN:
+            if self.context_code == self.choices.OWN:
                 self.allow_edit = self.is_auditor
+
+        """ Batch selection by material and state """
+
+        self.material = user_session.get("material", self.DEFAULT_MATERIAL)
+        self.state = user_session.get("state", None)
+        if not self.state:
+            self.state = State.ROOT_FOR_AUDIT \
+                if self.context_code == self.ChoicesOfView.COMMON \
+                else State.ROOT_CANDIDATE
 
         #   For logging of scene area pages, set User.current_context variable:
         #   are you browsing common, audited data or your own batches?
-        current_user.current_context=self.context
+        current_user.current_context=self.context_code
+
+    def __str__(self):
+        return f"{self.state}: {self.material}"
 
     def _set_next_from_request(self, request=None):
         ''' Calculate scope values from request or session. 
@@ -270,7 +280,7 @@ class UserContext():
 
     def batch_user(self):
         # Return current user id, if my candidate data is chosen
-        if self.context == self.choices.OWN:
+        if self.context_code == self.choices.OWN:
             return self.user
         else:
             return None
@@ -280,14 +290,14 @@ class UserContext():
         
         # ONly used in test_owner_filter.test_ownerfilter_nouser()
         try:
-            return self.choices.as_str[self.context]
+            return self.choices.as_str[self.context_code]
         except:
             return ''
 
     def use_case(self):
         # Return current use case (owner choise) as code 
         try:
-            return self.choices.CODE_VALUES[self.context]
+            return self.choices.CODE_VALUES[self.context_code]
         except:
             return ''
 
@@ -296,7 +306,7 @@ class UserContext():
 # 
 #             Always when others but self.ChoicesOfView.OWN only are required
 #         '''
-#         if (self.context & 2) > 0:
+#         if (self.context_code & 2) > 0:
 #             return 'user'
 #         else:
 #             return 'common'
@@ -306,14 +316,14 @@ class UserContext():
 
             Always when others but self.ChoicesOfView.OWN only are required
         '''
-        return (self.context & 2) > 0
+        return (self.context_code & 2) > 0
     
     def use_common(self):
         ''' Tells, if you should select objects from common database.
 
             Always when self.ChoicesOfView.COMMON is required
         '''
-        return (self.context & 1) > 0
+        return (self.context_code & 1) > 0
 
     def privacy_ok(self, obj):
         ''' Returns True, if there is no privacy reason to hide given object.

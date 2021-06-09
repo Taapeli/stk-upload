@@ -91,23 +91,39 @@ ORDER BY n.order"""
 
 # ----- Persons listing ----
 
-    read_approved_persons_w_events_fw_name = """
-MATCH () -[:PASSED]-> (p:Person)
+    read_persons_w_events_fw_name = """
+MATCH (a:Root {material:$material, state:$state}) -[:OBJ_PERSON]-> (p:Person)
     WHERE p.sortname >= $start_name
-WITH p //, COLLECT(DISTINCT b.user) as owners
-ORDER BY p.sortname LIMIT $limit
+WITH p ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
     OPTIONAL MATCH (p) <-[:PARENT]- (f:Family) -[rf:EVENT]-> (fe:Event)
-WITH p, n, re.role as role, e, f.rel_type as rel, fe //, owners
+WITH p, n, re.role as role, e, f.rel_type as rel, fe
 ORDER BY p.sortname, n.order
     OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
     OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
 RETURN p as person, 
     COLLECT(DISTINCT n) as names, 
     COLLECT(DISTINCT [e, pl.pname, role]) + COLLECT(DISTINCT [fe, fpl.pname, rel]) AS events
-    //, owners
 ORDER BY person.sortname"""
+
+#     read_approved_persons_w_events_fw_name = """
+# MATCH () -[:PASSED]-> (p:Person)
+#     WHERE p.sortname >= $start_name
+# WITH p //, COLLECT(DISTINCT b.user) as owners
+# ORDER BY p.sortname LIMIT $limit
+#     MATCH (p:Person) -[:NAME]-> (n:Name)
+#     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
+#     OPTIONAL MATCH (p) <-[:PARENT]- (f:Family) -[rf:EVENT]-> (fe:Event)
+# WITH p, n, re.role as role, e, f.rel_type as rel, fe //, owners
+# ORDER BY p.sortname, n.order
+#     OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
+#     OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
+# RETURN p as person, 
+#     COLLECT(DISTINCT n) as names, 
+#     COLLECT(DISTINCT [e, pl.pname, role]) + COLLECT(DISTINCT [fe, fpl.pname, rel]) AS events
+#     //, owners
+# ORDER BY person.sortname"""
 
     read_my_persons_w_events_fw_name = """
 MATCH (prof:UserProfile) -[:HAS_ACCESS]-> (b:Batch) -[:OWNS]-> (p:Person)
