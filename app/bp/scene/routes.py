@@ -132,6 +132,8 @@ def _do_get_persons(args):
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
 
+    # for i in res.get("items"):
+    #     print(f"_do_get_persons: @{i.user} {i.sortname}")
     return res, u_context
 
 
@@ -193,8 +195,8 @@ def show_person_search():
         args["key"] = key
 
     res, u_context = _do_get_persons(args)
-    print(f"show_person_search {request.method} "
-          f"{u_context.state} {u_context.material} Persons {args} ")
+    print(f"#show_person_search: {request.method} "
+          f"'{u_context.state}' '{u_context.material}' Persons {args} ")
     if Status.has_failed(res, strict=False):
         flash(f'{res.get("statustext","error")}', "error")
 

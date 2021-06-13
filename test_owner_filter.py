@@ -56,8 +56,8 @@ def test_ownerfilter_user_selection(user_env):
 
     assert f.context_code == 1
     assert f.owner_str() == 'Isotammi database'
-    x = f.use_owner_filter()
-    assert x == False, "use_owner_filter() failed"
+    # x = f.use_owner_filter()
+    # assert x == False, "use_owner_filter() failed"
     x = f.use_common()
     assert x == True, "use_common() failed"
 

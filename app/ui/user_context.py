@@ -116,22 +116,37 @@ class UserContext():
 
     class ChoicesOfView():
         """ Represents all possible combibations of selection by owner and batch. 
+
+        #TODO Define new context_code values including audit states and approved data
         """
         COMMON = 1  # Approved data
         OWN = 2     # Candidate data
-        BATCH = 4   # Candicate batch - currently not implemented
-        CODE_VALUES = ['', 'apr', 'can', 'apr,can', 'bat', 'can,bat']
+        BATCH = 4   # Selected candicate batch - currently not implemented
+        CODE_VALUES = ['', 'aud', 'can', 'aud,can', 'bat', 'can,bat']
 
         def __init__(self):
             ''' Initialise choise texts in user language '''
             self.as_str = {
-                self.COMMON:              N_('Approved common data'), 
+                self.COMMON:              N_('Approved common data'), #TODO: --> "Audit requested"
                 self.OWN:                 N_('My candidate data'), 
                 self.BATCH:               N_('My selected candidate batch'),
                 self.COMMON + self.OWN:   N_('My own and approved common data'), 
                 self.COMMON + self.BATCH: N_('My selected batch and approved common data')
             }
+            self.as_status = {
+                self.COMMON:              State.ROOT_FOR_AUDIT, 
+                self.OWN:                 State.ROOT_CANDIDATE, 
+                self.BATCH:               State.ROOT_CANDIDATE
+            }
             self.batch_name = None
+
+        def get_state(self, number):
+            # Return the state for given context_code value
+            try:
+                return self.as_status[number]
+            except Exception:
+                print(f"UserContext.ChoicesOfView.get_state: invalid key {number} for state")
+                return None
 
         def get_valid_key(self, number):
             # Return the key, if valid number, otherwise 0
@@ -157,6 +172,7 @@ class UserContext():
         self.session = user_session
         self.choices = self.ChoicesOfView()     # set of allowed material choices
         self.context_code = self.ChoicesOfView.COMMON
+        self.state = None
         self.lang = user_session.get('lang','') # User language
 
         self.years = []                         # example [1800, 1899]
@@ -206,22 +222,23 @@ class UserContext():
 
             # Use case: Selected material for display
             #    div=1 -> show approved material
-            #   [div2=2 -> show researcher's candicate material, too]
-            # NOTE. Only div is in use, request.div2 or cmp are never present!
-            new_selection = int(request.args.get('div', 0)) #+ int(request.args.get('div2', 0))
+            new_selection = int(request.args.get('div', 0))
             if new_selection:
                 # Got new material selection?
                 self.context_code = self.choices.get_valid_number(new_selection)
                 if self.context_code:
                     self.session['user_context'] = self.context_code
-                    print(f"UserContext: Now user_context={self.context_code}")
+                    self.state = self.choices.get_state(self.context_code)
+                    print(f"UserContext: Now user_context={self.context_code} {self.state}")
 
         if new_selection == 0:
             # If got no request user_context, use session value or 1
             self.context_code = user_session.get('user_context', self.choices.COMMON)
-            print(f"UserContext: Uses same or default user_context={self.context_code}")
+            print("UserContext: Uses same or default user_context=" \
+                  f"{self.context_code} {self.choices.get_state(self.context_code)}")
 
         if self.user and self.context_code == self.choices.OWN:
+            # Select state by contect code
             #TODO: Needs better rule for edit permission
             # May edit data, if user has such role
             if self.context_code == self.choices.OWN:
@@ -230,11 +247,9 @@ class UserContext():
         """ Batch selection by state and material """
 
         self.material = user_session.get("material", self.DEFAULT_MATERIAL)
-        self.state = user_session.get("state", None)
+        self.state = user_session.get("state")
         if not self.state:
-            self.state = State.ROOT_FOR_AUDIT \
-                if self.context_code == self.ChoicesOfView.COMMON \
-                else State.ROOT_CANDIDATE
+            self.state = self.choices.get_state(self.context_code)
 
         #   For logging of scene area pages, set User.current_context variable:
         #   are you browsing common, audited data or your own batches?
@@ -311,12 +326,12 @@ class UserContext():
 #         else:
 #             return 'common'
     
-    def use_owner_filter(self):
-        ''' Tells, if you should select object by data owner.
-
-            Always when others but self.ChoicesOfView.OWN only are required
-        '''
-        return (self.context_code & 2) > 0
+    # def use_owner_filter(self):
+    #     ''' Tells, if you should select object by data owner.
+    #
+    #         Always when others but self.ChoicesOfView.OWN only are required
+    #     '''
+    #     return (self.context_code & 2) > 0
     
     def use_common(self):
         ''' Tells, if you should select objects from common database.
@@ -392,8 +407,7 @@ class UserContext():
             The new scope is [name_first, name_last]. If end has reached, 
             the corresponding limit is set to endmark '> end' or '< top'.
         """
-        print(f"UserContext.update_session_scope: Got {rec_cnt} items {name_first!r} – {name_last!r}, "
-              f"{rec_cnt} of {limit} records")
+        print(f"UserContext.update_session_scope: Got {rec_cnt}  of {limit} items {name_first!r} – {name_last!r}")
         scope_old = (self.first, self.last)
         # 1. starting scope in session     ['y','z']
         # 2a accessed next fw              ['z', 'ö']  set first = old last
@@ -419,7 +433,7 @@ class UserContext():
 
             If direction is fw, display next names [last - ...]
             If direction is bw, display next names [... - first]
-            --> anyways, the next names is first.
+            --> anyways, the next names is included.
         '''
         if direction == 'fw':
             if self.last == self.NEXT_END:
@@ -438,7 +452,7 @@ class UserContext():
             print(f'UserContext.next_name: invalid direction="{direction}"')
             ret = None
 
-        print(f'UserContext.next_name: {[self.first, self.last]}, {direction} next="{ret}"')
+        #print(f'UserContext.next_name: {[self.first, self.last]}, {direction} next="{ret}"')
         return ret
 
     def at_end(self):

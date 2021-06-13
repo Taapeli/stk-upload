@@ -54,7 +54,7 @@ def do_schema_fixes():
                 ELSE '"""+State.ROOT_REMOVED+"""'
             END
         REMOVE b:Batch, b.status, b.material_type"""
-    # Audit: Root.state = "Requested"; Root.material = "Family Tree"
+    # Audit: Root.state = "Audit Requested"; Root.material = "Family Tree"
     change_Audit_to_Root = """
         MATCH (b:Audit) WITH b LIMIT 1
         SET b:Root

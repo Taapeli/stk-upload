@@ -72,15 +72,16 @@ class DataService:
         if user_context:
             self.user_context = user_context
             self.username = user_context.user
-            # Batch selection by material and state
-            shareds.dservice.material = user_context.material
-            shareds.dservice.state = user_context.state
-
             # The operative username
             if user_context.context_code == user_context.ChoicesOfView.COMMON:
                 self.use_user = None
             else:
                 self.use_user = user_context.user
+
+            # Batch selection by material and state
+            shareds.dservice.material = user_context.material
+            shareds.dservice.state = user_context.state
+            shareds.dservice.use_user = user_context.user
         else:
             raise IsotammiException("pe.dataservice.DataService: user_context is mandatory")
 

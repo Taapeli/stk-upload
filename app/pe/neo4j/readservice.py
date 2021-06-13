@@ -100,159 +100,160 @@ class Neo4jReadService(ConcreteService):
         obj.role = role if role != "Primary" else None
         return obj
 
-    def dr_get_person_list(self, args):
+    def dr_get_person_list(self, _args):
         """Read Person data from given fw_from.
+
+        NOT USED --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_list
 
         args = dict {use_user, fw, limit, rule, key, years}
         """
-        user = args.get("use_user")
-        show_approved = user is None
-        rule = args.get("rule")
-        key = args.get("key")
-        fw_from = args.get("fw", "")
-        years = args.get("years", [-9999, 9999])
-        limit = args.get("limit", 100)
-        restart = rule == "start"
-
         persons = []
-        with self.driver.session(default_access_mode="READ") as session:
-            try:
-                if restart:
-                    # Show search form only
-                    return {"items": [], "status": Status.NOT_STARTED}
-                elif args.get("pg") == "all":
-                    # Show persons, no search form
-                    if show_approved:
-                        print(
-                            f"dr_get_person_list: Show approved, common data fw={fw_from}"
-                        )
-                        result = session.run(
-                            CypherPerson.read_approved_persons_w_events_fw_name,
-                            start_name=fw_from,
-                            limit=limit,
-                        )
-                    else:
-                        print(f"dr_get_person_list: Show candidate data fw={fw_from}")
-                        result = session.run(
-                            CypherPerson.read_my_persons_w_events_fw_name,
-                            user=user,
-                            start_name=fw_from,
-                            limit=limit,
-                        )
-                elif rule in ["surname", "firstname", "patronyme"]:
-                    # Search persons matching <rule> field to <key> value
-                    if show_approved:
-                        print(
-                            f'dr_get_person_list: Show approved common data {rule} ~ "{key}*"'
-                        )
-                        result = session.run(
-                            CypherPerson.get_common_events_by_refname_use,
-                            use=rule,
-                            name=key,
-                        )
-                    else:
-                        print(
-                            f'dr_get_person_list: Show candidate data {rule} ~ "{key}*"'
-                        )
-                        result = session.run(
-                            CypherPerson.get_my_events_by_refname_use,
-                            use=rule,
-                            name=key,
-                            user=user,
-                        )
-                elif rule == "years":
-                    # Search persons matching <years>
-                    if show_approved:
-                        print(
-                            f"dr_get_person_list: Show approved common data years {years}"
-                        )
-                        result = session.run(
-                            CypherPerson.get_common_events_by_years, years=years
-                        )
-                    else:
-                        print(f"dr_get_person_list: Show candidate data  years {years}")
-                        result = session.run(
-                            CypherPerson.get_my_events_by_years, years=years, user=user
-                        )
-                elif rule == "ref":
-                    # Search persons where a reference name = <key> value
-                    if show_approved:
-                        print(
-                            f"dr_get_person_list: TODO: Show approved common data {rule}={key}"
-                        )
-                        # return session.run(Cypher_person.get_events_by_refname, name=key)
-                    else:
-                        print(
-                            f"dr_get_person_list: TODO: Show candidate data {rule}={key}"
-                        )
-                        # return session.run(Cypher_person.get_events_by_refname, name=key)
-                else:
-                    return {
-                        "items": [],
-                        "status": Status.ERROR,
-                        "statustext": "dr_get_person_list: Invalid rule",
-                    }
-                # result: person, names, events
-                for record in result:
-                    #  <Record
-                    #     person=<Node id=163281 labels={'Person'}
-                    #       properties={'sortname': 'Ahonius##Knut Hjalmar',
-                    #         'sex': '1', 'confidence': '', 'change': 1540719036,
-                    #         'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543',
-                    #         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}>
-                    #     names=[<Node id=163282 labels={'Name'}
-                    #       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name',
-                    #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>]
-                    #     events=[[
-                    #         <Node id=169494 labels={'Event'}
-                    #             properties={'datetype': 0, 'change': 1540587380,
-                    #             'description': '', 'handle': '_e04abcd46811349c7b18f6321ed',
-                    #             'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
-                    #          None
-                    #          ]]
-                    #     owners=['jpek']>
-                    node = record["person"]
-                    # print(node.id, node.get('sortname'), node.get('death_high'))
-                    p = PersonBl.from_node(node)
-                    # if show_with_common and p.too_new: continue
-
-                    # if take_refnames and record['refnames']:
-                    #     refnlist = sorted(record['refnames'])
-                    #     p.refnames = ", ".join(refnlist)
-                    p.names = []
-                    for node in record["names"]:
-                        pname = Name.from_node(node)
-                        pname.initial = pname.surname[0] if pname.surname else ""
-                        p.names.append(pname)
-
-                    # Create a list with the mentioned user name, if present
-                    if user:
-                        p.owners = record.get("owners", [user])
-
-                    # Events
-                    for node, pname, role in record["events"]:
-                        if not node is None:
-                            e = EventBl.from_node(node)
-                            e.place = pname or ""
-                            if role and role != "Primary":
-                                e.role = role
-                            p.events.append(e)
-
-                    persons.append(p)
-
-            except Exception as e:
-                return {
-                    "items": [],
-                    "status": Status.ERROR,
-                    "statustext": f"dr_get_person_list: {e.__class__.__name__} {e}",
-                }
-
-        if len(persons) == 0:
-            return {
-                "items": persons,
-                "status": Status.NOT_FOUND,
-                "statustext": f'No persons found by "{args}"',
-            }
+        # user = args.get("use_user")
+        # show_approved = user is None
+        # rule = args.get("rule")
+        # key = args.get("key")
+        # fw_from = args.get("fw", "")
+        # years = args.get("years", [-9999, 9999])
+        # limit = args.get("limit", 100)
+        # restart = rule == "start"
+        # with self.driver.session(default_access_mode="READ") as session:
+        #     try:
+        #         if restart:
+        #             # Show search form only
+        #             return {"items": [], "status": Status.NOT_STARTED}
+        #         elif args.get("pg") == "all":
+        #             # Show persons, no search form
+        #             if show_approved:
+        #                 print(
+        #                     f"dr_get_person_list: Show approved, common data fw={fw_from}"
+        #                 )
+        #                 result = session.run(
+        #                     CypherPerson.read_approved_persons_w_events_fw_name,
+        #                     start_name=fw_from,
+        #                     limit=limit,
+        #                 )
+        #             else:
+        #                 print(f"dr_get_person_list: Show candidate data fw={fw_from}")
+        #                 result = session.run(
+        #                     CypherPerson.read_my_persons_w_events_fw_name,
+        #                     user=user,
+        #                     start_name=fw_from,
+        #                     limit=limit,
+        #                 )
+        #         elif rule in ["surname", "firstname", "patronyme"]:
+        #             # Search persons matching <rule> field to <key> value
+        #             if show_approved:
+        #                 print(
+        #                     f'dr_get_person_list: Show approved common data {rule} ~ "{key}*"'
+        #                 )
+        #                 result = session.run(
+        #                     CypherPerson.get_common_events_by_refname_use,
+        #                     use=rule,
+        #                     name=key,
+        #                 )
+        #             else:
+        #                 print(
+        #                     f'dr_get_person_list: Show candidate data {rule} ~ "{key}*"'
+        #                 )
+        #                 result = session.run(
+        #                     CypherPerson.get_my_events_by_refname_use,
+        #                     use=rule,
+        #                     name=key,
+        #                     user=user,
+        #                 )
+        #         elif rule == "years":
+        #             # Search persons matching <years>
+        #             if show_approved:
+        #                 print(
+        #                     f"dr_get_person_list: Show approved common data years {years}"
+        #                 )
+        #                 result = session.run(
+        #                     CypherPerson.get_common_events_by_years, years=years
+        #                 )
+        #             else:
+        #                 print(f"dr_get_person_list: Show candidate data  years {years}")
+        #                 result = session.run(
+        #                     CypherPerson.get_my_events_by_years, years=years, user=user
+        #                 )
+        #         elif rule == "ref":
+        #             # Search persons where a reference name = <key> value
+        #             if show_approved:
+        #                 print(
+        #                     f"dr_get_person_list: TODO: Show approved common data {rule}={key}"
+        #                 )
+        #                 # return session.run(Cypher_person.get_events_by_refname, name=key)
+        #             else:
+        #                 print(
+        #                     f"dr_get_person_list: TODO: Show candidate data {rule}={key}"
+        #                 )
+        #                 # return session.run(Cypher_person.get_events_by_refname, name=key)
+        #         else:
+        #             return {
+        #                 "items": [],
+        #                 "status": Status.ERROR,
+        #                 "statustext": "dr_get_person_list: Invalid rule",
+        #             }
+        #         # result: person, names, events
+        #         for record in result:
+        #             #  <Record
+        #             #     person=<Node id=163281 labels={'Person'}
+        #             #       properties={'sortname': 'Ahonius##Knut Hjalmar',
+        #             #         'sex': '1', 'confidence': '', 'change': 1540719036,
+        #             #         'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543',
+        #             #         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}>
+        #             #     names=[<Node id=163282 labels={'Name'}
+        #             #       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name',
+        #             #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>]
+        #             #     events=[[
+        #             #         <Node id=169494 labels={'Event'}
+        #             #             properties={'datetype': 0, 'change': 1540587380,
+        #             #             'description': '', 'handle': '_e04abcd46811349c7b18f6321ed',
+        #             #             'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
+        #             #          None
+        #             #          ]]
+        #             #     owners=['jpek']>
+        #             node = record["person"]
+        #             # print(node.id, node.get('sortname'), node.get('death_high'))
+        #             p = PersonBl.from_node(node)
+        #             # if show_with_common and p.too_new: continue
+        #
+        #             # if take_refnames and record['refnames']:
+        #             #     refnlist = sorted(record['refnames'])
+        #             #     p.refnames = ", ".join(refnlist)
+        #             p.names = []
+        #             for node in record["names"]:
+        #                 pname = Name.from_node(node)
+        #                 pname.initial = pname.surname[0] if pname.surname else ""
+        #                 p.names.append(pname)
+        #
+        #             # Create a list with the mentioned user name, if present
+        #             if user:
+        #                 p.owners = record.get("owners", [user])
+        #
+        #             # Events
+        #             for node, pname, role in record["events"]:
+        #                 if not node is None:
+        #                     e = EventBl.from_node(node)
+        #                     e.place = pname or ""
+        #                     if role and role != "Primary":
+        #                         e.role = role
+        #                     p.events.append(e)
+        #
+        #             persons.append(p)
+        #
+        #     except Exception as e:
+        #         return {
+        #             "items": [],
+        #             "status": Status.ERROR,
+        #             "statustext": f"dr_get_person_list: {e.__class__.__name__} {e}",
+        #         }
+        #
+        # if len(persons) == 0:
+        #     return {
+        #         "items": persons,
+        #         "status": Status.NOT_FOUND,
+        #         "statustext": f'No persons found by "{args}"',
+        #     }
         return {"items": persons, "status": Status.OK}
 
     def dr_get_event_by_uuid(self, user: str, uuid: str):
@@ -1507,12 +1508,16 @@ class Neo4jReadService(ConcreteService):
 
     #   @functools.lru_cache
     def dr_get_surname_list(self, username, count):
+        """ List most common surnames """
         result_list = []
         with self.driver.session(default_access_mode="READ") as session:
             # Select Batches user, if defined
             cypher = CypherPerson.get_surname_list_by_username \
                 if username \
                 else CypherPerson.get_surname_list_common
+            print('#  Neo4jReadService.dr_get_surname_list: with \n{ material:"'
+                  f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
+            print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
             result = session.run(cypher,
                 material=self.material, state=self.state,
                 username=username,
@@ -1550,15 +1555,26 @@ class Neo4jReadService(ConcreteService):
     #             result_list.append({"surname": surname, "count": count})
     #     return result_list
 
-    def dr_get_placename_list(self, username, count):
+    def dr_get_placename_list(self, **kwargs):  # username, count):
+        """List most referenced Places by name. 
+        
+        If username is defined, filter by user. 
+        """
         result_list = []
+        username = kwargs.get("username")
+        count = kwargs.get("count", 50)
         with self.driver.session(default_access_mode="READ") as session:
-            # Select Batches user, if defined
-            cypher = CypherPlaceStats.get_place_list_by_username \
-                if username \
-                else CypherPlaceStats.get_place_list_common
+            # Select Batches by user, if defined
+            if username:
+                cypher = CypherPlaceStats.get_place_list_by_username
+            else:
+                cypher = CypherPlaceStats.get_place_list_common
+            print('#  Neo4jReadService.dr_get_placename_list: with \n{ material:"'
+                  f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
+            print(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
             result = session.run(cypher,
-                material=self.material, state=self.state,
+                material=self.material, 
+                state=self.state,
                 username=username,
                 count=count,
             )

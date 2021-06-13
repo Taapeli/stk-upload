@@ -623,7 +623,7 @@ class PlaceReader(DataService):
         """
         Return placename stats so that the names can be displayed in a name cloud.
         """
-        placenames = shareds.dservice.dr_get_placename_list(self.use_user, count=count)
+        placenames = shareds.dservice.dr_get_placename_list(username=self.use_user, count=count)
         # Returns [{'surname': surname, 'count': count},...]
 
         # if self.use_user:

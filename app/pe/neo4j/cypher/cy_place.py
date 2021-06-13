@@ -212,17 +212,6 @@ return p as place, count(p) as count
 order by count desc
 limit $count"""
 
-#     get_place_list_by_username = """
-# match (b:Batch{user:$username}) -[:OWNS]-> (e:Event) -[:PLACE]-> (p:Place) 
-# return p as place, count(p) as count
-# order by count desc
-# limit $count"""
-#     get_place_list_common = """
-# match () -[:PASSED]-> (e:Event) -[:PLACE]-> (p:Place) 
-# return p as place, count(p) as count
-# order by count desc
-# limit $count"""
-
 class CypherPlaceMerge:
 
     delete_namelinks = """
