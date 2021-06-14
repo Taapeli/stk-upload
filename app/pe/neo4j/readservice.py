@@ -1569,9 +1569,9 @@ class Neo4jReadService(ConcreteService):
                 cypher = CypherPlaceStats.get_place_list_by_username
             else:
                 cypher = CypherPlaceStats.get_place_list_common
-            print('#  Neo4jReadService.dr_get_placename_list: with \n{ material:"'
+            logger.debug('#  Neo4jReadService.dr_get_placename_list: with \n{ material:"'
                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
-            print(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
+            logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
             result = session.run(cypher,
                 material=self.material, 
                 state=self.state,

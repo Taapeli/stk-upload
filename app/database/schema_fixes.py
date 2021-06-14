@@ -59,7 +59,7 @@ def do_schema_fixes():
         MATCH (b:Audit) WITH b LIMIT 1
         SET b:Root
         SET b.material=coalesce(b.material_type, $default_material)
-        SET b.state='"""+State.ROOT_FOR_AUDIT+"""'
+        SET b.state='"""+State.ROOT_AUDITING+"""'
         REMOVE b:Audit, b.status, b.material_type"""
     # {object_label: relation_type}
     root_relations = {

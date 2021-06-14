@@ -134,7 +134,7 @@ class UserContext():
                 self.COMMON + self.BATCH: N_('My selected batch and approved common data')
             }
             self.as_status = {
-                self.COMMON:              State.ROOT_FOR_AUDIT, 
+                self.COMMON:              State.ROOT_AUDITING, 
                 self.OWN:                 State.ROOT_CANDIDATE, 
                 self.BATCH:               State.ROOT_CANDIDATE
             }
@@ -205,8 +205,7 @@ class UserContext():
         if request:
             # All args
             self.args = request.args
-            # Selected years (from-to)
-            #    years=1111-2222
+            # Selected years (from-to) years=1111-2222
             years = request.args.get('years', None)
             if years:
                 y1, y2 = years.split('-')
@@ -256,7 +255,7 @@ class UserContext():
         current_user.current_context=self.context_code
 
     def __str__(self):
-        return f"{self.state}: {self.material}"
+        return f"{self.state}/{self.material}"
 
     def _set_next_from_request(self, request=None):
         ''' Calculate scope values from request or session. 
