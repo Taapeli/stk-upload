@@ -301,7 +301,7 @@ def list_uploads(username):
             in_batches = batch_id in batches
             if not in_batches:
                 batch_id = ""
-                if status == Batch.BATCH_DONE:
+                if status ==  Batch.BATCH_CANDIDATE or status == Batch.BATCH_DONE:
                     status = Batch.BATCH_REMOVED
             # print(f"### Batch {batch_id} {status} {name} base={logfile_base}")
 
@@ -322,6 +322,7 @@ def list_uploads(username):
                         status_text = _("FOR_AUDIT")
                 else:
                     status = Batch.BATCH_REMOVED
+                    status_text = _("REMOVED")
             elif status == Batch.BATCH_FAILED:
                 status_text = _("FAILED")
             elif status == Batch.BATCH_ERROR:
@@ -368,7 +369,7 @@ def list_uploads(username):
         upload.upload_time = 0.0
         upload.material_type = b.material_type
         upload.description = b.description
-        print(f"### Batch {batch} {status} -")
+        print(f"### Batch {batch} {b.status} -> {upload.status} -")
         uploads.append(upload)
     
     return sorted(uploads,key=lambda x: x.upload_time)
