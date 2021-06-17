@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import traceback
 
 '''
 Created on 8.3.2019
@@ -115,7 +116,8 @@ class UserAdmin():
                 user.current_login_at = datetime.fromtimestamp(float(user.current_login_at)/1000) 
             return user
         except Exception as ex:
-            print(ex)  
+            print(ex)
+            traceback.print_exc()  
  
     @classmethod
     def register_applicant(cls, profile, role):
