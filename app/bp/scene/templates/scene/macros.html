@@ -145,10 +145,13 @@
         >{{ _("edited") }} {{obj.change_str()}}
         {%- if obj.root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
         , <span>
-        {% if obj.root.root_type == 'PASSED' %}{{ _('origin from') }}
-        {% else %}{{ _('User data') }}:
+        {% if obj.root.original_user %}
+        	{{ _('origin from') }}
+            <b>{{obj.root.original_user}}</b> {{obj.root.batch_id}} {{obj.root.root_type}}
+        {% else %}
+        	{{ _('User data') }}:
+            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.root_type}}
         {% endif %}
-            <b>{{obj.root.root_user}}</b> {{obj.root.id}}
         </span>
         {% endif %}
     </span>

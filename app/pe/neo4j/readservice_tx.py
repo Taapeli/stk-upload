@@ -200,7 +200,11 @@ class Neo4jReadServiceTx(ConcreteService):
         #    results: person, root
 
         try:
-            record = self.tx.run(CypherPerson.get_person, uuid=uuid).single()
+            if active_user is None:
+                username = ""
+            else:
+                username = active_user
+            record = self.tx.run(CypherPerson.get_person, uuid=uuid, username=username).single()
             # <Record 
             #    p=<Node id=25651 labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
@@ -222,24 +226,16 @@ class Neo4jReadServiceTx(ConcreteService):
             #    - root_type    which kind of owner link points to this object (PASSED / OWNER)
             #    - root_user    the (original) owner of this object
             #    - bid          Batch id
-            root_type = record['root_type'] # OWNS / PASSED
             root_node = record['root']
+            root_type = root_node.get('material', "")
             root_user = root_node.get('user', "")
+            original_user = root_node.get('original_user', "")
             bid = root_node.get('id', "")
-            if active_user is None:
-                if root_type != "PASSED":
-                    print(f'dx_get_person_by_uuid: person {uuid} is not in approved material')
-                    res.update({'status': Status.NOT_FOUND, 'statustext': 'The person is not accessible'})
-                    return res
-            elif root_type != "OWNS":
-                    print(f'dx_get_person_by_uuid: OWNS not allowed for person {uuid}')
-                    res.update({'status': Status.NOT_FOUND, 'statustext': 'The person is not accessible'})
-                    return res
 
             person_node = record['p']
             puid = person_node.id
             res['person_node'] = person_node
-            res['root'] = {'root_type':root_type, 'root_user': root_user, 'batch_id':bid}
+            res['root'] = {'root_type':root_type, 'root_user': root_user, 'original_user': original_user, 'batch_id':bid}
 
 #                 # Add to list of all objects connected to this person
 #                 self.objs[person.uniq_id] = person

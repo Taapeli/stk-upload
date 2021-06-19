@@ -38,7 +38,7 @@ SET p.sortname=$key"""
 # ----- Person page -----
 
     get_person = """
-MATCH (root) -[r:OBJ_PERSON]-> (p:Person {uuid:$uuid}) 
+MATCH (root{user:$username}) -[r:OBJ_PERSON]-> (p:Person {uuid:$uuid}) 
 RETURN p, type(r) AS root_type, root"""
 
     get_names_events = """
