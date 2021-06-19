@@ -106,11 +106,6 @@ RETURN p as person,
 ORDER BY person.sortname"""
 
     read_persons_w_events_fw_name = """
-MATCH (a:Root {material:$material, state:$state}) -[:OBJ_PERSON]-> (p:Person)
-    WHERE p.sortname >= $start_name
-""" + _read_persons_tail
-
-    read_persons_w_events_fw_name_by_user = """
 MATCH (a:Root{user:$username, material:$material, state:$state}) -[:OBJ_PERSON]-> (p:Person)
     WHERE p.sortname >= $start_name
 """ + _read_persons_tail
@@ -145,16 +140,6 @@ RETURN user, person,
 
     # With use=rule, name=name
     read_persons_w_events_by_refname = """
-MATCH path = ( (search:Refname) -[:BASENAME*0..3 {use:$use}]- (:Refname) )
-WHERE search.name STARTS WITH $name
-WITH search, nodes(path) AS x UNWIND x AS rn
-    MATCH (rn) -[:REFNAME {use:$use}]-> (person:Person) 
-        <-[:OBJ_PERSON]- (root:Root {material:$material, state:$state})
-    MATCH (person) -[:NAME]-> (name:Name {order:0})
-WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
-
-    # With use=rule, name=name, user=user
-    read_persons_w_events_by_refname_by_user = """
 MATCH path = ( (search:Refname) -[:BASENAME*0..3]- (:Refname))
     WHERE search.name STARTS WITH $name
 WITH nodes(path) AS x UNWIND x AS rn
@@ -164,13 +149,6 @@ WITH nodes(path) AS x UNWIND x AS rn
 WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
 
     read_persons_w_events_by_years = """
-MATCH (root:Root {material:$material, state:$state})
-        -[:OBJ_PERSON]-> (person:Person)
-    WHERE person.death_high >= $years[0] AND person.birth_low <= $years[1]
-OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
-WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
-
-    read_persons_w_events_by_years_by_user = """
 MATCH (root:Root {user:$username, material:$material, state:$state})
         -[:OBJ_PERSON]-> (person:Person)
     WHERE person.death_high >= $years[0] AND person.birth_low <= $years[1]

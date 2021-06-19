@@ -100,33 +100,23 @@ class Neo4jReadServiceTx(ConcreteService):
 
         # Select cypher clause by arguments
 
+        if not username: username = ""
+
         if restart:
             # Show search form only
             return {'items': [], 'status': Status.NOT_STARTED }
         elif args.get('pg') == 'all':
             # Show persons, no search form
-            if username:
-                cypher = CypherPerson.read_persons_w_events_fw_name_by_user
-                print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
-            else:
-                cypher = CypherPerson.read_persons_w_events_fw_name
-                print(f"tx_get_person_list: Show '{state}' '{material}' fw={fw_from}")
+            cypher = CypherPerson.read_persons_w_events_fw_name
+            print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
-            if username:
-                cypher = CypherPerson.read_persons_w_events_by_refname_by_user
-                print(f"tx_get_person_list: Show '{state}' '{material}' data @{username}, {rule} ~ \"{key}*\"")
-            else:
-                cypher = CypherPerson.read_persons_w_events_by_refname
-                print(f"tx_get_person_list: Show '{state}' '{material}' data, {rule} ~ \"{key}*\"")
+            cypher = CypherPerson.read_persons_w_events_by_refname
+            print(f"tx_get_person_list: Show '{state}' '{material}' data @{username}, {rule} ~ \"{key}*\"")
         elif rule == 'years':
             # Search persons matching <years>
-            if username:
-                cypher = CypherPerson.read_persons_w_events_by_years_by_user
-                print(f"tx_get_person_list: Show '{state}' '{material}', years {years}")
-            else:
-                cypher = CypherPerson.read_persons_w_events_by_years
-                print(f"tx_get_person_list: Show '{state}' '{material}' @{username}, years {years}")
+            cypher = CypherPerson.read_persons_w_events_by_years
+            print(f"tx_get_person_list: Show '{state}' '{material}', years {years}")
             # if show_approved:
             #     print(f'tx_get_person_list: Show approved common data years {years}')
             #     result = self.tx.run(CypherPerson.get_common_events_by_years,
