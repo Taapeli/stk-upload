@@ -468,58 +468,31 @@ class Neo4jReadService(ConcreteService):
         # Select True = filter by this user False = filter approved data
         # show_candidate = self.user_context.use_owner_filter()
         show_candidate = user is not None
-
+        if user is None: 
+            username = ""
+        else:
+            username = user
         with self.driver.session(default_access_mode="READ") as session:
-            try:
-                if show_candidate:
-                    # (u:UserProfile {username})
-                    #    -[:HAS_LOADED]-> (b:Batch)
-                    #    -[:OWNS]-> (f:Family {father_sortname})
-                    if order == "man":
-                        print(
-                            "Neo4jReadService.dr_get_families: candidate ordered by man"
-                        )
-                        result = session.run(
-                            CypherFamily.get_candidate_families_f,
-                            user=user,
-                            fw=fw,
-                            limit=limit,
-                        )
-                    elif order == "wife":
-                        print(
-                            "Neo4jReadService.dr_get_families: candidate ordered by wife"
-                        )
-                        result = session.run(
-                            CypherFamily.get_candidate_families_m,
-                            user=user,
-                            fwm=fw,
-                            limit=limit,
-                        )
-                else:  # approved from any researcher
-                    # (:Audit) -[:PASSED]-> (f:Family {father_sortname})
-                    if order == "man":
-                        # 3 == #1 simulates common by reading all
-                        print(
-                            "Neo4jReadService.dr_get_families: accepted ordered by man"
-                        )
-                        result = session.run(
-                            CypherFamily.get_passed_families_f,  # user=user,
-                            fw=fw,
-                            limit=limit,
-                        )
-                    elif order == "wife":
-                        # 1 get all with owner name for all
-                        print(
-                            "Neo4jReadService.dr_get_families: accepted ordered by wife"
-                        )
-                        result = session.run(
-                            CypherFamily.get_passed_families_m, fwm=fw, limit=limit
-                        )
-
-            except Exception as e:
-                msg = f"{e.__class__.__name__} {e}"
-                logger.error("Neo4jReadService.dr_get_families: " + msg)
-                return {"status": Status.ERROR, "statustext": msg}
+            if order == "man":
+                print(
+                    "Neo4jReadService.dr_get_families: candidate ordered by man"
+                )
+                result = session.run(
+                    CypherFamily.get_families_by_father,
+                    username=username,
+                    fw=fw,
+                    limit=limit,
+                )
+            elif order == "wife":
+                print(
+                    "Neo4jReadService.dr_get_families: candidate ordered by wife"
+                )
+                result = session.run(
+                    CypherFamily.get_families_by_mother,
+                    username=username,
+                    fw=fw,
+                    limit=limit,
+                )
 
             recs = []
             for record in result:

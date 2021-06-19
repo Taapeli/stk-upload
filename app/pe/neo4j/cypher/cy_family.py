@@ -102,7 +102,9 @@ ORDER BY family, person.birth_high"""
 
 # ----- Family data for families page
 
-    _get_families_tail = """
+    get_families_by_father = """
+MATCH (root:Root{user:$username}) -[:OBJ_FAMILY]-> (f:Family)
+    WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
@@ -111,23 +113,9 @@ RETURN f, p.pname AS marriage_place,
     COLLECT([r.role, pp, np]) AS parent, 
     COLLECT(DISTINCT pc) AS child, 
     COUNT(DISTINCT pc) AS no_of_children 
-    ORDER BY f.father_sortname LIMIT $limit
-"""
-    get_candidate_families_f = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
-    WHERE prof.username = $user AND f.father_sortname>=$fw""" + _get_families_tail
+    ORDER BY f.father_sortname LIMIT $limit"""
 
-    get_candidate_families_m = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
-    WHERE prof.username = $user AND f.mother_sortname>=$fwm""" + _get_families_tail
-
-    get_passed_families_f = """
-MATCH () -[:PASSED]-> (f:Family)
-    WHERE f.father_sortname>=$fw""" + _get_families_tail
-
-    get_passed_families_m = """
-MATCH () -[:PASSED]-> (f:Family)
-    WHERE f.mother_sortname>=$fwm""" + _get_families_tail
+    get_families_by_mother = get_families_by_father.replace("father", "mother")
 
 # ----- Family load in Batch
 
