@@ -40,19 +40,11 @@ class CypherPlace():
             COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
     ORDER BY name.name"""
 
-    get_common_name_hierarchies = """
-MATCH () -[:PASSED]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
+    get_name_hierarchies = """
+MATCH (root:Root{user:$username}) -[:OBJ_PLACE]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
     WHERE name.name >= $fw
-WITH place, name ORDER BY name.name LIMIT  $limit
-    OPTIONAL MATCH (place) <-[:PLACE]- (ref)
-""" + _get_name_hierarchies_tail
-
-    get_my_name_hierarchies = """
-MATCH (b:Batch) -[:OWNS]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
-    WHERE b.user = $user AND name.name >= $fw
 WITH place, name ORDER BY name.name LIMIT $limit
-    OPTIONAL MATCH (place) <-[:PLACE]- (ref) <-[*2]- (b)
-        WHERE b.user = $user
+    OPTIONAL MATCH (place) <-[:PLACE]- (ref) <-[*2]- (root)
 """ + _get_name_hierarchies_tail
 
 # Default language names update with $place_id, $fi_id, $sv_id

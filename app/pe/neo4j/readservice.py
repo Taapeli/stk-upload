@@ -867,24 +867,17 @@ class Neo4jReadService(ConcreteService):
             lang = "fi"
         with self.driver.session(default_access_mode="READ") as session:
             if user == None:
-                # 1 get approved common data
-                print("Neo4jReadService.dr_get_place_list_fw: approved")
-                result = session.run(
-                    CypherPlace.get_common_name_hierarchies,
-                    fw=fw_from,
-                    limit=limit,
-                    lang=lang,
-                )
+                username = ""
             else:
-                # 2 get my own
-                print("Neo4jReadService.dr_get_place_list_fw: candidate")
-                result = session.run(
-                    CypherPlace.get_my_name_hierarchies,
-                    user=user,
-                    fw=fw_from,
-                    limit=limit,
-                    lang=lang,
-                )
+                username = user
+            print("Neo4jReadService.dr_get_place_list_fw")
+            result = session.run(
+                CypherPlace.get_name_hierarchies,
+                username=username,
+                fw=fw_from,
+                limit=limit,
+                lang=lang,
+            )
             for record in result:
                 # <Record
                 #    place=<Node id=514341 labels={'Place'}
