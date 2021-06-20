@@ -30,11 +30,8 @@ class CypherFamily():
 
 # ----- Get Family node by uuid
 
-    get_a_family_common = '''
-MATCH (root:Audit) -[r:PASSED]-> (f:Family {uuid:$f_uuid}) 
-RETURN f, type(r) AS root_type, root'''
-    get_a_family_own = '''
-MATCH (root:Batch {user:$user}) -[r:OWNS]-> (f:Family {uuid:$f_uuid}) 
+    get_a_family = '''
+MATCH (root:Root{user:$username}) -[r:OBJ_FAMILY]-> (f:Family {uuid:$f_uuid}) 
 RETURN f, type(r) AS root_type, root'''
 
     get_family_parents = """

@@ -415,34 +415,29 @@ class Neo4jReadService(ConcreteService):
         family = None
 
         with self.driver.session(default_access_mode="READ") as session:
-            try:
-                if user:
-                    # Show my researcher data
-                    result = session.run(
-                        CypherFamily.get_a_family_own, f_uuid=uuid, user=user
-                    )
-                else:
-                    print("dr_get_family_by_uuid: approved common only")
-                    result = session.run(CypherFamily.get_a_family_common, f_uuid=uuid)
-                for record in result:
-                    if record["f"]:
-                        # <Record
-                        #    f=<Node id=590928 labels={'Family'}
-                        #        properties={'datetype': 1, 'father_sortname': 'Gadd#Peter Olofsson#',
-                        #            'change': 1560931512, 'rel_type': 'Unknown', 'id': 'F0002',
-                        #            'date2': 1766592, 'date1': 1766592, 'uuid': '9488e3c76c6645f8b024902f2119e15a'}>
-                        #    root_type='OWNS'
-                        #    root=<Node id=384349 labels={'Batch'}
-                        #        properties={'mediapath': '/home/rinminlij1l1j1/paikat_pirkanmaa_yhdistetty_06052020.gpkg.media',
-                        #            'file': 'uploads/juha/paikat_pirkanmaa_yhdistetty_6.5.2020_clean.gramps',
-                        #            'id': '2020-05-09.001', 'user': 'juha', 'timestamp': 1589022866282, 'status': 'completed'}>
-                        # >
-                        node = record["f"]
-                        family = FamilyBl.from_node(node)
-                    return {"item": family, "status": Status.OK}
-            except Exception as e:
-                return {"item": None, "status": Status.ERROR, "statustext": str(e)}
-
+            if user:
+                username = user
+            else:
+                username = ""
+            result = session.run(
+                CypherFamily.get_a_family, f_uuid=uuid, username=username
+            )
+            for record in result:
+                if record["f"]:
+                    # <Record
+                    #    f=<Node id=590928 labels={'Family'}
+                    #        properties={'datetype': 1, 'father_sortname': 'Gadd#Peter Olofsson#',
+                    #            'change': 1560931512, 'rel_type': 'Unknown', 'id': 'F0002',
+                    #            'date2': 1766592, 'date1': 1766592, 'uuid': '9488e3c76c6645f8b024902f2119e15a'}>
+                    #    root_type='OWNS'
+                    #    root=<Node id=384349 labels={'Batch'}
+                    #        properties={'mediapath': '/home/rinminlij1l1j1/paikat_pirkanmaa_yhdistetty_06052020.gpkg.media',
+                    #            'file': 'uploads/juha/paikat_pirkanmaa_yhdistetty_6.5.2020_clean.gramps',
+                    #            'id': '2020-05-09.001', 'user': 'juha', 'timestamp': 1589022866282, 'status': 'completed'}>
+                    # >
+                    node = record["f"]
+                    family = FamilyBl.from_node(node)
+                return {"item": family, "status": Status.OK}
         return {
             "item": None,
             "status": Status.NOT_FOUND,
