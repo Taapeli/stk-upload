@@ -922,14 +922,10 @@ class Neo4jReadService(ConcreteService):
         pl = None
         node_ids = []  # List of uniq_is for place, name, note and media nodes
         with self.driver.session(default_access_mode="READ") as session:
-            if user == None:
-                result = session.run(
-                    CypherPlace.get_common_w_names_notes, uuid=uuid, lang=lang
-                )
-            else:
-                result = session.run(
-                    CypherPlace.get_my_w_names_notes, user=user, uuid=uuid, lang=lang
-                )
+            username = "" if user is None else user
+            result = session.run(
+                CypherPlace.get_w_names_notes, username=username, uuid=uuid, lang=lang
+            )
             for record in result:
                 # <Record
                 #    place=<Node id=514286 labels={'Place'}

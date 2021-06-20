@@ -80,12 +80,10 @@ RETURN place, name,
     COLLECT(DISTINCT n) AS names,
     COLLECT (DISTINCT note) AS notes,
     COLLECT (DISTINCT media) AS medias"""
-    get_common_w_names_notes = """
-MATCH () -[:PASSED]-> (place:Place)
+
+    get_w_names_notes = """
+MATCH  (root:Root{user:$username}) -[:OBJ_PLACE]-> (place:Place)
     WHERE place.uuid=$uuid""" + _get_w_names_notes_tail
-    get_my_w_names_notes = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (:Batch) -[:OWNS]-> (place:Place)
-    WHERE prof.username = $user AND place.uuid=$uuid""" + _get_w_names_notes_tail
 
     # Result indi is a Person or Family
     get_person_family_events = """
