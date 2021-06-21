@@ -38,9 +38,10 @@ from flask_babelex import _
 #import gettext
 
 import shareds
+from bl.root import Root
 from bl.base import Status
-from bl.audit import Audit
-from bl.batch import Batch
+#from bl.audit import Audit
+#from bl.batch import Batch
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
 from bp.admin.csv_refnames import load_refnames
@@ -137,7 +138,7 @@ def audit_approvals(who=None):
         auditor=None
     else:
         auditor = current_user.username
-    titles, batches = Audit.get_auditor_stats(auditor)
+    titles, batches = Root.get_auditor_stats(auditor)
     # {'matti/2020-01-03.001/13.01.2020 20:30': {'Note': 17, 'Place': 30, 'Repository': 3}, 
     #  'teppo/2020-01-03.002/23.01.2020 15:52': {...} ...}
     total = 0
