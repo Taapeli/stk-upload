@@ -1055,6 +1055,7 @@ class DOM_handler:
                 "sortnames": sortname_count,
             }
 
+        res = {}
         with FamilyWriter('update', tx=shareds.dservice.tx) as service:
             for uniq_id in self.family_ids:
                 if uniq_id is not None:
