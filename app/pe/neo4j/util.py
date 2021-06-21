@@ -18,8 +18,15 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import shareds
 
-cypher_by_user_prefix = "MATCH (prof:UserProfile{username:$username}) -[:HAS_ACCESS]-> (root:Root) " 
-cypher_common_prefix = "MATCH (root:Root{user:''}) " 
+cypher_by_user_prefix = """
+    MATCH (prof:UserProfile{username:$username}) -[:HAS_ACCESS]-> (root:Root{material:$material,state:$state})
+    WITH root
+""" 
+
+cypher_common_prefix = """
+    MATCH (root:Root{material:$material,state:$state,user:''})
+    WITH root
+""" 
 
 def run_cypher( session, cypher, username, **kwargs):
     """
@@ -32,18 +39,17 @@ def run_cypher( session, cypher, username, **kwargs):
         cypher = "match (root) -[:OBJ_PERSON]-> (p:Person) ..."
     
     """
-    if shareds.dservice.use_user != username:
-        print(shareds.dservice.use_user)
-        print(username)
-        #assert shareds.dservice.use_user == username
     if username:
         cypher2 = cypher_by_user_prefix + cypher
-        print(cypher2)
-        print(username, kwargs)
-        return session.run(cypher2, username=username,  **kwargs)
+        return session.run(cypher2, 
+                           username=username,  
+                           material=shareds.dservice.material, 
+                           state=shareds.dservice.state, 
+                           **kwargs)
     else:
         cypher2 = cypher_common_prefix + cypher
-        print(cypher2)
-        print(kwargs)
-        return session.run(cypher2, **kwargs)
+        return session.run(cypher2, 
+                           material=shareds.dservice.material, 
+                           state=shareds.dservice.state, 
+                           **kwargs)
 
