@@ -266,14 +266,7 @@ class Neo4jReadService(ConcreteService):
         event = None
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                if user:
-                    # Show my researcher data
-                    result = session.run(
-                        CypherEvent.get_an_event_own, uuid=uuid, user=user
-                    )
-                else:
-                    print("dr_get_event_by_uuid: approved common only")
-                    result = session.run(CypherEvent.get_an_event_common, uuid=uuid)
+                result = run_cypher(session, CypherEvent.get_an_event, user, uuid=uuid)
                 for record in result:
                     if record["e"]:
                         # Record: <Record
