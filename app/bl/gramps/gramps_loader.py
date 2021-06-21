@@ -38,6 +38,7 @@ from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
 import shareds
 from bl.base import Status
+from bl.root import State
 from bp.scene.models import media
 
 
@@ -362,7 +363,7 @@ def xml_to_stkbase(pathname, userid):
             # The missing links counted in remove_handles
         ##TODO      res = handler.add_missing_links()
 
-        res = batch_service.batch_mark_status(Batch.BATCH_CANDIDATE)
+        res = batch_service.batch_mark_status(State.ROOT_CANDIDATE)
 
         # batch_service.commit()
         logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')

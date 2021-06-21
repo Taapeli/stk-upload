@@ -48,6 +48,7 @@ from flask_babelex import _
 
 import shareds
 from bl.base import Status
+from bl.root import State
 from models import loadfile, email, util, syslog
 
 # from ui.user_context import UserContext
@@ -131,7 +132,7 @@ def upload_gramps():
         uploads.set_meta(
             current_user.username,
             infile.filename,
-            status=Batch.BATCH_UPLOADED,
+            status=State.FILE_UPLOADED,
             upload_time=time.time(),
             material_type=material_type,
             description=description,
