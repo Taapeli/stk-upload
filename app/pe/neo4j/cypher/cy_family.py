@@ -31,7 +31,7 @@ class CypherFamily():
 # ----- Get Family node by uuid
 
     get_a_family = '''
-MATCH (root:Root{user:$username}) -[r:OBJ_FAMILY]-> (f:Family {uuid:$f_uuid}) 
+MATCH (root) -[r:OBJ_FAMILY]-> (f:Family {uuid:$f_uuid}) 
 RETURN f, type(r) AS root_type, root'''
 
     get_family_parents = """
@@ -100,7 +100,7 @@ ORDER BY family, person.birth_high"""
 # ----- Family data for families page
 
     get_families_by_father = """
-MATCH (root:Root{user:$username}) -[:OBJ_FAMILY]-> (f:Family)
+MATCH (root) -[:OBJ_FAMILY]-> (f:Family)
     WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
