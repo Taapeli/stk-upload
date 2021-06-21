@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from pe.neo4j.util import run_cypher
 
 """
 Created on 17.3.2020
@@ -415,13 +416,7 @@ class Neo4jReadService(ConcreteService):
         family = None
 
         with self.driver.session(default_access_mode="READ") as session:
-            if user:
-                username = user
-            else:
-                username = ""
-            result = session.run(
-                CypherFamily.get_a_family, f_uuid=uuid, username=username
-            )
+            result = run_cypher( session, CypherFamily.get_a_family, user, f_uuid=uuid)
             for record in result:
                 if record["f"]:
                     # <Record
@@ -462,19 +457,14 @@ class Neo4jReadService(ConcreteService):
 
         # Select True = filter by this user False = filter approved data
         # show_candidate = self.user_context.use_owner_filter()
-        show_candidate = user is not None
-        if user is None: 
-            username = ""
-        else:
-            username = user
         with self.driver.session(default_access_mode="READ") as session:
             if order == "man":
                 print(
                     "Neo4jReadService.dr_get_families: candidate ordered by man"
                 )
-                result = session.run(
+                result = run_cypher(session,
                     CypherFamily.get_families_by_father,
-                    username=username,
+                    user,
                     fw=fw,
                     limit=limit,
                 )
@@ -482,9 +472,9 @@ class Neo4jReadService(ConcreteService):
                 print(
                     "Neo4jReadService.dr_get_families: candidate ordered by wife"
                 )
-                result = session.run(
+                result = run_cypher(session,
                     CypherFamily.get_families_by_mother,
-                    username=username,
+                    user,
                     fw=fw,
                     limit=limit,
                 )
@@ -866,14 +856,11 @@ class Neo4jReadService(ConcreteService):
         if lang not in ["fi", "sv"]:
             lang = "fi"
         with self.driver.session(default_access_mode="READ") as session:
-            if user == None:
-                username = ""
-            else:
-                username = user
             print("Neo4jReadService.dr_get_place_list_fw")
-            result = session.run(
+            result = run_cypher(
+                session,
                 CypherPlace.get_name_hierarchies,
-                username=username,
+                user,
                 fw=fw_from,
                 limit=limit,
                 lang=lang,
@@ -922,9 +909,8 @@ class Neo4jReadService(ConcreteService):
         pl = None
         node_ids = []  # List of uniq_is for place, name, note and media nodes
         with self.driver.session(default_access_mode="READ") as session:
-            username = "" if user is None else user
-            result = session.run(
-                CypherPlace.get_w_names_notes, username=username, uuid=uuid, lang=lang
+            result = run_cypher(session,
+                CypherPlace.get_w_names_notes, user, uuid=uuid, lang=lang
             )
             for record in result:
                 # <Record
@@ -1123,29 +1109,20 @@ class Neo4jReadService(ConcreteService):
                 # Filter sources by searching keywords in fi and sv langiage
                 key1 = args.get("theme1")
                 key2 = args.get("theme2")
-                if user:
-                    # Show my researcher data
-                    print("dr_get_source_list_fw: my researcher data")
-                    result = session.run(
-                        CypherSource.get_own_set_selections,
-                        key1=key1,
-                        key2=key2,
-                        user=user,
-                    )
-                else:
-                    print("dr_get_source_list_fw: approved common only")
-                    result = session.run(
-                        CypherSource.get_audited_set_selections, key1=key1, key2=key2
-                    )
+                # Show my researcher data
+                print("dr_get_source_list_fw: my researcher data")
+                result = run_cypher(session,
+                    CypherSource.get_sources_with_selections,
+                    user,
+                    key1=key1,
+                    key2=key2,
+                )
             else:
                 # Show all themes
-                if user:
-                    # Show my researcher data
-                    print("dr_get_source_list_fw: my researcher data")
-                    result = session.run(CypherSource.get_own_sets, user=user)
-                else:
-                    print("dr_get_source_list_fw: approved common only")
-                    result = session.run(CypherSource.get_audited_sets)
+                result = run_cypher(session,
+                    CypherSource.get_sources,
+                    user
+                )
 
             for record in result:
                 # <Record
@@ -1205,14 +1182,9 @@ class Neo4jReadService(ConcreteService):
         """Returns the PlaceBl with Notes and PlaceNames included."""
         source = None
         with self.driver.session(default_access_mode="READ") as session:
-            if user == None:
-                result = session.run(
-                    CypherSource.get_audited_set_single_selection, uuid=uuid
-                )
-            else:
-                result = session.run(
-                    CypherSource.get_own_set_single_selection, user=user, uuid=uuid
-                )
+            result = run_cypher(session,
+                CypherSource.get_single_selection, user, uuid=uuid 
+            )
             for record in result:
                 # <Record
                 #    owner_type='PASSED'
@@ -1256,22 +1228,12 @@ class Neo4jReadService(ConcreteService):
         """
 
         with self.driver.session(default_access_mode="READ") as session:
-            if user == None:
-                # Show approved common data
-                result = session.run(
-                    CypherMedia.read_approved_medias,
-                    user=user,
-                    start_name=fw_from,
-                    limit=limit,
-                )
-            else:
-                # Show user Batch
-                result = session.run(
-                    CypherMedia.read_my_medias,
-                    start_name=fw_from,
-                    user=user,
-                    limit=limit,
-                )
+            result = run_cypher(session,
+                CypherMedia.get_media_list,
+                user,
+                start_name=fw_from,
+                limit=limit,
+            )
 
             recs = []
             for record in result:
@@ -1291,14 +1253,9 @@ class Neo4jReadService(ConcreteService):
         recs = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                if user:
-                    result = session.run(
-                        CypherMedia.get_my_media_by_uuid, uuid=uuid, user=user
-                    )
-                else:
-                    result = session.run(
-                        CypherMedia.get_approved_media_by_uuid, uuid=uuid
-                    )
+                result = run_cypher(session,
+                    CypherMedia.get_media_by_uuid, user, uuid=uuid
+                )
                 # RETURN media, r, ref, ref2
                 for record in result:
                     recs.append(
@@ -1323,22 +1280,12 @@ class Neo4jReadService(ConcreteService):
         """
 
         with self.driver.session(default_access_mode="READ") as session:
-            if user == None:
-                # Show approved common data
-                result = session.run(
-                    CypherComment.read_approved_comments,
-                    user=user,
-                    start_name=fw_from,
-                    limit=limit,
-                )
-            else:
-                # Show user Batch
-                result = session.run(
-                    CypherComment.read_my_comments,
-                    start_name=fw_from,
-                    user=user,
-                    limit=limit,
-                )
+            result = run_cypher(session,
+                CypherComment.get_comments,
+                user,
+                start_name=fw_from,
+                limit=limit,
+            )
 
             recs = []
             for record in result:
@@ -1522,19 +1469,11 @@ class Neo4jReadService(ConcreteService):
         count = kwargs.get("count", 50)
         with self.driver.session(default_access_mode="READ") as session:
             # Select Batches by user, if defined
-            if username:
-                cypher = CypherPlaceStats.get_place_list_by_username
-            else:
-                cypher = CypherPlaceStats.get_place_list_common
+            cypher = CypherPlaceStats.get_place_list
             logger.debug('#  Neo4jReadService.dr_get_placename_list: with \n{ material:"'
                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
             logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
-            result = session.run(cypher,
-                material=self.material, 
-                state=self.state,
-                username=username,
-                count=count,
-            )
+            result = run_cypher(session, cypher, username, count=count,)
             for record in result:
                 place = record["place"]
                 placename = place["pname"]
