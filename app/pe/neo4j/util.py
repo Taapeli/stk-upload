@@ -19,12 +19,12 @@
 import shareds
 
 cypher_by_user_prefix = """
-    MATCH (prof:UserProfile{username:$username}) -[:HAS_ACCESS]-> (root:Root{material:$material,state:$state})
+    MATCH (prof:UserProfile{username:$username}) -[:HAS_ACCESS]-> (root:Root{state:$state})
     WITH root
 """ 
 
 cypher_common_prefix = """
-    MATCH (root:Root{material:$material,state:$state,user:''})
+    MATCH (root:Root{state:$state,user:''})
     WITH root
 """ 
 
