@@ -79,8 +79,8 @@ RETURN  r.role AS role, p, n AS name
 # --- Save to Batch
 
     create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
-MERGE (b) -[r:OWNS]-> (e:Event {handle: $e_attr.handle})
+MATCH (b:Root {id: $batch_id})
+MERGE (b) -[r:OBJ_OTHER]-> (e:Event {handle: $e_attr.handle})
     SET e = $e_attr
 RETURN ID(e) as uniq_id"""
 

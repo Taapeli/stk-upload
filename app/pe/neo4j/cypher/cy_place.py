@@ -133,10 +133,10 @@ RETURN name, COLLECT(n) AS names LIMIT 15
 
     # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
-MATCH (u:Batch {id:$batch_id})
+MATCH (u:Root {id:$batch_id})
 CREATE (new_pl:Place)
     SET new_pl = $p_attr
-CREATE (u) -[:OWNS]-> (new_pl) 
+CREATE (u) -[:OBJ_PLACE]-> (new_pl) 
 RETURN ID(new_pl) AS uniq_id"""
 
     # Set properties for an existing Place and connect it to Batch

@@ -106,8 +106,8 @@ class CypherSourceByHandle():
     """ For Source class """
 
     create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
-MERGE (b) -[r:OWNS]-> (s:Source {handle: $s_attr.handle}) 
+MATCH (b:Root {id: $batch_id})
+MERGE (b) -[r:OBJ_SOURCE]-> (s:Source {handle: $s_attr.handle}) 
     SET s = $s_attr
 RETURN ID(s) as uniq_id"""
 

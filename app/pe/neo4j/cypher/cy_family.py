@@ -117,8 +117,8 @@ RETURN f, p.pname AS marriage_place,
 # ----- Family load in Batch
 
     create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
-MERGE (b) -[r:OWNS]-> (f:Family {handle: $f_attr.handle}) 
+MATCH (b:Root {id: $batch_id})
+MERGE (b) -[r:OBJ_FAMILY]-> (f:Family {handle: $f_attr.handle}) 
     SET f = $f_attr
 RETURN ID(f) as uniq_id"""
 
