@@ -295,7 +295,7 @@ class UserAdmin():
             rsp = []
             for rec in shareds.driver.session().run(Cypher_adm.list_accesses):
                 user = dict(rec.get("user"))
-                batch = dict(rec.get("batch"))
+                batch = dict(rec.get("root"))
                 file = batch.get('file','–')
                 batch["file"] = file.split("/")[-1].\
                     replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")

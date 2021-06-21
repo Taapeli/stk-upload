@@ -125,14 +125,14 @@ DELETE c'''
 
     list_accesses = """
 MATCH (user:User) -[:SUPPLEMENTED]-> (userprofile:UserProfile)
-    -[r:HAS_ACCESS]-> (batch:Batch)
-WITH user, userprofile, batch, id(r) as rel_id
-    OPTIONAL MATCH (batch) -[ow:OWNS]-> ()
-RETURN user, userprofile, batch, rel_id, count(ow) AS cnt
+    -[r:HAS_ACCESS]-> (root:Root)
+WITH user, userprofile, root, id(r) as rel_id
+    OPTIONAL MATCH (root) -[ow]-> ()
+RETURN user, userprofile, root, rel_id, count(ow) AS cnt
     LIMIT 200"""
 
     add_access = """
-MATCH (user:UserProfile{username:$username}), (batch:Batch{id:$batchid})
+MATCH (user:UserProfile{username:$username}), (batch:Root{id:$batchid})
 MERGE (user)-[r:HAS_ACCESS]->(batch)
 RETURN r,id(r) as rel_id
 """
