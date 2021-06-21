@@ -41,9 +41,9 @@ class CypherPlace():
     ORDER BY name.name"""
 
     get_name_hierarchies = """
-MATCH (root:Root{user:$username}) -[:OBJ_PLACE]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
+MATCH (root) -[:OBJ_PLACE]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
     WHERE name.name >= $fw
-WITH place, name ORDER BY name.name LIMIT $limit
+WITH root, place, name ORDER BY name.name LIMIT $limit
     OPTIONAL MATCH (place) <-[:PLACE]- (ref) <-[*2]- (root)
 """ + _get_name_hierarchies_tail
 
@@ -82,7 +82,7 @@ RETURN place, name,
     COLLECT (DISTINCT media) AS medias"""
 
     get_w_names_notes = """
-MATCH  (root:Root{user:$username}) -[:OBJ_PLACE]-> (place:Place)
+MATCH  (root) -[:OBJ_PLACE]-> (place:Place)
     WHERE place.uuid=$uuid""" + _get_w_names_notes_tail
 
     # Result indi is a Person or Family
@@ -188,16 +188,8 @@ MATCH (m:Media  {handle: $m_handle})
     SET r = $r_attr"""
 
 class CypherPlaceStats:
-    get_place_list_by_username = """
-match (b:Root{user:$username, material:$material, state:$state})
-    -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
-return p as place, count(p) as count
-order by count desc
-limit $count"""
-
-    get_place_list_common = """
-match (b:Root{material:$material, state:$state})
-    -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
+    get_place_list = """
+match (root) -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
 return p as place, count(p) as count
 order by count desc
 limit $count"""
