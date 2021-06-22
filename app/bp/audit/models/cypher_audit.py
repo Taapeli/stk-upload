@@ -30,32 +30,22 @@ class Cypher_audit:
     """
 
     copy_batch_to_audit = """
-MATCH (u:UserProfile {username:'_Stk_'})
-MERGE (u) -[:HAS_ACCESS]-> (audit:Audit {id:$batch, user:$user, auditor:$oper})
-    SET audit.timestamp = timestamp()
-WITH audit
-    MATCH (batch:Batch {id:$batch})
-    MERGE (batch) -[:AFTER_AUDIT]-> (audit)
-    WITH batch, audit
-        MATCH (batch) -[owns:OWNS]-> (x)
-            WHERE labels(x)[0] in $labels
-        WITH batch, audit, owns, x //LIMIT 2
-            DELETE owns
-            CREATE (audit) -[:PASSED]-> (x)
-            RETURN count(x) AS count //audit,x
+MATCH (stk_user:UserProfile {username:'_Stk_'})
+MATCH (target:Root {id:$batch, user:$user, state:$state_candidate})
+MATCH (original_user:UserProfile{username:$user}) -[original_access:HAS_ACCESS]-> (target)
+DELETE original_access
+MERGE (stk_user) -[:HAS_ACCESS]-> (target)
+    SET target.auditor = $oper
+    SET target.timestamp = timestamp()
+    SET target.user = ''
+    SET target.original_user = $user
+    SET target.state = $state_auditing
+CREATE (new_root:Root {id:$batch})
+    SET new_root.user = $user
+    SET new_root.file = target.file
+    SET new_root.material = target.material
+    SET new_root.state = $state_for_audit
+MERGE (new_root) -[:AFTER_AUDIT]-> (target)        
+MERGE (original_user) -[:HAS_ACCESS]-> (new_root)
+return *        
 """
-
-
-# MATCH (u:UserProfile {username:'_Stk_'})
-# MERGE (u) -[:HAS_ACCESS]-> (audit:Audit {id:$batch, user:$user, auditor:$oper})
-#     SET audit.timestamp = timestamp()
-# WITH audit
-#     MATCH (b:Batch {id:$batch})
-#     MERGE (b) -[:AFTER_AUDIT]-> (audit)
-#     WITH audit
-#         MATCH (b:Batch {id:$batch}) -[o:OWNS|OWNS_OTHER]-> (x)
-#             WHERE labels(x)[0] in $labels
-#         WITH audit, o, b, x //LIMIT $limit
-#             DELETE o
-#             CREATE (audit) -[:PASSED]-> (x)
-#             RETURN count(x)'''

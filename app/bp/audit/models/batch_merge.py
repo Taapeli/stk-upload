@@ -16,7 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from bl.batch import BatchUpdater
+from bl.root import State
 
 """
 Created on 5.12.2019
@@ -67,56 +67,21 @@ class Batch_merge:
         from bl.batch import Batch
 
         relationships_created = 0
-        label_sets = [  # Grouped for decent size chunks in logical order
-            ["Note"],
-            ["Repository", "Media"],
-            ["Place", "Place_name"],
-            ["Source", "Citation"],
-            ["Event"],
-            ["Person", "Name"],
-            ["Family"],
-        ]
-
         try:
             with shareds.driver.session() as session:
-                for labels in label_sets:
-                    # with session.begin_transaction() as tx:
-                    tx = session.begin_transaction()
-                    count = 0
-                    result = tx.run(
+                    result = session.run(
                         Cypher_audit.copy_batch_to_audit,
                         user=user,
                         batch=batch_id,
                         oper=auditor,
-                        labels=labels,
+                        state_candidate=State.ROOT_CANDIDATE,
+                        state_auditing=State.ROOT_AUDITING,
+                        state_for_audit=State.ROOT_FOR_AUDIT
                     )
-                    for record in result:
-                        count = record["count"]
-                    # count = result.single().value(0)
-                    print(f"Batch_merge.move_whole_batch {labels} {count}")
-                    if count:
-                        relationships_created += count
+                    print(f"Batch_merge.move_whole_batch")
                     logger.debug(
-                        f"Batch_merge.move_whole_batch: moved {count} nodes of type {labels}"
+                        f"Batch_merge.move_whole_batch"
                     )
-                    tx.commit()
-
-            # Mark as complete candidate material
-            with BatchUpdater('update') as service:
-                res = service.batch_get_one(user, batch_id)
-                # returns {"status":Status.OK, "item":batch}
-                if Status.has_failed(res):
-                    return res
-                service.batch = res.get('item')
-                res = service.batch_mark_status(Batch.BATCH_FOR_AUDIT)
-                if Status.has_failed(res):
-                    msg = res['statustext']
-                    print(f"Batch_merge.move_whole_batch: {msg}")
-                    flash(msg, "flash_error")
-                    logger.error(msg)
-                    return msg
-
-
         except Exception as e:
             msg = f"Only {relationships_created} objects moved: {e.__class__.__name__} {e}"
             print(f"Batch_merge.move_whole_batch: {msg}")
