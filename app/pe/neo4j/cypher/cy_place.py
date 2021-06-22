@@ -141,10 +141,10 @@ RETURN ID(new_pl) AS uniq_id"""
 
     # Set properties for an existing Place and connect it to Batch
     complete = """
-MATCH (u:Batch {id:$batch_id})
+MATCH (u:Root {id:$batch_id})
 MATCH (pl:Place) WHERE ID(pl) = $plid
     SET pl += $p_attr
-CREATE (u) -[:OWNS]-> (pl)"""
+CREATE (u) -[:OBJ_PLACE]-> (pl)"""
 
     add_name = """
 MATCH (pl:Place) WHERE ID(pl) = $pid
@@ -169,8 +169,8 @@ CREATE (pl) -[r:IS_INSIDE]-> (new_pl)
 RETURN ID(new_pl) AS uniq_id"""
 
     add_urls = """
-MATCH (u:Batch {id:$batch_id})
-CREATE (u) -[:OWNS]-> (n:Note) 
+MATCH (u:Root {id:$batch_id})
+CREATE (u) -[:OBJ_OTHER]-> (n:Note) 
     SET n = $n_attr
 WITH n
     MATCH (pl:Place) WHERE ID(pl) = $pid
