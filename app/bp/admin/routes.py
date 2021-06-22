@@ -125,12 +125,12 @@ def clear_empty_batches():
         if request.form:
             clear = request.form.get('clear', False)
             if clear:
-                cnt = Batch.drop_empty_batches()
+                cnt = Root.drop_empty_batches()
                 if cnt == 0:
                     flash(_('No empty batches removed'), 'warning')
                 pass
         logger.info(f"-> bp.admin.routes.clear_empty_batches {cnt}")
-        batches = Batch.list_empty_batches()
+        batches = Root.list_empty_batches()
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
         
