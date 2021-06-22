@@ -39,6 +39,8 @@ from bl.base import Status
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_batch_audit import CypherRoot, CypherAudit
 
+DEFAULT_MATERIAL = "Family Tree"
+
 class State:
     """File, Material or Object state.
 
@@ -95,7 +97,7 @@ class Root:
         self.user = userid
         self.file = None
         self.id = None  # batch_id
-        self.material = ""      # Material type "Family Tree" or other
+        self.material = DEFAULT_MATERIAL      # Material type "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
         self.timestamp = 0
