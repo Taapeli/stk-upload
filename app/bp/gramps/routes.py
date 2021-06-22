@@ -48,7 +48,7 @@ from flask_babelex import _
 
 import shareds
 from bl.base import Status
-from bl.root import State
+from bl.root import State, Root
 from models import loadfile, email, util, syslog
 
 # from ui.user_context import UserContext
@@ -240,10 +240,7 @@ def xml_download(xmlfile):
 @login_required
 @roles_accepted("research", "admin")
 def batch_delete(batch_id):
-
-    from bl.batch import Batch
-
-    filename = Batch.get_filename(current_user.username, batch_id)
+    filename = Root.get_filename(current_user.username, batch_id)
     if filename:
         # Remove file, if exists
         metafile = filename.replace("_clean.", ".") + ".meta"
@@ -251,9 +248,9 @@ def batch_delete(batch_id):
             data = eval(open(metafile).read())
             if data.get("batch_id") == batch_id:
                 del data["batch_id"]
-                data["status"] = Batch.BATCH_REMOVED
+                data["status"] = State.ROOT_REMOVED
                 open(metafile, "w").write(repr(data))
-    ret = Batch.delete_batch(current_user.username, batch_id)
+    ret = Root.delete_batch(current_user.username, batch_id)
     if Status.has_failed(ret):
         flash(_("Could not delete Batch id %(batch_id)s", batch_id=batch_id), "error")
         logger.warning(f'bp.gramps.routes.batch_delete ERROR {ret.get("statustext")}')
