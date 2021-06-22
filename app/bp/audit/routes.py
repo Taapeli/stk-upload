@@ -85,7 +85,7 @@ def list_uploads():
 @roles_accepted('audit')
 def move_in_1(batch_name):
     """ Confirm Batch move to Isotammi database """    
-    user, batch_id, tstring, labels = Batch.get_batch_stats(batch_name)
+    user, batch_id, tstring, labels = Root.get_batch_stats(batch_name)
     total = 0
     for _label, cnt in labels:
         total += cnt
@@ -116,9 +116,10 @@ def move_in_2():
 def delete_approved(batch_id):
     """ Confirm approved batch delete
     """    
-    (msg, _nodes_deleted) = Audit.delete_audit(current_user.username, batch_id)
+    (msg, _nodes_deleted) = Root.delete_audit(current_user.username, batch_id)
     if msg != '':
         logger.error(f'{msg}')
+        flash(msg)
     else:
         logger.info(f'-> bp.audit.routes.batch_delete f="{batch_id}"')
         syslog.log(type="approved batch_id deleted", batch_id=batch_id) 

@@ -484,59 +484,49 @@ class Root:
             ["Family"],
         ]
 
-        msg, deleted = "", 0
-        try:
-            with shareds.driver.session() as session:
-                # Delete the node types that are not directly connected to Audit node
-                with session.begin_transaction() as tx:
-                    result = tx.run(CypherAudit.delete_names, batch=batch_id)
-                    this_delete = result.single()[0]
-                    print(f"bl.audit.delete_audit: deleted {this_delete} name nodes")
-                    deleted += this_delete
+        deleted = 0
+        with shareds.driver.session() as session:
+            # Delete the node types that are not directly connected to Audit node
+            with session.begin_transaction() as tx:
+                result = tx.run(CypherAudit.delete_names, batch=batch_id)
+                this_delete = result.single()[0]
+                print(f"bl.audit.delete_audit: deleted {this_delete} name nodes")
+                deleted += this_delete
 
-                    result = tx.run(CypherAudit.delete_place_names, batch=batch_id)
+                result = tx.run(CypherAudit.delete_place_names, batch=batch_id)
+                this_delete = result.single()[0]
+                print(
+                    f"bl.audit.delete_audit: deleted {this_delete} place name nodes"
+                )
+                deleted += this_delete
+
+                # result = tx.run(CypherAudit.delete_citations,
+                #                 batch=batch_id)
+                # this_delete = result.single()[0]
+                # print(f"bl.audit.delete_audit: deleted {this_delete} citation nodes")
+                # deleted += this_delete
+
+            # Delete the directly connected node types as defined by the labels
+            for labels in label_sets:
+                with session.begin_transaction() as tx:
+                    result = tx.run(
+                        CypherAudit.delete, batch=batch_id, labels=labels
+                    )
                     this_delete = result.single()[0]
                     print(
-                        f"bl.audit.delete_audit: deleted {this_delete} place name nodes"
+                        f"bl.audit.delete_audit: deleted {this_delete} nodes of type {labels}"
                     )
                     deleted += this_delete
 
-                    # result = tx.run(CypherAudit.delete_citations,
-                    #                 batch=batch_id)
-                    # this_delete = result.single()[0]
-                    # print(f"bl.audit.delete_audit: deleted {this_delete} citation nodes")
-                    # deleted += this_delete
+            # Finally, delete the audit node itself
+            with session.begin_transaction() as tx:
+                result = tx.run(CypherAudit.delete_audit_node, batch=batch_id)
 
-                # Delee the directly connected node types as defined by the labels
-                for labels in label_sets:
-                    with session.begin_transaction() as tx:
-                        result = tx.run(
-                            CypherAudit.delete, batch=batch_id, labels=labels
-                        )
-                        this_delete = result.single()[0]
-                        print(
-                            f"bl.audit.delete_audit: deleted {this_delete} nodes of type {labels}"
-                        )
-                        deleted += this_delete
-
-                # Finally, delete the audit node itself
-                with session.begin_transaction() as tx:
-                    result = tx.run(CypherAudit.delete_audit_node, batch=batch_id)
-
-            flash(
-                _(
-                    "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted",
-                    batch_id=batch_id,
-                    deleted=deleted,
-                ),
-                "info",
-            )
-
-        except Exception as e:
-            msg = f"Only {deleted} objects deleted: {e.__class__.__name__} {e}"
-            print(f"Audit.delete_audit: {msg}")
-            flash(msg, "flash_error")
-
+        msg = _(
+                "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted",
+                batch_id=batch_id,
+                deleted=deleted,
+        )
         return msg, deleted
 
 class BatchUpdater(DataService):

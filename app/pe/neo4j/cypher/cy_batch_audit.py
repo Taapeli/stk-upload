@@ -174,21 +174,21 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
     ID(p) AS obj_id, LABELS(p)[0] AS obj_label, p.id AS obj_str
  """
 
-    xxdelete = '''
-MATCH (a:Audit {id: $batch}) -[:PASSED]-> (x)
+    delete = '''
+MATCH (a:Root{id: $batch, user:''}) -[:OBJ_PERSON|OBJ_FAMILY|OBJ_PLACE|OBJ_SOURCE|OBJ_OTHER]-> (x)
 WHERE labels(x) IN [$labels]
 DETACH DELETE x
 RETURN count(x)
 '''
 
-    xxdelete_names = '''
-MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Person) -[:NAME]-> (x:Name)
+    delete_names = '''
+MATCH (a:Root {id: $batch, user:''}) -[:OBJ_PERSON]-> (Person) -[:NAME]-> (x:Name)
 DETACH DELETE x
 RETURN count(x)
 '''
 
-    xxdelete_place_names = '''
-MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Place) -[:NAME]-> (x:Place_name)
+    delete_place_names = '''
+MATCH (a:Root{id: $batch, user:''}) -[:OBJ_PLACE]-> (Place) -[:NAME]-> (x:Place_name)
 DETACH DELETE x
 RETURN count(x)
 '''
@@ -199,7 +199,7 @@ RETURN count(x)
 # RETURN count(x)
 # '''
 
-    xxdelete_audit_node = '''
-MATCH (a:Audit {id: $batch})
+    delete_audit_node = '''
+MATCH (a:Root {id: $batch, user:''})
 DETACH DELETE a
 '''
