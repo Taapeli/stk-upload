@@ -352,6 +352,7 @@ def list_uploads(username):
     for batch, b in batches.items():
         upload = Upload()
         upload.batch_id = batch
+        upload.status = "?!"
         if b.state == State.ROOT_STORING:
             upload.status = "?"
         elif b.state == State.ROOT_CANDIDATE:
@@ -366,7 +367,7 @@ def list_uploads(username):
         upload.upload_time = 0.0
         upload.material_type = b.material
         upload.description = b.description
-        print(f"### Batch {batch} {status} -")
+        print(f"### Batch {batch} {b.state} -> {upload.status}")
         uploads.append(upload)
     
     return sorted(uploads,key=lambda x: x.upload_time)
