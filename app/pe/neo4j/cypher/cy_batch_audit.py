@@ -64,7 +64,7 @@ RETURN b """
 
     get_batches = '''
 match (b:Root) 
-    where b.user = $user and b.status = $status // "completed"
+    where b.user = $user and b.state = $status // "completed"
 optional match (b) --> (x)
 return b as batch,
     labels(x)[0] as label, count(x) as cnt 
