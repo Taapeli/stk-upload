@@ -33,7 +33,7 @@ from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 
 from pe.dataservice import ConcreteService
-from .cypher.cy_batch_audit import CypherBatch, CypherAudit
+from .cypher.cy_batch_audit import CypherRoot, CypherAudit
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_family import CypherFamily
@@ -98,7 +98,7 @@ class Neo4jUpdateService(ConcreteService):
 
     def ds_aqcuire_lock(self, lock_id):
         """Create a lock"""
-        self.tx.run(CypherBatch.acquire_lock, lock_id=lock_id).single()
+        self.tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
         return True  # value > 0
 
     def ds_new_batch_id(self):
@@ -110,7 +110,7 @@ class Neo4jUpdateService(ConcreteService):
         # 1. Find the latest Batch id of today from the db
         base = str(date.today())
         ext = 0
-        record = self.tx.run(CypherBatch.batch_find_id, batch_base=base).single()
+        record = self.tx.run(CypherRoot.batch_find_id, batch_base=base).single()
         if record:
             batch_id = record.get("bid")
             print(f"# Previous batch_id={batch_id}")
@@ -126,7 +126,7 @@ class Neo4jUpdateService(ConcreteService):
     def ds_get_batch(self, user, batch_id):
         """Get Batch node by username and batch id. """
         try:
-            result = self.tx.run(CypherBatch.get_single_batch, batch=batch_id)
+            result = self.tx.run(CypherRoot.get_single_batch, batch=batch_id)
             for record in result:
                 node = record.get("batch")
                 if node:
@@ -148,10 +148,10 @@ class Neo4jUpdateService(ConcreteService):
 
         Batch.timestamp is created in the Cypher clause.
         """
-        result = self.tx.run(CypherBatch.batch_create, b_attr=attr).single()
+        result = self.tx.run(CypherRoot.batch_create, b_attr=attr).single()
         if not result:
             raise IsotammiException("Unable to save Batch",
-                            cypher=CypherBatch.batch_create,
+                            cypher=CypherRoot.batch_create,
                             b_attr=attr,
                             )
         uniq_id = result[0]
@@ -165,7 +165,7 @@ class Neo4jUpdateService(ConcreteService):
         """
         try:
             result = self.tx.run(
-                CypherBatch.batch_set_status, bid=batch_id, user=user, status=status
+                CypherRoot.batch_set_status, bid=batch_id, user=user, status=status
             )
             uniq_id = result.single()[0]
             return {"status": Status.OK, "identity": uniq_id}
@@ -250,14 +250,14 @@ class Neo4jUpdateService(ConcreteService):
         total = 0
         unlinked = 0
         # Remove handles from nodes connected to given Batch
-        result = self.tx.run(CypherBatch.remove_all_handles, batch_id=batch_id)
+        result = self.tx.run(CypherRoot.remove_all_handles, batch_id=batch_id)
         for count, label in result:
             print(f"# - cleaned {count} {label} handles")
             total += count
         # changes = result.summary().counters.properties_set
 
         # Find handles left: missing link (:Batch) --> (x)
-        result = self.tx.run(CypherBatch.find_unlinked_nodes)
+        result = self.tx.run(CypherRoot.find_unlinked_nodes)
         for count, label in result:
             print(
                 f"Neo4jUpdateService.ds_obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch"

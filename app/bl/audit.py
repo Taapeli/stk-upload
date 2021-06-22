@@ -30,7 +30,7 @@ from datetime import datetime
 from flask import flash
 from flask_babelex import _
 
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 from pe.neo4j.cypher.cy_batch_audit import CypherAudit
 
 from models.util import format_timestamp
@@ -120,7 +120,7 @@ class Audit:
         labels = []
         batch = None
         result = shareds.driver.session().run(
-            CypherBatch.get_single_batch, batch=audit_id
+            CypherRoot.get_single_batch, batch=audit_id
         )
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'}
@@ -226,7 +226,7 @@ class Audit:
 #         '''
 #         labels = []
 #         batch = None
-#         result = shareds.driver.session().run(CypherBatch.get_single_batch,
+#         result = shareds.driver.session().run(CypherRoot.get_single_batch,
 #                                               batch=batch_id)
 #         for record in result:
 #             # <Record batch=<Node id=319388 labels={'Batch'}

@@ -42,7 +42,7 @@ from bl.root import Root, State
 from bl.base import Status, IsotammiException
 from models import email, util, syslog 
 from bl.gramps import gramps_loader
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 
 #==> bl.batch.Batch.BATCH_* 7.5.2021 / JMä
 # STATUS_UPLOADED = "uploaded", STATUS_LOADING = "loading", STATUS_DONE = "done"
@@ -255,7 +255,7 @@ def list_uploads(username):
     '''
     # 1. List Batches, their status and Person count
     batches = {}
-    result = shareds.driver.session().run(CypherBatch.get_user_batch_summary, 
+    result = shareds.driver.session().run(CypherRoot.get_user_batch_summary, 
                                           user=username)
     for record in result:
         # Returns batch, person_count, audit_count

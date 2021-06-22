@@ -25,7 +25,7 @@ Created on 7.11.2020
 @author: jm
 '''
 
-class CypherBatch():
+class CypherRoot():
     '''
     Cypher clauses for managing Root nodes
     '''

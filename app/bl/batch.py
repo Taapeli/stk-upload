@@ -35,7 +35,7 @@ from bl.admin.models.cypher_adm import Cypher_adm
 
 from bl.base import Status
 from pe.dataservice import DataService
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 
 # class State: --> bl.root.State
 # class Root: --> bl.root.Root
@@ -128,7 +128,7 @@ class Batch:
                 removed = -1
                 while removed != 0:
                     result = session.run(
-                        CypherBatch.delete_chunk, user=username, batch_id=batch_id
+                        CypherRoot.delete_chunk, user=username, batch_id=batch_id
                     )
                     # Supports both Neo4j version 3 and 4:
                     counters = shareds.db.consume_counters(result)
@@ -141,7 +141,7 @@ class Batch:
                     else:
                         # All connected nodes deleted. delete the batch node
                         result = session.run(
-                            CypherBatch.delete_batch_node,
+                            CypherRoot.delete_batch_node,
                             user=username,
                             batch_id=batch_id,
                         )
@@ -177,7 +177,7 @@ class Batch:
     def get_filename(username, batch_id):
         with shareds.driver.session() as session:
             record = session.run(
-                CypherBatch.get_filename, username=username, batch_id=batch_id
+                CypherRoot.get_filename, username=username, batch_id=batch_id
             ).single()
             if record:
                 return record[0]
@@ -185,7 +185,7 @@ class Batch:
 
     @staticmethod
     def get_batches():
-        result = shareds.driver.session().run(CypherBatch.list_all)
+        result = shareds.driver.session().run(CypherRoot.list_all)
         for rec in result:
             yield dict(rec.get("b"))
 
@@ -198,7 +198,7 @@ class Batch:
         """
         # Get your approved batches
         approved = {}
-        result = shareds.driver.session().run(CypherBatch.get_passed, user=user)
+        result = shareds.driver.session().run(CypherRoot.get_passed, user=user)
         for node, count in result:
             # <Record batch=<Node id=435790 labels={'Audit'}
             #    properties={'auditor': 'juha', 'id': '2020-03-24.002',
@@ -214,7 +214,7 @@ class Batch:
         titles = []
         user_data = {}
         result = shareds.driver.session().run(
-            CypherBatch.get_batches, user=user, status=Batch.BATCH_CANDIDATE
+            CypherRoot.get_batches, user=user, status=Batch.BATCH_CANDIDATE
         )
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'}
@@ -266,7 +266,7 @@ class Batch:
         labels = []
         batch = None
         result = shareds.driver.session().run(
-            CypherBatch.get_single_batch, batch=batch_id
+            CypherRoot.get_single_batch, batch=batch_id
         )
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'}
@@ -303,7 +303,7 @@ class Batch:
         print(
             'Batch.list_empty_batches: #TODO Tähän aikarajoitus "vvv-kk", nyt siinä on vakio "2019-10"!'
         )
-        result = shareds.driver.session().run(CypherBatch.TODO_get_empty_batches)
+        result = shareds.driver.session().run(CypherRoot.TODO_get_empty_batches)
 
         for record in result:
             # <Node id=317098 labels={'Batch'}
