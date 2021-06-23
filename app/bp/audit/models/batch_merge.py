@@ -16,7 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from bl.root import State
 
 """
 Created on 5.12.2019
@@ -25,7 +24,8 @@ Created on 5.12.2019
 """
 import shareds
 from bl.base import Status
-from .cypher_audit import Cypher_audit
+from bl.root import State
+from pe.neo4j.cypher.cy_batch_audit import CypherAudit
 
 from flask_babelex import _
 from flask import flash
@@ -68,7 +68,7 @@ class Batch_merge:
         try:
             with shareds.driver.session() as session:
                     result = session.run(
-                        Cypher_audit.copy_batch_to_audit,
+                        CypherAudit.copy_batch_to_audit,
                         user=user,
                         batch=batch_id,
                         oper=auditor,

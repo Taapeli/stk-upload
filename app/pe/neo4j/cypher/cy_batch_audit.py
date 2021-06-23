@@ -213,3 +213,25 @@ RETURN count(x)
 MATCH (a:Root {id: $batch, user:''})
 DETACH DELETE a
 '''
+
+    copy_batch_to_audit = """
+MATCH (stk_user:UserProfile {username:'_Stk_'})
+MATCH (target:Root {id:$batch, user:$user, state:$state_candidate})
+MATCH (original_user:UserProfile{username:$user}) -[original_access:HAS_ACCESS]-> (target)
+MATCH (original_user) -[original_has_loaded:HAS_LOADED]-> (target)
+DELETE original_has_loaded
+DELETE original_access
+MERGE (stk_user) -[:HAS_ACCESS]-> (target)
+    SET target.auditor = $oper
+    SET target.timestamp = timestamp()
+    SET target.state = $state_auditing
+CREATE (new_root:Root {id:$batch})
+    SET new_root.user = $user
+    SET new_root.file = target.file
+    SET new_root.material = target.material
+    SET new_root.state = $state_for_audit
+MERGE (new_root) -[:AFTER_AUDIT]-> (target)        
+MERGE (original_user) -[:HAS_LOADED]-> (new_root)
+MERGE (original_user) -[:HAS_ACCESS]-> (new_root)
+return *        
+"""
