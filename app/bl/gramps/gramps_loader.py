@@ -294,7 +294,7 @@ def xml_to_stkbase(pathname, userid):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch import BatchUpdater
+    from bl.root import BatchUpdater
 
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
