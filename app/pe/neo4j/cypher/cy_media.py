@@ -39,7 +39,7 @@ RETURN media, PROPERTIES(r) AS prop, ref, ref2"""
     get_media_list = """
 MATCH (root) -[:OBJ_OTHER]-> (o:Media) <- [r:MEDIA] - ()
 WHERE o.description >= $start_name
-RETURN o, case root.original_user when null then root.user else root.original_user end as credit, root.id as batch_id, COUNT(r) AS count
+RETURN o, root.user as credit, root.id as batch_id, COUNT(r) AS count
     ORDER BY o.description LIMIT $limit"""
 
 

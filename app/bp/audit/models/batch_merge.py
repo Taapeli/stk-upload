@@ -64,8 +64,6 @@ class Batch_merge:
         :param:    auditor    active auditor user id
 
         """
-        from bl.batch import Batch
-
         relationships_created = 0
         try:
             with shareds.driver.session() as session:

@@ -72,7 +72,7 @@ return b as batch,
 
     get_passed = '''
 match (b:Root) 
-    where b.user = '' and b.original_user = $user
+    where b.user = $user and b.state = 'Auditing'
 optional match (b) --> (x)
 return b as batch, count(x) as cnt 
     order by batch.id'''

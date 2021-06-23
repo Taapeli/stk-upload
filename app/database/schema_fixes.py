@@ -70,8 +70,6 @@ def do_schema_fixes():
                 ELSE b.material
             END
         SET b.state='{State.ROOT_AUDITING}'
-        SET b.original_user=b.user
-        SET b.user=''
         REMOVE b:Audit, b.status, b.material_type"""
     # {object_label: relation_type}
     root_relations = {

@@ -37,8 +37,6 @@ DELETE original_access
 MERGE (stk_user) -[:HAS_ACCESS]-> (target)
     SET target.auditor = $oper
     SET target.timestamp = timestamp()
-    SET target.user = ''
-    SET target.original_user = $user
     SET target.state = $state_auditing
 CREATE (new_root:Root {id:$batch})
     SET new_root.user = $user
