@@ -16,15 +16,9 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import shareds
 
-cypher_by_user_prefix = """
-    MATCH (prof:UserProfile{username:$username}) -[:HAS_ACCESS]-> (root:Root{state:$state})
-    WITH root
-""" 
-
-cypher_common_prefix = """
-    MATCH (root:Root{state:$state,user:''})
+cypher_prefix = """
+    MATCH (prof:UserProfile{username:$username}) -[:HAS_ACCESS]-> (root:Root)
     WITH root
 """ 
 
@@ -39,17 +33,9 @@ def run_cypher( session, cypher, username, **kwargs):
         cypher = "match (root) -[:OBJ_PERSON]-> (p:Person) ..."
     
     """
-    if username:
-        cypher2 = cypher_by_user_prefix + cypher
-        return session.run(cypher2, 
-                           username=username,  
-                           material=shareds.dservice.material, 
-                           state=shareds.dservice.state, 
-                           **kwargs)
-    else:
-        cypher2 = cypher_common_prefix + cypher
-        return session.run(cypher2, 
-                           material=shareds.dservice.material, 
-                           state=shareds.dservice.state, 
-                           **kwargs)
-
+    if not username:
+        username = '_Stk_'
+    cypher2 = cypher_prefix + cypher
+    return session.run(cypher2, 
+               username=username,  
+               **kwargs)
