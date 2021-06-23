@@ -271,9 +271,6 @@ class Root:
             #    'user': 'juha', 'timestamp': 1585070354153}>
             #  cnt=200>
             b = Root.from_node(node)
-            if not b.status:
-                # Audit node has no status field; the material has been sent forwards
-                b.state = State.ROOT_FOR_AUDIT  # Batch.BATCH_FOR_AUDIT
             approved[b.id] = count
 
         # Get current researcher batches
