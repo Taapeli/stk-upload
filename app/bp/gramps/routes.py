@@ -106,7 +106,6 @@ def list_uploads():
 @roles_accepted("research", "admin")
 def upload_gramps():
     """Load a gramps xml file to temp directory for processing in the server"""
-    from bl.batch import Batch # For status codes
 
     try:
         infile = request.files["filenm"]

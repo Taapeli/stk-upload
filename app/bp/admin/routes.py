@@ -116,8 +116,6 @@ def start_initiate():
 @roles_accepted('research', 'admin', 'audit')
 def clear_empty_batches():
     """ Show or clear unused batches. """
-    from bl.batch import Batch
-
     user=None
     clear=False
     cnt = -1
