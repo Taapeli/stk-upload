@@ -101,7 +101,7 @@ class Neo4jUpdateService(ConcreteService):
         self.tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
         return True  # value > 0
 
-    def ds_new_batch_id(self):
+    def ds_find_next_unused_batch_id(self):
         """Find next unused Batch id.
 
         Returns {id, status, [statustext]}
@@ -120,6 +120,31 @@ class Neo4jUpdateService(ConcreteService):
         # 2. Form a new batch id
         batch_id = "{}.{:03d}".format(base, ext + 1)
 
+        print("# New batch_id='{}'".format(batch_id))
+        return {"status": Status.OK, "id": batch_id}
+
+    def ds_new_batch_id(self):
+        """Find next unused Batch id using BatchId node.
+
+        Returns {id, status, [statustext]}
+        """
+
+        # 1. Find the latest Batch id of today from the db
+        base = str(date.today())
+        seq = 500
+        record = self.tx.run(CypherRoot.read_batch_id).single()
+        print("base:",base)
+        print("record:",record)
+        if record:
+            node = record["n"]
+            print("pre", node.get("prefix") )
+            if node.get("prefix") == base:
+                seq = node.get("seq")
+            else:
+                seq = 0
+        seq += 1
+        batch_id = "{}.{:03d}".format(base, seq)
+        self.tx.run(CypherRoot.save_batch_id, prefix=base, seq=seq)
         print("# New batch_id='{}'".format(batch_id))
         return {"status": Status.OK, "id": batch_id}
 

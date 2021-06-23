@@ -36,9 +36,19 @@ RETURN lock
 """
 
     batch_find_id = """
-MATCH (b:Root) WHERE b.id STARTS WITH $batch_base
-RETURN b.id AS bid
+MATCH (b:BatchId) WHERE b.prefix STARTS WITH $batch_base
+RETURN b.seq AS seq
     ORDER BY bid DESC LIMIT 1"""
+
+    read_batch_id = """
+MATCH (n:BatchId) return n
+"""
+
+    save_batch_id = """
+MERGE (n:BatchId) 
+SET n.prefix = $prefix 
+SET n.seq = $seq
+"""
 
     batch_create = """
 MATCH (u:UserProfile {username: $b_attr.user})
