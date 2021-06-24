@@ -101,13 +101,11 @@ def list_batches(args):
     file = 'file'
     status = 'status'
     #print(f"{id:14s} {user:16s} {file:60s} {status}")
-    run("match (b:Batch) return b",callback=list_batch)
+    run("match (b:Root) return b",callback=list_batch)
 
 def batches():
     cypher = """
-        match (b:Batch) return b
-        union
-        match (b:Audit) return b
+        match (b:Root) return b
     """
     batchlist = []
     run(cypher,callback=lambda n,count,rec, kwargs: batchlist.append(dict(rec.get('b'))))
@@ -118,7 +116,7 @@ def list_batch(rec):
     file = batch.get('file')
     id = batch.get('id')
     user = batch.get('user')
-    status = batch.get('status')
+    status = batch.get('state')
     print(f"{id:14s} {user:16s} {file:60s} {status}")
 
 def normalize_name(name_normalizer,name,nametype):
@@ -215,7 +213,7 @@ def generate_searchkey(n,count,rec, kwargs):
 def generate_keys(args):
     cypher1 = """
         match 
-            (b:Batch{id:$batch_id})
+            (b:Root{id:$batch_id})
         match 
             (b)-->(p:Person)-[:NAME]->(pn:Name{order:0})
         optional match
@@ -242,7 +240,7 @@ def generate_keys(args):
 
     cypher2 = """
         match 
-            (b:Batch)
+            (b:Root)
         where $batch_id = '' or b.id = $batch_id
         match 
             (b)-->(p:Person)
@@ -264,7 +262,7 @@ def generate_keys(args):
 def remove_keys(args):   
     index_name = index_name_from_batch_id(args.from_batch)
     cypher = f"""
-        match (b:Batch{{id:$batch_id}}) --> (p:Person)
+        match (b:Root{{id:$batch_id}}) --> (p:Person)
         remove p.searchkey 
         remove p.searchkey1 
         remove p.{index_name} 
@@ -396,7 +394,7 @@ def search_dups(args):
     t0 = time.time()
     matches = []
     run("""
-        match (b:Batch{id:$batch_id}) -[:OWNS]-> (p:Person) -[:NAME]-> (pn:Name{order:0}) 
+        match (b:Root{id:$batch_id}) -[:OBJ_PERSON]-> (p:Person) -[:NAME]-> (pn:Name{order:0}) 
         return id(p) as pid, p, collect(pn) as namenodes
     """,callback=lambda n,count,rec,kwargs: __search_dups(n,count,args,rec,matches), 
         batch_id=args.batchid1)
@@ -432,7 +430,7 @@ def get_refnames():
 
 def prune_matches(matches):
     refnames = get_refnames_by_type("firstname") # mapping of name -> refname
-    pprint(refnames['Aina'])
+    #pprint(refnames['Aina'])
     def get_firstnames(key):
         words = key.split()
         print(words)
@@ -488,7 +486,7 @@ def prune_matches(matches):
 def check_batch(batch_id):
     n = run("""
         match 
-            (b:Batch)
+            (b:Root)
         where $batch_id = '' or b.id = $batch_id
         return b
         """,    
