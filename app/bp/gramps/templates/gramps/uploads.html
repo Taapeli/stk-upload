@@ -186,7 +186,8 @@ function confirm_delete(subj, name) {
 				</th>
    			</tr>
 
-	    {% for upload in uploads %}{% if upload.status != "?" %}
+	    {% for upload in uploads %}
+	    {% if True or upload.status != "?" %}
 	       <tr>
 	           <td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
 	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}');">

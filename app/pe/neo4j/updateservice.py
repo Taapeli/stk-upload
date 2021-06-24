@@ -437,7 +437,7 @@ class Neo4jUpdateService(ConcreteService):
 
         return [(record["pid"], record["name"]) for record in result]
 
-    def ds_set_people_lifetime_estimates(self, uids=[]):
+    def ds_set_people_lifetime_estimates(self, uids):
         """Get estimated lifetimes to Person.dates for given person.uniq_ids.
 
         :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
@@ -487,6 +487,12 @@ class Neo4jUpdateService(ConcreteService):
                 datetype = e["datetype"]
                 datetype1 = None
                 datetype2 = None
+                date1 = e["date1"]
+                date2 = e["date2"]
+                year1 = None
+                year2 = None
+                if date1: year1 = date1 // 1024 
+                if date2: year2 = date1 // 1024 
                 if datetype == DR["DATE"]:
                     datetype1 = "exact"
                 elif datetype == DR["BEFORE"]:
@@ -505,14 +511,17 @@ class Neo4jUpdateService(ConcreteService):
                     else:
                         datetype1 = "exact"
                         datetype2 = "exact"
-                date1 = e["date1"]
-                date2 = e["date2"]
-                if datetype1 and date1 is not None:
-                    year1 = date1 // 1024
+                elif datetype == DR["ABOUT"]:
+                    year1 = year1 - 50
+                    year2 = year2 + 50
+                    datetype1 = "after"
+                    datetype2 = "before"
+                if datetype1 and year1 is not None:
+                    #year1 = date1 // 1024
                     ev = lifetime.Event(eventtype, datetype1, year1, role)
                     p.events.append(ev)
-                if datetype2 and date2 is not None:
-                    year2 = date2 // 1024
+                if datetype2 and year2 is not None:
+                    #year2 = date2 // 1024
                     ev = lifetime.Event(eventtype, datetype2, year2, role)
                     p.events.append(ev)
                 p.events.sort(key=sortkey)
