@@ -34,35 +34,37 @@ class CypherSource():
         <-[:HAS_ACCESS]- (u:UserProfile {username:$user})"""
 #   _match_my_own = "MATCH (s:Source) <-[owner:OWNS|OWNS_OTHER]- ()"
 
-    _sets = """
-WITH type(owner) as owner_type, s
+    get_sources = """
+MATCH (root) -[:OBJ_SOURCE]-> (s:Source)
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
     OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN owner_type, s as source, collect(DISTINCT note) as notes, 
+RETURN s as source, collect(DISTINCT note) as notes, 
        collect(DISTINCT [r.medium, rep]) as repositories,
        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
 ORDER BY toUpper(s.stitle)"""
 
-    _set_selections = """
-        WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
-WITH type(owner) as owner_type, s ORDER BY toUpper(s.stitle)
+    get_sources_with_selections = """
+MATCH (root) -[:OBJ_SOURCE]-> (s:Source)
+    WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
+WITH s ORDER BY toUpper(s.stitle)
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
     OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN owner_type, s as source, collect(DISTINCT note) as notes, 
+RETURN s as source, collect(DISTINCT note) as notes, 
        collect(DISTINCT [r.medium, rep]) as repositories,
        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
 ORDER BY toUpper(s.stitle)"""
 
-    _single_set_selection = """
-        WHERE s.uuid=$uuid
-WITH s, owner
+    get_single_selection = """
+MATCH (root) -[:OBJ_SOURCE]-> (s:Source)
+    WHERE s.uuid=$uuid
+WITH s
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (s) -[:NOTE]-> (n)
-RETURN type(owner) as owner_type, s AS source, 
+RETURN s AS source, 
     COLLECT(DISTINCT n) AS notes,
     COLLECT(DISTINCT [r.medium,rep]) AS reps
     ORDER BY source.stitle"""
@@ -78,15 +80,6 @@ return c as citation, collect(distinct n) as notes, x as near,
 order by c.id, x.id"""
 
     # ------------------------ Cypher clauses ------------------------
-
-    get_audited_sets = _match_audited + _sets
-    get_own_sets = _match_my_access + _sets
-
-    get_audited_set_selections = _match_audited + _set_selections
-    get_own_set_selections = _match_my_access + _set_selections
-
-    get_audited_set_single_selection = _match_audited + _single_set_selection
-    get_own_set_single_selection = _match_my_access + _single_set_selection
 
     # Default name, birth and death
     get_person_lifedata = """
@@ -113,8 +106,8 @@ class CypherSourceByHandle():
     """ For Source class """
 
     create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
-MERGE (b) -[r:OWNS]-> (s:Source {handle: $s_attr.handle}) 
+MATCH (b:Root {id: $batch_id})
+MERGE (b) -[r:OBJ_SOURCE]-> (s:Source {handle: $s_attr.handle}) 
     SET s = $s_attr
 RETURN ID(s) as uniq_id"""
 

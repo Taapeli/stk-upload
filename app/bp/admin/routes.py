@@ -46,6 +46,7 @@ from setups import User
 from bp.admin.forms import UpdateUserProfileForm, UpdateUserForm
 from bl.admin.models.data_admin import DataAdmin
 from bl.admin.models.user_admin import UserAdmin
+from bl.root import Root
 
 from . import bp
 from . import uploads
@@ -115,8 +116,6 @@ def start_initiate():
 @roles_accepted('research', 'admin', 'audit')
 def clear_empty_batches():
     """ Show or clear unused batches. """
-    from bl.batch import Batch
-
     user=None
     clear=False
     cnt = -1
@@ -124,12 +123,12 @@ def clear_empty_batches():
         if request.form:
             clear = request.form.get('clear', False)
             if clear:
-                cnt = Batch.drop_empty_batches()
+                cnt = Root.drop_empty_batches()
                 if cnt == 0:
                     flash(_('No empty batches removed'), 'warning')
                 pass
         logger.info(f"-> bp.admin.routes.clear_empty_batches {cnt}")
-        batches = Batch.list_empty_batches()
+        batches = Root.list_empty_batches()
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
         
@@ -526,10 +525,7 @@ def fetch_users():
 @login_required
 @roles_accepted('admin')
 def fetch_batches():
-
-    from bl.batch import Batch
-
-    batch_list = list(Batch.get_batches())
+    batch_list = list(Root.get_batches())
     for b in batch_list:
         file = b.get('file')
         if file:

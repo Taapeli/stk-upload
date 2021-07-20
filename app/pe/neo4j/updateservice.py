@@ -33,7 +33,7 @@ from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 
 from pe.dataservice import ConcreteService
-from .cypher.cy_batch_audit import CypherBatch, CypherAudit
+from .cypher.cy_batch_audit import CypherRoot, CypherAudit
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_family import CypherFamily
@@ -98,10 +98,10 @@ class Neo4jUpdateService(ConcreteService):
 
     def ds_aqcuire_lock(self, lock_id):
         """Create a lock"""
-        self.tx.run(CypherBatch.acquire_lock, lock_id=lock_id).single()
+        self.tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
         return True  # value > 0
 
-    def ds_new_batch_id(self):
+    def ds_find_next_unused_batch_id(self):
         """Find next unused Batch id.
 
         Returns {id, status, [statustext]}
@@ -110,7 +110,7 @@ class Neo4jUpdateService(ConcreteService):
         # 1. Find the latest Batch id of today from the db
         base = str(date.today())
         ext = 0
-        record = self.tx.run(CypherBatch.batch_find_id, batch_base=base).single()
+        record = self.tx.run(CypherRoot.batch_find_id, batch_base=base).single()
         if record:
             batch_id = record.get("bid")
             print(f"# Previous batch_id={batch_id}")
@@ -123,10 +123,35 @@ class Neo4jUpdateService(ConcreteService):
         print("# New batch_id='{}'".format(batch_id))
         return {"status": Status.OK, "id": batch_id}
 
+    def ds_new_batch_id(self):
+        """Find next unused Batch id using BatchId node.
+
+        Returns {id, status, [statustext]}
+        """
+
+        # 1. Find the latest Batch id of today from the db
+        base = str(date.today())
+        seq = 500
+        record = self.tx.run(CypherRoot.read_batch_id).single()
+        print("base:",base)
+        print("record:",record)
+        if record:
+            node = record["n"]
+            print("pre", node.get("prefix") )
+            if node.get("prefix") == base:
+                seq = node.get("seq")
+            else:
+                seq = 0
+        seq += 1
+        batch_id = "{}.{:03d}".format(base, seq)
+        self.tx.run(CypherRoot.save_batch_id, prefix=base, seq=seq)
+        print("# New batch_id='{}'".format(batch_id))
+        return {"status": Status.OK, "id": batch_id}
+
     def ds_get_batch(self, user, batch_id):
         """Get Batch node by username and batch id. """
         try:
-            result = self.tx.run(CypherBatch.get_single_batch, batch=batch_id)
+            result = self.tx.run(CypherRoot.get_single_batch, batch=batch_id)
             for record in result:
                 node = record.get("batch")
                 if node:
@@ -148,10 +173,10 @@ class Neo4jUpdateService(ConcreteService):
 
         Batch.timestamp is created in the Cypher clause.
         """
-        result = self.tx.run(CypherBatch.batch_create, b_attr=attr).single()
+        result = self.tx.run(CypherRoot.batch_create, b_attr=attr).single()
         if not result:
             raise IsotammiException("Unable to save Batch",
-                            cypher=CypherBatch.batch_create,
+                            cypher=CypherRoot.batch_create,
                             b_attr=attr,
                             )
         uniq_id = result[0]
@@ -165,7 +190,7 @@ class Neo4jUpdateService(ConcreteService):
         """
         try:
             result = self.tx.run(
-                CypherBatch.batch_set_status, bid=batch_id, user=user, status=status
+                CypherRoot.batch_set_status, bid=batch_id, user=user, status=status
             )
             uniq_id = result.single()[0]
             return {"status": Status.OK, "identity": uniq_id}
@@ -250,14 +275,14 @@ class Neo4jUpdateService(ConcreteService):
         total = 0
         unlinked = 0
         # Remove handles from nodes connected to given Batch
-        result = self.tx.run(CypherBatch.remove_all_handles, batch_id=batch_id)
+        result = self.tx.run(CypherRoot.remove_all_handles, batch_id=batch_id)
         for count, label in result:
             print(f"# - cleaned {count} {label} handles")
             total += count
         # changes = result.summary().counters.properties_set
 
         # Find handles left: missing link (:Batch) --> (x)
-        result = self.tx.run(CypherBatch.find_unlinked_nodes)
+        result = self.tx.run(CypherRoot.find_unlinked_nodes)
         for count, label in result:
             print(
                 f"Neo4jUpdateService.ds_obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch"
@@ -412,7 +437,7 @@ class Neo4jUpdateService(ConcreteService):
 
         return [(record["pid"], record["name"]) for record in result]
 
-    def ds_set_people_lifetime_estimates(self, uids=[]):
+    def ds_set_people_lifetime_estimates(self, uids):
         """Get estimated lifetimes to Person.dates for given person.uniq_ids.
 
         :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
@@ -462,6 +487,12 @@ class Neo4jUpdateService(ConcreteService):
                 datetype = e["datetype"]
                 datetype1 = None
                 datetype2 = None
+                date1 = e["date1"]
+                date2 = e["date2"]
+                year1 = None
+                year2 = None
+                if date1: year1 = date1 // 1024 
+                if date2: year2 = date1 // 1024 
                 if datetype == DR["DATE"]:
                     datetype1 = "exact"
                 elif datetype == DR["BEFORE"]:
@@ -480,14 +511,17 @@ class Neo4jUpdateService(ConcreteService):
                     else:
                         datetype1 = "exact"
                         datetype2 = "exact"
-                date1 = e["date1"]
-                date2 = e["date2"]
-                if datetype1 and date1 is not None:
-                    year1 = date1 // 1024
+                elif datetype == DR["ABOUT"]:
+                    year1 = year1 - 50
+                    year2 = year2 + 50
+                    datetype1 = "after"
+                    datetype2 = "before"
+                if datetype1 and year1 is not None:
+                    #year1 = date1 // 1024
                     ev = lifetime.Event(eventtype, datetype1, year1, role)
                     p.events.append(ev)
-                if datetype2 and date2 is not None:
-                    year2 = date2 // 1024
+                if datetype2 and year2 is not None:
+                    #year2 = date2 // 1024
                     ev = lifetime.Event(eventtype, datetype2, year2, role)
                     p.events.append(ev)
                 p.events.sort(key=sortkey)

@@ -43,23 +43,33 @@ def do_schema_fixes():
     """
 
     # Batch: Root.state depends on b.status; Root.material = b.material_type
-    change_Batch_to_Root = """
+    change_Batch_to_Root = f"""
         MATCH (b:Batch) WITH b LIMIT 1
         SET b:Root
-        SET b.material=coalesce(b.material_type, $default_material)
+        SET b.material=
+            CASE b.material_type
+                WHEN "" THEN $default_material
+                WHEN NULL THEN $default_material
+                ELSE b.material
+            END
         SET b.state=CASE
-                WHEN b.status = 'started' THEN '"""+State.ROOT_STORING+"""'
-                WHEN b.status = 'completed' THEN '"""+State.ROOT_CANDIDATE+"""'
-                WHEN b.status = 'audit_requested' THEN '"""+State.ROOT_FOR_AUDIT+"""'
-                ELSE '"""+State.ROOT_REMOVED+"""'
+                WHEN b.status = 'started' THEN '{State.ROOT_STORING}'
+                WHEN b.status = 'completed' THEN '{State.ROOT_CANDIDATE}'
+                WHEN b.status = 'audit_requested' THEN '{State.ROOT_FOR_AUDIT}'
+                ELSE '{State.ROOT_REMOVED}'
             END
         REMOVE b:Batch, b.status, b.material_type"""
     # Audit: Root.state = "Audit Requested"; Root.material = "Family Tree"
-    change_Audit_to_Root = """
+    change_Audit_to_Root = f"""
         MATCH (b:Audit) WITH b LIMIT 1
         SET b:Root
-        SET b.material=coalesce(b.material_type, $default_material)
-        SET b.state='"""+State.ROOT_AUDITING+"""'
+        SET b.material=
+            CASE b.material_type
+                WHEN "" THEN $default_material
+                WHEN NULL THEN $default_material
+                ELSE b.material
+            END
+        SET b.state='{State.ROOT_AUDITING}'
         REMOVE b:Audit, b.status, b.material_type"""
     # {object_label: relation_type}
     root_relations = {
