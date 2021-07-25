@@ -24,7 +24,7 @@ Created on 15.8.2018
 
 @author: jm
 """
-
+# blacked 2021-07-25 JMä
 import os
 import time
 import logging
@@ -117,14 +117,16 @@ def upload_gramps():
         os.makedirs(upload_folder, exist_ok=True)
 
         pathname = loadfile.upload_file(infile, upload_folder)
-        isotammi_metadata = gramps_loader.get_isotammi_metadata(current_user.username, infile.filename)
-        if isotammi_metadata: 
+        isotammi_metadata = gramps_loader.get_isotammi_metadata(
+            current_user.username, infile.filename
+        )
+        if isotammi_metadata:
             material_type = isotammi_metadata[0]
             description = isotammi_metadata[1]
         else:
             material_type = ""
             description = ""
-            
+
         shareds.tdiff = time.time() - t0
 
         logname = pathname + ".log"
