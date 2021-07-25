@@ -19,6 +19,7 @@
 
 import shareds
 import logging
+from bl.base import IsotammiException
 
 logger = logging.getLogger('stkserver')
 
@@ -32,7 +33,7 @@ class DataService:
     The current database is defined in /setups.py.
 
     Follows Context Manager pattern allowing automatic transaction management
-    using 'with' statement.
+    by 'with' statement.
 
     @See https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
     """
@@ -72,10 +73,18 @@ class DataService:
             self.user_context = user_context
             self.username = user_context.user
             # The operative username
-            if user_context.context == user_context.ChoicesOfView.COMMON:
+            if user_context.context_code == user_context.ChoicesOfView.COMMON:
                 self.use_user = None
             else:
                 self.use_user = user_context.user
+
+            # Batch selection by material and state
+            shareds.dservice.material = user_context.material
+            shareds.dservice.state = user_context.state
+            shareds.dservice.use_user = user_context.user
+        else:
+            #raise IsotammiException("pe.dataservice.DataService: user_context is mandatory")
+            pass
 
     def __enter__(self):
         # With 'update' and 'read_tx' begin transaction

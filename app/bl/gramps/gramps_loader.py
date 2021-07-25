@@ -38,6 +38,8 @@ from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
 import shareds
 from bl.base import Status
+from bl.root import State, DEFAULT_MATERIAL
+
 from bp.scene.models import media
 
 
@@ -292,7 +294,7 @@ def xml_to_stkbase(pathname, userid):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch import BatchUpdater, Batch
+    from bl.root import BatchUpdater
 
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
@@ -322,7 +324,8 @@ def xml_to_stkbase(pathname, userid):
         )
         handler.batch = res.get("batch")
         if metadata:
-            handler.batch.material_type = metadata[0]
+            handler.batch.material = metadata[0] if metadata[0] else DEFAULT_MATERIAL
+
             handler.batch.description = metadata[1]
             handler.batch.save()
         handler.handle_suffix = "_" + handler.batch.id  
@@ -362,7 +365,7 @@ def xml_to_stkbase(pathname, userid):
             # The missing links counted in remove_handles
         ##TODO      res = handler.add_missing_links()
 
-        res = batch_service.batch_mark_status(Batch.BATCH_CANDIDATE)
+        res = batch_service.batch_mark_status(State.ROOT_CANDIDATE)
 
         # batch_service.commit()
         logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')

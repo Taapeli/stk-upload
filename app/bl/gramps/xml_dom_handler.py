@@ -53,7 +53,7 @@ from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
 
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 #from models.cypher_gramps import Cypher_mixed
 from .batchlogger import LogItem
 
@@ -135,7 +135,7 @@ class DOM_handler:
 
     def add_missing_links(self):
         """Link the Nodes without OWNS link to Batch"""
-        result = self.tx.run(CypherBatch.add_missing_links, batch_id=self.batch_id)
+        result = self.tx.run(CypherRoot.add_missing_links, batch_id=self.batch_id)
         counters = shareds.db.consume_counters(result)
         if counters.relationships_created:
             print(f"Created {counters.relationships_created} relations")
@@ -1055,6 +1055,7 @@ class DOM_handler:
                 "sortnames": sortname_count,
             }
 
+        res = {}
         with FamilyWriter('update', tx=shareds.dservice.tx) as service:
             for uniq_id in self.family_ids:
                 if uniq_id is not None:

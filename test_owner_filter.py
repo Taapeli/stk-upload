@@ -33,11 +33,11 @@ def test_ownerfilter_nouser():
 
     f = UserContext(user_session)
 
-    assert f.context == 1
+    assert f.context_code == 1
     assert f.owner_str() == 'Isotammi database'
 
     user_session['user_context'] = 2
-    assert f.context == 1
+    assert f.context_code == 1
     assert f.owner_str() == 'Isotammi database', "No user gets wrong data"
 
 
@@ -54,10 +54,10 @@ def test_ownerfilter_user_selection(user_env):
 
     f = UserContext(user_session, current_user, request)
 
-    assert f.context == 1
+    assert f.context_code == 1
     assert f.owner_str() == 'Isotammi database'
-    x = f.use_owner_filter()
-    assert x == False, "use_owner_filter() failed"
+    # x = f.use_owner_filter()
+    # assert x == False, "use_owner_filter() failed"
     x = f.use_common()
     assert x == True, "use_common() failed"
 

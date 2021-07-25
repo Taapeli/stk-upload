@@ -70,7 +70,7 @@ function update_progress(xmlfile) {
 		progress_div.css("background","lightgreen");
 		if (rsp.progress == 0) rsp.progress = 1;
 		progress_div.get(0).style.width = rsp.progress + "%";
-		if (rsp.status == "loading") 
+		if (rsp.status == "Loading") 
 			setTimeout(function() {update_progress(xmlfile)}, PROGRESS_INTERVAL);
 		else 
 			location.reload();

@@ -4,11 +4,16 @@ Created on 30.1.2021
 @author: jm
 '''
 import shareds
+import logging
+
+logger = logging.getLogger("stkserver")
 
 from pe.dataservice import ConcreteService
 from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
+
+from .util import run_cypher
 
 class PersonRecord:
     ''' Object to return person display data. '''
@@ -64,7 +69,6 @@ class SourceReference:
             repo_str = ""
         return f'{source_str}-{self.medium}->({repo_str})'
 
-
 class Neo4jReadServiceTx(ConcreteService):
     ''' 
     Methods for accessing Neo4j database.
@@ -85,91 +89,91 @@ class Neo4jReadServiceTx(ConcreteService):
         
             args = dict {use_user, fw, limit, rule, key, years}
         """
-        user = args.get('use_user')
-        show_approved = (user is None)
+        material = shareds.dservice.material
+        state = shareds.dservice.state
+        username = args.get('use_user')
         rule = args.get('rule')
         key = args.get('key')
         fw_from = args.get('fw','')
         years= args.get('years',[-9999,9999])
         limit = args.get('limit', 100)
         restart = (rule == 'start')
-        
+
+        # Select cypher clause by arguments
+
+        #if not username: username = ""
+
+        if restart:
+            # Show search form only
+            return {'items': [], 'status': Status.NOT_STARTED }
+        elif args.get('pg') == 'all':
+            # Show persons, no search form
+            cypher = CypherPerson.get_person_list
+            print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
+        elif rule in ['surname', 'firstname', 'patronyme']:
+            # Search persons matching <rule> field to <key> value
+            cypher = CypherPerson.read_persons_w_events_by_refname
+            print(f"tx_get_person_list: Show '{state}' '{material}' data @{username}, {rule} ~ \"{key}*\"")
+        elif rule == 'years':
+            # Search persons matching <years>
+            cypher = CypherPerson.read_persons_w_events_by_years
+            print(f"tx_get_person_list: Show '{state}' '{material}', years {years}")
+            # if show_approved:
+            #     print(f'tx_get_person_list: Show approved common data years {years}')
+            #     result = self.tx.run(CypherPerson.get_common_events_by_years,
+            #                          years=years)
+            # else:
+            #     print(f'tx_get_person_list: Show candidate data  years {years}')
+            #     result = self.tx.run(CypherPerson.get_my_events_by_years,
+            #                          years=years, user=user)
+        elif rule == 'ref':
+            #TODO: Search persons where a reference name = <key> value
+            return {'items': [], 'status': Status.ERROR,
+                    'statustext': f'tx_get_person_list: TODO: Show approved common data {rule}={key}'}
+            #return session.run(Cypher_person.get_events_by_refname, name=key)
+            # if show_approved:
+            #     print(f'tx_get_person_list: TODO: Show approved common data {rule}={key}')
+            #     #return session.run(Cypher_person.get_events_by_refname, name=key)
+            # else:
+            #     print(f'tx_get_person_list: TODO: Show candidate data {rule}={key}')
+            #     #return session.run(Cypher_person.get_events_by_refname, name=key)
+        else:
+            return {'items': [], 'status': Status.ERROR,
+                    'statustext': 'tx_get_person_list: Invalid rule'}
+ 
         persons = []
-        try:
-            if restart:
-                # Show search form only
-                return {'items': [], 'status': Status.NOT_STARTED }
-            elif args.get('pg') == 'all':
-                # Show persons, no search form
-                if show_approved:
-                    print(f'tx_get_person_list: Show approved, common data fw={fw_from}')
-                    result = self.tx.run(CypherPerson.read_approved_persons_w_events_fw_name,
-                                         start_name=fw_from, limit=limit)
-                else:
-                    print(f'tx_get_person_list: Show candidate data fw={fw_from}')
-                    result = self.tx.run(CypherPerson.read_my_persons_w_events_fw_name,
-                                         user=user, start_name=fw_from, limit=limit)
-            elif rule in ['surname', 'firstname', 'patronyme']:
-                # Search persons matching <rule> field to <key> value
-                if show_approved:
-                    print(f'tx_get_person_list: Show approved common data {rule} ~ "{key}*"')
-                    result = self.tx.run(CypherPerson.get_common_events_by_refname_use,
-                                         use=rule, name=key)
-                else:
-                    print(f'tx_get_person_list: Show candidate data {rule} ~ "{key}*"')
-                    result = self.tx.run(CypherPerson.get_my_events_by_refname_use,
-                                         use=rule, name=key, user=user)
-            elif rule == 'years':
-                # Search persons matching <years>
-                if show_approved:
-                    print(f'tx_get_person_list: Show approved common data years {years}')
-                    result = self.tx.run(CypherPerson.get_common_events_by_years,
-                                         years=years)
-                else:
-                    print(f'tx_get_person_list: Show candidate data  years {years}')
-                    result = self.tx.run(CypherPerson.get_my_events_by_years,
-                                         years=years, user=user)
-            elif rule == 'ref':
-                # Search persons where a reference name = <key> value
-                if show_approved:
-                    print(f'tx_get_person_list: TODO: Show approved common data {rule}={key}')
-                    #return session.run(Cypher_person.get_events_by_refname, name=key)
-                else:
-                    print(f'tx_get_person_list: TODO: Show candidate data {rule}={key}')
-                    #return session.run(Cypher_person.get_events_by_refname, name=key)
-            else:
-                return {'items': [], 'status': Status.ERROR,
-                        'statustext': 'tx_get_person_list: Invalid rule'}
-            # result: person, names, events
-            for record in result:
-                #  <Record 
-                #     person=<Node id=163281 labels={'Person'} 
-                #       properties={'sortname': 'Ahonius##Knut Hjalmar',  
-                #         'sex': '1', 'confidence': '', 'change': 1540719036, 
-                #         'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
-                #         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
-                #     names=[<Node id=163282 labels={'Name'} 
-                #       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
-                #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
-                #     events=[
-                #        <Node id=18571 labels=frozenset({'Event'})
-                #           properties={'datetype': 0, 'change': 1585409703, 'description': '', 
-                #             'id': 'E5393', 'date2': 1839427, 'date1': 1839427, 'type': 'Birth',
-                #             'uuid': 'f461f3b634dd488cbc47d9a6978d5247'}>, 
-                #        'Voipala',
-                #        'Primary']
-                #  >
-                p = PersonRecord()
-                p.person_node = record.get('person')
-                p.names = record.get('names')           # list(name_nodes)
-                p.events_w_role = record.get('events')  # list of tuples (event_node, place_name, role)
-                p.owners = record.get('owners')
+        logger.debug(f"tx_get_person_list: cypher: {cypher}")
+        result = run_cypher(self.tx, cypher, username,
+                            #material=material, state=state,
+                            use=rule, name=key,
+                            years=years,
+                            start_name=fw_from, 
+                            limit=limit)            # result: person, names, events
+        for record in result:
+            #  <Record 
+            #     person=<Node id=163281 labels={'Person'} 
+            #       properties={'sortname': 'Ahonius##Knut Hjalmar',  
+            #         'sex': '1', 'confidence': '', 'change': 1540719036, 
+            #         'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
+            #         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
+            #     names=[<Node id=163282 labels={'Name'} 
+            #       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
+            #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
+            #     events=[
+            #        <Node id=18571 labels=frozenset({'Event'})
+            #           properties={'datetype': 0, 'change': 1585409703, 'description': '', 
+            #             'id': 'E5393', 'date2': 1839427, 'date1': 1839427, 'type': 'Birth',
+            #             'uuid': 'f461f3b634dd488cbc47d9a6978d5247'}>, 
+            #        'Voipala',
+            #        'Primary']
+            #  >
+            p = PersonRecord()
+            p.person_node = record.get('person')
+            p.names = record.get('names')           # list(name_nodes)
+            p.events_w_role = record.get('events')  # list of tuples (event_node, place_name, role)
+            p.owners = record.get('owners')
 
-                persons.append(p)   
-
-        except Exception as e:
-            return {'items':[], 'status':Status.ERROR,
-                    'statustext': f'tx_get_person_list: {e.__class__.__name__} {e}'}
+            persons.append(p)   
 
         if len(persons) == 0:
             return {'items': [], 'status': Status.NOT_FOUND,
@@ -190,7 +194,7 @@ class Neo4jReadServiceTx(ConcreteService):
         #    results: person, root
 
         try:
-            record = self.tx.run(CypherPerson.get_person, uuid=uuid).single()
+            record = run_cypher(self.tx, CypherPerson.get_person, active_user, uuid=uuid).single()
             # <Record 
             #    p=<Node id=25651 labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
@@ -212,24 +216,16 @@ class Neo4jReadServiceTx(ConcreteService):
             #    - root_type    which kind of owner link points to this object (PASSED / OWNER)
             #    - root_user    the (original) owner of this object
             #    - bid          Batch id
-            root_type = record['root_type'] # OWNS / PASSED
             root_node = record['root']
+            root_type = root_node.get('material', "")
+            root_state = root_node.get('state', "")
             root_user = root_node.get('user', "")
             bid = root_node.get('id', "")
-            if active_user is None:
-                if root_type != "PASSED":
-                    print(f'dx_get_person_by_uuid: person {uuid} is not in approved material')
-                    res.update({'status': Status.NOT_FOUND, 'statustext': 'The person is not accessible'})
-                    return res
-            elif root_type != "OWNS":
-                    print(f'dx_get_person_by_uuid: OWNS not allowed for person {uuid}')
-                    res.update({'status': Status.NOT_FOUND, 'statustext': 'The person is not accessible'})
-                    return res
 
             person_node = record['p']
             puid = person_node.id
             res['person_node'] = person_node
-            res['root'] = {'root_type':root_type, 'root_user': root_user, 'batch_id':bid}
+            res['root'] = {'root_type':root_type, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
 
 #                 # Add to list of all objects connected to this person
 #                 self.objs[person.uniq_id] = person

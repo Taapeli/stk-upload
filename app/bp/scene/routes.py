@@ -75,10 +75,7 @@ from bp.graph.models.fanchart import FanChart
 # opt = "read" --> Neo4jReadService
 
 
-calendars = [  # just for translations
-    _("Julian"),
-    _("Hebrew"),
-]
+calendars = [_("Julian"), _("Hebrew")]  # just for translations
 
 
 def stk_logger(context, msg: str):
@@ -135,6 +132,8 @@ def _do_get_persons(args):
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
 
+    # for i in res.get("items"):
+    #     print(f"_do_get_persons: @{i.user} {i.sortname}")
     return res, u_context
 
 
@@ -194,9 +193,10 @@ def show_person_search():
     key = rq.get("key")
     if key:
         args["key"] = key
-    print(f"{request.method} Persons {args}")
 
     res, u_context = _do_get_persons(args)
+    print(f"#show_person_search: {request.method} "
+          f"'{u_context.state}' '{u_context.material}' Persons {args} ")
     if Status.has_failed(res, strict=False):
         flash(f'{res.get("statustext","error")}', "error")
 
@@ -232,7 +232,7 @@ def show_person_search():
 
         # Most common place names cloud
         with PlaceReader("read", u_context) as service:
-            placenamestats = service.get_placename_stats(40)
+            placenamestats = service.get_placename_list(40)
             # {name, count, uuid}
             for i, stat in enumerate(placenamestats):
                 stat["order"] = i

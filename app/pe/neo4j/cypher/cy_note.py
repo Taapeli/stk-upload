@@ -12,8 +12,8 @@ class CypherNote():
 
     # Find the batch like '2019-02-24.006' and connect Note in that Batch
     create_in_batch = """
-MATCH (u:Batch {id:$bid})
-CREATE (u) -[:OWNS]-> (n:Note) 
+MATCH (u:Root {id:$bid})
+CREATE (u) -[:OBJ_OTHER]-> (n:Note) 
     SET n = $n_attr
 RETURN ID(n)"""
 

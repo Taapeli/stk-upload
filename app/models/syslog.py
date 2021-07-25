@@ -31,14 +31,14 @@ syslog_cypher_write = """
 
 syslog_cypher_read_from_end = """
     match (row:Syslog) -[r:NEXT*1..20]-> (end:Syslog{sentinel:'end'})   
-    where not exists(row.sentinel)
+    where row.sentinel is null // Depricated: not exists(row.sentinel)
     return row
     order by row.time
 """
 
 syslog_cypher_read_from_beginning = """
     match (beginning:Syslog{sentinel:'start'}) -[r:NEXT*1..20]-> (row:Syslog)   
-    where not exists(row.sentinel)
+    where row.sentinel is null
     return row
     order by row.time
 """
@@ -46,7 +46,7 @@ syslog_cypher_read_from_beginning = """
 syslog_cypher_read_backward = """
     match(end:Syslog) where id(end) = $startid
     match (row:Syslog) -[r:NEXT*0..20]-> (end)   
-    where not exists(row.sentinel)
+    where row.sentinel is null
     return row
     order by row.time
 """
@@ -54,7 +54,7 @@ syslog_cypher_read_backward = """
 syslog_cypher_read_forward = """
     match(start:Syslog) where id(start) = $startid
     match (start:Syslog) -[r:NEXT*0..20]-> (row:Syslog)   
-    where not exists(row.sentinel)
+    where row.sentinel is null
     return row
     order by row.time
 """

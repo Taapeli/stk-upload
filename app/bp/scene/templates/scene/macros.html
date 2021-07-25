@@ -87,7 +87,7 @@
     {#  call show_use_case(no_change=true) if you want to deny change. #}
     {% if user_context and not config['DEMO'] %}{{ user_context.owner_str() }}
        {% if user_context.user %}
-           {% if user_context.context == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
+           {% if user_context.context_code == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
            {%endif%}
            {% if not no_change %}
             <i>(<a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a>)</i>
@@ -145,10 +145,13 @@
         >{{ _("edited") }} {{obj.change_str()}}
         {%- if obj.root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
         , <span>
-        {% if obj.root.root_type == 'PASSED' %}{{ _('origin from') }}
-        {% else %}{{ _('User data') }}:
+        {% if obj.root.root_state == 'Candidate' %}
+        	{{ _('User data') }}:
+            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.root_type}}
+        {% else %}
+        	{{ _('origin from') }}
+            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.root_type}}
         {% endif %}
-            <b>{{obj.root.root_user}}</b> {{obj.root.id}}
         </span>
         {% endif %}
     </span>

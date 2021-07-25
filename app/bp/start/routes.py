@@ -32,6 +32,7 @@ from ui.user_context import UserContext
 from bl.person import PersonReader
 import shareds
 from operator import itemgetter
+from bl.root import Root
 
 logger = logging.getLogger("stkserver")
 
@@ -45,7 +46,6 @@ from models import email
 from bp.api import api
 
 from bp.start.forms import JoinForm
-from bl.batch import Batch
 
 """ Application route definitions
 """
@@ -82,7 +82,7 @@ def start_guest():
     logger.info(f"-> bp.start.routes.start_guest, lang={lang}")
     return redirect("/scene/persons/search")
     # is_demo = shareds.app.config.get('DEMO', False)
-    # return render_template('/start/index_guest.html', is_demo=is_demo)
+    # return render_template('/start/osolete_index_guest.html', is_demo=is_demo)
 
 
 @shareds.app.route("/start/persons/search", methods=["GET", "POST"])
@@ -238,7 +238,7 @@ def my_settings():
             flash(_("Update did not work"), category="flash_error")
             traceback.print_exc()
 
-    labels, user_batches = Batch.get_user_stats(current_user.username)
+    labels, user_batches = Root.get_user_stats(current_user.username)
     print(f"# User batches {user_batches}")
 
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)

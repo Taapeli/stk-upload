@@ -192,60 +192,66 @@ class PersonReader(DataService):
     """
 
     def get_person_list(self):
-        """List person data including all data needed to Person page.
+        """List person data including all data needed to Persons page.
+        
+        NOT USED --> bl.person_reader.PersonReaderTx.get_person_search
 
         Calls Neo4jDriver.dr_get_person_list(user, fw_from, limit)
         """
         context = self.user_context
         res_dict = {}
-        args = {
-            "use_user": self.use_user,
-            "fw": context.first,  # From here forward
-            "limit": context.count,
-        }
-        res = shareds.dservice.dr_get_person_list(args)
-        # {'items': persons, 'status': Status.OK}
-        if Status.has_failed(res):
-            return {
-                "items": None,
-                "status": res["status"],
-                "statustext": _("No persons found"),
-            }
-
-        # Update the page scope according to items really found
-        persons = res["items"]
-        if len(persons) > 0:
-            context.update_session_scope(
-                "person_scope",
-                persons[0].sortname,
-                persons[-1].sortname,
-                context.count,
-                len(persons),
-            )
-
-        if self.use_user is None:
-            persons2 = [p for p in persons if not p.too_new]
-            num_hidden = len(persons) - len(persons2)
-        else:
-            persons2 = persons
-            num_hidden = 0
-        res_dict["status"] = Status.OK
-
-        res_dict["num_hidden"] = num_hidden
-        res_dict["items"] = persons2
+        # args = {
+        #     "use_user": self.use_user,
+        #     "fw": context.first,  # From here forward
+        #     "limit": context.count,
+        # }
+        # res = shareds.dservice.dr_get_person_list(args)
+        # # {'items': persons, 'status': Status.OK}
+        # if Status.has_failed(res):
+        #     return {
+        #         "items": None,
+        #         "status": res["status"],
+        #         "statustext": _("No persons found"),
+        #     }
+        #
+        # # Update the page scope according to items really found
+        # persons = res["items"]
+        # if len(persons) > 0:
+        #     context.update_session_scope(
+        #         "person_scope",
+        #         persons[0].sortname,
+        #         persons[-1].sortname,
+        #         context.count,
+        #         len(persons),
+        #     )
+        #
+        # if self.use_user is None:
+        #     persons2 = [p for p in persons if not p.too_new]
+        #     num_hidden = len(persons) - len(persons2)
+        # else:
+        #     persons2 = persons
+        #     num_hidden = 0
+        # res_dict["status"] = Status.OK
+        #
+        # res_dict["num_hidden"] = num_hidden
+        # res_dict["items"] = persons2
         return res_dict
 
     def get_surname_list(self, count=40):
         """
         List all surnames so that they can be displayed in a name cloud.
+        
+        If self.use_user is defined, filter by user.
         """
-        if self.use_user:
-            surnames = shareds.dservice.dr_get_surname_list_by_user(
-                self.use_user, count=count
-            )
-        else:
-            surnames = shareds.dservice.dr_get_surname_list_common(count=count)
-        # [{'surname': surname, 'count': count},...]
+        surnames = shareds.dservice.dr_get_surname_list(self.use_user, count)
+        # Returns [{'surname': surname, 'count': count},...]
+
+        # if self.use_user:
+        #     surnames = shareds.dservice.dr_get_surname_list_by_user(
+        #         self.use_user, count=count
+        #     )
+        # else:
+        #     surnames = shareds.dservice.dr_get_surname_list_common(count=count)
         return surnames
 
     def get_person_minimal(self, uuid, privacy):

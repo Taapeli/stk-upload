@@ -105,16 +105,18 @@ def scan_endpoints_for_file(fname):
                         decorator_name = call.func.attr
                     if isinstance(call.func,_ast.Name):
                         decorator_name = call.func.id
-                    arglist = [arg.s for arg in call.args]
-                    #args = ",".join(arglist)
                     if decorator_name == 'route':
+                        arglist = [arg.s for arg in call.args]
+                        #args = ",".join(arglist)
                         if len(arglist) != 1:
                             raise RuntimeError("Invalid route "+ arglist[0])
                         if info.urls is None: info.urls = []
                         info.urls.append(arglist[0])
                     if decorator_name == 'roles_accepted':
+                        arglist = [arg.s for arg in call.args]
                         info.roles_accepted = arglist
                     if decorator_name == 'roles_required':
+                        arglist = [arg.s for arg in call.args]
                         info.roles_required = arglist
             if info.urls is not None:
                 for url in info.urls:

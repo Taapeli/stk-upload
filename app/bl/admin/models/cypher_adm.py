@@ -125,14 +125,14 @@ DELETE c'''
 
     list_accesses = """
 MATCH (user:User) -[:SUPPLEMENTED]-> (userprofile:UserProfile)
-    -[r:HAS_ACCESS]-> (batch:Batch)
-WITH user, userprofile, batch, id(r) as rel_id
-    OPTIONAL MATCH (batch) -[ow:OWNS]-> ()
-RETURN user, userprofile, batch, rel_id, count(ow) AS cnt
+    -[r:HAS_ACCESS]-> (root:Root)
+WITH user, userprofile, root, id(r) as rel_id
+    OPTIONAL MATCH (root) -[ow]-> ()
+RETURN user, userprofile, root, rel_id, count(ow) AS cnt
     LIMIT 200"""
 
     add_access = """
-MATCH (user:UserProfile{username:$username}), (batch:Batch{id:$batchid})
+MATCH (user:UserProfile{username:$username}), (batch:Root{id:$batchid})
 MERGE (user)-[r:HAS_ACCESS]->(batch)
 RETURN r,id(r) as rel_id
 """
@@ -142,8 +142,8 @@ MATCH (a) -[r:HAS_ACCESS]->(b) WHERE id(r) in $idlist DELETE r
 """
 
     drop_empty_batches = '''
-MATCH (a:Batch) 
-    WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS $today
+MATCH (a:Root) 
+    WHERE NOT ((a)-[:OBJ_PERSON|OBJ_FAMILY|OBJ_PLACE|OBJ_SOURCE|OBJ_OTHER]->()) AND NOT a.id CONTAINS $today
 DETACH DELETE a
 RETURN COUNT(a) AS cnt'''
 

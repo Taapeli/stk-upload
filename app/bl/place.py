@@ -619,19 +619,22 @@ class PlaceReader(DataService):
         results["events"] = res["items"]
         return results
 
-    def get_placename_stats(self, count=40):
+    def get_placename_list(self, count=40):
         """
         Return placename stats so that the names can be displayed in a name cloud.
         """
-        if self.use_user:
-            placename_stats = shareds.dservice.dr_get_placename_stats_by_user(
-                self.use_user, count=count
-            )
-        else:
-            placename_stats = shareds.dservice.dr_get_placename_stats_common(
-                count=count
-            )
-        return placename_stats
+        placenames = shareds.dservice.dr_get_placename_list(username=self.use_user, count=count)
+        # Returns [{'surname': surname, 'count': count},...]
+
+        # if self.use_user:
+        #     placename_stats = shareds.dservice.dr_get_placename_stats_by_user(
+        #         self.use_user, count=count
+        #     )
+        # else:
+        #     placename_stats = shareds.dservice.dr_get_placename_stats_common(
+        #         count=count
+        #     )
+        return placenames
 
 
 class PlaceUpdater(DataService):
