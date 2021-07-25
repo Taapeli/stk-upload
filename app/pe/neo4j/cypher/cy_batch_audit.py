@@ -139,22 +139,22 @@ MATCH (:UserProfile{username:$user}) -[:HAS_LOADED]-> (c:Root{id:$batch_id})
 DETACH DELETE c"""
 
     remove_all_handles = """
-match (b:Root {id:$batch_id}) -[*]-> (a)
-where exists(a.handle)
+match (b:Root {id:$batch_id}) -[*2..3]-> (a)
+where a.handle is not null
 with distinct a
     remove a.handle
 return count(a),labels(a)[0]"""
 
 # TODO Batch->Root:
     add_missing_links = """
-match (n) where exists (n.handle)
+match (n) where n.handle is not null
 match (b:Root{id:$batch_id})
     merge (b)-[:OWNS_OTHER]->(n)
     remove n.handle
 return count(n)"""
 
     find_unlinked_nodes = """
-match (n) where exists (n.handle)
+match (n) where n.handle is not null
 return  count(n), labels(n)[0]"""
 
 
