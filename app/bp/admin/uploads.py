@@ -272,7 +272,32 @@ def list_uploads(username):
     
         Also db Batches without upload file are included in the list.
     """
-    # 1. List Batches, their status and Person count
+
+    class Upload:
+        """Data entity for upload file/batch."""
+        def __init__(self):
+            self.xmlname = ""
+            self.upload_time_s = ""
+            self.user = ""
+            self.has_file = False
+            self.has_log = False
+
+        def __str__(self):
+            if self.batch_id:
+                s = f"batch={self.batch_id} [{self.status}]"
+            else:
+                s = f"NO BATCH [{self.status}]"
+            if self.upload_time_s:
+                s += f", uploaded={self.upload_time_s}"
+                if self.user:
+                    s += f"@{self.user}"
+            if self.count:
+                s += f", counts {self.count}/{self.count_a}"
+            has_file = f"{'file=' if self.has_file else 'NO FILE'}{self.xmlname}"
+            has_log = f"{'log' if self.has_log else 'NO LOG'}"
+            return f"{self.material_type} {s}, found {has_file}, {has_log}"
+
+    # 1. List Batches from db, their status and Person count
     batches = {}
     result = shareds.driver.session().run(
         CypherRoot.get_user_batch_summary, user=username
@@ -293,26 +318,19 @@ def list_uploads(username):
     except:
         names = []
     uploads = []
-    logfile_base = ""
-
-    class Upload:
-        pass
-
-    # There may be 4 files:
+    # There may be 4 files: 
     # - 'test.gramps',      original xml
     # - 'test.gramps.log'   logfile from conversion to db
     # - 'test.gramps.meta'  metafile from file conversion
     # - 'test_clean.gramps' cleaned xml data
     for name in names:
-        name_parts = name.split(".")
-        if name.endswith(".log"):
-            (logfile_base, _x) = name.rsplit(".", 1)
         if name.endswith(".meta"):
             # TODO: Tähän tarvitaan try catch, koska kaatuneen gramps-latauksen jälkeen
             #      metatiedosto voi olla rikki tai puuttua
-            fname = os.path.join(upload_folder, name)
-            xmlname = name.rsplit(".", maxsplit=1)[0]
-            meta = get_meta(fname)
+            meta_filepath = os.path.join(upload_folder, name)
+            xmlname = name[:-5]
+            log_filepath = meta_filepath.rsplit(".", maxsplit=1)[0] + ".log"
+            meta = get_meta(meta_filepath)
             status = meta.get("status", State.FILE_UPLOADED)
             status_text = None
             person_count = 0
@@ -323,7 +341,6 @@ def list_uploads(username):
                 batch_id = ""
                 if status == State.ROOT_CANDIDATE:
                     status = State.ROOT_REMOVED
-            # print(f"### Batch {batch_id} {status} {name} base={logfile_base}")
 
             if status == State.FILE_UPLOADED or status == "uploaded":
                 status_text = _("UPLOADED")
@@ -357,15 +374,13 @@ def list_uploads(username):
                 upload.batch_id = batch_id
                 upload.count = person_count
                 upload.count_a = audit_count
-                upload.done = status_text == _("CANDIDATE") or 
+                upload.done = status_text == _("CANDIDATE") or \
                               status_text == _("FOR_AUDIT")
                 upload.uploaded = status_text == _("UPLOADED")
                 upload.loading = status_text == _("STORING")
-                clean_name = os.path.join(
-                    upload_folder, name_parts[0] + "_clean." + name_parts[1]
-                )
-                upload.has_file = os.path.isfile(clean_name)
-                upload.has_log = name.startswith(logfile_base)
+                clean_filepath = meta_filepath[:-5].replace(".","_clean.",1)
+                upload.has_file = os.path.isfile(clean_filepath)
+                upload.has_log = os.path.isfile(log_filepath)
                 upload.upload_time = meta["upload_time"]
                 upload.upload_time_s = util.format_timestamp(upload.upload_time)
                 upload.user = username
@@ -387,8 +402,12 @@ def list_uploads(username):
         elif b.state == State.ROOT_CANDIDATE:
             # Todo: Remove later: Old FOR_AUDIT materials are CANDIDATE, too
             upload.status = _("CANDIDATE") + " ?"
-        elif audit_count > 0:
-            upload.status = f"{ _('FOR_AUDIT') } {audit_count} { _('persons') }"
+        elif b.state == State.ROOT_AUDITING:
+            if audit_count > 0:
+                upload.status = f"{ _('FOR_AUDIT') } {audit_count} { _('persons') }"
+            else:
+                upload.status = f"{ _('AUDITING') } (toistaiseksi nk. hyväksytty)"
+
         upload.count = b.person_count
         upload.count_a = b.audit_count
         upload.has_file = False
@@ -396,7 +415,6 @@ def list_uploads(username):
         upload.upload_time = 0.0
         upload.material_type = b.material
         upload.description = b.description
-        print(f"### Batch {batch} {b.state} -> {upload.status}")
         uploads.append(upload)
 
     return sorted(uploads, key=lambda x: x.upload_time)

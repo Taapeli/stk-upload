@@ -91,8 +91,12 @@ def list_uploads():
     if shareds.app.config.get("USE_I_AM_ALIVE", True):
         inter = shareds.PROGRESS_UPDATE_RATE * 1000
     else:
-        # For debugging: don't poll progress bar very much
+        # For debugging: don't poll progress bar very often
         inter = shareds.PROGRESS_UPDATE_RATE * 10000
+
+    for upl in upload_list:
+        print(f"#upload: {upl}")
+
     return render_template(
         "/gramps/uploads.html",
         interval=inter,
