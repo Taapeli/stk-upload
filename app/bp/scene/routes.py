@@ -62,11 +62,12 @@ from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
 from bl.comment import CommentReader
+from models import mediafile
+#from bp.scene.models import media
 
 from ui.user_context import UserContext
 from ui import jinja_filters
 
-from bp.scene.models import media
 from bp.graph.models.fanchart import FanChart
 
 # Select the read driver for current database
@@ -1008,7 +1009,7 @@ def show_medias():
         flash(f'{res.get("statustext","error")}', "error")
     medias = res.get("items", [])
 
-    stk_logger(u_context, f"-> bp.scene.media.show_medias fw n={len(medias)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_medias fw n={len(medias)}")
     return render_template(
         "/scene/medias.html",
         medias=medias,
@@ -1039,7 +1040,7 @@ def show_media(uuid=None):
 
     medium = res.get("item", None)
     if medium:
-        fullname, mimetype = media.get_fullname(medium.uuid)
+        fullname, mimetype = mediafile.get_fullname(medium.uuid)
         stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
     else:
         flash(f'{res.get("statustext","error")}', "error")
@@ -1048,7 +1049,7 @@ def show_media(uuid=None):
     if mimetype == "application/pdf":
         size = 0
     else:
-        size = media.get_image_size(fullname)
+        size = mediafile.get_image_size(fullname)
 
     return render_template(
         "/scene/media.html", media=medium, size=size, user_context=u_context, menuno=6
@@ -1076,11 +1077,11 @@ def fetch_media(fname):
     crop = request.args.get("crop")
     # show_thumb for cropped image only
     show_thumb = request.args.get("full", "0") == "0"
-    fullname, mimetype = media.get_fullname(uuid)
+    fullname, mimetype = mediafile.get_fullname(uuid)
     try:
         if crop:
             # crop dimensions are diescribed as % of width and height
-            image = media.get_cropped_image(fullname, crop, show_thumb)
+            image = mediafile.get_cropped_image(fullname, crop, show_thumb)
             logger.debug("-> bp.scene.routes.fetch_media cropped png")
             # Create a png image in memery and display it
             buffer = io.BytesIO()
@@ -1108,7 +1109,7 @@ def fetch_thumbnail():
     thumb_mime = "image/jpg"
     thumbname = "(no file)"
     try:
-        thumbname, cl = media.get_thumbname(uuid, crop)
+        thumbname, cl = mediafile.get_thumbname(uuid, crop)
         if cl == "jpg":
             ret = send_file(thumbname, mimetype=thumb_mime)
         elif cl == "pdf":

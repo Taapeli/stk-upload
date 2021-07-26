@@ -39,8 +39,8 @@ from .batchlogger import BatchLog, LogItem
 import shareds
 from bl.base import Status
 from bl.root import State, DEFAULT_MATERIAL
-
-from bp.scene.models import media
+from models import mediafile
+#from bp.scene.models import media
 
 
 def get_upload_folder(username):
@@ -50,7 +50,7 @@ def get_upload_folder(username):
 def get_isotammi_metadata(username, filename):
     upload_folder = get_upload_folder(username)
     pathname = os.path.join(upload_folder, filename)
-    file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
+    file_cleaned, file_displ_, cleaning_log_, is_gpkg_ = file_clean(pathname)
     handler = DOM_handler(file_cleaned, username, filename)
     return handler.get_metadata_from_header()
 
@@ -455,7 +455,7 @@ def file_clean(pathname):
 def extract_media(pathname, batch_id):
     """Save media files from Gramps .gpkg package."""
     try:
-        media_files_folder = media.get_media_files_folder(batch_id)
+        media_files_folder = mediafile.get_media_files_folder(batch_id)
         os.makedirs(media_files_folder, exist_ok=True)
         TarFile(fileobj=gzip.GzipFile(pathname)).extractall(path=media_files_folder)
         xml_filename = os.path.join(media_files_folder, "data.gramps")

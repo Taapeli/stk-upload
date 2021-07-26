@@ -69,6 +69,8 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
   color: white;
   background-color: orange;
 }
+
+.zoom {cursor: zoom-in}
 </style>
 
 <div id="startdiv">
@@ -85,7 +87,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
            {% set crop = ref[1] -%}
            {% set ord = ref[2] -%}
             <div class="thumbnail">
-                <div><a href="#indivgallery">
+                <div><a href="#indivgallery" class="zoom">
 	                <img alt="({{ _('Photo') }})" 
                          src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
@@ -314,7 +316,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	       {% set photo=obj[ref] %}
 	       {% set crop=crop0|replace(" ", "") %}
             <div class="thumbnail">
-                <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
+                <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}" class="zoom">
 	                <img alt="({{ _('Photo') }} {{ord}})" 
 	                     src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
 	                     title="{{ _('Show fullscreen') }}"/>

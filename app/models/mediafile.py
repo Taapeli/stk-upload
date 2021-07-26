@@ -2,6 +2,8 @@
 Created on Aug 16, 2019
 
 @author: kari
+
+Renamed scene.models.media -> models.mediafile / JMä 2021-07-26
 '''
 import os
 from PIL import Image 
@@ -26,7 +28,7 @@ def make_thumbnail(src_file, dst_file, crop=None):
         im.thumbnail(size)
         im.convert('RGB').save(dst_file, "JPEG")
     except FileNotFoundError as e:
-        print(f'bp.scene.models.media.make_thumbnail: {e}')
+        print(f'models.mediafile.make_thumbnail: {e}')
 
 def get_media_files_folder(batch_id):
     media_folder = os.path.join(media_base_folder,batch_id)
@@ -54,7 +56,7 @@ def get_thumbname(uuid, crop=None):
         If there is crop parameter, its value is added to thumb file name.
     '''
     if not uuid:
-        raise FileNotFoundError('bp.scene.models.media.get_thumbname: no uuid')
+        raise FileNotFoundError('models.mediafile.get_thumbname: no uuid')
 
     rec = shareds.driver.session(default_access_mode='READ').run(cypher_get_medium,
                                                                  uuid=uuid).single()
@@ -70,7 +72,7 @@ def get_thumbname(uuid, crop=None):
         src = m['src']
         mime = m['mime']
         if mime == 'application/pdf':
-            print("#bp.scene.models.media.get_thumbname: Show missing pdf thumbnail")
+            print("#models.mediafile.get_thumbname: Show missing pdf thumbnail")
             return "", "pdf"
 
         # Example: png --> cropped jpg
@@ -99,11 +101,11 @@ def get_thumbname(uuid, crop=None):
         return dst_file, "jpg"
 
     # No db Media node
-    print(f"#bp.scene.models.media.get_thumbname: No media {uuid}")
+    print(f"#models.mediafile.get_thumbname: No media {uuid}")
     return "", None
 
 def get_image_size(path):
-    # Get image size as tuple (width, height)
+    """ Get image size as tuple (width, height) """
     try:
         image = Image.open(path)
         return image.size
