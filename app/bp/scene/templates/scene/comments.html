@@ -1,6 +1,6 @@
 {# /scene/templates/scene/comments.html_ #}
 {% extends "/scene/sc_layout.html" %}
-{% block title %}{{ _('List of comments') }} (scenecomments){% endblock %}
+{% block title %}{{ _('List of Comments') }} (scenecomments){% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
@@ -19,14 +19,20 @@
             <div class="flex-container">
                <div id="description_box">
                    <p>{{ _('Displaying %(num)s distinct comments', num=cnt) }}</p>
-				</div>
-<section id="lista">
+			   </div>
+		    </div>
+
+{% include "flash_messages.html" %}
+
+        </div> {# summaryarea #}
+
+        <div id="comment_list">
+        	<h3>{{ _("Discussions") }}</h3>
 
   <table id="comments">
-    <tr><th>{{ _("Date") }}</th>
-        <th>{{ _("Node") }}</th>
-        <th>{{ _("Name") }}</th>
-        <th>{{ _("Counter") }}</th>
+    <tr><th>{{ _("Time") }} / {{ _("Author")|lower }}</th>
+        <th>{{ _("Concerned")|title }}</th>
+        <th>{{ _("References") }}</th>
     {% if user_context.is_auditor %}
         <th class="Auditor" title="{{ _('For auditor only') }}">{{ _('User Batch') }} &nbsp;</th>
     {% endif %}
@@ -34,27 +40,24 @@
 {% if cnt %}
     {% for c in comments %}
         <tr>
-            <td>{{c.timestr}}/{{c.user}}</td>
-            <td>{{c.label[0]}}</td>
+            <td>{{c.timestr}} / {{c.user}}</td>
+            <td><span class="typedesc">{{ _(c.label[0]) }}</span>
             {% if c.label[0] == 'Person' %}
-            	<td><a href="/scene/person?uuid={{c.object.uuid}}" class="inlink"
+            	<a href="/scene/person?uuid={{c.object.uuid}}" class="inlink"
                    title="{{ _('Go to comment page') }}">{{ c.object.sortname }}</a>
-            	</td>
             {% elif c.label[0] == 'Place' %}
-            	<td><a href="/scene/location/uuid={{c.object.uuid}}" class="inlink"
+            	<a href="/scene/location/uuid={{c.object.uuid}}" class="inlink"
                    title="{{ _('Go to comment page') }}">{{ c.object.pname }}</a>
-            	</td>
             {% elif c.label[0] == 'Family' %}
-            	<td><a href="/scene/family?uuid={{c.object.uuid}}" class="inlink"
+            	<a href="/scene/family?uuid={{c.object.uuid}}" class="inlink"
                    title="{{ _('Go to comment page') }}">{{ c.object.father_sortname }} / {{ c.object.mother_sortname }}</a>
-            	</td>
             {% elif c.label[0] == 'Source' %}
-            	<td><a href="/scene/source?uuid={{c.object.uuid}}" class="inlink"
-                   title="{{ _('Go to comment page') }}">{{ c.object.stitle }}</a>
-            	</td>
+            	<a href="/scene/source?uuid={{c.object.uuid}}" class="inlink"
+                   title="{{ _('Go to commented page') }}">{{ c.object.stitle }}</a>
      		{% else %}
-     			<td>{{ _('Unknown object') }}</td>
+     			{{ _('Unknown object') }}
     		{% endif %}
+    		</td>
             <td>{{c.count}}</td>
 
        {% if user_context.is_auditor %}
@@ -84,8 +87,6 @@
 	    </tr>
 {% endif %}
   </table>
-  </div>
-  </div>
-<!-- </section> -->
+</div>
 
 {% endblock %}
