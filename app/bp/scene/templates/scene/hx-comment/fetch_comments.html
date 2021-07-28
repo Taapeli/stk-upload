@@ -15,7 +15,7 @@
 
 {% if there_is_more %}
 	<div id="replaceMe">
-	<button class='btn' hx-get="/scene/comments/fetch_comments?start={{ last_timestamp }}" 
+	<button class='btn' hx-get="/scene/hx-comment/fetch_comments?start={{ last_timestamp }}" 
 	                    hx-target="#replaceMe" 
 				        hx-include="form" 
 	                    hx-swap="outerHTML">

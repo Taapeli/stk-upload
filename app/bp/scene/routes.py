@@ -314,12 +314,12 @@ def show_person(uuid=None, fanchart=False):
     )
 
 
-@bp.route("/scene/person_famtree_hx", methods=["GET"])
+@bp.route("/scene/hx-person/famtree", methods=["GET"])
 #     @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_person_family_tree_hx(uuid=None):
     """
-    Content of the selected tab for the families section: family details.
+    Htmx-component for displaying selected relatives tab: the families details.
     """
     uuid = request.args.get("uuid", uuid)
     u_context = UserContext(user_session, current_user, request)
@@ -341,7 +341,7 @@ def show_person_family_tree_hx(uuid=None):
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     may_edit = current_user.has_role("audit")  # or current_user.has_role('admin')
     return render_template(
-        "/scene/person_famtree_hx.html",
+        "/scene/hx-person/famtree.html",
         person=person,
         obj=objs,
         jscode=jscode,
@@ -353,12 +353,12 @@ def show_person_family_tree_hx(uuid=None):
     )
 
 
-@bp.route("/scene/person_fanchart_hx", methods=["GET"])
+@bp.route("/scene/hx-person/fanchart", methods=["GET"])
 #     @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_person_fanchart_hx(uuid=None):
     """
-    Content of the selected tab for the families section: fanchart.
+    Htmx-component for displaying selected relatives tab: fanchart.
     """
     t0 = time.time()
     uuid = request.args.get("uuid", uuid)
@@ -377,7 +377,7 @@ def show_person_fanchart_hx(uuid=None):
     t1 = time.time() - t0
     stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
     return render_template(
-        "/scene/person_fanchart_hx.html",
+        "/scene/hx-person/fanchart.html",
         person=person,
         fanchart_data=json.dumps(fanchart),
     )
@@ -1170,21 +1170,21 @@ def show_comments():
 @roles_accepted("guest", "research", "audit", "admin")
 def comments():
     """Page with comments and a field to add a new comment"""
-    return render_template("/scene/comments/comments.html")
+    return render_template("/scene/hx-comment/comments.html")
 
 
-@bp.route("/scene/comments/comments_header")
+@bp.route("/scene/hx-comment/comments_header")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def comments_header():
     """Comments header"""
     if "audit" in current_user.roles:
-        return render_template("/scene/comments/comments_header.html")
+        return render_template("/scene/hx-comment/comments_header.html")
     else:
         return ""
 
 
-@bp.route("/scene/comments/fetch_comments")
+@bp.route("/scene/hx-comment/fetch_comments")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def fetch_comments():
@@ -1219,14 +1219,14 @@ def fetch_comments():
     else:
         stk_logger(u_context, f"-> bp.scene.routes.fetch_comments n={len(comments)}")
         return render_template(
-            "/scene/comments/fetch_comments.html",
+            "/scene/hx-comment/fetch_comments.html",
             comments=comments[0:4],
             last_timestamp=last_timestamp,
             there_is_more=len(comments) > 4,
         )
 
 
-@bp.route("/scene/comments/add_comment", methods=["post"])
+@bp.route("/scene/hx-comment/add_comment", methods=["post"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def add_comment():
@@ -1260,7 +1260,7 @@ def add_comment():
     if res:
         stk_logger(u_context, "-> bp.scene.routes.add_comment")
         return render_template(
-            "/scene/comments/add_comment.html",
+            "/scene/hx-comment/add_comment.html",
             timestamp=timestr,
             user=user,
             comment_text=comment_text,

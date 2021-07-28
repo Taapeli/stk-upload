@@ -2316,7 +2316,7 @@ msgid "No event found"
 msgstr "Inga händelser hittades"
 
 #: bp/scene/routes.py:622 bp/scene/templates/scene/event.html:77
-#: bp/scene/templates/scene/person_famtree_hx.html:42
+#: bp/scene/templates/scene/hx-person/famtree.html.html:42
 msgid "Self"
 msgstr "Själv"
 
@@ -2326,16 +2326,16 @@ msgstr "Inga familjer"
 
 #: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:108
 #: bp/scene/templates/scene/family.html:26
-#: bp/scene/templates/scene/person_famtree_hx.html:17
-#: bp/scene/templates/scene/person_famtree_hx.html:60 ui/jinja_filters.py:85
+#: bp/scene/templates/scene/hx-person/famtree.html.html:17
+#: bp/scene/templates/scene/hx-person/famtree.html.html:60 ui/jinja_filters.py:85
 #: ui/jinja_filters.py:123
 msgid "Family"
 msgstr "Familj"
 
 #: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:112
 #: bp/scene/templates/scene/family.html:98
-#: bp/scene/templates/scene/person_famtree_hx.html:25
-#: bp/scene/templates/scene/person_famtree_hx.html:68
+#: bp/scene/templates/scene/hx-person/famtree.html.html:25
+#: bp/scene/templates/scene/hx-person/famtree.html.html:68
 msgid "Children"
 msgstr "Barn"
 
@@ -2555,14 +2555,14 @@ msgid "Top of page"
 msgstr "Överst på sidan"
 
 #: bp/scene/templates/scene/families.html:109
-#: bp/scene/templates/scene/person_famtree_hx.html:21
-#: bp/scene/templates/scene/person_famtree_hx.html:64
+#: bp/scene/templates/scene/hx-person/famtree.html.html:21
+#: bp/scene/templates/scene/hx-person/famtree.html.html:64
 msgid "Man"
 msgstr "Man"
 
 #: bp/scene/templates/scene/families.html:110
-#: bp/scene/templates/scene/person_famtree_hx.html:23
-#: bp/scene/templates/scene/person_famtree_hx.html:66 ui/jinja_filters.py:143
+#: bp/scene/templates/scene/hx-person/famtree.html.html:23
+#: bp/scene/templates/scene/hx-person/famtree.html.html:66 ui/jinja_filters.py:143
 msgid "Wife"
 msgstr "Hustru"
 
@@ -2673,8 +2673,8 @@ msgid "Persons"
 msgstr "Personer"
 
 #: bp/scene/templates/scene/macros.html:63
-#: bp/scene/templates/scene/person_famtree_hx.html:4
-#: bp/scene/templates/scene/person_famtree_hx.html:11
+#: bp/scene/templates/scene/hx-person/famtree.html.html:4
+#: bp/scene/templates/scene/hx-person/famtree.html.html:11
 #: bp/scene/templates/scene/person_fanchart_hx.html:3
 msgid "Families"
 msgstr "Familjer"
@@ -2750,7 +2750,7 @@ msgid "See Person's Details"
 msgstr "Se personens detaljer"
 
 #: bp/scene/templates/scene/macros.html:229
-#: bp/scene/templates/scene/person_famtree_hx.html:40
+#: bp/scene/templates/scene/hx-person/famtree.html.html:40
 msgid "self"
 msgstr "själv"
 
@@ -2903,21 +2903,21 @@ msgid "order by dragging"
 msgstr ""
 
 #: bp/scene/templates/scene/person.html:153
-#: bp/scene/templates/scene/person_famtree_hx.html:43
+#: bp/scene/templates/scene/hx-person/famtree.html.html:43
 #: bp/scene/templates/scene/person_names.html:24
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "first name"
 msgstr "förnamn"
 
 #: bp/scene/templates/scene/person.html:154
-#: bp/scene/templates/scene/person_famtree_hx.html:45
+#: bp/scene/templates/scene/hx-person/famtree.html.html:45
 #: bp/scene/templates/scene/person_names.html:25
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "patronymic"
 msgstr "patronym"
 
 #: bp/scene/templates/scene/person.html:156
-#: bp/scene/templates/scene/person_famtree_hx.html:47
+#: bp/scene/templates/scene/hx-person/famtree.html.html:47
 #: bp/scene/templates/scene/person_names.html:27
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "surname"
@@ -3009,28 +3009,28 @@ msgstr "Person anteckningar"
 msgid "Source references"
 msgstr "Käll referens"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:5
+#: bp/scene/templates/scene/hx-person/famtree.html.html:5
 #: bp/scene/templates/scene/person_fanchart_hx.html:4
 msgid "Two-way fanchart"
 msgstr ""
 
-#: bp/scene/templates/scene/person_famtree_hx.html:12
+#: bp/scene/templates/scene/hx-person/famtree.html.html:12
 msgid "Parents' family"
 msgstr "Föräldrarnas familj"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:15
+#: bp/scene/templates/scene/hx-person/famtree.html.html:15
 msgid "family"
 msgstr "familj"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:39
+#: bp/scene/templates/scene/hx-person/famtree.html.html:39
 msgid "Central person"
 msgstr "Central person"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:54
+#: bp/scene/templates/scene/hx-person/famtree.html.html:54
 msgid "Own families"
 msgstr "Egna familjer"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:55
+#: bp/scene/templates/scene/hx-person/famtree.html.html:55
 msgid "As Parent in Family"
 msgstr "Som förälder i familj"
 
@@ -3367,27 +3367,27 @@ msgstr "Arkiv namn"
 msgid "No sources found"
 msgstr "Inga källor hittades"
 
-#: bp/scene/templates/scene/comments/comments.html:11
+#: bp/scene/templates/scene/hx-comments/comments.html:11
 msgid "Discussion (hide)"
 msgstr "Diskussion (dölj)"
 
-#: bp/scene/templates/scene/comments/comments.html:17
+#: bp/scene/templates/scene/hx-comments/comments.html:17
 msgid "Your comment"
 msgstr "Din kommentar"
 
-#: bp/scene/templates/scene/comments/comments.html:26
+#: bp/scene/templates/scene/hx-comments/comments.html:26
 msgid "Add comment"
 msgstr ""
 
-#: bp/scene/templates/scene/comments/comments.html:32
+#: bp/scene/templates/scene/hx-comments/comments.html:32
 msgid "Latest comments"
 msgstr "Sista kommentarer"
 
-#: bp/scene/templates/scene/comments/comments_header.html:6
+#: bp/scene/templates/scene/hx-comments/comments_header.html:6
 msgid "Show discussion"
 msgstr "Visa diskussion"
 
-#: bp/scene/templates/scene/comments/fetch_comments.html:22
+#: bp/scene/templates/scene/hx-comments/fetch_comments.html:22
 msgid "Load More Comments"
 msgstr "Mera kommentarer"
 

@@ -2308,7 +2308,7 @@ msgid "No event found"
 msgstr "Ei tapahtumia"
 
 #: bp/scene/routes.py:622 bp/scene/templates/scene/event.html:77
-#: bp/scene/templates/scene/person_famtree_hx.html:42
+#: bp/scene/templates/scene/hx-person/famtree.html.html:42
 msgid "Self"
 msgstr "Itse"
 
@@ -2318,16 +2318,16 @@ msgstr "Ei perheitä"
 
 #: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:108
 #: bp/scene/templates/scene/family.html:26
-#: bp/scene/templates/scene/person_famtree_hx.html:17
-#: bp/scene/templates/scene/person_famtree_hx.html:60 ui/jinja_filters.py:85
+#: bp/scene/templates/scene/hx-person/famtree.html.html:17
+#: bp/scene/templates/scene/hx-person/famtree.html.html:60 ui/jinja_filters.py:85
 #: ui/jinja_filters.py:123
 msgid "Family"
 msgstr "Perhe"
 
 #: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:112
 #: bp/scene/templates/scene/family.html:98
-#: bp/scene/templates/scene/person_famtree_hx.html:25
-#: bp/scene/templates/scene/person_famtree_hx.html:68
+#: bp/scene/templates/scene/hx-person/famtree.html.html:25
+#: bp/scene/templates/scene/hx-person/famtree.html.html:68
 msgid "Children"
 msgstr "Lapset"
 
@@ -2542,14 +2542,14 @@ msgid "Top of page"
 msgstr "Sivun yläreunaan"
 
 #: bp/scene/templates/scene/families.html:109
-#: bp/scene/templates/scene/person_famtree_hx.html:21
-#: bp/scene/templates/scene/person_famtree_hx.html:64
+#: bp/scene/templates/scene/hx-person/famtree.html.html:21
+#: bp/scene/templates/scene/hx-person/famtree.html.html:64
 msgid "Man"
 msgstr "Mies"
 
 #: bp/scene/templates/scene/families.html:110
-#: bp/scene/templates/scene/person_famtree_hx.html:23
-#: bp/scene/templates/scene/person_famtree_hx.html:66 ui/jinja_filters.py:143
+#: bp/scene/templates/scene/hx-person/famtree.html.html:23
+#: bp/scene/templates/scene/hx-person/famtree.html.html:66 ui/jinja_filters.py:143
 msgid "Wife"
 msgstr "Vaimo"
 
@@ -2660,8 +2660,8 @@ msgid "Persons"
 msgstr "Henkilöt"
 
 #: bp/scene/templates/scene/macros.html:63
-#: bp/scene/templates/scene/person_famtree_hx.html:4
-#: bp/scene/templates/scene/person_famtree_hx.html:11
+#: bp/scene/templates/scene/hx-person/famtree.html.html:4
+#: bp/scene/templates/scene/hx-person/famtree.html.html:11
 #: bp/scene/templates/scene/person_fanchart_hx.html:3
 msgid "Families"
 msgstr "Perheet"
@@ -2737,7 +2737,7 @@ msgid "See Person's Details"
 msgstr "katso henkilön tiedot"
 
 #: bp/scene/templates/scene/macros.html:229
-#: bp/scene/templates/scene/person_famtree_hx.html:40
+#: bp/scene/templates/scene/hx-person/famtree.html.html:40
 msgid "self"
 msgstr "itse"
 
@@ -2890,21 +2890,21 @@ msgid "order by dragging"
 msgstr "järjestä raahaamalla"
 
 #: bp/scene/templates/scene/person.html:153
-#: bp/scene/templates/scene/person_famtree_hx.html:43
+#: bp/scene/templates/scene/hx-person/famtree.html.html:43
 #: bp/scene/templates/scene/person_names.html:24
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "first name"
 msgstr "etunimi"
 
 #: bp/scene/templates/scene/person.html:154
-#: bp/scene/templates/scene/person_famtree_hx.html:45
+#: bp/scene/templates/scene/hx-person/famtree.html.html:45
 #: bp/scene/templates/scene/person_names.html:25
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "patronymic"
 msgstr "patronyymi"
 
 #: bp/scene/templates/scene/person.html:156
-#: bp/scene/templates/scene/person_famtree_hx.html:47
+#: bp/scene/templates/scene/hx-person/famtree.html.html:47
 #: bp/scene/templates/scene/person_names.html:27
 #: bp/scene/templates/scene/persons_search.html:7
 msgid "surname"
@@ -2996,28 +2996,28 @@ msgstr "Henkilön lisätietoja"
 msgid "Source references"
 msgstr "Lähdeviitteet"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:5
+#: bp/scene/templates/scene/hx-person/famtree.html.html:5
 #: bp/scene/templates/scene/person_fanchart_hx.html:4
 msgid "Two-way fanchart"
 msgstr "Viuhkakaavio"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:12
+#: bp/scene/templates/scene/hx-person/famtree.html.html:12
 msgid "Parents' family"
 msgstr "Vanhempien perhe"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:15
+#: bp/scene/templates/scene/hx-person/famtree.html.html:15
 msgid "family"
 msgstr "perhe"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:39
+#: bp/scene/templates/scene/hx-person/famtree.html.html:39
 msgid "Central person"
 msgstr "Keskushenkilö"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:54
+#: bp/scene/templates/scene/hx-person/famtree.html.html:54
 msgid "Own families"
 msgstr "Omat perheet"
 
-#: bp/scene/templates/scene/person_famtree_hx.html:55
+#: bp/scene/templates/scene/hx-person/famtree.html.html:55
 msgid "As Parent in Family"
 msgstr "Perheessä vanhempana"
 
@@ -3356,27 +3356,27 @@ msgstr "Arkiston nimi"
 msgid "No sources found"
 msgstr "Ei lähteitä"
 
-#: bp/scene/templates/scene/comments/comments.html:11
+#: bp/scene/templates/scene/hx-comments/comments.html:11
 msgid "Discussion (hide)"
 msgstr "Keskustelu (piilota)"
 
-#: bp/scene/templates/scene/comments/comments.html:17
+#: bp/scene/templates/scene/hx-comments/comments.html:17
 msgid "Your comment"
 msgstr "Kommenttisi"
 
-#: bp/scene/templates/scene/comments/comments.html:26
+#: bp/scene/templates/scene/hx-comments/comments.html:26
 msgid "Add comment"
 msgstr "Lisää kommentti"
 
-#: bp/scene/templates/scene/comments/comments.html:32
+#: bp/scene/templates/scene/hx-comments/comments.html:32
 msgid "Latest comments"
 msgstr "Tuoreimmat kommentit"
 
-#: bp/scene/templates/scene/comments/comments_header.html:6
+#: bp/scene/templates/scene/hx-comments/comments_header.html:6
 msgid "Show discussion"
 msgstr "Näytä keskustelu"
 
-#: bp/scene/templates/scene/comments/fetch_comments.html:22
+#: bp/scene/templates/scene/hx-comments/fetch_comments.html:22
 msgid "Load More Comments"
 msgstr "Näytä lisää kommentteja"
 
