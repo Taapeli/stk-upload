@@ -22,16 +22,20 @@
             rx: 5;
             ry: 5;
         }
+
+        div {
+            padding: 0px;
+            margin: 0px;
+        }
+
         text {
             fill: black;
             font-style: normal;
-            font: 8px sans-serif;
+            font: 12px sans-serif;
             text-anchor: start;
         }
         .tick text {
             fill: black;
-            font-style: normal;
-            font: 8px sans-serif;
             text-anchor: middle;
         }
         .link {
@@ -49,14 +53,15 @@
     var desc_data = JSON.parse('{{ descendants|safe }}');
 
     var margin = {top: 20, right: 90, bottom: 30, left: 90};
-    const width = 660 - margin.left - margin.right;
-    const height = 440 - margin.top - margin.bottom;
+    const box_margin = '0.25em';
+    const width = 1200 - margin.left - margin.right;
+    const height = 600 - margin.top - margin.bottom;
     const axisoffset = 600;
-    const rect_height = 10;
+    const rect_height = 15;
     const nudge_height = 3;
     const link_width = 7;
-    const first_year = 1650;
-    const last_year = 2020;
+    const first_year = anc_data.oldest;
+    const last_year = desc_data.newest;
     const ave_age = 75;
     const ave_gen_gap = 30;
 
@@ -72,7 +77,67 @@
     var treelayout = d3.tree()
         .size([height, width]);
 
+    // Create Event Handlers for mouse
+    function handleClick(event, d) {
+        if (d.data.uuid != null) {
+            var searchParams = new URLSearchParams(window.location.search);
+            searchParams.set('uuid', d.data.uuid);
+            var newParams = searchParams.toString();
+            window.location.search = newParams;
+        }
+        event.stopPropagation();
+    }
+    function handleMouseEnter(event, d) {
+        d3.select("#isotammi_d3_infobox").remove();
+
+        g = d3.select(this).append("g");
+
+        g.attr("id", "isotammi_d3_infobox")
+            .append("rect")
+            .attr("x", "-1em").attr("y", "-2em")
+            .attr("fill", "lightyellow")
+            .style("opacity", "1.0")
+            .attr("height", rect_height*4)
+            .attr("width", rect_height*10)
+
+        // g.append("text")
+        //     .attr('x', box_margin)
+        //     .text(d => d.data.name)
+        //     .append("tspan")
+        //     .attr('x', box_margin).attr('dy', '1em')
+        //     .attr('fill', d => d.data.too_new ? 'red' : 'black')
+        //     .text(d => d.data.years)
+            // .append("tspan")
+            // .attr('x', box_margin).attr('dy', '1em')
+            // .text("What else to display?")
+        g.append('foreignObject')
+            .attr("x", "-1em").attr("y", "-2em")
+            .attr('width', 150)
+            .attr('height', 100)
+            .append("xhtml:body")
+            .html('<div>' +
+                d.data.name + "<br>" + d.data.years +
+                '</div>');
+
+        d3.select(this)
+            .raise();
+
+        event.stopPropagation();
+    }
+
+
+    // append the svg object to the body of the page
+    // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .style("fill", "lightyellow") //##### TEST #####
+        .attr("viewBox", [-width*0.3, -height*1.1, width, height*1.5])
+        .call(yearAxis);
+
     var draw = (this_data, root_node, anc) => {
+
         //  assigns the data to a hierarchy using parent-child relationships
         var nodes = d3.hierarchy(this_data, d => d.children);
 
@@ -80,21 +145,11 @@
         nodes = treelayout(nodes)
             .sort((a, b) => b.data.birth - a.data.birth);
 
-        // append the svg object to the body of the page
-        // appends a 'group' element to 'svg'
-        // moves the 'group' element to the top left margin
-        var svg = d3.select("body").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .style("fill", "lightyellow") //##### TEST #####
-            .attr("viewBox", [-width*0.3, -height*1.1, width, height*1.5])
-            // .call(yearAxis);
-
         var g = svg.append("g")
+            // .attr("transform",
+            //     "translate(" + margin.left + "," + (margin.top + axisoffset) + ")")
             .attr("transform",
-                "translate(" + margin.left + "," + (margin.top + axisoffset) + ")")
-            .attr("transform",
-                "translate(" + 0 + "," + -420 + ")");
+                "translate(" + 0 + "," + (-620 + (anc ? 0 : (root_node.x - nodes.x))) + ")");
 
         // adds the links between the nodes
         var link = g.selectAll(".link")
@@ -103,12 +158,12 @@
                 .attr("class", "link")
                 .attr("d", d => {
                     if (anc) {
-                        own_height = d.x + rect_height / 2
+                        own_height = d.x + rect_height / 2 - d.depth * nudge_height
                                 + Math.sign(d.parent.x - d.x) * rect_height/2;
                         return Math.abs(d.x - d.parent.x) + Math.sign(d.x - d.parent.x)*nudge_height < rect_height/2
                             ? null  // no connector if overlap
-                            : "M" + yearScale(d.parent.data.birth) + "," + (d.parent.x + rect_height/2)
-                            + "C" + (yearScale(d.parent.data.birth) - link_width) + "," + (d.parent.x + rect_height/2)
+                            : "M" + yearScale(d.parent.data.birth) + "," + (d.parent.x + rect_height/2 - (d.depth - 1)*nudge_height)
+                            + "C" + (yearScale(d.parent.data.birth) - link_width) + "," + (d.parent.x + rect_height/2 - (d.depth - 1)*nudge_height)
                             + " " + yearScale(d.parent.data.birth) + "," + own_height
                             + " " + (yearScale(d.parent.data.birth) - link_width) + "," + own_height;
                     } else {
@@ -133,11 +188,18 @@
                     "node" + 
                     (d.children ? " node--internal" : " node--leaf")
                 )
+                .on("click", handleClick)
+                .on("mouseenter", handleMouseEnter)
                 .attr("transform", d => {
                     birth = (d.data.birth == 0)
                         ? d.parent.data.birth + ave_gen_gap * (anc ? -1 : 1)
                         : d.data.birth;
-                    return "translate(" + yearScale(birth) + "," + (d.x + (anc ? 0 : d.depth*nudge_height)) + ")";
+                    if (anc)
+                        return "translate(" + yearScale(birth) + ","
+                            + (d.x - d.depth * nudge_height) + ")"
+                    else
+                        return "translate(" + yearScale(birth) + ","
+                            + (d.x + d.depth * nudge_height) + ")"
                 })
                 .classed("unknown_birth", d => d.data.birth == 0)
                 .classed("unknown_death", d => d.data.death == 0)
@@ -150,7 +212,7 @@
             .attr("width", d =>
                 d.data.death == 0
                     ? yearScale(d.data.birth + ave_age) - yearScale(d.data.birth)
-                : d.data.death == d.data.birth
+                : d.data.death == d.data.birth 
                     ? 1
                 : yearScale(d.data.death) - yearScale(d.data.birth)
             );
@@ -161,12 +223,7 @@
             .attr("x", "0.3em")
             .text(d => d.data.name);
 
-        // svg.transform(
-        //     // "translate(" + (node.x - root_node.x) + ")"
-        //     "translate(0 0)"
-        // )   
-        
-        return node;
+        return nodes;
     }
 
     // make sure the root nodes coincide

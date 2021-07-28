@@ -41,8 +41,8 @@ from ui.user_context import UserContext
 from bl.person import PersonReader
 from bl.base import Status
 
-MAX_ANCESTOR_LEVELS = 4
-MAX_DESCENDANT_LEVELS = 3
+MAX_ANCESTOR_LEVELS = 3
+MAX_DESCENDANT_LEVELS = 2
 
 
 class FamTree:
@@ -71,7 +71,7 @@ class FamTree:
                 sex, "white"
             )  # white if value is not in ISO 5218
 
-    def famtree_data(self, person_attributes, descendant):
+    def famtree_data(self, person_attributes, oldest, newest, descendant):
         """
         Format the data for fan/sunburst chart use.
         """
@@ -99,9 +99,10 @@ class FamTree:
             "title": f"{names[1]} {names[0]}, {birth}-{death}",
             "uuid": person_attributes["uuid"],
             "too_new": person_attributes["too_new"]
-        }
+        }, min(oldest, mk_int(birth)) if birth != "" else oldest, max(newest, mk_int(death)) if death != "" else newest
 
-    def build_parents(self, u_context, uniq_id, privacy, level=1):
+
+    def build_parents(self, u_context, uniq_id, privacy, oldest, newest, level=1):
         """
         Recurse to ancestors, building a data structure for famtree.
         """
@@ -112,15 +113,18 @@ class FamTree:
         parents = []
         result.sort(key=lambda x: x["gender"])
         for par in result:
-            node = self.famtree_data(par, descendant=False)
+            node, oldest, newest = self.famtree_data(par, oldest, newest, descendant=False)
             if level < MAX_ANCESTOR_LEVELS:  # continue recursion?
-                node["children"] = self.build_parents(  # for the tree structure, parents are "children"
-                    u_context, par["uniq_id"], privacy, level + 1
+                 # for the tree structure, parents are "children"
+                node["children"], maybe_oldest, maybe_newest = self.build_parents(
+                    u_context, par["uniq_id"], privacy, oldest, newest, level + 1
                 )
+                oldest = min(oldest, maybe_oldest)
+                newest = max(newest, maybe_newest)
             parents.append(node)
-        return parents
+        return parents, oldest, newest
 
-    def build_children(self, u_context, uniq_id, privacy, level=1):
+    def build_children(self, u_context, uniq_id, privacy, oldest, newest, level=1):
         """
         Recurse to descendants, building a data structure for famtree.
         """
@@ -143,13 +147,15 @@ class FamTree:
         children = []
         result.sort(reverse=False, key=lambda x: b_year(x))
         for chi in result:
-            node = self.famtree_data(chi, descendant=True)
+            node, oldest, newest = self.famtree_data(chi, oldest, newest, descendant=True)
             if level < MAX_DESCENDANT_LEVELS:  # continue recursion?
-                node["children"] = self.build_children(
-                    u_context, chi["uniq_id"], privacy, level + 1
+                node["children"], maybe_oldest, maybe_newest = self.build_children(
+                    u_context, chi["uniq_id"], privacy, oldest, newest, level + 1
                 )
+                oldest = min(oldest, maybe_oldest)
+                newest = max(newest, maybe_newest)
             children.append(node)
-        return children
+        return children, oldest, newest
 
     def get(self, uuid):
         """
@@ -169,14 +175,19 @@ class FamTree:
             return ""
 
         for person in result:
-            ancestors = self.famtree_data(person, descendant=True)      # Distinct copies
-            descendants = self.famtree_data(person, descendant=True)    # Distinct copies
+            ancestors, oldest, newest = self.famtree_data(person, 9999, 0, descendant=True)      # Distinct copies
+            descendants, oldest, newest = self.famtree_data(person, 9999, 0, descendant=True)    # Distinct copies
             uniq_id = person["uniq_id"]
 
         # Gather all required data in two directions from the central person. Data structure used in both is a
         # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
         # (https://vasturiano.github.io/sunburst-chart/)
-        ancestors["children"] = self.build_parents(u_context, uniq_id, privacy)
-        descendants["children"] = self.build_children(u_context, uniq_id, privacy)
+        ancestors["children"], maybe_oldest, maybe_newest = self.build_parents(u_context, uniq_id, privacy, oldest, newest)
+        ancestors["newest"] = max(maybe_newest, newest)
+        ancestors["oldest"] = min(maybe_oldest, oldest)
+
+        descendants["children"], maybe_oldest, maybe_newest = self.build_children(u_context, uniq_id, privacy, oldest, newest)
+        descendants["newest"] = max(maybe_newest, newest)
+        descendants["oldest"] = min(maybe_oldest, oldest)
 
         return (ancestors, descendants)
