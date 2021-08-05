@@ -30,7 +30,7 @@ Created on 19.1.2019
 
 from urllib.parse import unquote_plus
 from flask_babelex import lazy_gettext as N_
-from bl.root import State
+from bl.root import State, DEFAULT_MATERIAL
 
 class UserContext():
     """ Store filter values for finding the required subset of database.
@@ -111,7 +111,6 @@ class UserContext():
     """
     NEXT_START = '<'  # from first name of data
     NEXT_END = '>'    # end reached: there is nothing forwards
-    DEFAULT_MATERIAL = "Family Tree"
 
 
     class ChoicesOfView():
@@ -245,7 +244,7 @@ class UserContext():
 
         """ Batch selection by state and material """
 
-        self.material = user_session.get("material", self.DEFAULT_MATERIAL)
+        self.material = user_session.get("material", DEFAULT_MATERIAL)
         self.state = user_session.get("state")
         if not self.state:
             self.state = self.choices.get_state(self.context_code)

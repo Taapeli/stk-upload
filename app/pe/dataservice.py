@@ -83,7 +83,8 @@ class DataService:
             shareds.dservice.state = user_context.state
             shareds.dservice.use_user = user_context.user
         else:
-            raise IsotammiException("pe.dataservice.DataService: user_context is mandatory")
+            #raise IsotammiException("pe.dataservice.DataService: user_context is mandatory")
+            pass
 
     def __enter__(self):
         # With 'update' and 'read_tx' begin transaction

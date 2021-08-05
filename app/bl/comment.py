@@ -116,16 +116,18 @@ class CommentReader(DataService):
             if c.label[0] == "Family":
                 o = FamilyBl.from_node(onode)
                 c.object = o
-            if c.label[0] == "Person":
+            elif c.label[0] == "Person":
                 o = PersonBl.from_node(onode)
                 c.object = o
-            if c.label[0] == "Place":
+            elif c.label[0] == "Place":
                 o = PlaceBl.from_node(onode)
                 c.object = o
-            if c.label[0] == "Source":
+            elif c.label[0] == "Source":
                 o = SourceBl.from_node(onode)
                 c.object = o
-
+            else:
+                print(f"CommentReader.read_my_comment_list: Discarded referring object '{c.label[0]}'")
+                next
             comments.append(c)
 
         # Update the page scope according to items really found

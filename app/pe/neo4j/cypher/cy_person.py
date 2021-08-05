@@ -91,7 +91,9 @@ ORDER BY n.order"""
 
 # ----- Persons listing ----
 
-    _read_persons_tail = """
+    get_person_list = """
+MATCH (root) -[:OBJ_PERSON]-> (p:Person)
+    WHERE p.sortname >= $start_name
 WITH p ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
@@ -105,33 +107,8 @@ RETURN p as person,
     COLLECT(DISTINCT [e, pl.pname, role]) + COLLECT(DISTINCT [fe, fpl.pname, rel]) AS events
 ORDER BY person.sortname"""
 
-    read_persons_w_events_fw_name = """
-MATCH (a:Root {material:$material, state:$state}) -[:OBJ_PERSON]-> (p:Person)
-    WHERE p.sortname >= $start_name
-""" + _read_persons_tail
-
-    read_persons_w_events_fw_name_by_user = """
-MATCH (a:Root{user:$username, material:$material, state:$state}) -[:OBJ_PERSON]-> (p:Person)
-    WHERE p.sortname >= $start_name
-""" + _read_persons_tail
-
-#     read_approved_persons_w_events_fw_name = """
-# MATCH () -[:PASSED]-> (p:Person)
-#     WHERE ... """
-#     read_my_persons_w_events_fw_name = """
-# MATCH (prof:UserProfile) -[:HAS_ACCESS]-> (b:Batch) -[:OWNS]-> (p:Person)
-#     WHERE ... """
-
 # ----- Search page -----
 
-    _get_events_tail_w_refnames = """
- OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
- OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
- OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
-RETURN user, person, 
-    COLLECT(DISTINCT name) AS names,
-    COLLECT(DISTINCT refn.name) AS refnames,
-    COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
     _get_events_tail = """
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
@@ -145,33 +122,16 @@ RETURN user, person,
 
     # With use=rule, name=name
     read_persons_w_events_by_refname = """
-MATCH path = ( (search:Refname) -[:BASENAME*0..3 {use:$use}]- (:Refname) )
-WHERE search.name STARTS WITH $name
-WITH search, nodes(path) AS x UNWIND x AS rn
-    MATCH (rn) -[:REFNAME {use:$use}]-> (person:Person) 
-        <-[:OBJ_PERSON]- (root:Root {material:$material, state:$state})
-    MATCH (person) -[:NAME]-> (name:Name {order:0})
-WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
-
-    # With use=rule, name=name, user=user
-    read_persons_w_events_by_refname_by_user = """
 MATCH path = ( (search:Refname) -[:BASENAME*0..3]- (:Refname))
     WHERE search.name STARTS WITH $name
-WITH nodes(path) AS x UNWIND x AS rn
+WITH nodes(path) AS x, root UNWIND x AS rn 
     MATCH (rn) -[:REFNAME {use:$use}]-> (person:Person) 
-          <-[:OBJ_PERSON]- (root:Root {user:$username, material:$material, state:$state})
+          <-[:OBJ_PERSON]- (root)
     MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
 
     read_persons_w_events_by_years = """
-MATCH (root:Root {material:$material, state:$state})
-        -[:OBJ_PERSON]-> (person:Person)
-    WHERE person.death_high >= $years[0] AND person.birth_low <= $years[1]
-OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
-WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
-
-    read_persons_w_events_by_years_by_user = """
-MATCH (root:Root {user:$username, material:$material, state:$state})
+MATCH (root)
         -[:OBJ_PERSON]-> (person:Person)
     WHERE person.death_high >= $years[0] AND person.birth_low <= $years[1]
 OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
@@ -180,9 +140,9 @@ WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
 # ---- Person with Gramps handle -----
 
     create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
+MATCH (root:Root {id: $batch_id})
 MERGE (p:Person {handle: $p_attr.handle})
-MERGE (b) -[r:OBJ_PERSON]-> (p)
+MERGE (root) -[r:OBJ_PERSON]-> (p)
     SET p = $p_attr
 RETURN ID(p) as uniq_id"""
 

@@ -24,7 +24,7 @@ Created on 15.8.2018
 
 @author: jm
 """
-
+# blacked 2021-07-25 JMä
 import os
 import time
 import logging
@@ -48,6 +48,7 @@ from flask_babelex import _
 
 import shareds
 from bl.base import Status
+from bl.root import State, Root
 from models import loadfile, email, util, syslog
 
 # from ui.user_context import UserContext
@@ -90,8 +91,12 @@ def list_uploads():
     if shareds.app.config.get("USE_I_AM_ALIVE", True):
         inter = shareds.PROGRESS_UPDATE_RATE * 1000
     else:
-        # For debugging: don't poll progress bar very much
+        # For debugging: don't poll progress bar very often
         inter = shareds.PROGRESS_UPDATE_RATE * 10000
+
+    for upl in upload_list:
+        print(f"#upload: {upl}")
+
     return render_template(
         "/gramps/uploads.html",
         interval=inter,
@@ -105,7 +110,6 @@ def list_uploads():
 @roles_accepted("research", "admin")
 def upload_gramps():
     """Load a gramps xml file to temp directory for processing in the server"""
-    from bl.batch import Batch # For status codes
 
     try:
         infile = request.files["filenm"]
@@ -117,21 +121,23 @@ def upload_gramps():
         os.makedirs(upload_folder, exist_ok=True)
 
         pathname = loadfile.upload_file(infile, upload_folder)
-        isotammi_metadata = gramps_loader.get_isotammi_metadata(current_user.username, infile.filename)
-        if isotammi_metadata: 
+        isotammi_metadata = gramps_loader.get_isotammi_metadata(
+            current_user.username, infile.filename
+        )
+        if isotammi_metadata:
             material_type = isotammi_metadata[0]
             description = isotammi_metadata[1]
         else:
             material_type = ""
             description = ""
-            
+
         shareds.tdiff = time.time() - t0
 
         logname = pathname + ".log"
         uploads.set_meta(
             current_user.username,
             infile.filename,
-            status=Batch.BATCH_UPLOADED,
+            status=State.FILE_UPLOADED,
             upload_time=time.time(),
             material_type=material_type,
             description=description,
@@ -239,10 +245,7 @@ def xml_download(xmlfile):
 @login_required
 @roles_accepted("research", "admin")
 def batch_delete(batch_id):
-
-    from bl.batch import Batch
-
-    filename = Batch.get_filename(current_user.username, batch_id)
+    filename = Root.get_filename(current_user.username, batch_id)
     if filename:
         # Remove file, if exists
         metafile = filename.replace("_clean.", ".") + ".meta"
@@ -250,9 +253,9 @@ def batch_delete(batch_id):
             data = eval(open(metafile).read())
             if data.get("batch_id") == batch_id:
                 del data["batch_id"]
-                data["status"] = Batch.BATCH_REMOVED
+                data["status"] = State.ROOT_REMOVED
                 open(metafile, "w").write(repr(data))
-    ret = Batch.delete_batch(current_user.username, batch_id)
+    ret = Root.delete_batch(current_user.username, batch_id)
     if Status.has_failed(ret):
         flash(_("Could not delete Batch id %(batch_id)s", batch_id=batch_id), "error")
         logger.warning(f'bp.gramps.routes.batch_delete ERROR {ret.get("statustext")}')

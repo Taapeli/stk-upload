@@ -27,8 +27,8 @@ class CypherCitation():
 
     # Create Citation node and link (Batch) --> (Citation)
     create_to_batch = """
-MATCH (b:Batch {id: $batch_id})
-MERGE (b) -[r:OWNS]-> (c:Citation {handle: $c_attr.handle}) 
+MATCH (b:Root {id: $batch_id})
+MERGE (b) -[r:OBJ_OTHER]-> (c:Citation {handle: $c_attr.handle}) 
     SET c = $c_attr
 RETURN ID(c) as uniq_id"""
 

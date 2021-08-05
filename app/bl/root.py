@@ -37,7 +37,9 @@ from bl.admin.models.cypher_adm import Cypher_adm
 
 from bl.base import Status
 from pe.dataservice import DataService
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+from pe.neo4j.cypher.cy_batch_audit import CypherRoot, CypherAudit
+
+DEFAULT_MATERIAL = "Family Tree"
 
 class State:
     """File, Material or Object state.
@@ -84,7 +86,7 @@ class State:
 
 class Root:
     """
-    Data Root node for candidate, auditing and approved material chuncks.
+    Data Root node for candidate, auditing and approved material chunks.
     """
 
     def __init__(self, userid=None):
@@ -95,7 +97,7 @@ class Root:
         self.user = userid
         self.file = None
         self.id = None  # batch_id
-        self.material = ""      # Material type "Family Tree" or other
+        self.material = DEFAULT_MATERIAL      # Material type "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
         self.timestamp = 0
@@ -142,7 +144,7 @@ class Root:
 #===============================================================================
 
     def save(self):
-        """Create or update Batch node.
+        """Create or update Root node.
 
         Returns {'id':self.id, 'status':Status.OK}
         """
@@ -192,7 +194,7 @@ class Root:
                 removed = -1
                 while removed != 0:
                     result = session.run(
-                        CypherBatch.delete_chunk, user=username, batch_id=batch_id
+                        CypherRoot.delete_chunk, user=username, batch_id=batch_id
                     )
                     # Supports both Neo4j version 3 and 4:
                     counters = shareds.db.consume_counters(result)
@@ -205,7 +207,7 @@ class Root:
                     else:
                         # All connected nodes deleted. delete the batch node
                         result = session.run(
-                            CypherBatch.delete_batch_node,
+                            CypherRoot.delete_batch_node,
                             user=username,
                             batch_id=batch_id,
                         )
@@ -241,7 +243,7 @@ class Root:
     def get_filename(username, batch_id):
         with shareds.driver.session() as session:
             record = session.run(
-                CypherBatch.get_filename, username=username, batch_id=batch_id
+                CypherRoot.get_filename, username=username, batch_id=batch_id
             ).single()
             if record:
                 return record[0]
@@ -249,7 +251,7 @@ class Root:
 
     @staticmethod
     def get_batches():
-        result = shareds.driver.session().run(CypherBatch.list_all)
+        result = shareds.driver.session().run(CypherRoot.list_all)
         for rec in result:
             yield dict(rec.get("b"))
 
@@ -262,23 +264,20 @@ class Root:
         """
         # Get your approved batches
         approved = {}
-        result = shareds.driver.session().run(CypherBatch.get_passed, user=user)
+        result = shareds.driver.session().run(CypherRoot.get_passed, user=user)
         for node, count in result:
             # <Record batch=<Node id=435790 labels={'Audit'}
             #    properties={'auditor': 'juha', 'id': '2020-03-24.002',
             #    'user': 'juha', 'timestamp': 1585070354153}>
             #  cnt=200>
             b = Root.from_node(node)
-            if not b.status:
-                # Audit node has no status field; the material has been sent forwards
-                b.state = State.ROOT_FOR_AUDIT  # Batch.BATCH_FOR_AUDIT
             approved[b.id] = count
 
         # Get current researcher batches
         titles = []
         user_data = {}
         result = shareds.driver.session().run(
-            CypherBatch.get_batches, user=user, status=State.ROOT_CANDIDATE # Batch.BATCH_CANDIDATE
+            CypherRoot.get_batches, user=user, status=State.ROOT_CANDIDATE # Batch.BATCH_CANDIDATE
         )
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'}
@@ -330,7 +329,7 @@ class Root:
         labels = []
         batch = None
         result = shareds.driver.session().run(
-            CypherBatch.get_single_batch, batch=batch_id
+            CypherRoot.get_single_batch, batch=batch_id
         )
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'}
@@ -367,7 +366,7 @@ class Root:
         print(
             'Batch.list_empty_batches: #TODO Tähän aikarajoitus "vvv-kk", nyt siinä on vakio "2019-10"!'
         )
-        result = shareds.driver.session().run(CypherBatch.TODO_get_empty_batches)
+        result = shareds.driver.session().run(CypherRoot.TODO_get_empty_batches)
 
         for record in result:
             # <Node id=317098 labels={'Batch'}
@@ -393,6 +392,141 @@ class Root:
         cnt = record[0]
         return cnt
 
+# Copied from audit.py:
+    @staticmethod
+    def get_auditor_stats(auditor=None):
+        """Get statistics of auditor's audition batch contents."""
+        titles = []
+        labels = {}
+        if auditor:
+            result = shareds.driver.session().run(
+                CypherAudit.get_my_audits, oper=auditor
+            )
+        else:
+            result = shareds.driver.session().run(
+                CypherAudit.get_all_audits, oper=auditor
+            )
+        for record in result:
+            # <Record
+            #    b=<Node id=439060 labels={'Audit'}
+            #        properties={'auditor': 'juha', 'id': '2020-01-03.001',
+            #        'user': 'jpek', 'timestamp': 1578940247182}>
+            #    label='Note'
+            #    cnt=17>
+            b = Root.from_node(record["b"])
+            label = record["label"]
+            if not label:
+                label = ""
+            cnt = record["cnt"]
+
+            # Trick: Set Person as first in sort order!
+            if label == "Person":
+                label = " Person"
+            if label and not label in titles:
+                titles.append(label)
+
+            key = f"{b.auditor}/{b.user}/{b.id}/{'b.updated'}"  # TODO Audit->Root
+            if not key in labels:
+                labels[key] = {}
+            labels[key][label] = cnt
+            # print(f'labels[{key}] {labels[key]}')
+
+        return sorted(titles), labels
+
+    @staticmethod
+    def get_stats(audit_id):
+        """Get statistics of given Batch contents."""
+        labels = []
+        batch = None
+        result = shareds.driver.session().run(
+            CypherRoot.get_single_batch, batch=audit_id
+        )
+        for record in result:
+            # <Record batch=<Node id=319388 labels={'Batch'}
+            #    properties={ // 'mediapath': '/home/jm/my_own.media',
+            #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps',
+            #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787,
+            #        'status': 'completed'}>
+            #  label='Note'
+            #  cnt=2>
+
+            if not batch:
+                batch = record["batch"]
+                user = batch.get("user")
+                ts = batch.get("timestamp")
+                if ts:
+                    t = float(ts) / 1000.0
+                    tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+                else:
+                    tstring = ""
+            label = record["label"]
+            if label == None:
+                label = "-"
+            # Trick: Set Person as first in sort order!
+            if label == "Person":
+                label = " Person"
+            cnt = record["cnt"]
+            labels.append((label, cnt))
+
+        return user, audit_id, tstring, sorted(labels)
+
+    @staticmethod
+    def delete_audit(username, batch_id):
+        """Delete an audited batch having the given id."""
+        label_sets = [  # Grouped for decent size chunks in logical order
+            ["Note"],
+            ["Repository", "Media"],
+            ["Place"],
+            ["Source"],
+            ["Event"],
+            ["Person"],
+            ["Family"],
+        ]
+
+        deleted = 0
+        with shareds.driver.session() as session:
+            # Delete the node types that are not directly connected to Audit node
+            with session.begin_transaction() as tx:
+                result = tx.run(CypherAudit.delete_names, batch=batch_id)
+                this_delete = result.single()[0]
+                print(f"bl.audit.delete_audit: deleted {this_delete} name nodes")
+                deleted += this_delete
+
+                result = tx.run(CypherAudit.delete_place_names, batch=batch_id)
+                this_delete = result.single()[0]
+                print(
+                    f"bl.audit.delete_audit: deleted {this_delete} place name nodes"
+                )
+                deleted += this_delete
+
+                # result = tx.run(CypherAudit.delete_citations,
+                #                 batch=batch_id)
+                # this_delete = result.single()[0]
+                # print(f"bl.audit.delete_audit: deleted {this_delete} citation nodes")
+                # deleted += this_delete
+
+            # Delete the directly connected node types as defined by the labels
+            for labels in label_sets:
+                with session.begin_transaction() as tx:
+                    result = tx.run(
+                        CypherAudit.delete, batch=batch_id, labels=labels
+                    )
+                    this_delete = result.single()[0]
+                    print(
+                        f"bl.audit.delete_audit: deleted {this_delete} nodes of type {labels}"
+                    )
+                    deleted += this_delete
+
+            # Finally, delete the audit node itself
+            with session.begin_transaction() as tx:
+                result = tx.run(CypherAudit.delete_audit_node, batch=batch_id)
+
+        msg = _(
+                "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted",
+                batch_id=batch_id,
+                deleted=deleted,
+        )
+        return msg, deleted
 
 class BatchUpdater(DataService):
     """

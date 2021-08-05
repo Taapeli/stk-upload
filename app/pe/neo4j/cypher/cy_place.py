@@ -40,19 +40,11 @@ class CypherPlace():
             COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
     ORDER BY name.name"""
 
-    get_common_name_hierarchies = """
-MATCH () -[:PASSED]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
+    get_name_hierarchies = """
+MATCH (root) -[:OBJ_PLACE]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
     WHERE name.name >= $fw
-WITH place, name ORDER BY name.name LIMIT  $limit
-    OPTIONAL MATCH (place) <-[:PLACE]- (ref)
-""" + _get_name_hierarchies_tail
-
-    get_my_name_hierarchies = """
-MATCH (b:Batch) -[:OWNS]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
-    WHERE b.user = $user AND name.name >= $fw
-WITH place, name ORDER BY name.name LIMIT $limit
-    OPTIONAL MATCH (place) <-[:PLACE]- (ref) <-[*2]- (b)
-        WHERE b.user = $user
+WITH root, place, name ORDER BY name.name LIMIT $limit
+    OPTIONAL MATCH (place) <-[:PLACE]- (ref) <-[*2]- (root)
 """ + _get_name_hierarchies_tail
 
 # Default language names update with $place_id, $fi_id, $sv_id
@@ -88,12 +80,10 @@ RETURN place, name,
     COLLECT(DISTINCT n) AS names,
     COLLECT (DISTINCT note) AS notes,
     COLLECT (DISTINCT media) AS medias"""
-    get_common_w_names_notes = """
-MATCH () -[:PASSED]-> (place:Place)
+
+    get_w_names_notes = """
+MATCH  (root) -[:OBJ_PLACE]-> (place:Place)
     WHERE place.uuid=$uuid""" + _get_w_names_notes_tail
-    get_my_w_names_notes = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (:Batch) -[:OWNS]-> (place:Place)
-    WHERE prof.username = $user AND place.uuid=$uuid""" + _get_w_names_notes_tail
 
     # Result indi is a Person or Family
     get_person_family_events = """
@@ -143,18 +133,18 @@ RETURN name, COLLECT(n) AS names LIMIT 15
 
     # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
-MATCH (u:Batch {id:$batch_id})
+MATCH (u:Root {id:$batch_id})
 CREATE (new_pl:Place)
     SET new_pl = $p_attr
-CREATE (u) -[:OWNS]-> (new_pl) 
+CREATE (u) -[:OBJ_PLACE]-> (new_pl) 
 RETURN ID(new_pl) AS uniq_id"""
 
     # Set properties for an existing Place and connect it to Batch
     complete = """
-MATCH (u:Batch {id:$batch_id})
+MATCH (u:Root {id:$batch_id})
 MATCH (pl:Place) WHERE ID(pl) = $plid
     SET pl += $p_attr
-CREATE (u) -[:OWNS]-> (pl)"""
+CREATE (u) -[:OBJ_PLACE]-> (pl)"""
 
     add_name = """
 MATCH (pl:Place) WHERE ID(pl) = $pid
@@ -179,8 +169,8 @@ CREATE (pl) -[r:IS_INSIDE]-> (new_pl)
 RETURN ID(new_pl) AS uniq_id"""
 
     add_urls = """
-MATCH (u:Batch {id:$batch_id})
-CREATE (u) -[:OWNS]-> (n:Note) 
+MATCH (u:Root {id:$batch_id})
+CREATE (u) -[:OBJ_OTHER]-> (n:Note) 
     SET n = $n_attr
 WITH n
     MATCH (pl:Place) WHERE ID(pl) = $pid
@@ -198,16 +188,8 @@ MATCH (m:Media  {handle: $m_handle})
     SET r = $r_attr"""
 
 class CypherPlaceStats:
-    get_place_list_by_username = """
-match (b:Root{user:$username, material:$material, state:$state})
-    -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
-return p as place, count(p) as count
-order by count desc
-limit $count"""
-
-    get_place_list_common = """
-match (b:Root{material:$material, state:$state})
-    -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
+    get_place_list = """
+match (root) -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
 return p as place, count(p) as count
 order by count desc
 limit $count"""

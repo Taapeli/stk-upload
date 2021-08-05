@@ -1,0 +1,15 @@
+{# app/templates/unexpected_error.html #}
+{% extends "scene/sc_layout.html" %}
+{% block title %}{{ _('Unexpected error') }}{% endblock %}
+{% block body %}
+    {{ super() }}
+    <h1>
+        {{ _('Unexpected error') }}
+    </h1>
+    {% if text %}
+    <p>{{text|safe}}</p>
+    {% endif %}
+    <p>&rtrif; <a href="javascript:history.back()">{{ _('Go back') }}</a>
+    <br>&rtrif; <a href="/">{{ _('Back to Front Page') }}</a></p>
+{% endblock %}
+

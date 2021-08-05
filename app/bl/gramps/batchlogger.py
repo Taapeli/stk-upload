@@ -34,7 +34,7 @@ Created on 26.5.2018
 '''
 #from datetime import date
 import shareds
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 #from models.cypher_gramps import Cypher_batch
 #from models import dbutil
 
@@ -79,7 +79,7 @@ class BatchLog():
 # #                 local_tx = True
 # 
 #         try:
-#             return tx.run(CypherBatch.batch_complete, user=self.userid, bid=self.bid)
+#             return tx.run(CypherRoot.batch_complete, user=self.userid, bid=self.bid)
 #         
 # #         if local_tx:
 # #             tx.commit()
