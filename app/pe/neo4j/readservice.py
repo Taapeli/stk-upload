@@ -1264,26 +1264,26 @@ class Neo4jReadService(ConcreteService):
         status = Status.OK if recs else Status.NOT_FOUND
         return {"status": status, "items": recs}
 
-    def dr_get_comment_list(self, user, fw_from, limit):
+    def dr_get_topic_list(self, user, fw_from, limit):
         """Reads Comment objects from user batch or common data using context.
 
         :param: user    Active user or None, if approved data is requested
-        :param: fw_from The name from which the list is requested
+        :param: fw_from The timestamp from which the list is requested
         :param: limit   How many items per page
         """
 
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(session,
-                CypherComment.get_comments,
+                CypherComment.get_topics,
                 user,
-                start_name=fw_from,
+                start_timestamp=fw_from,
                 limit=limit,
             )
 
             recs = []
             for record in result:
                 recs.append(record)
-            #             recs = [record for record in result]
+            #recs = [record for record in result]
             if recs:
                 return {"recs": recs, "status": Status.OK}
             else:

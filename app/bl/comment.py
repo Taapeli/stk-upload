@@ -23,18 +23,17 @@ Created on 19.5.2021
 @author: jormah
 """
 # blacked 2021-05-01 JMä
-import os
-
 import shareds
-from .base import NodeObject, Status
+from bl.base import NodeObject, Status
+from bl.root import Root
 from bl.person import PersonBl
 from bl.family import FamilyBl
 from bl.place import PlaceBl
-from bl.event import EventBl
+#from bl.event import EventBl
 from bl.source import SourceBl
 
 from pe.dataservice import DataService
-from pe.neo4j.cypher.cy_comment import CypherComment
+#from pe.neo4j.cypher.cy_comment import CypherComment
 
 
 class Comment(NodeObject):
@@ -50,7 +49,7 @@ class Comment(NodeObject):
     """
 
     def __init__(self, uniq_id=None):
-        """ Create a new comment individ """
+        """ Create a new comment instance """
         NodeObject.__init__(self)
         self.text = ""
         self.user = ""
@@ -58,7 +57,7 @@ class Comment(NodeObject):
 
     def __str__(self):
 
-        return f"{self.text}: {self.timestr} {self.user} {self.timestamp}"
+        return f"{self.text}: {self.timestr} {self.user}" # {self.timestamp}"
 
     @classmethod
     def from_node(cls, node):
@@ -85,60 +84,74 @@ class CommentReader(DataService):
 
     def read_my_comment_list(self):
         """Read Comment object list using u_context."""
-        comments = []
+        topics = []
         fw = self.user_context.first  # next name
         user = self.user_context.batch_user()
         limit = self.user_context.count
         ustr = "for user " + user if user else "approved "
         print(
-            f"CommentReader.read_my_comment_list: Get max {limit} comments {ustr} starting {fw!r}"
+            f"CommentReader.read_my_comment_list: Get max {limit} topics {ustr} starting {fw!r}"
         )
 
-        res = shareds.dservice.dr_get_comment_list(self.use_user, fw, limit)
+        res = shareds.dservice.dr_get_topic_list(self.use_user, fw, limit)
         if Status.has_failed(res):
             return res
-        for record in res.get("recs", None):
-            # <Record o=<Node id=393949 labels={'Comment'}
-            #        properties={'text': 'Amanda syntyi Porvoossa',
-            #            'batch_id': '2020-01-02.001'}>
-            #    credit='juha'
-            #    batch_id='2020-01-02.001'
-            #    count=1>
+        for record in res['recs']:
+            # <Record 
+            #    o=<Node id=84627 labels=frozenset({'Person'}) 
+            #        properties={'sortname': 'Lundman#Maja Stina#', 'death_high': 1846, 'change': 1585409699, 
+            #            'sex': 2, 'confidence': '2.0', 'birth_low': 1770, 'birth_high': 1770, 'id': 'I1971', 
+            #            'uuid': 'cecd3b128c5f42ca8873bd7d3d4d5a57', 'death_low': 1846}>
+            #    c=<Node id=156264 labels=frozenset({'Topic'})
+            #        properties={'timestr': '28.07.2021 19:53', 'text': 'Kutsutaanko myös Kirstiksi?',
+            #            'timestamp': 1627491233.9907079}> credit='jpek'
+            #    count=0
+            #    root=<Node id=86708 labels=frozenset({'Root'})
+            #        properties={'material': 'Family Tree', 'auditor': 'juha', 'state': 'Auditing', 
+            #            'id': '2021-05-09.002', 'user': 'jpek', 'timestamp': 1620578577293}>>
+                # <Record o=<Node id=393949 labels={'Comment'}
+                #        properties={'text': 'Amanda syntyi Porvoossa',
+                #            'batch_id': '2020-01-02.001'}>
+                #    credit='juha'
+                #    batch_id='2020-01-02.001'
+                #    count=1>
 
-            cnode = record["c"]
-            c = Comment.from_node(cnode)
-            c.label = record.get("label")
+            node = record["c"]
+            c = Comment.from_node(node)
+            c.label = list(node.labels).pop()
+
+            c.obj_label = record.get("label")
             c.count = record.get("count", 0)
             c.credit = record.get("credit")
-            c.batch = record.get("batch_id")
-            
-            onode = record["o"]
-            if c.label[0] == "Family":
-                o = FamilyBl.from_node(onode)
-                c.object = o
-            elif c.label[0] == "Person":
-                o = PersonBl.from_node(onode)
-                c.object = o
-            elif c.label[0] == "Place":
-                o = PlaceBl.from_node(onode)
-                c.object = o
-            elif c.label[0] == "Source":
-                o = SourceBl.from_node(onode)
-                c.object = o
+
+            node = record['root']
+            c.root = Root.from_node(node)
+            #c.batch = record.get("batch_id")
+
+            node = record["o"]
+            c.obj_label = list(node.labels).pop()
+            if c.obj_label == "Family":
+                c.object = FamilyBl.from_node(node)
+            elif c.obj_label == "Person":
+                c.object = PersonBl.from_node(node)
+            elif c.obj_label == "Place":
+                c.object = PlaceBl.from_node(node)
+            elif c.obj_label == "Source":
+                c.object = SourceBl.from_node(node)
             else:
-                print(f"CommentReader.read_my_comment_list: Discarded referring object '{c.label[0]}'")
+                print(f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'")
                 next
-            comments.append(c)
+            topics.append(c)
 
         # Update the page scope according to items really found
-        if comments:
+        if topics:
             self.user_context.update_session_scope(
                 "comment_scope",
-                comments[0].object.uuid,
-                comments[-1].object.uuid,
+                topics[0].timestamp,
+                topics[-1].timestamp,
                 limit,
-                len(comments),
+                len(topics),
             )
-            return {"status": Status.OK, "items": comments}
+            return {"status": Status.OK, "items": topics}
         return {"status": Status.NOT_FOUND}
 

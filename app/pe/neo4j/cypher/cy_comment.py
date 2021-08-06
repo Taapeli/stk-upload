@@ -28,10 +28,19 @@ class CypherComment():
 
 # Read Comment data
 
-    # Comment list by description with count limit
-    get_comments = """
-MATCH (root) --> (o) -[r:COMMENT]-> (c:Comment)
-RETURN labels(o) as label, c, o, root.user as credit, root.id as batch_id, COUNT(r) AS count
-    ORDER BY c.timestamp desc LIMIT $limit"""
+    # Topic list by description with count limit
+    get_topics = """
+MATCH (o) -[:COMMENT]-> (c)  <-[:COMMENTED]- (u:UserProfile)
+MATCH (root:Root) --> (o)
+OPTIONAL MATCH repl = ( (c) -[:COMMENT*]-> () )
+RETURN o, c, u.username as credit, 
+    coalesce(length(repl),0) AS count,
+    root
+ORDER BY c.timestamp desc LIMIT $limit"""
+    obsolete_get_comments = """
+MATCH (root) --> (o) -[r:COMMENT]-> (c)  <-[:COMMENTED]- (u:UserProfile)
+RETURN labels(o) as label, 
+    c, o, root.user as credit, root.id as batch_id, COUNT(r) AS count
+ORDER BY c.timestamp desc LIMIT $limit"""
 
 
