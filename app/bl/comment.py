@@ -68,6 +68,7 @@ class Comment(NodeObject):
             properties={'text': 'Amanda syntyi Porvoossa'}>
         """
         n = super(Comment, cls).from_node(node)
+        n.title = node.get("title","")
         n.text = node["text"]
         n.timestr = node["timestr"]
         n.user = node["user"]
@@ -119,7 +120,16 @@ class CommentReader(DataService):
             node = record["c"]
             c = Comment.from_node(node)
             c.label = list(node.labels).pop()
-
+            if not c.title:
+                # Show shortened text without line breaks as title
+                text = c.text.replace("\n", " ")
+                if len(text) > 50:
+                    n = text[:50].rfind(" ")
+                    if n < 2:
+                        n = 50
+                    c.title = text[:n]
+                else:
+                    c.title = c.text
             c.obj_label = record.get("label")
             c.count = record.get("count", 0)
             c.credit = record.get("credit")

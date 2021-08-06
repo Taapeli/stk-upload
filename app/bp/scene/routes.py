@@ -1135,7 +1135,7 @@ def fetch_thumbnail():
 @bp.route("/scene/batch_comments")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_comments():
+def show_topics():
     """List of Comments for menu(7)"""
     t0 = time.time()
     print(f"--- {request}")
@@ -1153,7 +1153,7 @@ def show_comments():
         flash(f'{res.get("statustext","error")}', "error")
     comments = res.get("items", [])
 
-    stk_logger(u_context, f"-> bp.scene.comment.show_comments fw n={len(comments)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_topics n={len(comments)}")
     return render_template(
         "/scene/comments.html",
         comments=comments,
