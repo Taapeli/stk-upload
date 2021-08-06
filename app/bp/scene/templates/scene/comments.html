@@ -1,6 +1,6 @@
 {# /scene/templates/scene/comments.html_ #}
 {% extends "/scene/sc_layout.html" %}
-{% block title %}{{ _('List of Comments') }} (scenecomments){% endblock %}
+{% block title %}{{ _('List of Topics') }} (scenecomments){% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
@@ -9,7 +9,7 @@
 {% set cnt = comments|count %}
 
 <div id="startdiv">
-	<h1>{{ _('List of Comments') }}</h1>
+	<h1>{{ _('List of Topics') }}</h1>
     <div>{{ macro.show_use_case() }}</div>
 </div>
 
@@ -18,7 +18,7 @@
         <div id="summaryarea">
             <div class="flex-container">
                <div id="description_box">
-                   <p>{{ _('Displaying %(num)s distinct comments', num=cnt) }}</p>
+                   <p>{{ _('Displaying %(num)s distinct topics', num=cnt) }}</p>
 			   </div>
 		    </div>
 
@@ -30,38 +30,44 @@
         	<h3>{{ _("Discussions") }}</h3>
 
   <table id="comments">
-    <tr><th>{{ _("Time") }} / {{ _("Author")|lower }}</th>
-        <th>{{ _("Concerned")|title }}</th>
-        <th>{{ _("References") }}</th>
+    <tr><th>{{ _("Time") }}, {{ _("Author")|lower }}</th>
+        <th>{{ _("Concerned, Topic") }}</th>
+        <th>{{ _("Replies") }}</th>
     {% if user_context.is_auditor %}
-        <th class="Auditor" title="{{ _('For auditor only') }}">{{ _('User Batch') }} &nbsp;</th>
+        <th class="Auditor" title="{{ _('For auditor only') }}">{{ _('Material') }} &nbsp;</th>
     {% endif %}
     </tr>
 {% if cnt %}
     {% for c in comments %}
         <tr>
-            <td>{{c.timestr}} / {{c.user}}</td>
-            <td><span class="typedesc">{{ _(c.label[0]) }}</span>
-            {% if c.label[0] == 'Person' %}
+            <td>{{c.timestr}}<br>&nbsp;&nbsp;{{c.credit}}</td>
+            <td><span class="typedesc">{{ _(c.obj_label) }}</span>
+            {% if c.obj_label == 'Person' %}
             	<a href="/scene/person?uuid={{c.object.uuid}}" class="inlink"
                    title="{{ _('Go to comment page') }}">{{ c.object.sortname }}</a>
-            {% elif c.label[0] == 'Place' %}
+            {% elif c.obj_label == 'Place' %}
             	<a href="/scene/location/uuid={{c.object.uuid}}" class="inlink"
                    title="{{ _('Go to comment page') }}">{{ c.object.pname }}</a>
-            {% elif c.label[0] == 'Family' %}
+            {% elif c.obj_label == 'Family' %}
             	<a href="/scene/family?uuid={{c.object.uuid}}" class="inlink"
                    title="{{ _('Go to comment page') }}">{{ c.object.father_sortname }} / {{ c.object.mother_sortname }}</a>
-            {% elif c.label[0] == 'Source' %}
+            {% elif c.obj_label == 'Source' %}
             	<a href="/scene/source?uuid={{c.object.uuid}}" class="inlink"
                    title="{{ _('Go to commented page') }}">{{ c.object.stitle }}</a>
      		{% else %}
-     			{{ _('Unknown object') }}
+     			<i>{{ _('Unknown object') }}</i>
     		{% endif %}
+    		<br><i>{{c.title}}</i>
     		</td>
-            <td>{{c.count}}</td>
+            <td style="text-align:center">{{c.count}}</td>
 
        {% if user_context.is_auditor %}
-            <td class="Auditor"><i>{{c.credit}}</i><br>{{c.batch}}</td>
+            <td class="Auditor">
+            	<span class="typedesc">{{ _(c.root.state|upper) }}</span>
+            	{# if c.root.auditor %} – {{ c.root.user }}{% endif #}
+            	<br>{{c.root.id}}
+            	<i>{{c.root.user}}</i>
+            </td>
        {% endif %}
         </tr>
     {% endfor %}

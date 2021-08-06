@@ -87,6 +87,29 @@ def do_schema_fixes():
             CREATE (b) -[{new_type}]-> (x)
             DELETE r"""
 
+    # Comment and Topic:
+    #  - Identify old Comments by existing c.user
+    # a) Delete object comments except the 1st one
+    # b) Connect remaining comments to UserProfile,
+    #    change label to Topic and
+    #    remove c.user
+    Delete_comment_tails = """
+        MATCH (x) -[:COMMENT]-> (c:Comment) WHERE c.user IS NOT null 
+        WITH x, c ORDER BY id(x), c.timestamp
+        WITH x, collect(c)[1..] as coms
+        UNWIND coms AS com
+            DETACH DELETE com
+    """
+    Rename_label_Comment_to_Topic = """
+        MATCH (root:Root) --> (x) -[:COMMENT]-> (c:Comment) WHERE c.user IS NOT null
+        MATCH (up:UserProfile) WHERE up.username = root.user
+        WITH up, c                                             LIMIT 3
+            MERGE (up) -[:COMMENTED]-> (c)
+            SET c.user = null
+            SET c:Topic
+            REMOVE c:Comment
+    """
+
     with shareds.driver.session() as session: 
         try:
             for old_root, cypher_to_root, old_type in [
@@ -122,8 +145,8 @@ def do_schema_fixes():
                          f" Failed {e.__class__.__name__} {e}")
             return
 
-        # 3. Create index fot Root.material, Root.state
-        #
+        # 3. Create index for Root.material, Root.state
+
         try:
             result = session.run(f'CREATE INDEX FOR (b:Root) ON (b.material, b.state)')
             counters = shareds.db.consume_counters(result)
@@ -132,10 +155,27 @@ def do_schema_fixes():
         except ClientError as e:
             msgs = e.message.split(',')
             print(f'do_schema_fixes: New index for Root ok: {msgs[0]}')
-            return
         except Exception as e: 
             logger.warning(f"do_schema_fixes: Indexes for Root not created." 
                            f" Failed {e.__class__.__name__} {e.message}") 
+
+        # 4. Change 1st Comments to Topic and remove others
+
+        try:
+            result = session.run(Delete_comment_tails)
+            counters = shareds.db.consume_counters(result)
+            comments_removed = counters.nodes_deleted
+            print(f"do_schema_fixes: removed {comments_removed} old Comments")
+
+            result = session.run(Rename_label_Comment_to_Topic)
+            counters = shareds.db.consume_counters(result)
+            labels_changed = counters.labels_added
+            print(f"do_schema_fixes: changed {labels_changed} Comments to Topics")
+        except Exception as e: 
+            msg = f"do_schema_fixes: Comments to Topic failed. {e.__class__.__name__} {e.message}"
+            print (msg)
+            logger.warning(msg) 
+
 
 # Removed 5.6.2021
 # dropped=0

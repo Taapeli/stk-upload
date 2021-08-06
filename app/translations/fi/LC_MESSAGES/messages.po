@@ -491,6 +491,9 @@ msgstr "Ehdokasaineisto"
 msgid "FOR_AUDIT"
 msgstr "Luovutettu"
 
+msgid "AUDITING"
+msgstr "nk. Hyväksytty"
+
 #: bp/admin/templates/admin/uploads.html:40 bp/admin/uploads.py:362
 #: bp/admin/uploads.py:368 bp/audit/templates/audit/batches.html:33
 #: bp/gramps/templates/gramps/uploads.html:181
@@ -900,6 +903,9 @@ msgstr "Järjestelmän loki"
 #: bp/scene/templates/scene/comments.html:33
 msgid "Time"
 msgstr "Aika"
+
+msgid "Concerned, Topic"
+msgstr "Kohde, aihe"
 
 #: bp/admin/templates/admin/syslog.html:15
 #: bp/scene/templates/scene/place_events.html:112
@@ -2340,13 +2346,13 @@ msgid "No previous comments"
 msgstr "Ei aiempia kommentteja"
 
 #: bp/scene/templates/scene/comments.html:12
-msgid "List of Comments"
-msgstr "Kommentit ja keskustelut"
+msgid "List of Topics"
+msgstr "Keskustelut"
 
 #: bp/scene/templates/scene/comments.html:21
 #, python-format
-msgid "Displaying %(num)s distinct comments"
-msgstr "Näytetään %(num)s kommenttia"
+msgid "Displaying %(num)s distinct topics"
+msgstr "Näytetään %(num)s aihetta"
 
 #: bp/scene/templates/scene/comments.html:30
 msgid "Discussions"
@@ -2361,7 +2367,6 @@ msgstr "Tekijä"
 msgid "Concerned"
 msgstr "kohde"
 
-#: bp/scene/templates/scene/comments.html:35
 #: bp/scene/templates/scene/media.html:94
 #: bp/scene/templates/scene/medias.html:66
 #: bp/scene/templates/scene/places.html:72
@@ -2369,15 +2374,22 @@ msgstr "kohde"
 msgid "References"
 msgstr "Viittauksia"
 
+#: bp/scene/templates/scene/comments.html:35
+msgid "Replies"
+msgstr "Vastauksia"
+
 #: bp/scene/templates/scene/comments.html:37
 #: bp/scene/templates/scene/medias.html:68
 msgid "For auditor only"
 msgstr "Näytetään vain auditoijalle"
 
-#: bp/scene/templates/scene/comments.html:37
 #: bp/scene/templates/scene/medias.html:68
 msgid "User Batch"
 msgstr "Tarjokasaineisto"
+
+#: bp/scene/templates/scene/comments.html:37
+msgid "Material"
+msgstr "Aineisto"
 
 #: bp/scene/templates/scene/comments.html:47
 #: bp/scene/templates/scene/comments.html:50
