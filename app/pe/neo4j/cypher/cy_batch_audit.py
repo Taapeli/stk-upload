@@ -165,13 +165,13 @@ class CypherAudit():
     '''
 
     get_my_audits = '''
-match (b:Root {user:'', auditor: $oper})
+match (b:Root {state:'Auditing', auditor: $oper})
 optional match (b) --> (x)
 return b, labels(x)[0] as label, count(x) as cnt 
     order by b.user, b.id, label'''
 
     get_all_audits = '''
-match (b:Root{user:''})
+match (b:Root{state:'Auditing'})
 optional match (b) --> (x)
 return b, labels(x)[0] as label, count(x) as cnt 
     order by b.user, b.id, label'''
@@ -186,20 +186,20 @@ RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str,
  """
 
     delete = '''
-MATCH (a:Root{id: $batch, user:''}) -[:OBJ_PERSON|OBJ_FAMILY|OBJ_PLACE|OBJ_SOURCE|OBJ_OTHER]-> (x)
+MATCH (a:Root{id: $batch, state:'Auditing'}) -[:OBJ_PERSON|OBJ_FAMILY|OBJ_PLACE|OBJ_SOURCE|OBJ_OTHER]-> (x)
 WHERE labels(x) IN [$labels]
 DETACH DELETE x
 RETURN count(x)
 '''
 
     delete_names = '''
-MATCH (a:Root {id: $batch, user:''}) -[:OBJ_PERSON]-> (Person) -[:NAME]-> (x:Name)
+MATCH (a:Root {id: $batch, state:'Auditing'}) -[:OBJ_PERSON]-> (Person) -[:NAME]-> (x:Name)
 DETACH DELETE x
 RETURN count(x)
 '''
 
     delete_place_names = '''
-MATCH (a:Root{id: $batch, user:''}) -[:OBJ_PLACE]-> (Place) -[:NAME]-> (x:Place_name)
+MATCH (a:Root{id: $batch, state:'Auditing'}) -[:OBJ_PLACE]-> (Place) -[:NAME]-> (x:Place_name)
 DETACH DELETE x
 RETURN count(x)
 '''
@@ -211,7 +211,7 @@ RETURN count(x)
 # '''
 
     delete_audit_node = '''
-MATCH (a:Root {id: $batch, user:''})
+MATCH (a:Root {id: $batch})
 DETACH DELETE a
 '''
 
