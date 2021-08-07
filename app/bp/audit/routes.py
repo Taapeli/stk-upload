@@ -16,7 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 """
 Created on 28.11.2019
 
@@ -24,14 +23,15 @@ Created on 28.11.2019
  
 """
 # blacked 2021-07-25 JMä
-from . import bp
-import time
-
-import logging
-from io import StringIO, BytesIO
 import csv
+import time
+import logging
+import traceback
+from io import StringIO, BytesIO
 
 logger = logging.getLogger("stkserver")
+
+from . import bp
 
 from flask import render_template, request, redirect, url_for, flash
 from flask import send_file
@@ -46,7 +46,7 @@ from bl.base import Status
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
 from bp.admin.csv_refnames import load_refnames
-from .models.batch_merge import Batch_merge
+from bl.audit.models.batch_merge import Batch_merge
 
 from bp.admin import uploads
 from models import syslog, loadfile
@@ -116,8 +116,21 @@ def move_in_2():
     batch_id = request.form["batch"]
     auditor = current_user.username
     logger.info(f" bp.audit.routes.move_in_2 u={owner} b={batch_id}")
-    merger = Batch_merge()
-    msg = merger.move_whole_batch(batch_id, owner, auditor)
+    try:
+        merger = Batch_merge()
+        res = merger.move_whole_batch(batch_id, owner, auditor)
+        if res:
+            msg = "Transfer succeeded"
+            flash(_(msg))
+        else:
+            msg = "Transfer failed"
+            flash(_(msg), "error")
+    except Exception as e:
+        traceback.print_exc()
+        msg = f"Batch_merge.move_whole_batch FAILED: {e}"
+        flash(msg, "error")
+        logger.error(f"{msg} {e.__class__.__name__} {e}")
+    
     syslog.log(type="batch to Common data", batch=batch_id, by=owner, msg=msg)
     return redirect(url_for("audit.move_in_1", batch_name=batch_id))
 
