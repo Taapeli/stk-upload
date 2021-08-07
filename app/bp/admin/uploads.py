@@ -411,7 +411,7 @@ def list_uploads(username):
         upload.count = b.person_count
         upload.count_a = b.audit_count
         upload.has_file = False
-        upload.has_log = audit_count > 0  # Rough estimate!
+        upload.has_log = b.audit_count > 0  # Rough estimate!
         upload.upload_time = 0.0
         upload.material_type = b.material
         upload.description = b.description
