@@ -306,6 +306,7 @@ def list_uploads(username):
         # Returns batch, person_count, audit_count
         batch_node = record["b"]
         b = Root.from_node(batch_node)
+        print("uploads:", b.id, b.state)
         # augment with additional data
         b.person_count = record["person_count"]
         b.audit_count = record["audit_count"]
@@ -357,6 +358,8 @@ def list_uploads(username):
                     audit_count = b.audit_count
                     if status == State.ROOT_FOR_AUDIT:
                         status_text = _("FOR_AUDIT")
+                    if status == State.ROOT_AUDITING:
+                        status_text = _("AUDITING")
                 else:
                     status = State.ROOT_REMOVED
                     status_text = _("REMOVED")

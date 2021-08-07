@@ -102,6 +102,7 @@ return b.id as batch, b.timestamp as timestamp, b.status as status,
 # TODO Batch->Root:
     get_user_batch_summary = """
 match (b:Root) where b.user = $user
+and b.state <> 'Audit Requested'
 optional match (b) -[r:OBJ_PERSON]-> (:Person)
 with b, count(r) as person_count
     optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
