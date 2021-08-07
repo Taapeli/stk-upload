@@ -173,6 +173,7 @@ class UserContext():
         self.context_code = self.ChoicesOfView.COMMON
         self.state = None
         self.lang = user_session.get('lang','') # User language
+        self.batch_id = None
 
         self.years = []                         # example [1800, 1899]
         self.series = None                      # 'Source' data theme like "birth"

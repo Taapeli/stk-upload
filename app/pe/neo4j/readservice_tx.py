@@ -13,7 +13,7 @@ from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
 
-from .util import run_cypher
+from .util import run_cypher2
 
 class PersonRecord:
     ''' Object to return person display data. '''
@@ -97,6 +97,7 @@ class Neo4jReadServiceTx(ConcreteService):
         fw_from = args.get('fw','')
         years= args.get('years',[-9999,9999])
         limit = args.get('limit', 100)
+        batch_id = args.get('batch_id')
         restart = (rule == 'start')
 
         # Select cypher clause by arguments
@@ -143,7 +144,7 @@ class Neo4jReadServiceTx(ConcreteService):
  
         persons = []
         logger.debug(f"tx_get_person_list: cypher: {cypher}")
-        result = run_cypher(self.tx, cypher, username,
+        result = run_cypher2(self.tx, cypher, username, batch_id,
                             #material=material, state=state,
                             use=rule, name=key,
                             years=years,
@@ -181,7 +182,7 @@ class Neo4jReadServiceTx(ConcreteService):
         return {'items': persons, 'status': Status.OK}
 
 
-    def tx_get_person_by_uuid(self, uuid:str, active_user:str):
+    def tx_get_person_by_uuid(self, uuid:str, active_user:str, batch_id):
         ''' Read a person from common data or user's own Batch.
 
         :param: uuid        str
@@ -194,7 +195,7 @@ class Neo4jReadServiceTx(ConcreteService):
         #    results: person, root
 
         try:
-            record = run_cypher(self.tx, CypherPerson.get_person, active_user, uuid=uuid).single()
+            record = run_cypher2(self.tx, CypherPerson.get_person, active_user, batch_id, uuid=uuid).single()
             # <Record 
             #    p=<Node id=25651 labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
@@ -231,6 +232,7 @@ class Neo4jReadServiceTx(ConcreteService):
 #                 self.objs[person.uniq_id] = person
 
         except Exception as e:
+            raise
             msg = f'person={uuid} {e.__class__.__name__} {e}'
             print(f'dx_get_person_by_uuid: {msg}')
             res.update({'status': Status.ERROR, 'statustext': msg})

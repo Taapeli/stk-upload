@@ -300,6 +300,7 @@ class FamilyReader(DataService):
             "name": self.user_context.first,  # From here forward
             "order": order,
             "limit": limit,
+            "batch_id": self.user_context.batch_id,
         }
         ustr = "user " + args["use_user"] if args["use_user"] else "no user"
         print(
@@ -384,7 +385,6 @@ class FamilyReader(DataService):
                     len(families),
                 )
             self.user_context.order = order
-
         if self.user_context.use_common():
             families = self.hide_privacy_protected_families(families)
         return families

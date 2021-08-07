@@ -118,6 +118,7 @@ class PersonReaderTx(DataService):
         args["use_user"] = self.use_user
         args["fw"] = context.first  # From here forward
         args["limit"] = context.count
+        args["batch_id"] = context.batch_id
 
         res = shareds.dservice.tx_get_person_list(args)
 
@@ -265,7 +266,7 @@ class PersonReaderTx(DataService):
 
         # ---/
 
-        res = shareds.dservice.tx_get_person_by_uuid(uuid, active_user=self.use_user)
+        res = shareds.dservice.tx_get_person_by_uuid(uuid, active_user=self.use_user, batch_id=self.user_context.batch_id)
         if Status.has_failed(res):
             # Not found, not allowed (person.too_new) or error
             if res.get("status") == Status.NOT_FOUND:

@@ -16,7 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from pe.neo4j.util import run_cypher
+from pe.neo4j.util import run_cypher, run_cypher2
 
 """
 Created on 17.3.2020
@@ -455,9 +455,9 @@ class Neo4jReadService(ConcreteService):
                 print(
                     "Neo4jReadService.dr_get_families: candidate ordered by man"
                 )
-                result = run_cypher(session,
+                result = run_cypher2(session,
                     CypherFamily.get_families_by_father,
-                    user,
+                    user, args["batch_id"],
                     fw=fw,
                     limit=limit,
                 )
@@ -465,9 +465,9 @@ class Neo4jReadService(ConcreteService):
                 print(
                     "Neo4jReadService.dr_get_families: candidate ordered by wife"
                 )
-                result = run_cypher(session,
+                result = run_cypher2(session,
                     CypherFamily.get_families_by_mother,
-                    user,
+                    user, args["batch_id"],
                     fw=fw,
                     limit=limit,
                 )
