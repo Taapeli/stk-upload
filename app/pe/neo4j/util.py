@@ -67,8 +67,10 @@ def run_cypher2( session, cypher, username, batch_id, **kwargs):
         cypher2 = cypher_common_prefix + cypher
     else:
         cypher2 = cypher_batch_prefix + cypher
-    #print(cypher2)
-    #test_person.pypprint(locals())
+    if False:
+        print("----------- run_cypher2 -------------")
+        print(cypher2)
+        pprint(locals())
     return session.run(cypher2, 
                username=username,  
                batch_id=batch_id,

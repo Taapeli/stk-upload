@@ -406,8 +406,8 @@ def list_uploads(username):
             # Todo: Remove later: Old FOR_AUDIT materials are CANDIDATE, too
             upload.status = _("CANDIDATE") + " ?"
         elif b.state == State.ROOT_AUDITING:
-            if audit_count > 0:
-                upload.status = f"{ _('FOR_AUDIT') } {audit_count} { _('persons') }"
+            if b.audit_count > 0:
+                upload.status = f"{ _('FOR_AUDIT') } {b.audit_count} { _('persons') }"
             else:
                 upload.status = f"{ _('AUDITING') } (toistaiseksi nk. hyväksytty)"
 

@@ -33,6 +33,7 @@ from bl.person import PersonReader
 import shareds
 from operator import itemgetter
 from bl.root import Root
+from bp.dupsearch.models.search import batches
 
 logger = logging.getLogger("stkserver")
 
@@ -146,8 +147,10 @@ def start_logged():
                 stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
             surnamestats.sort(key=itemgetter("surname"))
 
+    my_batches = Root.get_my_batches(current_user.username)
     return render_template(
-        "/start/index_logged.html", is_demo=is_demo, surnamestats=surnamestats
+        "/start/index_logged.html", is_demo=is_demo, surnamestats=surnamestats,
+        batches=my_batches
     )
 
 
@@ -259,6 +262,19 @@ def my_settings():
         userprofile=userprofile,
     )
 
+@shareds.app.route("/my_batches/", methods=["GET"])
+@shareds.app.route("/my_batches/<selected_batch_id>", methods=["GET"])
+@login_required
+def my_batches(selected_batch_id=None):
+    batches = [
+        {"batch_id": "2021-08-07.501","batch_file":"X1testtree.gramps"},
+        {"batch_id": "2021-08-07.502","batch_file":"X2testtree.gramps"},
+    ]
+    return render_template(
+        "/start/hx-batches.html",
+    batches=batches
+    )
+    
 
 # # Admin start page in bp.admin
 # @shareds.app.route('/admin',  methods=['GET', 'POST'])

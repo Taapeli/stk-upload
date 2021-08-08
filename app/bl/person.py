@@ -243,7 +243,7 @@ class PersonReader(DataService):
         
         If self.use_user is defined, filter by user.
         """
-        surnames = shareds.dservice.dr_get_surname_list(self.use_user, count)
+        surnames = shareds.dservice.dr_get_surname_list(self.use_user, self.user_context.batch_id, count)
         # Returns [{'surname': surname, 'count': count},...]
 
         # if self.use_user:

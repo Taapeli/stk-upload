@@ -143,7 +143,7 @@ class Neo4jReadServiceTx(ConcreteService):
                     'statustext': 'tx_get_person_list: Invalid rule'}
  
         persons = []
-        logger.debug(f"tx_get_person_list: cypher: {cypher}")
+        #logger.debug(f"tx_get_person_list: cypher: {cypher}")
         result = run_cypher2(self.tx, cypher, username, batch_id,
                             #material=material, state=state,
                             use=rule, name=key,

@@ -94,7 +94,7 @@ class CommentReader(DataService):
             f"CommentReader.read_my_comment_list: Get max {limit} topics {ustr} starting {fw!r}"
         )
 
-        res = shareds.dservice.dr_get_topic_list(self.use_user, fw, limit)
+        res = shareds.dservice.dr_get_topic_list(self.use_user, self.user_context.batch_id, fw, limit)
         if Status.has_failed(res):
             return res
         for record in res['recs']:

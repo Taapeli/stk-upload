@@ -119,7 +119,6 @@ class PersonReaderTx(DataService):
         args["fw"] = context.first  # From here forward
         args["limit"] = context.count
         args["batch_id"] = context.batch_id
-
         res = shareds.dservice.tx_get_person_list(args)
 
         status = res.get("status")
