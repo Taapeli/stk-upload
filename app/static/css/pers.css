@@ -289,10 +289,10 @@ table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
     font-size: 90%;
     border-left: 6px solid silver;
 }
-table.legend > tbody > tr > td, table.legend > tbody > tr > th {
-    border:none;
-    outline:none;
-}
+/* table.legend > tbody > tr > td, table.legend > tbody > tr > th { */
+/*     border:none; */
+/*     outline:none; */
+/* } */
 
 div.steps { margin: 1em;}
 div.steps div {

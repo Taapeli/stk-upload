@@ -367,6 +367,10 @@ h3 {
     background-color: white;
     max-width: max-content;
 }
+.center {
+	text-align: center;
+}
+
 p#description {
     padding-left: 15px;
 }
