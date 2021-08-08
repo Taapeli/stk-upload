@@ -35,7 +35,7 @@ from models.util import format_timestamp
 # from bp.scene.routes import stk_logger
 from bl.admin.models.cypher_adm import Cypher_adm
 
-from bl.base import Status
+from bl.base import Status, NodeObject
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_batch_audit import CypherRoot, CypherAudit
 
@@ -84,9 +84,11 @@ class State:
     OBJECT_REJECTED = "Rejected"
 
 
-class Root:
+class Root(NodeObject):
     """
     Data Root node for candidate, auditing and approved material chunks.
+    
+    Given timestamp is milliseconrd from epoch. Convert to string by 
     """
 
     def __init__(self, userid=None):
@@ -100,7 +102,7 @@ class Root:
         self.material = DEFAULT_MATERIAL      # Material type "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
-        self.timestamp = 0
+        self.timestamp = 0 # Milliseconds; Convert to string by 
         self.description = ""
 
     def __str__(self):
@@ -257,7 +259,7 @@ class Root:
 
     @staticmethod
     def get_user_stats(user):
-        """Get statistics of user Batch contents.
+        """Get statistics of user Batch contents (for profile page).
 
         If the Batch has been moved to an Audit batch, this method returns
         ("Audit", count) to user_data data
@@ -292,7 +294,7 @@ class Root:
             cnt = record["cnt"]
 
             batch_id = b.id
-            tstring = Root.timestamp_to_str(b.timestamp)
+            tstring = b.timestamp_str()
 
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -314,20 +316,9 @@ class Root:
         return sorted(titles), user_data
 
     @staticmethod
-    def timestamp_to_str(ts):
-        """ Timestamp to display format. """
-        if ts:
-            t = float(ts) / 1000.0
-            tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
-        else:
-            tstring = ""
-        return tstring
-
-    @staticmethod
     def get_batch_stats(batch_id):
-        """Get statistics of given Batch contents."""
+        """Get statistics of given Batch contents (for move for approval)."""
         labels = []
-        batch = None
         result = shareds.driver.session().run(
             CypherRoot.get_single_batch, batch=batch_id
         )
@@ -340,12 +331,9 @@ class Root:
             #  label='Note'
             #  cnt=2>
 
-            if not batch:
-                batch = record["batch"]
-                user = batch.get("user")
-                # batch_id = batch.get('id')
-                ts = batch.get("timestamp")
-                tstring = Root.timestamp_to_str(ts)
+            node = record["batch"]
+            b = Root.from_node(node)
+            tstring = b.timestamp_str()
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -353,7 +341,7 @@ class Root:
             cnt = record["cnt"]
             labels.append((label, cnt))
 
-        return user, batch_id, tstring, sorted(labels)
+        return b.user, b.id, tstring, sorted(labels)
 
     @staticmethod
     def list_empty_batches():
@@ -392,10 +380,9 @@ class Root:
         cnt = record[0]
         return cnt
 
-# Copied from audit.py:
     @staticmethod
     def get_auditor_stats(auditor=None):
-        """Get statistics of auditor's audition batch contents."""
+        """Get statistics of auditor's audition batch contents (for audit/approvals)."""
         titles = []
         labels = {}
         if auditor:
@@ -418,6 +405,8 @@ class Root:
             if not label:
                 label = ""
             cnt = record["cnt"]
+            timestring = b.timestamp_str()
+            file = b.file.rsplit('/',1)[-1] if b.file else ""
 
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -425,7 +414,7 @@ class Root:
             if label and not label in titles:
                 titles.append(label)
 
-            key = f"{b.auditor}/{b.user}/{b.id}/{'b.updated'}"  # TODO Audit->Root
+            key = f"{b.auditor}/{b.user}/{b.id}/{file} {timestring}"
             if not key in labels:
                 labels[key] = {}
             labels[key][label] = cnt

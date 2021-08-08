@@ -13,14 +13,16 @@
 
 {% include "flash_messages.html" %}
 
-        <div class="startbox2">
+<!--         <div class="startbox2"> -->
             <h2>{{ _('Selected Batch') }}</h2>
-            <table width="100%">
-                <tr>
-                    {% set w = (100.0 / (label_nodes|length + 3) | round(0,'floor')) | int %}
-                    <th>{{ _('Batch id') }}</th>
-                    {% for label, cnt in label_nodes %}<th style="width: {{w}}%">{{ _(label|trim) }}</th>{% endfor %}
-                </tr>
+			<table>
+				<tr>
+					<th>{{ _('Batch id') }}</th>
+        {% for label, cnt in label_nodes %}
+					<th>{{ _(label|trim) | title }}</th>
+        {% endfor -%}
+				</tr>
+
                 <tr>
                     <td>{{batch}}{% if time %}<br>
                     <small>{{ _('saved at') }} {{time}}</small>{% endif %}
@@ -41,7 +43,7 @@
 {% else %}
             <p>{{ _('– There is no more data to move in this batch') }}.</p>        
 {% endif %}
-        </div>
+<!--         </div> -->
 
     </div>
 </div>

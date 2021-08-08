@@ -26,6 +26,7 @@ Created on 22.8.2019
 import uuid
 import json
 import traceback
+from datetime import datetime
 
 
 class Status:
@@ -120,6 +121,15 @@ class NodeObject:
         uuid = self.uuid if self.uuid else "-"
         return f'(NodeObject {uuid}/{self.uniq_id}/{self.id} date {self.dates})"'
 
+    def timestamp_str(self):
+        """ My timestamp to display format. """
+        if hasattr(self, "timestamp") and self.timestamp:
+            t = float(self.timestamp) / 1000.0
+            return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+        else:
+            return ""
+
+
     @classmethod
     def from_node(cls, node):
         """
@@ -193,8 +203,6 @@ class NodeObject:
 
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """
-        from datetime import datetime
-
         try:
             return datetime.fromtimestamp(self.change).strftime("%d.%m.%Y %H:%M:%S")
         except TypeError:
