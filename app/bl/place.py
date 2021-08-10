@@ -551,7 +551,8 @@ class PlaceReader(DataService):
         fw = context.first  # From here forward
         use_user = context.batch_user()
         places = shareds.dservice.dr_get_place_list_fw(
-            use_user, fw, context.count, lang=context.lang
+            use_user, fw, context.count, lang=context.lang,
+            batch_id=context.batch_id,
         )
 
         # Update the page scope according to items really found
@@ -623,7 +624,8 @@ class PlaceReader(DataService):
         """
         Return placename stats so that the names can be displayed in a name cloud.
         """
-        placenames = shareds.dservice.dr_get_placename_list(username=self.use_user, count=count)
+        placenames = shareds.dservice.dr_get_placename_list(self.use_user, 
+                                                            self.user_context.batch_id, count=count)
         # Returns [{'surname': surname, 'count': count},...]
 
         # if self.use_user:

@@ -56,7 +56,7 @@ class UserContext():
 
         Useful methods:
             batch_user()                Get effective user id or None
-            owner_str()                 Get owner descripition in current language
+            owner_str()                 Get owner description in current language
             use_owner_filter()          True, if data is filtered by owner id
             use_common()                True, if using common data
             privacy_ok(obj)             returns True, if there is no privacy reason
@@ -114,7 +114,7 @@ class UserContext():
 
 
     class ChoicesOfView():
-        """ Represents all possible combibations of selection by owner and batch. 
+        """ Represents all possible combinations of selection by owner and batch. 
 
         #TODO Define new context_code values including audit states and approved data
         """
@@ -173,6 +173,7 @@ class UserContext():
         self.context_code = self.ChoicesOfView.COMMON
         self.state = None
         self.lang = user_session.get('lang','') # User language
+        self.batch_id = None
 
         self.years = []                         # example [1800, 1899]
         self.series = None                      # 'Source' data theme like "birth"
@@ -216,24 +217,32 @@ class UserContext():
                 print(f'UserContext: Objects between years {self.years}')
 
 
-            """ Selected document series for Sources set in routes. """
-
             # Use case: Selected material for display
-            #    div=1 -> show approved material
-            new_selection = int(request.args.get('div', 0))
-            if new_selection:
-                # Got new material selection?
-                self.context_code = self.choices.get_valid_number(new_selection)
-                if self.context_code:
-                    self.session['user_context'] = self.context_code
-                    self.state = self.choices.get_state(self.context_code)
-                    print(f"UserContext: Now user_context={self.context_code} {self.state}")
+            #    set-scope = 1 -> set a new scope, common material or a specific user batch 
 
-        if new_selection == 0:
-            # If got no request user_context, use session value or 1
-            self.context_code = user_session.get('user_context', self.choices.COMMON)
-            print("UserContext: Uses same or default user_context=" \
-                  f"{self.context_code} {self.choices.get_state(self.context_code)}")
+            set_scope = request.args.get('set-scope')
+            if set_scope:
+                batch_id = request.args.get('batch_id')
+                if batch_id:
+                    self.context_code = self.ChoicesOfView.BATCH
+                    self.batch_id = batch_id
+                else:
+                    self.context_code = self.ChoicesOfView.COMMON
+                    self.batch_id = ""
+                self.session['user_context'] = self.context_code
+                self.session['batch_id'] = self.batch_id
+                self.session['person_scope'] = ('< start', '> end')
+                self.session['family_scope'] = ('< start', '> end')
+                self.session['place_scope'] = ('< start', '> end')
+                self.session['source_scope'] = ('< start', '> end')
+                self.session['media_scope'] = ('< start', '> end')
+                self.session['comment_scope'] = ('< start', '> end')
+            else:
+                # If got no request user_context, use session values
+                self.context_code = user_session.get('user_context', self.choices.COMMON)
+                self.batch_id = user_session.get('batch_id', "")
+                print("UserContext: Uses same or default user_context=" \
+                      f"{self.context_code} {self.choices.get_state(self.context_code)}")
 
         if self.user and self.context_code == self.choices.OWN:
             # Select state by contect code
@@ -251,12 +260,12 @@ class UserContext():
 
         #   For logging of scene area pages, set User.current_context variable:
         #   are you browsing common, audited data or your own batches?
-        current_user.current_context=self.context_code
+        current_user.current_context = self.context_code
 
     def __str__(self):
         return f"{self.state}/{self.material}"
 
-    def _set_next_from_request(self, request=None):
+    def _set_next_from_request(self, request=None):  # UNUSED???
         ''' Calculate scope values from request or session. 
         
             - session_var    str    session variable name
@@ -293,7 +302,7 @@ class UserContext():
 
     def batch_user(self):
         # Return current user id, if my candidate data is chosen
-        if self.context_code == self.choices.OWN:
+        if self.context_code in (self.choices.OWN, self.choices.BATCH):
             return self.user
         else:
             return None
@@ -303,7 +312,7 @@ class UserContext():
         
         # ONly used in test_owner_filter.test_ownerfilter_nouser()
         try:
-            return self.choices.as_str[self.context_code]
+            return f"{self.choices.as_str[self.context_code]} {self.batch_id}"
         except:
             return ''
 
@@ -368,7 +377,7 @@ class UserContext():
             If request is missing, try session.session_var.
         '''
         self.session_var = session_var
-
+            
         if request:
             fw = request.args.get('fw', None)
             bw = request.args.get('bw', None)
@@ -400,10 +409,10 @@ class UserContext():
             name_first  str    the first item name got from database
             name_last   str    the last item name
             limit       int    number of items requested
-            rec_cnt     int    records actually recieved
+            rec_cnt     int    records actually received
         
-            The new scope is [name_first, name_last]. If end has reached, 
-            the corresponding limit is set to endmark '> end' or '< top'.
+            The new scope is [name_first, name_last]. If end has been reached, 
+            the corresponding limit is set to endmark '> end' or '< start'.
         """
         print(f"UserContext.update_session_scope: Got {rec_cnt}  of {limit} items {name_first!r} – {name_last!r}")
         scope_old = (self.first, self.last)

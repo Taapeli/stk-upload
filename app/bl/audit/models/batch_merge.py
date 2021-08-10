@@ -54,4 +54,6 @@ class Batch_merge:
                 state_for_audit=State.ROOT_FOR_AUDIT
             ).single()
             logger.info(f"Batch_merge.move_whole_batch: {batch_id}")
+            print(f"Batch_merge.move_whole_batch: {batch_id}")
+            #print(f"Batch_merge.move_whole_batch: {batch_id}; result={result}")
             return result

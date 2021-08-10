@@ -244,8 +244,14 @@ RETURN person.confidence AS confidence,
 MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
+    get_surname_list = """
+match (root) -[:OBJ_PERSON]-> (p:Person) -[:NAME]-> (n:Name) 
+where n.surname <> "" and n.surname <> "N"
+return n.surname as surname, count(p) as count
+order by count desc
+limit $count"""
+
     get_surname_list_by_username = """
-    
 match (b:Root{user:$username, material:$material, state:$state}) 
     -[:OBJ_PERSON]-> (p:Person) -[:NAME]-> (n:Name) 
 where n.surname <> "" and n.surname <> "N"

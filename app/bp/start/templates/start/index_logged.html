@@ -41,7 +41,7 @@
            <div class="startbox">
              <div style="display: inline-block;">
                 <h2>{{ _('Candidate materials for Isotammi') }}</h2>
-                  <form action="/gramps">
+                  <form action="/gramps/uploads">
                  <p>{{ _('Save your  Gramps xml file as Isotammi candidate material.') }}</p>
                  <p>{{ _('Manage your candidate files and materials in database.') }}</p>
                  <div class="submit"> 
@@ -55,21 +55,28 @@
            <div class="startbox">
              <div style="display: inline-block;">
                <form method="get" action="/scene/persons/search">
+                   <input type="hidden" name="set-scope" value="1">
 
 {% if current_user.is_authenticated and 
    ( current_user.has_role('research') or current_user.has_role('admin') ) %}
                  <h2>{{ _('Browse Isotammi Database') }}</h2>
                  <p>{{ _('View your own candidate material or all approved common data') }}.</p>
-                 <p>{% set ctxt = session['user_context'] %}
-                   <input type="radio" name="div" value="1" 
-                    {% if ctxt == 1 %}checked{% endif %}>{{ _('The approved Isotammi data') }}<br>
-                   <input type="radio" name="div" value="2" 
-                    {% if ctxt == 2 or ctxt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
-{#
-                   &nbsp;&nbsp;└─ <input type="checkbox" name="cmp" value="1"  
-                    {% if ctxt == 3 or ctxt == 5 %}checked{% endif %}>
-                        {{ _('Compare to approved Isotammi data') }} 
-#}
+                 <p>{% set batch_id = session['batch_id'] %}
+                 {% set ctxt = session['user_context'] %}
+					<input type="radio" name="batch_id" value=""
+                    {% if batch_id == "" %}checked{% endif %}>{{ _('The approved Isotammi data') }}<br>
+				<br>
+                <b>{{ _('My candidate material') }}</b><br>
+					{% for batch in batches %}
+						<input type="radio" name="batch_id" value="{{ batch.id }}"
+		                    {% if batch_id == batch.id %}checked{% endif %}
+						>
+						{{ batch.id }}
+						<span style="font-size:smaller">{{ batch.filename }}</span>
+						<br>
+					{% endfor %}
+				
+				
                 </p>
 {% else %}
                  <h2>{{ _('The Browsed Material') }}</h2>

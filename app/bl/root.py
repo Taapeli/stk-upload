@@ -27,17 +27,20 @@ Created on 9.6.2021
 @author: jm
 """
 # blacked 2021-05-01 JMä
-from flask_babelex import _
-import shareds
+import os
 from datetime import date, datetime
+
+from flask_babelex import _
+
+import shareds
 from models.util import format_timestamp
 
-# from bp.scene.routes import stk_logger
 from bl.admin.models.cypher_adm import Cypher_adm
 
 from bl.base import Status, NodeObject
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_batch_audit import CypherRoot, CypherAudit
+from pe.neo4j.util import run_cypher
 
 DEFAULT_MATERIAL = "Family Tree"
 
@@ -256,6 +259,18 @@ class Root(NodeObject):
         result = shareds.driver.session().run(CypherRoot.list_all)
         for rec in result:
             yield dict(rec.get("b"))
+
+    @staticmethod
+    def get_my_batches(username):
+        with shareds.driver.session() as session:
+            result = run_cypher(session, "where root.state='Candidate' return root", username)
+            for rec in result:
+                print(rec.get("root"))
+                values = dict(rec.get("root"))
+                fname = values["file"]
+                filename = os.path.split(fname)[1]
+                values["filename"] = filename
+                yield values
 
     @staticmethod
     def get_user_stats(user):
