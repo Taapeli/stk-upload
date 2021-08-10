@@ -24,6 +24,8 @@
 # Blacked 2021-05-18 / JMä
 import logging
 import traceback
+from operator import itemgetter
+
 from werkzeug.utils import redirect
 from flask.helpers import url_for
 
@@ -31,7 +33,6 @@ from ..gedcom.models import gedcom_utils
 from ui.user_context import UserContext
 from bl.person import PersonReader
 import shareds
-from operator import itemgetter
 from bl.root import Root
 from bp.dupsearch.models.search import batches
 
@@ -150,7 +151,7 @@ def start_logged():
     my_batches = Root.get_my_batches(current_user.username)
     return render_template(
         "/start/index_logged.html", is_demo=is_demo, surnamestats=surnamestats,
-        batches=my_batches
+        batches=sorted(my_batches, key=itemgetter("id"))
     )
 
 
