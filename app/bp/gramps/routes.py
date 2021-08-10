@@ -63,9 +63,10 @@ from bl.gramps import gramps_utils
 @login_required
 @roles_accepted("research", "admin")
 def gramps_index():
+    return "Error: bp.gramps.routes.gramps_index is obsolete!"
     """ Home page gramps input file processing """
     logger.info("-> bp.start.routes.gramps_index")
-    return render_template("/gramps/index_gramps.html")
+    return render_template("/gramps/obsolete_index_gramps.html")
 
 
 @bp.route("/gramps/show_log/<xmlfile>")

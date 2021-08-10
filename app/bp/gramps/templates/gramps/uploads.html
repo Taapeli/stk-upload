@@ -159,13 +159,13 @@ function confirm_delete(subj, name) {
    ) ) }}
 
 <div id="startdiv">
-  <div>
-    <h1>{{ _("Uploaded Candidate Materials") }}</h1>
+    <div>
+		<h1>{{ _("Uploaded Candidate Materials") }}</h1>
 
 {% include "flash_messages.html" %}
 
-    <table class="fileselect">
-           <tr> <th></th>
+    	<table class="fileselect">
+        	<tr> <th></th>
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Batch id") }}</th>
@@ -188,12 +188,12 @@ function confirm_delete(subj, name) {
 
 	    {% for upload in uploads %}
 	    {% if True or upload.status != "?" %}
-	       <tr>
-	           <td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
+	        <tr>
+	        	<td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
 	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}');">
-	           </td>
-	           <td>{{upload.upload_time_s}}</td>
-	           <td>{{upload.xmlname}}
+	            </td>
+	            <td>{{upload.upload_time_s}}</td>
+	            <td>{{upload.xmlname}}
 
                 {% if upload.material_type or upload.description %}
                     <br><span class="typedesc">{{upload.material_type}}</span>
@@ -213,56 +213,90 @@ function confirm_delete(subj, name) {
                 {% endif %}
 
                 </td>
-               <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}</td>
-               <td class="center">
+                <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}</td>
+                <td class="center">
                 {% if upload.count %}{{upload.count}}{% endif %}
                 {% if upload.count_a %}
                     <i title="{{ _("The persons sent to common data") }}">{{upload.count_a}}</i>
                 {% endif %}
-               </td>
-               <td>{{upload.status}}
+                </td>
+                <td>{{upload.status}}
                     <div class="progress" data-name='{{upload.xmlname}}'></div>
                 {% if upload.loading %}
                      <script>
                          setTimeout( function() {update_progress('{{upload.xmlname}}')}, 1000 );
                      </script>
                 {% endif %}
-               </td>
-	       </tr>
+                </td>
+	        </tr>
 	    {% endif %}{% endfor %}
 	    {% if uploads|length == 0 %}
-	       <tr><td colspan="5" style="padding:2em">
-	              <a href="/gramps">{{ _("Start by sending your first Gramps file") }}</a></td>
-	       </tr>
+<!-- 	        <tr><td colspan="5" style="padding:2em"> -->
+<!-- 	              <a href="/gramps">{{ _("Start by sending your first Gramps file") }}</a></td> -->
+<!-- 	        </tr> -->
 	    {% endif %}
-    </table>
+    	</table>
     <div>
-      <form id="form" action="" method="get">
-	    <h2>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h2>
-        <div>{{ _("Saving data") }}:
-            <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
-            <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
-		    {% if gramps_verify %}
-            <button id="gramps_analyze" disabled>{{ _("Execute Gramps Verify Tool") }}</button>
-            {% endif %}
-            <button id="start_upload" disabled>{{ _("Store to database") }}</button>
-            <button id="show_log" disabled>{{ _("Show last log") }}</button>
-        </div>
-        <div>{{ _("Delete data") }}:
-            <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>
-            <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
-        </div>
-	  </form>
+    	<form id="form" action="" method="get">
+		    <h2>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h2>
+	        <div>{{ _("Saving data") }}:
+	            <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
+	            <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
+			    {% if gramps_verify %}
+	            <button id="gramps_analyze" disabled>{{ _("Execute Gramps Verify Tool") }}</button>
+	            {% endif %}
+	            <button id="start_upload" disabled>{{ _("Store to database") }}</button>
+	            <button id="show_log" disabled>{{ _("Show last log") }}</button>
+	        </div>
+	        <div>{{ _("Delete data") }}:
+	            <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>
+	            <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
+	        </div>
+		</form>
+		<p></p>
     </div>
     
-  <p>&rtrif; <a href="/gramps">{{ _("Send a new Gramps file") }}</a><br>
-   {% if current_user.is_authenticated and current_user.has_role('research') %}
-	&rtrif; <a href="/scene/persons/search?div=2">{{ _('Look at your candidate materials') }}</a><br>
-   {% endif %}
-    &rtrif; <a href="javascript:history.back()">{{ _("Return to front page") }}</a>
-  </p>
-    
   </div>
+
+    
+{% if current_user.is_authenticated and current_user.has_role('research') %}
+<script>
+var TOOLARGE =  _("The file is too large (max 60 MB)");
+
+function checkFileSize() {
+ 	try {
+	 	var input = document.getElementById('filenm');
+ 	 	var file = input.files[0];
+ 	 	if (file.size > 60000000) {
+			alert(TOOLARGE);
+			return false;
+ 	 	}
+ 	}
+ 	catch {
+ 	}
+	return true;
+}
+</script>
+   <div class="startbox">
+       <h2>{{ _("Send a new Gramps file") }}</h2>
+       <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
+	       <div style="display: inline-block;">
+	          <input type="hidden" name="material" value="xml_file">
+	          <p>{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.</p>
+	          <input type="file" name="filenm" accept=".gramps,.gpkg"/>
+	       </div>
+	       <div class="submit"> 
+	           <input type="submit" value="{{ _('Send') }}" onclick="checkFileSize()"/>
+	       </div>
+	       <div><p>► {{ _('Read more about') }}
+	           <i><a href="https://gramps-project.org/wiki/index.php/Fi:Etusivu" 
+	              title="{{ _('Manual') }}">Gramps</a></i>{{ _(' program') }}
+	           </p>
+	       </div>
+       </form>
+   </div>
+{% endif %}
+
 </div>
 {% endblock %}
 <script>
