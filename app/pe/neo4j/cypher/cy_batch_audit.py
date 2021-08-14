@@ -35,9 +35,9 @@ SET lock.locked = true
 RETURN lock
 """
 
-    batch_find_id = """
-MATCH (b:BatchId) WHERE b.prefix STARTS WITH $batch_base
-RETURN b.seq AS seq
+    batch_find_last_id = """
+MATCH (b:Root) WHERE b.id STARTS WITH $batch_base
+RETURN b.id as bid
     ORDER BY bid DESC LIMIT 1"""
 
     read_batch_id = """
