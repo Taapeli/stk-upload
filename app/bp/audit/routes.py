@@ -39,15 +39,13 @@ from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
 
 import shareds
-from bl.root import Root
+from bl.root import Root, BatchUpdater
 from bl.base import Status
-# from bl.audit import Audit
-# from bl.batch import Batch
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
-from bp.admin.csv_refnames import load_refnames
-from bl.audit.models.batch_merge import Batch_merge
+from bl.audit.models.batch_merge import BatchMerger
 
+from bp.admin.csv_refnames import load_refnames
 from bp.admin import uploads
 from models import syslog, loadfile
 
@@ -112,24 +110,29 @@ def move_in_1(batch_name):
 @roles_accepted("audit")
 def move_in_2():
     """ Move the accepted Batch to Isotammi database """
+
     owner = request.form["user"]
     batch_id = request.form["batch"]
     auditor = current_user.username
     logger.info(f" bp.audit.routes.move_in_2 u={owner} b={batch_id}")
-    try:
-        merger = Batch_merge()
-        res = merger.move_whole_batch(batch_id, owner, auditor)
-        if res:
-            msg = "Transfer succeeded"
-            flash(_(msg))
-        else:
-            msg = "Transfer failed"
-            flash(_(msg), "error")
-    except Exception as e:
-        traceback.print_exc()
-        msg = f"Batch_merge.move_whole_batch FAILED: {e}"
-        flash(msg, "error")
-        logger.error(f"{msg} {e.__class__.__name__} {e}")
+    with BatchUpdater("update") as batch_service:
+        res = batch_service.change_state(batch_id, owner)
+        msg = "Asked for auditing"
+
+    # try:
+    #     merger = BatchMerger()
+    #     res = merger.obsolete_move_whole_batch(batch_id, owner, auditor)
+    #     if res:
+    #         msg = "Transfer succeeded"
+    #         flash(_(msg))
+    #     else:
+    #         msg = "Transfer failed"
+    #         flash(_(msg), "error")
+    # except Exception as e:
+    #     traceback.print_exc()
+    #     msg = f"BatchMerger.obsolete_move_whole_batch FAILED: {e}"
+    #     flash(msg, "error")
+    #     logger.error(f"{msg} {e.__class__.__name__} {e}")
     
     syslog.log(type="batch to Common data", batch=batch_id, by=owner, msg=msg)
     return redirect(url_for("audit.move_in_1", batch_name=batch_id))

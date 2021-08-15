@@ -588,7 +588,7 @@ class BatchUpdater(DataService):
 
     def batch_mark_status(self, b_status):
         """ Mark this data batch status. """
-        res = shareds.dservice.ds_batch_set_status(
+        res = shareds.dservice.ds_batch_set_state(
             self.batch.id, self.batch.user, b_status
         )
         return res

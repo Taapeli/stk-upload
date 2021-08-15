@@ -13,7 +13,7 @@
 
 {% include "flash_messages.html" %}
 
-<!--         <div class="startbox2"> -->
+        <div style="width: min-content;">
             <h2>{{ _('Selected Batch') }}</h2>
 			<table>
 				<tr>
@@ -24,7 +24,7 @@
 				</tr>
 
                 <tr>
-                    <td>{{batch}}{% if time %}<br>
+                    <td class="nowrap">{{batch}}{% if time %}<br>
                     <small>{{ _('saved at') }} {{time}}</small>{% endif %}
                     </td> {% for label, cnt in label_nodes %}
                     <td class="right nowrap">{{cnt|int_thousands}}</td> {% endfor %}
@@ -38,12 +38,11 @@
                    <input type="hidden" value="{{user}}" name="user">
                    <input type="submit" value="{{ _('Move to Isotammi database') }}" />
 	            </div>
-<!--            <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back without changes') }}</a></p> -->
             </form>
 {% else %}
             <p>{{ _('– There is no more data to move in this batch') }}.</p>        
 {% endif %}
-<!--         </div> -->
+        </div>
 
     </div>
 </div>
