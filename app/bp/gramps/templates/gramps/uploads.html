@@ -23,10 +23,6 @@ td {
 	left: 0;
 	z-index: -1;
 }
-fileselect {
-	border-width: 2px 3px 3px 2px; 
-	min-width: 725px;
-}
 </style>
 
 <script>
@@ -165,7 +161,7 @@ function confirm_delete(subj, name) {
 {% include "flash_messages.html" %}
 
     	<table class="fileselect">
-        	<tr> <th></th>
+        	<tr><th></th>
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Batch id") }}</th>
@@ -231,9 +227,8 @@ function confirm_delete(subj, name) {
 	        </tr>
 	    {% endif %}{% endfor %}
 	    {% if uploads|length == 0 %}
-<!-- 	        <tr><td colspan="5" style="padding:2em"> -->
-<!-- 	              <a href="/gramps">{{ _("Start by sending your first Gramps file") }}</a></td> -->
-<!-- 	        </tr> -->
+	        <tr><td colspan="5" style="padding:2em">{{ _("Start by sending your first Gramps file") }}</td>
+	        </tr>
 	    {% endif %}
     	</table>
     <div>
@@ -297,6 +292,7 @@ function checkFileSize() {
    </div>
 {% endif %}
 
+<!-- Startdiv ends -->
 </div>
 {% endblock %}
 <script>

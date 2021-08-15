@@ -101,47 +101,39 @@ class Neo4jUpdateService(ConcreteService):
         self.tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
         return True  # value > 0
 
-    def ds_find_next_unused_batch_id(self):
-        """Find next unused Batch id.
-
-        Returns {id, status, [statustext]}
+    def ds_find_last_used_batch_seq(self):
+        """Find last used Batch id sequence number for today or zero.
         """
 
-        # 1. Find the latest Batch id of today from the db
+        # 1. Find the latest Batch id from the BatchId singleton node
         base = str(date.today())
-        ext = 0
-        record = self.tx.run(CypherRoot.batch_find_id, batch_base=base).single()
+        print("base="+base)
+        record = self.tx.run(CypherRoot.read_batch_id).single()
+        if record:
+            node = record["n"]
+            print("BatchId node",node)
+            if node.get("prefix") == base:
+                seq = node.get("seq")
+                return seq
+            else:
+                return 0        
+
+        # 2. Find the latest Batch id of today from the db
+        record = self.tx.run(CypherRoot.batch_find_last_id, batch_base=base).single()
         if record:
             batch_id = record.get("bid")
-            print(f"# Previous batch_id={batch_id}")
-            i = batch_id.rfind(".")
-            ext = int(batch_id[i + 1 :])
-
-        # 2. Form a new batch id
-        batch_id = "{}.{:03d}".format(base, ext + 1)
-
-        print("# New batch_id='{}'".format(batch_id))
-        return {"status": Status.OK, "id": batch_id}
+            print(f"# Previous batch_id='{batch_id}'")
+            seq = int(batch_id.split(".")[-1])
+            return seq
+        return 0
 
     def ds_new_batch_id(self):
         """Find next unused Batch id using BatchId node.
 
         Returns {id, status, [statustext]}
         """
-
-        # 1. Find the latest Batch id of today from the db
         base = str(date.today())
-        seq = 500
-        record = self.tx.run(CypherRoot.read_batch_id).single()
-        print("base:",base)
-        print("record:",record)
-        if record:
-            node = record["n"]
-            print("pre", node.get("prefix") )
-            if node.get("prefix") == base:
-                seq = node.get("seq")
-            else:
-                seq = 0
+        seq = self.ds_find_last_used_batch_seq()
         seq += 1
         batch_id = "{}.{:03d}".format(base, seq)
         self.tx.run(CypherRoot.save_batch_id, prefix=base, seq=seq)
