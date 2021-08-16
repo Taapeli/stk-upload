@@ -44,7 +44,7 @@ class CypherPlace():
 MATCH (root) -[:OBJ_PLACE]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
     WHERE name.name >= $fw
 WITH root, place, name ORDER BY name.name LIMIT $limit
-    OPTIONAL MATCH (place) <-[:PLACE]- (ref) <-[*2]- (root)
+    OPTIONAL MATCH (place) <-[:PLACE]- (ref)
 """ + _get_name_hierarchies_tail
 
 # Default language names update with $place_id, $fi_id, $sv_id
