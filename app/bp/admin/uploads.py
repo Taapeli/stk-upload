@@ -377,6 +377,7 @@ def list_uploads(username):
                 upload.batch_id = batch_id
                 upload.count = person_count
                 upload.count_a = audit_count
+                upload.is_candidate = 0 if status_text == _("CANDIDATE") else 1
                 upload.done = status_text == _("CANDIDATE") or \
                               status_text == _("FOR_AUDIT")
                 upload.uploaded = status_text == _("UPLOADED")
@@ -410,6 +411,8 @@ def list_uploads(username):
                 upload.status = f"{ _('FOR_AUDIT') } {b.audit_count} { _('persons') }"
             else:
                 upload.status = f"{ _('AUDITING') } (toistaiseksi nk. hyväksytty)"
+        elif b.state == State.FILE_LOADING:
+            upload.status = _(State.FILE_LOADING) 
 
         upload.count = b.person_count
         upload.count_a = b.audit_count

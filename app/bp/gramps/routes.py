@@ -164,7 +164,7 @@ def upload_gramps():
 @roles_accepted("research")
 def start_load_to_stkbase(xmlname):
     """The uploaded Gramps xml file is imported to database in background process.
-    A 'i_am_alive' process for monitoring the bg prosess is also started.
+    A 'i_am_alive' process for monitoring the bg process is also started.
     """
     uploads.initiate_background_load_to_stkbase(current_user.username, xmlname)
     logger.info(

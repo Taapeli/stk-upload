@@ -16,6 +16,7 @@
 td {
     position: relative;
 }
+form div {margin:.25em;}
 .progress {
 	position: absolute;
 	top: 0;
@@ -30,7 +31,7 @@ td {
 var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
 var selected_batch_id = '';
 
-function selectFile(sel, batch_id, xml_name) {
+function selectFile(sel, batch_id, xml_name, is_candidate) {
     document.getElementById('nm').innerHTML=uri_dec = decodeURIComponent(sel.value);
     selected_batch_id = batch_id;
 
@@ -39,6 +40,7 @@ function selectFile(sel, batch_id, xml_name) {
     // download     if xml_name
     // start_upload if xml_name         // (bring to database)
     // show_log     always
+    // ask_audit    if state == Candidate (user lang)
     // batch_delete if batch_id
     // xml_delete   if not batch_id
     var buttons = document.getElementsByTagName('button');
@@ -51,6 +53,8 @@ function selectFile(sel, batch_id, xml_name) {
 	        buttons[i].disabled = true;
 	    if (buttons[i].id == 'start_upload' && xml_name == '')
 	        buttons[i].disabled = true;
+	    if (buttons[i].id == 'ask_audit' && is_candidate)
+	        buttons[i].disabled = true;
 	    if (buttons[i].id == 'batch_delete' && batch_id == '')
 	        buttons[i].disabled = true;
 	    if (buttons[i].id == 'xml_delete' && batch_id != '')
@@ -62,8 +66,12 @@ function update_progress(xmlfile) {
 	// see http://jsfiddle.net/kedctfmj/3/
 	$.get("get_progress/" + encodeURIComponent(xmlfile), (rsp) => {
 		var progress_div = $("td div.progress[data-name='"+xmlfile+"']");
-		var batch_id_column = progress_div.parent().prev().prev();
-		progress_div.css("background","lightgreen");
+		var batch_id_column = progress_div.parent(); /*.prev().prev(); */
+		batch_id_column.css("background","silver");
+		progress_div.css("background","LightGreen");
+		progress_div.css("z-index","1");
+		progress_div.css("margin","4px");
+		progress_div.css("border-radius","6px 0 0 6px");
 		if (rsp.progress == 0) rsp.progress = 1;
 		progress_div.get(0).style.width = rsp.progress + "%";
 		if (rsp.status == "Loading") 
@@ -184,9 +192,9 @@ function confirm_delete(subj, name) {
 
 	    {% for upload in uploads %}
 	    {% if True or upload.status != "?" %}
-	        <tr>
+	        <tr> 
 	        	<td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
-	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}');">
+	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}', {{upload.is_candidate}});">
 	            </td>
 	            <td>{{upload.upload_time_s}}</td>
 	            <td>{{upload.xmlname}}
@@ -209,14 +217,7 @@ function confirm_delete(subj, name) {
                 {% endif %}
 
                 </td>
-                <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}</td>
-                <td class="center">
-                {% if upload.count %}{{upload.count}}{% endif %}
-                {% if upload.count_a %}
-                    <i title="{{ _("The persons sent to common data") }}">{{upload.count_a}}</i>
-                {% endif %}
-                </td>
-                <td>{{upload.status}}
+                <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}
                     <div class="progress" data-name='{{upload.xmlname}}'></div>
                 {% if upload.loading %}
                      <script>
@@ -224,6 +225,13 @@ function confirm_delete(subj, name) {
                      </script>
                 {% endif %}
                 </td>
+                <td class="center">
+                {% if upload.count %}{{upload.count}}{% endif %}
+                {% if upload.count_a %}
+                    <i title="{{ _("The persons sent to common data") }}">{{upload.count_a}}</i>
+                {% endif %}
+                </td>
+                <td>{{upload.status}}</td>
 	        </tr>
 	    {% endif %}{% endfor %}
 	    {% if uploads|length == 0 %}
@@ -235,13 +243,16 @@ function confirm_delete(subj, name) {
     	<form id="form" action="" method="get">
 		    <h2>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h2>
 	        <div>{{ _("Saving data") }}:
-	            <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
 	            <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
-			    {% if gramps_verify %}
+		{% if gramps_verify %}
 	            <button id="gramps_analyze" disabled>{{ _("Execute Gramps Verify Tool") }}</button>
-	            {% endif %}
-	            <button id="start_upload" disabled>{{ _("Store to database") }}</button>
+	    {% endif %}
+	            <button id="start_upload" disabled><b>{{ _("Store to database") }}</b></button>
 	            <button id="show_log" disabled>{{ _("Show last log") }}</button>
+	            <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
+	        </div>
+	        <div>{{ _("Batch ready") }}:
+	            <button id="ask_audit" disabled>{{ _("Send for auditing") }}</button>
 	        </div>
 	        <div>{{ _("Delete data") }}:
 	            <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>

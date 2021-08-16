@@ -197,7 +197,7 @@ def show_person_search():
 
     res, u_context = _do_get_persons(args)
     print(f"#show_person_search: {request.method} "
-          f"'{u_context.state}' '{u_context.material}' Persons {args} ")
+          f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
     if Status.has_failed(res, strict=False):
         flash(f'{res.get("statustext","error")}', "error")
 
