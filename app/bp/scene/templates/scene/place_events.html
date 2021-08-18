@@ -54,7 +54,7 @@ div#events div.scrollbox {
       {% endif %}
 
     <h2 class="sticky" title="▲ {{ _('Top') }}"><a href="#">
-        {{ place.names[0].name }} ({{ place.type|transl('lt') }})</a></h2>
+        {{ place.names[0].name }} <span class="typedesc">{{ place.type|transl('lt') }}</span></a></h2>
         <div>
 
 {% include "flash_messages.html" %}
