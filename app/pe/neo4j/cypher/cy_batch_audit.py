@@ -90,7 +90,7 @@ return b as batch, count(x) as cnt
     get_single_batch = '''
 match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch}) 
 optional match (b) --> (x)
-return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
+return up as profile, b as root, labels(x)[0] as label, count(x) as cnt'''
 
     get_user_batch_names = '''
 match (b:Root) where b.user = $user

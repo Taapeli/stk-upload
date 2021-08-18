@@ -69,6 +69,8 @@ class State:
         auditoinnin valmistuessa.
     
     """
+    
+    #See value translations in ui.jinja_filters
     FILE_LOADING = "Loading"
     FILE_LOAD_FAILED = "Load Failed"
     FILE_UPLOADED = "File"          # old BATCH_UPLOADED = "uploaded", BATCH_REMOVED = "removed"
@@ -186,7 +188,7 @@ class Root(NodeObject):
         obj.timestamp = node.get("timestamp", 0)
         obj.upload = format_timestamp(obj.timestamp)
         obj.auditor = node.get("auditor", None)
-        obj.material = node.get("material", "")
+        obj.material = node.get("material", DEFAULT_MATERIAL)
         obj.description = node.get("description", "")
         return obj
 
@@ -338,17 +340,24 @@ class Root(NodeObject):
             CypherRoot.get_single_batch, batch=batch_id
         )
         for record in result:
-            # <Record batch=<Node id=319388 labels={'Batch'}
-            #    properties={ // 'mediapath': '/home/jm/my_own.media',
-            #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps',
-            #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787,
-            #        'status': 'completed'}>
-            #  label='Note'
-            #  cnt=2>
+            # <Record
+            #    profile=<Node id=21 labels=frozenset({'UserProfile'})
+            #        properties={'apikey': '05dba9c9bfb643b39bf385de8dcac272', 'software': 'Gramps', 
+            #            'research_years': '11', 'created_at': 1620043583370, 'language': 'fi', 
+            #            'researched_names': 'Ankka, Hanhi', 'text_message': 'Jos olet ...', 
+            #            'GSF_membership': 'yes', 'name': 'Aku Ankka', 'email': 'aku@ankkalinna.com',
+            #            'researched_places': 'Ankkalinna', 'username': 'aku', 'agreed_at': 1620032783307}>
+            #    root=<Node id=119472 labels=frozenset({'Root'})
+            #        properties={'file': 'uploads/juha/Untitled_1.isotammi.gpkg', 'material':'Family Tree',
+            #            'description': 'Pieni koeaineisto', 'id': '2021-05-27.002', 'state': 'Candidate', 
+            #            'user': 'aku', 'timestamp': 1622140130273}>
+            #    label='Person'
+            #    cnt=6>
 
-            node = record["batch"]
+            user = record['profile']['username']
+            node = record["root"]
             b = Root.from_node(node)
-            tstring = b.timestamp_str()
+            #tstring = b.timestamp_str()
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -356,7 +365,8 @@ class Root(NodeObject):
             cnt = record["cnt"]
             labels.append((label, cnt))
 
-        return b.user, b.id, tstring, sorted(labels)
+        return  user, b, sorted(labels)
+        #return b.user, b.id, tstring, sorted(labels)
 
     @staticmethod
     def list_empty_batches():
@@ -585,6 +595,11 @@ class BatchUpdater(DataService):
                 f"BatchUpdater.get_batch failed: {e.__class__.__name__} {e}"
             )
             return {"status": Status.ERROR, "statustext": statustext}
+
+    def change_state(self, batch, user, b_status):
+        """ Mark this data batch status. """
+        res = shareds.dservice.ds_batch_set_state(batch, user, b_status)
+        return res
 
     def batch_mark_status(self, b_status):
         """ Mark this data batch status. """

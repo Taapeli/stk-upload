@@ -178,7 +178,7 @@ class Neo4jUpdateService(ConcreteService):
     def ds_batch_set_state(self, batch_id, user, status):
         """Updates Batch node selected by Batch id ans user.
 
-        Batch.timestamp is updated in the Cypher clause.
+        Not! Batch.timestamp is updated in the Cypher clause.
         """
         try:
             result = self.tx.run(

@@ -39,7 +39,7 @@ from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
 
 import shareds
-from bl.root import Root, BatchUpdater
+from bl.root import Root, State, BatchUpdater
 from bl.base import Status
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
@@ -89,26 +89,51 @@ def list_uploads():
 @roles_accepted("audit")
 def move_in_1(batch_name):
     """ Confirm Batch move to Isotammi database """
-    user, batch_id, tstring, labels = Root.get_batch_stats(batch_name)
+    username, root, labels = Root.get_batch_stats(batch_name)
     total = 0
     for _label, cnt in labels:
         total += cnt
-    # Not needed: logger.info(f' bp.audit.routes.move_in_1 {user} / {batch_name}, total {total} nodes')
+    time = root.timestamp_str()
 
     return render_template(
         "/audit/move_in_1.html",
-        user=user,
-        batch=batch_id,
+        user=username,
+        root=root,
         label_nodes=labels,
         total=total,
-        time=tstring,
+        time=time,
     )
+
+
+@bp.route("/audit/requested", methods=["POST"])
+@login_required
+@roles_accepted("audit")
+def audit_requested():
+    """ Move the accepted Batch to Isotammi database """
+    userid = request.form["user"]
+    batch_id = request.form["batch"]
+    #auditor = current_user.username
+    msg= "TODO"
+    with BatchUpdater("update") as batch_service:
+        res = batch_service.change_state(batch_id, 
+                                         userid, 
+                                         State.ROOT_AUDIT_REQUESTED)
+        if Status.has_failed(res):
+            msg = "Audit request failed"
+            flash(_(msg), "error")
+        else:
+            msg = "Audit request done"
+            flash(_(msg))
+
+    print("bp.audit.routes.audit_requested: {res.status}")
+    syslog.log(type="batch to Common data", batch=batch_id, by=userid, msg=msg)
+    return redirect(url_for("audit.move_in_1", batch_name=batch_id))
 
 
 @bp.route("/audit/movenow", methods=["POST"])
 @login_required
 @roles_accepted("audit")
-def move_in_2():
+def obsolete_move_in_2():
     """ Move the accepted Batch to Isotammi database """
 
     owner = request.form["user"]
