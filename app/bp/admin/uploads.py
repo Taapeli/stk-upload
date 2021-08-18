@@ -356,8 +356,8 @@ def list_uploads(username):
                     status = b.state
                     person_count = b.person_count
                     audit_count = b.audit_count
-                    if status == State.ROOT_FOR_AUDIT:
-                        status_text = _("FOR_AUDIT")
+                    if status == State.ROOT_AUDIT_REQUESTED:
+                        status_text = _("AUDIT_REQUESTED")
                     if status == State.ROOT_AUDITING:
                         status_text = _("AUDITING")
                 else:
@@ -379,7 +379,7 @@ def list_uploads(username):
                 upload.count_a = audit_count
                 upload.is_candidate = 0 if status_text == _("CANDIDATE") else 1
                 upload.done = status_text == _("CANDIDATE") or \
-                              status_text == _("FOR_AUDIT")
+                              status_text == _("AUDIT_REQUESTED")
                 upload.uploaded = status_text == _("UPLOADED")
                 upload.loading = status_text == _("STORING")
                 clean_filepath = meta_filepath[:-5].replace(".","_clean.",1)
@@ -404,11 +404,11 @@ def list_uploads(username):
         if b.state == State.ROOT_STORING:
             upload.status = "?"
         elif b.state == State.ROOT_CANDIDATE:
-            # Todo: Remove later: Old FOR_AUDIT materials are CANDIDATE, too
+            # Todo: Remove later: Old AUDIT_REQUESTED materials are CANDIDATE, too
             upload.status = _("CANDIDATE") + " ?"
         elif b.state == State.ROOT_AUDITING:
             if b.audit_count > 0:
-                upload.status = f"{ _('FOR_AUDIT') } {b.audit_count} { _('persons') }"
+                upload.status = f"{ _('AUDIT_REQUESTED') } {b.audit_count} { _('persons') }"
             else:
                 upload.status = f"{ _('AUDITING') } (toistaiseksi nk. hyväksytty)"
         elif b.state == State.FILE_LOADING:

@@ -55,7 +55,7 @@ def do_schema_fixes():
         SET b.state=CASE
                 WHEN b.status = 'started' THEN '{State.ROOT_STORING}'
                 WHEN b.status = 'completed' THEN '{State.ROOT_CANDIDATE}'
-                WHEN b.status = 'audit_requested' THEN '{State.ROOT_FOR_AUDIT}'
+                WHEN b.status = 'audit_requested' THEN '{State.ROOT_AUDIT_REQUESTED}'
                 ELSE '{State.ROOT_REMOVED}'
             END
         REMOVE b:Batch, b.status, b.material_type"""

@@ -55,7 +55,7 @@ class State:
     Storing                            ROOT_STORING
     Candidate                          ROOT_CANDIDATE     OBJECT_CANDICATE
 
-    Audit Requested                    ROOT_FOR_AUDIT
+    Audit Requested                    ROOT_AUDIT_REQUESTED
     Auditing                           ROOT_AUDITING
     Accepted                           ROOT_ACCEPTED      OBJECT_ACCEPTED
     Merged                                                OBJECT_MERGED
@@ -76,7 +76,7 @@ class State:
     ROOT_REMOVED = "File"           # old BATCH_UPLOADED = "uploaded", BATCH_REMOVED = "removed"
     ROOT_STORING = "Storing"        # old BATCH_STARTED  = "started"
     ROOT_CANDIDATE = "Candidate"    # old BATCH_CANDIDATE  = "completed"
-    ROOT_FOR_AUDIT = "Audit Requested"    # Old BATCH_FOR_AUDIT = "audit_requested"
+    ROOT_AUDIT_REQUESTED = "Audit Requested" # Old BATCH_FOR_AUDIT = "audit_requested"
     ROOT_AUDITING = "Auditing"
     ROOT_ACCEPTED = "Accepted"
     ROOT_REJECTED = "Rejected"

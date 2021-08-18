@@ -43,7 +43,7 @@ class BatchMerger:
         :param:    batch_id    active Batch
         :param:    user        owner of the Batch
         """
-        state = State.ROOT_FOR_AUDIT
+        state = State.ROOT_AUDIT_REQUESTED
         res = shareds.dservice.ds_batch_set_state(self, batch_id, user, state)
         if Status.has_failed(res):
             print(f"BatchMerger.ask_auditing: {batch_id} FAILED {res.get('statustext')}")
@@ -70,7 +70,7 @@ class BatchMerger:
                 oper=auditor,
                 state_candidate=State.ROOT_CANDIDATE,
                 state_auditing=State.ROOT_AUDITING,
-                state_for_audit=State.ROOT_FOR_AUDIT
+                state_for_audit=State.ROOT_AUDIT_REQUESTED
             ).single()
             logger.info(f"BatchMerger.obsolete_move_whole_batch: {batch_id}")
             print(f"BatchMerger.obsolete_move_whole_batch: {batch_id}")

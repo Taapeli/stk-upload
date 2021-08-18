@@ -49,6 +49,7 @@ def translate(term, var_name, show_table=False):
         'medium' = media types
         'marr' = marriage types
         'child' = child relations
+        'material' = root material types
     """
     if var_name == "nt":
         # Name types
@@ -311,6 +312,14 @@ def translate(term, var_name, show_table=False):
             SEX_UNKNOWN: _("Child")
         }
 
+    elif var_name == "material":
+        # Root.material types
+        tabl = {
+            "Family Tree": _(" Family Tree "),
+            "Example Material": _(" Example type ")
+        }
+        print(f"#jinja_filters:get {var_name}({term})")
+
     elif var_name == "handle":
         # Shows handle '_dd3d7f7206c3ca3408c9daf6c58' in short format '_d…f6c58'"
         if len(term) > 8:
@@ -347,7 +356,8 @@ def list_translations():
         'rept': "Repository types",
         'medium': "Document types",
         'marr': "Marriage types",
-        'child': "Child by gender"
+        'child': "Child by gender",
+        'material': "Material types"
         }
     for key, desc in keywords.items():
         key_dict = translate(None, key, True)

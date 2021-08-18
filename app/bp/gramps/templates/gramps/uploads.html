@@ -181,7 +181,7 @@ function confirm_delete(subj, name) {
 					  	<p>↓ <b>{{ _("UPLOADED") }}</b> – {{ _("the file has been uploaded to server") }}<br>
 					  	   ↓ <b>{{ _("STORING") }}</b>  – {{ _("the file content is being stored to the database") }}<br>
                            ↳ <b>{{ _("CANDIDATE") }}</b> – {{ _("the data is stored as candidate material") }}<br>
-                           ★ <b>{{ _("FOR_AUDIT") }}</b> – {{ _("the data has been sent to common data") }}<br>
+                           ★ <b>{{ _("AUDIT_REQUESTED") }}</b> – {{ _("the data has been sent to common data") }}<br>
 					  	   → <b>{{ _("REMOVED") }}</b>  – {{ _("Not found any more") }}<br>
 					  	   ↝ <b>{{ _("ERROR") }} / {{ _("FAILED") }}</b> – {{ _("there was an error") }}
 						</p>
@@ -200,7 +200,7 @@ function confirm_delete(subj, name) {
 	            <td>{{upload.xmlname}}
 
                 {% if upload.material_type or upload.description %}
-                    <br><span class="typedesc">{{upload.material_type}}</span>
+                    <br><span class="typedesc">{{upload.material_type|transl('material')}}</span>
                 {% endif %}
                 {% if upload.description %} 
                     <i>{{ upload.description[0:19] }}
