@@ -35,12 +35,10 @@ form div {margin:.25em;}
 var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
 var selected_batch_id = '';
 
-function selectFile(sel, batch_id, xml_name, is_candidate) {
+function selectFile(sel, batch_id='', xml_name, is_candidate) {
     document.getElementById('nm').innerHTML=uri_dec = decodeURIComponent(sel.value);
-	console.log(batch_id, xml_name)
-    if (batch_id) {
-   		document.getElementById('ba').innerHTML= batch_id != '' ? batch_id : "&mdash;";
-   	}
+	console.log("#selectFile", xml_name, batch_id);
+   	document.getElementById('ba').innerHTML= batch_id != '' ? batch_id : "&mdash;";
     	
     selected_batch_id = batch_id;
 
@@ -138,7 +136,8 @@ $(document).ready( function() {
     });
 
     $("#ask_audit").click(function(e) {
-        $("#form").attr("action","/audit/requested" + 
+    	console.log("#ask_audit.click", document.getElementById('ba').innerText);
+        $("#form").attr("action","/audit/requested/" + 
                 document.getElementById('ba').innerText);
         $("#form").submit();
     });
@@ -261,7 +260,8 @@ function confirm_delete(subj, name) {
     <div>
     	<form id="form" action="" method="get">
 		    <h2>{{ _("Operations") }}</h2>
-		    <div>{{ _("File")}}: <b id="nm">({{ _('the selected batch') }})</b>,
+		    <div style="margin-top:-1em;margin-bottom:1.5em;">
+		    	{{ _("File")}}: <b id="nm">({{ _('select') }})</b>,
 	{% if true %}
 		    	{{ _("Batch id")|lower }}: <b id="ba"></b>
 	{% endif %}
@@ -281,7 +281,7 @@ function confirm_delete(subj, name) {
 	        </div>
 
 	        <div><div class="button_group">{{ _("Batch ready") }}:</div>
-	            <button id="ask_audit" disabled>{{ _("Send for auditing") }}</button>
+	            <button id="ask_audit" disabled><b>{{ _("Send for auditing") }}</b></button>
 	        </div>
 
 	        <div><div class="button_group">{{ _("Delete data") }}:</div>

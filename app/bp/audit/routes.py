@@ -84,12 +84,12 @@ def list_uploads():
 # --------------------- Move Batch to Approved data ----------------------------
 
 
-@bp.route("/audit/movein/<batch_name>", methods=["GET", "POST"])
+@bp.route("/audit/start/<batch_id>", methods=["GET", "POST"])
 @login_required
 @roles_accepted("audit")
-def move_in_1(batch_name):
+def audit_start(batch_id):
     """ Confirm Batch move to Isotammi database """
-    username, root, labels = Root.get_batch_stats(batch_name)
+    username, root, labels = Root.get_batch_stats(batch_id)
     total = 0
     for _label, cnt in labels:
         total += cnt
@@ -108,7 +108,7 @@ def move_in_1(batch_name):
 @bp.route("/audit/requested", methods=["POST"])
 @login_required
 @roles_accepted("audit")
-def audit_requested():
+def audit_requested(batch_id):
     """ Move the accepted Batch to Audit queue """
     userid = request.form["user"]
     batch_id = request.form["batch"]
@@ -126,8 +126,8 @@ def audit_requested():
             flash(_(msg))
 
     print("bp.audit.routes.audit_requested: {res.status}")
-    syslog.log(type="batch to Common data", batch=batch_id, by=userid, msg=msg)
-    return redirect(url_for("audit.move_in_1", batch_name=batch_id))
+    syslog.log(type="Audit request", batch=batch_id, by=userid, msg=msg)
+    return redirect(url_for("audit.audit_start", batch_name=batch_id))
 
 
 @bp.route("/audit/movenow", methods=["POST"])
@@ -160,7 +160,7 @@ def obsolete_move_in_2():
     #     logger.error(f"{msg} {e.__class__.__name__} {e}")
     
     syslog.log(type="batch to Common data", batch=batch_id, by=owner, msg=msg)
-    return redirect(url_for("audit.move_in_1", batch_name=batch_id))
+    return redirect(url_for("audit.audit_start", batch_name=batch_id))
 
 
 # --------------------- Delete an approved data batch ----------------------------

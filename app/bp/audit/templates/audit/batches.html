@@ -71,14 +71,15 @@
 	           	   {% endif %}
 	        {% endif -%}
                </td>
+
 	           <td>
 	        {% if upload.xmlname %}
 	           <a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a><br>
 	        {% endif -%}
 	        {% if upload.status != "LUOVUTETTU" %}
-	           		<a href=/audit/movein/{{upload.batch_id}}>
-                       <i>{{ _("Move to Isotammi database") }}</i></a>
+	           		<a href=/audit/start/{{upload.batch_id}}>
+                       <i>{{ _("Start auditing") }}</i></a>
             {% endif -%}
 	           	</td>
 	       </tr>

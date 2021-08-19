@@ -9,12 +9,12 @@
 
 <div id="startdiv">
     <div>
-        <h1>{{ _("Moving batch forward") }}</h1>
+        <h1>{{ _("Select for auditing") }}</h1>
 
 {% include "flash_messages.html" %}
 
         <div style="width: min-content;">
-            <h2>{{ _('Selected Batch') }}</h2>
+            <h2>{{ _('Selected Batch') }} {{root.id}}</h2>
             <p>{{root.state|transl('state')}} {{_("material")}}:
                {{root.material|transl('material')}}</p>
 			<table>
@@ -38,7 +38,7 @@
 	            <div class="submit">
                    <input type="hidden" value="{{root.id}}" name="batch">
                    <input type="hidden" value="{{user}}" name="user">
-                   <input type="submit" value="{{ _('Move to Isotammi database') }}" />
+                   <input type="submit" value="{{ _('Start auditing') }}" />
 	            </div>
             </form>
 {% else %}
