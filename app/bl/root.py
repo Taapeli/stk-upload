@@ -82,6 +82,7 @@ class State:
     ROOT_AUDITING = "Auditing"
     ROOT_ACCEPTED = "Accepted"
     ROOT_REJECTED = "Rejected"
+    ROOT_UNKNOWN = "Unknown"
 
     OBJECT_CANDICATE = "Candidate"  # old BATCH_CANDIDATE  = "completed"
     OBJECT_ACCEPTED = "Accepted"
@@ -113,6 +114,15 @@ class Root(NodeObject):
     def __str__(self):
         return f"Root {self.user} / {self.id} {self.material}({self.state})"
 
+    def is_auditing(self):
+        """ Has the auditing possibly started? """
+        if self.state in [
+            State.ROOT_AUDIT_REQUESTED, 
+            State.ROOT_AUDITING, 
+            State.ROOT_ACCEPTED, 
+            State.ROOT_REJECTED]:
+            return True
+        return False
 
 #===============================================================================
 # class Batch:

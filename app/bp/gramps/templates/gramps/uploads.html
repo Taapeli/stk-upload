@@ -24,6 +24,10 @@ form div {margin:.25em;}
 	left: 0;
 	z-index: -1;
 }
+.button_group {
+    display: inline-block;
+    width: 10em;
+}
 </style>
 
 <script>
@@ -33,13 +37,18 @@ var selected_batch_id = '';
 
 function selectFile(sel, batch_id, xml_name, is_candidate) {
     document.getElementById('nm').innerHTML=uri_dec = decodeURIComponent(sel.value);
+	console.log(batch_id, xml_name)
+    if (batch_id) {
+   		document.getElementById('ba').innerHTML= batch_id != '' ? batch_id : "&mdash;";
+   	}
+    	
     selected_batch_id = batch_id;
 
     // Button rules for selected row:
     //   id           disabled
     // download     if xml_name
     // start_upload if xml_name         // (bring to database)
-    // show_log     always
+    // show_log     if xml_name
     // ask_audit    if state == Candidate (user lang)
     // batch_delete if batch_id
     // xml_delete   if not batch_id
@@ -52,6 +61,8 @@ function selectFile(sel, batch_id, xml_name, is_candidate) {
 	    if (buttons[i].id == 'analyze' && xml_name == '')
 	        buttons[i].disabled = true;
 	    if (buttons[i].id == 'start_upload' && xml_name == '')
+	        buttons[i].disabled = true;
+	    if (buttons[i].id == 'show_log' && xml_name == '')
 	        buttons[i].disabled = true;
 	    if (buttons[i].id == 'ask_audit' && is_candidate)
 	        buttons[i].disabled = true;
@@ -126,6 +137,12 @@ $(document).ready( function() {
         $("#form").submit();
     });
 
+    $("#ask_audit").click(function(e) {
+        $("#form").attr("action","/audit/requested" + 
+                document.getElementById('ba').innerText);
+        $("#form").submit();
+    });
+
     $("#xml_delete").click(function(e) {
         var name = document.getElementById('nm').innerText;
         if (confirm_delete('xml', name)) {
@@ -190,7 +207,7 @@ function confirm_delete(subj, name) {
 				</th>
    			</tr>
 
-	    {% for upload in uploads %}
+	{% for upload in uploads %}
 	    {% if True or upload.status != "?" %}
 	        <tr> 
 	        	<td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
@@ -199,12 +216,12 @@ function confirm_delete(subj, name) {
 	            <td>{{upload.upload_time_s}}</td>
 	            <td>{{upload.xmlname}}
 
-                {% if upload.material_type or upload.description %}
+			{% if upload.material_type or upload.description %}
                     <br><span class="typedesc">{{upload.material_type|transl('material')}}</span>
-                {% endif %}
-                {% if upload.description %} 
+			{% endif %}
+			{% if upload.description %} 
                     <i>{{ upload.description[0:19] }}
-                    {% if upload.description|length > 19  %}
+				{% if upload.description|length > 19  %}
                         ... 
                         <div class="tooltip"> 
                         &nbsp;&#8505;&nbsp;
@@ -212,49 +229,62 @@ function confirm_delete(subj, name) {
                             {{ upload.description }} 
                           </div>
                         </div> 
-                    {% endif %}
+				{% endif %}
                     </i>
-                {% endif %}
+			{% endif %}
 
                 </td>
                 <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}
                     <div class="progress" data-name='{{upload.xmlname}}'></div>
-                {% if upload.loading %}
+			{% if upload.loading %}
                      <script>
                          setTimeout( function() {update_progress('{{upload.xmlname}}')}, 1000 );
                      </script>
-                {% endif %}
+			{% endif %}
                 </td>
-                <td class="center">
-                {% if upload.count %}{{upload.count}}{% endif %}
-                {% if upload.count_a %}
-                    <i title="{{ _("The persons sent to common data") }}">{{upload.count_a}}</i>
-                {% endif %}
+                <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
                 </td>
-                <td>{{upload.status}}</td>
+                <td>{{upload.status}}
+			{% if upload.auditors %}
+                    <br><i>{{ _("Auditor") }}: {{ ', '.join(upload.auditors) }}</i>
+			{% endif %}
+                </td>
 	        </tr>
-	    {% endif %}{% endfor %}
-	    {% if uploads|length == 0 %}
+		{% endif %}
+	{% endfor %}
+	{% if uploads|length == 0 %}
 	        <tr><td colspan="5" style="padding:2em">{{ _("Start by sending your first Gramps file") }}</td>
 	        </tr>
-	    {% endif %}
+	{% endif %}
     	</table>
+
     <div>
     	<form id="form" action="" method="get">
-		    <h2>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h2>
-	        <div>{{ _("Saving data") }}:
-	            <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
-		{% if gramps_verify %}
-	            <button id="gramps_analyze" disabled>{{ _("Execute Gramps Verify Tool") }}</button>
-	    {% endif %}
+		    <h2>{{ _("Operations") }}</h2>
+		    <div>{{ _("File")}}: <b id="nm">({{ _('the selected batch') }})</b>,
+	{% if true %}
+		    	{{ _("Batch id")|lower }}: <b id="ba"></b>
+	{% endif %}
+			</div>
+
+	        <div><div class="button_group">{{ _("Saving data") }}:</div>
 	            <button id="start_upload" disabled><b>{{ _("Store to database") }}</b></button>
-	            <button id="show_log" disabled>{{ _("Show last log") }}</button>
 	            <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
 	        </div>
-	        <div>{{ _("Batch ready") }}:
+
+	        <div><div class="button_group">{{ _("Analyze data") }}:</div>
+	            <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
+	{% if gramps_verify %}
+	            <button id="gramps_analyze" disabled>{{ _("Execute Gramps Verify Tool") }}</button>
+	{% endif %}
+	            <button id="show_log" disabled>{{ _("Show last log") }}</button>
+	        </div>
+
+	        <div><div class="button_group">{{ _("Batch ready") }}:</div>
 	            <button id="ask_audit" disabled>{{ _("Send for auditing") }}</button>
 	        </div>
-	        <div>{{ _("Delete data") }}:
+
+	        <div><div class="button_group">{{ _("Delete data") }}:</div>
 	            <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>
 	            <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
 	        </div>
@@ -265,7 +295,7 @@ function confirm_delete(subj, name) {
   </div>
 
     
-{% if current_user.is_authenticated and current_user.has_role('research') %}
+	{% if current_user.is_authenticated and current_user.has_role('research') %}
 <script>
 var TOOLARGE =  _("The file is too large (max 60 MB)");
 
@@ -301,7 +331,7 @@ function checkFileSize() {
 	       </div>
        </form>
    </div>
-{% endif %}
+	{% endif %}
 
 <!-- Startdiv ends -->
 </div>

@@ -319,7 +319,7 @@ def translate(term, var_name, show_table=False):
             "Family Tree": _(" Family Tree "),
             "Example Material": _(" Example type ")
         }
-        print(f"#jinja_filters:get {var_name}({term})")
+        #print(f"#jinja_filters:get {var_name}({term})")
 
     elif var_name == "state":
         # Root.state types
@@ -332,7 +332,7 @@ def translate(term, var_name, show_table=False):
             State.ROOT_ACCEPTED: _("Accepted"),
             State.ROOT_REJECTED: _("Rejected"),
         }
-        print(f"#jinja_filters:get {var_name}({term})")
+        #print(f"#jinja_filters:get {var_name}({term})")
 
     elif var_name == "handle":
         # Shows handle '_dd3d7f7206c3ca3408c9daf6c58' in short format '_d…f6c58'"

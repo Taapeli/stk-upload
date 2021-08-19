@@ -109,7 +109,7 @@ def move_in_1(batch_name):
 @login_required
 @roles_accepted("audit")
 def audit_requested():
-    """ Move the accepted Batch to Isotammi database """
+    """ Move the accepted Batch to Audit queue """
     userid = request.form["user"]
     batch_id = request.form["batch"]
     #auditor = current_user.username
