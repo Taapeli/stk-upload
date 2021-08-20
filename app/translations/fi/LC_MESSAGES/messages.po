@@ -469,7 +469,7 @@ msgstr "Tuonti tiedostosta %(i)s on alkanut."
 #: bp/admin/uploads.py:383 bp/audit/templates/audit/batches.html:17
 #: bp/gramps/templates/gramps/uploads.html:181
 msgid "UPLOADED"
-msgstr "Ladattu"
+msgstr "Tiedosto ladattu"
 
 #: bp/admin/templates/admin/uploads.html:38 bp/admin/uploads.py:349
 #: bp/admin/uploads.py:384 bp/audit/templates/audit/batches.html:21
@@ -485,15 +485,23 @@ msgstr "Menossa tietokantaan"
 msgid "CANDIDATE"
 msgstr "Ehdokasaineisto"
 
+#: bp/gramps/templates/gramps/uploads.html:183
+msgid "Auditing"
+msgstr "Auditointi"
+
 #: bp/admin/uploads.py:360 bp/admin/uploads.py:382
 #: bp/audit/templates/audit/batches.html:29
 #: bp/gramps/templates/gramps/uploads.html:184
 msgid "AUDIT_REQUESTED"
-msgstr "Luovutettu"
+msgstr "Pyydetty auditoitavaksi"
 
 #: bp/admin/uploads.py:362
 msgid "AUDITING"
-msgstr "nk. Hyväksytty"
+msgstr "Auditoitavana"
+
+#: bp/admin/uploads.py:275
+msgid "Analyze data"
+msgstr "Analysoi"
 
 #: bp/admin/templates/admin/uploads.html:40 bp/admin/uploads.py:365
 #: bp/admin/uploads.py:371 bp/audit/templates/audit/batches.html:33
@@ -999,11 +1007,14 @@ msgstr "Virhe"
 msgid "there was an error"
 msgstr "päättyi virheeeseen"
 
-#: bp/admin/templates/admin/uploads.html:46
 #: bp/audit/templates/audit/batches.html:50
 #: bp/audit/templates/audit/index.html:35
 msgid "Operations"
 msgstr "Toimenpiteet"
+
+#: bp/admin/templates/admin/uploads.html:46
+msgid "Operations for selected row"
+msgstr "Valitun rivin toiminnot"
 
 #: bp/admin/templates/admin/uploads.html:52
 #: bp/audit/templates/audit/batches.html:57
@@ -2261,6 +2272,10 @@ msgstr "Valmis aineisto"
 msgid "Send for auditing"
 msgstr "Lähetä auditoitavaksi"
 
+#: bp/gramps/templates/gramps/uploads.html:255
+msgid "Withdraw auditing"
+msgstr "Peru auditontipyyntö"
+
 #: bp/gramps/templates/gramps/uploads.html:258
 msgid "Delete the file"
 msgstr "Tuhoa tiedosto"
@@ -2270,12 +2285,10 @@ msgid "Send a new Gramps file"
 msgstr "Tuo uusi Gramps-tiedosto"
 
 #: bp/gramps/templates/gramps/uploads.html:297
-#, fuzzy
 msgid "Read more about"
 msgstr "Lue lisää"
 
 #: bp/gramps/templates/gramps/uploads.html:299
-#, fuzzy
 msgid " program"
 msgstr "Käytetty ohjelma"
 
@@ -2374,7 +2387,6 @@ msgstr "Aineisto"
 #: bp/scene/templates/scene/comments.html:47
 #: bp/scene/templates/scene/comments.html:50
 #: bp/scene/templates/scene/comments.html:53
-#, fuzzy
 msgid "Go to comment page"
 msgstr "Siirry kommentoidulle sivulle"
 
@@ -2383,7 +2395,6 @@ msgid "Go to commented page"
 msgstr "Siirry kommentoidulle sivulle"
 
 #: bp/scene/templates/scene/comments.html:58
-#, fuzzy
 msgid "Unknown object"
 msgstr "tuntematon tyyppi"
 
@@ -4392,7 +4403,6 @@ msgid "Store to Database"
 msgstr "Tietojen talletus kantaan"
 
 #: templates/unexpected_error.html:3 templates/unexpected_error.html:7
-#, fuzzy
 msgid "Unexpected error"
 msgstr "Sisäinen virhe"
 

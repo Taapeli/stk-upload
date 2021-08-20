@@ -35,6 +35,7 @@ from . import bp
 
 from flask import render_template, request, redirect, url_for, flash
 from flask import send_file
+from flask import session as user_session
 from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
 
@@ -43,7 +44,7 @@ from bl.root import Root, State, BatchUpdater
 from bl.base import Status
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
-from bl.audit.models.batch_merge import BatchMerger
+#from bl.audit.models.batch_merge import BatchMerger
 
 from bp.admin.csv_refnames import load_refnames
 from bp.admin import uploads
@@ -105,13 +106,15 @@ def audit_start(batch_id):
     )
 
 
+@bp.route("/audit/requested/<batch_id>", methods=["GET"])
 @bp.route("/audit/requested", methods=["POST"])
 @login_required
 @roles_accepted("audit")
-def audit_requested(batch_id):
+def audit_requested(batch_id=None):
     """ Move the accepted Batch to Audit queue """
-    userid = request.form["user"]
-    batch_id = request.form["batch"]
+    userid = current_user.username
+    if not batch_id:
+        batch_id = user_session.get('batch_id')
     #auditor = current_user.username
     msg= "TODO"
     with BatchUpdater("update") as batch_service:
@@ -125,7 +128,7 @@ def audit_requested(batch_id):
             msg = "Audit request done"
             flash(_(msg))
 
-    print("bp.audit.routes.audit_requested: {res.status}")
+    print("bp.audit.routes.audit_requested: {res.status} for node {res.get('identity')}")
     syslog.log(type="Audit request", batch=batch_id, by=userid, msg=msg)
     return redirect(url_for("audit.audit_start", batch_name=batch_id))
 

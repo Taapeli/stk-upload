@@ -382,7 +382,7 @@ def list_uploads(username):
                 upload.batch_id = batch_id
                 upload.count = person_count
                 #upload.count_a = audit_count
-                upload.is_candidate = 0 if status_text == _("CANDIDATE") else 1
+                upload.is_candidate = 1 if status_text == _("CANDIDATE") else 0
                 upload.done = status_text == _("CANDIDATE") or \
                               status_text == _("AUDIT_REQUESTED")
                 upload.uploaded = status_text == _("UPLOADED")
