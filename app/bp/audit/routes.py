@@ -65,14 +65,21 @@ def audit_home():
     return render_template("/audit/index.html")
 
 
-# ------------------------- User Gramps uploads --------------------------------
-
+# --------------------- Move User Batch to Approved data ----------------------------
+# Steps:
+#    1. User: /gramps/uploads                                      (gramps/uploads.html)
+#    2. User: "Send for auditing" -> /audit/requested/<batch_id>   ()
+#    
+#    3. Auditor: /audit/list_uploads
+#    4. Auditor: "Pick for me to audit" -> /audit/pick/<batch_id>  (move_in_1.html)
+#    5. Auditor: "Start"            -> /audit/selected             ()
+# ------------------------------------------------------------------------------
 
 @bp.route("/audit/list_uploads", methods=["GET"])
 @login_required
 @roles_accepted("audit")
 def list_uploads():
-    """ Show Batches
+    """ 3. List Batches
 
         The list of Gramps uploads is filtered by an existing Batch node
     """
@@ -82,14 +89,12 @@ def list_uploads():
     return render_template("/audit/batches.html", uploads=upload_list)
 
 
-# --------------------- Move Batch to Approved data ----------------------------
-
-
-@bp.route("/audit/start/<batch_id>", methods=["GET", "POST"])
+@bp.route("/audit/pick/<batch_id>", methods=["GET"])
 @login_required
 @roles_accepted("audit")
-def audit_start(batch_id):
-    """ Confirm Batch move to Isotammi database """
+def audit_pick(batch_id):
+    """ 4. Confirm Batch move to common approved Isotammi database.
+    """
     username, root, labels = Root.get_batch_stats(batch_id)
     total = 0
     for _label, cnt in labels:
@@ -111,7 +116,8 @@ def audit_start(batch_id):
 @login_required
 @roles_accepted("audit")
 def audit_requested(batch_id=None):
-    """ Move the accepted Batch to Audit queue """
+    """ 2. Move the Batch to Audit queue by setting state="Audit requested".
+    """
     userid = current_user.username
     if not batch_id:
         batch_id = user_session.get('batch_id')
@@ -130,22 +136,43 @@ def audit_requested(batch_id=None):
 
     print("bp.audit.routes.audit_requested: {res.status} for node {res.get('identity')}")
     syslog.log(type="Audit request", batch=batch_id, by=userid, msg=msg)
-    return redirect(url_for("audit.audit_start", batch_name=batch_id))
+    return redirect(url_for("gramps.list_uploads", batch_name=batch_id))
 
 
-@bp.route("/audit/movenow", methods=["POST"])
+@bp.route("/audit/movein/<batch_name>", methods=["GET", "POST"])
 @login_required
 @roles_accepted("audit")
-def obsolete_move_in_2():
-    """ Move the accepted Batch to Isotammi database """
+def obsolete_move_in_1(batch_name):
+    """ Confirm Batch move to Isotammi database """
+    user, batch_id, tstring, labels = Root.get_batch_stats(batch_name)
+    total = 0
+    for _label, cnt in labels:
+        total += cnt
+    # Not needed: logger.info(f' bp.audit.routes.move_in_1 {user} / {batch_name}, total {total} nodes')
 
+    return render_template(
+        "/audit/move_in_1.html",
+        user=user,
+        batch=batch_id,
+        label_nodes=labels,
+        total=total,
+        time=tstring,
+    )
+
+
+@bp.route("/audit/selected", methods=["POST"])
+@login_required
+@roles_accepted("audit")
+def audit_selected():
+    """ 5. Pick selected Batch for Auditor.
+    """
     owner = request.form["user"]
     batch_id = request.form["batch"]
     auditor = current_user.username
     logger.info(f" bp.audit.routes.move_in_2 u={owner} b={batch_id}")
     with BatchUpdater("update") as batch_service:
-        res = batch_service.change_state(batch_id, owner)
-        msg = "Asked for auditing"
+        #res = batch_service.change_state(batch_id, owner)
+        msg = _("You have been selected as auditor for batch ") + batch_id
 
     # try:
     #     merger = BatchMerger()
@@ -161,9 +188,9 @@ def obsolete_move_in_2():
     #     msg = f"BatchMerger.obsolete_move_whole_batch FAILED: {e}"
     #     flash(msg, "error")
     #     logger.error(f"{msg} {e.__class__.__name__} {e}")
-    
+    flash(f"TODO: {msg}")
     syslog.log(type="batch to Common data", batch=batch_id, by=owner, msg=msg)
-    return redirect(url_for("audit.audit_start", batch_name=batch_id))
+    return redirect(url_for("audit.list_uploads", batch_name=batch_id))
 
 
 # --------------------- Delete an approved data batch ----------------------------

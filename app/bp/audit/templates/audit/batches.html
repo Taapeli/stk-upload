@@ -78,8 +78,8 @@
 	           			{{ _("Show log") }}</a><br>
 	        {% endif -%}
 	        {% if upload.status != "LUOVUTETTU" %}
-	           		<a href=/audit/start/{{upload.batch_id}}>
-                       <i>{{ _("Start auditing") }}</i></a>
+	           		<a href=/audit/pick/{{upload.batch_id}}>
+                       <i>{{ _("Pick for me to audit") }}</i></a>
             {% endif -%}
 	           	</td>
 	       </tr>

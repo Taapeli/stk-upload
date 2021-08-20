@@ -34,11 +34,11 @@
             </table>
             <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
 {% if total %}
-            <form action="/audit/requested" method="post">
+            <form action="/audit/selected" method="post">
 	            <div class="submit">
                    <input type="hidden" value="{{root.id}}" name="batch">
                    <input type="hidden" value="{{user}}" name="user">
-                   <input type="submit" value="{{ _('Start auditing') }}" />
+                   <input type="submit" value="{{ _('Start') }}" />
 	            </div>
             </form>
 {% else %}

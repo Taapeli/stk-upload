@@ -94,6 +94,10 @@ def show_upload_log(xmlfile=""):
 @login_required
 @roles_accepted("research", "admin")
 def list_uploads():
+    """ User uploads list.
+        Steps 1.& 3. of audit path: The user can  select one to Audit queue
+        Step 2. /audit/requested/<batch_id>
+    """
     upload_list = uploads.list_uploads(current_user.username)
     logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
