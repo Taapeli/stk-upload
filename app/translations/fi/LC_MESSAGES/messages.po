@@ -679,7 +679,7 @@ msgid "Empty batches for user"
 msgstr "Tyhjär erät käyttäjälle"
 
 #: bp/admin/templates/admin/batch_clear.html:22
-#: bp/audit/templates/audit/move_in_1.html:17
+#: bp/audit/templates/audit/pick_auditing.html:17
 msgid "Selected Batch"
 msgstr "Valittu tuontierä"
 
@@ -1085,7 +1085,7 @@ msgid "Researcher"
 msgstr "Tutkija"
 
 #: bp/audit/templates/audit/approvals.html:75
-#: bp/audit/templates/audit/move_in_1.html:20
+#: bp/audit/templates/audit/pick_auditing.html:20
 #: bp/gramps/templates/gramps/uploads.html:175
 #: bp/start/templates/start/my_settings.html:125
 msgid "Batch id"
@@ -1142,7 +1142,7 @@ msgid "batch %(batch_id)s; %(persons)d persons"
 msgstr "erä %(batch_id)s; %(persons)d henkilöä"
 
 #: bp/audit/templates/audit/batches.html:78
-#: bp/audit/templates/audit/move_in_1.html:39
+#: bp/audit/templates/audit/pick_auditing.html:39
 msgid "Move to Isotammi database"
 msgstr "Siirrä yhteiseen sukukantaan"
 
@@ -1229,24 +1229,24 @@ msgstr "Auditoijan etusivu"
 msgid "Instructions"
 msgstr "Ohjeita"
 
-#: bp/audit/templates/audit/move_in_1.html:3
+#: bp/audit/templates/audit/pick_auditing.html:3
 msgid "Material for Isotammi database"
 msgstr "Siirto yhteiseen sukukantaan"
 
-#: bp/audit/templates/audit/move_in_1.html:12
+#: bp/audit/templates/audit/pick_auditing.html:12
 msgid "Moving batch to Isotammi database"
 msgstr "Siirretään tuontierä yhteiseen sukukantaan"
 
-#: bp/audit/templates/audit/move_in_1.html:28
+#: bp/audit/templates/audit/pick_auditing.html:28
 msgid "saved at"
 msgstr "talletettu"
 
-#: bp/audit/templates/audit/move_in_1.html:33
+#: bp/audit/templates/audit/pick_auditing.html:33
 #, python-format
 msgid "Total %(cnt)s nodes from user <b>%(user)s</b>."
 msgstr "Yhteensä %(cnt)s kohdetta tutkijalta <b>%(user)s</b>."
 
-#: bp/audit/templates/audit/move_in_1.html:43
+#: bp/audit/templates/audit/pick_auditing.html:43
 msgid "– There is no more data to move in this batch"
 msgstr "– Aineistossa ei ole enempää siirrettävää"
 

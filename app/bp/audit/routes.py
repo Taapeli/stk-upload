@@ -71,7 +71,7 @@ def audit_home():
 #    2. User: "Send for auditing" -> /audit/requested/<batch_id>   ()
 #    
 #    3. Auditor: /audit/list_uploads
-#    4. Auditor: "Pick for me to audit" -> /audit/pick/<batch_id>  (move_in_1.html)
+#    4. Auditor: "Pick for me to audit" -> /audit/pick/<batch_id>  (pick_auditing.html)
 #    5. Auditor: "Start"            -> /audit/selected             ()
 # ------------------------------------------------------------------------------
 
@@ -102,7 +102,7 @@ def audit_pick(batch_id):
     time = root.timestamp_str()
 
     return render_template(
-        "/audit/move_in_1.html",
+        "/audit/pick_auditing.html", # prev. move_in_1
         user=username,
         root=root,
         label_nodes=labels,
@@ -151,7 +151,7 @@ def obsolete_move_in_1(batch_name):
     # Not needed: logger.info(f' bp.audit.routes.move_in_1 {user} / {batch_name}, total {total} nodes')
 
     return render_template(
-        "/audit/move_in_1.html",
+        "/audit/pick_auditing.html",
         user=user,
         batch=batch_id,
         label_nodes=labels,
