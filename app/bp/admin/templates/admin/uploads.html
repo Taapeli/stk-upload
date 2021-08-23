@@ -59,7 +59,7 @@
 	           </td>
 
                <td class="msg_INFO">
-                    <span class="typedesc">{{upload.material_type}}</span>
+                    <span class="typedesc">{{upload.material_type|transl('material')}}</span>
                 {% if upload.description %} 
                     <br><i>{{ upload.description[0:19] }}
                     {% if upload.description|length > 19  %}

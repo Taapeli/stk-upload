@@ -279,6 +279,7 @@ def list_uploads(username):
             self.xmlname = ""
             self.upload_time_s = ""
             self.user = ""
+            self.auditors = [] # usernames
             self.has_file = False
             self.has_log = False
 
@@ -292,7 +293,9 @@ def list_uploads(username):
                 if self.user:
                     s += f"@{self.user}"
             if self.count:
-                s += f", counts {self.count}/{self.count_a}"
+                s += f", counts {self.count}"
+            if self.auditors:
+                s += f", auditors: {self.auditors}"
             has_file = f"{'file=' if self.has_file else 'NO FILE'}{self.xmlname}"
             has_log = f"{'log' if self.has_log else 'NO LOG'}"
             return f"{self.material_type} {s}, found {has_file}, {has_log}"
@@ -300,16 +303,18 @@ def list_uploads(username):
     # 1. List Batches from db, their status and Person count
     batches = {}
     result = shareds.driver.session().run(
-        CypherRoot.get_user_batch_summary, user=username
+        CypherRoot.get_user_root_summary, user=username
     )
     for record in result:
-        # Returns batch, person_count, audit_count
-        batch_node = record["b"]
-        b = Root.from_node(batch_node)
-        print("uploads:", b.id, b.state)
+        # Returns root, person_count, auditors
+        node = record["root"]
+        b = Root.from_node(node)
         # augment with additional data
         b.person_count = record["person_count"]
-        b.audit_count = record["audit_count"]
+        b.auditors = []
+        for uname in record["auditors"]:
+            b.auditors.append(uname)
+        print("uploads:", b.id, b.state, b.auditors)
         batches[b.id] = b
 
     # 2. List uploaded files
@@ -321,7 +326,7 @@ def list_uploads(username):
     uploads = []
     # There may be 4 files: 
     # - 'test.gramps',      original xml
-    # - 'test.gramps.log'   logfile from conversion to db
+    # - 'test.gramps.log'   logfile from xml to db conversion
     # - 'test.gramps.meta'  metafile from file conversion
     # - 'test_clean.gramps' cleaned xml data
     for name in names:
@@ -335,7 +340,7 @@ def list_uploads(username):
             status = meta.get("status", State.FILE_UPLOADED)
             status_text = None
             person_count = 0
-            audit_count = 0
+            #audit_count = 0
             batch_id = meta.get("batch_id", "")
             in_batches = batch_id in batches
             if not in_batches:
@@ -355,9 +360,9 @@ def list_uploads(username):
                     b = batches.pop(batch_id)
                     status = b.state
                     person_count = b.person_count
-                    audit_count = b.audit_count
-                    if status == State.ROOT_FOR_AUDIT:
-                        status_text = _("FOR_AUDIT")
+                    #audit_count = b.auditors
+                    if status == State.ROOT_AUDIT_REQUESTED:
+                        status_text = _("AUDIT_REQUESTED")
                     if status == State.ROOT_AUDITING:
                         status_text = _("AUDITING")
                 else:
@@ -376,9 +381,10 @@ def list_uploads(username):
                 upload.status = status_text
                 upload.batch_id = batch_id
                 upload.count = person_count
-                upload.count_a = audit_count
+                #upload.count_a = audit_count
+                upload.is_candidate = 1 if status_text == _("CANDIDATE") else 0
                 upload.done = status_text == _("CANDIDATE") or \
-                              status_text == _("FOR_AUDIT")
+                              status_text == _("AUDIT_REQUESTED")
                 upload.uploaded = status_text == _("UPLOADED")
                 upload.loading = status_text == _("STORING")
                 clean_filepath = meta_filepath[:-5].replace(".","_clean.",1)
@@ -399,22 +405,25 @@ def list_uploads(username):
     for batch, b in batches.items():
         upload = Upload()
         upload.batch_id = batch
-        upload.status = "?!"
+        upload.status = State.ROOT_UNKNOWN
         if b.state == State.ROOT_STORING:
-            upload.status = "?"
+            upload.status = _("STORING") + " ?"
         elif b.state == State.ROOT_CANDIDATE:
-            # Todo: Remove later: Old FOR_AUDIT materials are CANDIDATE, too
+            # Todo: Remove later: Old AUDIT_REQUESTED materials are CANDIDATE, too
             upload.status = _("CANDIDATE") + " ?"
         elif b.state == State.ROOT_AUDITING:
-            if b.audit_count > 0:
-                upload.status = f"{ _('FOR_AUDIT') } {b.audit_count} { _('persons') }"
-            else:
-                upload.status = f"{ _('AUDITING') } (toistaiseksi nk. hyväksytty)"
+            # if b.audit_count > 0:
+            #     upload.status = f"{ _('AUDIT_REQUESTED') } {b.audit_count} { _('persons') }"
+            # else:
+            upload.status = f"{ _('AUDITING') } (toistaiseksi nk. hyväksytty)"
+        elif b.state == State.FILE_LOADING:
+            upload.status = _(State.FILE_LOADING) 
 
         upload.count = b.person_count
-        upload.count_a = b.audit_count
+        if b.is_auditing():
+            upload.auditors = b.auditors
         upload.has_file = False
-        upload.has_log = b.audit_count > 0  # Rough estimate!
+        #upload.has_log = b.audit_count > 0  # Rough estimate!
         upload.upload_time = 0.0
         upload.material_type = b.material
         upload.description = b.description

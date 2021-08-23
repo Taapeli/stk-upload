@@ -175,10 +175,10 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK, "identity": uniq_id}
 
 
-    def ds_batch_set_status(self, batch_id, user, status):
-        """Updates Batch node selected by Batch id.
+    def ds_batch_set_state(self, batch_id, user, status):
+        """Updates Batch node selected by Batch id ans user.
 
-        Batch.timestamp is updated in the Cypher clause.
+        Not! Batch.timestamp is updated in the Cypher clause.
         """
         try:
             result = self.tx.run(
@@ -188,7 +188,7 @@ class Neo4jUpdateService(ConcreteService):
             return {"status": Status.OK, "identity": uniq_id}
 
         except Exception as e:
-            statustext = f"Neo4jUpdateService.ds_batch_set_status failed: {e.__class__.__name__} {e}"
+            statustext = f"Neo4jUpdateService.ds_batch_set_state failed: {e.__class__.__name__} {e}"
             return {"status": Status.ERROR, "statustext": statustext}
 
     # ----- Common objects -----

@@ -75,7 +75,7 @@ class UserContext():
 
             COMMON - 1          approved common data 'Isotammi'
             OWN - 2             all user's own candidate materials
-            BATCH - 3 *         a selected Batch set
+            BATCH - 3           a selected Batch set
             COMMON+OWN *
             COMMON+BATCH *
             *) NOTE. Not implemented!
@@ -120,7 +120,7 @@ class UserContext():
         """
         COMMON = 1  # Approved data
         OWN = 2     # Candidate data
-        BATCH = 4   # Selected candicate batch - currently not implemented
+        BATCH = 4   # Selected candicate batch
         CODE_VALUES = ['', 'aud', 'can', 'aud,can', 'bat', 'can,bat']
 
         def __init__(self):
@@ -245,7 +245,7 @@ class UserContext():
                       f"{self.context_code} {self.choices.get_state(self.context_code)}")
 
         if self.user and self.context_code == self.choices.OWN:
-            # Select state by contect code
+            # Select state by context code
             #TODO: Needs better rule for edit permission
             # May edit data, if user has such role
             if self.context_code == self.choices.OWN:

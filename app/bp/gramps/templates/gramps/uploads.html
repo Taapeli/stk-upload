@@ -13,9 +13,13 @@
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 <style>
+h2 {margin-bottom: 0;}
 td {
     position: relative;
 }
+.fileselect > tbody > tr > td:nth-child(1) {text-align: center;}
+#upload_xml div {display: inline;}
+form div {margin:.25em;}
 .progress {
 	position: absolute;
 	top: 0;
@@ -23,38 +27,91 @@ td {
 	left: 0;
 	z-index: -1;
 }
+.button_group {
+    display: inline-block;
+    width: 10em;
+}
+.op_box {
+	border: solid silver 1px;
+	border-radius: 1em;
+	min-width: 35em;
+	max-width: max-content;
+	padding: .5em;
+	margin-left: 2em;
+	background-color: WhiteSmoke; 
+}
+.load_box {
+	max-width: max-content;
+}
+
 </style>
 
 <script>
+<script>
+//TODO: Translation for message
+var TOOLARGE =  "The file is too large (max 60 MB)";
+
+function checkFileSize() {
+	try {
+	 	var input = document.getElementById('filenm');
+	 	var file = input.files[0];
+	 	if (file.size > 60000000) {
+			alert(TOOLARGE);
+			return false;
+	 	}
+	}
+	catch {
+	}
+	return true;
+}
+
 // Progress bar
 var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
 var selected_batch_id = '';
 
-function selectFile(sel, batch_id, xml_name) {
-    document.getElementById('nm').innerHTML=uri_dec = decodeURIComponent(sel.value);
+function selectFile(sel, batch_id='', xml_name, is_candidate) {
+	if (sel.value)
+		document.getElementById('nm').innerHTML = decodeURIComponent(sel.value);
+	else
+		document.getElementById('nm').innerHTML = "&mdash;";
+	console.log("#selectFile", xml_name, batch_id);
+   	document.getElementById('ba').innerHTML= batch_id != '' ? batch_id : "&mdash;";
+    	
     selected_batch_id = batch_id;
 
     // Button rules for selected row:
     //   id           disabled
     // download     if xml_name
     // start_upload if xml_name         // (bring to database)
-    // show_log     always
+    // show_log     if xml_name
+    // ask_audit    if state == Candidate (user lang)
     // batch_delete if batch_id
     // xml_delete   if not batch_id
     var buttons = document.getElementsByTagName('button');
     for (var i = 0, length = buttons.length; i < length; i++)
     {
-	    buttons[i].disabled = false;
-	    if (buttons[i].id == 'download' && xml_name == '')
-	        buttons[i].disabled = true;
-	    if (buttons[i].id == 'analyze' && xml_name == '')
-	        buttons[i].disabled = true;
-	    if (buttons[i].id == 'start_upload' && xml_name == '')
-	        buttons[i].disabled = true;
-	    if (buttons[i].id == 'batch_delete' && batch_id == '')
-	        buttons[i].disabled = true;
-	    if (buttons[i].id == 'xml_delete' && batch_id != '')
-	        buttons[i].disabled = true;
+	    buttons[i].disabled = true;
+	    if (xml_name != '') {
+		    if (buttons[i].id == 'download')
+		        buttons[i].disabled = false;
+		    else if (buttons[i].id == 'analyze')
+		        buttons[i].disabled = false;
+		    else if (buttons[i].id == 'start_upload')
+		        buttons[i].disabled = false;
+		    else if (buttons[i].id == 'show_log')
+		        buttons[i].disabled = false;
+	    }
+	    if (batch_id != '') {
+		    if (buttons[i].id == 'batch_delete')
+		        buttons[i].disabled = false;
+	    } else {
+		    if (buttons[i].id == 'xml_delete')
+		        buttons[i].disabled = false;
+	    }
+	    if (is_candidate) {
+		    if (buttons[i].id == 'ask_audit')
+		        buttons[i].disabled = false;
+	    }
     }
 };
 
@@ -62,8 +119,12 @@ function update_progress(xmlfile) {
 	// see http://jsfiddle.net/kedctfmj/3/
 	$.get("get_progress/" + encodeURIComponent(xmlfile), (rsp) => {
 		var progress_div = $("td div.progress[data-name='"+xmlfile+"']");
-		var batch_id_column = progress_div.parent().prev().prev();
-		progress_div.css("background","lightgreen");
+		var batch_id_column = progress_div.parent(); /*.prev().prev(); */
+		batch_id_column.css("background","silver");
+		progress_div.css("background","LightGreen");
+		progress_div.css("z-index","1");
+		progress_div.css("margin","4px");
+		progress_div.css("border-radius","6px 0 0 6px");
 		if (rsp.progress == 0) rsp.progress = 1;
 		progress_div.get(0).style.width = rsp.progress + "%";
 		if (rsp.status == "Loading") 
@@ -118,6 +179,13 @@ $(document).ready( function() {
         $("#form").submit();
     });
 
+    $("#ask_audit").click(function(e) {
+    	console.log("#ask_audit.click", document.getElementById('ba').innerText);
+        $("#form").attr("action","/audit/requested/" + 
+                document.getElementById('ba').innerText);
+        $("#form").submit();
+    });
+
     $("#xml_delete").click(function(e) {
         var name = document.getElementById('nm').innerText;
         if (confirm_delete('xml', name)) {
@@ -160,7 +228,9 @@ function confirm_delete(subj, name) {
 
 {% include "flash_messages.html" %}
 
+{% if uploads %}
     	<table class="fileselect">
+	{% if uploads %}
         	<tr><th></th>
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("Gramps file") }}</th>
@@ -173,7 +243,7 @@ function confirm_delete(subj, name) {
 					  	<p>↓ <b>{{ _("UPLOADED") }}</b> – {{ _("the file has been uploaded to server") }}<br>
 					  	   ↓ <b>{{ _("STORING") }}</b>  – {{ _("the file content is being stored to the database") }}<br>
                            ↳ <b>{{ _("CANDIDATE") }}</b> – {{ _("the data is stored as candidate material") }}<br>
-                           ★ <b>{{ _("FOR_AUDIT") }}</b> – {{ _("the data has been sent to common data") }}<br>
+                           ★ <b>{{ _("AUDIT_REQUESTED") }}</b> – {{ _("the data has been sent to common data") }}<br>
 					  	   → <b>{{ _("REMOVED") }}</b>  – {{ _("Not found any more") }}<br>
 					  	   ↝ <b>{{ _("ERROR") }} / {{ _("FAILED") }}</b> – {{ _("there was an error") }}
 						</p>
@@ -181,22 +251,23 @@ function confirm_delete(subj, name) {
 					</div> 
 				</th>
    			</tr>
-
-	    {% for upload in uploads %}
+	{% endif %}
+ 
+	{% for upload in uploads %}
 	    {% if True or upload.status != "?" %}
-	        <tr>
+	        <tr> 
 	        	<td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
-	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}');">
+	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}', {{upload.is_candidate}});">
 	            </td>
 	            <td>{{upload.upload_time_s}}</td>
 	            <td>{{upload.xmlname}}
 
-                {% if upload.material_type or upload.description %}
-                    <br><span class="typedesc">{{upload.material_type}}</span>
-                {% endif %}
-                {% if upload.description %} 
+			{% if upload.material_type or upload.description %}
+                    <br><span class="typedesc">{{upload.material_type|transl('material')}}</span>
+			{% endif %}
+			{% if upload.description %} 
                     <i>{{ upload.description[0:19] }}
-                    {% if upload.description|length > 19  %}
+				{% if upload.description|length > 19  %}
                         ... 
                         <div class="tooltip"> 
                         &nbsp;&#8505;&nbsp;
@@ -204,93 +275,95 @@ function confirm_delete(subj, name) {
                             {{ upload.description }} 
                           </div>
                         </div> 
-                    {% endif %}
+				{% endif %}
                     </i>
-                {% endif %}
+			{% endif %}
 
                 </td>
-                <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}</td>
-                <td class="center">
-                {% if upload.count %}{{upload.count}}{% endif %}
-                {% if upload.count_a %}
-                    <i title="{{ _("The persons sent to common data") }}">{{upload.count_a}}</i>
-                {% endif %}
-                </td>
-                <td>{{upload.status}}
+                <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}
                     <div class="progress" data-name='{{upload.xmlname}}'></div>
-                {% if upload.loading %}
+			{% if upload.loading %}
                      <script>
                          setTimeout( function() {update_progress('{{upload.xmlname}}')}, 1000 );
                      </script>
-                {% endif %}
+			{% endif %}
+                </td>
+                <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
+                </td>
+                <td>{{upload.status}}
+			{% if upload.auditors %}
+                    <br><i>{{ _("Auditor") }}: {{ ', '.join(upload.auditors) }}</i>
+			{% endif %}
                 </td>
 	        </tr>
-	    {% endif %}{% endfor %}
-	    {% if uploads|length == 0 %}
-	        <tr><td colspan="5" style="padding:2em">{{ _("Start by sending your first Gramps file") }}</td>
-	        </tr>
-	    {% endif %}
-    	</table>
+		{% endif %}
+	{% endfor %}
+
+{% if current_user.is_authenticated and current_user.has_role('research') %}
+		<form action="/gramps/upload" method="post" enctype="multipart/form-data">
+   			<tr id="upload_xml" title="{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.">
+   				<td><b>+</b></td>
+   				<td>{{ _("Send a new Gramps file") }}
+   				</td>
+   				<td colspan="3">
+   					<div>
+	   					<div>
+				        	<input type="hidden" name="material" value="xml_file">
+				        	<input type="file" name="filenm" accept=".gramps,.gpkg"/>
+				        </div>
+				        <div class="submit"> 
+				        	<input type="submit" value="{{ _('Send') }}" onclick="checkFileSize()"/>
+				        </div>
+   					</div>
+   				</td>
+   				<td></td>
+   			</tr>
+ 		</form>
+   </div>
+{% endif %}
+   	</table>
+
     <div>
     	<form id="form" action="" method="get">
-		    <h2>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h2>
-	        <div>{{ _("Saving data") }}:
-	            <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
-	            <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
-			    {% if gramps_verify %}
-	            <button id="gramps_analyze" disabled>{{ _("Execute Gramps Verify Tool") }}</button>
-	            {% endif %}
-	            <button id="start_upload" disabled>{{ _("Store to database") }}</button>
-	            <button id="show_log" disabled>{{ _("Show last log") }}</button>
-	        </div>
-	        <div>{{ _("Delete data") }}:
-	            <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>
-	            <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
-	        </div>
+		    <h2>{{ _("Operations for selected row") }}</h2>
+		    <div>
+		    	{{ _("File")}}: <b id="nm">&mdash;</b>,
+	{% if true %}
+		    	{{ _("Batch id")|lower }}: <b id="ba">&mdash;</b>
+	{% endif %}
+			</div>
+			<div class="op_box">
+		        <div><div class="button_group">{{ _("Saving data") }}:</div>
+		            <button id="start_upload" disabled><b>{{ _("Store to database") }}</b></button>
+		            <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
+		        </div>
+	
+		        <div><div class="button_group">{{ _("Analyze data") }}:</div>
+	            	<button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
+	{% if gramps_verify %}
+	            	<button id="gramps_analyze" disabled>{{ _("Execute Gramps Verify Tool") }}</button>
+	{% endif %}
+	            	<button id="show_log" disabled>{{ _("Show last log") }}</button>
+		        </div>
+	
+		        <div><div class="button_group">{{ _("Auditing") }}:</div>
+		            <button id="ask_audit" disabled><b>{{ _("Send for auditing") }}</b></button>
+		            <button id="revert_audit" disabled>{{ _("Withdraw auditing") }}</button>
+		        </div>
+	
+		        <div><div class="button_group">{{ _("Delete data") }}:</div>
+		            <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>
+		            <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
+		        </div>
+			</div>
 		</form>
 		<p></p>
     </div>
     
   </div>
 
-    
-{% if current_user.is_authenticated and current_user.has_role('research') %}
-<script>
-var TOOLARGE =  _("The file is too large (max 60 MB)");
-
-function checkFileSize() {
- 	try {
-	 	var input = document.getElementById('filenm');
- 	 	var file = input.files[0];
- 	 	if (file.size > 60000000) {
-			alert(TOOLARGE);
-			return false;
- 	 	}
- 	}
- 	catch {
- 	}
-	return true;
-}
-</script>
-   <div class="startbox">
-       <h2>{{ _("Send a new Gramps file") }}</h2>
-       <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
-	       <div style="display: inline-block;">
-	          <input type="hidden" name="material" value="xml_file">
-	          <p>{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.</p>
-	          <input type="file" name="filenm" accept=".gramps,.gpkg"/>
-	       </div>
-	       <div class="submit"> 
-	           <input type="submit" value="{{ _('Send') }}" onclick="checkFileSize()"/>
-	       </div>
-	       <div><p>► {{ _('Read more about') }}
-	           <i><a href="https://gramps-project.org/wiki/index.php/Fi:Etusivu" 
-	              title="{{ _('Manual') }}">Gramps</a></i>{{ _(' program') }}
-	           </p>
-	       </div>
-       </form>
-   </div>
 {% endif %}
+    
 
 <!-- Startdiv ends -->
 </div>

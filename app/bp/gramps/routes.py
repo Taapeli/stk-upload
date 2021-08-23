@@ -62,7 +62,7 @@ from bl.gramps import gramps_utils
 @bp.route("/gramps")
 @login_required
 @roles_accepted("research", "admin")
-def gramps_index():
+def obsolete_gramps_index():
     return "Error: bp.gramps.routes.gramps_index is obsolete!"
     """ Home page gramps input file processing """
     logger.info("-> bp.start.routes.gramps_index")
@@ -70,13 +70,23 @@ def gramps_index():
 
 
 @bp.route("/gramps/show_log/<xmlfile>")
+@bp.route("/gramps/show_log/")
 @login_required
 @roles_accepted("research")
-def show_upload_log(xmlfile):
-    upload_folder = uploads.get_upload_folder(current_user.username)
-    fname = os.path.join(upload_folder, xmlfile + ".log")
-    msg = open(fname, encoding="utf-8").read()
-    logger.info(f"-> bp.gramps.routes.show_upload_log f='{xmlfile}'")
+def show_upload_log(xmlfile=""):
+    msg=""
+    try:
+        upload_folder = uploads.get_upload_folder(current_user.username)
+        fname = os.path.join(upload_folder, xmlfile + ".log")
+        msg = open(fname, encoding="utf-8").read()
+        logger.info(f"-> bp.gramps.routes.show_upload_log f='{xmlfile}'")
+    except Exception as e:
+        print(f"bp.gramps.routes.show_upload_log: {e}")
+        if not msg:
+            msg = f'{_("The uploaded file does not exist any more.")}'
+        flash(msg)
+        return redirect(url_for("gramps.list_uploads"))
+
     return render_template("/admin/load_result.html", msg=msg)
 
 
@@ -84,6 +94,10 @@ def show_upload_log(xmlfile):
 @login_required
 @roles_accepted("research", "admin")
 def list_uploads():
+    """ User uploads list.
+        Steps 1.& 3. of audit path: The user can  select one to Audit queue
+        Step 2. /audit/requested/<batch_id>
+    """
     upload_list = uploads.list_uploads(current_user.username)
     logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
@@ -164,7 +178,7 @@ def upload_gramps():
 @roles_accepted("research")
 def start_load_to_stkbase(xmlname):
     """The uploaded Gramps xml file is imported to database in background process.
-    A 'i_am_alive' process for monitoring the bg prosess is also started.
+    A 'i_am_alive' process for monitoring the bg process is also started.
     """
     uploads.initiate_background_load_to_stkbase(current_user.username, xmlname)
     logger.info(

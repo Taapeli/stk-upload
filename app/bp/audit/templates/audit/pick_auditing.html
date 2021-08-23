@@ -9,12 +9,14 @@
 
 <div id="startdiv">
     <div>
-        <h1>{{ _("Moving batch to Isotammi database") }}</h1>
+        <h1>{{ _("Pick for auditing") }}</h1>
 
 {% include "flash_messages.html" %}
 
-<!--         <div class="startbox2"> -->
-            <h2>{{ _('Selected Batch') }}</h2>
+        <div style="width: min-content;">
+            <h2>{{ _('Selected Batch') }} {{root.id}}</h2>
+            <p>{{root.state|transl('state')}} {{_("material")}}:
+               {{root.material|transl('material')}}</p>
 			<table>
 				<tr>
 					<th>{{ _('Batch id') }}</th>
@@ -24,7 +26,7 @@
 				</tr>
 
                 <tr>
-                    <td>{{batch}}{% if time %}<br>
+                    <td class="nowrap">{{root.id}}{% if time %}<br>
                     <small>{{ _('saved at') }} {{time}}</small>{% endif %}
                     </td> {% for label, cnt in label_nodes %}
                     <td class="right nowrap">{{cnt|int_thousands}}</td> {% endfor %}
@@ -32,18 +34,17 @@
             </table>
             <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
 {% if total %}
-            <form action="/audit/movenow" method="post">
+            <form action="/audit/selected" method="post">
 	            <div class="submit">
-                   <input type="hidden" value="{{batch}}" name="batch">
+                   <input type="hidden" value="{{root.id}}" name="batch">
                    <input type="hidden" value="{{user}}" name="user">
-                   <input type="submit" value="{{ _('Move to Isotammi database') }}" />
+                   <input type="submit" value="{{ _('Start') }}" />
 	            </div>
-<!--            <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back without changes') }}</a></p> -->
             </form>
 {% else %}
             <p>{{ _('– There is no more data to move in this batch') }}.</p>        
 {% endif %}
-<!--         </div> -->
+        </div>
 
     </div>
 </div>

@@ -1127,6 +1127,12 @@ body#FamilyMap {
 	}
 */
 
+/* Gren: Comments part now only for auditor! */
+div#comments_div h3 a {
+    color: DarkGreen;
+    text-decoration: none;
+}
+
 div.comment {
 	border: 1px solid;
 	padding: 5px;

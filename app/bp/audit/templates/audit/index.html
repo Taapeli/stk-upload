@@ -16,10 +16,6 @@
         <div class="startbox">
             <h2>{{ _('Queries') }}</h2>
             <ul>
-{#          <li><a href="/tables">{{ _("Table format tools") }}</a>.
-	           {{ _('The data includes accepted and candidate materials of all users.') }}
-	        </li>
-#}
             <li><a href="/admin/readlog">{{ _('Display application log') }}</a></li>
             <li>{{ _("List approved common data sets") }}:
                 <a href="/audit/approvals/all">{{ _("all") }}</a>,
@@ -35,7 +31,7 @@
             <h2>{{ _('Operations') }}</h2>
             <ul>
             <li><a href="/audit/list_uploads">
-                {{ _("Select a batch to be moved to Isotammi database") }}
+                {{ _("Choose a batch for you to audit") }}
                 </a></li>
             <li><a href="/admin/clear_batches">{{ _("Remove empty batches") }}</a></li>
             <li><a href="/refplace_editor">{{ _('Experimental place merge') }}</a></li>

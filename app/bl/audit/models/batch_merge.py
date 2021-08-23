@@ -23,7 +23,7 @@ Created on 5.12.2019
 @author: jm
 """
 import shareds
-from bl.root import State
+from bl.root import State, Status
 from pe.neo4j.cypher.cy_batch_audit import CypherAudit
 
 import logging
@@ -31,13 +31,32 @@ import logging
 logger = logging.getLogger("stkserver")
 
 
-class Batch_merge:
+class BatchMerger:
     """
     Methods to move a User Batch (Root node) to Common data.
     """
-
-    def move_whole_batch(self, batch_id, user, auditor):
+    
+    def ask_auditing(self, batch_id, user):
         """
+        Changes Root from Candidate to Auditing.
+
+        :param:    batch_id    active Batch
+        :param:    user        owner of the Batch
+        """
+        state = State.ROOT_AUDIT_REQUESTED
+        res = shareds.dservice.ds_batch_set_state(self, batch_id, user, state)
+        if Status.has_failed(res):
+            print(f"BatchMerger.ask_auditing: {batch_id} FAILED {res.get('statustext')}")
+        else:
+            logger.info(f"BatchMerger.ask_auditing: {batch_id}")
+            print(f"BatchMerger.ask_auditing: {batch_id}")
+        return res
+
+
+    def obsolete_move_whole_batch(self, batch_id, user, auditor):
+        """
+        Creates Root duplicate with state Auditing.
+
         :param:    batch_id    active Batch
         :param:    user        owner of the Batch
         :param:    auditor     active auditor user id
@@ -51,9 +70,9 @@ class Batch_merge:
                 oper=auditor,
                 state_candidate=State.ROOT_CANDIDATE,
                 state_auditing=State.ROOT_AUDITING,
-                state_for_audit=State.ROOT_FOR_AUDIT
+                state_for_audit=State.ROOT_AUDIT_REQUESTED
             ).single()
-            logger.info(f"Batch_merge.move_whole_batch: {batch_id}")
-            print(f"Batch_merge.move_whole_batch: {batch_id}")
-            #print(f"Batch_merge.move_whole_batch: {batch_id}; result={result}")
+            logger.info(f"BatchMerger.obsolete_move_whole_batch: {batch_id}")
+            print(f"BatchMerger.obsolete_move_whole_batch: {batch_id}")
+            #print(f"BatchMerger.obsolete_move_whole_batch: {batch_id}; result={result}")
             return result

@@ -90,27 +90,37 @@ return b as batch, count(x) as cnt
     get_single_batch = '''
 match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch}) 
 optional match (b) --> (x)
-return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
+return up as profile, b as root, labels(x)[0] as label, count(x) as cnt'''
 
-    get_user_batch_names = '''
-match (b:Root) where b.user = $user
-optional match (b) -[r:OBJ_PERSON]-> (:Person)
-return b.id as batch, b.timestamp as timestamp, b.status as status,
-    count(r) as persons 
-    order by batch'''
+#     get_user_batch_names = '''
+# match (b:Root) where b.user = $user
+# optional match (b) -[r:OBJ_PERSON]-> (:Person)
+# return b.id as batch, b.timestamp as timestamp, b.status as status,
+#     count(r) as persons 
+#     order by batch'''
 
-# TODO Batch->Root:
-    get_user_batch_summary = """
-match (b:Root) where b.user = $user
-and b.state <> 'Audit Requested'
+    get_user_root_summary = """
+match (u:UserProfile) --> (b:Root) where u.username = $user
+optional match (a:UserProfile) -[ar]-> (b)
 optional match (b) -[r:OBJ_PERSON]-> (:Person)
-with b, count(r) as person_count
+with b, count(r) as person_count, 
+    type(ar) as arel, a.username as auditor
+        where not arel = "HAS_LOADED" // TODO vaihda = "IS_AUDITING"
     optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
 return 
-    b, 
-    person_count,  
-    count(ar) as audit_count
-order by b.id"""
+    b as root, person_count,
+    collect(distinct auditor) as auditors
+order by root.id"""
+
+#     get_user_batch_summary = """
+# match (b:Root) where b.user = $user
+# //and b.state <> 'Audit Requested'
+# optional match (b) -[r:OBJ_PERSON]-> (:Person)
+# with b, count(r) as person_count
+#     optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
+# return b, person_count,  
+#     count(ar) as audit_count
+# order by b.id"""
 
     TODO_get_empty_batches = '''
 MATCH (a:Root) 
