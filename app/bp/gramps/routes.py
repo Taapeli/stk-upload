@@ -169,8 +169,8 @@ def upload_gramps():
         traceback.print_exc()
         return redirect(url_for("gramps.error_page", code=1, text=str(e)))
 
-    return redirect(url_for("gramps.list_uploads"))
-    # return redirect(url_for('gramps.save_loaded_gramps', filename=infile.filename))
+    #return redirect(url_for("gramps.list_uploads"))
+    return redirect(url_for("gramps.start_load_to_stkbase", xmlname=infile.filename))
 
 
 @bp.route("/gramps/start_upload/<xmlname>")
@@ -190,7 +190,7 @@ def start_load_to_stkbase(xmlname):
 
 @bp.route("/gramps/virhe_lataus/<int:code>/<text>")
 @login_required
-@roles_accepted("research", "admin")
+@roles_accepted("research", "admin") 
 def error_page(code, text=""):
     """ Virhesivu näytetään """
     logger.info(f"bp.gramps.routes.error_page/{code}")
