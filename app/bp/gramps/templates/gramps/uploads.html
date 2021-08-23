@@ -304,18 +304,17 @@ function confirm_delete(subj, name) {
    				<td><b>+</b></td>
    				<td>{{ _("Send a new Gramps file") }}
    				</td>
-   				<td colspan="3">
+   				<td colspan="4">
    					<div>
 	   					<div>
 				        	<input type="hidden" name="material" value="xml_file">
 				        	<input type="file" name="filenm" accept=".gramps,.gpkg"/>
 				        </div>
 				        <div class="submit"> 
-				        	<input type="submit" value="{{ _('Send') }}" onclick="checkFileSize()"/>
+				        	<input type="submit" value="{{ _('Send to database') }}" onclick="checkFileSize()"/>
 				        </div>
    					</div>
    				</td>
-   				<td></td>
    			</tr>
  		</form>
    </div>

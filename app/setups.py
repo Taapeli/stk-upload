@@ -262,11 +262,12 @@ accessDB.initialize_db()
 
 
 """ 
-    Jinja application filter definitions 
+    Jinja application filter definitions.
+    Example: {{ size|int_thousands }}
 """
 
 @shareds.app.template_filter('pvt')
-def _jinja2_filter_dates(dates):
+def _jinja2_filter_dates(dates):    # Not in use!
     """ Aikamääreet suodatetaan suomalaiseksi """
     return str(DateRange(dates))
 
@@ -296,7 +297,7 @@ def _jinja2_filter_datestamp(time_str, fmt=None):
     except:
         return time_str
 
-@shareds.app.template_filter('isodatetime')
+@shareds.app.template_filter('isodatetime') # Not in use
 def _jinja2_filter_datetime(datetime, fmt=None):
     """ Datetime ISO-muotoon ilman sekunnin osia """
     if datetime == None:
@@ -324,7 +325,7 @@ def _jinja2_filter_translate(term, var_name):
     """
     return jinja_filters.translate(term, var_name)
 
-@shareds.app.template_filter('is_list')
+@shareds.app.template_filter('is_list') # Not in use?
 def _is_list(value):
     return isinstance(value, list)
 

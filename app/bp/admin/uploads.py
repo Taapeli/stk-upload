@@ -296,7 +296,7 @@ def list_uploads(username):
                 s += f", counts {self.count}"
             if self.auditors:
                 s += f", auditors: {self.auditors}"
-            has_file = f"{'file=' if self.has_file else 'NO FILE'}{self.xmlname}"
+            has_file = f"{'file=' if self.has_file else 'NO FILE '}{self.xmlname}"
             has_log = f"{'log' if self.has_log else 'NO LOG'}"
             return f"{self.material_type} {s}, found {has_file}, {has_log}"
 
@@ -314,7 +314,7 @@ def list_uploads(username):
         b.auditors = []
         for uname in record["auditors"]:
             b.auditors.append(uname)
-        print("uploads:", b.id, b.state, b.auditors)
+        print("#list_uploads/root", b.user, b.id, b.user, b.state, b.auditors)
         batches[b.id] = b
 
     # 2. List uploaded files
@@ -425,8 +425,12 @@ def list_uploads(username):
         upload.has_file = False
         #upload.has_log = b.audit_count > 0  # Rough estimate!
         upload.upload_time = 0.0
+        if len(b.file) - len(upload_folder) > 0:
+            upload.xmlname = b.file[len(upload_folder)+1:]
+        upload.user = username
         upload.material_type = b.material
         upload.description = b.description
+        print(f"#list_uploads {upload}")
         uploads.append(upload)
 
     return sorted(uploads, key=lambda x: x.upload_time)
