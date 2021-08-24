@@ -27,7 +27,7 @@ from .. import gedcom_analyze
 
 import re
 import sys
-from _collections import defaultdict
+from collections import defaultdict
 
 version = "1.0"
 name = _("Dates")
