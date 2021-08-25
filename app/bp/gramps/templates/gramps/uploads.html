@@ -10,7 +10,7 @@
 {{ super() }}
 <!-- <meta http-equiv="refresh" content="30"> -->
 
-{% from "start/s_macros.html" import hamburger_menu with context %}
+{% from "start/s_macros.html" import hamburger_menu, state_info with context %}
 
 <style>
 h2 {margin-bottom: 0;}
@@ -235,20 +235,7 @@ function confirm_delete(subj, name) {
                 <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Batch id") }}</th>
                 <th>{{ _("Person count") }}</th>
-                <th>{{ _("Status") }}
-					<div class="tooltip"> &#x2754;
-					  <div class="tooltiptext">
-					  	<p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
-					  	<p>↓ <b>{{ _("UPLOADED") }}</b> – {{ _("the file has been uploaded to server") }}<br>
-					  	   ↓ <b>{{ _("STORING") }}</b>  – {{ _("the file content is being stored to the database") }}<br>
-                           ↳ <b>{{ _("CANDIDATE") }}</b> – {{ _("the data is stored as candidate material") }}<br>
-                           ★ <b>{{ _("AUDIT_REQUESTED") }}</b> – {{ _("the data has been sent to common data") }}<br>
-					  	   → <b>{{ _("REMOVED") }}</b>  – {{ _("Not found any more") }}<br>
-					  	   ↝ <b>{{ _("ERROR") }} / {{ _("FAILED") }}</b> – {{ _("there was an error") }}
-						</p>
-					  </div>
-					</div> 
-				</th>
+                <th>{{ _("Status") }} {{ state_info() }} </th>
    			</tr>
 	{% endif %}
  
@@ -304,18 +291,17 @@ function confirm_delete(subj, name) {
    				<td><b>+</b></td>
    				<td>{{ _("Send a new Gramps file") }}
    				</td>
-   				<td colspan="3">
+   				<td colspan="4">
    					<div>
 	   					<div>
 				        	<input type="hidden" name="material" value="xml_file">
 				        	<input type="file" name="filenm" accept=".gramps,.gpkg"/>
 				        </div>
 				        <div class="submit"> 
-				        	<input type="submit" value="{{ _('Send') }}" onclick="checkFileSize()"/>
+				        	<input type="submit" value="{{ _('Send to database') }}" onclick="checkFileSize()"/>
 				        </div>
    					</div>
    				</td>
-   				<td></td>
    			</tr>
  		</form>
    </div>
