@@ -145,9 +145,9 @@ class Neo4jUpdateService(ConcreteService):
         try:
             result = self.tx.run(CypherRoot.get_single_batch, batch=batch_id)
             for record in result:
-                node = record.get("batch")
+                node = record.get("root")
                 if node:
-                    return {"status":Status.OK, "node":record["batch"]}
+                    return {"status":Status.OK, "node":record["root"]}
                 else:
                     return {"status":Status.NOT_FOUND, "node":None,
                             "statustext": "Batch not found"}

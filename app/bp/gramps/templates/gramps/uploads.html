@@ -114,10 +114,10 @@ function selectFile(sel, batch_id='', xml_name, is_candidate) {
     }
 };
 
-function update_progress(xmlfile) {
+function update_progress(batch_id) {
 	// see http://jsfiddle.net/kedctfmj/3/
-	$.get("get_progress/" + encodeURIComponent(xmlfile), (rsp) => {
-		var progress_div = $("td div.progress[data-name='"+xmlfile+"']");
+	$.get("get_progress/" + encodeURIComponent(batch_id), (rsp) => {
+		var progress_div = $("td div.progress[data-name='"+batch_id+"']");
 		var batch_id_column = progress_div.parent(); /*.prev().prev(); */
 		batch_id_column.css("background","silver");
 		progress_div.css("background","LightGreen");
@@ -127,7 +127,7 @@ function update_progress(xmlfile) {
 		if (rsp.progress == 0) rsp.progress = 1;
 		progress_div.get(0).style.width = rsp.progress + "%";
 		if (rsp.status == "Loading") 
-			setTimeout(function() {update_progress(xmlfile)}, PROGRESS_INTERVAL);
+			setTimeout(function() {update_progress(batch_id)}, PROGRESS_INTERVAL);
 		else 
 			location.reload();
 	});
@@ -227,13 +227,12 @@ function confirm_delete(subj, name) {
 
 {% include "flash_messages.html" %}
 
-{% if uploads %}
+{% if 1 or uploads %}
     	<table class="fileselect">
 	{% if uploads %}
         	<tr><th></th>
-                <th>{{ _("Upload time") }}</th>
-                <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Batch id") }}</th>
+                <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Person count") }}</th>
                 <th>{{ _("Status") }} {{ state_info() }} </th>
    			</tr>
@@ -243,9 +242,18 @@ function confirm_delete(subj, name) {
 	    {% if True or upload.status != "?" %}
 	        <tr> 
 	        	<td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
-	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}', {{upload.is_candidate}});">
+	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.filename}}', {{upload.is_candidate}});">
 	            </td>
-	            <td>{{upload.upload_time_s}}</td>
+
+                <td id='{{upload.batch_id}}'>{{upload.batch_id}}
+                    <div class="progress" data-name='{{upload.batch_id}}'></div>
+			{% if upload.state == 'Loading' %}
+                     <script>
+                         setTimeout( function() {update_progress('{{upload.batch_id}}')}, 1000 );
+                     </script>
+			{% endif %}
+                </td>
+
 	            <td>{{upload.xmlname}}
 
 			{% if upload.material_type or upload.description %}
@@ -266,14 +274,7 @@ function confirm_delete(subj, name) {
 			{% endif %}
 
                 </td>
-                <td>{% if upload.batch_id %}{{upload.batch_id}}{% endif %}
-                    <div class="progress" data-name='{{upload.xmlname}}'></div>
-			{% if upload.loading %}
-                     <script>
-                         setTimeout( function() {update_progress('{{upload.xmlname}}')}, 1000 );
-                     </script>
-			{% endif %}
-                </td>
+
                 <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
                 </td>
                 <td>{{upload.status}}
@@ -284,6 +285,7 @@ function confirm_delete(subj, name) {
 	        </tr>
 		{% endif %}
 	{% endfor %}
+{% endif %}
 
 {% if current_user.is_authenticated and current_user.has_role('research') %}
 		<form action="/gramps/upload" method="post" enctype="multipart/form-data">
@@ -305,7 +307,6 @@ function confirm_delete(subj, name) {
    			</tr>
  		</form>
    </div>
-{% endif %}
    	</table>
 
     <div>

@@ -29,6 +29,7 @@ Created on 9.6.2021
 # blacked 2021-05-01 JMä
 import os
 from datetime import date, datetime
+from typing import Any, Optional
 
 from flask_babelex import _
 
@@ -94,22 +95,25 @@ class Root(NodeObject):
     """
     Data Root node for candidate, auditing and approved material chunks.
     
-    Given timestamp is milliseconrd from epoch. Convert to string by 
+    Given timestamp is milliseconds from epoch. Convert to string by 
     """
 
-    def __init__(self, userid=None):
+    def __init__(self, userid:str=None):
         """
         Creates a Root object
         """
         self.uniq_id = None
         self.user = userid
         self.file = None
-        self.id = None  # batch_id
+        self.id = ""  # batch_id
         self.material = DEFAULT_MATERIAL      # Material type "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
         self.timestamp = 0 # Milliseconds; Convert to string by 
         self.description = ""
+        self.xmlname = ""
+        self.metaname = ""
+        self.logname = ""
 
     def __str__(self):
         return f"Root {self.user} / {self.id} {self.material}({self.state})"
@@ -176,6 +180,9 @@ class Root(NodeObject):
             "state": self.state,
             "material": self.material,
             "description": self.description,
+            "xmlname": self.xmlname,
+            "metaname": self.metaname,
+            "logname": self.logname,
         }
         #TODO Create new root_save()
         res = shareds.dservice.ds_batch_save(attr)
@@ -187,6 +194,7 @@ class Root(NodeObject):
 
     @classmethod
     def from_node(cls, node):
+        # type: (Any) -> Root
         """Convert a Neo4j node to Root object."""
         obj = cls()
         obj.uniq_id = node.id
@@ -200,6 +208,9 @@ class Root(NodeObject):
         obj.auditor = node.get("auditor", None)
         obj.material = node.get("material", DEFAULT_MATERIAL)
         obj.description = node.get("description", "")
+        obj.xmlname = node.get("xmlname", "")
+        obj.metaname = node.get("metaname", "")
+        obj.logname = node.get("logname", "")
         return obj
 
     @staticmethod
@@ -264,6 +275,17 @@ class Root(NodeObject):
             ).single()
             if record:
                 return record[0]
+            return None
+
+    @staticmethod
+    def get_batch(username, batch_id):
+        # type: (str, str) -> Optional[Root]
+        with shareds.driver.session() as session:
+            record = session.run(
+                CypherRoot.get_batch, username=username, batch_id=batch_id
+            ).single()
+            if record:
+                return Root.from_node(record[0])
             return None
 
     @staticmethod
@@ -564,15 +586,9 @@ class BatchUpdater(DataService):
         super().__init__(service_name, user_context=u_context, tx=tx)
         self.batch = None
 
-    def start_data_batch(self, userid, file, mediapath, tx=None):
+    def new_batch(self, username):
         """
         Initiate new Batch.
-
-        :param: userid    user
-        :param: file      input file name
-        :param: mediapath media file store path
-
-        The stored Batch.file name is the original name with '_clean' removed.
         """
         # Lock db to avoid concurent Batch loads
         shareds.dservice.ds_aqcuire_lock("batch_id")
@@ -583,18 +599,35 @@ class BatchUpdater(DataService):
         res = shareds.dservice.ds_new_batch_id()
 
         batch.id = res.get("id")
+        batch.user = username
+
+        res = batch.save()
+        return batch
+
+    def xxxstart_data_batch(self, userid, file, mediapath, tx=None):
+        """
+        Initiate new Batch.
+
+        :param: userid    user
+        :param: file      input file name
+        :param: mediapath media file store path
+        """
+        
+        shareds.dservice.ds_aqcuire_lock("batch_id")
+
+        batch = self.new_batch()
+
         batch.user = userid
         batch.file = file.replace("_clean.", ".")
         batch.mediapath = mediapath
 
-        res = batch.save()
         self.batch = batch
 
         return {"batch": batch, "status": Status.OK}
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id. """
-        ret = shareds.dservice.ds_get_batch(user, batch_id)
+        ret = self.dataservice.ds_get_batch(user, batch_id)
         # returns {"status":Status.OK, "node":record}
         try:
             node = ret['node']
@@ -602,7 +635,7 @@ class BatchUpdater(DataService):
             return {"status":Status.OK, "item":batch}
         except Exception as e:
             statustext = (
-                f"BatchUpdater.get_batch failed: {e.__class__.__name__} {e}"
+                f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
             )
             return {"status": Status.ERROR, "statustext": statustext}
 
@@ -611,10 +644,10 @@ class BatchUpdater(DataService):
         res = shareds.dservice.ds_batch_set_state(batch, user, b_status)
         return res
 
-    def batch_mark_status(self, b_status):
+    def batch_mark_status(self, batch, b_status):
         """ Mark this data batch status. """
         res = shareds.dservice.ds_batch_set_state(
-            self.batch.id, self.batch.user, b_status
+            batch.id, batch.user, b_status
         )
         return res
 
@@ -632,3 +665,62 @@ class BatchUpdater(DataService):
         """
         if media_refs:
             shareds.dservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
+
+class DataServiceBase:
+    def __enter__(self):
+        self.idstr = f"{self.__class__.__name__}>DataServiceBase"
+        self.dataservice.tx = shareds.driver.session().begin_transaction()
+        print(f'#~~~{self.idstr} init tx={id(self.dataservice.tx)}')
+        return self
+
+    def __exit__(self, exc_type=None, exc_value=None, traceback=None):
+        """Exit the runtime context related to this object.
+
+        The parameters describe the exception that caused the context to be
+        exited. If the context was exited without an exception, all three
+        arguments will be None.
+        """
+        #print(f"--{self.idstr} exit tx={obj_addr(self.dataservice.tx)} prev {obj_addr(self.old_tx)}")
+        if self.dataservice.tx:
+            if exc_type:
+                print(f"--{self.idstr} exit rollback {exc_type}")
+                self.dataservice.tx.rollback()
+            else:
+                print(f'#~~~{self.idstr} exit commit tx={id(self.dataservice.tx)}')
+                try:
+                    self.dataservice.tx.commit()
+                except Exception as e:
+                    print(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
+        else:
+            print(f'#~~~{self.idstr} exit {id(self.old_tx)}')
+
+
+
+class BatchReader(DataServiceBase):
+
+    def __init__(self, service_name: str):
+        self.idstr = f"{self.__class__.__name__}"
+        print(f'#~~~{self.idstr} init')
+        # Find <class 'pe.neo4j.*service'> and initialize it
+        self.service_name = service_name
+        service_class = shareds.dataservices.get(self.service_name)
+        if not service_class:
+            raise KeyError(
+                f"BatchReader.__init__: name {self.service_name} not found"
+            )
+        # Initiate selected service object
+        self.dataservice = service_class(shareds.driver)
+
+    def batch_get_one(self, user, batch_id):
+        """Get Root object by username and batch id. """
+        ret = self.dataservice.ds_get_batch(user, batch_id)
+        # returns {"status":Status.OK, "node":record}
+        try:
+            node = ret['node']
+            batch = Root.from_node(node)
+            return {"status":Status.OK, "item":batch}
+        except Exception as e:
+            statustext = (
+                f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
+            )
+            return {"status": Status.ERROR, "statustext": statustext}

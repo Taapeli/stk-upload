@@ -66,8 +66,12 @@ RETURN ID(b) AS id"""
 
     get_filename = """
 MATCH (b:Root {id: $batch_id, user: $username}) 
-RETURN b.file"""
+RETURN b.filename"""
 
+    get_batch = """
+MATCH (b:Root {id: $batch_id, user: $username}) 
+RETURN b"""
+     
     list_all = """
 MATCH (b:Root) 
 RETURN b """
@@ -101,11 +105,10 @@ return up as profile, b as root, labels(x)[0] as label, count(x) as cnt'''
 
     get_user_root_summary = """
 match (u:UserProfile) --> (b:Root) where u.username = $user
-optional match (a:UserProfile) -[ar]-> (b)
+optional match (a:UserProfile) -[ar:IS_AUDITING]-> (b)
 optional match (b) -[r:OBJ_PERSON]-> (:Person)
 with b, count(r) as person_count, 
-    type(ar) as arel, a.username as auditor
-        where not arel = "HAS_LOADED" // TODO vaihda = "IS_AUDITING"
+    a.username as auditor
     optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
 return 
     b as root, person_count,

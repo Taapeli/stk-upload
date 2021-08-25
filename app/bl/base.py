@@ -91,7 +91,7 @@ class NodeObject:
     Class representing Neo4j node type objects
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, uniq_id:int=None):
         """
         Constructor.
 

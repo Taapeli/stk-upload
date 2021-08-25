@@ -108,7 +108,7 @@ class DOM_handler:
     - collects status log
     """
 
-    def __init__(self, infile, current_user, pathname=""):
+    def __init__(self, infile, current_user, pathname):
         """ Set DOM xml_tree and username """
         DOMTree = xml.dom.minidom.parse(open(infile, encoding="utf-8"))
         self.xml_tree = DOMTree.documentElement  # XML documentElement
@@ -123,9 +123,7 @@ class DOM_handler:
         self.progress = defaultdict(
             int
         )  # key=object type, value=count of objects processed
-        # self.datastore = None               # neo4j.DirectDriver object
         self.obj_counter = 0
-        #self.handle_suffix = "_" + uuid.uuid4().hex
 
     def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
