@@ -2,42 +2,13 @@
 {# Copied from admin/uploads_all #}
 {% extends "/audit/layout.html" %}
 {% block title %}{{ _("Batches") }}{% endblock %}
+{% from "start/s_macros.html" import state_info with context %}
 {% block body %}
     {{ super() }}
    
 	<h1>{{ _("Batches") }}</h1>
     
 {% include "flash_messages.html" %}
-
-    <div class="helptext">
-    	<table class=legend>
-        <tr><td colspan="3"><b>{{ _("Status for differents steps in XML file upload:") }}</b>
-    	<tr>
-    	<td>1
-    	<td>{{ _("UPLOADED") }}     
-    	<td>{{ _("the file has been uploaded to server") }}
-    	<tr>
-    	<td>2
-    	<td>{{ _("STORING") }}
-    	<td>{{ _("the file content is being stored to the database") }}
-    	<tr>
-    	<td>3
-    	<td>{{ _("CANDIDATE") }}
-    	<td>{{ _("the file content has been stored to the database") }}
-        <tr>
-        <td>4
-        <td>{{ _("AUDIT_REQUESTED") }}
-        <td>{{ _("the data has been sent to common data") }}
-        <tr>
-        <td>5
-        <td>{{ _("REMOVED") }}
-        <td>{{ _("not found any more") }}
-        <tr>
-    	<td>-
-    	<td>{{ _("ERROR") }} / {{ _("FAILED") }}
-    	<td>{{ _("there was an error") }}
-    	</table>
-    </div>
 
     <div class="content">
         <table class="table100">
@@ -46,7 +17,7 @@
 	                <th>{{ _("User") }}</th>
 	{% endif %}
                 <th>{{ _("Gramps file / uploaded at") }}</th>
-                <th>{{ _("Status") }}</th>
+                <th>{{ _("Status") }} {{ state_info() }}</th>
                 <th>{{ _("Batch id") }}</th>
                 <th>{{ _("Operations") }}</th>
            </tr>
@@ -105,6 +76,7 @@
 	    </table>
     <p>&rtrif; <a href="/admin/readlog">{{ _('Display application log') }}</a></p>
     </div>
+
 {% endblock %}
 </body>
 </html>

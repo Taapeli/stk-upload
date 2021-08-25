@@ -48,3 +48,20 @@
 	</nav>
 	{% endif %}
 {%- endmacro %}
+
+{% macro state_info() -%}
+
+	<div class="tooltip"> &nbsp;ℹ&nbsp;
+		<div class="tooltiptext">
+		  	<p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
+		  	<p>↓ <b>{{ _("UPLOADED") }}</b> – {{ _("the file has been uploaded to server") }}<br>
+		  	   ↓ <b>{{ _("STORING") }}</b>  – {{ _("the file content is being stored to the database") }}<br>
+		                      ↳ <b>{{ _("CANDIDATE") }}</b> – {{ _("the data is stored as candidate material") }}<br>
+		                      ★ <b>{{ _("AUDIT_REQUESTED") }}</b> – {{ _("the data has been sent to common data") }}<br>
+		  	   → <b>{{ _("REMOVED") }}</b>  – {{ _("Not found any more") }}<br>
+		  	   ↝ <b>{{ _("ERROR") }} / {{ _("FAILED") }}</b> – {{ _("there was an error") }}
+			</p>
+		</div>
+	</div>
+
+{%- endmacro %}
