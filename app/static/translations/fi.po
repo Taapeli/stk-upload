@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-08-23 19:43+0300\n"
+"POT-Creation-Date: 2021-08-26 11:37+0300\n"
 "PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -206,7 +206,7 @@ msgstr "Ketään ei löytynyt"
 msgid "Requested person not found"
 msgstr "Pyydettyä henkilöä ei ole"
 
-#: bl/root.py:548
+#: bl/root.py:570
 #, python-format
 msgid "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted"
 msgstr "Hyväksytty aineisto %(batch_id)s poistettu (%(deleted)d solmua)"
@@ -237,19 +237,19 @@ msgstr "Poistettu %(cnt)d nodea"
 msgid "Given allowed email address already exists"
 msgstr "Annettu sähköpostiosoite jo käytössä"
 
-#: bl/gramps/gramps_loader.py:172
+#: bl/gramps/gramps_loader.py:166
 msgid "Events with no references to"
 msgstr "Tapahtumaa ilman viitettä"
 
-#: bl/gramps/gramps_loader.py:252
+#: bl/gramps/gramps_loader.py:246
 msgid "Estimated time"
 msgstr "Arvioitu aika"
 
-#: bl/gramps/gramps_loader.py:255
+#: bl/gramps/gramps_loader.py:249
 msgid "sec"
 msgstr "sek"
 
-#: bl/gramps/gramps_loader.py:452
+#: bl/gramps/gramps_loader.py:442
 msgid "Unable to open Gramps file"
 msgstr "Gramps-tiedoston avaaminen ei onnistu"
 
@@ -459,54 +459,10 @@ msgstr "Käyttäjätunnuksesi {user} on nyt hyväksytty {server}-palveluun."
 msgid "User updated"
 msgstr "Käyttäjätiedot päivitetty"
 
-#: bp/admin/routes.py:340 bp/gramps/routes.py:187
+#: bp/admin/routes.py:340 bp/gramps/routes.py:188
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr "Tuonti tiedostosta %(i)s on alkanut."
-
-#: bp/admin/templates/admin/uploads.html:37
-#: bp/admin/templates/admin/uploads.html:80 bp/admin/uploads.py:352
-#: bp/admin/uploads.py:388 bp/audit/templates/audit/batches.html:17
-#: bp/gramps/templates/gramps/uploads.html:242
-msgid "UPLOADED"
-msgstr "Tiedosto ladattu"
-
-#: bp/admin/templates/admin/uploads.html:38 bp/admin/uploads.py:354
-#: bp/admin/uploads.py:389 bp/admin/uploads.py:410
-#: bp/audit/templates/audit/batches.html:21
-#: bp/gramps/templates/gramps/uploads.html:243
-msgid "STORING"
-msgstr "Menossa tietokantaan"
-
-#: bp/admin/templates/admin/uploads.html:39
-#: bp/admin/templates/admin/uploads.html:87 bp/admin/uploads.py:356
-#: bp/admin/uploads.py:385 bp/admin/uploads.py:386 bp/admin/uploads.py:413
-#: bp/audit/templates/audit/batches.html:25
-#: bp/gramps/templates/gramps/uploads.html:244
-msgid "CANDIDATE"
-msgstr "Ehdokasaineisto"
-
-#: bp/admin/uploads.py:365 bp/admin/uploads.py:387
-#: bp/audit/templates/audit/batches.html:29
-#: bp/gramps/templates/gramps/uploads.html:245
-msgid "AUDIT_REQUESTED"
-msgstr "Pyydetty tarkastettavaksi"
-
-#: bp/admin/uploads.py:367
-msgid "AUDITING"
-msgstr "Tarkastettavana"
-
-#: bp/admin/templates/admin/uploads.html:40 bp/admin/uploads.py:370
-#: bp/admin/uploads.py:376 bp/audit/templates/audit/batches.html:33
-#: bp/gramps/templates/gramps/uploads.html:246
-msgid "REMOVED"
-msgstr "Poistettu kannasta"
-
-#: bp/admin/templates/admin/uploads.html:41 bp/admin/uploads.py:372
-#: bp/audit/templates/audit/batches.html:37
-#: bp/gramps/templates/gramps/uploads.html:247
-msgid "FAILED"
-msgstr "Epäonnistui"
 
 #: bp/admin/templates/admin/access_management.html:3
 #: bp/admin/templates/admin/access_management.html:11
@@ -536,7 +492,7 @@ msgstr "Voimassa olevat käyttöoikeudet"
 #: bp/admin/templates/admin/list_users.html:78
 #: bp/admin/templates/admin/syslog.html:14
 #: bp/admin/templates/admin/uploads.html:29
-#: bp/audit/templates/audit/batches.html:46
+#: bp/audit/templates/audit/batches.html:17
 #: bp/dupsearch/templates/dupsearch.html:25
 #: bp/gramps/templates/gramps/obsolete_index_gramps.html:38
 #: bp/start/templates/start/my_message.html:53
@@ -547,7 +503,6 @@ msgstr "Käyttäjä"
 #: bp/admin/templates/admin/access_management.html:31
 #: bp/admin/templates/admin/batch_clear.html:26
 #: bp/audit/templates/audit/approvals.html:45
-#: bp/audit/templates/audit/batches.html:50
 #: bp/dupsearch/templates/dupsearch.html:24
 #: bp/gramps/templates/gramps/uploads.html:210
 msgid "Batch"
@@ -650,7 +605,7 @@ msgstr "Sovelluksen hallinta"
 
 #: bp/admin/templates/admin/admin.html:102
 #: bp/audit/templates/audit/approvals.html:103
-#: bp/audit/templates/audit/batches.html:103
+#: bp/audit/templates/audit/batches.html:67
 #: bp/audit/templates/audit/index.html:19
 msgid "Display application log"
 msgstr "Näytä sovelluksen loki"
@@ -948,7 +903,7 @@ msgid "Uploads for all users"
 msgstr "Kaikkien käyttäjien lataamat tiedostot"
 
 #: bp/admin/templates/admin/uploads.html:31
-#: bp/audit/templates/audit/batches.html:48
+#: bp/audit/templates/audit/batches.html:19
 msgid "Gramps file / uploaded at"
 msgstr "Gramps-tiedosto / ladattu"
 
@@ -957,63 +912,77 @@ msgid "Type / description"
 msgstr "Tyyppi / kuvaus"
 
 #: bp/admin/templates/admin/uploads.html:33
-#: bp/audit/templates/audit/batches.html:49
-#: bp/gramps/templates/gramps/uploads.html:238
+#: bp/audit/templates/audit/batches.html:20
+#: bp/gramps/templates/gramps/uploads.html:237
 msgid "Status"
 msgstr "Tila"
 
 #: bp/admin/templates/admin/uploads.html:36
-#: bp/gramps/templates/gramps/uploads.html:241
+#: bp/start/templates/start/s_macros.html:56
 msgid "Steps for uploading Gramps files"
 msgstr "Gramps-tiedoston käsittelyvaiheet"
 
 #: bp/admin/templates/admin/uploads.html:37
-#: bp/audit/templates/audit/batches.html:18
-#: bp/gramps/templates/gramps/uploads.html:242
+#: bp/admin/templates/admin/uploads.html:80
+msgid "UPLOADED"
+msgstr "Tiedosto ladattu"
+
+#: bp/admin/templates/admin/uploads.html:37
+#: bp/start/templates/start/s_macros.html:58
 msgid "the file has been uploaded to server"
 msgstr "tiedosto on talletettu palvelimelle"
 
 #: bp/admin/templates/admin/uploads.html:38
-#: bp/audit/templates/audit/batches.html:22
-#: bp/gramps/templates/gramps/uploads.html:243
+msgid "STORING"
+msgstr "Menossa tietokantaan"
+
+#: bp/admin/templates/admin/uploads.html:38
+#: bp/start/templates/start/s_macros.html:59
 msgid "the file content is being stored to the database"
 msgstr "tiedostoa viedään tietokantaan"
 
 #: bp/admin/templates/admin/uploads.html:39
-#: bp/gramps/templates/gramps/uploads.html:244
+#: bp/admin/templates/admin/uploads.html:87
+msgid "CANDIDATE"
+msgstr "Ehdokasaineisto"
+
+#: bp/admin/templates/admin/uploads.html:39
+#: bp/start/templates/start/s_macros.html:60
 msgid "the data is stored as candidate material"
 msgstr "tiedot on talletettu ehdokasaineistona"
 
 #: bp/admin/templates/admin/uploads.html:40
-#: bp/gramps/templates/gramps/uploads.html:246
+msgid "REMOVED"
+msgstr "Poistettu kannasta"
+
+#: bp/admin/templates/admin/uploads.html:40
 msgid "Not found any more"
 msgstr "Tarjokasaineisto poistunut"
 
 #: bp/admin/templates/admin/uploads.html:41
-#: bp/audit/templates/audit/batches.html:37
-#: bp/gramps/templates/gramps/uploads.html:247
 msgid "ERROR"
 msgstr "Virhe"
 
 #: bp/admin/templates/admin/uploads.html:41
-#: bp/audit/templates/audit/batches.html:38
-#: bp/gramps/templates/gramps/uploads.html:247
+msgid "FAILED"
+msgstr "Epäonnistui"
+
+#: bp/admin/templates/admin/uploads.html:41
 msgid "there was an error"
 msgstr "päättyi virheeeseen"
 
 #: bp/admin/templates/admin/uploads.html:46
-#: bp/audit/templates/audit/batches.html:51
+#: bp/audit/templates/audit/batches.html:22
 #: bp/audit/templates/audit/index.html:31
 msgid "Operations"
 msgstr "Toimenpiteet"
 
 #: bp/admin/templates/admin/uploads.html:52
-#: bp/audit/templates/audit/batches.html:58
+#: bp/audit/templates/audit/batches.html:29
 msgid "me"
 msgstr "minä"
 
 #: bp/admin/templates/admin/uploads.html:80
-#: bp/audit/templates/audit/batches.html:77
 msgid "deleted from database"
 msgstr "poistettu kannasta"
 
@@ -1023,12 +992,12 @@ msgid "batch %(batch_id)s; %(persons)d&nbsp;persons"
 msgstr "erä %(batch_id)s; %(persons)d&nbsp;henkilöä"
 
 #: bp/admin/templates/admin/uploads.html:89
-#: bp/gramps/templates/gramps/uploads.html:335
+#: bp/gramps/templates/gramps/uploads.html:323
 msgid "Store to database"
 msgstr "Vie tietokantaan"
 
 #: bp/admin/templates/admin/uploads.html:93
-#: bp/audit/templates/audit/batches.html:92
+#: bp/audit/templates/audit/batches.html:55
 msgid "Show log"
 msgstr "Näytä loki"
 
@@ -1071,7 +1040,7 @@ msgid "Total <b>%(tot)s</b> objects"
 msgstr "Yhteensä <b>%(tot)s</b> kohdetta"
 
 #: bp/audit/templates/audit/approvals.html:71
-#: bp/gramps/templates/gramps/uploads.html:294
+#: bp/gramps/templates/gramps/uploads.html:282
 #: bp/refplace_editor/templates/refplace_editor.html:3
 msgid "Auditor"
 msgstr "Auditoija"
@@ -1081,9 +1050,10 @@ msgid "Researcher"
 msgstr "Tutkija"
 
 #: bp/audit/templates/audit/approvals.html:75
+#: bp/audit/templates/audit/batches.html:21
 #: bp/audit/templates/audit/pick_auditing.html:22
-#: bp/gramps/templates/gramps/uploads.html:236
-#: bp/gramps/templates/gramps/uploads.html:330
+#: bp/gramps/templates/gramps/uploads.html:234
+#: bp/gramps/templates/gramps/uploads.html:318
 #: bp/start/templates/start/my_settings.html:125
 msgid "Batch id"
 msgstr "Aineistotunnus"
@@ -1097,52 +1067,34 @@ msgid "the selected approved batch"
 msgstr "valittu hyväksytty aineisto"
 
 #: bp/audit/templates/audit/approvals.html:96
-#: bp/gramps/templates/gramps/uploads.html:352
+#: bp/gramps/templates/gramps/uploads.html:340
 msgid "Delete data"
 msgstr "Poistetaan"
 
 #: bp/audit/templates/audit/approvals.html:97
-#: bp/gramps/templates/gramps/uploads.html:354
+#: bp/gramps/templates/gramps/uploads.html:342
 msgid "Delete from database"
 msgstr "Poista tietokannasta"
 
 #: bp/audit/templates/audit/batches.html:4
-#: bp/audit/templates/audit/batches.html:8
+#: bp/audit/templates/audit/batches.html:9
 msgid "Batches"
 msgstr "Tutkijan aineistoja"
 
-#: bp/audit/templates/audit/batches.html:14
-msgid "Status for differents steps in XML file upload:"
-msgstr "Syöttötiedoston käsittelyvaiheet"
-
-#: bp/audit/templates/audit/batches.html:26
-msgid "the file content has been stored to the database"
-msgstr "tiedot on talletettu tietokantaan"
-
-#: bp/audit/templates/audit/batches.html:30
-#: bp/gramps/templates/gramps/uploads.html:245
-msgid "the data has been sent to common data"
-msgstr "tiedot on lähetetty yhteiseen aineistoon"
-
-#: bp/audit/templates/audit/batches.html:34
-msgid "not found any more"
-msgstr "poistettu"
-
-#: bp/audit/templates/audit/batches.html:79
+#: bp/audit/templates/audit/batches.html:41
 #: bp/scene/templates/scene/persons_search.html:217
 msgid "persons"
 msgstr "henkilöä"
 
-#: bp/audit/templates/audit/batches.html:87
+#: bp/audit/templates/audit/batches.html:49
 msgid "Download file"
 msgstr "Tallenna tiedostona"
 
-#: bp/audit/templates/audit/batches.html:88
-#, fuzzy
+#: bp/audit/templates/audit/batches.html:50
 msgid "Download original file"
-msgstr "Tallenna tiedostona"
+msgstr "Tallenna alkuperäinen tiedosto"
 
-#: bp/audit/templates/audit/batches.html:96
+#: bp/audit/templates/audit/batches.html:60
 msgid "Pick for me to audit"
 msgstr "Poimi minun tarkastettavakseni"
 
@@ -1195,19 +1147,20 @@ msgstr "Referenssinimet"
 msgid "Classifier values"
 msgstr "Luokittelijoiden arvojoukot"
 
-#: bp/audit/templates/audit/index.html:34
-msgid "Choose a batch for you to audit"
-msgstr "Poimi aineisto tarkastettavaksi"
+#: bp/audit/templates/audit/index.html:33
+#, fuzzy
+msgid "Batch list"
+msgstr "vähintään"
 
-#: bp/audit/templates/audit/index.html:36
+#: bp/audit/templates/audit/index.html:34
 msgid "Remove empty batches"
 msgstr "Poista tyhjät tuontierät"
 
-#: bp/audit/templates/audit/index.html:37
+#: bp/audit/templates/audit/index.html:35
 msgid "Experimental place merge"
 msgstr "Paikkojen yhdistely (kokeellinen)"
 
-#: bp/audit/templates/audit/index.html:38
+#: bp/audit/templates/audit/index.html:36
 msgid "Experimental duplicate person search"
 msgstr "Tuplahenkilöiden haku (kokeellinen)"
 
@@ -1334,8 +1287,9 @@ msgstr "Valitse"
 #: bp/gedcom/templates/gedcom_info.html:29
 #: bp/gramps/templates/gramps/analyze_xml.html:14
 #: bp/gramps/templates/gramps/uploads.html:207
-#: bp/gramps/templates/gramps/uploads.html:328
-#: bp/start/templates/start/my_settings.html:166 ui/jinja_filters.py:327
+#: bp/gramps/templates/gramps/uploads.html:316
+#: bp/start/templates/start/my_settings.html:166
+#: bp/start/templates/start/s_macros.html:58 ui/jinja_filters.py:327
 msgid "File"
 msgstr "Tiedosto"
 
@@ -1620,7 +1574,6 @@ msgid "Statistics"
 msgstr "Tietoja"
 
 #: bp/gedcom/templates/gedcom_info.html:64
-#: bp/gramps/templates/gramps/uploads.html:234
 msgid "Upload time"
 msgstr "Viety palvelimelle"
 
@@ -2128,12 +2081,12 @@ msgstr "Poista tag-X-merkinnät"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Poistaa \"-X\"-merkityistä tunnisteista \"-X\" :n"
 
-#: bp/gramps/routes.py:275
+#: bp/gramps/routes.py:290
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr "Ehdokasaineiston %(batch_id)s poistaminen ei onnistunut"
 
-#: bp/gramps/routes.py:283
+#: bp/gramps/routes.py:298
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr "Ehdokasaineisto %(batch_id)s on poistettu (%(n)s solmua)"
@@ -2175,7 +2128,7 @@ msgid "Send data to server"
 msgstr "Aineiston lähettäminen"
 
 #: bp/gramps/templates/gramps/obsolete_index_gramps.html:49
-#: bp/gramps/templates/gramps/uploads.html:303
+#: bp/gramps/templates/gramps/uploads.html:292
 msgid ""
 "Select Gramps XML File (*.gramps etc) for converting to your candidate "
 "material"
@@ -2235,60 +2188,59 @@ msgstr "Haluatko todella tuhota tämän Gramps-tiedoston?"
 msgid "Gramps file"
 msgstr "Gramps-tiedosto"
 
-#: bp/gramps/templates/gramps/uploads.html:237
+#: bp/gramps/templates/gramps/uploads.html:236
 msgid "Person count"
 msgstr "Henkilöitä"
 
-#: bp/gramps/templates/gramps/uploads.html:305
+#: bp/gramps/templates/gramps/uploads.html:294
 msgid "Send a new Gramps file"
 msgstr "Tuo uusi Gramps-tiedosto"
 
-#: bp/gramps/templates/gramps/uploads.html:314
-#, fuzzy
+#: bp/gramps/templates/gramps/uploads.html:303
 msgid "Send to database"
 msgstr "Vie tietokantaan"
 
-#: bp/gramps/templates/gramps/uploads.html:326
+#: bp/gramps/templates/gramps/uploads.html:314
 msgid "Operations for selected row"
 msgstr "Valitun rivin toiminnot"
 
-#: bp/gramps/templates/gramps/uploads.html:334
+#: bp/gramps/templates/gramps/uploads.html:322
 msgid "Saving data"
 msgstr "Talletetaan"
 
-#: bp/gramps/templates/gramps/uploads.html:336
+#: bp/gramps/templates/gramps/uploads.html:324
 msgid "Download the Gramps file"
 msgstr "Talleta tiedosto koneellesi"
 
-#: bp/gramps/templates/gramps/uploads.html:339
+#: bp/gramps/templates/gramps/uploads.html:327
 msgid "Analyze data"
 msgstr "Analysoi"
 
-#: bp/gramps/templates/gramps/uploads.html:340
+#: bp/gramps/templates/gramps/uploads.html:328
 msgid "Analyze the Gramps file"
 msgstr "Analysoi Gramps-tiedosto"
 
-#: bp/gramps/templates/gramps/uploads.html:342
+#: bp/gramps/templates/gramps/uploads.html:330
 msgid "Execute Gramps Verify Tool"
 msgstr "Suorita Gramps Verify Tool"
 
-#: bp/gramps/templates/gramps/uploads.html:344
+#: bp/gramps/templates/gramps/uploads.html:332
 msgid "Show last log"
 msgstr "Näytä viimeisin loki"
 
-#: bp/gramps/templates/gramps/uploads.html:347 ui/jinja_filters.py:331
+#: bp/gramps/templates/gramps/uploads.html:335 ui/jinja_filters.py:331
 msgid "Auditing"
 msgstr "Tarkastus"
 
-#: bp/gramps/templates/gramps/uploads.html:348
+#: bp/gramps/templates/gramps/uploads.html:336
 msgid "Send for auditing"
 msgstr "Lähetä tarkastettavaksi"
 
-#: bp/gramps/templates/gramps/uploads.html:349
+#: bp/gramps/templates/gramps/uploads.html:337
 msgid "Withdraw auditing"
 msgstr "Peru tarkastuspyyntö"
 
-#: bp/gramps/templates/gramps/uploads.html:353
+#: bp/gramps/templates/gramps/uploads.html:341
 msgid "Delete the file"
 msgstr "Tuhoa tiedosto"
 
@@ -3773,6 +3725,49 @@ msgstr "Kirjaudu sovellukseen"
 msgid "Log out from this application"
 msgstr "Lopeta istunto"
 
+#: bp/start/templates/start/s_macros.html:59 ui/jinja_filters.py:328
+msgid "Storing"
+msgstr "Tallettamassa"
+
+#: bp/start/templates/start/s_macros.html:60 ui/jinja_filters.py:329
+msgid "Candidate"
+msgstr "Ehdokasaineisto"
+
+#: bp/start/templates/start/s_macros.html:61 ui/jinja_filters.py:330
+msgid "Audit Requested"
+msgstr "Tarkastus pyydetty"
+
+#: bp/start/templates/start/s_macros.html:61
+#, fuzzy
+msgid "waiting for audition"
+msgstr "Lähetä tarkastettavaksi"
+
+#: bp/start/templates/start/s_macros.html:62 ui/jinja_filters.py:332
+msgid "Accepted"
+msgstr "Hyväksytty"
+
+#: bp/start/templates/start/s_macros.html:62
+#, fuzzy
+msgid "Audit done"
+msgstr "Auditoijan etusivu"
+
+#: bp/start/templates/start/s_macros.html:63
+msgid "Merged"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:63
+#, fuzzy
+msgid "Joined to common data"
+msgstr "Yhteinen sukukanta"
+
+#: bp/start/templates/start/s_macros.html:64 ui/jinja_filters.py:333
+msgid "Rejected"
+msgstr "Hylätty"
+
+#: bp/start/templates/start/s_macros.html:64
+msgid "Returned to researcher with comments"
+msgstr ""
+
 #: bp/start/templates/start/thankyou.html:3
 msgid "Thank You"
 msgstr "Kiitos!"
@@ -5161,26 +5156,6 @@ msgstr "Sukupuu"
 #: ui/jinja_filters.py:320
 msgid " Example type "
 msgstr "(esimerkkiaineisto)"
-
-#: ui/jinja_filters.py:328
-msgid "Storing"
-msgstr "Tallettamassa"
-
-#: ui/jinja_filters.py:329
-msgid "Candidate"
-msgstr "Ehdokasaineisto"
-
-#: ui/jinja_filters.py:330
-msgid "Audit Requested"
-msgstr "Tarkastus pyydetty"
-
-#: ui/jinja_filters.py:332
-msgid "Accepted"
-msgstr "Hyväksytty"
-
-#: ui/jinja_filters.py:333
-msgid "Rejected"
-msgstr "Hylätty"
 
 #: ui/user_context.py:129
 msgid "Approved common data"

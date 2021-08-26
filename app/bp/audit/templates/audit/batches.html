@@ -33,7 +33,7 @@
     	  {% endif -%}
 
 			   <td>{{upload.xmlname}}</td>
-	           <td>{{upload.state|transl('status')}}</td>
+	           <td>{{upload.state|transl('state')}}</td>
 	           
 	           <td>
 	           	   {{upload.batch_id}} 
@@ -54,7 +54,7 @@
 	            ▸ <a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a>
 	        {% endif -%}
-	        {% if upload.status == "Ehdokasaineisto" %}
+	        {% if upload.state == "Candidate" %}
 		        {% if upload.xmlname %}<br>{% endif -%}
 	           	▸ <a href=/audit/pick/{{upload.batch_id}}>
                        {{ _("Pick for me to audit") }}</a>

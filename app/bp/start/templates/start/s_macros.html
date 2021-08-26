@@ -54,12 +54,14 @@
 	<div class="tooltip"> &nbsp;ℹ&nbsp;
 		<div class="tooltiptext">
 		  	<p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
-		  	<p>↓ <b>{{ _("UPLOADED") }}</b> – {{ _("the file has been uploaded to server") }}<br>
-		  	   ↓ <b>{{ _("STORING") }}</b>  – {{ _("the file content is being stored to the database") }}<br>
-		                      ↳ <b>{{ _("CANDIDATE") }}</b> – {{ _("the data is stored as candidate material") }}<br>
-		                      ★ <b>{{ _("AUDIT_REQUESTED") }}</b> – {{ _("the data has been sent to common data") }}<br>
-		  	   → <b>{{ _("REMOVED") }}</b>  – {{ _("Not found any more") }}<br>
-		  	   ↝ <b>{{ _("ERROR") }} / {{ _("FAILED") }}</b> – {{ _("there was an error") }}
+		  	<p>
+<!-- 		   ↓ <b>{{ _("File") }}</b> – {{ _("the file has been uploaded to server") }}<br> -->
+		  	   ↓ <b>{{ _("Storing") }}</b>  – {{ _("the file content is being stored to the database") }}<br>
+               ↳ <b>{{ _("Candidate") }}</b> – {{ _("the data is stored as candidate material") }}<br>
+               ★ <b>{{ _("Audit Requested") }}</b> – {{ _("waiting for audition") }}<br>
+		  	   → <b>{{ _("Accepted") }}</b>  – {{ _("Audit done") }}<br>
+		  	   → <b>{{ _("Merged") }}</b>  – {{ _("Joined to common data") }}<br>
+		  	   ↝ <b>{{ _("Rejected") }}</b> – {{ _("Returned to researcher with comments") }}
 			</p>
 		</div>
 	</div>

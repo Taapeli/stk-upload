@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-08-23 19:43+0300\n"
+"POT-Creation-Date: 2021-08-26 11:37+0300\n"
 "PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -206,7 +206,7 @@ msgstr "Inga personer hittades"
 msgid "Requested person not found"
 msgstr "Personen finns inte"
 
-#: bl/root.py:548
+#: bl/root.py:570
 #, python-format
 msgid "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted"
 msgstr ""
@@ -237,19 +237,19 @@ msgstr "Borttagna %(cnt)d noder"
 msgid "Given allowed email address already exists"
 msgstr "Angiven giltig epost address finns redan"
 
-#: bl/gramps/gramps_loader.py:172
+#: bl/gramps/gramps_loader.py:166
 msgid "Events with no references to"
 msgstr "Händelser utan referenser till"
 
-#: bl/gramps/gramps_loader.py:252
+#: bl/gramps/gramps_loader.py:246
 msgid "Estimated time"
 msgstr "Beräknad tid"
 
-#: bl/gramps/gramps_loader.py:255
+#: bl/gramps/gramps_loader.py:249
 msgid "sec"
 msgstr "sek"
 
-#: bl/gramps/gramps_loader.py:452
+#: bl/gramps/gramps_loader.py:442
 msgid "Unable to open Gramps file"
 msgstr ""
 
@@ -459,55 +459,10 @@ msgstr "Du är nu godkänd att använda Isotammi {server} med användarnamn {use
 msgid "User updated"
 msgstr "Användaren uppdaterad"
 
-#: bp/admin/routes.py:340 bp/gramps/routes.py:187
+#: bp/admin/routes.py:340 bp/gramps/routes.py:188
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr "Data importen från %(i)s till databasen har startats."
-
-#: bp/admin/templates/admin/uploads.html:37
-#: bp/admin/templates/admin/uploads.html:80 bp/admin/uploads.py:352
-#: bp/admin/uploads.py:388 bp/audit/templates/audit/batches.html:17
-#: bp/gramps/templates/gramps/uploads.html:242
-msgid "UPLOADED"
-msgstr "LADDAD"
-
-#: bp/admin/templates/admin/uploads.html:38 bp/admin/uploads.py:354
-#: bp/admin/uploads.py:389 bp/admin/uploads.py:410
-#: bp/audit/templates/audit/batches.html:21
-#: bp/gramps/templates/gramps/uploads.html:243
-msgid "STORING"
-msgstr "LAGRAS"
-
-#: bp/admin/templates/admin/uploads.html:39
-#: bp/admin/templates/admin/uploads.html:87 bp/admin/uploads.py:356
-#: bp/admin/uploads.py:385 bp/admin/uploads.py:386 bp/admin/uploads.py:413
-#: bp/audit/templates/audit/batches.html:25
-#: bp/gramps/templates/gramps/uploads.html:244
-msgid "CANDIDATE"
-msgstr ""
-
-#: bp/admin/uploads.py:365 bp/admin/uploads.py:387
-#: bp/audit/templates/audit/batches.html:29
-#: bp/gramps/templates/gramps/uploads.html:245
-msgid "AUDIT_REQUESTED"
-msgstr ""
-
-#: bp/admin/uploads.py:367
-#, fuzzy
-msgid "AUDITING"
-msgstr "Revisioner"
-
-#: bp/admin/templates/admin/uploads.html:40 bp/admin/uploads.py:370
-#: bp/admin/uploads.py:376 bp/audit/templates/audit/batches.html:33
-#: bp/gramps/templates/gramps/uploads.html:246
-msgid "REMOVED"
-msgstr "RADERAD"
-
-#: bp/admin/templates/admin/uploads.html:41 bp/admin/uploads.py:372
-#: bp/audit/templates/audit/batches.html:37
-#: bp/gramps/templates/gramps/uploads.html:247
-msgid "FAILED"
-msgstr "MISSLYCKADES"
 
 #: bp/admin/templates/admin/access_management.html:3
 #: bp/admin/templates/admin/access_management.html:11
@@ -537,7 +492,7 @@ msgstr "Aktuella åtkomster"
 #: bp/admin/templates/admin/list_users.html:78
 #: bp/admin/templates/admin/syslog.html:14
 #: bp/admin/templates/admin/uploads.html:29
-#: bp/audit/templates/audit/batches.html:46
+#: bp/audit/templates/audit/batches.html:17
 #: bp/dupsearch/templates/dupsearch.html:25
 #: bp/gramps/templates/gramps/obsolete_index_gramps.html:38
 #: bp/start/templates/start/my_message.html:53
@@ -548,7 +503,6 @@ msgstr "Användare"
 #: bp/admin/templates/admin/access_management.html:31
 #: bp/admin/templates/admin/batch_clear.html:26
 #: bp/audit/templates/audit/approvals.html:45
-#: bp/audit/templates/audit/batches.html:50
 #: bp/dupsearch/templates/dupsearch.html:24
 #: bp/gramps/templates/gramps/uploads.html:210
 msgid "Batch"
@@ -653,7 +607,7 @@ msgstr "Programhantering"
 
 #: bp/admin/templates/admin/admin.html:102
 #: bp/audit/templates/audit/approvals.html:103
-#: bp/audit/templates/audit/batches.html:103
+#: bp/audit/templates/audit/batches.html:67
 #: bp/audit/templates/audit/index.html:19
 msgid "Display application log"
 msgstr "Visa program loggen"
@@ -951,7 +905,7 @@ msgid "Uploads for all users"
 msgstr "Uppladdningar för alla användare"
 
 #: bp/admin/templates/admin/uploads.html:31
-#: bp/audit/templates/audit/batches.html:48
+#: bp/audit/templates/audit/batches.html:19
 msgid "Gramps file / uploaded at"
 msgstr "Gramps fil / laddad till"
 
@@ -960,63 +914,77 @@ msgid "Type / description"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:33
-#: bp/audit/templates/audit/batches.html:49
-#: bp/gramps/templates/gramps/uploads.html:238
+#: bp/audit/templates/audit/batches.html:20
+#: bp/gramps/templates/gramps/uploads.html:237
 msgid "Status"
 msgstr "Status"
 
 #: bp/admin/templates/admin/uploads.html:36
-#: bp/gramps/templates/gramps/uploads.html:241
+#: bp/start/templates/start/s_macros.html:56
 msgid "Steps for uploading Gramps files"
 msgstr "Steg för att ladda upp Gramps-filer"
 
 #: bp/admin/templates/admin/uploads.html:37
-#: bp/audit/templates/audit/batches.html:18
-#: bp/gramps/templates/gramps/uploads.html:242
+#: bp/admin/templates/admin/uploads.html:80
+msgid "UPLOADED"
+msgstr "LADDAD"
+
+#: bp/admin/templates/admin/uploads.html:37
+#: bp/start/templates/start/s_macros.html:58
 msgid "the file has been uploaded to server"
 msgstr "filen har överförts till servern"
 
 #: bp/admin/templates/admin/uploads.html:38
-#: bp/audit/templates/audit/batches.html:22
-#: bp/gramps/templates/gramps/uploads.html:243
+msgid "STORING"
+msgstr "LAGRAS"
+
+#: bp/admin/templates/admin/uploads.html:38
+#: bp/start/templates/start/s_macros.html:59
 msgid "the file content is being stored to the database"
 msgstr "filens innehåll lagras i databasen"
 
 #: bp/admin/templates/admin/uploads.html:39
-#: bp/gramps/templates/gramps/uploads.html:244
+#: bp/admin/templates/admin/uploads.html:87
+msgid "CANDIDATE"
+msgstr ""
+
+#: bp/admin/templates/admin/uploads.html:39
+#: bp/start/templates/start/s_macros.html:60
 msgid "the data is stored as candidate material"
 msgstr "data lagras som kandidatmaterial"
 
 #: bp/admin/templates/admin/uploads.html:40
-#: bp/gramps/templates/gramps/uploads.html:246
+msgid "REMOVED"
+msgstr "RADERAD"
+
+#: bp/admin/templates/admin/uploads.html:40
 msgid "Not found any more"
 msgstr "Hittades inte längre"
 
 #: bp/admin/templates/admin/uploads.html:41
-#: bp/audit/templates/audit/batches.html:37
-#: bp/gramps/templates/gramps/uploads.html:247
 msgid "ERROR"
 msgstr "FEL"
 
 #: bp/admin/templates/admin/uploads.html:41
-#: bp/audit/templates/audit/batches.html:38
-#: bp/gramps/templates/gramps/uploads.html:247
+msgid "FAILED"
+msgstr "MISSLYCKADES"
+
+#: bp/admin/templates/admin/uploads.html:41
 msgid "there was an error"
 msgstr "det uppstod ett fel"
 
 #: bp/admin/templates/admin/uploads.html:46
-#: bp/audit/templates/audit/batches.html:51
+#: bp/audit/templates/audit/batches.html:22
 #: bp/audit/templates/audit/index.html:31
 msgid "Operations"
 msgstr "Operationer"
 
 #: bp/admin/templates/admin/uploads.html:52
-#: bp/audit/templates/audit/batches.html:58
+#: bp/audit/templates/audit/batches.html:29
 msgid "me"
 msgstr "mig"
 
 #: bp/admin/templates/admin/uploads.html:80
-#: bp/audit/templates/audit/batches.html:77
 msgid "deleted from database"
 msgstr "raderad från databasen"
 
@@ -1026,12 +994,12 @@ msgid "batch %(batch_id)s; %(persons)d&nbsp;persons"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:89
-#: bp/gramps/templates/gramps/uploads.html:335
+#: bp/gramps/templates/gramps/uploads.html:323
 msgid "Store to database"
 msgstr "Spara till databas"
 
 #: bp/admin/templates/admin/uploads.html:93
-#: bp/audit/templates/audit/batches.html:92
+#: bp/audit/templates/audit/batches.html:55
 msgid "Show log"
 msgstr "Visa logg"
 
@@ -1075,7 +1043,7 @@ msgid "Total <b>%(tot)s</b> objects"
 msgstr "Totalt <b>%(tot)s</b> objekt"
 
 #: bp/audit/templates/audit/approvals.html:71
-#: bp/gramps/templates/gramps/uploads.html:294
+#: bp/gramps/templates/gramps/uploads.html:282
 #: bp/refplace_editor/templates/refplace_editor.html:3
 msgid "Auditor"
 msgstr "Revisor"
@@ -1085,9 +1053,10 @@ msgid "Researcher"
 msgstr "Forskare"
 
 #: bp/audit/templates/audit/approvals.html:75
+#: bp/audit/templates/audit/batches.html:21
 #: bp/audit/templates/audit/pick_auditing.html:22
-#: bp/gramps/templates/gramps/uploads.html:236
-#: bp/gramps/templates/gramps/uploads.html:330
+#: bp/gramps/templates/gramps/uploads.html:234
+#: bp/gramps/templates/gramps/uploads.html:318
 #: bp/start/templates/start/my_settings.html:125
 msgid "Batch id"
 msgstr "Batch id"
@@ -1101,52 +1070,35 @@ msgid "the selected approved batch"
 msgstr ""
 
 #: bp/audit/templates/audit/approvals.html:96
-#: bp/gramps/templates/gramps/uploads.html:352
+#: bp/gramps/templates/gramps/uploads.html:340
 msgid "Delete data"
 msgstr "Fösrstöra data"
 
 #: bp/audit/templates/audit/approvals.html:97
-#: bp/gramps/templates/gramps/uploads.html:354
+#: bp/gramps/templates/gramps/uploads.html:342
 msgid "Delete from database"
 msgstr "Tag bort från databasen"
 
 #: bp/audit/templates/audit/batches.html:4
-#: bp/audit/templates/audit/batches.html:8
+#: bp/audit/templates/audit/batches.html:9
 msgid "Batches"
 msgstr "Data batches"
 
-#: bp/audit/templates/audit/batches.html:14
-msgid "Status for differents steps in XML file upload:"
-msgstr "Status för skeden i XML-fil uppladdning:"
-
-#: bp/audit/templates/audit/batches.html:26
-msgid "the file content has been stored to the database"
-msgstr "filens innehåll har lagrats i databasen"
-
-#: bp/audit/templates/audit/batches.html:30
-#: bp/gramps/templates/gramps/uploads.html:245
-msgid "the data has been sent to common data"
-msgstr ""
-
-#: bp/audit/templates/audit/batches.html:34
-msgid "not found any more"
-msgstr "hittades inte längre"
-
-#: bp/audit/templates/audit/batches.html:79
+#: bp/audit/templates/audit/batches.html:41
 #: bp/scene/templates/scene/persons_search.html:217
 msgid "persons"
 msgstr "personer"
 
-#: bp/audit/templates/audit/batches.html:87
+#: bp/audit/templates/audit/batches.html:49
 msgid "Download file"
 msgstr "Ladda ner filen"
 
-#: bp/audit/templates/audit/batches.html:88
+#: bp/audit/templates/audit/batches.html:50
 #, fuzzy
 msgid "Download original file"
 msgstr "Ladda ner filen"
 
-#: bp/audit/templates/audit/batches.html:96
+#: bp/audit/templates/audit/batches.html:60
 msgid "Pick for me to audit"
 msgstr ""
 
@@ -1199,19 +1151,20 @@ msgstr "Referens namn"
 msgid "Classifier values"
 msgstr "Klassifierande kategorier"
 
-#: bp/audit/templates/audit/index.html:34
-msgid "Choose a batch for you to audit"
-msgstr ""
+#: bp/audit/templates/audit/index.html:33
+#, fuzzy
+msgid "Batch list"
+msgstr "minst"
 
-#: bp/audit/templates/audit/index.html:36
+#: bp/audit/templates/audit/index.html:34
 msgid "Remove empty batches"
 msgstr "Radera tomma batchar"
 
-#: bp/audit/templates/audit/index.html:37
+#: bp/audit/templates/audit/index.html:35
 msgid "Experimental place merge"
 msgstr "Experimental sammanslagning av platser"
 
-#: bp/audit/templates/audit/index.html:38
+#: bp/audit/templates/audit/index.html:36
 msgid "Experimental duplicate person search"
 msgstr ""
 
@@ -1340,8 +1293,9 @@ msgstr "Välj"
 #: bp/gedcom/templates/gedcom_info.html:29
 #: bp/gramps/templates/gramps/analyze_xml.html:14
 #: bp/gramps/templates/gramps/uploads.html:207
-#: bp/gramps/templates/gramps/uploads.html:328
-#: bp/start/templates/start/my_settings.html:166 ui/jinja_filters.py:327
+#: bp/gramps/templates/gramps/uploads.html:316
+#: bp/start/templates/start/my_settings.html:166
+#: bp/start/templates/start/s_macros.html:58 ui/jinja_filters.py:327
 msgid "File"
 msgstr "Filen"
 
@@ -1626,7 +1580,6 @@ msgid "Statistics"
 msgstr "Statistik"
 
 #: bp/gedcom/templates/gedcom_info.html:64
-#: bp/gramps/templates/gramps/uploads.html:234
 msgid "Upload time"
 msgstr "Uppladdad"
 
@@ -2136,12 +2089,12 @@ msgstr "Avmarkera"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Återställ markerad tag's: <tag>-X -> <tag>"
 
-#: bp/gramps/routes.py:275
+#: bp/gramps/routes.py:290
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr ""
 
-#: bp/gramps/routes.py:283
+#: bp/gramps/routes.py:298
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr ""
@@ -2183,7 +2136,7 @@ msgid "Send data to server"
 msgstr "Sänd data till servern"
 
 #: bp/gramps/templates/gramps/obsolete_index_gramps.html:49
-#: bp/gramps/templates/gramps/uploads.html:303
+#: bp/gramps/templates/gramps/uploads.html:292
 msgid ""
 "Select Gramps XML File (*.gramps etc) for converting to your candidate "
 "material"
@@ -2247,63 +2200,63 @@ msgstr "Vill du avlägsna XML filen?"
 msgid "Gramps file"
 msgstr "Gramps fil"
 
-#: bp/gramps/templates/gramps/uploads.html:237
+#: bp/gramps/templates/gramps/uploads.html:236
 msgid "Person count"
 msgstr "Person summering"
 
-#: bp/gramps/templates/gramps/uploads.html:305
+#: bp/gramps/templates/gramps/uploads.html:294
 msgid "Send a new Gramps file"
 msgstr "Sänd en ny Gramps fil"
 
-#: bp/gramps/templates/gramps/uploads.html:314
+#: bp/gramps/templates/gramps/uploads.html:303
 #, fuzzy
 msgid "Send to database"
 msgstr "Spara till databas"
 
-#: bp/gramps/templates/gramps/uploads.html:326
+#: bp/gramps/templates/gramps/uploads.html:314
 #, fuzzy
 msgid "Operations for selected row"
 msgstr "Åtgärder för valda användare"
 
-#: bp/gramps/templates/gramps/uploads.html:334
+#: bp/gramps/templates/gramps/uploads.html:322
 msgid "Saving data"
 msgstr "Sparar data"
 
-#: bp/gramps/templates/gramps/uploads.html:336
+#: bp/gramps/templates/gramps/uploads.html:324
 msgid "Download the Gramps file"
 msgstr "Ladda ned Gramps filen"
 
-#: bp/gramps/templates/gramps/uploads.html:339
+#: bp/gramps/templates/gramps/uploads.html:327
 #, fuzzy
 msgid "Analyze data"
 msgstr "Mitt kandiderande material"
 
-#: bp/gramps/templates/gramps/uploads.html:340
+#: bp/gramps/templates/gramps/uploads.html:328
 msgid "Analyze the Gramps file"
 msgstr "Analys av Gramps filen"
 
-#: bp/gramps/templates/gramps/uploads.html:342
+#: bp/gramps/templates/gramps/uploads.html:330
 msgid "Execute Gramps Verify Tool"
 msgstr "Kör Verifiera verktyg för gramps"
 
-#: bp/gramps/templates/gramps/uploads.html:344
+#: bp/gramps/templates/gramps/uploads.html:332
 msgid "Show last log"
 msgstr "Visa senaste logg"
 
-#: bp/gramps/templates/gramps/uploads.html:347 ui/jinja_filters.py:331
+#: bp/gramps/templates/gramps/uploads.html:335 ui/jinja_filters.py:331
 #, fuzzy
 msgid "Auditing"
 msgstr "Revisioner"
 
-#: bp/gramps/templates/gramps/uploads.html:348
+#: bp/gramps/templates/gramps/uploads.html:336
 msgid "Send for auditing"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:349
+#: bp/gramps/templates/gramps/uploads.html:337
 msgid "Withdraw auditing"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:353
+#: bp/gramps/templates/gramps/uploads.html:341
 msgid "Delete the file"
 msgstr "Ta bort filen"
 
@@ -3803,6 +3756,53 @@ msgstr "Logga in denna applikation"
 msgid "Log out from this application"
 msgstr "Logga ut denna applikation"
 
+#: bp/start/templates/start/s_macros.html:59 ui/jinja_filters.py:328
+#, fuzzy
+msgid "Storing"
+msgstr "Listor"
+
+#: bp/start/templates/start/s_macros.html:60 ui/jinja_filters.py:329
+#, fuzzy
+msgid "Candidate"
+msgstr "Slutdatum"
+
+#: bp/start/templates/start/s_macros.html:61 ui/jinja_filters.py:330
+#, fuzzy
+msgid "Audit Requested"
+msgstr "Skicka begäran"
+
+#: bp/start/templates/start/s_macros.html:61
+msgid "waiting for audition"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:62 ui/jinja_filters.py:332
+#, fuzzy
+msgid "Accepted"
+msgstr "Godkänn"
+
+#: bp/start/templates/start/s_macros.html:62
+#, fuzzy
+msgid "Audit done"
+msgstr "Revision hem"
+
+#: bp/start/templates/start/s_macros.html:63
+msgid "Merged"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:63
+#, fuzzy
+msgid "Joined to common data"
+msgstr "Godkända gemensamma data"
+
+#: bp/start/templates/start/s_macros.html:64 ui/jinja_filters.py:333
+#, fuzzy
+msgid "Rejected"
+msgstr "Val"
+
+#: bp/start/templates/start/s_macros.html:64
+msgid "Returned to researcher with comments"
+msgstr ""
+
 #: bp/start/templates/start/thankyou.html:3
 msgid "Thank You"
 msgstr "Tack"
@@ -5203,31 +5203,6 @@ msgstr "Familj notering"
 #, fuzzy
 msgid " Example type "
 msgstr "Kandiderande material"
-
-#: ui/jinja_filters.py:328
-#, fuzzy
-msgid "Storing"
-msgstr "Listor"
-
-#: ui/jinja_filters.py:329
-#, fuzzy
-msgid "Candidate"
-msgstr "Slutdatum"
-
-#: ui/jinja_filters.py:330
-#, fuzzy
-msgid "Audit Requested"
-msgstr "Skicka begäran"
-
-#: ui/jinja_filters.py:332
-#, fuzzy
-msgid "Accepted"
-msgstr "Godkänn"
-
-#: ui/jinja_filters.py:333
-#, fuzzy
-msgid "Rejected"
-msgstr "Val"
 
 #: ui/user_context.py:129
 msgid "Approved common data"
