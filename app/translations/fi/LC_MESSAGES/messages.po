@@ -2131,7 +2131,7 @@ msgstr "Aineiston lähettäminen"
 msgid ""
 "Select Gramps XML File (*.gramps etc) for converting to your candidate "
 "material"
-msgstr "Valitse Gramps-tiedosto (.gramps tai .gpkg) Tutkijan aineistoksi"
+msgstr "Valitse Gramps-tiedosto (.gramps tai .gpkg) tutkijan aineistoksi"
 
 #: bp/gramps/templates/gramps/obsolete_index_gramps.html:53
 msgid "Send"
@@ -2153,7 +2153,7 @@ msgstr "Tutkijan tiedostot ja aineistot"
 msgid ""
 "Manage your uploaded files and the candidate materials which you have "
 "stored in the database."
-msgstr "Hallinnoi tallettamiasi tiedostoja ja Tutkijan aineistojasi tietokannassa."
+msgstr "Hallinnoi tallettamiasi tiedostoja ja tutkijan aineistojasi tietokannassa."
 
 #: bp/gramps/templates/gramps/obsolete_index_gramps.html:67
 msgid "List my data sets"
@@ -3427,11 +3427,11 @@ msgstr "Tutkijan aineistot Isotammeen"
 
 #: bp/start/templates/start/index_logged.html:45
 msgid "Save your  Gramps xml file as Isotammi candidate material."
-msgstr "Tallenna Gramps-muotoinen aineistosi Isotammen tarjokasainestoksi."
+msgstr "Tallenna Gramps-muotoinen aineistosi Isotammen tutkijan ainestoksi."
 
 #: bp/start/templates/start/index_logged.html:46
 msgid "Manage your candidate files and materials in database."
-msgstr "Hallinnoi Tutkijan aineistoja ja Gramps-tiedostoja"
+msgstr "Hallinnoi tutkijan aineistoja ja Gramps-tiedostoja"
 
 #: bp/start/templates/start/index_logged.html:48
 msgid "Candidate materials"
@@ -3443,7 +3443,7 @@ msgstr "Selaa Isotammi-aineistoa"
 
 #: bp/start/templates/start/index_logged.html:63
 msgid "View your own candidate material or all approved common data"
-msgstr "Tarkastele omia Tutkijan aineistojasi tai yhdistettyjä Isotammi-aineistoja"
+msgstr "Tarkastele omia tutkijan aineistojasi tai yhdistettyjä Isotammi-aineistoja"
 
 #: bp/start/templates/start/index_logged.html:67
 msgid "The approved Isotammi data"
@@ -3597,7 +3597,7 @@ msgstr "Tutkijan aineistot"
 
 #: bp/start/templates/start/my_settings.html:121
 msgid "The amount of some data nodes included in your candidate data batches."
-msgstr "Tutkijan aineistosi tietojen lukumääriä"
+msgstr "Tutkijan aineistosi lukumääriä"
 
 #: bp/start/templates/start/my_settings.html:138
 #, python-format
