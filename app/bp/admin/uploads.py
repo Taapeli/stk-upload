@@ -270,9 +270,9 @@ class Upload:
 
     def __str__(self):
         if self.batch_id:
-            s = f"batch={self.batch_id} [{self.status}]"
+            s = f"batch={self.batch_id} [{self.state}]"
         else:
-            s = f"NO BATCH [{self.status}]"
+            s = f"NO BATCH [{self.state}]"
         if self.user:
             s += f"@{self.user}"
         if self.count:
@@ -304,7 +304,7 @@ def list_uploads(username:str) -> List[Upload]:
 
         upload = Upload(
             batch_id=b.id,
-            xmlname=os.path.split(b.file)[1],
+            xmlname=os.path.split(b.file)[1] if b.file else "",
             count=record["person_count"],
             user=b.user,
             auditors=record['auditors'],
