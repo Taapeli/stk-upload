@@ -85,7 +85,7 @@ def list_uploads():
     """
     users = shareds.user_datastore.get_users()
     upload_list = list(uploads.list_uploads_all(users))
-    logger.info(f"-> bp.audit.routes.list_uploads")
+    logger.info(f"-> bp.audit.routes.list_uploads n={len(upload_list)}")
     return render_template("/audit/batches.html", uploads=upload_list)
 
 
@@ -139,25 +139,25 @@ def audit_requested(batch_id=None):
     return redirect(url_for("gramps.list_uploads", batch_name=batch_id))
 
 
-@bp.route("/audit/movein/<batch_name>", methods=["GET", "POST"])
-@login_required
-@roles_accepted("audit")
-def obsolete_move_in_1(batch_name):
-    """ Confirm Batch move to Isotammi database """
-    user, batch_id, tstring, labels = Root.get_batch_stats(batch_name)
-    total = 0
-    for _label, cnt in labels:
-        total += cnt
-    # Not needed: logger.info(f' bp.audit.routes.move_in_1 {user} / {batch_name}, total {total} nodes')
-
-    return render_template(
-        "/audit/pick_auditing.html",
-        user=user,
-        batch=batch_id,
-        label_nodes=labels,
-        total=total,
-        time=tstring,
-    )
+# @bp.route("/audit/movein/<batch_name>", methods=["GET", "POST"])
+# @login_required
+# @roles_accepted("audit")
+# def obsolete_move_in_1(batch_name):
+#     """ Confirm Batch move to Isotammi database """
+#     user, batch_id, tstring, labels = Root.get_batch_stats(batch_name)
+#     total = 0
+#     for _label, cnt in labels:
+#         total += cnt
+#     # Not needed: logger.info(f' bp.audit.routes.move_in_1 {user} / {batch_name}, total {total} nodes')
+#
+#     return render_template(
+#         "/audit/pick_auditing.html",
+#         user=user,
+#         batch=batch_id,
+#         label_nodes=labels,
+#         total=total,
+#         time=tstring,
+#     )
 
 
 @bp.route("/audit/selected", methods=["POST"])
@@ -168,11 +168,17 @@ def audit_selected():
     """
     owner = request.form["user"]
     batch_id = request.form["batch"]
+    #do_pick = request.form.get("pick") is not None
+    do_remove = request.form.get("remove") is not None
     auditor = current_user.username
-    logger.info(f" bp.audit.routes.move_in_2 u={owner} b={batch_id}")
+    opmsg = "Remove" if do_remove else "Pick"
+    logger.info(f" bp.audit.routes.audit_selected u={owner} b={batch_id} {opmsg}")
     with BatchUpdater("update") as batch_service:
         #res = batch_service.change_state(batch_id, owner)
-        msg = _("You have been selected as auditor for batch ") + batch_id
+        if do_remove:
+            msg = _("You have been removed from auditors for batch ") + batch_id
+        else:
+            msg = _("You have been selected as auditor for batch ") + batch_id
 
     # try:
     #     merger = BatchMerger()

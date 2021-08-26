@@ -9,14 +9,19 @@
 
 <div id="startdiv">
     <div>
-        <h1>{{ _("Pick for auditing") }}</h1>
+        <h1>{{ _("Pick for me to audit") }}</h1>
 
 {% include "flash_messages.html" %}
 
         <div style="width: min-content;">
             <h2>{{ _('Selected Batch') }} {{root.id}}</h2>
-            <p>{{root.state|transl('state')}} {{_("material")}}:
-               {{root.material|transl('material')}}</p>
+            <p>{{root.state|transl('state')}}:
+               {{root.material|transl('material')}}
+        {% if root.description %}
+               <i>{{root.description}}</i>
+		{% endif %}
+            </p>
+
 			<table>
 				<tr>
 					<th>{{ _('Batch id') }}</th>
@@ -33,12 +38,18 @@
                 </tr>
             </table>
             <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
+{% if root.auditors %}
+            <p style="color:red">{{ _("Auditor") }}: <b>{{ ', '.join(root.auditors) }}</b></p>
+{% endif %}
 {% if total %}
             <form action="/audit/selected" method="post">
 	            <div class="submit">
+	               <a href="/audit/list_uploads"><button>{{ _('Go back') }}</button></a> &nbsp;
                    <input type="hidden" value="{{root.id}}" name="batch">
                    <input type="hidden" value="{{user}}" name="user">
-                   <input type="submit" value="{{ _('Start') }}" />
+                   <input type="submit" value="{{ _('Leave auditing') }}" name="remove"
+                   		  disabled="{{ current_user.username in root.auditors }}" /> &nbsp;
+                   <input type="submit" value="{{ _('Select for auditing') }}" name="pick" />
 	            </div>
             </form>
 {% else %}

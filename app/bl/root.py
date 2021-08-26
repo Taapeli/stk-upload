@@ -384,12 +384,14 @@ class Root(NodeObject):
             #            'description': 'Pieni koeaineisto', 'id': '2021-05-27.002', 'state': 'Candidate', 
             #            'user': 'aku', 'timestamp': 1622140130273}>
             #    label='Person'
-            #    cnt=6>
+            #    cnt=6
+            #    auditors=['juha']
+            # >
 
             user = record['profile']['username']
             node = record["root"]
             b = Root.from_node(node)
-            #tstring = b.timestamp_str()
+            b.auditors = record["auditors"]
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -398,7 +400,6 @@ class Root(NodeObject):
             labels.append((label, cnt))
 
         return  user, b, sorted(labels)
-        #return b.user, b.id, tstring, sorted(labels)
 
     @staticmethod
     def list_empty_batches():

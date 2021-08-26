@@ -94,7 +94,9 @@ return b as batch, count(x) as cnt
     get_single_batch = '''
 match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch}) 
 optional match (b) --> (x)
-return up as profile, b as root, labels(x)[0] as label, count(x) as cnt'''
+optional match (ap:UserProfile) -[:DOES_AUDIT]-> (b)
+return up as profile, b as root, labels(x)[0] as label, 
+    count(x) as cnt, collect(ap.username) as auditors'''
 
 #     get_user_batch_names = '''
 # match (b:Root) where b.user = $user
@@ -105,7 +107,7 @@ return up as profile, b as root, labels(x)[0] as label, count(x) as cnt'''
 
     get_user_root_summary = """
 match (u:UserProfile) --> (b:Root) where u.username = $user
-optional match (a:UserProfile) -[ar:IS_AUDITING]-> (b)
+optional match (a:UserProfile) -[ar:DOES_AUDIT]-> (b)
 optional match (b) -[r:OBJ_PERSON]-> (:Person)
 with b, count(r) as person_count, 
     a.username as auditor

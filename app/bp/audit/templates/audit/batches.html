@@ -32,8 +32,26 @@
              {% endif -%}
     	  {% endif -%}
 
-			   <td>{{upload.xmlname}}</td>
-	           <td>{{upload.state|transl('state')}}</td>
+			   <td>{{upload.xmlname}}
+			{% if upload.description %} 
+                    <br><i>{{ upload.description[0:29] }}
+				{% if upload.description|length > 29  %}
+                        ... 
+                        <div class="tooltip"> 
+                        &nbsp;&#8505;&nbsp;
+                          <div class="tooltiptext">
+                            {{ upload.description }} 
+                          </div>
+                        </div> 
+				{% endif %}
+                    </i>
+			{% endif %}
+			   </td>
+	           <td>{{upload.state|transl('state')}}
+			{% if upload.auditors %}
+                    <br><i>{{ _("Auditor") }}: {{ ', '.join(upload.auditors) }}</i>
+			{% endif %}
+	           </td>
 	           
 	           <td>
 	           	   {{upload.batch_id}} 
