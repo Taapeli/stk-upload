@@ -1415,9 +1415,9 @@ class Neo4jReadService(ConcreteService):
         result_list = []
         with self.driver.session(default_access_mode="READ") as session:
             cypher = CypherPerson.get_surname_list
-            print('#  Neo4jReadService.dr_get_surname_list: with \n{ material:"'
-                  f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
-            print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
+#             print('#  Neo4jReadService.dr_get_surname_list: with \n{ material:"'
+#                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
+#             print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
             result = run_cypher2(session, cypher,
                 username, batch_id,
                 count=count,
@@ -1463,8 +1463,8 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             # Select Batches by user, if defined
             cypher = CypherPlaceStats.get_place_list
-            logger.debug('#  Neo4jReadService.dr_get_placename_list: with \n{ material:"'
-                  f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
+#             logger.debug('#  Neo4jReadService.dr_get_placename_list: with \n{ material:"'
+#                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
             logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
             result = run_cypher2(session, cypher, username, batch_id, count=count)
             for record in result:

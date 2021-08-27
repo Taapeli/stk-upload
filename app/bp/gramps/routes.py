@@ -144,7 +144,7 @@ def upload_gramps():
             batch.metaname = batch.file + ".meta"
             batch.logname = batch.file + ".log"
 
-            batch.save()
+            batch.save(batch_service.dataservice) # todo: batch_service.save_batch(batch) ?
             
             shareds.tdiff = time.time() - t0
     

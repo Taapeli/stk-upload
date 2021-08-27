@@ -127,7 +127,7 @@ class FamilyBl(Family):
         # from multiple events and other objects
         self.note_ref = []
 
-    def save(self, tx, **kwargs):
+    def save(self, dataservice, tx, **kwargs):
         """Saves the family node to db with its relations.
 
         Connects the family to parent, child, citation and note nodes.
@@ -255,12 +255,12 @@ class FamilyWriter(DataService):
 
     def __init__(self, service_name: str, u_context=None, tx=None):
         super().__init__(service_name, u_context, tx=tx)
-        # shareds.dservice.tx = None # already ok
+        # self.dataservice.tx = None # already ok
         pass  # print(f"#FamilyWriter: {dir(self)}")
 
     # def set_calculated_attributes(self, uniq_id):
     #     """Set Family event dates and sortnames."""
-    #     return shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
+    #     return self.dataservice.ds_set_family_calculated_attributes(uniq_id)
     #     # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
 
 
@@ -309,7 +309,7 @@ class FamilyReader(DataService):
         )
 
         #  args = {use_user:str, direction:str="fw", name:str=None, limit:int=50, order:str"man"}
-        res = shareds.dservice.dr_get_families(args)
+        res = self.dataservice.dr_get_families(args)
         # returns {'recs':recs, 'status':Status.OK/NOT_FOUND}
         if Status.has_failed(res, False):
             return res
@@ -443,7 +443,7 @@ class FamilyReader(DataService):
             1. Get Family node by user/common
                res is dict {item, status, statustext}
         """
-        ret_results = shareds.dservice.dr_get_family_by_uuid(self.use_user, uuid)
+        ret_results = self.dataservice.dr_get_family_by_uuid(self.use_user, uuid)
         # ret_results {'item': <bl.family.FamilyBl>, 'status': Status}
         if Status.has_failed(ret_results):
             return ret_results
@@ -456,7 +456,7 @@ class FamilyReader(DataService):
                res is dict {items, status, statustext}
         """
         if select_parents:
-            res = shareds.dservice.dr_get_family_parents(
+            res = self.dataservice.dr_get_family_parents(
                 family.uniq_id, with_name=select_names
             )
             for p in res.get("items"):
@@ -472,7 +472,7 @@ class FamilyReader(DataService):
                res is dict {items, status, statustext}
         """
         if select_children:
-            res = shareds.dservice.dr_get_family_children(
+            res = self.dataservice.dr_get_family_children(
                 family.uniq_id, with_events=select_events, with_names=select_names
             )
             # res {'items': [<bl.person.PersonBl>], 'status': Status}
@@ -489,7 +489,7 @@ class FamilyReader(DataService):
                res is dict {items, status, statustext}
         """
         if select_events:
-            res = shareds.dservice.dr_get_family_events(
+            res = self.dataservice.dr_get_family_events(
                 family.uniq_id, with_places=select_places
             )
             for e in res.get("items"):
@@ -500,14 +500,14 @@ class FamilyReader(DataService):
               optionally with Notes
         """
         if select_sources:
-            res = shareds.dservice.dr_get_family_sources(src_list)
+            res = self.dataservice.dr_get_family_sources(src_list)
             for s in res.get("items"):
                 family.sources.append(s)
         """
             6 Get Notes for family and events
         """
         if select_notes:
-            res = shareds.dservice.dr_get_family_notes(src_list)
+            res = self.dataservice.dr_get_family_notes(src_list)
             for s in res.get("items"):
                 family.notes.append(s)
 
@@ -515,7 +515,7 @@ class FamilyReader(DataService):
 
     def get_person_families(self, uuid: str):
         """Get all families for given person in marriage date order."""
-        res = shareds.dservice.dr_get_person_families_uuid(uuid)
+        res = self.dataservice.dr_get_person_families_uuid(uuid)
         items = res.get("items")
         if items:
             items.sort(key=lambda x: x.dates)

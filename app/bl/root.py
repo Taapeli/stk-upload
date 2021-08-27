@@ -164,12 +164,12 @@ class Root(NodeObject):
 #         self.description = ""
 #===============================================================================
 
-    def save(self):
+    def save(self, dataservice):
         """Create or update Root node.
 
         Returns {'id':self.id, 'status':Status.OK}
         """
-        # print(f"Batch.save with {shareds.dservice.__class__.__name__}")
+        # print(f"Batch.save with {self.dataservice.__class__.__name__}")
         attr = {
             "id": self.id,
             "user": self.user,
@@ -185,7 +185,7 @@ class Root(NodeObject):
             "logname": self.logname,
         }
         #TODO Create new root_save()
-        res = shareds.dservice.ds_batch_save(attr)
+        res = dataservice.ds_batch_save(attr)
         # returns {status, identity}
 
         self.uniq_id = res.get("identity")
@@ -592,17 +592,17 @@ class BatchUpdater(DataService):
         Initiate new Batch.
         """
         # Lock db to avoid concurent Batch loads
-        shareds.dservice.ds_aqcuire_lock("batch_id")
+        self.dataservice.ds_aqcuire_lock("batch_id")
         # TODO check res
 
         # Find the next free Batch id
         batch = Root()
-        res = shareds.dservice.ds_new_batch_id()
+        res = self.dataservice.ds_new_batch_id()
 
         batch.id = res.get("id")
         batch.user = username
 
-        res = batch.save()
+        res = batch.save(self.dataservice)
         return batch
 
     def xxxstart_data_batch(self, userid, file, mediapath, tx=None):
@@ -614,7 +614,7 @@ class BatchUpdater(DataService):
         :param: mediapath media file store path
         """
         
-        shareds.dservice.ds_aqcuire_lock("batch_id")
+        self.dataservice.ds_aqcuire_lock("batch_id")
 
         batch = self.new_batch()
 
@@ -642,30 +642,30 @@ class BatchUpdater(DataService):
 
     def change_state(self, batch, user, b_status):
         """ Mark this data batch status. """
-        res = shareds.dservice.ds_batch_set_state(batch, user, b_status)
+        res = self.dataservice.ds_batch_set_state(batch, user, b_status)
         return res
 
     def batch_mark_status(self, batch, b_status):
         """ Mark this data batch status. """
-        res = shareds.dservice.ds_batch_set_state(
+        res = self.dataservice.ds_batch_set_state(
             batch.id, batch.user, b_status
         )
         return res
 
     def commit(self):
         """ Commit transaction. """
-        shareds.dservice.ds_commit()
+        self.dataservice.ds_commit()
 
     def rollback(self):
         """ Commit transaction. """
-        shareds.dservice.ds_rollback()
+        self.dataservice.ds_rollback()
 
     def media_create_and_link_by_handles(self, uniq_id, media_refs):
         """Save media object and it's Note and Citation references
         using their Gramps handles.
         """
         if media_refs:
-            shareds.dservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
+            self.dataservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
 
 class DataServiceBase:
     def __enter__(self):

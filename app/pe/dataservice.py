@@ -61,13 +61,6 @@ class DataService:
         # Initiate selected service object
         self.dataservice = service_class(shareds.driver)
         self.old_tx = tx
-        # Prepare to return back to the previous dataservice, if one exists
-        if shareds.dservice:
-            self.previous_dservice = shareds.dservice
-        else:
-            self.previous_dservice = None
-        shareds.dservice = self.dataservice
-        #print(f"#> pe.dataservice.DataService {service_name} dservice={obj_addr(self.dataservice)}")
 
         if user_context:
             self.user_context = user_context
@@ -77,11 +70,6 @@ class DataService:
                 self.use_user = None
             else:
                 self.use_user = user_context.user
-
-            # Batch selection by material and state
-            shareds.dservice.material = user_context.material
-            shareds.dservice.state = user_context.state
-            shareds.dservice.use_user = user_context.user
         else:
             #raise IsotammiException("pe.dataservice.DataService: user_context is mandatory")
             pass
@@ -128,13 +116,6 @@ class DataService:
                     print(f'#~~~{self.idstr} exit continue tx={obj_addr(self.dataservice.tx)}')
         else:
             print(f'#~~~{self.idstr} exit {obj_addr(self.old_tx)}')
-
-        if self.previous_dservice:
-            # print(f"-- {self.idstr} returning to dservice={obj_addr(self.previous_dservice)} from {obj_addr(shareds.dservice)}")
-            shareds.dservice = self.previous_dservice
-            self.previous_dservice = None
-        else:
-            shareds.dservice = None
 
 
 class ConcreteService:

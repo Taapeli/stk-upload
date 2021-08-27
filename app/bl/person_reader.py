@@ -119,7 +119,9 @@ class PersonReaderTx(DataService):
         args["fw"] = context.first  # From here forward
         args["limit"] = context.count
         args["batch_id"] = context.batch_id
-        res = shareds.dservice.tx_get_person_list(args)
+        args["material"] = context.material
+        args["state"] = context.state
+        res = self.dataservice.tx_get_person_list(args)
 
         status = res.get("status")
         if status == Status.NOT_FOUND:
@@ -265,7 +267,7 @@ class PersonReaderTx(DataService):
 
         # ---/
 
-        res = shareds.dservice.tx_get_person_by_uuid(uuid, active_user=self.use_user, batch_id=self.user_context.batch_id)
+        res = self.dataservice.tx_get_person_by_uuid(uuid, active_user=self.use_user, batch_id=self.user_context.batch_id)
         if Status.has_failed(res):
             # Not found, not allowed (person.too_new) or error
             if res.get("status") == Status.NOT_FOUND:
@@ -315,7 +317,7 @@ class PersonReaderTx(DataService):
 
         # 3. Person's families as child or parent
 
-        res = shareds.dservice.tx_get_person_families(person.uniq_id)
+        res = self.dataservice.tx_get_person_families(person.uniq_id)
         if Status.has_failed(res):
             print(
                 "#bl.person_reader.PersonReaderTx.get_person_data - Can not read families:"
@@ -373,7 +375,7 @@ class PersonReaderTx(DataService):
 
         # 4. Places for person and each event
 
-        res = shareds.dservice.tx_get_object_places(self.obj_catalog)
+        res = self.dataservice.tx_get_object_places(self.obj_catalog)
         # returns {status, place_references}
         if Status.has_failed(res):
             print(
@@ -417,7 +419,7 @@ class PersonReaderTx(DataService):
             notes = {}
             medias = {}
 
-            res = shareds.dservice.tx_get_object_citation_note_media(
+            res = self.dataservice.tx_get_object_citation_note_media(
                 self.obj_catalog, new_ids
             )
             # returns {status, new_objects, references}
@@ -495,7 +497,7 @@ class PersonReaderTx(DataService):
         #    for c in z:Citation
         #        (c) --> (s:Source) --> (r:Repository)
 
-        res = shareds.dservice.tx_get_object_sources_repositories(
+        res = self.dataservice.tx_get_object_sources_repositories(
             list(all_citations.keys())
         )
         if Status.has_failed(res, strict=False):
@@ -534,7 +536,7 @@ class PersonReaderTx(DataService):
                 # print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
 
         #         # Create Javascript code to create source/citation list
-        #         jscode = get_citations_js(shareds.dservice.objs)
+        #         jscode = get_citations_js(self.dataservice.objs)
         jscode = self.get_citations_js()
 
         # Return Person with included objects,  and javascript code to create

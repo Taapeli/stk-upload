@@ -58,7 +58,7 @@ def analyze_xml(username, batch_id, filename):
     file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
 
     """ Get XML DOM parser and start DOM elements handler transaction """
-    handler = DOM_handler(file_cleaned, username, filename)
+    handler = DOM_handler(file_cleaned, username, filename, dataservice=None)
 
     citation_source_cnt = 0
     event_citation_cnt = 0
@@ -290,35 +290,36 @@ def xml_to_stkbase(batch: Root):
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(batch.file)
 
-    # Get XML DOM parser and start DOM elements handler transaction
-    handler = DOM_handler(file_cleaned, batch.user, batch.file)
-
-    # Initialize Run report
-    handler.blog = BatchLog(batch.user)
-    handler.blog.log_event({"title": "Storing data from Gramps", "level": "TITLE"})
-    handler.blog.log_event(
-        {"title": "Loaded file '{}'".format(file_displ), "elapsed": shareds.tdiff}
-    )
-    handler.blog.log(cleaning_log)
-
-    handler.batch = batch
-
-    batch.mediapath = handler.get_mediapath_from_header()
-
-    metadata = handler.get_metadata_from_header()
-    print("metadata:", metadata)
-    if metadata:
-        batch.material = metadata[0] if metadata[0] else DEFAULT_MATERIAL
-        batch.description = metadata[1]
-    handler.handle_suffix = "_" + handler.batch.id  
-    # Open database connection as Neo4jDataService instance and start transaction
-
-    # Initiate BatchUpdater and Batch node data
-    ##shareds.datastore = BatchUpdater(shareds.driver, handler.dataservice)
     with BatchUpdater("update") as batch_service:
-        # print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
+        # Get XML DOM parser and start DOM elements handler transaction
+        handler = DOM_handler(file_cleaned, batch.user, batch.file, batch_service.dataservice)
+    
+        # Initialize Run report
+        handler.blog = BatchLog(batch.user)
+        handler.blog.log_event({"title": "Storing data from Gramps", "level": "TITLE"})
+        handler.blog.log_event(
+            {"title": "Loaded file '{}'".format(file_displ), "elapsed": shareds.tdiff}
+        )
+        handler.blog.log(cleaning_log)
+    
+        handler.batch = batch
+    
+        batch.mediapath = handler.get_mediapath_from_header()
+    
+        metadata = handler.get_metadata_from_header()
+        print("metadata:", metadata)
+        if metadata:
+            batch.material = metadata[0] if metadata[0] else DEFAULT_MATERIAL
+            batch.description = metadata[1]
+        handler.handle_suffix = "_" + handler.batch.id  
+        # Open database connection as Neo4jDataService instance and start transaction
+    
+        # Initiate BatchUpdater and Batch node data
+        ##shareds.datastore = BatchUpdater(shareds.driver, handler.dataservice)
+    
+            # print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
 
-        batch.save()
+        batch.save(batch_service.dataservice)
         
         t0 = time.time()
 
@@ -348,8 +349,6 @@ def xml_to_stkbase(batch: Root):
 
         # Copy date and name information from Person and Event nodes to Family nodes
         res = handler.set_family_calculated_attributes()
-        #res = shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
-
 
         res = handler.remove_handles()
             # The missing links counted in remove_handles

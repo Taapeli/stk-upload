@@ -89,8 +89,8 @@ class Neo4jReadServiceTx(ConcreteService):
         
             args = dict {use_user, fw, limit, rule, key, years}
         """
-        material = shareds.dservice.material
-        state = shareds.dservice.state
+        material = args.get('material')
+        state = args.get('state')
         username = args.get('use_user')
         rule = args.get('rule')
         key = args.get('key')

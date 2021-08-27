@@ -113,7 +113,7 @@ class SourceBl(Source):
         self.note_ref = []
 
 
-    def save(self, tx, **kwargs):
+    def save(self, dataservice, tx, **kwargs):
         """ Saves this Source and connect it to Notes and Repositories.
 
             :param: batch_id      batch id where this place is linked
@@ -209,7 +209,7 @@ class SourceReader(DataService):
             args["theme1"] = theme_fi
             args["theme2"] = theme_sv
         try:
-            sources = shareds.dservice.dr_get_source_list_fw(args)
+            sources = self.dataservice.dr_get_source_list_fw(args)
             # results = {'sources':sources,'status':Status.OK}
 
             # Update the page scope according to items really found
@@ -239,7 +239,7 @@ class SourceReader(DataService):
                             as [label, object] tuples(?)
         """
         use_user = self.user_context.batch_user()
-        res = shareds.dservice.dr_get_source_w_repository(use_user, uuid)
+        res = self.dataservice.dr_get_source_w_repository(use_user, uuid)
         if Status.has_failed(res):
             return res
         source = res.get("item")
@@ -247,7 +247,7 @@ class SourceReader(DataService):
             res.statustext = f"no Source with uuid={uuid}"
             return res
 
-        citations, notes, targets = shareds.dservice.dr_get_source_citations(
+        citations, notes, targets = self.dataservice.dr_get_source_citations(
             source.uniq_id
         )
 
@@ -268,7 +268,7 @@ class SourceReader(DataService):
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
                     if isinstance(target, Person):
-                        shareds.dservice.dr_inlay_person_lifedata(target)
+                        self.dataservice.dr_inlay_person_lifedata(target)
                     citation.citators.append(target)
                 else:
                     print(f"DbReader.get_source_with_references: hide {target}")
