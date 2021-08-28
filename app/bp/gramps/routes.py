@@ -310,7 +310,6 @@ def batch_delete(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def get_progress(batch_id):
-# Can' use BatchUpdater since it is being used by another thread doing the actual load    
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
@@ -319,7 +318,7 @@ def get_progress(batch_id):
                 "progress": 0,
                 "batch_id": batch_id,
             }
-            return jsonify(res)
+            return jsonify(rsp)
  
         batch = res['item']
 
@@ -329,6 +328,13 @@ def get_progress(batch_id):
 #         node = res["b"]
 #         batch = Root.from_node(node)
 
+        if not batch.metaname:
+            rsp = {
+                "status": 'Failed',
+                "progress": 0,
+                "batch_id": batch_id,
+            }
+            return jsonify(rsp)
         meta = uploads.get_meta(batch.metaname)
     
         status = meta.get("status")
