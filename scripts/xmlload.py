@@ -19,24 +19,21 @@ A default username can be stored in the instance/config.py as
 """
 
 import argparse
+import os
 import sys
 from unittest.mock import Mock
 import traceback
+import shutil
 
 sys.path.append("../app")
 import shareds
 from bl.base import Status, IsotammiException
 from bl.gramps.gramps_loader import xml_to_stkbase
+from bl.root import BatchUpdater
 
-def load_config(configfile):
-    shareds.app = Mock()
-    ns = {}
-    config_text = open(configfile).read()
-    exec(config_text, ns )
-    shareds.app.config = ns
+import shareds
 
-configfile = "../instance/config.py"
-load_config(configfile)
+from app import app
 
 username = shareds.app.config['TEST_USERNAME']
 
@@ -63,7 +60,24 @@ shareds.dataservices = {
 
 
 try:
-    xml_to_stkbase(args.xmlfilename, args.username)
+    class Root:  # emulate real Root
+        pass
+    with BatchUpdater("update")  as batch_service:
+        batch = batch_service.new_batch(args.username)
+        upload_folder = "uploads/" + args.username
+        batch_upload_folder = os.path.join(upload_folder, batch.id)
+        os.makedirs(batch_upload_folder, exist_ok=True)
+        destfile = shutil.copy(args.xmlfilename, batch_upload_folder)
+        batch.file = destfile
+        batch.user = args.username
+        batch.xmlname = os.path.split(destfile)[1]
+        batch.metaname = batch.file + ".meta"
+        batch.logname = batch.file + ".log"
+
+        batch.save(batch_service.dataservice) # todo: batch_service.save_batch(batch) ?
+
+    xml_to_stkbase(batch)
+    
 except IsotammiException as e:
     print("xmlload: IsotammiException")
     traceback.print_exc()
