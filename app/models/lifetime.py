@@ -191,17 +191,18 @@ def __update_range(p, eventtype, low, high):
         return
     current_range = __compute_overlap(current_range1, (low, high))
     if __empty_range(current_range):
-        print(
-            p.gramps_id,
-            ": empty range",
-            eventtype,
-            current_range1,
-            "&",
-            (low, high),
-            "->",
-            current_range,
-            file=sys.stderr,
-        )
+        pass
+#         print(
+#             p.gramps_id,
+#             ": empty range",
+#             eventtype,
+#             current_range1,
+#             "&",
+#             (low, high),
+#             "->",
+#             current_range,
+#             file=sys.stderr,
+#         )
         # assert not __empty_range(current_range)
     else:
         p.estimates[eventtype] = current_range
