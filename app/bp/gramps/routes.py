@@ -253,9 +253,38 @@ def xml_download(xmlfile):
         as_attachment=True,
     )
 
+@bp.route("/gramps/batch_download/<batch_id>")
+@login_required
+@roles_accepted("research", "admin")
+def batch_download(batch_id):
+    batch = Root.get_batch(current_user.username, batch_id)
+    if batch:
+        xml_folder = os.path.split(batch.file)[0]
+        xml_folder = os.path.abspath(xml_folder)
+        return send_from_directory(
+            directory=xml_folder,
+            filename=batch.xmlname,
+            mimetype="application/gzip",
+            as_attachment=True,
+        )
 
-#                                attachment_filename=xmlfile+".gz")
+@bp.route("/gramps/show_upload_log/<batch_id>")
+@login_required
+@roles_accepted("research")
+def show_upload_log_from_batch_id(batch_id):
+    msg=""
+    try:
+        batch = Root.get_batch(current_user.username, batch_id)
+        msg = open(batch.logname, encoding="utf-8").read()
+        logger.info(f"-> bp.gramps.routes.show_upload_log_from_batch_id f='{batch.logname}'")
+    except Exception as e:
+        print(f"bp.gramps.routes.show_upload_log_from_batch_id: {e}")
+        if not msg:
+            msg = f'{_("The log file does not exist any more.")}'
+        flash(msg)
+        return redirect(url_for("gramps.list_uploads"))
 
+    return render_template("/admin/load_result.html", msg=msg)
 
 @bp.route("/gramps/batch_delete/<batch_id>")
 @login_required
@@ -376,3 +405,41 @@ def get_progress(batch_id):
             "batch_id": meta.get("batch_id"),
         }
         return jsonify(rsp)
+
+@bp.route("/gramps/commands/<batch_id>")
+@login_required
+@roles_accepted("research")
+def get_commands(batch_id):
+    with BatchReader("update") as batch_service:
+        res = batch_service.batch_get_one(current_user.username, batch_id)
+        if Status.has_failed(res):
+            return _("Failed to retrieve commands")
+ 
+        batch = res['item']
+
+        commands = []
+        if batch.state == State.ROOT_CANDIDATE:
+            commands.append( (
+                f"/audit/requested/{batch_id}", 
+                _("Send for auditing")
+            ))
+        if batch.state == State.ROOT_AUDIT_REQUESTED:
+            commands.append( (
+                f"/audit/revert/{batch_id}", 
+                _("Withdraw auditing")
+            ))
+        commands.append( (
+            f"/gramps/batch_download/{batch_id}", 
+            _("Download the Gramps file")
+        ))
+        commands.append( (
+            f"/gramps/show_upload_log/{batch_id}", 
+            _("Show last log") 
+        ))
+        commands.append( (
+            f"/gramps/batch_delete/{batch_id}", 
+            _("Delete from database")
+        ))
+        
+        return render_template("/gramps/commands.html", batch_id=batch_id, description=batch.description, commands=commands)
+
