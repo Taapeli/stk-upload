@@ -331,6 +331,9 @@ def translate(term, var_name, show_table=False):
             State.ROOT_AUDITING: _("Auditing"),
             State.ROOT_ACCEPTED: _("Accepted"),
             State.ROOT_REJECTED: _("Rejected"),
+            State.FILE_LOADING: _("Loading"),
+            State.FILE_LOAD_FAILED: _("Load Failed"),
+            State.FILE_UPLOADED: _("File"),
         }
         #print(f"#jinja_filters:get {var_name}({term})")
 

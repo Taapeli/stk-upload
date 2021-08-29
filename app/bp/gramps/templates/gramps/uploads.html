@@ -120,7 +120,8 @@ function update_progress(batch_id) {
 		var progress_div = $("td div.progress[data-name='"+batch_id+"']");
 		var batch_id_column = progress_div.parent(); /*.prev().prev(); */
 		batch_id_column.css("background","silver");
-		progress_div.css("background","LightGreen");
+		progress_div.css("background","Green");
+		progress_div.css("opacity","0.5");
 		progress_div.css("z-index","1");
 		progress_div.css("margin","4px");
 		progress_div.css("border-radius","6px 0 0 6px");
@@ -245,7 +246,7 @@ function confirm_delete(subj, name) {
 	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.filename}}', {{upload.is_candidate}});">
 	            </td>
 
-                <td id='{{upload.batch_id}}'>{{upload.batch_id}}
+                <td id='{{upload.batch_id}}'>&nbsp;{{upload.batch_id}}
                     <div class="progress" data-name='{{upload.batch_id}}'></div>
 			{% if upload.state == 'Loading' %}
                      <script>
@@ -277,7 +278,7 @@ function confirm_delete(subj, name) {
 
                 <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
                 </td>
-                <td>{{upload.status}}
+                <td>{{ _(upload.status) }}
 			{% if upload.auditors %}
                     <br><i>{{ _("Auditor") }}: {{ ', '.join(upload.auditors) }}</i>
 			{% endif %}

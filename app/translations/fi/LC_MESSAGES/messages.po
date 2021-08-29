@@ -3760,6 +3760,14 @@ msgstr "Liitetty yhteiseen sukukantaan"
 msgid "Rejected"
 msgstr "Palautettu"
 
+#: ui/jinja_filters.py:334
+msgid "Loading"
+msgstr "Menossa tietokantaan"
+
+#: ui/jinja_filters.py:334
+msgid "Load Failed"
+msgstr "Lataus epäonnistui"
+
 #: bp/start/templates/start/s_macros.html:64
 msgid "Returned to researcher with comments"
 msgstr "Palautettu tutkijalle kommentein"

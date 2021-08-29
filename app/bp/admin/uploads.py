@@ -153,6 +153,8 @@ def get_meta(metaname):
                 stat.st_mtime < time.time() - 60
             ):  # not updated within last minute -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
+    except FileNotFoundError as e:
+        meta = {}
     except Exception as e:
         print(f"bp.admin.uploads.get_meta: error {e.__class__.__name__} {e}")
         meta = {}
@@ -269,17 +271,14 @@ class Upload:
     is_candidate: int  # for Javascript: 0=false, 1=true
 
     def __str__(self):
-        if self.batch_id:
-            s = f"batch={self.batch_id} [{self.state}]"
-        else:
-            s = f"NO BATCH [{self.state}]"
+        s = f"batch={self.batch_id}" if self.batch_id else "NO BATCH "
         if self.user:
             s += f"@{self.user}"
         if self.count:
             s += f", counts {self.count}"
         if self.auditors:
             s += f", auditors: {self.auditors}"
-        return f"{self.material_type} {s}" #, found {has_file}, {has_log}"
+        return f"{self.material_type}/{self.state}, {s}" #, found {has_file}, {has_log}"
 
 def list_uploads(username:str) -> List[Upload]:
     """ Gets a list of uploaded batches
@@ -314,7 +313,7 @@ def list_uploads(username:str) -> List[Upload]:
             material_type=b.material,
             description=b.description,
         )
-        print("uploads:", upload.batch_id, upload.state, upload.auditors)
+        print(f"#list_uploads: {upload}")
         uploads.append(upload)
 
     return sorted(uploads, key=lambda upload: upload.batch_id)
