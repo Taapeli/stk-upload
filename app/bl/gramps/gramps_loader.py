@@ -354,7 +354,8 @@ def xml_to_stkbase(batch: Root):
             # The missing links counted in remove_handles
         ##TODO      res = handler.add_missing_links()
 
-        res = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
+        res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
+        #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
 
         # batch_service.commit()
         logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')

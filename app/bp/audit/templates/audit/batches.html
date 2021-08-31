@@ -63,18 +63,18 @@
 	        <td>
 <!-- 
     		{% if upload.has_file %}
-	           	▸ <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}
+	           	▸ <a href="/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}"
     	             title="{{ _("Download file") }}">
     	               {{ _("Download original file") }}</a>
     		{% endif -%}
  -->
 	        {% if upload.xmlname %}
-	            ▸ <a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
+	            ▸ <a href="/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}">
 	           			{{ _("Show log") }}</a>
 	        {% endif -%}
-	        {% if upload.state == "Candidate" %}
+	        {% if upload.state == "Audit Requested" %}
 		        {% if upload.xmlname %}<br>{% endif -%}
-	           	▸ <a href=/audit/pick/{{upload.batch_id}}>
+	           	▸ <a href="/audit/pick/{{upload.batch_id}}">
                        {{ _("Pick for me to audit") }}</a>
             {% endif -%}
 	           	</td>

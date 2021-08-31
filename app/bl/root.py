@@ -605,26 +605,26 @@ class BatchUpdater(DataService):
         res = batch.save(self.dataservice)
         return batch
 
-    def xxxstart_data_batch(self, userid, file, mediapath, tx=None):
-        """
-        Initiate new Batch.
-
-        :param: userid    user
-        :param: file      input file name
-        :param: mediapath media file store path
-        """
-        
-        self.dataservice.ds_aqcuire_lock("batch_id")
-
-        batch = self.new_batch()
-
-        batch.user = userid
-        batch.file = file.replace("_clean.", ".")
-        batch.mediapath = mediapath
-
-        self.batch = batch
-
-        return {"batch": batch, "status": Status.OK}
+#     def xxxstart_data_batch(self, userid, file, mediapath, tx=None):
+#         """
+#         Initiate new Batch.
+# 
+#         :param: userid    user
+#         :param: file      input file name
+#         :param: mediapath media file store path
+#         """
+#         
+#         self.dataservice.ds_aqcuire_lock("batch_id")
+# 
+#         batch = self.new_batch()
+# 
+#         batch.user = userid
+#         batch.file = file.replace("_clean.", ".")
+#         batch.mediapath = mediapath
+# 
+#         self.batch = batch
+# 
+#         return {"batch": batch, "status": Status.OK}
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id. """
@@ -640,17 +640,24 @@ class BatchUpdater(DataService):
             )
             return {"status": Status.ERROR, "statustext": statustext}
 
-    def change_state(self, batch, user, b_status):
-        """ Mark this data batch status. """
-        res = self.dataservice.ds_batch_set_state(batch, user, b_status)
+    def change_state(self, batch_id, username, b_status):
+        """ Set this data batch status. """
+        res = self.dataservice.ds_batch_set_state(batch_id, username, b_status)
         return res
 
-    def batch_mark_status(self, batch, b_status):
-        """ Mark this data batch status. """
-        res = self.dataservice.ds_batch_set_state(
-            batch.id, batch.user, b_status
-        )
+    def select_auditor(self, batch_id, audit_username):
+        """ Mark auditor for this data batch and set status. """
+
+        res = self.dataservice.ds_batch_set_auditor(batch_id, audit_username, 
+                                                    State.ROOT_AUDIT_REQUESTED)
         return res
+
+# def batch_mark_status(self, batch, b_status): --> change_state
+#     """ Mark this data batch status. """
+#     res = self.dataservice.ds_batch_set_state(
+#         batch.id, batch.user, b_status
+#     )
+#     return res
 
     def commit(self):
         """ Commit transaction. """

@@ -176,20 +176,27 @@ class Neo4jUpdateService(ConcreteService):
 
 
     def ds_batch_set_state(self, batch_id, user, status):
-        """Updates Batch node selected by Batch id ans user.
-
-        Not! Batch.timestamp is updated in the Cypher clause.
+        """Updates Batch node selected by Batch id and user.
         """
-        try:
-            result = self.tx.run(
-                CypherRoot.batch_set_status, bid=batch_id, user=user, status=status
-            )
-            uniq_id = result.single()[0]
-            return {"status": Status.OK, "identity": uniq_id}
+        result = self.tx.run(
+            CypherRoot.batch_set_state, bid=batch_id, user=user, status=status
+        )
+        uniq_id = result.single()[0]
+        return {"status": Status.OK, "identity": uniq_id}
 
-        except Exception as e:
-            statustext = f"Neo4jUpdateService.ds_batch_set_state failed: {e.__class__.__name__} {e}"
-            return {"status": Status.ERROR, "statustext": statustext}
+        # except Exception as e:
+        #     statustext = f"Neo4jUpdateService.ds_batch_set_state failed: {e.__class__.__name__} {e}"
+        #     return {"status": Status.ERROR, "statustext": statustext}
+
+
+    def ds_batch_set_auditor(self, batch_id, user, status):
+        """Updates Batch node selected by Batch id and user.
+        """
+        result = self.tx.run(
+            CypherRoot.batch_set_auditor, bid=batch_id, audi=user, status=status
+        )
+        uniq_id = result.single()[0]
+        return {"status": Status.OK, "identity": uniq_id}
 
     # ----- Common objects -----
 
