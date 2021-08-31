@@ -17,7 +17,6 @@ h2 {margin-bottom: 0;}
 td {
     position: relative;
 }
-.xfileselect > tbody > tr > td:nth-child(1) {text-align: center;}
 #upload_xml div {display: inline;}
 form div {margin:.25em;}
 .progress {
@@ -27,23 +26,24 @@ form div {margin:.25em;}
 	left: 0;
 	z-index: -1;
 }
-.button_group {
-    display: inline-block;
-    width: 10em;
+li > button {
+  background: none!important;
+  border: none;
+  padding: 0!important;
+  /*optional*/
+  font-family: verdana, sans-serif;
+  /*color: #069;*/
+  cursor: pointer;
 }
-.op_box {
-	border: solid silver 1px;
-	border-radius: 1em;
-	min-width: 35em;
-	max-width: max-content;
-	padding: .5em;
-	margin-left: 2em;
-	background-color: WhiteSmoke; 
+li > button:hover, .a:hover, .a1:hover {
+  text-decoration: underline;
 }
-.load_box {
-	max-width: max-content;
+li > button, a, a1 {
+  text-decoration: none;
+  color: #0306c1;
 }
-
+.visible { display: inline; }
+.hidden { display:none; }
 </style>
 
 <script>
@@ -105,15 +105,6 @@ function confirm_delete(subj, name) {
 
 <script src="/static/js/hyperscript.org@0.8.1.js"></script>
 
-<style>
-.visible {
-	display: inline;
-}
-.hidden {
-	display:none;
-}
-</style>
-
 {{ hamburger_menu( (
    ) ) }}
 
@@ -126,7 +117,7 @@ function confirm_delete(subj, name) {
 	<table class="fileselect">
 	{% if uploads %}
         	<tr> 
-                <th>{{ _("Batch id") }}</th>
+                <th>{{ _("Batch operations") }}</th>
                 <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Person count") }}</th>
                 <th>{{ _("Status") }} {{ state_info() }} </th>
@@ -142,16 +133,13 @@ function confirm_delete(subj, name) {
                 		then show #b-{{loop.index}} 
                 		then show .a 
                 		then hide me">
-            		{{upload.batch_id}}
+            		▸ {{upload.batch_id}}
             	</a>
-				
             	<span class="b hidden" id="b-{{loop.index}}">
-                	<a href="#" 
-                		_="on click hide .b then show .a">
+                	▾ <a href="#" class="a1" _="on click hide .b then show .a">
                 		{{upload.batch_id}}
                 	</a>
-                	<br>
-            		<span class="cmd" id="commands-{{loop.index}}"></span>
+            		<div class="cmd" id="commands-{{loop.index}}"></div>
 				</span>
 				
                 <div class="progress" data-name='{{upload.batch_id}}'></div>
