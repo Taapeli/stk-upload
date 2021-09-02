@@ -56,7 +56,10 @@
 	           	   {{upload.state|transl('state')}} 
 	      {% endif %}
 			{% if upload.auditors %}
-                    <br><i>{{ _("Auditor") }}: {{ ', '.join(upload.auditors) }}</i>
+                    <br><i>{{ _("Auditor") }}:
+            	{% for auditor, ts, ts_str in upload.auditors %}
+            			<span title="{{ _('Audit start date') }}">{{auditor}}&nbsp;{{ts_str}}</span>
+            	{% endfor %}</i>
 			{% endif %}
 	           </td>
 	           

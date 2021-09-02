@@ -44,7 +44,7 @@ from flask_babelex import _
 
 import shareds
 from bl.root import Root, State
-from bl.base import Status, IsotammiException
+from bl.base import IsotammiException, NodeObject
 from models import email, util, syslog
 from bl.gramps import gramps_loader
 from pe.neo4j.cypher.cy_batch_audit import CypherRoot
@@ -266,7 +266,7 @@ class Upload:
     material_type: str
     description: str
     user: str
-    auditors: List[str]
+    auditors: List[List]    # [[username, timestamp, timestamp_str]...]
     count: int
     is_candidate: int  # for Javascript: 0=false, 1=true
 
@@ -277,8 +277,23 @@ class Upload:
         if self.count:
             s += f", counts {self.count}"
         if self.auditors:
-            s += f", auditors: {self.auditors}"
+            s += f", auditors: {[a[0] for a in self.auditors]}"
         return f"{self.material_type}/{self.state}, {s}" #, found {has_file}, {has_log}"
+
+
+    # def auditors_str(self) -> str:
+    #     """ Show auditor ids and times.
+    #
+    #         Use with Jinja: {{ upload.auditors_str() | safe }}
+    #     """
+    #     lst = []
+    #     for auditor, atime in self.auditors:
+    #         if auditor:
+    #             if atime is None:
+    #                 lst.append(auditor)
+    #             else:
+    #                 lst.append(f"{NodeObject.timestamp_str(atime,'d')}/{auditor}")
+    #     return ", ".join(lst)
 
 def list_uploads(username:str) -> List[Upload]:
     """ Gets a list of uploaded batches
@@ -286,11 +301,18 @@ def list_uploads(username:str) -> List[Upload]:
 
     # 1. List Batches from db, their status and Person count
     result = shareds.driver.session().run(
-        CypherRoot.get_user_root_summary, user=username
+        CypherRoot.get_user_roots_summary, user=username
     )
 
     uploads = []
     for record in result:
+        # <Record 
+        #    root=<Node id=34475 labels=frozenset({'Root'})
+        #        properties={'material': 'Family Tree', 'state': 'Auditing', 
+        #            'id': '2021-05-07.001', 'user': 'jpek', 
+        #            'timestamp': 1620403991562, ...}> 
+        #    person_count=64 auditors=[["juha",1630474129763]]
+        # >
         node = record["root"]
         b: Root = Root.from_node(node)
 
@@ -300,13 +322,21 @@ def list_uploads(username:str) -> List[Upload]:
             state = State.FILE_LOAD_FAILED
         else:
             state = b.state
+        audi_rec = record['auditors']
+        auditors = []
+        for au_user, ts in audi_rec:
+            # ["juha",1630474129763]
+            if au_user:
+                ts_str = NodeObject.timestamp_str(ts, "d")
+                # ["juha",1630474129763,"1.9.2021"]
+                auditors.append((au_user, ts, ts_str))
 
         upload = Upload(
             batch_id=b.id,
             xmlname=os.path.split(b.file)[1] if b.file else "",
             count=record["person_count"],
             user=b.user,
-            auditors=record['auditors'],
+            auditors=auditors,
             state=state,
             status=_(state),
             is_candidate=1 if (b.state == State.ROOT_CANDIDATE) else 0,
@@ -318,7 +348,8 @@ def list_uploads(username:str) -> List[Upload]:
 
     return sorted(uploads, key=lambda upload: upload.batch_id)
 
-def list_uploads_all(users):
+def list_uploads_all(users) -> List[Upload]:
+    """ Get named setups.User objects. """
     for user in users:
         for upload in list_uploads(user.username):
             yield upload

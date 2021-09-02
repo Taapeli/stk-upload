@@ -121,11 +121,23 @@ class NodeObject:
         uuid = self.uuid if self.uuid else "-"
         return f'(NodeObject {uuid}/{self.uniq_id}/{self.id} date {self.dates})"'
 
-    def timestamp_str(self):
+    def my_timestamp_str(self):
         """ My timestamp to display format. """
         if hasattr(self, "timestamp") and self.timestamp:
             t = float(self.timestamp) / 1000.0
             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+        else:
+            return ""
+
+    @staticmethod
+    def timestamp_str(timestamp, opt="m"):
+        """ Converts a Neo4j timestamp to display format (by 'm' minute or 'd' day). """
+        if timestamp:
+            t = float(timestamp) / 1000.0
+            if opt == "d":
+                return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y")
+            else:
+                return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
         else:
             return ""
 

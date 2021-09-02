@@ -174,9 +174,12 @@ function confirm_delete(subj, name) {
             <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
             </td>
             <td>{{upload.status}}
-		{% if upload.auditors %}
-                <br><i>{{ _("Auditor") }}: {{ ', '.join(upload.auditors) }}</i>
-		{% endif %}
+			{% if upload.auditors %}
+                    <br><i>{{ _("Auditor") }}:
+            	{% for auditor, ts, ts_str in upload.auditors %}
+            			<span title="{{ _('Audit start date') }}">{{auditor}}&nbsp;{{ts_str}}</span>
+            	{% endfor %}</i>
+			{% endif %}
             </td>
         </tr>
 	{% endfor %}
