@@ -39,17 +39,23 @@
             </table>
             <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
 {% if root.auditors %}
-            <p style="color:red">{{ _("Auditor") }}: <b>{{ ', '.join(root.auditors) }}</b></p>
+            <p style="color:red;">{{ _("Auditor") }}: <b>{{ ', '.join(root.auditors) }}</b></p>
 {% endif %}
 {% if total %}
             <form action="/audit/selected" method="post">
+                <input type="hidden" value="{{root.id}}" name="batch">
+                <input type="hidden" value="{{user}}" name="user">
 	            <div class="submit">
-	               <a href="/audit/list_uploads"><button>{{ _('Go back') }}</button></a> &nbsp;
-                   <input type="hidden" value="{{root.id}}" name="batch">
-                   <input type="hidden" value="{{user}}" name="user">
-                   <input type="submit" value="{{ _('Leave auditing') }}" name="remove"
-                   		  disabled="{{ current_user.username in root.auditors }}" /> &nbsp;
-                   <input type="submit" value="{{ _('Select for auditing') }}" name="pick" />
+	            	{{root.state}} {{user}}/{{current_user.username}}
+	            	{{is_auditor}},{{has_audit_request}}
+                   <input type="submit" value="{{ _('Cancel') }}" name="cancel" /> 
+                   <span style="font-size:large; color:gray;"> | </span>
+                   <input type="submit" value="{{ _('Start auditing') }}" name="start"
+	{% if not has_audit_request %} disabled {% endif %} />
+                   <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
+	{% if not is_auditor %} disabled {% endif %} />
+                   <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
+	{% if not is_auditor %} disabled {% endif %} />
 	            </div>
             </form>
 {% else %}

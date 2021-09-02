@@ -645,10 +645,10 @@ class BatchUpdater(DataService):
         res = self.dataservice.ds_batch_set_state(batch_id, username, b_status)
         return res
 
-    def select_auditor(self, batch_id, audit_username):
+    def select_auditor(self, batch_id, auditor_username):
         """ Mark auditor for this data batch and set status. """
 
-        res = self.dataservice.ds_batch_set_auditor(batch_id, audit_username, 
+        res = self.dataservice.ds_batch_set_auditor(batch_id, auditor_username, 
                                                     State.ROOT_AUDIT_REQUESTED)
         return res
 

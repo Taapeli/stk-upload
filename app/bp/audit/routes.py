@@ -67,12 +67,20 @@ def audit_home():
 
 # --------------------- Move User Batch to Approved data ----------------------------
 # Steps:
-#    1. User: /gramps/uploads                                      (gramps/uploads.html)
-#    2. User: "Send for auditing" -> /audit/requested/<batch_id>   ()
-#    
-#    3. Auditor: /audit/list_uploads
-#    4. Auditor: "Pick for me to audit" -> /audit/pick/<batch_id>  (pick_auditing.html)
-#    5. Auditor: "Start"            -> /audit/selected             ()
+#    1.  User: /gramps/uploads                                      (gramps/uploads.html)
+#    2.  User: "Send for auditing" -> /audit/requested/<batch_id>   ()
+#        - "request"   Candidate -> Audit request
+#    2.1 User: "Withdraw from audition queue" -> TODO
+#        - "revert"    Candidate <- Audit request
+#
+#    3. Auditor:                           /audit/list_uploads
+#    4. Auditor: "Pick audit operation" -> /audit/pick/<batch_id>   (pick_auditing.html)
+#    5. Auditor: "Start auditing"       -> /audit/selected "start",batch_id  -> list_uploads
+#       - "start"     Audit request -> Auditing
+#    6. Auditor: "Accept auditing"      -> /audit/selected "accept",batch_id -> list_uploads
+#       - "accept"    Auditing -> Accepted
+#    7. Auditor: "Reject auditing"      -> /audit/selected "reject",batch_id -> list_uploads
+#       - "reject"    Auditing -> Rejected
 # ------------------------------------------------------------------------------
 
 @bp.route("/audit/requested/<batch_id>", methods=["GET"])
@@ -91,50 +99,53 @@ def audit_requested(batch_id=None):
         res = batch_service.change_state(batch_id, 
                                          userid, 
                                          State.ROOT_AUDIT_REQUESTED)
-        if Status.has_failed(res):
-            msg = "Audit request failed"
-            flash(_(msg), "error")
-        else:
-            msg = "Audit request done"
-            flash(_(msg))
+    if Status.has_failed(res):
+        msg = "Audit request failed"
+        flash(_(msg), "error")
+    else:
+        msg = "Audit request done"
+        flash(_(msg))
 
     print(f"bp.audit.routes.audit_requested: {res.status} for node {res.get('identity')}")
     syslog.log(type="Audit request", batch=batch_id, by=userid, msg=msg)
-    return redirect(url_for("gramps.list_uploads", batch_name=batch_id))
+    return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
 
 @bp.route("/audit/list_uploads", methods=["GET"])
+@bp.route("/audit/list_uploads/<batch_id>", methods=["GET"])
 @login_required
 @roles_accepted("audit")
-def list_uploads():
+def list_uploads(batch_id=None):
     """ 3. List Batches
 
         The list of Gramps uploads is filtered by an existing Batch node
     """
+    #batch_id = request.args.get("batch_id")
     users = shareds.user_datastore.get_users()
     upload_list = list(uploads.list_uploads_all(users))
     logger.info(f"-> bp.audit.routes.list_uploads n={len(upload_list)}")
-    return render_template("/audit/batches.html", uploads=upload_list)
+    return render_template("/audit/batches.html", uploads=upload_list, batch_id=batch_id)
 
 
 @bp.route("/audit/pick/<batch_id>", methods=["GET"])
 @login_required
 @roles_accepted("audit")
-def audit_pick(batch_id):
-    """ 4. Confirm Batch move to common approved Isotammi database.
+def audit_pick(batch_id=None):
+    """ 4. Pick Batch auditor operation.
     """
     username, root, labels = Root.get_batch_stats(batch_id)
     total = 0
     for _label, cnt in labels:
         total += cnt
     time = root.timestamp_str()
+    has_audit_request = (root.state == State.ROOT_AUDIT_REQUESTED)
+    is_auditor = (current_user.username in root.auditors)
+    print(f"bp.audit.routes.audit_pick: {root}, auditors={root.auditors}, user={current_user.username}")
 
-    return render_template(
-        "/audit/pick_auditing.html",
-        user=username,
-        root=root,
-        label_nodes=labels,
-        total=total,
+    return render_template("/audit/pick_auditing.html",
+        user=username, root=root,
+        is_auditor=is_auditor, has_audit_request=has_audit_request,
+        label_nodes=labels, total=total,
         time=time,
     )
 
@@ -142,58 +153,61 @@ def audit_pick(batch_id):
 @bp.route("/audit/selected", methods=["POST"])
 @login_required
 @roles_accepted("audit")
-def audit_selected():
-    """ 5. Pick selected Batch for Auditor.
+def audit_selected_op():
+    """ 5. Select Auditor operation for Batch.
+    Auditor operations:
+        5. - "start"     Audit request -> Auditing
+        6. - "accept"    Auditing -> Accepted
+        7. - "reject"    Auditing -> Rejected
+        x. - "cancel"
     """
+    auditor = current_user.username
     user_id = request.form["user"]
     batch_id = request.form["batch"]
-    do_pick = request.form.get("pick") is not None
-    do_remove = request.form.get("remove") is not None
-    auditor = current_user.username
-    opmsg = "Remove" if do_remove else "Pick"
-    logger.info(f"--> bp.audit.routes.audit_selected u={user_id} b={batch_id} {opmsg}")
-    with BatchUpdater("update") as batch_service:
-        if do_remove:
-            #TODO remove
-            # res = batch_service.change_state(batch_id, 
-            #                                  user_id, 
-            #                                  State.ROOT_AUDIT_REQUESTED)
-            # if Status.has_failed(res):
-            #     msg = "Audit request failed"
-            #     flash(_(msg), "error")
-            # else:
-            #     msg = "Audit request done"
-            # flash(_(msg))
-            msg = _("TODO You have been removed from auditors for batch ") + batch_id
-        elif do_pick:
-            res = batch_service.select_auditor(batch_id, auditor)
-            if Status.has_failed(res):
-                msg = "Audit request failed"
-                flash(_(msg), "error")
-            else:
-                msg = "Audit request done"
-            #TODO select auditor
-            msg = _("You have been selected as auditor for batch ") + batch_id
-        else:
-            return redirect(url_for("audit.list_uploads", batch_name=batch_id))
+    operation = "cancel"
+    #request.form["oper"]
+    if request.form.get("start"):
+        operation = "start"
+    elif request.form.get("accept"):
+        operation = "accept"
+    elif request.form.get("reject"):
+        operation = "reject"
+    logger.info(f"--> bp.audit.routes.audit_selected u={user_id} b={batch_id} {operation}")
 
-    # try:
-    #     merger = BatchMerger()
-    #     res = merger.obsolete_move_whole_batch(batch_id, owner, auditor)
-    #     if res:
-    #         msg = "Transfer succeeded"
-    #         flash(_(msg))
-    #     else:
-    #         msg = "Transfer failed"
-    #         flash(_(msg), "error")
-    # except Exception as e:
-    #     traceback.print_exc()
-    #     msg = f"BatchMerger.obsolete_move_whole_batch FAILED: {e}"
-    #     flash(msg, "error")
-    #     logger.error(f"{msg} {e.__class__.__name__} {e}")
+    with BatchUpdater("update") as batch_service:
+
+        if operation == "start":
+            # 5. Move from "Audit Requested" to "Auditing" state to "Accepted"
+            res = batch_service.select_auditor(batch_id, auditor)
+
+        elif operation == "accept":
+            # 6. Move from "Auditing" to "Accepted" state
+            res = batch_service.change_state(batch_id, 
+                                             user_id, 
+                                             State.ROOT_ACCEPTED)
+            msg = "TODO Accept audit batch"
+
+        elif operation == "reject":
+            # 7. Move from "Auditing" to "Rejected" state
+            res = batch_service.change_state(batch_id, 
+                                             user_id, 
+                                             State.ROOT_REJECTED)
+            msg = _("You have rejected then batch ") + batch_id
+
+        else:
+            return redirect(url_for("audit.list_uploads", batch_id=batch_id))
+
+    if Status.has_failed(res):
+        msg = f"Audit request {operation} failed"
+        flash(_(msg), "error")
+    else:
+        msg = _("You have been selected as auditor for batch ") + batch_id
+        syslog.log(type="Audit state change", 
+                   batch=batch_id, by=user_id, msg=msg)
+    #msg = _("You have been selected as auditor for batch ") + batch_id
+
     flash(f"{msg}")
-    syslog.log(type="batch to Common data", batch=batch_id, by=user_id, msg=msg)
-    return redirect(url_for("audit.list_uploads", batch_name=batch_id))
+    return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 
 # --------------------- Delete an approved data batch ----------------------------

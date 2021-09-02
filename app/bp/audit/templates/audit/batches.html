@@ -23,7 +23,9 @@
            </tr>
     {% for upload in uploads %}
 	   {% if upload.batch_id and current_user.has_role('audit') %}
-	       <tr>
+	       <tr
+	      {% if batch_id == upload.batch_id %}style="background: bisque;"{% endif %}
+	       >
 		  {% if not user %}
              {% if current_user.username == upload.user %}
                <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>
@@ -47,16 +49,20 @@
                     </i>
 			{% endif %}
 			   </td>
-	           <td>{{upload.state|transl('state')}}
+	           <td>
+	      {% if upload.state.startswith("Audi") %}
+	           	   <b>{{upload.state|transl('state')}}</b>
+	      {% else %}
+	           	   {{upload.state|transl('state')}} 
+	      {% endif %}
 			{% if upload.auditors %}
                     <br><i>{{ _("Auditor") }}: {{ ', '.join(upload.auditors) }}</i>
 			{% endif %}
 	           </td>
 	           
-	           <td>
-	           	   {{upload.batch_id}} 
+	           <td>{{upload.batch_id}}
 	      {% if upload.count %}
-	           	   ({{upload.count}} {{ _("persons") }})
+	           	   ({{upload.count}}&nbsp;{{ _("persons") }})
 	      {% endif %}
 	        </td>
 
@@ -72,10 +78,10 @@
 	            ▸ <a href="/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}">
 	           			{{ _("Show log") }}</a>
 	        {% endif -%}
-	        {% if upload.state == "Audit Requested" %}
+	        {% if upload.state == "Audit Requested" or  upload.state == "Auditing"%}
 		        {% if upload.xmlname %}<br>{% endif -%}
 	           	▸ <a href="/audit/pick/{{upload.batch_id}}">
-                       {{ _("Pick for me to audit") }}</a>
+                     {{ _("Pick audit operation") }}</a>
             {% endif -%}
 	           	</td>
 	       </tr>
