@@ -343,7 +343,7 @@ class Root(NodeObject):
             cnt = record["cnt"]
 
             batch_id = b.id
-            tstring = b.timestamp_str()
+            tstring = b.my_timestamp_str()
 
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -366,7 +366,7 @@ class Root(NodeObject):
 
     @staticmethod
     def get_batch_stats(batch_id):
-        """Get statistics of given Batch contents (for move for approval)."""
+        """Get statistics of given Batch contents (for bp.audit.routes.audit_pick)."""
         labels = []
         result = shareds.driver.session().run(
             CypherRoot.get_single_batch, batch=batch_id
@@ -385,13 +385,16 @@ class Root(NodeObject):
             #            'user': 'aku', 'timestamp': 1622140130273}>
             #    label='Person'
             #    cnt=6
-            #    auditors=['juha']
+            #    auditors=['juha',0]
             # >
 
             user = record['profile']['username']
             node = record["root"]
             b = Root.from_node(node)
-            b.auditors = record["auditors"]
+            b.auditors = []
+            for au_user, _ts in record["auditors"]:
+                if au_user:
+                    b.auditors.append([au_user,None,""])
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -463,7 +466,7 @@ class Root(NodeObject):
             if not label:
                 label = ""
             cnt = record["cnt"]
-            timestring = b.timestamp_str()
+            timestring = b.my_timestamp_str()
             file = b.file.rsplit('/',1)[-1] if b.file else ""
 
             # Trick: Set Person as first in sort order!
@@ -483,6 +486,7 @@ class Root(NodeObject):
     @staticmethod
     def get_stats(audit_id):
         """Get statistics of given Batch contents."""
+        #TODO Get DOES_AUDIT timestamp
         labels = []
         batch = None
         result = shareds.driver.session().run(
@@ -627,7 +631,7 @@ class BatchUpdater(DataService):
 #         return {"batch": batch, "status": Status.OK}
 
     def batch_get_one(self, user, batch_id):
-        """Get Root object by username and batch id. """
+        """Get Root object by username and batch id (in BatchUpdater). """
         ret = self.dataservice.ds_get_batch(user, batch_id)
         # returns {"status":Status.OK, "node":record}
         try:
@@ -720,7 +724,7 @@ class BatchReader(DataServiceBase):
         self.dataservice = service_class(shareds.driver)
 
     def batch_get_one(self, user, batch_id):
-        """Get Root object by username and batch id. """
+        """Get Root object by username and batch id (in BatchReader). """
         ret = self.dataservice.ds_get_batch(user, batch_id)
         # returns {"status":Status.OK, "node":record}
         try:

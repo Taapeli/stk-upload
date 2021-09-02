@@ -116,15 +116,14 @@ def audit_requested(batch_id=None):
 @login_required
 @roles_accepted("audit")
 def list_uploads(batch_id=None):
-    """ 3. List Batches
+    """ 3. List Batches.
 
-        The list of Gramps uploads is filtered by an existing Batch node
+        In the list of Gramps batches the row of batch_id is highlighted.
     """
-    #batch_id = request.args.get("batch_id")
     users = shareds.user_datastore.get_users()
-    upload_list = list(uploads.list_uploads_all(users))
-    logger.info(f"-> bp.audit.routes.list_uploads n={len(upload_list)}")
-    return render_template("/audit/batches.html", uploads=upload_list, batch_id=batch_id)
+    root_list = list(uploads.list_uploads_all(users))
+    logger.info(f"-> bp.audit.routes.list_uploads n={len(root_list)}")
+    return render_template("/audit/batches.html", uploads=root_list, batch_id=batch_id)
 
 
 @bp.route("/audit/pick/<batch_id>", methods=["GET"])
@@ -137,15 +136,18 @@ def audit_pick(batch_id=None):
     total = 0
     for _label, cnt in labels:
         total += cnt
-    time = root.timestamp_str()
+    time = root.my_timestamp_str()
     has_audit_request = (root.state == State.ROOT_AUDIT_REQUESTED)
-    is_auditor = (current_user.username in root.auditors)
-    print(f"bp.audit.routes.audit_pick: {root}, auditors={root.auditors}, user={current_user.username}")
+    auditor_names = [a[0] for a in root.auditors]
+    is_auditor = (current_user.username in auditor_names)
+    print(f"bp.audit.routes.audit_pick: {root}, auditors={','.join(auditor_names)}, user={current_user.username}")
 
     return render_template("/audit/pick_auditing.html",
         user=username, root=root,
-        is_auditor=is_auditor, has_audit_request=has_audit_request,
-        label_nodes=labels, total=total,
+        is_auditor=is_auditor,
+        has_audit_request=has_audit_request,
+        label_nodes=labels, 
+        total=total,
         time=time,
     )
 

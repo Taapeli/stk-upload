@@ -108,13 +108,16 @@ optional match (b) --> (x)
 return b as batch, count(x) as cnt 
     order by batch.id'''
 
-#-bl.root.Root.get_batch_stats, pe.neo4j.updateservice.Neo4jUpdateService.ds_get_batch
+#-bl.root.Root.get_batch_stats
+#-bl.root.Root.list_empty_batches.Upload.get_stats
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_get_batch
+#TODO: Get DOES_AUDIT timestamp, too
     get_single_batch = '''
 match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch}) 
 optional match (b) --> (x)
 optional match (ap:UserProfile) -[:DOES_AUDIT]-> (b)
 return up as profile, b as root, labels(x)[0] as label, 
-    count(x) as cnt, collect(ap.username) as auditors'''
+    count(x) as cnt, collect([ap.username,0]) as auditors'''
 
 #     get_user_batch_names = '''
 # match (b:Root) where b.user = $user
@@ -124,16 +127,16 @@ return up as profile, b as root, labels(x)[0] as label,
 #     order by batch'''
 
 #-bp.admin.uploads.list_uploads
-    get_user_root_summary = """
+    get_user_roots_summary = """
 match (u:UserProfile) --> (b:Root) where u.username = $user
-optional match (a:UserProfile) -[ar:DOES_AUDIT]-> (b)
+optional match (audi:UserProfile) -[ar:DOES_AUDIT]-> (b)
 optional match (b) -[r:OBJ_PERSON]-> (:Person)
 with b, count(r) as person_count, 
-    a.username as auditor
-    optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
+    audi.username as auditor, ar.timestamp as atime
+//optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
 return 
     b as root, person_count,
-    collect(distinct auditor) as auditors
+    collect(distinct [auditor,atime]) as auditors
 order by root.id"""
 
 #     get_user_batch_summary = """
