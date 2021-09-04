@@ -130,13 +130,18 @@ def list_uploads(batch_id=None):
 @login_required
 @roles_accepted("audit")
 def audit_pick(batch_id=None):
-    """ 4. Pick Batch auditor operation.
+    """ 4. Pick Batch for selecting auditor operation.
     """
     username, root, labels = Root.get_batch_stats(batch_id)
+    
+    if not root:
+        flash(_("No such batch ") + str(batch_id), "error")
+        return redirect(url_for("audit.list_uploads", batch_id=batch_id))
+
     total = 0
     for _label, cnt in labels:
         total += cnt
-    time = root.my_timestamp_str()
+    timestamp = root.timestamp_str()
     has_audit_request = (root.state == State.ROOT_AUDIT_REQUESTED)
     auditor_names = [a[0] for a in root.auditors]
     is_auditor = (current_user.username in auditor_names)
@@ -148,7 +153,7 @@ def audit_pick(batch_id=None):
         has_audit_request=has_audit_request,
         label_nodes=labels, 
         total=total,
-        time=time,
+        time=timestamp,
     )
 
 
@@ -187,14 +192,14 @@ def audit_selected_op():
             res = batch_service.change_state(batch_id, 
                                              user_id, 
                                              State.ROOT_ACCEPTED)
-            msg = "TODO Accept audit batch"
+            msg = _("Audit batch accepted: ") + batch_id
 
         elif operation == "reject":
             # 7. Move from "Auditing" to "Rejected" state
             res = batch_service.change_state(batch_id, 
                                              user_id, 
                                              State.ROOT_REJECTED)
-            msg = _("You have rejected then batch ") + batch_id
+            msg = _("You have rejected the batch ") + batch_id
 
         else:
             return redirect(url_for("audit.list_uploads", batch_id=batch_id))
@@ -202,13 +207,11 @@ def audit_selected_op():
     if Status.has_failed(res):
         msg = f"Audit request {operation} failed"
         flash(_(msg), "error")
-    else:
-        msg = _("You have been selected as auditor for batch ") + batch_id
         syslog.log(type="Audit state change", 
                    batch=batch_id, by=user_id, msg=msg)
-    #msg = _("You have been selected as auditor for batch ") + batch_id
+    else:
+        flash(_("{msg}"))
 
-    flash(f"{msg}")
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 

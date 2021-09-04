@@ -115,9 +115,9 @@ return b as batch, count(x) as cnt
     get_single_batch = '''
 match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch}) 
 optional match (b) --> (x)
-optional match (ap:UserProfile) -[:DOES_AUDIT]-> (b)
+optional match (ap:UserProfile) -[ar:DOES_AUDIT]-> (b)
 return up as profile, b as root, labels(x)[0] as label, 
-    count(x) as cnt, collect(distinct [ap.username,0]) as auditors'''
+    count(x) as cnt, collect(distinct [ap.username,ar.timestamp]) as auditors'''
 
 #     get_user_batch_names = '''
 # match (b:Root) where b.user = $user

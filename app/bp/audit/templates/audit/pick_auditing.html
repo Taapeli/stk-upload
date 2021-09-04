@@ -1,6 +1,6 @@
 {# _audit/move_in_1.html_ #}
 {% extends "audit/layout.html" %}
-{% block title %}{{ _("Material for Isotammi database") }} 1/2{% endblock %}
+{% block title %}{{ _("Select auditiong operation") }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
@@ -9,20 +9,20 @@
 
 <div id="startdiv">
     <div>
-        <h1>{{ _("Pick for me to audit") }}</h1>
+        <h1>{{ _("Pick auditing operation") }}</h1>
 
 {% include "flash_messages.html" %}
 
         <div style="width: min-content;">
-            <h2>{{ _('Selected Batch') }} {{root.id}}</h2>
-            <p>{{root.state|transl('state')}}:
-               {{root.material|transl('material')}}
-        {% if root.description %}
-               <i>{{root.description}}</i>
-		{% endif %}
+            <h2>{{ _('Selected Batch') }} {{root.id}} 
+            	{{ _('in the phase of')}} <i>{{ root.state|transl('state')|lower }}</i></h2>
+            <p>{{root.material|transl('material')}}
+        {% if root.description %}{{ _('with title') }} <i>{{root.description}}</i>{% endif %}
+		{% if not total %}<br> – {{ _('There is no data in this batch') }}.{% endif %}
+
             </p>
 
-			<table>
+			<table style="min-width: 30em;">
 				<tr>
 					<th>{{ _('Batch id') }}</th>
         {% for label, cnt in label_nodes %}
@@ -40,11 +40,13 @@
             <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
 
 {% if root.auditors %}
-            <p>
+            <ul>
 	{% for auditor, ts, ts_str in root.auditors %}
-         		{{ _("Current auditors") }}: <span title="{{ _('Audit start date') }}">{{auditor}} {{ts_str}}</span></br>
+         		<li>{{ _("Current auditors") }}: 
+         			<span title="{{ _('Audit start date') }}">{{auditor}} {{ts_str}}</span>
+				</li>
     {% endfor %}
-         	</p>
+         	</ul>
 {% endif %}
 
 {% if total %}
@@ -64,12 +66,13 @@
 	            </div>
             </form>
 {% else %}
-            <p>{{ _('– There is no data in this batch') }}.</p>        
             <form action="/audit/selected" method="post">
                 <input type="hidden" value="{{root.id}}" name="batch">
                 <input type="hidden" value="{{user}}" name="user">
 	            <div class="submit">
                    <input type="submit" value="{{ _('Cancel') }}" name="cancel" /> 
+                   <span style="font-size:large; color:gray;"> | </span>
+                   <input type="submit" value="{{ _('Reject auditing') }}" name="reject"/>
 	            </div>
             </form>
 {% endif %}

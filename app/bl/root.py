@@ -34,7 +34,7 @@ from typing import Any, Optional
 from flask_babelex import _
 
 import shareds
-from models.util import format_timestamp
+from models.util import format_ms_timestamp
 
 from bl.admin.models.cypher_adm import Cypher_adm
 
@@ -204,8 +204,8 @@ class Root(NodeObject):
         obj.state = node.get("state", "")
         obj.mediapath = node.get("mediapath")
         obj.timestamp = node.get("timestamp", 0)
-        obj.upload = format_timestamp(obj.timestamp)
-        obj.auditor = node.get("auditor", None)
+        obj.upload = format_ms_timestamp(obj.timestamp)
+        #obj.auditor = node.get("auditor", None)
         obj.material = node.get("material", DEFAULT_MATERIAL)
         obj.description = node.get("description", "")
         obj.xmlname = node.get("xmlname", "")
@@ -343,7 +343,7 @@ class Root(NodeObject):
             cnt = record["cnt"]
 
             batch_id = b.id
-            tstring = b.my_timestamp_str()
+            tstring = b.timestamp_str()
 
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -366,7 +366,8 @@ class Root(NodeObject):
 
     @staticmethod
     def get_batch_stats(batch_id):
-        """Get statistics of given Batch contents (for bp.audit.routes.audit_pick)."""
+        """Get statistics of given Batch contents (for bp.audit.routes.audit_pick).
+        """
         labels = []
         result = shareds.driver.session().run(
             CypherRoot.get_single_batch, batch=batch_id
@@ -392,9 +393,9 @@ class Root(NodeObject):
             node = record["root"]
             b = Root.from_node(node)
             b.auditors = []
-            for au_user, _ts in record["auditors"]:
+            for au_user, ms in record["auditors"]:
                 if au_user:
-                    b.auditors.append([au_user,None,""])
+                    b.auditors.append([au_user, ms, format_ms_timestamp(ms,'d')])
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -402,7 +403,9 @@ class Root(NodeObject):
             cnt = record["cnt"]
             labels.append((label, cnt))
 
-        return  user, b, sorted(labels)
+            return user, b, sorted(labels)
+
+        return None, None, []
 
     @staticmethod
     def list_empty_batches():
@@ -466,7 +469,7 @@ class Root(NodeObject):
             if not label:
                 label = ""
             cnt = record["cnt"]
-            timestring = b.my_timestamp_str()
+            timestring = b.timestamp_str()
             file = b.file.rsplit('/',1)[-1] if b.file else ""
 
             # Trick: Set Person as first in sort order!

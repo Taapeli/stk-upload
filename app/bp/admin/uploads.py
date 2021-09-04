@@ -30,11 +30,9 @@ import os
 import pprint
 import time
 import threading
-
 import traceback
-
 import logging
-
+from datetime import datetime
 from dataclasses import dataclass
 from typing import List
 
@@ -44,7 +42,7 @@ from flask_babelex import _
 
 import shareds
 from bl.root import Root, State
-from bl.base import IsotammiException, NodeObject
+from bl.base import IsotammiException
 from models import email, util, syslog
 from bl.gramps import gramps_loader
 from pe.neo4j.cypher.cy_batch_audit import CypherRoot
@@ -266,9 +264,24 @@ class Upload:
     material_type: str
     description: str
     user: str
-    auditors: List[List]    # [[username, timestamp, timestamp_str]...]
+    auditors: List[List]    # [[username, timestamp, format_timestamp]...]
     count: int
     is_candidate: int  # for Javascript: 0=false, 1=true
+
+    # @staticmethod
+    # def timestamp_str(timestamp, opt="m"):
+    #     """ Converts a Neo4j timestamp to display format (by 'm' minute or 'd' day).
+    #
+    #         Duplicate to: bl.base.NodeObject.timestamp_str
+    #     """
+    #     if timestamp:
+    #         t = float(timestamp) / 1000.0
+    #         if opt == "d":
+    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y")
+    #         else:
+    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+    #     else:
+    #         return ""
 
     def __str__(self):
         s = f"batch={self.batch_id}" if self.batch_id else "NO BATCH "
@@ -279,21 +292,6 @@ class Upload:
         if self.auditors:
             s += f", auditors: {[a[0] for a in self.auditors]}"
         return f"{self.material_type}/{self.state}, {s}" #, found {has_file}, {has_log}"
-
-
-    # def auditors_str(self) -> str:
-    #     """ Show auditor ids and times.
-    #
-    #         Use with Jinja: {{ upload.auditors_str() | safe }}
-    #     """
-    #     lst = []
-    #     for auditor, atime in self.auditors:
-    #         if auditor:
-    #             if atime is None:
-    #                 lst.append(auditor)
-    #             else:
-    #                 lst.append(f"{NodeObject.timestamp_str(atime,'d')}/{auditor}")
-    #     return ", ".join(lst)
 
 def list_uploads(username:str) -> List[Upload]:
     """ Gets a list of uploaded batches
@@ -327,7 +325,7 @@ def list_uploads(username:str) -> List[Upload]:
         for au_user, ts in audi_rec:
             # ["juha",1630474129763]
             if au_user:
-                ts_str = NodeObject.timestamp_str(ts, "d")
+                ts_str = util.format_ms_timestamp(ts, "d")
                 # ["juha",1630474129763,"1.9.2021"]
                 auditors.append((au_user, ts, ts_str))
 
@@ -350,10 +348,11 @@ def list_uploads(username:str) -> List[Upload]:
 
 def list_uploads_all(users) -> List[Upload]:
     """ Get named setups.User objects. """
+    uploads = []
     for user in users:
         for upload in list_uploads(user.username):
-            yield upload
-
+            uploads.append(upload)
+    return sorted(uploads, key=lambda upload: upload.batch_id)
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.
