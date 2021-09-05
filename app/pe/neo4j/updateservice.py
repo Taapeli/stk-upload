@@ -175,11 +175,11 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK, "identity": uniq_id}
 
 
-    def ds_batch_set_state(self, batch_id, user, status):
+    def ds_batch_set_state(self, batch_id, user, state):
         """Updates Batch node selected by Batch id and user.
         """
         result = self.tx.run(
-            CypherRoot.batch_set_state, bid=batch_id, user=user, status=status
+            CypherRoot.batch_set_state, bid=batch_id, user=user, state=state
         )
         uniq_id = result.single()[0]
         return {"status": Status.OK, "identity": uniq_id}

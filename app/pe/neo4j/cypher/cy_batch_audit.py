@@ -65,7 +65,7 @@ RETURN ID(b) AS id"""
     batch_set_state = """
 MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Root {id: $bid})
-    SET b.state=$status
+    SET b.state=$state
 RETURN ID(b) AS id"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
@@ -79,13 +79,13 @@ RETURN ID(b) AS id"""
 
 #-bl.root.Root.get_filename
     get_filename = """
-MATCH (b:Root {id: $batch_id, user: $username}) 
-RETURN b.filename"""
+MATCH (u:UserProfile{username: $username}) -[:HAS_LOADED]-> (b:Root {id: $batch_id})
+RETURN b.filename, u.username as username"""
 
-# #-bl.root.Root.get_batch
-#     get_batch = """
-# MATCH (b:Root {id: $batch_id, user: $username}) 
-# RETURN b"""
+#-bl.root.Root.get_batch
+    get_batch = """
+MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Root {id:$batch_id})
+RETURN b, u.username as username"""
      
     list_all = """
 MATCH (b:Root) 

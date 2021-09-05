@@ -278,15 +278,17 @@ class Root(NodeObject):
             return None
 
     @staticmethod
-    def get_batch(username, batch_id):
+    def get_batch(username: str, batch_id: str):
         # type: (str, str) -> Optional[Root]
         with shareds.driver.session() as session:
             record = session.run(
                 CypherRoot.get_batch, username=username, batch_id=batch_id
             ).single()
             if record:
-                return Root.from_node(record[0])
-            return None
+                root = Root.from_node(record['b'])
+                root.user = record.get('username')
+                return root
+        return None
 
     @staticmethod
     def get_batches():
@@ -399,7 +401,7 @@ class Root(NodeObject):
             b.auditors = []
             for au_user, ms in record["auditors"]:
                 if au_user:
-                    b.auditors.append([au_user, ms, format_ms_timestamp(ms,'d')])
+                    b.auditors.append([au_user, ms, format_ms_timestamp(ms)])
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -650,9 +652,9 @@ class BatchUpdater(DataService):
             )
             return {"status": Status.ERROR, "statustext": statustext}
 
-    def change_state(self, batch_id, username, b_status):
+    def change_state(self, batch_id, username, b_state):
         """ Set this data batch status. """
-        res = self.dataservice.ds_batch_set_state(batch_id, username, b_status)
+        res = self.dataservice.ds_batch_set_state(batch_id, username, b_state)
         return res
 
     def select_auditor(self, batch_id, auditor_username):

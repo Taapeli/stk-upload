@@ -59,14 +59,14 @@ from bl.gramps import gramps_loader
 from bl.gramps import gramps_utils
 
 
-@bp.route("/gramps")
-@login_required
-@roles_accepted("research", "admin")
-def obsolete_gramps_index():
-    return "Error: bp.gramps.routes.gramps_index is obsolete!"
-    """ Home page gramps input file processing """
-    logger.info("-> bp.start.routes.gramps_index")
-    return render_template("/gramps/obsolete_index_gramps.html")
+# @bp.route("/gramps")
+# @login_required
+# @roles_accepted("research", "admin")
+# def obsolete_gramps_index():
+#     return "Error: bp.gramps.routes.gramps_index is obsolete!"
+#     """ Home page gramps input file processing """
+#     logger.info("-> bp.start.routes.gramps_index")
+#     return render_template("/gramps/obsolete_index_gramps.html")
 
 
 @bp.route("/gramps/show_log/<xmlfile>")
@@ -261,9 +261,7 @@ def batch_download(batch_id):
     if batch:
         xml_folder = os.path.split(batch.file)[0]
         xml_folder = os.path.abspath(xml_folder)
-        return send_from_directory(
-            directory=xml_folder,
-            filename=batch.xmlname,
+        return send_from_directory(xml_folder, batch.xmlname,
             mimetype="application/gzip",
             as_attachment=True,
         )
@@ -280,7 +278,7 @@ def show_upload_log_from_batch_id(batch_id):
     except Exception as e:
         print(f"bp.gramps.routes.show_upload_log_from_batch_id: {e}")
         if not msg:
-            msg = f'{_("The log file does not exist any more.")}'
+            msg = f'{_("The log file does not exist any more.")} {batch_id}'
         flash(msg)
         return redirect(url_for("gramps.list_uploads"))
 
@@ -302,11 +300,17 @@ def batch_delete(batch_id):
         xremove(batch.file + ".meta")  
         xremove(batch.file + ".log")  
         
+    referrer = request.headers.get("Referer")
+
     batch = Root.get_batch(current_user.username, batch_id)
+    if not batch:
+        flash(_("Batch not found"), "error")
+        return redirect(referrer)
+
     fname_parts = batch.file.split("/")  # uploads/<user>/<batch_id>/<file>
     if len(fname_parts) == 4 and fname_parts[2] == batch_id: # "new style" naming
         upload_dir = os.path.split(batch.file)[0]
-        import shutil
+        #import shutil
         #print("shutil.rmtree", upload_dir)
         #shutil.rmtree(upload_dir)
         #os.rename(upload_dir, upload_dir+"-deleted")
@@ -331,7 +335,6 @@ def batch_delete(batch_id):
             ),
             "info",
         )
-    referrer = request.headers.get("Referer")
     return redirect(referrer)
 
 
@@ -350,13 +353,6 @@ def get_progress(batch_id):
             return jsonify(rsp)
  
         batch = res['item']
-
-        
-#         cypher = "match (b:Root{id:$batch_id}) return b"
-#         res = shareds.driver.session().run(cypher, batch_id=batch_id).single()
-#         node = res["b"]
-#         batch = Root.from_node(node)
-
         if not batch.metaname:
             rsp = {
                 "status": 'Failed',
@@ -399,9 +395,10 @@ def get_progress(batch_id):
         done += progress.get("Source_gramps", 0)
         done += progress.get("Repository", 0)
         done += progress.get("refnames", 0)
+#TODO: Why total may be 0? Now indicates it as 50% progress!
         rsp = {
             "status": status,
-            "progress": 99 * done // total,
+            "progress": 99 * done // total if total else 50,
             "batch_id": meta.get("batch_id"),
         }
         return jsonify(rsp)
@@ -410,6 +407,8 @@ def get_progress(batch_id):
 @login_required
 @roles_accepted("research")
 def get_commands(batch_id):
+    """ Available commands for gramps/uploads page.
+    """
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
@@ -420,12 +419,12 @@ def get_commands(batch_id):
         commands = []
         if batch.state == State.ROOT_CANDIDATE:
             commands.append( (
-                f"/audit/requested/{batch_id}", 
+                f"/audit/user/request/{batch_id}", 
                 _("Send for auditing")
             ))
         if batch.state == State.ROOT_AUDIT_REQUESTED:
             commands.append( (
-                f"/audit/revert/{batch_id}", 
+                f"/audit/user/withdraw/{batch_id}", 
                 _("Withdraw auditing")
             ))
         commands.append( (
