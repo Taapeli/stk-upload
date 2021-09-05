@@ -142,16 +142,21 @@ def audit_pick(batch_id=None):
     for _label, cnt in labels:
         total += cnt
     timestamp = root.timestamp_str()
-    has_audit_request = (root.state == State.ROOT_AUDIT_REQUESTED)
     auditor_names = [a[0] for a in root.auditors]
     is_auditor = (current_user.username in auditor_names)
+    can_start = (is_auditor and root.state == State.ROOT_AUDIT_REQUESTED)
+    can_accept = (is_auditor and root.state  == State.ROOT_AUDITING)
+    can_remove = (is_auditor and total == 0 \
+                  and root.state in [State.ROOT_ACCEPTED, State.ROOT_REJECTED])
     print(f"bp.audit.routes.audit_pick: {root}, auditors={','.join(auditor_names)}, user={current_user.username}")
 
     return render_template("/audit/pick_auditing.html",
         user=username, root=root,
         is_auditor=is_auditor,
-        has_audit_request=has_audit_request,
-        label_nodes=labels, 
+        can_start=can_start,
+        can_accept=can_accept,
+        can_remove=can_remove,
+        label_nodes=labels,
         total=total,
         time=timestamp,
     )

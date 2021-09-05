@@ -82,10 +82,10 @@ RETURN ID(b) AS id"""
 MATCH (b:Root {id: $batch_id, user: $username}) 
 RETURN b.filename"""
 
-#-bl.root.Root.get_batch
-    get_batch = """
-MATCH (b:Root {id: $batch_id, user: $username}) 
-RETURN b"""
+# #-bl.root.Root.get_batch
+#     get_batch = """
+# MATCH (b:Root {id: $batch_id, user: $username}) 
+# RETURN b"""
      
     list_all = """
 MATCH (b:Root) 
@@ -111,24 +111,22 @@ return b as batch, count(x) as cnt
 #-bl.root.Root.get_batch_stats
 #-bl.root.Root.list_empty_batches.Upload.get_stats
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_get_batch
-#TODO: Get DOES_AUDIT timestamp, too
     get_single_batch = '''
-match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch}) 
+match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch})
+optional match (acc:UserProfile) -[:HAS_ACCESS]-> (b)
+    where not up.username = acc.username
 optional match (b) --> (x)
 optional match (ap:UserProfile) -[ar:DOES_AUDIT]-> (b)
-return up as profile, b as root, labels(x)[0] as label, 
-    count(x) as cnt, collect(distinct [ap.username,ar.timestamp]) as auditors'''
-
-#     get_user_batch_names = '''
-# match (b:Root) where b.user = $user
-# optional match (b) -[r:OBJ_PERSON]-> (:Person)
-# return b.id as batch, b.timestamp as timestamp, b.status as status,
-#     count(r) as persons 
-#     order by batch'''
+return up as profile, b as root,
+    labels(x)[0] as label, 
+    count(x) as cnt,
+    collect(distinct [ap.username,ar.timestamp]) as auditors,
+    collect(distinct acc.username) as has_access
+'''
 
 #-bp.admin.uploads.list_uploads
     get_user_roots_summary = """
-match (u:UserProfile) --> (b:Root) where u.username = $user
+match (u:UserProfile) -[:HAS_LOADED]-> (b:Root) where u.username = $user
 optional match (audi:UserProfile) -[ar:DOES_AUDIT]-> (b)
 optional match (b) -[r:OBJ_PERSON]-> (:Person)
 with b, count(r) as person_count, 
@@ -139,34 +137,12 @@ return
     collect(distinct [auditor,atime]) as auditors
 order by root.id"""
 
-#     get_user_batch_summary = """
-# match (b:Root) where b.user = $user
-# //and b.state <> 'Audit Requested'
-# optional match (b) -[r:OBJ_PERSON]-> (:Person)
-# with b, count(r) as person_count
-#     optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
-# return b, person_count,  
-#     count(ar) as audit_count
-# order by b.id"""
-
 #-bl.root.Root.list_empty_batches
     TODO_get_empty_batches = '''
 MATCH (a:Root) 
 WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
 RETURN a AS batch ORDER BY a.id DESC'''
 
-# TODO Batch->Root:
-#   delete = """
-# MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Root{id:$batch_id}) 
-# OPTIONAL MATCH (b) -[*]-> (n)
-# WITH b, n LIMIT $limit
-# DETACH DELETE b, n"""
-
-    # Safe Root removal in reasonable chunks:
-    #    a) Nodes pointed by OWNS, 
-    #    b) following nodes by relation NAME or NOTE
-    #    Not Root node self
-#-bl.root.Root.delete_batch
     delete_chunk = """
 MATCH (:UserProfile{username:$user})
     -[:HAS_LOADED]-> (:Root{id:$batch_id}) -[:OBJ_PERSON|OBJ_FAMILY|OBJ_PLACE|OBJ_SOURCE|OBJ_OTHER]-> (a)

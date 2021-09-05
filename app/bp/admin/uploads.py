@@ -267,6 +267,7 @@ class Upload:
     auditors: List[List]    # [[username, timestamp, format_timestamp]...]
     count: int
     is_candidate: int  # for Javascript: 0=false, 1=true
+    for_auditor: int
 
     # @staticmethod
     # def timestamp_str(timestamp, opt="m"):
@@ -292,6 +293,16 @@ class Upload:
         if self.auditors:
             s += f", auditors: {[a[0] for a in self.auditors]}"
         return f"{self.material_type}/{self.state}, {s}" #, found {has_file}, {has_log}"
+
+    def for_auditor(self):
+        """ Is relevant for auditor? """
+        if self.state in [
+            State.ROOT_AUDIT_REQUESTED, 
+            State.ROOT_AUDITING, 
+            State.ROOT_ACCEPTED, 
+            State.ROOT_REJECTED]:
+            return True
+        return False
 
 def list_uploads(username:str) -> List[Upload]:
     """ Gets a list of uploaded batches
@@ -338,6 +349,7 @@ def list_uploads(username:str) -> List[Upload]:
             state=state,
             status=_(state),
             is_candidate=1 if (b.state == State.ROOT_CANDIDATE) else 0,
+            for_auditor=1 if b.for_auditor() else 0,
             material_type=b.material,
             description=b.description,
         )

@@ -118,8 +118,8 @@ class Root(NodeObject):
     def __str__(self):
         return f"Root {self.user} / {self.id} {self.material}({self.state})"
 
-    def is_auditing(self):
-        """ Has the auditing possibly started? """
+    def for_auditor(self):
+        """ Is relevant for auditor? """
         if self.state in [
             State.ROOT_AUDIT_REQUESTED, 
             State.ROOT_AUDITING, 
@@ -369,6 +369,8 @@ class Root(NodeObject):
         """Get statistics of given Batch contents (for bp.audit.routes.audit_pick).
         """
         labels = []
+        user = None
+        b = None
         result = shareds.driver.session().run(
             CypherRoot.get_single_batch, batch=batch_id
         )
@@ -386,12 +388,14 @@ class Root(NodeObject):
             #            'user': 'aku', 'timestamp': 1622140130273}>
             #    label='Person'
             #    cnt=6
-            #    auditors=['juha',0]
+            #    auditors=['juha',1620570475208]
+            #    has_access=['jpek']
             # >
 
             user = record['profile']['username']
             node = record["root"]
             b = Root.from_node(node)
+            b.has_access = record['has_access']
             b.auditors = []
             for au_user, ms in record["auditors"]:
                 if au_user:
@@ -403,9 +407,8 @@ class Root(NodeObject):
             cnt = record["cnt"]
             labels.append((label, cnt))
 
-            return user, b, sorted(labels)
+        return user, b, sorted(labels)
 
-        return None, None, []
 
     @staticmethod
     def list_empty_batches():
