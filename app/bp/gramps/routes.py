@@ -417,6 +417,10 @@ def get_commands(batch_id):
         batch = res['item']
 
         commands = []
+        commands.append( (
+            f"/scene/persons/search?set-scope=1&batch_id={batch_id}", 
+            _("Browse this material")
+        ))
         if batch.state == State.ROOT_CANDIDATE:
             commands.append( (
                 f"/audit/user/request/{batch_id}", 
@@ -440,5 +444,8 @@ def get_commands(batch_id):
             _("Delete from database")
         ))
         
-        return render_template("/gramps/commands.html", batch_id=batch_id, description=batch.description, commands=commands)
+        return render_template("/gramps/commands.html", 
+                               batch_id=batch_id, 
+                               description=batch.description, 
+                               commands=commands)
 

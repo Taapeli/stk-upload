@@ -121,7 +121,7 @@ class UserContext():
         COMMON = 1  # Approved data
         OWN = 2     # Candidate data
         BATCH = 4   # Selected candicate batch
-        CODE_VALUES = ['', 'aud', 'can', 'aud,can', 'bat', 'can,bat']
+        CODE_VALUES = ['', 'apr', 'can', 'apr,can', 'bat', 'can,bat']
 
         def __init__(self):
             ''' Initialise choise texts in user language '''
@@ -133,7 +133,7 @@ class UserContext():
                 self.COMMON + self.BATCH: N_('My selected batch and approved common data')
             }
             self.as_status = {
-                self.COMMON:              State.ROOT_AUDITING, 
+                self.COMMON:              State.ROOT_ACCEPTED, 
                 self.OWN:                 State.ROOT_CANDIDATE, 
                 self.BATCH:               State.ROOT_CANDIDATE
             }
@@ -217,9 +217,9 @@ class UserContext():
                 print(f'UserContext: Objects between years {self.years}')
 
 
-            # Use case: Selected material for display
-            #    set-scope = 1 -> set a new scope, common material or a specific user batch 
-
+            """ Use case: Selected material for display
+                set-scope = 1 -> set a new scope, common material or a specific user batch 
+            """
             set_scope = request.args.get('set-scope')
             if set_scope:
                 batch_id = request.args.get('batch_id')

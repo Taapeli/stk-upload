@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-05 18:50+0300\n"
+"POT-Creation-Date: 2021-09-09 09:59+0300\n"
 "PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -308,7 +308,7 @@ msgstr "Forskare"
 
 #: bp/admin/forms.py:73
 msgid "Audit"
-msgstr "Revision"
+msgstr "Inspektion"
 
 #: bp/admin/forms.py:74
 msgid "Admin"
@@ -564,7 +564,6 @@ msgid "Delete all my imported data"
 msgstr "Tag bort allt mitt importerade data"
 
 #: bp/admin/templates/admin/admin.html:58
-#: bp/gramps/templates/gramps/uploads.html:113
 msgid "Uploaded Candidate Materials"
 msgstr "Laddat kandidat material"
 
@@ -907,7 +906,6 @@ msgid "Uploads for all users"
 msgstr "Uppladdningar för alla användare"
 
 #: bp/admin/templates/admin/uploads.html:31
-#: bp/audit/templates/audit/batches.html:21
 msgid "Gramps file / uploaded at"
 msgstr "Gramps fil / laddad till"
 
@@ -1090,7 +1088,7 @@ msgstr ""
 msgid "Delete data"
 msgstr "Fösrstöra data"
 
-#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:440
+#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:444
 msgid "Delete from database"
 msgstr "Tag bort från databasen"
 
@@ -1098,6 +1096,11 @@ msgstr "Tag bort från databasen"
 #: bp/audit/templates/audit/batches.html:9
 msgid "Batches"
 msgstr "Data batches"
+
+#: bp/audit/templates/audit/batches.html:21
+#: bp/gramps/templates/gramps/uploads.html:121
+msgid "Gramps file"
+msgstr "Gramps fil"
 
 #: bp/audit/templates/audit/batches.html:39
 #: bp/scene/templates/scene/persons_search.html:217
@@ -1202,7 +1205,7 @@ msgstr "Till framsidan"
 
 #: bp/audit/templates/audit/layout.html:60
 msgid "Audit home"
-msgstr "Revision hem"
+msgstr "Inspekt hem"
 
 #: bp/audit/templates/audit/layout.html:78 bp/gedcom/templates/g_layout.html:49
 #: bp/start/templates/start/s_layout.html:52 templates/a_layout.html:41
@@ -1214,7 +1217,6 @@ msgid "Select auditiong operation"
 msgstr ""
 
 #: bp/audit/templates/audit/pick_auditing.html:12
-#, fuzzy
 msgid "Pick auditing operation"
 msgstr "Administrativa åtgärder"
 
@@ -2161,19 +2163,24 @@ msgstr ""
 msgid "Failed to retrieve commands"
 msgstr ""
 
-#: bp/gramps/routes.py:423
+#: bp/gramps/routes.py:422
+#, fuzzy
+msgid "Browse this material"
+msgstr "Det bläddrade materialet"
+
+#: bp/gramps/routes.py:427
 msgid "Send for auditing"
 msgstr ""
 
-#: bp/gramps/routes.py:428
+#: bp/gramps/routes.py:432
 msgid "Withdraw auditing"
 msgstr ""
 
-#: bp/gramps/routes.py:432
+#: bp/gramps/routes.py:436
 msgid "Download the Gramps file"
 msgstr "Ladda ned Gramps filen"
 
-#: bp/gramps/routes.py:436
+#: bp/gramps/routes.py:440
 msgid "Show last log"
 msgstr "Visa senaste logg"
 
@@ -2266,9 +2273,11 @@ msgstr "Operation"
 msgid "Time / sec"
 msgstr "Tid / sek"
 
-#: bp/gramps/templates/gramps/uploads.html:8
-msgid "Uploads from Gramps"
-msgstr "Uppladdningar från Gramps"
+#: bp/gramps/templates/gramps/uploads.html:9
+#: bp/gramps/templates/gramps/uploads.html:113
+#: bp/start/templates/start/index_logged.html:43
+msgid "My Candidate Materials"
+msgstr "Mina kandidatmaterialer för Isotammi"
 
 #: bp/gramps/templates/gramps/uploads.html:93
 msgid "Are you sure you want to delete the XML file?"
@@ -2278,10 +2287,6 @@ msgstr "Vill du avlägsna XML filen?"
 #, fuzzy
 msgid "Batch operations"
 msgstr "Andra operationer"
-
-#: bp/gramps/templates/gramps/uploads.html:121
-msgid "Gramps file"
-msgstr "Gramps fil"
 
 #: bp/gramps/templates/gramps/uploads.html:122
 msgid "Person count"
@@ -3479,16 +3484,13 @@ msgstr ""
 msgid "Return the improved file back to your genealogy software."
 msgstr "Ladda den förbättrade filen tillbaka till din släktforskning programvara."
 
-#: bp/start/templates/start/index_logged.html:43
-msgid "Candidate materials for Isotammi"
-msgstr "Kandidatmaterial för Isotammi"
-
 #: bp/start/templates/start/index_logged.html:45
 msgid "Save your  Gramps xml file as Isotammi candidate material."
 msgstr "Spara din Gramps xml-fil som Isotammi kandidatmaterial."
 
 #: bp/start/templates/start/index_logged.html:46
-msgid "Manage your candidate files and materials in database."
+#, fuzzy
+msgid "Manage your candidate materials in the database."
 msgstr "Underhåll dina kandidat filer och material i databasen."
 
 #: bp/start/templates/start/index_logged.html:48
@@ -3540,12 +3542,11 @@ msgstr "Underhåll"
 
 #: bp/start/templates/start/index_logged.html:115
 msgid "Operations between user candidate materials and Isotammi database"
-msgstr "Operationer mellan användarkandidatsmaterial och Isotammi Databas"
+msgstr "Operationer med kandidatsmaterial och Isotammi Databas"
 
 #: bp/start/templates/start/index_logged.html:117
-#: bp/start/templates/start/obsolete_index_guest.html:60
-msgid "Continue"
-msgstr "Fortsätta"
+msgid "Audit materials"
+msgstr "Revisor åtgärder"
 
 #: bp/start/templates/start/index_logged.html:127
 msgid "Tools and Links"
@@ -3723,6 +3724,10 @@ msgstr ""
 "Du är på hemsidan för Isotammi demo. Du har loggats in som en besökande "
 "användare."
 
+#: bp/start/templates/start/obsolete_index_guest.html:60
+msgid "Continue"
+msgstr "Fortsätta"
+
 #: bp/start/templates/start/obsolete_index_guest.html:65
 #: bp/start/templates/start/obsolete_index_guest.html:71
 #: bp/start/templates/start/s_macros.html:41 templates/index_entry.html:90
@@ -3817,9 +3822,8 @@ msgid "Accepted"
 msgstr "Godkänn"
 
 #: bp/start/templates/start/s_macros.html:62
-#, fuzzy
 msgid "Audit done"
-msgstr "Revision hem"
+msgstr "Inspektion färdig"
 
 #: bp/start/templates/start/s_macros.html:63
 msgid "Merged"

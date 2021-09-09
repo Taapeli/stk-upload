@@ -1,14 +1,14 @@
 {# _gramps/uploads.html_ #}
-<!-- Note different versions (sorry):
-     ./gramps/templates/gramps/uploads.html
-     ./audit/templates/audit/batches.html
-     ./admin/templates/admin/uploads.html
- -->
+{#
+   Note different versions (sorry):
+     	./gramps/templates/gramps/uploads.html
+     	./audit/templates/audit/batches.html
+		./admin/templates/admin/uploads.html
+#}
 {% extends "start/s_layout.html" %}
-{% block title %}{{ _("Uploads from Gramps") }}{% endblock %}
+{% block title %}{{ _('My Candidate Materials') }}{% endblock %}
 {% block body %}
 {{ super() }}
-<!-- <meta http-equiv="refresh" content="30"> -->
 
 {% from "start/s_macros.html" import hamburger_menu, state_info with context %}
 
@@ -110,7 +110,7 @@ function confirm_delete(subj, name) {
 
 <div id="startdiv">
     <div>
-		<h1>{{ _("Uploaded Candidate Materials") }}</h1>
+		<h1>{{ _('My Candidate Materials') }}</h1>
 
 {% include "flash_messages.html" %}
 

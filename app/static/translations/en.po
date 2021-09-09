@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-05 18:50+0300\n"
+"POT-Creation-Date: 2021-09-09 09:59+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -564,7 +564,6 @@ msgid "Delete all my imported data"
 msgstr ""
 
 #: bp/admin/templates/admin/admin.html:58
-#: bp/gramps/templates/gramps/uploads.html:113
 msgid "Uploaded Candidate Materials"
 msgstr ""
 
@@ -905,7 +904,6 @@ msgid "Uploads for all users"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:31
-#: bp/audit/templates/audit/batches.html:21
 msgid "Gramps file / uploaded at"
 msgstr ""
 
@@ -1085,13 +1083,18 @@ msgstr ""
 msgid "Delete data"
 msgstr ""
 
-#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:440
+#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:444
 msgid "Delete from database"
 msgstr ""
 
 #: bp/audit/templates/audit/batches.html:4
 #: bp/audit/templates/audit/batches.html:9
 msgid "Batches"
+msgstr ""
+
+#: bp/audit/templates/audit/batches.html:21
+#: bp/gramps/templates/gramps/uploads.html:121
+msgid "Gramps file"
 msgstr ""
 
 #: bp/audit/templates/audit/batches.html:39
@@ -2143,19 +2146,23 @@ msgstr ""
 msgid "Failed to retrieve commands"
 msgstr ""
 
-#: bp/gramps/routes.py:423
+#: bp/gramps/routes.py:422
+msgid "Browse this material"
+msgstr ""
+
+#: bp/gramps/routes.py:427
 msgid "Send for auditing"
 msgstr ""
 
-#: bp/gramps/routes.py:428
+#: bp/gramps/routes.py:432
 msgid "Withdraw auditing"
 msgstr ""
 
-#: bp/gramps/routes.py:432
+#: bp/gramps/routes.py:436
 msgid "Download the Gramps file"
 msgstr ""
 
-#: bp/gramps/routes.py:436
+#: bp/gramps/routes.py:440
 msgid "Show last log"
 msgstr ""
 
@@ -2244,8 +2251,10 @@ msgstr ""
 msgid "Time / sec"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:8
-msgid "Uploads from Gramps"
+#: bp/gramps/templates/gramps/uploads.html:9
+#: bp/gramps/templates/gramps/uploads.html:113
+#: bp/start/templates/start/index_logged.html:43
+msgid "My Candidate Materials"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:93
@@ -2254,10 +2263,6 @@ msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:120
 msgid "Batch operations"
-msgstr ""
-
-#: bp/gramps/templates/gramps/uploads.html:121
-msgid "Gramps file"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:122
@@ -3444,16 +3449,12 @@ msgstr ""
 msgid "Return the improved file back to your genealogy software."
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:43
-msgid "Candidate materials for Isotammi"
-msgstr ""
-
 #: bp/start/templates/start/index_logged.html:45
 msgid "Save your  Gramps xml file as Isotammi candidate material."
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:46
-msgid "Manage your candidate files and materials in database."
+msgid "Manage your candidate materials in the database."
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:48
@@ -3506,8 +3507,7 @@ msgid "Operations between user candidate materials and Isotammi database"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:117
-#: bp/start/templates/start/obsolete_index_guest.html:60
-msgid "Continue"
+msgid "Audit materials"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:127
@@ -3672,6 +3672,10 @@ msgstr ""
 msgid ""
 "You are on the home page of Isotammi demo. You have log in as a guest "
 "user."
+msgstr ""
+
+#: bp/start/templates/start/obsolete_index_guest.html:60
+msgid "Continue"
 msgstr ""
 
 #: bp/start/templates/start/obsolete_index_guest.html:65
