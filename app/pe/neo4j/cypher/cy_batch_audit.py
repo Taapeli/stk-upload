@@ -70,7 +70,7 @@ RETURN ID(b) AS id"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
     batch_set_auditor = """
-MATCH (b:Root {id: $bid, state:$state})
+MATCH (b:Root {id: $bid}) WHERE b.state IN $states
 MATCH (audi:UserProfile {username: $audi})
     SET b.state = "Auditing"
     MERGE (audi) -[r:DOES_AUDIT]-> (b)

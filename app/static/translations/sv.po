@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-12 11:59+0300\n"
+"POT-Creation-Date: 2021-09-12 13:43+0300\n"
 "PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -803,7 +803,7 @@ msgid "Log of Gramps XML upload"
 msgstr "Log av Gramps XML uppladdning"
 
 #: bp/admin/templates/admin/load_result.html:13
-#: bp/audit/templates/audit/pick_auditing.html:78
+#: bp/audit/templates/audit/pick_auditing.html:86
 #: bp/gramps/templates/gramps/analyze_xml.html:29
 #: bp/gramps/templates/gramps/gramps_analyze.html:43
 #: bp/gramps/templates/gramps/result.html:21
@@ -1005,38 +1005,42 @@ msgstr "Visa logg"
 msgid "Delete file"
 msgstr "Radera fil"
 
-#: bp/audit/routes.py:117
+#: bp/audit/routes.py:118
 #, fuzzy
 msgid " failed"
 msgstr "kvinna"
 
-#: bp/audit/routes.py:119
+#: bp/audit/routes.py:120
 msgid " succeeded"
 msgstr ""
 
-#: bp/audit/routes.py:150
+#: bp/audit/routes.py:151
 #, fuzzy
 msgid "No such batch "
 msgstr "till batchID"
 
-#: bp/audit/routes.py:211
+#: bp/audit/routes.py:208
+msgid "You are now an auditor for batch "
+msgstr ""
+
+#: bp/audit/routes.py:215
 msgid "Audit batch accepted: "
 msgstr ""
 
-#: bp/audit/routes.py:218
+#: bp/audit/routes.py:222
 #, fuzzy
 msgid "You have rejected the batch "
 msgstr "Min valda kandidatsats"
 
-#: bp/audit/routes.py:354
+#: bp/audit/routes.py:358
 msgid "Done"
 msgstr "Färdigt"
 
-#: bp/audit/routes.py:443
+#: bp/audit/routes.py:447
 msgid "Data type '{}' is not supported"
 msgstr "Data typen '{}' stöds inte"
 
-#: bp/audit/routes.py:450
+#: bp/audit/routes.py:454
 msgid "Missing proper column title: "
 msgstr "Giltigt kolumn namn fattas: "
 
@@ -1070,7 +1074,7 @@ msgid "Researcher"
 msgstr "Forskare"
 
 #: bp/audit/templates/audit/approvals.html:75
-#: bp/audit/templates/audit/pick_auditing.html:46
+#: bp/audit/templates/audit/pick_auditing.html:64
 #: bp/start/templates/start/my_settings.html:125
 msgid "Batch id"
 msgstr "Batch id"
@@ -1107,7 +1111,7 @@ msgid "persons"
 msgstr "personer"
 
 #: bp/audit/templates/audit/batches.html:52
-#: bp/audit/templates/audit/pick_auditing.html:64
+#: bp/audit/templates/audit/pick_auditing.html:45
 #: bp/gramps/templates/gramps/uploads.html:180
 #, fuzzy
 msgid "Audit start date"
@@ -1224,56 +1228,58 @@ msgstr "Administrativa åtgärder"
 msgid "Selected %(m)s batch"
 msgstr "Markerad batch"
 
-#: bp/audit/templates/audit/pick_auditing.html:35
+#: bp/audit/templates/audit/pick_auditing.html:34
+#: bp/scene/templates/scene/medias.html:42
+#: bp/scene/templates/scene/medias.html:64
+#: bp/scene/templates/scene/place_events.html:139
+msgid "Title"
+msgstr "Titel"
+
+#: bp/audit/templates/audit/pick_auditing.html:38
 #, fuzzy
 msgid "In the phase"
 msgstr "i församlingen"
 
-#: bp/audit/templates/audit/pick_auditing.html:39
-#, fuzzy
-msgid "with title"
-msgstr "med roller"
+#: bp/audit/templates/audit/pick_auditing.html:43
+msgid "Current auditors"
+msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:40
+#: bp/audit/templates/audit/pick_auditing.html:50
+msgid "Access is given also to"
+msgstr ""
+
+#: bp/audit/templates/audit/pick_auditing.html:58
 #, fuzzy
 msgid "There is no data in this batch"
 msgstr "– Det finns inga fler data att flytta i denna batch"
 
-#: bp/audit/templates/audit/pick_auditing.html:54
+#: bp/audit/templates/audit/pick_auditing.html:72
 msgid "saved at"
 msgstr "sparade till"
 
-#: bp/audit/templates/audit/pick_auditing.html:59
+#: bp/audit/templates/audit/pick_auditing.html:78
 #, python-format
 msgid "Total %(cnt)s nodes from user <b>%(user)s</b>."
 msgstr "Totalt %(cnt)s noder från användaren <b>%(user)s</b>."
 
-#: bp/audit/templates/audit/pick_auditing.html:63
-msgid "Current auditors"
-msgstr ""
-
-#: bp/audit/templates/audit/pick_auditing.html:68
-msgid "Access is given also to"
-msgstr ""
-
-#: bp/audit/templates/audit/pick_auditing.html:81
+#: bp/audit/templates/audit/pick_auditing.html:89
 #, fuzzy
 msgid "Start auditing"
 msgstr "Revisioner"
 
-#: bp/audit/templates/audit/pick_auditing.html:83
+#: bp/audit/templates/audit/pick_auditing.html:91
 #, fuzzy
 msgid "Accept auditing"
 msgstr "Revisioner"
 
-#: bp/audit/templates/audit/pick_auditing.html:85
-#: bp/audit/templates/audit/pick_auditing.html:88
-#: bp/audit/templates/audit/pick_auditing.html:100
+#: bp/audit/templates/audit/pick_auditing.html:93
+#: bp/audit/templates/audit/pick_auditing.html:96
+#: bp/audit/templates/audit/pick_auditing.html:108
 #, fuzzy
 msgid "Reject auditing"
 msgstr "Revisioner"
 
-#: bp/audit/templates/audit/pick_auditing.html:98
+#: bp/audit/templates/audit/pick_auditing.html:106
 msgid "Cancel"
 msgstr ""
 
@@ -2858,12 +2864,6 @@ msgstr "Visning av %(num)s distinkta medier"
 #: bp/scene/templates/scene/medias.html:41
 msgid "First letters of media"
 msgstr "Startbokstav av media"
-
-#: bp/scene/templates/scene/medias.html:42
-#: bp/scene/templates/scene/medias.html:64
-#: bp/scene/templates/scene/place_events.html:139
-msgid "Title"
-msgstr "Titel"
 
 #: bp/scene/templates/scene/medias.html:68
 msgid "User Batch"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-12 11:59+0300\n"
+"POT-Creation-Date: 2021-09-12 13:43+0300\n"
 "PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -308,7 +308,7 @@ msgstr "Tutkija"
 
 #: bp/admin/forms.py:73
 msgid "Audit"
-msgstr "Auditoija"
+msgstr "Tarkastaja"
 
 #: bp/admin/forms.py:74
 msgid "Admin"
@@ -801,7 +801,7 @@ msgid "Log of Gramps XML upload"
 msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
 
 #: bp/admin/templates/admin/load_result.html:13
-#: bp/audit/templates/audit/pick_auditing.html:78
+#: bp/audit/templates/audit/pick_auditing.html:86
 #: bp/gramps/templates/gramps/analyze_xml.html:29
 #: bp/gramps/templates/gramps/gramps_analyze.html:43
 #: bp/gramps/templates/gramps/result.html:21
@@ -1003,35 +1003,39 @@ msgstr "Näytä loki"
 msgid "Delete file"
 msgstr "Poista tiedosto"
 
-#: bp/audit/routes.py:117
+#: bp/audit/routes.py:118
 msgid " failed"
 msgstr " epäonnistui"
 
-#: bp/audit/routes.py:119
+#: bp/audit/routes.py:120
 msgid " succeeded"
 msgstr " suoritettu"
 
-#: bp/audit/routes.py:150
+#: bp/audit/routes.py:151
 msgid "No such batch "
 msgstr "Aineistoa ei ole"
 
-#: bp/audit/routes.py:211
-msgid "Audit batch accepted: "
-msgstr "Auditointi läpäisty: "
+#: bp/audit/routes.py:208
+msgid "You are now an auditor for batch "
+msgstr ""
 
-#: bp/audit/routes.py:218
+#: bp/audit/routes.py:215
+msgid "Audit batch accepted: "
+msgstr "Trakastus läpäisty: "
+
+#: bp/audit/routes.py:222
 msgid "You have rejected the batch "
 msgstr "Olet palauttanut tutkijalle aineiston "
 
-#: bp/audit/routes.py:354
+#: bp/audit/routes.py:358
 msgid "Done"
 msgstr "Tehty"
 
-#: bp/audit/routes.py:443
+#: bp/audit/routes.py:447
 msgid "Data type '{}' is not supported"
 msgstr "Tietotyyppiä '{}' ei tueta"
 
-#: bp/audit/routes.py:450
+#: bp/audit/routes.py:454
 msgid "Missing proper column title: "
 msgstr "Kelvollinen sarakeotsikko puuttuu:"
 
@@ -1058,14 +1062,14 @@ msgstr "Yhteensä <b>%(tot)s</b> kohdetta"
 #: bp/gramps/templates/gramps/uploads.html:178
 #: bp/refplace_editor/templates/refplace_editor.html:3
 msgid "Auditor"
-msgstr "Auditoija"
+msgstr "Tarkastaja"
 
 #: bp/audit/templates/audit/approvals.html:74
 msgid "Researcher"
 msgstr "Tutkija"
 
 #: bp/audit/templates/audit/approvals.html:75
-#: bp/audit/templates/audit/pick_auditing.html:46
+#: bp/audit/templates/audit/pick_auditing.html:64
 #: bp/start/templates/start/my_settings.html:125
 msgid "Batch id"
 msgstr "Aineistotunnus"
@@ -1102,10 +1106,10 @@ msgid "persons"
 msgstr "henkilöä"
 
 #: bp/audit/templates/audit/batches.html:52
-#: bp/audit/templates/audit/pick_auditing.html:64
+#: bp/audit/templates/audit/pick_auditing.html:45
 #: bp/gramps/templates/gramps/uploads.html:180
 msgid "Audit start date"
-msgstr "Alkuaika"
+msgstr "Tarkastus alkoi"
 
 #: bp/audit/templates/audit/batches.html:77
 msgid "Download file"
@@ -1117,7 +1121,7 @@ msgstr "Tallenna alkuperäinen tiedosto"
 
 #: bp/audit/templates/audit/batches.html:88
 msgid "Your audit operations"
-msgstr "Auditoijan toiminnot"
+msgstr "Tarkastajan toiminnot"
 
 #: bp/audit/templates/audit/classifiers.html:4
 #: bp/audit/templates/audit/classifiers.html:23
@@ -1139,7 +1143,7 @@ msgstr "Inessiivi"
 #: bp/audit/templates/audit/index.html:3 bp/audit/templates/audit/index.html:12
 #: bp/start/templates/start/index_logged.html:114
 msgid "Isotammi auditor"
-msgstr "Auditoija"
+msgstr "Tarkastaja"
 
 #: bp/audit/templates/audit/index.html:17
 msgid "Queries"
@@ -1195,7 +1199,7 @@ msgstr "Palaa etusivulle"
 
 #: bp/audit/templates/audit/layout.html:60
 msgid "Audit home"
-msgstr "Auditoijan etusivu"
+msgstr "Tarkastajan etusivu"
 
 #: bp/audit/templates/audit/layout.html:78 bp/gedcom/templates/g_layout.html:49
 #: bp/start/templates/start/s_layout.html:52 templates/a_layout.html:41
@@ -1204,7 +1208,7 @@ msgstr "Ohjeita"
 
 #: bp/audit/templates/audit/pick_auditing.html:3
 msgid "Select auditiong operation"
-msgstr "Valitse auditoijan toiminto"
+msgstr "Valitse Tarkastajan toiminto"
 
 #: bp/audit/templates/audit/pick_auditing.html:25
 msgid "Pick auditing operation"
@@ -1215,50 +1219,53 @@ msgstr "Tarkastajan toimet"
 msgid "Selected %(m)s batch"
 msgstr "Valittu %(m)s-aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:35
+#: bp/audit/templates/audit/pick_auditing.html:34
+#: bp/scene/templates/scene/medias.html:42
+#: bp/scene/templates/scene/medias.html:64
+#: bp/scene/templates/scene/place_events.html:139
+msgid "Title"
+msgstr "Otsikko"
+
+#: bp/audit/templates/audit/pick_auditing.html:38
 msgid "In the phase"
 msgstr "Vaiheessa"
 
-#: bp/audit/templates/audit/pick_auditing.html:39
-msgid "with title"
-msgstr "otsikolla"
+#: bp/audit/templates/audit/pick_auditing.html:43
+msgid "Current auditors"
+msgstr "Tarkastajat"
 
-#: bp/audit/templates/audit/pick_auditing.html:40
+#: bp/audit/templates/audit/pick_auditing.html:50
+msgid "Access is given also to"
+msgstr "Käyttöoikeus myös"
+
+#: bp/audit/templates/audit/pick_auditing.html:58
 msgid "There is no data in this batch"
 msgstr "Aineisto on tyhjä"
 
-#: bp/audit/templates/audit/pick_auditing.html:54
+#: bp/audit/templates/audit/pick_auditing.html:72
 msgid "saved at"
 msgstr "talletettu"
 
-#: bp/audit/templates/audit/pick_auditing.html:59
+#: bp/audit/templates/audit/pick_auditing.html:78
 #, python-format
 msgid "Total %(cnt)s nodes from user <b>%(user)s</b>."
 msgstr "Yhteensä %(cnt)s kohdetta tutkijalta <b>%(user)s</b>."
 
-#: bp/audit/templates/audit/pick_auditing.html:63
-msgid "Current auditors"
-msgstr "Tarkastajat"
-
-#: bp/audit/templates/audit/pick_auditing.html:68
-msgid "Access is given also to"
-msgstr "Käyttöoikeus myös"
-
-#: bp/audit/templates/audit/pick_auditing.html:81
+#: bp/audit/templates/audit/pick_auditing.html:89
 msgid "Start auditing"
 msgstr "Aloita tarkastus"
 
-#: bp/audit/templates/audit/pick_auditing.html:83
+#: bp/audit/templates/audit/pick_auditing.html:91
 msgid "Accept auditing"
 msgstr "Hyväksy aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:85
-#: bp/audit/templates/audit/pick_auditing.html:88
-#: bp/audit/templates/audit/pick_auditing.html:100
+#: bp/audit/templates/audit/pick_auditing.html:93
+#: bp/audit/templates/audit/pick_auditing.html:96
+#: bp/audit/templates/audit/pick_auditing.html:108
 msgid "Reject auditing"
 msgstr "Palauta aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:98
+#: bp/audit/templates/audit/pick_auditing.html:106
 msgid "Cancel"
 msgstr "Palaa"
 
@@ -2833,12 +2840,6 @@ msgstr "Näytetään %(num)s eri kuvaa tai mediatiedostoa"
 #: bp/scene/templates/scene/medias.html:41
 msgid "First letters of media"
 msgstr "Median alkukirjaimet"
-
-#: bp/scene/templates/scene/medias.html:42
-#: bp/scene/templates/scene/medias.html:64
-#: bp/scene/templates/scene/place_events.html:139
-msgid "Title"
-msgstr "Otsikko"
 
 #: bp/scene/templates/scene/medias.html:68
 msgid "User Batch"

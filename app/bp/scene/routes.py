@@ -183,7 +183,7 @@ def show_persons():
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_person_search():
+def show_person_search(set_scope=None, batch_id=None):
     """Persons search page."""
     t0 = time.time()
     args = {"pg": "search"}
@@ -194,6 +194,9 @@ def show_person_search():
     key = rq.get("key")
     if key:
         args["key"] = key
+    if not (set_scope is None or batch_id is None): 
+        args["batch_id"] = batch_id
+        args["set_scope"] = set_scope
 
     res, u_context = _do_get_persons(args)
     print(f"#show_person_search: {request.method} "

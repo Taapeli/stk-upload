@@ -4,6 +4,19 @@
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
+<style>
+div.props {
+	display: inline-box;
+}
+div.props > div { 
+    margin: 2pt;
+}
+div.props > div > span:nth-child(1) {
+    display: inline-block;
+    width: 10em;
+    vertical-align:top;
+}
+</style>
 
 {{ hamburger_menu() }}
 
@@ -13,14 +26,38 @@
 
 {% include "flash_messages.html" %}
 
-        <div style="width: min-content;">
-            <h2>{{ _('Selected Batch') }} {{root.id}} 
-            	{{ _('in the phase of')}} <i>{{ root.state|transl('state')|lower }}</i></h2>
-            <p>{{root.material|transl('material')}}
-        {% if root.description %}{{ _('with title') }} <i>{{root.description}}</i>{% endif %}
-		{% if not total %}<br> – {{ _('There is no data in this batch') }}.{% endif %}
+        <h2>{{ _("Selected %(m)s batch", m= root.material | transl('material') | lower) }}</h2>
 
-            </p>
+		<div class="props">
+		
+    {% if root.description %}
+			<div><span>{{ _('Title') }}:</span>
+				<span><i>{{root.description}}</i></span>
+			</div>
+	{% endif %}
+			<div><span>{{ _("In the phase") }}:</span>
+				<span>{{ _(root.state | transl('state')) }}</span></div>
+
+	{% for auditor, ts, ts_str in root.auditors %}
+			<div style="color: brown;">
+				<span>{% if loop.first %}{{ _("Current auditors") }}:{% endif %}</span>
+				<span><b>{{auditor}}</b>
+					<span  title="{{ _('Audit start date') }}">{{ts_str}}</span>
+				</span>
+			</div>
+    {% endfor %}
+	{% for access in root.has_access %}
+         	<div><span>{{ _("Access is given also to") }}:</span>
+				<span><b>{{access}}</b> </span>
+				</span>
+			</div>
+    {% endfor %}
+
+		</div>
+		<p>  
+	{% if not total %} – {{ _('There is no data in this batch') }}.{% endif %}
+		</p>
+        <div style="width: min-content;">
 
 			<table style="min-width: 30em;">
 				<tr>
@@ -31,25 +68,15 @@
 				</tr>
 
                 <tr>
-                    <td class="nowrap">{{root.id}}{% if time %}<br>
-                    <small>{{ _('saved at') }} {{time}}</small>{% endif %}
-                    </td> {% for label, cnt in label_nodes %}
-                    <td class="right nowrap">{{cnt|int_thousands}}</td> {% endfor %}
+                    <td class="nowrap"><b>{{root.id}}</b>
+                    {% if time %}<br><small>{{ _('saved at') }} {{time}}</small>{% endif -%}
+                    </td>
+                    {% for label, cnt in label_nodes %}
+                    <td class="right nowrap">{{cnt|int_thousands}}</td> {% endfor -%}
                 </tr>
             </table>
             <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
 
-            <ul>
-	{% for auditor, ts, ts_str in root.auditors %}
-         		<li>{{ _("Current auditors") }}: 
-         			<span title="{{ _('Audit start date') }}"><b>{{auditor}}</b> {{ts_str}}</span>
-				</li>
-    {% endfor %}
-	{% for acc in root.has_access %}
-         		<li>{{ _("Access is given also to") }} <b>{{acc}}</b> 
-				</li>
-    {% endfor %}
-         	</ul>
 
             <form action="/audit/selected" method="post">
                 <input type="hidden" value="{{root.id}}" name="batch">

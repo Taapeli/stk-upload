@@ -189,12 +189,12 @@ class Neo4jUpdateService(ConcreteService):
         #     return {"status": Status.ERROR, "statustext": statustext}
 
 
-    def ds_batch_set_auditor(self, batch_id, auditor_user, old_state):
+    def ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
         """Updates Batch node selected by Batch id and user.
            We also check that the state is expected.
         """
         result = self.tx.run(
-            CypherRoot.batch_set_auditor, bid=batch_id, audi=auditor_user, state=old_state
+            CypherRoot.batch_set_auditor, bid=batch_id, audi=auditor_user, states=old_states
         )
         uniq_id = result.single()[0]
         return {"status": Status.OK, "identity": uniq_id}

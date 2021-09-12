@@ -156,7 +156,8 @@ def audit_pick(batch_id=None):
     timestamp = root.timestamp_str()
     auditor_names = [a[0] for a in root.auditors]
     i_am_auditor = (current_user.username in auditor_names)
-    can_start = (root.state == State.ROOT_AUDIT_REQUESTED)
+    can_start = (root.state == State.ROOT_AUDIT_REQUESTED or
+                 root.state == State.ROOT_AUDITING and not i_am_auditor)
     can_accept = (i_am_auditor and root.state  == State.ROOT_AUDITING)
     can_remove = (total == 0 \
                   and root.state in [State.ROOT_ACCEPTED, State.ROOT_REJECTED])
@@ -202,6 +203,7 @@ def audit_selected_op():
         if operation == "start":
             # 5. Move from "Audit Requested" to "Auditing" state to "Accepted"
             res = batch_service.select_auditor(batch_id, auditor)
+            msg = _("You are now an auditor for batch ") + batch_id
 
         elif operation == "accept":
             # 6. Move from "Auditing" to "Accepted" state
