@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-12 13:43+0300\n"
+"POT-Creation-Date: 2021-09-12 19:43+0300\n"
 "PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -674,13 +674,13 @@ msgid "GEDCOM file"
 msgstr "Gedcom-tiedosto"
 
 #: bp/admin/templates/admin/gedcoms.html:32
-#: bp/admin/templates/admin/uploads.html:104
+#: bp/admin/templates/admin/uploads.html:111
 msgid "Number of files"
 msgstr "Tiedostojen lukumäärä"
 
 #: bp/admin/templates/admin/gedcoms.html:33
 #: bp/admin/templates/admin/message.html:61
-#: bp/admin/templates/admin/uploads.html:105
+#: bp/admin/templates/admin/uploads.html:115
 msgid "List of users"
 msgstr "Käyttäjälistaus"
 
@@ -878,6 +878,7 @@ msgid "Newer events"
 msgstr "Uudemmat tapahtumat"
 
 #: bp/admin/templates/admin/syslog.html:43
+#: bp/gramps/templates/gramps/uploads.html:210
 msgid "Back"
 msgstr "Takaisin"
 
@@ -922,7 +923,7 @@ msgid "Steps for uploading Gramps files"
 msgstr "Gramps-tiedoston käsittelyvaiheet"
 
 #: bp/admin/templates/admin/uploads.html:37
-#: bp/admin/templates/admin/uploads.html:80
+#: bp/admin/templates/admin/uploads.html:85
 msgid "UPLOADED"
 msgstr "Tiedosto ladattu"
 
@@ -941,7 +942,7 @@ msgid "the file content is being stored to the database"
 msgstr "Tiedostoa viedään tietokantaan"
 
 #: bp/admin/templates/admin/uploads.html:39
-#: bp/admin/templates/admin/uploads.html:87
+#: bp/admin/templates/admin/uploads.html:93
 msgid "CANDIDATE"
 msgstr "Tutkijan aineisto"
 
@@ -976,66 +977,65 @@ msgstr "päättyi virheeeseen"
 msgid "Operations"
 msgstr "Toimenpiteet"
 
-#: bp/admin/templates/admin/uploads.html:52
+#: bp/admin/templates/admin/uploads.html:54
 #: bp/audit/templates/audit/batches.html:31
 msgid "me"
 msgstr "minä"
 
-#: bp/admin/templates/admin/uploads.html:80
+#: bp/admin/templates/admin/uploads.html:86
 msgid "deleted from database"
 msgstr "poistettu kannasta"
 
-#: bp/admin/templates/admin/uploads.html:82
+#: bp/admin/templates/admin/uploads.html:88
 #, python-format
 msgid "batch %(batch_id)s; %(persons)d&nbsp;persons"
 msgstr "erä %(batch_id)s; %(persons)d&nbsp;henkilöä"
 
-#: bp/admin/templates/admin/uploads.html:89
+#: bp/admin/templates/admin/uploads.html:95
 msgid "Store to database"
 msgstr "Vie tietokantaan"
 
-#: bp/admin/templates/admin/uploads.html:93
-#: bp/audit/templates/audit/batches.html:83
+#: bp/admin/templates/admin/uploads.html:99
 msgid "Show log"
 msgstr "Näytä loki"
 
-#: bp/admin/templates/admin/uploads.html:97
+#: bp/admin/templates/admin/uploads.html:103
 msgid "Delete file"
 msgstr "Poista tiedosto"
 
-#: bp/audit/routes.py:118
+#: bp/audit/routes.py:117
 msgid " failed"
 msgstr " epäonnistui"
 
-#: bp/audit/routes.py:120
+#: bp/audit/routes.py:119
 msgid " succeeded"
 msgstr " suoritettu"
 
-#: bp/audit/routes.py:151
+#: bp/audit/routes.py:150
 msgid "No such batch "
 msgstr "Aineistoa ei ole"
 
-#: bp/audit/routes.py:208
+#: bp/audit/routes.py:206
 msgid "You are now an auditor for batch "
 msgstr ""
 
-#: bp/audit/routes.py:215
+#: bp/audit/routes.py:213
 msgid "Audit batch accepted: "
 msgstr "Trakastus läpäisty: "
 
-#: bp/audit/routes.py:222
+#: bp/audit/routes.py:220
 msgid "You have rejected the batch "
 msgstr "Olet palauttanut tutkijalle aineiston "
 
-#: bp/audit/routes.py:358
+#: bp/audit/routes.py:356
 msgid "Done"
 msgstr "Tehty"
 
-#: bp/audit/routes.py:447
+#: bp/audit/routes.py:445
 msgid "Data type '{}' is not supported"
 msgstr "Tietotyyppiä '{}' ei tueta"
 
-#: bp/audit/routes.py:454
+#: bp/audit/routes.py:452
 msgid "Missing proper column title: "
 msgstr "Kelvollinen sarakeotsikko puuttuu:"
 
@@ -1086,7 +1086,7 @@ msgstr "valittu hyväksytty aineisto"
 msgid "Delete data"
 msgstr "Poistetaan"
 
-#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:451
+#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:447
 msgid "Delete from database"
 msgstr "Poista tietokannasta"
 
@@ -1118,6 +1118,11 @@ msgstr "Tallenna tiedostona"
 #: bp/audit/templates/audit/batches.html:78
 msgid "Download original file"
 msgstr "Tallenna alkuperäinen tiedosto"
+
+#: bp/audit/templates/audit/batches.html:83 bp/gramps/routes.py:443
+#, fuzzy
+msgid "Show upload log"
+msgstr "Näytä viimeisin loki"
 
 #: bp/audit/templates/audit/batches.html:88
 msgid "Your audit operations"
@@ -2139,43 +2144,39 @@ msgstr "Poista tag-X-merkinnät"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Poistaa \"-X\"-merkityistä tunnisteista \"-X\" :n"
 
-#: bp/gramps/routes.py:314
+#: bp/gramps/routes.py:310
 msgid "Batch not found"
 msgstr "Aineistoa ei ole"
 
-#: bp/gramps/routes.py:330
+#: bp/gramps/routes.py:326
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr "Aineiston %(batch_id)s poistaminen ei onnistunut"
 
-#: bp/gramps/routes.py:338
+#: bp/gramps/routes.py:334
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr "Aineisto %(batch_id)s on poistettu (%(n)s kohdetta)"
 
-#: bp/gramps/routes.py:422
+#: bp/gramps/routes.py:418
 msgid "Failed to retrieve commands"
 msgstr "Komentoja ei saatu esiin"
 
-#: bp/gramps/routes.py:429
+#: bp/gramps/routes.py:425
 msgid "Browse this material"
 msgstr "Selaa aineistoa"
 
-#: bp/gramps/routes.py:434
+#: bp/gramps/routes.py:430
 msgid "Send for auditing"
 msgstr "Lähetä tarkastettavaksi"
 
-#: bp/gramps/routes.py:439
+#: bp/gramps/routes.py:435
 msgid "Withdraw auditing"
 msgstr "Peru tarkastuspyyntö"
 
-#: bp/gramps/routes.py:443
+#: bp/gramps/routes.py:439
 msgid "Download the Gramps file"
 msgstr "Talleta tiedosto koneellesi"
-
-#: bp/gramps/routes.py:447
-msgid "Show last log"
-msgstr "Näytä viimeisin loki"
 
 #: bp/gramps/templates/gramps/analyze_xml.html:3
 msgid "Gramps to Neo5j analyze"
@@ -2214,7 +2215,7 @@ msgid "Send data to server"
 msgstr "Aineiston lähettäminen"
 
 #: bp/gramps/templates/gramps/obsolete_index_gramps.html:49
-#: bp/gramps/templates/gramps/uploads.html:189
+#: bp/gramps/templates/gramps/uploads.html:188
 msgid ""
 "Select Gramps XML File (*.gramps etc) for converting to your candidate "
 "material"

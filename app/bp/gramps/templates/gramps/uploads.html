@@ -35,7 +35,7 @@ li > button {
   /*color: #069;*/
   cursor: pointer;
 }
-li > button:hover, .a:hover, .a1:hover {
+li > button:hover, .a:hover, .a1:hover, p > a:hover {
   text-decoration: underline;
 }
 li > button, a, a1 {
@@ -115,16 +115,16 @@ function confirm_delete(subj, name) {
 {% include "flash_messages.html" %}
 
 	<table class="fileselect">
-	{% if uploads %}
-        	<tr> 
-                <th>{{ _("Batch operations") }}</th>
-                <th>{{ _("Gramps file") }}</th>
-                <th>{{ _("Person count") }}</th>
-                <th>{{ _("Status") }} {{ state_info() }} </th>
-   			</tr>
-	{% endif %}
+{% if uploads %}
+       	<tr> 
+               <th>{{ _("Batch operations") }}</th>
+               <th>{{ _("Gramps file") }}</th>
+               <th>{{ _("Person count") }}</th>
+               <th>{{ _("Status") }} {{ state_info() }} </th>
+  		</tr>
+{% endif %}
  
-	{% for upload in uploads %}
+{% for upload in uploads %}
         <tr> 
             <td id='{{upload.batch_id}}'>
             	<a href="#" id="a-{{loop.index}}" class="a"
@@ -143,21 +143,21 @@ function confirm_delete(subj, name) {
 				</span>
 				
                 <div class="progress" data-name='{{upload.batch_id}}'></div>
-				{% if upload.state == 'Loading' %}
+    {% if upload.state == 'Loading' %}
                      <script>
                          setTimeout( function() {update_progress('{{upload.batch_id}}')}, 1000 );
                      </script>
-				{% endif %}
+    {% endif -%}
             </td>
 
             <td>{{upload.xmlname}}
 
-		{% if upload.material_type or upload.description %}
+    {% if upload.material_type or upload.description %}
                 <br><span class="typedesc">{{upload.material_type|transl('material')}}</span>
-		{% endif %}
-		{% if upload.description %} 
+    {% endif -%}
+    {% if upload.description %} 
                 <i>{{ upload.description[0:19] }}
-			{% if upload.description|length > 19  %}
+        {% if upload.description|length > 19  %}
                     ... 
                     <div class="tooltip"> 
                     &nbsp;&#8505;&nbsp;
@@ -165,32 +165,32 @@ function confirm_delete(subj, name) {
                         {{ upload.description }} 
                       </div>
                     </div> 
-			{% endif %}
+        {% endif %}
                 </i>
-		{% endif %}
+    {% endif %}
 
             </td>
 
             <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
             </td>
             <td>{{upload.status}}
-			{% if upload.auditors %}
+    {% if upload.auditors %}
                     <br><i>{{ _("Auditor") }}:
-            	{% for auditor, ts, ts_str in upload.auditors %}
+        {% for auditor, ts, ts_str in upload.auditors %}
             			<span title="{{ _('Audit start date') }}">{{auditor}}&nbsp;{{ts_str}}</span>
-            	{% endfor %}</i>
-			{% endif %}
+        {% endfor %}</i>
+    {% endif %}
             </td>
         </tr>
-	{% endfor %}
+{% endfor %}
 
 {% if current_user.is_authenticated and current_user.has_role('research') %}
-		<form action="/gramps/upload" method="post" enctype="multipart/form-data">
-   			<tr id="upload_xml" title="{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.">
-   				<td><b>{{ _("Send a new Gramps file") }}</b>
-   				</td>
-   				<td colspan="4">
-   					<div>
+  		<tr id="upload_xml" title="{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.">
+            <form action="/gramps/upload" method="post" enctype="multipart/form-data">
+  				<td><b>{{ _("Send a new Gramps file") }}</b>
+  				</td>
+  				<td colspan="4">
+  					<div>
 	   					<div>
 				        	<input type="hidden" name="material" value="xml_file">
 				        	<input type="file" name="filenm" accept=".gramps,.gpkg"/>
@@ -198,18 +198,20 @@ function confirm_delete(subj, name) {
 				        <div class="submit"> 
 				        	<input type="submit" value="{{ _('Send to database') }}" onclick="checkFileSize()"/>
 				        </div>
-   					</div>
-   				</td>
-   			</tr>
- 		</form>
-   </div>
+  					</div>
+  				</td>
+            </form>
+  		</tr>
+{% endif %}
+
    	</table>
    
   </div>
-{% endif %}
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
 
 <!-- Startdiv ends -->
 </div>
+
 {% endblock %}
 <script>
 // Status help text

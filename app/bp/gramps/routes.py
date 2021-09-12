@@ -73,15 +73,15 @@ from bl.gramps import gramps_utils
 @bp.route("/gramps/show_log/")
 @login_required
 @roles_accepted("research")
-def show_upload_log(xmlfile=""):
+def obsolete_show_upload_log(xmlfile=""):
     msg=""
     try:
         upload_folder = uploads.get_upload_folder(current_user.username)
         fname = os.path.join(upload_folder, xmlfile + ".log")
         msg = open(fname, encoding="utf-8").read()
-        logger.info(f"-> bp.gramps.routes.show_upload_log f='{xmlfile}'")
+        logger.info(f"-> bp.gramps.routes.obsolete_show_upload_log f='{xmlfile}'")
     except Exception as e:
-        print(f"bp.gramps.routes.show_upload_log: {e}")
+        print(f"bp.gramps.routes.obsolete_show_upload_log: {e}")
         if not msg:
             msg = f'{_("The uploaded file does not exist any more.")}'
         flash(msg)
@@ -273,6 +273,9 @@ def show_upload_log_from_batch_id(batch_id):
     msg=""
     try:
         batch = Root.get_batch(current_user.username, batch_id)
+        if batch.file and not batch.logname:
+            # Old style v2021.1 Root without logname info
+            batch.logname = batch.file + ".log"        
         msg = open(batch.logname, encoding="utf-8").read()
         logger.info(f"-> bp.gramps.routes.show_upload_log_from_batch_id f='{batch.logname}'")
     except Exception as e:
@@ -437,7 +440,7 @@ def get_commands(batch_id):
         ))
         commands.append( (
             f"/gramps/show_upload_log/{batch_id}", 
-            _("Show last log") 
+            _("Show upload log") 
         ))
         commands.append( (
             f"/gramps/batch_delete/{batch_id}", 
