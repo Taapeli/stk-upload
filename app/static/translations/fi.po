@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-09 09:59+0300\n"
+"POT-Creation-Date: 2021-09-12 11:59+0300\n"
 "PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -628,7 +628,6 @@ msgid "Empty batches for user"
 msgstr "Tyhjär erät käyttäjälle"
 
 #: bp/admin/templates/admin/batch_clear.html:22
-#: bp/audit/templates/audit/pick_auditing.html:17
 msgid "Selected Batch"
 msgstr "Valittu aineisto"
 
@@ -802,7 +801,7 @@ msgid "Log of Gramps XML upload"
 msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
 
 #: bp/admin/templates/admin/load_result.html:13
-#: bp/audit/templates/audit/pick_auditing.html:59
+#: bp/audit/templates/audit/pick_auditing.html:78
 #: bp/gramps/templates/gramps/analyze_xml.html:29
 #: bp/gramps/templates/gramps/gramps_analyze.html:43
 #: bp/gramps/templates/gramps/result.html:21
@@ -905,7 +904,7 @@ msgstr "Kaikkien käyttäjien lataamat tiedostot"
 
 #: bp/admin/templates/admin/uploads.html:31
 msgid "Gramps file / uploaded at"
-msgstr ""
+msgstr "Gramps-tiedosto / ladattu"
 
 #: bp/admin/templates/admin/uploads.html:32
 msgid "Type / description"
@@ -1018,7 +1017,7 @@ msgstr "Aineistoa ei ole"
 
 #: bp/audit/routes.py:211
 msgid "Audit batch accepted: "
-msgstr "Auditointi hyväksytty: "
+msgstr "Auditointi läpäisty: "
 
 #: bp/audit/routes.py:218
 msgid "You have rejected the batch "
@@ -1066,7 +1065,7 @@ msgid "Researcher"
 msgstr "Tutkija"
 
 #: bp/audit/templates/audit/approvals.html:75
-#: bp/audit/templates/audit/pick_auditing.html:27
+#: bp/audit/templates/audit/pick_auditing.html:46
 #: bp/start/templates/start/my_settings.html:125
 msgid "Batch id"
 msgstr "Aineistotunnus"
@@ -1083,7 +1082,7 @@ msgstr "valittu hyväksytty aineisto"
 msgid "Delete data"
 msgstr "Poistetaan"
 
-#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:444
+#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:451
 msgid "Delete from database"
 msgstr "Poista tietokannasta"
 
@@ -1103,7 +1102,7 @@ msgid "persons"
 msgstr "henkilöä"
 
 #: bp/audit/templates/audit/batches.html:52
-#: bp/audit/templates/audit/pick_auditing.html:45
+#: bp/audit/templates/audit/pick_auditing.html:64
 #: bp/gramps/templates/gramps/uploads.html:180
 msgid "Audit start date"
 msgstr "Alkuaika"
@@ -1207,54 +1206,59 @@ msgstr "Ohjeita"
 msgid "Select auditiong operation"
 msgstr "Valitse auditoijan toiminto"
 
-#: bp/audit/templates/audit/pick_auditing.html:12
+#: bp/audit/templates/audit/pick_auditing.html:25
 msgid "Pick auditing operation"
-msgstr "Valitse auditointitehtävä"
+msgstr "Tarkastajan toimet"
 
-#: bp/audit/templates/audit/pick_auditing.html:18
-msgid "in the phase of"
-msgstr "vaiheessa"
+#: bp/audit/templates/audit/pick_auditing.html:29
+#, python-format
+msgid "Selected %(m)s batch"
+msgstr "Valittu %(m)s-aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:20
+#: bp/audit/templates/audit/pick_auditing.html:35
+msgid "In the phase"
+msgstr "Vaiheessa"
+
+#: bp/audit/templates/audit/pick_auditing.html:39
 msgid "with title"
 msgstr "otsikolla"
 
-#: bp/audit/templates/audit/pick_auditing.html:21
+#: bp/audit/templates/audit/pick_auditing.html:40
 msgid "There is no data in this batch"
-msgstr "– Aineisto on tyhjä"
+msgstr "Aineisto on tyhjä"
 
-#: bp/audit/templates/audit/pick_auditing.html:35
+#: bp/audit/templates/audit/pick_auditing.html:54
 msgid "saved at"
 msgstr "talletettu"
 
-#: bp/audit/templates/audit/pick_auditing.html:40
+#: bp/audit/templates/audit/pick_auditing.html:59
 #, python-format
 msgid "Total %(cnt)s nodes from user <b>%(user)s</b>."
 msgstr "Yhteensä %(cnt)s kohdetta tutkijalta <b>%(user)s</b>."
 
-#: bp/audit/templates/audit/pick_auditing.html:44
+#: bp/audit/templates/audit/pick_auditing.html:63
 msgid "Current auditors"
-msgstr "Auditoijat"
+msgstr "Tarkastajat"
 
-#: bp/audit/templates/audit/pick_auditing.html:49
+#: bp/audit/templates/audit/pick_auditing.html:68
 msgid "Access is given also to"
 msgstr "Käyttöoikeus myös"
 
-#: bp/audit/templates/audit/pick_auditing.html:62
+#: bp/audit/templates/audit/pick_auditing.html:81
 msgid "Start auditing"
-msgstr "Aloita auditointi"
+msgstr "Aloita tarkastus"
 
-#: bp/audit/templates/audit/pick_auditing.html:64
+#: bp/audit/templates/audit/pick_auditing.html:83
 msgid "Accept auditing"
 msgstr "Hyväksy aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:66
-#: bp/audit/templates/audit/pick_auditing.html:69
-#: bp/audit/templates/audit/pick_auditing.html:81
+#: bp/audit/templates/audit/pick_auditing.html:85
+#: bp/audit/templates/audit/pick_auditing.html:88
+#: bp/audit/templates/audit/pick_auditing.html:100
 msgid "Reject auditing"
 msgstr "Palauta aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:79
+#: bp/audit/templates/audit/pick_auditing.html:98
 msgid "Cancel"
 msgstr "Palaa"
 
@@ -2128,42 +2132,41 @@ msgstr "Poista tag-X-merkinnät"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Poistaa \"-X\"-merkityistä tunnisteista \"-X\" :n"
 
-#: bp/gramps/routes.py:307
+#: bp/gramps/routes.py:314
 msgid "Batch not found"
 msgstr "Aineistoa ei ole"
 
-#: bp/gramps/routes.py:323
+#: bp/gramps/routes.py:330
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr "Aineiston %(batch_id)s poistaminen ei onnistunut"
 
-#: bp/gramps/routes.py:331
+#: bp/gramps/routes.py:338
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr "Aineisto %(batch_id)s on poistettu (%(n)s kohdetta)"
 
-#: bp/gramps/routes.py:415
+#: bp/gramps/routes.py:422
 msgid "Failed to retrieve commands"
 msgstr "Komentoja ei saatu esiin"
 
-#: bp/gramps/routes.py:422
-#, fuzzy
+#: bp/gramps/routes.py:429
 msgid "Browse this material"
-msgstr "Selattava aineisto"
+msgstr "Selaa aineistoa"
 
-#: bp/gramps/routes.py:427
+#: bp/gramps/routes.py:434
 msgid "Send for auditing"
 msgstr "Lähetä tarkastettavaksi"
 
-#: bp/gramps/routes.py:432
+#: bp/gramps/routes.py:439
 msgid "Withdraw auditing"
 msgstr "Peru tarkastuspyyntö"
 
-#: bp/gramps/routes.py:436
+#: bp/gramps/routes.py:443
 msgid "Download the Gramps file"
 msgstr "Talleta tiedosto koneellesi"
 
-#: bp/gramps/routes.py:440
+#: bp/gramps/routes.py:447
 msgid "Show last log"
 msgstr "Näytä viimeisin loki"
 
@@ -2256,7 +2259,7 @@ msgstr "Aika sekunneissa"
 #: bp/gramps/templates/gramps/uploads.html:113
 #: bp/start/templates/start/index_logged.html:43
 msgid "My Candidate Materials"
-msgstr "Omat aineistoni Isotammeen"
+msgstr "Omat tutkijan aineistoni"
 
 #: bp/gramps/templates/gramps/uploads.html:93
 msgid "Are you sure you want to delete the XML file?"
@@ -2290,28 +2293,28 @@ msgstr "juutalainen"
 msgid "Data read failed."
 msgstr "Tietojen lukeminen ei onnistunut"
 
-#: bp/scene/routes.py:422
+#: bp/scene/routes.py:425
 msgid "type changed"
 msgstr "tyyppi muutettu"
 
-#: bp/scene/routes.py:424
+#: bp/scene/routes.py:427
 msgid "type change FAILED"
 msgstr "tyypin muutos EPÄONNISTUI"
 
-#: bp/scene/routes.py:575 bp/scene/routes.py:584
+#: bp/scene/routes.py:578 bp/scene/routes.py:587
 msgid "No event found"
 msgstr "Ei tapahtumia"
 
-#: bp/scene/routes.py:622 bp/scene/templates/scene/event.html:77
+#: bp/scene/routes.py:625 bp/scene/templates/scene/event.html:77
 #: bp/scene/templates/scene/hx-person/famtree.html:42
 msgid "Self"
 msgstr "Itse"
 
-#: bp/scene/routes.py:784
+#: bp/scene/routes.py:787
 msgid "No families"
 msgstr "Ei perheitä"
 
-#: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:108
+#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:108
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/hx-person/famtree.html:17
 #: bp/scene/templates/scene/hx-person/famtree.html:60 ui/jinja_filters.py:87
@@ -2319,18 +2322,18 @@ msgstr "Ei perheitä"
 msgid "Family"
 msgstr "Perhe"
 
-#: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:112
+#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:112
 #: bp/scene/templates/scene/family.html:98
 #: bp/scene/templates/scene/hx-person/famtree.html:25
 #: bp/scene/templates/scene/hx-person/famtree.html:68
 msgid "Children"
 msgstr "Lapset"
 
-#: bp/scene/routes.py:962
+#: bp/scene/routes.py:965
 msgid "No objects found"
 msgstr "Ei kohteita"
 
-#: bp/scene/routes.py:1218
+#: bp/scene/routes.py:1221
 msgid "No previous comments"
 msgstr "Ei aiempia kommentteja"
 
@@ -3461,9 +3464,8 @@ msgid "Save your  Gramps xml file as Isotammi candidate material."
 msgstr "Tallenna Gramps-muotoinen aineistosi Isotammen tutkijan ainestoksi."
 
 #: bp/start/templates/start/index_logged.html:46
-#, fuzzy
 msgid "Manage your candidate materials in the database."
-msgstr "Hallinnoi tutkijan aineistoja ja Gramps-tiedostoja"
+msgstr "Hallinnoi tutkijan aineistojasi."
 
 #: bp/start/templates/start/index_logged.html:48
 msgid "Candidate materials"
@@ -3551,8 +3553,8 @@ msgid ""
 "After sending this form you will still have to wait for a confirmation "
 "email from the Isotammi team before you can access the application."
 msgstr ""
-"Tämän lomakkeen lähettämisen jälkeen odota vielä hyväksymissähköpostia "
-"ennen kuin voit käyttää sovellusta."
+"Lähettämisen jälkeen odota vielä hyväksymissähköpostia ennen kuin voit "
+"käyttää sovellusta."
 
 #: bp/start/templates/start/join.html:46
 msgid "Thank You!"
@@ -3722,14 +3724,6 @@ msgstr "Etusivu"
 #: bp/start/templates/start/s_macros.html:19
 msgid "Home"
 msgstr "Etusivulle"
-
-#: bp/start/templates/start/s_macros.html:21
-msgid "Browse database"
-msgstr "Selaa omia tai hyväksyttyjä tietoja"
-
-#: bp/start/templates/start/s_macros.html:22
-msgid "Go to search page"
-msgstr "Siirry hakuihin"
 
 #: bp/start/templates/start/s_macros.html:24
 msgid "Instructions for this page"

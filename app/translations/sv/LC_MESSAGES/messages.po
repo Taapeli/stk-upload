@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-09 09:59+0300\n"
+"POT-Creation-Date: 2021-09-12 11:59+0300\n"
 "PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -630,7 +630,6 @@ msgid "Empty batches for user"
 msgstr "Tomma batchar för användare"
 
 #: bp/admin/templates/admin/batch_clear.html:22
-#: bp/audit/templates/audit/pick_auditing.html:17
 msgid "Selected Batch"
 msgstr "Markerad batch"
 
@@ -804,7 +803,7 @@ msgid "Log of Gramps XML upload"
 msgstr "Log av Gramps XML uppladdning"
 
 #: bp/admin/templates/admin/load_result.html:13
-#: bp/audit/templates/audit/pick_auditing.html:59
+#: bp/audit/templates/audit/pick_auditing.html:78
 #: bp/gramps/templates/gramps/analyze_xml.html:29
 #: bp/gramps/templates/gramps/gramps_analyze.html:43
 #: bp/gramps/templates/gramps/result.html:21
@@ -1071,7 +1070,7 @@ msgid "Researcher"
 msgstr "Forskare"
 
 #: bp/audit/templates/audit/approvals.html:75
-#: bp/audit/templates/audit/pick_auditing.html:27
+#: bp/audit/templates/audit/pick_auditing.html:46
 #: bp/start/templates/start/my_settings.html:125
 msgid "Batch id"
 msgstr "Batch id"
@@ -1088,7 +1087,7 @@ msgstr ""
 msgid "Delete data"
 msgstr "Fösrstöra data"
 
-#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:444
+#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:451
 msgid "Delete from database"
 msgstr "Tag bort från databasen"
 
@@ -1108,7 +1107,7 @@ msgid "persons"
 msgstr "personer"
 
 #: bp/audit/templates/audit/batches.html:52
-#: bp/audit/templates/audit/pick_auditing.html:45
+#: bp/audit/templates/audit/pick_auditing.html:64
 #: bp/gramps/templates/gramps/uploads.html:180
 #, fuzzy
 msgid "Audit start date"
@@ -1216,60 +1215,65 @@ msgstr "Instruktioner"
 msgid "Select auditiong operation"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:12
+#: bp/audit/templates/audit/pick_auditing.html:25
 msgid "Pick auditing operation"
 msgstr "Administrativa åtgärder"
 
-#: bp/audit/templates/audit/pick_auditing.html:18
+#: bp/audit/templates/audit/pick_auditing.html:29
+#, fuzzy, python-format
+msgid "Selected %(m)s batch"
+msgstr "Markerad batch"
+
+#: bp/audit/templates/audit/pick_auditing.html:35
 #, fuzzy
-msgid "in the phase of"
+msgid "In the phase"
 msgstr "i församlingen"
 
-#: bp/audit/templates/audit/pick_auditing.html:20
+#: bp/audit/templates/audit/pick_auditing.html:39
 #, fuzzy
 msgid "with title"
 msgstr "med roller"
 
-#: bp/audit/templates/audit/pick_auditing.html:21
+#: bp/audit/templates/audit/pick_auditing.html:40
 #, fuzzy
 msgid "There is no data in this batch"
 msgstr "– Det finns inga fler data att flytta i denna batch"
 
-#: bp/audit/templates/audit/pick_auditing.html:35
+#: bp/audit/templates/audit/pick_auditing.html:54
 msgid "saved at"
 msgstr "sparade till"
 
-#: bp/audit/templates/audit/pick_auditing.html:40
+#: bp/audit/templates/audit/pick_auditing.html:59
 #, python-format
 msgid "Total %(cnt)s nodes from user <b>%(user)s</b>."
 msgstr "Totalt %(cnt)s noder från användaren <b>%(user)s</b>."
 
-#: bp/audit/templates/audit/pick_auditing.html:44
+#: bp/audit/templates/audit/pick_auditing.html:63
 msgid "Current auditors"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:49
+#: bp/audit/templates/audit/pick_auditing.html:68
 msgid "Access is given also to"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:62
+#: bp/audit/templates/audit/pick_auditing.html:81
 #, fuzzy
 msgid "Start auditing"
 msgstr "Revisioner"
 
-#: bp/audit/templates/audit/pick_auditing.html:64
+#: bp/audit/templates/audit/pick_auditing.html:83
 #, fuzzy
 msgid "Accept auditing"
 msgstr "Revisioner"
 
-#: bp/audit/templates/audit/pick_auditing.html:66
-#: bp/audit/templates/audit/pick_auditing.html:69
-#: bp/audit/templates/audit/pick_auditing.html:81
+#: bp/audit/templates/audit/pick_auditing.html:85
+#: bp/audit/templates/audit/pick_auditing.html:88
+#: bp/audit/templates/audit/pick_auditing.html:100
 #, fuzzy
 msgid "Reject auditing"
 msgstr "Revisioner"
 
-#: bp/audit/templates/audit/pick_auditing.html:79
+#: bp/audit/templates/audit/pick_auditing.html:98
 msgid "Cancel"
 msgstr ""
 
@@ -2145,42 +2149,41 @@ msgstr "Avmarkera"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Återställ markerad tag's: <tag>-X -> <tag>"
 
-#: bp/gramps/routes.py:307
+#: bp/gramps/routes.py:314
 msgid "Batch not found"
 msgstr ""
 
-#: bp/gramps/routes.py:323
+#: bp/gramps/routes.py:330
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr ""
 
-#: bp/gramps/routes.py:331
+#: bp/gramps/routes.py:338
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr ""
 
-#: bp/gramps/routes.py:415
+#: bp/gramps/routes.py:422
 msgid "Failed to retrieve commands"
 msgstr ""
 
-#: bp/gramps/routes.py:422
-#, fuzzy
+#: bp/gramps/routes.py:429
 msgid "Browse this material"
-msgstr "Det bläddrade materialet"
+msgstr "Bläddrade detta materialet"
 
-#: bp/gramps/routes.py:427
+#: bp/gramps/routes.py:434
 msgid "Send for auditing"
-msgstr ""
+msgstr "Be om revisionen"
 
-#: bp/gramps/routes.py:432
+#: bp/gramps/routes.py:439
 msgid "Withdraw auditing"
-msgstr ""
+msgstr "Tillbakadra revisionen"
 
-#: bp/gramps/routes.py:436
+#: bp/gramps/routes.py:443
 msgid "Download the Gramps file"
 msgstr "Ladda ned Gramps filen"
 
-#: bp/gramps/routes.py:440
+#: bp/gramps/routes.py:447
 msgid "Show last log"
 msgstr "Visa senaste logg"
 
@@ -2284,9 +2287,8 @@ msgid "Are you sure you want to delete the XML file?"
 msgstr "Vill du avlägsna XML filen?"
 
 #: bp/gramps/templates/gramps/uploads.html:120
-#, fuzzy
 msgid "Batch operations"
-msgstr "Andra operationer"
+msgstr "Materialoperationer"
 
 #: bp/gramps/templates/gramps/uploads.html:122
 msgid "Person count"
@@ -2297,7 +2299,6 @@ msgid "Send a new Gramps file"
 msgstr "Sänd en ny Gramps fil"
 
 #: bp/gramps/templates/gramps/uploads.html:199
-#, fuzzy
 msgid "Send to database"
 msgstr "Spara till databas"
 
@@ -2313,28 +2314,28 @@ msgstr ""
 msgid "Data read failed."
 msgstr ""
 
-#: bp/scene/routes.py:422
+#: bp/scene/routes.py:425
 msgid "type changed"
 msgstr ""
 
-#: bp/scene/routes.py:424
+#: bp/scene/routes.py:427
 msgid "type change FAILED"
 msgstr ""
 
-#: bp/scene/routes.py:575 bp/scene/routes.py:584
+#: bp/scene/routes.py:578 bp/scene/routes.py:587
 msgid "No event found"
 msgstr "Inga händelser hittades"
 
-#: bp/scene/routes.py:622 bp/scene/templates/scene/event.html:77
+#: bp/scene/routes.py:625 bp/scene/templates/scene/event.html:77
 #: bp/scene/templates/scene/hx-person/famtree.html:42
 msgid "Self"
 msgstr "Själv"
 
-#: bp/scene/routes.py:784
+#: bp/scene/routes.py:787
 msgid "No families"
 msgstr "Inga familjer"
 
-#: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:108
+#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:108
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/hx-person/famtree.html:17
 #: bp/scene/templates/scene/hx-person/famtree.html:60 ui/jinja_filters.py:87
@@ -2342,34 +2343,32 @@ msgstr "Inga familjer"
 msgid "Family"
 msgstr "Familj"
 
-#: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:112
+#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:112
 #: bp/scene/templates/scene/family.html:98
 #: bp/scene/templates/scene/hx-person/famtree.html:25
 #: bp/scene/templates/scene/hx-person/famtree.html:68
 msgid "Children"
 msgstr "Barn"
 
-#: bp/scene/routes.py:962
+#: bp/scene/routes.py:965
 msgid "No objects found"
 msgstr "Ingenting funnits"
 
-#: bp/scene/routes.py:1218
+#: bp/scene/routes.py:1221
 msgid "No previous comments"
 msgstr "Inga kommentarer"
 
 #: bp/scene/templates/scene/comments.html:3
 #: bp/scene/templates/scene/comments.html:12
-#, fuzzy
 msgid "List of Topics"
-msgstr "Lista av källor"
+msgstr "Lista av ämnen"
 
 #: bp/scene/templates/scene/comments.html:21
-#, fuzzy, python-format
+#, python-format
 msgid "Displaying %(num)s distinct topics"
-msgstr "Visning av %(num)s distinkta platser"
+msgstr "Visning av %(num)s distinkta ämnen"
 
 #: bp/scene/templates/scene/comments.html:30
-#, fuzzy
 msgid "Discussions"
 msgstr "Visa diskussion"
 
@@ -2384,9 +2383,8 @@ msgid "Concerned, Topic"
 msgstr "Mäl"
 
 #: bp/scene/templates/scene/comments.html:35
-#, fuzzy
 msgid "Replies"
-msgstr "roller"
+msgstr "Svaren"
 
 #: bp/scene/templates/scene/comments.html:37
 #: bp/scene/templates/scene/medias.html:68
@@ -2396,7 +2394,7 @@ msgstr "Bara for revisorn"
 #: bp/scene/templates/scene/comments.html:37
 #, fuzzy
 msgid "Material"
-msgstr "Demomaterialet"
+msgstr "Materialet"
 
 #: bp/scene/templates/scene/comments.html:47
 #: bp/scene/templates/scene/comments.html:50
@@ -3760,14 +3758,6 @@ msgstr "Start sida"
 #: bp/start/templates/start/s_macros.html:19
 msgid "Home"
 msgstr "Hem"
-
-#: bp/start/templates/start/s_macros.html:21
-msgid "Browse database"
-msgstr "Bläddra i databasen"
-
-#: bp/start/templates/start/s_macros.html:22
-msgid "Go to search page"
-msgstr "Gå till söksidan"
 
 #: bp/start/templates/start/s_macros.html:24
 msgid "Instructions for this page"

@@ -55,14 +55,14 @@ def format_ms_timestamp(ts_ms=None, opt="m"):
     """Converts timestamp (ms since the Epoch) to string (by 'm' minute or 'd' day)
        Returns "", is no ts is given.
 
-        Example '23.05.2021 15:10' or '23.05.2021'.
+        Example '23.5.2021 15:10' or '23.5.2021'.
     """
     if ts_ms:
         ts = float(ts_ms) / 1000.
         if opt == "d":
-            return time.strftime("%d.%m.%Y", time.localtime(ts))
+            return time.strftime("%-d.%-m.%Y", time.localtime(ts))
         else:
-            return time.strftime("%d.%m.%Y %H:%M", time.localtime(ts))
+            return time.strftime("%-d.%-m.%Y %H:%M", time.localtime(ts))
     return ""
 
 def format_date(ts=None):

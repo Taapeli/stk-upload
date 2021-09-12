@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-09 09:59+0300\n"
+"POT-Creation-Date: 2021-09-12 11:59+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -628,7 +628,6 @@ msgid "Empty batches for user"
 msgstr ""
 
 #: bp/admin/templates/admin/batch_clear.html:22
-#: bp/audit/templates/audit/pick_auditing.html:17
 msgid "Selected Batch"
 msgstr ""
 
@@ -802,7 +801,7 @@ msgid "Log of Gramps XML upload"
 msgstr ""
 
 #: bp/admin/templates/admin/load_result.html:13
-#: bp/audit/templates/audit/pick_auditing.html:59
+#: bp/audit/templates/audit/pick_auditing.html:78
 #: bp/gramps/templates/gramps/analyze_xml.html:29
 #: bp/gramps/templates/gramps/gramps_analyze.html:43
 #: bp/gramps/templates/gramps/result.html:21
@@ -1066,7 +1065,7 @@ msgid "Researcher"
 msgstr ""
 
 #: bp/audit/templates/audit/approvals.html:75
-#: bp/audit/templates/audit/pick_auditing.html:27
+#: bp/audit/templates/audit/pick_auditing.html:46
 #: bp/start/templates/start/my_settings.html:125
 msgid "Batch id"
 msgstr ""
@@ -1083,7 +1082,7 @@ msgstr ""
 msgid "Delete data"
 msgstr ""
 
-#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:444
+#: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:451
 msgid "Delete from database"
 msgstr ""
 
@@ -1103,7 +1102,7 @@ msgid "persons"
 msgstr ""
 
 #: bp/audit/templates/audit/batches.html:52
-#: bp/audit/templates/audit/pick_auditing.html:45
+#: bp/audit/templates/audit/pick_auditing.html:64
 #: bp/gramps/templates/gramps/uploads.html:180
 msgid "Audit start date"
 msgstr ""
@@ -1207,54 +1206,59 @@ msgstr ""
 msgid "Select auditiong operation"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:12
+#: bp/audit/templates/audit/pick_auditing.html:25
 msgid "Pick auditing operation"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:18
-msgid "in the phase of"
-msgstr ""
-
-#: bp/audit/templates/audit/pick_auditing.html:20
-msgid "with title"
-msgstr ""
-
-#: bp/audit/templates/audit/pick_auditing.html:21
-msgid "There is no data in this batch"
+#: bp/audit/templates/audit/pick_auditing.html:29
+#, python-format
+msgid "Selected %(m)s batch"
 msgstr ""
 
 #: bp/audit/templates/audit/pick_auditing.html:35
-msgid "saved at"
+msgid "In the phase"
+msgstr ""
+
+#: bp/audit/templates/audit/pick_auditing.html:39
+msgid "with title"
 msgstr ""
 
 #: bp/audit/templates/audit/pick_auditing.html:40
+msgid "There is no data in this batch"
+msgstr ""
+
+#: bp/audit/templates/audit/pick_auditing.html:54
+msgid "saved at"
+msgstr ""
+
+#: bp/audit/templates/audit/pick_auditing.html:59
 #, python-format
 msgid "Total %(cnt)s nodes from user <b>%(user)s</b>."
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:44
+#: bp/audit/templates/audit/pick_auditing.html:63
 msgid "Current auditors"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:49
+#: bp/audit/templates/audit/pick_auditing.html:68
 msgid "Access is given also to"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:62
+#: bp/audit/templates/audit/pick_auditing.html:81
 msgid "Start auditing"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:64
+#: bp/audit/templates/audit/pick_auditing.html:83
 msgid "Accept auditing"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:66
-#: bp/audit/templates/audit/pick_auditing.html:69
-#: bp/audit/templates/audit/pick_auditing.html:81
+#: bp/audit/templates/audit/pick_auditing.html:85
+#: bp/audit/templates/audit/pick_auditing.html:88
+#: bp/audit/templates/audit/pick_auditing.html:100
 msgid "Reject auditing"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:79
+#: bp/audit/templates/audit/pick_auditing.html:98
 msgid "Cancel"
 msgstr ""
 
@@ -2128,41 +2132,41 @@ msgstr ""
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr ""
 
-#: bp/gramps/routes.py:307
+#: bp/gramps/routes.py:314
 msgid "Batch not found"
 msgstr ""
 
-#: bp/gramps/routes.py:323
+#: bp/gramps/routes.py:330
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr ""
 
-#: bp/gramps/routes.py:331
+#: bp/gramps/routes.py:338
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr ""
 
-#: bp/gramps/routes.py:415
+#: bp/gramps/routes.py:422
 msgid "Failed to retrieve commands"
 msgstr ""
 
-#: bp/gramps/routes.py:422
+#: bp/gramps/routes.py:429
 msgid "Browse this material"
 msgstr ""
 
-#: bp/gramps/routes.py:427
+#: bp/gramps/routes.py:434
 msgid "Send for auditing"
 msgstr ""
 
-#: bp/gramps/routes.py:432
+#: bp/gramps/routes.py:439
 msgid "Withdraw auditing"
 msgstr ""
 
-#: bp/gramps/routes.py:436
+#: bp/gramps/routes.py:443
 msgid "Download the Gramps file"
 msgstr ""
 
-#: bp/gramps/routes.py:440
+#: bp/gramps/routes.py:447
 msgid "Show last log"
 msgstr ""
 
@@ -2289,28 +2293,28 @@ msgstr ""
 msgid "Data read failed."
 msgstr ""
 
-#: bp/scene/routes.py:422
+#: bp/scene/routes.py:425
 msgid "type changed"
 msgstr ""
 
-#: bp/scene/routes.py:424
+#: bp/scene/routes.py:427
 msgid "type change FAILED"
 msgstr ""
 
-#: bp/scene/routes.py:575 bp/scene/routes.py:584
+#: bp/scene/routes.py:578 bp/scene/routes.py:587
 msgid "No event found"
 msgstr ""
 
-#: bp/scene/routes.py:622 bp/scene/templates/scene/event.html:77
+#: bp/scene/routes.py:625 bp/scene/templates/scene/event.html:77
 #: bp/scene/templates/scene/hx-person/famtree.html:42
 msgid "Self"
 msgstr ""
 
-#: bp/scene/routes.py:784
+#: bp/scene/routes.py:787
 msgid "No families"
 msgstr ""
 
-#: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:108
+#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:108
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/hx-person/famtree.html:17
 #: bp/scene/templates/scene/hx-person/famtree.html:60 ui/jinja_filters.py:87
@@ -2318,18 +2322,18 @@ msgstr ""
 msgid "Family"
 msgstr ""
 
-#: bp/scene/routes.py:794 bp/scene/templates/scene/families.html:112
+#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:112
 #: bp/scene/templates/scene/family.html:98
 #: bp/scene/templates/scene/hx-person/famtree.html:25
 #: bp/scene/templates/scene/hx-person/famtree.html:68
 msgid "Children"
 msgstr ""
 
-#: bp/scene/routes.py:962
+#: bp/scene/routes.py:965
 msgid "No objects found"
 msgstr ""
 
-#: bp/scene/routes.py:1218
+#: bp/scene/routes.py:1221
 msgid "No previous comments"
 msgstr ""
 
@@ -3705,14 +3709,6 @@ msgstr ""
 
 #: bp/start/templates/start/s_macros.html:19
 msgid "Home"
-msgstr ""
-
-#: bp/start/templates/start/s_macros.html:21
-msgid "Browse database"
-msgstr ""
-
-#: bp/start/templates/start/s_macros.html:22
-msgid "Go to search page"
 msgstr ""
 
 #: bp/start/templates/start/s_macros.html:24
