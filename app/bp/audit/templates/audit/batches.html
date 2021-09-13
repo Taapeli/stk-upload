@@ -71,13 +71,6 @@
 			   </td>
 
 	           <td>
-<!-- 
-    		{% if upload.has_file %}
-	           	▸ <a href="/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}"
-    	             title="{{ _("Download file") }}">
-    	               {{ _("Download original file") }}</a>
-    		{% endif -%}
- -->
 	        {% if upload.xmlname %}
 	            ▸ <a href="/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}/{{upload.batch_id}}">
 	           			{{ _("Show upload log") }}</a>
