@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-12 19:43+0300\n"
+"POT-Creation-Date: 2021-09-13 11:15+0300\n"
 "PO-Revision-Date: 2021-06-01 15:45+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -605,7 +605,7 @@ msgstr "Sovelluksen hallinta"
 
 #: bp/admin/templates/admin/admin.html:102
 #: bp/audit/templates/audit/approvals.html:103
-#: bp/audit/templates/audit/batches.html:95
+#: bp/audit/templates/audit/batches.html:88
 #: bp/audit/templates/audit/index.html:19
 msgid "Display application log"
 msgstr "Näytä sovelluksen loki"
@@ -904,8 +904,10 @@ msgid "Uploads for all users"
 msgstr "Kaikkien käyttäjien lataamat tiedostot"
 
 #: bp/admin/templates/admin/uploads.html:31
-msgid "Gramps file / uploaded at"
-msgstr "Gramps-tiedosto / ladattu"
+#: bp/audit/templates/audit/batches.html:21
+#: bp/gramps/templates/gramps/uploads.html:121
+msgid "Gramps file"
+msgstr "Gramps-tiedosto"
 
 #: bp/admin/templates/admin/uploads.html:32
 msgid "Type / description"
@@ -915,7 +917,7 @@ msgstr "Tyyppi / kuvaus"
 #: bp/audit/templates/audit/batches.html:20
 #: bp/gramps/templates/gramps/uploads.html:123
 msgid "Status"
-msgstr "Tila"
+msgstr "Vaihe"
 
 #: bp/admin/templates/admin/uploads.html:36
 #: bp/start/templates/start/s_macros.html:56
@@ -1095,11 +1097,6 @@ msgstr "Poista tietokannasta"
 msgid "Batches"
 msgstr "Tutkijan aineistoja"
 
-#: bp/audit/templates/audit/batches.html:21
-#: bp/gramps/templates/gramps/uploads.html:121
-msgid "Gramps file"
-msgstr "Gramps-tiedosto"
-
 #: bp/audit/templates/audit/batches.html:39
 #: bp/scene/templates/scene/persons_search.html:217
 msgid "persons"
@@ -1111,19 +1108,11 @@ msgstr "henkilöä"
 msgid "Audit start date"
 msgstr "Tarkastus alkoi"
 
-#: bp/audit/templates/audit/batches.html:77
-msgid "Download file"
-msgstr "Tallenna tiedostona"
-
-#: bp/audit/templates/audit/batches.html:78
-msgid "Download original file"
-msgstr "Tallenna alkuperäinen tiedosto"
-
-#: bp/audit/templates/audit/batches.html:83 bp/gramps/routes.py:443
+#: bp/audit/templates/audit/batches.html:76 bp/gramps/routes.py:443
 msgid "Show upload log"
 msgstr "Näytä latauksen loki"
 
-#: bp/audit/templates/audit/batches.html:88
+#: bp/audit/templates/audit/batches.html:81
 msgid "Your audit operations"
 msgstr "Tarkastajan toiminnot"
 
@@ -3446,7 +3435,7 @@ msgstr "Käyttäjän alkusivu"
 
 #: bp/start/templates/start/index_logged.html:13
 msgid "User's home page for Isotammi Services"
-msgstr "Isotammen aloitussivusi"
+msgstr "Isotammen aloitussivu"
 
 #: bp/start/templates/start/index_logged.html:30
 msgid ""

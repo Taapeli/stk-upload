@@ -103,10 +103,10 @@ def audit_user_op(oper=None, batch_id=None):
 
     if operation == "request":
         new_state = State.ROOT_AUDIT_REQUESTED
-        msg = "Audit request for " + batch_id
+        msg = _("Audit request for ") + batch_id
     elif operation == "withdraw":
         new_state = State.ROOT_CANDIDATE
-        msg = "Withdrawing audit request for " + batch_id
+        msg = _("Withdrawing audit request for ") + batch_id
     else:
         return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 

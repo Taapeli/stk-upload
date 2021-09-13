@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-12 19:43+0300\n"
+"POT-Creation-Date: 2021-09-13 11:15+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -605,7 +605,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/admin.html:102
 #: bp/audit/templates/audit/approvals.html:103
-#: bp/audit/templates/audit/batches.html:95
+#: bp/audit/templates/audit/batches.html:88
 #: bp/audit/templates/audit/index.html:19
 msgid "Display application log"
 msgstr ""
@@ -904,7 +904,9 @@ msgid "Uploads for all users"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:31
-msgid "Gramps file / uploaded at"
+#: bp/audit/templates/audit/batches.html:21
+#: bp/gramps/templates/gramps/uploads.html:121
+msgid "Gramps file"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:32
@@ -1095,11 +1097,6 @@ msgstr ""
 msgid "Batches"
 msgstr ""
 
-#: bp/audit/templates/audit/batches.html:21
-#: bp/gramps/templates/gramps/uploads.html:121
-msgid "Gramps file"
-msgstr ""
-
 #: bp/audit/templates/audit/batches.html:39
 #: bp/scene/templates/scene/persons_search.html:217
 msgid "persons"
@@ -1111,19 +1108,11 @@ msgstr ""
 msgid "Audit start date"
 msgstr ""
 
-#: bp/audit/templates/audit/batches.html:77
-msgid "Download file"
-msgstr ""
-
-#: bp/audit/templates/audit/batches.html:78
-msgid "Download original file"
-msgstr ""
-
-#: bp/audit/templates/audit/batches.html:83 bp/gramps/routes.py:443
+#: bp/audit/templates/audit/batches.html:76 bp/gramps/routes.py:443
 msgid "Show upload log"
 msgstr ""
 
-#: bp/audit/templates/audit/batches.html:88
+#: bp/audit/templates/audit/batches.html:81
 msgid "Your audit operations"
 msgstr ""
 
