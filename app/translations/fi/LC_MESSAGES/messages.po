@@ -1017,9 +1017,13 @@ msgstr " suoritettu"
 msgid "No such batch "
 msgstr "Aineistoa ei ole"
 
-#: bp/audit/routes.py:206
-msgid "You are now an auditor for batch "
-msgstr "Olet nyt tarkastaja aineistolle "
+#: bp/audit/routes.py:150
+msgid "No such batch "
+msgstr "Aineistoa ei ole"
+
+#: bp/audit/routes.py:151
+msgid "The operation failed due to error"
+msgstr "Toiminto päättyi valitettavasti virheeseen"
 
 #: bp/audit/routes.py:213
 msgid "Audit batch accepted: "
