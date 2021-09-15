@@ -26,7 +26,6 @@ Created on 28.11.2019
 import csv
 import time
 import logging
-import traceback
 from io import StringIO, BytesIO
 
 logger = logging.getLogger("stkserver")
@@ -49,16 +48,9 @@ from bl.refname import Refname
 from bp.admin.csv_refnames import load_refnames
 from bp.admin import uploads
 from models import syslog, loadfile
+from ui.util import error_print
 
 
-def error_print(module_name:str, e:Exception):
-    """ Print error messages to flask.flash, console and logs. """
-    msg = f"bp.audit.routes.{module_name}: {e.__class__.__name__} {e}"
-    print(msg)
-    logger.error(msg)
-    flash(f'{_("The operation failed due to error")}: {e}')
-
-#@staticmethod
 def _get_server_location():
     # Returns server address as a str
     dbloc = shareds.driver.address
