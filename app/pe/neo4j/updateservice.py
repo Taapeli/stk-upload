@@ -145,9 +145,9 @@ class Neo4jUpdateService(ConcreteService):
         try:
             result = self.tx.run(CypherRoot.get_single_batch, batch=batch_id)
             for record in result:
-                node = record.get("batch")
+                node = record.get("root")
                 if node:
-                    return {"status":Status.OK, "node":record["batch"]}
+                    return {"status":Status.OK, "node":record["root"]}
                 else:
                     return {"status":Status.NOT_FOUND, "node":None,
                             "statustext": "Batch not found"}
@@ -175,21 +175,29 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK, "identity": uniq_id}
 
 
-    def ds_batch_set_state(self, batch_id, user, status):
-        """Updates Batch node selected by Batch id ans user.
-
-        Not! Batch.timestamp is updated in the Cypher clause.
+    def ds_batch_set_state(self, batch_id, user, state):
+        """Updates Batch node selected by Batch id and user.
         """
-        try:
-            result = self.tx.run(
-                CypherRoot.batch_set_status, bid=batch_id, user=user, status=status
-            )
-            uniq_id = result.single()[0]
-            return {"status": Status.OK, "identity": uniq_id}
+        result = self.tx.run(
+            CypherRoot.batch_set_state, bid=batch_id, user=user, state=state
+        )
+        uniq_id = result.single()[0]
+        return {"status": Status.OK, "identity": uniq_id}
 
-        except Exception as e:
-            statustext = f"Neo4jUpdateService.ds_batch_set_state failed: {e.__class__.__name__} {e}"
-            return {"status": Status.ERROR, "statustext": statustext}
+        # except Exception as e:
+        #     statustext = f"Neo4jUpdateService.ds_batch_set_state failed: {e.__class__.__name__} {e}"
+        #     return {"status": Status.ERROR, "statustext": statustext}
+
+
+    def ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
+        """Updates Batch node selected by Batch id and user.
+           We also check that the state is expected.
+        """
+        result = self.tx.run(
+            CypherRoot.batch_set_auditor, bid=batch_id, audi=auditor_user, states=old_states
+        )
+        uniq_id = result.single()[0]
+        return {"status": Status.OK, "identity": uniq_id}
 
     # ----- Common objects -----
 

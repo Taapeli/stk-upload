@@ -146,7 +146,7 @@ class EventReader(DataService):
         """
         statustext = ""
         res_dict = {}
-        res = shareds.dservice.dr_get_event_by_uuid(self.use_user, uuid)
+        res = self.dataservice.dr_get_event_by_uuid(self.use_user, uuid)
         if Status.has_failed(res):
             return {
                 "item": None,
@@ -159,7 +159,7 @@ class EventReader(DataService):
 
         members = []
         if args.get("referees"):
-            res = shareds.dservice.dr_get_event_participants(event.uniq_id)
+            res = self.dataservice.dr_get_event_participants(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _("Participants read error ") + res["statustext"] + " "
                 print(f"bl.event.EventReader.get_event_data: {statustext}")
@@ -168,7 +168,7 @@ class EventReader(DataService):
                 res_dict["members"] = members
         places = []
         if args.get("places"):
-            res = shareds.dservice.dr_get_event_place(event.uniq_id)
+            res = self.dataservice.dr_get_event_place(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _("Place read error ") + res["statustext"] + " "
             else:
@@ -178,7 +178,7 @@ class EventReader(DataService):
         notes = []
         medias = []
         if args.get("notes"):
-            res = shareds.dservice.dr_get_event_notes_medias(event.uniq_id)
+            res = self.dataservice.dr_get_event_notes_medias(event.uniq_id)
             if Status.has_failed(res):
                 statustext += _("Notes read error ") + res["statustext"] + " "
             else:
@@ -226,7 +226,7 @@ class EventBl(Event):
         self.place = None  # Place node, if included
         self.person = None  # Persons names connected; for creating display
 
-    def save(self, tx, **kwargs):
+    def save(self, dataservice, tx, **kwargs):
         """Saves event to database:
         - Creates a new db node for this Event
         - Sets self.uniq_id
@@ -314,7 +314,7 @@ class EventBl(Event):
 
         # Make relations to the Media nodes and their Note and Citation references
         if self.media_refs:
-            shareds.dservice.ds_create_link_medias_w_handles(
+            dataservice.ds_create_link_medias_w_handles(
                 self.uniq_id, self.media_refs
             )
         return

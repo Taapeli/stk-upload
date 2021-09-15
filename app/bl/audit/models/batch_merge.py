@@ -53,26 +53,26 @@ class BatchMerger:
         return res
 
 
-    def obsolete_move_whole_batch(self, batch_id, user, auditor):
-        """
-        Creates Root duplicate with state Auditing.
-
-        :param:    batch_id    active Batch
-        :param:    user        owner of the Batch
-        :param:    auditor     active auditor user id
-
-        """
-        with shareds.driver.session() as session:
-            result = session.run(
-                CypherAudit.copy_batch_to_audit,
-                user=user,
-                batch=batch_id,
-                oper=auditor,
-                state_candidate=State.ROOT_CANDIDATE,
-                state_auditing=State.ROOT_AUDITING,
-                state_for_audit=State.ROOT_AUDIT_REQUESTED
-            ).single()
-            logger.info(f"BatchMerger.obsolete_move_whole_batch: {batch_id}")
-            print(f"BatchMerger.obsolete_move_whole_batch: {batch_id}")
-            #print(f"BatchMerger.obsolete_move_whole_batch: {batch_id}; result={result}")
-            return result
+    # def obsolete_move_whole_batch(self, batch_id, user, auditor):
+    #     """
+    #     Creates Root duplicate with state Auditing.
+    #
+    #     :param:    batch_id    active Batch
+    #     :param:    user        owner of the Batch
+    #     :param:    auditor     active auditor user id
+    #
+    #     """
+    #     with shareds.driver.session() as session:
+    #         result = session.run(
+    #             CypherAudit.copy_batch_to_audit,
+    #             user=user,
+    #             batch=batch_id,
+    #             oper=auditor,
+    #             state_candidate=State.ROOT_CANDIDATE,
+    #             state_auditing=State.ROOT_AUDITING,
+    #             state_for_audit=State.ROOT_AUDIT_REQUESTED
+    #         ).single()
+    #         logger.info(f"BatchMerger.obsolete_move_whole_batch: {batch_id}")
+    #         print(f"BatchMerger.obsolete_move_whole_batch: {batch_id}")
+    #         #print(f"BatchMerger.obsolete_move_whole_batch: {batch_id}; result={result}")
+    #         return result

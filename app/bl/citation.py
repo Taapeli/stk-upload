@@ -134,7 +134,7 @@ class Citation(NodeObject):
     #             print ("Sourceref_hlink: " + self.source_handle)
     #         return True
 
-    def save(self, tx, **kwargs):
+    def save(self, dataservice, tx, **kwargs):
         """Saves this Citation and connects it to it's Notes and Sources."""
         if "batch_id" in kwargs:
             batch_id = kwargs["batch_id"]

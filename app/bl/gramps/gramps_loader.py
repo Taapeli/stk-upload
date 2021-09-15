@@ -23,48 +23,42 @@
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 """
 
-import time
 import gzip
-from os.path import basename, splitext
 import logging
+import os
+import time
+import traceback
+
+from tarfile import TarFile
 
 logger = logging.getLogger("stkserver")
+
 from flask_babelex import _
-import traceback
-from tarfile import TarFile
-import os
+
+import shareds
+from models import mediafile
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
-import shareds
-from bl.base import Status
-from bl.root import State, DEFAULT_MATERIAL
-from models import mediafile
-#from bp.scene.models import media
 
+from bl.base import Status
+from bl.root import Root, State, DEFAULT_MATERIAL 
 
 def get_upload_folder(username):
     """ Returns upload directory for given user"""
     return os.path.join("uploads", username)
 
-def get_isotammi_metadata(username, filename):
-    upload_folder = get_upload_folder(username)
-    pathname = os.path.join(upload_folder, filename)
-    file_cleaned, file_displ_, cleaning_log_, is_gpkg_ = file_clean(pathname)
-    handler = DOM_handler(file_cleaned, username, filename)
-    return handler.get_metadata_from_header()
-
-def analyze_xml(username, filename):
+def analyze_xml(username, batch_id, filename):
     """Returns a dict of Gramps xml object type counts."""
     # Read the xml file
     upload_folder = get_upload_folder(username)
-    pathname = os.path.join(upload_folder, filename)
+    pathname = os.path.join(upload_folder, batch_id, filename)
     print("bp.gramps.gramps_loader.analyze_xml Pathname: " + pathname)
 
     file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
 
     """ Get XML DOM parser and start DOM elements handler transaction """
-    handler = DOM_handler(file_cleaned, username, filename)
+    handler = DOM_handler(file_cleaned, username, filename, dataservice=None)
 
     citation_source_cnt = 0
     event_citation_cnt = 0
@@ -260,10 +254,7 @@ def analyze(username, filename):
     return references
 
 
-# def analyze_old2(username, filename):
-
-
-def xml_to_stkbase(pathname, userid):
+def xml_to_stkbase(batch: Root):
     """
     Reads a Gramps xml file, and saves the information to db
 
@@ -297,43 +288,43 @@ def xml_to_stkbase(pathname, userid):
     from bl.root import BatchUpdater
 
     # Uncompress and hide apostrophes (and save log)
-    file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
+    file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(batch.file)
 
-    # Get XML DOM parser and start DOM elements handler transaction
-    handler = DOM_handler(file_cleaned, userid, pathname)
-
-    # Initialize Run report
-    handler.blog = BatchLog(userid)
-    handler.blog.log_event({"title": "Storing data from Gramps", "level": "TITLE"})
-    handler.blog.log_event(
-        {"title": "Loaded file '{}'".format(file_displ), "elapsed": shareds.tdiff}
-    )
-    handler.blog.log(cleaning_log)
-
-    # Open database connection as Neo4jDataService instance and start transaction
-
-    # Initiate BatchUpdater and Batch node data
-    ##shareds.datastore = BatchUpdater(shareds.driver, handler.dataservice)
     with BatchUpdater("update") as batch_service:
-        # print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
-        mediapath = handler.get_mediapath_from_header()
+        # Get XML DOM parser and start DOM elements handler transaction
+        handler = DOM_handler(file_cleaned, batch.user, batch.file, batch_service.dataservice)
+    
+        # Initialize Run report
+        handler.blog = BatchLog(batch.user)
+        handler.blog.log_event({"title": "Storing data from Gramps", "level": "TITLE"})
+        handler.blog.log_event(
+            {"title": "Loaded file '{}'".format(file_displ), "elapsed": shareds.tdiff}
+        )
+        handler.blog.log(cleaning_log)
+    
+        handler.batch = batch
+    
+        batch.mediapath = handler.get_mediapath_from_header()
+    
         metadata = handler.get_metadata_from_header()
         print("metadata:", metadata)
-        res = batch_service.start_data_batch(
-            userid, file_cleaned, mediapath, batch_service.dataservice.tx
-        )
-        handler.batch = res.get("batch")
         if metadata:
-            handler.batch.material = metadata[0] if metadata[0] else DEFAULT_MATERIAL
-
-            handler.batch.description = metadata[1]
-            handler.batch.save()
+            batch.material = metadata[0] if metadata[0] else DEFAULT_MATERIAL
+            batch.description = metadata[1]
         handler.handle_suffix = "_" + handler.batch.id  
+        # Open database connection as Neo4jDataService instance and start transaction
+    
+        # Initiate BatchUpdater and Batch node data
+        ##shareds.datastore = BatchUpdater(shareds.driver, handler.dataservice)
+    
+            # print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
 
+        batch.save(batch_service.dataservice)
+        
         t0 = time.time()
 
         if is_gpkg:
-            extract_media(pathname, handler.batch.id)
+            extract_media(batch.file, batch.id)
 
         res = handler.handle_notes()
         res = handler.handle_repositories()
@@ -358,14 +349,13 @@ def xml_to_stkbase(pathname, userid):
 
         # Copy date and name information from Person and Event nodes to Family nodes
         res = handler.set_family_calculated_attributes()
-        #res = shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
-
 
         res = handler.remove_handles()
             # The missing links counted in remove_handles
         ##TODO      res = handler.add_missing_links()
 
-        res = batch_service.batch_mark_status(State.ROOT_CANDIDATE)
+        res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
+        #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
 
         # batch_service.commit()
         logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
@@ -403,10 +393,10 @@ def file_clean(pathname):
         return n
 
     t0 = time.time()
-    root, ext = splitext(pathname)
+    root, ext = os.path.splitext(pathname)
     file_cleaned = root + "_clean" + ext
     # Filename for display
-    file_displ = basename(pathname)
+    file_displ = os.path.basename(pathname)
     with open(file_cleaned, "w", encoding="utf-8") as file_out:
         # Creates the output file and closes it
 

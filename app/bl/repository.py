@@ -125,7 +125,7 @@ class Repository(NodeObject):
     #         print ("Type: " + self.type)
     #         return True
 
-    def save(self, tx, **kwargs):
+    def save(self, dataservice,  tx, **kwargs):
         """Saves this Repository to db under given batch."""
         if not "batch_id" in kwargs:
             raise RuntimeError(f"Repository.save needs batch_id for {self.id}")
@@ -155,7 +155,7 @@ class Repository(NodeObject):
         try:
             # Save the notes attached to self
             if self.notes:
-                Note.save_note_list(tx, parent=self, batch_id=batch_id)
+                Note.save_note_list(dataservice, parent=self, batch_id=batch_id)
         except Exception as err:
             print(f"iError Repository.save note: {err}", file=stderr)
             raise SystemExit("Stopped due to errors")  # Stop processing

@@ -12,20 +12,10 @@ import argparse
 import sys
 from unittest.mock import Mock
 
-sys.path.append("../app")
 import shareds
 from bl.root import Root
-#from bl.batch import Batch
- 
-def load_config(configfile):
-    shareds.app = Mock()
-    ns = {}
-    config_text = open(configfile).read()
-    exec(config_text, ns )
-    shareds.app.config = ns
- 
-configfile = "../instance/config.py"
-load_config(configfile)
+
+from app import app
 
 parser = argparse.ArgumentParser()
 args = parser.parse_args()

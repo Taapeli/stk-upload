@@ -91,7 +91,7 @@ class NodeObject:
     Class representing Neo4j node type objects
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, uniq_id:int=None):
         """
         Constructor.
 
@@ -128,6 +128,18 @@ class NodeObject:
             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
         else:
             return ""
+
+    # @staticmethod
+    # def timestamp_str(timestamp, opt="m"): --> models.util.format_timestamp
+    #     """ Converts a Neo4j timestamp to display format (by 'm' minute or 'd' day). """
+    #     if timestamp:
+    #         t = float(timestamp) / 1000.0
+    #         if opt == "d":
+    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y")
+    #         else:
+    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+    #     else:
+    #         return ""
 
 
     @classmethod

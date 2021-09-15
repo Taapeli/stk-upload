@@ -24,7 +24,7 @@ cypher_prefix = """
 """ 
 
 cypher_common_prefix = """
-    MATCH (prof:UserProfile{username:'_Stk_'}) -[:HAS_ACCESS]-> (root:Root)
+    MATCH (root:Root {state:"Accepted"})
     WITH root
 """ 
 

@@ -38,6 +38,7 @@ WHERE NOT ( 'UserProfile' IN labels(a)
     OR 'User' IN labels(a)
     OR 'Role' IN labels(a)
     OR 'Lock' IN labels(a)
+    OR 'BatchId' IN labels(a)
     OR 'Syslog' IN labels(a) )
 WITH  a LIMIT $limit
 DETACH DELETE a"""

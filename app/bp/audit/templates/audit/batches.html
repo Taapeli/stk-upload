@@ -16,58 +16,69 @@
 	{% if not user %}
 	                <th>{{ _("User") }}</th>
 	{% endif %}
-                <th>{{ _("Gramps file / uploaded at") }}</th>
+                <th>{{ _("Batch") }}</th>
                 <th>{{ _("Status") }} {{ state_info() }}</th>
-                <th>{{ _("Batch id") }}</th>
+                <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Operations") }}</th>
            </tr>
     {% for upload in uploads %}
 	   {% if upload.batch_id and current_user.has_role('audit') %}
-	       <tr>
+	       <tr
+	      {% if batch_id == upload.batch_id %}style="background: bisque;"{% endif %}
+	       >
 		  {% if not user %}
              {% if current_user.username == upload.user %}
-                    <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>
+               <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>
              {% else %}
-                    <td>{{upload.user}}</td>
+               <td>{{upload.user}}</td>
              {% endif -%}
     	  {% endif -%}
 
-    	  {% if upload.has_file %}
-    				<td>{{upload.xmlname}}
-    					<br>&nbsp;{{upload.upload_time_s}}
-    				</td>
-    	  {% else %}
-	           		<td style="color:gray">{{upload.xmlname}}</td>
-    	  {% endif -%}
+	           <td>{{upload.batch_id}}
+	      {% if upload.count %}
+	           	   <br>– {{upload.count}}&nbsp;{{ _("persons") }}
+	      {% endif %}
+	           </td>
 
-	           <td>{{upload.status}}</td>
-	           
 	           <td>
-	      {% if upload.batch_id %}
-	         {% if upload.status == "LADATTU" %}
-	           	   ({{_( "deleted from database" ) }})
-	         {% else %}
-	           	   {{upload.batch_id}} 
-	        		{% if upload.count %}
-	           	   ({{upload.count}} {{ _("persons") }})
-	           		{% endif %}
-	         {% endif %}
-	      {% endif -%}
-	        </td>
+	      {% if upload.for_auditor %}
+	           	   <b>{{upload.state|transl('state')}}</b>
+	      {% else %}
+	           	   {{upload.state|transl('state')}} 
+	      {% endif %}
+			{% if upload.auditors %}
+                    <br><i>{{ _("Auditor") }}:
+            	{% for auditor, ts, ts_str in upload.auditors %}
+            			<span title="{{ _('Audit start date') }}">{{auditor}}&nbsp;{{ts_str}}</span>
+            	{% endfor %}</i>
+			{% endif %}
+	           </td>
 
-	        <td>
-    		{% if upload.has_file %}
-	           	▸ <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}
-    	             title="{{ _("Download file") }}">
-    	               {{ _("Download original file") }}</a>
-    		{% endif -%}
-	        {% if upload.has_log %}
-	            <br>▸ <a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
-	           			{{ _("Show log") }}</a>
+			   <td>{{upload.xmlname}}
+			{% if upload.description %} 
+                    <br><i>{{ upload.description[0:29] }}
+				{% if upload.description|length > 29  %}
+                        ... 
+                        <div class="tooltip"> 
+                        &nbsp;&#8505;&nbsp;
+                          <div class="tooltiptext">
+                            {{ upload.description }} 
+                          </div>
+                        </div> 
+				{% endif %}
+                    </i>
+			{% endif %}
+			   </td>
+
+	           <td>
+	        {% if upload.xmlname %}
+	            ▸ <a href="/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}/{{upload.batch_id}}">
+	           			{{ _("Show upload log") }}</a>
 	        {% endif -%}
-	        {% if upload.status == "Ehdokasaineisto" %}
-	           	<br>▸ <a href=/audit/pick/{{upload.batch_id}}>
-                       {{ _("Pick for me to audit") }}</a>
+	        {% if upload.for_auditor %}
+		        {% if upload.xmlname %}<br>{% endif -%}
+	           	▸ <a href="/audit/pick/{{upload.batch_id}}">
+                     {{ _("Your audit operations") }}</a>
             {% endif -%}
 	           	</td>
 	       </tr>

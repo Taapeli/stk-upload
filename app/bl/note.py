@@ -127,7 +127,7 @@ class Note(NodeObject):
     #         return 0
 
     @staticmethod
-    def save_note_list(tx, **kwargs):
+    def save_note_list(dataservice, **kwargs):
         """Save the parent.notes[] objects as a descendant of the parent node.
 
         Arguments:
@@ -146,11 +146,11 @@ class Note(NodeObject):
                 if not note.id:
                     n_cnt += 1
                     note.id = f"N{n_cnt}-{parent.id}"
-                note.save(tx, parent_id=parent.uniq_id, batch_id=batch_id)
+                note.save(dataservice, dataservice.tx, parent_id=parent.uniq_id, batch_id=batch_id)
             else:
                 raise AttributeError("note.save_note_list: Argument not a Note")
 
-    def save(self, tx, **kwargs):  # batch_id=None, parent_id=None):
+    def save(self, dataservice, tx, **kwargs):  # batch_id=None, parent_id=None):
         """Creates this Note object as a Note node
 
         Arguments:
@@ -163,7 +163,8 @@ class Note(NodeObject):
         if not "batch_id":
             raise RuntimeError(f"Note.save needs batch_id for {self.id}")
         n_attr = {}
-        try:
+#        try:
+        if 1:
             n_attr = {
                 "uuid": self.uuid,
                 "change": self.change,
@@ -196,6 +197,6 @@ class Note(NodeObject):
                     f"Note.save needs batch_id or parent_id for {self.id}"
                 )
 
-        except Exception as err:
-            print(f"iError Note_save: {err} attr={n_attr}", file=stderr)
-            raise RuntimeError(f"Could not save Note {self.id}")
+#         except Exception as err:
+#             print(f"iError Note_save: {err} attr={n_attr}", file=stderr)
+#             raise RuntimeError(f"Could not save Note {self.id}")

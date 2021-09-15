@@ -33,8 +33,8 @@ Created on 26.5.2018
 @author: jm
 '''
 #from datetime import date
-import shareds
-from pe.neo4j.cypher.cy_batch_audit import CypherRoot
+#import shareds
+#from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 #from models.cypher_gramps import Cypher_batch
 #from models import dbutil
 

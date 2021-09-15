@@ -108,12 +108,13 @@ class DOM_handler:
     - collects status log
     """
 
-    def __init__(self, infile, current_user, pathname=""):
+    def __init__(self, infile, current_user, pathname, dataservice):
         """ Set DOM xml_tree and username """
         DOMTree = xml.dom.minidom.parse(open(infile, encoding="utf-8"))
         self.xml_tree = DOMTree.documentElement  # XML documentElement
         self.username = current_user  # current username
-
+        self.dataservice = dataservice
+        
         self.handle_to_node = {}  # {handle:(uuid, uniq_id)}
         self.person_ids = []  # List of processed Person node unique id's
         self.family_ids = []  # List of processed Family node unique id's
@@ -123,13 +124,11 @@ class DOM_handler:
         self.progress = defaultdict(
             int
         )  # key=object type, value=count of objects processed
-        # self.datastore = None               # neo4j.DirectDriver object
         self.obj_counter = 0
-        #self.handle_suffix = "_" + uuid.uuid4().hex
 
     def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
-        res = shareds.dservice.ds_obj_remove_gramps_handles(self.batch.id)
+        res = self.dataservice.ds_obj_remove_gramps_handles(self.batch.id)
         print(f'# --- removed handles from {res.get("count")} nodes')
         return res
 
@@ -152,13 +151,12 @@ class DOM_handler:
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
         #print(f"DOM_handler.save_and_link_handle: {obj} {kwargs}")
-        #shareds.dservice.ds_obj_save_and_link(obj, **kwargs)
-        obj.save(shareds.dservice.tx, **kwargs)
+        obj.save(self.dataservice, self.dataservice.tx, **kwargs)
         self.obj_counter += 1 
         if self.obj_counter % 1000 == 0:
             #print(self.obj_counter, "Transaction restart")
-            shareds.dservice.tx.commit()
-            shareds.dservice.tx = shareds.driver.session().begin_transaction()
+            self.dataservice.tx.commit()
+            self.dataservice.tx = shareds.driver.session().begin_transaction()
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
@@ -1056,7 +1054,7 @@ class DOM_handler:
             }
 
         res = {}
-        with FamilyWriter('update', tx=shareds.dservice.tx) as service:
+        with FamilyWriter('update', tx=self.dataservice.tx) as service:
             for uniq_id in self.family_ids:
                 if uniq_id is not None:
                     ds = service.dataservice    # <Neo4jUpdateService>
@@ -1087,8 +1085,7 @@ class DOM_handler:
                 "status": Status.NOT_FOUND,
             }
 
-        with PersonWriter('update', tx=shareds.dservice.tx) as service:
-            #print(f"### set_person_calculated_attributes: shareds.dservice.tx = {shareds.dservice.tx}")
+        with PersonWriter('update', tx=self.dataservice.tx) as service:
             for p_id in self.person_ids:
                 self.update_progress("refnames")
                 if p_id is not None:
@@ -1117,10 +1114,7 @@ class DOM_handler:
         message = f"{len(self.person_ids)} Estimated lifetimes"
         print(f"***** {message} *****")
         t0 = time.time()
-        #print(f"### set_person_estimated_dates: shareds.dservice.tx = {shareds.dservice.tx}")
-
-        #res = PersonBl.estimate_lifetimes(self.person_ids)
-        res = shareds.dservice.ds_set_people_lifetime_estimates(self.person_ids)
+        res = self.dataservice.ds_set_people_lifetime_estimates(self.person_ids)
 
         count = res.get("count")
         message = "Estimated person lifetimes"
@@ -1141,7 +1135,7 @@ class DOM_handler:
 
         t0 = time.time()
 
-        res = PersonBl.update_person_confidences(self.person_ids)
+        res = PersonBl.update_person_confidences(self.dataservice, self.person_ids)
         # returns {status, count, statustext}
         status = res.get("status")
         count = res.get("count", 0)
