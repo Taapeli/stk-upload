@@ -185,65 +185,71 @@ def show_persons():
 @roles_accepted("guest", "research", "audit", "admin")
 def show_person_search(set_scope=None, batch_id=None):
     """Persons search page."""
-    t0 = time.time()
-    args = {"pg": "search"}
-    rq = request.args if request.method == "GET" else request.form
-    rule = rq.get("rule")
-    if rule:
-        args["rule"] = rule
-    key = rq.get("key")
-    if key:
-        args["key"] = key
-    if not (set_scope is None or batch_id is None): 
-        args["batch_id"] = batch_id
-        args["set_scope"] = set_scope
+    try:
+        t0 = time.time()
+        args = {"pg": "search"}
+        rq = request.args if request.method == "GET" else request.form
+        rule = rq.get("rule")
+        if rule:
+            args["rule"] = rule
+        key = rq.get("key")
+        if key:
+            args["key"] = key
+        if not (set_scope is None or batch_id is None): 
+            args["batch_id"] = batch_id
+            args["set_scope"] = set_scope
 
-    res, u_context = _do_get_persons(args)
-    print(f"#show_person_search: {request.method} "
-          f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
-    if Status.has_failed(res, strict=False):
-        flash(f'{res.get("statustext","error")}', "error")
+        res, u_context = _do_get_persons(args)
 
-    found = res.get("items", [])
-    num_hidden = res.get("num_hidden", 0)
-    hidden = f" hide={num_hidden}" if num_hidden > 0 else ""
-    status = res["status"]
-    elapsed = time.time() - t0
-    stk_logger(
-        u_context,
-        f"-> bp.scene.routes.show_person_search/{rule}"
-        f" n={len(found)}{hidden} e={elapsed:.3f}",
-    )
-    print(
-        f"Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
-    )
+        print(f"#show_person_search: {request.method} "
+              f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
+        if Status.has_failed(res, strict=False):
+            flash(f'{res.get("statustext","error")}', "error")
 
-    surnamestats = []
-    placenamestats = []
-    if args.get("rule") is None:
-        # Start search page: show name clouds
-        minfont = 6
-        maxfont = 20
+        found = res.get("items", [])
+        num_hidden = res.get("num_hidden", 0)
+        hidden = f" hide={num_hidden}" if num_hidden > 0 else ""
+        status = res["status"]
+        elapsed = time.time() - t0
+        stk_logger(
+            u_context,
+            f"-> bp.scene.routes.show_person_search/{rule}"
+            f" n={len(found)}{hidden} e={elapsed:.3f}",
+        )
+        print(
+            f"Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
+        )
 
-        # Most common surnames cloud
-        with PersonReader("read", u_context) as service:
-            surnamestats = service.get_surname_list(47)
-            # {name, count, uuid}
-            for i, stat in enumerate(surnamestats):
-                stat["order"] = i
-                stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
-            surnamestats.sort(key=itemgetter("surname"))
+        surnamestats = []
+        placenamestats = []
+        if args.get("rule") is None:
+            # Start search page: show name clouds
+            minfont = 6
+            maxfont = 20
+    
+            # Most common surnames cloud
+            with PersonReader("read", u_context) as service:
+                surnamestats = service.get_surname_list(47)
+                # {name, count, uuid}
+                for i, stat in enumerate(surnamestats):
+                    stat["order"] = i
+                    stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
+                surnamestats.sort(key=itemgetter("surname"))
+    
+            # Most common place names cloud
+            with PlaceReader("read", u_context) as service:
+                placenamestats = service.get_placename_list(40)
+                # {name, count, uuid}
+                for i, stat in enumerate(placenamestats):
+                    stat["order"] = i
+                    stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(
+                        placenamestats
+                    )
+                placenamestats.sort(key=itemgetter("placename"))
 
-        # Most common place names cloud
-        with PlaceReader("read", u_context) as service:
-            placenamestats = service.get_placename_list(40)
-            # {name, count, uuid}
-            for i, stat in enumerate(placenamestats):
-                stat["order"] = i
-                stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(
-                    placenamestats
-                )
-            placenamestats.sort(key=itemgetter("placename"))
+    except Exception as e:
+        error_print("show_person_search", e)
+        return redirect(url_for("routes.entry"))
 
     return render_template(
         "/scene/persons_search.html",

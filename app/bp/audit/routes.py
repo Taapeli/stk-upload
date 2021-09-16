@@ -26,7 +26,6 @@ Created on 28.11.2019
 import csv
 import time
 import logging
-import traceback
 from io import StringIO, BytesIO
 
 logger = logging.getLogger("stkserver")
