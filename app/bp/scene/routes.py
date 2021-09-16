@@ -63,12 +63,12 @@ from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
 from bl.comment import CommentReader
 from models import mediafile
-#from bp.scene.models import media
+from bp.graph.models.fanchart import FanChart
 
 from ui.user_context import UserContext
 from ui import jinja_filters
+from ui.util import error_print, stk_logger
 
-from bp.graph.models.fanchart import FanChart
 
 # Select the read driver for current database
 # from database.accessDB import get_dataservice
@@ -79,17 +79,17 @@ from bp.graph.models.fanchart import FanChart
 calendars = [_("Julian"), _("Hebrew")]  # just for translations
 
 
-def stk_logger(context, msg: str):
-    """Emit logger info message with Use Case mark uc=<code> ."""
-    if not context:
-        logger.info(msg)
-        return
-    uc = context.use_case()
-    if (msg[:2] != "->") or (uc == ""):
-        logger.info(msg)
-        return
-    logger.info(f"-> {msg[2:]} uc={uc}")
-    return
+# def stk_logger(context, msg: str): # --> ui.util.stk_logger
+#     """Emit logger info message with Use Case mark uc=<code> ."""
+#     if not context:
+#         logger.info(msg)
+#         return
+#     uc = context.use_case()
+#     if (msg[:2] != "->") or (uc == ""):
+#         logger.info(msg)
+#         return
+#     logger.info(f"-> {msg[2:]} uc={uc}")
+#     return
 
 
 # ------------------------- Menu 1: Person search ------------------------------
@@ -195,6 +195,8 @@ def show_person_search(set_scope=None, batch_id=None):
         key = rq.get("key")
         if key:
             args["key"] = key
+        batch_id = rq.get("batch_id")
+        set_scope = rq.get("set-scope")
         if not (set_scope is None or batch_id is None): 
             args["batch_id"] = batch_id
             args["set_scope"] = set_scope
@@ -226,7 +228,7 @@ def show_person_search(set_scope=None, batch_id=None):
             # Start search page: show name clouds
             minfont = 6
             maxfont = 20
-    
+
             # Most common surnames cloud
             with PersonReader("read", u_context) as service:
                 surnamestats = service.get_surname_list(47)
@@ -235,7 +237,7 @@ def show_person_search(set_scope=None, batch_id=None):
                     stat["order"] = i
                     stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
                 surnamestats.sort(key=itemgetter("surname"))
-    
+
             # Most common place names cloud
             with PlaceReader("read", u_context) as service:
                 placenamestats = service.get_placename_list(40)
@@ -1129,11 +1131,15 @@ def fetch_thumbnail():
             ret = send_file(
                 os.path.join("static", "image/noone.jpg"), mimetype=thumb_mime
             )
-        logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
+        #logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
     except FileNotFoundError:
         # Show default image
         ret = send_file(os.path.join("static", "image/noone.jpg"), mimetype=thumb_mime)
-        logger.debug(f"-> bp.scene.routes.fetch_thumbnail none")
+        logger.debug(f"bp.scene.routes.fetch_thumbnail none")
+    except Exception as e:
+        error_print("fetch_thumbnail", e)
+        return redirect(url_for("entry"))
+
 
     return ret
 
