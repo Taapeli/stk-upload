@@ -34,7 +34,7 @@ logger = logging.getLogger("stkserver")
 from operator import itemgetter
 import time
 from datetime import datetime
-from types import SimpleNamespace
+#from types import SimpleNamespace
 
 
 from flask import send_file, Response, jsonify
@@ -50,7 +50,7 @@ from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
 
 import shareds
-from models import util
+#from models import util
 
 from . import bp
 from bl.base import Status, StkEncoder
@@ -61,7 +61,7 @@ from bl.event import EventReader, EventWriter
 from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
-from bl.comment import CommentReader
+from bl.comment import Comment, CommentReader, CommentsUpdater
 from models import mediafile
 from bp.graph.models.fanchart import FanChart
 
@@ -1210,75 +1210,76 @@ def fetch_comments():
     if request.args.get("start"):
         start = float(request.args.get("start"))
     else:
-        start = datetime.now().timestamp()
+        # Neo4j timestamp
+        start = datetime.now().timestamp() * 1000.
 
     query = """
-        match (p) -[:COMMENT] -> (c:Comment)
-            where id(p) = $uniq_id and c.timestamp <= $start
-        return c as comment order by c.timestamp desc limit 5
-    """
-    result = shareds.driver.session().run(query, uniq_id=uniq_id, start=start)
-    comments = []
-    last_timestamp = None
-    for record in result:
-        node = record["comment"]
-        c = SimpleNamespace()
-        c.user = node["user"]
-        c.comment_text = node["text"]
-        c.timestr = node["timestr"]
-        c.timestamp = node["timestamp"]
-        comments.append(c)
-        last_timestamp = c.timestamp
-    if last_timestamp is None:
-        return "<span id='no_comments'>" + _("No previous comments") + "</span>"
-    else:
-        stk_logger(u_context, f"-> bp.scene.routes.fetch_comments n={len(comments)}")
-        return render_template(
-            "/scene/hx-comment/fetch_comments.html",
-            comments=comments[0:4],
-            last_timestamp=last_timestamp,
-            there_is_more=len(comments) > 4,
-        )
-
+MATCH (p) -[:COMMENT] -> (c:Comment) <-[:COMMENTED]- (u:UserProfile)
+    WHERE id(p) = $uniq_id AND c.timestamp <= $start
+RETURN c AS comment, u.username AS commenter 
+    ORDER BY c.timestamp DESC LIMIT 5
+"""
+    try:
+        result = shareds.driver.session().run(query, uniq_id=uniq_id, start=start)
+        comments = []
+        last_timestamp = None
+        for record in result:
+            node = record["comment"]
+            c = Comment.from_node(node)
+            # c = SimpleNamespace()
+            c.user = record["commenter"]
+            # c.comment_text = node["text"]
+            # c.timestr = node["timestr"]
+            # c.timestamp = node["timestamp"]
+            comments.append(c)
+            last_timestamp = c.timestamp
+        if last_timestamp is None:
+            return "<span id='no_comments'>" + _("No previous comments") + "</span>"
+        else:
+            stk_logger(u_context, f"-> bp.scene.routes.fetch_comments n={len(comments)}")
+            return render_template(
+                "/scene/hx-comment/fetch_comments.html",
+                comments=comments[0:4],
+                last_timestamp=last_timestamp,
+                there_is_more=len(comments) > 4,
+            )
+    except Exception as e:
+        error_print("fetch_comments", e, flash=False)
+        return f"{ _('Sorry, operation failed') }: {e.__class__.__name__} {e}"
 
 @bp.route("/scene/hx-comment/add_comment", methods=["post"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def add_comment():
     """Add a comment"""
+    
     u_context = UserContext(user_session, current_user, request)
     # uuid = request.form.get("uuid")
-    uniq_id = int(request.form.get("uniq_id"))
+    uniq_id = int(request.form.get("uniq_id", 0))
     comment_text = request.form.get("comment_text")
     if comment_text.strip() == "":
         return ""
     user = current_user.username
-    timestamp = time.time()
-    timestr = util.format_timestamp(timestamp)
-    res = (
-        shareds.driver.session()
-        .run(
-            """
-        match (p) where id(p) = $uniq_id 
-        create (p) -[:COMMENT] -> 
-            (c:Comment{user:$user,text:$text,timestamp:$timestamp,timestr:$timestr})
-        return c
-        """,
-            uniq_id=uniq_id,
-            user=user,
-            text=comment_text,
-            timestamp=timestamp,
-            timestr=timestr,
-        )
-        .single()
-    )
-    if res:
-        stk_logger(u_context, "-> bp.scene.routes.add_comment")
-        return render_template(
-            "/scene/hx-comment/add_comment.html",
-            timestamp=timestr,
-            user=user,
-            comment_text=comment_text,
-        )
-    else:
-        return ""
+    comment = None
+    try:
+        with CommentsUpdater("update") as comment_service:
+            res = comment_service.add_comment(user, uniq_id, comment_text)
+            if res:
+                if Status.has_failed(res, strict=True):
+                    flash(f'{res.get("statustext","error")}', "error")
+                    return ""
+                comment = res.get("comment")
+            else:
+                msg = f'{_("The operation failed due to error")}: {res.get("statustext","error")}'
+                print("bp.scene.routes.add_comment" + msg)
+                logger.error("bp.scene.routes.add_comment" + msg)
+                flash(msg)
+                return ""
+
+    except Exception as e:
+        error_print("add_comment", e)
+        return str(e)
+
+    stk_logger(u_context, "-> bp.scene.routes.add_comment")
+    return render_template("/scene/hx-comment/add_comment.html",
+                           comment=comment)

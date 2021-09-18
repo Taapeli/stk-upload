@@ -44,8 +44,8 @@ def run_cypher( session, cypher, username, **kwargs):
         cypher = "match (root) -[:OBJ_PERSON]-> (p:Person) ..."
     
     """
-    if not username:
-        username = '_Stk_'
+    # if not username:
+    #     username = '_Stk_'
     cypher2 = cypher_prefix + cypher
     return session.run(cypher2, 
                username=username,  

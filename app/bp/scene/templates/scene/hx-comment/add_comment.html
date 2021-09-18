@@ -1,9 +1,10 @@
 <div class="comment">
     <div class="hdr">
-    	{{ timestamp }} by <b>{{ user }}</b>
+    	<b>{{ comment.user }}</b> {{ comment.timestamp_str() }}:
+        <i>{{comment.title}}</i>
     </div>
     <div class="content">
-    {{- comment_text }}
+    {{- comment.text }}
 	</div>
 </div>
 

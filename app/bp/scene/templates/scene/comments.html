@@ -40,7 +40,7 @@
 {% if cnt %}
     {% for c in comments %}
         <tr>
-            <td class="center">{{c.timestr}}<br>{{c.credit}}</td>
+            <td class="center">{{c.timestamp_str()}}<br>{{c.credit}}</td>
             <td><span class="typedesc">{{ _(c.obj_label) }}</span>
             {% if c.obj_label == 'Person' %}
             	<a href="/scene/person?uuid={{c.object.uuid}}" class="inlink"

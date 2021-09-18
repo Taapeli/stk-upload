@@ -25,6 +25,17 @@ Created on 19.5.2021
 
 class CypherComment():
 
+# Write Topic and Comment data
+#TODO: Case object_id refers to a Comment, create a Comment; else create a Topic.
+
+    comment_create = """
+MATCH (obj)             WHERE id(obj) = $attr.object_id
+MATCH (u:UserProfile)   WHERE u.username = $attr.username
+CREATE (obj) -[:COMMENT] -> (c:Comment) <-[:COMMENTED]- (u)
+    SET c.text = $attr.text
+    SET c.title = $attr.title
+    SET c.timestamp = timestamp()
+RETURN c AS comment, labels(obj)[2] AS obj_type"""
 
 # Read Comment data
 
@@ -32,7 +43,7 @@ class CypherComment():
     get_topics = """
 MATCH (root) --> (o) -[:COMMENT]-> (c)  <-[:COMMENTED]- (u:UserProfile)
 OPTIONAL MATCH repl = ( (c) -[:COMMENT*]-> () )
-RETURN o, c, u.username as credit, 
+RETURN o, c, u.username as commenter, 
     coalesce(length(repl),0) AS count,
     root
 ORDER BY c.timestamp desc LIMIT $limit"""

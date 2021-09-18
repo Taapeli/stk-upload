@@ -27,7 +27,7 @@ def stk_logger(context: UserContext, msg: str):
     return
 
 
-def error_print(module_name:str, e:Exception):
+def error_print(module_name:str, e:Exception, flash:bool = True):
     """ Print error messages to flask.flash, console and logs. 
     """
     traceback.print_exc()  
@@ -35,4 +35,5 @@ def error_print(module_name:str, e:Exception):
     msg = f"bp.audit.routes.{module_name}: {e.__class__.__name__} {e}"
     print(msg)
     logger.error(msg)
-    flash(f'{_("The operation failed due to error")}: {e}')
+    if flash:
+        flash(f'{_("The operation failed due to error")}: {e}')

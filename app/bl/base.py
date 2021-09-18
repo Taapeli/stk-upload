@@ -155,7 +155,7 @@ class NodeObject:
         n.uuid = node["uuid"]
         if node["handle"]:
             n.handle = node["handle"]
-        n.change = node["change"]
+        n.change = node.get("change")
         return n
 
     """
