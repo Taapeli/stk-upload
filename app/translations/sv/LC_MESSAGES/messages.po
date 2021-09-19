@@ -5200,8 +5200,8 @@ msgid "Unknown relation"
 msgstr "Okänd relation"
 
 #: ui/jinja_filters.py:319
-msgid " Family Tree "
-msgstr " Släktträd "
+msgid "Family Tree"
+msgstr "Släktträd"
 
 #: ui/jinja_filters.py:320
 msgid " Example type "

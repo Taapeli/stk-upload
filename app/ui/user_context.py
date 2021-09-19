@@ -30,6 +30,7 @@ Created on 19.1.2019
 
 from urllib.parse import unquote_plus
 from flask_babelex import lazy_gettext as N_
+from flask_babelex import _
 from bl.root import State, DEFAULT_MATERIAL
 
 class UserContext():
@@ -308,37 +309,22 @@ class UserContext():
             return None
 
     def owner_str(self):
-        # Return current owner choise as text.
+        # Return current owner choice as text.
         
-        # ONly used in test_owner_filter.test_ownerfilter_nouser()
+        # Only used in test_owner_filter.test_ownerfilter_nouser()
         try:
-            return f"{self.choices.as_str[self.context_code]} {self.batch_id}"
+            print("ui.user_context.UserContext.owner_str:",self.material,self.state,self.batch_id)
+            return f"{ _(self.material) }: { _(self.state) } {self.batch_id}"
+            #return f"{self.choices.as_str[self.context_code]} {self.batch_id}"
         except:
             return ''
 
     def use_case(self):
-        # Return current use case (owner choise) as code 
+        # Return current use case (owner choice) as code 
         try:
             return self.choices.CODE_VALUES[self.context_code]
         except:
             return ''
-
-#     def owner_or_common(self):
-#         ''' Tells, if you should select object by data owner.
-# 
-#             Always when others but self.ChoicesOfView.OWN only are required
-#         '''
-#         if (self.context_code & 2) > 0:
-#             return 'user'
-#         else:
-#             return 'common'
-    
-    # def use_owner_filter(self):
-    #     ''' Tells, if you should select object by data owner.
-    #
-    #         Always when others but self.ChoicesOfView.OWN only are required
-    #     '''
-    #     return (self.context_code & 2) > 0
     
     def use_common(self):
         ''' Tells, if you should select objects from common database.

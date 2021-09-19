@@ -5173,7 +5173,7 @@ msgid "Unknown relation"
 msgstr "Tuntematon suhde"
 
 #: ui/jinja_filters.py:319
-msgid " Family Tree "
+msgid "Family Tree"
 msgstr "Sukupuu"
 
 #: ui/jinja_filters.py:320

@@ -316,8 +316,9 @@ def translate(term, var_name, show_table=False):
     elif var_name == "material":
         # Root.material types
         tabl = {
-            "Family Tree": _(" Family Tree "),
-            "Example Material": _(" Example type ")
+            "Family Tree": _("Family Tree"),
+            "Demo Material": _("Demo Material"),
+            "Example Material": _("Example type"),
         }
         #print(f"#jinja_filters:get {var_name}({term})")
 

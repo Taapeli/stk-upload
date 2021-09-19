@@ -13,7 +13,7 @@ from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
 
-from .util import run_cypher2
+from .util import run_cypher_batch
 
 class PersonRecord:
     ''' Object to return person display data. '''
@@ -144,7 +144,7 @@ class Neo4jReadServiceTx(ConcreteService):
  
         persons = []
         #logger.debug(f"tx_get_person_list: cypher: {cypher}")
-        result = run_cypher2(self.tx, cypher, username, batch_id,
+        result = run_cypher_batch(self.tx, cypher, username, batch_id,
                             #material=material, state=state,
                             use=rule, name=key,
                             years=years,
@@ -195,7 +195,7 @@ class Neo4jReadServiceTx(ConcreteService):
         #    results: person, root
 
         try:
-            record = run_cypher2(self.tx, CypherPerson.get_person, active_user, batch_id, uuid=uuid).single()
+            record = run_cypher_batch(self.tx, CypherPerson.get_person, active_user, batch_id, uuid=uuid).single()
             # <Record 
             #    p=<Node id=25651 labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
