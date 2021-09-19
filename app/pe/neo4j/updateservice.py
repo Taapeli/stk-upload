@@ -31,14 +31,16 @@ from datetime import date  # , datetime
 from bl.base import Status, IsotammiException
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
+from bl.comment import Comment
 
 from pe.dataservice import ConcreteService
-from .cypher.cy_batch_audit import CypherRoot, CypherAudit
+from .cypher.cy_batch_audit import CypherRoot #, CypherAudit
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_family import CypherFamily
 from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_gramps import CypherObjectWHandle
+from .cypher.cy_comment import CypherComment
 
 
 
@@ -215,38 +217,39 @@ class Neo4jUpdateService(ConcreteService):
 
         objs = {}
         try:
-            result = self.tx.run(CypherAudit.merge_check, id_list=[id1, id2])
-            # for root_id, root_str, rel, obj_id, obj_label, obj_str in result:
-            for record in result:
-                ro = RefObj()
-                ro.uniq_id = record["obj_id"]
-                ro.label = record["obj_label"]
-                ro.str = record["obj_str"]
-                ro.root = (
-                    record.get("rel"),
-                    record.get("root_id"),
-                    record.get("root_str"),
-                )
-                # rint(f'#ds_merge_check {root_id}:{root_str} -[{rel}]-> {obj_id}:{obj_label} {obj_str}')
-                print(f"#ds_merge_check {ro.uniq_id}:{ro.label} {ro.str} in {ro.root}")
-                if ro.uniq_id in objs.keys():
-                    # Error if current uniq_id exists twice
-                    msg = f"Object {ro} has two roots {objs[ro.uniq_id].root} and {ro.root}"
-                    return {"status": Status.ERROR, "statustext": msg}
-                for i, obj2 in objs.items():
-                    print(f"#ds_merge_check {obj2} <> {ro}")
-                    if i == ro.uniq_id:
-                        continue
-                    # Error if different labels or has different root node
-                    if obj2.label != ro.label:
-                        msg = f"Objects {obj2} and {ro} are different"
-                        return {"status": Status.ERROR, "statustext": msg}
-                    if obj2.root[1] != ro.root[1]:
-                        msg = (
-                            f"Object {ro} has different roots {obj2.root} and {ro.root}"
-                        )
-                        return {"status": Status.ERROR, "statustext": msg}
-                objs[ro.uniq_id] = ro
+            print("pe.neo4j.updateservice.Neo4jUpdateService.ds_merge_check: TODO fix merge_check")
+            # result = self.tx.run(CypherAudit.merge_check, id_list=[id1, id2])
+            # # for root_id, root_str, rel, obj_id, obj_label, obj_str in result:
+            # for record in result:
+            #     ro = RefObj()
+            #     ro.uniq_id = record["obj_id"]
+            #     ro.label = record["obj_label"]
+            #     ro.str = record["obj_str"]
+            #     ro.root = (
+            #         record.get("rel"),
+            #         record.get("root_id"),
+            #         record.get("root_str"),
+            #     )
+            #     # rint(f'#ds_merge_check {root_id}:{root_str} -[{rel}]-> {obj_id}:{obj_label} {obj_str}')
+            #     print(f"#ds_merge_check {ro.uniq_id}:{ro.label} {ro.str} in {ro.root}")
+            #     if ro.uniq_id in objs.keys():
+            #         # Error if current uniq_id exists twice
+            #         msg = f"Object {ro} has two roots {objs[ro.uniq_id].root} and {ro.root}"
+            #         return {"status": Status.ERROR, "statustext": msg}
+            #     for i, obj2 in objs.items():
+            #         print(f"#ds_merge_check {obj2} <> {ro}")
+            #         if i == ro.uniq_id:
+            #             continue
+            #         # Error if different labels or has different root node
+            #         if obj2.label != ro.label:
+            #             msg = f"Objects {obj2} and {ro} are different"
+            #             return {"status": Status.ERROR, "statustext": msg}
+            #         if obj2.root[1] != ro.root[1]:
+            #             msg = (
+            #                 f"Object {ro} has different roots {obj2.root} and {ro.root}"
+            #             )
+            #             return {"status": Status.ERROR, "statustext": msg}
+            #     objs[ro.uniq_id] = ro
 
             if len(objs) == 2:
                 print(f"ds_merge_check ok {objs}")
@@ -443,7 +446,7 @@ class Neo4jUpdateService(ConcreteService):
         :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
         """
         from models import lifetime
-        from models.lifetime import BIRTH, DEATH, BAPTISM, BURIAL, MARRIAGE
+        from models.lifetime import BIRTH, DEATH, BAPTISM, BURIAL #, MARRIAGE
         from bl.dates import DR
         
         def sortkey(event): # sorts events so that BIRTH, DEATH, BAPTISM, BURIAL come first
@@ -777,3 +780,34 @@ class Neo4jUpdateService(ConcreteService):
             "statustext": ret.get("statustext", ""),
         }
 
+
+    # ----- Discussions -----
+
+    def ds_comment_save(self, attr):
+        """Creates a Comment node linked from commenting object and the commenter.
+
+        attr = {object_id:int, username:str, title:str, text:str, reply:bool}
+
+        Comment.timestamp is created in the Cypher clause.
+        
+        TODO: Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
+        """
+        is_reply = attr.get("reply")
+        if is_reply:
+            cypher = CypherComment.create_comment
+        else: # default
+            cypher = CypherComment.create_topic
+
+        record = self.tx.run(cypher, attr=attr).single()
+        if not record:
+            raise IsotammiException(
+                "Unable to save " + "Comment" if is_reply else "Topic",
+                cypher=cypher, attr=attr)
+
+        node = record.get("comment")
+        if not node:
+            return {"status": Status.ERROR, "statustext": _("Could not save a comment")}
+        comment = Comment.from_node(node)
+        comment.obj_type = record.get("obj_type")
+        comment.user = attr.get("username")
+        return {"status": Status.OK, "comment": comment}

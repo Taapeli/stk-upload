@@ -61,7 +61,7 @@ the page.
 
 body {
     font-family: sans-serif;
-    font-size: 90%;
+    font-size: 10pt;
     color: black;
     margin: 0px;
     background-color: #EEE;
@@ -1127,7 +1127,7 @@ body#FamilyMap {
 	}
 */
 
-/* Gren: Comments part now only for auditor! */
+/* Gren: Discussions part now only for auditor! */
 div#comments_div h3 a {
     color: DarkGreen;
     text-decoration: none;

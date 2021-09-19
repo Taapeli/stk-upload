@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-13 11:15+0300\n"
-"PO-Revision-Date: 2021-06-01 15:45+0300\n"
+"POT-Creation-Date: 2021-09-16 16:46+0300\n"
+"PO-Revision-Date: 2021-09-16 11:23+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
 "Language-Team: sv <LL@li.org>\n"
@@ -63,11 +63,13 @@ msgid ""
 "I have read and agree to the <a href='{terms_of_use_url}' "
 "target='esite'>{terms_of_use}</a>"
 msgstr ""
+"Jag har läst och samtyckt <a href='{terms_of_use_url}' "
+"target='esite'>till {terms_of_use}</a>"
 
 #: bp/start/templates/start/my_settings.html:78
 #: bp/start/templates/start/my_settings.html:85 setups.py:185
 msgid "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
-msgstr ""
+msgstr "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
 
 #: bp/start/templates/start/my_settings.html:75
 #: bp/start/templates/start/my_settings.html:79
@@ -86,7 +88,7 @@ msgstr "Indikera att du har läst och godkänner användar vilkoren"
 
 #: setups.py:201
 msgid "Email has been reserved already"
-msgstr ""
+msgstr "Denna e-post har redan reserverats"
 
 #: setups.py:206
 msgid "Username has been reserved already"
@@ -209,7 +211,7 @@ msgstr "Personen finns inte"
 #: bl/root.py:583
 #, python-format
 msgid "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted"
-msgstr ""
+msgstr "Godkänt batch-ID %(batch_id)s med %(deleted)d-noder har tagits bort"
 
 #: bl/admin/models/data_admin.py:60 bl/admin/models/user_admin.py:86
 msgid "User {} has not admin privileges"
@@ -393,35 +395,35 @@ msgstr "Vet inte"
 
 #: bp/admin/forms.py:106
 msgid "Research years:"
-msgstr ""
+msgstr "Forskningsår:"
 
 #: bp/admin/forms.py:107
 msgid "research years"
-msgstr ""
+msgstr "forskningsår"
 
 #: bp/admin/forms.py:108
 msgid "Researched names:"
-msgstr ""
+msgstr "Undersökta namn:"
 
 #: bp/admin/forms.py:109
 msgid "Researched names"
-msgstr ""
+msgstr "Undersökta namn"
 
 #: bp/admin/forms.py:110
 msgid "Researched places:"
-msgstr ""
+msgstr "Undersökta platser:"
 
 #: bp/admin/forms.py:111
 msgid "Researched places"
-msgstr ""
+msgstr "Undersökta platser"
 
 #: bp/admin/forms.py:112
 msgid "Software:"
-msgstr ""
+msgstr "Släktprogram:"
 
 #: bp/admin/forms.py:113
 msgid "Genealogy software"
-msgstr ""
+msgstr "Släktprogram"
 
 #: bp/admin/forms.py:114 bp/start/forms.py:55
 msgid "Message:"
@@ -429,11 +431,11 @@ msgstr "Meddelande:"
 
 #: bp/admin/forms.py:115
 msgid "Agreed to terms time"
-msgstr ""
+msgstr "Överenskommen villkorstid"
 
 #: bp/admin/forms.py:116
 msgid "The time when the user agreed to the terms and conditions"
-msgstr ""
+msgstr "Den tidpunkt då användaren gick med på villkoren"
 
 #: bp/admin/routes.py:117
 msgid "Database initial check done."
@@ -993,7 +995,7 @@ msgstr "raderad från databasen"
 #: bp/admin/templates/admin/uploads.html:88
 #, python-format
 msgid "batch %(batch_id)s; %(persons)d&nbsp;persons"
-msgstr ""
+msgstr "batch %(batch_id)s. %(persons)d personer"
 
 #: bp/admin/templates/admin/uploads.html:95
 msgid "Store to database"
@@ -1007,39 +1009,47 @@ msgstr "Visa logg"
 msgid "Delete file"
 msgstr "Radera fil"
 
-#: bp/audit/routes.py:117
-msgid " failed"
-msgstr " misslyckas"
+#: bp/audit/routes.py:104
+msgid "Audit request for "
+msgstr "Inspectionen begärad för "
+
+#: bp/audit/routes.py:107
+msgid "Withdrawing audit request for "
+msgstr "Återtagning av inspectionsbegär för "
 
 #: bp/audit/routes.py:119
+msgid " failed"
+msgstr " misslyckades"
+
+#: bp/audit/routes.py:121
 msgid " succeeded"
-msgstr " fungerade"
+msgstr " lyckades"
 
-#: bp/audit/routes.py:150
+#: bp/audit/routes.py:159
 msgid "No such batch "
-msgstr "En sådan material finns inte"
-
-#: bp/audit/routes.py:206
-msgid "You are now an auditor for batch "
-msgstr ""
-
-#: bp/audit/routes.py:213
-msgid "Audit batch accepted: "
-msgstr ""
+msgstr "Ingen sådan sats "
 
 #: bp/audit/routes.py:220
+msgid "You are now an auditor for batch "
+msgstr "Du är nu revisor för materialet "
+
+#: bp/audit/routes.py:227
+msgid "Audit batch accepted: "
+msgstr "Materialet i inspektion godkänd: "
+
+#: bp/audit/routes.py:234
 msgid "You have rejected the batch "
 msgstr "Du har avfärdat detta materialet "
 
-#: bp/audit/routes.py:356
+#: bp/audit/routes.py:374
 msgid "Done"
 msgstr "Färdigt"
 
-#: bp/audit/routes.py:445
+#: bp/audit/routes.py:463
 msgid "Data type '{}' is not supported"
 msgstr "Data typen '{}' stöds inte"
 
-#: bp/audit/routes.py:452
+#: bp/audit/routes.py:470
 msgid "Missing proper column title: "
 msgstr "Giltigt kolumn namn fattas: "
 
@@ -1054,7 +1064,7 @@ msgstr "Är du säker på att du vill avlägsna denna batch från databasen?"
 
 #: bp/audit/templates/audit/approvals.html:55
 msgid "Approved batches"
-msgstr ""
+msgstr "Godkända materialen"
 
 #: bp/audit/templates/audit/approvals.html:59
 #, python-format
@@ -1133,7 +1143,7 @@ msgstr "Översättning"
 
 #: bp/audit/templates/audit/classifiers.html:54
 msgid "Inessive"
-msgstr ""
+msgstr "Inessive (inessive)"
 
 #: bp/audit/templates/audit/index.html:3 bp/audit/templates/audit/index.html:12
 #: bp/start/templates/start/index_logged.html:114
@@ -1142,7 +1152,7 @@ msgstr "Isotammi revisor"
 
 #: bp/audit/templates/audit/index.html:17
 msgid "Queries"
-msgstr ""
+msgstr "Databassökningar"
 
 #: bp/audit/templates/audit/index.html:20
 msgid "List approved common data sets"
@@ -1181,7 +1191,7 @@ msgstr "Experimental sammanslagning av platser"
 
 #: bp/audit/templates/audit/index.html:36
 msgid "Experimental duplicate person search"
-msgstr ""
+msgstr "Experimentell dubbelpersonssökning"
 
 #: bp/audit/templates/audit/layout.html:54 bp/gedcom/templates/g_layout.html:25
 #: bp/scene/templates/scene/sc_layout.html:37
@@ -1194,7 +1204,7 @@ msgstr "Till framsidan"
 
 #: bp/audit/templates/audit/layout.html:60
 msgid "Audit home"
-msgstr "Inspekt hem"
+msgstr "Inspektör hem"
 
 #: bp/audit/templates/audit/layout.html:78 bp/gedcom/templates/g_layout.html:49
 #: bp/start/templates/start/s_layout.html:52 templates/a_layout.html:41
@@ -1231,7 +1241,7 @@ msgstr "Inspektioner"
 
 #: bp/audit/templates/audit/pick_auditing.html:50
 msgid "Access is given also to"
-msgstr ""
+msgstr "Tillgång ges också till"
 
 #: bp/audit/templates/audit/pick_auditing.html:58
 msgid "There is no data in this batch"
@@ -1854,7 +1864,7 @@ msgstr "Förändring 1999-12 till DEC 1999"
 
 #: bp/gedcom/transforms/dates.py:52
 msgid "Change [00.]12.1999 to DEC 1999"
-msgstr "Ändra [00.] 12,1999 till DEC 1999"
+msgstr "Ändra [00.]12,1999 till DEC 1999"
 
 #: bp/gedcom/transforms/dates.py:54
 msgid "Change 00 DEC 1999 to DEC 1999"
@@ -1862,7 +1872,7 @@ msgstr "Förändring 00 DEC 1999 till DEC 1999"
 
 #: bp/gedcom/transforms/dates.py:56
 msgid "Change 1950-[19]59 to FROM 1950 TO 1959"
-msgstr "Förändring 1950-[19] 59 till från 1950 till 1959"
+msgstr "Förändring 1950-[19]59 till från 1950 till 1959"
 
 #: bp/gedcom/transforms/dates.py:58
 msgid "Change 1950-/>1950 to FROM/AFT 1950"
@@ -2143,16 +2153,16 @@ msgstr "Materialet finns inte"
 #: bp/gramps/routes.py:326
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
-msgstr ""
+msgstr "Det gick inte att ta bort material-id %(batch_id)s"
 
 #: bp/gramps/routes.py:334
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
-msgstr ""
+msgstr "Batch %(batch_id)s har tagits bort, %(n)s noder"
 
 #: bp/gramps/routes.py:418
 msgid "Failed to retrieve commands"
-msgstr ""
+msgstr "Det gick inte att hämta kommandon"
 
 #: bp/gramps/routes.py:425
 msgid "Browse this material"
@@ -2295,30 +2305,30 @@ msgstr "Judiska"
 
 #: bp/scene/routes.py:162
 msgid "Data read failed."
-msgstr ""
+msgstr "Dataläsningen misslyckades."
 
-#: bp/scene/routes.py:425
+#: bp/scene/routes.py:433
 msgid "type changed"
 msgstr "typen has förendrats"
 
-#: bp/scene/routes.py:427
+#: bp/scene/routes.py:435
 msgid "type change FAILED"
 msgstr "typ förendring MISSLYCKAS"
 
-#: bp/scene/routes.py:578 bp/scene/routes.py:587
+#: bp/scene/routes.py:586 bp/scene/routes.py:595
 msgid "No event found"
 msgstr "Inga händelser hittades"
 
-#: bp/scene/routes.py:625 bp/scene/templates/scene/event.html:77
+#: bp/scene/routes.py:633 bp/scene/templates/scene/event.html:77
 #: bp/scene/templates/scene/hx-person/famtree.html:42
 msgid "Self"
 msgstr "Själv"
 
-#: bp/scene/routes.py:787
+#: bp/scene/routes.py:795
 msgid "No families"
 msgstr "Inga familjer"
 
-#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:108
+#: bp/scene/routes.py:805 bp/scene/templates/scene/families.html:108
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/hx-person/famtree.html:17
 #: bp/scene/templates/scene/hx-person/famtree.html:60 ui/jinja_filters.py:87
@@ -2326,18 +2336,18 @@ msgstr "Inga familjer"
 msgid "Family"
 msgstr "Familj"
 
-#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:112
+#: bp/scene/routes.py:805 bp/scene/templates/scene/families.html:112
 #: bp/scene/templates/scene/family.html:98
 #: bp/scene/templates/scene/hx-person/famtree.html:25
 #: bp/scene/templates/scene/hx-person/famtree.html:68
 msgid "Children"
 msgstr "Barn"
 
-#: bp/scene/routes.py:965
+#: bp/scene/routes.py:973
 msgid "No objects found"
 msgstr "Ingenting funnits"
 
-#: bp/scene/routes.py:1221
+#: bp/scene/routes.py:1233
 msgid "No previous comments"
 msgstr "Inga kommentarer"
 
@@ -2401,7 +2411,7 @@ msgstr "Den sista föremålet"
 #: bp/scene/templates/scene/comments.html:86
 #, python-format
 msgid "No comment found starting from \"%(name)s\""
-msgstr ""
+msgstr "Det hittades ingen kommentar som startar från %(name)s"
 
 #: bp/scene/templates/scene/comments.html:88
 #: bp/scene/templates/scene/families.html:160
@@ -2413,11 +2423,11 @@ msgstr "första sidan"
 
 #: bp/scene/templates/scene/comments.html:88
 msgid "Go to the first comment"
-msgstr ""
+msgstr "Gå till den första kommentaren"
 
 #: bp/scene/templates/scene/comments.html:90
 msgid "No comments found"
-msgstr ""
+msgstr "Inga kommentarer hittades"
 
 #: bp/scene/templates/scene/edit_event.html:8
 #: bp/scene/templates/scene/event.html:49
@@ -2587,7 +2597,7 @@ msgstr[1] "%(num)d dolda"
 #: bp/scene/templates/scene/families.html:158
 #, python-format
 msgid "No family found with search keys starting \"%(name)s\""
-msgstr "En sådan familje finns inte"
+msgstr "Ingen familj hittades med söknycklar som startade %(name)s\""
 
 #: bp/scene/templates/scene/families.html:160
 #: bp/scene/templates/scene/persons_list.html:180
@@ -2675,8 +2685,8 @@ msgid "Pictures"
 msgstr "Bilder"
 
 #: bp/scene/templates/scene/macros.html:75
-msgid "Comments"
-msgstr ""
+msgid "Discussions"
+msgstr "Kommentarer"
 
 #: bp/scene/templates/scene/macros.html:78
 msgid "Get more info"
@@ -2892,7 +2902,7 @@ msgstr "Namn"
 
 #: bp/scene/templates/scene/person.html:125
 msgid "order by dragging"
-msgstr ""
+msgstr "ordna genom att dra"
 
 #: bp/scene/templates/scene/hx-person/famtree.html:43
 #: bp/scene/templates/scene/person.html:149
@@ -3340,7 +3350,7 @@ msgstr "Din kommentar"
 
 #: bp/scene/templates/scene/hx-comment/comments.html:26
 msgid "Add comment"
-msgstr ""
+msgstr "Lägg till kommentar"
 
 #: bp/scene/templates/scene/hx-comment/comments.html:32
 msgid "Latest comments"
@@ -3351,7 +3361,7 @@ msgid "Show discussion"
 msgstr "Visa diskussion"
 
 #: bp/scene/templates/scene/hx-comment/fetch_comments.html:22
-msgid "Load More Comments"
+msgid "Load More Discussions"
 msgstr "Mera kommentarer"
 
 #: bp/scene/templates/scene/hx-person/famtree.html:5
@@ -3465,7 +3475,7 @@ msgstr "Administrera dina material."
 
 #: bp/start/templates/start/index_logged.html:48
 msgid "Candidate materials"
-msgstr "Dina material"
+msgstr "Materiallistan"
 
 #: bp/start/templates/start/index_logged.html:62
 msgid "Browse Isotammi Database"
@@ -3580,7 +3590,7 @@ msgid "User Settings"
 msgstr "Inställningar av användaren"
 
 #: bp/start/templates/start/my_settings.html:34
-msgid "My Profile Page"
+msgid "Profile Page"
 msgstr "Min profilsida"
 
 #: bp/start/templates/start/my_settings.html:37
@@ -3604,10 +3614,12 @@ msgid ""
 "Agreed to the <a href='{terms_of_use_url}' "
 "target='esite'>{terms_of_use}</a> at"
 msgstr ""
+"Gick med på <a href='{terms_of_use_url}' "
+"target='esite'>{terms_of_use}</a> på"
 
 #: bp/start/templates/start/my_settings.html:84
 msgid "<a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"
-msgstr ""
+msgstr "<a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"
 
 #: bp/start/templates/start/my_settings.html:97
 msgid "Active Roles"
@@ -3642,8 +3654,8 @@ msgid "Approved %(n)s objects"
 msgstr "Godkända %(n)s-objekt"
 
 #: bp/start/templates/start/my_settings.html:149
-msgid "Upload or remove a file or candidate batch"
-msgstr "Ladda eller tag bort en fil från kandidat material"
+msgid "Upload or remove a candidate batch"
+msgstr "Ladda eller tag bort en kandidat material"
 
 #: bp/start/templates/start/my_settings.html:155
 msgid "You have no candidate data loaded in the database."
@@ -3690,9 +3702,7 @@ msgstr "Demomaterialet"
 msgid ""
 "You are on the home page of Isotammi demo. You have log in as a guest "
 "user."
-msgstr ""
-"Du är på hemsidan för Isotammi demo. Du har loggats in som en besökande "
-"användare."
+msgstr "Du är på hemsidan för Isotammi demo som en besökande användare."
 
 #: bp/start/templates/start/obsolete_index_guest.html:60
 msgid "Continue"
@@ -4247,8 +4257,8 @@ msgid ""
 "Mark the central person (1st selection column) and the people to be "
 "merged (2nd column)"
 msgstr ""
-"Markera den centrala personen (1: a kolumnen att väljä på) och de "
-"personer som ska slås samman (2: a kolumnen)"
+"Markera den centrala personen (1:a kolumnen att väljä på) och de personer"
+" som ska slås samman (2:a kolumnen)"
 
 #: templates/join_persons.html:27
 msgid "If necessary, pick up nearby reference names <i> (not already in use)"
@@ -4375,7 +4385,7 @@ msgstr "Plats_normaliserad"
 
 #: templates/select_refcols.html:39 templates/select_refcols.html:67
 msgid "Comment"
-msgstr "Komment"
+msgstr "Kommentar"
 
 #: templates/select_refcols.html:40 templates/select_refcols.html:68
 msgid "Court"
@@ -4651,11 +4661,11 @@ msgstr "som make/maka"
 
 #: ui/jinja_filters.py:121
 msgid "Adoption"
-msgstr ""
+msgstr "Adoption"
 
 #: ui/jinja_filters.py:122
 msgid "Foster-child"
-msgstr ""
+msgstr "Fosterbarn"
 
 #: ui/jinja_filters.py:123
 msgid "Clergy"
@@ -4675,7 +4685,7 @@ msgstr "Mäl"
 
 #: ui/jinja_filters.py:129 ui/jinja_filters.py:130
 msgid "Wittness"
-msgstr "fadder"
+msgstr "Fadder"
 
 #: ui/jinja_filters.py:131
 msgid "Husband"
@@ -4687,7 +4697,7 @@ msgstr "Säljare"
 
 #: ui/jinja_filters.py:134
 msgid "Teacher"
-msgstr "lärare"
+msgstr "Lärare"
 
 #: ui/jinja_filters.py:135
 msgid "Osallinen"
@@ -4887,7 +4897,7 @@ msgstr "Byggnad"
 
 #: ui/jinja_filters.py:210
 msgid "Church"
-msgstr "kyrka"
+msgstr "Kyrka"
 
 #: ui/jinja_filters.py:211
 msgid "City"
@@ -4915,7 +4925,7 @@ msgstr "By"
 
 #: ui/jinja_filters.py:218
 msgid "Burial Site"
-msgstr "begravningsplats"
+msgstr "Begravningsplats"
 
 #: ui/jinja_filters.py:219
 msgid "Cemetery"
@@ -4931,11 +4941,11 @@ msgstr "Herrgård"
 
 #: ui/jinja_filters.py:222
 msgid "Denomination"
-msgstr "samfund"
+msgstr "Samfund"
 
 #: ui/jinja_filters.py:223
 msgid "Street Address"
-msgstr "gatuaddress"
+msgstr "Gatuadress"
 
 #: ui/jinja_filters.py:224
 msgid "Block"
@@ -4947,7 +4957,7 @@ msgstr "Kommun centrum"
 
 #: ui/jinja_filters.py:226
 msgid "Governorate"
-msgstr "guvernement"
+msgstr "Guvernement"
 
 #: ui/jinja_filters.py:227
 msgid "Institute"
@@ -4963,7 +4973,7 @@ msgstr "Lokalitet"
 
 #: ui/jinja_filters.py:230
 msgid "Natural Place"
-msgstr "naturlig plats"
+msgstr "Naturplats"
 
 #: ui/jinja_filters.py:231
 msgid "Municipality"
@@ -4971,11 +4981,11 @@ msgstr "Kommun"
 
 #: ui/jinja_filters.py:232
 msgid "Neighborhood"
-msgstr ""
+msgstr "Område"
 
 #: ui/jinja_filters.py:233
 msgid "Learning Institution"
-msgstr "läroanstalt"
+msgstr "Läroanstalt"
 
 #: ui/jinja_filters.py:234
 msgid "Organization"
@@ -4987,11 +4997,11 @@ msgstr "Församling"
 
 #: ui/jinja_filters.py:236
 msgid "Province"
-msgstr "provins"
+msgstr "Provins"
 
 #: ui/jinja_filters.py:239
 msgid "Hospital"
-msgstr ""
+msgstr "Sjukhus"
 
 #: ui/jinja_filters.py:240
 msgid "State"
@@ -4999,7 +5009,7 @@ msgstr "Delstat"
 
 #: ui/jinja_filters.py:241
 msgid "Seat Farm"
-msgstr ""
+msgstr "Gård"
 
 #: ui/jinja_filters.py:243
 msgid "Tontti"
@@ -5051,7 +5061,7 @@ msgstr "i landet"
 
 #: ui/jinja_filters.py:260
 msgid "in the department of"
-msgstr "i avdelningen"
+msgstr "i departmentet"
 
 #: ui/jinja_filters.py:261
 msgid "in the district of"
@@ -5083,7 +5093,7 @@ msgstr "i herrgården"
 
 #: ui/jinja_filters.py:268
 msgid "in the denomination of"
-msgstr ""
+msgstr "i samfundet av"
 
 #: ui/jinja_filters.py:269
 msgid "at street address"
@@ -5099,11 +5109,11 @@ msgstr "I kommun centrum"
 
 #: ui/jinja_filters.py:272
 msgid "in the governorate"
-msgstr ""
+msgstr "i guvernörsatet"
 
 #: ui/jinja_filters.py:273
 msgid "in the nstitute"
-msgstr ""
+msgstr "i nstitutet"
 
 #: ui/jinja_filters.py:274
 msgid "in the fortress"
@@ -5123,7 +5133,7 @@ msgstr "i kommunen"
 
 #: ui/jinja_filters.py:278
 msgid "in the neighborhood of"
-msgstr ""
+msgstr "i området av"
 
 #: ui/jinja_filters.py:279
 msgid "in the learning lnstitution"
@@ -5191,11 +5201,11 @@ msgstr "Okänd relation"
 
 #: ui/jinja_filters.py:319
 msgid " Family Tree "
-msgstr "Släktträd"
+msgstr " Släktträd "
 
 #: ui/jinja_filters.py:320
 msgid " Example type "
-msgstr "Exempel typ "
+msgstr " Exempeltyp "
 
 #: ui/jinja_filters.py:331
 msgid "Auditing"
@@ -5228,4 +5238,3 @@ msgstr "Mina egna och godkända gemensamma data"
 #: ui/user_context.py:133
 msgid "My selected batch and approved common data"
 msgstr "Min valda material och godkända gemensamma material"
-

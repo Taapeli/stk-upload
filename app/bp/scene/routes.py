@@ -34,7 +34,7 @@ logger = logging.getLogger("stkserver")
 from operator import itemgetter
 import time
 from datetime import datetime
-from types import SimpleNamespace
+#from types import SimpleNamespace
 
 
 from flask import send_file, Response, jsonify
@@ -50,7 +50,7 @@ from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
 
 import shareds
-from models import util
+#from models import util
 
 from . import bp
 from bl.base import Status, StkEncoder
@@ -61,14 +61,14 @@ from bl.event import EventReader, EventWriter
 from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
-from bl.comment import CommentReader
+from bl.comment import Comment, CommentReader, CommentsUpdater
+
 from models import mediafile
 from bp.graph.models.fanchart import FanChart
 
 from ui.user_context import UserContext
 from ui import jinja_filters
 from ui.util import error_print, stk_logger
-
 
 # Select the read driver for current database
 # from database.accessDB import get_dataservice
@@ -195,16 +195,19 @@ def show_person_search(set_scope=None, batch_id=None):
         key = rq.get("key")
         if key:
             args["key"] = key
+        batch_id = rq.get("batch_id")
+        set_scope = rq.get("set-scope")
         if not (set_scope is None or batch_id is None): 
             args["batch_id"] = batch_id
             args["set_scope"] = set_scope
-    
+
         res, u_context = _do_get_persons(args)
+
         print(f"#show_person_search: {request.method} "
               f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
-    
+
         found = res.get("items", [])
         num_hidden = res.get("num_hidden", 0)
         hidden = f" hide={num_hidden}" if num_hidden > 0 else ""
@@ -218,14 +221,14 @@ def show_person_search(set_scope=None, batch_id=None):
         print(
             f"Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
         )
-    
+
         surnamestats = []
         placenamestats = []
         if args.get("rule") is None:
             # Start search page: show name clouds
             minfont = 6
             maxfont = 20
-    
+
             # Most common surnames cloud
             with PersonReader("read", u_context) as service:
                 surnamestats = service.get_surname_list(47)
@@ -234,7 +237,7 @@ def show_person_search(set_scope=None, batch_id=None):
                     stat["order"] = i
                     stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
                 surnamestats.sort(key=itemgetter("surname"))
-    
+
             # Most common place names cloud
             with PlaceReader("read", u_context) as service:
                 placenamestats = service.get_placename_list(40)
@@ -249,7 +252,6 @@ def show_person_search(set_scope=None, batch_id=None):
     except Exception as e:
         error_print("show_person_search", e)
         return redirect(url_for("routes.entry"))
-
 
     return render_template(
         "/scene/persons_search.html",
@@ -1145,11 +1147,11 @@ def fetch_thumbnail():
 # ------------------------------ Menu 7: Comment --------------------------------
 
 
-@bp.route("/scene/batch_comments")
+@bp.route("/scene/topics")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_topics():
-    """List of Comments for menu(7)"""
+    """List of Discussions for menu(7)"""
     t0 = time.time()
     print(f"--- {request}")
     print(f"--- {user_session}")
@@ -1190,7 +1192,7 @@ def comments():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def comments_header():
-    """Comments header"""
+    """Discussions header"""
     if "audit" in current_user.roles:
         return render_template("/scene/hx-comment/comments_header.html")
     else:
@@ -1201,82 +1203,75 @@ def comments_header():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def fetch_comments():
-    """Fetch comments"""
+    """Fetch topics and comments to given object """
+    from pe.neo4j.cypher.cy_comment import CypherComment
+
     u_context = UserContext(user_session, current_user, request)
     uniq_id = int(request.args.get("uniq_id"))
     # uuid = request.args.get("uuid")
     if request.args.get("start"):
         start = float(request.args.get("start"))
     else:
-        start = datetime.now().timestamp()
+        # Neo4j timestamp
+        start = datetime.now().timestamp() * 1000.
 
-    query = """
-        match (p) -[:COMMENT] -> (c:Comment)
-            where id(p) = $uniq_id and c.timestamp <= $start
-        return c as comment order by c.timestamp desc limit 5
-    """
-    result = shareds.driver.session().run(query, uniq_id=uniq_id, start=start)
-    comments = []
-    last_timestamp = None
-    for record in result:
-        node = record["comment"]
-        c = SimpleNamespace()
-        c.user = node["user"]
-        c.comment_text = node["text"]
-        c.timestr = node["timestr"]
-        c.timestamp = node["timestamp"]
-        comments.append(c)
-        last_timestamp = c.timestamp
-    if last_timestamp is None:
-        return "<span id='no_comments'>" + _("No previous comments") + "</span>"
-    else:
-        stk_logger(u_context, f"-> bp.scene.routes.fetch_comments n={len(comments)}")
-        return render_template(
-            "/scene/hx-comment/fetch_comments.html",
-            comments=comments[0:4],
-            last_timestamp=last_timestamp,
-            there_is_more=len(comments) > 4,
-        )
-
+    try:
+        result = shareds.driver.session().run(CypherComment.fetch_obj_comments, 
+                                              uniq_id=uniq_id, start=start)
+        comments = []
+        last_timestamp = None
+        for record in result:
+            node = record["comment"]
+            c = Comment.from_node(node)
+            c.user = record["commenter"]
+            comments.append(c)
+            last_timestamp = c.timestamp
+        if last_timestamp is None:
+            return "<span id='no_comments'>" + _("No previous comments") + "</span>"
+        else:
+            stk_logger(u_context, f"-> bp.scene.routes.fetch_comments n={len(comments)}")
+            return render_template(
+                "/scene/hx-comment/fetch_comments.html",
+                comments=comments[0:4],
+                last_timestamp=last_timestamp,
+                there_is_more=len(comments) > 4,
+            )
+    except Exception as e:
+        error_print("fetch_comments", e, do_flash=False)
+        return f"{ _('Sorry, operation failed') }: {e.__class__.__name__} {e}"
 
 @bp.route("/scene/hx-comment/add_comment", methods=["post"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def add_comment():
     """Add a comment"""
+    
     u_context = UserContext(user_session, current_user, request)
     # uuid = request.form.get("uuid")
-    uniq_id = int(request.form.get("uniq_id"))
+    uniq_id = int(request.form.get("uniq_id", 0))
     comment_text = request.form.get("comment_text")
     if comment_text.strip() == "":
         return ""
     user = current_user.username
-    timestamp = time.time()
-    timestr = util.format_timestamp(timestamp)
-    res = (
-        shareds.driver.session()
-        .run(
-            """
-        match (p) where id(p) = $uniq_id 
-        create (p) -[:COMMENT] -> 
-            (c:Comment{user:$user,text:$text,timestamp:$timestamp,timestr:$timestr})
-        return c
-        """,
-            uniq_id=uniq_id,
-            user=user,
-            text=comment_text,
-            timestamp=timestamp,
-            timestr=timestr,
-        )
-        .single()
-    )
-    if res:
-        stk_logger(u_context, "-> bp.scene.routes.add_comment")
-        return render_template(
-            "/scene/hx-comment/add_comment.html",
-            timestamp=timestr,
-            user=user,
-            comment_text=comment_text,
-        )
-    else:
-        return ""
+    comment = None
+    try:
+        with CommentsUpdater("update") as comment_service:
+            res = comment_service.add_comment(user, uniq_id, comment_text)
+            if res:
+                if Status.has_failed(res, strict=True):
+                    flash(f'{res.get("statustext","error")}', "error")
+                    return ""
+                comment = res.get("comment")
+            else:
+                msg = f'{_("The operation failed due to error")}: {res.get("statustext","error")}'
+                print("bp.scene.routes.add_comment" + msg)
+                logger.error("bp.scene.routes.add_comment" + msg)
+                flash(msg)
+                return ""
+
+    except Exception as e:
+        error_print("add_comment", e, do_flash=False)
+        return f"{ _('Sorry, operation failed') }: {e.__class__.__name__} {e}"
+
+    stk_logger(u_context, "-> bp.scene.routes.add_comment")
+    return render_template("/scene/hx-comment/add_comment.html", comment=comment)

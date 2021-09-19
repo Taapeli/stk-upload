@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-13 11:15+0300\n"
+"POT-Creation-Date: 2021-09-16 16:46+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -1005,39 +1005,47 @@ msgstr ""
 msgid "Delete file"
 msgstr ""
 
-#: bp/audit/routes.py:117
-msgid " failed"
+#: bp/audit/routes.py:104
+msgid "Audit request for "
+msgstr ""
+
+#: bp/audit/routes.py:107
+msgid "Withdrawing audit request for "
 msgstr ""
 
 #: bp/audit/routes.py:119
+msgid " failed"
+msgstr ""
+
+#: bp/audit/routes.py:121
 msgid " succeeded"
 msgstr ""
 
-#: bp/audit/routes.py:150
+#: bp/audit/routes.py:159
 msgid "No such batch "
 msgstr ""
 
-#: bp/audit/routes.py:206
+#: bp/audit/routes.py:220
 msgid "You are now an auditor for batch "
 msgstr ""
 
-#: bp/audit/routes.py:213
+#: bp/audit/routes.py:227
 msgid "Audit batch accepted: "
 msgstr ""
 
-#: bp/audit/routes.py:220
+#: bp/audit/routes.py:234
 msgid "You have rejected the batch "
 msgstr ""
 
-#: bp/audit/routes.py:356
+#: bp/audit/routes.py:374
 msgid "Done"
 msgstr ""
 
-#: bp/audit/routes.py:445
+#: bp/audit/routes.py:463
 msgid "Data type '{}' is not supported"
 msgstr ""
 
-#: bp/audit/routes.py:452
+#: bp/audit/routes.py:470
 msgid "Missing proper column title: "
 msgstr ""
 
@@ -2289,28 +2297,28 @@ msgstr ""
 msgid "Data read failed."
 msgstr ""
 
-#: bp/scene/routes.py:425
+#: bp/scene/routes.py:433
 msgid "type changed"
 msgstr ""
 
-#: bp/scene/routes.py:427
+#: bp/scene/routes.py:435
 msgid "type change FAILED"
 msgstr ""
 
-#: bp/scene/routes.py:578 bp/scene/routes.py:587
+#: bp/scene/routes.py:586 bp/scene/routes.py:595
 msgid "No event found"
 msgstr ""
 
-#: bp/scene/routes.py:625 bp/scene/templates/scene/event.html:77
+#: bp/scene/routes.py:633 bp/scene/templates/scene/event.html:77
 #: bp/scene/templates/scene/hx-person/famtree.html:42
 msgid "Self"
 msgstr ""
 
-#: bp/scene/routes.py:787
+#: bp/scene/routes.py:795
 msgid "No families"
 msgstr ""
 
-#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:108
+#: bp/scene/routes.py:805 bp/scene/templates/scene/families.html:108
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/hx-person/famtree.html:17
 #: bp/scene/templates/scene/hx-person/famtree.html:60 ui/jinja_filters.py:87
@@ -2318,18 +2326,18 @@ msgstr ""
 msgid "Family"
 msgstr ""
 
-#: bp/scene/routes.py:797 bp/scene/templates/scene/families.html:112
+#: bp/scene/routes.py:805 bp/scene/templates/scene/families.html:112
 #: bp/scene/templates/scene/family.html:98
 #: bp/scene/templates/scene/hx-person/famtree.html:25
 #: bp/scene/templates/scene/hx-person/famtree.html:68
 msgid "Children"
 msgstr ""
 
-#: bp/scene/routes.py:965
+#: bp/scene/routes.py:973
 msgid "No objects found"
 msgstr ""
 
-#: bp/scene/routes.py:1221
+#: bp/scene/routes.py:1233
 msgid "No previous comments"
 msgstr ""
 
@@ -3558,7 +3566,7 @@ msgid "User Settings"
 msgstr ""
 
 #: bp/start/templates/start/my_settings.html:34
-msgid "My Profile Page"
+msgid "Profile Page"
 msgstr ""
 
 #: bp/start/templates/start/my_settings.html:37
