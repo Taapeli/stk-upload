@@ -42,11 +42,12 @@ def run_cypher( session, cypher, username, **kwargs):
     
     The cypher query should access all other nodes through the node (root). For example
         cypher = "match (root) -[:OBJ_PERSON]-> (p:Person) ..."
-    
+
     """
-    # if not username:
-    #     username = '_Stk_'
-    cypher2 = cypher_prefix + cypher
+    if username:
+        cypher2 = cypher_prefix + cypher
+    else:
+        cypher2 = cypher_common_prefix + cypher
     return session.run(cypher2, 
                username=username,  
                **kwargs)

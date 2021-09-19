@@ -2353,7 +2353,7 @@ msgstr "Näytetään %(num)s aihetta"
 
 #: bp/scene/templates/scene/comments.html:30
 msgid "Discussions"
-msgstr "Keskustelut"
+msgstr "Keskustelu"
 
 #: bp/scene/templates/scene/comments.html:33
 #: bp/scene/templates/scene/source_events.html:50
@@ -2675,8 +2675,8 @@ msgid "Pictures"
 msgstr "Kuvat ja mediat"
 
 #: bp/scene/templates/scene/macros.html:75
-msgid "Comments"
-msgstr "Kommentit"
+msgid "Discussions"
+msgstr "Keskustelu"
 
 #: bp/scene/templates/scene/macros.html:78
 msgid "Get more info"
@@ -3353,7 +3353,7 @@ msgid "Show discussion"
 msgstr "Näytä keskustelu"
 
 #: bp/scene/templates/scene/hx-comment/fetch_comments.html:22
-msgid "Load More Comments"
+msgid "Load More Discussions"
 msgstr "Näytä lisää kommentteja"
 
 #: bp/scene/templates/scene/hx-person/famtree.html:5

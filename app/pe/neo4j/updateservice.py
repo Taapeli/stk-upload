@@ -781,22 +781,28 @@ class Neo4jUpdateService(ConcreteService):
         }
 
 
-    # ----- Comments -----
+    # ----- Discussions -----
 
     def ds_comment_save(self, attr):
         """Creates a Comment node linked from commenting object and the commenter.
 
-        attr = {"object_id", "username", "title", "text"}
+        attr = {object_id:int, username:str, title:str, text:str, reply:bool}
 
         Comment.timestamp is created in the Cypher clause.
         
         TODO: Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
         """
-        record = self.tx.run(CypherComment.comment_create, attr=attr).single()
+        is_reply = attr.get("reply")
+        if is_reply:
+            cypher = CypherComment.create_comment
+        else: # default
+            cypher = CypherComment.create_topic
+
+        record = self.tx.run(cypher, attr=attr).single()
         if not record:
-            raise IsotammiException("Unable to save Comment",
-                            cypher=CypherComment.comment_create,
-                            attr=attr)
+            raise IsotammiException(
+                "Unable to save " + "Comment" if is_reply else "Topic",
+                cypher=cypher, attr=attr)
 
         node = record.get("comment")
         if not node:

@@ -71,8 +71,8 @@
                   {% endif %}><a href="/scene/medias" class="CurrentSection"
                    title="{{ _('Thumbnails') }}">{{ _('Pictures') }}</a></li>
                 <li{% if value == 7 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/batch_comments" class="CurrentSection"
-                   title="{{ _('Comments') }}">{{ _('Comments') }}</a></li>
+                  {% endif %}><a href="/scene/topics" class="CurrentSection"
+                   title="{{ _('Discussions') }}">{{ _('Discussions') }}</a></li>
         {% if not current_user or not current_user.is_authenticated %}
                 <li id="loginpage"><a href="/login"
                      title="{{ _('Get more info') }}">{{ _('Log in to Isotammi') }}!</a></li>

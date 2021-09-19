@@ -62,13 +62,13 @@ from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
 from bl.comment import Comment, CommentReader, CommentsUpdater
+
 from models import mediafile
 from bp.graph.models.fanchart import FanChart
 
 from ui.user_context import UserContext
 from ui import jinja_filters
 from ui.util import error_print, stk_logger
-
 
 # Select the read driver for current database
 # from database.accessDB import get_dataservice
@@ -1147,11 +1147,11 @@ def fetch_thumbnail():
 # ------------------------------ Menu 7: Comment --------------------------------
 
 
-@bp.route("/scene/batch_comments")
+@bp.route("/scene/topics")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_topics():
-    """List of Comments for menu(7)"""
+    """List of Discussions for menu(7)"""
     t0 = time.time()
     print(f"--- {request}")
     print(f"--- {user_session}")
@@ -1192,7 +1192,7 @@ def comments():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def comments_header():
-    """Comments header"""
+    """Discussions header"""
     if "audit" in current_user.roles:
         return render_template("/scene/hx-comment/comments_header.html")
     else:
@@ -1203,7 +1203,9 @@ def comments_header():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def fetch_comments():
-    """Fetch comments"""
+    """Fetch topics and comments to given object """
+    from pe.neo4j.cypher.cy_comment import CypherComment
+
     u_context = UserContext(user_session, current_user, request)
     uniq_id = int(request.args.get("uniq_id"))
     # uuid = request.args.get("uuid")
@@ -1213,24 +1215,15 @@ def fetch_comments():
         # Neo4j timestamp
         start = datetime.now().timestamp() * 1000.
 
-    query = """
-MATCH (p) -[:COMMENT] -> (c:Comment) <-[:COMMENTED]- (u:UserProfile)
-    WHERE id(p) = $uniq_id AND c.timestamp <= $start
-RETURN c AS comment, u.username AS commenter 
-    ORDER BY c.timestamp DESC LIMIT 5
-"""
     try:
-        result = shareds.driver.session().run(query, uniq_id=uniq_id, start=start)
+        result = shareds.driver.session().run(CypherComment.fetch_obj_comments, 
+                                              uniq_id=uniq_id, start=start)
         comments = []
         last_timestamp = None
         for record in result:
             node = record["comment"]
             c = Comment.from_node(node)
-            # c = SimpleNamespace()
             c.user = record["commenter"]
-            # c.comment_text = node["text"]
-            # c.timestr = node["timestr"]
-            # c.timestamp = node["timestamp"]
             comments.append(c)
             last_timestamp = c.timestamp
         if last_timestamp is None:
@@ -1244,7 +1237,7 @@ RETURN c AS comment, u.username AS commenter
                 there_is_more=len(comments) > 4,
             )
     except Exception as e:
-        error_print("fetch_comments", e, flash=False)
+        error_print("fetch_comments", e, do_flash=False)
         return f"{ _('Sorry, operation failed') }: {e.__class__.__name__} {e}"
 
 @bp.route("/scene/hx-comment/add_comment", methods=["post"])
@@ -1277,9 +1270,8 @@ def add_comment():
                 return ""
 
     except Exception as e:
-        error_print("add_comment", e)
-        return str(e)
+        error_print("add_comment", e, do_flash=False)
+        return f"{ _('Sorry, operation failed') }: {e.__class__.__name__} {e}"
 
     stk_logger(u_context, "-> bp.scene.routes.add_comment")
-    return render_template("/scene/hx-comment/add_comment.html",
-                           comment=comment)
+    return render_template("/scene/hx-comment/add_comment.html", comment=comment)

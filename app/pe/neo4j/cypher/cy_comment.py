@@ -26,20 +26,35 @@ Created on 19.5.2021
 class CypherComment():
 
 # Write Topic and Comment data
-#TODO: Case object_id refers to a Comment, create a Comment; else create a Topic.
 
-    comment_create = """
-MATCH (obj)             WHERE id(obj) = $attr.object_id
+    # New Topic to any object (should not be a Topic or Comment)
+    create_topic = """
+MATCH (obj)  WHERE id(obj) = $attr.object_id 
 MATCH (u:UserProfile)   WHERE u.username = $attr.username
-CREATE (obj) -[:COMMENT] -> (c:Comment) <-[:COMMENTED]- (u)
+CREATE (obj) -[:COMMENT] -> (c:Topic) <-[:COMMENTED]- (u)
     SET c.text = $attr.text
     SET c.title = $attr.title
     SET c.timestamp = timestamp()
-RETURN c AS comment, labels(obj)[2] AS obj_type"""
+RETURN c AS comment, labels(obj)[0] AS obj_type"""
+    # New Comment to a Topic or Comment
+    create_comment = """
+MATCH (obj)  WHERE id(obj) = $attr.object_id
+MATCH (u:UserProfile)   WHERE u.username = $attr.username
+CREATE (obj:Topic) -[:COMMENT] -> (c:Comment) <-[:COMMENTED]- (u)
+    SET c.text = $attr.text
+    SET c.title = $attr.title
+    SET c.timestamp = timestamp()
+RETURN c AS comment, labels(obj)[0] AS obj_type"""
 
 # Read Comment data
 
-    # Topic list by description with count limit
+    fetch_obj_comments = """
+MATCH (p) -[:COMMENT] -> (c) <-[:COMMENTED]- (u:UserProfile)
+    WHERE id(p) = $uniq_id AND c.timestamp <= $start
+RETURN c AS comment, u.username AS commenter 
+    ORDER BY c.timestamp DESC LIMIT 5"""
+
+    # Topic list with count limit
     get_topics = """
 MATCH (root) --> (o) -[:COMMENT]-> (c)  <-[:COMMENTED]- (u:UserProfile)
 OPTIONAL MATCH repl = ( (c) -[:COMMENT*]-> () )
@@ -47,11 +62,3 @@ RETURN o, c, u.username as commenter,
     coalesce(length(repl),0) AS count,
     root
 ORDER BY c.timestamp desc LIMIT $limit"""
-
-    obsolete_get_comments = """
-MATCH (root) --> (o) -[r:COMMENT]-> (c)  <-[:COMMENTED]- (u:UserProfile)
-RETURN labels(o) as label, 
-    c, o, root.user as credit, root.id as batch_id, COUNT(r) AS count
-ORDER BY c.timestamp desc LIMIT $limit"""
-
-

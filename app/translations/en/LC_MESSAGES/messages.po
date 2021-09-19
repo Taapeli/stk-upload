@@ -2675,7 +2675,7 @@ msgid "Pictures"
 msgstr ""
 
 #: bp/scene/templates/scene/macros.html:75
-msgid "Comments"
+msgid "Discussions"
 msgstr ""
 
 #: bp/scene/templates/scene/macros.html:78
@@ -3349,7 +3349,7 @@ msgid "Show discussion"
 msgstr ""
 
 #: bp/scene/templates/scene/hx-comment/fetch_comments.html:22
-msgid "Load More Comments"
+msgid "Load More Discussions"
 msgstr ""
 
 #: bp/scene/templates/scene/hx-person/famtree.html:5
