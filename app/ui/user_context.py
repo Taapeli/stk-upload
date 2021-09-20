@@ -121,7 +121,7 @@ class UserContext():
         """
         COMMON = 1  # Approved data
         OWN = 2     # Candidate data
-        BATCH = 4   # Selected candicate batch
+        BATCH = 4   # Selected candidate batch
         CODE_VALUES = ['', 'apr', 'can', 'apr,can', 'bat', 'can,bat']
 
         def __init__(self):

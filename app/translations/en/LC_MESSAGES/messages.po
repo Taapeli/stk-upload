@@ -2262,7 +2262,7 @@ msgstr ""
 #: bp/gramps/templates/gramps/uploads.html:9
 #: bp/gramps/templates/gramps/uploads.html:113
 #: bp/start/templates/start/index_logged.html:43
-msgid "My Candidate Materials"
+msgid "Manage Materials"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:93
@@ -3452,11 +3452,11 @@ msgid "Return the improved file back to your genealogy software."
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:45
-msgid "Save your  Gramps xml file as Isotammi candidate material."
+msgid "You may import your new material to Isotammi and work with existing materials."
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:46
-msgid "Manage your candidate materials in the database."
+msgid "You may also check in which phase your materials are."
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:48
@@ -3464,7 +3464,7 @@ msgid "Candidate materials"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:62
-msgid "Browse Isotammi Database"
+msgid "Browse Materials"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:63

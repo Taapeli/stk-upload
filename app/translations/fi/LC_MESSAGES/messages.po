@@ -2262,7 +2262,7 @@ msgstr "Aika sekunneissa"
 #: bp/gramps/templates/gramps/uploads.html:9
 #: bp/gramps/templates/gramps/uploads.html:113
 #: bp/start/templates/start/index_logged.html:43
-msgid "My Candidate Materials"
+msgid "Manage Materials"
 msgstr "Omat tutkijan aineistoni"
 
 #: bp/gramps/templates/gramps/uploads.html:93
@@ -3458,20 +3458,20 @@ msgid "Return the improved file back to your genealogy software."
 msgstr "Palauta parannettu tiedosto omaan sukututkimusohjelmaasi."
 
 #: bp/start/templates/start/index_logged.html:45
-msgid "Save your  Gramps xml file as Isotammi candidate material."
-msgstr "Tallenna Gramps-muotoinen aineistosi Isotammen tutkijan ainestoksi."
+msgid "You may import your new material to Isotammi and work with existing materials."
+msgstr "Voit tuoda Isotammeen uuden aineiston ja kohdistaa aikaisempiin eri toimenpiteitä."
 
 #: bp/start/templates/start/index_logged.html:46
-msgid "Manage your candidate materials in the database."
-msgstr "Hallinnoi tutkijan aineistojasi."
+msgid "You may also check in which phase your materials are."
+msgstr "Näet myös aineiston käsittelytilan."
 
 #: bp/start/templates/start/index_logged.html:48
 msgid "Candidate materials"
 msgstr "Tutkijan aineistot"
 
 #: bp/start/templates/start/index_logged.html:62
-msgid "Browse Isotammi Database"
-msgstr "Selaa Isotammi-aineistoa"
+msgid "Browse Materials"
+msgstr "Selaa sisältöjä"
 
 #: bp/start/templates/start/index_logged.html:63
 msgid "View your own candidate material or all approved common data"

@@ -238,6 +238,7 @@ def translate(term, var_name, show_table=False):
             "srk": _("Parish"), #"seurakunta"
             "Sairaala": _("Hospital"),
             "State": _("State"), #"valtio"
+            "Street": _("Street"),
             "Säteri": _("Seat Farm"), 
             "Tila": _("Farm"), #"maatila"
             "Tontti": _("Tontti"), #"tontti"
