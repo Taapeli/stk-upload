@@ -185,11 +185,12 @@ function confirm_delete(subj, name) {
 {% endfor %}
 
 {% if current_user.is_authenticated and current_user.has_role('research') %}
-  		<tr id="upload_xml" title="{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.">
+  		<tr id="upload_xml"
+            title="{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.">
             <form action="/gramps/upload" method="post" enctype="multipart/form-data">
   				<td><b>{{ _("Send a new Gramps file") }}</b>
   				</td>
-  				<td colspan="4">
+  				<td colspan="4" style="padding: 10pt; background='pink'">
   					<div>
 	   					<div>
 				        	<input type="hidden" name="material" value="xml_file">

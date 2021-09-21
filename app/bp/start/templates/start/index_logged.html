@@ -45,7 +45,7 @@
                  <p>{{ _('You may import your new material to Isotammi and work with existing materials.') }}</p>
                  <p>{{ _('You may also check in which phase your materials are.') }}</p>
                  <div class="submit"> 
-                    <input type="submit" value="{{ _('Candidate materials') }}" />
+                    <input type="submit" value="{{ _('Continue') }}" />
                  </div>
                  </form>
              </div>
@@ -64,7 +64,7 @@
                  <p>{% set batch_id = session['batch_id'] %}
                  {% set ctxt = session['user_context'] %}
 					<b><input type="radio" name="batch_id" value=""
-                    {% if batch_id == "" %}checked{% endif %}>{{ _('The approved Isotammi data') }}</b>
+                    {% if batch_id == "" %}checked{% endif %}>{{ _('Approved Isotammi tree') }}</b>
 				<p>
                 <b>{{ _('My candidate material') }}</b>
 					{% for batch in batches %}

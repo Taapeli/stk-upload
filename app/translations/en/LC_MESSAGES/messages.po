@@ -3474,7 +3474,7 @@ msgid "You may also check in which phase your materials are."
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:48
-msgid "Candidate materials"
+msgid "Continue"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:62
@@ -3486,7 +3486,7 @@ msgid "View your own candidate material or all approved common data"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:67
-msgid "The approved Isotammi data"
+msgid "Approved Isotammi tree"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:69

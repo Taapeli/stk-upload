@@ -1094,7 +1094,7 @@ msgstr "Poista tietokannasta"
 
 #: bp/audit/templates/audit/batches.html:4 bp/audit/templates/audit/batches.html:9
 msgid "Batches"
-msgstr "Tutkijan aineistoja"
+msgstr "Tutkijoiden aineistot"
 
 #: bp/audit/templates/audit/batches.html:39
 #: bp/scene/templates/scene/persons_search.html:229
@@ -2239,7 +2239,7 @@ msgstr "Aika sekunneissa"
 #: bp/gramps/templates/gramps/uploads.html:113
 #: bp/start/templates/start/index_logged.html:43
 msgid "Manage Materials"
-msgstr "Omat tutkijan aineistoni"
+msgstr "Aineistojen hallinta"
 
 #: bp/gramps/templates/gramps/uploads.html:93
 msgid "Are you sure you want to delete the XML file?"
@@ -2247,7 +2247,7 @@ msgstr "Haluatko todella tuhota tämän Gramps-tiedoston?"
 
 #: bp/gramps/templates/gramps/uploads.html:120
 msgid "Batch operations"
-msgstr "Aineiston toimintoja"
+msgstr "Valitse aineisto ja toiminto"
 
 #: bp/gramps/templates/gramps/uploads.html:122
 msgid "Person count"
@@ -3399,18 +3399,12 @@ msgid "Return the improved file back to your genealogy software."
 msgstr "Palauta parannettu tiedosto omaan sukututkimusohjelmaasi."
 
 #: bp/start/templates/start/index_logged.html:45
-msgid ""
-"You may import your new material to Isotammi and work with existing materials."
-msgstr ""
-"Voit tuoda Isotammeen uuden aineiston ja kohdistaa aikaisempiin eri toimenpiteitä."
+msgid "You may import your new material to Isotammi and work with existing materials."
+msgstr "Tuo Isotammeen uusi aineisto ja käsittele aikaisempia aineistoja."
 
 #: bp/start/templates/start/index_logged.html:46
 msgid "You may also check in which phase your materials are."
 msgstr "Näet myös aineiston käsittelytilan."
-
-#: bp/start/templates/start/index_logged.html:48
-msgid "Candidate materials"
-msgstr "Tutkijan aineistot"
 
 #: bp/start/templates/start/index_logged.html:62
 msgid "Browse Materials"
@@ -3421,8 +3415,8 @@ msgid "View your own candidate material or all approved common data"
 msgstr "Tarkastele omia tutkijan aineistojasi tai yhdistettyjä Isotammi-aineistoja"
 
 #: bp/start/templates/start/index_logged.html:67
-msgid "The approved Isotammi data"
-msgstr "Yhteinen sukukanta"
+msgid "Approved Isotammi tree"
+msgstr "Yhteinen sukupuu"
 
 #: bp/start/templates/start/index_logged.html:69
 #: bp/start/templates/start/obsolete_index_guest.html:40
@@ -4359,7 +4353,7 @@ msgstr "Sisäinen virhe"
 
 #: templates/virhe_lataus.html:3
 msgid "Failed to load"
-msgstr "Lataus epäonnistui"
+msgstr "Lataus epäonnistunut"
 
 #: templates/virhe_lataus.html:8
 msgid "Invalid input file"
@@ -5139,7 +5133,7 @@ msgstr "Lataus epäonnistui"
 
 #: ui/user_context.py:130
 msgid "Approved common data"
-msgstr "Yhteinen sukukanta"
+msgstr "Yhteinen sukupuu"
 
 #: ui/user_context.py:131
 msgid "My candidate data"

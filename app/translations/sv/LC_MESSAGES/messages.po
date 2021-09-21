@@ -982,7 +982,7 @@ msgstr "FEL"
 
 #: bp/admin/templates/admin/uploads.html:41
 msgid "FAILED"
-msgstr "MISSLYCKAS"
+msgstr "MISSLYCKATS"
 
 #: bp/admin/templates/admin/uploads.html:41
 msgid "there was an error"
@@ -1022,7 +1022,7 @@ msgstr "Radera fil"
 
 #: bp/audit/routes.py:104
 msgid "Audit request for "
-msgstr "Inspectionen begärad för "
+msgstr "Gransking önskad för "
 
 #: bp/audit/routes.py:107
 msgid "Withdrawing audit request for "
@@ -1113,7 +1113,7 @@ msgstr "Fösrstöra data"
 
 #: bp/audit/templates/audit/approvals.html:97 bp/gramps/routes.py:447
 msgid "Delete from database"
-msgstr "Tag bort från databasen"
+msgstr "Radera från Isotammi"
 
 #: bp/audit/templates/audit/batches.html:4
 #: bp/audit/templates/audit/batches.html:9
@@ -1129,7 +1129,7 @@ msgstr "personer"
 #: bp/audit/templates/audit/pick_auditing.html:45
 #: bp/gramps/templates/gramps/uploads.html:180
 msgid "Audit start date"
-msgstr "Startdatum for inspectionen"
+msgstr "Startdatum for inspektionen"
 
 #: bp/audit/templates/audit/batches.html:76 bp/gramps/routes.py:443
 msgid "Show upload log"
@@ -1269,7 +1269,7 @@ msgstr "Totalt %(cnt)s noder från användaren <b>%(user)s</b>."
 
 #: bp/audit/templates/audit/pick_auditing.html:89
 msgid "Start auditing"
-msgstr "Starta inspectionen"
+msgstr "Starta inspektionen"
 
 #: bp/audit/templates/audit/pick_auditing.html:91
 msgid "Accept auditing"
@@ -2177,7 +2177,7 @@ msgstr "Det gick inte att hämta kommandon"
 
 #: bp/gramps/routes.py:425
 msgid "Browse this material"
-msgstr "Bläddra i detta materialet"
+msgstr "Bläddra materialet"
 
 #: bp/gramps/routes.py:430
 msgid "Send for auditing"
@@ -2185,7 +2185,7 @@ msgstr "Be om granskningen"
 
 #: bp/gramps/routes.py:435
 msgid "Withdraw auditing"
-msgstr "Tillbakadra granskningen"
+msgstr "Återkalla granskningen"
 
 #: bp/gramps/routes.py:439
 msgid "Download the Gramps file"
@@ -2284,7 +2284,7 @@ msgstr "Tid / sek"
 #: bp/gramps/templates/gramps/uploads.html:113
 #: bp/start/templates/start/index_logged.html:43
 msgid "Manage Materials"
-msgstr "Mina egna material"
+msgstr "Förvalta dina material"
 
 #: bp/gramps/templates/gramps/uploads.html:93
 msgid "Are you sure you want to delete the XML file?"
@@ -2292,7 +2292,7 @@ msgstr "Vill du avlägsna XML filen?"
 
 #: bp/gramps/templates/gramps/uploads.html:120
 msgid "Batch operations"
-msgstr "Materialoperationer"
+msgstr "Välj material och aktion"
 
 #: bp/gramps/templates/gramps/uploads.html:122
 msgid "Person count"
@@ -2300,7 +2300,7 @@ msgstr "Personer"
 
 #: bp/gramps/templates/gramps/uploads.html:190
 msgid "Send a new Gramps file"
-msgstr "Sänd en ny Gramps fil"
+msgstr "Sänd ny Gramps fil"
 
 #: bp/gramps/templates/gramps/uploads.html:199
 msgid "Send to database"
@@ -2324,7 +2324,7 @@ msgstr "typen has förendrats"
 
 #: bp/scene/routes.py:435
 msgid "type change FAILED"
-msgstr "typ förendring MISSLYCKAS"
+msgstr "typ förendring MISSLYCKATS"
 
 #: bp/scene/routes.py:586 bp/scene/routes.py:595
 msgid "No event found"
@@ -2375,7 +2375,7 @@ msgstr "Visning av %(num)s distinkta ämnen"
 #: bp/scene/templates/scene/comments.html:30
 #: bp/scene/templates/scene/macros.html:75
 msgid "Discussions"
-msgstr "Visa diskussion"
+msgstr "Diskussioner"
 
 #: bp/scene/templates/scene/comments.html:34
 #: bp/scene/templates/scene/source_events.html:50
@@ -2734,7 +2734,7 @@ msgstr "nummer"
 
 #: bp/scene/templates/scene/macros.html:145
 msgid "latest change time and contributor"
-msgstr "sist förändringen och original bigragsgivare"
+msgstr "sist förändringen och original bidragsgivare"
 
 #: bp/scene/templates/scene/macros.html:147
 msgid "edited"
@@ -2747,7 +2747,7 @@ msgstr "Anvädardata"
 
 #: bp/scene/templates/scene/macros.html:154
 msgid "origin from"
-msgstr "bigragsgivare"
+msgstr "bidragsgivare"
 
 #: bp/scene/templates/scene/macros.html:191
 #: bp/scene/templates/scene/macros.html:224
@@ -3447,7 +3447,7 @@ msgstr "Meddelande om anslutning till Isotammi sent"
 
 #: bp/start/routes.py:185
 msgid "Sending join message failed"
-msgstr "Sändninga av meddelandet misslyckas"
+msgstr "Sändninga av meddelandet misslyckats"
 
 #: bp/start/routes.py:239
 msgid "Update did not work1"
@@ -3478,20 +3478,16 @@ msgid "Return the improved file back to your genealogy software."
 msgstr "Ladda den förbättrade filen tillbaka till din släktforskning programvara."
 
 #: bp/start/templates/start/index_logged.html:45
-msgid ""
-"You may import your new material to Isotammi and work with existing "
-"materials."
-msgstr ""
-"Du kan ladda up en ny material som Isotammi forskarens material och "
-"administrera dina andra materialet."
+msgid "You may import your new material to Isotammi and work with existing materials."
+msgstr "Här laddar du dina nya material och administrera dina förra material."
 
 #: bp/start/templates/start/index_logged.html:46
 msgid "You may also check in which phase your materials are."
-msgstr "Du kan också kolla skedena för dina materialen."
+msgstr "Du kan också kolla skedena av dina materialen."
 
 #: bp/start/templates/start/index_logged.html:48
-msgid "Candidate materials"
-msgstr "Materiallistan"
+msgid "Continue"
+msgstr "Fortsätt"
 
 #: bp/start/templates/start/index_logged.html:62
 msgid "Browse Materials"
@@ -3499,16 +3495,16 @@ msgstr "Bläddra i Isotammi material"
 
 #: bp/start/templates/start/index_logged.html:63
 msgid "View your own candidate material or all approved common data"
-msgstr "Visa ditt eget eller godkänd material"
+msgstr "Välj ditt eget eller Isotammi material"
 
 #: bp/start/templates/start/index_logged.html:67
-msgid "The approved Isotammi data"
-msgstr "Godkänt Isotammi material"
+msgid "Approved Isotammi tree"
+msgstr "Gemensamt Isotammi träd"
 
 #: bp/start/templates/start/index_logged.html:69
 #: bp/start/templates/start/obsolete_index_guest.html:40
 msgid "My candidate material"
-msgstr "Mina material"
+msgstr "Dina egna material"
 
 #: bp/start/templates/start/index_logged.html:79
 msgid "The Browsed Material"
@@ -3720,10 +3716,6 @@ msgid ""
 "user."
 msgstr "Du är på hemsidan för Isotammi demo som en besökande användare."
 
-#: bp/start/templates/start/obsolete_index_guest.html:60
-msgid "Continue"
-msgstr "Fortsätta"
-
 #: bp/start/templates/start/obsolete_index_guest.html:65
 #: bp/start/templates/start/obsolete_index_guest.html:71
 #: bp/start/templates/start/s_macros.html:41 templates/index_entry.html:90
@@ -3795,11 +3787,11 @@ msgstr "Kandidat"
 
 #: bp/start/templates/start/s_macros.html:61 ui/jinja_filters.py:332
 msgid "Audit Requested"
-msgstr "Inspectionen begärad"
+msgstr "Granskning önskad"
 
 #: bp/start/templates/start/s_macros.html:61
 msgid "waiting for audition"
-msgstr "väntar på inspectionen"
+msgstr "väntar på inspektionen"
 
 #: bp/start/templates/start/s_macros.html:62 ui/jinja_filters.py:334
 msgid "Accepted"
@@ -3819,7 +3811,7 @@ msgstr "Sammansmältad till den gemensamma datan"
 
 #: bp/start/templates/start/s_macros.html:64 ui/jinja_filters.py:335
 msgid "Rejected"
-msgstr "Avfärdad"
+msgstr "Avfärdat"
 
 #: bp/start/templates/start/s_macros.html:64
 msgid "Returned to researcher with comments"
@@ -4091,7 +4083,7 @@ msgstr "Det gick inte att spara databasen"
 
 #: pe/db_writer.py:93
 msgid "Database save failed due to {}"
-msgstr "Databas sparningen misslyckas på grund av {}"
+msgstr "Databas sparningen misslyckats på grund av {}"
 
 #: pe/neo4j/updateservice.py:809
 msgid "Could not save a comment"
@@ -5245,7 +5237,7 @@ msgstr "Laddar"
 
 #: ui/jinja_filters.py:337
 msgid "Load Failed"
-msgstr "Laddningen misslyckas"
+msgstr "Laddning misslyckats"
 
 #: ui/user_context.py:130
 msgid "Approved common data"
