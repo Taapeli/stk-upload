@@ -653,3 +653,10 @@ def delete_accesses():
     logger.info(f"-> bp.admin.routes.delete_accesses")
     rsp = UserAdmin.delete_accesses(data)
     return jsonify(rsp)
+
+@bp.route("/admin/build_free_text_search_indexes", methods=["GET"])
+@login_required
+@roles_accepted("admin")
+def build_indexes():
+    res = DataAdmin.build_free_text_search_indexes()
+    return render_template("/admin/free_text_indexes.html", res=res)

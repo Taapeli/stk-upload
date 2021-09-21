@@ -25,6 +25,7 @@ Created on 8.3.2019
     
 class Cypher_adm():
     ' Cypher clauses for admin purposes'
+
     
     remove_all_nodes = """
 MATCH (a) 
@@ -148,3 +149,13 @@ MATCH (a:Root)
 DETACH DELETE a
 RETURN COUNT(a) AS cnt'''
 
+# ------------------ free text search ----------------
+    create_freetext_index = """
+CALL db.index.fulltext.createNodeIndex("searchattr",["Person"],["searchattr"])
+    """
+
+    build_indexes = """
+match (p:Person) --> (n:Name) 
+with p,collect(n.firstname + " " + n.suffix + " " + n.surname) as names
+set p.searchattr = reduce(s="", n in names | s + " " + n) 
+    """

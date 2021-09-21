@@ -21,6 +21,8 @@
 
 #from datetime import datetime
 import logging
+import traceback
+
 logger = logging.getLogger('stkserver')
 
 #from neobolt.exceptions import ConstraintError # Obsolete
@@ -30,6 +32,7 @@ from flask_security import utils as sec_utils
 import shareds
 from .cypher_setup import SetupCypher
 from .schema_fixes import do_schema_fixes
+from bl.admin.models.cypher_adm import Cypher_adm
 
 # All User roles here:
 ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön käyttäjä, näkee esittelysukupuun'},
@@ -43,8 +46,8 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 )
 
 # ====== Database schema ======
-# Change (icrement) this, if shcema must be updated
-DB_SCHEMA_VERSION = '2021.2.0.2'
+# Change (increment) this, if schema must be updated
+DB_SCHEMA_VERSION = '2021.2.0.3'
 # =============================
 
 
@@ -58,6 +61,8 @@ DB_SCHEMA_VERSION = '2021.2.0.2'
 #     '''
 #     service = shareds.dataservices[opt]
 #     return service(shareds.driver)
+
+
 
 
 def initialize_db():
@@ -106,6 +111,8 @@ def initialize_db():
         }
         check_constraints(constr_list)
 
+        create_freetext_index()
+        
         # Fix changed schema
         do_schema_fixes()
 
@@ -374,4 +381,16 @@ def create_constraint(label, prop):
             raise
     return
 
+
+def create_freetext_index():
+    try:
+        result = shareds.driver.session().run(Cypher_adm.create_freetext_index)
+    except ClientError as e:
+        msgs = e.message.split(',')
+        print(f'Create_freetext_index ok: {msgs[0]}')
+        return
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f'database.accessDB.create_freetext_index: {e.__class__.__name__} {e}' )
+        raise
 

@@ -1,0 +1,17 @@
+{# _myapp/templates/gr_result.html_ #}
+{% extends "a_layout.html" %}
+{% block title %}{{ _("Free text indexes created") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+    <h1>{{ _("Free text indexes created") }}</h1>
+
+{% include "flash_messages.html" %}
+
+<pre>
+{{ msg }}
+</pre>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
+{% endblock %}
+</body>
+</html>
+

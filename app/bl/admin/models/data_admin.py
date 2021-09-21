@@ -112,4 +112,11 @@ class DataAdmin():
         msg2 = _('Removed %(cnt)d nodes', cnt=cnt)
         return {'msg':'\n'.join((msg, msg2)), 'count':cnt}
 
+    
+    @classmethod
+    def build_free_text_search_indexes(cls, tx=None):
+        if not tx:
+            tx = shareds.driver.session()
+        result = tx.run(Cypher_adm.build_indexes)
+    
         
