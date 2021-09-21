@@ -13,7 +13,7 @@ from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
 
-from .util import run_cypher2, run_cypher3
+from .util import run_cypher_batch, run_cypher_batch2
 
 class PersonRecord:
     ''' Object to return person display data. '''
@@ -104,7 +104,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
         #if not username: username = ""
 
-        use_run_cypher3 = False
+        freetext_search = False
         if restart:
             # Show search form only
             return {'items': [], 'status': Status.NOT_STARTED }
@@ -115,7 +115,7 @@ class Neo4jReadServiceTx(ConcreteService):
         elif rule == 'freetext':
             cypher1 = CypherPerson.read_persons_w_events_by_name1
             cypher2 = CypherPerson.read_persons_w_events_by_name2
-            use_run_cypher3 = True
+            freetext_search = True
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
             cypher = CypherPerson.read_persons_w_events_by_refname
@@ -149,18 +149,18 @@ class Neo4jReadServiceTx(ConcreteService):
  
         persons = []
         #logger.debug(f"tx_get_person_list: cypher: {cypher}")
-        if use_run_cypher3:
-            result = run_cypher3(self.tx, cypher1, cypher2, username, batch_id,
+        if freetext_search:
+            result = run_cypher_batch2(self.tx, cypher1, cypher2, username, batch_id,
                                 use=rule, name=key,
                                 years=years,
                                 start_name=fw_from, 
-                                limit=limit)       
+                                limit=limit)
         else:
-            result = run_cypher2(self.tx, cypher, username, batch_id,
+            result = run_cypher_batch(self.tx, cypher, username, batch_id,
                                 use=rule, name=key,
                                 years=years,
                                 start_name=fw_from, 
-                                limit=limit)            
+                                limit=limit)
         # result: person, names, events
         for record in result:
             #  <Record 
@@ -207,7 +207,7 @@ class Neo4jReadServiceTx(ConcreteService):
         #    results: person, root
 
         try:
-            record = run_cypher2(self.tx, CypherPerson.get_person, active_user, batch_id, uuid=uuid).single()
+            record = run_cypher_batch(self.tx, CypherPerson.get_person, active_user, batch_id, uuid=uuid).single()
             # <Record 
             #    p=<Node id=25651 labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,

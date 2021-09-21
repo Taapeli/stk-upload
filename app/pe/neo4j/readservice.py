@@ -16,7 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from pe.neo4j.util import run_cypher, run_cypher2
+from pe.neo4j.util import run_cypher, run_cypher_batch
 
 """
 Created on 17.3.2020
@@ -455,7 +455,7 @@ class Neo4jReadService(ConcreteService):
                 print(
                     "Neo4jReadService.dr_get_families: candidate ordered by man"
                 )
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherFamily.get_families_by_father,
                     user, args["batch_id"],
                     fw=fw,
@@ -465,7 +465,7 @@ class Neo4jReadService(ConcreteService):
                 print(
                     "Neo4jReadService.dr_get_families: candidate ordered by wife"
                 )
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherFamily.get_families_by_mother,
                     user, args["batch_id"],
                     fw=fw,
@@ -850,7 +850,7 @@ class Neo4jReadService(ConcreteService):
             lang = "fi"
         with self.driver.session(default_access_mode="READ") as session:
             print("Neo4jReadService.dr_get_place_list_fw")
-            result = run_cypher2(
+            result = run_cypher_batch(
                 session,
                 CypherPlace.get_name_hierarchies,
                 user,
@@ -1106,7 +1106,7 @@ class Neo4jReadService(ConcreteService):
                 key2 = args.get("theme2")
                 # Show my researcher data
                 print("dr_get_source_list_fw: my researcher data")
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherSource.get_sources_with_selections,
                     user,
                     batch_id,
@@ -1115,7 +1115,7 @@ class Neo4jReadService(ConcreteService):
                 )
             else:
                 # Show all themes
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherSource.get_sources,
                     user,
                     batch_id,
@@ -1225,7 +1225,7 @@ class Neo4jReadService(ConcreteService):
         """
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher2(session,
+            result = run_cypher_batch(session,
                 CypherMedia.get_media_list,
                 user,
                 batch_id,
@@ -1251,7 +1251,7 @@ class Neo4jReadService(ConcreteService):
         recs = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherMedia.get_media_by_uuid, user, batch_id, uuid=uuid
                 )
                 # RETURN media, r, ref, ref2
@@ -1278,7 +1278,7 @@ class Neo4jReadService(ConcreteService):
         """
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher2(session,
+            result = run_cypher_batch(session,
                 CypherComment.get_topics,
                 user,
                 batch_id,
@@ -1418,7 +1418,7 @@ class Neo4jReadService(ConcreteService):
 #             print('#  Neo4jReadService.dr_get_surname_list: with \n{ material:"'
 #                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
 #             print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
-            result = run_cypher2(session, cypher,
+            result = run_cypher_batch(session, cypher,
                 username, batch_id,
                 count=count,
             )
@@ -1466,7 +1466,7 @@ class Neo4jReadService(ConcreteService):
 #             logger.debug('#  Neo4jReadService.dr_get_placename_list: with \n{ material:"'
 #                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
             logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
-            result = run_cypher2(session, cypher, username, batch_id, count=count)
+            result = run_cypher_batch(session, cypher, username, batch_id, count=count)
             for record in result:
                 place = record["place"]
                 placename = place["pname"]

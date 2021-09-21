@@ -1035,7 +1035,7 @@ msgstr "Du är nu revisor för materialet "
 
 #: bp/audit/routes.py:227
 msgid "Audit batch accepted: "
-msgstr "Materialet i inspektion godkänd: "
+msgstr "Materialet i granskning godkänd: "
 
 #: bp/audit/routes.py:234
 msgid "You have rejected the batch "
@@ -1217,7 +1217,7 @@ msgstr "Välj din inspections åtgärd"
 
 #: bp/audit/templates/audit/pick_auditing.html:25
 msgid "Pick auditing operation"
-msgstr "Välj inspektions åtgärd"
+msgstr "Välj gransknings åtgärd"
 
 #: bp/audit/templates/audit/pick_auditing.html:29
 #, python-format
@@ -1262,13 +1262,13 @@ msgstr "Starta inspectionen"
 
 #: bp/audit/templates/audit/pick_auditing.html:91
 msgid "Accept auditing"
-msgstr "Godkänna inspektionen"
+msgstr "Godkänna granskningen"
 
 #: bp/audit/templates/audit/pick_auditing.html:93
 #: bp/audit/templates/audit/pick_auditing.html:96
 #: bp/audit/templates/audit/pick_auditing.html:108
 msgid "Reject auditing"
-msgstr "Avfärda inspektionen"
+msgstr "Avfärda granskningen"
 
 #: bp/audit/templates/audit/pick_auditing.html:106
 msgid "Cancel"
@@ -2170,11 +2170,11 @@ msgstr "Bläddra i detta materialet"
 
 #: bp/gramps/routes.py:430
 msgid "Send for auditing"
-msgstr "Be om revisionen"
+msgstr "Be om granskningen"
 
 #: bp/gramps/routes.py:435
 msgid "Withdraw auditing"
-msgstr "Tillbakadra revisionen"
+msgstr "Tillbakadra granskningen"
 
 #: bp/gramps/routes.py:439
 msgid "Download the Gramps file"
@@ -2272,8 +2272,8 @@ msgstr "Tid / sek"
 #: bp/gramps/templates/gramps/uploads.html:9
 #: bp/gramps/templates/gramps/uploads.html:113
 #: bp/start/templates/start/index_logged.html:43
-msgid "My Candidate Materials"
-msgstr "Mina forskarens material"
+msgid "Manage Materials"
+msgstr "Mina egna material"
 
 #: bp/gramps/templates/gramps/uploads.html:93
 msgid "Are you sure you want to delete the XML file?"
@@ -3466,19 +3466,19 @@ msgid "Return the improved file back to your genealogy software."
 msgstr "Ladda den förbättrade filen tillbaka till din släktforskning programvara."
 
 #: bp/start/templates/start/index_logged.html:45
-msgid "Save your  Gramps xml file as Isotammi candidate material."
-msgstr "Spara din Gramps xml-fil som Isotammi forskarens material."
+msgid "You may import your new material to Isotammi and work with existing materials."
+msgstr "Du kan ladda up en ny material som Isotammi forskarens material och administrera dina andra materialet."
 
 #: bp/start/templates/start/index_logged.html:46
-msgid "Manage your candidate materials in the database."
-msgstr "Administrera dina material."
+msgid "You may also check in which phase your materials are."
+msgstr "Du kan också kolla skedena för dina materialen."
 
 #: bp/start/templates/start/index_logged.html:48
 msgid "Candidate materials"
 msgstr "Materiallistan"
 
 #: bp/start/templates/start/index_logged.html:62
-msgid "Browse Isotammi Database"
+msgid "Browse Materials"
 msgstr "Bläddra i Isotammi material"
 
 #: bp/start/templates/start/index_logged.html:63
@@ -4257,8 +4257,8 @@ msgid ""
 "Mark the central person (1st selection column) and the people to be "
 "merged (2nd column)"
 msgstr ""
-"Markera den centrala personen (1:a kolumnen att väljä på) och de personer"
-" som ska slås samman (2:a kolumnen)"
+"Markera den centrala personen (första kolumnen att väljä på) och de personer"
+" som ska slås samman (andra kolumnen)"
 
 #: templates/join_persons.html:27
 msgid "If necessary, pick up nearby reference names <i> (not already in use)"
@@ -5200,8 +5200,8 @@ msgid "Unknown relation"
 msgstr "Okänd relation"
 
 #: ui/jinja_filters.py:319
-msgid " Family Tree "
-msgstr " Släktträd "
+msgid "Family Tree"
+msgstr "Släktträd"
 
 #: ui/jinja_filters.py:320
 msgid " Example type "
