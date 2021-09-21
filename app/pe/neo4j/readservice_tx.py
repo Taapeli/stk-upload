@@ -13,7 +13,7 @@ from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
 
-from .util import run_cypher2
+from .util import run_cypher2, run_cypher3
 
 class PersonRecord:
     ''' Object to return person display data. '''
@@ -104,6 +104,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
         #if not username: username = ""
 
+        use_run_cypher3 = False
         if restart:
             # Show search form only
             return {'items': [], 'status': Status.NOT_STARTED }
@@ -111,6 +112,10 @@ class Neo4jReadServiceTx(ConcreteService):
             # Show persons, no search form
             cypher = CypherPerson.get_person_list
             print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
+        elif rule == 'freetext':
+            cypher1 = CypherPerson.read_persons_w_events_by_name1
+            cypher2 = CypherPerson.read_persons_w_events_by_name2
+            use_run_cypher3 = True
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
             cypher = CypherPerson.read_persons_w_events_by_refname
@@ -144,12 +149,19 @@ class Neo4jReadServiceTx(ConcreteService):
  
         persons = []
         #logger.debug(f"tx_get_person_list: cypher: {cypher}")
-        result = run_cypher2(self.tx, cypher, username, batch_id,
-                            #material=material, state=state,
-                            use=rule, name=key,
-                            years=years,
-                            start_name=fw_from, 
-                            limit=limit)            # result: person, names, events
+        if use_run_cypher3:
+            result = run_cypher3(self.tx, cypher1, cypher2, username, batch_id,
+                                use=rule, name=key,
+                                years=years,
+                                start_name=fw_from, 
+                                limit=limit)       
+        else:
+            result = run_cypher2(self.tx, cypher, username, batch_id,
+                                use=rule, name=key,
+                                years=years,
+                                start_name=fw_from, 
+                                limit=limit)            
+        # result: person, names, events
         for record in result:
             #  <Record 
             #     person=<Node id=163281 labels={'Person'} 

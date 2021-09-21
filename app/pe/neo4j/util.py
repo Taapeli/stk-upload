@@ -25,13 +25,12 @@ cypher_prefix = """
 
 cypher_common_prefix = """
     MATCH (root:Root {state:"Accepted"})
-    WITH root
 """ 
 
 cypher_batch_prefix = """
     MATCH (prof:UserProfile{username:$username}) -[:HAS_ACCESS]-> (root:Root{id:$batch_id})
-    WITH root
 """ 
+#    WITH root
 
 def run_cypher( session, cypher, username, **kwargs):
     """
@@ -73,6 +72,28 @@ def run_cypher2( session, cypher, username, batch_id, **kwargs):
         print(cypher2)
         pprint(locals())
     return session.run(cypher2, 
+               username=username,  
+               batch_id=batch_id,
+               **kwargs)
+
+def run_cypher3( session, cypher1, cypher2, username, batch_id, **kwargs):
+    """
+    Variation where the common part must be inserted in the middle,
+    between cypher1 and cypher2.
+    """
+    if not username:
+        cypher = cypher1 + cypher_common_prefix + cypher2
+    else:
+        cypher = cypher1 + cypher_batch_prefix + cypher2
+    if 1 or False:
+        print("----------- run_cypher3 -------------")
+        print(cypher)
+        args = kwargs.copy()
+        args.update(
+                username=username,  
+                batch_id=batch_id)
+        pprint(args)  
+    return session.run(cypher, 
                username=username,  
                batch_id=batch_id,
                **kwargs)

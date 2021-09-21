@@ -117,8 +117,23 @@ RETURN user, person,
     COLLECT(DISTINCT name) AS names,
     //COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
+    
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
     ORDER BY TOUPPER(names[0].surname), names[0].firstname"""
+
+    # With rule=names, free text search
+    read_persons_w_events_by_name1 = """
+CALL db.index.fulltext.queryNodes("searchattr",$name) YIELD node as person, score
+with person,score order by score desc
+"""
+    read_persons_w_events_by_name2 = """
+MATCH (root) -[:OBJ_PERSON]-> (person) -[:NAME]-> (name:Name {order:0})
+WITH score, person, name, root.user as user""" + _get_events_tail + """ 
+, TOUPPER(LEFT(name.surname,1)) as initial
+LIMIT $limit
+"""
+#    ORDER BY score DESC""" 
+
 
     # With use=rule, name=name
     read_persons_w_events_by_refname = """
