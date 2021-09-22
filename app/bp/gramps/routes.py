@@ -291,9 +291,9 @@ def show_upload_log_from_batch_id(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def batch_delete(batch_id):
-    def xremove(path): # safe remove, replace by real delete after testing...
+    def xremove(path): 
         if os.path.exists(path):
-            os.rename(path, path+"-deleted")
+            os.remove(path)
 
     def remove_old_style_files(path):  
         xremove(batch.file)
@@ -313,11 +313,9 @@ def batch_delete(batch_id):
     fname_parts = batch.file.split("/")  # uploads/<user>/<batch_id>/<file>
     if len(fname_parts) == 4 and fname_parts[2] == batch_id: # "new style" naming
         upload_dir = os.path.split(batch.file)[0]
-        #import shutil
-        #print("shutil.rmtree", upload_dir)
-        #shutil.rmtree(upload_dir)
-        #os.rename(upload_dir, upload_dir+"-deleted")
-        xremove(upload_dir) # safe remove, replace by real delete (rmtree) after testing...
+        import shutil
+        print("shutil.rmtree", upload_dir)
+        shutil.rmtree(upload_dir)
     else:
         remove_old_style_files(batch.file) 
             
