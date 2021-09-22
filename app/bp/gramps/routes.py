@@ -363,7 +363,7 @@ def get_progress(batch_id):
                 "batch_id": batch_id,
             }
             return jsonify(rsp)
-        meta = uploads.get_meta(batch.metaname)
+        meta = uploads.get_meta(batch)
     
         status = meta.get("status")
         if status is None:

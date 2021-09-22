@@ -139,10 +139,11 @@ def update_metafile(metaname, **kwargs):
     open(metaname, "w").write(pprint.pformat(meta))
 
 
-def get_meta(metaname):
+def get_meta(root):
     """ Reads status information from .meta file """
-
+    
     try:
+        metaname = root.metaname
         meta = eval(open(metaname).read())
         status = meta.get("status")
         if status == State.FILE_LOADING:
@@ -151,6 +152,13 @@ def get_meta(metaname):
                 stat.st_mtime < time.time() - 60
             ):  # not updated within last minute -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
+                with open(root.logname,"a") as f:
+                    print("", file=f)
+                    msg = "{}: {}".format(
+                            util.format_timestamp(),
+                            _("Load failed, no progress in 60 seconds")) 
+                    print(msg, file=f)
+                update_metafile(metaname, status=State.FILE_LOAD_FAILED)
     except FileNotFoundError as e:
         meta = {}
     except Exception as e:
@@ -325,7 +333,7 @@ def list_uploads(username:str) -> List[Upload]:
         node = record["root"]
         b: Root = Root.from_node(node)
 
-        meta = get_meta(b.metaname)
+        meta = get_meta(b)
         status = meta.get("status", State.FILE_UPLOADED)
         if status == State.FILE_LOAD_FAILED:
             state = State.FILE_LOAD_FAILED
