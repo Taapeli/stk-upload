@@ -251,7 +251,7 @@ def show_person_search(set_scope=None, batch_id=None):
 
     except Exception as e:
         error_print("show_person_search", e)
-        return redirect(url_for("routes.entry"))
+        return redirect(url_for("entry"))
 
     return render_template(
         "/scene/persons_search.html",
