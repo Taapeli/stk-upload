@@ -3102,7 +3102,7 @@ msgstr "Sökfras"
 
 #: bp/scene/templates/scene/persons_search.html:89
 msgid "Free text (any name, can use wildcards)"
-msgstr ""
+msgstr "Namnsökning från alla namn (flera namn åtskiljs med mellanslag, trunkering med '*')"
 
 #: bp/scene/templates/scene/persons_search.html:95
 msgid "Any surname (beginning part)"
