@@ -3486,8 +3486,8 @@ msgid "You may also check in which phase your materials are."
 msgstr "Du kan också kolla skedena av dina materialen."
 
 #: bp/start/templates/start/index_logged.html:48
-msgid "Continue"
-msgstr "Fortsätt"
+msgid "Look at your materials"
+msgstr "Materiallistan"
 
 #: bp/start/templates/start/index_logged.html:62
 msgid "Browse Materials"

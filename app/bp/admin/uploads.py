@@ -272,25 +272,11 @@ class Upload:
     material_type: str
     description: str
     user: str
+    u_name: str
     auditors: List[List]    # [[username, timestamp, format_timestamp]...]
     count: int
     is_candidate: int  # for Javascript: 0=false, 1=true
     for_auditor: int
-
-    # @staticmethod
-    # def timestamp_str(timestamp, opt="m"):
-    #     """ Converts a Neo4j timestamp to display format (by 'm' minute or 'd' day).
-    #
-    #         Duplicate to: bl.base.NodeObject.timestamp_str
-    #     """
-    #     if timestamp:
-    #         t = float(timestamp) / 1000.0
-    #         if opt == "d":
-    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y")
-    #         else:
-    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
-    #     else:
-    #         return ""
 
     def __str__(self):
         s = f"batch={self.batch_id}" if self.batch_id else "NO BATCH "
@@ -324,14 +310,17 @@ def list_uploads(username:str) -> List[Upload]:
     uploads = []
     for record in result:
         # <Record 
+        #    u_name='Juha P.'
         #    root=<Node id=34475 labels=frozenset({'Root'})
         #        properties={'material': 'Family Tree', 'state': 'Auditing', 
         #            'id': '2021-05-07.001', 'user': 'jpek', 
         #            'timestamp': 1620403991562, ...}> 
-        #    person_count=64 auditors=[["juha",1630474129763]]
+        #    person_count=64
+        #    auditors=[["juha",1630474129763]]
         # >
         node = record["root"]
         b: Root = Root.from_node(node)
+        u_name = record["u_name"]
 
         meta = get_meta(b)
         status = meta.get("status", State.FILE_UPLOADED)
@@ -353,6 +342,7 @@ def list_uploads(username:str) -> List[Upload]:
             xmlname=os.path.split(b.file)[1] if b.file else "",
             count=record["person_count"],
             user=b.user,
+            u_name=u_name,
             auditors=auditors,
             state=state,
             status=_(state),

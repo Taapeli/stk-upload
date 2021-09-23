@@ -4,6 +4,11 @@
 {% block title %}{{ _("Batches") }}{% endblock %}
 {% from "start/s_macros.html" import state_info with context %}
 {% block body %}
+<style>
+tr > td:nth-child(1), tr > td:nth-child(5) {
+    white-space: nowrap;
+}
+</style>
     {{ super() }}
    
 	<h1>{{ _("Batches") }}</h1>
@@ -28,10 +33,12 @@
 	       >
 		  {% if not user %}
              {% if current_user.username == upload.user %}
-               <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>
+               <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b>
              {% else %}
-               <td>{{upload.user}}</td>
+               <td><a href="/audit/profile/{{upload.user}}">{{upload.user}}</a>
              {% endif -%}
+                   <br>{{upload.u_name}}
+               </td>
     	  {% endif -%}
 
 	           <td>{{upload.batch_id}}

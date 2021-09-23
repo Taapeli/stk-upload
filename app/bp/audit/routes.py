@@ -307,6 +307,29 @@ def audit_approvals(who=None):
         elapsed=time.time() - t0,
     )
 
+# --------------------- Show user profile ----------------------------
+
+@shareds.app.route("/audit/profile/<user>", methods=["GET"])
+@login_required
+@roles_accepted("audit")
+def user_profile(user):
+    """Show user profile.
+       - From original method: my_settings()
+    """
+    labels, user_batches = Root.get_user_stats(user)
+    userprofile = shareds.user_datastore.get_userprofile(user, roles=True)
+
+    logger.info(f"-> bp.audit.routes.user_profile {user}")
+    return render_template(
+        "/audit/user_profile.html",
+        referrer=request.referrer,
+        apikey=None,    #api.get_apikey(current_user),
+        labels=labels,
+        batches=user_batches,
+        gedcoms=[],
+        userprofile=userprofile,
+    )
+
 
 # --------------------- List classifiers and refnames ----------------------------
 

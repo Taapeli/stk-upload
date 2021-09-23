@@ -3620,8 +3620,8 @@ msgid "You are on the home page of Isotammi demo. You have log in as a guest use
 msgstr "Olet kirjautunut vierailijana Isotammen esittelysivulle."
 
 #: bp/start/templates/start/obsolete_index_guest.html:60
-msgid "Continue"
-msgstr "Jatka"
+msgid "Look at your materials"
+msgstr "Aineistoluettelo"
 
 #: bp/start/templates/start/obsolete_index_guest.html:65
 #: bp/start/templates/start/obsolete_index_guest.html:71
