@@ -51,7 +51,7 @@ from bl.base import Status
 from bl.root import State, Root, BatchUpdater, BatchReader
 from models import loadfile, email, util, syslog
 
-# from ui.user_context import UserContext
+from ui.batch_ops import RESEARCHER_FUNCTIONS, RESEARCHER_OPERATIONS
 from ..admin import uploads
 
 from . import bp
@@ -259,9 +259,11 @@ def xml_download(xmlfile):
 def batch_download(batch_id):
     batch = Root.get_batch(current_user.username, batch_id)
     if batch:
-        xml_folder = os.path.split(batch.file)[0]
+        xml_folder, xname = os.path.split(batch.file)
+        if batch.xmlname:
+            xname = batch.xmlname
         xml_folder = os.path.abspath(xml_folder)
-        return send_from_directory(xml_folder, batch.xmlname,
+        return send_from_directory(xml_folder, xname,
             mimetype="application/gzip",
             as_attachment=True,
         )
@@ -418,33 +420,16 @@ def get_commands(batch_id):
         batch = res['item']
 
         commands = []
-        commands.append( (
-            f"/scene/persons/search?set-scope=1&batch_id={batch_id}", 
-            _("Browse this material")
-        ))
-        if batch.state == State.ROOT_CANDIDATE:
-            commands.append( (
-                f"/audit/user/request/{batch_id}", 
-                _("Send for auditing")
-            ))
-        if batch.state == State.ROOT_AUDIT_REQUESTED:
-            commands.append( (
-                f"/audit/user/withdraw/{batch_id}", 
-                _("Withdraw auditing")
-            ))
-        commands.append( (
-            f"/gramps/batch_download/{batch_id}", 
-            _("Download the Gramps file")
-        ))
-        commands.append( (
-            f"/gramps/show_upload_log/{batch_id}", 
-            _("Show upload log") 
-        ))
-        commands.append( (
-            f"/gramps/batch_delete/{batch_id}", 
-            _("Delete from database")
-        ))
-        
+        # Boolean vector of allowed researcher operations for this State 
+        ops = RESEARCHER_OPERATIONS.get(batch.state)
+        if ops:
+            for i in range(len(RESEARCHER_FUNCTIONS)):
+                if ops[i]:
+                    # If allowed function, add (url, title) tuple to commands
+                    cmd, title = RESEARCHER_FUNCTIONS[i]
+                    # The batch_id is appended to given command
+                    commands.append( (cmd + batch.id, _(title)) )
+
         return render_template("/gramps/commands.html", 
                                batch_id=batch_id, 
                                description=batch.description, 

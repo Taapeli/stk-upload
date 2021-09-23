@@ -145,7 +145,7 @@ function confirm_delete(subj, name) {
                 <div class="progress" data-name='{{upload.batch_id}}'></div>
     {% if upload.state == 'Loading' %}
                      <script>
-                         setTimeout( function() {update_progress('{{upload.batch_id}}')}, 1000 );
+                         setTimeout( function() {update_progress('{{upload.batch_id}}')}, PROGRESS_INTERVAL );
                      </script>
     {% endif -%}
             </td>
