@@ -196,7 +196,7 @@ def show_person_search(set_scope=None, batch_id=None):
         if key:
             args["key"] = key
         batch_id = rq.get("batch_id")
-        set_scope = rq.get("set-scope")
+        set_scope = rq.get("set_scope")
         if not (set_scope is None or batch_id is None): 
             args["batch_id"] = batch_id
             args["set_scope"] = set_scope

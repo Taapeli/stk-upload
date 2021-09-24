@@ -219,9 +219,9 @@ class UserContext():
 
 
             """ Use case: Selected material for display
-                set-scope = 1 -> set a new scope, common material or a specific user batch 
+                set_scope = 1 -> set a new scope, common material or a specific user batch 
             """
-            set_scope = request.args.get('set-scope')
+            set_scope = request.args.get('set_scope')
             if set_scope:
                 batch_id = request.args.get('batch_id')
                 if batch_id:
@@ -313,9 +313,12 @@ class UserContext():
         
         # Only used in test_owner_filter.test_ownerfilter_nouser()
         try:
-            print("ui.user_context.UserContext.owner_str:",self.material,self.state,self.batch_id)
-            return f"{ _(self.material) }: { _(self.state) } {self.batch_id}"
-            #return f"{self.choices.as_str[self.context_code]} {self.batch_id}"
+            print("ui.user_context.UserContext.owner_str:",
+                  self.material, self.state, self.batch_id)
+            if self.state == State.ROOT_ACCEPTED:
+                return f"{ _(self.material) }: { _('Approved Isotammi tree') } {self.batch_id}"
+            else:
+                return f"{ _(self.material) }: { _(self.state) } {self.batch_id}"
         except:
             return ''
 

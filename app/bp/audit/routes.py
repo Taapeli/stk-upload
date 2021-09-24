@@ -204,7 +204,10 @@ def audit_selected_op():
         batch_id = request.form["batch"]
         operation = "cancel"
         #request.form["oper"]
-        if request.form.get("start"):
+        if request.form.get("browse"):
+            return redirect(url_for("scene.show_person_search", 
+                                    set_scope="1", batch_id=batch_id))
+        elif request.form.get("start"):
             operation = "start"
         elif request.form.get("accept"):
             operation = "accept"
