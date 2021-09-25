@@ -299,9 +299,9 @@ class Root(NodeObject):
     @staticmethod
     def get_my_batches(username):
         with shareds.driver.session() as session:
-            result = run_cypher(session, "where root.state='Candidate' return root", username)
+            result = run_cypher(session, CypherRoot.get_my_batches, username)
             for rec in result:
-                print(rec.get("root"))
+                #print(rec.get("root"))
                 values = dict(rec.get("root"))
                 fname = values["file"]
                 filename = os.path.split(fname)[1]

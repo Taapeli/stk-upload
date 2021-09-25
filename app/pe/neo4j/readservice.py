@@ -1463,9 +1463,7 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             # Select Batches by user, if defined
             cypher = CypherPlaceStats.get_place_list
-#             logger.debug('#  Neo4jReadService.dr_get_placename_list: with \n{ material:"'
-#                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
-            logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
+            #logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
             result = run_cypher_batch(session, cypher, username, batch_id, count=count)
             for record in result:
                 place = record["place"]

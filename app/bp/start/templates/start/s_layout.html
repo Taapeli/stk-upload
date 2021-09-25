@@ -31,11 +31,13 @@
 			onmouseout="this.src='/static/tam.png';" /></a>
 		<div class="curr_user">
 			<a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}
-			<span style="letter-spacing: 0;">
-                {% if current_user.roles %}
-                [{% for r in current_user.roles %} {{r}} {% endfor %}]
-                {% endif %}
-            </span></a>
+{#			<span style="letter-spacing: 0;">
+#                {% if current_user.roles %}
+#                [{% for r in current_user.roles %} {{r}} {% endfor %}]
+#                {% endif %}
+#            </span>
+#}
+            </a>
 		</div>
 		<i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i>
 	</div>

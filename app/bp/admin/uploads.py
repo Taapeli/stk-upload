@@ -351,7 +351,7 @@ def list_uploads(username:str) -> List[Upload]:
             material_type=b.material,
             description=b.description,
         )
-        print(f"#list_uploads: {upload}")
+        #print(f"#bp.admin.uploads.list_uploads: {upload}")
         uploads.append(upload)
 
     return sorted(uploads, key=lambda upload: upload.batch_id)

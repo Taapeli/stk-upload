@@ -151,7 +151,7 @@ def start_logged():
     my_batches = Root.get_my_batches(current_user.username)
     return render_template(
         "/start/index_logged.html", is_demo=is_demo, surnamestats=surnamestats,
-        batches=sorted(my_batches, key=itemgetter("id"))
+        batches=my_batches # sorted(my_batches, key=itemgetter("id"))
     )
 
 

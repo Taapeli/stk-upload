@@ -100,6 +100,11 @@ return b as batch,
     labels(x)[0] as label, count(x) as cnt 
     order by batch.user, batch.id'''
 
+#-bl.root.Root.get_my_batches
+    get_my_batches = """
+where root.state='Candidate' 
+return root order by root.id desc"""
+
 #-bl.root.Root.get_user_stats
     get_passed = '''
 match (u:UserProfile) --> (b:Root) 

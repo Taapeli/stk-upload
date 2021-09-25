@@ -109,8 +109,8 @@ def list_uploads():
         # For debugging: don't poll progress bar very often
         inter = shareds.PROGRESS_UPDATE_RATE * 10000
 
-    for upl in upload_list:
-        print(f"#upload: {upl}")
+    # for upl in upload_list:
+    #     print(f"#bp.gramps.routes.list_uploads: {upl}")
 
     return render_template(
         "/gramps/uploads.html",
