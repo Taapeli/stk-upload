@@ -88,7 +88,7 @@ msgstr "Indikera att du har läst och godkänner användar vilkoren"
 
 #: setups.py:201
 msgid "Email has been reserved already"
-msgstr "Denna e-post har redan reserverats"
+msgstr "Denna e-post redan reserverat"
 
 #: setups.py:206
 msgid "Username has been reserved already"
@@ -1026,7 +1026,7 @@ msgstr "Gransking önskad för "
 
 #: bp/audit/routes.py:107
 msgid "Withdrawing audit request for "
-msgstr "Återtagning av inspectionsbegär för "
+msgstr "Återtagning av inspektionsbegär för "
 
 #: bp/audit/routes.py:119
 msgid " failed"
@@ -1190,7 +1190,7 @@ msgstr "Klassifierande kategorier"
 
 #: bp/audit/templates/audit/index.html:33
 msgid "Batch list"
-msgstr "Materiallistan"
+msgstr "Listan över materialen"
 
 #: bp/audit/templates/audit/index.html:34
 msgid "Remove empty batches"
@@ -3487,7 +3487,7 @@ msgstr "Du kan också kolla skedena av dina materialen."
 
 #: bp/start/templates/start/index_logged.html:48
 msgid "Look at your materials"
-msgstr "Materiallistan"
+msgstr "Listan över materialen"
 
 #: bp/start/templates/start/index_logged.html:62
 msgid "Browse Materials"

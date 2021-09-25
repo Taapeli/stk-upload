@@ -7,6 +7,16 @@
 
   {{ hamburger_menu( (
    ) ) }}
+<style>
+p.bullet {
+    text-indent: -2em;
+    padding-left: 2em;
+    margin: 0;
+}
+p > span {
+    font-size: smaller;
+    white-space: nowrap;
+}</style>
 
 <div id="startdiv">
   <div>
@@ -59,22 +69,28 @@
 
 {% if current_user.is_authenticated and 
    ( current_user.has_role('research') or current_user.has_role('admin') ) %}
+    {% set batch_id = session['batch_id'] %}<!-- '{{batch_id}}' -->
+    {% set ctxt = session['user_context'] %}
+
                  <h2>{{ _('Browse Materials') }}</h2>
                  <p>{{ _('View your own candidate material or all approved common data') }}.</p>
-                 <p>{% set batch_id = session['batch_id'] %}
-                 {% set ctxt = session['user_context'] %}
+
+                 <p class="bullet">
 					<b><input type="radio" name="batch_id" value=""
-                    {% if batch_id == "" %}checked{% endif %}>{{ _('Approved Isotammi tree') }}</b>
-				<p>
-                <b>{{ _('My candidate material') }}</b>
-					{% for batch in batches %}
-						<br><input type="radio" name="batch_id" value="{{ batch.id }}"
-		                    {% if batch_id == batch.id %}checked{% endif %}
-						>
-						{{ batch.id }}
-						<span style="font-size:smaller">{{ batch.filename }}</span>
-					{% endfor %}
-                </p>
+        {% if batch_id == "" %}checked{% endif %}
+                       >{{ _('Approved Isotammi tree') }}</b>
+                 </p>
+
+				 <p style="margin-bottom: .5em;"><b>{{ _('My candidate material') }}</b></p>
+    {% for batch in batches %}
+                 <p class="bullet">
+                    <input type="radio" name="batch_id" value="{{ batch.id }}"
+        {% if batch_id == batch.id %}checked{% endif %}
+                    >
+                    {{ batch.id }}
+					<span>{{ batch.filename }}</span>
+                 </p>
+    {% endfor -%}
 {% else %}
                  <h2>{{ _('The Browsed Material') }}</h2>
                  <p>{{ _('You can view only approved and public material in Demo Database') }}.</p>
