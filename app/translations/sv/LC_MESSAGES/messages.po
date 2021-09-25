@@ -106,6 +106,9 @@ msgstr "Användarnamn"
 msgid "Name"
 msgstr "Namn"
 
+msgid "Free name search"
+msgstr "Fritt namnsökning"
+
 #: bp/admin/forms.py:62 bp/admin/forms.py:65
 #: bp/admin/templates/admin/list_users.html:95 bp/start/forms.py:39
 #: bp/start/forms.py:43 setups.py:210 setups.py:258
@@ -722,6 +725,9 @@ msgstr "Administratorns start sida"
 #: bp/stat/templates/stat/layout.html:33 templates/a_layout.html:27
 msgid "My profile"
 msgstr "Min profil"
+
+msgid "My profile, roles: "
+msgstr "Min profil med roller: "
 
 #: bp/admin/templates/admin/layout.html:21
 #: bp/audit/templates/audit/layout.html:58

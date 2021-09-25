@@ -122,8 +122,8 @@ def start_logged():
         f" roles= {role_names}"
     )
 
-    print(current_user.is_authenticated)
-    print(current_user.has_role("to_be_approved"))
+    print(f"start_logged: is_authenticated={current_user.is_authenticated}, "\
+          f"to_be_approved={current_user.has_role('to_be_approved')}")
     if current_user.is_authenticated and current_user.has_role("to_be_approved"):
         # Home page for logged in user
         logger.info(f"-> start.routes.entry/join")

@@ -84,13 +84,6 @@ div.CloudPink div {
                           <label for="cars">{{ _('Search term') }}</label>
 
                           <select id="rule" name="rule">
-
-                            <option value="freetext"
-                                x-desc="{{ _('Free text (any name, can use wildcards)') }}"
-                        		{% if selection == "freetext" %}selected{% endif %}>
-                        		{{ _('Name') }}
-                        	</option>
-                            
                             <option value="surname"
                                 x-desc="{{ _('Any surname (beginning part)') }}"
                         {% if selection == "surname" %}selected{% endif %}>{{ _('Surname') }}</option>
@@ -100,6 +93,13 @@ div.CloudPink div {
                             <option value="patronyme"
                                 x-desc="{{ _('Any patronymic (beginning part)') }}"
                         {% if selection == "patronyme" %}selected{% endif %}>{{ _('Patronymic') }}</option>
+
+                            <option value="freetext"
+                                x-desc="{{ _('Free text (any name, can use wildcards)') }}"
+                                {% if selection == "freetext" %}selected{% endif %}>
+                                {{ _('Free name search') }}
+                            </option>
+                            
                             <option value="years"
                                 x-desc="{{ _('A year (1750) or years range (1700-1750) where persons might live') }}"
                         {% if selection == "years" %}selected{% endif %}>{{ _('Years range') }}</option>

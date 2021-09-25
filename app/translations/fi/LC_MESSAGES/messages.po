@@ -105,6 +105,9 @@ msgstr "Käyttäjätunnus"
 msgid "Name"
 msgstr "Nimi"
 
+msgid "Free name search"
+msgstr "Vapaa nimihaku"
+
 #: bp/admin/forms.py:62 bp/admin/forms.py:65
 #: bp/admin/templates/admin/list_users.html:95 bp/start/forms.py:39
 #: bp/start/forms.py:43 setups.py:210 setups.py:258
@@ -276,7 +279,7 @@ msgstr "Käyttäjätunnus"
 
 #: bp/admin/forms.py:60
 msgid "Name:"
-msgstr "Nimi"
+msgstr "Nimi:
 
 #: bp/admin/forms.py:61 bp/start/forms.py:33
 msgid "Name of the user"
@@ -712,6 +715,9 @@ msgstr "Ylläpitäjän alkusivulle"
 #: templates/a_layout.html:27
 msgid "My profile"
 msgstr "Käyttäjäprofiilini"
+
+msgid "My profile, roles: "
+msgstr "Käyttäjäprofiilini, roolit: "
 
 #: bp/admin/templates/admin/layout.html:21 bp/audit/templates/audit/layout.html:58
 #: bp/scene/templates/scene/sc_layout.html:41
@@ -3023,7 +3029,7 @@ msgstr "Hakutermi"
 
 #: bp/scene/templates/scene/persons_search.html:89
 msgid "Free text (any name, can use wildcards)"
-msgstr "Nimihaku, voi käyttää villikortteja"
+msgstr "Nimihaku, voi käyttää villikortteja (* yms)"
 
 #: bp/scene/templates/scene/persons_search.html:95
 msgid "Any surname (beginning part)"

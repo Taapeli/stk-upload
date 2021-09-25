@@ -30,13 +30,12 @@
 			onmouseover="this.src='/static/tam1.png';"
 			onmouseout="this.src='/static/tam.png';" /></a>
 		<div class="curr_user">
-			<a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}
-{#			<span style="letter-spacing: 0;">
-#                {% if current_user.roles %}
-#                [{% for r in current_user.roles %} {{r}} {% endfor %}]
-#                {% endif %}
-#            </span>
-#}
+            {% set ns = namespace(roles='') %}
+            {% for role in current_user.roles %}
+                {% set ns.roles = ns.roles + ' ' + role.name %}
+            {% endfor %}
+			<a href="/settings" title="{{ _('My profile, roles: ') + ns.roles }}">
+                {{current_user.username}}
             </a>
 		</div>
 		<i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i>
