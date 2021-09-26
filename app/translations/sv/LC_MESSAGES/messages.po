@@ -314,7 +314,7 @@ msgstr "Forskare"
 
 #: bp/admin/forms.py:73
 msgid "Audit"
-msgstr "Inspektion"
+msgstr "Granskning"
 
 #: bp/admin/forms.py:74
 msgid "Admin"
@@ -1032,7 +1032,7 @@ msgstr "Gransking önskad för "
 
 #: bp/audit/routes.py:107
 msgid "Withdrawing audit request for "
-msgstr "Återtagning av inspektionsbegär för "
+msgstr "Återtagning av granskningsbegär för "
 
 #: bp/audit/routes.py:119
 msgid " failed"
@@ -1048,7 +1048,7 @@ msgstr "Ingen sådan sats "
 
 #: bp/audit/routes.py:220
 msgid "You are now an auditor for batch "
-msgstr "Du är nu revisor för materialet "
+msgstr "Du är nu granskare för materialet "
 
 #: bp/audit/routes.py:227
 msgid "Audit batch accepted: "
@@ -1093,7 +1093,7 @@ msgstr "Totalt <b>%(tot)s</b> objekt"
 #: bp/gramps/templates/gramps/uploads.html:178
 #: bp/refplace_editor/templates/refplace_editor.html:3
 msgid "Auditor"
-msgstr "Revisor"
+msgstr "Granskare"
 
 #: bp/audit/templates/audit/approvals.html:74
 msgid "Researcher"
@@ -1135,7 +1135,7 @@ msgstr "personer"
 #: bp/audit/templates/audit/pick_auditing.html:45
 #: bp/gramps/templates/gramps/uploads.html:180
 msgid "Audit start date"
-msgstr "Startdatum for inspektionen"
+msgstr "Startdatum for granskningen"
 
 #: bp/audit/templates/audit/batches.html:76 bp/gramps/routes.py:443
 msgid "Show upload log"
@@ -1165,7 +1165,7 @@ msgstr "Inessive (inessive)"
 #: bp/audit/templates/audit/index.html:3 bp/audit/templates/audit/index.html:12
 #: bp/start/templates/start/index_logged.html:111
 msgid "Isotammi auditor"
-msgstr "Isotammi revisor"
+msgstr "Isotammi granskare"
 
 #: bp/audit/templates/audit/index.html:17
 msgid "Queries"
@@ -1254,7 +1254,7 @@ msgstr "I stadium"
 
 #: bp/audit/templates/audit/pick_auditing.html:43
 msgid "Current auditors"
-msgstr "Inspektioner"
+msgstr "Granskare"
 
 #: bp/audit/templates/audit/pick_auditing.html:50
 msgid "Access is given also to"
@@ -1266,7 +1266,7 @@ msgstr "Det finns ingen data i detta materialet"
 
 #: bp/audit/templates/audit/pick_auditing.html:72
 msgid "saved at"
-msgstr "sparade till"
+msgstr "sparade"
 
 #: bp/audit/templates/audit/pick_auditing.html:78
 #, python-format
@@ -1275,7 +1275,7 @@ msgstr "Totalt %(cnt)s noder från användaren <b>%(user)s</b>."
 
 #: bp/audit/templates/audit/pick_auditing.html:89
 msgid "Start auditing"
-msgstr "Starta inspektionen"
+msgstr "Starta granskningen"
 
 #: bp/audit/templates/audit/pick_auditing.html:91
 msgid "Accept auditing"
@@ -2399,7 +2399,7 @@ msgstr "Svaren"
 #: bp/scene/templates/scene/comments.html:38
 #: bp/scene/templates/scene/medias.html:68
 msgid "For auditor only"
-msgstr "Bara for revisorn"
+msgstr "Bara for granskaren"
 
 #: bp/scene/templates/scene/comments.html:38
 msgid "Material"
@@ -3544,7 +3544,7 @@ msgstr "Operationer med forskarens material"
 
 #: bp/start/templates/start/index_logged.html:114
 msgid "Audit materials"
-msgstr "Revisor åtgärder"
+msgstr "Granskarens åtgärder"
 
 #: bp/start/templates/start/index_logged.html:124
 msgid "Tools and Links"
@@ -3797,7 +3797,7 @@ msgstr "Granskning önskad"
 
 #: bp/start/templates/start/s_macros.html:61
 msgid "waiting for audition"
-msgstr "väntar på inspektionen"
+msgstr "väntar på granskningen"
 
 #: bp/start/templates/start/s_macros.html:62 ui/jinja_filters.py:334
 msgid "Accepted"
@@ -3805,7 +3805,7 @@ msgstr "Godkänt"
 
 #: bp/start/templates/start/s_macros.html:62
 msgid "Audit done"
-msgstr "Inspektion färdig"
+msgstr "Granskning färdig"
 
 #: bp/start/templates/start/s_macros.html:63
 msgid "Merged"

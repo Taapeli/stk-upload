@@ -243,10 +243,10 @@ def my_settings():
             traceback.print_exc()
 
     labels, user_batches = Root.get_user_stats(current_user.username)
-    print(f"# User batches {user_batches}")
+    print(f"#bp.start.routes.my_settings: User batches {user_batches}")
 
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)
-    print(f"# Gedcoms {gedcoms}")
+    print(f"#bp.start.routes.my_settings: Gedcoms {gedcoms}")
 
     userprofile = shareds.user_datastore.get_userprofile(current_user.username)
 
