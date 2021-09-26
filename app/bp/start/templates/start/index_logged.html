@@ -7,6 +7,16 @@
 
   {{ hamburger_menu( (
    ) ) }}
+<style>
+p.bullet {
+    text-indent: -2em;
+    padding-left: 2em;
+    margin: 0;
+}
+p > span {
+    font-size: smaller;
+    white-space: nowrap;
+}</style>
 
 <div id="startdiv">
   <div>
@@ -40,12 +50,12 @@
 {% if current_user.is_authenticated and current_user.has_role('research') %}
            <div class="startbox">
              <div style="display: inline-block;">
-                <h2>{{ _('Candidate materials for Isotammi') }}</h2>
-                  <form action="/gramps">
-                 <p>{{ _('Save your  Gramps xml file as Isotammi candidate material.') }}</p>
-                 <p>{{ _('Manage your candidate files and materials in database.') }}</p>
+                <h2>{{ _('Manage Materials') }}</h2>
+                  <form action="/gramps/uploads">
+                 <p>{{ _('You may import your new material to Isotammi and work with existing materials.') }}</p>
+                 <p>{{ _('You may also check in which phase your materials are.') }}</p>
                  <div class="submit"> 
-                    <input type="submit" value="{{ _('Candidate materials') }}" />
+                    <input type="submit" value="{{ _('Look at your materials') }}" />
                  </div>
                  </form>
              </div>
@@ -55,22 +65,32 @@
            <div class="startbox">
              <div style="display: inline-block;">
                <form method="get" action="/scene/persons/search">
+                   <input type="hidden" name="set_scope" value="1">
 
 {% if current_user.is_authenticated and 
    ( current_user.has_role('research') or current_user.has_role('admin') ) %}
-                 <h2>{{ _('Browse Isotammi Database') }}</h2>
+    {% set batch_id = session['batch_id'] %}<!-- '{{batch_id}}' -->
+    {% set ctxt = session['user_context'] %}
+
+                 <h2>{{ _('Browse Materials') }}</h2>
                  <p>{{ _('View your own candidate material or all approved common data') }}.</p>
-                 <p>{% set ctxt = session['user_context'] %}
-                   <input type="radio" name="div" value="1" 
-                    {% if ctxt == 1 %}checked{% endif %}>{{ _('The approved Isotammi data') }}<br>
-                   <input type="radio" name="div" value="2" 
-                    {% if ctxt == 2 or ctxt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
-{#
-                   &nbsp;&nbsp;└─ <input type="checkbox" name="cmp" value="1"  
-                    {% if ctxt == 3 or ctxt == 5 %}checked{% endif %}>
-                        {{ _('Compare to approved Isotammi data') }} 
-#}
-                </p>
+
+                 <p class="bullet">
+					<b><input type="radio" name="batch_id" value=""
+        {% if batch_id == "" %}checked{% endif %}
+                       >{{ _('Approved Isotammi tree') }}</b>
+                 </p>
+
+				 <p style="margin-bottom: .5em;"><b>{{ _('My candidate material') }}</b></p>
+    {% for batch in batches %}
+                 <p class="bullet">
+                    <input type="radio" name="batch_id" value="{{ batch.id }}"
+        {% if batch_id == batch.id %}checked{% endif %}
+                    >
+                    {{ batch.id }}
+					<span>{{ batch.filename }}</span>
+                 </p>
+    {% endfor -%}
 {% else %}
                  <h2>{{ _('The Browsed Material') }}</h2>
                  <p>{{ _('You can view only approved and public material in Demo Database') }}.</p>
@@ -107,7 +127,7 @@
              <h2>{{ _('Isotammi auditor') }}</h2>
              <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
              <div class="submit"> 
-                <button type="submit">{{ _('Continue') }}</button>
+                <button type="submit">{{ _('Audit materials') }}</button>
              </div>
           </form>
         </div>

@@ -31,7 +31,7 @@ table.transparent tbody tr td {
 
 <div id="startdiv">
 	<div>
-		<h1>{{ _("My Profile Page") }}</h1>
+		<h1>{{ _("Profile Page") }}</h1>
 
                 <div id="return_on_title">
                     <a href="{{ referrer }}"><button>{{ _('Go back') }}</button></a>
@@ -146,7 +146,7 @@ table.transparent tbody tr td {
 		{% endfor %}
 			</table>
 			<p class="goto">
-				&rtrif; <a href="/gramps">{{ _('Upload or remove a file or candidate batch') }}</a>
+				&rtrif; <a href="/gramps/uploads">{{ _('Upload or remove a candidate batch') }}</a>
 			</p>
 		</div>
     {% else %}
@@ -154,7 +154,7 @@ table.transparent tbody tr td {
 			<h2>{{ _('Data Batches') }}</h2>
 			<p>{{ _('You have no candidate data loaded in the database.') }}</p>
 			<p class="goto">
-				&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
+				&rtrif; <a href="/gramps/uploads">{{ _('Upload another file') }}</a>
 			</p>
 		</div>
     {% endif %}{# Batches #}

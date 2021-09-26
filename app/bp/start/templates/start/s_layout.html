@@ -17,6 +17,9 @@
 <!-- i18n for Javascript: {{ session.lang }}-->
 <link rel="gettext" type="application/x-po" href="/static/translations/{{ session.lang }}.po">
 <script src="/static/js/gettext.js"></script>
+
+<script src="/static/js/htmx.org@1.2.0.js"></script>
+
 </head>
 
 <body>
@@ -27,12 +30,13 @@
 			onmouseover="this.src='/static/tam1.png';"
 			onmouseout="this.src='/static/tam.png';" /></a>
 		<div class="curr_user">
-			<a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}
-			<span style="letter-spacing: 0;">
-                {% if current_user.roles %}
-                [{% for r in current_user.roles %} {{r}} {% endfor %}]
-                {% endif %}
-            </span></a>
+            {% set ns = namespace(roles='') %}
+            {% for role in current_user.roles %}
+                {% set ns.roles = ns.roles + ' ' + role.name %}
+            {% endfor %}
+			<a href="/settings" title="{{ _('My profile, roles: ') + ns.roles }}">
+                {{current_user.username}}
+            </a>
 		</div>
 		<i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i>
 	</div>

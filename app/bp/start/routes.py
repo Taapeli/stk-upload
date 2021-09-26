@@ -24,6 +24,8 @@
 # Blacked 2021-05-18 / JMä
 import logging
 import traceback
+from operator import itemgetter
+
 from werkzeug.utils import redirect
 from flask.helpers import url_for
 
@@ -31,7 +33,8 @@ from ..gedcom.models import gedcom_utils
 from ui.user_context import UserContext
 from bl.person import PersonReader
 import shareds
-from operator import itemgetter
+from bl.root import Root
+#from bp.dupsearch.models.search import batches
 
 logger = logging.getLogger("stkserver")
 
@@ -45,7 +48,6 @@ from models import email
 from bp.api import api
 
 from bp.start.forms import JoinForm
-from bl.batch import Batch
 
 """ Application route definitions
 """
@@ -82,7 +84,7 @@ def start_guest():
     logger.info(f"-> bp.start.routes.start_guest, lang={lang}")
     return redirect("/scene/persons/search")
     # is_demo = shareds.app.config.get('DEMO', False)
-    # return render_template('/start/index_guest.html', is_demo=is_demo)
+    # return render_template('/start/osolete_index_guest.html', is_demo=is_demo)
 
 
 @shareds.app.route("/start/persons/search", methods=["GET", "POST"])
@@ -120,8 +122,8 @@ def start_logged():
         f" roles= {role_names}"
     )
 
-    print(current_user.is_authenticated)
-    print(current_user.has_role("to_be_approved"))
+    print(f"start_logged: is_authenticated={current_user.is_authenticated}, "\
+          f"to_be_approved={current_user.has_role('to_be_approved')}")
     if current_user.is_authenticated and current_user.has_role("to_be_approved"):
         # Home page for logged in user
         logger.info(f"-> start.routes.entry/join")
@@ -146,8 +148,10 @@ def start_logged():
                 stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
             surnamestats.sort(key=itemgetter("surname"))
 
+    my_batches = Root.get_my_batches(current_user.username)
     return render_template(
-        "/start/index_logged.html", is_demo=is_demo, surnamestats=surnamestats
+        "/start/index_logged.html", is_demo=is_demo, surnamestats=surnamestats,
+        batches=my_batches # sorted(my_batches, key=itemgetter("id"))
     )
 
 
@@ -238,11 +242,11 @@ def my_settings():
             flash(_("Update did not work"), category="flash_error")
             traceback.print_exc()
 
-    labels, user_batches = Batch.get_user_stats(current_user.username)
-    print(f"# User batches {user_batches}")
+    labels, user_batches = Root.get_user_stats(current_user.username)
+    print(f"#bp.start.routes.my_settings: User batches {user_batches}")
 
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)
-    print(f"# Gedcoms {gedcoms}")
+    print(f"#bp.start.routes.my_settings: Gedcoms {gedcoms}")
 
     userprofile = shareds.user_datastore.get_userprofile(current_user.username)
 
@@ -259,6 +263,19 @@ def my_settings():
         userprofile=userprofile,
     )
 
+# @shareds.app.route("/my_batches/", methods=["GET"])
+# @shareds.app.route("/my_batches/<selected_batch_id>", methods=["GET"])
+# @login_required
+# def my_batches(selected_batch_id=None):
+#     batches = [
+#         {"batch_id": "2021-08-07.501","batch_file":"X1testtree.gramps"},
+#         {"batch_id": "2021-08-07.502","batch_file":"X2testtree.gramps"},
+#     ]
+#     return render_template(
+#         "/start/hx-batches.html",
+#     batches=batches
+#     )
+    
 
 # # Admin start page in bp.admin
 # @shareds.app.route('/admin',  methods=['GET', 'POST'])

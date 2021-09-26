@@ -25,122 +25,162 @@ Created on 7.11.2020
 @author: jm
 '''
 
-class CypherBatch():
+class CypherRoot():
     '''
-    Cypher clauses for managing Batch nodes
+    Cypher clauses for managing Root nodes
     '''
 
-    aquire_lock = """MERGE (lock:Lock {id:$lock_id})
-SET lock.locked = true"""
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_aqcuire_lock
+    acquire_lock = """MERGE (lock:Lock {id:$lock_id})
+SET lock.locked = true
+RETURN lock
+"""
 
-    batch_find_id = """
-MATCH (b:Batch) WHERE b.id STARTS WITH $batch_base
-RETURN b.id AS bid
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_find_last_used_batch_seq
+    batch_find_last_id = """
+MATCH (b:Root) WHERE b.id STARTS WITH $batch_base
+RETURN b.id as bid
     ORDER BY bid DESC LIMIT 1"""
 
+    read_batch_id = """
+MATCH (n:BatchId) return n
+"""
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_new_batch_id
+    save_batch_id = """
+MERGE (n:BatchId) 
+SET n.prefix = $prefix 
+SET n.seq = $seq
+"""
+
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_save
     batch_create = """
 MATCH (u:UserProfile {username: $b_attr.user})
-MERGE (u) -[:HAS_LOADED]-> (b:Batch {id: $b_attr.id})
-MERGE (u) -[:HAS_ACCESS]-> (b)
+    MERGE (u) -[:HAS_LOADED]-> (b:Root {id: $b_attr.id})
+    MERGE (u) -[:HAS_ACCESS]-> (b)
     SET b = $b_attr
     SET b.timestamp = timestamp()
 RETURN ID(b) AS id"""
 
-    batch_set_status = """
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_state
+    batch_set_state = """
 MATCH (u:UserProfile {username: $user})
-MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
-    SET b.status=$status
+MATCH (u) -[:HAS_LOADED]-> (b:Root {id: $bid})
+    SET b.state=$state
 RETURN ID(b) AS id"""
 
-    get_filename = """
-MATCH (b:Batch {id: $batch_id, user: $username}) 
-RETURN b.file"""
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
+    batch_set_auditor = """
+MATCH (b:Root {id: $bid}) WHERE b.state IN $states
+MATCH (audi:UserProfile {username: $audi})
+    SET b.state = "Auditing"
+    MERGE (audi) -[r:DOES_AUDIT]-> (b)
+    SET r.timestamp = timestamp()
+RETURN ID(b) AS id"""
 
+#-bl.root.Root.get_filename
+    get_filename = """
+MATCH (u:UserProfile{username: $username}) -[:HAS_LOADED]-> (b:Root {id: $batch_id})
+RETURN b.filename, u.username as username"""
+
+#-bl.root.Root.get_batch
+    get_batch = """
+MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Root {id:$batch_id})
+RETURN b, u.username as username"""
+     
     list_all = """
-MATCH (b:Batch) 
+MATCH (b:Root) 
 RETURN b """
 
+#-bl.root.Root.get_batches
     get_batches = '''
-match (b:Batch) 
-    where b.user = $user and b.status = $status // "completed"
-optional match (b) -[:OWNS]-> (x)
+match (b:Root) 
+    where b.user = $user and b.state = $status // "completed"
+optional match (b) --> (x)
 return b as batch,
     labels(x)[0] as label, count(x) as cnt 
     order by batch.user, batch.id'''
 
+#-bl.root.Root.get_my_batches
+    get_my_batches = """
+where root.state='Candidate' 
+return root order by root.id desc"""
+
+#-bl.root.Root.get_user_stats
     get_passed = '''
-match (b:Audit) 
-    where b.user = $user
-optional match (b) -[:PASSED]-> (x)
+match (u:UserProfile) --> (b:Root) 
+    where u.username = $user and b.state = 'Auditing'
+optional match (b) --> (x)
 return b as batch, count(x) as cnt 
     order by batch.id'''
 
+#-bl.root.Root.get_batch_stats
+#-bl.root.Root.list_empty_batches.Upload.get_stats
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_get_batch
     get_single_batch = '''
-match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
-optional match (b) -[:OWNS]-> (x)
-return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
+match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch})
+optional match (acc:UserProfile) -[:HAS_ACCESS]-> (b)
+    where not up.username = acc.username
+optional match (b) --> (x)
+optional match (ap:UserProfile) -[ar:DOES_AUDIT]-> (b)
+return up as profile, b as root,
+    labels(x)[0] as label, 
+    count(x) as cnt,
+    collect(distinct [ap.username,ar.timestamp]) as auditors,
+    collect(distinct acc.username) as has_access
+'''
 
-    get_user_batch_names = '''
-match (b:Batch) where b.user = $user
-optional match (b) -[r:OWNS]-> (:Person)
-return b.id as batch, b.timestamp as timestamp, b.status as status,
-    count(r) as persons 
-    order by batch'''
+#-bp.admin.uploads.list_uploads
+    get_user_roots_summary = """
+match (u:UserProfile) -[:HAS_LOADED]-> (root:Root)
+    where u.username = $user
+optional match (audi:UserProfile) -[ar:DOES_AUDIT]-> (root)
+optional match (root) -[r:OBJ_PERSON]-> (:Person)
+with u, audi, root, count(r) as person_count,
+    audi.username as auditor, ar.timestamp as a_time
+return u.name as u_name, 
+    root, person_count,
+    collect(distinct [auditor,a_time]) as auditors
+order by root.id"""
 
-    get_user_batch_summary = """
-match (b:Batch) where b.user = $user
-optional match (b) -[r:OWNS]-> (:Person)
-with b, count(r) as batch_persons
-    optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
-return b.id as batch, //b.timestamp as stamp_batch, 
-    b.status as status, batch_persons, //a.timestamp as stamp_audit, 
-    count(ar) as audit_persons
-    order by batch"""
-
+#-bl.root.Root.list_empty_batches
     TODO_get_empty_batches = '''
-MATCH (a:Batch) 
+MATCH (a:Root) 
 WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
 RETURN a AS batch ORDER BY a.id DESC'''
 
-#   delete = """
-# MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
-# OPTIONAL MATCH (b) -[*]-> (n)
-# WITH b, n LIMIT $limit
-# DETACH DELETE b, n"""
-
-    # Safe Batch removal in reasonable chunks:
-    #    a) Nodes pointed by OWNS, 
-    #    b) following nodes by relation NAME or NOTE
-    #    Not Batch node self
     delete_chunk = """
 MATCH (:UserProfile{username:$user})
-    -[:HAS_LOADED]-> (:Batch{id:$batch_id}) -[:OWNS]-> (a)
+    -[:HAS_LOADED]-> (:Root{id:$batch_id}) -[:OBJ_PERSON|OBJ_FAMILY|OBJ_PLACE|OBJ_SOURCE|OBJ_OTHER]-> (a)
 WITH a LIMIT 1000 
     OPTIONAL MATCH (a) -[r]-> (b) WHERE TYPE(r) = "NAME" OR TYPE(r) = "NOTE"
     DETACH DELETE b
     DETACH DELETE a"""
+
+#-bl.root.Root.delete_batch
     delete_batch_node = """
-MATCH (:UserProfile{username:$user}) -[:HAS_LOADED]-> (c:Batch{id:$batch_id})
+MATCH (:UserProfile{username:$user}) -[:HAS_LOADED]-> (c:Root{id:$batch_id})
 DETACH DELETE c"""
 
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_obj_remove_gramps_handles
     remove_all_handles = """
-match (b:Batch {id:$batch_id}) -[*]-> (a)
-where exists(a.handle)
+match (b:Root {id:$batch_id}) -[*2..3]-> (a)
+where a.handle is not null
 with distinct a
     remove a.handle
 return count(a),labels(a)[0]"""
 
+#-bl.gramps.xml_dom_handler.DOM_handler.add_missing_links
     add_missing_links = """
-match (n) where exists (n.handle)
-match (b:Batch{id:$batch_id})
+match (n) where n.handle is not null
+match (b:Root{id:$batch_id})
     merge (b)-[:OWNS_OTHER]->(n)
     remove n.handle
 return count(n)"""
 
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_obj_remove_gramps_handles
     find_unlinked_nodes = """
-match (n) where exists (n.handle)
+match (n) where n.handle is not null
 return  count(n), labels(n)[0]"""
-
 
 
 class CypherAudit():
@@ -149,40 +189,41 @@ class CypherAudit():
     '''
 
     get_my_audits = '''
-match (b:Audit {auditor: $oper})
-optional match (b) -[:PASSED]-> (x)
+match (b:Root {state:'Auditing', auditor: $oper})
+optional match (b) --> (x)
 return b, labels(x)[0] as label, count(x) as cnt 
     order by b.user, b.id, label'''
 
     get_all_audits = '''
-match (b:Audit)
-optional match (b) -[:PASSED]-> (x)
+match (b:Root{state:'Auditing'})
+optional match (b) --> (x)
 return b, labels(x)[0] as label, count(x) as cnt 
     order by b.user, b.id, label'''
 
-    merge_check = """
-MATCH (p) WHERE id(p) IN $id_list
-OPTIONAL MATCH (x) -[r:OWNS|PASSED]-> (p)
-RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str, 
-    TYPE(r) AS rel, 
-    ID(p) AS obj_id, LABELS(p)[0] AS obj_label, p.id AS obj_str
- """
+# # TODO Batch/Audit->Root
+#     xxmerge_check = """
+# MATCH (p) WHERE id(p) IN $id_list
+# OPTIONAL MATCH (x) -[r:OWNS|PASSED]-> (p)
+# RETURN ID(x) AS root_id, LABELS(x)[0]+' '+x.id AS root_str, 
+#     TYPE(r) AS rel, 
+#     ID(p) AS obj_id, LABELS(p)[0] AS obj_label, p.id AS obj_str
+#  """
 
     delete = '''
-MATCH (a:Audit {id: $batch}) -[:PASSED]-> (x)
+MATCH (a:Root{id: $batch, state:'Auditing'}) -[:OBJ_PERSON|OBJ_FAMILY|OBJ_PLACE|OBJ_SOURCE|OBJ_OTHER]-> (x)
 WHERE labels(x) IN [$labels]
 DETACH DELETE x
 RETURN count(x)
 '''
 
     delete_names = '''
-MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Person) -[:NAME]-> (x:Name)
+MATCH (a:Root {id: $batch, state:'Auditing'}) -[:OBJ_PERSON]-> (Person) -[:NAME]-> (x:Name)
 DETACH DELETE x
 RETURN count(x)
 '''
 
     delete_place_names = '''
-MATCH (a:Audit {id: $batch}) -[:PASSED]-> (Place) -[:NAME]-> (x:Place_name)
+MATCH (a:Root{id: $batch, state:'Auditing'}) -[:OBJ_PLACE]-> (Place) -[:NAME]-> (x:Place_name)
 DETACH DELETE x
 RETURN count(x)
 '''
@@ -194,6 +235,28 @@ RETURN count(x)
 # '''
 
     delete_audit_node = '''
-MATCH (a:Audit {id: $batch})
+MATCH (a:Root {id: $batch})
 DETACH DELETE a
 '''
+
+    copy_batch_to_audit = """
+MATCH (stk_user:UserProfile {username:'_Stk_'})
+MATCH (target:Root {id:$batch, user:$user, state:$state_candidate})
+MATCH (original_user:UserProfile{username:$user}) -[original_access:HAS_ACCESS]-> (target)
+MATCH (original_user) -[original_has_loaded:HAS_LOADED]-> (target)
+DELETE original_has_loaded
+DELETE original_access
+MERGE (stk_user) -[:HAS_ACCESS]-> (target)
+    SET target.auditor = $oper
+    SET target.timestamp = timestamp()
+    SET target.state = $state_auditing
+CREATE (new_root:Root {id:$batch})
+    SET new_root.user = $user
+    SET new_root.file = target.file
+    SET new_root.material = target.material
+    SET new_root.state = $state_for_audit
+MERGE (new_root) -[:AFTER_AUDIT]-> (target)        
+MERGE (original_user) -[:HAS_LOADED]-> (new_root)
+MERGE (original_user) -[:HAS_ACCESS]-> (new_root)
+return *        
+"""

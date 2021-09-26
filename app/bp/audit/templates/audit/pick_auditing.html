@@ -1,0 +1,117 @@
+{# _audit/move_in_1.html_ #}
+{% extends "audit/layout.html" %}
+{% block title %}{{ _("Select auditiong operation") }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+<style>
+div.props {
+	display: inline-box;
+}
+div.props > div { 
+    margin: 2pt;
+}
+div.props > div > span:nth-child(1) {
+    display: inline-block;
+    width: 12em;
+    vertical-align:top;
+}
+</style>
+
+{{ hamburger_menu() }}
+
+<div id="startdiv">
+    <div>
+        <h1>{{ _("Pick auditing operation") }}</h1>
+
+{% include "flash_messages.html" %}
+
+        <h2>{{ _("Selected %(m)s batch", m= root.material | transl('material') | lower) }}</h2>
+
+		<div class="props">
+		
+    {% if root.description %}
+			<div><span>{{ _('Title') }}:</span>
+				<span><i>{{root.description}}</i></span>
+			</div>
+	{% endif %}
+			<div><span>{{ _("In the phase") }}:</span>
+				<span>{{ _(root.state | transl('state')) }}</span></div>
+
+	{% for auditor, ts, ts_str in root.auditors %}
+			<div style="color: brown;">
+				<span>{% if loop.first %}{{ _("Current auditors") }}:{% endif %}</span>
+				<span><b>{{auditor}}</b>
+					<span  title="{{ _('Audit start date') }}">{{ts_str}}</span>
+				</span>
+			</div>
+    {% endfor %}
+	{% for access in root.has_access %}
+         	<div><span>{{ _("Access is given also to") }}:</span>
+				<span><b>{{access}}</b> </span>
+				</span>
+			</div>
+    {% endfor %}
+
+		</div>
+		<p>  
+	{% if not total %} – {{ _('There is no data in this batch') }}.{% endif %}
+		</p>
+        <div style="width: min-content;">
+
+			<table style="min-width: 35em;">
+				<tr>
+					<th>{{ _('Batch id') }}</th>
+        {% for label, cnt in label_nodes %}
+					<th>{{ _(label|trim) | title }}</th>
+        {% endfor -%}
+				</tr>
+
+                <tr>
+                    <td class="nowrap"><b>{{root.id}}</b>
+                    {% if time %}<br><small>{{ _('saved at') }} {{time}}</small>{% endif -%}
+                    </td>
+                    {% for label, cnt in label_nodes %}
+                    <td class="right nowrap">{{cnt|int_thousands}}</td> {% endfor -%}
+                </tr>
+            </table>
+            <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
+
+
+            <form action="/audit/selected" method="post">
+                <input type="hidden" value="{{root.id}}" name="batch">
+                <input type="hidden" value="{{user}}" name="user">
+	            <div class="submit">
+<!-- 	            	{{root.state}} {{user}}/{{current_user.username}} -->
+                   <input type="submit" value="{{ _('Return') }}" name="cancel" /> 
+                   <input type="submit" value="{{ _('Browse this material') }}" name="browse" /> 
+                   <span style="font-size:large; color:gray;"> | </span>
+{% if total %}
+                   <input type="submit" value="{{ _('Start auditing') }}" name="start"
+	{% if not can_start %} disabled {% endif %} />
+                   <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
+	{% if not can_accept %} disabled {% endif %} />
+                   <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
+	{% if not can_accept %} disabled {% endif %} />
+{% else %}
+                   <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
+	{% if not can_remove %} disabled {% endif %} />
+{% endif %}
+	            </div>
+            </form>
+{% if false %}
+            <form action="/audit/selected" method="post">
+                <input type="hidden" value="{{root.id}}" name="batch">
+                <input type="hidden" value="{{user}}" name="user">
+	            <div class="submit">
+                   <input type="submit" value="{{ _('Cancel') }}" name="cancel" /> 
+                   <span style="font-size:large; color:gray;"> | </span>
+                   <input type="submit" value="{{ _('Reject auditing') }}" name="reject"/>
+	            </div>
+            </form>
+{% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

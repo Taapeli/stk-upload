@@ -25,7 +25,7 @@ from flask_babelex import _
 
 from .. import transformer
 from ..transformer import Item
-from _collections import defaultdict
+from collections import defaultdict
 
 version = "1.0"
 name = _("Suku2004")

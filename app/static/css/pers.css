@@ -145,12 +145,14 @@ table, th, td {
     border-collapse: collapse;
     padding: 2px;
     text-align: left;
-/*  vertical-align: text-top; poistettu 3.7.2018/JMä */
 }
 .table100 { 
-	background: ivory; 
+	background-color: ivory; 
 	width: 100%;
+	max-width: 1000px;
 }
+tr:hover {background-color: #f5f5f5}
+
 .id { color: sienna; text-align: right; }
 .handle {
 	font-family: Courier, monospace;
@@ -161,7 +163,6 @@ table, th, td {
     text-align: center;
 }
 .center { text-align: center;}
-tr:hover {background-color: #f5f5f5}
 
 #lista { width:80%; float:left}
 #tiedot { 
@@ -172,6 +173,12 @@ tr:hover {background-color: #f5f5f5}
     position:fixed; top:90pt; right: 10pt;}
 #tiedot li {margin-left: -20pt;}
 #tiedot ul {list-style-type: none; font-size: 80%;}
+
+.typedesc {
+    font-variant: small-caps;
+    text-transform: uppercase;
+    font-size: 84%;
+}
 
 ul.event {
     list-style:circle;
@@ -276,67 +283,33 @@ div.legend {
      font-size: 90%;
      border-left: 6px solid silver;
 }
-table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
+
+table.legend, table.legend td, table.legend th {
     border:none;
     outline:none;
     margin: 1em 4em; 
     font-size: 90%;
+}
+table.legend, table.legend + td, table.legend + th {
     border-left: 6px solid silver;
 }
-table.legend > tbody > tr > td, table.legend > tbody > tr > th {
-    border:none;
-    outline:none;
-}
 
-div.steps { margin: 1em;}
-div.steps div {
-	border-style: solid;
-	border-radius: 5px;
-	border-width: 1px 3px 3px 1px;
-	border-color: gray;
-	display: inline-block;
-    height: 70px;
-	width: 150px;
-	padding: 5px;
-	background-color: lightyellow;
-	box-shadow: 5px 5px 5px lightgrey;
-}
-div.steps > div div {
-	padding-bottom: 0 !important;
-}
-div.steps div.bg {
-    border: 0px;
-    height:35px;
-    /*color: none;
-    background-color: #ffffe9;*/
-}
-div.steps div.exception {
-    border: 0px;
-    margin:3px;
-    height:auto;
-    color: gray;
-    background-color: #ffffe9;
-}
-div.steps div.active {
-    background-color: gainsboro;
-}
-.fileselect {
+table.fileselect {
 	border-width: 2px 3px 3px 2px; 
 	min-width: 725px;
 }
 
 /* Tooltip help container */
-.tooltip {
+div.tooltip {
   position: relative;
   display: inline-block;
-  /*border-bottom: 1px dotted black;*/
   background-color: DarkGray;
   color: white;
   padding: 0 2pt;
   border-radius: 7pt;
 }
 /* Tooltip text */
-.tooltip .tooltiptext {
+div.tooltip div.tooltiptext {
   font-weight: normal;
   visibility: hidden;
   width: 320pt;
@@ -345,10 +318,9 @@ div.steps div.active {
   padding: 0 5pt;
   border: 1pt solid gray;
   border-radius: 6pt;
-  /* Position the tooltip text */
   position: absolute;
-  top: -5px;
-  right: 105%; 
+  top: 1em;
+  right: -8em;
   z-index: 1;
 }
 /* Show the tooltip text when you mouse over the tooltip container */

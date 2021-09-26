@@ -1,0 +1,152 @@
+<div class="tab-bottom">
+    <div class="tab-list">
+        <a hx-get="/scene/hx-person/famtree?uuid={{person.uuid}}">{{ _("Families") }}</a>
+        <a hx-get="/scene/hx-person/fanchart?uuid={{person.uuid}}" class="selected">{{ _("Two-way fanchart") }}</a>
+    </div>
+    <div class="tab-content">
+    </div>
+</div>
+
+<style>
+    body {
+        font-family: Sans-serif;
+        font-size: 14px;
+    }
+
+    .slice {
+        cursor: pointer;
+    }
+
+    .slice .main-arc {
+        stroke: #fff;
+        stroke-width: 1px;
+    }
+
+    .slice .hidden-arc {
+        fill: none;
+    }
+
+    .slice text {
+        pointer-events: none;
+        dominant-baseline: middle;
+        text-anchor: middle;
+    }
+</style>
+
+<script> 
+    // Adapted from Vasco Asturiano's https://github.com/vasturiano/sunburst-chart
+    // Copyright (c) 2021 Isotammi project and Heikki Roikonen
+    
+    east = 0;
+    west = Math.PI;
+
+    const
+        width = window.innerWidth,
+        height = window.innerHeight,
+        maxRadius = (Math.min(width, height) / 2) - 5;
+
+    const formatNumber = d3.format(',d');
+
+    const x = d3.scaleLinear()
+        .range([0, 2 * Math.PI])
+        .clamp(true);
+
+    const y = d3.scaleLinear()
+        .range([maxRadius*.1, maxRadius]);
+
+    const partition = d3.partition();
+
+    const arc = d3.arc()
+        .startAngle(d => x(d.x0))
+        .endAngle(d => x(d.x1))
+        .innerRadius(d => Math.max(0, y(d.y0)))
+        .outerRadius(d => Math.max(0, y(d.y1)));
+
+    const middleArcLine = d => {
+        const halfPi = Math.PI/2;
+        const angles = [x(d.x0) - halfPi, x(d.x1) - halfPi];
+        const r = Math.max(0, (y(d.y0) + y(d.y1)) / 2);
+
+        const middleAngle = (angles[1] + angles[0]) / 2;
+        const invertDirection = middleAngle > east && middleAngle < west; // On lower quadrants write text ccw
+        if (invertDirection) { angles.reverse(); }
+
+        const path = d3.path();
+        path.arc(0, 0, r, angles[0], angles[1], invertDirection);
+        return path.toString();
+    };
+
+    const handleClick = (d, i) => {
+        if (d.data.uuid != null) {
+            var searchParams = new URLSearchParams(window.location.search);
+            searchParams.set('uuid', d.data.uuid);
+            searchParams.set('fanchart', true);
+            var newParams = searchParams.toString();
+            window.location.search = newParams;
+            window.location.hash = "relations";
+        }
+        d3.event.stopPropagation();
+    }
+
+    const drawFanchart = (slice) => {
+        const newSlice = slice.enter()
+            .append('g').attr('class', 'slice');
+
+        newSlice.on("click", handleClick);
+
+        newSlice.append('title')
+            .text(d => d.data.title);
+
+        newSlice.append('path')
+            .attr('class', 'main-arc')
+            .style('fill', d => d.data.color)
+            .attr('d', arc);
+
+        newSlice.append('path')
+            .attr('class', 'hidden-arc')
+            .attr('id', (_, i) => `hiddenArc${i}`)
+            .attr('d', middleArcLine);
+
+        // First line of text
+        const text = newSlice.append('text')
+            .attr('display', null); // d => textFits(d) ? null : 'none');
+
+        text.append('textPath')
+            .attr('startOffset','50%')
+            .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
+            .append('tspan')
+            .attr('dy', '-0.4em')
+            .attr('fill', d => d.data.too_new ? 'red' : 'black')
+            .text(d => d.data.name);
+
+        // Second line of text
+        const text2 = newSlice.append('text')
+            .attr('display', null); // d => textFits(d) ? null : 'none');
+
+        text2.append('textPath')
+            .attr('startOffset','50%')
+            .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
+            .append('tspan')
+            .attr('x', 0).attr('dy', '0.8em')
+            .attr('fill', d => d.data.too_new ? 'red' : 'black')
+            .text(d => d.data.years);
+    }
+
+    const svg = d3.select('.tab-content').append('svg')
+        .style('width', '75vw')
+        .style('height', '75vh')
+        .attr('viewBox', `${-width / 2} ${-height / 2} ${width} ${height}`);
+
+    var fanchart_data = JSON.parse('{{ fanchart_data|safe }}');
+
+    root = d3.hierarchy(fanchart_data);
+    root.sum(d => d.size);
+
+    const slice = svg.selectAll('g.slice')
+        .data(partition(root).descendants());
+
+    slice.exit().remove();
+
+    drawFanchart(slice);
+
+</script>

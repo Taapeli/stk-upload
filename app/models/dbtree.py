@@ -40,7 +40,7 @@ class DbTree():
             Query result must have the following mandatory fields:
                 nodes   terminal nodes
                 r       relation between terminal nodes
-                lv      lenght of the relation SIZE(r); 
+                lv      length of the relation SIZE(r); 
                         negative, if upwards towards the root of the tree
             Other field names form arguments:
                 name_field_name  node instance display name

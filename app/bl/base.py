@@ -26,6 +26,7 @@ Created on 22.8.2019
 import uuid
 import json
 import traceback
+from datetime import datetime
 
 
 class Status:
@@ -90,7 +91,7 @@ class NodeObject:
     Class representing Neo4j node type objects
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, uniq_id:int=None):
         """
         Constructor.
 
@@ -120,6 +121,27 @@ class NodeObject:
         uuid = self.uuid if self.uuid else "-"
         return f'(NodeObject {uuid}/{self.uniq_id}/{self.id} date {self.dates})"'
 
+    def timestamp_str(self):
+        """ My timestamp to display format. """
+        if hasattr(self, "timestamp") and self.timestamp:
+            t = float(self.timestamp) / 1000.0
+            return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+        else:
+            return ""
+
+    # @staticmethod
+    # def timestamp_str(timestamp, opt="m"): --> models.util.format_timestamp
+    #     """ Converts a Neo4j timestamp to display format (by 'm' minute or 'd' day). """
+    #     if timestamp:
+    #         t = float(timestamp) / 1000.0
+    #         if opt == "d":
+    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y")
+    #         else:
+    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+    #     else:
+    #         return ""
+
+
     @classmethod
     def from_node(cls, node):
         """
@@ -133,7 +155,7 @@ class NodeObject:
         n.uuid = node["uuid"]
         if node["handle"]:
             n.handle = node["handle"]
-        n.change = node["change"]
+        n.change = node.get("change")
         return n
 
     """
@@ -193,8 +215,6 @@ class NodeObject:
 
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """
-        from datetime import datetime
-
         try:
             return datetime.fromtimestamp(self.change).strftime("%d.%m.%Y %H:%M:%S")
         except TypeError:
@@ -214,3 +234,9 @@ class NodeObject:
         Called by `json.dumps(my_stk_object, cls=StkEncoder)`
         """
         return self.__dict__
+
+class IsotammiException(Exception):
+    def __init__(self, msg, **kwargs):
+        Exception.__init__(self, msg)
+        self.kwargs = kwargs
+        

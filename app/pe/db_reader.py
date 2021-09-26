@@ -35,7 +35,7 @@ class DbReader:
             # For reader only; writer has no context?
             self.user_context = u_context
             self.username = u_context.user
-            if u_context.context == u_context.ChoicesOfView.COMMON:
+            if u_context.context_code == u_context.ChoicesOfView.COMMON:
                 self.use_user = None
             else:
                 self.use_user = u_context.user
@@ -44,7 +44,7 @@ class DbReader:
 #         ''' List person data including all data needed to Person page. '''
 
 #     def get_place_list(self): # --> bl.place.PlaceReader.get_place_list()
-#         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
+#         """ Get a list on PlaceBl objects with nearest hierarchy neighbors.
 
 #     def get_place_with_events(self, uuid): # --> bl.place.PlaceReader.get_with_events()
 #         """ Read the place hierarchy and events connected to this place.

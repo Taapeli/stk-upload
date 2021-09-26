@@ -31,119 +31,172 @@ logger = logging.getLogger('stkserver')
 from neo4j.exceptions import ClientError #, ConstraintError
 
 import shareds
-
+from bl.root import State
 
 def do_schema_fixes():
     """ Search current obsolete terms and structures in schema and fix them.
-    
+
+        Set a new DB_SCHEMA_VERSION value in database.accessDB to activate this method.
         #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
+
+        @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
     """
-    if True:
-        # // Fix master HAS_LOADED => Stk HAS_ACCESS
-        # // and Add (:Batch) -[:AFTER_AUDIT]-> (:Audit) 
-        change_master_HAS_LOADED_to_Stk_HAS_AUDITED = """
-MATCH (stk:UserProfile{username:"_Stk_"})
-WITH stk
-    MATCH (master:UserProfile{username:"master"})-[r:HAS_LOADED]->(audit:Audit)
-WITH master,stk,r,audit limit 50
-    DELETE r
-    MERGE (stk)-[:HAS_ACCESS]->(audit)
-    WITH audit
-        MATCH (b:Batch) WHERE b.id = audit.id
-        MERGE (b)-[:AFTER_AUDIT]->(audit)
-    RETURN count(audit)"""
-        change_Stk_name = """
-MATCH (u:UserProfile {username:'_Stk_'})
-SET u.name = 'Suomi tk', u.change = timestamp()"""
-        guest_role_removal = """
-MATCH (a:Role{name:"guest"}) <-[r:HAS_ROLE]- (u:User {username:"guest"})
-SET u.roles=""
-SET u.email = 'nobody'
-DELETE r"""
-        guest_role_adding = """
-MATCH (a:Role{name:"guest"}), (u:User {username:"guest"})
-MERGE (a) <-[r:HAS_ROLE]- (u)
-SET u.roles = 'guest'
-SET u.email = 'nobody'"""
 
-        with shareds.driver.session() as session: 
-            try:
-                # Name field missed
-                if shareds.app.config.get('DEMO', False):
-                    # Add guest role in demo service
-                    result = session.run(guest_role_adding)
+    # Batch: Root.state depends on b.status; Root.material = b.material_type
+    change_Batch_to_Root = f"""
+        MATCH (b:Batch) WITH b LIMIT 1
+        SET b:Root
+        SET b.material=
+            CASE b.material_type
+                WHEN "" THEN $default_material
+                WHEN NULL THEN $default_material
+                ELSE b.material
+            END
+        SET b.state=CASE
+                WHEN b.status = 'started' THEN '{State.ROOT_STORING}'
+                WHEN b.status = 'completed' THEN '{State.ROOT_CANDIDATE}'
+                WHEN b.status = 'audit_requested' THEN '{State.ROOT_AUDIT_REQUESTED}'
+                ELSE '{State.ROOT_REMOVED}'
+            END
+        REMOVE b:Batch, b.status, b.material_type"""
+    # Audit: Root.state = "Audit Requested"; Root.material = "Family Tree"
+    change_Audit_to_Root = f"""
+        MATCH (b:Audit) WITH b LIMIT 1
+        SET b:Root
+        SET b.material=
+            CASE b.material_type
+                WHEN "" THEN $default_material
+                WHEN NULL THEN $default_material
+                ELSE b.material
+            END
+        SET b.state='{State.ROOT_AUDITING}'
+        REMOVE b:Audit, b.status, b.material_type"""
+    # {object_label: relation_type}
+    root_relations = {
+        ":Person": ":OBJ_PERSON",
+        ":Family": ":OBJ_FAMILY",
+        ":Place": ":OBJ_PLACE",
+        ":Source": ":OBJ_SOURCE",
+        "" : ":OBJ_OTHER"
+        }
+    # Root relation to objects (types OWNS or PASSED) are split to types
+    # OBJ_PERSON, OBJ_FAMILY, OBJ_PLACE, OBJ_SOURCE" and OBJ_OTHER
+    OWNS_to_OBJ_x = """
+        MATCH (b:Root) -[r{old_type}]-> (x{label})
+        WITH b,r,x
+            CREATE (b) -[{new_type}]-> (x)
+            DELETE r"""
+
+    # Comment and Topic:
+    #  - Identify old Comments by existing c.user
+    # a) Delete object comments except the 1st one
+    # b) Connect remaining comments to UserProfile,
+    #    change label to Topic and
+    #    remove c.user
+    Delete_comment_tails = """
+        MATCH (x) -[:COMMENT]-> (c:Comment) WHERE c.user IS NOT null 
+        WITH x, c ORDER BY id(x), c.timestamp
+        WITH x, collect(c)[1..] as coms
+        UNWIND coms AS com
+            DETACH DELETE com
+    """
+    Rename_label_Comment_to_Topic = """
+        MATCH (root:Root) --> (x) -[:COMMENT]-> (c:Comment) WHERE c.user IS NOT null
+        MATCH (up:UserProfile) WHERE up.username = root.user
+        WITH up, c                                             LIMIT 3
+            MERGE (up) -[:COMMENTED]-> (c)
+            SET c.user = null
+            SET c:Topic
+            REMOVE c:Comment
+    """
+
+    with shareds.driver.session() as session: 
+        try:
+            for old_root, cypher_to_root, old_type in [
+                ("Batch", change_Batch_to_Root, ":OWNS"), 
+                ("Audit", change_Audit_to_Root, ":PASSED")]:
+                # 1. Change Batch label to Root
+                #
+                # Change (:Batch {"material_type":"Family Tree", "status":"completed"})
+                # to     (:Root  {material:'Family Tree', state:'Candidate'}) etc
+                labels_added = -1 
+                while labels_added != 0:
+                    result = session.run(cypher_to_root, default_material="Family Tree")
                     counters = shareds.db.consume_counters(result)
-                    if counters.properties_set > 0:
-                        msg = "database.schema_fixes.do_schema_fixes: guest role added to DEMO guest!"
-                        print(msg)
-                        logger.info(msg)
-                else:
-                    # Remove guest role from real services
-                    result = session.run(guest_role_removal)
-                    counters = shareds.db.consume_counters(result)
-                    if counters.properties_set > 0:
-                        msg = "database.schema_fixes.do_schema_fixes: guest role removed from guest!"
-                        print(msg)
-                        logger.info(msg)
+                    labels_added = counters.labels_added 
+                    #properties_set = counters.properties_set
+                    print(f"do_schema_fixes: change {labels_added} {old_root} nodes to Root")
+    
+                    # 2. Change OWNS OR PASSED links to distinct OBJ_* links
+                    #
+                    #    Change (:Root) -[r]-> (:Label) 
+                    #    to     (:Root) -[:OBJ_LABEL]-> (:Label)
+                    #    using root_relations dictionary
+                    for label, rtype in root_relations.items():
+                        cypher = OWNS_to_OBJ_x.format(label=label, old_type=old_type, new_type=rtype)
+                        result = session.run(cypher)
+                        counters = shareds.db.consume_counters(result)
+                        relationships_created = counters.relationships_created
+                        if relationships_created:
+                            print(f" -- created {relationships_created} links (:Root) -[{rtype}]-> ({label})")
 
-                # From (:UserProfile{'master'} -[:HAS_LOADED]-> (a:Audit)
-                #   to (:UserProfile{'_Stk_'} -[:HAS_ACCESS]-> (a:Audit) 
-                #  and OPTIONAL (b:Batch) -[AUDITED]-> (a)
-                result = session.run(change_master_HAS_LOADED_to_Stk_HAS_AUDITED)
-                for record in result:
-                    # If any found, get the counters of changes
-                    _cnt = record[0]
-                    counters = shareds.db.consume_counters(result)
-                    #print(counters)
-                    rel_created = counters.relationships_created
-                    rel_deleted = counters.relationships_deleted
-                    print(f"do_schema_fixes: Audit links {rel_deleted} removed, {rel_created} added")
-                    if rel_created + rel_deleted > 0:
-                        logger.info(f"database.schema_fixes.do_schema_fixes: "
-                                    f"Audit links {rel_deleted} removed, {rel_created} added")
+        except Exception as e:
+            logger.error(f"do_schema_fixes: {e} in database.schema_fixes.do_schema_fixes"
+                         f" Failed {e.__class__.__name__} {e}")
+            return
 
-                # Name field missed
-                result = session.run(change_Stk_name)
-                counters = shareds.db.consume_counters(result)
-                if counters.properties_set > 0:
-                    logger.info("database.schema_fixes.do_schema_fixes: profile _Stk_ name set")
+        # 3. Create index for Root.material, Root.state
 
-#                 cnt1 = result.single()[0]
-#                 result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
-#                                      use0="matronyme", use1="mother")
-#                 cnt2 = result.single()[0]
-#                 result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
-#                                      use0="patronyme", use1="father")
-#                 cnt3 = result.single()[0]
-#                 print(f"database.schema_fixes.do_schema_fixes: fixed Refname links {cnt1} REFNAME, {cnt2} matronyme, {cnt3} patronyme")
-            except Exception as e:
-                logger.error(f"{e} in database.accessDB.do_schema_fixes/Audit"
-                             f" Failed {e.__class__.__name__} {e}") 
-                return
+        try:
+            result = session.run(f'CREATE INDEX FOR (b:Root) ON (b.material, b.state)')
+            counters = shareds.db.consume_counters(result)
+            indexes_added = counters.indexes_added
+            print(f"do_schema_fixes: created {indexes_added} indexes for (:Root)")
+        except ClientError as e:
+            msgs = e.message.split(',')
+            print(f'do_schema_fixes: New index for Root ok: {msgs[0]}')
+        except Exception as e: 
+            logger.warning(f"do_schema_fixes: Indexes for Root not created." 
+                           f" Failed {e.__class__.__name__} {e.message}") 
+
+        # 4. Change 1st Comments to Topic and remove others
+
+        try:
+            result = session.run(Delete_comment_tails)
+            counters = shareds.db.consume_counters(result)
+            comments_removed = counters.nodes_deleted
+            print(f"do_schema_fixes: removed {comments_removed} old Comments")
+
+            result = session.run(Rename_label_Comment_to_Topic)
+            counters = shareds.db.consume_counters(result)
+            labels_changed = counters.labels_added
+            print(f"do_schema_fixes: changed {labels_changed} Comments to Topics")
+        except Exception as e: 
+            msg = f"do_schema_fixes: Comments to Topic failed. {e.__class__.__name__} {e.message}"
+            print (msg)
+            logger.warning(msg) 
 
 
-            dropped=0
-            created=0
-            for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
-                          'Note', 'Person', 'Place', 'Place_name', 'Repository',
-                          'Source']:
-                try:
-                    result = session.run(f'CREATE INDEX ON :{label}(handle)')
-                    counters = shareds.db.consume_counters(result)
-                    created += counters.indexes_added
-                except ClientError as e:
-                    msgs = e.message.split(',')
-                    print(f'Unique constraint for {label}.handle ok: {msgs[0]}')
-                    return
-                except Exception as e: 
-                    logger.warning(f"do_schema_fixes Index for {label}.handle not created." 
-                                   f" Failed {e.__class__.__name__} {e.message}") 
-            return 
-
-            print(f"database.schema_fixes.do_schema_fixes: index updates: {dropped} removed, {created} created")
-
-    else:
-        print("database.schema_fixes.do_schema_fixes: No schema changes tried")
+# Removed 5.6.2021
+# dropped=0
+# created=0
+# for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
+#               'Note', 'Person', 'Place', 'Place_name', 'Repository',
+#               'Source']:
+#     try:
+#         result = session.run(f'CREATE INDEX ON :{label}(handle)')
+#         counters = shareds.db.consume_counters(result)
+#         created += counters.indexes_added
+#     except ClientError as e:
+#         msgs = e.message.split(',')
+#         print(f'Unique constraint for {label}.handle ok: {msgs[0]}')
+#         return
+#     except Exception as e: 
+#         logger.warning(f"do_schema_fixes Index for {label}.handle not created." 
+#                        f" Failed {e.__class__.__name__} {e.message}") 
+# return 
+#
+# print(f"database.schema_fixes.do_schema_fixes: index updates: {dropped} removed, {created} created")
 
 
 #Removed 6.5.2020

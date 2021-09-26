@@ -39,6 +39,7 @@ import logging
 from .base import NodeObject, Status
 from .person import Person
 from pe.dataservice import DataService
+from pe.neo4j.cypher.cy_source import CypherSourceByHandle
 
 logger = logging.getLogger("stkserver")
 
@@ -51,8 +52,6 @@ class Source(NodeObject):
             change
             id              esim. "S0001"
             stitle          str lähteen otsikko
-
-    See also: bp.gramps.models.source_gramps.Source_gramps
     """
 
     def __init__(self, uniq_id=None):
@@ -101,7 +100,7 @@ class SourceBl(Source):
     def __init__(self, uniq_id=None):
         """Creates a new PlaceBl instance.
 
-        You may also give for printout eventuell hierarhy level
+        You may also give for printout eventual hierarchy level
         """
         Source.__init__(self, uniq_id)
 
@@ -114,11 +113,68 @@ class SourceBl(Source):
         self.note_ref = []
 
 
+    def save(self, dataservice, tx, **kwargs):
+        """ Saves this Source and connect it to Notes and Repositories.
+
+            :param: batch_id      batch id where this place is linked
+
+        """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Source_gramps.save needs batch_id for {self.id}")
+            
+        self.uuid = self.newUuid()
+        s_attr = {}
+        try:
+            s_attr = {
+                "uuid": self.uuid,
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "stitle": self.stitle,
+                "sauthor": self.sauthor,
+                "spubinfo": self.spubinfo
+            }
+
+            result = tx.run(CypherSourceByHandle.create_to_batch,
+                            batch_id=batch_id, s_attr=s_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, s_attr))
+
+        except Exception as err:
+            print("iError source_save: {0} attr={1}".format(err, s_attr))
+            raise RuntimeError("Could not save Source {}".format(self.id))
+
+        # Make relation to the Note nodes
+        for note_handle in self.note_handles:
+            try:
+                tx.run(CypherSourceByHandle.link_note,
+                       handle=self.handle, hlink=note_handle)
+            except Exception as err:
+                logger.error(f"Source_gramps.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
+                #print("iError Source.save note: {0}".format(err), file=stderr)
+
+        # Make relation to the Repository nodes
+        for repo in self.repositories:
+            try:
+                tx.run(CypherSourceByHandle.link_repository,
+                       handle=self.handle, hlink=repo.handle, medium=repo.medium)
+            except Exception as err:
+                print("iError Source.save Repository: {0}".format(err))
+                
+        return
+
+
 class SourceReader(DataService):
     """
     Data reading class for Source objects with associated data.
 
-    - Returns a Result object which includes the tems and eventuel error object.
+    - Returns a Result object which includes the items and eventual error object.
     """
 
     def __init__(self, service_name: str, u_context=None):
@@ -128,7 +184,7 @@ class SourceReader(DataService):
             # For reader only; writer has no context?
             self.user_context = u_context
             self.username = u_context.user
-            if u_context.context == u_context.ChoicesOfView.COMMON:
+            if u_context.context_code == u_context.ChoicesOfView.COMMON:
                 self.use_user = None
             else:
                 self.use_user = u_context.user
@@ -139,11 +195,12 @@ class SourceReader(DataService):
         fw = context.first  # From here forward
         use_user = context.batch_user()
         args = {"user": use_user, "fw": fw, "count": context.count}
+        args['batch_id'] = context.batch_id
         if context.series:
             # Filtering by series (Lähdesarja)
             THEMES = {
                 "birth": ("syntyneet", "födda"),
-                "babtism": ("kastetut", "döpta"),
+                "baptism": ("kastetut", "döpta"),
                 "wedding": ("vihityt", "vigda"),
                 "death": ("kuolleet", "döda"),
                 "move": ("muuttaneet", "flyttade"),
@@ -152,7 +209,7 @@ class SourceReader(DataService):
             args["theme1"] = theme_fi
             args["theme2"] = theme_sv
         try:
-            sources = shareds.dservice.dr_get_source_list_fw(args)
+            sources = self.dataservice.dr_get_source_list_fw(args)
             # results = {'sources':sources,'status':Status.OK}
 
             # Update the page scope according to items really found
@@ -175,14 +232,14 @@ class SourceReader(DataService):
     def get_source_with_references(self, uuid, u_context):
         """Read the source, repository and events etc referencing this source.
 
-        Returns a dicitonary, where items = Source object.
+        Returns a dictionary, where items = Source object.
         - item.notes[]      Notes connected to Source
         - item.repositories Repositories for Source
         - item.citations    Citating Persons, Events, Families and Medias
                             as [label, object] tuples(?)
         """
         use_user = self.user_context.batch_user()
-        res = shareds.dservice.dr_get_source_w_repository(use_user, uuid)
+        res = self.dataservice.dr_get_source_w_repository(use_user, uuid)
         if Status.has_failed(res):
             return res
         source = res.get("item")
@@ -190,7 +247,7 @@ class SourceReader(DataService):
             res.statustext = f"no Source with uuid={uuid}"
             return res
 
-        citations, notes, targets = shareds.dservice.dr_get_source_citations(
+        citations, notes, targets = self.dataservice.dr_get_source_citations(
             source.uniq_id
         )
 
@@ -211,7 +268,7 @@ class SourceReader(DataService):
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
                     if isinstance(target, Person):
-                        shareds.dservice.dr_inlay_person_lifedata(target)
+                        self.dataservice.dr_inlay_person_lifedata(target)
                     citation.citators.append(target)
                 else:
                     print(f"DbReader.get_source_with_references: hide {target}")

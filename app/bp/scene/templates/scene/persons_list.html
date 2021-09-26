@@ -9,7 +9,7 @@
 {% set next_fw = user_context.next_name('fw') %}
 {% set next_bw = user_context.next_name('bw') %}
 {% set next_at_end = user_context.at_end() %}
-{% set ctxt = user_context.context %}
+{% set ctxt = user_context.context_code %}
 {% if ctxt == 3 or ctxt == 5 %}{#
 	#   common_own   011 3 = 1+2 = user's data & common
 	#   common_batch 101 5 = 1+4 = user batch & common #}
@@ -62,6 +62,7 @@
 {% include "flash_messages.html" %}
 
         </div>
+  <div id="hx-fam"></div>
 
     {% if cnt %}
 		<div id="alphanav">{% set alpha = "¤" %}
@@ -128,12 +129,11 @@
                                 {{ macro.person(p) }}
                                  <div class="pop-open-family" 
                                     v-on:mouseover="showPopup(uuid='{{p.uuid}}',$event)"
-                                    title="Näytä perheet">👪</div>
-                            </div>
+                                    title="Näytä perheet">👪</div>                            
 	       {% endif %}
 
            
-           {% if p.uuid %}   <span class="idno">Uuid:{{p.uuid_short()}} /</span>
+           {% if p.uuid %}   <br><span class="idno">uuid:{{p.uuid_short()}} /</span>
 	       {% endif %}
                              <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
 	                    </div>

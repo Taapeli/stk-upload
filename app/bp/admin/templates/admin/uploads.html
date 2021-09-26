@@ -25,10 +25,11 @@
     <div class="content">
         <table style="width:90%">
            <tr>
-			    {% if not user %}
-	                <th>{{ _("User id") }}</th>
-			    {% endif %}
-                <th>{{ _("Gramps file / uploaded at") }}</th>
+    {% if not user %}
+	                <th>{{ _("User") }}</th>
+    {% endif %}
+                <th>{{ _("Gramps file") }}</th>
+                <th>{{ _("Type / description") }}</th>
                 <th>{{ _("Status") }}
                     <div class="tooltip"> &#x2754;
                       <div class="tooltiptext">
@@ -44,47 +45,75 @@
                 </th>
                 <th>{{ _("Operations") }}</th>
            </tr>
-	    {% for upload in uploads %}
+
+    {% for upload in uploads %}
 	       <tr>
-			    {% if not user %}
-                  {% if current_user.username == upload.user %}
-                    <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>{% else %}
-                    <td>{{upload.user}}{% endif %}</td>
-			      {% endif %}
+
+        {% if not user %}
+            {% if current_user.username == upload.user %}
+                    <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>
+            {% else %}
+                    <td>{{upload.user}}</td>
+            {% endif %}
+        {% endif%}
+
 	           <td class="msg_INFO">
     	           <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}>
     	               {{upload.xmlname}}</a>
                    <br>{{upload.upload_time_s}} 
 	           </td>
+
+               <td class="msg_INFO">
+                    <span class="typedesc">{{upload.material_type|transl('material')}}</span>
+        {% if upload.description %} 
+                    <br><i>{{ upload.description[0:19] }}
+            {% if upload.description|length > 19  %}
+                        ... 
+                        <div class="tooltip"> 
+                        &nbsp;&#8505;&nbsp;
+                          <div class="tooltiptext">
+                            {{ upload.description }} 
+                          </div>
+                        </div> 
+            {% endif %}
+                    </i>
+        {% endif %}
+               </td>
+
 	           <td class="msg_INFO">{{upload.status}}
-	           	{% if upload.batch_id %}
-	           	   {% if upload.status == _("UPLOADED") %}({{_( "deleted from database" ) }})
-	           	   {% else %}<br>
-                      {{ _("batch %(batch_id)s; %(persons)d persons", batch_id=upload.batch_id, persons=upload.count) }}
-	           	   {% endif %}
-	           	{% endif %}
+        {% if upload.batch_id %}
+            {% if upload.status == _("UPLOADED") %}
+                    ({{_( "deleted from database" ) }})
+            {% else %}<br>
+                    {{ _("batch %(batch_id)s; %(persons)d&nbsp;persons", batch_id=upload.batch_id, persons=upload.count) }}
+            {% endif %}
+        {% endif %}
                </td>
 	           <td class="msg_INFO">
-{% if upload.xmlname and upload.status != _("CANDIDATE") %}
+        {% if upload.xmlname and upload.status != _("CANDIDATE") %}
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
-{% endif %}
-{% if upload.xmlname and upload.has_log %}
-	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
+        {% endif %}
+        {% if upload.xmlname and upload.has_log %}
+	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}/{{upload.batch_id}}>
 	           			{{ _("Show log") }}</a> |
-{% endif %}
-{% if upload.xmlname %}
+        {% endif %}
+        {% if upload.xmlname %}
                     <a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
                         {{ _("Delete file") }}</a>
-{% endif %}
+        {% endif %}
 	           	</td>
 	       </tr>
-	    {% endfor %}
+    {% endfor %}
+
 	    </table>
-	    <br>
-	    {{ _("Number of files") }}: {{ uploads|count }}
-    <p>&rtrif; <a href="/admin/list_users">{{ _("List of users") }}</a></p>
+
+	    <p>{{ _("Number of files") }}: {{ uploads|count }}</p>
+
     </div>
+
+    <p>&rtrif; <a href="/admin/list_users">{{ _("List of users") }}</a></p>
+
 {% endblock %}
 
 <script>

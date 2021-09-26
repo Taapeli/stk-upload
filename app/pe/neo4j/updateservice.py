@@ -28,17 +28,22 @@ from neo4j.exceptions import ClientError
 logger = logging.getLogger("stkserver")
 from datetime import date  # , datetime
 
-from bl.base import Status
+from bl.base import Status, IsotammiException
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
+from bl.comment import Comment
 
 from pe.dataservice import ConcreteService
-from .cypher.cy_batch_audit import CypherBatch, CypherAudit
+from .cypher.cy_batch_audit import CypherRoot #, CypherAudit
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_family import CypherFamily
 from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_gramps import CypherObjectWHandle
+from .cypher.cy_comment import CypherComment
+
+
+
 
 
 class Neo4jUpdateService(ConcreteService):
@@ -95,47 +100,56 @@ class Neo4jUpdateService(ConcreteService):
 
     def ds_aqcuire_lock(self, lock_id):
         """Create a lock"""
-        self.tx.run(CypherBatch.aquire_lock, lock_id=lock_id)
+        self.tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
         return True  # value > 0
 
+    def ds_find_last_used_batch_seq(self):
+        """Find last used Batch id sequence number for today or zero.
+        """
+
+        # 1. Find the latest Batch id from the BatchId singleton node
+        base = str(date.today())
+        print("base="+base)
+        record = self.tx.run(CypherRoot.read_batch_id).single()
+        if record:
+            node = record["n"]
+            print("BatchId node",node)
+            if node.get("prefix") == base:
+                seq = node.get("seq")
+                return seq
+            else:
+                return 0        
+
+        # 2. Find the latest Batch id of today from the db
+        record = self.tx.run(CypherRoot.batch_find_last_id, batch_base=base).single()
+        if record:
+            batch_id = record.get("bid")
+            print(f"# Previous batch_id='{batch_id}'")
+            seq = int(batch_id.split(".")[-1])
+            return seq
+        return 0
+
     def ds_new_batch_id(self):
-        """Find next unused Batch id.
+        """Find next unused Batch id using BatchId node.
 
         Returns {id, status, [statustext]}
         """
-
-        # 1. Find the latest Batch id of today from the db
         base = str(date.today())
-        ext = 0
-        try:
-            record = self.tx.run(CypherBatch.batch_find_id, batch_base=base).single()
-            if record:
-                batch_id = record.get("bid")
-                print(f"# Pervious batch_id={batch_id}")
-                i = batch_id.rfind(".")
-                ext = int(batch_id[i + 1 :])
-        except AttributeError as e:
-            # Normal exception: this is the first batch of day
-            ext = 0
-        except Exception as e:
-            statustext = f"Neo4jUpdateService.ds_new_batch_id: {e.__class__.__name__} {e}"
-            print(statustext)
-            return {"status": Status.ERROR, "statustext": statustext}
-
-        # 2. Form a new batch id
-        batch_id = "{}.{:03d}".format(base, ext + 1)
-
+        seq = self.ds_find_last_used_batch_seq()
+        seq += 1
+        batch_id = "{}.{:03d}".format(base, seq)
+        self.tx.run(CypherRoot.save_batch_id, prefix=base, seq=seq)
         print("# New batch_id='{}'".format(batch_id))
         return {"status": Status.OK, "id": batch_id}
 
     def ds_get_batch(self, user, batch_id):
         """Get Batch node by username and batch id. """
         try:
-            result = self.tx.run(CypherBatch.get_single_batch, batch=batch_id)
+            result = self.tx.run(CypherRoot.get_single_batch, batch=batch_id)
             for record in result:
-                node = record.get("batch")
+                node = record.get("root")
                 if node:
-                    return {"status":Status.OK, "node":record["batch"]}
+                    return {"status":Status.OK, "node":record["root"]}
                 else:
                     return {"status":Status.NOT_FOUND, "node":None,
                             "statustext": "Batch not found"}
@@ -153,32 +167,39 @@ class Neo4jUpdateService(ConcreteService):
 
         Batch.timestamp is created in the Cypher clause.
         """
-        try:
-            result = self.tx.run(CypherBatch.batch_create, b_attr=attr)
-            uniq_id = result.single()[0]
-            return {"status": Status.OK, "identity": uniq_id}
+        result = self.tx.run(CypherRoot.batch_create, b_attr=attr).single()
+        if not result:
+            raise IsotammiException("Unable to save Batch",
+                            cypher=CypherRoot.batch_create,
+                            b_attr=attr,
+                            )
+        uniq_id = result[0]
+        return {"status": Status.OK, "identity": uniq_id}
 
-        except Exception as e:
-            statustext = (
-                f"Neo4jUpdateService.ds_batch_save failed: {e.__class__.__name__} {e}"
-            )
-            return {"status": Status.ERROR, "statustext": statustext}
 
-    def ds_batch_set_status(self, batch_id, user, status):
-        """Updates Batch node selected by Batch id.
-
-        Batch.timestamp is updated in the Cypher clause.
+    def ds_batch_set_state(self, batch_id, user, state):
+        """Updates Batch node selected by Batch id and user.
         """
-        try:
-            result = self.tx.run(
-                CypherBatch.batch_set_status, bid=batch_id, user=user, status=status
-            )
-            uniq_id = result.single()[0]
-            return {"status": Status.OK, "identity": uniq_id}
+        result = self.tx.run(
+            CypherRoot.batch_set_state, bid=batch_id, user=user, state=state
+        )
+        uniq_id = result.single()[0]
+        return {"status": Status.OK, "identity": uniq_id}
 
-        except Exception as e:
-            statustext = f"Neo4jUpdateService.ds_batch_set_status failed: {e.__class__.__name__} {e}"
-            return {"status": Status.ERROR, "statustext": statustext}
+        # except Exception as e:
+        #     statustext = f"Neo4jUpdateService.ds_batch_set_state failed: {e.__class__.__name__} {e}"
+        #     return {"status": Status.ERROR, "statustext": statustext}
+
+
+    def ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
+        """Updates Batch node selected by Batch id and user.
+           We also check that the state is expected.
+        """
+        result = self.tx.run(
+            CypherRoot.batch_set_auditor, bid=batch_id, audi=auditor_user, states=old_states
+        )
+        uniq_id = result.single()[0]
+        return {"status": Status.OK, "identity": uniq_id}
 
     # ----- Common objects -----
 
@@ -196,38 +217,39 @@ class Neo4jUpdateService(ConcreteService):
 
         objs = {}
         try:
-            result = self.tx.run(CypherAudit.merge_check, id_list=[id1, id2])
-            # for root_id, root_str, rel, obj_id, obj_label, obj_str in result:
-            for record in result:
-                ro = RefObj()
-                ro.uniq_id = record["obj_id"]
-                ro.label = record["obj_label"]
-                ro.str = record["obj_str"]
-                ro.root = (
-                    record.get("rel"),
-                    record.get("root_id"),
-                    record.get("root_str"),
-                )
-                # rint(f'#ds_merge_check {root_id}:{root_str} -[{rel}]-> {obj_id}:{obj_label} {obj_str}')
-                print(f"#ds_merge_check {ro.uniq_id}:{ro.label} {ro.str} in {ro.root}")
-                if ro.uniq_id in objs.keys():
-                    # Error if current uniq_id exists twice
-                    msg = f"Object {ro} has two roots {objs[ro.uniq_id].root} and {ro.root}"
-                    return {"status": Status.ERROR, "statustext": msg}
-                for i, obj2 in objs.items():
-                    print(f"#ds_merge_check {obj2} <> {ro}")
-                    if i == ro.uniq_id:
-                        continue
-                    # Error if different labels or has different root node
-                    if obj2.label != ro.label:
-                        msg = f"Objects {obj2} and {ro} are different"
-                        return {"status": Status.ERROR, "statustext": msg}
-                    if obj2.root[1] != ro.root[1]:
-                        msg = (
-                            f"Object {ro} has different roots {obj2.root} and {ro.root}"
-                        )
-                        return {"status": Status.ERROR, "statustext": msg}
-                objs[ro.uniq_id] = ro
+            print("pe.neo4j.updateservice.Neo4jUpdateService.ds_merge_check: TODO fix merge_check")
+            # result = self.tx.run(CypherAudit.merge_check, id_list=[id1, id2])
+            # # for root_id, root_str, rel, obj_id, obj_label, obj_str in result:
+            # for record in result:
+            #     ro = RefObj()
+            #     ro.uniq_id = record["obj_id"]
+            #     ro.label = record["obj_label"]
+            #     ro.str = record["obj_str"]
+            #     ro.root = (
+            #         record.get("rel"),
+            #         record.get("root_id"),
+            #         record.get("root_str"),
+            #     )
+            #     # rint(f'#ds_merge_check {root_id}:{root_str} -[{rel}]-> {obj_id}:{obj_label} {obj_str}')
+            #     print(f"#ds_merge_check {ro.uniq_id}:{ro.label} {ro.str} in {ro.root}")
+            #     if ro.uniq_id in objs.keys():
+            #         # Error if current uniq_id exists twice
+            #         msg = f"Object {ro} has two roots {objs[ro.uniq_id].root} and {ro.root}"
+            #         return {"status": Status.ERROR, "statustext": msg}
+            #     for i, obj2 in objs.items():
+            #         print(f"#ds_merge_check {obj2} <> {ro}")
+            #         if i == ro.uniq_id:
+            #             continue
+            #         # Error if different labels or has different root node
+            #         if obj2.label != ro.label:
+            #             msg = f"Objects {obj2} and {ro} are different"
+            #             return {"status": Status.ERROR, "statustext": msg}
+            #         if obj2.root[1] != ro.root[1]:
+            #             msg = (
+            #                 f"Object {ro} has different roots {obj2.root} and {ro.root}"
+            #             )
+            #             return {"status": Status.ERROR, "statustext": msg}
+            #     objs[ro.uniq_id] = ro
 
             if len(objs) == 2:
                 print(f"ds_merge_check ok {objs}")
@@ -256,14 +278,14 @@ class Neo4jUpdateService(ConcreteService):
         total = 0
         unlinked = 0
         # Remove handles from nodes connected to given Batch
-        result = self.tx.run(CypherBatch.remove_all_handles, batch_id=batch_id)
+        result = self.tx.run(CypherRoot.remove_all_handles, batch_id=batch_id)
         for count, label in result:
             print(f"# - cleaned {count} {label} handles")
             total += count
         # changes = result.summary().counters.properties_set
 
         # Find handles left: missing link (:Batch) --> (x)
-        result = self.tx.run(CypherBatch.find_unlinked_nodes)
+        result = self.tx.run(CypherRoot.find_unlinked_nodes)
         for count, label in result:
             print(
                 f"Neo4jUpdateService.ds_obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch"
@@ -418,13 +440,13 @@ class Neo4jUpdateService(ConcreteService):
 
         return [(record["pid"], record["name"]) for record in result]
 
-    def ds_set_people_lifetime_estimates(self, uids=[]):
+    def ds_set_people_lifetime_estimates(self, uids):
         """Get estimated lifetimes to Person.dates for given person.uniq_ids.
 
         :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
         """
         from models import lifetime
-        from models.lifetime import BIRTH, DEATH, BAPTISM, BURIAL, MARRIAGE
+        from models.lifetime import BIRTH, DEATH, BAPTISM, BURIAL #, MARRIAGE
         from bl.dates import DR
         
         def sortkey(event): # sorts events so that BIRTH, DEATH, BAPTISM, BURIAL come first
@@ -439,111 +461,125 @@ class Neo4jUpdateService(ConcreteService):
         personmap = {}
         res = {"status": Status.OK}
         # print(f"### ds_set_people_lifetime_estimates: self.tx = {self.tx}")
-        try:
-            if uids:
-                result = self.tx.run(
-                    CypherPerson.fetch_selected_for_lifetime_estimates, idlist=uids
-                )
-            else:
-                result = self.tx.run(CypherPerson.fetch_all_for_lifetime_estimates)
-            # RETURN p, id(p) as pid,
-            #     COLLECT(DISTINCT [e,r.role]) AS events,
-            #     COLLECT(DISTINCT [fam_event,r2.role]) AS fam_events,
-            #     COLLECT(DISTINCT [c,id(c)]) as children,
-            #     COLLECT(DISTINCT [parent,id(parent)]) as parents
-            for record in result:
-                # Person
-                p = lifetime.Person()
-                p.pid = record["pid"]
-                p.gramps_id = record["p"]["id"]
 
-                # Person and family event dates
-                events = record["events"]
-                fam_events = record["fam_events"]
-                for e, role in events + fam_events:
-                    if e is None:
-                        continue
-                    # print("e:",e)
-                    eventtype = e["type"]
-                    datetype = e["datetype"]
-                    datetype1 = None
-                    datetype2 = None
-                    if datetype == DR["DATE"]:
-                        datetype1 = "exact"
-                    elif datetype == DR["BEFORE"]:
-                        datetype1 = "before"
-                    elif datetype == DR["AFTER"]:
-                        datetype1 = "after"
-                    elif datetype == DR["BETWEEN"]:
+        if uids:
+            result = self.tx.run(
+                CypherPerson.fetch_selected_for_lifetime_estimates, idlist=uids
+            )
+        else:
+            result = self.tx.run(CypherPerson.fetch_all_for_lifetime_estimates)
+        # RETURN p, id(p) as pid,
+        #     COLLECT(DISTINCT [e,r.role]) AS events,
+        #     COLLECT(DISTINCT [fam_event,r2.role]) AS fam_events,
+        #     COLLECT(DISTINCT [c,id(c)]) as children,
+        #     COLLECT(DISTINCT [parent,id(parent)]) as parents
+        for record in result:
+            # Person
+            p = lifetime.Person()
+            p.pid = record["pid"]
+            p.gramps_id = record["p"]["id"]
+
+            # Person and family event dates
+            events = record["events"]
+            fam_events = record["fam_events"]
+            for e, role in events + fam_events:
+                if e is None:
+                    continue
+                # print("e:",e)
+                eventtype = e["type"]
+                datetype = e["datetype"]
+                datetype1 = None
+                datetype2 = None
+                date1 = e["date1"]
+                date2 = e["date2"]
+                year1 = None
+                year2 = None
+                if date1: year1 = date1 // 1024 
+                if date2: year2 = date1 // 1024 
+                if datetype == DR["DATE"]:
+                    datetype1 = "exact"
+                elif datetype == DR["BEFORE"]:
+                    datetype1 = "before"
+                elif datetype == DR["AFTER"]:
+                    datetype1 = "after"
+                elif datetype == DR["BETWEEN"]:
+                    datetype1 = "after"
+                    datetype2 = "before"
+                elif datetype == DR["PERIOD"]:
+                    if eventtype in (BIRTH, DEATH, BAPTISM, BURIAL):
+                        # cannot be a span, must be between
+                        datetype = DR["BETWEEN"]
                         datetype1 = "after"
                         datetype2 = "before"
-                    elif datetype == DR["PERIOD"]:
-                        if eventtype in (BIRTH, DEATH, BAPTISM, BURIAL):
-                            # cannot be a span, must be between
-                            datetype = DR["BETWEEN"]
-                            datetype1 = "after"
-                            datetype2 = "before"
-                        else:
-                            datetype1 = "exact"
-                            datetype2 = "exact"
-                    date1 = e["date1"]
-                    date2 = e["date2"]
-                    if datetype1 and date1 is not None:
-                        year1 = date1 // 1024
-                        ev = lifetime.Event(eventtype, datetype1, year1, role)
-                        p.events.append(ev)
-                    if datetype2 and date2 is not None:
-                        year2 = date2 // 1024
-                        ev = lifetime.Event(eventtype, datetype2, year2, role)
-                        p.events.append(ev)
-                    p.events.sort(key=sortkey)
-                        
+                    else:
+                        datetype1 = "exact"
+                        datetype2 = "exact"
+                elif datetype == DR["ABOUT"]:
+                    year1 = year1 - 50
+                    year2 = year2 + 50
+                    datetype1 = "after"
+                    datetype2 = "before"
+                if datetype1 and year1 is not None:
+                    #year1 = date1 // 1024
+                    ev = lifetime.Event(eventtype, datetype1, year1, role)
+                    p.events.append(ev)
+                if datetype2 and year2 is not None:
+                    #year2 = date2 // 1024
+                    ev = lifetime.Event(eventtype, datetype2, year2, role)
+                    p.events.append(ev)
+                p.events.sort(key=sortkey)
+                    
 
-                # List Parent and Child identities
-                p.parent_pids = []
-                for _parent, pid in record["parents"]:
-                    if pid:
-                        p.parent_pids.append(pid)
-                p.child_pids = []
-                for _parent, pid in record["children"]:
-                    if pid:
-                        p.child_pids.append(pid)
+            # List Parent, Child and Spouse identities
+            p.parent_pids = []
+            for _parent, pid in record["parents"]:
+                if pid:
+                    p.parent_pids.append(pid)
 
-                # print(f"#> lifetime.Person {p}")
-                personlist.append(p)
-                personmap[p.pid] = p
+            p.child_pids = []
+            for _parent, pid in record["children"]:
+                if pid:
+                    p.child_pids.append(pid)
 
-            # Add parents and children to lifetime.Person objects
-            for p in personlist:
-                for pid in p.parent_pids:
-                    xid = personmap.get(pid)
-                    if xid:
-                        p.parents.append(xid)
-                for pid in p.child_pids:
-                    xid = personmap.get(pid)
-                    if xid:
-                        p.children.append(xid)
-            lifetime.calculate_estimates(personlist)
+            p.spouse_pids = []
+            for _spouse, pid in record["spouses"]:
+                if pid:
+                    p.spouse_pids.append(pid)
 
-            for p in personlist:
-                result = self.tx.run(
-                    CypherPerson.update_lifetime_estimate,
-                    id=p.pid,
-                    birth_low=p.birth_low.getvalue(),
-                    death_low=p.death_low.getvalue(),
-                    birth_high=p.birth_high.getvalue(),
-                    death_high=p.death_high.getvalue(),
-                )
+            # print(f"#> lifetime.Person {p}")
+            personlist.append(p)
+            personmap[p.pid] = p
 
-            res["count"] = len(personlist)
-            # print(f"Estimated lifetime for {res['count']} persons")
-            return res
+        # Add parents and children to lifetime.Person objects
+        for p in personlist:
+            for pid in p.parent_pids:
+                xid = personmap.get(pid)
+                if xid:
+                    p.parents.append(xid)
+            for pid in p.child_pids:
+                xid = personmap.get(pid)
+                if xid:
+                    p.children.append(xid)
+            for pid in p.spouse_pids:
+                xid = personmap.get(pid)
+                if xid:
+                    p.spouses.append(xid)
+        lifetime.calculate_estimates(personlist)
 
-        except Exception as e:
-            msg = f"Neo4jUpdateService.ds_set_people_lifetime_estimates: {e.__class__.__name__} {e}"
-            print(f"Error {msg}")
-            traceback.print_exc()
-            return {"status": Status.ERROR, "statustext": msg}
+        for p in personlist:
+            result = self.tx.run(
+                CypherPerson.update_lifetime_estimate,
+                id=p.pid,
+                birth_low=p.birth_low.getvalue(),
+                death_low=p.death_low.getvalue(),
+                birth_high=p.birth_high.getvalue(),
+                death_high=p.death_high.getvalue(),
+            )
+
+        res["count"] = len(personlist)
+        # print(f"Estimated lifetime for {res['count']} persons")
+        return res
+
 
     def ds_build_refnames(self, person_uid: int, name: Name):
         """Set Refnames to the Person with given uniq_id."""
@@ -558,27 +594,21 @@ class Neo4jUpdateService(ConcreteService):
             return rid
 
         count = 0
-        try:
-            # 1. firstnames
-            if name.firstname and name.firstname != "N":
-                for nm in name.firstname.split(" "):
-                    if link_to_refname(person_uid, nm, "firstname"):
-                        count += 1
-
-            # 2. surname and patronyme
-            if name.surname and name.surname != "N":
-                if link_to_refname(person_uid, name.surname, "surname"):
+        # 1. firstnames
+        if name.firstname and name.firstname != "N":
+            for nm in name.firstname.split(" "):
+                if link_to_refname(person_uid, nm, "firstname"):
                     count += 1
 
-            if name.suffix:
-                if link_to_refname(person_uid, name.suffix, "patronyme"):
-                    count += 1
+        # 2. surname and patronyme
+        if name.surname and name.surname != "N":
+            if link_to_refname(person_uid, name.surname, "surname"):
+                count += 1
 
-        except Exception as e:
-            msg = f"Neo4jUpdateService.ds_build_refnames: {e.__class__.__name__} {e}"
-            print(msg)
-            return {"status": Status.ERROR, "count": count, "statustext": msg}
-
+        if name.suffix:
+            if link_to_refname(person_uid, name.suffix, "patronyme"):
+                count += 1
+        #xxx
         return {"status": Status.OK, "count": count}
 
     def ds_update_person_confidences(self, uniq_id: int):
@@ -587,35 +617,30 @@ class Neo4jUpdateService(ConcreteService):
         Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
         sumc = 0
-        try:
-            result = self.tx.run(CypherPerson.get_confidences, id=uniq_id)
-            for record in result:
-                # Returns person.uniq_id, COLLECT(confidence) AS list
-                orig_conf = record["confidence"]
-                confs = record["list"]
-                for conf in confs:
-                    sumc += int(conf)
+        result = self.tx.run(CypherPerson.get_confidences, id=uniq_id)
+        for record in result:
+            # Returns person.uniq_id, COLLECT(confidence) AS list
+            orig_conf = record["confidence"]
+            confs = record["list"]
+            for conf in confs:
+                sumc += int(conf)
 
-            if confs:
-                conf_float = sumc / len(confs)
-                new_conf = "%0.1f" % conf_float  # string with one decimal
-            else:
-                new_conf = ""
-            if orig_conf != new_conf:
-                # Update confidence needed
-                self.tx.run(
-                    CypherPerson.set_confidence, id=uniq_id, confidence=new_conf
-                )
+        if confs:
+            conf_float = sumc / len(confs)
+            new_conf = "%0.1f" % conf_float  # string with one decimal
+        else:
+            new_conf = ""
+        if orig_conf != new_conf:
+            # Update confidence needed
+            self.tx.run(
+                CypherPerson.set_confidence, id=uniq_id, confidence=new_conf
+            )
 
-                return {"confidence": new_conf, "status": Status.UPDATED}
-            return {"confidence": new_conf, "status": Status.OK}
+            return {"confidence": new_conf, "status": Status.UPDATED}
+        return {"confidence": new_conf, "status": Status.OK}
 
-        except Exception as e:
-            msg = f"Neo4jUpdateService.ds_update_person_confidences: {e.__class__.__name__} {e}"
-            print(msg)
-            return {"confidence": new_conf, "status": Status.ERROR, "statustext": msg}
 
-    def ds_link_person_to_refname(self, pid, name, reftype):
+    def ds_link_person_to_refname(self, pid, name, reftype): # not used?
         """Connects a reference name of type reftype to Person(pid)."""
         from bl.refname import REFTYPES
 
@@ -654,13 +679,8 @@ class Neo4jUpdateService(ConcreteService):
 
     def ds_set_person_sortname(self, uniq_id: int, sortname):
         """ Set sortname property to Person object by uniq_id."""
-        try:
-            self.tx.run(CypherPerson.set_sortname, uid=uniq_id, key=sortname)
-            return {"status": Status.OK}
-        except Exception as e:
-            msg = f"Neo4jUpdateService.ds_set_person_sortname: person={uniq_id}, {e.__class__.__name__}, {e}"
-            print(msg)
-            return {"status": Status.ERROR, "statustext": msg}
+        self.tx.run(CypherPerson.set_sortname, uid=uniq_id, key=sortname)
+        return {"status": Status.OK}
 
     # ----- Family -----
 
@@ -704,66 +724,90 @@ class Neo4jUpdateService(ConcreteService):
         sortname_count = 0
         status = Status.OK
         # print(f"### ds_set_family_calculated_attributes: self.tx = {self.tx}")
-        try:
-            # Process the family
-            #### Todo Move and refactor to bl.FamilyBl
-            # result = Family_combo.get_dates_parents(my_tx, uniq_id)
-            result = self.tx.run(CypherFamily.get_dates_parents, id=uniq_id)
-            for record in result:
-                # RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
-                #        mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
-                #        event.date1 AS marriage_date, divorce_event.date1 AS divorce_date
-                father_death_date = record["father_death_date"]
-                mother_death_date = record["mother_death_date"]
-                marriage_date = record["marriage_date"]
-                divorce_date = record["divorce_date"]
+        # Process the family
+        #### Todo Move and refactor to bl.FamilyBl
+        # result = Family_combo.get_dates_parents(my_tx, uniq_id)
+        result = self.tx.run(CypherFamily.get_dates_parents, id=uniq_id)
+        for record in result:
+            # RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
+            #        mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
+            #        event.date1 AS marriage_date, divorce_event.date1 AS divorce_date
+            father_death_date = record["father_death_date"]
+            mother_death_date = record["mother_death_date"]
+            marriage_date = record["marriage_date"]
+            divorce_date = record["divorce_date"]
 
-                # Dates calculation
-                dates = None
-                end_date = None
-                if divorce_date:
-                    end_date = divorce_date
-                elif father_death_date and mother_death_date:
-                    if father_death_date < mother_death_date:
-                        end_date = father_death_date
-                    else:
-                        end_date = mother_death_date
-                elif father_death_date:
+            # Dates calculation
+            dates = None
+            end_date = None
+            if divorce_date:
+                end_date = divorce_date
+            elif father_death_date and mother_death_date:
+                if father_death_date < mother_death_date:
                     end_date = father_death_date
-                elif mother_death_date:
+                else:
                     end_date = mother_death_date
+            elif father_death_date:
+                end_date = father_death_date
+            elif mother_death_date:
+                end_date = mother_death_date
 
-                if marriage_date:
-                    if end_date:
-                        dates = DateRange(DR["PERIOD"], marriage_date, end_date)
-                    else:
-                        dates = DateRange(DR["DATE"], marriage_date)
-                elif end_date:
-                    dates = DateRange(DR["BEFORE"], end_date)
-                dates_dict = dates.for_db() if dates else None
+            if marriage_date:
+                if end_date:
+                    dates = DateRange(DR["PERIOD"], marriage_date, end_date)
+                else:
+                    dates = DateRange(DR["DATE"], marriage_date)
+            elif end_date:
+                dates = DateRange(DR["BEFORE"], end_date)
+            dates_dict = dates.for_db() if dates else None
 
-                # Save the dates from Event node and sortnames from Person nodes
-                ret = self.ds_set_family_dates_sortnames(
-                    uniq_id,
-                    dates_dict,
-                    record.get("father_sortname"),
-                    record.get("mother_sortname"),
-                )
-                if Status.has_failed(ret):
-                    return ret
-                # print('Neo4jUpdateService.ds_set_family_calculated_attributes: '
-                #      f'id={uniq_id} properties_set={ret.get("count","none")}')
-                dates_count += 1
-                sortname_count += 1
+            # Save the dates from Event node and sortnames from Person nodes
+            ret = self.ds_set_family_dates_sortnames(
+                uniq_id,
+                dates_dict,
+                record.get("father_sortname"),
+                record.get("mother_sortname"),
+            )
+            # print('Neo4jUpdateService.ds_set_family_calculated_attributes: '
+            #      f'id={uniq_id} properties_set={ret.get("count","none")}')
+            dates_count += 1
+            sortname_count += 1
 
-            return {
-                "status": status,
-                "dates": dates_count,
-                "sortnames": sortname_count,
-                "statustext": ret.get("statustext", ""),
-            }
+        return {
+            "status": status,
+            "dates": dates_count,
+            "sortnames": sortname_count,
+            "statustext": ret.get("statustext", ""),
+        }
 
-        except Exception as e:
-            msg = f"Neo4jUpdateService.ds_set_family_calculated_attributes: person={uniq_id}, {e.__class__.__name__}, {e}"
-            print(msg)
-            return {"status": Status.ERROR, "statustext": msg}
+
+    # ----- Discussions -----
+
+    def ds_comment_save(self, attr):
+        """Creates a Comment node linked from commenting object and the commenter.
+
+        attr = {object_id:int, username:str, title:str, text:str, reply:bool}
+
+        Comment.timestamp is created in the Cypher clause.
+        
+        TODO: Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
+        """
+        is_reply = attr.get("reply")
+        if is_reply:
+            cypher = CypherComment.create_comment
+        else: # default
+            cypher = CypherComment.create_topic
+
+        record = self.tx.run(cypher, attr=attr).single()
+        if not record:
+            raise IsotammiException(
+                "Unable to save " + "Comment" if is_reply else "Topic",
+                cypher=cypher, attr=attr)
+
+        node = record.get("comment")
+        if not node:
+            return {"status": Status.ERROR, "statustext": _("Could not save a comment")}
+        comment = Comment.from_node(node)
+        comment.obj_type = record.get("obj_type")
+        comment.user = attr.get("username")
+        return {"status": Status.OK, "comment": comment}

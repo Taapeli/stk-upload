@@ -22,8 +22,8 @@
 </head>
 <body>
 {% if user_context %}
-  {% if user_context.context == 1 %}{% set material_st = "passed" %}
-  {% elif user_context.context == 2 %}{% set material_st = "own" %}
+  {% if user_context.context_code == 1 %}{% set material_st = "passed" %}
+  {% elif user_context.context_code == 2 %}{% set material_st = "own" %}
 {% endif %}{% endif %}
 {% block body %}
     <div id="Header" class={{material_st}}><a href="/"><img id="logo" src="/static/tam.png" 

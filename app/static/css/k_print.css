@@ -125,6 +125,9 @@ h4, h5 {
 p {
     font:normal 11pt/13pt serif;
 }
+.center {
+	text-align: center;
+}
 p#description {
     margin:0 0 14pt 0;
 }

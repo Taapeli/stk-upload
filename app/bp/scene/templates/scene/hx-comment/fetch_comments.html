@@ -1,0 +1,26 @@
+<!-- Isotammi Genealogical Service for combining multiple researchers' results.
+     Copyright (C) 2016-2021  Kari Kujansuu, Juha Mäkeläinen
+     See the LICENSE file.
+ -->
+{% for c in comments %}
+    <div class="comment">
+        <div class="hdr">
+        	<b>{{ c.user }}</b> {{ c.timestamp_str() }}
+            <i>{{c.title}}</i>
+        </div>
+	    <div class="content">
+	    	{{- c.text }}
+		</div>
+	</div>
+{% endfor %}
+
+{% if there_is_more %}
+	<div id="replaceMe">
+	<button class='btn' hx-get="/scene/hx-comment/fetch_comments?start={{ last_timestamp }}" 
+	                    hx-target="#replaceMe" 
+				        hx-include="form" 
+	                    hx-swap="outerHTML">
+	{{ _("Load More Comments") }}
+	</button>
+	</div>
+{% endif %}

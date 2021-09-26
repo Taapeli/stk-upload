@@ -53,16 +53,15 @@ import shareds
 
 from bl.base import NodeObject, Status
 from bl.person_name import Name
+from bl.note import Note
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_person import CypherPerson
-
-from models.gen.note import Note
 
 # Privacy rule: how many years after death
 PRIVACY_LIMIT = 0
 
 # Sex code values
-SEX_UNKOWN = 0
+SEX_UNKNOWN = 0
 SEX_MALE = 1
 SEX_FEMALE = 2
 SEX_NOT_APPLICABLE = 9
@@ -92,7 +91,7 @@ class Person(NodeObject):
         """ Creates a new Person instance. """
         NodeObject.__init__(self)
         self.priv = None
-        self.sex = SEX_UNKOWN
+        self.sex = SEX_UNKNOWN
         self.confidence = ""
         self.sortname = ""
         self.dates = None  # Daterange: Estimated datetype, date1, date2
@@ -113,7 +112,7 @@ class Person(NodeObject):
     def sex_symbol(self):
         " Returns person's sex as string"
         symbols = {
-            SEX_UNKOWN: "",
+            SEX_UNKNOWN: "",
             SEX_MALE: "♂",
             SEX_FEMALE: "♀",
             SEX_NOT_APPLICABLE: "-",
@@ -123,7 +122,7 @@ class Person(NodeObject):
     def child_by_sex(self):
         " Returns person's sex as string"
         ch = {
-            SEX_UNKOWN: _("Child"),
+            SEX_UNKNOWN: _("Child"),
             SEX_MALE: _("Son"),
             SEX_FEMALE: _("Daughter"),
             SEX_NOT_APPLICABLE: _("Child"),
@@ -135,7 +134,7 @@ class Person(NodeObject):
         " Returns sex code as string"
 
         sexstrings = {
-            SEX_UNKOWN: _("sex not known"),
+            SEX_UNKNOWN: _("sex not known"),
             SEX_MALE: _("male"),
             SEX_FEMALE: _("female"),
             SEX_NOT_APPLICABLE: _("sex not applicable"),
@@ -193,60 +192,68 @@ class PersonReader(DataService):
     """
 
     def get_person_list(self):
-        """List person data including all data needed to Person page.
+        """List person data including all data needed to Persons page.
+        
+        NOT USED --> bl.person_reader.PersonReaderTx.get_person_search
 
         Calls Neo4jDriver.dr_get_person_list(user, fw_from, limit)
         """
         context = self.user_context
         res_dict = {}
-        args = {
-            "use_user": self.use_user,
-            "fw": context.first,  # From here forward
-            "limit": context.count,
-        }
-        res = shareds.dservice.dr_get_person_list(args)
-        # {'items': persons, 'status': Status.OK}
-        if Status.has_failed(res):
-            return {
-                "items": None,
-                "status": res["status"],
-                "statustext": _("No persons found"),
-            }
-
-        # Update the page scope according to items really found
-        persons = res["items"]
-        if len(persons) > 0:
-            context.update_session_scope(
-                "person_scope",
-                persons[0].sortname,
-                persons[-1].sortname,
-                context.count,
-                len(persons),
-            )
-
-        if self.use_user is None:
-            persons2 = [p for p in persons if not p.too_new]
-            num_hidden = len(persons) - len(persons2)
-        else:
-            persons2 = persons
-            num_hidden = 0
-        res_dict["status"] = Status.OK
-
-        res_dict["num_hidden"] = num_hidden
-        res_dict["items"] = persons2
+        # args = {
+        #     "use_user": self.use_user,
+        #     "fw": context.first,  # From here forward
+        #     "limit": context.count,
+        # }
+        # res = self.dataservice.dr_get_person_list(args)
+        # # {'items': persons, 'status': Status.OK}
+        # if Status.has_failed(res):
+        #     return {
+        #         "items": None,
+        #         "status": res["status"],
+        #         "statustext": _("No persons found"),
+        #     }
+        #
+        # # Update the page scope according to items really found
+        # persons = res["items"]
+        # if len(persons) > 0:
+        #     context.update_session_scope(
+        #         "person_scope",
+        #         persons[0].sortname,
+        #         persons[-1].sortname,
+        #         context.count,
+        #         len(persons),
+        #     )
+        #
+        # if self.use_user is None:
+        #     persons2 = [p for p in persons if not p.too_new]
+        #     num_hidden = len(persons) - len(persons2)
+        # else:
+        #     persons2 = persons
+        #     num_hidden = 0
+        # res_dict["status"] = Status.OK
+        #
+        # res_dict["num_hidden"] = num_hidden
+        # res_dict["items"] = persons2
         return res_dict
 
     def get_surname_list(self, count=40):
         """
         List all surnames so that they can be displayed in a name cloud.
+        
+        If self.use_user is defined, filter by user.
         """
-        if self.use_user:
-            surnames = shareds.dservice.dr_get_surname_list_by_user(
-                self.use_user, count=count
-            )
-        else:
-            surnames = shareds.dservice.dr_get_surname_list_common(count=count)
-        # [{'surname': surname, 'count': count},...]
+        surnames = self.dataservice.dr_get_surname_list(self.use_user,
+                                                        self.user_context.batch_id,
+                                                        count)
+        # Returns [{'surname': surname, 'count': count},...]
+
+        # if self.use_user:
+        #     surnames = self.dataservice.dr_get_surname_list_by_user(
+        #         self.use_user, count=count
+        #     )
+        # else:
+        #     surnames = self.dataservice.dr_get_surname_list_common(count=count)
         return surnames
 
     def get_person_minimal(self, uuid, privacy):
@@ -299,16 +306,16 @@ class PersonWriter(DataService):
 
     def __init__(self, service_name: str, u_context=None, tx=None):
         super().__init__(service_name, u_context, tx=tx)
-        shareds.dservice.tx = None
+        self.dataservice.tx = None
 
     def set_primary_name(self, uuid, old_order):
-        shareds.dservice.dr_set_primary_name(uuid, old_order)
+        self.dataservice.dr_set_primary_name(uuid, old_order)
 
     def set_name_orders(self, uid_list):
-        shareds.dservice.dr_set_name_orders(uid_list)
+        self.dataservice.dr_set_name_orders(uid_list)
 
     def set_name_type(self, uniq_id, nametype):
-        shareds.dservice.dr_set_name_type(uniq_id, nametype)
+        self.dataservice.dr_set_name_type(uniq_id, nametype)
 
     def set_person_name_properties(self, uniq_id=None, ops=["refname", "sortname"]):
         """Set Refnames to all Persons or one Person with given uniq_id;
@@ -324,7 +331,7 @@ class PersonWriter(DataService):
         names = []
 
         # Get each Name object (with person_uid)
-        for pid, name_node in shareds.dservice.ds_get_personnames(uniq_id):
+        for pid, name_node in self.dataservice.ds_get_personnames(uniq_id):
             name = Name.from_node(name_node)
             name.person_uid = pid
             names.append(name)
@@ -332,20 +339,16 @@ class PersonWriter(DataService):
         if do_refnames:
             for name in names:
                 # Create links and nodes from given person: (:Person) --> (r:Refname)
-                res = shareds.dservice.ds_build_refnames(name.person_uid, name)
-                if Status.has_failed(res):
-                    return res
+                res = self.dataservice.ds_build_refnames(name.person_uid, name)
                 refname_count += res.get("count", 0)
         if do_sortname:
             for name in names:
                 if name.order == 0:
                     # If default name, store sortname key to Person node
                     sortname = name.key_surname()
-                    res = shareds.dservice.ds_set_person_sortname(
+                    res = self.dataservice.ds_set_person_sortname(
                         name.person_uid, sortname
                     )
-                    if Status.has_failed(res):
-                        return res
                     sortname_count += 1
                     break
 
@@ -365,7 +368,7 @@ class PersonWriter(DataService):
         Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
         and models.dataupdater.set_estimated_dates
         """
-        res = shareds.dservice.ds_set_people_lifetime_estimates(uids)
+        res = self.dataservice.ds_set_people_lifetime_estimates(uids)
 
         print(f"Estimated lifetime for {res['count']} persons")
         return res
@@ -383,7 +386,7 @@ class PersonBl(Person):
         self.events = []  # bl.event.EventBl
         self.notes = []  #
 
-    def save(self, tx, **kwargs):  # batch_id):
+    def save(self, dataservice, tx, **kwargs):  # batch_id):
         """Saves the Person object and possibly the Names, Events ja Citations.
 
         On return, the self.uniq_id is set
@@ -392,9 +395,8 @@ class PersonBl(Person):
                new names (:Person) --> (:Name)
         """
 
-        if "batch_id" in kwargs:
-            batch_id = kwargs["batch_id"]
-        else:
+        batch_id = kwargs.get('batch_id', None)
+        if not 'batch_id':
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
         self.uuid = self.newUuid()
         # Save the Person node under UserProfile; all attributes are replaced
@@ -441,7 +443,7 @@ class PersonBl(Person):
 
         # Save web urls as Note nodes connected under the Person
         if self.notes:
-            Note.save_note_list(tx, self)
+            Note.save_note_list(dataservice, parent=self, batch_id=batch_id)
 
         """ Connect to each Event loaded from Gramps """
         try:
@@ -461,7 +463,7 @@ class PersonBl(Person):
 
         # Make relations to the Media nodes and it's Note and Citation references
         if self.media_refs:
-            shareds.dservice.ds_create_link_medias_w_handles(
+            dataservice.ds_create_link_medias_w_handles(
                 self.uniq_id, self.media_refs
             )
 
@@ -490,15 +492,15 @@ class PersonBl(Person):
         return
 
     @staticmethod
-    def update_person_confidences(person_ids: list):
-        """Sets a quality rate for given list of Person.uniq_ids.
+    def update_person_confidences(dataservice, person_ids: list):
+        """Sets a quality rating for given list of Person.uniq_ids.
 
         Person.confidence is calculated as a mean of confidences in
         all Citations used for Person's Events.
         """
         counter = 0
         for uniq_id in person_ids:
-            res = shareds.dservice.ds_update_person_confidences(uniq_id)
+            res = dataservice.ds_update_person_confidences(uniq_id)
             # returns {confidence, status, statustext}
             stat = res.get("status")
             if stat == Status.UPDATED:

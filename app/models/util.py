@@ -45,10 +45,29 @@ def generate_name(name):
     return os.path.join(dirname,newname)
 
 def format_timestamp(ts=None):
+    """Converts timestamp (seconds since the Epoch) to string like '23.05.2021 15:10'.
+       Returns current time, is no ts is given.
+    """
     if ts is None: ts = time.time()
     return time.strftime("%d.%m.%Y %H:%M", time.localtime(ts))
 
+def format_ms_timestamp(ts_ms=None, opt="m"):
+    """Converts timestamp (ms since the Epoch) to string (by 'm' minute or 'd' day)
+       Returns "", is no ts is given.
+
+        Example '23.5.2021 15:10' or '23.5.2021'.
+    """
+    if ts_ms:
+        ts = float(ts_ms) / 1000.
+        if opt == "d":
+            return time.strftime("%-d.%-m.%Y", time.localtime(ts))
+        else:
+            return time.strftime("%-d.%-m.%Y %H:%M", time.localtime(ts))
+    return ""
+
 def format_date(ts=None):
+    """Converts the ts (seconds since the Epoch) to ISO date string like '2021-05-23'.
+    """
     if ts is None: ts = time.time()
     return time.strftime("%Y-%m-%d", time.localtime(ts))
 
@@ -101,16 +120,18 @@ def scan_endpoints_for_file(fname):
                         decorator_name = call.func.attr
                     if isinstance(call.func,_ast.Name):
                         decorator_name = call.func.id
-                    arglist = [arg.s for arg in call.args]
-                    #args = ",".join(arglist)
                     if decorator_name == 'route':
+                        arglist = [arg.s for arg in call.args]
+                        #args = ",".join(arglist)
                         if len(arglist) != 1:
                             raise RuntimeError("Invalid route "+ arglist[0])
                         if info.urls is None: info.urls = []
                         info.urls.append(arglist[0])
                     if decorator_name == 'roles_accepted':
+                        arglist = [arg.s for arg in call.args]
                         info.roles_accepted = arglist
                     if decorator_name == 'roles_required':
+                        arglist = [arg.s for arg in call.args]
                         info.roles_required = arglist
             if info.urls is not None:
                 for url in info.urls:
