@@ -457,6 +457,7 @@ div#nav ul li.CurrentSection a {
     position: relative;
     top: 1px;
     border: solid 1px #999;
+    border-radius: 9px 9px 0 0;
     border-bottom-style: none;
     background-color: white;
 }

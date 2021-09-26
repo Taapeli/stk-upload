@@ -2370,8 +2370,8 @@ msgstr "Inga kommentarer"
 
 #: bp/scene/templates/scene/comments.html:3
 #: bp/scene/templates/scene/comments.html:12
-msgid "List of Topics"
-msgstr "Lista av ämnen"
+msgid "List of Discussion Topics"
+msgstr "Lista av diskussion ämnen"
 
 #: bp/scene/templates/scene/comments.html:21
 #, python-format

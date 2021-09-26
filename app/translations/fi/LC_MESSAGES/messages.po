@@ -2325,8 +2325,8 @@ msgstr "Ei aiempia kommentteja"
 
 #: bp/scene/templates/scene/comments.html:3
 #: bp/scene/templates/scene/comments.html:12
-msgid "List of Topics"
-msgstr "Keskustelut"
+msgid "List of Discussion Topics"
+msgstr "Keskusteluaiheet"
 
 #: bp/scene/templates/scene/comments.html:21
 #, python-format
@@ -2335,7 +2335,7 @@ msgstr "Näytetään %(num)s aihetta"
 
 #: bp/scene/templates/scene/comments.html:30 bp/scene/templates/scene/macros.html:75
 msgid "Discussions"
-msgstr "Keskustelu"
+msgstr "Keskustelut"
 
 #: bp/scene/templates/scene/comments.html:34
 #: bp/scene/templates/scene/source_events.html:50

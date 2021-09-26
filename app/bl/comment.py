@@ -23,7 +23,7 @@ Created on 19.5.2021
 @author: jormah
 """
 # blacked 2021-05-01 JMä
-import shareds
+#import shareds
 from bl.base import NodeObject, Status
 from bl.root import Root
 from bl.person import PersonBl
@@ -31,6 +31,7 @@ from bl.family import FamilyBl
 from bl.place import PlaceBl
 #from bl.event import EventBl
 from bl.source import SourceBl
+from bl.media import MediaBl
 
 from pe.dataservice import DataService
 #from pe.neo4j.cypher.cy_comment import CypherComment
@@ -167,6 +168,8 @@ class CommentReader(DataService):
                 c.object = PlaceBl.from_node(node)
             elif c.obj_label == "Source":
                 c.object = SourceBl.from_node(node)
+            elif c.obj_label == "Media":
+                c.object = MediaBl.from_node(node)
             else:
                 print(f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'")
                 next

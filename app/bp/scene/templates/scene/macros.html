@@ -61,18 +61,25 @@
                 <li{% if value == 3 %} class="CurrentSection"
                   {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %} href="/scene/families?o=father&f=%20"{% endif %}
                    title="{{ _('Families') }}">{{ _('Families') }}</a></li>
+
                 <li{% if value == 4 %} class="CurrentSection"
                   {% endif %}><a href="/scene/locations"
                    title="{{ _('Places') }}">{{ _('Places') }}</a></li>
+
                 <li{% if value == 5 %} class="CurrentSection"
                   {% endif %}><a href="/scene/sources"
                    title="{{ _('Sources') }}">{{ _('Sources') }}</a></li>
+
                 <li{% if value == 6 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/medias" class="CurrentSection"
+                  {% endif %}><a href="/scene/medias"
                    title="{{ _('Thumbnails') }}">{{ _('Pictures') }}</a></li>
+
+        {% if user_context.is_auditor %}
                 <li{% if value == 7 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/topics" class="CurrentSection"
+                  {% endif %}><a href="/scene/topics" class="Auditor"
                    title="{{ _('Discussions') }}">{{ _('Discussions') }}</a></li>
+        {% endif %}
+
         {% if not current_user or not current_user.is_authenticated %}
                 <li id="loginpage"><a href="/login"
                      title="{{ _('Get more info') }}">{{ _('Log in to Isotammi') }}!</a></li>

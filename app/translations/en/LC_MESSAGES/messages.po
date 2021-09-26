@@ -2354,7 +2354,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/comments.html:3
 #: bp/scene/templates/scene/comments.html:12
-msgid "List of Topics"
+msgid "List of Discussion Topics"
 msgstr ""
 
 #: bp/scene/templates/scene/comments.html:21
