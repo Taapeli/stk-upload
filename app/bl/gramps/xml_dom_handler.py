@@ -33,7 +33,7 @@ from collections import defaultdict
 import re
 import time
 import os
-import uuid
+#import uuid
 import xml.dom.minidom
 
 # from flask_babelex import _
@@ -47,15 +47,16 @@ from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaBl, MediaReferenceByHandles
 from bl.event import EventBl
+from bl.note import Note
 from bl.dates import Gramps_DateRange
+from bl.citation import Citation
+from bl.repository import Repository
+from bl.source import SourceBl
 
-from .models.source_gramps import Source_gramps
+from pe.neo4j.cypher.cy_batch_audit import CypherRoot
+#from models.cypher_gramps import Cypher_mixed
 from .batchlogger import LogItem
 
-from models.cypher_gramps import Cypher_mixed
-from models.gen.note import Note
-from models.gen.citation import Citation
-from models.gen.repository import Repository
 
 import threading
 
@@ -107,12 +108,13 @@ class DOM_handler:
     - collects status log
     """
 
-    def __init__(self, infile, current_user, pathname=""):
+    def __init__(self, infile, current_user, pathname, dataservice):
         """ Set DOM xml_tree and username """
         DOMTree = xml.dom.minidom.parse(open(infile, encoding="utf-8"))
         self.xml_tree = DOMTree.documentElement  # XML documentElement
         self.username = current_user  # current username
-
+        self.dataservice = dataservice
+        
         self.handle_to_node = {}  # {handle:(uuid, uniq_id)}
         self.person_ids = []  # List of processed Person node unique id's
         self.family_ids = []  # List of processed Family node unique id's
@@ -122,21 +124,17 @@ class DOM_handler:
         self.progress = defaultdict(
             int
         )  # key=object type, value=count of objects processed
-        # self.datastore = None               # neo4j.DirectDriver object
         self.obj_counter = 0
-        #self.handle_suffix = "_" + uuid.uuid4().hex
 
     def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
-        res = shareds.dservice.ds_obj_remove_gramps_handles(self.batch.id)
-        if Status.has_failed(res):
-            return res
+        res = self.dataservice.ds_obj_remove_gramps_handles(self.batch.id)
         print(f'# --- removed handles from {res.get("count")} nodes')
         return res
 
     def add_missing_links(self):
         """Link the Nodes without OWNS link to Batch"""
-        result = self.tx.run(Cypher_mixed.add_links, batch_id=self.batch_id)
+        result = self.tx.run(CypherRoot.add_missing_links, batch_id=self.batch_id)
         counters = shareds.db.consume_counters(result)
         if counters.relationships_created:
             print(f"Created {counters.relationships_created} relations")
@@ -152,13 +150,13 @@ class DOM_handler:
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
-        #shareds.dservice.ds_obj_save_and_link(obj, **kwargs)
-        obj.save(shareds.dservice.tx, **kwargs)
+        #print(f"DOM_handler.save_and_link_handle: {obj} {kwargs}")
+        obj.save(self.dataservice, self.dataservice.tx, **kwargs)
         self.obj_counter += 1 
         if self.obj_counter % 1000 == 0:
-            print(self.obj_counter, "Transaction restart")
-            shareds.dservice.tx.commit()
-            shareds.dservice.tx = shareds.driver.session().begin_transaction()
+            #print(self.obj_counter, "Transaction restart")
+            self.dataservice.tx.commit()
+            self.dataservice.tx = shareds.driver.session().begin_transaction()
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
@@ -166,13 +164,40 @@ class DOM_handler:
     # ---------------------   XML subtree handlers   --------------------------
 
     def get_mediapath_from_header(self):
-        """Pick eventuel media path from XML header to Batch node."""
+        """Pick eventual media path from XML header to Batch node."""
         for header in self.xml_tree.getElementsByTagName("header"):
             for mediapath in header.getElementsByTagName("mediapath"):
                 if len(mediapath.childNodes) > 0:
                     return mediapath.childNodes[0].data
         return None
 
+    def get_metadata_from_header(self):
+        """Extract Isotammi metadata from XML header"""
+        for header in self.xml_tree.getElementsByTagName("header"):
+            for node in header.childNodes:
+                #print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
+                if node.nodeName == "isotammi":
+                    return self.get_isotammi_metadata(node)
+        return None
+
+    def get_isotammi_metadata(self, isotammi_node):
+        material_type = None
+        description = None
+        for node in isotammi_node.childNodes:
+            print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
+            if node.nodeName == "#text": print("- data:",node.data)
+            if node.nodeName == "#text":
+                pass
+            elif node.nodeName == "researcher-info":
+                pass
+            elif node.nodeName == "material_type":
+                material_type = node.childNodes[0].data
+            elif node.nodeName == "user_description":
+                description = node.childNodes[0].data.strip()
+            else:
+                print("Unsupported element in <isotammi>: {node.nodeName}")
+        return (material_type, description)
+        
     def handle_citations(self):
         # Get all the citations in the xml_tree
         citations = self.xml_tree.getElementsByTagName("citation")
@@ -563,7 +588,7 @@ class DOM_handler:
                 if p.sex:
                     self.blog.log_event(
                         {
-                            "title": "More than one sexes in a person",
+                            "title": "A person has more than one gender",
                             "level": "WARNING",
                             "count": p.id,
                         }
@@ -919,7 +944,11 @@ class DOM_handler:
         # Print detail of each source
         for source in sources:
 
-            s = Source_gramps()
+            s = SourceBl()
+            s.note_handles = []  # allow multiple; prev. noteref_hlink = ''
+            s.repositories = []  # list of Repository objects, containing 
+                                # prev. repository_id, reporef_hlink and reporef_medium
+
             # Extract handle, change and id
             self._extract_base(source, s)
 
@@ -1024,14 +1053,13 @@ class DOM_handler:
                 "sortnames": sortname_count,
             }
 
-        with FamilyWriter('update', tx=shareds.dservice.tx) as service:
+        res = {}
+        with FamilyWriter('update', tx=self.dataservice.tx) as service:
             for uniq_id in self.family_ids:
                 if uniq_id is not None:
                     ds = service.dataservice    # <Neo4jUpdateService>
                     res = ds.ds_set_family_calculated_attributes(uniq_id)
                     # returns {refnames, sortnames, status}
-                    if Status.has_failed(res):
-                        return res
                     dates_count += res.get("dates")
                     sortname_count += res.get("sortnames")
 
@@ -1057,15 +1085,12 @@ class DOM_handler:
                 "status": Status.NOT_FOUND,
             }
 
-        with PersonWriter('update', tx=shareds.dservice.tx) as service:
-            #print(f"### set_person_calculated_attributes: shareds.dservice.tx = {shareds.dservice.tx}")
+        with PersonWriter('update', tx=self.dataservice.tx) as service:
             for p_id in self.person_ids:
                 self.update_progress("refnames")
                 if p_id is not None:
                     res = service.set_person_name_properties(uniq_id=p_id)
                     # returns {refnames, sortnames, status}
-                    if Status.has_failed(res):
-                        return res
                     refname_count += res.get("refnames")
                     sortname_count += res.get("sortnames")
 
@@ -1089,15 +1114,7 @@ class DOM_handler:
         message = f"{len(self.person_ids)} Estimated lifetimes"
         print(f"***** {message} *****")
         t0 = time.time()
-        #print(f"### set_person_estimated_dates: shareds.dservice.tx = {shareds.dservice.tx}")
-
-        #res = PersonBl.estimate_lifetimes(self.person_ids)
-        res = shareds.dservice.ds_set_people_lifetime_estimates(self.person_ids)
-
-        if Status.has_failed(res):
-            msg = res.get("statustext")
-            logger.error(f"DOM_handler.set_person_estimated_dates {msg}")
-            #flash(ret.get("statustext"), "error")
+        res = self.dataservice.ds_set_people_lifetime_estimates(self.person_ids)
 
         count = res.get("count")
         message = "Estimated person lifetimes"
@@ -1107,9 +1124,9 @@ class DOM_handler:
         return {"status": status, "message": f"{message}, {count} changed"}
 
     def set_all_person_confidence_values(self):
-        """Sets a quality rate for collected list of Persons.
+        """Sets a quality ratings for collected list of Persons.
 
-        Asettaa henkilölle laatuarvion.
+        Asettaa henkilöille laatuarvion.
 
         Person.confidence is mean of all Citations used for Person's Events
         """
@@ -1118,7 +1135,7 @@ class DOM_handler:
 
         t0 = time.time()
 
-        res = PersonBl.update_person_confidences(self.person_ids)
+        res = PersonBl.update_person_confidences(self.dataservice, self.person_ids)
         # returns {status, count, statustext}
         status = res.get("status")
         count = res.get("count", 0)

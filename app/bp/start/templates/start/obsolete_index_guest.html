@@ -1,0 +1,79 @@
+{# _scene/index_guest.html_ #}
+{% extends "start/s_layout.html" %}
+{% block title %}{{ _('Anonymous user') }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu((
+   ) ) }}
+
+
+<div id="startdiv">
+  <div>
+    <h1>{{ _('Exploring Isotammi demo environment') }}</h1>
+
+{% include "flash_messages.html" %}
+
+{#  {% if current_user.name %}
+    <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
+       {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+    </p>
+    {% endif %}
+#}
+{# <p><small>{{session}}</small></p> #}
+
+        <div class="row">
+           <div class="startbox">
+             <div style="display: inline-block;">
+               <form method="get" action="/scene/persons/search">
+
+     {% if current_user.is_authenticated and 
+        ( current_user.has_role('member') or current_user.has_role('admin') ) %}
+                <h2>{{ _('Select Material for Browsing') }}</h2>
+                <p>{% set ctxt = session['user_context'] %}
+	                <input type="checkbox" name="div" value="1"
+	                    {% if ctxt == 1 or ctxt == 3 %}checked{% endif %}
+	                    >{{ _('Demo database') }}<br>
+	                <input type="checkbox" name="div2" value="2"
+	                    {% if ctxt == 2 or ctxt == 3 %}checked{% endif %}
+	                    >{{ _('My candidate material') }}<br>
+                 </p>
+{#              <p>{% set ctxt = session['user_context'] %}<br>
+                  <input type="radio" name="div" value="1" 
+                    {% if ctxt == 1 %}checked{% endif %}>{{ _('Demo database') }}<br>
+                  <input type="radio" name="div" value="2" 
+                    {% if ctxt == 2 or ctxt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
+                <input type="radio" name="div" value="4" style="cursor:not-allowed" 
+                    {% if ctxt == 4 or ctxt == 5 %}checked{% endif %}>{{ _('Selected set of material') }}<br>
+                 &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1"  
+                    {% if ctxt == 3 or ctxt == 5 %}checked{% endif %}>
+                        {{ _('Compare to Demo Database') }} 
+                </p>
+#}
+     {% else %}
+                <h2>{{ _('The Demo Material') }}</h2>
+                <p>{{ _('You are on the home page of Isotammi demo. You have log in as a guest user.') }}</p>
+                <input name="div" type="hidden" value="1">
+     {% endif %}
+                <div class="submit"> 
+                    <button type="submit">{{ _('Continue') }}</button>
+                 </div>
+               </form>
+             </div>
+     {% if not is_demo %}
+            <h2>{{ _('Log in') }}</h2>
+            <p>{{ _('If you have already registered, you can log in and refine the structure of your own data.') }}
+                   {{ _('As a member of <i>Genealogical Society of Finland</i> you will get more services.') }}.
+            </p>
+            <form method="get">
+				<div class="submit">
+					<button type="submit" formaction="/logout">{{ _('Log in') }}</button>
+				</div>
+			</form>
+     {% endif %}
+           </div>
+		</div>
+  </div>
+</div>
+{% endblock %}

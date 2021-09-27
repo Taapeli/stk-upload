@@ -102,7 +102,7 @@ class MediaBl(Media):
         self.mime = None
         self.name = ""
 
-    def save(self, tx, **kwargs):  # batch_id=None):
+    def save(self, dataservice, tx, **kwargs):  # batch_id=None):
         """Saves this new Media object to db.
 
         #TODO: Process also Notes for media?
@@ -155,7 +155,7 @@ class MediaReader(DataService):
             f"MediaReader.read_my_media_list: Get max {limit} medias {ustr}starting {fw!r}"
         )
 
-        res = shareds.dservice.dr_get_media_list(self.use_user, fw, limit)
+        res = self.dataservice.dr_get_media_list(self.use_user, self.user_context.batch_id, fw, limit)
         if Status.has_failed(res):
             return res
         for record in res.get("recs", None):
@@ -217,7 +217,7 @@ class MediaReader(DataService):
         # (media) <-[crop()]-   (Event  'E9999' id=99999) <-- (Person 'I9999' id=999)
 
         user = self.user_context.batch_user()
-        res = shareds.dservice.dr_get_media_single(user, oid)
+        res = self.dataservice.dr_get_media_single(user, self.user_context.batch_id, oid)
         # returns {status, items}
         if Status.has_failed(res):
             return res

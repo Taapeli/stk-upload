@@ -26,16 +26,19 @@
 """
 
 # Blacked 2021-05-18 / JMä
-import urllib
-
 import logging
+import urllib
+from operator import itemgetter
+
+logger = logging.getLogger("stkserver")
 
 logger = logging.getLogger("stkserver")
 
 from flask import render_template, request, redirect, url_for, session
 from flask_security import login_required, logout_user, current_user
 from flask_babelex import get_locale
-from operator import itemgetter
+
+from werkzeug.exceptions import HTTPException
 
 import shareds
 
@@ -57,6 +60,12 @@ def before_request():
             filt.user = "<anon>"
         # print (f'routes.before_request current_user for {logger.name}: {filt.user}')
 
+@app.errorhandler(HTTPException)
+def handle_bad_request(e):
+    return render_template(
+        "unexpected_error.html",
+        text=e.get_description(),
+    ), e.code
 
 @app.route("/")
 def entry():

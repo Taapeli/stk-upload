@@ -22,6 +22,7 @@ Created on 12.8.2018
 
 @author: jm
 """
+# blacked 25.5.2021/JMä
 import io
 import os
 import traceback
@@ -33,7 +34,7 @@ logger = logging.getLogger("stkserver")
 from operator import itemgetter
 import time
 from datetime import datetime
-from types import SimpleNamespace
+#from types import SimpleNamespace
 
 
 from flask import send_file, Response, jsonify
@@ -49,7 +50,7 @@ from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
 
 import shareds
-from models import util
+#from models import util
 
 from . import bp
 from bl.base import Status, StkEncoder
@@ -60,40 +61,35 @@ from bl.event import EventReader, EventWriter
 from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
+from bl.comment import Comment, CommentReader, CommentsUpdater
+
+from models import mediafile
+from bp.graph.models.fanchart import FanChart
 
 from ui.user_context import UserContext
 from ui import jinja_filters
-
-from bp.scene.models import media
-from models.obsolete_datareader import obsolete_read_persons_with_events
+from ui.util import error_print, stk_logger
 
 # Select the read driver for current database
 # from database.accessDB import get_dataservice
 # opt = "read_tx" --> Neo4jReadServiceTx # initiate when used
 # opt = "read" --> Neo4jReadService
 
-# from pe.neo4j.writeservice import Neo4jWriteService
-# writeservice = Neo4jWriteService(shareds.driver)
 
-from bp.graph.models.fanchart import FanChart
-
-calendars = [  # just for translations
-    _("Julian"),
-    _("Hebrew"),
-]
+calendars = [_("Julian"), _("Hebrew")]  # just for translations
 
 
-def stk_logger(context, msg: str):
-    """Emit logger info message with Use Case mark uc=<code> ."""
-    if not context:
-        logger.info(msg)
-        return
-    uc = context.use_case()
-    if (msg[:2] != "->") or (uc == ""):
-        logger.info(msg)
-        return
-    logger.info(f"-> {msg[2:]} uc={uc}")
-    return
+# def stk_logger(context, msg: str): # --> ui.util.stk_logger
+#     """Emit logger info message with Use Case mark uc=<code> ."""
+#     if not context:
+#         logger.info(msg)
+#         return
+#     uc = context.use_case()
+#     if (msg[:2] != "->") or (uc == ""):
+#         logger.info(msg)
+#         return
+#     logger.info(f"-> {msg[2:]} uc={uc}")
+#     return
 
 
 # ------------------------- Menu 1: Person search ------------------------------
@@ -137,6 +133,8 @@ def _do_get_persons(args):
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
 
+    # for i in res.get("items"):
+    #     print(f"_do_get_persons: @{i.user} {i.sortname}")
     return res, u_context
 
 
@@ -185,63 +183,75 @@ def show_persons():
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_person_search():
+def show_person_search(set_scope=None, batch_id=None):
     """Persons search page."""
-    t0 = time.time()
-    args = {"pg": "search"}
-    rq = request.args if request.method == "GET" else request.form
-    rule = rq.get("rule")
-    if rule:
-        args["rule"] = rule
-    key = rq.get("key")
-    if key:
-        args["key"] = key
-    print(f"{request.method} Persons {args}")
+    try:
+        t0 = time.time()
+        args = {"pg": "search"}
+        rq = request.args if request.method == "GET" else request.form
+        rule = rq.get("rule")
+        if rule:
+            args["rule"] = rule
+        key = rq.get("key")
+        if key:
+            args["key"] = key
+        batch_id = rq.get("batch_id")
+        set_scope = rq.get("set_scope")
+        if not (set_scope is None or batch_id is None): 
+            args["batch_id"] = batch_id
+            args["set_scope"] = set_scope
 
-    res, u_context = _do_get_persons(args)
-    if Status.has_failed(res, strict=False):
-        flash(f'{res.get("statustext","error")}', "error")
+        res, u_context = _do_get_persons(args)
 
-    found = res.get("items", [])
-    num_hidden = res.get("num_hidden", 0)
-    hidden = f" hide={num_hidden}" if num_hidden > 0 else ""
-    status = res["status"]
-    elapsed = time.time() - t0
-    stk_logger(
-        u_context,
-        f"-> bp.scene.routes.show_person_search/{rule}"
-        f" n={len(found)}{hidden} e={elapsed:.3f}",
-    )
-    print(
-        f"Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
-    )
+        print(f"#show_person_search: {request.method} "
+              f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
+        if Status.has_failed(res, strict=False):
+            flash(f'{res.get("statustext","error")}', "error")
 
-    surnamestats = []
-    placenamestats = []
-    if args.get("rule") is None:
-        # Start search page: show name clouds
-        minfont = 6
-        maxfont = 20
+        found = res.get("items", [])
+        num_hidden = res.get("num_hidden", 0)
+        hidden = f" hide={num_hidden}" if num_hidden > 0 else ""
+        status = res["status"]
+        elapsed = time.time() - t0
+        stk_logger(
+            u_context,
+            f"-> bp.scene.routes.show_person_search/{rule}"
+            f" n={len(found)}{hidden} e={elapsed:.3f}",
+        )
+        print(
+            f"Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
+        )
 
-        # Most common surnames cloud
-        with PersonReader("read", u_context) as service:
-            surnamestats = service.get_surname_list(47)
-            # {name, count, uuid}
-            for i, stat in enumerate(surnamestats):
-                stat["order"] = i
-                stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
-            surnamestats.sort(key=itemgetter("surname"))
+        surnamestats = []
+        placenamestats = []
+        if args.get("rule") is None:
+            # Start search page: show name clouds
+            minfont = 6
+            maxfont = 20
 
-        # Most common place names cloud
-        with PlaceReader("read", u_context) as service:
-            placenamestats = service.get_placename_stats(40)
-            # {name, count, uuid}
-            for i, stat in enumerate(placenamestats):
-                stat["order"] = i
-                stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(
-                    placenamestats
-                )
-            placenamestats.sort(key=itemgetter("placename"))
+            # Most common surnames cloud
+            with PersonReader("read", u_context) as service:
+                surnamestats = service.get_surname_list(47)
+                # {name, count, uuid}
+                for i, stat in enumerate(surnamestats):
+                    stat["order"] = i
+                    stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
+                surnamestats.sort(key=itemgetter("surname"))
+
+            # Most common place names cloud
+            with PlaceReader("read", u_context) as service:
+                placenamestats = service.get_placename_list(40)
+                # {name, count, uuid}
+                for i, stat in enumerate(placenamestats):
+                    stat["order"] = i
+                    stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(
+                        placenamestats
+                    )
+                placenamestats.sort(key=itemgetter("placename"))
+
+    except Exception as e:
+        error_print("show_person_search", e)
+        return redirect(url_for("entry"))
 
     return render_template(
         "/scene/persons_search.html",
@@ -256,67 +266,6 @@ def show_person_search():
         placenamestats=placenamestats,
         elapsed=time.time() - t0,
     )
-
-
-# @bp.route('/obsolete/search', methods=['POST'])
-# @bp.route('/obsolete/ref=<key>', methods=['GET'])
-# @login_required
-# @roles_accepted('guest', 'research', 'audit', 'admin')
-# def obsolete_show_person_search(selection=None):
-#     """ Show list of selected Persons for menu(1) or menu(12).
-#         GET persons [?years]
-#         GET persons/?haku [&years]
-#         POST persons form: rule, name [,years]
-
-# @bp.route('/obsolete/persons/v1', methods=['POST', 'GET'])
-# @login_required
-# @roles_accepted('guest', 'research', 'audit', 'admin')
-# def obsolete_show_person_list_v2(selection=None):
-#     """ Show list of selected Persons for menu(0). """
-
-
-@bp.route("/obsolete/persons/ref=<string:refname>")
-@bp.route("/obsolete/persons/ref=<string:refname>/<opt>")
-@login_required
-@roles_accepted("guest", "research", "audit", "admin")
-def obsolete_show_persons_by_refname(refname, opt=""):
-    """List persons by refname for menu(0). Called from /list/refnames"""
-    logger.warning(
-        "#TODO: fix material selection or remove action show_persons_by_refname"
-    )
-
-    u_context = UserContext(user_session, current_user, request)
-    keys = ("refname", refname)
-    ref = "ref" in opt
-    order = 0
-    args = {"ref": ref, "order": order}
-    if current_user.is_authenticated:
-        args["user"] = current_user.username
-    print(f"Obsolete! {request.method}: keys={keys}, args={args}")
-    persons = obsolete_read_persons_with_events(keys, args=args)
-    print(persons)
-    persons = []
-    stk_logger(
-        u_context, f"-> bp.scene.routes.show_persons_by_refname FAIL?"
-    )  # n={len(persons)}")
-    return render_template(
-        "/scene/persons_search.html",
-        persons=persons,
-        menuno=1,
-        user_context=u_context,
-        order=order,
-        rule=keys,
-    )
-
-
-# @bp.route('/obsolete/persons/all/<string:opt>')
-# @bp.route('/obsolete/persons/all/')
-# @login_required
-# @roles_accepted('guest', 'research', 'audit', 'admin')
-# def obsolete_show_all_persons_list(opt=''):
-#     """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
-#
-#         Linked from admin/refnames only
 
 
 # -------------------------- Menu 12 Persons by user ---------------------------
@@ -376,12 +325,12 @@ def show_person(uuid=None, fanchart=False):
     )
 
 
-@bp.route("/scene/person_famtree_hx", methods=["GET"])
+@bp.route("/scene/hx-person/famtree", methods=["GET"])
 #     @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_person_family_tree_hx(uuid=None):
     """
-    Content of the selected tab for the families section: family details.
+    Htmx-component for displaying selected relatives tab: the families details.
     """
     uuid = request.args.get("uuid", uuid)
     u_context = UserContext(user_session, current_user, request)
@@ -403,7 +352,7 @@ def show_person_family_tree_hx(uuid=None):
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     may_edit = current_user.has_role("audit")  # or current_user.has_role('admin')
     return render_template(
-        "/scene/person_famtree_hx.html",
+        "/scene/hx-person/famtree.html",
         person=person,
         obj=objs,
         jscode=jscode,
@@ -415,12 +364,12 @@ def show_person_family_tree_hx(uuid=None):
     )
 
 
-@bp.route("/scene/person_fanchart_hx", methods=["GET"])
+@bp.route("/scene/hx-person/fanchart", methods=["GET"])
 #     @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_person_fanchart_hx(uuid=None):
     """
-    Content of the selected tab for the families section: fanchart.
+    Htmx-component for displaying selected relatives tab: fanchart.
     """
     t0 = time.time()
     uuid = request.args.get("uuid", uuid)
@@ -439,7 +388,7 @@ def show_person_fanchart_hx(uuid=None):
     t1 = time.time() - t0
     stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
     return render_template(
-        "/scene/person_fanchart_hx.html",
+        "/scene/hx-person/fanchart.html",
         person=person,
         fanchart_data=json.dumps(fanchart),
     )
@@ -546,12 +495,6 @@ def sort_names():
     return get_person_primary_name(uuid)
 
 
-# @bp.route('/scene/person/uuid=<pid>')
-# @bp.route('/scene/person=<int:pid>')
-# #     @login_required
-# def obsolete_show_person_v1(pid):
-
-
 # @bp.route('/scene/event/<int:uniq_id>')
 @bp.route("/older/event/uuid=<string:uuid>")
 @login_required
@@ -602,7 +545,7 @@ def edit_event(uuid):
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_event_vue(uuid):
-    """ Show Event page template which marchals data by Vue. """
+    """ Show Event page template which marshals data by Vue. """
     u_context = UserContext(user_session, current_user, request)
     return render_template("/scene/event_vue.html", uuid=uuid, user_context=u_context)
 
@@ -784,13 +727,6 @@ def show_families():
     )
 
 
-# @bp.route('/scene/family=<int:fid>')
-# def show_family_page(fid):
-#     """ Home page for a Family.    OBSOLETE: use show_family
-#         fid = id(Family)
-#     """
-
-
 @bp.route("/scene/family", methods=["GET"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
@@ -942,22 +878,16 @@ def show_place(locid):
     t0 = time.time()
     u_context = UserContext(user_session, current_user, request)
     try:
-        # Open database connection and start transaction
-        # readservice -> Tietokantapalvelu
-        #      reader ~= Toimialametodit
-
         with PlaceReader("read", u_context) as service:
             # reader = PlaceReader(readservice, u_context)
             res = service.get_places_w_events(locid)
 
         if res["status"] == Status.NOT_FOUND:
             print(f'bp.scene.routes.show_place: {_("Place not found")}')
-            # return redirect(url_for('virhesivu', code=1, text=f'Ei löytynyt yhtään'))
-        if res["status"] != Status.OK:
+        elif res["status"] != Status.OK:
             print(
                 f'bp.scene.routes.show_place: {_("Place not found")}: {res.get("statustext")}'
             )
-            # return redirect(url_for('virhesivu', code=1, text=f'Virhetilanne'))
 
     except KeyError as e:
         traceback.print_exc()
@@ -987,7 +917,7 @@ def show_sources(series=None):
 
     Possible args example: ?years=1800-1899&series=birth
     - source years (#todo)
-    - series, one of {"birth", "babtism", "wedding", "death", "move"}
+    - series, one of {"birth", "baptism", "wedding", "death", "move"}
     Missing series or years = all
     Theme may also be expressed in url path
 
@@ -1001,11 +931,7 @@ def show_sources(series=None):
     u_context.set_scope_from_request(request, "source_scope")
     u_context.count = request.args.get("c", 100, type=int)
 
-    # readservice -> Tietokantapalvelu
-    #      reader ~= Toimialametodit
     with SourceReader("read", u_context) as service:
-        # reader = SourceReader(readservice, u_context)
-
         if series:
             u_context.series = series
         # try:
@@ -1041,7 +967,6 @@ def show_source_page(sourceid=None):
     u_context = UserContext(user_session, current_user, request)
     try:
         with SourceReader("read", u_context) as service:
-            # reader = SourceReader(readservice, u_context)
             res = service.get_source_with_references(uuid, u_context)
 
         if res["status"] == Status.NOT_FOUND:
@@ -1078,7 +1003,7 @@ def show_source_page(sourceid=None):
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_medias():
-    """List of Medias for menu(5)"""
+    """List of Medias for menu(6)"""
     t0 = time.time()
     print(f"--- {request}")
     print(f"--- {user_session}")
@@ -1089,14 +1014,13 @@ def show_medias():
     u_context.count = 20
 
     with MediaReader("read", u_context) as service:
-        # datareader = MediaReader(readservice, u_context)
         res = service.read_my_media_list()
 
     if Status.has_failed(res, False):
         flash(f'{res.get("statustext","error")}', "error")
     medias = res.get("items", [])
 
-    stk_logger(u_context, f"-> bp.scene.media.show_medias fw n={len(medias)}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_medias fw n={len(medias)}")
     return render_template(
         "/scene/medias.html",
         medias=medias,
@@ -1115,7 +1039,6 @@ def show_media(uuid=None):
     uuid = request.args.get("uuid", uuid)
     u_context = UserContext(user_session, current_user, request)
     with MediaReader("read", u_context) as service:
-        # reader = MediaReader(readservice, u_context)
         res = service.get_one(uuid)
 
     status = res.get("status")
@@ -1128,7 +1051,7 @@ def show_media(uuid=None):
 
     medium = res.get("item", None)
     if medium:
-        fullname, mimetype = media.get_fullname(medium.uuid)
+        fullname, mimetype = mediafile.get_fullname(medium.uuid)
         stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
     else:
         flash(f'{res.get("statustext","error")}', "error")
@@ -1137,7 +1060,7 @@ def show_media(uuid=None):
     if mimetype == "application/pdf":
         size = 0
     else:
-        size = media.get_image_size(fullname)
+        size = mediafile.get_image_size(fullname)
 
     return render_template(
         "/scene/media.html", media=medium, size=size, user_context=u_context, menuno=6
@@ -1165,11 +1088,11 @@ def fetch_media(fname):
     crop = request.args.get("crop")
     # show_thumb for cropped image only
     show_thumb = request.args.get("full", "0") == "0"
-    fullname, mimetype = media.get_fullname(uuid)
+    fullname, mimetype = mediafile.get_fullname(uuid)
     try:
         if crop:
             # crop dimensions are diescribed as % of width and height
-            image = media.get_cropped_image(fullname, crop, show_thumb)
+            image = mediafile.get_cropped_image(fullname, crop, show_thumb)
             logger.debug("-> bp.scene.routes.fetch_media cropped png")
             # Create a png image in memery and display it
             buffer = io.BytesIO()
@@ -1197,7 +1120,7 @@ def fetch_thumbnail():
     thumb_mime = "image/jpg"
     thumbname = "(no file)"
     try:
-        thumbname, cl = media.get_thumbname(uuid, crop)
+        thumbname, cl = mediafile.get_thumbname(uuid, crop)
         if cl == "jpg":
             ret = send_file(thumbname, mimetype=thumb_mime)
         elif cl == "pdf":
@@ -1208,13 +1131,50 @@ def fetch_thumbnail():
             ret = send_file(
                 os.path.join("static", "image/noone.jpg"), mimetype=thumb_mime
             )
-        logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
+        #logger.debug(f"-> bp.scene.routes.fetch_thumbnail ok")
     except FileNotFoundError:
         # Show default image
         ret = send_file(os.path.join("static", "image/noone.jpg"), mimetype=thumb_mime)
-        logger.debug(f"-> bp.scene.routes.fetch_thumbnail none")
+        logger.debug(f"bp.scene.routes.fetch_thumbnail none")
+    except Exception as e:
+        error_print("fetch_thumbnail", e)
+        return redirect(url_for("entry"))
+
 
     return ret
+
+
+# ------------------------------ Menu 7: Comment --------------------------------
+
+
+@bp.route("/scene/topics")
+@login_required
+@roles_accepted("guest", "research", "audit", "admin")
+def show_topics():
+    """List of Discussions for menu(7)"""
+    t0 = time.time()
+    print(f"--- {request}")
+    print(f"--- {user_session}")
+    # Set context by owner and the data selections
+    u_context = UserContext(user_session, current_user, request)
+    # Which range of data is shown
+    u_context.set_scope_from_request(request, "comment_scope")
+    u_context.count = 20
+
+    with CommentReader("read", u_context) as service:
+        res = service.read_my_comment_list()
+
+    if Status.has_failed(res, False):
+        flash(f'{res.get("statustext","error")}', "error")
+    comments = res.get("items", [])
+
+    stk_logger(u_context, f"-> bp.scene.routes.show_topics n={len(comments)}")
+    return render_template(
+        "/scene/comments.html",
+        comments=comments,
+        user_context=u_context,
+        elapsed=time.time() - t0,
+    )
 
 
 # ----------- Access htmx components ---------------
@@ -1225,100 +1185,93 @@ def fetch_thumbnail():
 @roles_accepted("guest", "research", "audit", "admin")
 def comments():
     """Page with comments and a field to add a new comment"""
-    return render_template("/scene/comments/comments.html")
+    return render_template("/scene/hx-comment/comments.html")
 
 
-@bp.route("/scene/comments/comments_header")
+@bp.route("/scene/hx-comment/comments_header")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def comments_header():
-    """Comments header"""
+    """Discussions header"""
     if "audit" in current_user.roles:
-        return render_template("/scene/comments/comments_header.html")
+        return render_template("/scene/hx-comment/comments_header.html")
     else:
         return ""
 
 
-@bp.route("/scene/comments/fetch_comments")
+@bp.route("/scene/hx-comment/fetch_comments")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def fetch_comments():
-    """Fetch comments"""
+    """Fetch topics and comments to given object """
+    from pe.neo4j.cypher.cy_comment import CypherComment
+
     u_context = UserContext(user_session, current_user, request)
     uniq_id = int(request.args.get("uniq_id"))
     # uuid = request.args.get("uuid")
     if request.args.get("start"):
         start = float(request.args.get("start"))
     else:
-        start = datetime.now().timestamp()
+        # Neo4j timestamp
+        start = datetime.now().timestamp() * 1000.
 
-    query = """
-        match (p) -[:COMMENT] -> (c:Comment)
-            where id(p) = $uniq_id and c.timestamp <= $start
-        return c as comment order by c.timestamp desc limit 5
-    """
-    result = shareds.driver.session().run(query, uniq_id=uniq_id, start=start)
-    comments = []
-    last_timestamp = None
-    for record in result:
-        node = record["comment"]
-        c = SimpleNamespace()
-        c.user = node["user"]
-        c.comment_text = node["text"]
-        c.timestr = node["timestr"]
-        c.timestamp = node["timestamp"]
-        comments.append(c)
-        last_timestamp = c.timestamp
-    if last_timestamp is None:
-        return "<span id='no_comments'>" + _("No previous comments") + "</span>"
-    else:
-        stk_logger(u_context, f"-> bp.scene.routes.fetch_comments n={len(comments)}")
-        return render_template(
-            "/scene/comments/fetch_comments.html",
-            comments=comments[0:4],
-            last_timestamp=last_timestamp,
-            there_is_more=len(comments) > 4,
-        )
+    try:
+        result = shareds.driver.session().run(CypherComment.fetch_obj_comments, 
+                                              uniq_id=uniq_id, start=start)
+        comments = []
+        last_timestamp = None
+        for record in result:
+            node = record["comment"]
+            c = Comment.from_node(node)
+            c.user = record["commenter"]
+            comments.append(c)
+            last_timestamp = c.timestamp
+        if last_timestamp is None:
+            return "<span id='no_comments'>" + _("No previous comments") + "</span>"
+        else:
+            stk_logger(u_context, f"-> bp.scene.routes.fetch_comments n={len(comments)}")
+            return render_template(
+                "/scene/hx-comment/fetch_comments.html",
+                comments=comments[0:4],
+                last_timestamp=last_timestamp,
+                there_is_more=len(comments) > 4,
+            )
+    except Exception as e:
+        error_print("fetch_comments", e, do_flash=False)
+        return f"{ _('Sorry, operation failed') }: {e.__class__.__name__} {e}"
 
-
-@bp.route("/scene/comments/add_comment", methods=["post"])
+@bp.route("/scene/hx-comment/add_comment", methods=["post"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def add_comment():
     """Add a comment"""
+    
     u_context = UserContext(user_session, current_user, request)
     # uuid = request.form.get("uuid")
-    uniq_id = int(request.form.get("uniq_id"))
+    uniq_id = int(request.form.get("uniq_id", 0))
     comment_text = request.form.get("comment_text")
     if comment_text.strip() == "":
         return ""
     user = current_user.username
-    timestamp = time.time()
-    timestr = util.format_timestamp(timestamp)
-    res = (
-        shareds.driver.session()
-        .run(
-            """
-        match (p) where id(p) = $uniq_id 
-        create (p) -[:COMMENT] -> 
-            (c:Comment{user:$user,text:$text,timestamp:$timestamp,timestr:$timestr})
-        return c
-        """,
-            uniq_id=uniq_id,
-            user=user,
-            text=comment_text,
-            timestamp=timestamp,
-            timestr=timestr,
-        )
-        .single()
-    )
-    if res:
-        stk_logger(u_context, "-> bp.scene.routes.add_comment")
-        return render_template(
-            "/scene/comments/add_comment.html",
-            timestamp=timestr,
-            user=user,
-            comment_text=comment_text,
-        )
-    else:
-        return ""
+    comment = None
+    try:
+        with CommentsUpdater("update") as comment_service:
+            res = comment_service.add_comment(user, uniq_id, comment_text)
+            if res:
+                if Status.has_failed(res, strict=True):
+                    flash(f'{res.get("statustext","error")}', "error")
+                    return ""
+                comment = res.get("comment")
+            else:
+                msg = f'{_("The operation failed due to error")}: {res.get("statustext","error")}'
+                print("bp.scene.routes.add_comment" + msg)
+                logger.error("bp.scene.routes.add_comment" + msg)
+                flash(msg)
+                return ""
+
+    except Exception as e:
+        error_print("add_comment", e, do_flash=False)
+        return f"{ _('Sorry, operation failed') }: {e.__class__.__name__} {e}"
+
+    stk_logger(u_context, "-> bp.scene.routes.add_comment")
+    return render_template("/scene/hx-comment/add_comment.html", comment=comment)

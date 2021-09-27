@@ -34,8 +34,10 @@ function copyTextToClipboard(text) {
 	  }
 	  navigator.clipboard.writeText(text).then(function() {
 		  console.log('Async: Copying to clipboard was successful!');
+	      alert("Kopioitu leikepöydälle: " + text);
 	  }, function(err) {
 		  console.error('Async: Could not copy text: ', err);
+		  alert(err);
 	  });
 	}
 function toClipboard(myvar) {
@@ -48,7 +50,6 @@ function toClipboard(myvar) {
 	  var copyText = document.getElementById(myvar);
 	  if (copyText) {
 	  	copyTextToClipboard(copyText.value);
-	    alert("Kopioitu leikepöydälle: " + copyText.value);
 	  } else {
 	    alert("Error: No data!");
     }

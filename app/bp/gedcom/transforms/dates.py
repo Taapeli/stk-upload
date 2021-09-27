@@ -27,7 +27,7 @@ from .. import gedcom_analyze
 
 import re
 import sys
-from _collections import defaultdict
+from collections import defaultdict
 
 version = "1.0"
 name = _("Dates")
@@ -93,7 +93,7 @@ def optional(pat):
 
 def match(s,**kwargs):    
     pat = p(**kwargs)
-    flags = re.VERBOSE
+    flags = re.RegexFlag.VERBOSE
     r = re.fullmatch(pat,s,flags)
     if r is None: return None
     class Ret: pass

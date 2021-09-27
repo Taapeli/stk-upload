@@ -28,8 +28,8 @@ Created on 4.1.2018
 '''
 from urllib.parse import urlparse
 from flask_babelex import _
-from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKOWN
-
+from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKNOWN
+from bl.root import State
 
 def translate(term, var_name, show_table=False):
     """ Given term is translated depending of var_name name.
@@ -49,6 +49,8 @@ def translate(term, var_name, show_table=False):
         'medium' = media types
         'marr' = marriage types
         'child' = child relations
+        'material' = Root.material types
+        'state' = Root.state values
     """
     if var_name == "nt":
         # Name types
@@ -236,6 +238,7 @@ def translate(term, var_name, show_table=False):
             "srk": _("Parish"), #"seurakunta"
             "Sairaala": _("Hospital"),
             "State": _("State"), #"valtio"
+            "Street": _("Street"),
             "Säteri": _("Seat Farm"), 
             "Tila": _("Farm"), #"maatila"
             "Tontti": _("Tontti"), #"tontti"
@@ -308,8 +311,33 @@ def translate(term, var_name, show_table=False):
         tabl = {
             SEX_FEMALE: _("Daughter"),
             SEX_MALE: _("Son"),
-            SEX_UNKOWN: _("Child")
+            SEX_UNKNOWN: _("Child")
         }
+
+    elif var_name == "material":
+        # Root.material types
+        tabl = {
+            "Family Tree": _("Family Tree"),
+            "Demo Material": _("Demo Material"),
+            "Example Material": _("Example type"),
+        }
+        #print(f"#jinja_filters:get {var_name}({term})")
+
+    elif var_name == "state":
+        # Root.state types
+        tabl = {
+            State.ROOT_REMOVED: _("File"),
+            State.ROOT_STORING: _("Storing"),
+            State.ROOT_CANDIDATE: _("Candidate"),
+            State.ROOT_AUDIT_REQUESTED: _("Audit Requested"),
+            State.ROOT_AUDITING: _("Auditing"),
+            State.ROOT_ACCEPTED: _("Accepted"),
+            State.ROOT_REJECTED: _("Rejected"),
+            State.FILE_LOADING: _("Loading"),
+            State.FILE_LOAD_FAILED: _("Load Failed"),
+            State.FILE_UPLOADED: _("File"),
+        }
+        #print(f"#jinja_filters:get {var_name}({term})")
 
     elif var_name == "handle":
         # Shows handle '_dd3d7f7206c3ca3408c9daf6c58' in short format '_d…f6c58'"
@@ -347,7 +375,9 @@ def list_translations():
         'rept': "Repository types",
         'medium': "Document types",
         'marr': "Marriage types",
-        'child': "Child by gender"
+        'child': "Child by gender",
+        'material': "Material types",
+        'state': "Batch states",
         }
     for key, desc in keywords.items():
         key_dict = translate(None, key, True)

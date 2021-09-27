@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from bl.admin.models.data_admin import DataAdmin
 
 """
     Methods to import all data from Gramps xml file
@@ -23,40 +24,42 @@
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 """
 
-import time
 import gzip
-from os.path import basename, splitext
 import logging
+import os
+import time
+import traceback
+
+from tarfile import TarFile
 
 logger = logging.getLogger("stkserver")
+
 from flask_babelex import _
-import traceback
-from tarfile import TarFile
-import os
+
+import shareds
+from models import mediafile
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
-import shareds
-from bl.base import Status
-from bp.scene.models import media
 
+from bl.base import Status
+from bl.root import Root, State, DEFAULT_MATERIAL 
 
 def get_upload_folder(username):
     """ Returns upload directory for given user"""
     return os.path.join("uploads", username)
 
-
-def analyze_xml(username, filename):
-    """Returns a dict of Gremp xml objec type counts."""
+def analyze_xml(username, batch_id, filename):
+    """Returns a dict of Gramps xml object type counts."""
     # Read the xml file
     upload_folder = get_upload_folder(username)
-    pathname = os.path.join(upload_folder, filename)
+    pathname = os.path.join(upload_folder, batch_id, filename)
     print("bp.gramps.gramps_loader.analyze_xml Pathname: " + pathname)
 
-    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(pathname)
 
     """ Get XML DOM parser and start DOM elements handler transaction """
-    handler = DOM_handler(file_cleaned, username, filename)
+    handler = DOM_handler(file_cleaned, username, filename, dataservice=None)
 
     citation_source_cnt = 0
     event_citation_cnt = 0
@@ -252,10 +255,7 @@ def analyze(username, filename):
     return references
 
 
-# def analyze_old2(username, filename):
-
-
-def xml_to_stkbase(pathname, userid):
+def xml_to_stkbase(batch: Root):
     """
     Reads a Gramps xml file, and saves the information to db
 
@@ -286,132 +286,81 @@ def xml_to_stkbase(pathname, userid):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.batch import BatchUpdater, Batch
+    from bl.root import BatchUpdater
 
     # Uncompress and hide apostrophes (and save log)
-    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(batch.file)
 
-    # Get XML DOM parser and start DOM elements handler transaction
-    handler = DOM_handler(file_cleaned, userid, pathname)
-
-    # Initialize Run report
-    handler.blog = BatchLog(userid)
-    handler.blog.log_event({"title": "Storing data from Gramps", "level": "TITLE"})
-    handler.blog.log_event(
-        {"title": "Loaded file '{}'".format(file_displ), "elapsed": shareds.tdiff}
-    )
-    handler.blog.log(cleaning_log)
-
-    # Open database connection as Neo4jDataService instance and start transaction
-
-    # Initiate BatchUpdater and Batch node data
-    ##shareds.datastore = BatchUpdater(shareds.driver, handler.dataservice)
     with BatchUpdater("update") as batch_service:
-        # print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
-        mediapath = handler.get_mediapath_from_header()
-        res = batch_service.start_data_batch(
-            userid, file_cleaned, mediapath, batch_service.dataservice.tx
+        # Get XML DOM parser and start DOM elements handler transaction
+        handler = DOM_handler(file_cleaned, batch.user, batch.file, batch_service.dataservice)
+    
+        # Initialize Run report
+        handler.blog = BatchLog(batch.user)
+        handler.blog.log_event({"title": "Storing data from Gramps", "level": "TITLE"})
+        handler.blog.log_event(
+            {"title": "Loaded file '{}'".format(file_displ), "elapsed": shareds.tdiff}
         )
-        if Status.has_failed(res):
-            print("bp.gramps.gramps_loader.xml_to_stkbase TODO _rollback")
-            return res
-        handler.batch = res.get("batch")
+        handler.blog.log(cleaning_log)
+    
+        handler.batch = batch
+    
+        batch.mediapath = handler.get_mediapath_from_header()
+    
+        metadata = handler.get_metadata_from_header()
+        print("metadata:", metadata)
+        if metadata:
+            batch.material = metadata[0] if metadata[0] else DEFAULT_MATERIAL
+            batch.description = metadata[1]
         handler.handle_suffix = "_" + handler.batch.id  
+        # Open database connection as Neo4jDataService instance and start transaction
+    
+        # Initiate BatchUpdater and Batch node data
+        ##shareds.datastore = BatchUpdater(shareds.driver, handler.dataservice)
+    
+            # print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
 
+        batch.save(batch_service.dataservice)
+        
         t0 = time.time()
 
-        if pathname.endswith(".gpkg"):
-            extract_media(pathname, handler.batch.id)
+        if is_gpkg:
+            extract_media(batch.file, batch.id)
 
-        try:
-            # handler.handle_header() --> get_header_mediapath()
-            res = handler.handle_notes()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_repositories()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_media()
-            if Status.has_failed(res):
-                return res
+        res = handler.handle_notes()
+        res = handler.handle_repositories()
+        res = handler.handle_media()
 
-            res = handler.handle_places()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_sources()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_citations()
-            if Status.has_failed(res):
-                return res
+        res = handler.handle_places()
+        res = handler.handle_sources()
+        res = handler.handle_citations()
 
-            res = handler.handle_events()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_people()
-            if Status.has_failed(res):
-                return res
-            res = handler.handle_families()
-            if Status.has_failed(res):
-                return res
+        res = handler.handle_events()
+        res = handler.handle_people()
+        res = handler.handle_families()
 
-            #       for k in handler.handle_to_node.keys():
-            #             print (f'\t{k} –> {handler.handle_to_node[k]}')
+        #       for k in handler.handle_to_node.keys():
+        #             print (f'\t{k} –> {handler.handle_to_node[k]}')
 
-            # Set person confidence values
-            # TODO: Only for imported persons (now for all persons!)
-            res = handler.set_all_person_confidence_values()
-            if Status.has_failed(res):
-                return res
-            res = handler.set_person_calculated_attributes()
-            if Status.has_failed(res):
-                return res
-            res = handler.set_person_estimated_dates()
-            if Status.has_failed(res):
-                return res
+        # Set person confidence values
+        # TODO: Only for imported persons (now for all persons!)
+        res = handler.set_all_person_confidence_values()
+        res = handler.set_person_calculated_attributes()
+        res = handler.set_person_estimated_dates()
 
-            # Copy date and name information from Person and Event nodes to Family nodes
-            res = handler.set_family_calculated_attributes()
-            #res = shareds.dservice.ds_set_family_calculated_attributes(uniq_id)
+        # Copy date and name information from Person and Event nodes to Family nodes
+        res = handler.set_family_calculated_attributes()
 
-            if Status.has_failed(res):
-                return res
-
-            res = handler.remove_handles()
-            if Status.has_failed(res):
-                return res
+        print("build_free_text_search_indexes")
+        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx)
+        print("build_free_text_search_indexes done")
+            
+        res = handler.remove_handles()
             # The missing links counted in remove_handles
         ##TODO      res = handler.add_missing_links()
 
-        except Exception as e:
-            traceback.print_exc()
-            msg = f"Stopped xml load due to {e}"
-            print("bp.gramps.gramps_loader.xml_to_stkbase: " + msg)
-            # batch_service.rollback()
-            handler.blog.log_event(
-                {
-                    "title": _("Database save failed due to {}".format(msg)),
-                    "level": "ERROR",
-                }
-            )
-            return {"status": Status.ERROR, "statustext": msg}
-
-        res = batch_service.batch_mark_status(Batch.BATCH_CANDIDATE)
-        if Status.has_failed(res):
-            msg = res.get("statustext", "")
-            batch_service.rollback()
-            handler.blog.log_event(
-                {
-                    "title": _("Database save failed due to {}".format(msg)),
-                    "level": "ERROR",
-                }
-            )
-            return {
-                "status": res.get("status"),
-                "statustest": msg,
-                "steps": handler.blog.list(),
-                "batch_id": handler.batch.id,
-            }
+        res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
+        #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
 
         # batch_service.commit()
         logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
@@ -449,45 +398,59 @@ def file_clean(pathname):
         return n
 
     t0 = time.time()
-    root, ext = splitext(pathname)
+    root, ext = os.path.splitext(pathname)
     file_cleaned = root + "_clean" + ext
     # Filename for display
-    file_displ = basename(pathname)
+    file_displ = os.path.basename(pathname)
     with open(file_cleaned, "w", encoding="utf-8") as file_out:
         # Creates the output file and closes it
-        if (
-            ext == ".gpkg"
-        ):  # gzipped tar file with embedded gzipped 'data.gramps' xml file
+
+        try:  # .gpkg: gzipped tar file with embedded gzipped 'data.gramps' xml file
             with gzip.open(
                 TarFile(fileobj=gzip.GzipFile(pathname)).extractfile("data.gramps"),
                 mode="rt",
                 encoding="utf-8",
             ) as file_in:
                 counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned apostrophes from .gpkg input file"  # Try to read a gzipped file
-        else:  # .gramps: either gzipped or plain xml file
-            try:
-                with gzip.open(
-                    pathname, mode="rt", encoding="utf-8", compresslevel=9
-                ) as file_in:
-                    # print("A gzipped file")
-                    counter = _clean_apostrophes(file_in, file_out)
-                msg = "Cleaned apostrophes from packed input lines"  # Try to read a gzipped file
-            except OSError:  # Not gzipped; Read as an ordinary file
-                with open(pathname, mode="rt", encoding="utf-8") as file_in:
-                    print("Not a gzipped file")
-                    counter = _clean_apostrophes(file_in, file_out)
-                msg = "Cleaned apostrophes from input lines"
-        event = LogItem(
-            {"title": msg, "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-    return (file_cleaned, file_displ, event)
+            msg = "Cleaned apostrophes from .gpkg input file"  
+            event = LogItem(
+                {"title": msg, "count": counter, "elapsed": time.time() - t0}
+            )
+            return (file_cleaned, file_displ, event, True)
+        except: 
+            pass
+
+        try: # .gramps:  gzipped xml file
+            with gzip.open(
+                pathname, mode="rt", encoding="utf-8", compresslevel=9
+            ) as file_in:
+                # print("A gzipped file")
+                counter = _clean_apostrophes(file_in, file_out)
+            msg = "Cleaned apostrophes from packed input lines"
+            event = LogItem(
+                {"title": msg, "count": counter, "elapsed": time.time() - t0}
+            )
+            return (file_cleaned, file_displ, event, False)
+        except:
+            pass
+
+        try: # .gramps:  plain xml file
+            with open(pathname, mode="rt", encoding="utf-8") as file_in:
+                print("Not a gzipped file")
+                counter = _clean_apostrophes(file_in, file_out)
+            msg = "Cleaned apostrophes from input lines"
+            event = LogItem(
+                {"title": msg, "count": counter, "elapsed": time.time() - t0}
+            )
+            return (file_cleaned, file_displ, event, False)
+        except:
+            raise RuntimeError(_("Unable to open Gramps file"))
 
 
 def extract_media(pathname, batch_id):
     """Save media files from Gramps .gpkg package."""
     try:
-        media_files_folder = media.get_media_files_folder(batch_id)
+        media_files_folder = mediafile.get_media_files_folder(batch_id)
         os.makedirs(media_files_folder, exist_ok=True)
         TarFile(fileobj=gzip.GzipFile(pathname)).extractall(path=media_files_folder)
         xml_filename = os.path.join(media_files_folder, "data.gramps")

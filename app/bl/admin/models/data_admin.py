@@ -61,8 +61,8 @@ class DataAdmin():
 
 
 
-    def _remove_chuncks(self, cypher_clause, user=None):
-        ''' Execute Delete cypher clause in appropiate chuncks. '''
+    def _remove_chunks(self, cypher_clause, user=None):
+        ''' Execute Delete cypher clause in appropriate chunks. '''
         LIMIT=2000
         cnt_all = 0
         cnt_nodes = -1
@@ -87,12 +87,12 @@ class DataAdmin():
         if opt == "total":
             """ Koko kanta tyhjennetään """
             msg = _("All data is deleted. ")
-            cnt = self._remove_chuncks(Cypher_adm.remove_all_nodes)
+            cnt = self._remove_chunks(Cypher_adm.remove_all_nodes)
             #logger.info(f'bp.admin.models.data_admin.DataAdmin.db_reset/{opt} n={cnt}')
 
         elif opt == "save_users":
             msg = _("All data but users and roles are removed.")
-            cnt = self._remove_chuncks(Cypher_adm.remove_data_nodes)
+            cnt = self._remove_chunks(Cypher_adm.remove_data_nodes)
             #logger.info(f'bp.admin.models.data_admin.DataAdmin.db_reset/{opt} n={cnt}')
 
         elif opt == "my_own":
@@ -106,10 +106,17 @@ class DataAdmin():
             #     RETURN labels(x)[0] as lab, count(x)
 
             msg = _("All persons and event by %(un)s are removed.", un=self.username)
-            cnt = self._remove_chuncks(Cypher_adm.remove_my_nodes, user=self.username)
+            cnt = self._remove_chunks(Cypher_adm.remove_my_nodes, user=self.username)
             #logger.info(f'bp.admin.models.data_admin.DataAdmin.db_reset/{opt} n={cnt}')
 
         msg2 = _('Removed %(cnt)d nodes', cnt=cnt)
         return {'msg':'\n'.join((msg, msg2)), 'count':cnt}
 
+    
+    @classmethod
+    def build_free_text_search_indexes(cls, tx=None):
+        if not tx:
+            tx = shareds.driver.session()
+        result = tx.run(Cypher_adm.build_indexes)
+    
         

@@ -76,13 +76,22 @@ class Role(RoleMixin):
     timestamp = None
     
     def __init__(self, **kwargs):
-        self.name = kwargs['name']
-        self.description = kwargs['description']
+        self.name = kwargs.get("name")
+        self.description = kwargs.get("description")
 #        self.timestamp = kwargs['timestamp']
 
     def __str__(self):
         """ Role name in ui language """
         return _(self.name)
+
+    @classmethod
+    def from_node(cls, node):
+        # type: (Any) -> Root
+        """Convert a Neo4j node to Role object."""
+        obj = cls()
+        obj.name = node.get("name", "")
+        obj.description = node.get("description", "")
+        return obj
 
     @staticmethod
     def has_role(name, role_list):
@@ -196,7 +205,9 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
             return True 
 
     def validate_email(self, field):
-        return True
+        user = shareds.user_datastore.get_user(field.data)
+        if user:
+            raise ValidationError(_l('Email has been reserved already'))
 
     def validate_username(self, field):
         user = shareds.user_datastore.get_user(field.data)
@@ -260,11 +271,12 @@ accessDB.initialize_db()
 
 
 """ 
-    Jinja application filter definitions 
+    Jinja application filter definitions.
+    Example: {{ size|int_thousands }}
 """
 
 @shareds.app.template_filter('pvt')
-def _jinja2_filter_dates(dates):
+def _jinja2_filter_dates(dates):    # Not in use!
     """ Aikamääreet suodatetaan suomalaiseksi """
     return str(DateRange(dates))
 
@@ -294,7 +306,7 @@ def _jinja2_filter_datestamp(time_str, fmt=None):
     except:
         return time_str
 
-@shareds.app.template_filter('isodatetime')
+@shareds.app.template_filter('isodatetime') # Not in use
 def _jinja2_filter_datetime(datetime, fmt=None):
     """ Datetime ISO-muotoon ilman sekunnin osia """
     if datetime == None:
@@ -322,7 +334,7 @@ def _jinja2_filter_translate(term, var_name):
     """
     return jinja_filters.translate(term, var_name)
 
-@shareds.app.template_filter('is_list')
+@shareds.app.template_filter('is_list') # Not in use?
 def _is_list(value):
     return isinstance(value, list)
 

@@ -126,7 +126,7 @@ class PlaceBl(Place):
     def __init__(self, uniq_id=None, ptype="", level=None):
         """Creates a new PlaceBl instance.
 
-        You may also give for printout eventuell hierarhy level
+        You may also give for printout eventual hierarchy level
         """
         Place.__init__(self, uniq_id)
 
@@ -136,13 +136,13 @@ class PlaceBl(Place):
         if level != None:
             self.level = level
 
-        self.uppers = []  # Upper place objects for hirearchy display
+        self.uppers = []  # Upper place objects for hierarchy display
         self.notes = []  # Notes connected to this place
         self.note_ref = []  # uniq_ids of Notes
         self.media_ref = []  # uniq_id of models.gen.media.Media
         self.ref_cnt = None  # for display: count of referencing objects
 
-    def set_default_names(self, def_names: dict):
+    def set_default_names(self, def_names: dict, dataservice):
         """Creates default links from Place to fi and sv PlaceNames.
 
         The objects are referred with database id numbers.
@@ -151,8 +151,7 @@ class PlaceBl(Place):
         - - .names      PlaceName objects
         - def_names     dict {lang, uid} uniq_id's of PlaceName objects
         """
-        ds = shareds.dservice
-        ds.ds_place_set_default_names(self.uniq_id, def_names["fi"], def_names["sv"])
+        dataservice.ds_place_set_default_names(self.uniq_id, def_names["fi"], def_names["sv"])
 
     @staticmethod
     def find_default_names(names: list, use_langs: list):
@@ -199,7 +198,7 @@ class PlaceBl(Place):
             logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
             return {"status": Status.ERROR, "items": selection}
 
-    def save(self, tx, **kwargs):
+    def save(self, dataservice, tx, **kwargs):
         """Save Place, Place_names, Notes and connect to hierarchy.
 
         :param: place_keys    dict {handle: uniq_id}
@@ -305,7 +304,7 @@ class PlaceBl(Place):
         ret = PlaceBl.find_default_names(self.names, ["fi", "sv"])
         if ret.get("status") == Status.OK:
             # Update default language name links
-            self.set_default_names(ret.get("ids"))
+            self.set_default_names(ret.get("ids"), dataservice)
 
         # Make hierarchy relations to upper Place nodes
 
@@ -381,7 +380,7 @@ class PlaceBl(Place):
 
         if self.media_refs:
             # Make relations to the Media nodes and their Note and Citation references
-            shareds.dservice.ds_create_link_medias_w_handles(
+            dataservice.ds_create_link_medias_w_handles(
                 self.uniq_id, self.media_refs
             )
 
@@ -543,15 +542,16 @@ class PlaceReader(DataService):
     """
 
     def get_place_list(self):
-        """Get a list on PlaceBl objects with nearest heirarchy neighbours.
+        """Get a list on PlaceBl objects with nearest hierarchy neighbors.
 
         Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
         """
         context = self.user_context
         fw = context.first  # From here forward
         use_user = context.batch_user()
-        places = shareds.dservice.dr_get_place_list_fw(
-            use_user, fw, context.count, lang=context.lang
+        places = self.dataservice.dr_get_place_list_fw(
+            use_user, fw, context.count, lang=context.lang,
+            batch_id=context.batch_id,
         )
 
         # Update the page scope according to items really found
@@ -579,14 +579,14 @@ class PlaceReader(DataService):
     def get_places_w_events(self, uuid):
         """Read the place hierarchy and events connected to this place.
 
-        Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
+        Luetaan annettuun paikkaan liittyvä hierarkia ja tapahtumat
         Palauttaa paikkahierarkian ja (henkilö)tapahtumat.
 
         """
         # Get a Place with Names, Notes and Medias
         use_user = self.user_context.batch_user()
         lang = self.user_context.lang
-        res = shareds.dservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
+        res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
         place = res.get("place")
         results = {"place": place, "status": Status.OK}
 
@@ -599,7 +599,7 @@ class PlaceReader(DataService):
 
         # TODO: Find Citation -> Source -> Repository for each uniq_ids
         try:
-            results["hierarchy"] = shareds.dservice.dr_get_place_tree(
+            results["hierarchy"] = self.dataservice.dr_get_place_tree(
                 place.uniq_id, lang=lang
             )
 
@@ -615,23 +615,27 @@ class PlaceReader(DataService):
                 "statustext": f"Place tree value for {place.uniq_id}: {e}",
             }
 
-        res = shareds.dservice.dr_get_place_events(place.uniq_id)
+        res = self.dataservice.dr_get_place_events(place.uniq_id)
         results["events"] = res["items"]
         return results
 
-    def get_placename_stats(self, count=40):
+    def get_placename_list(self, count=40):
         """
         Return placename stats so that the names can be displayed in a name cloud.
         """
-        if self.use_user:
-            placename_stats = shareds.dservice.dr_get_placename_stats_by_user(
-                self.use_user, count=count
-            )
-        else:
-            placename_stats = shareds.dservice.dr_get_placename_stats_common(
-                count=count
-            )
-        return placename_stats
+        placenames = self.dataservice.dr_get_placename_list(self.use_user, 
+                                                            self.user_context.batch_id, count=count)
+        # Returns [{'surname': surname, 'count': count},...]
+
+        # if self.use_user:
+        #     placename_stats = self.dataservice.dr_get_placename_stats_by_user(
+        #         self.use_user, count=count
+        #     )
+        # else:
+        #     placename_stats = self.dataservice.dr_get_placename_stats_common(
+        #         count=count
+        #     )
+        return placenames
 
 
 class PlaceUpdater(DataService):
@@ -646,32 +650,32 @@ class PlaceUpdater(DataService):
     def merge2places(self, id1, id2):
         """Merges two places"""
         # Check that given nodes are included in the same Batch or Audit node
-        ret = shareds.dservice.ds_merge_check(id1, id2)
+        ret = self.dataservice.ds_merge_check(id1, id2)
         if Status.has_failed(ret):
-            shareds.dservice.ds_rollback()
+            self.dataservice.ds_rollback()
             return ret
 
         # Merge nodes
-        ret = shareds.dservice.ds_places_merge(id1, id2)
+        ret = self.dataservice.ds_places_merge(id1, id2)
         if Status.has_failed(ret):
-            shareds.dservice.ds_rollback()
+            self.dataservice.ds_rollback()
             return ret
 
         place = ret.get("place")
         # Select default names for default languages
         ret = PlaceBl.find_default_names(place.names, ["fi", "sv"])
         if Status.has_failed(ret):
-            shareds.dservice.ds_rollback()
+            self.dataservice.ds_rollback()
             return ret
         st = ret.get("status")
         if st == Status.OK:
             # Update default language name links
             def_names = ret.get("ids")
-            shareds.dservice.ds_place_set_default_names(
+            self.dataservice.ds_place_set_default_names(
                 place.uniq_id, def_names["fi"], def_names["sv"]
             )
 
-            ret = shareds.dservice.ds_commit()
+            ret = self.dataservice.ds_commit()
             st = ret.get("status")
             return {
                 "status": st,

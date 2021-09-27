@@ -48,6 +48,6 @@ allowed_email_model = None
 tdiff = 0.0         # Elapsed time of previous step, if any
 
 DEFAULT_ROLE = 'member'    # Value overridden with configuration in application setup
-PROGRESS_UPDATE_RATE = 15  # seconds to update progress data in UI
+PROGRESS_UPDATE_RATE = 10  # seconds to update progress data in UI
 
 PRIVACY_LIMIT = 0       #Todo: Use bl.person.PRIVACY_LIMIT (?)

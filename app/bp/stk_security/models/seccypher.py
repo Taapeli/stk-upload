@@ -163,4 +163,11 @@ DELETE c'''
     get_userprofile = '''
 MATCH (p:UserProfile {username: $username})
 RETURN p'''
-    
+
+    get_userprofile_w_roles = """
+MATCH (user:User) -[:SUPPLEMENTED]-> (p:UserProfile)
+    WHERE user.username = $username
+MATCH (user) -[r:HAS_ROLE]-> (role)
+WITH p, role ORDER BY role.level LIMIT 200
+RETURN p, role"""
+

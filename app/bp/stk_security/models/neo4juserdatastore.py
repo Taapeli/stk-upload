@@ -22,7 +22,7 @@ Created on 28.9.2017
 
 @author: TimNal
 '''
-import time
+#import time
 
 
 #from flask_security import current_user
@@ -38,6 +38,7 @@ logger = logging.getLogger('neo4juserdatastore')
 driver = None
 
 from bl.admin.models.user_admin import UserAdmin
+
 
 class Neo4jUserDatastore(UserDatastore):
     """ User info database designed after a Flask-security UserDatastore and observed Flask-security behavior:
@@ -442,15 +443,38 @@ class Neo4jUserDatastore(UserDatastore):
             logging.error(f'Neo4jUserDatastore.password_reset: {e.__class__.__name__}, {e}')            
             raise      
         
-    def get_userprofile(self, username):
+    def get_userprofile(self, username:str, roles:bool=False):
+        """Get user's profile and optionally their groups.
+        """
+        from setups import Role
+
+        profile = None
         with self.driver.session() as session:
-            result = session.run(Cypher.get_userprofile, username=username).single()
-            if not result: return None
-            profile = result.get('p')
-            if profile:
-                p = self.user_profile_model(**profile)
-                if p.agreed_at:     
-                    p.agreed_at = datetime.fromtimestamp(float(p.agreed_at)/1000)
-                return p  
+            if roles:
+                cypher = Cypher.get_userprofile_w_roles
             else:
-                return None
+                cypher = Cypher.get_userprofile
+            result = session.run(cypher, username=username)
+
+            for record in result:
+                # <Record
+                #    p=<Node id=188986 labels=frozenset({'UserProfile'})
+                #        properties={... 'username': 'big'}>
+                #    role=<Node id=3 labels=frozenset({'Role'})
+                #        properties={'name': 'member',
+                #            'description': 'Seuran jäsen täysin lukuoikeuksin', 
+                #            'level': '2', 'timestamp': 1620041938840}>>
+
+                if not profile:
+                    profile = record.get('p')
+                    p = self.user_profile_model(**profile)
+                    if p.agreed_at:     
+                        p.agreed_at = datetime.fromtimestamp(float(p.agreed_at)/1000)
+                    p.roles = []
+
+                node = record.get('role')
+                if node:
+                    role = Role.from_node(node)
+                    p.roles.append(role)
+
+            return p

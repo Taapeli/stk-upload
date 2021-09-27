@@ -135,4 +135,4 @@ class DbWriter(DataService):
 #             return place
 
 #     def update_person_confidences(self, tx, person_ids:list): #-> bl.person.PersonBl.update_person_confidences
-#         """ Sets a quality rate for given list of Person.uniq_ids.
+#         """ Sets a quality rating for given list of Person.uniq_ids.

@@ -25,7 +25,7 @@ from unittest.mock import Mock
 
 sys.path.append("../app")
 import shareds
-from bl.batch import Batch
+from bl.root import Root
 
 def load_config(configfile):
     shareds.app = Mock()
@@ -61,7 +61,7 @@ shareds.dataservices = {
     }
 
 
-ret = Batch.delete_batch(args.username, args.batch_id)
+ret = Root.delete_batch(args.username, args.batch_id)
 print(ret)
  
  

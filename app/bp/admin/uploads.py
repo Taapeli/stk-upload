@@ -1,7 +1,7 @@
 #   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
-#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
 #                            Timo Nallikari, Pekka Valta
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -17,61 +17,65 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-'''
+"""
 Created on 8.8.2018
 
 @author: jm
 
  Administrator operations page urls
  
-'''
+"""
+# blacked 2021-07-25 JMä
 import os
 import pprint
 import time
 import threading
-#from pathlib import Path
 import traceback
+import logging
+from datetime import datetime
+from dataclasses import dataclass
+from typing import List
 
-import logging 
-logger = logging.getLogger('stkserver')
+logger = logging.getLogger("stkserver")
 
 from flask_babelex import _
 
 import shareds
-from bl.base import Status
-from models import email, util, syslog 
+from bl.root import Root, State
+from bl.base import IsotammiException
+from models import email, util, syslog
 from bl.gramps import gramps_loader
-from pe.neo4j.cypher.cy_batch_audit import CypherBatch
+from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 
-#==> bl.batch.Batch.BATCH_* 7.5.2021 / JMä
+# ==> bl.batch.Batch.BATCH_* 7.5.2021 / JMä
 # STATUS_UPLOADED = "uploaded", STATUS_LOADING = "loading", STATUS_DONE = "done"
 # STATUS_FAILED = "failed", STATUS_ERROR = "error", STATUS_REMOVED = "removed"
 
 
-#===============================================================================
+# ===============================================================================
 # Background loading of a Gramps XML file
-# 
+#
 # 1. The user uploads an XML file using the user interface. This is handled by
 #    the function "upload_gramps". The file is stored in the user specific folder
 #    uploads/<username>. A log file with the name <xml-file>.log is created
 #    automatically (where <xml-file> is the name of the uploaded file.
-# 
+#
 # 2. The upload_gramps function redirects to "list_uploads" which shows the XML
-#    files uploaded by this user. 
+#    files uploaded by this user.
 #
 # 3. The admin user can see all users' uploads by going to the user list screen
 #    and clicking the link 'uploads' or via the link "show all uploads".
 #
 # 4. The admin user sees a list of the uploaded files for a user but he also sees
 #    more information and is able to initiate loading of the file into the Neo4j
-#    database called "stkbase". This will call the function 
+#    database called "stkbase". This will call the function
 #    "initiate_background_load_to_stkbase".
-# 
+#
 # 5. The function "initiate_background_load_to_stkbase" starts a background
-#    thread to do the actual database load. The thread executes the function 
+#    thread to do the actual database load. The thread executes the function
 #    "background_load_to_stkbase" which calls the actual logic in
 #    "gramps_loader.xml_to_stkbase".
-#    
+#
 #    The folder "uploads/<userid>" also contains a "metadata" file
 #    "<xml-file>.meta" for status information. This file contains a text form
 #    of a dictionary with keys "status" and "upload_time".
@@ -81,11 +85,11 @@ from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 #    "loading". After successful database load the status is set to "done"
 #    (these values are mapped to different words in the user interface).
 #
-#    If an exception occurs during the database load then the status is set to 
+#    If an exception occurs during the database load then the status is set to
 #    "failed".
-#    
+#
 # 6. It is conceivable that the thread doing the load is somehow stopped
-#    without being able to rename the file to indicate a completion or failure. 
+#    without being able to rename the file to indicate a completion or failure.
 #    Then the status remains "loading" indefinitely. This situation is noticed
 #    by the "i_am_alive" thread whose only purpose is to update the timestamp of
 #    ("touch") the log file as long as the loading thread is running. This
@@ -107,274 +111,266 @@ from pe.neo4j.cypher.cy_batch_audit import CypherBatch
 #
 #    Note. For easier Gramps upload testing you may set 'USE_I_AM_ALIVE = False'
 #          in instance/config.py, which reduces console output.
-# 
+#
 #    The user is redirected to this screen immediately after initiating a load
 #    operation. The user can also go to the screen from the main display.
-#===============================================================================
+# ===============================================================================
 
 
-def get_upload_folder(username): 
-    ''' Returns upload directory for given user'''
+def get_upload_folder(username):
+    """ Returns upload directory for given user"""
     return os.path.join("uploads", username)
 
-def set_meta(username,filename,**kwargs):
-    ''' Stores status information in .meta file '''
-    upload_folder = get_upload_folder(username) 
-    name = "{}.meta".format(filename)
-    metaname = os.path.join(upload_folder,name)
-    update_metafile(metaname,**kwargs)
 
-def update_metafile(metaname,**kwargs):
+def set_meta(username, batch_id, filename, **kwargs):
+    """ Stores status information in .meta file """
+    upload_folder = get_upload_folder(username)
+    name = "{}.meta".format(filename)
+    metaname = os.path.join(upload_folder, batch_id, name)
+    update_metafile(metaname, **kwargs)
+
+
+def update_metafile(metaname, **kwargs):
     try:
         meta = eval(open(metaname).read())
     except FileNotFoundError:
         meta = {}
     meta.update(kwargs)
-    open(metaname,"w").write(pprint.pformat(meta))
+    open(metaname, "w").write(pprint.pformat(meta))
 
-def get_meta(metaname):
-    ''' Reads status information from .meta file '''
-    from bl.batch import Batch # For status codes
 
+def get_meta(root):
+    """ Reads status information from .meta file """
+    
     try:
+        metaname = root.metaname
         meta = eval(open(metaname).read())
-        status= meta.get("status")
-        if status == Batch.BATCH_LOADING:
+        status = meta.get("status")
+        if status == State.FILE_LOADING:
             stat = os.stat(metaname)
-            if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
-                meta["status"] = Batch.BATCH_ERROR
+            if (
+                stat.st_mtime < time.time() - 60
+            ):  # not updated within last minute -> assume failure
+                meta["status"] = State.FILE_LOAD_FAILED
+                with open(root.logname,"a") as f:
+                    print("", file=f)
+                    msg = "{}: {}".format(
+                            util.format_timestamp(),
+                            _("Load failed, no progress in 60 seconds")) 
+                    print(msg, file=f)
+                update_metafile(metaname, status=State.FILE_LOAD_FAILED)
+    except FileNotFoundError as e:
+        meta = {}
     except Exception as e:
-        print(f'bp.admin.uploads.get_meta: error {e.__class__.__name__} {e}')
+        print(f"bp.admin.uploads.get_meta: error {e.__class__.__name__} {e}")
         meta = {}
     return meta
 
-def i_am_alive(metaname,parent_thread):
-    ''' Checks, if backgroud thread is still alive '''
+
+def i_am_alive(metaname, parent_thread):
+    """ Checks if background thread is still alive """
     while os.path.exists(metaname) and parent_thread.is_alive():
         print(parent_thread.progress)
-        update_metafile(metaname,
-                        progress=parent_thread.progress)
+        update_metafile(metaname, progress=parent_thread.progress)
         time.sleep(shareds.PROGRESS_UPDATE_RATE)
 
-def background_load_to_stkbase(username,filename):
-    ''' Imports gramps xml data to database '''
-    from bl.batch import Batch # For status codes
-    
-    upload_folder = get_upload_folder(username) 
-    pathname = os.path.join(upload_folder,filename)
-    metaname = pathname+".meta"
-    logname =  pathname+".log"
-    update_metafile(metaname, progress={})
+
+def background_load_to_stkbase(batch:Root) -> None:
+    """ Imports gramps xml data to database """
+
+    update_metafile(batch.metaname, progress={})
     steps = []
     try:
-        os.makedirs(upload_folder, exist_ok=True)
-        set_meta(username,filename, status=Batch.BATCH_LOADING)
+        update_metafile(batch.metaname, status=State.FILE_LOADING)
+
         this_thread = threading.current_thread()
-        this_thread.progress = {}
-        counts = gramps_loader.analyze_xml(username, filename)
-        update_metafile(metaname,counts=counts,progress={})
+        this_thread.progress = {} # type: ignore
+
+        counts = gramps_loader.analyze_xml(batch.user, batch.id, batch.xmlname)
+        update_metafile(batch.metaname, counts=counts, progress={})
+
         # Start background process monitoring
         if shareds.app.config.get("USE_I_AM_ALIVE", True):
-            threading.Thread(target=lambda: i_am_alive(metaname, this_thread),
-                             name="i_am_alive for " + filename).start()
+            threading.Thread(
+                target=lambda: i_am_alive(batch.metaname, this_thread),
+                name="i_am_alive for " + batch.xmlname,
+            ).start()
 
         # Read the Gramps xml file, and save the information to db
-        res = gramps_loader.xml_to_stkbase(pathname,username)
+        res = gramps_loader.xml_to_stkbase(batch)
 
-        steps = res.get('steps',[])
-        batch_id = res.get('batch_id',"-")
-        if Status.has_failed(res):
-            print(f'background_load_to_stkbase: Error {res.get("statustext")}')
-            return res
-
+        steps = res.get("steps", [])
         for step in steps:
             print(f"    {step}")
-        if not batch_id:
-            return {'status': Status.ERROR,
-                    'statustext': "Run Failed: no batch created."}
 
-        if os.path.exists(metaname): 
-            set_meta(username,filename, batch_id=batch_id, status=Batch.BATCH_CANDIDATE) #prev. BATCH_DONE)
-        msg = "{}:\nStored the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
-        msg += "\nBatch id: {}".format(batch_id)
-        msg += "\nLog file: {}".format(logname)
+        if os.path.exists(batch.metaname):
+            update_metafile(batch.metaname, status=State.ROOT_CANDIDATE)
+        msg = "{}:\nStored the file {} from user {} to neo4j".format(
+            util.format_timestamp(), batch.file, batch.user
+        )
+        msg += "\nBatch id: {}".format(batch.id)
+        msg += "\nLog file: {}".format(batch.logname)
         msg += "\n"
         for step in steps:
             msg += "\n{}".format(step)
         msg += "\n"
-        open(logname,"w", encoding='utf-8').write(msg)
-        email.email_admin(
-                    "Stk: Gramps XML file stored",
-                    msg )
-        syslog.log(type="completed save to database", file=filename, user=username)
+        open(batch.logname, "w", encoding="utf-8").write(msg)
+        email.email_admin("Stk: Gramps XML file stored", msg)
+        syslog.log(type="completed save to database", file=batch.xmlname, user=batch.user)
     except Exception as e:
-        #traceback.print_exc()
-        print(f'bp.admin.uploads.background_load_to_stkbase: {e.__class__.__name__} {e}')
+        # traceback.print_exc()
+        print(
+            f"bp.admin.uploads.background_load_to_stkbase: {e.__class__.__name__} {e}"
+        )
         res = traceback.format_exc()
         print(res)
-        set_meta(username,filename,status=Batch.BATCH_FAILED)
-        msg = f"{util.format_timestamp()}:\nStoring the file {pathname} from user {username} to database FAILED"
-        msg += f"\nLog file: {logname}\n" + res
+        update_metafile(batch.metaname, status=State.FILE_LOAD_FAILED)
+        msg = f"{util.format_timestamp()}:\nStoring the file {batch.file} from user {batch.user} to database FAILED"
+        msg += f"\nLog file: {batch.logname}\n" + res
         for step in steps:
             msg += f"\n{step}"
         msg += "\n"
-        open(logname,"w", encoding='utf-8').write(msg)
-        email.email_admin(
-                    "Stk: Gramps XML file storing FAILED",
-                    msg )
-        syslog.log(type="gramps store to database failed",file=filename,user=username)
+        if isinstance(e, IsotammiException):
+            pprint.pprint(e.kwargs)
+            msg += pprint.pformat(e.kwargs)
+        open(batch.logname, "w", encoding="utf-8").write(msg)
+        email.email_admin("Stk: Gramps XML file storing FAILED", msg)
+        syslog.log(type="gramps store to database failed", file=batch.xmlname, user=batch.user)
 
 
-def initiate_background_load_to_stkbase(userid,filename):
-    ''' Starts gramps xml data import to database.
-    '''
-    #===========================================================================
-    # subprocess.Popen("PYTHONPATH=app python runload.py " 
-    #                  + pathname + " " 
+def initiate_background_load_to_stkbase(batch):
+    """ Starts gramps xml data import to database.
+    """
+    # ===========================================================================
+    # subprocess.Popen("PYTHONPATH=app python runload.py "
+    #                  + pathname + " "
     #                  + username + " "
     #                  + logname,
     #                   shell=True)
-    #===========================================================================
+    # ===========================================================================
     def background_load_to_stkbase_thread(app):
         with app.app_context():
-            background_load_to_stkbase(userid,filename)
-        
-    threading.Thread(target=background_load_to_stkbase_thread,
-                     args=(shareds.app,),
-                     name="neo4j load for " + filename).start()
-    syslog.log(type="storing to database initiated",file=filename,user=userid)
+            background_load_to_stkbase(batch)
+
+    threading.Thread(
+        target=background_load_to_stkbase_thread,
+        args=(shareds.app,),
+        name="neo4j load for " + batch.file,
+    ).start()
+    syslog.log(type="storing to database initiated", file=batch.file, user=batch.user)
     return False
 
-#Removed / 3.2.2020/JMä
-# def batch_count(username,batch_id):
-# def batch_person_count(username,batch_id):
 
-def list_uploads(username):
-    ''' Gets a list of uploaded files and their process status.
-    
-        Also db Batches without upload file are included in the list.
-    '''
-    from bl.batch import Batch # For status codes
 
-    # 1. List Batches, their status and Person count
-    batches = {}
-    result = shareds.driver.session().run(CypherBatch.get_user_batch_summary, 
-                                          user=username)
-    for record in result:
-        # Retuns {batch, status, batch_persons, audit_persons}
-        batch_id = record['batch']
-        batches[batch_id] = (record['status'], record['batch_persons'], record["audit_persons"])
+@dataclass
+class Upload:
+    """Data entity for upload file/batch."""
+    batch_id: str
+    xmlname: str
+    state: str
+    status: str
+    material_type: str
+    description: str
+    user: str
+    u_name: str
+    auditors: List[List]    # [[username, timestamp, format_timestamp]...]
+    count: int
+    is_candidate: int  # for Javascript: 0=false, 1=true
+    for_auditor: int
 
-    # 2. List uploaded files
-    upload_folder = get_upload_folder(username)
-    try:
-        names = sorted([name for name in os.listdir(upload_folder)])
-    except:
-        names = []
+    def __str__(self):
+        s = f"batch={self.batch_id}" if self.batch_id else "NO BATCH "
+        if self.user:
+            s += f"@{self.user}"
+        if self.count:
+            s += f", counts {self.count}"
+        if self.auditors:
+            s += f", auditors: {[a[0] for a in self.auditors]}"
+        return f"{self.material_type}/{self.state}, {s}" #, found {has_file}, {has_log}"
+
+    def for_auditor(self):
+        """ Is relevant for auditor? """
+        if self.state in [
+            State.ROOT_AUDIT_REQUESTED, 
+            State.ROOT_AUDITING, 
+            State.ROOT_ACCEPTED, 
+            State.ROOT_REJECTED]:
+            return True
+        return False
+
+def list_uploads(username:str) -> List[Upload]:
+    """ Gets a list of uploaded batches
+    """
+
+    # 1. List Batches from db, their status and Person count
+    result = shareds.driver.session().run(
+        CypherRoot.get_user_roots_summary, user=username
+    )
+
     uploads = []
-    logfile_base = ""
-    class Upload: pass
-    # There may be 4 files: 
-    # - 'test.gramps',      original xml
-    # - 'test.gramps.log'   logfile from conversion to db
-    # - 'test.gramps.meta'  metafile from file conversion
-    # - 'test_clean.gramps' cleaned xml data
-    for name in names:
-        name_parts = name.split(".")
-        if name.endswith(".log"):
-            (logfile_base, _x) = name.rsplit(".",1)
-        if name.endswith(".meta"):
-            #TODO: Tähän tarvitaan try catch, koska kaatuneen gramps-latauksen jälkeen
-            #      metatiedosto voi olla rikki tai puuttua
-            fname = os.path.join(upload_folder,name)
-            xmlname = name.rsplit(".",maxsplit=1)[0]
-            meta = get_meta(fname)
-            status = meta["status"]
-            status_text = None
-            person_count = 0
-            audit_count = 0
-            batch_id = meta.get('batch_id',"")
-            in_batches = batch_id in batches
-            if not in_batches:
-                batch_id = ""
-                if status == Batch.BATCH_DONE:
-                    status = Batch.BATCH_REMOVED
-            # print(f"### Batch {batch_id} {status} {name} base={logfile_base}")
+    for record in result:
+        # <Record 
+        #    u_name='Juha P.'
+        #    root=<Node id=34475 labels=frozenset({'Root'})
+        #        properties={'material': 'Family Tree', 'state': 'Auditing', 
+        #            'id': '2021-05-07.001', 'user': 'jpek', 
+        #            'timestamp': 1620403991562, ...}> 
+        #    person_count=64
+        #    auditors=[["juha",1630474129763]]
+        # >
+        node = record["root"]
+        b: Root = Root.from_node(node)
+        u_name = record["u_name"]
 
-            if status == Batch.BATCH_UPLOADED:
-                status_text = _("UPLOADED")
-            elif status == Batch.BATCH_LOADING:
-                status_text = _("STORING") 
-            elif status == Batch.BATCH_CANDIDATE or status == Batch.BATCH_DONE:
-                status_text = _("CANDIDATE")
-                # The meta file does not contain later status values
-                if in_batches:
-                    status, person_count, audit_count = batches.pop(batch_id)
-                    if status == Batch.BATCH_FOR_AUDIT:
-                        status_text = _("FOR_AUDIT")
-                else:
-                    status = Batch.BATCH_REMOVED
-            elif status == Batch.BATCH_FAILED:
-                status_text = _("FAILED")
-            elif status == Batch.BATCH_ERROR:
-                status_text = _("ERROR")
-            elif status == Batch.BATCH_REMOVED:
-                status_text = _("REMOVED")
+        meta = get_meta(b)
+        status = meta.get("status", State.FILE_UPLOADED)
+        if status == State.FILE_LOAD_FAILED:
+            state = State.FILE_LOAD_FAILED
+        else:
+            state = b.state
+        audi_rec = record['auditors']
+        auditors = []
+        for au_user, ts in audi_rec:
+            # ["juha",1630474129763]
+            if au_user:
+                ts_str = util.format_ms_timestamp(ts, "d")
+                # ["juha",1630474129763,"1.9.2021"]
+                auditors.append((au_user, ts, ts_str))
 
-            if status_text:
-                upload = Upload()
-                upload.xmlname = xmlname
-                upload.status = status_text
-                upload.batch_id = batch_id
-                upload.count = person_count
-                upload.count_a = audit_count
-                upload.done = (status_text == _("CANDIDATE") or \
-                               status_text == _("FOR_AUDIT"))
-                upload.uploaded = (status_text == _("UPLOADED"))
-                upload.loading = (status_text == _("STORING"))
-                clean_name =  os.path.join(upload_folder, name_parts[0] + "_clean." + name_parts[1])
-                upload.has_file = os.path.isfile(clean_name)
-                upload.has_log = name.startswith(logfile_base)
-                upload.upload_time = meta["upload_time"]
-                upload.upload_time_s = util.format_timestamp(upload.upload_time)
-                upload.user = username
-                uploads.append(upload)
-    
-    # 3. Add batches where there is no meta file
-    for batch, item in batches.items():
-        upload = Upload()
-        upload.batch_id = batch
-        status, person_count, audit_count = item
-        if status == Batch.BATCH_STARTED:
-            upload.status = "?"
-        elif status == Batch.BATCH_CANDIDATE: # "completed"
-            #Todo: Remove later: Old FOR_AUDIT materials are CANDIDATE, too
-            upload.status = _("CANDIDATE") + " ?"
-        elif audit_count > 0:
-            upload.status = f"{ _('FOR_AUDIT') } {audit_count} { _('persons') }"
-        upload.count = person_count
-        upload.count_a = audit_count
-        upload.has_file = False
-        upload.has_log = audit_count > 0 # Rough estimate!
-        upload.upload_time = 0.0
-        print(f"### Batch {batch} {status} -")
+        upload = Upload(
+            batch_id=b.id,
+            xmlname=os.path.split(b.file)[1] if b.file else "",
+            count=record["person_count"],
+            user=b.user,
+            u_name=u_name,
+            auditors=auditors,
+            state=state,
+            status=_(state),
+            is_candidate=1 if (b.state == State.ROOT_CANDIDATE) else 0,
+            for_auditor=1 if b.for_auditor() else 0,
+            material_type=b.material,
+            description=b.description,
+        )
+        #print(f"#bp.admin.uploads.list_uploads: {upload}")
         uploads.append(upload)
-        
-    return sorted(uploads,key=lambda x: x.upload_time)
 
-def list_uploads_all(users):
+    return sorted(uploads, key=lambda upload: upload.batch_id)
+
+def list_uploads_all(users) -> List[Upload]:
+    """ Get named setups.User objects. """
+    uploads = []
     for user in users:
         for upload in list_uploads(user.username):
-            yield upload 
-
+            uploads.append(upload)
+    return sorted(uploads, key=lambda upload: upload.batch_id)
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.
 # --> bl.batch.Batch.list_empty_batches
 
 
-def removefile(fname): 
-    ''' Removing a file '''
+def removefile(fname):
+    """ Removing a file """
     try:
         os.remove(fname)
     except FileNotFoundError:
@@ -382,13 +378,12 @@ def removefile(fname):
 
 
 def delete_files(username, xmlfile):
-    ''' Removing uploaded file with associated .meta and .log '''
+    """ Removing uploaded file with associated .meta and .log """
     upload_folder = get_upload_folder(username)
-    removefile(os.path.join(upload_folder,xmlfile))
-    removefile(os.path.join(upload_folder,xmlfile+".meta"))
-    removefile(os.path.join(upload_folder,xmlfile+".log"))
+    removefile(os.path.join(upload_folder, xmlfile))
+    removefile(os.path.join(upload_folder, xmlfile + ".meta"))
+    removefile(os.path.join(upload_folder, xmlfile + ".log"))
     i = xmlfile.rfind(".")
     if i >= 0:
         file_cleaned = xmlfile[:i] + "_clean" + xmlfile[i:]
-        removefile(os.path.join(upload_folder,file_cleaned))
-        
+        removefile(os.path.join(upload_folder, file_cleaned))

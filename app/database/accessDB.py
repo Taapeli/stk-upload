@@ -21,6 +21,8 @@
 
 #from datetime import datetime
 import logging
+import traceback
+
 logger = logging.getLogger('stkserver')
 
 #from neobolt.exceptions import ConstraintError # Obsolete
@@ -30,6 +32,7 @@ from flask_security import utils as sec_utils
 import shareds
 from .cypher_setup import SetupCypher
 from .schema_fixes import do_schema_fixes
+from bl.admin.models.cypher_adm import Cypher_adm
 
 # All User roles here:
 ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön käyttäjä, näkee esittelysukupuun'},
@@ -43,8 +46,8 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 )
 
 # ====== Database schema ======
-# increment this, if shcema must be updated
-DB_SCHEMA_VERSION = '2021.1.0'
+# Change (increment) this, if schema must be updated
+DB_SCHEMA_VERSION = '2021.2.0.3'
 # =============================
 
 
@@ -60,6 +63,8 @@ DB_SCHEMA_VERSION = '2021.1.0'
 #     return service(shareds.driver)
 
 
+
+
 def initialize_db():
     '''
     Check and initiate important nodes and constraints and schema fixes,
@@ -69,7 +74,7 @@ def initialize_db():
     pe.neo4j.neo4jengine.Neo4jEngine called from app.setups.py
 
     ''' 
-    if not schema_updated():
+    if schema_updated():
         logger.info('database.accessDB.initialize_db: checking roles, constraints '
                     f'and schema fixes (version {DB_SCHEMA_VERSION})' )
 
@@ -106,6 +111,8 @@ def initialize_db():
         }
         check_constraints(constr_list)
 
+        create_freetext_index()
+        
         # Fix changed schema
         do_schema_fixes()
 
@@ -122,7 +129,7 @@ def schema_updated():
     active_version = 0
     for record in result:
         active_version = record[0]
-    return active_version == DB_SCHEMA_VERSION
+    return active_version != DB_SCHEMA_VERSION
 
 def roles_exist():
     #  Tarkista roolien olemassaolo
@@ -268,7 +275,7 @@ def create_role_constraints():
 
 
 def create_user_constraints():
-    ''' Unique contraint for User email and user properties
+    ''' Unique constraint for User email and user properties
     '''
     cnt = 0
     with shareds.driver.session() as session:
@@ -325,7 +332,7 @@ def check_constraints(needed:dict):
 def create_lock_w_constraint():
     # Initial lock with schema version.
     with shareds.driver.session() as session:
-        # Create first Lock node and contraint
+        # Create first Lock node and constraint
         session.run(SetupCypher.update_lock, 
                     id="initiated", 
                     db_schema=DB_SCHEMA_VERSION, 
@@ -343,7 +350,7 @@ def re_initiate_nodes_constraints_fixes():
         return
 
 def create_unique_constraint(label, prop):
-    ' Create given contraint for given label and property.'
+    ' Create given constraint for given label and property.'
     with shareds.driver.session() as session:
         query = f"create constraint on (n:{label}) assert n.{prop} is unique"
         try:  
@@ -359,7 +366,7 @@ def create_unique_constraint(label, prop):
     return
 
 def create_constraint(label, prop):
-    ' Create given contraint for given label and property.'
+    ' Create given constraint for given label and property.'
     with shareds.driver.session() as session:
         query = f"create constraint on (n:{label})"
         try:  
@@ -374,4 +381,16 @@ def create_constraint(label, prop):
             raise
     return
 
+
+def create_freetext_index():
+    try:
+        result = shareds.driver.session().run(Cypher_adm.create_freetext_index)
+    except ClientError as e:
+        msgs = e.message.split(',')
+        print(f'Create_freetext_index ok: {msgs[0]}')
+        return
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f'database.accessDB.create_freetext_index: {e.__class__.__name__} {e}' )
+        raise
 

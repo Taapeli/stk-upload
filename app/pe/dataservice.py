@@ -19,6 +19,7 @@
 
 import shareds
 import logging
+from bl.base import IsotammiException
 
 logger = logging.getLogger('stkserver')
 
@@ -32,7 +33,7 @@ class DataService:
     The current database is defined in /setups.py.
 
     Follows Context Manager pattern allowing automatic transaction management
-    using 'with' statement.
+    by 'with' statement.
 
     @See https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
     """
@@ -50,7 +51,7 @@ class DataService:
         """
         self.idstr = f"{self.__class__.__name__}>DataService"
         print(f'#~~~{self.idstr} init')
-        # Find <class 'pe.neo4j.*service'> and initilialize it
+        # Find <class 'pe.neo4j.*service'> and initialize it
         self.service_name = service_name
         service_class = shareds.dataservices.get(self.service_name)
         if not service_class:
@@ -60,22 +61,18 @@ class DataService:
         # Initiate selected service object
         self.dataservice = service_class(shareds.driver)
         self.old_tx = tx
-        # Prepare to return back to the privious dataservice, if one exists
-        if shareds.dservice:
-            self.previous_dservice = shareds.dservice
-        else:
-            self.previous_dservice = None
-        shareds.dservice = self.dataservice
-        #print(f"#> pe.dataservice.DataService {service_name} dservice={obj_addr(self.dataservice)}")
 
         if user_context:
             self.user_context = user_context
             self.username = user_context.user
             # The operative username
-            if user_context.context == user_context.ChoicesOfView.COMMON:
+            if user_context.context_code == user_context.ChoicesOfView.COMMON:
                 self.use_user = None
             else:
                 self.use_user = user_context.user
+        else:
+            #raise IsotammiException("pe.dataservice.DataService: user_context is mandatory")
+            pass
 
     def __enter__(self):
         # With 'update' and 'read_tx' begin transaction
@@ -106,7 +103,8 @@ class DataService:
         if self.dataservice.tx:
             if exc_type:
                 print(f"--{self.idstr} exit rollback {exc_type}")
-                self.dataservice.tx.rollback()
+                if self.old_tx is None:
+                    self.dataservice.tx.rollback()
             else:
                 if self.old_tx is None:
                     print(f'#~~~{self.idstr} exit commit tx={obj_addr(self.dataservice.tx)}')
@@ -118,13 +116,6 @@ class DataService:
                     print(f'#~~~{self.idstr} exit continue tx={obj_addr(self.dataservice.tx)}')
         else:
             print(f'#~~~{self.idstr} exit {obj_addr(self.old_tx)}')
-
-        if self.previous_dservice:
-            # print(f"-- {self.idstr} returning to dsrvice={obj_addr(self.previous_dservice)} from {obj_addr(shareds.dservice)}")
-            shareds.dservice = self.previous_dservice
-            self.previous_dservice = None
-        else:
-            shareds.dservice = None
 
 
 class ConcreteService:

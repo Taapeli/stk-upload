@@ -41,7 +41,7 @@ II. Between Refnames there can be different references:
         (r:Refname {name:'Persson'}) -[b:PARENTNAME]-> (s:Refname {name:'Per'})
 
 The I links are created, when new Person nodes are inserted.
-The II links are created, when reference names are added from a cvs file.
+The II links are created, when reference names are added from a csv file.
 """
 # blacked 2021-05-01 JMä
 from sys import stderr
@@ -53,7 +53,7 @@ logger = logging.getLogger("stkserver")
 import shareds
 from bl.base import NodeObject  # , Status
 from pe.neo4j.cypher.cy_refname import CypherRefname
-from .person import Person, SEX_UNKOWN
+from .person import Person, SEX_UNKNOWN 
 
 # Global allowed reference types in Refname.reftype field or use attribute in db
 REFTYPES = ["basename", "firstname", "surname", "patronyme", "father", "mother"]
@@ -145,7 +145,7 @@ class Refname(NodeObject):
         if "sex" in node:
             n.sex = node["sex"]
         else:
-            n.sex = SEX_UNKOWN
+            n.sex = SEX_UNKNOWN
 
         return n
 
@@ -363,7 +363,7 @@ class RefnameReader:
 
     Data reading class for Refname objects with associated data.
 
-    - Returns a Result object which includes the items and eventuel error object.
+    - Returns a Result object which includes the items and eventual error object.
 
     #TODO: Should move Refname.get_refnames() here
     """

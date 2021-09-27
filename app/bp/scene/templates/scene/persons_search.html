@@ -75,13 +75,14 @@ div.CloudPink div {
 {% endif %}
 
 {% if rule %}{% set selection = rule %}
-{% else %}{% set selection = "surname" %}
+{% else %}{% set selection = "any" %}
 {% endif %}
 {% set oldkey = key %}
            
                 <div id="namesearch" class="SearchBox2">
                        <h2>
                           <label for="cars">{{ _('Search term') }}</label>
+
                           <select id="rule" name="rule">
                             <option value="surname"
                                 x-desc="{{ _('Any surname (beginning part)') }}"
@@ -92,6 +93,13 @@ div.CloudPink div {
                             <option value="patronyme"
                                 x-desc="{{ _('Any patronymic (beginning part)') }}"
                         {% if selection == "patronyme" %}selected{% endif %}>{{ _('Patronymic') }}</option>
+
+                            <option value="freetext"
+                                x-desc="{{ _('Free text (any name, can use wildcards)') }}"
+                                {% if selection == "freetext" %}selected{% endif %}>
+                                {{ _('Free name search') }}
+                            </option>
+                            
                             <option value="years"
                                 x-desc="{{ _('A year (1750) or years range (1700-1750) where persons might live') }}"
                         {% if selection == "years" %}selected{% endif %}>{{ _('Years range') }}</option>
@@ -126,6 +134,7 @@ selector.addEventListener("change", () => {
 
 
 {% if status == 'OK' %}
+{% if selection != "freetext" %}
 	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
 	        {% for p in persons %}
@@ -136,6 +145,7 @@ selector.addEventListener("change", () => {
 	        {% endfor %}
 			</ul>
 	</div>
+{% endif %}
 
 	<table class="IndividualList">
 		<thead>
@@ -148,10 +158,12 @@ selector.addEventListener("change", () => {
 	    {% for p in persons %}
 	        <tr>
                 <td class="ColumnAlpha">
+{% if selection != "freetext" %}
             {% set ini = p.names[0].initial|upper %}
             {% if loop.changed(ini) %}
 		            <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
 			{% endif %}
+{% endif %}
 				</td>
 	            <td class="ColumnPerson">
                     <div>
