@@ -65,20 +65,12 @@ class FanChart:
         Format the data for fan/sunburst chart use.
         """
         names = person_attributes["sortname"].split("#")
-        if (
-            len(person_attributes["events"]) > 0
-            and person_attributes["events"][0][1] != None
-        ):
-            birth = f"{person_attributes['events'][0][1]}"
-        else:
-            birth = ""
-        if (
-            len(person_attributes["events"]) > 1
-            and person_attributes["events"][0][1] != None
-        ):
-            death = f"{person_attributes['events'][1][1]}"
-        else:
-            death = ""
+        birth = death = ""
+        for ev in person_attributes["events"]:
+            if ev[0] == "Birth":
+                birth = str(ev[1])
+            elif ev[0] == "Death":
+                death = str(ev[1])
         return {
             "name": f"{names[1]} {names[0]}",
             "color": self.gender_color(person_attributes["gender"], descendant),
