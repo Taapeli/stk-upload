@@ -35,7 +35,8 @@ tr > td:nth-child(1), tr > td:nth-child(5) {
              {% if current_user.username == upload.user %}
                <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b>
              {% else %}
-               <td><a href="/audit/profile/{{upload.user}}">{{upload.user}}</a>
+               <td><a href="/audit/profile/{{upload.user}}" title="{{ _('User Profile') }}"
+                    >{{upload.user}}</a>
              {% endif -%}
                    <br>{{upload.u_name}}
                </td>
