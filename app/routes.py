@@ -120,7 +120,7 @@ def entry():
 
     # If not logged in, a login page is shown here first
     return render_template(
-        "/index_entry.html", demo_site=demo_site, lang=lang, surnamestats=surnamestats
+        "/index_demo.html", demo_site=demo_site, lang=lang, surnamestats=surnamestats
     )
 
 
