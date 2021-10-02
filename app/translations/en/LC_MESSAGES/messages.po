@@ -3237,7 +3237,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/place_events.html:3
 #: bp/scene/templates/scene/place_events.html:27
-msgid "Place events"
+msgid "Place Details"
 msgstr ""
 
 #: bp/scene/templates/scene/place_events.html:37
@@ -3318,7 +3318,7 @@ msgid "Events of a Source"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:15
-msgid "Source References"
+msgid "Source Details"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:21
@@ -3348,7 +3348,7 @@ msgid "Abbreviation"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:83
-msgid "Source References and Events"
+msgid "Source References"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:95

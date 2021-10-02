@@ -3253,8 +3253,8 @@ msgstr "Inga platser"
 
 #: bp/scene/templates/scene/place_events.html:3
 #: bp/scene/templates/scene/place_events.html:27
-msgid "Place events"
-msgstr "Plats händelser"
+msgid "Place Details"
+msgstr "Plats detaljer"
 
 #: bp/scene/templates/scene/place_events.html:37
 msgid "Invalid coordinates"
@@ -3334,8 +3334,8 @@ msgid "Events of a Source"
 msgstr "Händelser av en källa"
 
 #: bp/scene/templates/scene/source_events.html:15
-msgid "Source References"
-msgstr "Käll referenser"
+msgid "Source Details"
+msgstr "Käll detaljer"
 
 #: bp/scene/templates/scene/source_events.html:21
 #: bp/scene/templates/scene/sources.html:71
@@ -3364,8 +3364,8 @@ msgid "Abbreviation"
 msgstr "Förkortning"
 
 #: bp/scene/templates/scene/source_events.html:83
-msgid "Source References and Events"
-msgstr "Käll referenser och händelser"
+msgid "Source References"
+msgstr "Käll referenser"
 
 #: bp/scene/templates/scene/source_events.html:95
 msgid "Copy citation to clipboard"

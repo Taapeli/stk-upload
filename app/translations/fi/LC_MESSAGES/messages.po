@@ -3241,8 +3241,8 @@ msgstr "Ei paikkoja"
 
 #: bp/scene/templates/scene/place_events.html:3
 #: bp/scene/templates/scene/place_events.html:27
-msgid "Place events"
-msgstr "Paikan tapahtumat"
+msgid "Place Details"
+msgstr "Paikan tiedot"
 
 #: bp/scene/templates/scene/place_events.html:37
 msgid "Invalid coordinates"
@@ -3322,8 +3322,8 @@ msgid "Events of a Source"
 msgstr "Lähteeseen liitetyt tapahtumat"
 
 #: bp/scene/templates/scene/source_events.html:15
-msgid "Source References"
-msgstr "Lähdeviitteet"
+msgid "Source Details"
+msgstr "Lähteen tiedot"
 
 #: bp/scene/templates/scene/source_events.html:21
 #: bp/scene/templates/scene/sources.html:71
@@ -3352,8 +3352,8 @@ msgid "Abbreviation"
 msgstr "Lyhenne"
 
 #: bp/scene/templates/scene/source_events.html:83
-msgid "Source References and Events"
-msgstr "Lähdeviitteet ja tapahtumat"
+msgid "Source References"
+msgstr "Lähdeviittaukset"
 
 #: bp/scene/templates/scene/source_events.html:95
 msgid "Copy citation to clipboard"
