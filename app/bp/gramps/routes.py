@@ -246,23 +246,23 @@ def xml_delete(xmlfile):
     return redirect(url_for("gramps.list_uploads"))
 
 
-@bp.route("/gramps/xml_download/<xmlfile>")
-@login_required
-@roles_accepted("research", "admin")
-def xml_download(xmlfile):
-    xml_folder = uploads.get_upload_folder(current_user.username)
-    xml_folder = os.path.abspath(xml_folder)
-    return send_from_directory(
-        directory=xml_folder,
-        filename=xmlfile,
-        mimetype="application/gzip",
-        as_attachment=True,
-    )
+# @bp.route("/gramps/xml_download/<xmlfile>")
+# @login_required
+# @roles_accepted("research", "admin")
+# def xml_download(xmlfile):
+#     xml_folder = uploads.get_upload_folder(current_user.username)
+#     xml_folder = os.path.abspath(xml_folder)
+#     return send_from_directory(
+#         directory=xml_folder,
+#         filename=xmlfile,
+#         mimetype="application/gzip",
+#         as_attachment=True,
+#     )
 
 @bp.route("/gramps/batch_download/<batch_id>")
 @login_required
 @roles_accepted("research", "admin")
-def batch_download(batch_id):
+def gramps_batch_download(batch_id):
     batch = Root.get_batch(current_user.username, batch_id)
     if batch:
         xml_folder, xname = os.path.split(batch.file)

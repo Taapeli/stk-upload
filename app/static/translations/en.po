@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-30 13:23+0300\n"
+"POT-Creation-Date: 2021-10-03 20:53+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -267,7 +267,7 @@ msgstr ""
 
 #: bl/gramps/xml_dom_handler.py:384 bp/scene/templates/scene/person.html:221
 #: bp/scene/templates/scene/persons_list.html:85
-#: bp/scene/templates/scene/place_events.html:162
+#: bp/scene/templates/scene/place.html:162
 msgid "Events"
 msgstr ""
 
@@ -280,7 +280,7 @@ msgid "Families"
 msgstr ""
 
 #: bl/gramps/xml_dom_handler.py:516 bp/scene/templates/scene/family.html:121
-#: bp/scene/templates/scene/place_events.html:86
+#: bp/scene/templates/scene/place.html:86
 #: bp/scene/templates/scene/source_events.html:64
 msgid "Notes"
 msgstr ""
@@ -534,7 +534,7 @@ msgstr ""
 msgid "User updated"
 msgstr ""
 
-#: bp/admin/routes.py:340 bp/gramps/routes.py:188
+#: bp/admin/routes.py:340
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr ""
@@ -739,7 +739,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/free_text_indexes.html:13
 #: bp/admin/templates/admin/load_result.html:13
-#: bp/audit/templates/audit/pick_auditing.html:86
+#: bp/audit/templates/audit/pick_auditing.html:97
 #: bp/gramps/templates/gramps/analyze_xml.html:29
 #: bp/gramps/templates/gramps/gramps_analyze.html:43
 #: bp/gramps/templates/gramps/result.html:21
@@ -947,9 +947,8 @@ msgid "Time"
 msgstr ""
 
 #: bp/admin/templates/admin/syslog.html:15
-#: bp/scene/templates/scene/place_events.html:112
-#: templates/cite_sour_repo.html:15 templates/cite_sour_repo.html:59
-#: templates/repo_sources.html:19
+#: bp/scene/templates/scene/place.html:112 templates/cite_sour_repo.html:15
+#: templates/cite_sour_repo.html:59 templates/repo_sources.html:19
 msgid "Type"
 msgstr ""
 
@@ -993,6 +992,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:31
 #: bp/audit/templates/audit/batches.html:26
+#: bp/audit/templates/audit/pick_auditing.html:43
 #: bp/gramps/templates/gramps/uploads.html:121
 msgid "Gramps file"
 msgstr ""
@@ -1093,47 +1093,47 @@ msgstr ""
 msgid "Delete file"
 msgstr ""
 
-#: bp/audit/routes.py:104
+#: bp/audit/routes.py:105
 msgid "Audit request for "
 msgstr ""
 
-#: bp/audit/routes.py:107
+#: bp/audit/routes.py:108
 msgid "Withdrawing audit request for "
 msgstr ""
 
-#: bp/audit/routes.py:119
+#: bp/audit/routes.py:120
 msgid " failed"
 msgstr ""
 
-#: bp/audit/routes.py:121
+#: bp/audit/routes.py:122
 msgid " succeeded"
 msgstr ""
 
-#: bp/audit/routes.py:159
+#: bp/audit/routes.py:160
 msgid "No such batch "
 msgstr ""
 
-#: bp/audit/routes.py:223
+#: bp/audit/routes.py:225
 msgid "You are now an auditor for batch "
 msgstr ""
 
-#: bp/audit/routes.py:230
+#: bp/audit/routes.py:232
 msgid "Audit batch accepted: "
 msgstr ""
 
-#: bp/audit/routes.py:237
+#: bp/audit/routes.py:239
 msgid "You have rejected the batch "
 msgstr ""
 
-#: bp/audit/routes.py:400
+#: bp/audit/routes.py:417
 msgid "Done"
 msgstr ""
 
-#: bp/audit/routes.py:489
+#: bp/audit/routes.py:506
 msgid "Data type '{}' is not supported"
 msgstr ""
 
-#: bp/audit/routes.py:496
+#: bp/audit/routes.py:513
 msgid "Missing proper column title: "
 msgstr ""
 
@@ -1163,11 +1163,12 @@ msgid "Auditor"
 msgstr ""
 
 #: bp/audit/templates/audit/approvals.html:74
+#: bp/audit/templates/audit/pick_auditing.html:53
 msgid "Researcher"
 msgstr ""
 
 #: bp/audit/templates/audit/approvals.html:75
-#: bp/audit/templates/audit/pick_auditing.html:64
+#: bp/audit/templates/audit/pick_auditing.html:76
 #: bp/audit/templates/audit/user_profile.html:114
 #: bp/start/templates/start/my_settings.html:125
 msgid "Batch id"
@@ -1185,7 +1186,7 @@ msgstr ""
 msgid "Delete data"
 msgstr ""
 
-#: bp/audit/templates/audit/approvals.html:97
+#: bp/audit/templates/audit/approvals.html:97 ui/batch_ops.py:17
 msgid "Delete from database"
 msgstr ""
 
@@ -1205,12 +1206,12 @@ msgid "persons"
 msgstr ""
 
 #: bp/audit/templates/audit/batches.html:60
-#: bp/audit/templates/audit/pick_auditing.html:45
+#: bp/audit/templates/audit/pick_auditing.html:61
 #: bp/gramps/templates/gramps/uploads.html:180
 msgid "Audit start date"
 msgstr ""
 
-#: bp/audit/templates/audit/batches.html:84
+#: bp/audit/templates/audit/batches.html:84 ui/batch_ops.py:16
 msgid "Show upload log"
 msgstr ""
 
@@ -1311,60 +1312,51 @@ msgstr ""
 
 #: bp/audit/templates/audit/pick_auditing.html:29
 #, python-format
-msgid "Selected %(m)s batch"
+msgid "Selected %(m)s batch in the state %(s)s"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:34
+#: bp/audit/templates/audit/pick_auditing.html:37
 #: bp/scene/templates/scene/medias.html:42
 #: bp/scene/templates/scene/medias.html:64
-#: bp/scene/templates/scene/place_events.html:139
+#: bp/scene/templates/scene/place.html:139
 msgid "Title"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:38
-msgid "In the phase"
+#: bp/audit/templates/audit/pick_auditing.html:49
+msgid "Total nodes"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:43
+#: bp/audit/templates/audit/pick_auditing.html:59
 msgid "Current auditors"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:50
+#: bp/audit/templates/audit/pick_auditing.html:66
 msgid "Access is given also to"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:58
-msgid "There is no data in this batch"
-msgstr ""
-
-#: bp/audit/templates/audit/pick_auditing.html:72
+#: bp/audit/templates/audit/pick_auditing.html:84
 msgid "saved at"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:78
-#, python-format
-msgid "Total %(cnt)s nodes from user <b>%(user)s</b>."
-msgstr ""
-
-#: bp/audit/templates/audit/pick_auditing.html:87
+#: bp/audit/templates/audit/pick_auditing.html:98
 msgid "Browse this material"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:90
+#: bp/audit/templates/audit/pick_auditing.html:101
 msgid "Start auditing"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:92
+#: bp/audit/templates/audit/pick_auditing.html:103
 msgid "Accept auditing"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:94
-#: bp/audit/templates/audit/pick_auditing.html:97
-#: bp/audit/templates/audit/pick_auditing.html:109
+#: bp/audit/templates/audit/pick_auditing.html:105
+#: bp/audit/templates/audit/pick_auditing.html:108
+#: bp/audit/templates/audit/pick_auditing.html:120
 msgid "Reject auditing"
 msgstr ""
 
-#: bp/audit/templates/audit/pick_auditing.html:107
+#: bp/audit/templates/audit/pick_auditing.html:118
 msgid "Cancel"
 msgstr ""
 
@@ -1758,7 +1750,7 @@ msgstr ""
 #: bp/scene/templates/scene/event.html:45
 #: bp/scene/templates/scene/event_vue.html:62
 #: bp/scene/templates/scene/person.html:228
-#: bp/scene/templates/scene/place_events.html:171
+#: bp/scene/templates/scene/place.html:171
 #: bp/start/templates/start/my_settings.html:169
 msgid "Description"
 msgstr ""
@@ -2286,21 +2278,21 @@ msgstr ""
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr ""
 
-#: bp/gramps/routes.py:312
+#: bp/gramps/routes.py:318
 msgid "Batch not found"
 msgstr ""
 
-#: bp/gramps/routes.py:326
+#: bp/gramps/routes.py:332
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr ""
 
-#: bp/gramps/routes.py:334
+#: bp/gramps/routes.py:340
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr ""
 
-#: bp/gramps/routes.py:418
+#: bp/gramps/routes.py:424
 msgid "Failed to retrieve commands"
 msgstr ""
 
@@ -2556,7 +2548,7 @@ msgstr ""
 #: bp/scene/templates/scene/event.html:49
 #: bp/scene/templates/scene/event_vue.html:66
 #: bp/scene/templates/scene/person.html:226
-#: bp/scene/templates/scene/place_events.html:170
+#: bp/scene/templates/scene/place.html:170
 #: bp/start/templates/start/my_settings.html:167
 #: templates/cite_sour_repo.html:19 templates/cite_sour_repo.html:29
 msgid "Date"
@@ -2582,7 +2574,7 @@ msgstr ""
 #: bp/scene/templates/scene/family.html:29
 #: bp/scene/templates/scene/media.html:63
 #: bp/scene/templates/scene/person.html:115
-#: bp/scene/templates/scene/place_events.html:77
+#: bp/scene/templates/scene/place.html:77
 #: bp/scene/templates/scene/source_events.html:44
 msgid "Identifiers"
 msgstr ""
@@ -2598,7 +2590,7 @@ msgid "Role"
 msgstr ""
 
 #: bp/scene/templates/scene/event_vue.html:83
-#: bp/scene/templates/scene/place_events.html:135
+#: bp/scene/templates/scene/place.html:135
 msgid "Media"
 msgstr ""
 
@@ -2939,7 +2931,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/medias.html:75
 #: bp/scene/templates/scene/medias.html:82
-#: bp/scene/templates/scene/place_events.html:147
+#: bp/scene/templates/scene/place.html:147
 msgid "Go to media page"
 msgstr ""
 
@@ -2947,8 +2939,8 @@ msgstr ""
 #: bp/scene/templates/scene/person.html:88
 #: bp/scene/templates/scene/person.html:91
 #: bp/scene/templates/scene/person.html:317
-#: bp/scene/templates/scene/place_events.html:140
-#: bp/scene/templates/scene/place_events.html:150 ui/jinja_filters.py:199
+#: bp/scene/templates/scene/place.html:140
+#: bp/scene/templates/scene/place.html:150 ui/jinja_filters.py:199
 msgid "Photo"
 msgstr ""
 
@@ -2971,7 +2963,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/person.html:100
 #: bp/scene/templates/scene/persons_search.html:139
-#: bp/scene/templates/scene/place_events.html:56
+#: bp/scene/templates/scene/place.html:56
 #: bp/scene/templates/scene/places.html:53
 #: bp/scene/templates/scene/sources.html:40
 msgid "Top"
@@ -3015,7 +3007,7 @@ msgid "Gender"
 msgstr ""
 
 #: bp/scene/templates/scene/person.html:169
-#: bp/scene/templates/scene/place_events.html:119
+#: bp/scene/templates/scene/place.html:119
 msgid "Private data"
 msgstr ""
 
@@ -3057,8 +3049,7 @@ msgid "See %(num)d person notes"
 msgstr ""
 
 #: bp/scene/templates/scene/person.html:225
-#: bp/scene/templates/scene/place_events.html:169
-#: templates/cite_sour_repo.html:8
+#: bp/scene/templates/scene/place.html:169 templates/cite_sour_repo.html:8
 msgid "Event"
 msgstr ""
 
@@ -3118,7 +3109,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/persons_list.html:84
 #: bp/scene/templates/scene/persons_search.html:153
-#: bp/scene/templates/scene/place_events.html:168
+#: bp/scene/templates/scene/place.html:168
 msgid "Person"
 msgstr ""
 
@@ -3235,45 +3226,44 @@ msgstr ""
 msgid "No places"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:3
-#: bp/scene/templates/scene/place_events.html:27
-msgid "Place events"
+#: bp/scene/templates/scene/place.html:3 bp/scene/templates/scene/place.html:27
+msgid "Place Details"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:37
+#: bp/scene/templates/scene/place.html:37
 msgid "Invalid coordinates"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:38
+#: bp/scene/templates/scene/place.html:38
 msgid "should be in decimal format"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:48
+#: bp/scene/templates/scene/place.html:48
 msgid "OpenStreetMap on a larger scale"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:50
+#: bp/scene/templates/scene/place.html:50
 msgid "on Google Map"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:51
+#: bp/scene/templates/scene/place.html:51
 #: bp/scene/templates/scene/places.html:71
 msgid "Location"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:107
+#: bp/scene/templates/scene/place.html:107
 msgid "Note"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:113
+#: bp/scene/templates/scene/place.html:113
 msgid "Additional Information"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:195
+#: bp/scene/templates/scene/place.html:195
 msgid "No events"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:200
+#: bp/scene/templates/scene/place.html:200
 msgid "The required place was not found."
 msgstr ""
 
@@ -3318,7 +3308,8 @@ msgid "Events of a Source"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:15
-msgid "Source References"
+#: templates/cite_sour_repo.html:3
+msgid "Source Details"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:21
@@ -3348,7 +3339,7 @@ msgid "Abbreviation"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:83
-msgid "Source References and Events"
+msgid "Source References"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:95
@@ -4138,10 +4129,6 @@ msgstr ""
 msgid "No data"
 msgstr ""
 
-#: templates/cite_sour_repo.html:3
-msgid "Source Details"
-msgstr ""
-
 #: templates/cite_sour_repo.html:11 templates/cite_sour_repo.html:29
 #: templates/cite_sour_repo.html:43 templates/cite_sour_repo.html:59
 #: templates/repo_sources.html:11
@@ -4471,6 +4458,18 @@ msgstr ""
 
 #: templates/virhe_lataus.html:14
 msgid "Unable to load file, code ="
+msgstr ""
+
+#: ui/batch_ops.py:13
+msgid "Send for auditing"
+msgstr ""
+
+#: ui/batch_ops.py:14
+msgid "Withdraw auditing"
+msgstr ""
+
+#: ui/batch_ops.py:15
+msgid "Download the Gramps file"
 msgstr ""
 
 #: ui/jinja_filters.py:58 ui/jinja_filters.py:59

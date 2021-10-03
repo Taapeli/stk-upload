@@ -360,19 +360,20 @@ def list_threads():
 
 @bp.route("/admin/xml_download/<username>/<xmlfile>")
 @login_required
-@roles_accepted("admin", "audit")
-def xml_download(username, xmlfile):
+@roles_accepted("admin")
+def admin_xml_download(username, xmlfile):
     xml_folder = uploads.get_upload_folder(username)
     xml_folder = os.path.abspath(xml_folder)
-    logger.info(f'-> bp.admin.routes.xml_download f="{xmlfile}"')
+    # logger.info(f'-> bp.admin.routes.xml_download f="{xmlfile}"')
     logging.debug(xml_folder)
-    return send_from_directory(
-        directory=xml_folder,
-        filename=xmlfile,
+
+    logger.info(f"-> bp.admin.routes.admin_xml_download u={username} \"{xmlfile}\"")
+    syslog.log(type="Admin xml download", by=username, file=xmlfile)
+
+    return send_from_directory(xml_folder, xmlfile,
         mimetype="application/gzip",
         as_attachment=True,
     )
-    # attachment_filename=xmlfile+".gz")
 
 
 @bp.route("/admin/show_upload_log/<username>/<xmlfile>/<batch_id>")

@@ -3,17 +3,18 @@ Created on 23.9.2021
 
 @author: jm
 '''
+from flask_babelex import _
 from bl.root import State
 
 # List of functions available for researcher
 
 RESEARCHER_FUNCTIONS = [ # (URL, title)
     ("/scene/persons/search?set_scope=1&batch_id=", "Browse this material"),
-    ("/audit/user/request/",     "Send for auditing"),
-    ("/audit/user/withdraw/",    "Withdraw auditing"),
-    ("/gramps/batch_download/",  "Download the Gramps file"),
-    ("/gramps/show_upload_log/", "Show upload log"),
-    ("/gramps/batch_delete/",    "Delete from database"),
+    ("/audit/user/request/",     _("Send for auditing")),
+    ("/audit/user/withdraw/",    _("Withdraw auditing")),
+    ("/gramps/batch_download/",  _("Download the Gramps file")),
+    ("/gramps/show_upload_log/", _("Show upload log")),
+    ("/gramps/batch_delete/",    _("Delete from database")),
     ]
 
 # A boolean vector, which RESEARCHER_FUNCTIONS are allowed for any Root.status
