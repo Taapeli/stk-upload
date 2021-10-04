@@ -323,7 +323,10 @@ def batch_delete(batch_id):
         upload_dir = os.path.split(batch.file)[0]
         import shutil
         print("shutil.rmtree", upload_dir)
-        shutil.rmtree(upload_dir)
+        try:
+            shutil.rmtree(upload_dir)
+        except FileNotFoundError:
+            pass
     else:
         remove_old_style_files(batch.file) 
             
