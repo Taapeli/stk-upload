@@ -896,7 +896,7 @@ def show_place(locid):
     cnt = len(res.get("events")) if res.get("events", False) else 0
     stk_logger(u_context, f"-> bp.scene.routes.show_place n={cnt}")
     return render_template(
-        "/scene/place_events.html",
+        "/scene/place.html",
         place=res.get("place"),
         pl_hierarchy=res.get("hierarchy"),
         events=res.get("events"),

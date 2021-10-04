@@ -69,25 +69,25 @@ from bl.gramps import gramps_utils
 #     return render_template("/gramps/obsolete_index_gramps.html")
 
 
-@bp.route("/gramps/show_log/<xmlfile>")
-@bp.route("/gramps/show_log/")
-@login_required
-@roles_accepted("research")
-def obsolete_show_upload_log(xmlfile=""):
-    msg=""
-    try:
-        upload_folder = uploads.get_upload_folder(current_user.username)
-        fname = os.path.join(upload_folder, xmlfile + ".log")
-        msg = open(fname, encoding="utf-8").read()
-        logger.info(f"-> bp.gramps.routes.obsolete_show_upload_log f='{xmlfile}'")
-    except Exception as e:
-        print(f"bp.gramps.routes.obsolete_show_upload_log: {e}")
-        if not msg:
-            msg = f'{_("The uploaded file does not exist any more.")}'
-        flash(msg)
-        return redirect(url_for("gramps.list_uploads"))
-
-    return render_template("/admin/load_result.html", msg=msg)
+# @bp.route("/gramps/show_log/<xmlfile>")
+# @bp.route("/gramps/show_log/")
+# @login_required
+# @roles_accepted("research")
+# def obsolete_show_upload_log(xmlfile=""):
+#     msg=""
+#     try:
+#         upload_folder = uploads.get_upload_folder(current_user.username)
+#         fname = os.path.join(upload_folder, xmlfile + ".log")
+#         msg = open(fname, encoding="utf-8").read()
+#         logger.info(f"-> bp.gramps.routes.obsolete_show_upload_log f='{xmlfile}'")
+#     except Exception as e:
+#         print(f"bp.gramps.routes.obsolete_show_upload_log: {e}")
+#         if not msg:
+#             msg = f'{_("The uploaded file does not exist any more.")}'
+#         flash(msg)
+#         return redirect(url_for("gramps.list_uploads"))
+#
+#     return render_template("/admin/load_result.html", msg=msg)
 
 
 @bp.route("/gramps/uploads")
@@ -133,30 +133,32 @@ def upload_gramps():
 
         t0 = time.time()
         with BatchUpdater("update") as batch_service:
+            # Create Root with next free batch id
             batch = batch_service.new_batch(current_user.username)
+            # Prepare uploads folder
             upload_folder = uploads.get_upload_folder(current_user.username)
             batch_upload_folder = os.path.join(upload_folder, batch.id)
             os.makedirs(batch_upload_folder, exist_ok=True)
-            
+            # Load user's XML file
             batch.file = loadfile.upload_file(infile, batch_upload_folder)
-            
+
             batch.xmlname = infile.filename
             batch.metaname = batch.file + ".meta"
             batch.logname = batch.file + ".log"
-
             batch.save(batch_service.dataservice) # todo: batch_service.save_batch(batch) ?
-            
             shareds.tdiff = time.time() - t0
-    
+
+            # Create metafile
             uploads.set_meta(
                 current_user.username,
                 batch.id,
                 infile.filename,
                 status=State.FILE_UPLOADED,
                 upload_time=time.time(),
-#                 material_type=material_type,
-#                 description=description,
+#               material_type=material_type, description=description,
             )
+
+            # Create upload log file
             msg = f"{util.format_timestamp()}: User {current_user.name} ({current_user.username}) uploaded the file {batch.file} for batch {batch.id}"
             open(batch.logname, "w", encoding="utf-8").write(msg)
             email.email_admin("Stk: Gramps XML file uploaded", msg)
@@ -165,7 +167,11 @@ def upload_gramps():
                 f'-> bp.gramps.routes.upload_gramps/{material} f="{infile.filename}"'
                 f" e={shareds.tdiff:.3f}sek"
             )
+
+        # Start storing the XML file objects as database nodes in background
         uploads.initiate_background_load_to_stkbase(batch)
+
+        # Return to the uploads page
         return redirect(url_for("gramps.list_uploads"))
             #return redirect(url_for("gramps.start_load_to_stkbase", xmlname=infile.filename))
     except Exception as e:
@@ -174,19 +180,19 @@ def upload_gramps():
 
 
 
-@bp.route("/gramps/start_upload/<xmlname>")
-@login_required
-@roles_accepted("research")
-def start_load_to_stkbase(xmlname):
-    """The uploaded Gramps xml file is imported to database in background process.
-    A 'i_am_alive' process for monitoring the bg process is also started.
-    """
-    uploads.initiate_background_load_to_stkbase(current_user.username, xmlname)
-    logger.info(
-        f'-> bp.gramps.routes.start_load_to_stkbase f="{os.path.basename(xmlname)}"'
-    )
-    flash(_("Data import from %(i)s to database has been started.", i=xmlname), "info")
-    return redirect(url_for("gramps.list_uploads"))
+# @bp.route("/gramps/start_upload/<xmlname>")
+# @login_required
+# @roles_accepted("research")
+# def start_load_to_stkbase(xmlname):
+#     """The uploaded Gramps xml file is imported to database in background process.
+#     A 'i_am_alive' process for monitoring the bg process is also started.
+#     """
+#     uploads.initiate_background_load_to_stkbase(current_user.username, xmlname)
+#     logger.info(
+#         f'-> bp.gramps.routes.start_load_to_stkbase f="{os.path.basename(xmlname)}"'
+#     )
+#     flash(_("Data import from %(i)s to database has been started.", i=xmlname), "info")
+#     return redirect(url_for("gramps.list_uploads"))
 
 
 @bp.route("/gramps/virhe_lataus/<int:code>/<text>")
@@ -240,23 +246,23 @@ def xml_delete(xmlfile):
     return redirect(url_for("gramps.list_uploads"))
 
 
-@bp.route("/gramps/xml_download/<xmlfile>")
-@login_required
-@roles_accepted("research", "admin")
-def xml_download(xmlfile):
-    xml_folder = uploads.get_upload_folder(current_user.username)
-    xml_folder = os.path.abspath(xml_folder)
-    return send_from_directory(
-        directory=xml_folder,
-        filename=xmlfile,
-        mimetype="application/gzip",
-        as_attachment=True,
-    )
+# @bp.route("/gramps/xml_download/<xmlfile>")
+# @login_required
+# @roles_accepted("research", "admin")
+# def xml_download(xmlfile):
+#     xml_folder = uploads.get_upload_folder(current_user.username)
+#     xml_folder = os.path.abspath(xml_folder)
+#     return send_from_directory(
+#         directory=xml_folder,
+#         filename=xmlfile,
+#         mimetype="application/gzip",
+#         as_attachment=True,
+#     )
 
 @bp.route("/gramps/batch_download/<batch_id>")
 @login_required
 @roles_accepted("research", "admin")
-def batch_download(batch_id):
+def gramps_batch_download(batch_id):
     batch = Root.get_batch(current_user.username, batch_id)
     if batch:
         xml_folder, xname = os.path.split(batch.file)

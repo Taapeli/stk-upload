@@ -33,10 +33,8 @@ from collections import defaultdict
 import re
 import time
 import os
-#import uuid
 import xml.dom.minidom
-
-# from flask_babelex import _
+from flask_babelex import _
 
 import shareds
 from bl.base import Status
@@ -276,7 +274,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Citations", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Citations"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message, "for_test": for_test}
 
@@ -383,7 +381,7 @@ class DOM_handler:
                 raise
 
         self.blog.log_event(
-            {"title": "Events", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Events"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -480,7 +478,7 @@ class DOM_handler:
             self.family_ids.append(f.uniq_id)
 
         self.blog.log_event(
-            {"title": "Families", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Families"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -515,7 +513,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Notes", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Notes"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         # return {'status':status, 'message': message}
         return {"status": status, "message": message, "for_test": for_test}
@@ -558,7 +556,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Media objects", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Media objects"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -734,7 +732,7 @@ class DOM_handler:
             self.person_ids.append(p.uniq_id)
 
         self.blog.log_event(
-            {"title": "Persons", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Persons"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -870,7 +868,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Places", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Places"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -927,7 +925,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Repositories", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Repositories"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -1025,7 +1023,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Sources", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Sources"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -1064,9 +1062,9 @@ class DOM_handler:
                     sortname_count += res.get("sortnames")
 
         self.blog.log_event(
-            {"title": "Dates", "count": dates_count, "elapsed": time.time() - t0}
+            {"title": _("Dates"), "count": dates_count, "elapsed": time.time() - t0}
         )
-        self.blog.log_event({"title": "Family sorting names", "count": sortname_count})
+        self.blog.log_event({"title": _("Family sorting names"), "count": sortname_count})
         return res
 
     def set_person_calculated_attributes(self):
@@ -1101,7 +1099,7 @@ class DOM_handler:
                 "elapsed": time.time() - t0,
             }
         )
-        self.blog.log_event({"title": "Person sorting names", "count": sortname_count})
+        self.blog.log_event({"title": _("Person sorting names"), "count": sortname_count})
         return {"status": status, "message": message}
 
     def set_person_estimated_dates(self):
@@ -1117,7 +1115,7 @@ class DOM_handler:
         res = self.dataservice.ds_set_people_lifetime_estimates(self.person_ids)
 
         count = res.get("count")
-        message = "Estimated person lifetimes"
+        message = _("Estimated person lifetimes")
         self.blog.log_event(
             {"title": message, "count": count, "elapsed": time.time() - t0}
         )
