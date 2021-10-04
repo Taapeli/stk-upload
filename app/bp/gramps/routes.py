@@ -434,7 +434,11 @@ def get_commands(batch_id):
                     # If allowed function, add (url, title) tuple to commands
                     cmd, title = RESEARCHER_FUNCTIONS[i]
                     # The batch_id is appended to given command
-                    commands.append( (cmd + batch.id, _(title)) )
+                    confirm = False
+                    if cmd == "/gramps/batch_delete/":
+                        confirm = True
+
+                    commands.append( (cmd + batch.id, _(title), confirm) )
 
         return render_template("/gramps/commands.html", 
                                batch_id=batch_id, 
