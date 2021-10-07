@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-05 20:50+0300\n"
+"POT-Creation-Date: 2021-10-07 16:35+0300\n"
 "PO-Revision-Date: 2021-09-16 11:23+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -2240,21 +2240,31 @@ msgstr "Avmarkera"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Återställ markerad tag's: <tag>-X -> <tag>"
 
-#: bp/gramps/routes.py:318
+#: bp/gramps/routes.py:279
+#, python-format
+msgid "The file \"%(n)s\" does not exist"
+msgstr "Filen \"%(n)s\" finns inte"
+
+#: bp/gramps/routes.py:299
+#, fuzzy, python-format
+msgid "The log file for \"%(n)s\" does not exist any more"
+msgstr "Filen \"%(n)s\" finns inte"
+
+#: bp/gramps/routes.py:325
 msgid "Batch not found"
 msgstr "Materialet finns inte"
 
-#: bp/gramps/routes.py:335
+#: bp/gramps/routes.py:342
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
-msgstr "Det gick inte att ta bort material-id %(batch_id)s"
+msgstr "Det gick inte att ta bort material \"%(batch_id)s\""
 
-#: bp/gramps/routes.py:343
+#: bp/gramps/routes.py:350
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr "Batch %(batch_id)s har tagits bort, %(n)s noder"
 
-#: bp/gramps/routes.py:427
+#: bp/gramps/routes.py:434
 msgid "Failed to retrieve commands"
 msgstr "Det gick inte att hämta kommandon"
 
