@@ -6,6 +6,7 @@
  -->
 {% extends "/admin/layout.html" %}
 {% block title %}{{ _("Uploads") }}{% endblock %}
+{% from "start/s_macros.html" import state_info with context %}
 {% block body %}
     {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
@@ -23,26 +24,14 @@
 {% include "flash_messages.html" %}
 
     <div class="content">
-        <table style="width:90%">
+        <table>
            <tr>
     {% if not user %}
 	                <th>{{ _("User") }}</th>
     {% endif %}
-                <th>{{ _("Gramps file") }}</th>
+                <th>{{ _("Material") }}</th>
                 <th>{{ _("Type / description") }}</th>
-                <th>{{ _("Status") }}
-                    <div class="tooltip"> &#x2754;
-                      <div class="tooltiptext">
-                          <p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
-                          <p>↓ {{ _("UPLOADED") }} – {{ _("the file has been uploaded to server") }}<br>
-                             ↓ {{ _("STORING") }}  – {{ _("the file content is being stored to the database") }}<br>
-                             ↳ {{ _("CANDIDATE") }}   – {{ _("the data is stored as candidate material") }}<br>
-                             → {{ _("REMOVED") }}  – {{ _("Not found any more") }}<br>
-                             ↝ {{ _("ERROR") }} / {{ _("FAILED") }} – {{ _("there was an error") }}
-                        </p>
-                      </div>
-                    </div> 
-                </th>
+                <th>{{ _("Status") }} {{ state_info() }}</th>
                 <th>{{ _("Operations") }}</th>
            </tr>
 
@@ -53,14 +42,13 @@
             {% if current_user.username == upload.user %}
                     <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>
             {% else %}
-                    <td>{{upload.user}}</td>
+                    <td>{{upload.user}}<br><i>{{upload.u_name}}</i></td>
             {% endif %}
         {% endif%}
 
 	           <td class="msg_INFO">
-    	           <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}>
-    	               {{upload.xmlname}}</a>
-                   <br>{{upload.upload_time_s}} 
+    	           {{upload.xmlname}}
+                   <br>{{upload.batch_id}} 
 	           </td>
 
                <td class="msg_INFO">
@@ -85,15 +73,17 @@
             {% if upload.status == _("UPLOADED") %}
                     ({{_( "deleted from database" ) }})
             {% else %}<br>
-                    {{ _("batch %(batch_id)s; %(persons)d&nbsp;persons", batch_id=upload.batch_id, persons=upload.count) }}
+                    {{upload.count}} {{ _("persons") }}
             {% endif %}
         {% endif %}
                </td>
 	           <td class="msg_INFO">
+{#
         {% if upload.xmlname and upload.status != _("CANDIDATE") %}
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
         {% endif %}
+#}
         {% if upload.xmlname and upload.has_log %}
 	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}/{{upload.batch_id}}>
 	           			{{ _("Show log") }}</a> |

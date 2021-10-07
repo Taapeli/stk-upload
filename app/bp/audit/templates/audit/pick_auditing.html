@@ -26,40 +26,52 @@ div.props > div > span:nth-child(1) {
 
 {% include "flash_messages.html" %}
 
-        <h2>{{ _("Selected %(m)s batch", m= root.material | transl('material') | lower) }}</h2>
+        <h2>{{ _("Selected <i>%(m)s</i> batch in the state <i>%(s)s</i>", 
+            m = root.material | transl('material') | lower,
+            s = root.state | transl('state') | lower ) }}</h2>
 
 		<div class="props">
 		
     {% if root.description %}
-			<div><span>{{ _('Title') }}:</span>
-				<span><i>{{root.description}}</i></span>
+			<div style="margin: 6pt 2pt;">
+                <span>{{ _('Title') }}:</span>
+				<span style="font-size:larger; font-style:italic;">
+                    {{root.description}}</span>
 			</div>
 	{% endif %}
-			<div><span>{{ _("In the phase") }}:</span>
-				<span>{{ _(root.state | transl('state')) }}</span></div>
+            <div>
+                <span>{{ _('Gramps file') }}:</span>
+                <span>
+                    <a href="/audit/batch_download/{{root.id}}/{{user}}">{{basename}}</a>
+                </span>
+            </div>
+            <div>
+                <span>{{ _('Total nodes') }}:</span>
+                <span>{{total|int_thousands}}</span>
+            </div>
+            <div>
+                <span>{{_('Researcher')}}:</span>
+                <span><b>{{user}}</b></span>
+            </div>
 
-	{% for auditor, ts, ts_str in root.auditors %}
-			<div style="color: brown;">
-				<span>{% if loop.first %}{{ _("Current auditors") }}:{% endif %}</span>
-				<span><b>{{auditor}}</b>
-					<span  title="{{ _('Audit start date') }}">{{ts_str}}</span>
-				</span>
-			</div>
+    {% for auditor, ts, ts_str in root.auditors %}
+            <div style="color: brown;">
+                <span>{% if loop.first %}{{ _("Current auditors") }}:{% endif %}</span>
+                <span><b>{{auditor}}</b>
+                    <span  title="{{ _('Audit start date') }}">{{ts_str}}</span>
+                </span>
+            </div>
     {% endfor %}
-	{% for access in root.has_access %}
-         	<div><span>{{ _("Access is given also to") }}:</span>
-				<span><b>{{access}}</b> </span>
-				</span>
-			</div>
+    {% for access in root.has_access %}
+            <div><span>{{ _("Access is given also to") }}:</span>
+                <span><b>{{access}}</b> </span>
+            </div>
     {% endfor %}
-
 		</div>
-		<p>  
-	{% if not total %} – {{ _('There is no data in this batch') }}.{% endif %}
-		</p>
+
         <div style="width: min-content;">
 
-			<table style="min-width: 35em;">
+			<table style="min-width: 35em; margin: 1em 0;">
 				<tr>
 					<th>{{ _('Batch id') }}</th>
         {% for label, cnt in label_nodes %}
@@ -75,7 +87,6 @@ div.props > div > span:nth-child(1) {
                     <td class="right nowrap">{{cnt|int_thousands}}</td> {% endfor -%}
                 </tr>
             </table>
-            <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
 
 
             <form action="/audit/selected" method="post">
