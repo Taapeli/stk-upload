@@ -101,6 +101,12 @@ function confirm_delete(subj, name) {
     }
     return true;
 }
+
+function doconfirm( command, title ) { // used in commands.html
+	if (confirm(title)) {
+		document.location.href = command;
+	}
+}
 </script>
 
 <script src="/static/js/hyperscript.org@0.8.1.js"></script>

@@ -6,6 +6,7 @@
  -->
 {% extends "/admin/layout.html" %}
 {% block title %}{{ _("Uploads") }}{% endblock %}
+{% from "start/s_macros.html" import state_info with context %}
 {% block body %}
     {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
@@ -30,19 +31,7 @@
     {% endif %}
                 <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Type / description") }}</th>
-                <th>{{ _("Status") }}
-                    <div class="tooltip"> &#x2754;
-                      <div class="tooltiptext">
-                          <p><b>{{ _("Steps for uploading Gramps files") }}</b></p>
-                          <p>↓ {{ _("UPLOADED") }} – {{ _("the file has been uploaded to server") }}<br>
-                             ↓ {{ _("STORING") }}  – {{ _("the file content is being stored to the database") }}<br>
-                             ↳ {{ _("CANDIDATE") }}   – {{ _("the data is stored as candidate material") }}<br>
-                             → {{ _("REMOVED") }}  – {{ _("Not found any more") }}<br>
-                             ↝ {{ _("ERROR") }} / {{ _("FAILED") }} – {{ _("there was an error") }}
-                        </p>
-                      </div>
-                    </div> 
-                </th>
+                <th>{{ _("Status") }} {{ state_info() }}</th>
                 <th>{{ _("Operations") }}</th>
            </tr>
 

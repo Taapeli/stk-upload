@@ -312,7 +312,8 @@ div.tooltip {
 div.tooltip div.tooltiptext {
   font-weight: normal;
   visibility: hidden;
-  width: 320pt;
+  width: 35em;
+  right: -17em;
   background-color: Cornsilk;
   color: DarkSlateGray;
   padding: 0 5pt;
@@ -320,7 +321,6 @@ div.tooltip div.tooltiptext {
   border-radius: 6pt;
   position: absolute;
   top: 1em;
-  right: -8em;
   z-index: 1;
 }
 /* Show the tooltip text when you mouse over the tooltip container */

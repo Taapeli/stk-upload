@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-03 20:53+0300\n"
+"POT-Creation-Date: 2021-10-07 16:35+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -570,7 +570,7 @@ msgstr ""
 #: bp/admin/templates/admin/list_users.html:76
 #: bp/admin/templates/admin/list_users.html:78
 #: bp/admin/templates/admin/syslog.html:14
-#: bp/admin/templates/admin/uploads.html:29
+#: bp/admin/templates/admin/uploads.html:30
 #: bp/audit/templates/audit/batches.html:22
 #: bp/audit/templates/audit/user_profile.html:46
 #: bp/dupsearch/templates/dupsearch.html:25
@@ -772,13 +772,13 @@ msgid "GEDCOM file"
 msgstr ""
 
 #: bp/admin/templates/admin/gedcoms.html:32
-#: bp/admin/templates/admin/uploads.html:111
+#: bp/admin/templates/admin/uploads.html:100
 msgid "Number of files"
 msgstr ""
 
 #: bp/admin/templates/admin/gedcoms.html:33
 #: bp/admin/templates/admin/message.html:61
-#: bp/admin/templates/admin/uploads.html:115
+#: bp/admin/templates/admin/uploads.html:104
 msgid "List of users"
 msgstr ""
 
@@ -965,7 +965,7 @@ msgid "Newer events"
 msgstr ""
 
 #: bp/admin/templates/admin/syslog.html:43
-#: bp/gramps/templates/gramps/uploads.html:211
+#: bp/gramps/templates/gramps/uploads.html:217
 msgid "Back"
 msgstr ""
 
@@ -977,119 +977,73 @@ msgstr ""
 msgid "Uploads"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:15
+#: bp/admin/templates/admin/uploads.html:16
 msgid "Uploads for user"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:17
+#: bp/admin/templates/admin/uploads.html:18
 #, python-format
 msgid "Uploads for %(n)s users"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:20
+#: bp/admin/templates/admin/uploads.html:21
 msgid "Uploads for all users"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:31
+#: bp/admin/templates/admin/uploads.html:32
 #: bp/audit/templates/audit/batches.html:26
 #: bp/audit/templates/audit/pick_auditing.html:43
-#: bp/gramps/templates/gramps/uploads.html:121
+#: bp/gramps/templates/gramps/uploads.html:127
 msgid "Gramps file"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:32
+#: bp/admin/templates/admin/uploads.html:33
 msgid "Type / description"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:33
+#: bp/admin/templates/admin/uploads.html:34
 #: bp/audit/templates/audit/batches.html:25
-#: bp/gramps/templates/gramps/uploads.html:123
+#: bp/gramps/templates/gramps/uploads.html:129
 msgid "Status"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:36
-#: bp/start/templates/start/s_macros.html:56
-msgid "Steps for uploading Gramps files"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:37
-#: bp/admin/templates/admin/uploads.html:85
-msgid "UPLOADED"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:37
-#: bp/start/templates/start/s_macros.html:58
-msgid "the file has been uploaded to server"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:38
-msgid "STORING"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:38
-#: bp/start/templates/start/s_macros.html:59
-msgid "the file content is being stored to the database"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:39
-#: bp/admin/templates/admin/uploads.html:93
-msgid "CANDIDATE"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:39
-#: bp/start/templates/start/s_macros.html:60
-msgid "the data is stored as candidate material"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:40
-msgid "REMOVED"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:40
-msgid "Not found any more"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:41
-msgid "ERROR"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:41
-msgid "FAILED"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:41
-msgid "there was an error"
-msgstr ""
-
-#: bp/admin/templates/admin/uploads.html:46
+#: bp/admin/templates/admin/uploads.html:35
 #: bp/audit/templates/audit/batches.html:27
 #: bp/audit/templates/audit/index.html:31
 msgid "Operations"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:54
+#: bp/admin/templates/admin/uploads.html:43
 #: bp/audit/templates/audit/batches.html:36
 msgid "me"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:86
+#: bp/admin/templates/admin/uploads.html:74
+msgid "UPLOADED"
+msgstr ""
+
+#: bp/admin/templates/admin/uploads.html:75
 msgid "deleted from database"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:88
+#: bp/admin/templates/admin/uploads.html:77
 #, python-format
 msgid "batch %(batch_id)s; %(persons)d&nbsp;persons"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:95
+#: bp/admin/templates/admin/uploads.html:82
+msgid "CANDIDATE"
+msgstr ""
+
+#: bp/admin/templates/admin/uploads.html:84
 msgid "Store to database"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:99
+#: bp/admin/templates/admin/uploads.html:88
 msgid "Show log"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:103
+#: bp/admin/templates/admin/uploads.html:92
 msgid "Delete file"
 msgstr ""
 
@@ -1113,27 +1067,27 @@ msgstr ""
 msgid "No such batch "
 msgstr ""
 
-#: bp/audit/routes.py:225
+#: bp/audit/routes.py:226
 msgid "You are now an auditor for batch "
 msgstr ""
 
-#: bp/audit/routes.py:232
+#: bp/audit/routes.py:233
 msgid "Audit batch accepted: "
 msgstr ""
 
-#: bp/audit/routes.py:239
+#: bp/audit/routes.py:240
 msgid "You have rejected the batch "
 msgstr ""
 
-#: bp/audit/routes.py:417
+#: bp/audit/routes.py:424
 msgid "Done"
 msgstr ""
 
-#: bp/audit/routes.py:506
+#: bp/audit/routes.py:513
 msgid "Data type '{}' is not supported"
 msgstr ""
 
-#: bp/audit/routes.py:513
+#: bp/audit/routes.py:520
 msgid "Missing proper column title: "
 msgstr ""
 
@@ -1157,7 +1111,7 @@ msgstr ""
 
 #: bp/audit/templates/audit/approvals.html:71
 #: bp/audit/templates/audit/batches.html:58
-#: bp/gramps/templates/gramps/uploads.html:178
+#: bp/gramps/templates/gramps/uploads.html:184
 #: bp/refplace_editor/templates/refplace_editor.html:3
 msgid "Auditor"
 msgstr ""
@@ -1207,7 +1161,7 @@ msgstr ""
 
 #: bp/audit/templates/audit/batches.html:60
 #: bp/audit/templates/audit/pick_auditing.html:61
-#: bp/gramps/templates/gramps/uploads.html:180
+#: bp/gramps/templates/gramps/uploads.html:186
 msgid "Audit start date"
 msgstr ""
 
@@ -2278,21 +2232,31 @@ msgstr ""
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr ""
 
-#: bp/gramps/routes.py:318
+#: bp/gramps/routes.py:279
+#, python-format
+msgid "The file \"%(n)s\" does not exist"
+msgstr ""
+
+#: bp/gramps/routes.py:299
+#, python-format
+msgid "The log file for \"%(n)s\" does not exist any more"
+msgstr ""
+
+#: bp/gramps/routes.py:325
 msgid "Batch not found"
 msgstr ""
 
-#: bp/gramps/routes.py:332
+#: bp/gramps/routes.py:342
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr ""
 
-#: bp/gramps/routes.py:340
+#: bp/gramps/routes.py:350
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr ""
 
-#: bp/gramps/routes.py:424
+#: bp/gramps/routes.py:434
 msgid "Failed to retrieve commands"
 msgstr ""
 
@@ -2333,7 +2297,7 @@ msgid "Send data to server"
 msgstr ""
 
 #: bp/gramps/templates/gramps/obsolete_index_gramps.html:49
-#: bp/gramps/templates/gramps/uploads.html:189
+#: bp/gramps/templates/gramps/uploads.html:195
 msgid ""
 "Select Gramps XML File (*.gramps etc) for converting to your candidate "
 "material"
@@ -2382,7 +2346,7 @@ msgid "Time / sec"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:9
-#: bp/gramps/templates/gramps/uploads.html:113
+#: bp/gramps/templates/gramps/uploads.html:119
 #: bp/start/templates/start/index_logged.html:53
 msgid "Manage Materials"
 msgstr ""
@@ -2391,19 +2355,19 @@ msgstr ""
 msgid "Are you sure you want to delete the XML file?"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:120
+#: bp/gramps/templates/gramps/uploads.html:126
 msgid "Batch operations"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:122
+#: bp/gramps/templates/gramps/uploads.html:128
 msgid "Person count"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:191
+#: bp/gramps/templates/gramps/uploads.html:197
 msgid "Send a new Gramps file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:200
+#: bp/gramps/templates/gramps/uploads.html:206
 msgid "Send to database"
 msgstr ""
 
@@ -3786,12 +3750,28 @@ msgstr ""
 msgid "Log out from this application"
 msgstr ""
 
+#: bp/start/templates/start/s_macros.html:56
+msgid "Processing steps of Isotammi material"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:58
+msgid "the file has been uploaded to server"
+msgstr ""
+
 #: bp/start/templates/start/s_macros.html:59 ui/jinja_filters.py:330
 msgid "Storing"
 msgstr ""
 
+#: bp/start/templates/start/s_macros.html:59
+msgid "Converting the Gramps file to the database"
+msgstr ""
+
 #: bp/start/templates/start/s_macros.html:60 ui/jinja_filters.py:331
 msgid "Candidate"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:60
+msgid "the data is stored as candidate material"
 msgstr ""
 
 #: bp/start/templates/start/s_macros.html:61 ui/jinja_filters.py:332

@@ -269,10 +269,17 @@ def gramps_batch_download(batch_id):
         if batch.xmlname:
             xname = batch.xmlname
         xml_folder = os.path.abspath(xml_folder)
-        return send_from_directory(xml_folder, xname,
-            mimetype="application/gzip",
-            as_attachment=True,
-        )
+        try:
+            return send_from_directory(xml_folder, xname,
+                mimetype="application/gzip",
+                as_attachment=True,
+            )
+        except Exception as e:
+            print(f"bp.gramps.routes.gramps_batch_download: {e}")
+            msg = _("The file \"%(n)s\" does not exist", n=xname)
+            flash(msg)
+            return redirect(url_for("gramps.list_uploads"))
+            
 
 @bp.route("/gramps/show_upload_log/<batch_id>")
 @login_required
@@ -289,7 +296,7 @@ def show_upload_log_from_batch_id(batch_id):
     except Exception as e:
         print(f"bp.gramps.routes.show_upload_log_from_batch_id: {e}")
         if not msg:
-            msg = f'{_("The log file does not exist any more.")} {batch_id}'
+            msg = _("The log file for \"%(n)s\" does not exist any more", n=batch_id)
         flash(msg)
         return redirect(url_for("gramps.list_uploads"))
 
@@ -323,7 +330,10 @@ def batch_delete(batch_id):
         upload_dir = os.path.split(batch.file)[0]
         import shutil
         print("shutil.rmtree", upload_dir)
-        shutil.rmtree(upload_dir)
+        try:
+            shutil.rmtree(upload_dir)
+        except FileNotFoundError:
+            pass
     else:
         remove_old_style_files(batch.file) 
             
@@ -434,7 +444,11 @@ def get_commands(batch_id):
                     # If allowed function, add (url, title) tuple to commands
                     cmd, title = RESEARCHER_FUNCTIONS[i]
                     # The batch_id is appended to given command
-                    commands.append( (cmd + batch.id, _(title)) )
+                    confirm = False
+                    if cmd == "/gramps/batch_delete/":
+                        confirm = True
+
+                    commands.append( (cmd + batch.id, _(title), confirm) )
 
         return render_template("/gramps/commands.html", 
                                batch_id=batch_id, 
