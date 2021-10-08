@@ -58,36 +58,12 @@ from . import bp
 from bl.gramps import gramps_loader
 from bl.gramps import gramps_utils
 
-
 # @bp.route("/gramps")
-# @login_required
-# @roles_accepted("research", "admin")
 # def obsolete_gramps_index():
-#     return "Error: bp.gramps.routes.gramps_index is obsolete!"
-#     """ Home page gramps input file processing """
-#     logger.info("-> bp.start.routes.gramps_index")
-#     return render_template("/gramps/obsolete_index_gramps.html")
-
 
 # @bp.route("/gramps/show_log/<xmlfile>")
 # @bp.route("/gramps/show_log/")
-# @login_required
-# @roles_accepted("research")
 # def obsolete_show_upload_log(xmlfile=""):
-#     msg=""
-#     try:
-#         upload_folder = uploads.get_upload_folder(current_user.username)
-#         fname = os.path.join(upload_folder, xmlfile + ".log")
-#         msg = open(fname, encoding="utf-8").read()
-#         logger.info(f"-> bp.gramps.routes.obsolete_show_upload_log f='{xmlfile}'")
-#     except Exception as e:
-#         print(f"bp.gramps.routes.obsolete_show_upload_log: {e}")
-#         if not msg:
-#             msg = f'{_("The uploaded file does not exist any more.")}'
-#         flash(msg)
-#         return redirect(url_for("gramps.list_uploads"))
-#
-#     return render_template("/admin/load_result.html", msg=msg)
 
 
 @bp.route("/gramps/uploads")
@@ -181,18 +157,7 @@ def upload_gramps():
 
 
 # @bp.route("/gramps/start_upload/<xmlname>")
-# @login_required
-# @roles_accepted("research")
 # def start_load_to_stkbase(xmlname):
-#     """The uploaded Gramps xml file is imported to database in background process.
-#     A 'i_am_alive' process for monitoring the bg process is also started.
-#     """
-#     uploads.initiate_background_load_to_stkbase(current_user.username, xmlname)
-#     logger.info(
-#         f'-> bp.gramps.routes.start_load_to_stkbase f="{os.path.basename(xmlname)}"'
-#     )
-#     flash(_("Data import from %(i)s to database has been started.", i=xmlname), "info")
-#     return redirect(url_for("gramps.list_uploads"))
 
 
 @bp.route("/gramps/virhe_lataus/<int:code>/<text>")

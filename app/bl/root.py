@@ -29,7 +29,7 @@ Created on 9.6.2021
 # blacked 2021-05-01 JMä
 import os
 from datetime import date, datetime
-from typing import Any, Optional
+#from typing import Any, Optional
 
 from flask_babelex import _
 
@@ -127,42 +127,6 @@ class Root(NodeObject):
             State.ROOT_REJECTED]:
             return True
         return False
-
-#===============================================================================
-# class Batch:
-#     """
-#     User Batch node and statistics about them.
-#     """
-# 
-#     # Batch status values:
-#     #    1. Import file; no Batch node created
-#     BATCH_LOADING = "loading"
-#     BATCH_UPLOADED = "uploaded"
-#     BATCH_DONE = "done"         # Obsolete
-#     BATCH_FAILED = "failed"     # in bp.admin.uploads
-#     BATCH_ERROR = "error"       # in bp.admin.uploads
-#     BATCH_REMOVED = "removed"
-#     BATCH_STORING = "storing"   # NOT IN USE
-#     #    2. Batch node exists
-#     BATCH_STARTED = "started"
-#     BATCH_CANDIDATE = "completed"  # Means candidate
-#     #    3. Batch is empty
-#     BATCH_FOR_AUDIT = "audit_requested"
-# 
-#     def __init__(self, userid=None):
-#         """
-#         Creates a Batch object
-#         """
-#         self.uniq_id = None
-#         self.user = userid
-#         self.file = None
-#         self.id = None  # batch_id
-#         self.status = Batch.BATCH_STARTED
-#         self.mediapath = None  # Directory for media files
-#         self.timestamp = 0
-#         self.material_type = ""
-#         self.description = ""
-#===============================================================================
 
     def save(self, dataservice):
         """Create or update Root node.
@@ -667,10 +631,6 @@ class BatchUpdater(DataService):
 
 # def batch_mark_status(self, batch, b_status): --> change_state
 #     """ Mark this data batch status. """
-#     res = self.dataservice.ds_batch_set_state(
-#         batch.id, batch.user, b_status
-#     )
-#     return res
 
     def commit(self):
         """ Commit transaction. """
@@ -686,6 +646,7 @@ class BatchUpdater(DataService):
         """
         if media_refs:
             self.dataservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
+
 
 class DataServiceBase:
     def __enter__(self):
@@ -714,7 +675,6 @@ class DataServiceBase:
                     print(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
         else:
             print(f'#~~~{self.idstr} exit {id(self.old_tx)}')
-
 
 
 class BatchReader(DataServiceBase):

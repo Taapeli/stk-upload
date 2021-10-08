@@ -110,17 +110,6 @@ div.props > div > span:nth-child(1) {
 {% endif %}
 	            </div>
             </form>
-{% if false %}
-            <form action="/audit/selected" method="post">
-                <input type="hidden" value="{{root.id}}" name="batch">
-                <input type="hidden" value="{{user}}" name="user">
-	            <div class="submit">
-                   <input type="submit" value="{{ _('Cancel') }}" name="cancel" /> 
-                   <span style="font-size:large; color:gray;"> | </span>
-                   <input type="submit" value="{{ _('Reject auditing') }}" name="reject"/>
-	            </div>
-            </form>
-{% endif %}
         </div>
 
     </div>

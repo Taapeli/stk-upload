@@ -362,18 +362,7 @@ def list_threads():
 # @login_required
 # @roles_accepted("admin")
 # def admin_xml_download(username, xmlfile):
-#     xml_folder = uploads.get_upload_folder(username)
-#     xml_folder = os.path.abspath(xml_folder)
-#     # logger.info(f'-> bp.admin.routes.xml_download f="{xmlfile}"')
-#     logging.debug(xml_folder)
-#
-#     logger.info(f"-> bp.admin.routes.admin_xml_download u={username} \"{xmlfile}\"")
-#     syslog.log(type="Admin xml download", by=username, file=xmlfile)
-#
-#     return send_from_directory(xml_folder, xmlfile,
-#         mimetype="application/gzip",
-#         as_attachment=True,
-#     )
+#removed 8.10.2021/JMä
 
 
 @bp.route("/admin/show_upload_log/<username>/<xmlfile>/<batch_id>")
@@ -389,9 +378,10 @@ def show_upload_log(username, xmlfile, batch_id=None):
             msg = open(fname, encoding="utf-8").read()
             break
         except FileNotFoundError:
-            print(f"bp.admin.routes.show_upload_log: failed {fname}")
+            #print(f"bp.admin.routes.show_upload_log: no file {fname}")
+            pass
 
-    logger.info(f"-> bp.admin.routes.show_upload_log")
+    logger.info(f"-> bp.admin.routes.show_upload_log f={fname}")
     return render_template("/admin/load_result.html", msg=msg)
 
 
