@@ -167,6 +167,7 @@ def audit_pick(batch_id=None):
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
         can_start = (root.state == State.ROOT_AUDIT_REQUESTED or
+                     root.state == State.ROOT_REJECTED or
                      root.state == State.ROOT_AUDITING and not i_am_auditor)
         can_accept = (i_am_auditor and root.state  == State.ROOT_AUDITING)
         can_remove = (total == 0 \
@@ -245,8 +246,6 @@ def audit_selected_op():
         if Status.has_failed(res):
             msg = f"Audit request {operation} failed"
             flash(_(msg), "error")
-            syslog.log(type="Audit state change", 
-                       batch=batch_id, by=user_id, msg=msg)
         else:
             flash(_(msg))
 
@@ -254,6 +253,8 @@ def audit_selected_op():
         error_print("audit_selected_op", e)
         return redirect(url_for("audit.list_uploads"))
 
+    syslog.log(type="Audit state change", 
+               batch=batch_id, by=user_id, msg=msg, op=operation)
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 

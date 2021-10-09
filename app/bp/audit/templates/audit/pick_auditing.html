@@ -98,8 +98,13 @@ div.props > div > span:nth-child(1) {
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse" /> 
                    <span style="font-size:large; color:gray;"> | </span>
 {% if total %}
+    {% if root.state == "Rejected" %}
+                   <input type="submit" value="{{ _('Start auditing again') }}" name="start"
+        {% if not can_start %} disabled {% endif %} />
+    {% else %}
                    <input type="submit" value="{{ _('Start auditing') }}" name="start"
-	{% if not can_start %} disabled {% endif %} />
+        {% if not can_start %} disabled {% endif %} />
+    {% endif %}
                    <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
 	{% if not can_accept %} disabled {% endif %} />
                    <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
