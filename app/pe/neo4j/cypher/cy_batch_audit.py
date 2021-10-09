@@ -142,11 +142,11 @@ return u.name as u_name,
     collect(distinct [auditor,a_time]) as auditors
 order by root.id"""
 
-#-bl.root.Root.list_empty_batches
-    TODO_get_empty_batches = '''
-MATCH (a:Root) 
-WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
-RETURN a AS batch ORDER BY a.id DESC'''
+# #-bl.root.Root.list_empty_batches
+#     TODO_get_empty_batches = '''
+# MATCH (a:Root) 
+# WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
+# RETURN a AS batch ORDER BY a.id DESC'''
 
     delete_chunk = """
 MATCH (:UserProfile{username:$user})

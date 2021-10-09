@@ -124,14 +124,6 @@ class Neo4jReadServiceTx(ConcreteService):
             # Search persons matching <years>
             cypher = CypherPerson.read_persons_w_events_by_years
             print(f"tx_get_person_list: Show '{state}' '{material}', years {years}")
-            # if show_approved:
-            #     print(f'tx_get_person_list: Show approved common data years {years}')
-            #     result = self.tx.run(CypherPerson.get_common_events_by_years,
-            #                          years=years)
-            # else:
-            #     print(f'tx_get_person_list: Show candidate data  years {years}')
-            #     result = self.tx.run(CypherPerson.get_my_events_by_years,
-            #                          years=years, user=user)
         elif rule == 'ref':
             #TODO: Search persons where a reference name = <key> value
             return {'items': [], 'status': Status.ERROR,
@@ -271,7 +263,8 @@ class Neo4jReadServiceTx(ConcreteService):
                 #            'type': 'Birth Name', 'suffix': '', 'title': '', 'order': 0}>
                 #    role=None
                 # >
-                person_rel = record['rel_type']     # NAME / EVENT
+
+                #person_rel = record['rel_type']     # NAME / EVENT
                 node = record['node']
                 role = record['role']               # Event: Primary ...
                 label, = node.labels
@@ -351,11 +344,11 @@ class Neo4jReadServiceTx(ConcreteService):
 
                 for event_node in record['events']:
 #                         f_event = EventBl.from_node(event_node)
-                    eid = event_node.get('id')
                     relation_type = event_node.get('type')
                     # Add family events to person events, too
                     if family_rel == "PARENT":
-                        event_role = "Family"
+                        #eid = event_node.get('id')
+                        #event_role = "Family"
                         #print(f"#+3.2 ({puid}) -[:EVENT {event_role}]-> (:Event {event_node.id} {eid})")
                         family_events.append(event_node)
 
@@ -488,7 +481,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 # The existing object src
                 src_node = record['src']
                 src_uniq_id = src_node.id
-                src_label, = src_node.labels
+                #src_label, = src_node.labels
                 #src = obj_catalog[record['uniq_id']]
 
                 # Target is a Citation, Note or Media

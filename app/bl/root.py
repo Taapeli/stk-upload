@@ -380,24 +380,19 @@ class Root(NodeObject):
     def list_empty_batches():
         """Gets a list of db Batches without any linked data."""
         batches = []
-
-        class Upload:
-            pass
-
-        print(
-            'Batch.list_empty_batches: #TODO Tähän aikarajoitus "vvv-kk", nyt siinä on vakio "2019-10"!'
-        )
-        result = shareds.driver.session().run(CypherRoot.TODO_get_empty_batches)
-
-        for record in result:
-            # <Node id=317098 labels={'Batch'}
-            #    properties={'file': 'uploads/juha/Sibelius_20190820_clean.gpkg',
-            #        'id': '2019-09-27.001', 'user': 'juha', 'status': 'started',
-            #        'timestamp': 1569586423509}>
-
-            node = record["batch"]
-            batch = Root.from_node(node)
-            batches.append(batch)
+        print('Batch.list_empty_batches: ERROR obsolete!')
+        # class Upload:
+        #     pass        # result = shareds.driver.session().run(CypherRoot.TODO_get_empty_batches)
+        #
+        # for record in result:
+        #     # <Node id=317098 labels={'Batch'}
+        #     #    properties={'file': 'uploads/juha/Sibelius_20190820_clean.gpkg',
+        #     #        'id': '2019-09-27.001', 'user': 'juha', 'status': 'started',
+        #     #        'timestamp': 1569586423509}>
+        #
+        #     node = record["batch"]
+        #     batch = Root.from_node(node)
+        #     batches.append(batch)
 
         return batches
 

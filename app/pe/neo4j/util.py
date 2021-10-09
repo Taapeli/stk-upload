@@ -84,8 +84,8 @@ def run_cypher_batch(session, cypher, username, batch_id, **kwargs):
 
 def run_cypher_batch2( session, cypher1, cypher2, username, batch_id, **kwargs):
     """
-    Variation where the common part must be inserted in the middle,
-    between cypher1 and cypher2.
+    Variation for freetext search where the common part must be inserted
+    in the middle, between cypher1 and cypher2.
     """
     if not username:
         full_cypher = cypher1 + cypher_common_prefix + cypher2

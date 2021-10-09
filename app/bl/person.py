@@ -196,46 +196,20 @@ class PersonReader(DataService):
         
         NOT USED --> bl.person_reader.PersonReaderTx.get_person_search
 
-        Calls Neo4jDriver.dr_get_person_list(user, fw_from, limit)
+        In version v2021.1.2 called:
+            # --> Neo4jDriver.dr_get_person_list(user, fw_from, limit)
+            #     --> Neo4jReadServiceTx.tx_get_person_list()
+            #         --> CypherPerson.read_approved_persons_w_events_fw_name
+            #         --> CypherPerson.read_my_persons_w_events_fw_name
+            #         --> CypherPerson.get_common_events_by_refname_use
+            #         --> CypherPerson.get_my_events_by_refname_use
+            #         --> CypherPerson.get_common_events_by_years
+            #         --> CypherPerson.get_my_events_by_years
+            #        #--> Cypher_person.get_events_by_refname
+            #        #--> Cypher_person.get_events_by_refname
         """
-        context = self.user_context
-        res_dict = {}
-        # args = {
-        #     "use_user": self.use_user,
-        #     "fw": context.first,  # From here forward
-        #     "limit": context.count,
-        # }
-        # res = self.dataservice.dr_get_person_list(args)
-        # # {'items': persons, 'status': Status.OK}
-        # if Status.has_failed(res):
-        #     return {
-        #         "items": None,
-        #         "status": res["status"],
-        #         "statustext": _("No persons found"),
-        #     }
-        #
-        # # Update the page scope according to items really found
-        # persons = res["items"]
-        # if len(persons) > 0:
-        #     context.update_session_scope(
-        #         "person_scope",
-        #         persons[0].sortname,
-        #         persons[-1].sortname,
-        #         context.count,
-        #         len(persons),
-        #     )
-        #
-        # if self.use_user is None:
-        #     persons2 = [p for p in persons if not p.too_new]
-        #     num_hidden = len(persons) - len(persons2)
-        # else:
-        #     persons2 = persons
-        #     num_hidden = 0
-        # res_dict["status"] = Status.OK
-        #
-        # res_dict["num_hidden"] = num_hidden
-        # res_dict["items"] = persons2
-        return res_dict
+        print("bl.person.PersonReader.get_person_list: ERROR obsolete")
+        return {"items": [], "status": Status.ERROR, "statustext":"obsolete get_person_list"}
 
     def get_surname_list(self, count=40):
         """
