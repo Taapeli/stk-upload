@@ -5,22 +5,24 @@ Created on 21.5.2021
 '''
 
 class CypherNote():
-    """ A Note is added to given batch or parent node 
-    
-        # MATCH (u:Batch {id:$bid}) -[*]-> (a {handle:$parent_handle})
+    """ A Note is added to given batch and optionally parent node 
     """
 
-    # Find the batch like '2019-02-24.006' and connect Note in that Batch
+    # Find given Root node and connect Note in that Batch
     create_in_batch = """
 MATCH (u:Root {id:$bid})
 CREATE (u) -[:OBJ_OTHER]-> (n:Note) 
     SET n = $n_attr
+    SET n.change = timestamp()
 RETURN ID(n)"""
 
     # Find a known parent node with uniq_id and connect a new Note to it
     create_in_batch_as_leaf = """
 MATCH (a) WHERE ID(a) = $parent_id
-CREATE (a) -[:NOTE]-> (n:Note) 
+MATCH (u:Root {id:$bid})
+    CREATE (u) -[:OBJ_OTHER]-> (n:Note) 
+    CREATE (a) -[:NOTE]-> (n)
     SET n = $n_attr
+    SET n.change = timestamp()
 RETURN ID(n)"""
 

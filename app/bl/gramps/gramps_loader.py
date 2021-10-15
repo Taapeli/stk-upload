@@ -351,9 +351,13 @@ def xml_to_stkbase(batch: Root):
         # Copy date and name information from Person and Event nodes to Family nodes
         res = handler.set_family_calculated_attributes()
 
-        print("build_free_text_search_indexes")
+        # print("build_free_text_search_indexes")
+        t1 = time.time()
         res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx)
-        print("build_free_text_search_indexes done")
+        handler.blog.log_event(
+            {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
+        )
+        # print("build_free_text_search_indexes done")
             
         res = handler.remove_handles()
             # The missing links counted in remove_handles

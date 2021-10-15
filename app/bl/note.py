@@ -160,43 +160,36 @@ class Note(NodeObject):
         """
         self.uuid = self.newUuid()
         batch_id = kwargs.get("batch_id", None)
+        parent_id = kwargs.get("parent_id", None)
         if not "batch_id":
             raise RuntimeError(f"Note.save needs batch_id for {self.id}")
-        n_attr = {}
-#        try:
-        if 1:
-            n_attr = {
-                "uuid": self.uuid,
-                "change": self.change,
-                "id": self.id,
-                "priv": self.priv,
-                "type": self.type,
-                "text": self.text,
-                "url": self.url,
-            }
-            if self.handle:
-                n_attr["handle"] = self.handle
-            if "parent_id" in kwargs:
-                print(
-                    f"Note_save: parent (uid={kwargs['parent_id']}) --> (id={self.id})"
-                    " [No link Batch-->Note created!]"
-                )
-                self.uniq_id = tx.run(
-                    CypherNote.create_in_batch_as_leaf,
-                    bid=batch_id,
-                    parent_id=kwargs["parent_id"],
-                    n_attr=n_attr,
-                ).single()[0]
-            elif "batch_id" in kwargs:
-                # print(f"Note_save: batch ({kwargs['batch_id']}) --> ({self.id})")
-                self.uniq_id = tx.run(
-                    CypherNote.create_in_batch, bid=batch_id, n_attr=n_attr
-                ).single()[0]
-            else:
-                raise RuntimeError(
-                    f"Note.save needs batch_id or parent_id for {self.id}"
-                )
-
-#         except Exception as err:
-#             print(f"iError Note_save: {err} attr={n_attr}", file=stderr)
-#             raise RuntimeError(f"Could not save Note {self.id}")
+        n_attr = {
+            "uuid": self.uuid,
+            #"change": self.change,
+            "id": self.id,
+            "priv": self.priv,
+            "type": self.type,
+            "text": self.text,
+            "url": self.url,
+        }
+        if self.handle:
+            n_attr["handle"] = self.handle
+        if not parent_id is None:
+            #print(f"Note.save: (Root {batch_id}) --> (Note {self.id}) <-- (parent {parent_id})")
+            self.uniq_id = tx.run(
+                CypherNote.create_in_batch_as_leaf,
+                bid=batch_id,
+                parent_id=parent_id,
+                n_attr=n_attr,
+            ).single()[0]
+        elif not batch_id is None:
+            #print(f"Note.save: (Root {batch_id}) --> (Note {self.id})")
+            self.uniq_id = tx.run(
+                CypherNote.create_in_batch, 
+                bid=batch_id, 
+                n_attr=n_attr
+            ).single()[0]
+        else:
+            raise RuntimeError(
+                f"Note.save needs batch_id or parent_id for {self.id}"
+            )
