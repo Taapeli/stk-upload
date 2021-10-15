@@ -113,7 +113,7 @@ class SourceBl(Source):
         self.note_ref = []
 
 
-    def save(self, dataservice, tx, **kwargs):
+    def save(self, dataservice, **kwargs):
         """ Saves this Source and connect it to Notes and Repositories.
 
             :param: batch_id      batch id where this place is linked
@@ -137,8 +137,8 @@ class SourceBl(Source):
                 "spubinfo": self.spubinfo
             }
 
-            result = tx.run(CypherSourceByHandle.create_to_batch,
-                            batch_id=batch_id, s_attr=s_attr)
+            result = dataservice.tx.run(CypherSourceByHandle.create_to_batch,
+                                        batch_id=batch_id, s_attr=s_attr)
             ids = []
             for record in result:
                 self.uniq_id = record[0]
@@ -153,8 +153,8 @@ class SourceBl(Source):
         # Make relation to the Note nodes
         for note_handle in self.note_handles:
             try:
-                tx.run(CypherSourceByHandle.link_note,
-                       handle=self.handle, hlink=note_handle)
+                dataservice.tx.run(CypherSourceByHandle.link_note,
+                                   handle=self.handle, hlink=note_handle)
             except Exception as err:
                 logger.error(f"Source_gramps.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
                 #print("iError Source.save note: {0}".format(err), file=stderr)
@@ -162,8 +162,10 @@ class SourceBl(Source):
         # Make relation to the Repository nodes
         for repo in self.repositories:
             try:
-                tx.run(CypherSourceByHandle.link_repository,
-                       handle=self.handle, hlink=repo.handle, medium=repo.medium)
+                dataservice.tx.run(CypherSourceByHandle.link_repository,
+                                   handle=self.handle, 
+                                   hlink=repo.handle, 
+                                   medium=repo.medium)
             except Exception as err:
                 print("iError Source.save Repository: {0}".format(err))
                 

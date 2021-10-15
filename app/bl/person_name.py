@@ -98,7 +98,7 @@ class Name(NodeObject):
         n.order = node["order"]
         return n
 
-    def save(self, tx, **kwargs):
+    def save(self, dataservice, **kwargs):
         """Creates or updates this Name node. (There is no handle)
         If parent_id is given, a link (parent) -[:NAME]-> (Name) is created
 
@@ -107,26 +107,21 @@ class Name(NodeObject):
         if not "parent_id" in kwargs:
             raise ValueError("Name.save: no base person defined")
 
-        try:
-            n_attr = {
-                "order": self.order,
-                "type": self.type,
-                "firstname": self.firstname,
-                "surname": self.surname,
-                "prefix": self.prefix,
-                "suffix": self.suffix,
-                "title": self.title,
-            }
-            tx.run(
-                CypherPerson.create_name_as_leaf,
-                n_attr=n_attr,
-                parent_id=kwargs["parent_id"],
-                citation_handles=self.citation_handles,
-            )
-        except ConnectionError as err:
-            raise SystemExit("Stopped in Name.save: {}".format(err))
-        except Exception as err:
-            print("iError (Name.save): {0}".format(err), file=stderr)
+        n_attr = {
+            "order": self.order,
+            "type": self.type,
+            "firstname": self.firstname,
+            "surname": self.surname,
+            "prefix": self.prefix,
+            "suffix": self.suffix,
+            "title": self.title,
+        }
+        dataservice.tx.run(
+            CypherPerson.create_name_as_leaf,
+            n_attr=n_attr,
+            parent_id=kwargs["parent_id"],
+            citation_handles=self.citation_handles,
+        )
 
     @staticmethod
     def get_people_with_same_name():

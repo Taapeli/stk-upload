@@ -360,7 +360,7 @@ class PersonBl(Person):
         self.events = []  # bl.event.EventBl
         self.notes = []  #
 
-    def save(self, dataservice, tx, **kwargs):  # batch_id):
+    def save(self, dataservice, **kwargs):
         """Saves the Person object and possibly the Names, Events ja Citations.
 
         On return, the self.uniq_id is set
@@ -374,66 +374,54 @@ class PersonBl(Person):
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
         self.uuid = self.newUuid()
         # Save the Person node under UserProfile; all attributes are replaced
-        p_attr = {}
-        try:
-            p_attr = {
-                "uuid": self.uuid,
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "priv": self.priv,
-                "sex": self.sex,
-                "confidence": self.confidence,
-                "sortname": self.sortname,
-            }
-            if self.dates:
-                p_attr.update(self.dates.for_db())
 
-            result = tx.run(
-                CypherPerson.create_to_batch, batch_id=batch_id, p_attr=p_attr
-            )  # , date=today)
-            ids = []
-            for record in result:
-                self.uniq_id = record[0]
-                ids.append(self.uniq_id)
-                if len(ids) > 1:
-                    print(
-                        "iError updated multiple Persons {} - {}, attr={}".format(
-                            self.id, ids, p_attr
-                        )
+        p_attr = {
+            "uuid": self.uuid,
+            "handle": self.handle,
+            "change": self.change,
+            "id": self.id,
+            "priv": self.priv,
+            "sex": self.sex,
+            "confidence": self.confidence,
+            "sortname": self.sortname,
+        }
+        if self.dates:
+            p_attr.update(self.dates.for_db())
+
+        result = dataservice.tx.run(CypherPerson.create_to_batch, 
+                                    batch_id=batch_id, 
+                                    p_attr=p_attr)
+        ids = []
+        for record in result:
+            self.uniq_id = record[0]
+            ids.append(self.uniq_id)
+            if len(ids) > 1:
+                print(
+                    "iError updated multiple Persons {} - {}, attr={}".format(
+                        self.id, ids, p_attr
                     )
-                # print("Person {} ".format(self.uniq_id))
-            if self.uniq_id == None:
-                print("iWarning got no uniq_id for Person {}".format(p_attr))
-
-        except Exception as err:
-            logger.error(f"Person_gramps.save: {err} in Person {self.id} {p_attr}")
-            # print("iError: Person_gramps.save: {0} attr={1}".format(err, p_attr), file=stderr)
-            raise
+                )
+            # print("Person {} ".format(self.uniq_id))
+        if self.uniq_id == None:
+            print("iWarning got no uniq_id for Person {}".format(p_attr))
 
         # Save Name nodes under the Person node
         for name in self.names:
-            name.save(tx, parent_id=self.uniq_id)
+            name.save(dataservice, parent_id=self.uniq_id)
 
         # Save web urls as Note nodes connected under the Person
         if self.notes:
             Note.save_note_list(dataservice, parent=self, batch_id=batch_id)
 
         """ Connect to each Event loaded from Gramps """
-        try:
-            # for i in range(len(self.eventref_hlink)):
-            for event_handle, role in self.event_handle_roles:
-                tx.run(
-                    CypherPerson.link_event,
-                    p_handle=self.handle,
-                    e_handle=event_handle,
-                    role=role,
-                )
-        except Exception as err:
-            logger.error(
-                f"Person_gramps.save: {err} in linking Event {self.handle} -> {self.handle_role}"
+        # for i in range(len(self.eventref_hlink)):
+        for event_handle, role in self.event_handle_roles:
+            dataservice.tx.run(
+                CypherPerson.link_event,
+                p_handle=self.handle,
+                e_handle=event_handle,
+                role=role,
             )
-            # print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Media nodes and it's Note and Citation references
         if self.media_refs:
@@ -445,23 +433,15 @@ class PersonBl(Person):
         # because the Family object is not yet created
 
         # Make relations to the Note nodes
-        try:
-            for handle in self.note_handles:
-                tx.run(CypherPerson.link_note, p_handle=self.handle, n_handle=handle)
-        except Exception as err:
-            logger.error(
-                f"Person_gramps.save: {err} in linking Notes {self.handle} -> {handle}"
-            )
+
+        for handle in self.note_handles:
+            dataservice.tx.run(CypherPerson.link_note, p_handle=self.handle, n_handle=handle)
 
         # Make relations to the Citation nodes
-        try:
-            for handle in self.citation_handles:
-                tx.run(
-                    CypherPerson.link_citation, p_handle=self.handle, c_handle=handle
-                )
-        except Exception as err:
-            logger.error(
-                f"Person_gramps.save: {err} in linking Citations {self.handle} -> {handle}"
+
+        for handle in self.citation_handles:
+            dataservice.tx.run(
+                CypherPerson.link_citation, p_handle=self.handle, c_handle=handle
             )
         return
 

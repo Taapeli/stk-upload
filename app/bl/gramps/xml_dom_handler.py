@@ -149,7 +149,8 @@ class DOM_handler:
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
         #print(f"DOM_handler.save_and_link_handle: {obj} {kwargs}")
-        obj.save(self.dataservice, self.dataservice.tx, **kwargs)
+        #obj.save(self.dataservice, self.dataservice.tx, **kwargs)
+        obj.save(self.dataservice, **kwargs)
         self.obj_counter += 1 
         if self.obj_counter % 1000 == 0:
             #print(self.obj_counter, "Transaction restart")
