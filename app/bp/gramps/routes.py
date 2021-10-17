@@ -137,7 +137,6 @@ def upload_gramps():
             # Create upload log file
             msg = f"{util.format_timestamp()}: User {current_user.name} ({current_user.username}) uploaded the file {batch.file} for batch {batch.id}"
             open(batch.logname, "w", encoding="utf-8").write(msg)
-            email.email_admin("Stk: Gramps XML file uploaded", msg)
             syslog.log(type="gramps file uploaded", file=infile.filename, batch=batch.id)
             logger.info(
                 f'-> bp.gramps.routes.upload_gramps/{material} f="{infile.filename}"'
