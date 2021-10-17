@@ -118,12 +118,12 @@ from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 
 
 def get_upload_folder(username):
-    """ Returns upload directory for given user"""
+    """ Returns upload directory for given user. """
     return os.path.join("uploads", username)
 
 
 def set_meta(username, batch_id, filename, **kwargs):
-    """ Stores status information in .meta file """
+    """ Stores status information from kwargs to .meta file. """
     upload_folder = get_upload_folder(username)
     name = "{}.meta".format(filename)
     metaname = os.path.join(upload_folder, batch_id, name)
@@ -131,6 +131,7 @@ def set_meta(username, batch_id, filename, **kwargs):
 
 
 def update_metafile(metaname, **kwargs):
+    """ Create or update meta data. """
     try:
         meta = eval(open(metaname).read())
     except FileNotFoundError:
@@ -215,7 +216,7 @@ def background_load_to_stkbase(batch:Root) -> None:
             msg += "\n{}".format(step)
         msg += "\n"
         open(batch.logname, "w", encoding="utf-8").write(msg)
-        email.email_admin("Stk: Gramps XML file stored", msg)
+        email.email_admin(_("Gramps file stored"), msg)
         syslog.log(type="completed save to database", file=batch.xmlname, user=batch.user)
     except Exception as e:
         # traceback.print_exc()
@@ -234,7 +235,7 @@ def background_load_to_stkbase(batch:Root) -> None:
             pprint.pprint(e.kwargs)
             msg += pprint.pformat(e.kwargs)
         open(batch.logname, "w", encoding="utf-8").write(msg)
-        email.email_admin("Stk: Gramps XML file storing FAILED", msg)
+        email.email_admin(_("Gramps file storing FAILED"), msg)
         syslog.log(type="gramps store to database failed", file=batch.xmlname, user=batch.user)
 
 

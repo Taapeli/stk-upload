@@ -100,8 +100,8 @@ def list_uploads():
 @login_required
 @roles_accepted("research", "admin")
 def upload_gramps():
-    """Load a gramps xml file to temp directory for processing in the server"""
-
+    """Load a gramps xml file to temp directory for processing in the server
+    """
     try:
         infile = request.files["filenm"]
         material = request.form["material"]
@@ -121,7 +121,7 @@ def upload_gramps():
             batch.xmlname = infile.filename
             batch.metaname = batch.file + ".meta"
             batch.logname = batch.file + ".log"
-            batch.save(batch_service.dataservice) # todo: batch_service.save_batch(batch) ?
+            batch.save(batch_service.dataservice) #todo: batch_service.save_batch(batch) ?
             shareds.tdiff = time.time() - t0
 
             # Create metafile
@@ -265,6 +265,7 @@ def show_upload_log_from_batch_id(batch_id):
         return redirect(url_for("gramps.list_uploads"))
 
     return render_template("/admin/load_result.html", msg=msg)
+
 
 @bp.route("/gramps/batch_delete/<batch_id>")
 @login_required

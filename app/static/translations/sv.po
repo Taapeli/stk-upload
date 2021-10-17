@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-07 16:35+0300\n"
+"POT-Creation-Date: 2021-10-17 14:46+0300\n"
 "PO-Revision-Date: 2021-09-16 11:23+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -171,7 +171,7 @@ msgstr "Läsfel för anteckningar "
 msgid "undefined relation"
 msgstr "odefinerad relation"
 
-#: bl/family.py:537
+#: bl/family.py:509
 msgid "This person has no families"
 msgstr "Denna person har inga familjer"
 
@@ -216,7 +216,7 @@ msgstr "Inga personer hittades"
 msgid "Requested person not found"
 msgstr "Personen finns inte"
 
-#: bl/root.py:583
+#: bl/root.py:542
 #, python-format
 msgid "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted"
 msgstr "Godkänt batch-ID %(batch_id)s med %(deleted)d-noder har tagits bort"
@@ -259,21 +259,25 @@ msgstr "Beräknad tid"
 msgid "sec"
 msgstr "sek"
 
-#: bl/gramps/gramps_loader.py:447
+#: bl/gramps/gramps_loader.py:358
+msgid "Free text search indexes"
+msgstr "Fritt namnsökning index"
+
+#: bl/gramps/gramps_loader.py:451
 msgid "Unable to open Gramps file"
 msgstr "Kan inte öppna Gramps fil"
 
-#: bl/gramps/xml_dom_handler.py:277
+#: bl/gramps/xml_dom_handler.py:278
 msgid "Citations"
 msgstr "Citerings"
 
-#: bl/gramps/xml_dom_handler.py:384 bp/scene/templates/scene/person.html:221
+#: bl/gramps/xml_dom_handler.py:385 bp/scene/templates/scene/person.html:221
 #: bp/scene/templates/scene/persons_list.html:85
 #: bp/scene/templates/scene/place.html:162
 msgid "Events"
 msgstr "Händelser"
 
-#: bl/gramps/xml_dom_handler.py:481
+#: bl/gramps/xml_dom_handler.py:482
 #: bp/scene/templates/scene/hx-person/famtree.html:4
 #: bp/scene/templates/scene/hx-person/famtree.html:11
 #: bp/scene/templates/scene/hx-person/fanchart.html:3
@@ -281,52 +285,52 @@ msgstr "Händelser"
 msgid "Families"
 msgstr "Familjer"
 
-#: bl/gramps/xml_dom_handler.py:516 bp/scene/templates/scene/family.html:121
+#: bl/gramps/xml_dom_handler.py:517 bp/scene/templates/scene/family.html:121
 #: bp/scene/templates/scene/place.html:86
 #: bp/scene/templates/scene/source_events.html:64
 msgid "Notes"
 msgstr "Anteckningar"
 
-#: bl/gramps/xml_dom_handler.py:559
+#: bl/gramps/xml_dom_handler.py:560
 msgid "Media objects"
 msgstr "Media objekts"
 
-#: bl/gramps/xml_dom_handler.py:735 bp/scene/templates/scene/macros.html:55
+#: bl/gramps/xml_dom_handler.py:736 bp/scene/templates/scene/macros.html:55
 #: bp/scene/templates/scene/persons_list.html:22
 #: bp/scene/templates/scene/persons_search.html:35
 msgid "Persons"
 msgstr "Personer"
 
-#: bl/gramps/xml_dom_handler.py:871 bp/gedcom/transforms/places.py:30
+#: bl/gramps/xml_dom_handler.py:872 bp/gedcom/transforms/places.py:30
 #: bp/scene/templates/scene/macros.html:67
 #: bp/scene/templates/scene/places.html:3
 msgid "Places"
 msgstr "Platser"
 
-#: bl/gramps/xml_dom_handler.py:928 templates/cite_sour_repo.html:55
+#: bl/gramps/xml_dom_handler.py:929 templates/cite_sour_repo.html:55
 msgid "Repositories"
 msgstr "Arkiv"
 
-#: bl/gramps/xml_dom_handler.py:1026 bp/scene/templates/scene/family.html:76
+#: bl/gramps/xml_dom_handler.py:1027 bp/scene/templates/scene/family.html:76
 #: bp/scene/templates/scene/macros.html:71
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:39
 #: templates/repo_sources.html:38
 msgid "Sources"
 msgstr "Källor"
 
-#: bl/gramps/xml_dom_handler.py:1065 bp/gedcom/transforms/dates.py:33
+#: bl/gramps/xml_dom_handler.py:1066 bp/gedcom/transforms/dates.py:33
 msgid "Dates"
 msgstr "Datum"
 
-#: bl/gramps/xml_dom_handler.py:1067
+#: bl/gramps/xml_dom_handler.py:1068
 msgid "Family sorting names"
 msgstr "Familj sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1102
+#: bl/gramps/xml_dom_handler.py:1103
 msgid "Person sorting names"
 msgstr "Person sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1118
+#: bl/gramps/xml_dom_handler.py:1119
 msgid "Estimated person lifetimes"
 msgstr "Beräkna person livstider"
 
@@ -541,9 +545,17 @@ msgstr "Användaren uppdaterad"
 msgid "Data import from %(i)s to database has been started."
 msgstr "Data importen från %(i)s till databasen har startats."
 
-#: bp/admin/uploads.py:159
+#: bp/admin/uploads.py:160
 msgid "Load failed, no progress in 60 seconds"
 msgstr ""
+
+#: bp/admin/uploads.py:219
+msgid "Gramps file stored"
+msgstr "Gramps filen lagrat"
+
+#: bp/admin/uploads.py:238
+msgid "Gramps file storing FAILED"
+msgstr "Gramps fil lagring mislyckats"
 
 #: bp/admin/templates/admin/access_management.html:3
 #: bp/admin/templates/admin/access_management.html:11
@@ -776,13 +788,13 @@ msgid "GEDCOM file"
 msgstr "Gedcom fil"
 
 #: bp/admin/templates/admin/gedcoms.html:32
-#: bp/admin/templates/admin/uploads.html:100
+#: bp/admin/templates/admin/uploads.html:101
 msgid "Number of files"
 msgstr "Antal av filer"
 
 #: bp/admin/templates/admin/gedcoms.html:33
 #: bp/admin/templates/admin/message.html:61
-#: bp/admin/templates/admin/uploads.html:104
+#: bp/admin/templates/admin/uploads.html:105
 msgid "List of users"
 msgstr "Lista över användare"
 
@@ -995,11 +1007,9 @@ msgid "Uploads for all users"
 msgstr "Uppladdningar för alla användare"
 
 #: bp/admin/templates/admin/uploads.html:32
-#: bp/audit/templates/audit/batches.html:26
-#: bp/audit/templates/audit/pick_auditing.html:43
-#: bp/gramps/templates/gramps/uploads.html:127
-msgid "Gramps file"
-msgstr "Gramps fil"
+#: bp/scene/templates/scene/comments.html:41
+msgid "Material"
+msgstr "Materialet"
 
 #: bp/admin/templates/admin/uploads.html:33
 msgid "Type / description"
@@ -1022,32 +1032,25 @@ msgstr "Operationer"
 msgid "me"
 msgstr "mig"
 
-#: bp/admin/templates/admin/uploads.html:74
+#: bp/admin/templates/admin/uploads.html:73
 msgid "UPLOADED"
 msgstr "LADDAD"
 
-#: bp/admin/templates/admin/uploads.html:75
+#: bp/admin/templates/admin/uploads.html:74
 msgid "deleted from database"
 msgstr "Raderad från databasen"
 
-#: bp/admin/templates/admin/uploads.html:77
-#, python-format
-msgid "batch %(batch_id)s; %(persons)d&nbsp;persons"
-msgstr "batch %(batch_id)s. %(persons)d personer"
+#: bp/admin/templates/admin/uploads.html:76
+#: bp/audit/templates/audit/batches.html:47
+#: bp/scene/templates/scene/persons_search.html:229
+msgid "persons"
+msgstr "personer"
 
-#: bp/admin/templates/admin/uploads.html:82
-msgid "CANDIDATE"
-msgstr "KANDIDAT"
-
-#: bp/admin/templates/admin/uploads.html:84
-msgid "Store to database"
-msgstr "Spara till databas"
-
-#: bp/admin/templates/admin/uploads.html:88
+#: bp/admin/templates/admin/uploads.html:89
 msgid "Show log"
 msgstr "Visa logg"
 
-#: bp/admin/templates/admin/uploads.html:92
+#: bp/admin/templates/admin/uploads.html:93
 msgid "Delete file"
 msgstr "Radera fil"
 
@@ -1071,27 +1074,27 @@ msgstr " lyckades"
 msgid "No such batch "
 msgstr "Ingen sådan sats "
 
-#: bp/audit/routes.py:226
+#: bp/audit/routes.py:227
 msgid "You are now an auditor for batch "
 msgstr "Du är nu granskare för materialet "
 
-#: bp/audit/routes.py:233
+#: bp/audit/routes.py:234
 msgid "Audit batch accepted: "
 msgstr "Materialet i granskning godkänd: "
 
-#: bp/audit/routes.py:240
+#: bp/audit/routes.py:241
 msgid "You have rejected the batch "
 msgstr "Du har avfärdat detta materialet "
 
-#: bp/audit/routes.py:424
+#: bp/audit/routes.py:425
 msgid "Done"
 msgstr "Färdigt"
 
-#: bp/audit/routes.py:513
+#: bp/audit/routes.py:514
 msgid "Data type '{}' is not supported"
 msgstr "Data typen '{}' stöds inte"
 
-#: bp/audit/routes.py:520
+#: bp/audit/routes.py:521
 msgid "Missing proper column title: "
 msgstr "Giltigt kolumn namn fattas: "
 
@@ -1144,7 +1147,7 @@ msgstr "det valda materialet"
 msgid "Delete data"
 msgstr "Fösrstöra data"
 
-#: bp/audit/templates/audit/approvals.html:97 ui/batch_ops.py:17
+#: bp/audit/templates/audit/approvals.html:97 ui/batch_ops.py:36
 msgid "Delete from database"
 msgstr "Radera från Isotammi"
 
@@ -1153,15 +1156,16 @@ msgstr "Radera från Isotammi"
 msgid "Batches"
 msgstr "Materialen"
 
+#: bp/audit/templates/audit/batches.html:26
+#: bp/audit/templates/audit/pick_auditing.html:43
+#: bp/gramps/templates/gramps/uploads.html:127
+msgid "Gramps file"
+msgstr "Gramps fil"
+
 #: bp/audit/templates/audit/batches.html:38
 #: bp/audit/templates/audit/user_profile.html:34
 msgid "User Profile"
 msgstr "Forskarens profil"
-
-#: bp/audit/templates/audit/batches.html:47
-#: bp/scene/templates/scene/persons_search.html:229
-msgid "persons"
-msgstr "personer"
 
 #: bp/audit/templates/audit/batches.html:60
 #: bp/audit/templates/audit/pick_auditing.html:61
@@ -1169,7 +1173,7 @@ msgstr "personer"
 msgid "Audit start date"
 msgstr "Startdatum for granskningen"
 
-#: bp/audit/templates/audit/batches.html:84 ui/batch_ops.py:16
+#: bp/audit/templates/audit/batches.html:84 ui/batch_ops.py:35
 msgid "Show upload log"
 msgstr "Visa uppladdninslogget"
 
@@ -1300,23 +1304,22 @@ msgstr "sparade"
 msgid "Browse this material"
 msgstr "Bläddra materialet"
 
-#: bp/audit/templates/audit/pick_auditing.html:101
+#: bp/audit/templates/audit/pick_auditing.html:102
+msgid "Start auditing again"
+msgstr "Starta granskningen åter"
+
+#: bp/audit/templates/audit/pick_auditing.html:105
 msgid "Start auditing"
 msgstr "Starta granskningen"
 
-#: bp/audit/templates/audit/pick_auditing.html:103
+#: bp/audit/templates/audit/pick_auditing.html:108
 msgid "Accept auditing"
 msgstr "Godkänna granskningen"
 
-#: bp/audit/templates/audit/pick_auditing.html:105
-#: bp/audit/templates/audit/pick_auditing.html:108
-#: bp/audit/templates/audit/pick_auditing.html:120
+#: bp/audit/templates/audit/pick_auditing.html:110
+#: bp/audit/templates/audit/pick_auditing.html:113
 msgid "Reject auditing"
 msgstr "Avfärda granskningen"
-
-#: bp/audit/templates/audit/pick_auditing.html:118
-msgid "Cancel"
-msgstr "Tillbaka"
 
 #: bp/audit/templates/audit/reference.html:3
 #: bp/gedcom/templates/gedcom_info.html:3
@@ -2240,31 +2243,31 @@ msgstr "Avmarkera"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Återställ markerad tag's: <tag>-X -> <tag>"
 
-#: bp/gramps/routes.py:279
+#: bp/gramps/routes.py:243
 #, python-format
 msgid "The file \"%(n)s\" does not exist"
 msgstr "Filen \"%(n)s\" finns inte"
 
-#: bp/gramps/routes.py:299
-#, fuzzy, python-format
+#: bp/gramps/routes.py:263
+#, python-format
 msgid "The log file for \"%(n)s\" does not exist any more"
-msgstr "Filen \"%(n)s\" finns inte"
+msgstr "Det finns inte log fil för material \"%(n)s\""
 
-#: bp/gramps/routes.py:325
+#: bp/gramps/routes.py:290
 msgid "Batch not found"
 msgstr "Materialet finns inte"
 
-#: bp/gramps/routes.py:342
+#: bp/gramps/routes.py:307
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr "Det gick inte att ta bort material \"%(batch_id)s\""
 
-#: bp/gramps/routes.py:350
+#: bp/gramps/routes.py:315
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr "Batch %(batch_id)s har tagits bort, %(n)s noder"
 
-#: bp/gramps/routes.py:434
+#: bp/gramps/routes.py:399
 msgid "Failed to retrieve commands"
 msgstr "Det gick inte att hämta kommandon"
 
@@ -2472,10 +2475,6 @@ msgstr "Svaren"
 #: bp/scene/templates/scene/medias.html:68
 msgid "For auditor only"
 msgstr "Bara for granskaren"
-
-#: bp/scene/templates/scene/comments.html:41
-msgid "Material"
-msgstr "Materialet"
 
 #: bp/scene/templates/scene/comments.html:51
 #: bp/scene/templates/scene/comments.html:54
@@ -3490,6 +3489,10 @@ msgstr "Vilka platser forskar du främst?"
 msgid "Send request"
 msgstr "Skicka begäran"
 
+#: bp/start/routes.py:181
+msgid "New user request"
+msgstr "en ny användarsökare"
+
 #: bp/start/routes.py:183
 msgid "Join message sent"
 msgstr "Meddelande om anslutning till Isotammi sent"
@@ -4106,7 +4109,7 @@ msgstr "Det gick inte att spara databasen"
 msgid "Database save failed due to {}"
 msgstr "Databas sparningen misslyckats på grund av {}"
 
-#: pe/neo4j/updateservice.py:809
+#: pe/neo4j/updateservice.py:800
 msgid "Could not save a comment"
 msgstr "Commentarens sparningen misslyckats"
 
@@ -4491,15 +4494,15 @@ msgstr "Kan ej ladda filen"
 msgid "Unable to load file, code ="
 msgstr "Kan ej ladda filen, kod ="
 
-#: ui/batch_ops.py:13
+#: ui/batch_ops.py:32
 msgid "Send for auditing"
 msgstr "Sänd för granskning"
 
-#: ui/batch_ops.py:14
+#: ui/batch_ops.py:33
 msgid "Withdraw auditing"
 msgstr "Återkalla granskningen"
 
-#: ui/batch_ops.py:15
+#: ui/batch_ops.py:34
 msgid "Download the Gramps file"
 msgstr "Ladda ner Gramps-filen"
 

@@ -599,9 +599,9 @@ class BatchUpdater(DataService):
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id (in BatchUpdater). """
-        ret = self.dataservice.ds_get_batch(user, batch_id)
-        # returns {"status":Status.OK, "node":record}
         try:
+            ret = self.dataservice.ds_get_batch(user, batch_id)
+            # returns {"status":Status.OK, "node":record}
             node = ret['node']
             batch = Root.from_node(node)
             return {"status":Status.OK, "item":batch}
@@ -691,9 +691,9 @@ class BatchReader(DataServiceBase):
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id (in BatchReader). """
-        ret = self.dataservice.ds_get_batch(user, batch_id)
-        # returns {"status":Status.OK, "node":record}
         try:
+            ret = self.dataservice.ds_get_batch(user, batch_id)
+            # returns {"status":Status.OK, "node":record}
             node = ret['node']
             batch = Root.from_node(node)
             return {"status":Status.OK, "item":batch}
