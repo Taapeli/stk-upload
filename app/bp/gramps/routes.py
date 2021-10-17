@@ -420,3 +420,36 @@ def get_commands(batch_id):
                                description=batch.description, 
                                commands=commands)
 
+@bp.route("/gramps/details/<batch_id>")
+@login_required
+@roles_accepted("research", "admin")
+def batch_details(batch_id):
+    with BatchReader("update") as batch_service:
+        res = batch_service.batch_get_one(current_user.username, batch_id)
+        if Status.has_failed(res):
+            raise RuntimeError(_("Failed to retrieve batch"))
+ 
+        batch = res['item']
+
+    return render_template(
+        "/gramps/details.html",
+       batch_id=batch_id, 
+       batch=batch,
+    )
+
+@bp.route("/gramps/details/update_description", methods=["post"])
+@login_required
+@roles_accepted("research", "admin")
+def batch_update_description():
+    batch_id = request.form["batch_id"]
+    description = request.form["description"]
+    with BatchUpdater("update") as batch_service:
+        res = batch_service.batch_get_one(current_user.username, batch_id)
+        if Status.has_failed(res):
+            raise RuntimeError(_("Failed to retrieve batch"))
+ 
+        batch = res['item']
+        batch.description = description
+        batch.save(batch_service.dataservice)
+
+    return description

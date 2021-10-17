@@ -1,0 +1,61 @@
+{# _gramps/details.html_ #}
+{% extends "start/s_layout.html" %}
+{% block title %}{{ _('Batch Details') }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+{% from "start/s_macros.html" import hamburger_menu, state_info with context %}
+
+<style>
+h2 {margin-bottom: 0;}
+td {
+    position: relative;
+}
+.visible { display: inline; }
+.hidden { display:none; }
+</style>
+
+{{ hamburger_menu( (
+   ) ) }}
+
+<div id="startdiv">
+    <div>
+		<h1>{{ _('Batch Details') }}</h1>
+
+{% include "flash_messages.html" %}
+
+	<table>
+	<tr>
+		<td>{{ _("Batch id:") }}
+		<td>{{ batch_id }}
+	</tr>
+	<tr>
+		<td>{{ _("Gramps file:") }}
+		<td>{{ batch.xmlname }}
+	</tr>
+	<tr>
+		<td>{{ _("Material:") }}
+		<td>{{ batch.material }}
+	</tr>
+	<tr>
+		<td>{{ _("Description:") }}
+		<td>
+			<form>
+			<input type="hidden" name="batch_id" value="{{ batch_id }}">
+			<textarea id="description" name="description">{{ batch.description }}</textarea>
+			<button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
+			</form>
+	</tr>
+   	</table>
+   
+  </div>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
+
+<!-- Startdiv ends -->
+</div>
+
+{% endblock %}
+
+</body>
+</html>
+
