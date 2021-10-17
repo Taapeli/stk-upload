@@ -117,8 +117,7 @@ return b as batch, count(x) as cnt
 #-bl.root.Root.list_empty_batches.Upload.get_stats
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_get_batch
     get_single_batch = '''
-match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root)
-    where up.username = $user and b.id = $batch
+match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch})
 optional match (acc:UserProfile) -[:HAS_ACCESS]-> (b)
     where not up.username = acc.username
 optional match (b) --> (x)
