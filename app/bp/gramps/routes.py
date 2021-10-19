@@ -57,6 +57,7 @@ from ..admin import uploads
 from . import bp
 from bl.gramps import gramps_loader
 from bl.gramps import gramps_utils
+from .models.stats import get_stats
 
 # @bp.route("/gramps")
 # def obsolete_gramps_index():
@@ -430,11 +431,13 @@ def batch_details(batch_id):
             raise RuntimeError(_("Failed to retrieve batch"))
  
         batch = res['item']
-
+    stats = get_stats(batch_id)
+    stats_localized = [(_(label),do_citations,data) for (label,do_citations,data) in stats]
     return render_template(
         "/gramps/details.html",
        batch_id=batch_id, 
        batch=batch,
+       stats=sorted(stats_localized),
     )
 
 @bp.route("/gramps/details/update_description", methods=["post"])

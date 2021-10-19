@@ -19,26 +19,27 @@ td {
    ) ) }}
 
 <div id="startdiv">
-    <div>
 		<h1>{{ _('Batch Details') }}</h1>
 
 {% include "flash_messages.html" %}
 
+<div class="startbox" style="width:auto">
+	<h2 class="center">{{ _("General") }}</h2>
 	<table>
 	<tr>
-		<td>{{ _("Batch id:") }}
+		<th>{{ _("Batch id:") }}
 		<td>{{ batch_id }}
 	</tr>
 	<tr>
-		<td>{{ _("Gramps file:") }}
-		<td>{{ batch.xmlname }}
+		<th>{{ _("Gramps file:") }}
+		<td style="overflow: hidden">{{ batch.xmlname }}
 	</tr>
 	<tr>
-		<td>{{ _("Material:") }}
+		<th>{{ _("Material:") }}
 		<td>{{ batch.material }}
 	</tr>
 	<tr>
-		<td>{{ _("Description:") }}
+		<th>{{ _("Description:") }}
 		<td>
 			<form>
 			<input type="hidden" name="batch_id" value="{{ batch_id }}">
@@ -48,7 +49,26 @@ td {
 	</tr>
    	</table>
    
-  </div>
+</div>
+
+<div class="startbox">
+	<h2 class="center">{{ _("Statistics") }}</h2>
+	<table>
+	<tr>
+		<th>{{ _("Type") }}
+		<th>{{ _("Object count") }}
+		<th>{{ _("Objects with source citations") }}
+	{% for label,do_citations,(cnt1,cnt2) in stats %}
+		<tr>
+			<td>{{ label }}
+			<td class="right">{{ cnt1 }}
+			<td class="right">{% if do_citations %}
+				{{ cnt2 }}
+				{% endif %}
+	{% endfor %}
+	</table>
+</div>
+
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
 
 <!-- Startdiv ends -->
