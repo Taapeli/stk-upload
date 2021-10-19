@@ -150,7 +150,7 @@ def get_meta(root):
         if status == State.FILE_LOADING:
             stat = os.stat(metaname)
             if (
-                stat.st_mtime < time.time() - 60
+                stat.st_mtime < time.time() - 2*60
             ):  # not updated within last minute -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
                 with open(root.logname,"a") as f:
