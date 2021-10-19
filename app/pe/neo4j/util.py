@@ -72,31 +72,14 @@ def run_cypher_batch(session, cypher, username, batch_id, **kwargs):
         cypher = "match (root) -[:OBJ_PERSON]-> (p:Person) ..."
 
     """
+    cypher_prefix = kwargs.get("cypher_prefix", "")
     if not username:
-        full_cypher = cypher_common_prefix + cypher
+        full_cypher = cypher_prefix + cypher_common_prefix + cypher
     else:
-        full_cypher = cypher_batch_prefix + cypher
+        full_cypher = cypher_prefix + cypher_batch_prefix + cypher
     if False:
         print("----------- run_cypher_batch -------------")
         print(full_cypher)
         pprint(locals())
     return session.run(full_cypher, username=username, batch_id=batch_id, **kwargs)
 
-def run_cypher_batch2( session, cypher1, cypher2, username, batch_id, **kwargs):
-    """
-    Variation for freetext search where the common part must be inserted
-    in the middle, between cypher1 and cypher2.
-    """
-    if not username:
-        full_cypher = cypher1 + cypher_common_prefix + cypher2
-    else:
-        full_cypher = cypher1 + cypher_batch_prefix + cypher2
-    if False:
-        print("----------- run_cypher_batch2 -------------")
-        print(full_cypher)
-        args = kwargs.copy()
-        args.update(
-                username=username,  
-                batch_id=batch_id)
-        pprint(args)  
-    return session.run(full_cypher, username=username, batch_id=batch_id, **kwargs)

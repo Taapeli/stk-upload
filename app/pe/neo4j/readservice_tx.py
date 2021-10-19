@@ -104,7 +104,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
         #if not username: username = ""
 
-        freetext_search = False
+        cypher_prefix = ""
         if restart:
             # Show search form only
             return {'items': [], 'status': Status.NOT_STARTED }
@@ -113,9 +113,8 @@ class Neo4jReadServiceTx(ConcreteService):
             cypher = CypherPerson.get_person_list
             print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
         elif rule == 'freetext':
-            cypher1 = CypherPerson.read_persons_w_events_by_name1
-            cypher2 = CypherPerson.read_persons_w_events_by_name2
-            freetext_search = True
+            cypher_prefix = CypherPerson.read_persons_w_events_by_name1
+            cypher = CypherPerson.read_persons_w_events_by_name2
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
             cypher = CypherPerson.read_persons_w_events_by_refname
@@ -141,18 +140,12 @@ class Neo4jReadServiceTx(ConcreteService):
  
         persons = []
         #logger.debug(f"tx_get_person_list: cypher: {cypher}")
-        if freetext_search:
-            result = run_cypher_batch2(self.tx, cypher1, cypher2, username, batch_id,
-                                use=rule, name=key,
-                                years=years,
-                                start_name=fw_from, 
-                                limit=limit)
-        else:
-            result = run_cypher_batch(self.tx, cypher, username, batch_id,
-                                use=rule, name=key,
-                                years=years,
-                                start_name=fw_from, 
-                                limit=limit)
+        result = run_cypher_batch(self.tx, cypher, username, batch_id,
+                            cypher_prefix=cypher_prefix,
+                            use=rule, name=key,
+                            years=years,
+                            start_name=fw_from, 
+                            limit=limit)
         # result: person, names, events
         for record in result:
             #  <Record 
