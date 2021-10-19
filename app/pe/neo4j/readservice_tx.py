@@ -13,7 +13,7 @@ from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
 
-from .util import run_cypher_batch, run_cypher_batch2
+from .util import run_cypher_batch
 
 class PersonRecord:
     ''' Object to return person display data. '''
