@@ -27,19 +27,19 @@ td {
 	<h2 class="center">{{ _("General") }}</h2>
 	<table>
 	<tr>
-		<th>{{ _("Batch id:") }}
+		<th>{{ _("Batch id") }}:
 		<td>{{ batch_id }}
 	</tr>
 	<tr>
-		<th>{{ _("Gramps file:") }}
+		<th>{{ _("Gramps file") }}:
 		<td style="overflow: hidden">{{ batch.xmlname }}
 	</tr>
 	<tr>
-		<th>{{ _("Material:") }}
+		<th>{{ _("Material") }}:
 		<td>{{ batch.material }}
 	</tr>
 	<tr>
-		<th>{{ _("Description:") }}
+		<th>{{ _("Description") }}:
 		<td>
 			<form>
 			<input type="hidden" name="batch_id" value="{{ batch_id }}">
@@ -58,13 +58,30 @@ td {
 		<th>{{ _("Type") }}
 		<th>{{ _("Object count") }}
 		<th>{{ _("Objects with source citations") }}
-	{% for label,do_citations,(cnt1,cnt2) in stats %}
+	{% for label,do_citations,(cnt1,cnt2) in object_stats %}
 		<tr>
 			<td>{{ label }}
 			<td class="right">{{ cnt1 }}
 			<td class="right">{% if do_citations %}
 				{{ cnt2 }}
 				{% endif %}
+	{% endfor %}
+	</table>
+</div>
+
+<div class="startbox">
+	<h2 class="center">{{ _("Event Statistics") }}</h2>
+	<table>
+	<tr>
+		<th>{{ _("Event type") }}
+		<th>{{ _("Event count") }}
+		<th>{{ _("Events with source citations") }}
+	{% for label,(cnt1,cnt2,pct) in event_stats %}
+		<tr>
+			<td>{{ label }}
+			<td class="right">{{ cnt1 }}
+			<td class="right">{{ cnt2 }}
+			<td class="right">{{ pct }}%
 	{% endfor %}
 	</table>
 </div>
