@@ -931,7 +931,7 @@ class Neo4jReadService(ConcreteService):
                 ret.append(e)
             else:  # Audit or Batch
                 print(
-                    f"r_get_place_events No Person or Family:"
+                    f"dr_get_place_events No Person or Family:"
                     f" {e.id} {record['indi'].labels} {record['indi'].get('id')}"
                 )
         return {"items": ret, "status": Status.OK}

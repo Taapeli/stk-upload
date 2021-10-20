@@ -19,7 +19,7 @@
 
 import shareds
 import logging
-from bl.base import IsotammiException
+#from bl.base import IsotammiException
 
 logger = logging.getLogger('stkserver')
 
@@ -50,7 +50,7 @@ class DataService:
         - 3. else                                        No transaction
         """
         self.idstr = f"{self.__class__.__name__}>DataService"
-        print(f'#~~~{self.idstr} init')
+        logger.debug(f'#~~~{self.idstr} init')
         # Find <class 'pe.neo4j.*service'> and initialize it
         self.service_name = service_name
         service_class = shareds.dataservices.get(self.service_name)
@@ -78,18 +78,18 @@ class DataService:
         # With 'update' and 'read_tx' begin transaction
         if self.old_tx:
             # 1. Use given transaction
-            print(f'#~~~{self.idstr} enter active tx={obj_addr(self.old_tx)}')
+            logger.debug(f'#~~~{self.idstr} enter active tx={obj_addr(self.old_tx)}')
             self.dataservice.tx = self.old_tx
         else:
             if self.service_name == "update" or self.service_name == "read_tx":
                 # 2. Create transaction
                 self.dataservice.tx = shareds.driver.session().begin_transaction()
-                print(f'#~~~{self.idstr} enter "{self.service_name}" tx={obj_addr(self.dataservice.tx)}')
+                logger.debug(f'#~~~{self.idstr} enter "{self.service_name}" tx={obj_addr(self.dataservice.tx)}')
 
             else:
                 # 3. No transaction
                 self.dataservice.tx = None
-                print(f'#~~~{self.idstr} enter') # {obj_addr(self.old_tx)}')
+                logger.debug(f'#~~~{self.idstr} enter') # {obj_addr(self.old_tx)}')
         return self
 
     def __exit__(self, exc_type=None, exc_value=None, traceback=None):
@@ -99,23 +99,23 @@ class DataService:
         exited. If the context was exited without an exception, all three
         arguments will be None.
         """
-        #print(f"--{self.idstr} exit tx={obj_addr(self.dataservice.tx)} prev {obj_addr(self.old_tx)}")
+        #logger.debug(f"--{self.idstr} exit tx={obj_addr(self.dataservice.tx)} prev {obj_addr(self.old_tx)}")
         if self.dataservice.tx:
             if exc_type:
-                print(f"--{self.idstr} exit rollback {exc_type}")
+                logger.info(f"--{self.idstr} exit rollback {exc_type}")
                 if self.old_tx is None:
                     self.dataservice.tx.rollback()
             else:
                 if self.old_tx is None:
-                    print(f'#~~~{self.idstr} exit commit tx={obj_addr(self.dataservice.tx)}')
+                    logger.info(f'#~~~{self.idstr} exit commit tx={obj_addr(self.dataservice.tx)}')
                     try:
                         self.dataservice.tx.commit()
                     except Exception as e:
-                        print(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
+                        logger.error(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
                 else:
-                    print(f'#~~~{self.idstr} exit continue tx={obj_addr(self.dataservice.tx)}')
+                    logger.info(f'#~~~{self.idstr} exit continue tx={obj_addr(self.dataservice.tx)}')
         else:
-            print(f'#~~~{self.idstr} exit {obj_addr(self.old_tx)}')
+            logger.info(f'#~~~{self.idstr} exit {obj_addr(self.old_tx)}')
 
 
 class ConcreteService:

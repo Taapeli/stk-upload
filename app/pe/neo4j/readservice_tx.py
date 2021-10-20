@@ -80,7 +80,7 @@ class Neo4jReadServiceTx(ConcreteService):
     '''
     def __init__(self, driver=None):
         
-        print(f'#~~~~{self.__class__.__name__} init')
+        logger.debug(f'#~~~~{self.__class__.__name__} init')
         self.driver = driver if driver else shareds.driver
 
 

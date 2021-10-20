@@ -65,14 +65,16 @@ function checkFileSize() {
 }
 
 // Progress bar
-var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
+var PROGRESS_INTERVAL = {{interval}}; {# 10000 #}
 
 function update_progress(batch_id) {
 	// see http://jsfiddle.net/kedctfmj/3/
 	$.get("get_progress/" + encodeURIComponent(batch_id), (rsp) => {
 		var progress_div = $("td div.progress[data-name='"+batch_id+"']");
-		var batch_id_column = progress_div.parent(); /*.prev().prev(); */
-		batch_id_column.css("background","silver");
+		var batch_id_column = progress_div.parent();
+		batch_id_column.css("background","oldlace");
+        batch_id_column.css("border-color", "#00800070")
+        batch_id_column.css("border-width", "3pt")
 		progress_div.css("background","Green");
 		progress_div.css("opacity","0.5");
 		progress_div.css("z-index","1");
@@ -196,7 +198,7 @@ function doconfirm( command, title ) { // used in commands.html
             <form action="/gramps/upload" method="post" enctype="multipart/form-data">
   				<td><b>{{ _("Send a new Gramps file") }}</b>
   				</td>
-  				<td colspan="4" style="padding: 10pt; background='pink'">
+  				<td colspan="4" style="padding: 10pt;">
   					<div>
 	   					<div>
 				        	<input type="hidden" name="material" value="xml_file">

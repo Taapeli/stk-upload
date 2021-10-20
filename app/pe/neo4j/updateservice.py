@@ -59,7 +59,7 @@ class Neo4jUpdateService(ConcreteService):
 
         :param: driver             neo4j.DirectDriver object
         """
-        print(f"#~~~~{self.__class__.__name__} init")
+        logger.info(f"#~~~~{self.__class__.__name__} init")
         self.driver = driver
         self.tx = None  # Until started in Dataservice.__enter__()
 

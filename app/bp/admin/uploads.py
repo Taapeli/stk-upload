@@ -34,6 +34,7 @@ import traceback
 from dataclasses import dataclass
 from typing import List
 from flask_babelex import _
+from flask import flash
 import logging
 
 logger = logging.getLogger("stkserver")
@@ -146,12 +147,13 @@ def get_meta(root):
             if (stat.st_mtime < time.time() - max_sec): 
                 # not updated within last minute -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
-                msg = f"{util.format_timestamp()}: "\
-                      f"{_('Load failed, no progress in %(n)s seconds', n=max_sec)}"
+                msg1= f"{_('Load failed, no progress in %(n)s seconds', n=max_sec)}"
+                msg = f"{util.format_timestamp()}: {msg1}"
                 with open(root.logname,"a") as f:
                     print("", file=f)
                     print(msg, file=f)
                 print(f"bp.admin.uploads.get_meta: {msg}")
+                flash(msg1)
                 update_metafile(metaname, status=State.FILE_LOAD_FAILED)
     except FileNotFoundError as e:
         meta = {}

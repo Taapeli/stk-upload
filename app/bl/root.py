@@ -29,15 +29,16 @@ Created on 9.6.2021
 # blacked 2021-05-01 JMä
 import os
 from datetime import date, datetime
-#from typing import Any, Optional
-
 from flask_babelex import _
+#from typing import Any, Optional
+#from bl.base import IsotammiException
+import logging
+
+logger = logging.getLogger('stkserver')
 
 import shareds
 from models.util import format_ms_timestamp
-
 from bl.admin.models.cypher_adm import Cypher_adm
-
 from bl.base import Status, NodeObject
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_batch_audit import CypherRoot, CypherAudit
@@ -649,7 +650,7 @@ class DataServiceBase:
     def __enter__(self):
         self.idstr = f"{self.__class__.__name__}>DataServiceBase"
         self.dataservice.tx = shareds.driver.session().begin_transaction()
-        print(f'#~~~{self.idstr} init tx={id(self.dataservice.tx)}')
+        logger.debug(f'#~~~{self.idstr} init tx={id(self.dataservice.tx)}')
         return self
 
     def __exit__(self, exc_type=None, exc_value=None, traceback=None):
@@ -665,20 +666,20 @@ class DataServiceBase:
                 print(f"--{self.idstr} exit rollback {exc_type}")
                 self.dataservice.tx.rollback()
             else:
-                print(f'#~~~{self.idstr} exit commit tx={id(self.dataservice.tx)}')
+                logger.debug(f'#~~~{self.idstr} exit commit tx={id(self.dataservice.tx)}')
                 try:
                     self.dataservice.tx.commit()
                 except Exception as e:
-                    print(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
+                    logger.debug(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
         else:
-            print(f'#~~~{self.idstr} exit {id(self.old_tx)}')
+            logger.debug(f'#~~~{self.idstr} exit {id(self.old_tx)}')
 
 
 class BatchReader(DataServiceBase):
 
     def __init__(self, service_name: str):
         self.idstr = f"{self.__class__.__name__}"
-        print(f'#~~~{self.idstr} init')
+        logger.debug(f'#~~~{self.idstr} init')
         # Find <class 'pe.neo4j.*service'> and initialize it
         self.service_name = service_name
         service_class = shareds.dataservices.get(self.service_name)
