@@ -31,26 +31,19 @@ import pprint
 import time
 import threading
 import traceback
-import logging
-#from datetime import datetime
 from dataclasses import dataclass
 from typing import List
+from flask_babelex import _
+import logging
 
 logger = logging.getLogger("stkserver")
 
-from flask_babelex import _
-
 import shareds
+from models import email, util, syslog
 from bl.root import Root, State
 from bl.base import IsotammiException
-from models import email, util, syslog
 from bl.gramps import gramps_loader
 from pe.neo4j.cypher.cy_batch_audit import CypherRoot
-
-# ==> bl.batch.Batch.BATCH_* 7.5.2021 / JMä
-# STATUS_UPLOADED = "uploaded", STATUS_LOADING = "loading", STATUS_DONE = "done"
-# STATUS_FAILED = "failed", STATUS_ERROR = "error", STATUS_REMOVED = "removed"
-
 
 # ===============================================================================
 # Background loading of a Gramps XML file
@@ -149,16 +142,16 @@ def get_meta(root):
         status = meta.get("status")
         if status == State.FILE_LOADING:
             stat = os.stat(metaname)
-            if (
-                stat.st_mtime < time.time() - 2*60
-            ):  # not updated within last minute -> assume failure
+            max_sec = 2*60
+            if (stat.st_mtime < time.time() - max_sec): 
+                # not updated within last minute -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
+                msg = f"{util.format_timestamp()}: "\
+                      f"{_('Load failed, no progress in %(n)s seconds', n=max_sec)}"
                 with open(root.logname,"a") as f:
                     print("", file=f)
-                    msg = "{}: {}".format(
-                            util.format_timestamp(),
-                            _("Load failed, no progress in 60 seconds")) 
                     print(msg, file=f)
+                print(f"bp.admin.uploads.get_meta: {msg}")
                 update_metafile(metaname, status=State.FILE_LOAD_FAILED)
     except FileNotFoundError as e:
         meta = {}
@@ -216,7 +209,7 @@ def background_load_to_stkbase(batch:Root) -> None:
             msg += "\n{}".format(step)
         msg += "\n"
         open(batch.logname, "w", encoding="utf-8").write(msg)
-        email.email_admin(_("Gramps file stored"), msg)
+        email.email_admin("Gramps file stored", msg)
         syslog.log(type="completed save to database", file=batch.xmlname, user=batch.user)
     except Exception as e:
         # traceback.print_exc()
@@ -235,7 +228,7 @@ def background_load_to_stkbase(batch:Root) -> None:
             pprint.pprint(e.kwargs)
             msg += pprint.pformat(e.kwargs)
         open(batch.logname, "w", encoding="utf-8").write(msg)
-        email.email_admin(_("Gramps file storing FAILED"), msg)
+        email.email_admin("Gramps file storing FAILED", msg)
         syslog.log(type="gramps store to database failed", file=batch.xmlname, user=batch.user)
 
 

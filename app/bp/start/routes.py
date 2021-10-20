@@ -178,7 +178,7 @@ def join():
             msg += f"\n{name}: {value}"
         msg += f"\n\nApprove user: http://{request.host}/admin/update_user/{username}"
         if email.email_admin(
-            _("New user request"), msg, sender=request.form.get("email")
+            "New user request", msg, sender=request.form.get("email")
         ):
             flash(_("Join message sent"))
         else:
@@ -215,7 +215,9 @@ def send_email():
     subject = request.form["subject"]
     body = request.form["message"]
     ok = email.email_admin(
-        _(subject), body, sender=(current_user.name, current_user.email)
+        subject, 
+        body, 
+        sender=(current_user.name, current_user.email)
     )
     if ok:
         return "ok"

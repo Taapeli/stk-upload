@@ -143,7 +143,9 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK, "id": batch_id}
 
     def ds_get_batch(self, user, batch_id):
-        """Get Batch node by username and batch id. """
+        """Get Batch node by username and batch id. 
+           Note. 'user' not used!
+        """
         result = self.tx.run(CypherRoot.get_single_batch, 
                              user=user, batch=batch_id)
         for record in result:
