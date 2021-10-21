@@ -32,7 +32,7 @@ class CypherFamily():
 
     get_a_family = '''
 MATCH (root) -[r:OBJ_FAMILY]-> (f:Family {uuid:$f_uuid}) 
-RETURN f, type(r) AS root_type, root'''
+RETURN f, root'''
 
     get_family_parents = """
 MATCH (f:Family) -[r:PARENT]-> (pp:Person) WHERE ID(f) = $fuid

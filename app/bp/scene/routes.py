@@ -290,7 +290,7 @@ def show_person(uuid=None, fanchart=False):
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
         person = None
@@ -302,7 +302,7 @@ def show_person(uuid=None, fanchart=False):
         objs = result.get("objs", [])
         print(f"# Person with {len(objs)} objects")
         jscode = result.get("jscode", "")
-        # Batch or Audit node data like {'root_type', 'root_user', 'id'}
+        # Batch or Audit node data like {'material', 'root_user', 'id'}
         person.root = result.get("root")
 
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
@@ -338,7 +338,7 @@ def show_person_family_tree_hx(uuid=None):
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")
@@ -378,7 +378,7 @@ def show_person_fanchart_hx(uuid=None):
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")

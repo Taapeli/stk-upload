@@ -39,7 +39,7 @@ SET p.sortname=$key"""
 
     get_person = """
 MATCH (root) -[r:OBJ_PERSON]-> (p:Person {uuid:$uuid}) 
-RETURN p, type(r) AS root_type, root"""
+RETURN p, root"""
 
     get_names_events = """
 MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid

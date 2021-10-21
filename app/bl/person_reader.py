@@ -188,21 +188,21 @@ class PersonReaderTx(DataService):
         Get a Person with all connected nodes for display in Person page as object tree.
         """
         """
-        For Person data page we must have all business objects, which has connection
+        For Person data page we need all business objects, which has connection
         to current Person. This is done in the following steps:
     
         1. (p:Person) --> (x:Name|Event)
         2. (p:Person) <-- (f:Family)
            for f
-           (f) --> (fp:Person) -[*1]-> (fpn:Name)
-           (f) --> (fe:Event)
+                (f) --> (fp:Person) -[*1]-> (fpn:Name)
+                (f) --> (fe:Event)
         3. for z in p, x, fe, z, s, r
-           (y) --> (z:Citation|Note|Media)
+               (y) --> (z:Citation|Note|Media)
         4. for pl in z:Place, ph
-           (pl) --> (pn:Place_name)
-           (pl) --> (ph:Place)
+               (pl) --> (pn:Place_name)
+               (pl) --> (ph:Place)
         5. for c in z:Citation
-           (c) --> (s:Source) --> (r:Repository)
+               (c) --> (s:Source) --> (r:Repository)
         
             p:Person
               +-- x:Name
@@ -212,7 +212,7 @@ class PersonReaderTx(DataService):
         (1)   +-- x:Event
               |     +-- z:Place
               |     |     +-- pn:Place_name
-              |     |     +-- z:Place (hierarkia)
+              |     |     +-- z:Place (hierarchy)
               |     |     +-- z:Citation (2)
               |     |     +-- z:Note (3)
               |     |     +-- z:Media (4)
@@ -248,8 +248,8 @@ class PersonReaderTx(DataService):
         - x and f: included objects (in p.names etc)
         - others: reference to "PersonReader.objs" dictionary (p.citation_ref[] etc)
     
-        For ex. Sources may be referenced multiple times and we want to process them 
-        once only.
+        For example Sources may be referenced multiple times and we want to
+        process them once only.
         """
 
         def _extract_place_w_names(pl_reference):
@@ -267,7 +267,11 @@ class PersonReaderTx(DataService):
 
         # ---/
 
-        res = self.dataservice.tx_get_person_by_uuid(uuid, active_user=self.use_user, batch_id=self.user_context.batch_id)
+        res = self.dataservice.tx_get_person_by_uuid(
+            uuid, 
+            active_user=self.use_user, 
+            batch_id=self.user_context.batch_id
+        )
         if Status.has_failed(res):
             # Not found, not allowed (person.too_new) or error
             if res.get("status") == Status.NOT_FOUND:
@@ -278,7 +282,7 @@ class PersonReaderTx(DataService):
             return res
         # Got dictionary: Status and following objects:
         #     - person_node, root, name_nodes, event_node_roles, cause_of_death, families
-        #     - - root = {root_type, root,user, batch_id}
+        #     - - root = {material, root,user, batch_id}
         #     - - event_node_roles = [[Event node, role], ...]
         #     - - cause_of_death = Event node
         #     - - families = [{family_rel, family_role, family_node,
@@ -297,8 +301,8 @@ class PersonReaderTx(DataService):
         person.media_ref = []
         self._catalog(person)
 
-        # Info about linked Batch or Audit node
-        root_dict = res.get("root")  # {root_type, root_user, batch_id}
+        # Info about linked Root node
+        root_dict = res.get("root")  # {material, root_user, batch_id}
         for name_node in res.get("name_nodes"):
             name = Name.from_node(name_node)
             person.names.append(name)
@@ -319,7 +323,7 @@ class PersonReaderTx(DataService):
 
         res = self.dataservice.tx_get_person_families(person.uniq_id)
         if Status.has_failed(res):
-            print(
+            logger.error(
                 "#bl.person_reader.PersonReaderTx.get_person_data - Can not read families:"
                 f' {res.get("statustext")}'
             )
@@ -358,7 +362,7 @@ class PersonReaderTx(DataService):
                     family.father = member
                 elif parental_role == "mother":
                     family.mother = member
-                else:  # children
+                else:  # child
                     family.children.append(member)
 
             if family_role:  # main person is a father or mother
@@ -378,7 +382,7 @@ class PersonReaderTx(DataService):
         res = self.dataservice.tx_get_object_places(self.obj_catalog)
         # returns {status, place_references}
         if Status.has_failed(res):
-            print(
+            logger.error(
                 "#bl.person_reader.PersonReaderTx.get_person_data - Can not read places:"
                 f' {res.get("statustext")}'
             )
@@ -426,7 +430,7 @@ class PersonReaderTx(DataService):
             # - new_objects    the objects, for which a new search should be done
             # - references     {source id: [ReferenceObj(node, order, crop)]}
             if Status.has_failed(res):
-                print(
+                logger.error(
                     "#bl.person_reader.PersonReaderTx.get_person_data - Can not read citations etc.:"
                     f' {res.get("statustext")}'
                 )
@@ -441,7 +445,7 @@ class PersonReaderTx(DataService):
                         node = current.node
                         order = current.order
                         crop = current.crop
-                        (label,) = node.labels
+                        label, = node.labels
                         # print (f'Link ({src.__class__.__name__} {src_id}:{src.id}) {current}')
 
                         target_obj = None
@@ -501,7 +505,7 @@ class PersonReaderTx(DataService):
             list(all_citations.keys())
         )
         if Status.has_failed(res, strict=False):
-            print(
+            logger.error(
                 "#bl.person_reader.PersonReaderTx.get_person_data - Can not read repositories:"
                 f' {res.get("statustext")}'
             )

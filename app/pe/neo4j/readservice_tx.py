@@ -192,17 +192,16 @@ class Neo4jReadServiceTx(ConcreteService):
         #    results: person, root
 
         try:
-            record = run_cypher_batch(self.tx, CypherPerson.get_person, active_user, batch_id, uuid=uuid).single()
+            record = run_cypher_batch(self.tx, CypherPerson.get_person,
+                                      active_user, batch_id, uuid=uuid).single()
             # <Record 
             #    p=<Node id=25651 labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
             #            'sex': 1, 'confidence': '', 'change': 1585409698, 'birth_low': 1783,
             #            'birth_high': 1783, 'id': 'I1135', 'uuid': 'dc6a05ca6b2249bfbdd9708c2ee6ef2b',
             #            'death_low': 1865}>
-            #    root_type='PASSED'
             #    root=<Node id=31100 labels=frozenset({'Audit'})
-            #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
-            #            'timestamp': 1596463360673}>
+            #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
             # >
             if record is None:
                 print(f'dx_get_person_by_uuid: person={uuid} not found')
@@ -210,12 +209,12 @@ class Neo4jReadServiceTx(ConcreteService):
                 return res
 
             # Store original researcher data 
-            #    root = dict {root_type, root_user, id}
-            #    - root_type    which kind of owner link points to this object (PASSED / OWNER)
+            #    root = dict {material, root_user, id}
+            #    - material     root material type
             #    - root_user    the (original) owner of this object
             #    - bid          Batch id
             root_node = record['root']
-            root_type = root_node.get('material', "")
+            material = root_node.get('material', "")
             root_state = root_node.get('state', "")
             root_user = root_node.get('user', "")
             bid = root_node.get('id', "")
@@ -223,7 +222,7 @@ class Neo4jReadServiceTx(ConcreteService):
             person_node = record['p']
             puid = person_node.id
             res['person_node'] = person_node
-            res['root'] = {'root_type':root_type, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
+            res['root'] = {'material':material, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
 
 #                 # Add to list of all objects connected to this person
 #                 self.objs[person.uniq_id] = person

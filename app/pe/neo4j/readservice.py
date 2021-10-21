@@ -128,10 +128,8 @@ class Neo4jReadService(ConcreteService):
                         #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
                         #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
                         #            'type': 'Baptism', 'uuid': 'dc969e6831dc47d7b6719edd94fe6007'}>
-                        #    root_type='PASSED'
                         #    root=<Node id=31100 labels=frozenset({'Audit'})
-                        #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
-                        #            'timestamp': 1596463360673}>
+                        #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
                         # >
                         node = record["e"]
                         event = EventBl.from_node(node)
@@ -271,7 +269,6 @@ class Neo4jReadService(ConcreteService):
                     #        properties={'datetype': 1, 'father_sortname': 'Gadd#Peter Olofsson#',
                     #            'change': 1560931512, 'rel_type': 'Unknown', 'id': 'F0002',
                     #            'date2': 1766592, 'date1': 1766592, 'uuid': '9488e3c76c6645f8b024902f2119e15a'}>
-                    #    root_type='OWNS'
                     #    root=<Node id=384349 labels={'Batch'}
                     #        properties={'mediapath': '/home/rinminlij1l1j1/paikat_pirkanmaa_yhdistetty_06052020.gpkg.media',
                     #            'file': 'uploads/juha/paikat_pirkanmaa_yhdistetty_6.5.2020_clean.gramps',

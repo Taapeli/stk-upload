@@ -127,7 +127,7 @@ class FanChart:
             if "events" in x:
                 for ev in x["events"]:
                     if ev[0] == "Birth":
-                        return ev[1]
+                        return ev[1] if ev[1] else 9999
             return (
                 9999  # no birth year given, sort after siblings with known birth years
             )
@@ -163,7 +163,7 @@ class FanChart:
         """
         # Set up the database access and find out whether looking at own data.
         u_context = UserContext(user_session, current_user, request)
-        privacy = u_context.context_code == u_context.ChoicesOfView.COMMON
+        privacy = u_context.use_common() # context_code == u_context.ChoicesOfView.COMMON
 
         # Fill in basic data from current person
         with PersonReader("read", u_context) as service:
