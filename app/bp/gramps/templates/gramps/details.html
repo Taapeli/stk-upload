@@ -19,12 +19,12 @@ td {
    ) ) }}
 
 <div id="startdiv">
-		<h1>{{ _('Batch Details') }}</h1>
+		<h1>{{ _('Material Details') }}</h1>
 
 {% include "flash_messages.html" %}
 
 <div class="startbox" style="width:auto">
-	<h2 class="center">{{ _("General") }}</h2>
+	<h2 class="center">{{ _("General")|title() }}</h2>
 	<table>
 	<tr>
 		<th>{{ _("Batch id") }}:
@@ -52,19 +52,21 @@ td {
 </div>
 
 <div class="startbox">
-	<h2 class="center">{{ _("Statistics") }}</h2>
+	<h2 class="center">{{ _("Object Statistics") }}</h2>
 	<table>
 	<tr>
 		<th>{{ _("Type") }}
-		<th>{{ _("Object count") }}
-		<th>{{ _("Objects with source citations") }}
+		<th>{{ _("Count") }}
+		<th colspan="2">{{ _("Source citations") }}
 	{% for label,do_citations,(cnt1,cnt2) in object_stats %}
 		<tr>
 			<td>{{ label }}
 			<td class="right">{{ cnt1 }}
-			<td class="right">{% if do_citations %}
+	   {% if do_citations %}
+ 		    <td class="right">
 				{{ cnt2 }}
-				{% endif %}
+            <td class="right">{% if cnt1 %}{{ (100 * cnt2/cnt1)|int }}%{% endif %}
+       {% endif %}
 	{% endfor %}
 	</table>
 </div>
@@ -73,9 +75,9 @@ td {
 	<h2 class="center">{{ _("Event Statistics") }}</h2>
 	<table>
 	<tr>
-		<th>{{ _("Event type") }}
-		<th>{{ _("Event count") }}
-		<th>{{ _("Events with source citations") }}
+		<th>{{ _("Type") }}
+        <th>{{ _("Count") }}
+        <th colspan="2">{{ _("Source citations") }}
 	{% for label,(cnt1,cnt2,pct) in event_stats %}
 		<tr>
 			<td>{{ label }}

@@ -42,14 +42,15 @@ Todo:
 # blacked 2021-05-01 JMä
 import traceback
 import logging
-import shareds
+#import shareds
 
 logger = logging.getLogger("stkserver")
 
 from .base import NodeObject, Status
 from bl.dates import DateRange
-from pe.neo4j.cypher.cy_place import CypherPlace
 from pe.dataservice import DataService
+from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.neo4j.cypher.cy_object import CypherObject
 
 
 class Place(NodeObject):
@@ -340,22 +341,26 @@ class PlaceBl(Place):
             n_attr = {"url": note.url, "type": note.type, "text": note.text}
             result = dataservice.tx.run(
                 CypherPlace.add_urls,
-                batch_id=batch_id,
-                pid=self.uniq_id,
-                n_attr=n_attr,
-            )
+                batch_id=batch_id, pid=self.uniq_id, n_attr=n_attr)
 
         # Make the place note relations; the Notes have been stored before
         # TODO: There may be several Notes for the same handle! You shold use uniq_id!
 
         for n_handle in self.note_handles:
-            result = dataservice.tx.run(CypherPlace.link_note, pid=self.uniq_id, hlink=n_handle)
+            result = dataservice.tx.run(
+                CypherPlace.link_note,
+                pid=self.uniq_id, hlink=n_handle)
+
+        for handle in self.citation_handles:
+            # Link to existing Citation
+            result = dataservice.tx.run(
+                CypherObject.link_citation, 
+                handle=self.handle, c_handle=handle)
 
         if self.media_refs:
             # Make relations to the Media nodes and their Note and Citation references
-            dataservice.ds_create_link_medias_w_handles(
-                self.uniq_id, self.media_refs
-            )
+            result = dataservice.ds_create_link_medias_w_handles(
+                self.uniq_id, self.media_refs)
 
         return
 

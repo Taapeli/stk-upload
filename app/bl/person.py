@@ -49,14 +49,14 @@ from datetime import datetime
 import logging
 
 logger = logging.getLogger("stkserver")
-import shareds
+#import shareds
 
 from bl.base import NodeObject, Status
 from bl.person_name import Name
 from bl.note import Note
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_person import CypherPerson
-
+from pe.neo4j.cypher.cy_object import CypherObject
 # Privacy rule: how many years after death
 PRIVACY_LIMIT = 0
 
@@ -441,7 +441,7 @@ class PersonBl(Person):
 
         for handle in self.citation_handles:
             dataservice.tx.run(
-                CypherPerson.link_citation, p_handle=self.handle, c_handle=handle
+                CypherObject.link_citation, handle=self.handle, c_handle=handle
             )
         return
 

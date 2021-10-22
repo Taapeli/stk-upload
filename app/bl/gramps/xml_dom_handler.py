@@ -757,6 +757,7 @@ class DOM_handler:
 
             pl = PlaceBl()
             pl.note_handles = []
+            pl.citation_handles = []
 
             # Extract handle, change and id
             self._extract_base(placeobj, pl)
@@ -860,8 +861,12 @@ class DOM_handler:
 
             # Handle <objref>
             pl.media_refs = self._extract_mediaref(placeobj)
-
             # if pl.media_refs: print(f'#> saving Place {pl.id} with {len(pl.media_refs)} media_refs')
+
+            for ref in placeobj.getElementsByTagName("citationref"):
+                if ref.hasAttribute("hlink"):
+                    pl.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
+                    ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
             self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys)

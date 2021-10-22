@@ -17,28 +17,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-Created on 25.5.2021
+Created on 22.10.2021
 
 @author: jm
 '''
 
-class CypherCitation():
-    """ For creating Citation object from Gramps data. """
+class CypherObject():
+    """ For linking existing objects from Gramps data. """
 
-    # Create Citation node and link (Batch) --> (Citation)
-    create_to_batch = """
-MATCH (b:Root {id: $batch_id})
-MERGE (b) -[r:OBJ_OTHER]-> (c:Citation {handle: $c_attr.handle}) 
-    SET c = $c_attr
-RETURN ID(c) as uniq_id"""
-
-    link_source = """
-MERGE (n:Citation {handle: $handle})
-MERGE (m:Source   {handle: $hlink})
-MERGE (n) -[r:SOURCE]-> (m)"""
-
-    # Create Note node and link (Citation) --> (Note)
-    link_note = """
-MERGE (n:Citation {handle: $handle})
-MERGE (m:Note     {handle: $hlink})
-CREATE (n) -[r:NOTE]-> (m)"""
+    link_citation = """
+MATCH (x)          WHERE x.handle = $handle
+MATCH (c:Citation) WHERE c.handle = $c_handle
+MERGE (x) -[:CITATION]-> (c)
+RETURN c"""

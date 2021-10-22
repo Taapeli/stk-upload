@@ -23,7 +23,6 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm 
 """
 # blacked
-import shareds
 from ui.jinja_filters import translate
 import logging
 
@@ -36,6 +35,7 @@ from .person_name import Name
 
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_family import CypherFamily
+from pe.neo4j.cypher.cy_object import CypherObject
 
 from bl.dates import DateRange
 
@@ -206,7 +206,7 @@ class FamilyBl(Family):
         # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
         for handle in self.citation_handles:
             dataservice.tx.run(
-                CypherFamily.link_citation, f_handle=self.handle, c_handle=handle
+                CypherObject.link_citation, handle=self.handle, c_handle=handle
             )
 
         return

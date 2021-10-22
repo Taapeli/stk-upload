@@ -327,14 +327,13 @@ def xml_to_stkbase(batch: Root):
         if is_gpkg:
             extract_media(batch.file, batch.id)
 
-        res = handler.handle_notes()
         res = handler.handle_repositories()
-        res = handler.handle_media()
-
-        res = handler.handle_places()
         res = handler.handle_sources()
         res = handler.handle_citations()
 
+        res = handler.handle_notes()
+        res = handler.handle_media()
+        res = handler.handle_places()
         res = handler.handle_events()
         res = handler.handle_people()
         res = handler.handle_families()
