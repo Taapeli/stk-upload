@@ -11,6 +11,7 @@ from sys import stderr
 
 from bl.base import NodeObject
 from pe.neo4j.cypher.cy_note import CypherNote
+from pe.dataservice import DataService
 
 # from models.gen.cypher import Cypher_note
 # from models.cypher_gramps import Cypher_note_in_batch # Cypher_note_w_handle,
@@ -197,3 +198,26 @@ class Note(NodeObject):
             raise RuntimeError(
                 f"Note.save needs batch_id or parent_id for {self.id}"
             )
+
+
+class NoteReader(DataService):
+    """
+    Data reading class for Note objects. Used with free text search.
+    """
+
+    def __init__(self, service_name: str, u_context=None):
+        super().__init__(service_name, u_context)
+
+    def note_search(self, args):
+        context = self.user_context
+        args["use_user"] = self.use_user
+        args["fw"] = context.first  # From here forward
+        args["limit"] = context.count
+        args["batch_id"] = context.batch_id
+        args["material"] = context.material
+        args["state"] = context.state
+        res = self.dataservice.tx_note_search(args)
+        print(res)
+        return res
+    
+    

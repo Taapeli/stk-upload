@@ -58,6 +58,7 @@ from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
+from bl.note import NoteReader
 from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
@@ -180,6 +181,100 @@ def show_persons():
     )
 
 
+def format_item(rec, searchtext):
+    import re
+    MINLEN = 100  # display an excerpt that is at least this long
+    #print(rec)
+    note = rec.get('note')
+    id = note.get('id')
+    text = note.get('text')
+    labels = rec.get('labels')
+    startpos = -1
+    searchtext = searchtext.split()[0] # only search for first word
+    i = text.lower().find(searchtext)
+    if i >= 0:
+        startpos = i
+        endpos = i + len(searchtext) 
+    else:
+        regextext = searchtext.replace('*','.*?').replace('(',r'\(').replace(')',r'\)')
+        regextext = regextext.replace('[',r'\[')
+        regextext = regextext.replace(']',r'\]')
+        regextext = regextext.replace('\\',r'\\')
+        regex = fr"(\W|^)({regextext})(\W|$)"
+        print(regex)
+        m = re.search(regex, text.lower())
+        if m:
+            #print(m)
+            #print(m.start(1),m.end(1),len(text))
+            startpos = m.start(2)
+            endpos = m.end(2) # ???
+    if startpos != -1:
+        # display at least MINLEN/2 characters before and after the match
+        xstart = max(0,startpos-MINLEN//2)
+        xend = endpos + MINLEN//2
+        
+        # if needed, increase the size up to MINLEN characters 
+        if xstart == 0 and xend < xstart + MINLEN:
+            xend = xstart + MINLEN
+        if xend >= len(text) and xstart > len(text) - MINLEN:
+            xstart = max(0, len(text)-MINLEN)
+
+        # break at space if possible
+        xstart = text.rfind(" ",0,xstart)+1
+        xend1 = text.find(" ",xend)
+        if xend1 != -1:
+            xend = xend1
+
+        excerpt = text[xstart:xend]
+        excerpt = excerpt[0:endpos-xstart] + "</match>" + excerpt[endpos-xstart:]
+        excerpt = excerpt[0:startpos-xstart] + "<match>" + excerpt[startpos-xstart:]
+        if xstart > 0:
+            excerpt = "..." + excerpt
+        if xend < len(text)-1:
+            excerpt = excerpt +"..."
+    else:
+        excerpt = ""
+    referrers = rec.get('referrers')
+    score = rec.get('score')
+    return dict(
+        note=note,
+        id=id,
+        labels=labels,
+        referrers=referrers,
+        score=score,
+        #x=dict(x),
+        excerpt=repr(excerpt)[1:-1])
+
+def note_search(args):
+    print(args)
+    u_context = UserContext(user_session, current_user, request)
+    u_context.count = request.args.get("c", 100, type=int)
+
+    try:
+        with NoteReader("read_tx", u_context) as service:
+            res = service.note_search(args)
+    
+        searchtext = args['key'].lower()
+        items=res['items']
+        displaylist = []
+        for item in items:
+            print("item", item)
+            #note = item[0]
+            #x = item[1]
+            displaylist.append(format_item(item, searchtext))
+    
+        from pprint import  pprint
+        #pprint(displaylist[0:5])
+    except Exception as e:
+        displaylist = []
+        flash(str(e))
+    return render_template(
+        "/scene/note_search_result.html",
+        items=displaylist,
+        key=args.get('key',''),
+    )
+
+
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
@@ -200,6 +295,9 @@ def show_person_search(set_scope=None, batch_id=None):
         if not (set_scope is None or batch_id is None): 
             args["batch_id"] = batch_id
             args["set_scope"] = set_scope
+
+        if rule == 'notetext':
+            return note_search(args)
 
         res, u_context = _do_get_persons(args)
 

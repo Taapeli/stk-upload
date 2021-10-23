@@ -1,0 +1,92 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "/scene/sc_layout.html" %}
+{% block title %}{{ _('Note Search') }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+
+<style>
+	td.ColumnSource ul { margin: 0.5em;}
+	td.ColumnSource ul li { font-size: smaller; }
+	td.Archive ul { margin: 0; padding-left: 1em; padding-bottom: 0.5em; }
+	td ul li p { margin: 0 0 0.3em 0; }
+	match {
+		color: red;
+	}
+	a {
+		color: blue;
+	}
+</style>
+
+{% set oldkey = key %}
+           
+<div id="startdiv">
+    <h1>{{ _('Note Search') }}</h1>
+</div>
+
+{% include "flash_messages.html" %}
+
+    <div id="namesearch" class="SearchBox2">
+		<form  action="/scene/persons/search" method="post">
+			<input type="hidden" name="rule" value="notetext">
+		   	<input type="text" name="key" id="snam"
+		      {% if oldkey %}value="{{oldkey}}"
+		        {# else %}placeholder="{{ _('Name') }}"#}
+		      {% endif %}>
+		  <div class="submit"><input type="submit" value="Hae"></div>
+		</form>
+	</div>
+	
+    <div class="content" id="Individuals">
+		<table class="IndividualList">
+			<thead>
+				<tr><th></th>
+                    <th>{{ _('Note') }}</th>
+				</tr>
+			</thead>
+			<tbody>
+	{% if items %}
+	    {% for item in items %}
+{#	    
+item:
+ {'excerpt': "'Katarina <match>Sibelius</match>-sivustossa'",
+  'id': 'N1-I0020',
+  'labels': ['Person'],
+  'note': {'change': 0,
+           'id': 'N1-I0020',
+           'text': 'Katarina Sibelius-sivustossa',
+           'type': 'Web Search',
+           'url': 'http://www.sibelius.fi/suomi/suku_perhe/suku_sibelius.htm',
+           'uuid': '451f5cff711b40a08e2fc2cfe5ebf0dd'},
+ 'referrers': [{'change': 1621797006,
+                 'date1': 1705152,
+                 'date2': 1705152,
+                 'datetype': 5,
+                 'description': '',
+                 'id': 'E3202',
+                 'type': 'Birth',
+                 'url': '/scene/event?uuid=30511c7ec67d4c12ae1b62c564e98220',
+                 'uuid': '30511c7ec67d4c12ae1b62c564e98220'}],
+  'score': 0.886018693447113}]
+#}      	    
+	    	<tr>
+	    		<!-- td>{{ item.score }} -->
+	    		<td>{{ item.note.id }}
+	    		<td>{{ item.excerpt|safe }}
+	    		{% for r in item.referrers %}
+	    			<br>
+	    			<a href={{ r.url }} target="_blank">
+	    			{{ r.id }} {{ r.description }}
+	    			</a>
+	    		{% endfor %}
+	    {% endfor %}
+    {% else %}
+            <tr><td colspan="4" id="lastitem_badge">
+                    <i>{{ _('No results') }}</i>
+                </td>
+            </tr>
+	{% endif %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

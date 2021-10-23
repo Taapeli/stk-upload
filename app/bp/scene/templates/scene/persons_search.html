@@ -100,6 +100,12 @@ div.CloudPink div {
                                 {{ _('Free name search') }}
                             </option>
                             
+                            <option value="notetext"
+                                x-desc="{{ _('Search notes') }}"
+                                {% if selection == "notetext" %}selected{% endif %}>
+                                {{ _('Search notes') }}
+                            </option>
+
                             <option value="years"
                                 x-desc="{{ _('A year (1750) or years range (1700-1750) where persons might live') }}"
                         {% if selection == "years" %}selected{% endif %}>{{ _('Years range') }}</option>

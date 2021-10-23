@@ -563,3 +563,65 @@ class Neo4jReadServiceTx(ConcreteService):
                 references[uniq_id] = ref
 
         return {'status': Status.OK, 'sources': references}
+
+
+    def tx_note_search(self, args):
+        """Free text search in Notes"""
+        material = args.get('material')
+        state = args.get('state')
+        username = args.get('use_user')
+        searchtext = args.get('key')
+        limit = args.get('limit', 100)
+        batch_id = args.get('batch_id')
+
+        cypher_prefix = """
+            CALL db.index.fulltext.queryNodes("notetext",$searchtext) 
+                YIELD node as note, score
+            with note,score
+            order by score desc
+        """
+        #cypher_prefix = ""
+        cypher = """
+            match (root) --> (note) 
+            match (x) --> (note)
+                where not "Root" in labels(x)
+            return distinct note, collect([x,labels(x)]) as referrers, score
+            limit $limit
+            """
+        result = run_cypher_batch(self.tx, cypher, username, batch_id,
+                            cypher_prefix=cypher_prefix,
+                            searchtext=searchtext,
+                            limit=limit)
+        rsp = []
+        for record in result:
+            item = record.get('item')
+            #note = item[0]
+            #x = item[1]
+            note = record.get('note')
+            #x = record.get('x')
+            referrers = record.get('referrers')
+            score = record.get('score')
+            referrerlist = []
+            for r in referrers:
+                refdata = dict(r[0])
+                url = ""
+                label = r[1][0]
+                if label == "Place": label = "location"
+                if label in ["Person","Family","Source","Media"]:
+                    url = f"/scene/{label.lower()}?uuid=" + refdata["uuid"]
+                else:
+                    url = f"/scene/{label.lower()}/uuid=" + refdata["uuid"]
+#                     url = "/scene/person?uuid=" + refdata["uuid"]
+#                 if r[1] == ["Event"]:
+#                     url = "/scene/event/uuid=" + refdata["uuid"]
+                #url = f"/scene/{labels[0].lower()}?uuid=" + refdata["uuid"]
+                refdata['url'] = url 
+                referrerlist.append(refdata)
+            d = dict(
+                note=dict(note),
+                #x=dict(x),
+                referrers=referrerlist,
+                score=score)
+            rsp.append(d) 
+        return {'items': rsp, 'status': Status.OK}
+
