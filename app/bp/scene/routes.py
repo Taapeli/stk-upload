@@ -190,50 +190,55 @@ def format_item(rec, searchtext):
     text = note.get('text')
     labels = rec.get('labels')
     startpos = -1
-    searchtext = searchtext.split()[0] # only search for first word
-    i = text.lower().find(searchtext)
-    if i >= 0:
-        startpos = i
-        endpos = i + len(searchtext) 
+    if searchtext.startswith('"') and searchtext.endswith('"'):
+        searchwords = [searchtext[1:-1]]
+    elif searchtext.startswith("'") and searchtext.endswith("'"):
+         searchwords = searchtext[1:-1].split()
     else:
-        regextext = searchtext.replace('*','.*?').replace('(',r'\(').replace(')',r'\)')
-        regextext = regextext.replace('[',r'\[')
-        regextext = regextext.replace(']',r'\]')
+        searchwords =  searchtext.split()
+    for wordnum,searchword in enumerate(searchwords):
+        regextext = searchword
         regextext = regextext.replace('\\',r'\\')
-        regex = fr"(\W|^)({regextext})(\W|$)"
-        print(regex)
-        m = re.search(regex, text.lower())
+        regextext= regextext.replace('(',r'\(').replace(')',r'\)')
+        regextext = regextext.replace('[',r'\[').replace(']',r'\]')
+        regextext = regextext.replace('*',r'\w*?')  # asterisk means word characters only, ? indicate non-greedy search
+        regex = fr"\W({regextext})\W"
+
+        m = re.search(regex, f" {text.lower()} ")  # add delimiters to start and end (will match \W)
         if m:
             #print(m)
             #print(m.start(1),m.end(1),len(text))
-            startpos = m.start(2)
-            endpos = m.end(2) # ???
-    if startpos != -1:
-        # display at least MINLEN/2 characters before and after the match
-        xstart = max(0,startpos-MINLEN//2)
-        xend = endpos + MINLEN//2
-        
-        # if needed, increase the size up to MINLEN characters 
-        if xstart == 0 and xend < xstart + MINLEN:
-            xend = xstart + MINLEN
-        if xend >= len(text) and xstart > len(text) - MINLEN:
-            xstart = max(0, len(text)-MINLEN)
-
-        # break at space if possible
-        xstart = text.rfind(" ",0,xstart)+1
-        xend1 = text.find(" ",xend)
-        if xend1 != -1:
-            xend = xend1
-
-        excerpt = text[xstart:xend]
-        excerpt = excerpt[0:endpos-xstart] + "</match>" + excerpt[endpos-xstart:]
-        excerpt = excerpt[0:startpos-xstart] + "<match>" + excerpt[startpos-xstart:]
-        if xstart > 0:
-            excerpt = "..." + excerpt
-        if xend < len(text)-1:
-            excerpt = excerpt +"..."
-    else:
-        excerpt = ""
+            startpos = m.start(1)-1
+            endpos = m.end(1)-1
+        if startpos != -1:
+            # display at least MINLEN/2 characters before and after the match
+            xstart = max(0,startpos-MINLEN//2)
+            xend = endpos + MINLEN//2
+            
+            # if needed, increase the size up to MINLEN characters 
+            if xstart == 0 and xend < xstart + MINLEN:
+                xend = xstart + MINLEN
+            if xend >= len(text) and xstart > len(text) - MINLEN:
+                xstart = max(0, len(text)-MINLEN)
+    
+            # break at space if possible
+            xstart = text.rfind(" ",0,xstart)+1
+            xend1 = text.find(" ",xend)
+            if xend1 != -1:
+                xend = xend1
+    
+            excerpt = text[xstart:xend]
+            excerpt = excerpt[0:endpos-xstart] + "</match>" + excerpt[endpos-xstart:]
+            excerpt = excerpt[0:startpos-xstart] + "<match>" + excerpt[startpos-xstart:]
+            if xstart > 0:
+                excerpt = "..." + excerpt
+            if xend < len(text)-1:
+                excerpt = excerpt +"..."
+            break # found a match
+        else:
+            excerpt = ""
+            if wordnum < len(searchwords)-1:
+                continue  # try again except for last word
     referrers = rec.get('referrers')
     score = rec.get('score')
     return dict(
