@@ -190,12 +190,12 @@ def format_item(rec, searchtext):
     text = note.get('text')
     labels = rec.get('labels')
     startpos = -1
+    if searchtext.startswith("'") and searchtext.endswith("'"):
+        searchtext = searchtext[1:-1] 
     if searchtext.startswith('"') and searchtext.endswith('"'):
         searchwords = [searchtext[1:-1]]
-    elif searchtext.startswith("'") and searchtext.endswith("'"):
-         searchwords = searchtext[1:-1].split()
     else:
-        searchwords =  searchtext.split()
+        searchwords =  [searchtext] + searchtext.split()
     for wordnum,searchword in enumerate(searchwords):
         regextext = searchword
         regextext = regextext.replace('\\',r'\\')
