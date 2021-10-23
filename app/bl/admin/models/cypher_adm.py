@@ -153,6 +153,10 @@ RETURN COUNT(a) AS cnt'''
     create_freetext_index = """
 CALL db.index.fulltext.createNodeIndex("searchattr",["Person"],["searchattr"])
     """
+    
+    create_freetext_index_for_notes = """
+CALL db.index.fulltext.createNodeIndex("notetext",["Note"],["text"])     
+    """
 
     build_indexes = """
 match (p:Person) --> (n:Name) 
