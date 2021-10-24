@@ -129,13 +129,14 @@ def _do_get_persons(args):
     else:  # pg:'all'
         u_context.set_scope_from_request(request, "person_scope")
         args["rule"] = "all"
-    u_context.count = request.args.get("c", 100, type=int)
+    request_args = UserContext.get_request_args(request)
+    u_context.count = request_args.get("c", 100, type=int)
 
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
+        # for i in res.get("items"):
+        #     print(f"_do_get_persons: @{i.user} {i.sortname}")
 
-    # for i in res.get("items"):
-    #     print(f"_do_get_persons: @{i.user} {i.sortname}")
     return res, u_context
 
 
@@ -181,9 +182,11 @@ def show_persons():
     )
 
 
-def format_item(rec, searchtext):
+def format_item(rec, searchtext, min_length=100):
+    """ Display an excerpt from Note text that is at least this long
+    """
     import re
-    MINLEN = 100  # display an excerpt that is at least this long
+
     #print(rec)
     note = rec.get('note')
     id = note.get('id')
@@ -211,15 +214,15 @@ def format_item(rec, searchtext):
             startpos = m.start(1)-1
             endpos = m.end(1)-1
         if startpos != -1:
-            # display at least MINLEN/2 characters before and after the match
-            xstart = max(0,startpos-MINLEN//2)
-            xend = endpos + MINLEN//2
+            # display at least min_length/2 characters before and after the match
+            xstart = max(0,startpos-min_length//2)
+            xend = endpos + min_length//2
             
-            # if needed, increase the size up to MINLEN characters 
-            if xstart == 0 and xend < xstart + MINLEN:
-                xend = xstart + MINLEN
-            if xend >= len(text) and xstart > len(text) - MINLEN:
-                xstart = max(0, len(text)-MINLEN)
+            # if needed, increase the size up to min_length characters 
+            if xstart == 0 and xend < xstart + min_length:
+                xend = xstart + min_length
+            if xend >= len(text) and xstart > len(text) - min_length:
+                xstart = max(0, len(text)-min_length)
     
             # break at space if possible
             xstart = text.rfind(" ",0,xstart)+1
@@ -268,7 +271,7 @@ def note_search(args):
             #x = item[1]
             displaylist.append(format_item(item, searchtext))
     
-        from pprint import  pprint
+        #from pprint import  pprint
         #pprint(displaylist[0:5])
     except Exception as e:
         displaylist = []
@@ -296,19 +299,20 @@ def show_person_search(set_scope=None, batch_id=None):
     try:
         t0 = time.time()
         args = {"pg": "search"}
-        rq = request.args if request.method == "GET" else request.form
-        rule = rq.get("rule")
+        request_args = UserContext.get_request_args(request)
+        rule = request_args.get("rule")
         if rule:
             args["rule"] = rule
-        key = rq.get("key")
+        key = request_args.get("key")
         if key:
             args["key"] = key
-        batch_id = rq.get("batch_id")
-        set_scope = rq.get("set_scope")
-        if not (set_scope is None or batch_id is None): 
+        batch_id = request_args.get("batch_id", False)
+        set_scope = request_args.get("set_scope", False)
+        if set_scope and batch_id:
+            # A new scope (batch or common data) must be stored
             args["batch_id"] = batch_id
             args["set_scope"] = set_scope
-
+        # Else missing batch_id indicates common data to be selected by root.state
         if rule == 'notetext':
             return note_search(args)
 
@@ -330,7 +334,7 @@ def show_person_search(set_scope=None, batch_id=None):
             f" n={len(found)}{hidden} e={elapsed:.3f}",
         )
         print(
-            f"Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
+            f"show_person_search: Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
         )
 
         surnamestats = []
@@ -667,8 +671,9 @@ def show_event_vue(uuid):
 def json_get_event():
     """Get Event page data."""
     t0 = time.time()
+    request_args = UserContext.get_request_args(request)
     try:
-        args = request.args
+        args = request_args
         if args:
             print(f"got request args: {args}")
         else:

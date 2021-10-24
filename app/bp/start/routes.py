@@ -148,7 +148,14 @@ def start_logged():
                 stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
             surnamestats.sort(key=itemgetter("surname"))
 
-    my_batches = Root.get_my_batches(current_user.username)
+    my_batches = list(Root.get_my_batches(current_user.username))
+    #  { 'metaname': 'uploads/usr/2021-10-24.001/A-test.gramps.meta', 
+    #    'file': 'uploads/usr/2021-10-24.001/A-test.gramps', 
+    #    'xmlname': 'A-test.gramps','material': 'Family Tree', 
+    #    'logname': 'uploads/usr/2021-10-24.001/A-test.gramps.log', 
+    #    'description': 'Pieni koeaineisto erilaisia tapauksia', 'state': 'Candidate', 
+    #    'id': '2021-10-24.001', 'user': 'usr', 'timestamp': 1635098882577, 
+    #    'filename': 'A-test.gramps'}
     return render_template(
         "/start/index_logged.html", is_demo=is_demo, surnamestats=surnamestats,
         batches=my_batches # sorted(my_batches, key=itemgetter("id"))

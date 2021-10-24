@@ -202,12 +202,12 @@ class UserContext():
         - Stores the request parameter div=1 as session variable user_context.
         - Returns owner context name if detected, otherwise False    
         """
-        new_selection = 0
-        if request:
+        request_args = UserContext.get_request_args(request)
+        if request_args:
             # All args
-            self.args = request.args
+            self.args = request_args
             # Selected years (from-to) years=1111-2222
-            years = request.args.get('years', None)
+            years = request_args.get('years', None)
             if years:
                 y1, y2 = years.split('-')
                 if y1:  yi1 = int(y1)
@@ -221,9 +221,9 @@ class UserContext():
             """ Use case: Selected material for display
                 set_scope = 1 -> set a new scope, common material or a specific user batch 
             """
-            set_scope = request.args.get('set_scope')
+            set_scope = request_args.get('set_scope')
             if set_scope:
-                batch_id = request.args.get('batch_id')
+                batch_id = request_args.get('batch_id')
                 if batch_id:
                     self.context_code = self.ChoicesOfView.BATCH
                     self.batch_id = batch_id
@@ -266,6 +266,18 @@ class UserContext():
     def __str__(self):
         return f"{self.state}/{self.material}"
 
+    @staticmethod
+    def get_request_args(request):
+        """Return request arguments from request.args or request.form.
+        """
+        if request is None:
+            return {}
+        if request.method == "GET":
+            return request.args
+        else: 
+            return request.form
+
+
     def _set_next_from_request(self, request=None):  # UNUSED???
         ''' Calculate scope values from request or session. 
         
@@ -278,9 +290,10 @@ class UserContext():
 
             The missing limit will be filled by the data afterwards.
         '''
-        if request:
-            fw = request.args.get('fw', None)
-            bw = request.args.get('bw', None)
+        request_args = UserContext.get_request_args(request)
+        if request_args:
+            fw = request_args.get('fw', None)
+            bw = request_args.get('bw', None)
             if fw is None and bw is None:
                 # Use original session_scope as is
                 return [self.first, self.last]
@@ -352,8 +365,6 @@ class UserContext():
                 pass
         return True
 
-#     def obsolete_set_scope_from_request(self, request=None, var_name=None):
-
     def set_scope_from_request(self, request=None, session_var=None): #set_next_from_request:
         ''' Calculate scope values from request or session. 
         
@@ -367,9 +378,10 @@ class UserContext():
         '''
         self.session_var = session_var
             
-        if request:
-            fw = request.args.get('fw', None)
-            bw = request.args.get('bw', None)
+        request_args = UserContext.get_request_args(request)
+        if request_args:
+            fw = request_args.get('fw', None)
+            bw = request_args.get('bw', None)
             if not (fw is None and bw is None):
                 if fw is None:
                     # Direction backwards from bw parameter
