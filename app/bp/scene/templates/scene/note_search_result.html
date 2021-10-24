@@ -1,10 +1,3 @@
-{# _myapp/templates/table1.html_ #}
-{% extends "/scene/sc_layout.html" %}
-{% block title %}{{ _('Note Search') }}{% endblock %}
-{% block body %}
-{{ super() }}
-{% import '/scene/macros.html' as macro with context %}
-
 <style>
 	td.ColumnSource ul { margin: 0.5em;}
 	td.ColumnSource ul li { font-size: smaller; }
@@ -19,24 +12,7 @@
 </style>
 
 {% set oldkey = key %}
-           
-<div id="startdiv">
-    <h1>{{ _('Note Search') }}</h1>
-</div>
 
-{% include "flash_messages.html" %}
-
-    <div id="namesearch" class="SearchBox2">
-		<form  action="/scene/persons/search" method="post">
-			<input type="hidden" name="rule" value="notetext">
-		   	<input type="text" name="key" id="snam"
-		      {% if oldkey %}value="{{oldkey}}"
-		        {# else %}placeholder="{{ _('Name') }}"#}
-		      {% endif %}>
-		  <div class="submit"><input type="submit" value="Hae"></div>
-		</form>
-	</div>
-	
     <div class="content" id="Individuals">
 		<table class="IndividualList">
 			<thead>
@@ -89,4 +65,3 @@ item:
 			</tbody>
 		</table>
 	</div>
-{% endblock %}

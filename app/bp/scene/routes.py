@@ -274,6 +274,14 @@ def note_search(args):
         displaylist = []
         flash(str(e))
     return render_template(
+        "/scene/persons_search.html",
+        menuno=0,
+        items=displaylist,
+        user_context=u_context,
+        rule='notetext',
+        key=searchtext,
+    )
+    return render_template(
         "/scene/note_search_result.html",
         items=displaylist,
         key=args.get('key',''),
