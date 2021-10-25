@@ -23,7 +23,7 @@ Batch Statistics
 
 import json
 from dataclasses import dataclass
-from pprint import pprint
+#from pprint import pprint
 from typing import List
 
 import shareds
@@ -141,7 +141,7 @@ class StatsBuilder:
             return stats
         """ 
         rec = self.session.run(cypher, batch_id=batch_id).single()
-        print("get_stats_node",rec)
+        #print("bl.stats.StatsBuilder.get_stats_node",rec)
         if rec is None: return None
         return rec.get('stats')
     
@@ -166,7 +166,7 @@ class StatsBuilder:
         """ 
         object_stats = json.dumps(stats.object_stats)
         event_stats = json.dumps(stats.event_stats)
-        rec = self.session.run(cypher, batch_id=batch_id, object_stats=object_stats, event_stats=event_stats).single()
+        _rec = self.session.run(cypher, batch_id=batch_id, object_stats=object_stats, event_stats=event_stats).single()
     
     
     def get_stats_from_node(self, node):

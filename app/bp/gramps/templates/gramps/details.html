@@ -8,6 +8,11 @@
 
 <style>
 h2 {margin-bottom: 0;}
+div.startbox { height: 280px; }
+div.startbox > table { width: 280px; }
+td,th {
+    background: whitesmoke;
+}
 td {
     position: relative;
 }
@@ -27,22 +32,22 @@ td {
 	<h2 class="center">{{ _("General")|title() }}</h2>
 	<table>
 	<tr>
-		<th>{{ _("Batch id") }}:
-		<td>{{ batch_id }}
+		<th>{{ _("Batch id") }}</th>
+		<td>{{ batch.id }}</td>
 	</tr>
 	<tr>
-		<th>{{ _("Gramps file") }}:
-		<td style="overflow: hidden">{{ batch.xmlname }}
+		<th>{{ _("Gramps file") }}</th>
+		<td style="overflow: hidden">{{ batch.xmlname }}</td>
 	</tr>
 	<tr>
-		<th>{{ _("Material") }}:
-		<td>{{ batch.material }}
+		<th>{{ _("Material") }}</th>
+		<td>{{ _(batch.material) }}</td>
 	</tr>
 	<tr>
-		<th>{{ _("Description") }}:
+		<th>{{ _("Description") }}</th>
 		<td>
 			<form>
-			<input type="hidden" name="batch_id" value="{{ batch_id }}">
+			<input type="hidden" name="batch_id" value="{{ batch.id }}">
 			<textarea id="description" name="description">{{ batch.description }}</textarea>
 			<button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
 			</form>
@@ -55,17 +60,20 @@ td {
 	<h2 class="center">{{ _("Object Statistics") }}</h2>
 	<table>
 	<tr>
-		<th>{{ _("Type") }}
-		<th>{{ _("Count") }}
-		<th colspan="2">{{ _("Source citations") }}
-	{% for label,do_citations,(cnt1,cnt2) in object_stats %}
-		<tr>
-			<td>{{ label }}
-			<td class="right">{{ cnt1 }}
-	   {% if do_citations %}
- 		    <td class="right">
-				{{ cnt2 }}
-            <td class="right">{% if cnt1 %}{{ (100 * cnt2/cnt1)|int }}%{% endif %}
+		<th>{{ _("Type") }}</th>
+		<th>{{ _("Count") }}</th>
+		<th colspan="2">{{ _("Source citations") }}</th>
+	{% for label,do_citations,(c_obj,c_ref) in object_stats %}
+		<tr><!-- {{label}}, {{do_citations}}, ({{c_obj}},{{c_ref}}) -->
+			<td>{{ label|title }}</td>
+			<td class="right">{{ c_obj }}</td>
+       {% if do_citations %}
+ 		    <td class="right">{{ c_ref }}</td>
+            <td class="right">
+            {% if c_obj %}{{ (100 * c_ref/c_obj)|int }}% {% endif %}
+            </td>
+       {% else %}
+            <td colspan="2"> </td>
        {% endif %}
 	{% endfor %}
 	</table>
@@ -78,11 +86,11 @@ td {
 		<th>{{ _("Type") }}
         <th>{{ _("Count") }}
         <th colspan="2">{{ _("Source citations") }}
-	{% for label,(cnt1,cnt2,pct) in event_stats %}
+	{% for label,(c_obj,c_ref,pct) in event_stats %}
 		<tr>
 			<td>{{ label }}
-			<td class="right">{{ cnt1 }}
-			<td class="right">{{ cnt2 }}
+			<td class="right">{{ c_obj }}
+			<td class="right">{{ c_ref }}
 			<td class="right">{{ pct }}%
 	{% endfor %}
 	</table>

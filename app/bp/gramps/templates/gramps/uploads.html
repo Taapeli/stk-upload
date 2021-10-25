@@ -133,7 +133,9 @@ function doconfirm( command, title ) { // used in commands.html
 {% endif %}
  
 {% for upload in uploads %}
-        <tr> 
+        <tr
+          {% if batch_id == upload.batch_id %}style="background: bisque;"{% endif %}
+        >
             <td id='{{upload.batch_id}}'>
             	<a href="#" id="a-{{loop.index}}" class="a"
             		hx-get="commands/{{upload.batch_id}}" hx-target="#commands-{{loop.index}}" 

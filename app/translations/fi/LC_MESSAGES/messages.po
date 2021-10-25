@@ -1485,7 +1485,7 @@ msgstr[1] "%(num)d kpl, riveillä %(lines)s"
 #: bp/gramps/templates/gramps/details.html:79
 #: bp/gramps/templates/gramps/result.html:12
 msgid "Count"
-msgstr "Lukumäärä"
+msgstr "Määrä"
 
 #: bp/gedcom/gedcom_analyze.py:195
 msgid "Invalid tag hierarchy"
@@ -2302,7 +2302,7 @@ msgstr "Kohteiden määrät"
 #: bp/gramps/templates/gramps/details.html:60
 #: bp/gramps/templates/gramps/details.html:80
 msgid "Source citations"
-msgstr "Lähde- viittauksia"
+msgstr "Lähdeviittauksia"
 
 #: bp/gramps/templates/gramps/details.html:75
 msgid "Event Statistics"
@@ -3593,7 +3593,7 @@ msgstr "Tutkijan aineistoni"
 
 #: bp/start/templates/start/index_logged.html:103
 msgid "View your own candidate materials"
-msgstr "Selaa omia aineistojasi"
+msgstr "Selaa omia aineistojasi, joita ei ole lähetetty edelleen"
 
 #: bp/start/templates/start/index_logged.html:125
 msgid "Admin Operations"

@@ -49,9 +49,10 @@ from flask_babelex import _
 import shareds
 from bl.base import Status
 from bl.root import State, Root, BatchUpdater, BatchReader
-from models import loadfile, email, util, syslog
+from models import loadfile, util, syslog
 
 from ui.batch_ops import RESEARCHER_FUNCTIONS, RESEARCHER_OPERATIONS
+from ui.util import error_print
 from ..admin import uploads
 
 from . import bp
@@ -277,12 +278,12 @@ def batch_delete(batch_id):
             os.remove(path)
 
     def remove_old_style_files(path):  
-        xremove(batch.file)
-        xremove(batch.file.replace("_clean.", ".") )
-        xremove(batch.file.replace(".gramps", "_clean.gramps") )
-        xremove(batch.file.replace(".gpkg", "_clean.gpkg"))  
-        xremove(batch.file + ".meta")  
-        xremove(batch.file + ".log")  
+        xremove(path)
+        xremove(path.replace("_clean.", ".") )
+        xremove(path.replace(".gramps", "_clean.gramps") )
+        xremove(path.replace(".gpkg", "_clean.gpkg"))  
+        xremove(path + ".meta")  
+        xremove(path + ".log")  
         
     referrer = request.headers.get("Referer")
 
@@ -437,11 +438,12 @@ def batch_details(batch_id):
     SELECTED_EVENT_TYPES = (
         'Birth',
         'Death',
+        'Marriage',
     )
     event_stats = [(_(label),data) for (label,data) in stats.event_stats if label in SELECTED_EVENT_TYPES]
     return render_template(
         "/gramps/details.html",
-       batch_id=batch_id, 
+       #batch_id=batch_id, 
        batch=batch,
        object_stats=sorted(object_stats),
        event_stats=sorted(event_stats),
@@ -453,13 +455,19 @@ def batch_details(batch_id):
 def batch_update_description():
     batch_id = request.form["batch_id"]
     description = request.form["description"]
-    with BatchUpdater("update") as batch_service:
-        res = batch_service.batch_get_one(current_user.username, batch_id)
-        if Status.has_failed(res):
-            raise RuntimeError(_("Failed to retrieve batch"))
- 
-        batch = res['item']
-        batch.description = description
-        batch.save(batch_service.dataservice)
+    try:
+        with BatchUpdater("update") as batch_service:
+            res = batch_service.batch_get_one(current_user.username, batch_id)
+            if Status.has_failed(res):
+                raise RuntimeError(_("Failed to retrieve batch"))
+     
+            batch = res['item']
+            batch.description = description
+            batch.save(batch_service.dataservice)
 
-    return description
+    except Exception as e:
+        error_print("audit_selected_op", e)
+        return redirect(url_for("audit.list_uploads"))
+
+    #return description
+    return redirect(url_for("audit.list_uploads", batch_id=batch_id))
