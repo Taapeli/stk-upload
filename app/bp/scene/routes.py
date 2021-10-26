@@ -54,6 +54,7 @@ import shareds
 
 from . import bp
 from bl.base import Status, StkEncoder
+from bl.root import Root
 from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
@@ -97,7 +98,7 @@ calendars = [_("Julian"), _("Hebrew")]  # just for translations
 
 
 def _do_get_persons(args):
-    """Execute persons list query by arguments.
+    """Execute persons list query by arguments and optionally set material type.
 
         Persons, current
             GET    /all                                       --> args={pg:all}
@@ -120,12 +121,14 @@ def _do_get_persons(args):
     #     Search by name & years
     #         POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
     """
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request, args.get("material"))
     if args.get("pg") == "search":
         # No scope
         u_context.set_scope_from_request()
         if args.get("rule", "start") == "start" or args.get("key", "") == "":
-            return {"rule": "start", "status": Status.NOT_STARTED}, u_context
+            # Initializing this batch.
+            return {"rule": "start", "status": Status.NOT_STARTED,
+                    "u_context": u_context}
     else:  # pg:'all'
         u_context.set_scope_from_request(request, "person_scope")
         args["rule"] = "all"
@@ -137,7 +140,8 @@ def _do_get_persons(args):
         # for i in res.get("items"):
         #     print(f"_do_get_persons: @{i.user} {i.sortname}")
 
-    return res, u_context
+    res["u_context"] = u_context
+    return res
 
 
 # @bp.route('/scene/persons', methods=['POST', 'GET'])
@@ -158,7 +162,8 @@ def show_persons():
         args["c"] = c
     print(f"{request.method} All persons {args}")
 
-    res, u_context = _do_get_persons(args)
+    res = _do_get_persons(args)
+    u_context = res.get("u_context")
 
     if Status.has_failed(res):
         flash(_("Data read failed."), "error")
@@ -189,7 +194,7 @@ def format_item(rec, searchtext, min_length=100):
 
     #print(rec)
     note = rec.get('note')
-    id = note.get('id')
+    #id = note.get('id')
     text = note.get('text')
     labels = rec.get('labels')
     startpos = -1
@@ -294,14 +299,15 @@ def note_search(args):
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_person_search(set_scope=None, batch_id=None):
-    """Persons search page."""
+#def show_person_search(set_scope=None, batch_id=None):
+def material_search(set_scope=None, batch_id=None):
+    """Start material browse with Persons search page."""
     try:
         t0 = time.time()
         args = {"pg": "search"}
         request_args = UserContext.get_request_args(request)
-        rule = request_args.get("rule")
-        if rule:
+        rule = request_args.get("rule","init")
+        if rule != "init":
             args["rule"] = rule
         key = request_args.get("key")
         if key:
@@ -312,13 +318,16 @@ def show_person_search(set_scope=None, batch_id=None):
             # A new scope (batch or common data) must be stored
             args["batch_id"] = batch_id
             args["set_scope"] = set_scope
+            root = Root.get_batch(current_user.username, batch_id)
+            args["material"] = root.material
         # Else missing batch_id indicates common data to be selected by root.state
         if rule == 'notetext':
             return note_search(args)
 
-        res, u_context = _do_get_persons(args)
-
-        print(f"#show_person_search: {request.method} "
+        res = _do_get_persons(args)
+        u_context = res.get("u_context")
+        
+        print(f"#bp.scene.routes.material_search: {request.method} "
               f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
@@ -330,17 +339,19 @@ def show_person_search(set_scope=None, batch_id=None):
         elapsed = time.time() - t0
         stk_logger(
             u_context,
-            f"-> bp.scene.routes.show_person_search/{rule}"
+            f"-> bp.scene.routes.material_search/{rule}"
             f" n={len(found)}{hidden} e={elapsed:.3f}",
         )
         print(
-            f"show_person_search: Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
+            f"bp.scene.routes.material_search: Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
         )
 
         surnamestats = []
         placenamestats = []
-        if args.get("rule") is None:
-            # Start search page: show name clouds
+        if rule == "init":
+            # Start material search page:
+            #    - show name clouds and
+            #    - store material type to session.material
             minfont = 6
             maxfont = 20
 
@@ -365,7 +376,7 @@ def show_person_search(set_scope=None, batch_id=None):
                 placenamestats.sort(key=itemgetter("placename"))
 
     except Exception as e:
-        error_print("show_person_search", e)
+        error_print("material_search", e)
         return redirect(url_for("entry"))
 
     return render_template(

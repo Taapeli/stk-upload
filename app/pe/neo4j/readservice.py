@@ -101,6 +101,40 @@ class Neo4jReadService(ConcreteService):
         obj.role = role if role != "Primary" else None
         return obj
 
+    def dr_get_material_batches(self, user: str, uuid: str):
+        """
+        Get list of my different materials and accepted all different materials.
+
+        Returns dict {item, status, statustext}
+        """
+        event = None
+        with self.driver.session(default_access_mode="READ") as session:
+            try:
+                result = run_cypher(session, CypherEvent.get_an_event, user, uuid=uuid)
+                for record in result:
+                    if record["e"]:
+                        # Record: <Record
+                        #    e=<Node id=16580 labels=frozenset({'Event'})
+                        #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
+                        #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
+                        #            'type': 'Baptism', 'uuid': 'dc969e6831dc47d7b6719edd94fe6007'}>
+                        #    root=<Node id=31100 labels=frozenset({'Audit'})
+                        #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
+                        # >
+                        node = record["e"]
+                        event = EventBl.from_node(node)
+                if event:
+                    return {"item": event, "status": Status.OK}
+
+            except Exception as e:
+                return {"item": None, "status": Status.ERROR, "statustext": str(e)}
+
+        return {
+            "item": event,
+            "status": Status.NOT_FOUND,
+            "statustext": "No Event found",
+        }
+
     def dr_get_person_list(self, _args):
         """Read Person data from given fw_from.
 

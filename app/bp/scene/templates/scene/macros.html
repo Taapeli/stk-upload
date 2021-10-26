@@ -94,16 +94,6 @@
     {#  call show_use_case(no_change=true) if you want to deny change. #}
     {% if user_context and not config['DEMO'] %}
         {{ user_context.owner_str() }}
-{#
-#        {% if user_context.user %}
-#           {% if not no_change %}
-#               {% if user_context.context_code == 1 %}{%set newdiv = 2%}
-#               {%else%}{% set newdiv=1 %}
-#               {%endif%}
-#            <i>(<a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a>)</i>
-#           {% endif %}
-#        {% endif %}
-#}
     {% endif %}
 {%- endmacro %}
 
@@ -161,7 +151,7 @@
             <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.material}}
         {% else %}
         	{{ _('origin from') }}
-            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.material}}
+            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{ _(obj.root.material) }}
         {% endif %}
         </span>
         {% endif %}

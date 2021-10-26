@@ -12,13 +12,14 @@ div.starters {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    height: 120px;
+    /*height: 120px;*/
     align-items: center;
 }
 div.starters > span {
     padding: 2pt;
     display: inline-flex;
 }
+div.starters span.typedesc { color: brown; }
 div.starters button {
     min-height: 36px;
 }
@@ -29,6 +30,7 @@ div.starters button {
     <h1>{{ _("User's home page for Isotammi Services") }}</h1>
 
 {% include "flash_messages.html" %}
+{% set batch_id = session['batch_id'] %}<!-- current batch '{{batch_id}}' -->
 
     <div class="row">
 
@@ -66,7 +68,6 @@ div.starters button {
 
 {% if current_user.is_authenticated and 
    ( current_user.has_role('research') or current_user.has_role('admin') ) %}
-    {% set batch_id = session['batch_id'] %}<!-- '{{batch_id}}' -->
     {% set ctxt = session['user_context'] %}
            <div class="startbox">
              <div style="display: inline-block;">
@@ -96,17 +97,26 @@ div.starters button {
                <form method="post" action="/scene/persons/search">
                    <input type="hidden" name="set_scope" value="1">
 
-    {% set batch_id = session['batch_id'] %}<!-- '{{batch_id}}' -->
     {% set ctxt = session['user_context'] %}
 
                  <h2>{{ _('My candidate material') }}</h2>
                  <p>{{ _('View your own candidate materials') }}.</p>
                  <div class="starters">
     {% for batch in batches %}
+        {% if batch.description %}
+            {% set title = _(batch.material) + " / " + batch.description %}
+        {% else %}
+            {% set title = _(batch.material) %}
+        {% endif -%}
                     <span>
                        <button type="submit" name="batch_id" value="{{ batch.id }}"
+                            title="{{ title }}"
            {% if batch_id == batch.id %}autofocus{% endif %}
-                       >{{ batch.id }}<br>{{ batch.filename|replace('_',' ') }}
+                       >
+           {% if batch.material != "Family Tree" %}
+                       <span class="typedesc">{{ _(batch.material) }}</span>
+           {% endif %}
+                        {{ batch.id }}<br>{{ batch.filename|replace('_',' ') }}
                        </button>
                     </span>
     {% endfor -%}

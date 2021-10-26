@@ -27,6 +27,9 @@ from dataclasses import dataclass
 from typing import List
 
 import shareds
+import logging
+
+logger = logging.getLogger("stkserver")
 
 labels = [
 ("Citation",0),
@@ -141,7 +144,7 @@ class StatsBuilder:
             return stats
         """ 
         rec = self.session.run(cypher, batch_id=batch_id).single()
-        #print("bl.stats.StatsBuilder.get_stats_node",rec)
+        logger.debug(f"bl.stats.StatsBuilder.get_stats_node {rec}")
         if rec is None: return None
         return rec.get('stats')
     

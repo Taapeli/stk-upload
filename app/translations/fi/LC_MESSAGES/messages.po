@@ -5255,12 +5255,12 @@ msgid "Family Tree"
 msgstr "Sukupuu"
 
 #: ui/jinja_filters.py:321
-msgid "Demo Material"
-msgstr "Esittelyaineisto"
+msgid "Place Data"
+msgstr "Paikat"
 
 #: ui/jinja_filters.py:322
-msgid "Example type"
-msgstr "Esimerkki"
+msgid "Hiski Tree"
+msgstr "Hiski"
 
 #: ui/jinja_filters.py:333
 msgid "Auditing"

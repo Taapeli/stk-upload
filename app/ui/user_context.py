@@ -165,9 +165,16 @@ class UserContext():
 #         '''
 
 
-    def __init__(self, user_session, current_user=None, request=None):
+    def __init__(self, user_session, current_user=None, request=None, material=None):
         '''
-            Init UserContext with filtering from user session, request and current user.
+            Init UserContext setting filtering and optionally material type.
+
+            Filtering is detected from user session, request and current user.
+
+            :param: user_session    current SecureCookieSession
+            :param: current_user    setups.User
+            :param: request         http Request
+            :param: material        bl.Root.material or None 
         '''
         self.session = user_session
         self.choices = self.ChoicesOfView()     # set of allowed material choices
@@ -175,6 +182,7 @@ class UserContext():
         self.state = None
         self.lang = user_session.get('lang','') # User language
         self.batch_id = None
+        self.material = material
 
         self.years = []                         # example [1800, 1899]
         self.series = None                      # 'Source' data theme like "birth"
@@ -230,8 +238,9 @@ class UserContext():
                 else:
                     self.context_code = self.ChoicesOfView.COMMON
                     self.batch_id = ""
-                self.session['user_context'] = self.context_code
                 self.session['batch_id'] = self.batch_id
+                self.session['material'] = self.material
+                self.session['user_context'] = self.context_code
                 self.session['person_scope'] = ('< start', '> end')
                 self.session['family_scope'] = ('< start', '> end')
                 self.session['place_scope'] = ('< start', '> end')
@@ -252,9 +261,8 @@ class UserContext():
             if self.context_code == self.choices.OWN:
                 self.allow_edit = self.is_auditor
 
-        """ Batch selection by state and material """
+        """ Batch selection by state (and material?) """
 
-        self.material = user_session.get("material", DEFAULT_MATERIAL)
         self.state = user_session.get("state")
         if not self.state:
             self.state = self.choices.get_state(self.context_code)

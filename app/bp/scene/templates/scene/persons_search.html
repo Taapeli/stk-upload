@@ -143,16 +143,18 @@ selector.addEventListener("change", () => {
 
 {% if rule == 'notetext' %}
    {%  include "scene/note_search_result.html" %}
+
 {% elif status == 'OK' %}
    {%  include "scene/person_search_result.html" %}
-{% elif rule %}
+
+{% elif rule == "init" %}
+   {%  include "scene/most_common.html" %}
+
+{% else %}
     <div class="NotFound">
         <p>{{ _('No one found with search keys') }}.</p>
     </div>
     <p>&nbsp;</p>
-{% else %}
-   {%  include "scene/most_common.html" %}
-
-   {% endif %}
+{% endif %}
 </div><!-- end Individuals -->
 {% endblock %}

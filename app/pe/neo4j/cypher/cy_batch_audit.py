@@ -42,6 +42,7 @@ MATCH (b:Root) WHERE b.id STARTS WITH $batch_base
 RETURN b.id as bid
     ORDER BY bid DESC LIMIT 1"""
 
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_find_last_used_batch_seq
     read_batch_id = """
 MATCH (n:BatchId) return n
 """
@@ -90,6 +91,15 @@ RETURN b, u.username as username"""
     list_all = """
 MATCH (b:Root) 
 RETURN b """
+
+    # List both my different materials and accepted all different materials
+    get_root_pallette = """
+match (u:UserProfile{username:$user}) -[:HAS_LOADED]-> (root:Root)
+return root.material as material, u.username as user, root.state as state, count(root) as count
+union
+match (u:UserProfile) -[:HAS_LOADED]-> (root:Root{state:"Accepted"})
+return root.material as material, "" as user, root.state as state, count(root) as count
+"""
 
 #-bl.root.Root.get_batches
     get_batches = '''

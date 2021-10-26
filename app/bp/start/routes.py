@@ -105,8 +105,7 @@ def start_guest_search():
 @login_required
 # @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def start_logged():
-    """Opening the home page for logged in user (from login page or home button)
-    or anonymous user (home).
+    """Opening the home page for logged in user (from login page or home button).
 
     Note. The home page for anonymous user is routes.entry in app/routes.py
     """
@@ -122,11 +121,11 @@ def start_logged():
         f" roles= {role_names}"
     )
 
-    print(f"start_logged: is_authenticated={current_user.is_authenticated}, "\
+    print(f"bp.start.routes.start_logged: is_authenticated={current_user.is_authenticated}, "\
           f"to_be_approved={current_user.has_role('to_be_approved')}")
     if current_user.is_authenticated and current_user.has_role("to_be_approved"):
         # Home page for logged in user
-        logger.info(f"-> start.routes.entry/join")
+        logger.info(f"-> bp.start.routes.start_logged > start.routes.entry/join")
         return redirect(url_for("join"))
 
     surnamestats = []
