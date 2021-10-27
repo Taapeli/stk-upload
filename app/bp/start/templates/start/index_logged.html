@@ -77,7 +77,7 @@ div.starters button {
                   <input type="hidden" name="set_scope" value="1">
                   <div class="starters"
                        style="">
-                       <button type="submit" name="batch_id" value=""
+                       <button type="submit" name="material" value="Family Tree"
                        >{{ _("Browse") }}:<br>{{ _('Approved Isotammi tree') }}
                        </button>
                   </div>
@@ -109,7 +109,8 @@ div.starters button {
             {% set title = _(batch.material) %}
         {% endif -%}
                     <span>
-                       <button type="submit" name="batch_id" value="{{ batch.id }}"
+                        <input type="hidden" name="material" value={{batch.material}}>
+                        <button type="submit" name="batch_id" value="{{ batch.id }}"
                             title="{{ title }}"
            {% if batch_id == batch.id %}autofocus{% endif %}
                        >

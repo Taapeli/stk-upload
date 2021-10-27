@@ -6,9 +6,6 @@
 	match {
 		color: red;
 	}
-	a {
-		color: blue;
-	}
 </style>
 
 {% set oldkey = key %}
@@ -51,7 +48,7 @@ item:
 	    		<td>{{ item.excerpt|safe }}
 	    		{% for r in item.referrers %}
 	    			<br>
-	    			<a href={{ r.url }} target="_blank">
+	    			<a href={{ r.url }} class="inlink">
 	    			{{ r.id }} {{ r.description }}
 	    			</a>
 	    		{% endfor %}

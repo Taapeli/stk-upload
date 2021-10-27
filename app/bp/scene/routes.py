@@ -27,31 +27,21 @@ import io
 import os
 import traceback
 import json
-
-import logging
-
-logger = logging.getLogger("stkserver")
-from operator import itemgetter
 import time
 from datetime import datetime
+from operator import itemgetter
 #from types import SimpleNamespace
 
+import logging
+logger = logging.getLogger("stkserver")
 
-from flask import send_file, Response, jsonify
-from flask import (
-    render_template,
-    request,
-    redirect,
-    url_for,
-    flash,
-    session as user_session,
-)
+from flask import send_file, Response, jsonify, render_template
+from flask import request, redirect, url_for, flash
+from flask import session as user_session
 from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
 
 import shareds
-#from models import util
-
 from . import bp
 from bl.base import Status, StkEncoder
 from bl.root import Root
@@ -64,50 +54,26 @@ from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
 from bl.comment import Comment, CommentReader, CommentsUpdater
-
-from models import mediafile
 from bp.graph.models.fanchart import FanChart
-
 from ui.user_context import UserContext
 from ui import jinja_filters
 from ui.util import error_print, stk_logger
+from models import mediafile
 
 # Select the read driver for current database
 # from database.accessDB import get_dataservice
 # opt = "read_tx" --> Neo4jReadServiceTx # initiate when used
 # opt = "read" --> Neo4jReadService
 
-
 calendars = [_("Julian"), _("Hebrew")]  # just for translations
 
 
-# def stk_logger(context, msg: str): # --> ui.util.stk_logger
-#     """Emit logger info message with Use Case mark uc=<code> ."""
-#     if not context:
-#         logger.info(msg)
-#         return
-#     uc = context.use_case()
-#     if (msg[:2] != "->") or (uc == ""):
-#         logger.info(msg)
-#         return
-#     logger.info(f"-> {msg[2:]} uc={uc}")
-#     return
-
-
-# ------------------------- Menu 1: Person search ------------------------------
+# ------------------------- Menu 1: Material search ------------------------------
 
 
 def _do_get_persons(args):
     """Execute persons list query by arguments and optionally set material type.
 
-        Persons, current
-            GET    /all                                       --> args={pg:all}
-        Persons, forward
-            GET    /all?fw=<sortname>&c=<count>               --> args={pg:all,fw:sortname,c:count}
-    #     Persons, by years range
-    #         GET    /all?years=<y1-y2>                         --> args={pg:all,years:y1_y2}
-    #     Persons fw,years
-    #         GET    /all?years=<y1-y2>&fw=<sortname>&c=<count> --> args={pg:all,fw:sortname,c:count,years:y1_y2}
         Search form
             GET    /search                                    --> args={pg:search,rule:start}
         Search by refname
@@ -116,6 +82,16 @@ def _do_get_persons(args):
             POST   /search                                    --> args={pg:search,rule:start}
         Search by name starting or years
             POST   /search rule=<rule>,key=<str>              --> args={pg:search,rule:ref,key:str}
+
+        Persons, current list page
+            GET    /all                                       --> args={pg:all}
+        Persons, forward
+            GET    /all?fw=<sortname>&c=<count>               --> args={pg:all,fw:sortname,c:count}
+
+    #     Persons, by years range
+    #         GET    /all?years=<y1-y2>                         --> args={pg:all,years:y1_y2}
+    #     Persons fw,years
+    #         GET    /all?years=<y1-y2>&fw=<sortname>&c=<count> --> args={pg:all,fw:sortname,c:count,years:y1_y2}
     #     Search by years range
     #         POST   /search years=<y1-y2>                      --> args={pg:search,years:y1_y2}
     #     Search by name & years
@@ -300,26 +276,30 @@ def note_search(args):
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 #def show_person_search(set_scope=None, batch_id=None):
-def material_search(set_scope=None, batch_id=None):
+def material_search(set_scope=False, batch_id="", material=None):
     """Start material browse with Persons search page."""
     try:
         t0 = time.time()
         args = {"pg": "search"}
         request_args = UserContext.get_request_args(request)
         rule = request_args.get("rule","init")
-        if rule != "init":
-            args["rule"] = rule
-        key = request_args.get("key")
-        if key:
-            args["key"] = key
-        batch_id = request_args.get("batch_id", False)
-        set_scope = request_args.get("set_scope", False)
-        if set_scope and batch_id:
-            # A new scope (batch or common data) must be stored
-            args["batch_id"] = batch_id
+        args["rule"] = rule
+        key = request_args.get("key","")
+        if key: args["key"] = key
+        batch_id = request_args.get("batch_id", batch_id)
+        material = request_args.get("material", "")
+        set_scope = request_args.get("set_scope", set_scope)
+        logger.debug(f"#(1)bp.scene.routes.material_search: {request.method} {list(request.args)} "
+              f"set_scope={set_scope} material={material}:{batch_id}")
+        if set_scope:
+            if batch_id:
+                # A new scope (batch or common data) must be stored
+                root = Root.get_batch(current_user.username, batch_id)
+                material = root.material
+            # else:
+                args["batch_id"] = batch_id
+            args["material"] = material
             args["set_scope"] = set_scope
-            root = Root.get_batch(current_user.username, batch_id)
-            args["material"] = root.material
         # Else missing batch_id indicates common data to be selected by root.state
         if rule == 'notetext':
             return note_search(args)
@@ -327,7 +307,7 @@ def material_search(set_scope=None, batch_id=None):
         res = _do_get_persons(args)
         u_context = res.get("u_context")
         
-        print(f"#bp.scene.routes.material_search: {request.method} "
+        logger.info(f"#(2)bp.scene.routes.material_search: {request.method} "
               f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
