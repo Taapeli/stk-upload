@@ -66,7 +66,7 @@ class DataService:
             self.user_context = user_context
             self.username = user_context.user
             # The operative username
-            if user_context.context_code == user_context.ChoicesOfView.COMMON:
+            if user_context.current_context == "common":
                 self.use_user = None
             else:
                 self.use_user = user_context.user

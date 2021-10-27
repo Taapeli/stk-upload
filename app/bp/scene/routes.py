@@ -97,16 +97,16 @@ def _do_get_persons(args):
     #     Search by name & years
     #         POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
     """
-    u_context = UserContext(user_session, current_user, request, args.get("material"))
+    u_context = args["u_context"] #UserContext(user_session, current_user, request, args.get("material"))
     if args.get("pg") == "search":
         # No scope
-        u_context.set_scope_from_request()
+        # u_context.set_scope_from_request()
         if args.get("rule", "start") == "start" or args.get("key", "") == "":
             # Initializing this batch.
             return {"rule": "start", "status": Status.NOT_STARTED,
                     "u_context": u_context}
     else:  # pg:'all'
-        u_context.set_scope_from_request(request, "person_scope")
+        #u_context.set_scope_from_request(request, "person_scope")
         args["rule"] = "all"
     request_args = UserContext.get_request_args(request)
     u_context.count = request_args.get("c", 100, type=int)
@@ -280,14 +280,27 @@ def material_search(set_scope=False, batch_id="", material=None):
     """Start material browse with Persons search page."""
     try:
         t0 = time.time()
-        args = {"pg": "search"}
-        request_args = UserContext.get_request_args(request)
+        # 1. Set user grants (is_auditor,allow_edit) and 
+        u_context = UserContext()
+
+        request_args = u_context.get_request_args(request)
+        material = request_args.get("material", "")
+        if material:
+            # 2. Select batch_id: '2021-10-20.005', material: 'Family Tree'
+            #    and store them to session
+            ##batch_id = request_args.get("batch_id", "")
+            u_context.set_material(request_args)
+    
+            # 3. Synchronize list view scope
+            #    'person_scope': ('Manninen#Matti#', '> end') from request
+            u_context.set_scope("person_scope", request_args)
+        
+        
+        args = {"pg": "search", "u_context":u_context}
         rule = request_args.get("rule","init")
         args["rule"] = rule
         key = request_args.get("key","")
         if key: args["key"] = key
-        batch_id = request_args.get("batch_id", batch_id)
-        material = request_args.get("material", "")
         set_scope = request_args.get("set_scope", set_scope)
         logger.debug(f"#(1)bp.scene.routes.material_search: {request.method} {list(request.args)} "
               f"set_scope={set_scope} material={material}:{batch_id}")
