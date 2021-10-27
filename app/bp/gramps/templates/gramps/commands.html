@@ -1,8 +1,12 @@
-{{ description }}
+<i>{{ description }}</i>
 <ul>
 <form>
-	{% for command, title in commands %}
-		<li><a href="{{command}}">{{title}}</a></li>
+	{% for command, title, confirm in commands %}
+		{% if confirm %}
+			<li><a href="javascript:doconfirm('{{command}}', '{{title}}')">{{title}}</a></li>
+		{% else %}
+			<li><a href="{{command}}">{{title}}</a></li>
+		{% endif %}
 	{% endfor %}
 </form>
 </ul>

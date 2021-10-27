@@ -27,85 +27,53 @@ import io
 import os
 import traceback
 import json
-
-import logging
-
-logger = logging.getLogger("stkserver")
-from operator import itemgetter
 import time
 from datetime import datetime
+from operator import itemgetter
 #from types import SimpleNamespace
 
+import logging
+logger = logging.getLogger("stkserver")
 
-from flask import send_file, Response, jsonify
-from flask import (
-    render_template,
-    request,
-    redirect,
-    url_for,
-    flash,
-    session as user_session,
-)
+from flask import send_file, Response, jsonify, render_template
+from flask import request, redirect, url_for, flash
+from flask import session as user_session
 from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
 
 import shareds
-#from models import util
-
 from . import bp
 from bl.base import Status, StkEncoder
+from bl.root import Root
 from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
 from bl.event import EventReader, EventWriter
+from bl.note import NoteReader
 from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
 from bl.comment import Comment, CommentReader, CommentsUpdater
-
-from models import mediafile
 from bp.graph.models.fanchart import FanChart
-
 from ui.user_context import UserContext
 from ui import jinja_filters
 from ui.util import error_print, stk_logger
+from models import mediafile
 
 # Select the read driver for current database
 # from database.accessDB import get_dataservice
 # opt = "read_tx" --> Neo4jReadServiceTx # initiate when used
 # opt = "read" --> Neo4jReadService
 
-
 calendars = [_("Julian"), _("Hebrew")]  # just for translations
 
 
-# def stk_logger(context, msg: str): # --> ui.util.stk_logger
-#     """Emit logger info message with Use Case mark uc=<code> ."""
-#     if not context:
-#         logger.info(msg)
-#         return
-#     uc = context.use_case()
-#     if (msg[:2] != "->") or (uc == ""):
-#         logger.info(msg)
-#         return
-#     logger.info(f"-> {msg[2:]} uc={uc}")
-#     return
-
-
-# ------------------------- Menu 1: Person search ------------------------------
+# ------------------------- Menu 1: Material search ------------------------------
 
 
 def _do_get_persons(args):
-    """Execute persons list query by arguments.
+    """Execute persons list query by arguments and optionally set material type.
 
-        Persons, current
-            GET    /all                                       --> args={pg:all}
-        Persons, forward
-            GET    /all?fw=<sortname>&c=<count>               --> args={pg:all,fw:sortname,c:count}
-    #     Persons, by years range
-    #         GET    /all?years=<y1-y2>                         --> args={pg:all,years:y1_y2}
-    #     Persons fw,years
-    #         GET    /all?years=<y1-y2>&fw=<sortname>&c=<count> --> args={pg:all,fw:sortname,c:count,years:y1_y2}
         Search form
             GET    /search                                    --> args={pg:search,rule:start}
         Search by refname
@@ -114,28 +82,42 @@ def _do_get_persons(args):
             POST   /search                                    --> args={pg:search,rule:start}
         Search by name starting or years
             POST   /search rule=<rule>,key=<str>              --> args={pg:search,rule:ref,key:str}
+
+        Persons, current list page
+            GET    /all                                       --> args={pg:all}
+        Persons, forward
+            GET    /all?fw=<sortname>&c=<count>               --> args={pg:all,fw:sortname,c:count}
+
+    #     Persons, by years range
+    #         GET    /all?years=<y1-y2>                         --> args={pg:all,years:y1_y2}
+    #     Persons fw,years
+    #         GET    /all?years=<y1-y2>&fw=<sortname>&c=<count> --> args={pg:all,fw:sortname,c:count,years:y1_y2}
     #     Search by years range
     #         POST   /search years=<y1-y2>                      --> args={pg:search,years:y1_y2}
     #     Search by name & years
     #         POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
     """
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request, args.get("material"))
     if args.get("pg") == "search":
         # No scope
         u_context.set_scope_from_request()
         if args.get("rule", "start") == "start" or args.get("key", "") == "":
-            return {"rule": "start", "status": Status.NOT_STARTED}, u_context
+            # Initializing this batch.
+            return {"rule": "start", "status": Status.NOT_STARTED,
+                    "u_context": u_context}
     else:  # pg:'all'
         u_context.set_scope_from_request(request, "person_scope")
         args["rule"] = "all"
-    u_context.count = request.args.get("c", 100, type=int)
+    request_args = UserContext.get_request_args(request)
+    u_context.count = request_args.get("c", 100, type=int)
 
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
+        # for i in res.get("items"):
+        #     print(f"_do_get_persons: @{i.user} {i.sortname}")
 
-    # for i in res.get("items"):
-    #     print(f"_do_get_persons: @{i.user} {i.sortname}")
-    return res, u_context
+    res["u_context"] = u_context
+    return res
 
 
 # @bp.route('/scene/persons', methods=['POST', 'GET'])
@@ -156,7 +138,8 @@ def show_persons():
         args["c"] = c
     print(f"{request.method} All persons {args}")
 
-    res, u_context = _do_get_persons(args)
+    res = _do_get_persons(args)
+    u_context = res.get("u_context")
 
     if Status.has_failed(res):
         flash(_("Data read failed."), "error")
@@ -180,30 +163,151 @@ def show_persons():
     )
 
 
+def format_item(rec, searchtext, min_length=100):
+    """ Display an excerpt from Note text that is at least this long
+    """
+    import re
+
+    #print(rec)
+    note = rec.get('note')
+    #id = note.get('id')
+    text = note.get('text')
+    labels = rec.get('labels')
+    startpos = -1
+    if searchtext.startswith("'") and searchtext.endswith("'"):
+        searchtext = searchtext[1:-1] 
+    if searchtext.startswith('"') and searchtext.endswith('"'):
+        searchwords = [searchtext[1:-1]]
+    else:
+        searchwords =  [searchtext] + searchtext.split()
+    for wordnum,searchword in enumerate(searchwords):
+        regextext = searchword
+        regextext = regextext.replace('\\',r'\\')
+        regextext= regextext.replace('(',r'\(').replace(')',r'\)')
+        regextext = regextext.replace('[',r'\[').replace(']',r'\]')
+        regextext = regextext.replace('*',r'\w*?')  # asterisk means word characters only, ? indicate non-greedy search
+        regex = fr"\W({regextext})\W"
+
+        m = re.search(regex, f" {text.lower()} ")  # add delimiters to start and end (will match \W)
+        if m:
+            #print(m)
+            #print(m.start(1),m.end(1),len(text))
+            startpos = m.start(1)-1
+            endpos = m.end(1)-1
+        if startpos != -1:
+            # display at least min_length/2 characters before and after the match
+            xstart = max(0,startpos-min_length//2)
+            xend = endpos + min_length//2
+            
+            # if needed, increase the size up to min_length characters 
+            if xstart == 0 and xend < xstart + min_length:
+                xend = xstart + min_length
+            if xend >= len(text) and xstart > len(text) - min_length:
+                xstart = max(0, len(text)-min_length)
+    
+            # break at space if possible
+            xstart = text.rfind(" ",0,xstart)+1
+            xend1 = text.find(" ",xend)
+            if xend1 != -1:
+                xend = xend1
+    
+            excerpt = text[xstart:xend]
+            excerpt = excerpt[0:endpos-xstart] + "</match>" + excerpt[endpos-xstart:]
+            excerpt = excerpt[0:startpos-xstart] + "<match>" + excerpt[startpos-xstart:]
+            if xstart > 0:
+                excerpt = "..." + excerpt
+            if xend < len(text)-1:
+                excerpt = excerpt +"..."
+            break # found a match
+        else:
+            excerpt = ""
+            if wordnum < len(searchwords)-1:
+                continue  # try again except for last word
+    referrers = rec.get('referrers')
+    score = rec.get('score')
+    return dict(
+        note=note,
+        id=id,
+        labels=labels,
+        referrers=referrers,
+        score=score,
+        #x=dict(x),
+        excerpt=repr(excerpt)[1:-1])
+
+def note_search(args):
+    print(args)
+    u_context = UserContext(user_session, current_user, request)
+    u_context.count = request.args.get("c", 100, type=int)
+
+    try:
+        with NoteReader("read_tx", u_context) as service:
+            res = service.note_search(args)
+    
+        searchtext = args['key'].lower()
+        items=res['items']
+        displaylist = []
+        for item in items:
+            print("item", item)
+            #note = item[0]
+            #x = item[1]
+            displaylist.append(format_item(item, searchtext))
+    
+        #from pprint import  pprint
+        #pprint(displaylist[0:5])
+    except Exception as e:
+        displaylist = []
+        flash(str(e))
+    return render_template(
+        "/scene/persons_search.html",
+        menuno=0,
+        items=displaylist,
+        user_context=u_context,
+        rule='notetext',
+        key=searchtext,
+    )
+    return render_template(
+        "/scene/note_search_result.html",
+        items=displaylist,
+        key=args.get('key',''),
+    )
+
+
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_person_search(set_scope=None, batch_id=None):
-    """Persons search page."""
+#def show_person_search(set_scope=None, batch_id=None):
+def material_search(set_scope=False, batch_id="", material=None):
+    """Start material browse with Persons search page."""
     try:
         t0 = time.time()
         args = {"pg": "search"}
-        rq = request.args if request.method == "GET" else request.form
-        rule = rq.get("rule")
-        if rule:
-            args["rule"] = rule
-        key = rq.get("key")
-        if key:
-            args["key"] = key
-        batch_id = rq.get("batch_id")
-        set_scope = rq.get("set-scope")
-        if not (set_scope is None or batch_id is None): 
-            args["batch_id"] = batch_id
+        request_args = UserContext.get_request_args(request)
+        rule = request_args.get("rule","init")
+        args["rule"] = rule
+        key = request_args.get("key","")
+        if key: args["key"] = key
+        batch_id = request_args.get("batch_id", batch_id)
+        material = request_args.get("material", "")
+        set_scope = request_args.get("set_scope", set_scope)
+        logger.debug(f"#(1)bp.scene.routes.material_search: {request.method} {list(request.args)} "
+              f"set_scope={set_scope} material={material}:{batch_id}")
+        if set_scope:
+            if batch_id:
+                # A new scope (batch or common data) must be stored
+                root = Root.get_batch(current_user.username, batch_id)
+                material = root.material
+            # else:
+                args["batch_id"] = batch_id
+            args["material"] = material
             args["set_scope"] = set_scope
+        # Else missing batch_id indicates common data to be selected by root.state
+        if rule == 'notetext':
+            return note_search(args)
 
-        res, u_context = _do_get_persons(args)
-
-        print(f"#show_person_search: {request.method} "
+        res = _do_get_persons(args)
+        u_context = res.get("u_context")
+        
+        logger.info(f"#(2)bp.scene.routes.material_search: {request.method} "
               f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
@@ -215,17 +319,19 @@ def show_person_search(set_scope=None, batch_id=None):
         elapsed = time.time() - t0
         stk_logger(
             u_context,
-            f"-> bp.scene.routes.show_person_search/{rule}"
+            f"-> bp.scene.routes.material_search/{rule}"
             f" n={len(found)}{hidden} e={elapsed:.3f}",
         )
         print(
-            f"Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
+            f"bp.scene.routes.material_search: Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
         )
 
         surnamestats = []
         placenamestats = []
-        if args.get("rule") is None:
-            # Start search page: show name clouds
+        if rule == "init":
+            # Start material search page:
+            #    - show name clouds and
+            #    - store material type to session.material
             minfont = 6
             maxfont = 20
 
@@ -250,8 +356,8 @@ def show_person_search(set_scope=None, batch_id=None):
                 placenamestats.sort(key=itemgetter("placename"))
 
     except Exception as e:
-        error_print("show_person_search", e)
-        return redirect(url_for("routes.entry"))
+        error_print("material_search", e)
+        return redirect(url_for("entry"))
 
     return render_template(
         "/scene/persons_search.html",
@@ -290,7 +396,7 @@ def show_person(uuid=None, fanchart=False):
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
         person = None
@@ -302,7 +408,7 @@ def show_person(uuid=None, fanchart=False):
         objs = result.get("objs", [])
         print(f"# Person with {len(objs)} objects")
         jscode = result.get("jscode", "")
-        # Batch or Audit node data like {'root_type', 'root_user', 'id'}
+        # Batch or Audit node data like {'material', 'root_user', 'id'}
         person.root = result.get("root")
 
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
@@ -338,7 +444,7 @@ def show_person_family_tree_hx(uuid=None):
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")
@@ -378,7 +484,7 @@ def show_person_fanchart_hx(uuid=None):
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")
@@ -556,8 +662,9 @@ def show_event_vue(uuid):
 def json_get_event():
     """Get Event page data."""
     t0 = time.time()
+    request_args = UserContext.get_request_args(request)
     try:
-        args = request.args
+        args = request_args
         if args:
             print(f"got request args: {args}")
         else:
@@ -896,7 +1003,7 @@ def show_place(locid):
     cnt = len(res.get("events")) if res.get("events", False) else 0
     stk_logger(u_context, f"-> bp.scene.routes.show_place n={cnt}")
     return render_template(
-        "/scene/place_events.html",
+        "/scene/place.html",
         place=res.get("place"),
         pl_hierarchy=res.get("hierarchy"),
         events=res.get("events"),

@@ -1,0 +1,67 @@
+{% if selection != "freetext" %}
+	<div id="alphanav">
+			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
+	        {% for p in persons %}
+         	  {% set ini = p.names[0].initial|upper %}
+              {% if loop.changed(ini) %}
+                 <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+              {% endif %}
+	        {% endfor %}
+			</ul>
+	</div>
+{% endif %}
+
+	<table class="IndividualList">
+		<thead>
+			<tr><th></th>
+                   <th>{{ _('Person') }}</th>
+                   <th>{{ _("Person's events") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+	    {% for p in persons %}
+	        <tr>
+                <td class="ColumnAlpha">
+{% if selection != "freetext" %}
+            {% set ini = p.names[0].initial|upper %}
+            {% if loop.changed(ini) %}
+		            <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
+			{% endif %}
+{% endif %}
+				</td>
+	            <td class="ColumnPerson">
+                    <div>
+	                    <a href="/scene/person?uuid={{p.uuid}}"
+	                      title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
+                          {{p.names[0].firstname}} 
+            {% if p.names[0].prefix %} {{p.names[0].prefix}}{% endif %}
+            {% if p.names[0].surname %}
+                          <b>{{p.names[0].surname}}</b>{% else %}
+                          <i>{{p.names[0].suffix}}</i>{% endif -%}</a>
+		                <small class="idno">[{{ p.uuid_short() }}]</small>
+		    {% if p.refnames %}
+		                <br><small class="refname" title="{{ _('Reference names') }}">
+		                  {{ _('Keywords') }}: {{p.refnames}}</small>
+            {% endif %}
+                        <br><small style="color:olive">{{ macro.lifetimes(p) }}</small>
+            {% if p.too_new %}
+		                <br><small><i style="color:red;">{{ _('Too recent for display to others!') }}</i></small>
+		    {% endif %}
+	                </div>
+                </td>
+
+	            <td class="ColumnEvent">
+            {% if p.events %}<ul>
+                {% for e in p.events|sort(attribute='dates') %}
+		            <li><i>{{e.type|transl('evt')}}</i> {{e.description}}
+		            {% if e.dates %}
+                        <span class="{{e.dates.calendar_css()}}">{{e.dates}}</span> 
+                    {% endif %}
+		            {% if e.place %} | {{e.place}}{% endif %}</li>
+		        {% endfor %}</ul>
+	        {% endif %}
+                </td>
+	        </tr>
+	    {% endfor %}
+        </tbody>
+    </table>

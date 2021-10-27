@@ -105,8 +105,7 @@ def start_guest_search():
 @login_required
 # @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def start_logged():
-    """Opening the home page for logged in user (from login page or home button)
-    or anonymous user (home).
+    """Opening the home page for logged in user (from login page or home button).
 
     Note. The home page for anonymous user is routes.entry in app/routes.py
     """
@@ -122,11 +121,11 @@ def start_logged():
         f" roles= {role_names}"
     )
 
-    print(current_user.is_authenticated)
-    print(current_user.has_role("to_be_approved"))
+    print(f"bp.start.routes.start_logged: is_authenticated={current_user.is_authenticated}, "\
+          f"to_be_approved={current_user.has_role('to_be_approved')}")
     if current_user.is_authenticated and current_user.has_role("to_be_approved"):
         # Home page for logged in user
-        logger.info(f"-> start.routes.entry/join")
+        logger.info(f"-> bp.start.routes.start_logged > start.routes.entry/join")
         return redirect(url_for("join"))
 
     surnamestats = []
@@ -148,10 +147,17 @@ def start_logged():
                 stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
             surnamestats.sort(key=itemgetter("surname"))
 
-    my_batches = Root.get_my_batches(current_user.username)
+    my_batches = list(Root.get_my_batches(current_user.username))
+    #  { 'metaname': 'uploads/usr/2021-10-24.001/A-test.gramps.meta', 
+    #    'file': 'uploads/usr/2021-10-24.001/A-test.gramps', 
+    #    'xmlname': 'A-test.gramps','material': 'Family Tree', 
+    #    'logname': 'uploads/usr/2021-10-24.001/A-test.gramps.log', 
+    #    'description': 'Pieni koeaineisto erilaisia tapauksia', 'state': 'Candidate', 
+    #    'id': '2021-10-24.001', 'user': 'usr', 'timestamp': 1635098882577, 
+    #    'filename': 'A-test.gramps'}
     return render_template(
         "/start/index_logged.html", is_demo=is_demo, surnamestats=surnamestats,
-        batches=sorted(my_batches, key=itemgetter("id"))
+        batches=my_batches # sorted(my_batches, key=itemgetter("id"))
     )
 
 
@@ -178,7 +184,7 @@ def join():
             msg += f"\n{name}: {value}"
         msg += f"\n\nApprove user: http://{request.host}/admin/update_user/{username}"
         if email.email_admin(
-            "New user request for Isotammi", msg, sender=request.form.get("email")
+            "New user request", msg, sender=request.form.get("email")
         ):
             flash(_("Join message sent"))
         else:
@@ -215,7 +221,9 @@ def send_email():
     subject = request.form["subject"]
     body = request.form["message"]
     ok = email.email_admin(
-        _(subject), body, sender=(current_user.name, current_user.email)
+        subject, 
+        body, 
+        sender=(current_user.name, current_user.email)
     )
     if ok:
         return "ok"
@@ -243,10 +251,10 @@ def my_settings():
             traceback.print_exc()
 
     labels, user_batches = Root.get_user_stats(current_user.username)
-    print(f"# User batches {user_batches}")
+    print(f"#bp.start.routes.my_settings: User batches {user_batches}")
 
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)
-    print(f"# Gedcoms {gedcoms}")
+    print(f"#bp.start.routes.my_settings: Gedcoms {gedcoms}")
 
     userprofile = shareds.user_datastore.get_userprofile(current_user.username)
 

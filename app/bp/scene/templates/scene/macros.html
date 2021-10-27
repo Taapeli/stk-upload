@@ -61,18 +61,25 @@
                 <li{% if value == 3 %} class="CurrentSection"
                   {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %} href="/scene/families?o=father&f=%20"{% endif %}
                    title="{{ _('Families') }}">{{ _('Families') }}</a></li>
+
                 <li{% if value == 4 %} class="CurrentSection"
                   {% endif %}><a href="/scene/locations"
                    title="{{ _('Places') }}">{{ _('Places') }}</a></li>
+
                 <li{% if value == 5 %} class="CurrentSection"
                   {% endif %}><a href="/scene/sources"
                    title="{{ _('Sources') }}">{{ _('Sources') }}</a></li>
+
                 <li{% if value == 6 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/medias" class="CurrentSection"
+                  {% endif %}><a href="/scene/medias"
                    title="{{ _('Thumbnails') }}">{{ _('Pictures') }}</a></li>
+
+        {% if user_context.is_auditor %}
                 <li{% if value == 7 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/topics" class="CurrentSection"
+                  {% endif %}><a href="/scene/topics" class="Auditor"
                    title="{{ _('Discussions') }}">{{ _('Discussions') }}</a></li>
+        {% endif %}
+
         {% if not current_user or not current_user.is_authenticated %}
                 <li id="loginpage"><a href="/login"
                      title="{{ _('Get more info') }}">{{ _('Log in to Isotammi') }}!</a></li>
@@ -85,14 +92,8 @@
 {% macro show_use_case(no_change) -%}
     {#  Show and change data: researcher data or approved common data. #}
     {#  call show_use_case(no_change=true) if you want to deny change. #}
-    {% if user_context and not config['DEMO'] %}{{ user_context.owner_str() }}
-       {% if user_context.user %}
-           {% if user_context.context_code == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
-           {%endif%}
-           {% if False and not no_change %}
-            <i>(<a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a>)</i>
-           {% endif %}
-       {% endif %}
+    {% if user_context and not config['DEMO'] %}
+        {{ user_context.owner_str() }}
     {% endif %}
 {%- endmacro %}
 
@@ -138,19 +139,19 @@
     <tt title="{{ _('Copy UUID key') }}" class="copy-fld" 
         onclick="toClipboard('my_uuid')">{{obj.uuid_short()}}</tt> /
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
-    <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
+    <span class="id" title="{{ _('number') }}">{{obj.uniq_id}}</span>
     {% if obj.change %}
-    <span id="changetime" title="{{ _("latest change time and contributor") }}"
+    <span id="changetime" title="{{ _('latest change time and contributor') }}"
         {% if margin %}style='margin-right:{{margin}}'{% endif %}
         >{{ _("edited") }} {{obj.change_str()}}
-        {%- if obj.root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
+        {%- if obj.root %}{# Batch node data like {'material', 'root_user', 'id'} #}
         , <span>
         {% if obj.root.root_state == 'Candidate' %}
         	{{ _('User data') }}:
-            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.root_type}}
+            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.material}}
         {% else %}
         	{{ _('origin from') }}
-            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.root_type}}
+            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{ _(obj.root.material) }}
         {% endif %}
         </span>
         {% endif %}
@@ -186,7 +187,7 @@
             <span class="typedesc">{{pn.type|transl('nt')}}</span>
          {% endif %}
          <a href="/scene/person?uuid={{person.uuid}}" class="inlink"
-            title="{{ _("See Person's Details") }}">{{ person_name_long(pn) }}</a>
+            title="{{ _('See Person\'s Details') }}">{{ person_name_long(pn) }}</a>
      {% else %}
       <small><br> – 
          {% if pn.type != "Birth Name" %}
@@ -219,7 +220,7 @@
         N N
     {% else %}
         <a href="/scene/person?uuid={{p.uuid}}" class="inlink"
-            title="{{ _("See Person's Details") }}">{{ person_name_by_sortname(p) }}</a>
+            title="{{ _('See Person\'s Details') }}">{{ person_name_by_sortname(p) }}</a>
      {% endif %}
 {%- endmacro %}
 
@@ -265,7 +266,7 @@
     {#  Formats a Family name with link. #}
          {# <span class="typedesc">{{family.rel_type|transl('marr')}}</span> #}
          <a href="/scene/family?uuid={{family.uuid}}" class="inlink"
-            title="{{ _("See Family Details") }}">
+            title="{{ _('See Family Details') }}">
             {% for name in [family.father_sortname, family.mother_sortname] %}
                 {% set a = name.split('#') %}
                 {{a[1]}} <i>{{a[2]}}</i> <b>{{a[0]}}</b>

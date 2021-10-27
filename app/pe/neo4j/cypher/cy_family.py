@@ -32,7 +32,7 @@ class CypherFamily():
 
     get_a_family = '''
 MATCH (root) -[r:OBJ_FAMILY]-> (f:Family {uuid:$f_uuid}) 
-RETURN f, type(r) AS root_type, root'''
+RETURN f, root'''
 
     get_family_parents = """
 MATCH (f:Family) -[r:PARENT]-> (pp:Person) WHERE ID(f) = $fuid
@@ -143,10 +143,11 @@ MATCH (n:Family) WHERE n.handle=$f_handle
 MATCH (m:Note)   WHERE m.handle=$n_handle
 CREATE (n)-[r:NOTE]->(m)"""
 
-    link_citation = """
-MATCH (n:Family) WHERE n.handle=$f_handle
-MATCH (m:Citation) WHERE m.handle=$c_handle
-CREATE (n)-[r:CITATION]->(m)"""
+#     link_citation = # --> CypherObject.link_citation
+# """
+# MATCH (n:Family) WHERE n.handle=$f_handle
+# MATCH (m:Citation) WHERE m.handle=$c_handle
+# CREATE (n)-[r:CITATION]->(m)"""
 
     set_dates_sortname = """
 MATCH (family:Family) WHERE ID(family) = $id

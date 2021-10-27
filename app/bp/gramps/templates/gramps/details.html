@@ -1,0 +1,108 @@
+{# _gramps/details.html_ #}
+{% extends "start/s_layout.html" %}
+{% block title %}{{ _('Batch Details') }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+{% from "start/s_macros.html" import hamburger_menu, state_info with context %}
+
+<style>
+h2 {margin-bottom: 0;}
+div.startbox { height: 280px; }
+div.startbox > table { width: 280px; }
+td,th {
+    background: whitesmoke;
+}
+td {
+    position: relative;
+}
+.visible { display: inline; }
+.hidden { display:none; }
+</style>
+
+{{ hamburger_menu( (
+   ) ) }}
+
+<div id="startdiv">
+		<h1>{{ _('Material Details') }}</h1>
+
+{% include "flash_messages.html" %}
+
+<div class="startbox" style="width:auto">
+	<h2 class="center">{{ _("General")|title() }}</h2>
+	<table>
+	<tr>
+		<th>{{ _("Batch id") }}</th>
+		<td>{{ batch.id }}</td>
+	</tr>
+	<tr>
+		<th>{{ _("Gramps file") }}</th>
+		<td style="overflow: hidden">{{ batch.xmlname }}</td>
+	</tr>
+	<tr>
+		<th>{{ _("Material") }}</th>
+		<td class="typedesc">{{ _(batch.material) }}</td>
+	</tr>
+	<tr>
+		<th>{{ _("Description") }}</th>
+		<td>
+			<form>
+			<input type="hidden" name="batch_id" value="{{ batch.id }}">
+			<textarea id="description" name="description">{{ batch.description }}</textarea>
+			<button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
+			</form>
+	</tr>
+   	</table>
+   
+</div>
+
+<div class="startbox">
+	<h2 class="center">{{ _("Object Statistics") }}</h2>
+	<table>
+	<tr>
+		<th>{{ _("Type") }}</th>
+		<th>{{ _("Count") }}</th>
+		<th colspan="2">{{ _("Source citations") }}</th>
+	{% for label,do_citations,(c_obj,c_ref) in object_stats %}
+		<tr><!-- {{label}}, {{do_citations}}, ({{c_obj}},{{c_ref}}) -->
+			<td>{{ label|title }}</td>
+			<td class="right">{{ c_obj }}</td>
+       {% if do_citations %}
+ 		    <td class="right">{{ c_ref }}</td>
+            <td class="right">
+            {% if c_obj %}{{ (100 * c_ref/c_obj)|int }}% {% endif %}
+            </td>
+       {% else %}
+            <td colspan="2"> </td>
+       {% endif %}
+	{% endfor %}
+	</table>
+</div>
+
+<div class="startbox">
+	<h2 class="center">{{ _("Event Statistics") }}</h2>
+	<table>
+	<tr>
+		<th>{{ _("Type") }}
+        <th>{{ _("Count") }}
+        <th colspan="2">{{ _("Source citations") }}
+	{% for label,(c_obj,c_ref,pct) in event_stats %}
+		<tr>
+			<td>{{ label }}
+			<td class="right">{{ c_obj }}
+			<td class="right">{{ c_ref }}
+			<td class="right">{{ pct }}%
+	{% endfor %}
+	</table>
+</div>
+
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
+
+<!-- Startdiv ends -->
+</div>
+
+{% endblock %}
+
+</body>
+</html>
+

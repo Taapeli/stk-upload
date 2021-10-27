@@ -59,7 +59,7 @@ class Neo4jUpdateService(ConcreteService):
 
         :param: driver             neo4j.DirectDriver object
         """
-        print(f"#~~~~{self.__class__.__name__} init")
+        logger.info(f"#~~~~{self.__class__.__name__} init")
         self.driver = driver
         self.tx = None  # Until started in Dataservice.__enter__()
 
@@ -143,21 +143,18 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK, "id": batch_id}
 
     def ds_get_batch(self, user, batch_id):
-        """Get Batch node by username and batch id. """
-        try:
-            result = self.tx.run(CypherRoot.get_single_batch, batch=batch_id)
-            for record in result:
-                node = record.get("root")
-                if node:
-                    return {"status":Status.OK, "node":record["root"]}
-                else:
-                    return {"status":Status.NOT_FOUND, "node":None,
-                            "statustext": "Batch not found"}
-        except Exception as e:
-            statustext = (
-                f"Neo4jUpdateService.ds_get_batch failed: {e.__class__.__name__} {e}"
-            )
-            return {"status": Status.ERROR, "statustext": statustext}
+        """Get Batch node by username and batch id. 
+           Note. 'user' not used!
+        """
+        result = self.tx.run(CypherRoot.get_single_batch, 
+                             user=user, batch=batch_id)
+        for record in result:
+            node = record.get("root")
+            if node:
+                return {"status":Status.OK, "node":record["root"]}
+            else:
+                return {"status":Status.NOT_FOUND, "node":None,
+                        "statustext": "Batch not found"}
        
 
     def ds_batch_save(self, attr):
@@ -167,10 +164,10 @@ class Neo4jUpdateService(ConcreteService):
 
         Batch.timestamp is created in the Cypher clause.
         """
-        result = self.tx.run(CypherRoot.batch_create, b_attr=attr).single()
+        result = self.tx.run(CypherRoot.batch_merge, b_attr=attr).single()
         if not result:
             raise IsotammiException("Unable to save Batch",
-                            cypher=CypherRoot.batch_create,
+                            cypher=CypherRoot.batch_merge,
                             b_attr=attr,
                             )
         uniq_id = result[0]
@@ -185,10 +182,6 @@ class Neo4jUpdateService(ConcreteService):
         )
         uniq_id = result.single()[0]
         return {"status": Status.OK, "identity": uniq_id}
-
-        # except Exception as e:
-        #     statustext = f"Neo4jUpdateService.ds_batch_set_state failed: {e.__class__.__name__} {e}"
-        #     return {"status": Status.ERROR, "statustext": statustext}
 
 
     def ds_batch_set_auditor(self, batch_id, auditor_user, old_states):

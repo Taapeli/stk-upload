@@ -16,7 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from pe.neo4j.util import run_cypher, run_cypher2
+from pe.neo4j.util import run_cypher, run_cypher_batch
 
 """
 Created on 17.3.2020
@@ -101,6 +101,40 @@ class Neo4jReadService(ConcreteService):
         obj.role = role if role != "Primary" else None
         return obj
 
+    def dr_get_material_batches(self, user: str, uuid: str):
+        """
+        Get list of my different materials and accepted all different materials.
+
+        Returns dict {item, status, statustext}
+        """
+        event = None
+        with self.driver.session(default_access_mode="READ") as session:
+            try:
+                result = run_cypher(session, CypherEvent.get_an_event, user, uuid=uuid)
+                for record in result:
+                    if record["e"]:
+                        # Record: <Record
+                        #    e=<Node id=16580 labels=frozenset({'Event'})
+                        #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
+                        #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
+                        #            'type': 'Baptism', 'uuid': 'dc969e6831dc47d7b6719edd94fe6007'}>
+                        #    root=<Node id=31100 labels=frozenset({'Audit'})
+                        #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
+                        # >
+                        node = record["e"]
+                        event = EventBl.from_node(node)
+                if event:
+                    return {"item": event, "status": Status.OK}
+
+            except Exception as e:
+                return {"item": None, "status": Status.ERROR, "statustext": str(e)}
+
+        return {
+            "item": event,
+            "status": Status.NOT_FOUND,
+            "statustext": "No Event found",
+        }
+
     def dr_get_person_list(self, _args):
         """Read Person data from given fw_from.
 
@@ -109,153 +143,7 @@ class Neo4jReadService(ConcreteService):
         args = dict {use_user, fw, limit, rule, key, years}
         """
         persons = []
-        # user = args.get("use_user")
-        # show_approved = user is None
-        # rule = args.get("rule")
-        # key = args.get("key")
-        # fw_from = args.get("fw", "")
-        # years = args.get("years", [-9999, 9999])
-        # limit = args.get("limit", 100)
-        # restart = rule == "start"
-        # with self.driver.session(default_access_mode="READ") as session:
-        #     try:
-        #         if restart:
-        #             # Show search form only
-        #             return {"items": [], "status": Status.NOT_STARTED}
-        #         elif args.get("pg") == "all":
-        #             # Show persons, no search form
-        #             if show_approved:
-        #                 print(
-        #                     f"dr_get_person_list: Show approved, common data fw={fw_from}"
-        #                 )
-        #                 result = session.run(
-        #                     CypherPerson.read_approved_persons_w_events_fw_name,
-        #                     start_name=fw_from,
-        #                     limit=limit,
-        #                 )
-        #             else:
-        #                 print(f"dr_get_person_list: Show candidate data fw={fw_from}")
-        #                 result = session.run(
-        #                     CypherPerson.read_my_persons_w_events_fw_name,
-        #                     user=user,
-        #                     start_name=fw_from,
-        #                     limit=limit,
-        #                 )
-        #         elif rule in ["surname", "firstname", "patronyme"]:
-        #             # Search persons matching <rule> field to <key> value
-        #             if show_approved:
-        #                 print(
-        #                     f'dr_get_person_list: Show approved common data {rule} ~ "{key}*"'
-        #                 )
-        #                 result = session.run(
-        #                     CypherPerson.get_common_events_by_refname_use,
-        #                     use=rule,
-        #                     name=key,
-        #                 )
-        #             else:
-        #                 print(
-        #                     f'dr_get_person_list: Show candidate data {rule} ~ "{key}*"'
-        #                 )
-        #                 result = session.run(
-        #                     CypherPerson.get_my_events_by_refname_use,
-        #                     use=rule,
-        #                     name=key,
-        #                     user=user,
-        #                 )
-        #         elif rule == "years":
-        #             # Search persons matching <years>
-        #             if show_approved:
-        #                 print(
-        #                     f"dr_get_person_list: Show approved common data years {years}"
-        #                 )
-        #                 result = session.run(
-        #                     CypherPerson.get_common_events_by_years, years=years
-        #                 )
-        #             else:
-        #                 print(f"dr_get_person_list: Show candidate data  years {years}")
-        #                 result = session.run(
-        #                     CypherPerson.get_my_events_by_years, years=years, user=user
-        #                 )
-        #         elif rule == "ref":
-        #             # Search persons where a reference name = <key> value
-        #             if show_approved:
-        #                 print(
-        #                     f"dr_get_person_list: TODO: Show approved common data {rule}={key}"
-        #                 )
-        #                 # return session.run(Cypher_person.get_events_by_refname, name=key)
-        #             else:
-        #                 print(
-        #                     f"dr_get_person_list: TODO: Show candidate data {rule}={key}"
-        #                 )
-        #                 # return session.run(Cypher_person.get_events_by_refname, name=key)
-        #         else:
-        #             return {
-        #                 "items": [],
-        #                 "status": Status.ERROR,
-        #                 "statustext": "dr_get_person_list: Invalid rule",
-        #             }
-        #         # result: person, names, events
-        #         for record in result:
-        #             #  <Record
-        #             #     person=<Node id=163281 labels={'Person'}
-        #             #       properties={'sortname': 'Ahonius##Knut Hjalmar',
-        #             #         'sex': '1', 'confidence': '', 'change': 1540719036,
-        #             #         'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543',
-        #             #         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}>
-        #             #     names=[<Node id=163282 labels={'Name'}
-        #             #       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name',
-        #             #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>]
-        #             #     events=[[
-        #             #         <Node id=169494 labels={'Event'}
-        #             #             properties={'datetype': 0, 'change': 1540587380,
-        #             #             'description': '', 'handle': '_e04abcd46811349c7b18f6321ed',
-        #             #             'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
-        #             #          None
-        #             #          ]]
-        #             #     owners=['jpek']>
-        #             node = record["person"]
-        #             # print(node.id, node.get('sortname'), node.get('death_high'))
-        #             p = PersonBl.from_node(node)
-        #             # if show_with_common and p.too_new: continue
-        #
-        #             # if take_refnames and record['refnames']:
-        #             #     refnlist = sorted(record['refnames'])
-        #             #     p.refnames = ", ".join(refnlist)
-        #             p.names = []
-        #             for node in record["names"]:
-        #                 pname = Name.from_node(node)
-        #                 pname.initial = pname.surname[0] if pname.surname else ""
-        #                 p.names.append(pname)
-        #
-        #             # Create a list with the mentioned user name, if present
-        #             if user:
-        #                 p.owners = record.get("owners", [user])
-        #
-        #             # Events
-        #             for node, pname, role in record["events"]:
-        #                 if not node is None:
-        #                     e = EventBl.from_node(node)
-        #                     e.place = pname or ""
-        #                     if role and role != "Primary":
-        #                         e.role = role
-        #                     p.events.append(e)
-        #
-        #             persons.append(p)
-        #
-        #     except Exception as e:
-        #         return {
-        #             "items": [],
-        #             "status": Status.ERROR,
-        #             "statustext": f"dr_get_person_list: {e.__class__.__name__} {e}",
-        #         }
-        #
-        # if len(persons) == 0:
-        #     return {
-        #         "items": persons,
-        #         "status": Status.NOT_FOUND,
-        #         "statustext": f'No persons found by "{args}"',
-        #     }
-        return {"items": persons, "status": Status.OK}
+        return {"items": persons, "status": Status.ERROR, "statustext":"obsolete dr_get_person_list"}
 
     def dr_get_event_by_uuid(self, user: str, uuid: str):
         """
@@ -274,10 +162,8 @@ class Neo4jReadService(ConcreteService):
                         #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
                         #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
                         #            'type': 'Baptism', 'uuid': 'dc969e6831dc47d7b6719edd94fe6007'}>
-                        #    root_type='PASSED'
                         #    root=<Node id=31100 labels=frozenset({'Audit'})
-                        #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
-                        #            'timestamp': 1596463360673}>
+                        #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
                         # >
                         node = record["e"]
                         event = EventBl.from_node(node)
@@ -417,7 +303,6 @@ class Neo4jReadService(ConcreteService):
                     #        properties={'datetype': 1, 'father_sortname': 'Gadd#Peter Olofsson#',
                     #            'change': 1560931512, 'rel_type': 'Unknown', 'id': 'F0002',
                     #            'date2': 1766592, 'date1': 1766592, 'uuid': '9488e3c76c6645f8b024902f2119e15a'}>
-                    #    root_type='OWNS'
                     #    root=<Node id=384349 labels={'Batch'}
                     #        properties={'mediapath': '/home/rinminlij1l1j1/paikat_pirkanmaa_yhdistetty_06052020.gpkg.media',
                     #            'file': 'uploads/juha/paikat_pirkanmaa_yhdistetty_6.5.2020_clean.gramps',
@@ -455,7 +340,7 @@ class Neo4jReadService(ConcreteService):
                 print(
                     "Neo4jReadService.dr_get_families: candidate ordered by man"
                 )
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherFamily.get_families_by_father,
                     user, args["batch_id"],
                     fw=fw,
@@ -465,7 +350,7 @@ class Neo4jReadService(ConcreteService):
                 print(
                     "Neo4jReadService.dr_get_families: candidate ordered by wife"
                 )
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherFamily.get_families_by_mother,
                     user, args["batch_id"],
                     fw=fw,
@@ -850,7 +735,7 @@ class Neo4jReadService(ConcreteService):
             lang = "fi"
         with self.driver.session(default_access_mode="READ") as session:
             print("Neo4jReadService.dr_get_place_list_fw")
-            result = run_cypher2(
+            result = run_cypher_batch(
                 session,
                 CypherPlace.get_name_hierarchies,
                 user,
@@ -1077,7 +962,7 @@ class Neo4jReadService(ConcreteService):
                 ret.append(e)
             else:  # Audit or Batch
                 print(
-                    f"r_get_place_events No Person or Family:"
+                    f"dr_get_place_events No Person or Family:"
                     f" {e.id} {record['indi'].labels} {record['indi'].get('id')}"
                 )
         return {"items": ret, "status": Status.OK}
@@ -1106,7 +991,7 @@ class Neo4jReadService(ConcreteService):
                 key2 = args.get("theme2")
                 # Show my researcher data
                 print("dr_get_source_list_fw: my researcher data")
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherSource.get_sources_with_selections,
                     user,
                     batch_id,
@@ -1115,7 +1000,7 @@ class Neo4jReadService(ConcreteService):
                 )
             else:
                 # Show all themes
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherSource.get_sources,
                     user,
                     batch_id,
@@ -1225,7 +1110,7 @@ class Neo4jReadService(ConcreteService):
         """
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher2(session,
+            result = run_cypher_batch(session,
                 CypherMedia.get_media_list,
                 user,
                 batch_id,
@@ -1251,7 +1136,7 @@ class Neo4jReadService(ConcreteService):
         recs = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher2(session,
+                result = run_cypher_batch(session,
                     CypherMedia.get_media_by_uuid, user, batch_id, uuid=uuid
                 )
                 # RETURN media, r, ref, ref2
@@ -1278,7 +1163,7 @@ class Neo4jReadService(ConcreteService):
         """
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher2(session,
+            result = run_cypher_batch(session,
                 CypherComment.get_topics,
                 user,
                 batch_id,
@@ -1418,7 +1303,7 @@ class Neo4jReadService(ConcreteService):
 #             print('#  Neo4jReadService.dr_get_surname_list: with \n{ material:"'
 #                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
 #             print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
-            result = run_cypher2(session, cypher,
+            result = run_cypher_batch(session, cypher,
                 username, batch_id,
                 count=count,
             )
@@ -1463,10 +1348,8 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             # Select Batches by user, if defined
             cypher = CypherPlaceStats.get_place_list
-#             logger.debug('#  Neo4jReadService.dr_get_placename_list: with \n{ material:"'
-#                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
-            logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
-            result = run_cypher2(session, cypher, username, batch_id, count=count)
+            #logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
+            result = run_cypher_batch(session, cypher, username, batch_id, count=count)
             for record in result:
                 place = record["place"]
                 placename = place["pname"]

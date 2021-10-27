@@ -33,10 +33,8 @@ from collections import defaultdict
 import re
 import time
 import os
-#import uuid
 import xml.dom.minidom
-
-# from flask_babelex import _
+from flask_babelex import _
 
 import shareds
 from bl.base import Status
@@ -151,7 +149,8 @@ class DOM_handler:
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
         #print(f"DOM_handler.save_and_link_handle: {obj} {kwargs}")
-        obj.save(self.dataservice, self.dataservice.tx, **kwargs)
+        #obj.save(self.dataservice, self.dataservice.tx, **kwargs)
+        obj.save(self.dataservice, **kwargs)
         self.obj_counter += 1 
         if self.obj_counter % 1000 == 0:
             #print(self.obj_counter, "Transaction restart")
@@ -276,7 +275,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Citations", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Citations"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message, "for_test": for_test}
 
@@ -383,7 +382,7 @@ class DOM_handler:
                 raise
 
         self.blog.log_event(
-            {"title": "Events", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Events"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -480,7 +479,7 @@ class DOM_handler:
             self.family_ids.append(f.uniq_id)
 
         self.blog.log_event(
-            {"title": "Families", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Families"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -515,7 +514,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Notes", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Notes"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         # return {'status':status, 'message': message}
         return {"status": status, "message": message, "for_test": for_test}
@@ -558,7 +557,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Media objects", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Media objects"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -734,7 +733,7 @@ class DOM_handler:
             self.person_ids.append(p.uniq_id)
 
         self.blog.log_event(
-            {"title": "Persons", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Persons"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -758,6 +757,7 @@ class DOM_handler:
 
             pl = PlaceBl()
             pl.note_handles = []
+            pl.citation_handles = []
 
             # Extract handle, change and id
             self._extract_base(placeobj, pl)
@@ -861,8 +861,12 @@ class DOM_handler:
 
             # Handle <objref>
             pl.media_refs = self._extract_mediaref(placeobj)
-
             # if pl.media_refs: print(f'#> saving Place {pl.id} with {len(pl.media_refs)} media_refs')
+
+            for ref in placeobj.getElementsByTagName("citationref"):
+                if ref.hasAttribute("hlink"):
+                    pl.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
+                    ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
             self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys)
@@ -870,7 +874,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Places", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Places"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -927,7 +931,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Repositories", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Repositories"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -1025,7 +1029,7 @@ class DOM_handler:
             counter += 1
 
         self.blog.log_event(
-            {"title": "Sources", "count": counter, "elapsed": time.time() - t0}
+            {"title": _("Sources"), "count": counter, "elapsed": time.time() - t0}
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
@@ -1064,9 +1068,9 @@ class DOM_handler:
                     sortname_count += res.get("sortnames")
 
         self.blog.log_event(
-            {"title": "Dates", "count": dates_count, "elapsed": time.time() - t0}
+            {"title": _("Dates"), "count": dates_count, "elapsed": time.time() - t0}
         )
-        self.blog.log_event({"title": "Family sorting names", "count": sortname_count})
+        self.blog.log_event({"title": _("Family sorting names"), "count": sortname_count})
         return res
 
     def set_person_calculated_attributes(self):
@@ -1101,7 +1105,7 @@ class DOM_handler:
                 "elapsed": time.time() - t0,
             }
         )
-        self.blog.log_event({"title": "Person sorting names", "count": sortname_count})
+        self.blog.log_event({"title": _("Person sorting names"), "count": sortname_count})
         return {"status": status, "message": message}
 
     def set_person_estimated_dates(self):
@@ -1117,7 +1121,7 @@ class DOM_handler:
         res = self.dataservice.ds_set_people_lifetime_estimates(self.person_ids)
 
         count = res.get("count")
-        message = "Estimated person lifetimes"
+        message = _("Estimated person lifetimes")
         self.blog.log_event(
             {"title": message, "count": count, "elapsed": time.time() - t0}
         )

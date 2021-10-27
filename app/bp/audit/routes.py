@@ -27,13 +27,14 @@ import csv
 import time
 import logging
 from io import StringIO, BytesIO
+import os.path
 
 logger = logging.getLogger("stkserver")
 
 from . import bp
 
 from flask import render_template, request, redirect, url_for, flash
-from flask import send_file
+from flask import send_file, send_from_directory
 from flask import session as user_session
 from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
@@ -166,6 +167,7 @@ def audit_pick(batch_id=None):
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
         can_start = (root.state == State.ROOT_AUDIT_REQUESTED or
+                     root.state == State.ROOT_REJECTED or
                      root.state == State.ROOT_AUDITING and not i_am_auditor)
         can_accept = (i_am_auditor and root.state  == State.ROOT_AUDITING)
         can_remove = (total == 0 \
@@ -175,9 +177,11 @@ def audit_pick(batch_id=None):
         error_print("audit_pick", e)
         return redirect(url_for("audit.list_uploads"))
 
-    print(f"bp.audit.routes.audit_pick: {root}, auditors={','.join(auditor_names)}, user={current_user.username}")
+    print(f"bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, user={current_user.username}")
     return render_template("/audit/pick_auditing.html",
-        user=username, root=root,
+        user=username, 
+        root=root,
+        basename=os.path.basename(root.file),
         can_start=can_start,
         can_accept=can_accept,
         can_remove=can_remove,
@@ -204,7 +208,10 @@ def audit_selected_op():
         batch_id = request.form["batch"]
         operation = "cancel"
         #request.form["oper"]
-        if request.form.get("start"):
+        if request.form.get("browse"):
+            return redirect(url_for("scene.material_search", 
+                                    set_scope="1", batch_id=batch_id))
+        elif request.form.get("start"):
             operation = "start"
         elif request.form.get("accept"):
             operation = "accept"
@@ -239,8 +246,6 @@ def audit_selected_op():
         if Status.has_failed(res):
             msg = f"Audit request {operation} failed"
             flash(_(msg), "error")
-            syslog.log(type="Audit state change", 
-                       batch=batch_id, by=user_id, msg=msg)
         else:
             flash(_(msg))
 
@@ -248,7 +253,30 @@ def audit_selected_op():
         error_print("audit_selected_op", e)
         return redirect(url_for("audit.list_uploads"))
 
+    syslog.log(type="Audit state change", 
+               batch=batch_id, by=user_id, msg=msg, op=operation)
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
+
+
+@bp.route("/audit/batch_download/<batch_id>/<username>")
+@login_required
+@roles_accepted("audit")
+def audit_batch_download(batch_id, username):
+    batch = Root.get_batch(username, batch_id)
+    if batch:
+        xml_folder, xname = os.path.split(batch.file)
+        if batch.xmlname:
+            xname = batch.xmlname
+        abs_folder = os.path.abspath(xml_folder)
+
+        logger.info(f"--> bp.audit.routes.audit_batch_download u={username} b={batch_id} {xname}")
+        syslog.log(type="Auditor xml download", 
+                   batch=batch_id, by=username, file=xname)
+
+        return send_from_directory(abs_folder, xname,
+            mimetype="application/gzip",
+            as_attachment=True,
+        )
 
 
 # --------------------- Delete an approved data batch ----------------------------
@@ -305,6 +333,29 @@ def audit_approvals(who=None):
         titles=titles,
         batches=batches,
         elapsed=time.time() - t0,
+    )
+
+# --------------------- Show user profile ----------------------------
+
+@shareds.app.route("/audit/profile/<user>", methods=["GET"])
+@login_required
+@roles_accepted("audit")
+def user_profile(user):
+    """Show user profile.
+       - From original method: my_settings()
+    """
+    labels, user_batches = Root.get_user_stats(user)
+    userprofile = shareds.user_datastore.get_userprofile(user, roles=True)
+
+    logger.info(f"-> bp.audit.routes.user_profile {user}")
+    return render_template(
+        "/audit/user_profile.html",
+        referrer=request.referrer,
+        apikey=None,    #api.get_apikey(current_user),
+        labels=labels,
+        batches=user_batches,
+        gedcoms=[],
+        userprofile=userprofile,
     )
 
 

@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from bl.admin.models.data_admin import DataAdmin
 
 """
     Methods to import all data from Gramps xml file
@@ -326,14 +327,13 @@ def xml_to_stkbase(batch: Root):
         if is_gpkg:
             extract_media(batch.file, batch.id)
 
-        res = handler.handle_notes()
         res = handler.handle_repositories()
-        res = handler.handle_media()
-
-        res = handler.handle_places()
         res = handler.handle_sources()
         res = handler.handle_citations()
 
+        res = handler.handle_notes()
+        res = handler.handle_media()
+        res = handler.handle_places()
         res = handler.handle_events()
         res = handler.handle_people()
         res = handler.handle_families()
@@ -350,6 +350,14 @@ def xml_to_stkbase(batch: Root):
         # Copy date and name information from Person and Event nodes to Family nodes
         res = handler.set_family_calculated_attributes()
 
+        # print("build_free_text_search_indexes")
+        t1 = time.time()
+        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx)
+        handler.blog.log_event(
+            {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
+        )
+        # print("build_free_text_search_indexes done")
+            
         res = handler.remove_handles()
             # The missing links counted in remove_handles
         ##TODO      res = handler.add_missing_links()

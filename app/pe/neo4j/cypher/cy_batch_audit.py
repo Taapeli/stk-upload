@@ -42,6 +42,7 @@ MATCH (b:Root) WHERE b.id STARTS WITH $batch_base
 RETURN b.id as bid
     ORDER BY bid DESC LIMIT 1"""
 
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_find_last_used_batch_seq
     read_batch_id = """
 MATCH (n:BatchId) return n
 """
@@ -53,7 +54,7 @@ SET n.seq = $seq
 """
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_save
-    batch_create = """
+    batch_merge = """
 MATCH (u:UserProfile {username: $b_attr.user})
     MERGE (u) -[:HAS_LOADED]-> (b:Root {id: $b_attr.id})
     MERGE (u) -[:HAS_ACCESS]-> (b)
@@ -91,6 +92,15 @@ RETURN b, u.username as username"""
 MATCH (b:Root) 
 RETURN b """
 
+    # List both my different materials and accepted all different materials
+    get_root_pallette = """
+match (u:UserProfile{username:$user}) -[:HAS_LOADED]-> (root:Root)
+return root.material as material, u.username as user, root.state as state, count(root) as count
+union
+match (u:UserProfile) -[:HAS_LOADED]-> (root:Root{state:"Accepted"})
+return root.material as material, "" as user, root.state as state, count(root) as count
+"""
+
 #-bl.root.Root.get_batches
     get_batches = '''
 match (b:Root) 
@@ -100,10 +110,15 @@ return b as batch,
     labels(x)[0] as label, count(x) as cnt 
     order by batch.user, batch.id'''
 
+#-bl.root.Root.get_my_batches
+    get_my_batches = """
+where root.state='Candidate' 
+return root order by root.id desc"""
+
 #-bl.root.Root.get_user_stats
     get_passed = '''
-match (b:Root) 
-    where b.user = $user and b.state = 'Auditing'
+match (u:UserProfile) --> (b:Root) 
+    where u.username = $user and b.state = 'Auditing'
 optional match (b) --> (x)
 return b as batch, count(x) as cnt 
     order by batch.id'''
@@ -126,22 +141,22 @@ return up as profile, b as root,
 
 #-bp.admin.uploads.list_uploads
     get_user_roots_summary = """
-match (u:UserProfile) -[:HAS_LOADED]-> (b:Root) where u.username = $user
-optional match (audi:UserProfile) -[ar:DOES_AUDIT]-> (b)
-optional match (b) -[r:OBJ_PERSON]-> (:Person)
-with b, count(r) as person_count, 
-    audi.username as auditor, ar.timestamp as atime
-//optional match (b) -[:AFTER_AUDIT]-> (a:Audit) -[ar:PASSED]-> (:Person)
-return 
-    b as root, person_count,
-    collect(distinct [auditor,atime]) as auditors
+match (u:UserProfile) -[:HAS_LOADED]-> (root:Root)
+    where u.username = $user
+optional match (audi:UserProfile) -[ar:DOES_AUDIT]-> (root)
+optional match (root) -[r:OBJ_PERSON]-> (:Person)
+with u, audi, root, count(r) as person_count,
+    audi.username as auditor, ar.timestamp as a_time
+return u.name as u_name, 
+    root, person_count,
+    collect(distinct [auditor,a_time]) as auditors
 order by root.id"""
 
-#-bl.root.Root.list_empty_batches
-    TODO_get_empty_batches = '''
-MATCH (a:Root) 
-WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
-RETURN a AS batch ORDER BY a.id DESC'''
+# #-bl.root.Root.list_empty_batches
+#     TODO_get_empty_batches = '''
+# MATCH (a:Root) 
+# WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
+# RETURN a AS batch ORDER BY a.id DESC'''
 
     delete_chunk = """
 MATCH (:UserProfile{username:$user})

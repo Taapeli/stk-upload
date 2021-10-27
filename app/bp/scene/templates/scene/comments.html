@@ -1,6 +1,6 @@
 {# /scene/templates/scene/comments.html_ #}
 {% extends "/scene/sc_layout.html" %}
-{% block title %}{{ _('List of Topics') }} (scenecomments){% endblock %}
+{% block title %}{{ _('List of Discussion Topics') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
@@ -9,92 +9,101 @@
 {% set cnt = comments|count %}
 
 <div id="startdiv">
-	<h1>{{ _('List of Topics') }}</h1>
-    <div>{{ macro.show_use_case() }}</div>
+	<h1>{{ _('List of Discussion Topics') }}</h1>
+    <div>{{ macro.show_use_case(no_change=true) }}</div>
 </div>
 
 {{ macro.menu(7) }}
 <div class="content" id="Comments">
+
+<!--     <h2>{{ _("Discussions") }}</h2> -->
+    
+    <div>
+{% include "flash_messages.html" %}
+    </div>
+ 
     <div id="summaryarea">
         <div class="flex-container">
             <div id="description_box">
                 <p>{{ _('Displaying %(num)s distinct topics', num=cnt) }}</p>
             </div>
-    </div>
+        </div>
+    </div> {# summaryarea #}
 
-{% include "flash_messages.html" %}
-
-</div> {# summaryarea #}
-
-<div id="comment_list">
-  <h3>{{ _("Discussions") }}</h3>
-
-{% if cnt %}
-  <table id="comments">
-    <tr><th>{{ _("Time") }}, {{ _("Author")|lower }}</th>
-        <th>{{ _("Concerned, Topic") }}</th>
-        <th>{{ _("Replies") }}</th>
+    <div id="comment_list">
+        <h3>{{ _('Discussions') }}</h3>
+{% if comments %}
+        <table id="comments">
+            <tr><th>{{ _("Time") }}, {{ _("Author")|lower }}</th>
+                <th>{{ _("Concerned, Topic") }}</th>
+                <th>{{ _("Replies") }}</th>
     {% if user_context.is_auditor %}
-        <th class="Auditor" title="{{ _('For auditor only') }}">{{ _('Material') }} &nbsp;</th>
+                <th class="Auditor" title="{{ _('For auditor only') }}">{{ _('Material') }} &nbsp;</th>
     {% endif %}
-    </tr>
+            </tr>
     {% for c in comments %}
-        <tr>
-            <td class="center">{{c.timestamp_str()}}<br>{{c.credit}}</td>
-            <td><span class="typedesc">{{ _(c.obj_label) }}</span>
-            {% if c.obj_label == 'Person' %}
-            	<a href="/scene/person?uuid={{c.object.uuid}}" class="inlink"
-                   title="{{ _('Go to comment page') }}">{{ c.object.sortname | replace("#", " ") }}</a>
-            {% elif c.obj_label == 'Place' %}
-            	<a href="/scene/location/uuid={{c.object.uuid}}" class="inlink"
-                   title="{{ _('Go to comment page') }}">{{ c.object.pname }}</a>
-            {% elif c.obj_label == 'Family' %}
-            	<a href="/scene/family?uuid={{c.object.uuid}}" class="inlink"
-                   title="{{ _('Go to comment page') }}">{{ c.object.father_sortname }} / {{ c.object.mother_sortname }}</a>
-            {% elif c.obj_label == 'Source' %}
-            	<a href="/scene/source?uuid={{c.object.uuid}}" class="inlink"
-                   title="{{ _('Go to commented page') }}">{{ c.object.stitle }}</a>
-     		{% else %}
-     			<i>{{ _('Unknown object') }}</i>
-    		{% endif %}
-    		<br><i>{{c.title}}</i>
-    		</td>
-            <td class="center">{{c.count}}</td>
+            <tr>
+                <td class="center">{{c.timestamp_str()}}<br>{{c.credit}}</td>
+    
+                <td><span class="typedesc">{{ _(c.obj_label) }}</span>
+                {% if c.obj_label == 'Person' %}
+                	<a href="/scene/person?uuid={{c.object.uuid}}" class="inlink"
+                       title="{{ _('Go to comment page') }}">{{ c.object.sortname | replace("#", " ") }}</a>
+                {% elif c.obj_label == 'Place' %}
+                	<a href="/scene/location/uuid={{c.object.uuid}}" class="inlink"
+                       title="{{ _('Go to comment page') }}">{{ c.object.pname }}</a>
+                {% elif c.obj_label == 'Family' %}
+                	<a href="/scene/family?uuid={{c.object.uuid}}" class="inlink"
+                       title="{{ _('Go to comment page') }}">{{ c.object.father_sortname }} / {{ c.object.mother_sortname }}</a>
+                {% elif c.obj_label == 'Source' %}
+                	<a href="/scene/source?uuid={{c.object.uuid}}" class="inlink"
+                       title="{{ _('Go to commented page') }}">{{ c.object.stitle }}</a>
+                {% elif c.obj_label == 'Media' %}
+                    <a href="/scene/media?uuid={{c.object.uuid}}" class="inlink"
+                       title="{{ _('Go to commented page') }}">{{ c.object.description }}</a>
+         		{% else %}
+         			<i>{{ _('Unknown object') }}</i>
+        		{% endif -%}
+       		        <br><i>{{c.title}}</i>
+        		</td>
+
+                <td class="center">{{c.count}}</td>
 
        {% if user_context.is_auditor %}
-            <td class="Auditor">
-            	<span class="typedesc">{{ _(c.root.state|upper) }}</span>
-                {{c.root.id}}
-            	<i>{{c.root.user}}</i>
-            {% if c.root.description %}
-                <small><br>{{ c.root.description }}</small>
-            {% endif %}
-            </td>
+                <td class="Auditor">
+                	<span class="typedesc">{{ _(c.root.state|upper) }}</span>
+                    {{c.root.id}}
+                	<i>{{c.root.user}}</i>
+                {% if c.root.description %}
+                    <small><br>{{ c.root.description }}</small>
+                {% endif %}
+                </td>
        {% endif %}
-        </tr>
+            </tr>
     {% endfor %}
 
     {% if next_fw == None or next_at_end %}
-        <tr><td colspan="4" id="lastitem_badge">
-                <i>{{ _('The last item found') }}</i>
-            </td>
-        </tr>
+            <tr><td colspan="4" id="lastitem_badge">
+                    <i>{{ _('The last item found') }}</i>
+                </td>
+            </tr>
     {% endif %}
 
 {% else %}
-	    <tr><td colspan="4">
-		  <div class="NotFound">
+	        <tr><td colspan="4">
+		            <div class="NotFound">
     {% if next_bw %}
-		      <p>{{ _('No comment found starting from "%(name)s"', name=next_bw) }}.</p>
-		      <p>&nbsp;&#9656; <a href="/scene/comments?fw=%20" 
-		          title="{{ _('first page') }}">{{ _("Go to the first comment") }}</a></p>
+   		              <p>{{ _('No comment found starting from "%(name)s"', name=next_bw) }}.</p>
+   		              <p>&nbsp;&#9656; <a href="/scene/comments?fw=%20" 
+   		                   title="{{ _('first page') }}">{{ _("Go to the first comment") }}</a></p>
     {% else %}
-              <p>{{ _('No comments found') }}.</p>
+                      <p>{{ _('No comments found') }}.</p>
     {% endif %}
-		  </div></td>
-	    </tr>
-  </table>
+		            </div>
+                </td>
+	        </tr>
 {% endif %}
-</div>
-
+        </table>
+    </div> {# comment_list #}
+<!-- </div> {# content #} -->
 {% endblock %}

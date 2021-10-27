@@ -30,14 +30,16 @@ Created on 19.1.2019
 
 from urllib.parse import unquote_plus
 from flask_babelex import lazy_gettext as N_
-from bl.root import State, DEFAULT_MATERIAL
+from flask_babelex import _
+from bl.root import State #, DEFAULT_MATERIAL
 
 class UserContext():
     """ Store filter values for finding the required subset of database.
     
         Usage examples:
             #    Create context with defaults from session and request (1)
-            u_context = UserContext(user_session, current_user, request)
+            u_context = UserContext(user_session, current_user, request)  OR
+            u_context = UserContext(user_session, current_user, request, material)
 
             #    Set the scope of data keys using request arguments or previous defalts (2)
             u_context.set_scope_from_request(request, 'person_scope')
@@ -73,12 +75,12 @@ class UserContext():
                                 from request.div or session.user_context.
                                 Default = 1 (common) if neither present
 
-            COMMON - 1          approved common data 'Isotammi'
-            OWN - 2             all user's own candidate materials
-            BATCH - 3           a selected Batch set
+            COMMON - 1          status='Approved' common data
+            OWN - 2             all user's status='Candidate' materials
+            BATCH - 4           a selected Batch
             COMMON+OWN *
             COMMON+BATCH *
-            *) NOTE. Not implemented!
+                        *) NOTE. Not implemented!
 
         (2) sort keys displayed in the current page
         - first, last          str   Boundary names for current display page [from, to]
@@ -101,13 +103,13 @@ class UserContext():
             2b or accessed next bw      ['x', 'y']           set last = old first
 
             first (from which name to display, forwards):
-                ' '              from first name of data
-                name             forwards from the name given
-                NEXT_END '>'     top reached: there is nothing forwards
+                ' '                      from first name of data
+                name                     forwards from the name given
+                symbol NEXT_END '>'      top reached: there is nothing forwards
             last (from which name to display, backwards):
-                NEXT_END '>'     from last name of data
-                name             backwards from the name given
-                NEXT_START '<'   bottom reached: there is nothing before
+                symbol NEXT_END '>'      from last name of data
+                name                     backwards from the name given
+                symbol NEXT_START '<'    bottom reached: there is nothing before
     """
     NEXT_START = '<'  # from first name of data
     NEXT_END = '>'    # end reached: there is nothing forwards
@@ -120,19 +122,19 @@ class UserContext():
         """
         COMMON = 1  # Approved data
         OWN = 2     # Candidate data
-        BATCH = 4   # Selected candicate batch
-        CODE_VALUES = ['', 'apr', 'can', 'apr,can', 'bat', 'can,bat']
+        BATCH = 4   # Selected candidate batch
+        CODE_VALUES = ['', 'apr', 'can', 'apr+can', 'bat', 'can+bat'] # for logger
 
         def __init__(self):
-            ''' Initialise choise texts in user language '''
+            ''' Initialize choice texts in user language '''
             self.as_str = {
                 self.COMMON:              N_('Approved common data'), #TODO: --> "Audit requested"
                 self.OWN:                 N_('My candidate data'), 
                 self.BATCH:               N_('My selected candidate batch'),
-                self.COMMON + self.OWN:   N_('My own and approved common data'), 
-                self.COMMON + self.BATCH: N_('My selected batch and approved common data')
+                # self.COMMON + self.OWN:   N_('My own and approved common data'), 
+                # self.COMMON + self.BATCH: N_('My selected batch and approved common data')
             }
-            self.as_status = {
+            self.as_state = {
                 self.COMMON:              State.ROOT_ACCEPTED, 
                 self.OWN:                 State.ROOT_CANDIDATE, 
                 self.BATCH:               State.ROOT_CANDIDATE
@@ -142,7 +144,7 @@ class UserContext():
         def get_state(self, number):
             # Return the state for given context_code value
             try:
-                return self.as_status[number]
+                return self.as_state[number]
             except Exception:
                 print(f"UserContext.ChoicesOfView.get_state: invalid key {number} for state")
                 return None
@@ -164,9 +166,16 @@ class UserContext():
 #         '''
 
 
-    def __init__(self, user_session, current_user=None, request=None):
+    def __init__(self, user_session, current_user=None, request=None, material=None):
         '''
-            Init UserContext with filtering from user session, request and current user.
+            Init UserContext setting filtering and optionally material type.
+
+            Filtering is detected from user session, request and current user.
+
+            :param: user_session    current SecureCookieSession
+            :param: current_user    setups.User
+            :param: request         http Request
+            :param: material        bl.Root.material or None 
         '''
         self.session = user_session
         self.choices = self.ChoicesOfView()     # set of allowed material choices
@@ -174,6 +183,7 @@ class UserContext():
         self.state = None
         self.lang = user_session.get('lang','') # User language
         self.batch_id = None
+        self.material = user_session.get("material")
 
         self.years = []                         # example [1800, 1899]
         self.series = None                      # 'Source' data theme like "birth"
@@ -182,7 +192,7 @@ class UserContext():
         self.is_auditor = False
 
         # View range: names [first, last]
-        self.session_var = None
+        self.browse_var = None
         self.first = ''
         self.last = self.NEXT_END
         self.direction = 'fw'
@@ -201,12 +211,12 @@ class UserContext():
         - Stores the request parameter div=1 as session variable user_context.
         - Returns owner context name if detected, otherwise False    
         """
-        new_selection = 0
-        if request:
-            # All args
-            self.args = request.args
+        request_args = UserContext.get_request_args(request)
+        if request_args:
+            # # All args
+            # self.args = request_args
             # Selected years (from-to) years=1111-2222
-            years = request.args.get('years', None)
+            years = request_args.get('years', None)
             if years:
                 y1, y2 = years.split('-')
                 if y1:  yi1 = int(y1)
@@ -218,19 +228,22 @@ class UserContext():
 
 
             """ Use case: Selected material for display
-                set-scope = 1 -> set a new scope, common material or a specific user batch 
+                set_scope = 1 -> set a new scope, common material or a specific user batch 
             """
-            set_scope = request.args.get('set-scope')
+            set_scope = request_args.get('set_scope')
+            print(f"UserContext: material {self.session['material']}<-{material}/{self.material}"
+                  f" batch_id {self.session['batch_id']}<-{self.batch_id}")
             if set_scope:
-                batch_id = request.args.get('batch_id')
+                batch_id = request_args.get('batch_id','')
                 if batch_id:
                     self.context_code = self.ChoicesOfView.BATCH
                     self.batch_id = batch_id
                 else:
                     self.context_code = self.ChoicesOfView.COMMON
                     self.batch_id = ""
-                self.session['user_context'] = self.context_code
                 self.session['batch_id'] = self.batch_id
+                self.session['material'] = self.material
+                self.session['user_context'] = self.context_code
                 self.session['person_scope'] = ('< start', '> end')
                 self.session['family_scope'] = ('< start', '> end')
                 self.session['place_scope'] = ('< start', '> end')
@@ -241,8 +254,10 @@ class UserContext():
                 # If got no request user_context, use session values
                 self.context_code = user_session.get('user_context', self.choices.COMMON)
                 self.batch_id = user_session.get('batch_id', "")
+                if self.material:
+                    self.session['material'] = self.material
                 print("UserContext: Uses same or default user_context=" \
-                      f"{self.context_code} {self.choices.get_state(self.context_code)}")
+                      f"{self.context_code} {self.choices.get_state(self.context_code)} {self.material}")
 
         if self.user and self.context_code == self.choices.OWN:
             # Select state by context code
@@ -251,9 +266,8 @@ class UserContext():
             if self.context_code == self.choices.OWN:
                 self.allow_edit = self.is_auditor
 
-        """ Batch selection by state and material """
+        """ Batch selection by state (and material?) """
 
-        self.material = user_session.get("material", DEFAULT_MATERIAL)
         self.state = user_session.get("state")
         if not self.state:
             self.state = self.choices.get_state(self.context_code)
@@ -265,10 +279,22 @@ class UserContext():
     def __str__(self):
         return f"{self.state}/{self.material}"
 
+    @staticmethod
+    def get_request_args(request):
+        """Return request arguments from request.args or request.form, if available.
+        """
+        if request is None:
+            return {}
+        if request.method == "GET":
+            return request.args
+        else: 
+            return request.form
+
+
     def _set_next_from_request(self, request=None):  # UNUSED???
         ''' Calculate scope values from request or session. 
         
-            - session_var    str    session variable name
+            - browse_var    str    session variable name
             - request        http request
 
             If request argument fw is defined, set scope [fw,None].
@@ -277,9 +303,10 @@ class UserContext():
 
             The missing limit will be filled by the data afterwards.
         '''
-        if request:
-            fw = request.args.get('fw', None)
-            bw = request.args.get('bw', None)
+        request_args = UserContext.get_request_args(request)
+        if request_args:
+            fw = request_args.get('fw', None)
+            bw = request_args.get('bw', None)
             if fw is None and bw is None:
                 # Use original session_scope as is
                 return [self.first, self.last]
@@ -294,9 +321,9 @@ class UserContext():
                 return [None, unquote_plus(bw)]
         else:
             # No request
-            if self.session_var:
-                self.session[self.session_var] = self.scope
-                print(f"UserContext: Now {self.session_var} is cleared")
+            if self.browse_var:
+                self.session[self.browse_var] = self.scope
+                print(f"UserContext: Now {self.browse_var} is cleared")
             return self.scope
 
 
@@ -308,37 +335,25 @@ class UserContext():
             return None
 
     def owner_str(self):
-        # Return current owner choise as text.
+        # Return current owner choice as text.
         
-        # ONly used in test_owner_filter.test_ownerfilter_nouser()
+        # Only used in test_owner_filter.test_ownerfilter_nouser()
         try:
-            return f"{self.choices.as_str[self.context_code]} {self.batch_id}"
+            m = self.material or 'Family Tree'
+            print(f"UserContext.owner_str: {m}:{self.batch_id}, {self.state}" )
+            if self.state == State.ROOT_ACCEPTED:
+                return f"{ _(m) }: { _('Approved Isotammi tree') } {self.batch_id}"
+            else:
+                return f"{ _(m) }: { _(self.state) } {self.batch_id}"
         except:
             return ''
 
     def use_case(self):
-        # Return current use case (owner choise) as code 
+        # Return current use case (owner choice) as code 
         try:
             return self.choices.CODE_VALUES[self.context_code]
         except:
             return ''
-
-#     def owner_or_common(self):
-#         ''' Tells, if you should select object by data owner.
-# 
-#             Always when others but self.ChoicesOfView.OWN only are required
-#         '''
-#         if (self.context_code & 2) > 0:
-#             return 'user'
-#         else:
-#             return 'common'
-    
-    # def use_owner_filter(self):
-    #     ''' Tells, if you should select object by data owner.
-    #
-    #         Always when others but self.ChoicesOfView.OWN only are required
-    #     '''
-    #     return (self.context_code & 2) > 0
     
     def use_common(self):
         ''' Tells, if you should select objects from common database.
@@ -363,24 +378,23 @@ class UserContext():
                 pass
         return True
 
-#     def obsolete_set_scope_from_request(self, request=None, var_name=None):
-
-    def set_scope_from_request(self, request=None, session_var=None): #set_next_from_request:
-        ''' Calculate scope values from request or session. 
+    def set_scope_from_request(self, request=None, browse_var=None):
+        ''' Calculate list display scope values from request or session. 
         
             :param: request        http request
-            :param: session_var    str    session variable name like  'person_scope'
+            :param: browse_var    str    session variable name like  'person_scope'
         
             Use request arguments fw or bw, if defined.
             Else use original from session.
             
-            If request is missing, try session.session_var.
+            If request is missing, try session.browse_var.
         '''
-        self.session_var = session_var
+        self.browse_var = browse_var
             
-        if request:
-            fw = request.args.get('fw', None)
-            bw = request.args.get('bw', None)
+        request_args = UserContext.get_request_args(request)
+        if request_args:
+            fw = request_args.get('fw', None)
+            bw = request_args.get('bw', None)
             if not (fw is None and bw is None):
                 if fw is None:
                     # Direction backwards from bw parameter
@@ -392,13 +406,13 @@ class UserContext():
                     return
 
         # No request OR no fw or bw in request
-        if self.session_var:
+        if self.browse_var:
             # Scope from session, if defined; else default
-            scope = self.session.get(self.session_var, [self.first, self.last])
+            scope = self.session.get(self.browse_var, [self.first, self.last])
             self.first = scope[0]
             self.last = scope[1]
-            self.session[self.session_var] = scope
-            print(f"UserContext.set_scope_from_request: {self.session_var} is cleared {scope}")
+            self.session[self.browse_var] = scope
+            print(f"UserContext.set_scope_from_request: {self.browse_var} is set to {scope}")
         return
 
 
@@ -430,7 +444,7 @@ class UserContext():
             print(f"UserContext.update_session_scope: New {var_name!r} {self.first!r} – {self.last!r}")
 
         self.session[var_name] = (self.first, self.last)
-        print(f"UserContext = {repr(self.session)}")
+        print(f"update_session_scope: UserContext = {repr(self.session)}")
 
 
     def next_name(self, direction='fw'):

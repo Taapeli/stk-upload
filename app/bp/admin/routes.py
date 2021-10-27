@@ -358,21 +358,11 @@ def list_threads():
     return s
 
 
-@bp.route("/admin/xml_download/<username>/<xmlfile>")
-@login_required
-@roles_accepted("admin", "audit")
-def xml_download(username, xmlfile):
-    xml_folder = uploads.get_upload_folder(username)
-    xml_folder = os.path.abspath(xml_folder)
-    logger.info(f'-> bp.admin.routes.xml_download f="{xmlfile}"')
-    logging.debug(xml_folder)
-    return send_from_directory(
-        directory=xml_folder,
-        filename=xmlfile,
-        mimetype="application/gzip",
-        as_attachment=True,
-    )
-    # attachment_filename=xmlfile+".gz")
+# @bp.route("/admin/xml_download/<username>/<xmlfile>")
+# @login_required
+# @roles_accepted("admin")
+# def admin_xml_download(username, xmlfile):
+#removed 8.10.2021/JMä
 
 
 @bp.route("/admin/show_upload_log/<username>/<xmlfile>/<batch_id>")
@@ -388,9 +378,10 @@ def show_upload_log(username, xmlfile, batch_id=None):
             msg = open(fname, encoding="utf-8").read()
             break
         except FileNotFoundError:
-            print(f"bp.admin.routes.show_upload_log: failed {fname}")
+            #print(f"bp.admin.routes.show_upload_log: no file {fname}")
+            pass
 
-    logger.info(f"-> bp.admin.routes.show_upload_log")
+    logger.info(f"-> bp.admin.routes.show_upload_log f={fname}")
     return render_template("/admin/load_result.html", msg=msg)
 
 
@@ -398,9 +389,13 @@ def show_upload_log(username, xmlfile, batch_id=None):
 @login_required
 @roles_accepted("admin", "audit")
 def xml_delete(username, xmlfile):
-    uploads.delete_files(username, xmlfile)
-    syslog.log(type="gramps file uploaded", file=xmlfile, user=username)
-    logger.info(f'-> bp.admin.routes.xml_delete f="{xmlfile}"')
+    msg = f" Deleting of \"{xmlfile}\" is blocked before the batch is deleted, too!"
+    flash(msg)
+    print("bp.admin.routes.xml_delete" + msg)
+    
+    # uploads.delete_files(username, xmlfile)
+    # syslog.log(type="gramps file uploaded", file=xmlfile, user=username)
+    logger.error(f'-> bp.admin.routes.xml_delete f="{xmlfile}"')
     # TODO: Return to list_uploads_all, if called from there
     return redirect(url_for("admin.list_uploads", username=username))
 
@@ -653,3 +648,10 @@ def delete_accesses():
     logger.info(f"-> bp.admin.routes.delete_accesses")
     rsp = UserAdmin.delete_accesses(data)
     return jsonify(rsp)
+
+@bp.route("/admin/build_free_text_search_indexes", methods=["GET"])
+@login_required
+@roles_accepted("admin")
+def build_indexes():
+    res = DataAdmin.build_free_text_search_indexes()
+    return render_template("/admin/free_text_indexes.html", res=res)

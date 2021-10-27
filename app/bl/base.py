@@ -132,14 +132,6 @@ class NodeObject:
     # @staticmethod
     # def timestamp_str(timestamp, opt="m"): --> models.util.format_timestamp
     #     """ Converts a Neo4j timestamp to display format (by 'm' minute or 'd' day). """
-    #     if timestamp:
-    #         t = float(timestamp) / 1000.0
-    #         if opt == "d":
-    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y")
-    #         else:
-    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
-    #     else:
-    #         return ""
 
 
     @classmethod
@@ -213,19 +205,19 @@ class NodeObject:
         else:
             return ""
 
-    def change_str(self):
-        """ Display change time like '28.03.2020 17:34:58'. """
-        try:
-            return datetime.fromtimestamp(self.change).strftime("%d.%m.%Y %H:%M:%S")
-        except TypeError:
-            return ""
-
     def uuid_str(self):
         """ Display uuid in short form, or show self.uniq_id is missing. """
         if self.uuid:
             return self.uuid[:6]
         else:
             return f"({self.uniq_id})"
+
+    def change_str(self):
+        """ Display change time like '28.03.2020 17:34:58'. """
+        try:
+            return datetime.fromtimestamp(self.change).strftime("%d.%m.%Y %H:%M:%S")
+        except TypeError:
+            return ""
 
     def _json_encode(self):
         """Creates a dictionary of class parameters, if JSON serializable.

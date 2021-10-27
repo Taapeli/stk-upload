@@ -65,20 +65,12 @@ class FanChart:
         Format the data for fan/sunburst chart use.
         """
         names = person_attributes["sortname"].split("#")
-        if (
-            len(person_attributes["events"]) > 0
-            and person_attributes["events"][0][1] != None
-        ):
-            birth = f"{person_attributes['events'][0][1]}"
-        else:
-            birth = ""
-        if (
-            len(person_attributes["events"]) > 1
-            and person_attributes["events"][0][1] != None
-        ):
-            death = f"{person_attributes['events'][1][1]}"
-        else:
-            death = ""
+        birth = death = ""
+        for ev in person_attributes["events"]:
+            if ev[0] == "Birth":
+                birth = str(ev[1])
+            elif ev[0] == "Death":
+                death = str(ev[1])
         return {
             "name": f"{names[1]} {names[0]}",
             "color": self.gender_color(person_attributes["gender"], descendant),
@@ -135,7 +127,7 @@ class FanChart:
             if "events" in x:
                 for ev in x["events"]:
                     if ev[0] == "Birth":
-                        return ev[1]
+                        return ev[1] if ev[1] else 9999
             return (
                 9999  # no birth year given, sort after siblings with known birth years
             )
@@ -171,7 +163,7 @@ class FanChart:
         """
         # Set up the database access and find out whether looking at own data.
         u_context = UserContext(user_session, current_user, request)
-        privacy = u_context.context_code == u_context.ChoicesOfView.COMMON
+        privacy = u_context.use_common() # context_code == u_context.ChoicesOfView.COMMON
 
         # Fill in basic data from current person
         with PersonReader("read", u_context) as service:

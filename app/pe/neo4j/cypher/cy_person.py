@@ -39,7 +39,7 @@ SET p.sortname=$key"""
 
     get_person = """
 MATCH (root) -[r:OBJ_PERSON]-> (p:Person {uuid:$uuid}) 
-RETURN p, type(r) AS root_type, root"""
+RETURN p, root"""
 
     get_names_events = """
 MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
@@ -70,11 +70,11 @@ MATCH (src) -[r:CITATION|NOTE|MEDIA]-> (target)
     WHERE ID(src) IN $uid_list
 RETURN src, properties(r) AS r, target"""
 
-    # Older version:
-    get_objs_citation_note_media = """
-MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-    WHERE ID(x) IN $uid_list
-RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
+#     # Older version:
+#     get_objs_citation_note_media = """
+# MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
+#     WHERE ID(x) IN $uid_list
+# RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
 
 
     get_names = """
@@ -117,8 +117,22 @@ RETURN user, person,
     COLLECT(DISTINCT name) AS names,
     //COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
+    
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
     ORDER BY TOUPPER(names[0].surname), names[0].firstname"""
+
+    # With rule=names, free text search
+    read_persons_w_events_by_name1 = """
+CALL db.index.fulltext.queryNodes("searchattr",$name)
+    YIELD node as person, score
+WITH person,score ORDER BY score DESC, person.sortname
+"""
+    read_persons_w_events_by_name2 = """
+MATCH (root) -[:OBJ_PERSON]-> (person) -[:NAME]-> (name:Name {order:0})
+WITH score, person, name, root.user as user""" + _get_events_tail + """ 
+, TOUPPER(LEFT(name.surname,1)) as initial
+LIMIT $limit
+"""
 
     # With use=rule, name=name
     read_persons_w_events_by_refname = """
@@ -146,11 +160,11 @@ MERGE (root) -[r:OBJ_PERSON]-> (p)
     SET p = $p_attr
 RETURN ID(p) as uniq_id"""
 
-    link_name = """
-CREATE (n:Name) SET n = $n_attr
-WITH n
-MATCH (p:Person {handle:$p_handle})
-MERGE (p)-[r:NAME]->(n)"""
+#     link_name = """
+# CREATE (n:Name) SET n = $n_attr
+# WITH n
+# MATCH (p:Person {handle:$p_handle})
+# MERGE (p)-[r:NAME]->(n)"""
 
     create_name_as_leaf = """
 CREATE (n:Name) SET n = $n_attr
@@ -161,10 +175,10 @@ WITH n
 match (c:Citation) where c.handle in $citation_handles
 merge (n) -[r:CITATION]-> (c)"""
 
-    link_event_embedded = """
-MATCH (p:Person {handle: $handle}) 
-CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
-    SET e = $e_attr"""
+#     link_event_embedded = """
+# MATCH (p:Person {handle: $handle}) 
+# CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
+#     SET e = $e_attr"""
 
     link_event = """
 MATCH (p:Person {handle:$p_handle})
@@ -179,10 +193,11 @@ MATCH (m:Media  {handle: $m_handle})
 
 # use models.gen.cypher.Cypher_name (there is no handle)
 
-    link_citation = """
-MATCH (p:Person   {handle: $p_handle})
-MATCH (c:Citation {handle: $c_handle})
-MERGE (p)-[r:CITATION]->(c)"""
+#     link_citation = # --> CypherObject.link_citation
+# """
+# MATCH (p:Person   {handle: $p_handle})
+# MATCH (c:Citation {handle: $c_handle})
+# MERGE (p)-[r:CITATION]->(c)"""
 
     link_note = """
 MATCH (n) WHERE n.handle=$p_handle
@@ -251,22 +266,6 @@ where n.surname <> "" and n.surname <> "N"
 return n.surname as surname, count(p) as count
 order by count desc
 limit $count"""
-
-#     get_surname_list_by_username = """
-# match (b:Root{user:$username, material:$material, state:$state}) 
-#     -[:OBJ_PERSON]-> (p:Person) -[:NAME]-> (n:Name) 
-# where n.surname <> "" and n.surname <> "N"
-# return n.surname as surname, count(p) as count
-# order by count desc
-# limit $count"""
-
-#     get_surname_list_common = """
-# match (b:Root{material:$material, state:$state}) 
-#     -[:OBJ_PERSON]-> (p:Person) -[:NAME]-> (n:Name) 
-# where n.surname <> "" and n.surname <> "N"
-# return n.surname as surname, count(p) as count
-# order by count desc
-# limit $count"""
 
     set_primary_name = """
 match (p:Person{uuid:$uuid})  

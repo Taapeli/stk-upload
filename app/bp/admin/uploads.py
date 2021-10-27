@@ -31,26 +31,20 @@ import pprint
 import time
 import threading
 import traceback
-import logging
-from datetime import datetime
 from dataclasses import dataclass
 from typing import List
+from flask_babelex import _
+from flask import flash
+import logging
 
 logger = logging.getLogger("stkserver")
 
-from flask_babelex import _
-
 import shareds
+from models import email, util, syslog
 from bl.root import Root, State
 from bl.base import IsotammiException
-from models import email, util, syslog
 from bl.gramps import gramps_loader
 from pe.neo4j.cypher.cy_batch_audit import CypherRoot
-
-# ==> bl.batch.Batch.BATCH_* 7.5.2021 / JMä
-# STATUS_UPLOADED = "uploaded", STATUS_LOADING = "loading", STATUS_DONE = "done"
-# STATUS_FAILED = "failed", STATUS_ERROR = "error", STATUS_REMOVED = "removed"
-
 
 # ===============================================================================
 # Background loading of a Gramps XML file
@@ -118,12 +112,12 @@ from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 
 
 def get_upload_folder(username):
-    """ Returns upload directory for given user"""
+    """ Returns upload directory for given user. """
     return os.path.join("uploads", username)
 
 
 def set_meta(username, batch_id, filename, **kwargs):
-    """ Stores status information in .meta file """
+    """ Stores status information from kwargs to .meta file. """
     upload_folder = get_upload_folder(username)
     name = "{}.meta".format(filename)
     metaname = os.path.join(upload_folder, batch_id, name)
@@ -131,6 +125,7 @@ def set_meta(username, batch_id, filename, **kwargs):
 
 
 def update_metafile(metaname, **kwargs):
+    """ Create or update meta data. """
     try:
         meta = eval(open(metaname).read())
     except FileNotFoundError:
@@ -139,18 +134,27 @@ def update_metafile(metaname, **kwargs):
     open(metaname, "w").write(pprint.pformat(meta))
 
 
-def get_meta(metaname):
+def get_meta(root):
     """ Reads status information from .meta file """
-
+    
     try:
+        metaname = root.metaname
         meta = eval(open(metaname).read())
         status = meta.get("status")
         if status == State.FILE_LOADING:
             stat = os.stat(metaname)
-            if (
-                stat.st_mtime < time.time() - 60
-            ):  # not updated within last minute -> assume failure
+            max_sec = 2*60
+            if (stat.st_mtime < time.time() - max_sec): 
+                # not updated within last minute -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
+                msg1= f"{_('Load failed, no progress in %(n)s seconds', n=max_sec)}"
+                msg = f"{util.format_timestamp()}: {msg1}"
+                with open(root.logname,"a") as f:
+                    print("", file=f)
+                    print(msg, file=f)
+                print(f"bp.admin.uploads.get_meta: {msg}")
+                flash(msg1)
+                update_metafile(metaname, status=State.FILE_LOAD_FAILED)
     except FileNotFoundError as e:
         meta = {}
     except Exception as e:
@@ -207,7 +211,7 @@ def background_load_to_stkbase(batch:Root) -> None:
             msg += "\n{}".format(step)
         msg += "\n"
         open(batch.logname, "w", encoding="utf-8").write(msg)
-        email.email_admin("Stk: Gramps XML file stored", msg)
+        email.email_admin("Gramps file stored", msg)
         syslog.log(type="completed save to database", file=batch.xmlname, user=batch.user)
     except Exception as e:
         # traceback.print_exc()
@@ -226,7 +230,7 @@ def background_load_to_stkbase(batch:Root) -> None:
             pprint.pprint(e.kwargs)
             msg += pprint.pformat(e.kwargs)
         open(batch.logname, "w", encoding="utf-8").write(msg)
-        email.email_admin("Stk: Gramps XML file storing FAILED", msg)
+        email.email_admin("Gramps file storing FAILED", msg)
         syslog.log(type="gramps store to database failed", file=batch.xmlname, user=batch.user)
 
 
@@ -264,25 +268,11 @@ class Upload:
     material_type: str
     description: str
     user: str
+    u_name: str
     auditors: List[List]    # [[username, timestamp, format_timestamp]...]
     count: int
     is_candidate: int  # for Javascript: 0=false, 1=true
     for_auditor: int
-
-    # @staticmethod
-    # def timestamp_str(timestamp, opt="m"):
-    #     """ Converts a Neo4j timestamp to display format (by 'm' minute or 'd' day).
-    #
-    #         Duplicate to: bl.base.NodeObject.timestamp_str
-    #     """
-    #     if timestamp:
-    #         t = float(timestamp) / 1000.0
-    #         if opt == "d":
-    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y")
-    #         else:
-    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
-    #     else:
-    #         return ""
 
     def __str__(self):
         s = f"batch={self.batch_id}" if self.batch_id else "NO BATCH "
@@ -316,16 +306,19 @@ def list_uploads(username:str) -> List[Upload]:
     uploads = []
     for record in result:
         # <Record 
+        #    u_name='Juha P.'
         #    root=<Node id=34475 labels=frozenset({'Root'})
         #        properties={'material': 'Family Tree', 'state': 'Auditing', 
         #            'id': '2021-05-07.001', 'user': 'jpek', 
         #            'timestamp': 1620403991562, ...}> 
-        #    person_count=64 auditors=[["juha",1630474129763]]
+        #    person_count=64
+        #    auditors=[["juha",1630474129763]]
         # >
         node = record["root"]
         b: Root = Root.from_node(node)
+        u_name = record["u_name"]
 
-        meta = get_meta(b.metaname)
+        meta = get_meta(b)
         status = meta.get("status", State.FILE_UPLOADED)
         if status == State.FILE_LOAD_FAILED:
             state = State.FILE_LOAD_FAILED
@@ -345,6 +338,7 @@ def list_uploads(username:str) -> List[Upload]:
             xmlname=os.path.split(b.file)[1] if b.file else "",
             count=record["person_count"],
             user=b.user,
+            u_name=u_name,
             auditors=auditors,
             state=state,
             status=_(state),
@@ -353,7 +347,7 @@ def list_uploads(username:str) -> List[Upload]:
             material_type=b.material,
             description=b.description,
         )
-        print(f"#list_uploads: {upload}")
+        #print(f"#bp.admin.uploads.list_uploads: {upload}")
         uploads.append(upload)
 
     return sorted(uploads, key=lambda upload: upload.batch_id)

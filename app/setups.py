@@ -76,13 +76,22 @@ class Role(RoleMixin):
     timestamp = None
     
     def __init__(self, **kwargs):
-        self.name = kwargs['name']
-        self.description = kwargs['description']
+        self.name = kwargs.get("name")
+        self.description = kwargs.get("description")
 #        self.timestamp = kwargs['timestamp']
 
     def __str__(self):
         """ Role name in ui language """
         return _(self.name)
+
+    @classmethod
+    def from_node(cls, node):
+        # type: (Any) -> Root
+        """Convert a Neo4j node to Role object."""
+        obj = cls()
+        obj.name = node.get("name", "")
+        obj.description = node.get("description", "")
+        return obj
 
     @staticmethod
     def has_role(name, role_list):

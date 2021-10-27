@@ -29,15 +29,16 @@ Created on 9.6.2021
 # blacked 2021-05-01 JMä
 import os
 from datetime import date, datetime
-from typing import Any, Optional
-
 from flask_babelex import _
+#from typing import Any, Optional
+#from bl.base import IsotammiException
+import logging
+
+logger = logging.getLogger('stkserver')
 
 import shareds
 from models.util import format_ms_timestamp
-
 from bl.admin.models.cypher_adm import Cypher_adm
-
 from bl.base import Status, NodeObject
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_batch_audit import CypherRoot, CypherAudit
@@ -127,42 +128,6 @@ class Root(NodeObject):
             State.ROOT_REJECTED]:
             return True
         return False
-
-#===============================================================================
-# class Batch:
-#     """
-#     User Batch node and statistics about them.
-#     """
-# 
-#     # Batch status values:
-#     #    1. Import file; no Batch node created
-#     BATCH_LOADING = "loading"
-#     BATCH_UPLOADED = "uploaded"
-#     BATCH_DONE = "done"         # Obsolete
-#     BATCH_FAILED = "failed"     # in bp.admin.uploads
-#     BATCH_ERROR = "error"       # in bp.admin.uploads
-#     BATCH_REMOVED = "removed"
-#     BATCH_STORING = "storing"   # NOT IN USE
-#     #    2. Batch node exists
-#     BATCH_STARTED = "started"
-#     BATCH_CANDIDATE = "completed"  # Means candidate
-#     #    3. Batch is empty
-#     BATCH_FOR_AUDIT = "audit_requested"
-# 
-#     def __init__(self, userid=None):
-#         """
-#         Creates a Batch object
-#         """
-#         self.uniq_id = None
-#         self.user = userid
-#         self.file = None
-#         self.id = None  # batch_id
-#         self.status = Batch.BATCH_STARTED
-#         self.mediapath = None  # Directory for media files
-#         self.timestamp = 0
-#         self.material_type = ""
-#         self.description = ""
-#===============================================================================
 
     def save(self, dataservice):
         """Create or update Root node.
@@ -299,9 +264,9 @@ class Root(NodeObject):
     @staticmethod
     def get_my_batches(username):
         with shareds.driver.session() as session:
-            result = run_cypher(session, "where root.state='Candidate' return root", username)
+            result = run_cypher(session, CypherRoot.get_my_batches, username)
             for rec in result:
-                print(rec.get("root"))
+                #print(rec.get("root"))
                 values = dict(rec.get("root"))
                 fname = values["file"]
                 filename = os.path.split(fname)[1]
@@ -362,7 +327,7 @@ class Root(NodeObject):
             if audited:
                 user_data[key]["Audit"] = audited
 
-            print(f"user_data[{key}] {user_data[key]}")
+        print(f"bl.root.Root.get_user_stats: user_data[{key}] {user_data[key]}")
 
         return sorted(titles), user_data
 
@@ -416,24 +381,19 @@ class Root(NodeObject):
     def list_empty_batches():
         """Gets a list of db Batches without any linked data."""
         batches = []
-
-        class Upload:
-            pass
-
-        print(
-            'Batch.list_empty_batches: #TODO Tähän aikarajoitus "vvv-kk", nyt siinä on vakio "2019-10"!'
-        )
-        result = shareds.driver.session().run(CypherRoot.TODO_get_empty_batches)
-
-        for record in result:
-            # <Node id=317098 labels={'Batch'}
-            #    properties={'file': 'uploads/juha/Sibelius_20190820_clean.gpkg',
-            #        'id': '2019-09-27.001', 'user': 'juha', 'status': 'started',
-            #        'timestamp': 1569586423509}>
-
-            node = record["batch"]
-            batch = Root.from_node(node)
-            batches.append(batch)
+        print('Batch.list_empty_batches: ERROR obsolete!')
+        # class Upload:
+        #     pass        # result = shareds.driver.session().run(CypherRoot.TODO_get_empty_batches)
+        #
+        # for record in result:
+        #     # <Node id=317098 labels={'Batch'}
+        #     #    properties={'file': 'uploads/juha/Sibelius_20190820_clean.gpkg',
+        #     #        'id': '2019-09-27.001', 'user': 'juha', 'status': 'started',
+        #     #        'timestamp': 1569586423509}>
+        #
+        #     node = record["batch"]
+        #     batch = Root.from_node(node)
+        #     batches.append(batch)
 
         return batches
 
@@ -640,9 +600,9 @@ class BatchUpdater(DataService):
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id (in BatchUpdater). """
-        ret = self.dataservice.ds_get_batch(user, batch_id)
-        # returns {"status":Status.OK, "node":record}
         try:
+            ret = self.dataservice.ds_get_batch(user, batch_id)
+            # returns {"status":Status.OK, "node":record}
             node = ret['node']
             batch = Root.from_node(node)
             return {"status":Status.OK, "item":batch}
@@ -660,17 +620,15 @@ class BatchUpdater(DataService):
     def select_auditor(self, batch_id, auditor_username):
         """ Mark auditor for this data batch and set status. """
 
-        allowed_states = [State.ROOT_AUDIT_REQUESTED, State.ROOT_AUDITING]
+        allowed_states = [State.ROOT_AUDIT_REQUESTED,
+                          State.ROOT_AUDITING,
+                          State.ROOT_REJECTED]
         res = self.dataservice.ds_batch_set_auditor(batch_id, auditor_username, 
                                                     allowed_states)
         return res
 
 # def batch_mark_status(self, batch, b_status): --> change_state
 #     """ Mark this data batch status. """
-#     res = self.dataservice.ds_batch_set_state(
-#         batch.id, batch.user, b_status
-#     )
-#     return res
 
     def commit(self):
         """ Commit transaction. """
@@ -687,11 +645,12 @@ class BatchUpdater(DataService):
         if media_refs:
             self.dataservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
 
+
 class DataServiceBase:
     def __enter__(self):
         self.idstr = f"{self.__class__.__name__}>DataServiceBase"
         self.dataservice.tx = shareds.driver.session().begin_transaction()
-        print(f'#~~~{self.idstr} init tx={id(self.dataservice.tx)}')
+        logger.debug(f'#~~~{self.idstr} init tx={id(self.dataservice.tx)}')
         return self
 
     def __exit__(self, exc_type=None, exc_value=None, traceback=None):
@@ -707,21 +666,20 @@ class DataServiceBase:
                 print(f"--{self.idstr} exit rollback {exc_type}")
                 self.dataservice.tx.rollback()
             else:
-                print(f'#~~~{self.idstr} exit commit tx={id(self.dataservice.tx)}')
+                logger.debug(f'#~~~{self.idstr} exit commit tx={id(self.dataservice.tx)}')
                 try:
                     self.dataservice.tx.commit()
                 except Exception as e:
-                    print(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
+                    logger.debug(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
         else:
-            print(f'#~~~{self.idstr} exit {id(self.old_tx)}')
-
+            logger.debug(f'#~~~{self.idstr} exit {id(self.old_tx)}')
 
 
 class BatchReader(DataServiceBase):
 
     def __init__(self, service_name: str):
         self.idstr = f"{self.__class__.__name__}"
-        print(f'#~~~{self.idstr} init')
+        logger.debug(f'#~~~{self.idstr} init')
         # Find <class 'pe.neo4j.*service'> and initialize it
         self.service_name = service_name
         service_class = shareds.dataservices.get(self.service_name)
@@ -734,9 +692,9 @@ class BatchReader(DataServiceBase):
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id (in BatchReader). """
-        ret = self.dataservice.ds_get_batch(user, batch_id)
-        # returns {"status":Status.OK, "node":record}
         try:
+            ret = self.dataservice.ds_get_batch(user, batch_id)
+            # returns {"status":Status.OK, "node":record}
             node = ret['node']
             batch = Root.from_node(node)
             return {"status":Status.OK, "item":batch}

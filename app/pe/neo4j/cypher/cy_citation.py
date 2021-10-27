@@ -42,4 +42,3 @@ MERGE (n) -[r:SOURCE]-> (m)"""
 MERGE (n:Citation {handle: $handle})
 MERGE (m:Note     {handle: $hlink})
 CREATE (n) -[r:NOTE]-> (m)"""
-

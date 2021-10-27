@@ -6,7 +6,7 @@
 		./admin/templates/admin/uploads.html
 #}
 {% extends "start/s_layout.html" %}
-{% block title %}{{ _('My Candidate Materials') }}{% endblock %}
+{% block title %}{{ _('Manage Materials') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -65,14 +65,16 @@ function checkFileSize() {
 }
 
 // Progress bar
-var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
+var PROGRESS_INTERVAL = {{interval}}; {# 10000 #}
 
 function update_progress(batch_id) {
 	// see http://jsfiddle.net/kedctfmj/3/
 	$.get("get_progress/" + encodeURIComponent(batch_id), (rsp) => {
 		var progress_div = $("td div.progress[data-name='"+batch_id+"']");
-		var batch_id_column = progress_div.parent(); /*.prev().prev(); */
-		batch_id_column.css("background","silver");
+		var batch_id_column = progress_div.parent();
+		batch_id_column.css("background","oldlace");
+        batch_id_column.css("border-color", "#00800070")
+        batch_id_column.css("border-width", "3pt")
 		progress_div.css("background","Green");
 		progress_div.css("opacity","0.5");
 		progress_div.css("z-index","1");
@@ -101,6 +103,12 @@ function confirm_delete(subj, name) {
     }
     return true;
 }
+
+function doconfirm( command, title ) { // used in commands.html
+	if (confirm(title)) {
+		document.location.href = command;
+	}
+}
 </script>
 
 <script src="/static/js/hyperscript.org@0.8.1.js"></script>
@@ -110,7 +118,7 @@ function confirm_delete(subj, name) {
 
 <div id="startdiv">
     <div>
-		<h1>{{ _('My Candidate Materials') }}</h1>
+		<h1>{{ _('Manage Materials') }}</h1>
 
 {% include "flash_messages.html" %}
 
@@ -125,7 +133,9 @@ function confirm_delete(subj, name) {
 {% endif %}
  
 {% for upload in uploads %}
-        <tr> 
+        <tr
+          {% if batch_id == upload.batch_id %}style="background: bisque;"{% endif %}
+        >
             <td id='{{upload.batch_id}}'>
             	<a href="#" id="a-{{loop.index}}" class="a"
             		hx-get="commands/{{upload.batch_id}}" hx-target="#commands-{{loop.index}}" 
@@ -145,7 +155,7 @@ function confirm_delete(subj, name) {
                 <div class="progress" data-name='{{upload.batch_id}}'></div>
     {% if upload.state == 'Loading' %}
                      <script>
-                         setTimeout( function() {update_progress('{{upload.batch_id}}')}, 1000 );
+                         setTimeout( function() {update_progress('{{upload.batch_id}}')}, PROGRESS_INTERVAL );
                      </script>
     {% endif -%}
             </td>
@@ -185,11 +195,12 @@ function confirm_delete(subj, name) {
 {% endfor %}
 
 {% if current_user.is_authenticated and current_user.has_role('research') %}
-  		<tr id="upload_xml" title="{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.">
+  		<tr id="upload_xml"
+            title="{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.">
             <form action="/gramps/upload" method="post" enctype="multipart/form-data">
   				<td><b>{{ _("Send a new Gramps file") }}</b>
   				</td>
-  				<td colspan="4">
+  				<td colspan="4" style="padding: 10pt;">
   					<div>
 	   					<div>
 				        	<input type="hidden" name="material" value="xml_file">
@@ -207,7 +218,7 @@ function confirm_delete(subj, name) {
    	</table>
    
   </div>
-    <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
+    <p>&rtrif; <a href="/">{{ _("Back") }}</a></p>
 
 <!-- Startdiv ends -->
 </div>

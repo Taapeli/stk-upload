@@ -1,6 +1,6 @@
 {# _myapp/templates/k_persons.html_ #}
 {% extends "/scene/sc_layout.html" %}
-{% block title %}{{ _('List of persons') }}{% endblock %}
+{% block title %}{{ _('Search') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
@@ -32,7 +32,7 @@ div.CloudPink div {
 <div id="startdiv">
 	{% if rule == 'all' %}<h1>{{ _('Persons ordered by') }} {{ ordname[order] }}</h1>
 	{% elif rule == 'refname' %}<h1>{{ _('Persons carrying a Name') }} {{ key }}</h1>
-	{% else %}<h1>{{ _('Persons') }}</h1>
+	{% else %}<h1>{{ _('Search') }}</h1>
 	{% endif %}
     <div>{{ macro.show_use_case() }}</div>
 </div>
@@ -44,6 +44,7 @@ div.CloudPink div {
 {% include "flash_messages.html" %}
 
          <form  action="/scene/persons/search" method="post">
+{% if rule != 'notetext' %}         
             <div class="flex-container2">
 {% if cnt + num_hidden > 0 %}
                 <div class="description_box2">
@@ -73,15 +74,17 @@ div.CloudPink div {
                     </ul>
                 </div>
 {% endif %}
+{% endif %}
 
 {% if rule %}{% set selection = rule %}
-{% else %}{% set selection = "surname" %}
+{% else %}{% set selection = "any" %}
 {% endif %}
 {% set oldkey = key %}
            
                 <div id="namesearch" class="SearchBox2">
                        <h2>
                           <label for="cars">{{ _('Search term') }}</label>
+
                           <select id="rule" name="rule">
                             <option value="surname"
                                 x-desc="{{ _('Any surname (beginning part)') }}"
@@ -92,6 +95,19 @@ div.CloudPink div {
                             <option value="patronyme"
                                 x-desc="{{ _('Any patronymic (beginning part)') }}"
                         {% if selection == "patronyme" %}selected{% endif %}>{{ _('Patronymic') }}</option>
+
+                            <option value="freetext"
+                                x-desc="{{ _('Free text (any name, can use wildcards)') }}"
+                                {% if selection == "freetext" %}selected{% endif %}>
+                                {{ _('Free name search') }}
+                            </option>
+                            
+                            <option value="notetext"
+                                x-desc="{{ _('Free text search from note texts (can use wildcards)') }}"
+                                {% if selection == "notetext" %}selected{% endif %}>
+                                {{ _('Search from notes') }}
+                            </option>
+
                             <option value="years"
                                 x-desc="{{ _('A year (1750) or years range (1700-1750) where persons might live') }}"
                         {% if selection == "years" %}selected{% endif %}>{{ _('Years range') }}</option>
@@ -125,125 +141,20 @@ selector.addEventListener("change", () => {
 </script>
 
 
-{% if status == 'OK' %}
-	<div id="alphanav">
-			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-	        {% for p in persons %}
-         	  {% set ini = p.names[0].initial|upper %}
-              {% if loop.changed(ini) %}
-                 <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
-              {% endif %}
-	        {% endfor %}
-			</ul>
-	</div>
+{% if rule == 'notetext' %}
+   {%  include "scene/note_search_result.html" %}
 
-	<table class="IndividualList">
-		<thead>
-			<tr><th></th>
-                   <th>{{ _('Person') }}</th>
-                   <th>{{ _("Person's events") }}</th>
-			</tr>
-		</thead>
-		<tbody>
-	    {% for p in persons %}
-	        <tr>
-                <td class="ColumnAlpha">
-            {% set ini = p.names[0].initial|upper %}
-            {% if loop.changed(ini) %}
-		            <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
-			{% endif %}
-				</td>
-	            <td class="ColumnPerson">
-                    <div>
-	                    <a href="/scene/person?uuid={{p.uuid}}"
-	                      title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
-                          {{p.names[0].firstname}} 
-            {% if p.names[0].prefix %} {{p.names[0].prefix}}{% endif %}
-            {% if p.names[0].surname %}
-                          <b>{{p.names[0].surname}}</b>{% else %}
-                          <i>{{p.names[0].suffix}}</i>{% endif -%}</a>
-		                <small class="idno">[{{ p.uuid_short() }}]</small>
-		    {% if p.refnames %}
-		                <br><small class="refname" title="{{ _('Reference names') }}">
-		                  {{ _('Keywords') }}: {{p.refnames}}</small>
-            {% endif %}
-                        <br><small style="color:olive">{{ macro.lifetimes(p) }}</small>
-            {% if p.too_new %}
-		                <br><small><i style="color:red;">{{ _('Too recent for display to others!') }}</i></small>
-		    {% endif %}
-	                </div>
-                </td>
+{% elif status == 'OK' %}
+   {%  include "scene/person_search_result.html" %}
 
-	            <td class="ColumnEvent">
-            {% if p.events %}<ul>
-                {% for e in p.events|sort(attribute='dates') %}
-		            <li><i>{{e.type|transl('evt')}}</i> {{e.description}}
-		            {% if e.dates %}
-                        <span class="{{e.dates.calendar_css()}}">{{e.dates}}</span> 
-                    {% endif %}
-		            {% if e.place %} | {{e.place}}{% endif %}</li>
-		        {% endfor %}</ul>
-	        {% endif %}
-                </td>
-	        </tr>
-	    {% endfor %}
-        </tbody>
-    </table>
+{% elif rule == "init" %}
+   {%  include "scene/most_common.html" %}
 
-{% elif rule %}
+{% else %}
     <div class="NotFound">
         <p>{{ _('No one found with search keys') }}.</p>
     </div>
     <p>&nbsp;</p>
-{% else %}
-
-    <h3>{{ _('Most common names') }}</h3>
-    <div class="flex-container2">
-        <div class="CloudBox" style="display: inline-block;">
-            <div>
-        {% if surnamestats %}
-                 <form name="surnameform" method="post" action="/scene/persons/search">
-                    <input name="rule" type="hidden" value="surname">
-                    <input name="key" type="hidden">
-                    <script>
-                        function submit_search(surname) {
-                            document.forms.surnameform.elements.namedItem('key').value = surname;
-                            document.forms.surnameform.submit();
-                        }
-                    </script>
-                     {% for stat in surnamestats %}
-                        <span style='font-size:{{ stat.fontsize}}px'>
-                            <a href=# onclick="submit_search('{{ stat.surname }}')"
-                               title="{{ stat.count }} {{ _('persons') }}">{{ stat.surname }}</a>
-                        </span>
-                     {% endfor %}
-                 </form>
-        {% else %}
-                <i>{{ _('No person names') }}</i>
-        {% endif %}
-            </div>
-        </div>
-
-           <div class="CloudBox CloudPink" style="display: inline-block;">
-             <div>
-        {% if placenamestats %}
-                 <form name="placenameform" method="post" action="/scene/persons/search">
-                    <input name="rule" type="hidden" value="placename">
-                    <input name="key" type="hidden">
-                     {% for stat in placenamestats %}
-                        <span style='font-size:{{ stat.fontsize }}px'>
-                            <a href="/scene/location/uuid={{ stat.uuid }}"
-                               title="{{ stat.count }} {{ _('references') }}">{{ stat.placename }}</a>
-                        </span>
-                     {% endfor %}
-                 </form>
-        {% else %}
-                <i>{{ _('No places') }}</i>
-        {% endif %}
-             </div>
-           </div>
-
-    </div><!-- end flex-container -->
-   {% endif %}
+{% endif %}
 </div><!-- end Individuals -->
 {% endblock %}
