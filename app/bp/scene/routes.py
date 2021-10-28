@@ -71,55 +71,6 @@ calendars = [_("Julian"), _("Hebrew")]  # just for translations
 # ------------------------- Menu 1: Material search ------------------------------
 
 
-def _do_get_persons(args):
-    """Execute persons list query by arguments and optionally set material type.
-
-        Search form
-            GET    /search                                    --> args={pg:search,rule:start}
-        Search by refname
-            GET    /search?rule=ref,key=<str>                 --> args={pg:search,rule:ref,key:str}
-        Search form
-            POST   /search                                    --> args={pg:search,rule:start}
-        Search by name starting or years
-            POST   /search rule=<rule>,key=<str>              --> args={pg:search,rule:ref,key:str}
-
-        Persons, current list page
-            GET    /all                                       --> args={pg:all}
-        Persons, forward
-            GET    /all?fw=<sortname>&c=<count>               --> args={pg:all,fw:sortname,c:count}
-
-    #     Persons, by years range
-    #         GET    /all?years=<y1-y2>                         --> args={pg:all,years:y1_y2}
-    #     Persons fw,years
-    #         GET    /all?years=<y1-y2>&fw=<sortname>&c=<count> --> args={pg:all,fw:sortname,c:count,years:y1_y2}
-    #     Search by years range
-    #         POST   /search years=<y1-y2>                      --> args={pg:search,years:y1_y2}
-    #     Search by name & years
-    #         POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
-    """
-    u_context = args["u_context"] #UserContext(user_session, current_user, request, args.get("material"))
-    if args.get("pg") == "search":
-        # No scope
-        # u_context.set_scope_from_request()
-        if args.get("rule", "start") == "start" or args.get("key", "") == "":
-            # Initializing this batch.
-            return {"rule": "start", "status": Status.NOT_STARTED,
-                    "u_context": u_context}
-    else:  # pg:'all'
-        #u_context.set_scope_from_request(request, "person_scope")
-        args["rule"] = "all"
-    request_args = UserContext.get_request_args(request)
-    u_context.count = request_args.get("c", 100, type=int)
-
-    with PersonReaderTx("read_tx", u_context) as service:
-        res = service.get_person_search(args)
-        # for i in res.get("items"):
-        #     print(f"_do_get_persons: @{i.user} {i.sortname}")
-
-    res["u_context"] = u_context
-    return res
-
-
 # @bp.route('/scene/persons', methods=['POST', 'GET'])
 @bp.route("/scene/persons/all", methods=["GET"])
 @login_required
@@ -161,7 +112,6 @@ def show_persons():
         user_context=u_context,
         elapsed=elapsed,
     )
-
 
 def format_item(rec, searchtext, min_length=100):
     """ Display an excerpt from Note text that is at least this long
@@ -272,6 +222,55 @@ def note_search(args):
     )
 
 
+def _do_get_persons(args):
+    """Execute persons list query by arguments and optionally set material type.
+
+        Search form
+            GET    /search                                    --> args={pg:search,rule:start}
+        Search by refname
+            GET    /search?rule=ref,key=<str>                 --> args={pg:search,rule:ref,key:str}
+        Search form
+            POST   /search                                    --> args={pg:search,rule:start}
+        Search by name starting or years
+            POST   /search rule=<rule>,key=<str>              --> args={pg:search,rule:ref,key:str}
+
+        Persons, current list page
+            GET    /all                                       --> args={pg:all}
+        Persons, forward
+            GET    /all?fw=<sortname>&c=<count>               --> args={pg:all,fw:sortname,c:count}
+
+    #     Persons, by years range
+    #         GET    /all?years=<y1-y2>                         --> args={pg:all,years:y1_y2}
+    #     Persons fw,years
+    #         GET    /all?years=<y1-y2>&fw=<sortname>&c=<count> --> args={pg:all,fw:sortname,c:count,years:y1_y2}
+    #     Search by years range
+    #         POST   /search years=<y1-y2>                      --> args={pg:search,years:y1_y2}
+    #     Search by name & years
+    #         POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
+    """
+    u_context = args["u_context"] #UserContext(user_session, current_user, request, args.get("material"))
+    if args.get("pg") == "search":
+        # No scope
+        # u_context.set_scope_from_request()
+        if args.get("rule", "start") == "start" or args.get("key", "") == "":
+            # Initializing this batch.
+            return {"rule": "start", "status": Status.NOT_STARTED,
+                    "u_context": u_context}
+    else:  # pg:'all'
+        #u_context.set_scope_from_request(request, "person_scope")
+        args["rule"] = "all"
+    request_args = UserContext.get_request_args(request)
+    u_context.count = request_args.get("c", 100, type=int)
+
+    with PersonReaderTx("read_tx", u_context) as service:
+        res = service.get_person_search(args)
+        # for i in res.get("items"):
+        #     print(f"_do_get_persons: @{i.user} {i.sortname}")
+
+    res["u_context"] = u_context
+    return res
+
+
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
@@ -282,28 +281,34 @@ def material_search(set_scope=False, batch_id="", material=None):
         t0 = time.time()
         # 1. Set user grants (is_auditor,allow_edit) and 
         u_context = UserContext()
-
         request_args = u_context.get_request_args(request)
-        material = request_args.get("material", "")
-        if material:
+
+        if request_args.get("set_scope", False):
+            # 'set_scope=1' tells, that material info is missing
+            root = Root.get_batch(current_user.username, request_args.get("batch_id"))
+            request_args["material"] = root.material
+            request_args["state"] = root.state
+
+        if request_args.get("material", ""):
             # 2. Select batch_id: '2021-10-20.005', material: 'Family Tree'
             #    and store them to session
-            ##batch_id = request_args.get("batch_id", "")
+
             u_context.set_material(request_args)
     
             # 3. Synchronize list view scope
             #    'person_scope': ('Manninen#Matti#', '> end') from request
             u_context.set_scope("person_scope", request_args)
-        
-        
+
+
         args = {"pg": "search", "u_context":u_context}
         rule = request_args.get("rule","init")
         args["rule"] = rule
         key = request_args.get("key","")
         if key: args["key"] = key
         set_scope = request_args.get("set_scope", set_scope)
-        logger.debug(f"#(1)bp.scene.routes.material_search: {request.method} {list(request.args)} "
-              f"set_scope={set_scope} material={material}:{batch_id}")
+        logger.debug("#(1)bp.scene.routes.material_search: "
+                     f"{request.method} {list(request.args.items())} "
+                     f"set_scope={set_scope} material={material}:{batch_id}")
         if set_scope:
             if batch_id:
                 # A new scope (batch or common data) must be stored
@@ -314,6 +319,7 @@ def material_search(set_scope=False, batch_id="", material=None):
             args["material"] = material
             args["set_scope"] = set_scope
         # Else missing batch_id indicates common data to be selected by root.state
+
         if rule == 'notetext':
             return note_search(args)
 

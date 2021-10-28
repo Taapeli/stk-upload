@@ -65,7 +65,7 @@ class UserContext():
 
         Useful methods:
             batch_user()                Get effective user id or None
-            owner_str()                 Get owner description in current language
+            current_material()                 Get owner description in current language
             # use_owner_filter()          True, if data is filtered by owner id
             #? use_common()               True, if using common data
             privacy_ok(obj)             returns True, if there is no privacy reason
@@ -127,10 +127,11 @@ class UserContext():
 
         #TODO Define new context_code values including audit states and approved data
         """
-        COMMON = 1  # Approved data
-        OWN = 2     # Candidate data
-        BATCH = 4   # Selected candidate batch
-        CODE_VALUES = ['', 'apr', 'can', 'apr+can', 'bat', 'can+bat'] # for logger
+        COMMON = "common" # Approved data
+        OWN = "own"       # Candidate data
+        BATCH = "batch"   # Selected candidate batch
+        CODE_VALUES = {"common":"apr", "own":"can", "batch":"bat"} # for logger
+        #             ['', 'apr', 'can', 'apr+can', 'bat', 'can+bat']
 
         def __init__(self):
             ''' Initialize choice texts in user language '''
@@ -184,6 +185,7 @@ class UserContext():
         self.lang = self.session.get('lang','') # User language
         self.batch_id = self.session.get("batch_id")
         self.material = self.session.get("material")
+        self.is_approved = self.batch_id is None
 
         """ Set active user, if any username """
         if current_user:
@@ -195,21 +197,23 @@ class UserContext():
         return
 
     def set_material(self, request_args={}):
-        """ Store data context from request arguments.
+        """ Store data context from request arguments, if available.
         """
         self.material = request_args.get('material', self.material)
         self.session['material'] = self.material
         if 'batch_id' in request_args:
             self.batch_id = request_args.get('batch_id', self.batch_id)
             self.session['batch_id'] = self.batch_id
-
         return
 
 
     def set_scope(self, browse_var, request_args):
-        """ Store data context from request arguments.
+        """ Store data context from request arguments for data listing page.
         """
-        self.browse_var = None
+        # if browse_var:
+        #     self.browse_var = browse_var    # Is needed?
+        # else:
+        #     self.browse_var = None
         self.first = ''
         self.last = self.NEXT_END
         self.direction = 'fw' # or "bw"
@@ -277,9 +281,9 @@ class UserContext():
         if request is None:
             return {}
         if request.method == "GET":
-            return request.args
+            return dict(request.args)
         else: 
-            return request.form
+            return dict(request.form)
 
 
     def _set_next_from_request(self, request=None):  # UNUSED???
@@ -325,14 +329,13 @@ class UserContext():
         else:
             return None
 
-    def owner_str(self):
-        # Return current owner choice as text.
-        
-        # Only used in test_owner_filter.test_ownerfilter_nouser()
+    def current_material(self):
+        # Return current material and batch choice as text.
         try:
             m = self.material or 'Family Tree'
-            print(f"UserContext.owner_str: {m}:{self.batch_id}, {self.state}" )
-            if self.state == State.ROOT_ACCEPTED:
+            if m == "Place": m = "Places"
+            print(f"UserContext.current_material: {m}:{self.batch_id}, {self.state}" )
+            if self.state is None or self.state == State.ROOT_ACCEPTED:
                 return f"{ _(m) }: { _('Approved Isotammi tree') } {self.batch_id}"
             else:
                 return f"{ _(m) }: { _(self.state) } {self.batch_id}"
