@@ -33,7 +33,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 """
 # blacked 2021-05-01 JMä
-import shareds
+#import shareds
 import logging
 
 from .base import NodeObject, Status
@@ -186,7 +186,7 @@ class SourceReader(DataService):
             # For reader only; writer has no context?
             self.user_context = u_context
             self.username = u_context.user
-            if u_context.context_code == u_context.ChoicesOfView.COMMON:
+            if u_context.context_code == u_context.is_approved:
                 self.use_user = None
             else:
                 self.use_user = u_context.user

@@ -65,7 +65,7 @@ class UserContext():
 
         Useful methods:
             batch_user()                Get effective user id or None
-            current_material()                 Get owner description in current language
+            show_current_material()                 Get owner description in current language
             # use_owner_filter()          True, if data is filtered by owner id
             #? use_common()               True, if using common data
             privacy_ok(obj)             returns True, if there is no privacy reason
@@ -122,52 +122,41 @@ class UserContext():
     NEXT_END = '>'    # end reached: there is nothing forwards
 
 
-    class ChoicesOfView():
-        """ Represents all possible combinations of selection by owner and batch. 
-
-        #TODO Define new context_code values including audit states and approved data
-        """
-        COMMON = "common" # Approved data
-        OWN = "own"       # Candidate data
-        BATCH = "batch"   # Selected candidate batch
-        CODE_VALUES = {"common":"apr", "own":"can", "batch":"bat"} # for logger
-        #             ['', 'apr', 'can', 'apr+can', 'bat', 'can+bat']
-
-        def __init__(self):
-            ''' Initialize choice texts in user language '''
-            self.as_str = {
-                self.COMMON:              N_('Approved common data'), #TODO: --> "Audit requested"
-                self.OWN:                 N_('My candidate data'), 
-                self.BATCH:               N_('My selected candidate batch'),
-                # self.COMMON + self.OWN:   N_('My own and approved common data'), 
-                # self.COMMON + self.BATCH: N_('My selected batch and approved common data')
-            }
-            self.as_state = {
-                self.COMMON:              State.ROOT_ACCEPTED, 
-                self.OWN:                 State.ROOT_CANDIDATE, 
-                self.BATCH:               State.ROOT_CANDIDATE
-            }
-            self.batch_name = None
-
-        def get_state(self, number):
-            # Return the state for given context_code value
-            try:
-                return self.as_state[number]
-            except Exception:
-                print(f"UserContext.ChoicesOfView.get_state: invalid key {number} for state")
-                return None
-
-        def get_valid_key(self, number):
-            # Return the key, if valid number, otherwise 0
-            if number in list(self.as_str.keys()):
-                return number
-            return 0
-
-        def get_valid_number(self, number):
-            # Return the key, if valid number, otherwise 0
-            if number in list(self.as_str.keys()):
-                return number
-            return 0
+    # class ChoicesOfView():
+    #     """ Represents all possible combinations of selection by owner and batch. 
+    #
+    #     #TODO Define new context_code values including audit states and approved data
+    #     """
+    #     # COMMON = "common" # Approved data
+    #     # OWN = "own"       # Candidate data
+    #     # BATCH = "batch"   # Selected candidate batch
+    #     CODE_VALUES = {"common":"apr", "own":"can", "batch":"bat"} # for logger
+    #     #             ['', 'apr', 'can', 'apr+can', 'bat', 'can+bat']
+    #
+    #     def __init__(self):
+    #         ''' Initialize choice texts in user language '''
+    #         self.as_str = {
+    #             self.COMMON:              N_('Approved common data'), #TODO: --> "Audit requested"
+    #             self.OWN:                 N_('My candidate data'), 
+    #             self.BATCH:               N_('My selected candidate batch'),
+    #             # self.COMMON + self.OWN:   N_('My own and approved common data'), 
+    #             # self.COMMON + self.BATCH: N_('My selected batch and approved common data')
+    #         }
+    #         self.as_state = {
+    #             self.COMMON:              State.ROOT_ACCEPTED, 
+    #             self.OWN:                 State.ROOT_CANDIDATE, 
+    #             self.BATCH:               State.ROOT_CANDIDATE
+    #         }
+    #         self.batch_name = None
+    #
+    ##    def get_state(self, number):
+    #         # Return the state for given context_code value
+    #         try:
+    #             return self.as_state[number]
+    #         except Exception:
+    #             print(f"UserContext.ChoicesOfView.get_state: invalid key {number} for state")
+    #             return None
+    #
 
     # def __init__(self, user_session, current_user=None, request=None, material=None):
 
@@ -206,37 +195,46 @@ class UserContext():
             self.session['batch_id'] = self.batch_id
         return
 
+    def _get_years(self):
+        """Selected years (from-to) years=1111-2222. """
+        years = self.request_args.get('years', None)
+        if years:
+            y1, y2 = years.split('-')
+            if y1: yi1 = int(y1)
+            else: yi1 = 0
+            if y2: yi2 = int(y2)
+            else: yi2 = 9999
+            print(f'UserContext.set_scope: Objects between years {self.years}')
+            return [yi1, yi2] # selected years [from, to]
+        else:
+            return []
 
-    def set_scope(self, browse_var, request_args):
+
+    def set_scope(self, browse_var:str, request_args:list):
         """ Store data context from request arguments for data listing page.
+
+            Optional settings:
+            - first         Lower limit of display scope for 'browse_var' view
+            - last          Higher limit of display scope
+            - years         optional time limit like [1800, 1899]
+            - series        Source data theme like "birth"
+            - count         Max count of objects to display
+            - allow_edit    User is granted to edit objects
         """
-        # if browse_var:
-        #     self.browse_var = browse_var    # Is needed?
-        # else:
-        #     self.browse_var = None
+        #Defaults:
         self.first = ''
         self.last = self.NEXT_END
         self.direction = 'fw' # or "bw"
 
         if request_args:
             self.request_args = request_args
-            # Selected years (from-to) years=1111-2222
-            years = request_args.get('years', None)
-            if years:
-                y1, y2 = years.split('-')
-                if y1:  yi1 = int(y1)
-                else:   yi1 = 0
-                if y2:  yi2 = int(y2)
-                else:   yi2 = 9999
-                self.years = [yi1, yi2]     # selected years [from, to]
-                print(f'UserContext.set_scope: Objects between years {self.years}')
-
-
+            self.years = self._get_years()
             """ Use case: Selected material for display
-                set_scope = 1 -> set a new scope, common material or a specific user batch 
+                If set_scope is given, set a new scope: common material or a specific user batch 
             """
-            set_scope = request_args.get('set_scope')
-            if set_scope:
+            # set_scope = request_args.get('set_scope')
+            # if set_scope:
+            if request_args.get('set_scope'):
                 # self.session['user_context'] = self.context_code
                 self.session[browse_var] = ('< start', '> end')
                 # self.session['family_scope'] = ('< start', '> end')
@@ -244,10 +242,10 @@ class UserContext():
                 # self.session['source_scope'] = ('< start', '> end')
                 # self.session['media_scope'] = ('< start', '> end')
                 # self.session['comment_scope'] = ('< start', '> end')
-            else:
-                # If got no request user_context, use session values
-                print("UserContext: Uses same or default user_context=" \
-                      f"{self.context_code} {self.choices.get_state(self.context_code)} {self.material}")
+            # else:
+            #     # If got no request user_context, use session values
+            #     print("UserContext: Uses same or default user_context=" \
+            #           f"{self.context_code} {self.choices.get_state(self.context_code)} {self.material}")
         else:
             self.request_args = {}
             self.years = []                         # example [1800, 1899]
@@ -267,7 +265,7 @@ class UserContext():
 
         """ Batch selection by state (and material?) """
 
-        self.state = self.session.get("state")
+        self.state = self.session.get("state", None)
         # if not self.state: self.state = self.choices.get_state(self.context_code)
 
 
@@ -329,12 +327,12 @@ class UserContext():
         else:
             return None
 
-    def current_material(self):
+    def show_current_material(self):
         # Return current material and batch choice as text.
         try:
             m = self.material or 'Family Tree'
             if m == "Place": m = "Places"
-            print(f"UserContext.current_material: {m}:{self.batch_id}, {self.state}" )
+            print(f"UserContext.show_current_material: {m}:{self.batch_id}, {self.state}" )
             if self.state is None or self.state == State.ROOT_ACCEPTED:
                 return f"{ _(m) }: { _('Approved Isotammi tree') } {self.batch_id}"
             else:
@@ -442,7 +440,7 @@ class UserContext():
 
 
     def next_name(self, direction='fw'):
-        ''' Tells the next name from which the names must be read from.
+        ''' For template pages, tells the next page starting name.
 
             :parameter:    direction    str    forwards or backwards
 
@@ -471,14 +469,14 @@ class UserContext():
         return ret
 
     def at_end(self):
-        ''' Tells, if page contains the last name of data.
+        ''' For template pages, tells if page contains the last name of data.
         '''
         if self.last.startswith(self.NEXT_END):
             return True
         return False
 
     def at_start(self):
-        ''' Tells, if page contains the first name of data.
+        ''' For template pages, tells if page contains the first name of data.
         '''
         if self.first == '' or self.first.startswith(self.NEXT_START):
             return True

@@ -122,7 +122,7 @@ class User(UserMixin):
     login_count = 0
     agree = False
     # View filtering option. Stored here for logging in scene pages
-    current_context = UserContext.ChoicesOfView.COMMON
+    current_context = "common"
 
     def __init__(self, **kwargs):
         if 'id' in kwargs:
