@@ -65,7 +65,7 @@ def batches():
         #print(b)
         file = b.get('file')
         status = b.get('state')
-        if file and status == State.ROOT_CANDIDATE:
+        if file: # and status == State.ROOT_CANDIDATE:
             file = file.split("/")[-1].replace("_clean.gramps",".gramps")
             file = file.split("/")[-1].replace("_clean.gpkg",".gpkg")
             b['file'] = file 

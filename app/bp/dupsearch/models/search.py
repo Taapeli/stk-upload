@@ -356,9 +356,6 @@ def __search_dups(n,count,args,rec,matches):
     if n % 100 == 0: print(f"{time.time()-t0}: Searching {n}/{count}")
     pid = rec.get('pid')
     p = rec.get('p')
-    gid = p.get('id')
-    print("gid2",gid)
-    gids.add(gid)
 
     namenodes = rec.get('namenodes') # there may be several Name nodes with order:0, pick the first
     pn = namenodes[0]
@@ -389,7 +386,6 @@ def __search_dups(n,count,args,rec,matches):
         )
     return 
     
-gids = set()
 def search_dups(args):
     print(args)
     print(args.model)
@@ -405,11 +401,6 @@ def search_dups(args):
     print("num matches:", len(matches))
     matches = prune_matches(matches)
     print("pruned matches:", len(matches))
-    for m in matches:
-        p1 = m['p1']
-        gid = p1.get("id")
-        if gid in gids: gids.remove(gid)
-    print("gids:", gids)
     return sorted(matches,reverse=True,key=itemgetter('score')) #[0:50]
 
 
