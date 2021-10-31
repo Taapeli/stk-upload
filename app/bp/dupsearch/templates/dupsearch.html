@@ -112,7 +112,8 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 				<td><a 
 						target=_blank 
 						v-bind:href="'/dupsearch/compare?uuid1=' + match.p1.uuid + '&uuid2=' + match.p2.uuid +
-						'&batch_id1=' + batch1.id + '&batch_id2=' + batch2.id
+						'&batch_id1=' + batch1.id + '&batch_id2=' + batch2.id +
+						'&state1=' + batch1.state + '&state2=' + batch2.state
 						"
 						class="plink"
 					>{{ _("Compare") }}

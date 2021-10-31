@@ -140,8 +140,10 @@ def compare():
     uuid2 = request.args.get("uuid2")
     batch_id1 = request.args.get("batch_id1")
     batch_id2 = request.args.get("batch_id2")
+    state1 = request.args.get("state1")
+    state2 = request.args.get("state2")
     
-    def get_person(uuid):
+    def get_person(service, uuid):
         result = service.get_person_data(uuid)
 
         # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
@@ -155,25 +157,22 @@ def compare():
             person.root = result.get("root")
             return person, objs
         
-    u_context = UserContext(user_session, current_user, request)
+    u_context1 = UserContext(user_session, current_user, request)
+    u_context2 = UserContext(user_session, current_user, request)
+    if state1 == "Accepted":        
+        u_context1.user = None
+        
+    if state2 == "Accepted":        
+        u_context2.user = None
 
-    u_context.batch_id = batch_id1
-    with PersonReaderTx("read_tx", u_context) as service:
-        person1,objs1 = get_person(uuid1)
+    u_context1.batch_id = batch_id1
+    with PersonReaderTx("read_tx", u_context1) as service:
+        person1,objs1 = get_person(service, uuid1)
 
-    u_context.batch_id = batch_id2
-    with PersonReaderTx("read_tx", u_context) as service:
-        person2,objs2 = get_person(uuid2)
+    u_context2.batch_id = batch_id2
+    with PersonReaderTx("read_tx", u_context2) as service:
+        person2,objs2 = get_person(service, uuid2)
     
-#     from pprint import pprint
-#     pprint(person1.__dict__)
-#     for name in person1.names:
-#         pprint(name.__dict__)
-#     for e in person1.events:
-#         pprint(e.__dict__)
-#         pprint(e.dates.__dict__)
-        
-        
     return render_template('/compare.html', 
                            person1=person1,
                            objs1=objs1,
