@@ -231,8 +231,8 @@ class UserContext():
                 set_scope = 1 -> set a new scope, common material or a specific user batch 
             """
             set_scope = request_args.get('set_scope')
-            print(f"UserContext: material {self.session['material']}<-{material}/{self.material}"
-                  f" batch_id {self.session['batch_id']}<-{self.batch_id}")
+            print(f"UserContext: material {self.session.get('material')}<-{material}/{self.material}"
+                  f" batch_id {self.session.get('batch_id')}<-{self.batch_id}")
             if set_scope:
                 batch_id = request_args.get('batch_id','')
                 if batch_id:
