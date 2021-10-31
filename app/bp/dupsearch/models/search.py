@@ -356,6 +356,9 @@ def __search_dups(n,count,args,rec,matches):
     if n % 100 == 0: print(f"{time.time()-t0}: Searching {n}/{count}")
     pid = rec.get('pid')
     p = rec.get('p')
+    gid = p.get('id')
+    print("gid2",gid)
+    gids.add(gid)
 
     namenodes = rec.get('namenodes') # there may be several Name nodes with order:0, pick the first
     pn = namenodes[0]
@@ -377,7 +380,7 @@ def __search_dups(n,count,args,rec,matches):
         match (node) --> (mn:Name{{order:0}})
         RETURN node, score, collect(mn) as namenodes, id(node) as matchpid   
         order by score desc
-        limit 5
+        limit 50
     """,callback=lambda n,count,rec,kwargs: display_matches(args,p,pid,pn,rec,matches,index_name,index_name2),
         searchkey=searchkey,
         pid=pid,
@@ -386,7 +389,7 @@ def __search_dups(n,count,args,rec,matches):
         )
     return 
     
-
+gids = set()
 def search_dups(args):
     print(args)
     print(args.model)
@@ -402,6 +405,11 @@ def search_dups(args):
     print("num matches:", len(matches))
     matches = prune_matches(matches)
     print("pruned matches:", len(matches))
+    for m in matches:
+        p1 = m['p1']
+        gid = p1.get("id")
+        if gid in gids: gids.remove(gid)
+    print("gids:", gids)
     return sorted(matches,reverse=True,key=itemgetter('score')) #[0:50]
 
 
@@ -433,7 +441,7 @@ def prune_matches(matches):
     #pprint(refnames['Aina'])
     def get_firstnames(key):
         words = key.split()
-        print(words)
+        #print(words)
         names = [refnames.get(value[1:],value[1:]) for value in words if value[0] == "G"]
         return set(names)
     
@@ -476,9 +484,10 @@ def prune_matches(matches):
 #         firstnames2 = get_firstnames(key2, refnames)
 #         firstnames1 = set(key1.split())
 #         firstnames2 = set(key2.split())
-        common_names = firstnames1 & firstnames2
-        if len(common_names) == 0: continue
-        if common_names != firstnames1 and common_names != firstnames2: continue
+
+#         common_names = firstnames1 & firstnames2
+#         if len(common_names) == 0: continue
+#         if common_names != firstnames1 and common_names != firstnames2: continue
         
         matches2.append(match)
     return matches2

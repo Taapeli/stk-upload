@@ -21,13 +21,17 @@ import json
 import time
 from types import SimpleNamespace
 
-from flask import render_template, request, jsonify #, redirect, url_for, session
+from flask import render_template, request, jsonify, flash,  session as user_session
 from flask_security import login_required, roles_required
+from flask_security import current_user
 #from flask_babelex import _
 from . import bp
 
 from bl.root import Root, State
 from bp.dupsearch.models import search
+from ui.user_context import UserContext
+from bl.person_reader import PersonReaderTx
+from bl.base import Status
 
 @bp.route('/dupsearch',  methods=['GET'])
 @login_required
@@ -120,10 +124,58 @@ def get_models():
     return jsonify(res)
 
 @bp.route('/dupsearch/upload', methods=['POST'])
-@login_required
 @roles_required('audit')
+@login_required
 def upload():
     file = request.files['file']
     res = search.upload(file)
     return jsonify(res)
 
+
+@bp.route('/dupsearch/compare', methods=['GET'])
+@login_required
+@roles_required('audit')
+def compare():
+    uuid1 = request.args.get("uuid1")
+    uuid2 = request.args.get("uuid2")
+    batch_id1 = request.args.get("batch_id1")
+    batch_id2 = request.args.get("batch_id2")
+    
+    def get_person(uuid):
+        result = service.get_person_data(uuid)
+
+        # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+        if Status.has_failed(result):
+            flash(f'{result.get("statustext","error")}', "error")
+            person = None
+            objs = []
+        else:
+            person = result.get("person")
+            objs = result.get("objs", [])
+            person.root = result.get("root")
+            return person, objs
+        
+    u_context = UserContext(user_session, current_user, request)
+
+    u_context.batch_id = batch_id1
+    with PersonReaderTx("read_tx", u_context) as service:
+        person1,objs1 = get_person(uuid1)
+
+    u_context.batch_id = batch_id2
+    with PersonReaderTx("read_tx", u_context) as service:
+        person2,objs2 = get_person(uuid2)
+    
+#     from pprint import pprint
+#     pprint(person1.__dict__)
+#     for name in person1.names:
+#         pprint(name.__dict__)
+#     for e in person1.events:
+#         pprint(e.__dict__)
+#         pprint(e.dates.__dict__)
+        
+        
+    return render_template('/compare.html', 
+                           person1=person1,
+                           objs1=objs1,
+                           person2=person2,
+                           objs2=objs2)

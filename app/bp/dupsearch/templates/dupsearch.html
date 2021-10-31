@@ -14,7 +14,7 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 </style>
 
 <div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
-  <h1>{{ _('Duplicates search') }}</h1>
+  <h1>{{ _('Find possible duplicates') }}</h1>
 
     <div class="startbox2">
         <h2>{{ _('Data Batches') }}</h2>
@@ -73,12 +73,13 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 				<th>Score
 				<th>Person 1
 				<th>Person 2
+				<th>Compare
 				<th>Names match?
 			<tr v-for="match in matches" class="match_row">
 				<td>${ match.score.toFixed(2) }
 				<!-- td class="matchvector">${ match.matchvector } -->
 				<!-- td><a href="#" @click=show_persons($event)>Show</a -->
-				<td><a 
+				<td><zzza 
 						target=_blank 
 						v-bind:href="'/scene/person?uuid=' + match.p1.uuid"
 						class="plink"
@@ -93,7 +94,7 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 					</a>
 					<div class="xsearchkey">${ match.p1.page }</div>
 					#} 
-				<td><a 
+				<td><zzza 
 						target=_blank 
 						v-bind:href="'/scene/person?uuid=' + match.p2.uuid"
 						class="plink"
@@ -108,7 +109,16 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 					</a> 
 					<div class="xsearchkey">${ match.p2.page }</div>
 					#} 
+				<td><a 
+						target=_blank 
+						v-bind:href="'/dupsearch/compare?uuid1=' + match.p1.uuid + '&uuid2=' + match.p2.uuid +
+						'&batch_id1=' + batch1.id + '&batch_id2=' + batch2.id
+						"
+						class="plink"
+					>{{ _("Compare") }}
+					</a>
 				<td><span v-if="match.p1.name == match.p2.name">Same name</span>
+				<td><span v-if="match.p1.id == match.p2.id">Same ID</span>
 			</tr>
 			</table>
 			${ matches.length } matches
