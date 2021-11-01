@@ -1,0 +1,192 @@
+{# templates/admin/start.html_ #}
+{% extends "/scene/sc_layout.html" %}
+{% import '/scene/macros.html' as macro with context %}
+{% block title %}{{ _('Compare possible duplicates') }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% include "security/_messages.html" %}
+
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+
+<style>
+div.searchkey { display: none; }
+td.matchvector:hover ~ td > div.searchkey { display: inline; }
+</style>
+
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+.row {
+  margin-left:10px;
+  margin-right:-5px;
+}
+  
+.column {
+  float: left;
+  width: 50%;
+  padding: 5px;
+}
+
+/* Clearfix (clear floats) */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+}
+
+th, td {
+  text-align: left;
+  #padding: 16px;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.hdrcol {
+  width: 10%;
+}
+
+.datacol {
+  width: 45%;
+}
+</style>
+
+{% macro parents(person) -%}
+    {% for fam in person.families_as_child %}
+            {% if fam.father %}
+                {{ macro.person_name(fam.father.names[0]) }}
+            {% endif %}
+            {% if fam.mother %}
+                <br>
+                {{ macro.person_name(fam.mother.names[0]) }}
+			{% endif %}
+			</ul>
+		</div>
+	</div>
+	{% endfor %}
+{%- endmacro %}
+
+{% macro families(person) -%}
+    {% for fam in person.families_as_parent %}
+    <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
+        <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
+                {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
+            {{fam.marriage_dates}}</p>
+        <ul>
+            {% if fam.father %}
+            <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
+            {% endif %}{% if fam.mother %}
+            <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
+            {% endif %}{% if fam.children|count %}
+            <li>{{ _("Children") }}<ul>
+                    {% for ch in fam.children|sort %}
+                    <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
+                    {% endfor -%}
+                </ul>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endfor %}
+{%- endmacro %}
+
+
+
+{% macro events(person, objs) -%}
+		<table>
+    {% for e in person.events if e.type != "Cause Of Death" %}
+                    <tr>
+                        <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
+                            <div class="magnifier" alt="{{e.uniq_id}}">
+                                <a href="/scene/event/uuid={{e.uuid}}" class="inlink">
+                                   {{e.type|transl('evt')}}</a>
+        {% if e.role and e.role != "Primary" %}
+                                <span class="typedesc">({{e.role|transl('role')}})</span>
+        {% endif -%}
+                            </div>
+                        </td>
+
+                        <td class="ColumnDate {{e.dates.calendar_css()}}">{{e.dates}}</td>
+
+                        <td class="ColumnPlace">{% set br=0 %}
+    	{% for pref in e.place_ref %}{% set pl = objs[pref] %}
+    	    {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
+                            <a href="/scene/location/uuid={{pl.uuid}}" class="inlink"
+                             title="{{ _('of type') }} {{pl.type}}; {{ _('see details of place') }}">
+                              {{macro.place_names_lang(pl)}}</a
+                            >{% if pl.uppers %},
+                            <small>{{macro.place_names_lang(pl.uppers[0])}}</small>{% endif %}
+    	{% endfor %}
+                        </td>
+
+                        <td class="ColumnDescription"><div>{{e.description}}</div>
+                            <div>
+        {% if e.type == "Death" and person1.cause_of_death %}
+                                <span class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span>
+	       {% if person.cause_of_death.dates %}
+                                <span class="{{person.cause_of_death.dates.calendar_css()}}">{{person.cause_of_death.dates}}</span> 
+           {% endif -%}
+                                {{person.cause_of_death.description}}
+                                {{macro.place_names_lang(person.cause_of_death)}}<br>
+        {% endif %}
+	    {% if e.note_ref %}
+        	{% for ref in e.note_ref %}{% set note = objs[ref] %}
+	                            	<div><span class="typedesc">{{ note.type|transl('notet') }}</span>
+				                      </div>
+	        {% endfor %}
+        {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+    {% endfor %}
+
+		</table>
+
+{%- endmacro %}
+
+
+ <h1>{{ _('Compare possible duplicates') }}</h1>
+
+<div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
+    <div>
+    	<table border>
+    	<tr><th class="hdrcol">{{ _("Names") }}
+    		<td class="datacol">{{ macro.person_name(person1.names[0]) }}
+    		<td class="datacol">{{ macro.person_name(person2.names[0]) }}
+		</tr>
+    			
+    	<tr><th>{{ _("Parents") }}
+			<td>{{ parents(person1) }}
+			<td>{{ parents(person2) }}
+		</tr>
+		    			
+    	<tr><th>{{ _("Families") }}
+			<td>{{ families(person1) }}
+			<td>{{ families(person2) }}
+		</tr>
+
+    	<tr><th>{{ _("Events") }}
+			<td>{{ events(person1, objs1) }}
+			<td>{{ events(person2, objs2) }}
+		</tr>
+
+		</table>
+	</div>
+
+
+</div>
+
+
+{% endblock %}

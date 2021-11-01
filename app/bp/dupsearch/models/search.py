@@ -377,7 +377,7 @@ def __search_dups(n,count,args,rec,matches):
         match (node) --> (mn:Name{{order:0}})
         RETURN node, score, collect(mn) as namenodes, id(node) as matchpid   
         order by score desc
-        limit 5
+        limit 50
     """,callback=lambda n,count,rec,kwargs: display_matches(args,p,pid,pn,rec,matches,index_name,index_name2),
         searchkey=searchkey,
         pid=pid,
@@ -386,7 +386,6 @@ def __search_dups(n,count,args,rec,matches):
         )
     return 
     
-
 def search_dups(args):
     print(args)
     print(args.model)
@@ -433,7 +432,7 @@ def prune_matches(matches):
     #pprint(refnames['Aina'])
     def get_firstnames(key):
         words = key.split()
-        print(words)
+        #print(words)
         names = [refnames.get(value[1:],value[1:]) for value in words if value[0] == "G"]
         return set(names)
     
@@ -476,9 +475,10 @@ def prune_matches(matches):
 #         firstnames2 = get_firstnames(key2, refnames)
 #         firstnames1 = set(key1.split())
 #         firstnames2 = set(key2.split())
-        common_names = firstnames1 & firstnames2
-        if len(common_names) == 0: continue
-        if common_names != firstnames1 and common_names != firstnames2: continue
+
+#         common_names = firstnames1 & firstnames2
+#         if len(common_names) == 0: continue
+#         if common_names != firstnames1 and common_names != firstnames2: continue
         
         matches2.append(match)
     return matches2
