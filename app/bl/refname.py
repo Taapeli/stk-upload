@@ -372,7 +372,7 @@ class RefnameReader:
         """Initiate datastore.
 
         :param: readservice   pe.neo4j.readservice.Neo4jReadService
-        :param: u_context     ui.user_context.UserContext object
+        :param: u_context     ui.context.UserContext object
         """
         self.readservice = readservice
         self.driver = readservice.driver

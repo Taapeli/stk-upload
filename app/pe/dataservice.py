@@ -42,7 +42,7 @@ class DataService:
         """Create a reader object with db driver and user context.
 
         :param: service_name    str - one of service names (update, read, read_tx, simple)
-        :param: user_context    <ui.user_context.UserContext object>
+        :param: user_context    <ui.context.UserContext object>
         :param: tx              None or <neo4j.work.transaction.Transaction object>
 
         - 1. if tx is given                              Use the given, opened transaction

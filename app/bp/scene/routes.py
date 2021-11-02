@@ -55,7 +55,7 @@ from bl.person_reader import PersonReaderTx
 from bl.media import MediaReader
 from bl.comment import Comment, CommentReader, CommentsUpdater
 from bp.graph.models.fanchart import FanChart
-from ui.user_context import UserContext
+from ui.context import UserContext
 from ui import jinja_filters
 from ui.util import error_print, stk_logger
 from models import mediafile
@@ -144,7 +144,7 @@ def note_item_format(rec, searchtext, min_length=100):
 
 def note_search(args):
     print(args)
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     u_context.count = request.args.get("c", 100, type=int)
 
     try:
@@ -217,8 +217,8 @@ def _do_get_persons(args):
     else:  # pg:'all'
         #u_context.set_scope_from_request(request, "person_scope")
         args["rule"] = "all"
-    request_args = UserContext.get_request_args(request)
-    u_context.count = request_args.get("c", 100, type=int)
+    #request_args = UserContext.get_request_args(request)
+    u_context.count = u_context.get("c", 100, int)
 
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
@@ -274,13 +274,12 @@ def show_persons():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 #def show_person_search(set_scope=None, batch_id=None):
-def search_material(set_scope=False, batch_id="", material=None):
-    """Start material browse with Persons search page."""
+def start_search_people(set_scope=False, batch_id="", material=None):
+    """Start material browsing with Persons search page."""
     try:
         t0 = time.time()
         # 1. Set user grants (is_auditor,allow_edit) and 
         u_context = UserContext()
-        request_args = u_context.get_request_args(request)
 
         # if request_args.get("set_scope", False):
         #     # 'set_scope=1' tells, that material info is missing
@@ -288,23 +287,23 @@ def search_material(set_scope=False, batch_id="", material=None):
         #     request_args["material"] = root.material
         #     request_args["state"] = root.state
 
-        if request_args.get("material"):
+        if u_context.get("material"):
             # 2. Select batch_id: '2021-10-20.005', material: 'Family Tree'
             #    and store them to session
 
-            u_context.set_material(request_args)
+            #u_context.set_material(request_args)
     
             # 3. Synchronize list view scope
             #    'person_scope': ('Manninen#Matti#', '> end') from request
-            u_context.set_scope("person_scope", request_args)
+            u_context.set_scope("person_scope")
 
 
         args = {"pg": "search", "u_context":u_context}
-        rule = request_args.get("rule","init")
+        rule = u_context.get("rule","init")
         args["rule"] = rule
-        key = request_args.get("key","")
+        key = u_context.get("key","")
         if key: args["key"] = key
-        set_scope = request_args.get("set_scope", set_scope)
+        set_scope = u_context.get("set_scope", set_scope)
         if set_scope:
             #material = request_args.get("material")
             if not material:
@@ -319,7 +318,7 @@ def search_material(set_scope=False, batch_id="", material=None):
             args["material"] = material
             args["set_scope"] = set_scope
 
-        logger.debug("#(1)bp.scene.routes.search_material: "
+        logger.debug("#(1)bp.scene.routes.start_search_people: "
                      f"{request.method} {list(request.args.items())} "
                      f"set_scope={set_scope} material={material}:{batch_id}")
 
@@ -329,7 +328,7 @@ def search_material(set_scope=False, batch_id="", material=None):
         u_context.set_scope_from_request(request, "person_scope")
 
         res = _do_get_persons(args)        
-        logger.info(f"#(2)bp.scene.routes.search_material: {request.method} "
+        logger.info(f"#(2)bp.scene.routes.start_search_people: {request.method} "
               f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
@@ -341,11 +340,11 @@ def search_material(set_scope=False, batch_id="", material=None):
         elapsed = time.time() - t0
         stk_logger(
             u_context,
-            f"-> bp.scene.routes.search_material/{rule}"
+            f"-> bp.scene.routes.start_search_people/{rule}"
             f" n={len(found)}{hidden_txt} e={elapsed:.3f}",
         )
         print(
-            f"bp.scene.routes.search_material: Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
+            f"bp.scene.routes.start_search_people: Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
         )
 
         surnamestats = []
@@ -380,7 +379,7 @@ def search_material(set_scope=False, batch_id="", material=None):
     # except Exception as e:
     #     return redirect(url_for("entry"))
     except Exception as e:
-        error_print("search_material", e)
+        error_print("start_search_people", e)
         found = []
         num_hidden = 0
         status = ""
@@ -421,7 +420,7 @@ def show_person(uuid=None, fanchart=False):
     uuid = request.args.get("uuid", uuid)
     fanchart_shown = request.args.get("fanchart", fanchart)
     dbg = request.args.get("debug", None)
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
@@ -469,7 +468,7 @@ def show_person_family_tree_hx(uuid=None):
     Htmx-component for displaying selected relatives tab: the families details.
     """
     uuid = request.args.get("uuid", uuid)
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
@@ -509,7 +508,7 @@ def show_person_fanchart_hx(uuid=None):
     """
     t0 = time.time()
     uuid = request.args.get("uuid", uuid)
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
@@ -562,7 +561,7 @@ def person_name_changetype(uniq_id):
         uid_list = request.form.getlist("order")
         index = uid_list.index(uniq_id)
         nametype = nametype_list[index]
-        u_context = UserContext(user_session, current_user, request)
+        u_context = UserContext()
 
         with PersonWriter("simple", u_context) as service:
             service.set_name_type(int(uniq_id), nametype)
@@ -574,7 +573,7 @@ def person_name_changetype(uniq_id):
 @bp.route("/scene/get_person_names/<uuid>", methods=["PUT"])
 @roles_accepted("guest", "research", "audit", "admin")
 def get_person_names(uuid):
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     args = {}
     with PersonReader("read", u_context) as service:
@@ -594,7 +593,7 @@ def get_person_names(uuid):
 @bp.route("/scene/get_person_primary_name/<uuid>", methods=["PUT"])
 @roles_accepted("guest", "research", "audit", "admin")
 def get_person_primary_name(uuid):
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(uuid)
@@ -609,7 +608,7 @@ def get_person_primary_name(uuid):
 @bp.route("/scene/set_primary_name/<uuid>/<int:old_order>", methods=["PUT"])
 @roles_accepted("audit", "admin")
 def set_primary_name(uuid, old_order):
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     # writeservice = get_dataservice("update")
     with PersonWriter("update", u_context) as service:
@@ -623,7 +622,7 @@ def sort_names():
     uuid = request.form.get("uuid")
     uid_list = request.form.getlist("order")
     uid_list = [int(uid) for uid in uid_list]
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     # writeservice = get_dataservice("update")
     with PersonWriter("simple", u_context) as service:
@@ -640,7 +639,7 @@ def obsolete_show_event_v1(uuid):
 
     Derived from bp.obsolete_tools.routes.show_baptism_data()
     """
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     with EventReader("read", u_context) as service:
         # reader = EventReader(readservice, u_context)
@@ -660,7 +659,7 @@ def obsolete_show_event_v1(uuid):
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def edit_event(uuid):
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     with EventReader("read", u_context) as service:
         # datastore = EventReader(readservice, u_context)
@@ -682,7 +681,7 @@ def edit_event(uuid):
 @roles_accepted("guest", "research", "audit", "admin")
 def show_event_vue(uuid):
     """ Show Event page template which marshals data by Vue. """
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     return render_template("/scene/event_vue.html", uuid=uuid, user_context=u_context)
 
 
@@ -692,6 +691,7 @@ def show_event_vue(uuid):
 def json_get_event():
     """Get Event page data."""
     t0 = time.time()
+    u_context = UserContext()
     request_args = UserContext.get_request_args(request)
     try:
         args = request_args
@@ -707,7 +707,6 @@ def json_get_event():
                 {"records": [], "status": Status.ERROR, "statusText": "Missing uuid"}
             )
 
-        u_context = UserContext(user_session, current_user, request)
         with EventReader("read", u_context) as service:
             # reader = EventReader(readservice, u_context)
             res = service.get_event_data(uuid, args)
@@ -804,7 +803,7 @@ def json_update_event():
             args = json.loads(request.data)
             # print(f'got request data: {args}')
         uuid = args.get("uuid")
-        u_context = UserContext(user_session, current_user, request)
+        u_context = UserContext()
 
         # writeservice = get_dataservice("update")
         with EventWriter("update", u_context) as service:
@@ -843,7 +842,7 @@ def show_families():
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set context by owner and the data selections
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     # Which range of data is shown
     u_context.set_scope_from_request(request, "person_scope")
     opt = request.args.get("o", "father", type=str)
@@ -873,7 +872,7 @@ def show_family_page(uuid=None):
     if not uuid:
         return redirect(url_for("virhesivu", code=1, text="Missing Family key"))
     t0 = time.time()
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
 
     with FamilyReader("read", u_context) as service:
         # reader = FamilyReader(readservice, u_context)
@@ -919,7 +918,7 @@ def json_get_person_families():
                 {"records": [], "status": Status.ERROR, "statusText": "Missing uuid"}
             )
 
-        u_context = UserContext(user_session, current_user, request)
+        u_context = UserContext()
         with FamilyReader("read", u_context) as service:
             # reader = FamilyReader(readservice, u_context)
             res = service.get_person_families(uuid)
@@ -975,7 +974,7 @@ def show_places():
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set context by owner and the data selections
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     # Which range of data is shown
     u_context.set_scope_from_request(request, "place_scope")
     u_context.count = request.args.get("c", 50, type=int)
@@ -1013,7 +1012,7 @@ def show_places():
 def show_place(locid):
     """Home page for a Place, shows events and place hierarchy."""
     t0 = time.time()
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     try:
         with PlaceReader("read", u_context) as service:
             # reader = PlaceReader(readservice, u_context)
@@ -1063,7 +1062,7 @@ def show_sources(series=None):
     print(f"--- {user_session}")
     t0 = time.time()
     # Set context by owner and the data selections
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     # Which range of data is shown
     u_context.set_scope_from_request(request, "source_scope")
     u_context.count = request.args.get("c", 100, type=int)
@@ -1101,7 +1100,7 @@ def show_source_page(sourceid=None):
     uuid = request.args.get("uuid", sourceid)
     if not uuid:
         return redirect(url_for("virhesivu", code=1, text="Missing Source key"))
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     try:
         with SourceReader("read", u_context) as service:
             res = service.get_source_with_references(uuid, u_context)
@@ -1145,7 +1144,7 @@ def show_medias():
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set context by owner and the data selections
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     # Which range of data is shown
     u_context.set_scope_from_request(request, "media_scope")
     u_context.count = 20
@@ -1174,7 +1173,7 @@ def show_media(uuid=None):
     One Media
     """
     uuid = request.args.get("uuid", uuid)
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     with MediaReader("read", u_context) as service:
         res = service.get_one(uuid)
 
@@ -1293,7 +1292,7 @@ def show_topics():
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set context by owner and the data selections
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     # Which range of data is shown
     u_context.set_scope_from_request(request, "comment_scope")
     u_context.count = 20
@@ -1343,7 +1342,7 @@ def fetch_comments():
     """Fetch topics and comments to given object """
     from pe.neo4j.cypher.cy_comment import CypherComment
 
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     uniq_id = int(request.args.get("uniq_id"))
     # uuid = request.args.get("uuid")
     if request.args.get("start"):
@@ -1383,7 +1382,7 @@ def fetch_comments():
 def add_comment():
     """Add a comment"""
     
-    u_context = UserContext(user_session, current_user, request)
+    u_context = UserContext()
     # uuid = request.form.get("uuid")
     uniq_id = int(request.form.get("uniq_id", 0))
     comment_text = request.form.get("comment_text")
