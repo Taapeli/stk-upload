@@ -173,8 +173,10 @@ def compare():
     with PersonReaderTx("read_tx", u_context2) as service:
         person2,objs2 = get_person(service, uuid2)
     
-    return render_template('/compare.html', 
+    return render_template('/compare.html',
+                           batch_id1=batch_id1, 
                            person1=person1,
                            objs1=objs1,
+                           batch_id2=batch_id2, 
                            person2=person2,
                            objs2=objs2)

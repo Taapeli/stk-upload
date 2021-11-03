@@ -162,6 +162,12 @@ tr:nth-child(even) {
 <div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
     <div>
     	<table border>
+    	<tr><th>{{ _("Batch") }}
+    		<td>{{ batch_id1 }} 
+    		<td>{{ batch_id2 }} 
+    	<tr><th>{{ _("ID") }}
+    		<td>{{ person1.id }} 
+    		<td>{{ person2.id }} 
     	<tr><th class="hdrcol">{{ _("Names") }}
     		<td class="datacol">{{ macro.person_name(person1.names[0]) }}
     		<td class="datacol">{{ macro.person_name(person2.names[0]) }}
