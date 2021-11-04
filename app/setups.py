@@ -53,7 +53,7 @@ from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
 from bl.admin.models.user_admin import UserProfile
 from bl.dates import DateRange  # Aikavälit ym. määreet
 from datetime import datetime
-from ui.user_context import UserContext
+#from ui.context import UserContext
 
 import json
 from flask_babelex import lazy_gettext as _l

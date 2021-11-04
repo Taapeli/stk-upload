@@ -27,11 +27,11 @@ def user_env():
 
 
 def test_ownerfilter_nouser():
-    # UserContext(user_session)
+    # UserContext()
     user_session = {}
     user_session['user_context'] = 1
 
-    f = UserContext(user_session)
+    f = UserContext()
 
     assert f.context_code == 1
     assert f.show_current_material() == 'Isotammi database'
@@ -52,7 +52,7 @@ def test_ownerfilter_user_selection(user_env):
     '''
     user_session, current_user, request = user_env
 
-    f = UserContext(user_session, current_user, request)
+    f = UserContext()
 
     assert f.context_code == 1
     assert f.show_current_material() == 'Isotammi database'
@@ -76,7 +76,7 @@ def test_ownerfilter_next_item(user_env):
     user_session, current_user, request = user_env
 
     # 0. Initialize UserContext with current session, user and request info
-    f = UserContext(user_session, current_user, request)
+    f = UserContext()
     
     # 1. In the beginning
     user_session['person_scope'] = ['', '<']

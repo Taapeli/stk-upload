@@ -35,13 +35,13 @@ import logging
 
 logger = logging.getLogger("stkserver")
 
-from flask import render_template, request, redirect, url_for, send_from_directory
+from flask import render_template, request, redirect, url_for #, send_from_directory
 from flask import flash, session, jsonify
 from flask_security import login_required, roles_accepted, roles_required, current_user
 from flask_babelex import _
 
 import shareds
-from ui.user_context import UserContext
+from ui.context import UserContext
 from bl.base import Status
 from bl.person import PersonWriter
 
@@ -163,7 +163,7 @@ def estimate_dates(uid=None):
     # ext = _("estimated lifetime")
     # return render_template("/talletettu.html", text=msg, info=ext)
 
-    u_context = UserContext(session, current_user, request)
+    u_context = UserContext()
     with PersonWriter("update", u_context) as service:
         ret = service.set_estimated_lifetimes(uids)
 

@@ -29,7 +29,7 @@ from . import bp
 
 from bl.root import Root, State
 from bp.dupsearch.models import search
-from ui.user_context import UserContext
+from ui.context import UserContext
 from bl.person_reader import PersonReaderTx
 from bl.base import Status
 
@@ -157,8 +157,8 @@ def compare():
             person.root = result.get("root")
             return person, objs
         
-    u_context1 = UserContext(user_session, current_user, request)
-    u_context2 = UserContext(user_session, current_user, request)
+    u_context1 = UserContext()
+    u_context2 = UserContext()
     if state1 == "Accepted":        
         u_context1.user = None
         
