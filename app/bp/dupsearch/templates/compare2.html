@@ -180,9 +180,8 @@ tr:nth-child(even) {
     		<td colspan="3">{{ person1.id }} 
     		<td colspan="3">{{ person2.id }} 
     	<tr><th class="hdrcol">{{ _("Names") }}
-    		<td colspan="3" class="datacol">{{ macro.person_name(person1.names[0]) }}
-    		<td colspan="3" class="datacol">{{ macro.person_name(person2.names[0]) }}
-		</tr>
+		{{ namelines|safe }}
+    			
     	<tr><th>{{ _("Parents") }}
 			<td colspan="3">{{ parents(person1) }}
 			<td colspan="3">{{ parents(person2) }}
@@ -194,9 +193,7 @@ tr:nth-child(even) {
 		</tr>
 
     	<tr><th>{{ _("Events") }}
-			<td colspan="3">{{ events(person1, objs1) }}
-			<td colspan="3">{{ events(person2, objs2) }}
-		</tr>
+    	{{ difftable|safe }}
 		</table>
 	</div>
 
