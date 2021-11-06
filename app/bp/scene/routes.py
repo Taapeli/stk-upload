@@ -168,6 +168,17 @@ def format_item(rec, searchtext, min_length=100):
     """
     import re
 
+    def generate_choices(q):
+        choices = []
+        for i,c in enumerate(q):
+            choice = fr"{q[0:i]}\w{q[i:]}"  # add any character
+            choices.append(choice)
+            choice = fr"{q[0:i]}\w{q[i+1:]}" # replace any character
+            choices.append(choice)
+            choice = fr"{q[0:i]}{q[i+1:]}"   # remove any character
+            choices.append(choice)
+        return choices
+
     #print(rec)
     note = rec.get('note')
     #id = note.get('id')
@@ -181,11 +192,19 @@ def format_item(rec, searchtext, min_length=100):
     else:
         searchwords =  [searchtext] + searchtext.split()
     for wordnum,searchword in enumerate(searchwords):
-        regextext = searchword
-        regextext = regextext.replace('\\',r'\\')
-        regextext= regextext.replace('(',r'\(').replace(')',r'\)')
-        regextext = regextext.replace('[',r'\[').replace(']',r'\]')
-        regextext = regextext.replace('*',r'\w*?')  # asterisk means word characters only, ? indicate non-greedy search
+        if searchword.endswith("~"):
+            searchword = searchword[:-1]
+            choices = generate_choices(searchword)
+            choices = [searchword] + choices
+            print(choices)
+            regextext = "(" + "|".join(choices) + ")"
+        else:
+            regextext = searchword
+            regextext = regextext.replace('\\',r'\\')
+            regextext= regextext.replace('(',r'\(').replace(')',r'\)')
+            regextext = regextext.replace('[',r'\[').replace(']',r'\]')
+            regextext = regextext.replace('*',r'\w*?')  # asterisk means word characters only, ? indicate non-greedy search
+            
         regex = fr"\W({regextext})\W"
 
         m = re.search(regex, f" {text.lower()} ")  # add delimiters to start and end (will match \W)
@@ -220,7 +239,7 @@ def format_item(rec, searchtext, min_length=100):
                 excerpt = excerpt +"..."
             break # found a match
         else:
-            excerpt = ""
+            excerpt = text[0:min_length]
             if wordnum < len(searchwords)-1:
                 continue  # try again except for last word
     referrers = rec.get('referrers')
@@ -247,7 +266,7 @@ def note_search(args):
         items=res['items']
         displaylist = []
         for item in items:
-            print("item", item)
+            #print("item", item)
             #note = item[0]
             #x = item[1]
             displaylist.append(format_item(item, searchtext))

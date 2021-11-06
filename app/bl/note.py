@@ -217,7 +217,7 @@ class NoteReader(DataService):
         args["material"] = context.material
         args["state"] = context.state
         res = self.dataservice.tx_note_search(args)
-        print(res)
+        #print(res)
         return res
     
     
