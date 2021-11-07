@@ -15,7 +15,7 @@ div.starters {
     /*height: 120px;*/
     align-items: center;
 }
-div.starters > span {
+div.starters span {
     padding: 2pt;
     display: inline-flex;
 }
@@ -72,18 +72,17 @@ div.starters button {
 
 {% if current_user.is_authenticated and 
    ( current_user.has_role('research') or current_user.has_role('admin') ) %}
-    {% set ctxt = session['user_context'] %}
         <div class="startbox">
             <div style="display: inline-block;">
 
                 <h2>{{ _('Browse Common Materials') }}</h2>
 
                 <p>{{ _('View different approved common data') }}.</p>
-                <form method="get" action="/scene/persons/search">
-                    <input type="hidden" name="set_scope" value="1">
+                <form method="get" action="/scene/material/common">
+<!--                <input type="hidden" name="set_scope" value="1"> -->
 <!--                <input type="hidden" name="state" value="Accepted"> -->
                     <div class="starters">
-                        <button type="submit" name="material" value="Family Tree"
+                        <button type="submit" name="material_type" value="Family Tree"
                             >{{ _("Browse") }}:<br>{{ _('Approved Isotammi tree') }}
                         </button>
                     </div>
@@ -99,37 +98,32 @@ div.starters button {
     {% else %} class="startbox"
     {% endif -%}>
             <div style="display: inline-block;">
-                <form method="post" action="/scene/persons/search">
-                    <input type="hidden" name="set_scope" value="1">
 
-    {% set ctxt = session['user_context'] %}
+                <h2>{{ _('My candidate material') }}</h2>
 
-                    <h2>{{ _('My candidate material') }}</h2>
-
-                    <p>{{ _('View your own candidate materials') }}.</p>
-                    <div class="starters">
-
-    {% for batch in batches %}
-        {% if batch.description %}
-                  {% set title = _(batch.material) + " / " + batch.description %}
-        {% else %}{% set title = _(batch.material) %}
+                <p>{{ _('View your own candidate materials') }}.</p>
+                <div class="starters">
+    {% for root in batches %}
+                <form method="post" action="/scene/material/batch">
+        {% if root.description %}
+                  {% set title = _(root.material) + " / " + root.description %}
+        {% else %}{% set title = _(root.material) %}
         {% endif -%}
-                    <span>
-                        <input type="hidden" name="material" value="{{batch.material}}">
-                        <input type="hidden" name="state" value="{{batch.state}}">
-                        <button type="submit" name="batch_id" value="{{ batch.id }}"
-           {% if batch_id == batch.id %}autofocus{% endif %}
-                         title="{{ title }}">
-           {% if batch.material != "Family Tree" %}
-                            <span class="typedesc">{{ _(batch.material) }}</span>
+                        <span>
+                            <input type="hidden" name="material_type" value="{{root.material}}">
+                            <input type="hidden" name="state" value="{{root.state}}">
+                            <button type="submit" name="batch_id" value="{{ root.id }}"
+           {% if batch_id == root.id %}autofocus{% endif %}
+                             title="{{ title }}">
+           {% if root.material != "Family Tree" %}
+                                <span class="typedesc">{{ _(root.material) }}</span>
            {% endif %}
-                        {{ batch.id }}<br>{{ batch.filename|replace('_',' ') }}
-                        </button>
-                    </span>
+                            {{ root.id }}<br>{{ root.filename|replace('_',' ') }}
+                            </button>
+                        </span>
+                    </form>
     {% endfor -%}
-
                  </div>
-               </form>
              </div>
         </div>
 {% endif %}

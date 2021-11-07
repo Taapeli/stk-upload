@@ -1,13 +1,20 @@
-from bl.base import Status, StkEncoder
-from bl.source import SourceReader, SourceWriter
+"""
+    Merge two Sources.
+
+Created on 1.11.2021
+
+@author: kku
+"""
 
 from .. import bp
 
 from flask import request, session as user_session, render_template
 from flask_security import current_user, roles_accepted
 
-from ui.user_context import UserContext
-import shareds
+from bl.base import Status, StkEncoder
+from bl.source import SourceReader, SourceWriter
+from ui.context import UserContext
+
 
 @bp.route("/merge/sources")
 @roles_accepted('audit')

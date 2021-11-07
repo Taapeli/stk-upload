@@ -67,6 +67,24 @@ from models import mediafile
 
 calendars = [_("Julian"), _("Hebrew")]  # just for translations
 
+# ---------------------- Enter with material select ---------------------------
+
+@bp.route("/scene/material/<kind>", methods=["GET", "POST"])
+@login_required
+@roles_accepted("guest", "research", "audit", "admin")
+def material_select(kind):  #set_scope=False, batch_id="", material=None):
+    """Select material for browsing and go to Search page.
+    
+       Parameters for database access and displaying current material
+       - If browsing Accepted (common) materials (= a collection of multiple batches)
+         - input: material and state – no uniq_id
+       - If browsing other material types:
+         - input: batch id
+         - figure: material and state
+    """
+    # 1. User and data context from session and current_user
+    args = UserContext.select_material(kind)
+    return f"<p>TODO {args}</p><p><a href='/'>Alkuun</a></p>"
 
 # ------------------------- Menu 1: Material search ------------------------------
 

@@ -89,6 +89,24 @@ class UserContext:
             self.state = State.ROOT_ACCEPTED
         return
 
+    @staticmethod
+    def select_material(kind):
+        """ Save material selection from request to session.
+
+            kind == "batch"     the material is single batch
+            kind == "common"    the material is batches selected by material_type and state
+        """
+        args = UserContext.get_request_args()
+        print(f"ui.context.UserContext.select_material: {args}")
+
+        if kind == "batch":
+            print("ui.context.UserContext.select_material: TODO the material is single batch")
+            
+        elif kind == "common":
+            print("ui.context.UserContext.select_material: "
+                  "TODO the material is batches selected by material_type and state")
+        return args
+
     def get(self, var, default=None, datatype=None):
         """ Get request argument value from args or form data.
         
@@ -265,6 +283,6 @@ class UserContext:
         if request is None:
             return {}
         if request.method == "GET":
-            return dict(request.args)
+            return request.args.to_dict()
         else:
-            return dict(request.form)
+            return request.form.to_dict()
