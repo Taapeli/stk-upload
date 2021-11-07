@@ -29,16 +29,16 @@ def user_env():
 def test_ownerfilter_nouser():
     # UserContext()
     user_session = {}
-    user_session['user_context'] = 1
+    user_session['user_context'] = "common"
 
     f = UserContext()
 
-    assert f.context_code == 1
-    assert f.show_current_material() == 'Isotammi database'
+    assert f.current_context == "common"
+    assert f.display_current_material() == 'Isotammi database'
 
-    user_session['user_context'] = 2
-    assert f.context_code == 1
-    assert f.show_current_material() == 'Isotammi database', "No user gets wrong data"
+    user_session['user_context'] = "batch"
+    assert f.current_context == "common"
+    assert f.display_current_material() == 'Isotammi database', "No user gets wrong data"
 
 
 def test_ownerfilter_user_selection(user_env):
@@ -54,8 +54,8 @@ def test_ownerfilter_user_selection(user_env):
 
     f = UserContext()
 
-    assert f.context_code == 1
-    assert f.show_current_material() == 'Isotammi database'
+    assert f.current_context == "common"
+    assert f.display_current_material() == 'Isotammi database'
     # x = f.use_owner_filter()
     # assert x == False, "use_owner_filter() failed"
     x = f.use_common()

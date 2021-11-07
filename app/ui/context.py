@@ -29,6 +29,7 @@ Created on 1.11.2021
 """
 from flask import session, request
 from flask_security import current_user
+from flask_babelex import _
 from urllib.parse import unquote_plus
 
 from bl.root import State
@@ -52,14 +53,16 @@ class UserContext:
         # 1. From session (previous settings)
 
         self.session = session
-        self.state = None
-        self.lang = self.session.get("lang", "")  # User language
         self.batch_id = self.session.get("batch_id")
         self.material = self.session.get("material")
-        self.is_approved = self.batch_id is None or self.batch_id == ""
-
+        self.state = self.session.get("state")
+        self.lang = self.session.get("lang", "")  # User language
+        print(f"#UserContext: session={self.session}")
+        print(f"#UserContext: SESSION material={self.material}, batch={self.batch_id}, state={self.state}")
+        
         # 2. From current_user (login data)
 
+        self.current_context = self.COMMON
         self.user = None
         self.allow_edit = False  # By default data edit is not allowed
         self.is_auditor = False
@@ -69,17 +72,21 @@ class UserContext:
                 self.user = current_user.username
                 self.is_auditor = current_user.has_role("audit")
 
-        # obsolete set_material(self, request_args={}):
-
         # 3. From request parameters (calling page)
         #    overriding session data
 
         self.args = UserContext.get_request_args()
+        print(f"#UserContext: REQUEST material={self.args.get('material')},"
+              f" batch={self.args.get('batch_id')} / {self.current_context}")
         self.material = self.args.get("material", self.material)
         self.session["material"] = self.material
         if "batch_id" in self.args:
-            self.batch_id = self.args.get("batch_id", self.batch_id)
+            # Access data by batch_id
+            self.batch_id = self.args["batch_id"] #, self.batch_id)
             self.session["batch_id"] = self.batch_id
+        else:
+            # Access data by material and state
+            self.state = State.ROOT_ACCEPTED
         return
 
     def get(self, var, default=None, datatype=None):
@@ -90,6 +97,23 @@ class UserContext:
         if datatype is int and not default is None:
             return int(self.args.get(var, default))
         return self.args.get(var, default)
+
+    def is_common(self):
+        """ Tells, if current material may be formed from multiple batches.
+
+            - True, if current material may have multiple batches
+            - False, if current material is limited by batch_id
+        """
+        return self.current_context == self.COMMON
+
+    def use_case(self):
+        """ Return current use case (owner choice) as code.
+        """
+        if self.batch_id:
+            return self.BATCH # Selected candidate or approved batch
+        else:
+            return self.COMMON # Approved data
+        # else self.OWN - Collection of own data not in use
 
     def set_scope(self, browse_var:str):
         """ Store data context from request for listing page.
@@ -121,13 +145,13 @@ class UserContext:
                 if y2: yi2 = int(y2)
                 else: yi2 = 9999
                 self.years = [yi1, yi2]
-                print(f'UserContext.set_scope: Objects between years {self.years}')
+                print(f'#UserContext.set_scope: Objects between years {self.years}')
 
             if self.args.get('set_scope'):
                 self.session[browse_var] = ('< start', '> end')
             else:
                 # If got no request user_context, use session values
-                print("UserContext: Uses same or default user_context: " \
+                print("#UserContext: Uses same or default user_context: " \
                       f"{self.current_context} {self.material} in state {self.state}")
         else:
             self.request_args = {}
@@ -137,32 +161,35 @@ class UserContext:
 
         #   For logging of scene area pages, set User.current_context variable:
         #   are you browsing common, audited data or your own batches?
-        if self.user and self.batch_id: #self.context_code == self.choices.OWN:
-            self.current_context = "batch"
+        if not self.is_common():     #self.user and self.batch_id:
+            # Data selection by Root.batch_id and username
+            self.current_context = self.BATCH   # "batch"
             # May edit data, if user has appropriate role
             self.allow_edit = self.is_auditor
         else:
-            self.current_context = "common"
+            # Data selection by Root.state and Root.material
+            self.current_context = self.COMMON  # "common"
+            self.state = State.ROOT_ACCEPTED
         current_user.current_context = self.current_context
 
-        """ Batch selection by state (and material?) """
-
+        # State selection, if any
         self.state = self.session.get("state", None)
-        # if not self.state: self.state = self.choices.get_state(self.context_code)
         return
 
-    def show_current_material(self):
+    def display_current_material(self):
         """ Return current material and batch choice for display. """
         try:
-            m = self.material or 'Family Tree'
-            if m == "Place": m = "Places"
-            print(f"UserContext.show_current_material: {m}:{self.batch_id}, {self.state}" )
-            if self.state is None or self.state == State.ROOT_ACCEPTED:
+            m = self.material or 'Unknown material'
+            #if m == "Place": m = "Places"
+            print(f"#UserContext.display_current_material: {m}: {self.batch_id}, state={self.state}" )
+            if self.state is None:
+                return f"{ _(m) }: {self.batch_id}"
+            elif self.state == State.ROOT_ACCEPTED:
                 return f"{ _(m) }: { _('Approved Isotammi tree') } {self.batch_id}"
             else:
                 return f"{ _(m) }: { _(self.state) } {self.batch_id}"
-        except:
-            return ''
+        except Exception as e:
+            return "Error: " + str(e)
 
     def set_scope_from_request(self, request=None, browse_var=None):
         ''' Calculate list display scope values from request or session. 
@@ -201,14 +228,35 @@ class UserContext:
 
         return
 
-    def use_case(self):
-        """ Return current use case (owner choice) as code.
+    def update_session_scope(self, var_name, name_first, name_last, limit, rec_cnt):
+        """ Update the session scope according to items really found from database.
+        
+            var_name    str    field name in self.session
+            name_first  str    the first item name got from database
+            name_last   str    the last item name
+            limit       int    number of items requested
+            rec_cnt     int    records actually received
+        
+            The new scope is [name_first, name_last]. If end has been reached, 
+            the corresponding limit is set to endmark '> end' or '< start'.
         """
-        if self.batch_id:
-            return self.BATCH # Selected candidate or approved batch
+        print(f"#UserContext.update_session_scope: Got {rec_cnt}  of {limit} items {name_first!r} – {name_last!r}")
+        scope_old = (self.first, self.last)
+        # 1. starting scope in session     ['y','z']
+        # 2a accessed next fw              ['z', 'ö']  set first = old last
+        # 2b or accessed next bw           ['x', 'y']  set last = old first
+        if self.direction == 'bw':
+            self.first = name_first if rec_cnt == limit else '< start'
+            self.last = name_last
         else:
-            return self.COMMON # Approved data
-        # else self.OWN - Collection of own data not in use
+            self.first = name_first
+            self.last = name_last if rec_cnt == limit else '> end'
+
+        if scope_old[0] != self.first or scope_old[1] != self.last:
+            print(f"#UserContext.update_session_scope: New {var_name!r} {self.first!r} – {self.last!r}")
+
+        self.session[var_name] = (self.first, self.last)
+        print(f"#UserContext.update_session_scope: UserContext = {repr(self.session)}")
 
     @staticmethod
     def get_request_args():

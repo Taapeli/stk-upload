@@ -22,7 +22,7 @@
 </head>
 <body>
 {% if user_context %}
-  {% if user_context.current_context == "common" %}{% set material_st = "common" %}
+  {% if user_context.is_common() %}{% set material_st = "common" %}
   {% else %}{% set material_st = "own" %}{% endif %}
 {% endif %}
 {% block body %}

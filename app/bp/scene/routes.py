@@ -44,7 +44,7 @@ from flask_babelex import _
 import shareds
 from . import bp
 from bl.base import Status, StkEncoder
-from bl.root import Root, DEFAULT_MATERIAL
+from bl.root import State
 from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
@@ -206,7 +206,7 @@ def _do_get_persons(args):
     #     Search by name & years
     #         POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
     """
-    u_context = args["u_context"] #UserContext(user_session, current_user, request, args.get("material"))
+    u_context = args["u_context"]
     if args.get("pg") == "search":
         # No scope
         # u_context.set_scope_from_request()
@@ -218,13 +218,14 @@ def _do_get_persons(args):
         #u_context.set_scope_from_request(request, "person_scope")
         args["rule"] = "all"
     #request_args = UserContext.get_request_args(request)
+    u_context.set_scope("person_scope")
     u_context.count = u_context.get("c", 100, int)
 
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
         # for i in res.get("items"): print(f"_do_get_persons: @{i.user} {i.sortname}")
 
-    res["u_context"] = u_context
+    #res["u_context"] = u_context
     return res
 
 # @bp.route('/scene/persons', methods=['POST', 'GET'])
@@ -234,19 +235,21 @@ def _do_get_persons(args):
 def show_persons():
     """Persons listings."""
     t0 = time.time()
-    args = {"pg": "all"}
-    #     years = request.args.get('years')
-    #     if years: args['years'] = years
-    fw = request.args.get("fw")
-    if fw:
-        args["fw"] = fw
-    c = request.args.get("c")
-    if c:
-        args["c"] = c
-    print(f"{request.method} All persons {args}")
+    u_context = UserContext()
+    run_args = {"pg": "all", "u_context":u_context}
+    # #     years = request.args.get('years')
+    # #     if years: args['years'] = years
+    # fw = request.args.get("fw")
+    # if fw:
+    #     args["fw"] = fw
+    # c = request.args.get("c")
+    # if c:
+    #     args["c"] = c
+        # 1. User and data context from session and current_user
+    print(f"{request.method} All persons {run_args}")
 
-    res = _do_get_persons(args)
-    u_context = res.get("u_context")
+    res = _do_get_persons(run_args)
+    #u_context = res.get("u_context")
 
     if Status.has_failed(res):
         flash(_("Data read failed."), "error")
@@ -259,7 +262,7 @@ def show_persons():
         u_context,
         f"-> bp.scene.routes.show_persons" f" n={len(found)}/{hidden} e={elapsed:.3f}",
     )
-    print(f"Got {len(found)} persons {num_hidden} hidden, fw={fw}")
+    print(f"Got {len(found)} persons {num_hidden} hidden, fw={u_context.fw}")
     return render_template(
         "/scene/persons_list.html",
         persons=found,
@@ -274,77 +277,82 @@ def show_persons():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 #def show_person_search(set_scope=None, batch_id=None):
-def start_search_people(set_scope=False, batch_id="", material=None):
-    """Start material browsing with Persons search page."""
+def start_search_people():  #set_scope=False, batch_id="", material=None):
+    """Start material browsing with Persons search page.
+    
+       Parameters for database access and displaying current material
+       - If browsing Accepted (common) materials (= a collection of multiple batches)
+         - input: material and state – no uniq_id
+       - If browsing other material types:
+         - input: batch id
+         - figure: material and state
+    """
     try:
         t0 = time.time()
-        # 1. Set user grants (is_auditor,allow_edit) and 
+        # 1. User and data context from session and current_user
         u_context = UserContext()
 
-        # if request_args.get("set_scope", False):
-        #     # 'set_scope=1' tells, that material info is missing
-        #     root = Root.get_batch(current_user.username, request_args.get("batch_id"))
-        #     request_args["material"] = root.material
-        #     request_args["state"] = root.state
+        # Combine with request parameters
+        new_material = u_context.get('material')
+        new_state = u_context.get("state", State.ROOT_ACCEPTED)
+        new_batch_id = "" if u_context.is_common() else u_context.get("batch_id", "")
 
-        if u_context.get("material"):
-            # 2. Select batch_id: '2021-10-20.005', material: 'Family Tree'
-            #    and store them to session
+        run_args = {"pg": "search", "u_context":u_context}
+        rule = u_context.get("rule", "init")
+        run_args["rule"] = rule
+        key = u_context.get("key", "")
+        if key: run_args["key"] = key
 
-            #u_context.set_material(request_args)
-    
-            # 3. Synchronize list view scope
-            #    'person_scope': ('Manninen#Matti#', '> end') from request
-            u_context.set_scope("person_scope")
-
-
-        args = {"pg": "search", "u_context":u_context}
-        rule = u_context.get("rule","init")
-        args["rule"] = rule
-        key = u_context.get("key","")
-        if key: args["key"] = key
-        set_scope = u_context.get("set_scope", set_scope)
-        if set_scope:
-            #material = request_args.get("material")
-            if not material:
-                # A new scope (batch or common data) must be stored
-                root = Root.get_batch(current_user.username, batch_id)
-                if root:
-                    material = root.material
-                else:
-                    material = DEFAULT_MATERIAL
+        #set_scope = u_context.get("set_scope")
+        if u_context.get("set_scope"):
+            # # A new scope (batch or common data) must be stored
+            # root = Root.get_batch(current_user.username, u_context.batch_id)
+            # if root:
+            #     material = root.material
+            #     new_state = root.state
+            #     u_context.state = new_state
+            #     if new_state != State.ROOT_ACCEPTED:
+            #         new_batch_id = u_context.get('batch_id',"")
+            #
             # else:
-            #     args["batch_id"] = batch_id
-            args["material"] = material
-            args["set_scope"] = set_scope
+            #     material = DEFAULT_MATERIAL
+            # # else:
+            #     run_args["batch_id"] = new_batch_id
+            run_args["set_scope"] = True
+            run_args["material"] = new_material
+            run_args["state"] = new_state
+            run_args["batch_id"] = new_batch_id
+        # 'person_scope': ('Manninen#Matti#', '> end') from request
 
         logger.debug("#(1)bp.scene.routes.start_search_people: "
                      f"{request.method} {list(request.args.items())} "
-                     f"set_scope={set_scope} material={material}:{batch_id}")
+                     f"material={new_material}: {new_batch_id} {new_state}")
 
+        # Free text search by Note texts
         if rule == 'notetext':
-            return note_search(args)
+            return note_search(run_args)
 
+        # Mitä tää on
         u_context.set_scope_from_request(request, "person_scope")
 
-        res = _do_get_persons(args)        
+        # Execute database search
+        res = _do_get_persons(run_args)        
         logger.info(f"#(2)bp.scene.routes.start_search_people: {request.method} "
-              f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {args} ")
+              f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {run_args} ")
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
-
+        
         found = res.get("items", [])
         num_hidden = res.get("num_hidden", 0)
         hidden_txt = f" hide={num_hidden}" if num_hidden > 0 else ""
         status = res["status"]
         elapsed = time.time() - t0
         stk_logger(
-            u_context,
-            f"-> bp.scene.routes.start_search_people/{rule}"
-            f" n={len(found)}{hidden_txt} e={elapsed:.3f}",
+            u_context, "-> bp.scene.routes.start_search_people/"
+            f"{rule} n={len(found)}{hidden_txt} e={elapsed:.3f}",
         )
-        print(
-            f"bp.scene.routes.start_search_people: Got {len(found)} persons {num_hidden} hidden, {rule}={key}, status={status}"
+        print(f"bp.scene.routes.start_search_people: Got {len(found)} persons "
+              f"{num_hidden} hidden, {rule}={key}, status={status}"
         )
 
         surnamestats = []

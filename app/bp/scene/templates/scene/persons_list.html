@@ -9,14 +9,6 @@
 {% set next_fw = user_context.next_name('fw') %}
 {% set next_bw = user_context.next_name('bw') %}
 {% set next_at_end = user_context.at_end() %}
-{% set ctxt = user_context.context_code %}
-{% if ctxt == 3 or ctxt == 5 %}{#
-	#   common_own   011 3 = 1+2 = user's data & common
-	#   common_batch 101 5 = 1+4 = user batch & common #}
-	{% set multi_owners = ctxt - 1 %}
-{% else %}
-    {% set multi_owners = 0 %}
-{% endif %}
 
 <div id="startdiv">
     <h1>{{ _('Persons') }}</h1>
@@ -88,10 +80,6 @@
 			<tbody>
 
 	    {% for p in persons %}
-	       {% if multi_owners %}
-              {% set owner_but_me = p.owners | sort %}
-	       {% else %}{% set owner_but_me = [] %}
-	       {% endif %}
 	            <tr><td class="ColumnAlpha">
            {% set ini = p.sortname[0] %}
            {% if loop.changed(ini) %}

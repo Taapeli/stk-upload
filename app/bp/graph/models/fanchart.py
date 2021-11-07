@@ -164,7 +164,7 @@ class FanChart:
         """
         # Set up the database access and find out whether looking at own data.
         u_context = UserContext()
-        privacy = u_context.is_approved # context_code == u_context.ChoicesOfView.COMMON
+        privacy = u_context.is_common()
 
         # Fill in basic data from current person
         with PersonReader("read", u_context) as service:

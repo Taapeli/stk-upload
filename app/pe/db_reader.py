@@ -35,7 +35,7 @@ class DbReader:
             # For reader only; writer has no context?
             self.user_context = u_context
             self.username = u_context.user
-            if u_context.is_approved:
+            if u_context.is_common():
                 self.use_user = None
             else:
                 self.use_user = u_context.user
