@@ -16,7 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 """
     User Context for Scene pages has information of 
     - current user,
@@ -32,6 +31,7 @@ from flask_security import current_user
 from flask_babelex import _
 from urllib.parse import unquote_plus
 
+from bl.base import Status
 from bl.root import State
 
 
@@ -90,31 +90,70 @@ class UserContext:
         return
 
     @staticmethod
-    def select_material(kind):
-        """ Save material selection from request to session.
+    def select_material(breed):
+        """
+        Save material selection from request to session.
 
-            kind == "batch"     the material is single batch
-            kind == "common"    the material is batches selected by material_type and state
+            breed == "batch"     the material is single batch
+            breed == "common"    the material is batches selected by material_type and state
+
+        1.1 The material is single batch
+            /gramps/commands/2021-10-09.001 HTTP/1.1
+            --> "GET /scene/material/batch?batch_id=2021-10-09.001 HTTP/1.1" 200 -
+        
+        From /start/logged
+        ------------------
+        1.2 The material is single batch
+            /start/logged HTTP/1.1
+            --> "POST /scene/material/batch HTTP/1.1" 200 -
+        
+        2. The material is batches selected by material_type and state
+            /start/logged HTTP/1.1
+            --> "GET /scene/material/common?material_type=Family+Tree HTTP/1.1" 200 -
         """
         args = UserContext.get_request_args()
         print(f"ui.context.UserContext.select_material: {args}")
+        print(f"ui.context.UserContext.select_material: {session}")
+        session["breed"] = breed
+        session['set_scope'] = True     # Reset material and scope
 
-        if kind == "batch":
-            print("ui.context.UserContext.select_material: TODO the material is single batch")
+        if breed == "batch":
+            # request args:  {'batch_id': '2021-10-09.001'}
+            session['batch_id'] = args.get('batch_id')
+            # optional args: {'material_type': 'Family Tree', 'state': 'Candidate'}
+            session['material_type'] = args.get('material_type')
+            session['state'] = args.get('state')
+
+            print("ui.context.UserContext.select_material: the material is single batch")
+            if not ( "batch_id" in session and session["batch_id"] ):
+                return {"status": Status.ERROR, "statustext": _("Missing batch id")}
+            return {"status": Status.OK, "breed": breed, "args":args}
             
-        elif kind == "common":
-            print("ui.context.UserContext.select_material: "
-                  "TODO the material is batches selected by material_type and state")
-        return args
+        elif breed == "common":
+            # request args: {'material_type': 'Place Data', 'state': 'Candidate', 'batch_id': '2021-10-26.001'}
+            session['material_type'] = args.get('material_type')
+            session['state'] = args.get('state', State.ROOT_DEFAULT_STATE)
+            session['batch_id'] = None
 
-    def get(self, var, default=None, datatype=None):
+            print("ui.context.UserContext.select_material: "
+                  "The material is batches selected by material_type and state")
+            if not ( "material_type" in session and "state" in session and
+                     session["material_type"] and session["state"] ):
+                return {"status": Status.ERROR, 
+                        "statustext": _("Missing material type or state")}
+            return {"status": Status.OK, "breed": breed, "args":args}
+        return {"status": Status.ERROR, "breed": breed, "statustext": _("Undefined breed of materials")}
+
+    def get(self, var_name, default=None):
         """ Get request argument value from args or form data.
         
             If datatype is int, returns the argument valie converted to int.
         """
-        if datatype is int and not default is None:
-            return int(self.args.get(var, default))
-        return self.args.get(var, default)
+        value = self.args.get(var_name, default)
+        if value is None and var_name in self.session:
+            value = self.session.get(var_name)
+        print(f"#UserContext.get({var_name}) = {value}")
+        return value
 
     def is_common(self):
         """ Tells, if current material may be formed from multiple batches.
