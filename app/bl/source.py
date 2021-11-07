@@ -279,3 +279,9 @@ class SourceReader(DataService):
         res["citations"] = cit
 
         return res
+        
+class SourceWriter(DataService):
+        
+    def mergesources(self, id1, id2):
+        source = self.dataservice.mergesources(id1,id2)
+        return source        

@@ -1,0 +1,296 @@
+{# templates/refsource_editor.html_ #}
+{% extends "/audit/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _('Merge sources') }}{% endblock %}
+{% block body %}}
+{{ super() }}
+
+<style>
+
+body {
+  font-family: Verdana, Helvetica, sans-serif;
+  background-color: #DDDDDD;
+} 
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+</style>
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+
+<style>
+div.box {
+    display: inline-block;
+    vertical-align:top;
+    margin: 0 1em 1em 0;
+    padding: 1em; 
+    background-color: #f9f8bf;
+    width: 300px;
+    min-height: 200px;
+    border-radius: 15px;
+}
+
+div.box1 {
+   	width: 100%;
+    min-height: 100px;
+}
+
+div.box2 {
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+div.box3 {
+    display: inline-block;
+    vertical-align:top;
+    margin: 0 1em 1em 0;
+    padding: 1em; 
+    width: 300px;
+    min-height: 200px;
+    border-radius: 15px;
+    background-color: #D5F5E3;
+}
+
+th {
+ 	position: sticky; 
+ 	top: -1px;
+ 	background: #eee;
+}
+
+td.checkbox {
+	width: 20px;
+}
+
+a.bolded {
+	font-weight: bold;
+}
+
+tr.opened {
+	background: lightgreen;
+}
+
+div#edit_dialog {
+    display: inline-block;
+    vertical-align:top;
+	background: lightgreen;
+    width: 250px;
+    height: 200px;
+    margin: 0 1em 1em 0;
+    padding: 1em; 
+    border-radius: 15px;
+}
+
+input {
+	font-size: 16px;
+	background: lightblue;
+}
+	
+</style>
+
+</head>
+
+<body>
+
+<h3>{{ _("Merge Sources") }}</h3>
+
+<p>
+
+<div id="myApp">
+
+    <div>
+    
+	<div class="box" v-show="to_be_merged.length == 0">
+	    <form>
+	        <h4>Paikat</h4>
+	        Paikkojen lukumäärä: ${ sources.length }
+	        <br>
+            <a href="#" 
+            	@click="list_top_level_sources()">
+            	Top
+            	</a>
+	        <span v-for="(p,i) in path">
+	        	&gt;
+                <a href="#" 
+                	@click="list_subordinate_sources(p, i)">
+                	${ p.pname }
+                	</a>
+	        </span>
+	        <p>
+	        <input type="button" :disabled="selected.length != 2" value="Vertaa" @click="merge()">
+    		<input type="checkbox" v-model="show_dups" @click="clear_selected">Näytä mahdolliset duplikaatit
+	        <div class=box2>
+		        <table border>
+		        	<thead>
+		        	<tr><th class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		            <th>Nimi</th>
+		        	</thead>
+		        	<tbody>
+		            <tr v-for="source in sources"
+		            	v-show="!show_dups || dups.indexOf(source.stitle) >= 0"
+		            > 
+		            	<td class="checkbox">
+		            		<input type="checkbox" v-model="selected" 
+		            		:value="source">
+		                <td> 
+		                	${ source.stitle }
+		                <td>${ source.type }
+		            </tr>
+		        	</tbody>
+		        </table>
+	        </div>
+	        <p>
+	    </form>
+	</div>
+
+    <input type="button" value="Create test data" @click="test_create">
+    <input type="button" value="Delete test data" @click="test_delete">
+
+	<div class="box1" v-show="to_be_merged.length > 0">	    
+	<template v-for="p in to_be_merged">
+		<div class="box3">
+		        <h2>${ p.stitle } (${ p.uniq_id })</h2>
+		        <div class=box2>
+		        <h3>Ominaisuudet</h3>
+		        <table border>
+		            <tr><td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		                <td>ID<td>${ p.id }
+		            <tr><td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		                <td>Pubinfo<td>${ p.spubinfo }
+		            <tr><td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		                <td>Author<td>${ p.sauthor }
+		            </tr>
+		        </table>
+		        <h3>Arkistot</h3>
+		        <ul>
+		        	<li v-for="r in p.repositories">
+		        	${ r.rname }  
+		        </ul>
+				</div>
+		</div>
+	</template>
+	<br>
+	<input type=button value="Yhdistä" @click="mergesources()">
+	<input type=button value="Sulje" @click="to_be_merged = []">
+	</div>
+		
+	</div>
+
+    <div class="modal" ng-if="loading"></div>
+
+</div>
+</body>
+
+<script>
+function log(msg) {
+    console.log(msg);
+}
+
+function removeFromArray(arr, value) { 
+    var index = arr.indexOf(value);
+    if (index > -1) {
+        arr.splice(index, 1);
+    }
+    return arr;
+}
+
+var app = new Vue({
+    el: '#myApp',
+    delimiters: ['${', '}'],
+    created: function() {
+        this.init();    
+    },
+    data: {
+        q: "Bea",
+        ptypes: ["Valtio","Kaupunki"],
+        lastquery:"Bea",
+        use:"firstname",
+        match:"startswith",
+        to_be_merged: [],
+        show_dups: false,
+        dups: [],
+        selected: [],
+        names: [],
+        sources: [], // {id:1234,name:"Suomi",type:"Valtio"}
+        path: [],
+        parentname: "",
+    }, // data
+//        ,lat:60,long:24,surrounds:["Helsinki","Tampere"]},
+
+    methods: {
+        init: function() {
+            this.list_sources();
+        },
+        list_sources: function() {
+            this.path = [];
+            axios.get('/merge/sources/list' ).
+                then(function(rsp, status) {
+                    app.sources = rsp.data.items;
+                    app.compute_dups();
+                    app.selected = [];
+                    app.show_dups = false;
+                });
+        },
+        compute_dups: function() {
+        	var prevname = "";
+        	app.sources.forEach( function(source) {
+        		// if (source.stitle.substr(0,6) == prevname.substr(0,6)) app.dups.push(prevname);
+        		if (source.stitle == prevname) app.dups.push(prevname);
+        		prevname = source.stitle;
+        	});
+        	console.log("dups:");
+        	console.log(app.dups);
+    	},
+        merge: function() {
+        	this.to_be_merged = [];
+        	var index = {};
+        	this.selected.forEach( function(p, i) {
+	        	app.to_be_merged.push(p);
+	        	index[p.uniq_id] = i;
+        	});
+        	this.selected.forEach( function(p) {
+	            axios.get('/merge/sources/get/' + p.uuid ).
+	                then(function(rsp, status) {
+	                	var p = rsp.data.item;
+			        	app.to_be_merged[index[p.uniq_id]] = p;
+	                });
+        	});
+    	},
+        mergesources: function() {
+        	var id1 = this.selected[0].uniq_id;
+        	var id2 = this.selected[1].uniq_id;
+            axios.get('/merge/sources/merge/' + id1 + "/" +id2 ).
+                then(function(rsp, status) {
+		        	app.to_be_merged = [];
+		        	var p = app.selected[0];
+		            axios.get('/merge/sources/get/' + p.uuid ).
+		                then(function(rsp, status) {
+		                	var source = rsp.data.item;
+				        	app.to_be_merged.push(source);
+		                });
+                });
+    	},
+    	clear_selected: function() {
+    		this.selected = [];
+    	},
+        test_create: function() {
+            axios.get('/merge/test_create' ).
+            then (function(rsp) {
+            	alert(rsp.data);
+        	});
+    	},
+        test_delete: function() {
+            axios.get('/merge/test_delete' ).
+            then (function(rsp) {
+            	alert(rsp.data);
+        	});
+    	},
+    } // methods
+
+});
+
+</script>
+
+{% endblock %}

@@ -29,9 +29,10 @@ logger = logging.getLogger("stkserver")
 from datetime import date  # , datetime
 
 from bl.base import Status, IsotammiException
+from bl.comment import Comment
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
-from bl.comment import Comment
+from bl.source import SourceBl
 
 from pe.dataservice import ConcreteService
 from .cypher.cy_batch_audit import CypherRoot #, CypherAudit
@@ -410,7 +411,21 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Source -----
 
-    # ----- Citation -----
+    def mergesources(self, id1, id2):
+        cypher_mergesources = """
+            match (p1:Source)        where id(p1) = $id1 
+            match (p2:Source)        where id(p2) = $id2
+            call apoc.refactor.mergeNodes([p1,p2],
+                {properties:'discard',mergeRels:true})
+            yield node
+            return node
+        """
+        rec = self.tx.run(cypher_mergesources,id1=id1,id2=id2).single()
+        if rec is None: return None
+        node = rec['node']
+        source = SourceBl.from_node(node)
+        return source
+            # ----- Citation -----
 
     # ----- Event -----
 
