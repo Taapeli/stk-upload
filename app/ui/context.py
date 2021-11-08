@@ -20,7 +20,7 @@
     User Context for Scene pages has information of 
     - current user,
     - the material concerned
-    - view properties enabling object listing division to concurrent pages.
+    - view properties enabling multi page object listing pages.
 
 Created on 1.11.2021
 
@@ -36,13 +36,24 @@ from bl.root import State
 
 
 class UserContext:
-    """ Store user and data context from session and current_user.
+    """
+    Store user and data context from session and current_user.
+    
+    Steps:
+        1. UserContext.select_material()
+           Stores current material (material_type, batch, state)
+           from request to session
+        2. u_context = UserContext()
+           Access user context (material, request, list scope)
+           from session and user_profile
+        3. u_context.update_session_scope(var_name, name_first, name_last, limit, rec_cnt)
+           Updates changed list scope to session for next page
     """
 
     NEXT_START = "<"  # from first name of data
     NEXT_END = ">"  # end reached: there is nothing forwards
 
-    COMMON = "common" # Approved data
+    COMMON = "common" # Multi-batch data like Approved data
     BATCH = "batch"   # Selected candidate or approved batch
     # OWN = "own"     # Candidate data
 
@@ -54,11 +65,11 @@ class UserContext:
 
         self.session = session
         self.batch_id = self.session.get("batch_id")
-        self.material = self.session.get("material")
+        self.material_type = self.session.get("material")
         self.state = self.session.get("state")
         self.lang = self.session.get("lang", "")  # User language
         print(f"#UserContext: session={self.session}")
-        print(f"#UserContext: SESSION material={self.material}, batch={self.batch_id}, state={self.state}")
+        print(f"#UserContext: SESSION material={self.material_type}, batch={self.batch_id}, state={self.state}")
         
         # 2. From current_user (login data)
 
@@ -78,8 +89,8 @@ class UserContext:
         self.args = UserContext.get_request_args()
         print(f"#UserContext: REQUEST material={self.args.get('material')},"
               f" batch={self.args.get('batch_id')} / {self.current_context}")
-        self.material = self.args.get("material", self.material)
-        self.session["material"] = self.material
+        self.material_type = self.args.get("material", self.material_type)
+        self.session["material"] = self.material_type
         if "batch_id" in self.args:
             # Access data by batch_id
             self.batch_id = self.args["batch_id"] #, self.batch_id)
@@ -209,7 +220,7 @@ class UserContext:
             else:
                 # If got no request user_context, use session values
                 print("#UserContext: Uses same or default user_context: " \
-                      f"{self.current_context} {self.material} in state {self.state}")
+                      f"{self.current_context} {self.material_type} in state {self.state}")
         else:
             self.request_args = {}
             self.years = []                         # example [1800, 1899]
@@ -224,7 +235,7 @@ class UserContext:
             # May edit data, if user has appropriate role
             self.allow_edit = self.is_auditor
         else:
-            # Data selection by Root.state and Root.material
+            # Data selection by Root.state and Root.material_type
             self.current_context = self.COMMON  # "common"
             self.state = State.ROOT_ACCEPTED
         current_user.current_context = self.current_context
@@ -236,7 +247,7 @@ class UserContext:
     def display_current_material(self):
         """ Return current material and batch choice for display. """
         try:
-            m = self.material or 'Unknown material'
+            m = self.material_type or 'Unknown material'
             #if m == "Place": m = "Places"
             print(f"#UserContext.display_current_material: {m}: {self.batch_id}, state={self.state}" )
             if self.state is None:

@@ -98,8 +98,8 @@ def material_select(breed):  # set_scope=False, batch_id="", material=None):
 # ------------------------- Menu 1: Material search ------------------------------
 
 
-def note_item_format(rec, searchtext, min_length=100):
-    """ Display an excerpt from Note text that is at least this long
+def _note_item_format(rec, searchtext, min_length=100):
+    """ Display an excerpt from Note.text that is at least this long
     """
     import re
 
@@ -200,7 +200,9 @@ def note_item_format(rec, searchtext, min_length=100):
     )
 
 
-def note_search(args):
+def _note_search(args):
+    """ Free text search by Note.text.
+    """
     print(args)
     u_context = UserContext()
     u_context.count = request.args.get("c", 100, type=int)
@@ -216,7 +218,7 @@ def note_search(args):
             # print("item", item)
             # note = item[0]
             # x = item[1]
-            displaylist.append(note_item_format(item, searchtext))
+            displaylist.append(_note_item_format(item, searchtext))
 
         # from pprint import  pprint
         # pprint(displaylist[0:5])
@@ -368,7 +370,7 @@ def show_person_search():
             # # A new scope (batch or common data) must be stored
             # root = Root.get_batch(current_user.username, u_context.batch_id)
             # if root:
-            #     material = root.material
+            #     material = root.material_type
             #     new_state = root.state
             #     u_context.state = new_state
             #     if new_state != State.ROOT_ACCEPTED:
@@ -392,7 +394,7 @@ def show_person_search():
 
         # Free text search by Note texts
         if rule == "notetext":
-            return note_search(run_args)
+            return _note_search(run_args)
 
         # Mitä tää on
         u_context.set_scope_from_request(request, "person_scope")
@@ -401,7 +403,7 @@ def show_person_search():
         res = _do_get_persons(run_args)
         logger.info(
             f"#(2)bp.scene.routes.show_person_search: {request.method} "
-            f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material}' Persons {run_args} "
+            f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material_type}' Persons {run_args} "
         )
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
@@ -426,7 +428,7 @@ def show_person_search():
         if rule == "init":
             # Start material search page:
             #    - show name clouds and
-            #    - store material type to session.material
+            #    - store material type to session.material_type
             minfont = 6
             maxfont = 20
 
@@ -452,10 +454,9 @@ def show_person_search():
                     )
                 placenamestats.sort(key=itemgetter("placename"))
 
-    # except Exception as e:
-    #     return redirect(url_for("entry"))
     except Exception as e:
         error_print("show_person_search", e)
+        # Set default values
         found = []
         num_hidden = 0
         status = ""

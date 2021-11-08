@@ -108,7 +108,7 @@ class Root(NodeObject):
         self.user = userid
         self.file = None
         self.id = ""  # batch_id
-        self.material = DEFAULT_MATERIAL      # Material type "Family Tree" or other
+        self.material_type = DEFAULT_MATERIAL      # Material type "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
         self.timestamp = 0 # Milliseconds; Convert to string by 
@@ -118,7 +118,7 @@ class Root(NodeObject):
         self.logname = ""
 
     def __str__(self):
-        return f"Root {self.user} / {self.id} {self.material}({self.state})"
+        return f"Root {self.user} / {self.id} {self.material_type}({self.state})"
 
     def for_auditor(self):
         """ Is relevant for auditor? """
@@ -144,7 +144,7 @@ class Root(NodeObject):
             # timestamp": <to be set in cypher>,
             # id: <uniq_id from result>,
             "state": self.state,
-            "material": self.material,
+            "material": self.material_type,
             "description": self.description,
             "xmlname": self.xmlname,
             "metaname": self.metaname,
@@ -172,7 +172,7 @@ class Root(NodeObject):
         obj.timestamp = node.get("timestamp", 0)
         obj.upload = format_ms_timestamp(obj.timestamp)
         #obj.auditor = node.get("auditor", None)
-        obj.material = node.get("material", DEFAULT_MATERIAL)
+        obj.material_type = node.get("material", DEFAULT_MATERIAL)
         obj.description = node.get("description", "")
         obj.xmlname = node.get("xmlname", "")
         obj.metaname = node.get("metaname", "")

@@ -106,17 +106,17 @@ div.starters button {
     {% for root in batches %}
                 <form method="post" action="/scene/material/batch">
         {% if root.description %}
-                  {% set title = _(root.material) + " / " + root.description %}
-        {% else %}{% set title = _(root.material) %}
+                  {% set title = _(root.material_type) + " / " + root.description %}
+        {% else %}{% set title = _(root.material_type) %}
         {% endif -%}
                         <span>
-                            <input type="hidden" name="material_type" value="{{root.material}}">
+                            <input type="hidden" name="material_type" value="{{root.material_type}}">
                             <input type="hidden" name="state" value="{{root.state}}">
                             <button type="submit" name="batch_id" value="{{ root.id }}"
            {% if batch_id == root.id %}autofocus{% endif %}
                              title="{{ title }}">
-           {% if root.material != "Family Tree" %}
-                                <span class="typedesc">{{ _(root.material) }}</span>
+           {% if root.material_type != "Family Tree" %}
+                                <span class="typedesc">{{ _(root.material_type) }}</span>
            {% endif %}
                             {{ root.id }}<br>{{ root.filename|replace('_',' ') }}
                             </button>
