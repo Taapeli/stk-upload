@@ -103,22 +103,22 @@ div.starters button {
 
                 <p>{{ _('View your own candidate materials') }}.</p>
                 <div class="starters">
-    {% for root in batches %}
+    {% for b in batches %}
                 <form method="post" action="/scene/material/batch">
-        {% if root.description %}
-                  {% set title = _(root.material_type) + " / " + root.description %}
-        {% else %}{% set title = _(root.material_type) %}
+        {% if b.description %}
+                  {% set title = _(b.material) + " / " + b.description %}
+        {% else %}{% set title = _(b.material) %}
         {% endif -%}
                         <span>
-                            <input type="hidden" name="material_type" value="{{root.material_type}}">
-                            <input type="hidden" name="state" value="{{root.state}}">
-                            <button type="submit" name="batch_id" value="{{ root.id }}"
-           {% if batch_id == root.id %}autofocus{% endif %}
+                            <input type="hidden" name="material_type" value="{{b.material}}">
+                            <input type="hidden" name="state" value="{{b.state}}">
+                            <button type="submit" name="batch_id" value="{{ b.id }}"
+           {% if batch_id == b.id %}autofocus{% endif %}
                              title="{{ title }}">
-           {% if root.material_type != "Family Tree" %}
-                                <span class="typedesc">{{ _(root.material_type) }}</span>
+           {% if b.material != "Family Tree" %}
+                                <span class="typedesc">{{ _(b.material) }}</span>
            {% endif %}
-                            {{ root.id }}<br>{{ root.filename|replace('_',' ') }}
+                            {{ b.id }}<br>{{ b.filename|replace('_',' ') }}
                             </button>
                         </span>
                     </form>

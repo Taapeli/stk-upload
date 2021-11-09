@@ -90,9 +90,7 @@ def material_select(breed):  # set_scope=False, batch_id="", material=None):
         )
         return redirect("/")
 
-    #args = ret.get("args", [])
-    session["breed"] = breed
-    return redirect(url_for("scene.show_person_search")) #, breed=breed))
+    return redirect(url_for("scene.show_person_search"))
 
 
 # ------------------------- Menu 1: Material search ------------------------------
@@ -198,7 +196,6 @@ def _note_item_format(rec, searchtext, min_length=100):
         # x=dict(x),
         excerpt=repr(excerpt)[1:-1],
     )
-
 
 def _note_search(args):
     """ Free text search by Note.text.
@@ -354,9 +351,10 @@ def show_person_search():
         u_context = UserContext()
 
         # Combine with request parameters
-        new_material = u_context.get("material")
+        new_material = u_context.get("material_type")
         new_state = u_context.get("state", State.ROOT_ACCEPTED)
-        new_batch_id = "" if u_context.is_common() else u_context.get("batch_id", "")
+        # new_batch_id = "" if u_context.is_common() else u_context.get("batch_id", "")
+        new_batch_id = u_context.get("batch_id", "")
 
         run_args = {"pg": "search", "u_context": u_context}
         rule = u_context.get("rule", "init")
@@ -367,6 +365,7 @@ def show_person_search():
 
         breed = session.pop("breed", "")
         if breed:
+            u_context.current_context = breed
             # # A new scope (batch or common data) must be stored
             # root = Root.get_batch(current_user.username, u_context.batch_id)
             # if root:
@@ -392,14 +391,13 @@ def show_person_search():
             f"material={new_material}: {new_batch_id} {new_state}"
         )
 
-        # Free text search by Note texts
+        #------ Free text search by Note texts
         if rule == "notetext":
             return _note_search(run_args)
 
-        # Mitä tää on
-        u_context.set_scope_from_request(request, "person_scope")
+        #------ Person search by names or years
+        u_context.set_scope_from_request("person_scope")
 
-        # Execute database search
         res = _do_get_persons(run_args)
         logger.info(
             f"#(2)bp.scene.routes.show_person_search: {request.method} "
@@ -438,9 +436,8 @@ def show_person_search():
                 # {name, count, uuid}
                 for i, stat in enumerate(surnamestats):
                     stat["order"] = i
-                    stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(
-                        surnamestats
-                    )
+                    stat["fontsize"] = \
+                        maxfont - i * (maxfont - minfont) / len( surnamestats)
                 surnamestats.sort(key=itemgetter("surname"))
 
             # Most common place names cloud
