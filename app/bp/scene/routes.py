@@ -46,7 +46,7 @@ from flask_babelex import _
 import shareds
 from . import bp
 from bl.base import Status, StkEncoder
-from bl.root import State
+from bl.root import State, Root, DEFAULT_MATERIAL
 from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
@@ -75,19 +75,18 @@ def material_select(breed):  # set_scope=False, batch_id="", material=None):
     """Select material for browsing and go to Search page.
     
        Parameters for database access and displaying current material
-       - If browsing Accepted (common) materials (= a collection of multiple batches)
+       - breed="common": Browsing Accepted materials (= a collection of multiple batches)
          - input: material and state – no uniq_id
-       - If browsing other material types:
+       - breed="batch": Browsing other material types:
          - input: batch id
-         - figure: material and state
+         - figure from database: material and state
     """
     # 1. User and data context from session and current_user
-    ret = UserContext.select_material(breed)
+    ret = UserContext.set_session_material(breed)
     # return f"<p>TODO {ret.get('args')}</p><p><a href='/'>Alkuun</a></p>"
     if Status.has_failed(ret):
-        flash(
-            f"{ _('Opening material failed: ') }: { _(ret.get('statustext')) }", "error"
-        )
+        flash(f"{ _('Opening material failed: ') }: "
+              f"{ _(ret.get('statustext')) }", "error")
         return redirect("/")
 
     return redirect(url_for("scene.show_person_search"))
@@ -350,45 +349,29 @@ def show_person_search():
         # 1. User and data context from session and current_user
         u_context = UserContext()
 
-        # Combine with request parameters
-        new_material = u_context.get("material_type")
-        new_state = u_context.get("state", State.ROOT_ACCEPTED)
-        # new_batch_id = "" if u_context.is_common() else u_context.get("batch_id", "")
-        new_batch_id = u_context.get("batch_id", "")
+        new_material = u_context.material_type
+        new_state = u_context.state
 
         run_args = {"pg": "search", "u_context": u_context}
         rule = u_context.get("rule", "init")
         run_args["rule"] = rule
         key = u_context.get("key", "")
-        if key:
-            run_args["key"] = key
+        if key: run_args["key"] = key
 
-        breed = session.pop("breed", "")
+        breed = session.pop("breed", "")    # From routes.material_select
         if breed:
+            # Select another material (batch or common data)
             u_context.current_context = breed
-            # # A new scope (batch or common data) must be stored
-            # root = Root.get_batch(current_user.username, u_context.batch_id)
-            # if root:
-            #     material = root.material_type
-            #     new_state = root.state
-            #     u_context.state = new_state
-            #     if new_state != State.ROOT_ACCEPTED:
-            #         new_batch_id = u_context.get('batch_id',"")
-            #
-            # else:
-            #     material = DEFAULT_MATERIAL
-            # # else:
-            #     run_args["batch_id"] = new_batch_id
             run_args["set_scope"] = True
             run_args["material"] = new_material
             run_args["state"] = new_state
-            run_args["batch_id"] = new_batch_id
+
         # 'person_scope': ('Manninen#Matti#', '> end') from request
 
         logger.debug(
             "#(1)bp.scene.routes.show_person_search: "
-            f"{request.method} {list(request.args.items())} "
-            f"material={new_material}: {new_batch_id} {new_state}"
+            f"{request.method} {u_context.get_request_args()} => "
+            f'{session["material_type"]!r} {session["batch_id"]!r}/{session["state"]!r}'
         )
 
         #------ Free text search by Note texts

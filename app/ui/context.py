@@ -26,14 +26,14 @@ Created on 1.11.2021
 
 @author: jm
 """
-#blacked 8.11.2021
+# blacked 8.11.2021
 from flask import session, request
 from flask_security import current_user
 from flask_babelex import _
 from urllib.parse import unquote_plus
 
 from bl.base import Status
-from bl.root import State
+from bl.root import State, Root
 
 
 class UserContext:
@@ -65,14 +65,18 @@ class UserContext:
         # 1. From session (previous settings)
 
         self.session = session
-        self.batch_id = self.session.get("batch_id")
-        _x = self.session.pop("material_type")
         self.material_type = self.session.get("material_type")
-        self.state = self.session.get("state")
+        self.state = self.session.get("state", "")
         self.lang = self.session.get("lang", "")  # User language
+        self.batch_id = self.session.get("batch_id", "")
+        if session.get("breed", "") == self.COMMON:
+            # Material changed to 'common' in self.material_select()
+            self.batch_id = ""
+
         print(f"#UserContext: session={self.session}")
         print(
-            f"#UserContext: SESSION material={self.material_type}, batch={self.batch_id}, state={self.state}"
+            f"#UserContext: SESSION material={self.material_type!r}, "
+            f"batch={self.batch_id!r}, state={self.state!r}"
         )
 
         # 2. From current_user (login data)
@@ -92,8 +96,9 @@ class UserContext:
 
         self.args = UserContext.get_request_args()
         print(
-            f"#UserContext: REQUEST material={self.material_type},"
-            f" batch={self.batch_id} / {self.current_context} values={self.args}"
+            f"#UserContext: {self.current_context} "
+            f"material={self.material_type!r}, batch={self.batch_id!r} "
+            f"state={self.state!r} / REQUEST values={self.args}"
         )
         # self.material_type = self.args.get("material", self.material_type)
         # self.session["material"] = self.material_type
@@ -107,7 +112,7 @@ class UserContext:
         return
 
     @staticmethod
-    def select_material(breed):
+    def set_session_material(breed):
         """
         Save material selection from request to session.
 
@@ -125,20 +130,39 @@ class UserContext:
             --> "GET /scene/material/common?material_type=Family+Tree HTTP/1.1" 200 -
         """
         args = UserContext.get_request_args()
-        print(f"#UserContext.select_material: {args}")
-        print(f"#UserContext.select_material: {session}")
+        print(f"#UserContext.set_session_material: request {args}")
+        print(f"#UserContext.set_session_material: {session}")
+        # if not args.get("material") or not args.get("batch_id") not args.get("state"):
+        #    raise(...?)
         session["breed"] = breed
         session["set_scope"] = True  # Reset material and scope
+        if "material" in session:
+            print(
+                f"ui.context.UserContext.set_session_material: "
+                f'Removed obsolete session.material={session.pop("material")!r}'
+            )
 
         if breed == "batch":
             # request args:  {'batch_id': '2021-10-09.001'}
-            session["batch_id"] = args.get("batch_id")
-            # optional args: {'material_type': 'Family Tree', 'state': 'Candidate'}
+            session["batch_id"] = (
+                args.get("batch_id") if breed == UserContext.BATCH else ""
+            )
             session["material_type"] = args.get("material_type")
             session["state"] = args.get("state")
 
+            # New material (batch or common data)
+            # - optional args: {'material_type': 'Family Tree', 'state': 'Candidate'}
+            if session["batch_id"] and (
+                not session["material_type"] or not session["state"]
+            ):
+                # Get batch properties material and state from database
+                root = Root.get_batch(current_user.username, session["batch_id"])
+                session["material_type"] = root.material_type
+                session["state"] = root.state
+
             print(
-                "#UserContext.select_material: the material is single batch"
+                "#UserContext.select_material: the material is single batch: "
+                f'{session["material_type"]!r} {session["batch_id"]!r}/{session["state"]!r}'
             )
             # if not ("batch_id" in session and session["batch_id"]):
             #     return {"status": Status.ERROR, "statustext": _("Missing batch id")}
@@ -172,14 +196,14 @@ class UserContext:
         }
 
     def get(self, var_name, default=None):
-        """ Get request argument value from args, form data or session.
+        """ Get a REQUEST argument value from args, form data or session.
         """
         value = self.args.get(var_name)
         if value is None and var_name in self.session:
             value = self.session.get(var_name)
         if not value:
             value = default
-        print(f"#UserContext.get({var_name}) = '{value}'")
+        print(f"#UserContext.get({var_name}) = {value!r}")
         return value
 
     def is_common(self):
@@ -241,7 +265,8 @@ class UserContext:
                 # If got no request user_context, use session values
                 print(
                     "#UserContext: Uses same or default user_context: "
-                    f"{self.current_context} {self.material_type} in state {self.state}"
+                    f"{self.current_context} {self.material_type} "
+                    f"in state {self.state}"
                 )
         else:
             self.request_args = {}
@@ -272,12 +297,14 @@ class UserContext:
             m = self.material_type or "Unknown material"
             # if m == "Place": m = "Places"
             print(
-                f"#UserContext.display_current_material: {m}: {self.batch_id}, state={self.state}"
+                f"#UserContext.display_current_material: {m}: "
+                f"batch={self.batch_id}, state={self.state}"
             )
             if self.state is None:
                 return f"{ _(m) }: {self.batch_id}"
             elif self.state == State.ROOT_ACCEPTED:
-                return f"{ _(m) }: { _('Approved Isotammi tree') } {self.batch_id}"
+                batch = self.batch_id if self.batch_id else ""
+                return f"{ _(m) }: { _('Approved Isotammi tree') } {batch}"
             else:
                 return f"{ _(m) }: { _(self.state) } {self.batch_id}"
         except Exception as e:
