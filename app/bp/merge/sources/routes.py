@@ -28,7 +28,7 @@ def list_sources(series=None):
     # Set context by owner and the data selections
     u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    u_context.set_scope_from_request(request, 'merge_sources_scope')
+    u_context.set_scope_from_request('merge_sources_scope')
     u_context.count = request.args.get('c', 100, type=int)
 
     with SourceReader("read", u_context) as reader: 

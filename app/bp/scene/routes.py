@@ -261,7 +261,7 @@ def _do_get_persons(args):
     if args.get("pg") == "search":
         # No scope
         # u_context.set_scope_from_request()
-        if args.get("rule", "init") == "start" or args.get("key", "") == "":
+        if args.get("rule", "init") == "init" or args.get("key", "") == "":
             # Initializing this batch.
             return {
                 "rule": "init",
@@ -269,7 +269,7 @@ def _do_get_persons(args):
                 "u_context": u_context,
             }
     else:  # pg:'all'
-        # u_context.set_scope_from_request(request, "person_scope")
+        # u_context.set_scope_from_request("person_scope")
         args["rule"] = "all"
     # request_args = UserContext.get_request_args(request)
     u_context.set_scope("person_scope")
@@ -291,6 +291,7 @@ def show_persons():
     """Persons listings."""
     t0 = time.time()
     u_context = UserContext()
+    u_context.set_scope_from_request("person_scope")
     run_args = {"pg": "all", "u_context": u_context}
     # #     years = request.args.get('years')
     # #     if years: args['years'] = years
@@ -344,34 +345,35 @@ def show_person_search():
           - input: batch id – figure out material and state from database
         - No breed --> use previous material
     """
+    t0 = time.time()
     try:
-        t0 = time.time()
+        
         # 1. User and data context from session and current_user
         u_context = UserContext()
-
-        new_material = u_context.material_type
-        new_state = u_context.state
-
         run_args = {"pg": "search", "u_context": u_context}
         rule = u_context.get("rule", "init")
         run_args["rule"] = rule
         key = u_context.get("key", "")
         if key: run_args["key"] = key
 
-        breed = session.pop("breed", "")    # From routes.material_select
-        if breed:
+        # Breed from routes.material_select:
+        new_breed = session.pop("breed", "")    # Remove from session
+        if new_breed:
             # Select another material (batch or common data)
-            u_context.current_context = breed
+            u_context.current_context = new_breed
+            # ['batch', 'Candidate', 'Family Tree', '2021-10-20.004']
+            _current_context, new_state, new_material, new_batch_id = u_context.get_material_tuple()
             run_args["set_scope"] = True
-            run_args["material"] = new_material
             run_args["state"] = new_state
+            run_args["material"] = new_material
+            run_args["batch_id"] = new_batch_id
 
-        # 'person_scope': ('Manninen#Matti#', '> end') from request
 
         logger.debug(
             "#(1)bp.scene.routes.show_person_search: "
             f"{request.method} {u_context.get_request_args()} => "
-            f'{session["material_type"]!r} {session["batch_id"]!r}/{session["state"]!r}'
+            f'({session["current_context"]!r}, {session["state"]!r}, '
+            f'{session["material_type"]!r}, {session["batch_id"]!r})'
         )
 
         #------ Free text search by Note texts
@@ -379,12 +381,13 @@ def show_person_search():
             return _note_search(run_args)
 
         #------ Person search by names or years
+        # 'person_scope': ('Manninen#Matti#', '> end') from request
         u_context.set_scope_from_request("person_scope")
 
         res = _do_get_persons(run_args)
         logger.info(
-            f"#(2)bp.scene.routes.show_person_search: {request.method} "
-            f"'{u_context.state}' '{u_context.batch_id}' '{u_context.material_type}' Persons {run_args} "
+            f"#(2)bp.scene.routes.show_person_search: "
+            f"{ u_context.get_material_tuple() } Persons with {run_args} "
         )
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
@@ -901,7 +904,7 @@ def show_families():
     # Set context by owner and the data selections
     u_context = UserContext()
     # Which range of data is shown
-    u_context.set_scope_from_request(request, "person_scope")
+    u_context.set_scope_from_request("person_scope")
     opt = request.args.get("o", "father", type=str)
     u_context.order = "man" if opt == "father" else "wife"
     u_context.count = request.args.get("c", 100, type=int)
@@ -1033,7 +1036,7 @@ def show_places():
     # Set context by owner and the data selections
     u_context = UserContext()
     # Which range of data is shown
-    u_context.set_scope_from_request(request, "place_scope")
+    u_context.set_scope_from_request("place_scope")
     u_context.count = request.args.get("c", 50, type=int)
 
     with PlaceReader("read", u_context) as service:
@@ -1121,7 +1124,7 @@ def show_sources(series=None):
     # Set context by owner and the data selections
     u_context = UserContext()
     # Which range of data is shown
-    u_context.set_scope_from_request(request, "source_scope")
+    u_context.set_scope_from_request("source_scope")
     u_context.count = request.args.get("c", 100, type=int)
 
     with SourceReader("read", u_context) as service:
@@ -1203,7 +1206,7 @@ def show_medias():
     # Set context by owner and the data selections
     u_context = UserContext()
     # Which range of data is shown
-    u_context.set_scope_from_request(request, "media_scope")
+    u_context.set_scope_from_request("media_scope")
     u_context.count = 20
 
     with MediaReader("read", u_context) as service:
@@ -1350,7 +1353,7 @@ def show_topics():
     # Set context by owner and the data selections
     u_context = UserContext()
     # Which range of data is shown
-    u_context.set_scope_from_request(request, "comment_scope")
+    u_context.set_scope_from_request("comment_scope")
     u_context.count = 20
 
     with CommentReader("read", u_context) as service:

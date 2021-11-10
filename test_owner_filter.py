@@ -80,7 +80,7 @@ def test_ownerfilter_next_item(user_env):
     
     # 1. In the beginning
     user_session['person_scope'] = ['', '<']
-    f.set_scope_from_request(request, 'person_scope')
+    f.set_scope_from_request('person_scope')
     #    Read data here --> got required amount
     f.update_session_scope('person_name', '##Elisabet', '#Hansson#Lars', 100, 100)
     
@@ -89,7 +89,7 @@ def test_ownerfilter_next_item(user_env):
     
     # 2. At given point
     user_session['person_scope'] = ['Za', None]
-    f.set_scope_from_request(request, 'person_scope')
+    f.set_scope_from_request('person_scope')
     #    Read data here --> reached end
     f.update_session_scope('person_name', 'Zakrevski##Arseni', 'Östling##Carl', 50, 28)
     
@@ -99,7 +99,7 @@ def test_ownerfilter_next_item(user_env):
     # 3. At end
     user_session['person_scope'] = ['>', None]
     #    Read data here --> reached end
-    f.set_scope_from_request(request, 'person_scope')
+    f.set_scope_from_request('person_scope')
     
     x = f.next_name('fw')
     assert x == '> end', "next fw not at end"

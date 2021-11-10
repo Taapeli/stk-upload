@@ -89,7 +89,7 @@ class Neo4jReadServiceTx(ConcreteService):
         
             args = dict {use_user, fw, limit, rule, key, years}
         """
-        material = args.get('material')
+        material = args.get('material_type')
         state = args.get('state')
         username = args.get('use_user')
         rule = args.get('rule')
@@ -567,8 +567,8 @@ class Neo4jReadServiceTx(ConcreteService):
 
     def tx_note_search(self, args):
         """Free text search in Notes"""
-        material = args.get('material')
-        state = args.get('state')
+        #material = args.get('material')
+        #state = args.get('state')
         username = args.get('use_user')
         searchtext = args.get('key')
         limit = args.get('limit', 100)
@@ -594,7 +594,7 @@ class Neo4jReadServiceTx(ConcreteService):
                             limit=limit)
         rsp = []
         for record in result:
-            item = record.get('item')
+            #item = record.get('item')
             #note = item[0]
             #x = item[1]
             note = record.get('note')
