@@ -152,7 +152,7 @@ class Neo4jUpdateService(ConcreteService):
         for record in result:
             node = record.get("root")
             if node:
-                return {"status":Status.OK, "node":record["root"]}
+                return {"status":Status.OK, "node":node}
             else:
                 return {"status":Status.NOT_FOUND, "node":None,
                         "statustext": "Batch not found"}

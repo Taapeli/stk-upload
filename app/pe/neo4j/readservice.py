@@ -1301,7 +1301,7 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             cypher = CypherPerson.get_surname_list
 #             print('#  Neo4jReadService.dr_get_surname_list: with \n{ material:"'
-#                   f'{self.material_type}", state:"{self.state}", username:"{username}", count:{count}''}')
+#                   f'{self.material.m_type}", state:"{self.material.state}", username:"{username}", count:{count}''}')
 #             print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
             result = run_cypher_batch(session, cypher,
                 username, batch_id,

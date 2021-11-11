@@ -529,7 +529,7 @@ class PlaceReader(DataService):
         use_user = context.batch_user()
         places = self.dataservice.dr_get_place_list_fw(
             use_user, fw, context.count, lang=context.lang,
-            batch_id=context.batch_id,
+            batch_id=context.material.batch_id,
         )
 
         # Update the page scope according to items really found
@@ -601,8 +601,9 @@ class PlaceReader(DataService):
         """
         Return placename stats so that the names can be displayed in a name cloud.
         """
-        placenames = self.dataservice.dr_get_placename_list(self.use_user, 
-                                                            self.user_context.batch_id, count=count)
+        ds = self.dataservice
+        placenames = ds.dr_get_placename_list(self.use_user, 
+                                              self.user_context.material.batch_id, count=count)
         # Returns [{'surname': surname, 'count': count},...]
 
         # if self.use_user:

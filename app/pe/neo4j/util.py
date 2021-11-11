@@ -61,7 +61,7 @@ def run_cypher_batch(session, cypher, username, batch_id, **kwargs):
     Runs the given Cypher query returning only the appropriate/allowed objects
     of given batch.
 
-    1) if username is not None or empty, then return objects from all 
+    1) if username is given, then return objects from all 
        candidate materials that the user has access to
     2) if username is None or empty, the return objects only from the 
        Accepted material

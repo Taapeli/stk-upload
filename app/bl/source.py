@@ -197,7 +197,7 @@ class SourceReader(DataService):
         fw = context.first  # From here forward
         use_user = context.batch_user()
         args = {"user": use_user, "fw": fw, "count": context.count}
-        args['batch_id'] = context.batch_id
+        args['batch_id'] = context.material.batch_id
         if context.series:
             # Filtering by series (Lähdesarja)
             THEMES = {

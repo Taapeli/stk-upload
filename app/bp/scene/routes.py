@@ -46,7 +46,8 @@ from flask_babelex import _
 import shareds
 from . import bp
 from bl.base import Status, StkEncoder
-from bl.root import State, Root, DEFAULT_MATERIAL
+#from bl.root import State, Root, DEFAULT_MATERIAL
+from bl.material import Material
 from bl.place import PlaceReader
 from bl.source import SourceReader
 from bl.family import FamilyReader
@@ -82,7 +83,7 @@ def material_select(breed):  # set_scope=False, batch_id="", material=None):
          - figure from database: material and state
     """
     # 1. User and data context from session and current_user
-    ret = UserContext.set_session_material(breed)
+    ret = Material.set_session_material(breed, current_user.username)
     # return f"<p>TODO {ret.get('args')}</p><p><a href='/'>Alkuun</a></p>"
     if Status.has_failed(ret):
         flash(f"{ _('Opening material failed: ') }: "
@@ -266,7 +267,7 @@ def _do_get_persons(args):
             return {
                 "rule": "init",
                 "status": Status.NOT_STARTED,
-                "u_context": u_context,
+                # "u_context": u_context,
             }
     else:  # pg:'all'
         # u_context.set_scope_from_request("person_scope")
@@ -360,9 +361,9 @@ def show_person_search():
         new_breed = session.pop("breed", "")    # Remove from session
         if new_breed:
             # Select another material (batch or common data)
-            u_context.current_context = new_breed
+            u_context.breed = new_breed
             # ['batch', 'Candidate', 'Family Tree', '2021-10-20.004']
-            _current_context, new_state, new_material, new_batch_id = u_context.get_material_tuple()
+            _current_context, new_state, new_material, new_batch_id = u_context.material.get_tuple()
             run_args["set_scope"] = True
             run_args["state"] = new_state
             run_args["material"] = new_material
@@ -371,7 +372,7 @@ def show_person_search():
 
         logger.debug(
             "#(1)bp.scene.routes.show_person_search: "
-            f"{request.method} {u_context.get_request_args()} => "
+            f"{request.method} {u_context.material.get_request_args()} => "
             f'({session["current_context"]!r}, {session["state"]!r}, '
             f'{session["material_type"]!r}, {session["batch_id"]!r})'
         )
@@ -387,7 +388,7 @@ def show_person_search():
         res = _do_get_persons(run_args)
         logger.info(
             f"#(2)bp.scene.routes.show_person_search: "
-            f"{ u_context.get_material_tuple() } Persons with {run_args} "
+            f"{ u_context.material.get_tuple() } Persons with {run_args} "
         )
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
@@ -752,7 +753,7 @@ def json_get_event():
     """Get Event page data."""
     t0 = time.time()
     u_context = UserContext()
-    request_args = UserContext.get_request_args(request)
+    request_args = Material.get_request_args(request)
     try:
         args = request_args
         if args:

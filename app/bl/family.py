@@ -272,7 +272,7 @@ class FamilyReader(DataService):
             "name": self.user_context.first,  # From here forward
             "order": order,
             "limit": limit,
-            "batch_id": self.user_context.batch_id,
+            "batch_id": self.user_context.material.batch_id,
         }
         ustr = "user " + args["use_user"] if args["use_user"] else "no user"
         print(
