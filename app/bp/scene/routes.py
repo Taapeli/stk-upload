@@ -232,7 +232,7 @@ def _note_search(args):
     )
 
 
-def _do_get_persons(args):
+def _do_get_persons(u_context, args):
     """Execute persons list query by arguments and optionally set material type.
 
         Search form
@@ -258,7 +258,7 @@ def _do_get_persons(args):
     #     Search by name & years
     #         POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
     """
-    u_context = args["u_context"]
+    #u_context = args["u_context"]
     if args.get("pg") == "search":
         # No scope
         # u_context.set_scope_from_request()
@@ -270,9 +270,9 @@ def _do_get_persons(args):
                 # "u_context": u_context,
             }
     else:  # pg:'all'
-        # u_context.set_scope_from_request("person_scope")
+        #u_context.set_scope_from_request("person_scope")
         args["rule"] = "all"
-    # request_args = UserContext.get_request_args(request)
+    # request_args = UserContext.get_request_args()
     u_context.set_scope("person_scope")
     u_context.count = int(u_context.get("c", 100))
 
@@ -292,20 +292,20 @@ def show_persons():
     """Persons listings."""
     t0 = time.time()
     u_context = UserContext()
-    u_context.set_scope_from_request("person_scope")
-    run_args = {"pg": "all", "u_context": u_context}
-    # #     years = request.args.get('years')
-    # #     if years: args['years'] = years
+    # Request may include fw, bw, count or years
+    run_args = u_context.set_scope_from_request("person_scope")
+    run_args["pg"] = "all"
+    # years = request.args.get('years')
+    # if years: run_args['years'] = years
     # fw = request.args.get("fw")
-    # if fw:
-    #     args["fw"] = fw
+    # if fw: run_args["fw"] = fw
     # c = request.args.get("c")
-    # if c:
-    #     args["c"] = c
+    # if c: run_args["c"] = c
+
     # 1. User and data context from session and current_user
     print(f"{request.method} All persons {run_args}")
 
-    res = _do_get_persons(run_args)
+    res = _do_get_persons(u_context, run_args)
     # u_context = res.get("u_context")
 
     if Status.has_failed(res):
@@ -319,7 +319,7 @@ def show_persons():
         u_context,
         f"-> bp.scene.routes.show_persons" f" n={len(found)}/{hidden} e={elapsed:.3f}",
     )
-    print(f"Got {len(found)} persons {num_hidden} hidden, fw={u_context.fw}")
+    print(f"Got {len(found)} persons {num_hidden} hidden, fw={u_context.first}")
     return render_template(
         "/scene/persons_list.html",
         persons=found,
@@ -333,25 +333,18 @@ def show_persons():
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-# def show_person_search(set_scope=None, batch_id=None):
-def show_person_search():
+def show_person_search():   #(set_scope=None, batch_id=None):
     """
     Start material browsing with Persons search page.
 
-        Optional request argument "breed" tells, if a new material breed
-        should be opened:
-        - If breed = "common" --> a collection of multiple batches
-          - input: material and state – no batch_id
-        - If breed = "batch" --> single batch view
-          - input: batch id – figure out material and state from database
-        - No breed --> use previous material
+    Uses the material defined in SecureCookieSession session
     """
     t0 = time.time()
     try:
         
         # 1. User and data context from session and current_user
         u_context = UserContext()
-        run_args = {"pg": "search", "u_context": u_context}
+        run_args = {"pg": "search"}
         rule = u_context.get("rule", "init")
         run_args["rule"] = rule
         key = u_context.get("key", "")
@@ -369,7 +362,6 @@ def show_person_search():
             run_args["material"] = new_material
             run_args["batch_id"] = new_batch_id
 
-
         logger.debug(
             "#(1)bp.scene.routes.show_person_search: "
             f"{request.method} {u_context.material.get_request_args()} => "
@@ -383,9 +375,10 @@ def show_person_search():
 
         #------ Person search by names or years
         # 'person_scope': ('Manninen#Matti#', '> end') from request
-        u_context.set_scope_from_request("person_scope")
-
-        res = _do_get_persons(run_args)
+        new_args = u_context.set_scope_from_request("person_scope")
+        run_args.update(new_args)
+        
+        res = _do_get_persons(u_context, run_args)
         logger.info(
             f"#(2)bp.scene.routes.show_person_search: "
             f"{ u_context.material.get_tuple() } Persons with {run_args} "
@@ -753,9 +746,8 @@ def json_get_event():
     """Get Event page data."""
     t0 = time.time()
     u_context = UserContext()
-    request_args = Material.get_request_args(request)
+    args = Material.get_request_args()
     try:
-        args = request_args
         if args:
             print(f"got request args: {args}")
         else:
@@ -1126,19 +1118,16 @@ def show_sources(series=None):
     u_context = UserContext()
     # Which range of data is shown
     u_context.set_scope_from_request("source_scope")
-    u_context.count = request.args.get("c", 100, type=int)
+    u_context.count = int(u_context.get("c", 100))
+    u_context.series = series
 
     with SourceReader("read", u_context) as service:
-        if series:
-            u_context.series = series
-        # try:
+        # if series: u_context.series = series
         res = service.get_source_list()
         if res["status"] == Status.NOT_FOUND:
             print("bp.scene.routes.show_sources: No sources found")
         elif res["status"] != Status.OK:
             print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
-        # except KeyError as e:
-        # return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     series = u_context.series if u_context.series else "all"
     stk_logger(

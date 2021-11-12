@@ -563,6 +563,7 @@ class PlaceReader(DataService):
         """
         # Get a Place with Names, Notes and Medias
         use_user = self.user_context.batch_user()
+        privacy = self.user_context.is_common()
         lang = self.user_context.lang
         res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
         place = res.get("place")
@@ -593,7 +594,7 @@ class PlaceReader(DataService):
                 "statustext": f"Place tree value for {place.uniq_id}: {e}",
             }
 
-        res = self.dataservice.dr_get_place_events(place.uniq_id)
+        res = self.dataservice.dr_get_place_events(place.uniq_id, privacy)
         results["events"] = res["items"]
         return results
 

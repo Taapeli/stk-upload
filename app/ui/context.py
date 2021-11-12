@@ -26,14 +26,12 @@ Created on 1.11.2021
 
 @author: jm
 """
-# blacked 8.11.2021
-from flask import session #, request
+# blacked 12.11.2021
+from flask import session  # , request
 from flask_security import current_user
-#from flask_babelex import _
 from urllib.parse import unquote_plus
 
-#from bl.base import Status
-from bl.root import State #, Root
+from bl.root import State
 from bl.material import Material
 
 
@@ -73,7 +71,10 @@ class UserContext:
         self.lang = session.get("lang", "")  # User language
 
         print(f"#UserContext: session={session}")
-        #print(f"#UserContext: {self.get_tuple()} SESSION")
+        # print(f"#UserContext: {self.get_tuple()} SESSION")
+        self.first = ""
+        self.last = self.NEXT_END
+        self.direction = "fw"  # or "bw"
 
         # 2. From current_user (login data)
 
@@ -96,86 +97,6 @@ class UserContext:
         )
         return
 
-    # @staticmethod
-    # def set_session_material(breed):
-    #     """
-    #     Save material selection from request to session.
-    #
-    #     1.1 The material is single batch (breed="batch")
-    #         From /gramps/commands/2021-10-09.001 HTTP/1.1
-    #         --> "GET /scene/material/batch?batch_id=2021-10-09.001 HTTP/1.1" 200 -
-    #
-    #     1.2 The material is single batch (breed="batch")
-    #         From /start/logged HTTP/1.1
-    #         --> "POST /scene/material/batch HTTP/1.1" 200 -
-    #             form --> ImmutableMultiDict([('material_type', 'Place Data'),
-    #                      ('state', 'Candidate'), ('batch_id', '2021-10-26.001')])
-    #
-    #     2. The material is batches selected by material_type and state (breed="common")
-    #         From /start/logged HTTP/1.1
-    #         --> "GET /scene/material/common?material_type=Family+Tree HTTP/1.1" 200 -
-    #     """
-    #     args = Material.get_request_args()
-    #     print(f"#Material.set_session_material: request {args}")
-    #     session["breed"] = breed
-    #     session["set_scope"] = True  # Reset material and scope
-    #     session["current_context"] = breed
-    #     if "material" in session:
-    #         print(
-    #             f"ui.context.Material.set_session_material: "
-    #             f'Removed obsolete session.material={session.pop("material")!r}'
-    #         )
-    #
-    #     if breed == "batch":
-    #         # request args:  {'batch_id': '2021-10-09.001'}
-    #         session["state"] = args.get("state")
-    #         session["material_type"] = args.get("material_type")
-    #         session["batch_id"] = args.get("batch_id")
-    #
-    #         # Missing material type or state?
-    #         # - optional args: {'material_type': 'Family Tree', 'state': 'Candidate'}
-    #         if session["batch_id"] and (
-    #             not session["material_type"] or not session["state"]
-    #         ):
-    #             # Get from database
-    #             root = Root.get_batch(current_user.username, session["batch_id"])
-    #             session["material_type"] = root.material_type
-    #             session["state"] = root.state
-    #
-    #         print(
-    #             "Material.select_material: the material is single batch "
-    #             f'{Material.get_session_material_tuple()})'
-    #         )
-    #         # if not ("batch_id" in session and session["batch_id"]):
-    #         #     return {"status": Status.ERROR, "statustext": _("Missing batch id")}
-    #         return {"status": Status.OK, "breed": breed, "args": args}
-    #
-    #     elif breed == "common":
-    #         # request args: {'state': 'Candidate', 'material_type': 'Place Data', 'batch_id': '2021-10-26.001'}
-    #         session["state"] = args.get("state", State.ROOT_DEFAULT_STATE)
-    #         session["material_type"] = args.get("material_type")
-    #         session["batch_id"] = None
-    #
-    #         print(
-    #             "Material.select_material: The material is batch collection "
-    #             f'{Material.get_session_material_tuple()}'
-    #         )
-    #         if not (
-    #             "material_type" in session
-    #             and "state" in session
-    #             and session["material_type"]
-    #             and session["state"]
-    #         ):
-    #             return {
-    #                 "status": Status.ERROR,
-    #                 "statustext": _("Missing material type or state"),
-    #             }
-    #         return {"status": Status.OK, "breed": breed, "args": args}
-    #     return {
-    #         "status": Status.ERROR,
-    #         "statustext": _("Undefined breed of materials"),
-    #     }
-
     def get(self, var_name, default=None):
         """ Get a REQUEST argument value from args, form data or session.
         """
@@ -195,6 +116,25 @@ class UserContext:
         """
         return self.material.breed == self.COMMON
 
+    def batch_user(self):
+        """ Return current user id, if my candidate data is chosen. """
+        # if self.context_code in (self.choices.OWN, self.choices.BATCH):
+        if not self.is_common():
+            return self.user
+        else:
+            return None
+
+    def privacy_ok(self, obj):
+        """ Returns True, if there is no privacy reason to hide given object.
+        """
+        if self.is_common():
+            # Privacy limits only for common data
+            try:
+                return obj.too_new == False
+            except:  # No privacy limit for this kind of object
+                pass
+        return True
+
     def use_case(self):
         """ Return current use case (owner choice) as code.
         """
@@ -203,6 +143,41 @@ class UserContext:
         else:
             return self.COMMON  # Approved data
         # else self.OWN - Collection of own data not in use
+
+    def next_name(self, direction="fw"):
+        """ For template pages, tells the next page starting name.
+
+            :parameter:    direction    str    forwards or backwards
+
+            If direction is fw, display next names [last - ...]
+            If direction is bw, display next names [... - first]
+            --> anyways, the next names is included.
+        """
+        if direction == "fw":
+            if self.last == self.NEXT_END:
+                ret = "> end"  # Generic end mark
+            else:
+                ret = self.last
+        elif direction == "bw":
+            if self.first == self.NEXT_START:
+                ret = "< start"  # Generic start mark
+            else:
+                ret = self.first
+        else:
+            print(f'UserContext.next_name: invalid direction="{direction}"')
+            ret = None
+        # print(f'UserContext.next_name: {[self.first, self.last]}, {direction} next="{ret}"')
+        return ret
+
+    def at_end(self):
+        """ For template pages, tells if page contains the last name of data.
+        """
+        return self.last.startswith(self.NEXT_END)
+
+    def at_start(self):
+        """ For template pages, tells if page contains the first name of data.
+        """
+        return self.first == "" or self.first.startswith(self.NEXT_START)
 
     def set_scope(self, browse_var: str):
         """ Store data context from request for listing page.
@@ -220,9 +195,9 @@ class UserContext:
         """
         print(f"#Material.set_scope: {browse_var}")
         # Defaults values
-        self.first = ""
-        self.last = self.NEXT_END
-        self.direction = "fw"  # or "bw"
+        # self.first = ""
+        # self.last = self.NEXT_END
+        # self.direction = "fw"  # or "bw"
 
         if self.material.request_args:
             # Selected years [from,to] years=1111-2222
@@ -230,10 +205,14 @@ class UserContext:
             years = self.material.request_args.get("years", None)
             if years:
                 y1, y2 = years.split("-")
-                if y1: yi1 = int(y1)
-                else: yi1 = 0
-                if y2: yi2 = int(y2)
-                else: yi2 = 9999
+                if y1:
+                    yi1 = int(y1)
+                else:
+                    yi1 = 0
+                if y2:
+                    yi2 = int(y2)
+                else:
+                    yi2 = 9999
                 self.years = [yi1, yi2]
                 print(f"#Material.set_scope: Objects between years {self.years}")
 
@@ -260,7 +239,7 @@ class UserContext:
             self.allow_edit = self.is_auditor
         else:
             # Data selection by Root.state and Root.material_type
-            self.material.breed = self.COMMON  # "common"
+            # self.material.breed = self.COMMON  # "common"
             self.material.state = State.ROOT_ACCEPTED
         current_user.breed = self.material.breed
 
@@ -272,55 +251,47 @@ class UserContext:
         """ Return current material and batch choice for display. """
         return self.material.to_display()
 
-        # try:
-        #     m = self.material.m_type or "Unknown material"
-        #     # if m == "Place": m = "Places"
-        #     print(
-        #         f"#Material.display_current_material: "
-        #         f'[{self.material.breed!r}, {self.state!r}, {m!r}, {self.batch_id!r}]'
-        #         )
-        #     if self.state is None:
-        #         return f"{ _(m) }: {self.batch_id}"
-        #     elif self.state == State.ROOT_ACCEPTED:
-        #         batch = self.batch_id if self.batch_id else ""
-        #         return f"{ _(m) }: { _('Approved Isotammi tree') } {batch}"
-        #     else:
-        #         return f"{ _(m) }: { _(self.state) } {self.batch_id}"
-        # except Exception as e:
-        #     return "Error: " + str(e)
-
     def set_scope_from_request(self, browse_var=None):
         """ Calculate list display scope values from request or session. 
+
+            :param: request     http request
+            :param: browse_var  str         session variable name like  'person_scope'
+            :return:            dict        arguments for list pageing fw/bw
         
-            :param: request        http request
-            :param: browse_var    str    session variable name like  'person_scope'
-        
-            Use request arguments fw or bw, if defined.
-            Else use original from session.
-            
-            If request is missing, try session.browse_var.
+            #?
+            # Use request arguments fw or bw, if defined.
+            # Else use original from session.
+            #
+            # If request is missing, try session.browse_var.
         """
+        return_args = {}
         self.browse_var = browse_var
+        self.first = self.NEXT_START
+        self.last = self.NEXT_END
         req_args = self.material.request_args
         if req_args:
             # New values from request?
+            years = req_args.get("years")
+            if years:
+                return_args["years"] = years
+            c = req_args.get("c")
+            if c:
+                return_args["c"] = c
+
             fw = req_args.get("fw", None)
             bw = req_args.get("bw", None)
             if fw is None and bw is None:
-                self.first = self.NEXT_START
-                self.last = self.NEXT_END
-                return
+                return return_args
             if fw is None:
                 # bw: Direction backwards from bw parameter
                 self.last = unquote_plus(bw)
-                return
+                return_args["bw"] = self.last
+                return return_args
             else:
                 # fw: Direction forward from fw parameter
                 self.first = unquote_plus(fw)
-                return
-        else:
-            self.first = self.NEXT_START
-            self.last = self.NEXT_END
+                return_args["fw"] = self.first
+                return return_args
 
         # No request OR no fw or bw in request
         if self.browse_var:
@@ -328,12 +299,13 @@ class UserContext:
             scope = session.get(self.browse_var, [self.first, self.last])
             self.first = scope[0]
             self.last = scope[1]
+            return_args["fw"] = self.first
             session[self.browse_var] = scope
             print(
                 f"Material.set_scope_from_request: {self.browse_var} is set to {scope}"
             )
 
-        return
+        return return_args
 
     def update_session_scope(self, var_name, name_first, name_last, limit, rec_cnt):
         """ Update the session scope according to items really found from database.
@@ -368,4 +340,3 @@ class UserContext:
 
         session[var_name] = (self.first, self.last)
         print(f"#Material.update_session_scope: UserContext = {repr(session)}")
-

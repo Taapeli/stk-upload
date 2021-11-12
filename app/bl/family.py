@@ -330,7 +330,7 @@ class FamilyReader(DataService):
                 if record["no_of_children"]:
                     family.no_of_children = record["no_of_children"]
                 family.num_hidden_children = 0
-                if not self.user_context.use_common():
+                if not self.user_context.is_common():
                     if family.father:
                         family.father.too_new = False
                     if family.mother:
@@ -357,7 +357,7 @@ class FamilyReader(DataService):
                     len(families),
                 )
             self.user_context.order = order
-        if self.user_context.use_common():
+        if self.user_context.is_common():
             families = self.hide_privacy_protected_families(families)
         return families
 

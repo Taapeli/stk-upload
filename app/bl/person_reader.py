@@ -22,7 +22,7 @@ Created on 30.1.2021
 @author: jm
 """
 # blacked
-import shareds
+#import shareds
 from pe.dataservice import DataService
 from bl.base import Status
 from bl.dates import DateRange
@@ -371,7 +371,7 @@ class PersonReaderTx(DataService):
             else:  # child
                 person.families_as_child.append(family)
 
-            if not self.user_context.use_common():
+            if not self.user_context.is_common():
                 family.remove_privacy_limits()
 
         #    Sort all Person and family Events by date

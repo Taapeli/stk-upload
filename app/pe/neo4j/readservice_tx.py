@@ -214,7 +214,7 @@ class Neo4jReadServiceTx(ConcreteService):
             #    - root_user    the (original) owner of this object
             #    - bid          Batch id
             root_node = record['root']
-            material = root_node.get('material', "")
+            material_type = root_node.get('material', "")
             root_state = root_node.get('state', "")
             root_user = root_node.get('user', "")
             bid = root_node.get('id', "")
@@ -222,7 +222,7 @@ class Neo4jReadServiceTx(ConcreteService):
             person_node = record['p']
             puid = person_node.id
             res['person_node'] = person_node
-            res['root'] = {'material':material, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
+            res['root'] = {'material':material_type, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
 
 #                 # Add to list of all objects connected to this person
 #                 self.objs[person.uniq_id] = person
