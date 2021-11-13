@@ -28,7 +28,7 @@ from bl.root import State
 # List of functions available for researcher
 
 RESEARCHER_FUNCTIONS = [ # (URL, title)
-    ("/scene/persons/search?set_scope=1&batch_id=", "Browse this material"),
+    ("/scene/material/batch?batch_id=", "Browse this material"),
     ("/audit/user/request/",     _("Send for auditing")),
     ("/audit/user/withdraw/",    _("Withdraw auditing")),
     ("/gramps/batch_download/",  _("Download the Gramps file")),

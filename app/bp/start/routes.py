@@ -30,11 +30,11 @@ from werkzeug.utils import redirect
 from flask.helpers import url_for
 
 from ..gedcom.models import gedcom_utils
-from ui.user_context import UserContext
+from ui.context import UserContext
 from bl.person import PersonReader
 import shareds
 from bl.root import Root
-from bp.dupsearch.models.search import batches
+#from bp.dupsearch.models.search import batches
 
 logger = logging.getLogger("stkserver")
 
@@ -132,7 +132,7 @@ def start_logged():
     is_demo = shareds.app.config.get("DEMO", False)
     if is_demo:
         # Get surname cloud data
-        u_context = UserContext(session, current_user, request)
+        u_context = UserContext()
         u_context.user = None
 
         with PersonReader("read", u_context) as service:

@@ -85,6 +85,7 @@ class State:
     ROOT_ACCEPTED = "Accepted"
     ROOT_REJECTED = "Rejected"
     ROOT_UNKNOWN = "Unknown"
+    ROOT_DEFAULT_STATE = ROOT_ACCEPTED
 
     OBJECT_CANDICATE = "Candidate"  # old BATCH_CANDIDATE  = "completed"
     OBJECT_ACCEPTED = "Accepted"

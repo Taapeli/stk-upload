@@ -310,7 +310,7 @@ def xml_to_stkbase(batch: Root):
         metadata = handler.get_metadata_from_header()
         print("metadata:", metadata)
         if metadata:
-            batch.material = metadata[0] if metadata[0] else DEFAULT_MATERIAL
+            batch.material_type = metadata[0] if metadata[0] else DEFAULT_MATERIAL
             batch.description = metadata[1]
         handler.handle_suffix = "_" + handler.batch.id  
         # Open database connection as Neo4jDataService instance and start transaction

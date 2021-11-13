@@ -250,7 +250,7 @@ class FamilyReader(DataService):
             # For reader only; writer has no context?
             self.user_context = u_context
             self.username = u_context.user
-            if u_context.context_code == u_context.ChoicesOfView.COMMON:
+            if u_context.is_common():
                 self.use_user = None
             else:
                 self.use_user = u_context.user
@@ -272,7 +272,7 @@ class FamilyReader(DataService):
             "name": self.user_context.first,  # From here forward
             "order": order,
             "limit": limit,
-            "batch_id": self.user_context.batch_id,
+            "batch_id": self.user_context.material.batch_id,
         }
         ustr = "user " + args["use_user"] if args["use_user"] else "no user"
         print(
@@ -330,7 +330,7 @@ class FamilyReader(DataService):
                 if record["no_of_children"]:
                     family.no_of_children = record["no_of_children"]
                 family.num_hidden_children = 0
-                if not self.user_context.use_common():
+                if not self.user_context.is_common():
                     if family.father:
                         family.father.too_new = False
                     if family.mother:
@@ -357,7 +357,7 @@ class FamilyReader(DataService):
                     len(families),
                 )
             self.user_context.order = order
-        if self.user_context.use_common():
+        if self.user_context.is_common():
             families = self.hide_privacy_protected_families(families)
         return families
 

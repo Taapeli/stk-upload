@@ -22,7 +22,7 @@ Created on 30.1.2021
 @author: jm
 """
 # blacked
-import shareds
+#import shareds
 from pe.dataservice import DataService
 from bl.base import Status
 from bl.dates import DateRange
@@ -118,9 +118,9 @@ class PersonReaderTx(DataService):
         args["use_user"] = self.use_user
         args["fw"] = context.first  # From here forward
         args["limit"] = context.count
-        args["batch_id"] = context.batch_id
-        args["material"] = context.material
-        args["state"] = context.state
+        args["batch_id"] = context.material.batch_id
+        args["material_type"] = context.material.m_type
+        args["state"] = context.material.state
         res = self.dataservice.tx_get_person_list(args)
 
         status = res.get("status")
@@ -270,7 +270,7 @@ class PersonReaderTx(DataService):
         res = self.dataservice.tx_get_person_by_uuid(
             uuid, 
             active_user=self.use_user, 
-            batch_id=self.user_context.batch_id
+            batch_id=self.user_context.material.batch_id
         )
         if Status.has_failed(res):
             # Not found, not allowed (person.too_new) or error
@@ -371,7 +371,7 @@ class PersonReaderTx(DataService):
             else:  # child
                 person.families_as_child.append(family)
 
-            if not self.user_context.use_common():
+            if not self.user_context.is_common():
                 family.remove_privacy_limits()
 
         #    Sort all Person and family Events by date

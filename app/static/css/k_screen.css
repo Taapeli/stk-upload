@@ -129,7 +129,7 @@ div#Header {
     margin: 13px 0;
 }
 div#Header.own    { border-bottom: solid 3pt #e0bc91; }
-div#Header.passed { border-bottom: solid 2pt #6884be; }
+div#Header.common { border-bottom: solid 2pt #6884be; }
 
 div#Header div.curr_user {
     float: right; 

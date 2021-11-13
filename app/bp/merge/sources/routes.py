@@ -1,13 +1,20 @@
-from bl.base import Status, StkEncoder
-from bl.source import SourceReader, SourceWriter
+"""
+    Merge two Sources.
+
+Created on 1.11.2021
+
+@author: kku
+"""
 
 from .. import bp
 
 from flask import request, session as user_session, render_template
 from flask_security import current_user, roles_accepted
 
-from ui.user_context import UserContext
-import shareds
+from bl.base import Status, StkEncoder
+from bl.source import SourceReader, SourceWriter
+from ui.context import UserContext
+
 
 @bp.route("/merge/sources")
 @roles_accepted('audit')
@@ -21,7 +28,7 @@ def list_sources(series=None):
     # Set context by owner and the data selections
     u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    u_context.set_scope_from_request(request, 'merge_sources_scope')
+    u_context.set_scope_from_request('merge_sources_scope')
     u_context.count = request.args.get('c', 100, type=int)
 
     with SourceReader("read", u_context) as reader: 

@@ -27,7 +27,7 @@ div.props > div > span:nth-child(1) {
 {% include "flash_messages.html" %}
 
         <h2>{{ _("Selected <i>%(m)s</i> batch in the state <i>%(s)s</i>", 
-            m = root.material | transl('material') | lower,
+            m = root.material_type | transl('material') | lower,
             s = root.state | transl('state') | lower ) }}</h2>
 
 		<div class="props">

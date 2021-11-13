@@ -913,11 +913,11 @@ class Neo4jReadService(ConcreteService):
                 ret.append(p)
         return ret
 
-    def dr_get_place_events(self, uniq_id):
-        """Find events and persons associated to given Place
+    def dr_get_place_events(self, uniq_id, privacy):
+        """Find events and persons associated to given Place.
 
-        Haetaan paikkaan liittyvät tapahtumat sekä
-        osallisen henkilön nimitiedot.
+            :param: uniq_id    current place uniq_id
+            :param: privacy    True, if not showing live people
         """
         result = self.driver.session(default_access_mode="READ").run(
             CypherPlace.get_person_family_events, locid=uniq_id
@@ -944,12 +944,15 @@ class Neo4jReadService(ConcreteService):
             # Fields uid (person uniq_id) and names are on standard in EventBl
             e.role = record["role"]
             indi_label = list(record["indi"].labels)[0]
-            if indi_label in ["Audit", "Batch"]:
-                continue
+            # if indi_label in ["Audit", "Batch"]:
+            #     continue
             if "Person" == indi_label:
                 e.indi_label = "Person"
                 e.indi = PersonBl.from_node(record["indi"])
-                if e.indi.too_new:  # Check privacy
+                # Reading confidental person data which is available to this user?
+                if not privacy: 
+                    e.indi.too_new = False
+                elif e.indi.too_new:  # Check privacy
                     continue
                 for node in record["names"]:
                     e.indi.names.append(Name.from_node(node))
@@ -1041,18 +1044,17 @@ class Neo4jReadService(ConcreteService):
                 # 4  cit_cnt=1
                 # 5  ref_cnt=1
                 # >
-                source = record["source"]
-                s = SourceBl.from_node(source)
+                node = record["source"]
+                s = SourceBl.from_node(node)
                 notes = record["notes"]
-                for note in notes:
-                    n = Note.from_node(note)
+                for node in notes:
+                    n = Note.from_node(node)
                     s.notes.append(n)
                 repositories = record["repositories"]
-                for repo in repositories:
-                    # [medium, repo_node]
-                    if repo[1] != None:
-                        rep = Repository.from_node(repo[1])
-                        rep.medium = repo[0]
+                for medium, node in repositories:
+                    if node:
+                        rep = Repository.from_node(node)
+                        rep.medium = medium
                         s.repositories.append(rep)
                 s.cit_cnt = record["cit_cnt"]
                 s.ref_cnt = record["ref_cnt"]
@@ -1301,7 +1303,7 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             cypher = CypherPerson.get_surname_list
 #             print('#  Neo4jReadService.dr_get_surname_list: with \n{ material:"'
-#                   f'{self.material}", state:"{self.state}", username:"{username}", count:{count}''}')
+#                   f'{self.material.m_type}", state:"{self.material.state}", username:"{username}", count:{count}''}')
 #             print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
             result = run_cypher_batch(session, cypher,
                 username, batch_id,

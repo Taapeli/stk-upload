@@ -22,13 +22,14 @@
 #
 #   Copyright (C) 2021  Heikki Roikonen
 
-from flask import render_template, request, flash, session as user_session
-from flask import json  # , send_file
-from flask_security import login_required, roles_accepted, current_user
+from flask import request #, render_template, flash, 
+from flask import session as user_session
+#from flask import json  # , send_file
+from flask_security import current_user #, login_required, roles_accepted, 
 
-from ui.user_context import UserContext
+from ui.context import UserContext
 from bl.person import PersonReader
-from bl.base import Status
+#from bl.base import Status
 
 MAX_ANCESTOR_LEVELS = 4
 MAX_DESCENDANT_LEVELS = 3
@@ -162,8 +163,8 @@ class FanChart:
         a simple two-way fanchart.
         """
         # Set up the database access and find out whether looking at own data.
-        u_context = UserContext(user_session, current_user, request)
-        privacy = u_context.use_common() # context_code == u_context.ChoicesOfView.COMMON
+        u_context = UserContext()
+        privacy = u_context.is_common()
 
         # Fill in basic data from current person
         with PersonReader("read", u_context) as service:

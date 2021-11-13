@@ -89,7 +89,7 @@ class Neo4jReadServiceTx(ConcreteService):
         
             args = dict {use_user, fw, limit, rule, key, years}
         """
-        material = args.get('material')
+        material = args.get('material_type')
         state = args.get('state')
         username = args.get('use_user')
         rule = args.get('rule')
@@ -214,7 +214,7 @@ class Neo4jReadServiceTx(ConcreteService):
             #    - root_user    the (original) owner of this object
             #    - bid          Batch id
             root_node = record['root']
-            material = root_node.get('material', "")
+            material_type = root_node.get('material', "")
             root_state = root_node.get('state', "")
             root_user = root_node.get('user', "")
             bid = root_node.get('id', "")
@@ -222,7 +222,7 @@ class Neo4jReadServiceTx(ConcreteService):
             person_node = record['p']
             puid = person_node.id
             res['person_node'] = person_node
-            res['root'] = {'material':material, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
+            res['root'] = {'material':material_type, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
 
 #                 # Add to list of all objects connected to this person
 #                 self.objs[person.uniq_id] = person
@@ -567,8 +567,8 @@ class Neo4jReadServiceTx(ConcreteService):
 
     def tx_note_search(self, args):
         """Free text search in Notes"""
-        material = args.get('material')
-        state = args.get('state')
+        #material = args.get('material')
+        #state = args.get('state')
         username = args.get('use_user')
         searchtext = args.get('key')
         limit = args.get('limit', 100)
@@ -594,7 +594,7 @@ class Neo4jReadServiceTx(ConcreteService):
                             limit=limit)
         rsp = []
         for record in result:
-            item = record.get('item')
+            #item = record.get('item')
             #note = item[0]
             #x = item[1]
             note = record.get('note')

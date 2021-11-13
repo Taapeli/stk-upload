@@ -529,7 +529,7 @@ class PlaceReader(DataService):
         use_user = context.batch_user()
         places = self.dataservice.dr_get_place_list_fw(
             use_user, fw, context.count, lang=context.lang,
-            batch_id=context.batch_id,
+            batch_id=context.material.batch_id,
         )
 
         # Update the page scope according to items really found
@@ -563,6 +563,7 @@ class PlaceReader(DataService):
         """
         # Get a Place with Names, Notes and Medias
         use_user = self.user_context.batch_user()
+        privacy = self.user_context.is_common()
         lang = self.user_context.lang
         res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
         place = res.get("place")
@@ -593,7 +594,7 @@ class PlaceReader(DataService):
                 "statustext": f"Place tree value for {place.uniq_id}: {e}",
             }
 
-        res = self.dataservice.dr_get_place_events(place.uniq_id)
+        res = self.dataservice.dr_get_place_events(place.uniq_id, privacy)
         results["events"] = res["items"]
         return results
 
@@ -601,8 +602,9 @@ class PlaceReader(DataService):
         """
         Return placename stats so that the names can be displayed in a name cloud.
         """
-        placenames = self.dataservice.dr_get_placename_list(self.use_user, 
-                                                            self.user_context.batch_id, count=count)
+        ds = self.dataservice
+        placenames = ds.dr_get_placename_list(self.use_user, 
+                                              self.user_context.material.batch_id, count=count)
         # Returns [{'surname': surname, 'count': count},...]
 
         # if self.use_user:
