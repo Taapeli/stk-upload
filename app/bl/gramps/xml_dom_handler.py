@@ -176,7 +176,12 @@ class DOM_handler:
             for node in header.childNodes:
                 #print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
                 if node.nodeName == "isotammi":
-                    return self.get_isotammi_metadata(node)
+                    material_type, description = self.get_isotammi_metadata(node)
+                    self.blog.log_event(
+                        {"title": _("Material type"), "level": "TITLE", 
+                         "count": f"{material_type} {description!r}\n"}
+                    )
+                    return material_type, description
         return None
 
     def get_isotammi_metadata(self, isotammi_node):

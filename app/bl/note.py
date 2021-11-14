@@ -208,13 +208,13 @@ class NoteReader(DataService):
     def __init__(self, service_name: str, u_context=None):
         super().__init__(service_name, u_context)
 
-    def _note_search(self, args):
+    def note_search(self, args):
         context = self.user_context
         args["use_user"] = self.use_user
         args["fw"] = context.first  # From here forward
         args["limit"] = context.count
         args["batch_id"] = context.material.batch_id
-        args["material"] = context.material.m_type
+        args["material_type"] = context.material.m_type
         args["state"] = context.material.state
         res = self.dataservice.tx_note_search(args)
         #print(res)

@@ -479,8 +479,8 @@ def upload_csv():
     """
     try:
         infile = request.files["filenm"]
-        material = request.form["material"]
-        logging.info(f"-> bp.audit.routes.upload_csv/{material} f='{infile.filename}'")
+        material_type = request.form["material"]
+        logging.info(f"-> bp.audit.routes.upload_csv/{material_type} f='{infile.filename}'")
 
         loadfile.upload_file(infile)
         if "destroy" in request.form and request.form["destroy"] == "all":
@@ -492,7 +492,7 @@ def upload_csv():
         return redirect(url_for("virhesivu", code=1, text=str(e)))
 
     return redirect(
-        url_for("audit.save_loaded_csv", filename=infile.filename, subj=material)
+        url_for("audit.save_loaded_csv", filename=infile.filename, subj=material_type)
     )
 
 

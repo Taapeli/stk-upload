@@ -135,7 +135,7 @@ class Material():
             ):
                 # Get from database
                 root = Root.get_batch(username, session["batch_id"])
-                session["material_type"] = root.material
+                session["material_type"] = root.material_type
                 session["state"] = root.state
 
             print(
@@ -164,7 +164,7 @@ class Material():
             ):
                 return {
                     "status": Status.ERROR,
-                    "statustext": _("Missing material type or state"),
+                    "statustext": _("Missing material_type or state"),
                 }
             return {"status": Status.OK, "breed": breed, "args": args}
         return {

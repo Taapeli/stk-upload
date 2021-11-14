@@ -108,7 +108,7 @@ class Root(NodeObject):
         self.user = userid
         self.file = None
         self.id = ""  # batch_id
-        self.material = DEFAULT_MATERIAL      # Material type "Family Tree" or other
+        self.material_type = DEFAULT_MATERIAL      # Material type "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
         self.timestamp = 0 # Milliseconds; Convert to string by 
@@ -118,7 +118,7 @@ class Root(NodeObject):
         self.logname = ""
 
     def __str__(self):
-        return f"Root {self.user} / {self.id} {self.material}({self.state})"
+        return f"Root {self.user} / {self.id} {self.material_type}({self.state})"
 
     def for_auditor(self):
         """ Is relevant for auditor? """
@@ -130,12 +130,19 @@ class Root(NodeObject):
             return True
         return False
 
+    def filename(self):
+        """ Get filenname of Root.file. """
+        try:
+            return os.path.split(self.file)[1]
+        except Exception:
+            return ""
+        
     def save(self, dataservice):
         """Create or update Root node.
 
         Returns {'id':self.id, 'status':Status.OK}
         """
-        # print(f"Batch.save with {self.dataservice.__class__.__name__}")
+        # Root node variables
         attr = {
             "id": self.id,
             "user": self.user,
@@ -144,7 +151,7 @@ class Root(NodeObject):
             # timestamp": <to be set in cypher>,
             # id: <uniq_id from result>,
             "state": self.state,
-            "material": self.material,
+            "material": self.material_type,
             "description": self.description,
             "xmlname": self.xmlname,
             "metaname": self.metaname,
@@ -172,7 +179,7 @@ class Root(NodeObject):
         obj.timestamp = node.get("timestamp", 0)
         obj.upload = format_ms_timestamp(obj.timestamp)
         #obj.auditor = node.get("auditor", None)
-        obj.material = node.get("material", DEFAULT_MATERIAL)
+        obj.material_type = node.get("material", DEFAULT_MATERIAL)
         obj.description = node.get("description", "")
         obj.xmlname = node.get("xmlname", "")
         obj.metaname = node.get("metaname", "")
@@ -267,12 +274,14 @@ class Root(NodeObject):
         with shareds.driver.session() as session:
             result = run_cypher(session, CypherRoot.get_my_batches, username)
             for rec in result:
-                #print(rec.get("root"))
-                values = dict(rec.get("root"))
-                fname = values["file"]
-                filename = os.path.split(fname)[1]
-                values["filename"] = filename
-                yield values
+                root = Root.from_node(rec["root"])
+                print(f"#get_my_batches: {root}")
+                yield root
+                # values = dict(rec.get("root"))
+                # fname = values["file"]
+                # filename = os.path.split(fname)[1]
+                # values["filename"] = filename
+                # yield values
 
     @staticmethod
     def get_user_stats(user):

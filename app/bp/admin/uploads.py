@@ -344,7 +344,7 @@ def list_uploads(username:str) -> List[Upload]:
             status=_(state),
             is_candidate=1 if (b.state == State.ROOT_CANDIDATE) else 0,
             for_auditor=1 if b.for_auditor() else 0,
-            material_type=b.material,
+            material_type=b.material_type,
             description=b.description,
         )
         #print(f"#bp.admin.uploads.list_uploads: {upload}")

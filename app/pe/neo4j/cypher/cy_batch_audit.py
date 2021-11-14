@@ -111,6 +111,11 @@ return b as batch,
     order by batch.user, batch.id'''
 
 #-bl.root.Root.get_my_batches
+    get_batches_accepted = """
+match (b:Root) 
+where root.state='Accepted' 
+return root.material, count(*) order by root.material"""
+
     get_my_batches = """
 where root.state='Candidate' 
 return root order by root.id desc"""
@@ -161,7 +166,7 @@ order by root.id"""
     delete_chunk = """
 MATCH (:UserProfile{username:$user})
     -[:HAS_LOADED]-> (:Root{id:$batch_id}) -[:OBJ_PERSON|OBJ_FAMILY|OBJ_PLACE|OBJ_SOURCE|OBJ_OTHER]-> (a)
-WITH a LIMIT 1000 
+WITH a LIMIT 2000 
     OPTIONAL MATCH (a) -[r]-> (b) WHERE TYPE(r) = "NAME" OR TYPE(r) = "NOTE"
     DETACH DELETE b
     DETACH DELETE a"""
@@ -248,25 +253,3 @@ RETURN count(x)
 MATCH (a:Root {id: $batch})
 DETACH DELETE a
 '''
-
-#     copy_batch_to_audit = """
-# MATCH (stk_user:UserProfile {username:'_Stk_'})
-# MATCH (target:Root {id:$batch, user:$user, state:$state_candidate})
-# MATCH (original_user:UserProfile{username:$user}) -[original_access:HAS_ACCESS]-> (target)
-# MATCH (original_user) -[original_has_loaded:HAS_LOADED]-> (target)
-# DELETE original_has_loaded
-# DELETE original_access
-# MERGE (stk_user) -[:HAS_ACCESS]-> (target)
-#     SET target.auditor = $oper
-#     SET target.timestamp = timestamp()
-#     SET target.state = $state_auditing
-# CREATE (new_root:Root {id:$batch})
-#     SET new_root.user = $user
-#     SET new_root.file = target.file
-#     SET new_root.material = target.material
-#     SET new_root.state = $state_for_audit
-# MERGE (new_root) -[:AFTER_AUDIT]-> (target)        
-# MERGE (original_user) -[:HAS_LOADED]-> (new_root)
-# MERGE (original_user) -[:HAS_ACCESS]-> (new_root)
-# return *        
-# """

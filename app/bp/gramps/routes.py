@@ -106,8 +106,8 @@ def upload_gramps():
     """
     try:
         infile = request.files["filenm"]
-        material = request.form["material"]
-        # logger.debug("Got a {} file '{}'".format(material, infile.filename))
+        material_type = request.form["material"]
+        # logger.debug("Got a {} file '{}'".format(material_type, infile.filename))
 
         t0 = time.time()
         with BatchUpdater("update") as batch_service:
@@ -141,7 +141,7 @@ def upload_gramps():
             open(batch.logname, "w", encoding="utf-8").write(msg)
             syslog.log(type="gramps file uploaded", file=infile.filename, batch=batch.id)
             logger.info(
-                f'-> bp.gramps.routes.upload_gramps/{material} f="{infile.filename}"'
+                f'-> bp.gramps.routes.upload_gramps/{material_type} f="{infile.filename}"'
                 f" e={shareds.tdiff:.3f}sek"
             )
 

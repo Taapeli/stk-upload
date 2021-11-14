@@ -16,6 +16,10 @@ td,th {
 td {
     position: relative;
 }
+#description { 
+    width: 266px;
+    height: 5em;
+}
 .visible { display: inline; }
 .hidden { display:none; }
 </style>
@@ -41,7 +45,7 @@ td {
 	</tr>
 	<tr>
 		<th>{{ _("Material") }}</th>
-		<td class="typedesc">{{ _(batch.material) }}</td>
+		<td class="typedesc">{{ _(batch.material_type) }}</td>
 	</tr>
 	<tr>
 		<th>{{ _("Description") }}</th>

@@ -308,9 +308,15 @@ def xml_to_stkbase(batch: Root):
         batch.mediapath = handler.get_mediapath_from_header()
     
         metadata = handler.get_metadata_from_header()
-        print("metadata:", metadata)
+        print("gramps_loader.xml_to_stkbase: metadata:", metadata)
         if metadata:
-            batch.material_type = metadata[0] if metadata[0] else DEFAULT_MATERIAL
+            if metadata[0]:
+                batch.material_type = metadata[0]
+                print(f"- got material type {batch.material_type} {metadata[1]!r}")
+            else:
+                batch.material_type = DEFAULT_MATERIAL
+                print(f"- default material type {batch.material_type} {metadata[1]!r}")
+            # batch.material_type = metadata[0] if metadata[0] else DEFAULT_MATERIAL
             batch.description = metadata[1]
         handler.handle_suffix = "_" + handler.batch.id  
         # Open database connection as Neo4jDataService instance and start transaction

@@ -203,25 +203,25 @@ def _note_search(args):
     print(args)
     u_context = UserContext()
     u_context.count = request.args.get("c", 100, type=int)
+    searchtext = args["key"].lower()
+    displaylist = []
 
     try:
         with NoteReader("read_tx", u_context) as service:
             res = service.note_search(args)
-
-        searchtext = args["key"].lower()
-        items = res["items"]
-        displaylist = []
-        for item in items:
-            # print("item", item)
-            # note = item[0]
-            # x = item[1]
-            displaylist.append(_note_item_format(item, searchtext))
+            for item in res["items"]:
+                # print("item", item)
+                # note = item[0]
+                # x = item[1]
+                displaylist.append(_note_item_format(item, searchtext))
 
         # from pprint import  pprint
         # pprint(displaylist[0:5])
     except Exception as e:
-        displaylist = []
+        traceback.print_exc()
         flash(str(e))
+        stk_logger(u_context, f"-> bp.scene.routes._note_search FAILED")
+
     return render_template(
         "/scene/persons_search.html",
         menuno=0,
