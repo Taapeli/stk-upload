@@ -27,7 +27,7 @@ import uuid
 import json
 import traceback
 from datetime import datetime
-
+import base32_lib as base32
 
 class Status:
     """Status code values for result dictionary.
@@ -189,6 +189,31 @@ class NodeObject:
         if self.dates:
             return self.dates != other.dates
         return False
+
+    @staticmethod
+    def split_with_hyphen(id_str):
+        """Inserts a hyphen into the id string."""
+        """Examples: H-1, H-1234, H1-2345, H1234-5678."""
+
+        return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
+
+    @staticmethod
+    def new_isotammi_id(dataservice, obj_type_letter):
+        """Generates a new Isotammi id."""
+
+        get_new_id ="""
+MERGE (a:Isotammi_id {id:$id_type})
+ON CREATE SET a.counter = 1
+ON MATCH SET a.counter = a.counter + 1
+RETURN a.counter AS n_Isotammi_id"""
+
+        result = dataservice.tx.run(get_new_id, id_type=obj_type_letter)
+        iid = result.single()[0]
+##        print(f"new_isotammi_id lock value: {iid}")
+        isotammi_id = NodeObject.split_with_hyphen(obj_type_letter + base32.encode(iid, checksum=False))
+
+##        print(f"new_isotammi_id: {isotammi_id}")
+        return isotammi_id
 
     @staticmethod
     def newUuid():
