@@ -224,18 +224,23 @@ RETURN a.counter AS n_Isotammi_id"""
         return uuid.uuid4().hex
 
     def uuid_short(self):
-        """ Display uuid in short form. """
+        """ Display uuid (or isotammi_id) in short form. 
+        
+            Real uuid shortened, isotammi_id need is not too long
+        """
         if self.uuid:
-            return self.uuid[:6]
+            if len(self.uuid) > 20:
+                return self.uuid[:6]
+            return self.uuid
         else:
             return ""
 
-    def uuid_str(self):
-        """ Display uuid in short form, or show self.uniq_id is missing. """
-        if self.uuid:
-            return self.uuid[:6]
-        else:
-            return f"({self.uniq_id})"
+    # def uuid_str(self):
+    #     """ Display uuid in short form, or show self.uniq_id is missing. """
+    #     if self.uuid:
+    #         return self.uuid[:6]
+    #     else:
+    #         return f"({self.uniq_id})"
 
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """
