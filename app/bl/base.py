@@ -97,7 +97,7 @@ class NodeObject:
 
         Optional uniq_id may be uuid identifier (str) or database key (int).
         """
-        self.uuid = None  # UUID
+        self.uuid = None  # UUID / isotammi_id
         self.uniq_id = None  # Neo4j object id
         self.change = 0  # Object change time
         self.id = ""  # Gedcom object id like "I1234"
@@ -212,7 +212,7 @@ RETURN a.counter AS n_Isotammi_id"""
 ##        print(f"new_isotammi_id lock value: {iid}")
         isotammi_id = NodeObject.split_with_hyphen(obj_type_letter + base32.encode(iid, checksum=False))
 
-##        print(f"new_isotammi_id: {isotammi_id}")
+        print(f"new_isotammi_id: {iid} -> {isotammi_id}")
         return isotammi_id
 
     @staticmethod
