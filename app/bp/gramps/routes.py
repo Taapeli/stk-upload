@@ -34,6 +34,7 @@ logger = logging.getLogger("stkserver")
 
 from flask import (
     render_template,
+    session,
     request,
     redirect,
     url_for,
@@ -187,18 +188,23 @@ def xml_analyze(xmlfile):
 def gramps_analyze(batch_id):
     batch = Root.get_batch(current_user.username, batch_id)
     logger.info(f'bp.gramps.routes.gramps_analyze b="{batch_id}"')
-    return render_template("/gramps/gramps_analyze.html", batch_id=batch_id)
+    base, ext = os.path.splitext(batch.xmlname)
+    newfile = base + "_checked" + ext
+    
+    return render_template("/gramps/gramps_analyze.html", batch_id=batch_id, file=batch.xmlname, newfile=newfile)
 
 
-@bp.route("/gramps/gramps_analyze_json/<batch_id>")
+@bp.route("/gramps/gramps_analyze_json/<batch_id>/<newfile>")
 @login_required
 @roles_accepted("research", "admin", "audit")
-def gramps_analyze_json(batch_id):
+def gramps_analyze_json(batch_id, newfile):
     batch = Root.get_batch(current_user.username, batch_id)
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
     print("gramps_runner",gramps_runner)
     if gramps_runner:
-        msgs = gramps_utils.gramps_verify(gramps_runner, current_user.username, batch_id, batch.xmlname)
+        lang = session.get("lang","")
+        print("lang",lang)
+        msgs = gramps_utils.gramps_verify(gramps_runner, lang, current_user.username, batch_id, batch.xmlname, newfile)
     else:
         msgs = {}
     logger.info(f'bp.gramps.routes.gramps_analyze_json f="{os.path.basename(batch.xmlname)}"')
@@ -249,6 +255,29 @@ def gramps_batch_download(batch_id):
             flash(msg)
             return redirect(url_for("gramps.list_uploads"))
             
+@bp.route("/gramps/download_checked_file/<batch_id>")
+@login_required
+@roles_accepted("research", "admin")
+def download_checked_file(batch_id):
+    batch = Root.get_batch(current_user.username, batch_id)
+    if batch:
+        xml_folder, xname = os.path.split(batch.file)
+        if batch.xmlname:
+            xname = batch.xmlname
+        base,ext = os.path.splitext(xname)
+        xname = base + "_checked" + ext
+        xml_folder = os.path.abspath(xml_folder)
+        try:
+            return send_from_directory(xml_folder, xname,
+                mimetype="application/gzip",
+                as_attachment=True,
+                max_age=0,
+            )
+        except Exception as e:
+            print(f"bp.gramps.routes.gramps_batch_download: {e}")
+            msg = _("The file \"%(n)s\" does not exist", n=xname)
+            flash(msg)
+            return redirect(url_for("gramps.list_uploads"))
 
 @bp.route("/gramps/show_upload_log/<batch_id>")
 @login_required

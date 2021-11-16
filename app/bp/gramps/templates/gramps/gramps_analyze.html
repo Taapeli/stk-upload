@@ -22,11 +22,11 @@ td {
 
 <div id="app">
 	<h1>{{ _("Gramps Verify Tool") }}</h1>
-	File name: {{ file }}
+	{{ _("File") }}: {{ file }}
 	<p>
 	<img v-show="!ready" src="/static/5.gif">
 	<table v-show="ready">
-		<tr><th>Message<th>Count
+		<tr><th>{{ _("Message") }}<th>{{ _("Count") }}
 	    <tr v-for="msg,i in msgs">
 	    	<td @click="toggle(i)">${ msg[0] }
 	    	<td class=number>${ msg[1].length }
@@ -40,6 +40,14 @@ td {
     	</tr>
 	</table>
     <p>
+
+	<div v-show="ready">
+    	<a href="/gramps/download_checked_file/{{ batch_id }}">
+    		{{ _("Download checked file") }}
+		</a>
+    </div>
+    <p>
+    
     &rtrif; <a href="/gramps/uploads">{{ _("Return") }}</a></p>
 
 </div>
@@ -63,12 +71,13 @@ var app = new Vue({
     	ready: false,
 		batch_id: '{{ batch_id }}',
 //    	xmlfile: '{{ file }}',
+    	newfile: '{{ newfile }}',
     	msgs: [],
     	current: -1,
     },
     methods: {
     	init: function() {
-    		axios.get('/gramps/gramps_analyze_json/' + this.batch_id)
+    		axios.get('/gramps/gramps_analyze_json/' + this.batch_id + '/' + this.newfile)
     		.then( function(rsp) {
     			app.msgs = Object.entries(rsp.data);
     			console.log(this.msgs);
