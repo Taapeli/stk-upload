@@ -155,7 +155,7 @@ function doconfirm( command, title ) { // used in commands.html
                 <div class="progress" data-name='{{upload.batch_id}}'></div>
     {% if upload.state == 'Loading' %}
                      <script>
-                         setTimeout( function() {update_progress('{{upload.batch_id}}')}, PROGRESS_INTERVAL );
+                         update_progress('{{upload.batch_id}}');
                      </script>
     {% endif -%}
             </td>
