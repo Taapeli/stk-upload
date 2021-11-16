@@ -102,18 +102,31 @@ def _note_item_format(rec, searchtext, min_length=100):
     """
     import re
 
-    def generate_choices(q):
-        choices = []
-        for i, _c in enumerate(q):
-            choice = fr"{q[0:i]}\w{q[i:]}"  # add any character
-            choices.append(choice)
-            choice = fr"{q[0:i]}\w{q[i+1:]}"  # replace any character
-            choices.append(choice)
-            choice = fr"{q[0:i]}{q[i+1:]}"  # remove any character
-            choices.append(choice)
-        return choices
-
-    # print(rec)
+    def generate_choices(q, n):
+        """
+        Naive algorithm trying to generate regexes 
+        for all words that have a Damerau-Levenshtein distance 
+        of at most n from the word q.
+        """
+        def generate_choices1(q, n):
+            if n == 0: 
+                yield q
+                return
+            for i, c in enumerate(q):
+                choice = fr"{q[0:i]}.{q[i:]}"  # add any character
+                yield from generate_choices1(choice,n-1)
+                choice = fr"{q}."  # add any character after the word
+                yield from generate_choices1(choice,n-1)
+                if c == ".": continue
+                choice = fr"{q[0:i]}.{q[i+1:]}"  # replace any character
+                yield from generate_choices1(choice,n-1)
+                choice = fr"{q[0:i]}{q[i+1:]}"  # remove any character
+                yield from generate_choices1(choice,n-1)
+                if i > 0 and q[i-1] != ".":
+                    choice = fr"{q[0:i-1]}{q[i]}{q[i-1]}{q[i+1:]}"  # swap any characters
+                    yield from generate_choices1(choice,n-1)
+        return [choice.replace(".",r"\w") for choice in generate_choices1(q, n)]
+    
     note = rec.get("note")
     # id = note.get('id')
     text = note.get("text")
@@ -128,7 +141,7 @@ def _note_item_format(rec, searchtext, min_length=100):
     for wordnum, searchword in enumerate(searchwords):
         if searchword.endswith("~"):
             searchword = searchword[:-1]
-            choices = generate_choices(searchword)
+            choices = generate_choices(searchword, 2)
             choices = [searchword] + choices
             print(choices)
             regextext = "(" + "|".join(choices) + ")"
