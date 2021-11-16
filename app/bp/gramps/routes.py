@@ -271,9 +271,10 @@ def download_checked_file(batch_id):
             return send_from_directory(xml_folder, xname,
                 mimetype="application/gzip",
                 as_attachment=True,
-                max_age=0,
+                cache_timeout=0,  # change to max_age in Flask 2.x
             )
         except Exception as e:
+            traceback.print_exc()
             print(f"bp.gramps.routes.gramps_batch_download: {e}")
             msg = _("The file \"%(n)s\" does not exist", n=xname)
             flash(msg)
