@@ -813,14 +813,14 @@ done
 
 test_output = None
 
-def gramps_verify(gramps_runner, username, xmlfile):
+def gramps_verify(gramps_runner, username, batch_id, xmlfile):
     if test_output:
         lines = test_output.splitlines()
         import time
         time.sleep(3)
     else:
         upload_folder = get_upload_folder(username) 
-        pathname = os.path.join(upload_folder, xmlfile)
+        pathname = os.path.join(upload_folder, batch_id, xmlfile)
         #cmd = f"unset PYTHONPATH;env;"
         #cmd += f"rm -rf ~/{xmlfile}.media;"
         #cmd += f"/usr/bin/gramps -i {pathname} -a tool -p name=verify" #.split()

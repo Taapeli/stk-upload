@@ -61,13 +61,14 @@ var app = new Vue({
     },
     data: {
     	ready: false,
-    	xmlfile: '{{ file }}',
+		batch_id: '{{ batch_id }}',
+//    	xmlfile: '{{ file }}',
     	msgs: [],
     	current: -1,
     },
     methods: {
     	init: function() {
-    		axios.get('/gramps/gramps_analyze_json/' + this.xmlfile)
+    		axios.get('/gramps/gramps_analyze_json/' + this.batch_id)
     		.then( function(rsp) {
     			app.msgs = Object.entries(rsp.data);
     			console.log(this.msgs);

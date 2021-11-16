@@ -181,24 +181,27 @@ def xml_analyze(xmlfile):
     )
 
 
-@bp.route("/gramps/gramps_analyze/<xmlfile>")
+@bp.route("/gramps/gramps_analyze/<batch_id>")
 @login_required
 @roles_accepted("research", "admin", "audit")
-def gramps_analyze(xmlfile):
-    logger.info(f'bp.gramps.routes.gramps_analyze f="{os.path.basename(xmlfile)}"')
-    return render_template("/gramps/gramps_analyze.html", file=xmlfile)
+def gramps_analyze(batch_id):
+    batch = Root.get_batch(current_user.username, batch_id)
+    logger.info(f'bp.gramps.routes.gramps_analyze b="{batch_id}"')
+    return render_template("/gramps/gramps_analyze.html", batch_id=batch_id)
 
 
-@bp.route("/gramps/gramps_analyze_json/<xmlfile>")
+@bp.route("/gramps/gramps_analyze_json/<batch_id>")
 @login_required
 @roles_accepted("research", "admin", "audit")
-def gramps_analyze_json(xmlfile):
+def gramps_analyze_json(batch_id):
+    batch = Root.get_batch(current_user.username, batch_id)
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
+    print("gramps_runner",gramps_runner)
     if gramps_runner:
-        msgs = gramps_utils.gramps_verify(gramps_runner, current_user.username, xmlfile)
+        msgs = gramps_utils.gramps_verify(gramps_runner, current_user.username, batch_id, batch.xmlname)
     else:
         msgs = {}
-    logger.info(f'bp.gramps.routes.gramps_analyze_json f="{os.path.basename(xmlfile)}"')
+    logger.info(f'bp.gramps.routes.gramps_analyze_json f="{os.path.basename(batch.xmlname)}"')
     return jsonify(msgs)
 
 
