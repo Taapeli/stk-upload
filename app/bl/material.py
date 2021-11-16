@@ -21,7 +21,7 @@ Created on 11.11.2021
 
 @author: jm
 '''
-from flask import session, request
+#from flask import session, request
 #from flask_security import current_user
 from flask_babelex import _
 
@@ -33,7 +33,7 @@ class Material():
     Material defines a seleced view to Root data objects and data behind that.
     '''
 
-    def __init__(self):
+    def __init__(self, session, request):
         """ Initialize Material object using session and request information.
         """
 
@@ -43,7 +43,7 @@ class Material():
         self.state = session.get("state", "")
         self.batch_id = session.get("batch_id", "")
 
-        self.request_args = Material.get_request_args()
+        self.request_args = Material.get_request_args(session, request)
         
         # # 2. From current_user (login data)
         #
@@ -55,20 +55,10 @@ class Material():
         #     self.user = current_user.username
         #     self.is_auditor = current_user.has_role("audit")
         print(
-            f"#bl.material.Material: {self.get_tuple()}"
+            f"#bl.material.Material: {self.get_current()}"
             f" REQUEST values={self.request_args}"
         )
         return
-
-    def get_tuple(self):
-        """Return current material properties.
-        """
-        return [
-            self.breed,   # "batch" / "common"
-            self.state,             # Root.state "Candidate", ... "Accepted"
-            self.m_type,     # "Family Tree", ...
-            self.batch_id           # Root.batch_id
-        ]
 
     def to_display(self):
         """ Return current material and batch choice for display. """
@@ -93,7 +83,7 @@ class Material():
     #----- Static methods
     
     @staticmethod
-    def set_session_material(breed, username):
+    def set_session_material(session, request, breed, username):
         """
         Save material selection from request to session.
 
@@ -111,7 +101,7 @@ class Material():
             From /start/logged HTTP/1.1
             --> "GET /scene/material/common?material_type=Family+Tree HTTP/1.1" 200 -
         """
-        args = Material.get_request_args()
+        args = Material.get_request_args(session, request)
         print(f"#Material.set_session_material: request {args}")
         session["breed"] = breed
         session["set_scope"] = True  # Reset material and scope
@@ -140,7 +130,7 @@ class Material():
 
             print(
                 "Material.select_material: the material is single batch "
-                f'{Material.get_session_material_tuple()})'
+                f'{Material.get_from_session(session)})'
             )
             # if not ("batch_id" in session and session["batch_id"]):
             #     return {"status": Status.ERROR, "statustext": _("Missing batch id")}
@@ -154,7 +144,7 @@ class Material():
 
             print(
                 "Material.select_material: The material is batch collection "
-                f'{Material.get_session_material_tuple()}'
+                f'{Material.get_from_session(session)}'
             )
             if not (
                 "material_type" in session
@@ -172,8 +162,18 @@ class Material():
             "statustext": _("Undefined breed of materials"),
         }
 
+    def get_current(self):
+        """Return current material properties.
+        """
+        return [
+            self.breed,   # "batch" / "common"
+            self.state,             # Root.state "Candidate", ... "Accepted"
+            self.m_type,     # "Family Tree", ...
+            self.batch_id           # Root.batch_id
+        ]
+
     @staticmethod
-    def get_session_material_tuple():
+    def get_from_session(session):
         """Return session material properties.
         """
         if "current_context" in session: cc = session["current_context"]
@@ -187,7 +187,7 @@ class Material():
         return [ cc, st, mt, bi ]
 
     @staticmethod
-    def get_request_args():
+    def get_request_args(session, request):
         """Return request arguments from request.args or request.form.
         """
         if request is None:

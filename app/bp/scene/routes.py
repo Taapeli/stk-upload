@@ -46,7 +46,6 @@ from flask_babelex import _
 import shareds
 from . import bp
 from bl.base import Status, StkEncoder
-#from bl.root import State, Root, DEFAULT_MATERIAL
 from bl.material import Material
 from bl.place import PlaceReader
 from bl.source import SourceReader
@@ -83,11 +82,13 @@ def material_select(breed):  # set_scope=False, batch_id="", material=None):
          - figure from database: material and state
     """
     # 1. User and data context from session and current_user
-    ret = Material.set_session_material(breed, current_user.username)
+    ret = Material.set_session_material(session, request, breed, current_user.username)
     # return f"<p>TODO {ret.get('args')}</p><p><a href='/'>Alkuun</a></p>"
     if Status.has_failed(ret):
-        flash(f"{ _('Opening material failed: ') }: "
-              f"{ _(ret.get('statustext')) }", "error")
+        flash(
+            f"{ _('Opening material failed: ') }: { _(ret.get('statustext')) }",
+            "error",
+        )
         return redirect("/")
 
     return redirect(url_for("scene.show_person_search"))
@@ -197,6 +198,7 @@ def _note_item_format(rec, searchtext, min_length=100):
         excerpt=repr(excerpt)[1:-1],
     )
 
+
 def _note_search(args):
     """ Free text search by Note.text.
     """
@@ -258,7 +260,6 @@ def _do_get_persons(u_context, args):
     #     Search by name & years
     #         POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
     """
-    #u_context = args["u_context"]
     if args.get("pg") == "search":
         # No scope
         # u_context.set_scope_from_request()
@@ -270,7 +271,7 @@ def _do_get_persons(u_context, args):
                 # "u_context": u_context,
             }
     else:  # pg:'all'
-        #u_context.set_scope_from_request("person_scope")
+        # u_context.set_scope_from_request("person_scope")
         args["rule"] = "all"
     # request_args = UserContext.get_request_args()
     u_context.set_scope("person_scope")
@@ -333,7 +334,7 @@ def show_persons():
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_person_search():   #(set_scope=None, batch_id=None):
+def show_person_search():  # (set_scope=None, batch_id=None):
     """
     Start material browsing with Persons search page.
 
@@ -341,22 +342,25 @@ def show_person_search():   #(set_scope=None, batch_id=None):
     """
     t0 = time.time()
     try:
-        
+
         # 1. User and data context from session and current_user
         u_context = UserContext()
         run_args = {"pg": "search"}
         rule = u_context.get("rule", "init")
         run_args["rule"] = rule
         key = u_context.get("key", "")
-        if key: run_args["key"] = key
+        if key:
+            run_args["key"] = key
 
         # Breed from routes.material_select:
-        new_breed = session.pop("breed", "")    # Remove from session
+        new_breed = session.pop("breed", "")  # Remove from session
         if new_breed:
             # Select another material (batch or common data)
             u_context.breed = new_breed
             # ['batch', 'Candidate', 'Family Tree', '2021-10-20.004']
-            _current_context, new_state, new_material, new_batch_id = u_context.material.get_tuple()
+            _current_context, new_state, new_material, new_batch_id = (
+                u_context.material.get_current()
+            )
             run_args["set_scope"] = True
             run_args["state"] = new_state
             run_args["material"] = new_material
@@ -364,24 +368,24 @@ def show_person_search():   #(set_scope=None, batch_id=None):
 
         logger.debug(
             "#(1)bp.scene.routes.show_person_search: "
-            f"{request.method} {u_context.material.get_request_args()} => "
+            f"{request.method} {u_context.material.get_request_args(session, request)} => "
             f'({session["current_context"]!r}, {session["state"]!r}, '
             f'{session["material_type"]!r}, {session["batch_id"]!r})'
         )
 
-        #------ Free text search by Note texts
+        # ------ Free text search by Note texts
         if rule == "notetext":
             return _note_search(run_args)
 
-        #------ Person search by names or years
+        # ------ Person search by names or years
         # 'person_scope': ('Manninen#Matti#', '> end') from request
         new_args = u_context.set_scope_from_request("person_scope")
         run_args.update(new_args)
-        
+
         res = _do_get_persons(u_context, run_args)
         logger.info(
             f"#(2)bp.scene.routes.show_person_search: "
-            f"{ u_context.material.get_tuple() } Persons with {run_args} "
+            f"{ u_context.material.get_current() } Persons with {run_args} "
         )
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
@@ -416,8 +420,9 @@ def show_person_search():   #(set_scope=None, batch_id=None):
                 # {name, count, uuid}
                 for i, stat in enumerate(surnamestats):
                     stat["order"] = i
-                    stat["fontsize"] = \
-                        maxfont - i * (maxfont - minfont) / len( surnamestats)
+                    stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(
+                        surnamestats
+                    )
                 surnamestats.sort(key=itemgetter("surname"))
 
             # Most common place names cloud
@@ -746,7 +751,7 @@ def json_get_event():
     """Get Event page data."""
     t0 = time.time()
     u_context = UserContext()
-    args = Material.get_request_args()
+    args = Material.get_request_args(session, request)
     try:
         if args:
             print(f"got request args: {args}")

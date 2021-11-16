@@ -27,7 +27,7 @@ Created on 1.11.2021
 @author: jm
 """
 # blacked 12.11.2021
-from flask import session  # , request
+from flask import session, request
 from flask_security import current_user
 from urllib.parse import unquote_plus
 
@@ -63,7 +63,7 @@ class UserContext:
 
         # 1. From session (previous settings)
 
-        self.material = Material()
+        self.material = Material(session, request)
         # self.material.breed = session.get("current_context", "")
         # self.material.m_type = session.get("material_type")
         # self.material.state = session.get("state", "")
@@ -71,7 +71,7 @@ class UserContext:
         self.lang = session.get("lang", "")  # User language
 
         print(f"#UserContext: session={session}")
-        # print(f"#UserContext: {self.get_tuple()} SESSION")
+        # print(f"#UserContext: {self.get_current()} SESSION")
         self.first = ""
         self.last = self.NEXT_END
         self.direction = "fw"  # or "bw"
@@ -92,7 +92,7 @@ class UserContext:
 
         # self.request_args = Material.get_request_args()
         print(
-            f"#UserContext: {self.material.get_tuple()}"
+            f"#UserContext: {self.material.get_current()}"
             f" REQUEST values={self.material.request_args}"
         )
         return
@@ -222,7 +222,7 @@ class UserContext:
                 # If got no request user_context, use session values
                 print(
                     "#UserContext: Uses same or default user_context: "
-                    f"{self.material.get_tuple()})"
+                    f"{self.material.get_current()})"
                 )
         else:
             # self.material.request_args = {}
