@@ -92,13 +92,23 @@ RETURN b, u.username as username"""
 MATCH (b:Root) 
 RETURN b """
 
-    # List both my different materials and accepted all different materials
+    # List 1) my batches and 2) accepted material collections
     get_root_pallette = """
 match (u:UserProfile{username:$user}) -[:HAS_LOADED]-> (root:Root)
-return root.material as material, u.username as user, root.state as state, count(root) as count
+return u.username as user,  
+    root.material as material_type,
+    root.state as state,
+    root.id as batch_id,
+    root.file as filename,
+    root.description as description
 union
-match (u:UserProfile) -[:HAS_LOADED]-> (root:Root{state:"Accepted"})
-return root.material as material, "" as user, root.state as state, count(root) as count
+match (root:Root{state:"Accepted"})
+return "" as user, 
+    root.material as material_type,
+    root.state as state, 
+    null as batch_id,
+    count(root) as filename,
+    "" as description
 """
 
 #-bl.root.Root.get_batches
@@ -111,10 +121,10 @@ return b as batch,
     order by batch.user, batch.id'''
 
 #-bl.root.Root.get_my_batches
-    get_batches_accepted = """
-match (b:Root) 
+    get_materials_accepted = """
+match (root:Root) 
 where root.state='Accepted' 
-return root.material, count(*) order by root.material"""
+return root.material as material_type, count(*) as nodes order by material_type"""
 
     get_my_batches = """
 where root.state='Candidate' 

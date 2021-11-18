@@ -798,7 +798,7 @@ class Neo4jUpdateService(ConcreteService):
 
         Comment.timestamp is created in the Cypher clause.
         
-        TODO: Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
+        Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
         """
         is_reply = attr.get("reply")
         if is_reply:

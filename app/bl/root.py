@@ -269,19 +269,53 @@ class Root(NodeObject):
         for rec in result:
             yield dict(rec.get("b"))
 
+    # @staticmethod
+    # def get_batch_pallette(username):
+    #     """ Get my batches and batch collections.
+    #  -- Ei toimi näin, hyväksyttyjä materiaaleja ei voi palauttaa Root-solmuina
+    #
+    #         my_batches      batches loaded by username
+    #         collections     sets of accepted batches by material type
+    #     """
+    #     batches = []
+    #     commons = []
+    #     result = shareds.driver.session().run(CypherRoot.get_root_pallette, 
+    #                                           user=username)
+    #     for record in result:
+    #         # Record: <Record  user='juha' material_type='Place Data' 
+    #         #    state='Candidate' batch_id='2021-11-14.005' 
+    #         #    description='Käkisalmi, Catharina Javanaisen esivanhemmat'>
+    #         user = record.get("user")
+    #         root = Root.from_node(record.get("root"))
+    #         if user:
+    #             print(f"#Root.get_batch_pallette: batch {root}")
+    #             batches.append(root)
+    #         else:
+    #             print(f"#Root.get_batch_pallette: common {root}")
+    #             commons.append(root)
+    #
+    #     return batches, commons
+
     @staticmethod
     def get_my_batches(username):
+        """ Returns user's batches, which are in Candidate state. """
         with shareds.driver.session() as session:
             result = run_cypher(session, CypherRoot.get_my_batches, username)
             for rec in result:
                 root = Root.from_node(rec["root"])
                 print(f"#get_my_batches: {root}")
                 yield root
-                # values = dict(rec.get("root"))
-                # fname = values["file"]
-                # filename = os.path.split(fname)[1]
-                # values["filename"] = filename
-                # yield values
+
+    @staticmethod
+    def get_materials_accepted():
+        """ Returns list of accepted material_types. """
+        with shareds.driver.session() as session:
+            result = session.run(CypherRoot.get_materials_accepted)
+            for rec in result:
+                # Record: <Record root.material='Family Tree' count(*)=6>
+                m_type = rec.get("material_type")
+                print(f"#get_batches_accepted: {m_type} ({rec.get('nodes')} nodes)")
+                yield m_type
 
     @staticmethod
     def get_user_stats(user):
