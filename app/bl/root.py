@@ -41,7 +41,7 @@ from models.util import format_ms_timestamp
 from bl.admin.models.cypher_adm import Cypher_adm
 from bl.base import Status, NodeObject
 from pe.dataservice import DataService
-from pe.neo4j.cypher.cy_batch_audit import CypherRoot, CypherAudit
+from pe.neo4j.cypher.cy_root import CypherRoot, CypherAudit
 from pe.neo4j.util import run_cypher
 
 DEFAULT_MATERIAL = "Family Tree"

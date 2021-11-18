@@ -51,7 +51,7 @@ from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
 
-from pe.neo4j.cypher.cy_batch_audit import CypherRoot
+from pe.neo4j.cypher.cy_root import CypherRoot
 #from models.cypher_gramps import Cypher_mixed
 from .batchlogger import LogItem
 

@@ -32,12 +32,6 @@ Created on 26.5.2018
 
 @author: jm
 '''
-#from datetime import date
-#import shareds
-#from pe.neo4j.cypher.cy_batch_audit import CypherRoot
-#from models.cypher_gramps import Cypher_batch
-#from models import dbutil
-
 
 class BatchLog():
     '''
@@ -63,28 +57,6 @@ class BatchLog():
         self.totaltime = 0.0    # Sum of LogItem.elapsed
         self.totalpercent = 0   # Sum of LogItem.percent
 
-
-#     def start_batch(self, tx, infile, mediapath): --> bl.batch.BatchDatastore.start_batch()
-#         '''
-#         Creates a new Batch node
-
-
-#     def complete(self, tx=None):
-#         ''' Mark this data batch completed '''
-# #         # 0. Create transaction, if not given
-# #         local_tx = False
-# #         with shareds.driver.session() as session:
-# #             if tx == None:
-# #                 tx = session.begin_transaction()
-# #                 local_tx = True
-# 
-#         try:
-#             return tx.run(CypherRoot.batch_complete, user=self.userid, bid=self.bid)
-#         
-# #         if local_tx:
-# #             tx.commit()
-
-
     def log_event(self, event_dict):
         # Add a and event dictionary as a new LogItem to Batch log
         batch_event = LogItem(event_dict)
@@ -93,7 +65,6 @@ class BatchLog():
     def log(self, batch_event):
         # Add a bp.gramps.batchlogger.LogItem to Batch log
         self.append(batch_event)
-
 
     def append(self, obj):
         '''

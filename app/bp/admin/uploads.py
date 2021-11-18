@@ -44,7 +44,7 @@ from models import email, util, syslog
 from bl.root import Root, State
 from bl.base import IsotammiException
 from bl.gramps import gramps_loader
-from pe.neo4j.cypher.cy_batch_audit import CypherRoot
+from pe.neo4j.cypher.cy_root import CypherRoot
 
 # ===============================================================================
 # Background loading of a Gramps XML file
