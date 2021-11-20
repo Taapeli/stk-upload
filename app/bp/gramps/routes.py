@@ -16,8 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from types import SimpleNamespace
-from ui.context import UserContext
 
 """
     Gramps xml file upload
@@ -31,6 +29,7 @@ import os
 import time
 import logging
 import traceback
+from types import SimpleNamespace
 
 logger = logging.getLogger("stkserver")
 
@@ -55,6 +54,7 @@ from bl.root import State, Root, BatchUpdater, BatchReader
 from models import loadfile, util, syslog
 
 from ui.batch_ops import RESEARCHER_FUNCTIONS, RESEARCHER_OPERATIONS
+from ui.context import UserContext
 from ui.util import error_print
 from ..admin import uploads
 

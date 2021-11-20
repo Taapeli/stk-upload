@@ -22,7 +22,10 @@
 <form>	
 	<input type="hidden" name="batch_id" value="{{ batch.id }}">
 
+
 	<div class="startbox"  style="width:auto">
+		{{ _("Batch ID") }}: {{ batch.id }} {{ batch.xmlname }}
+
 		<h2>{{ _("Scope") }}</h2>
 		<select name="scope" hx-trigger="load,click" hx-post="/scripting_attrs" hx-target="#attrs">
 			<option value="Person" checked>{{ _("Person") }}
@@ -65,7 +68,7 @@
 			>{{ _("Execute") }}
 		</button>
 		 <img id="indicator" class="htmx-indicator" src="/static/5.gif"/>
-
+		<span id="count"></span>
 		<div id="results">
 		</div>
 	</div>

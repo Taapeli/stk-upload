@@ -16,8 +16,6 @@ import traceback
 
 from pprint import pprint 
 
-from typing import List
-
 # parser = argparse.ArgumentParser()
 # parser.add_argument("--batch_id", required=True)
 # parser.add_argument("--scope", choices=["Person","Family","Event","Place"], required=True)
@@ -43,20 +41,17 @@ from bl.root import Root
 # shareds.db = Neo4jEngine(shareds.app)
 # shareds.driver  = shareds.db.driver
 
-class NULLException(Exception): pass
+def cachedproperty(x):
+    return property(x)
 
 class Lazyenv(dict):
-    def __init__(self, obj, attrs, exception_from_null=False):
+    def __init__(self, obj, attrs):
         self.obj = obj
         self.attrs = attrs
         self['self'] = obj
-        self.exception_from_null = exception_from_null
     def __getitem__(self, attrname):
         if attrname in self.attrs + ["scope"]:
-            value = getattr(self.obj, attrname, NULL)
-            if value is NULL and self.exception_from_null:
-                raise NULLException()
-            return value
+            return  getattr(self.obj, attrname, NULL)
         return dict.__getitem__(self, attrname)
 
 class Proxy:
@@ -122,168 +117,134 @@ class Proxy:
             values.append(NoteProxy(self._executor, rec['id'],dict(obj)))
         return values
 
-USE_MOCK = True
-USE_MOCK = False
-if USE_MOCK:
-    from unittest.mock import MagicMock
-    NULL = MagicMock()
-    NULL.__bool__.return_value = False
-else:
-    @functools.total_ordering
-    class NullProxy:
-        def __repr__(self):
-            return "NULL"
-        def __str__(self):
-            return ""
-        def __getattr__(self, _attrname):
-            return NULL
-        def __getitem__(self, _index):
-            return NULL
-        def __add__(self, _other):
-            return NULL
-        def __sub__(self, _other):
-            return NULL
-        def __mul__(self, _other):
-            return NULL
-        def __div__(self, _other):
-            return NULL
-        def __floordiv__(self, _other):
-            return NULL
-        def __lt__(self, _other):
-            return NULL
-        def __gt__(self, _other):
-            return NULL
-        def __eq__(self, _other):
-            return NULL
-        def __call__(self, _other):
-            return NULL
-        def __bool__(self):
-            return False
+@functools.total_ordering
+class NullProxy:
+    def __repr__(self):
+        return ""
+    def __getattr__(self, attrname):
+        return NULL
+    def __add__(self, other):
+        return NULL
+    def __sub__(self, other):
+        return NULL
+    def __lt__(self, other):
+        return NULL
+    def __eq__(self, other):
+        return NULL
+    def __bool__(self):
+        return False
     
-    NULL = NullProxy()
-
-
+NULL = NullProxy()
 import bl.dates as dates
 
-def getSortkey(tuplevalue):
-    return "-".join([f"{a:04}" for a in tuplevalue])
+class DateProxy():
+    def __init__(self, datetype, date1, date2):
+        self.datetype = datetype
+        self.date1 = date1
+        self.date2 = date2
+        self.dr = dates.DateRange(self.datetype, self.date1, self.date2)
+    def __repr__(self):
+        return str(self.dr)
+    def __sub__(self, other):
+        return self.dr - other.dr
+    def __lt__(self, other):
+        return self.dr < other.dr
 
 @functools.total_ordering
-class DateProxy():
-    def __init__(self, dates: List[int]):  # dates = [yyyy,mm,dd]
-        self.dates1 = dates[:]
-        self.dates = dates[:]
-        while len(self.dates) < 3: self.dates.append(0)
-        #self.dt = datetime.date(*self.dates)
-
-    @staticmethod
-    def from_daterange(datetype, date1, date2):
-        dr = dates.DateRange(datetype, date1, date2)
-        dp = DateProxy(dr.date1.vector())
-        return dp
-
+class DateRange: #(dates.DateRange):
+    def __init__(self, datetype, date1, date2):
+        self.datetype = datetype
+        self.date1 = date1
+        self.date2 = date2
+        self.dr = dates.DateRange(self.datetype, self.date1, self.date2)
     def __repr__(self):
-        return "("+",".join(str(a) for a in self.dates)+")"
-    
-    def __str__(self):
-        return "-".join([f"{a:02}" for a in self.dates])
-
-    def normalize(self, yy, mm, dd):
-        while dd <= 0:
-            mm -= 1
-            dd += 30
-        while mm <= 0:
-            yy -= 1
-            mm += 12
-        while dd > 30:
-            mm += 1
-            dd -= 30
-        while mm > 12:
-            yy += 1
-            mm -= 12
-        return (yy,mm,dd) 
-    
-    def normalize_interval(self, yy, mm, dd):
-        while dd < 0:
-            mm -= 1
-            dd += 30
-        while mm < 0:
-            yy -= 1
-            mm += 12
-        while dd > 30:
-            mm += 1
-            dd -= 30
-        while mm > 12:
-            yy += 1
-            mm -= 12
-        return (yy,mm,dd) 
-
-    def __sub__(self, other):
-        if other is NULL:
-            return NULL
-        if isinstance(other, DateProxy):
-            yy = self.dates[0] - other.dates[0]
-            mm = self.dates[1] - other.dates[1]
-            dd = self.dates[2] - other.dates[2]
-            (yy,mm,dd) = self.normalize_interval(yy,mm,dd)
-            return [yy,mm,dd]
+        return str(self.dr)
+    def __eq__(self, other):
+        if isinstance(other, DateRange):
+            return dates.DateRange.__eq__(self.dr, other.dr)
         if isinstance(other, int):
-            d1 = self.dates1
-            while len(d1) < 3: d1.append(1)
-            d1 = datetime.date(*d1)
-            d2 = d1 - datetime.timedelta(other)
-            return [d1.year,d2.month,d2.day]
-        if isinstance(other, (tuple,list)):
-            assert len(other) <= 3
-            return self - DateProxy(other)
-
+            return self.dr.date1.vector() == [other,1,1]
+    def __lt__(self, other):
+        if isinstance(other, DateRange):
+            return dates.DateRange.__lt__(self.dr, other.dr)
+        if isinstance(other, int):
+            return self.dr.date1.vector() < [other,1,1]
     def __add__(self, other):
-        if other is NULL:
-            return NULL
         if isinstance(other, int):
-            d1 = self.dates1
+            d1 = self.dr.date1.vector()
             while len(d1) < 3: d1.append(1)
             d1 = datetime.date(*d1)
             d2 = d1 + datetime.timedelta(other)
-            (yy,mm,dd) = self.normalize(d2.year,d2.month,d2.day)
-            return DateProxy([yy,mm,dd])
-        if isinstance(other, (tuple,list)):
+            return (d1.year,d2.month,d2.day)
+        if isinstance(other, tuple):
             assert len(other) <= 3
-            d1 = list(other[:])
-            while len(d1) < 3: d1.append(0)
-            yy = self.dates[0] + d1[0]
-            mm = self.dates[1] + d1[1]
-            dd = self.dates[2] + d1[2]
-            (yy,mm,dd) = self.normalize(yy,mm,dd)
-            return DateProxy([yy,mm,dd])
-
-    def __lt__(self, other):
-        if other is NULL:
-            return NULL
-        if isinstance(other, DateProxy):
-            return self.dates < other.dates
-        if isinstance(other, (tuple,list)):
-            assert len(other) <= 3
-            d1 = list(other[:])
-            while len(d1) < 3: d1.append(0)
-            return self.dates < d1
+            d1 = self.dr.date1.vector()
+            while len(d1) < 3: d1.append(1)
+            while len(other) < 3: other.append(0)
+            yy = d1[0] + other[0]
+            mm = d1[1] + other[1]
+            dd = d1[2] + other[2]
+            while dd > 30:
+                dd -= 30
+                mm += 1
+            while dd < 0:
+                dd += 30
+                mm -= 1
+            while mm > 12:
+                mm -= 12
+                yy += 1
+            while mm < 0:
+                mm += 12
+                yy -= 1
+            d2 = datetime.date(yy,mm,dd)
+            return DateRange(d2)
+        
+    def __sub__(self, other):
+        if isinstance(other, DateRange):
+            d1 = self.dr.date1.vector()
+            d2 = other.dr.date1.vector()
+            # vector(9 returns [dy], [dy,dm] or [dy,dm,dd]
+            while len(d1) < 3: d1.append(1)
+            while len(d2) < 3: d2.append(1)
+            yy = d1[0] - d2[0]
+            mm = d1[1] - d2[1]
+            dd = d1[2] - d2[2]
+            if dd < 0:
+                mm -= 1
+                dd += 30
+            if mm < 0:
+                yy -= 1
+                mm += 12
+            return (yy,mm,dd)
         if isinstance(other, int):
-            return self < (other,0,0)
-        raise RuntimeError(f"Invalid comparison: {self} < {other}")
-    def __eq__(self, other):
-        if other is NULL:
-            return NULL
-        if isinstance(other, DateProxy):
-            return self.dates == other.dates
-        if isinstance(other, (tuple,list)):
+            d1 = self.dr.date1.vector()
+            while len(d1) < 3: d1.append(1)
+            d1 = datetime.date(*d1)
+            d2 = d1 - datetime.timedelta(other)
+            return (d1.year,d2.month,d2.day)
+        if isinstance(other, tuple):
             assert len(other) <= 3
-            d1 = list(other[:])
-            while len(d1) < 3: d1.append(0)
-            return self.dates == d1
-        if isinstance(other, int):
-            return self.dates == (other,0,0)
-        raise RuntimeError(f"Invalid comparison: {self} == {other}")
-
+            d1 = self.dr.date1.vector()
+            while len(d1) < 3: d1.append(1)
+            while len(other) < 3: other.append(0)
+            yy = d1[0] - other[0]
+            mm = d1[1] - other[1]
+            dd = d1[2] - other[2]
+            while dd > 30:
+                dd -= 30
+                mm += 1
+            while dd < 0:
+                dd += 30
+                mm -= 1
+            while mm > 12:
+                mm -= 12
+                yy += 1
+            while mm < 0:
+                mm += 12
+                yy -= 1
+            d2 = datetime.date(yy,mm,dd)
+            return DateRange(d2)
+        return NULL
 
 class EventProxy(Proxy):
 
@@ -309,8 +270,11 @@ class EventProxy(Proxy):
 
     @property
     def date(self):
+        #print("---> date", self)
+        #pprint(dir(self))
         if hasattr(self, 'datetype'):
-            return DateProxy.from_daterange(self.datetype, self.date1, self.date2)
+            return DateRange(self.datetype, self.date1, self.date2)
+            #return DateProxy(self.datetype, self.date1, self.date2)
         else:
             return NULL
         
@@ -482,22 +446,7 @@ class FamilyProxy(Proxy):
 class PersonProxy(Proxy):
     @property
     def name(self):
-        return self.names[0] if self.names else NULL
-
-    @property
-    def firstname(self):
-        self.names # load names
-        return self.firstnames[0] if self.firstnames else NULL
-
-    @property
-    def patronymic(self):
-        self.names
-        return self.patronymics[0] if self.patronymics else NULL
-
-    @property
-    def surname(self):
-        self.names
-        return self.surnames[0] if self.surnames else NULL
+        return self.names[0]
 
     @property
     def gender(self):
@@ -518,23 +467,14 @@ class PersonProxy(Proxy):
         """
         
         values = []
-        self.firstnames = []
-        self.patronymics = []
-        self.surnames = []
         for rec in self._executor.session.run(cypher, batch_id=self.batch_id, uid=self.uid):
             n = rec['n']
             firstname = f"{n['firstname']}"
             patronymic = f"{n['suffix']}"
             surname = f"{n['surname']}"
             name = firstname
-            if firstname:
-                self.firstnames.append(firstname)
-            if patronymic: 
-                name += " " + patronymic
-                self.patronymics.append(patronymic)
-            if surname: 
-                name += " " + surname
-                self.surnames.append(surname)
+            if patronymic: name += " " + patronymic
+            if surname: name += " " + surname
             values.append(name)
         return values
     
@@ -735,36 +675,19 @@ proxies = {
 }
 
 import ast
-MAXHDRLEN = 25
-ELLIPSIS = "..."
 def parse_hdrs(s):
-
+    expr = ast.parse(s, mode='eval')
+    print(expr)
+    print(expr.body)
+#     if not isinstance(expr.body, ast.Tuple):
+#         return [s.strip()]
+    offsets = [e.col_offset for e in expr.body.elts]
     def strip_comma(s):
         s = s.strip()
         if s.endswith(","):
                 s = s[:-1]
-        s = s.strip()
-        if len(s) > MAXHDRLEN:
-            s = s[0:MAXHDRLEN-len(ELLIPSIS)] + ELLIPSIS
         return s
-
-    def leftmost(e):
-        pos = e.col_offset
-        for subelem in ast.walk(e):
-            #print(subelem)
-            if hasattr(subelem,"col_offset"):
-                if subelem.col_offset < pos:
-                    pos = subelem.col_offset
-        if isinstance(e,ast.Tuple):
-            i = s.rfind("(",0,pos)
-            if i >= 0: return i
-        return pos
-        
-    expr = ast.parse(s, mode='eval')
-    offsets = [leftmost(e) for e in expr.body.elts]
-    hdrs = [strip_comma(s[i:j]) for (i,j) in zip(offsets,offsets[1:]+[len(s)-1])] # this removes the trailing bracket (])
-    #return [ast.unparse(e) for e in expr.body.elts]  # Python 3.9+
-
+    hdrs = [strip_comma(s[i:j]) for (i,j) in zip(offsets,offsets[1:]+[None])]
     return hdrs
     
 class Executor:
@@ -773,17 +696,6 @@ class Executor:
         self.format = format
         self.session = shareds.driver.session()
 
-    def set_headers(self, hdrs):
-        print("set_headers", hdrs)
-        self.hdrs = hdrs
-        self.result_string += "\n<tr><th>ID<th>" + "<th>".join(self.hdrs)
-
-    def add_to_result(self, row, env):
-        print("add_to_result", row)
-        row = eval(str(row), env)
-        #self.result_string += "<tr><td><td>" + "<td>".join(str(eval(repr(col),env)) for col in row)
-        self.result_string += "<tr><td><td>" + "<td>".join(str(col) for col in row)
-    
     def execute1(self, args):
         self._args = args
         proxyclass = proxies[args.scope]
@@ -795,29 +707,22 @@ class Executor:
         match (r:Root{id:$batch_id}) --> (obj:%(scope)s) 
         %(where)s
         return id(obj) as id, obj
-        order by obj.id
         """ % {"scope": args.scope, "where": where}
         if args.limit.isdigit():
             limit = int(args.limit)
             if limit > 0: cypher += " limit $limit"
         else:
             limit = None
+        s = "<table>"
         json_result = []
-        self.hdrs = None
+        hdrs = None
         globals = {}
         #globals["os"] = None
         env = Lazyenv(None, get_attrs(args.scope))
-        env["xx"] = 123
-        env["set_headers"] = lambda x: self.set_headers(x)
-        env["add_to_result"] = lambda x: self.add_to_result(x,env)
-        env["NULL"] = NULL
-        #globals.update(env)
-        self.result_string = "<table>"
 
-        exec( args.initial_statements, env)
+        globals.update(env)
+        exec( args.initial_statements, globals, globals)
         
-        total = 0
-        count = 0
         for rec in self.session.run(cypher, batch_id=self.batch_id, limit=limit):
             # {'birth_high': 1546,
             #  'birth_low': 1436,
@@ -832,56 +737,45 @@ class Executor:
             #  'sex': 1,
             #  'sortname': '#Björn#Jönsson',
             #  'uuid': '4e6c356760f4400eb6c04190ca769124'}
-            total += 1
+        
             p = proxyclass(self, rec['id'],dict(rec['obj']))
-            if self.hdrs is None:
+            if hdrs is None:
                 if args.expressions == "*":
-                    self.hdrs = get_attrs(args.scope)
+                    hdrs = get_attrs(args.scope)
                 else:
-                    expressions = "["+args.expressions.replace("\n", " ").strip() + "]"
-                    self.hdrs = parse_hdrs(expressions)
+                    expressions = args.expressions.replace("\n", " ").strip() + ","
+                    hdrs = parse_hdrs(expressions)
                     #hdrs = [hdr.strip() for hdr in args.expressions.replace("\n", " ").split(",")]
+                s += "\n<tr><th>ID<th>" + "<th>".join(hdrs)
                 #env = Lazyenv(p, get_attrs(args.scope))
-                self.result_string += "\n<tr><th>ID<th>" + "<th>".join(self.hdrs)
             env.obj = p
-            env["self"] = p
             if args.statements:
                 globals.update(env)
-                exec( args.statements, env)
+                exec( args.statements, globals, env)
             if args.filter.strip():
                 args.filter = args.filter.replace("\n", " ")
                 globals.update(env)
-                value = eval( args.filter, env)
+                value = eval( args.filter, globals, env)
                 if not value: continue
-            count += 1
             if args.expressions:
                 expressions = args.expressions.replace("\n", " ").strip()
                 if expressions == "*":
-                    expressions = ",".join(self.hdrs)
-                row = eval("["+expressions+"]", env)
+                    expressions = ",".join(hdrs)
+                globals.update(env)
+                row = eval(expressions+",", globals, env)
                 #row = [p.id] + list(row)
-                self.result_string += "\n    <tr><td>"
-                self.result_string += p._getlink_or_id()
-
-                #self.result_string += "<td>" + "<td>".join(str(col) for col in row)
-                rowhtml = ""
-                for col in row:
-                    if isinstance(col, list):
-                        rowhtml += f"<td data-sortkey={getSortkey(col)}>{col}"
-                    else:
-                        rowhtml += f"<td>{col}"
-                self.result_string += rowhtml
-
+                s += "\n    <tr><td>"
+                s += p._getlink_or_id()
+                s += "<td>" + "<td>".join(str(col) for col in row)
                 json_row = [p._getlink_or_id()]
                 json_row.extend([str(col) for col in row])
                 json_result.append(json_row)
-        self.result_string += "\n</table>"
-        self.result_string += f"<small id=count hx-swap-oob=true>Count: {count}/{total}</small>"
+        s += "\n</table>"
         
         # table sorting javascript from https://stackoverflow.com/questions/14267781/sorting-html-table-with-javascript
-        self.result_string += """
+        s += """
             <script>
-            const getCellValue = (tr, idx) => tr.children[idx].getAttribute("data-sortkey") || tr.children[idx].innerText || tr.children[idx].textContent;
+            const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
             
             const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
                 v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
@@ -899,7 +793,7 @@ class Executor:
         if self.format == "json":
             return json.dumps({"status":"OK","rows":json_result,"headers":hdrs})
         else:
-            return self.result_string
+            return s
 
     def execute(self, args):
         try:
@@ -926,7 +820,6 @@ def get_attrs(scope):
             'events',
             'families',
             'father',
-            'firstname',
             'gender',
             'id',
             'mother',
@@ -935,11 +828,9 @@ def get_attrs(scope):
             'notes',
             'parent_families',
             'parents',
-            'patronymic',
             'sex',
             'sortname',
             'spouses',
-            'surname',
             'uid',
             'uuid']
     if scope == "Family":
