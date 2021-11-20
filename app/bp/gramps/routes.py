@@ -17,6 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from types import SimpleNamespace
+from ui.context import UserContext
 
 """
     Gramps xml file upload
@@ -460,6 +461,7 @@ def get_commands(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def batch_details(batch_id):
+    user_context = UserContext()
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
@@ -479,6 +481,7 @@ def batch_details(batch_id):
         "/gramps/details.html",
        #batch_id=batch_id, 
        batch=batch,
+       user_context=user_context,
        object_stats=sorted(object_stats),
        event_stats=sorted(event_stats),
     )
