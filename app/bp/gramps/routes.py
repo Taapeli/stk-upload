@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from types import SimpleNamespace
 
 """
     Gramps xml file upload
@@ -504,3 +505,38 @@ def batch_update_description():
 
     #return description
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
+
+# =================== experimental scripting tool ======================
+
+@bp.route("/scripting/<batch_id>", methods=["get"])
+@bp.route("/scripting", methods=["post"])
+@login_required
+@roles_accepted("audit")
+def scripting(batch_id=None):
+    from pprint import pprint
+    if request.method == "POST":
+        batch_id = request.form.get("batch_id")
+    with BatchReader("update") as batch_service:
+        res = batch_service.batch_get_one(current_user.username, batch_id)
+        if Status.has_failed(res):
+            raise RuntimeError(_("Failed to retrieve batch"))
+ 
+        batch = res['item']
+    if request.method == "POST":
+        #pprint(request.form)
+        from bl.scripting.scripting_tool import Executor
+        executor = Executor(batch_id)
+        return executor.execute(SimpleNamespace(**request.form))
+    else:
+        return render_template(
+            "/gramps/scripting.html",
+           batch=batch,
+    )
+
+@bp.route("/scripting_attrs", methods=["post"])
+@login_required
+@roles_accepted("audit")
+def scripting_attrs(batch_id=None):
+    from bl.scripting.scripting_tool import get_attrs
+    attrs = get_attrs(request.form.get("scope"))
+    return ",".join(attrs)
