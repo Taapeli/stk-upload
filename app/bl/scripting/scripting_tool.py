@@ -729,10 +729,10 @@ class Executor:
                 value = eval( args.filter, globals, env)
                 if not value: continue
             if args.expressions:
-                expressions = args.expressions.replace("\n", " ").strip() + ","
+                expressions = args.expressions.replace("\n", " ").strip()
                 if expressions == "*":
                     expressions = ",".join(hdrs)
-                row = eval(expressions, globals, env)
+                row = eval(expressions+",", globals, env)
                 #row = [p.id] + list(row)
                 s += "\n    <tr><td>"
                 s += p._getlink_or_id()
