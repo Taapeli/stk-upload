@@ -658,6 +658,8 @@ def parse_hdrs(s):
     expr = ast.parse(s, mode='eval')
     print(expr)
     print(expr.body)
+#     if not isinstance(expr.body, ast.Tuple):
+#         return [s.strip()]
     offsets = [e.col_offset for e in expr.body.elts]
     def strip_comma(s):
         s = s.strip()
@@ -714,7 +716,7 @@ class Executor:
                 if args.expressions == "*":
                     hdrs = get_attrs(args.scope)
                 else:
-                    expressions = args.expressions.replace("\n", " ").strip()
+                    expressions = args.expressions.replace("\n", " ").strip() + ","
                     hdrs = parse_hdrs(expressions)
                     #hdrs = [hdr.strip() for hdr in args.expressions.replace("\n", " ").split(",")]
                 s += "\n<tr><th>ID<th>" + "<th>".join(hdrs)
@@ -727,10 +729,10 @@ class Executor:
                 value = eval( args.filter, globals, env)
                 if not value: continue
             if args.expressions:
-                expressions = args.expressions.replace("\n", " ").strip()
+                expressions = args.expressions.replace("\n", " ").strip() + ","
                 if expressions == "*":
                     expressions = ",".join(hdrs)
-                row = eval(expressions + ",", globals, env)
+                row = eval(expressions, globals, env)
                 #row = [p.id] + list(row)
                 s += "\n    <tr><td>"
                 s += p._getlink_or_id()
