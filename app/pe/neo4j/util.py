@@ -30,7 +30,8 @@ cypher_common_prefix = """
 """
 
 cypher_batch_prefix = """
-    MATCH (prof:UserProfile{username:$username}) -[:HAS_ACCESS]-> (root:Root{id:$batch_id})
+    MATCH (prof:UserProfile{username:$username})
+        -[:HAS_ACCESS|:DOES_AUDIT]-> (root:Root{id:$batch_id})
 """
 
 
