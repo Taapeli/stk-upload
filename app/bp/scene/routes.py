@@ -30,6 +30,7 @@ import json
 import time
 from datetime import datetime
 from operator import itemgetter
+from pprint import pprint
 
 # from types import SimpleNamespace
 
@@ -97,11 +98,7 @@ def material_select(breed):  # set_scope=False, batch_id="", material=None):
 # ------------------------- Menu 1: Material search ------------------------------
 
 
-def _note_item_format(rec, searchtext, min_length=100):
-    """ Display an excerpt from Note.text that is at least this long
-    """
-    import re
-
+def _note_generate_regexes(searchtext):
     def generate_choices(q, n):
         """
         Naive algorithm trying to generate regexes 
@@ -117,33 +114,30 @@ def _note_item_format(rec, searchtext, min_length=100):
                 yield from generate_choices1(choice,n-1)
                 choice = fr"{q}."  # add any character after the word
                 yield from generate_choices1(choice,n-1)
-                if c == ".": continue
                 choice = fr"{q[0:i]}.{q[i+1:]}"  # replace any character
                 yield from generate_choices1(choice,n-1)
                 choice = fr"{q[0:i]}{q[i+1:]}"  # remove any character
                 yield from generate_choices1(choice,n-1)
-                if i > 0 and q[i-1] != ".":
+                if i > 0:
                     choice = fr"{q[0:i-1]}{q[i]}{q[i-1]}{q[i+1:]}"  # swap any characters
                     yield from generate_choices1(choice,n-1)
-        return [choice.replace(".",r"\w") for choice in generate_choices1(q, n)]
-    
-    note = rec.get("note")
-    # id = note.get('id')
-    text = note.get("text")
-    labels = rec.get("labels")
-    startpos = -1
+        choices = list(set([choice.replace(".",r"\w") for choice in generate_choices1(q, n)]))
+        return sorted(choices, key=lambda x: len(x), reverse=True)
+        #return [choice.replace(".",r"\w") for choice in generate_choices1(q, n)]
+        
+    regexes = []
     if searchtext.startswith("'") and searchtext.endswith("'"):
         searchtext = searchtext[1:-1]
     if searchtext.startswith('"') and searchtext.endswith('"'):
         searchwords = [searchtext[1:-1]]
     else:
         searchwords = [searchtext] + searchtext.split()
-    for wordnum, searchword in enumerate(searchwords):
+    for searchword in set(searchwords):
         if searchword.endswith("~"):
             searchword = searchword[:-1]
             choices = generate_choices(searchword, 2)
             choices = [searchword] + choices
-            print(choices)
+            #pprint(choices)
             regextext = "(" + "|".join(choices) + ")"
         else:
             regextext = searchword
@@ -155,7 +149,19 @@ def _note_item_format(rec, searchtext, min_length=100):
             )  # asterisk means word characters only, ? indicate non-greedy search
 
         regex = fr"\W({regextext})\W"
+        regexes.append(regex)
+    return regexes
 
+def _note_item_format(rec, regexes, min_length=100):
+    """ Display an excerpt from Note.text that is at least this long
+    """
+    import re
+    note = rec.get("note")
+    # id = note.get('id')
+    text = note.get("text")
+    labels = rec.get("labels")
+    startpos = -1
+    for wordnum,regex in enumerate(regexes):
         m = re.search(
             regex, f" {text.lower()} "
         )  # add delimiters to start and end (will match \W)
@@ -197,7 +203,7 @@ def _note_item_format(rec, searchtext, min_length=100):
             break  # found a match
         else:
             excerpt = text[0:min_length]
-            if wordnum < len(searchwords) - 1:
+            if wordnum < len(regexes) - 1:
                 continue  # try again except for last word
     referrers = rec.get("referrers")
     score = rec.get("score")
@@ -220,7 +226,7 @@ def _note_search(args):
     u_context.count = request.args.get("c", 100, type=int)
     searchtext = args["key"].lower()
     displaylist = []
-
+    regexes = _note_generate_regexes(searchtext)
     try:
         with NoteReader("read_tx", u_context) as service:
             res = service.note_search(args)
@@ -228,7 +234,7 @@ def _note_search(args):
                 # print("item", item)
                 # note = item[0]
                 # x = item[1]
-                displaylist.append(_note_item_format(item, searchtext))
+                displaylist.append(_note_item_format(item, regexes))
 
         # from pprint import  pprint
         # pprint(displaylist[0:5])

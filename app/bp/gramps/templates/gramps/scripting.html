@@ -1,0 +1,84 @@
+{# _gramps/details.html_ #}
+{% extends "start/s_layout.html" %}
+{% block title %}{{ _('Scripting tool') }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+{% from "start/s_macros.html" import hamburger_menu, state_info with context %}
+
+<script src="https://unpkg.com/hyperscript.org"></script>
+
+<style>
+</style>
+
+{{ hamburger_menu( (
+   ) ) }}
+
+<div id="startdiv">
+		<h1>{{ _('Scripting tool') }}</h1>
+
+{% include "flash_messages.html" %}
+
+<form>	
+	<input type="hidden" name="batch_id" value="{{ batch.id }}">
+
+	<div class="startbox"  style="width:auto">
+		<h2>{{ _("Scope") }}</h2>
+		<select name="scope" hx-trigger="load,click" hx-post="/scripting_attrs" hx-target="#attrs">
+			<option value="Person" checked>{{ _("Person") }}
+			<option value="Family">{{ _("Family") }}
+			<option value="Event">{{ _("Event") }}
+			<option value="Place">{{ _("Place") }}
+			<option value="Citation">{{ _("Citation") }}
+			<option value="Source">{{ _("Source") }}
+			<option value="Repository">{{ _("Repository") }}
+			<option value="Media">{{ _("Media") }}
+			<option value="Note">{{ _("Note") }}
+		</select>
+		
+		<b>Attributes:</b>
+		<span id="attrs">
+		</span>
+
+		<h2>{{ _("Name") }}</h2>
+		<input name="name" size="100">
+	
+		<h2>{{ _("Initial statements") }}</h2>
+		<textarea name="initial_statements" rows="3" cols="100"></textarea>
+	
+		<h2>{{ _("Where") }}</h2>
+		<textarea name="where" rows="1" cols="100"></textarea>
+
+		<h2>{{ _("Statements to execute for each object") }}</h2>
+		<textarea name="statements" rows="3" cols="100"></textarea>
+	
+		<h2>{{ _("Filter") }}</h2>
+		<textarea name="filter" rows="3" cols="100"></textarea>
+	
+		<h2>{{ _("Expressions to display") }}</h2>
+		<textarea name="expressions" rows="3" cols="100">*</textarea>
+		<br>
+		Limit: <input name="limit" value="10">
+		
+		<button hx-post="/scripting" hx-target="#results"
+			 hx-indicator="#indicator"
+			>{{ _("Execute") }}
+		</button>
+		 <img id="indicator" class="htmx-indicator" src="/static/5.gif"/>
+
+		<div id="results">
+		</div>
+	</div>
+	
+</form>
+
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
+
+<!-- Startdiv ends -->
+</div>
+
+{% endblock %}
+
+</body>
+</html>
+
