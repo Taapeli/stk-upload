@@ -26,12 +26,19 @@ div.props > div > span:nth-child(1) {
 
 {% include "flash_messages.html" %}
 
-        <h2>{{ _("Selected <i>%(m)s</i> batch in the state <i>%(s)s</i>", 
-            m = root.material_type | transl('material') | lower,
-            s = root.state | transl('state') | lower ) }}</h2>
+        <h2>{{ _("Material for Auditing") }}</h2>
 
 		<div class="props">
 		
+            <div>
+                <span>{{ _('Material') }}:</span>
+                
+                <span><span 
+                    {% if root.material_type == "Family Tree" %} class="typedesc"
+                    {% else %} class="typetag"{% endif %}
+                    >{{ _(root.material_type) }}</span>
+                {{ _('In state')|lower }} {{ _(root.state) }}</span>
+            </div>
     {% if root.description %}
 			<div style="margin: 6pt 2pt;">
                 <span>{{ _('Title') }}:</span>
@@ -41,8 +48,7 @@ div.props > div > span:nth-child(1) {
 	{% endif %}
             <div>
                 <span>{{ _('Gramps file') }}:</span>
-                <span>
-                    <a href="/audit/batch_download/{{root.id}}/{{user}}">{{basename}}</a>
+                <span><a href="/audit/batch_download/{{root.id}}/{{user}}">{{basename}}</a>
                 </span>
             </div>
             <div>

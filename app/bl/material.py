@@ -21,8 +21,6 @@ Created on 11.11.2021
 
 @author: jm
 '''
-#from flask import session, request
-#from flask_security import current_user
 from flask_babelex import _
 
 from bl.base import Status
@@ -30,12 +28,23 @@ from bl.root import State, Root
 
 class Material():
     '''
-    Material defines a seleced view to Root data objects and data behind that.
+    Material defines a selected view to Root and data objects.
+    
+    breed="batch"   -> selection by Root.batch_id only
+                       Store also request.material_type and request.state, if given;
+                       else clear old session.material_type and session.state
+    breed="common"  -> selection by Root.material_type and Root.state
+                       Ignore and clear session.batch_id
     '''
+
+    COMMON = "common"  # Multi-batch data like Approved data
+    BATCH = "batch"  # Selected candidate or approved batch
 
     def __init__(self, session, request):
         """ Initialize Material object using session and request information.
         """
+        self.request_args = Material.get_request_args(session, request)
+        breed = session.get("current_context", "")
 
         self.breed = session.get("current_context", "")
         
@@ -43,8 +52,6 @@ class Material():
         self.state = session.get("state", "")
         self.batch_id = session.get("batch_id", "")
 
-        self.request_args = Material.get_request_args(session, request)
-        
         # # 2. From current_user (login data)
         #
         # self.user = None
@@ -113,7 +120,7 @@ class Material():
                 f'Removed obsolete session.material={session.pop("material")!r}'
             )
 
-        if breed == "batch":
+        if breed == self.BATCH:
             # request args:  {'batch_id': '2021-10-09.001'}
             if "state" in args:
                 session["state"] = args.get("state")
@@ -140,7 +147,7 @@ class Material():
             #     return {"status": Status.ERROR, "statustext": _("Missing batch id")}
             return {"status": Status.OK, "args": args}
 
-        elif breed == "common":
+        elif breed == self.COMMON:
             # request args: {'state': 'Candidate', 'material_type': 'Place Data', 'batch_id': '2021-10-26.001'}
             session["state"] = args.get("state", State.ROOT_DEFAULT_STATE)
             session["material_type"] = args.get("material_type")

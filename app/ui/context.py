@@ -53,8 +53,9 @@ class UserContext:
     NEXT_START = "<"  # from first name of data
     NEXT_END = ">"  # end reached: there is nothing forwards
 
-    COMMON = "common"  # Multi-batch data like Approved data
-    BATCH = "batch"  # Selected candidate or approved batch
+    # Modev to Material:
+    # COMMON = "common"  # Multi-batch data like Approved data
+    # BATCH = "batch"  # Selected candidate or approved batch
     # OWN = "own"     # Candidate data
 
     def __init__(self):
@@ -96,6 +97,62 @@ class UserContext:
             f" REQUEST values={self.material.request_args}"
         )
         return
+
+    def set_scope_from_request(self, browse_var=None):
+        """ Calculate list display scope values from request or session. 
+
+            :param: request     http request
+            :param: browse_var  str         session variable name like  'person_scope'
+            :return:            dict        arguments for list pageing fw/bw
+        
+            #?
+            # Use request arguments fw or bw, if defined.
+            # Else use original from session.
+            #
+            # If request is missing, try session.browse_var.
+        """
+        return_args = {}
+        self.browse_var = browse_var
+        self.first = self.NEXT_START
+        self.last = self.NEXT_END
+        req_args = self.material.request_args
+        if req_args:
+            # New values from request?
+            years = req_args.get("years")
+            if years:
+                return_args["years"] = years
+            c = req_args.get("c")
+            if c:
+                return_args["c"] = c
+
+            fw = req_args.get("fw", None)
+            bw = req_args.get("bw", None)
+            if fw is None and bw is None:
+                return return_args
+            if fw is None:
+                # bw: Direction backwards from bw parameter
+                self.last = unquote_plus(bw)
+                return_args["bw"] = self.last
+                return return_args
+            else:
+                # fw: Direction forward from fw parameter
+                self.first = unquote_plus(fw)
+                return_args["fw"] = self.first
+                return return_args
+
+        # No request OR no fw or bw in request
+        if self.browse_var:
+            # Scope from session, if defined; else default
+            scope = session.get(self.browse_var, [self.first, self.last])
+            self.first = scope[0]
+            self.last = scope[1]
+            return_args["fw"] = self.first
+            session[self.browse_var] = scope
+            print(
+                f"Material.set_scope_from_request: {self.browse_var} is set to {scope}"
+            )
+
+        return return_args
 
     def get(self, var_name, default=None):
         """ Get a REQUEST argument value from args, form data or session.
@@ -139,9 +196,9 @@ class UserContext:
         """ Return current use case (owner choice) as code.
         """
         if self.material.batch_id:
-            return self.BATCH  # Selected candidate or approved batch
+            return self.material.BATCH  # Selected candidate or approved batch
         else:
-            return self.COMMON  # Approved data
+            return self.material.COMMON  # Approved data
         # else self.OWN - Collection of own data not in use
 
     def next_name(self, direction="fw"):
@@ -250,62 +307,6 @@ class UserContext:
     def display_current_material(self):
         """ Return current material and batch choice for display. """
         return self.material.to_display()
-
-    def set_scope_from_request(self, browse_var=None):
-        """ Calculate list display scope values from request or session. 
-
-            :param: request     http request
-            :param: browse_var  str         session variable name like  'person_scope'
-            :return:            dict        arguments for list pageing fw/bw
-        
-            #?
-            # Use request arguments fw or bw, if defined.
-            # Else use original from session.
-            #
-            # If request is missing, try session.browse_var.
-        """
-        return_args = {}
-        self.browse_var = browse_var
-        self.first = self.NEXT_START
-        self.last = self.NEXT_END
-        req_args = self.material.request_args
-        if req_args:
-            # New values from request?
-            years = req_args.get("years")
-            if years:
-                return_args["years"] = years
-            c = req_args.get("c")
-            if c:
-                return_args["c"] = c
-
-            fw = req_args.get("fw", None)
-            bw = req_args.get("bw", None)
-            if fw is None and bw is None:
-                return return_args
-            if fw is None:
-                # bw: Direction backwards from bw parameter
-                self.last = unquote_plus(bw)
-                return_args["bw"] = self.last
-                return return_args
-            else:
-                # fw: Direction forward from fw parameter
-                self.first = unquote_plus(fw)
-                return_args["fw"] = self.first
-                return return_args
-
-        # No request OR no fw or bw in request
-        if self.browse_var:
-            # Scope from session, if defined; else default
-            scope = session.get(self.browse_var, [self.first, self.last])
-            self.first = scope[0]
-            self.last = scope[1]
-            return_args["fw"] = self.first
-            session[self.browse_var] = scope
-            print(
-                f"Material.set_scope_from_request: {self.browse_var} is set to {scope}"
-            )
-
-        return return_args
 
     def update_session_scope(self, var_name, name_first, name_last, limit, rec_cnt):
         """ Update the session scope according to items really found from database.

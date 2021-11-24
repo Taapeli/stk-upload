@@ -111,7 +111,7 @@ div.starters button {
             {% else %}
                 {% if loop.previtem.state != root.state %}
                 </div>
-                <p>Vaiheessa {{ _(root.state) }}</p>
+                <p>{{ _("In state") }} {{ _(root.state) }}</p>
                 <div class="starters">
                 {% endif %}
             {% endif %}

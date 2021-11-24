@@ -218,7 +218,6 @@ def _note_item_format(rec, regexes, min_length=100):
         excerpt=repr(excerpt)[1:-1],
     )
 
-
 def _note_search(args):
     """ Free text search by Note.text.
     """
