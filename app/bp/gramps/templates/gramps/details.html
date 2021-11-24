@@ -48,13 +48,13 @@ td {
 		<td class="typedesc">{{ _(batch.material_type) }}</td>
 	</tr>
 	<tr>
-		<th>{{ _("Description") }}</th>
-		<td>
+		<th colspan="2">{{ _("Description") }}<br>
 			<form>
 			<input type="hidden" name="batch_id" value="{{ batch.id }}">
 			<textarea id="description" name="description">{{ batch.description }}</textarea>
 			<button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
 			</form>
+        </th>
 	</tr>
    	</table>
    	<p>

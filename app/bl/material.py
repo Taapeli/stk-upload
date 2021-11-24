@@ -26,6 +26,9 @@ from flask_babelex import _
 from bl.base import Status
 from bl.root import State, Root
 
+MATERIAL_COMMON = "common"  # Multi-batch data like Approved data
+MATERIAL_BATCH = "batch"  # Selected candidate or approved batch
+
 class Material():
     '''
     Material defines a selected view to Root and data objects.
@@ -37,34 +40,19 @@ class Material():
                        Ignore and clear session.batch_id
     '''
 
-    COMMON = "common"  # Multi-batch data like Approved data
-    BATCH = "batch"  # Selected candidate or approved batch
-
     def __init__(self, session, request):
         """ Initialize Material object using session and request information.
         """
         self.request_args = Material.get_request_args(session, request)
-        breed = session.get("current_context", "")
-
         self.breed = session.get("current_context", "")
         
         self.m_type = session.get("material_type")
         self.state = session.get("state", "")
-        self.batch_id = session.get("batch_id", "")
+        self.batch_id = session.get("batch_id")
+        if not self.batch_id:
+            self.batch_id = self.request_args.get("batch_id")
 
-        # # 2. From current_user (login data)
-        #
-        # self.user = None
-        # self.allow_edit = False  # By default data edit is not allowed
-        # self.is_auditor = False
-        # """ Set active user, if any username """
-        # if current_user.is_active and current_user.is_authenticated:
-        #     self.user = current_user.username
-        #     self.is_auditor = current_user.has_role("audit")
-        print(
-            f"#bl.material.Material: {self.get_current()}"
-            f" REQUEST values={self.request_args}"
-        )
+        # print(f"#Material(): {self.get_current()} REQUEST values={self.request_args}")
         return
 
     def to_display(self):
@@ -115,12 +103,9 @@ class Material():
         session["current_context"] = breed
         # Remove obsolete var:
         if "material" in session:
-            print(
-                f"ui.context.Material.set_session_material: "
-                f'Removed obsolete session.material={session.pop("material")!r}'
-            )
+            print(f'Removed obsolete session.material={session.pop("material")!r}')
 
-        if breed == self.BATCH:
+        if breed == MATERIAL_BATCH:
             # request args:  {'batch_id': '2021-10-09.001'}
             if "state" in args:
                 session["state"] = args.get("state")
@@ -140,14 +125,14 @@ class Material():
                 session["state"] = root.state
 
             print(
-                "Material.select_material: the material is single batch "
+                "Material.select_material: The material is single batch "
                 f'{Material.get_from_session(session)})'
             )
             # if not ("batch_id" in session and session["batch_id"]):
             #     return {"status": Status.ERROR, "statustext": _("Missing batch id")}
             return {"status": Status.OK, "args": args}
 
-        elif breed == self.COMMON:
+        elif breed == MATERIAL_COMMON:
             # request args: {'state': 'Candidate', 'material_type': 'Place Data', 'batch_id': '2021-10-26.001'}
             session["state"] = args.get("state", State.ROOT_DEFAULT_STATE)
             session["material_type"] = args.get("material_type")
@@ -168,6 +153,7 @@ class Material():
                     "statustext": _("Missing material_type or state"),
                 }
             return {"status": Status.OK, "args": args}
+
         return {
             "status": Status.ERROR,
             "statustext": _("Undefined breed of materials"),
@@ -175,15 +161,15 @@ class Material():
         }
 
     def get_current(self):
-        """Return current material properties [breed, state, material_type, batch_id].
+        """Return current material tuple [breed, state, material_type, batch_id].
         """
         return [
-            self.breed,   # "batch" / "common"
-            self.state,             # Root.state "Candidate", ... "Accepted"
-            self.m_type,     # "Family Tree", ...
-            self.batch_id           # Root.batch_id
+            self.breed,     # "batch" / "common"
+            self.state,     # Root.state "Candidate", ... "Accepted"
+            self.m_type,    # "Family Tree", ...
+            self.batch_id   # Root.batch_id
         ]
-
+                            #
     @staticmethod
     def get_from_session(session):
         """Return session material properties.

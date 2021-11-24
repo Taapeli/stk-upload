@@ -78,17 +78,17 @@ def material_select(breed):  # set_scope=False, batch_id="", material=None):
     
        Parameters for database access and displaying current material
        - breed="common": Browsing Accepted materials (= a collection of multiple batches)
-         - input: material and state – no uniq_id
+         - arguments: material_type, state – no batch_id
        - breed="batch": Browsing other material types:
-         - input: batch id
-         - figure from database: material and state
+         - arguments: batch id; optional material_type, state
+         - may figure from database: material_type and state
     """
     # 1. User and data context from session and current_user
     ret = Material.set_session_material(session, request, breed, current_user.username)
     # return f"<p>TODO {ret.get('args')}</p><p><a href='/'>Alkuun</a></p>"
     if Status.has_failed(ret):
         flash(
-            f"{ _('Opening material failed: ') }: { _(ret.get('statustext')) }",
+            f"{ _('Could not open Material: ') }: { _(ret.get('statustext')) }",
             "error",
         )
         return redirect("/")
@@ -293,7 +293,7 @@ def _do_get_persons(u_context, args):
         # u_context.set_scope_from_request("person_scope")
         args["rule"] = "all"
     # request_args = UserContext.get_request_args()
-    u_context.set_scope("person_scope")
+    u_context.set_scope_from_request("person_scope")
     u_context.count = int(u_context.get("c", 100))
 
     with PersonReaderTx("read_tx", u_context) as service:

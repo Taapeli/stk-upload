@@ -80,6 +80,7 @@ div.starters button {
                 <form method="get" action="/scene/material/common">
                     <div class="starters">
     {% for material_type in commons  %}
+                        <input type="hidden" name="state" value="Accepted">
                         <button type="submit" name="material_type" value="{{material_type}}"
                             >{{ _(material_type) }}
         {% if material_type == "Family Tree" %}
