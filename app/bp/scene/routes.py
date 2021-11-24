@@ -73,7 +73,7 @@ calendars = [_("Julian"), _("Hebrew")]  # just for translations
 @bp.route("/scene/material/<breed>", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def material_select(breed):  # set_scope=False, batch_id="", material=None):
+def material_select(breed):
     """Select material for browsing and go to Search page.
     
        Parameters for database access and displaying current material

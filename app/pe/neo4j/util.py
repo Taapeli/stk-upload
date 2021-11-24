@@ -22,7 +22,8 @@ from pprint import pprint
 import base32_lib as base32
 
 cypher_prefix = """
-    MATCH (prof:UserProfile{username:$username}) -[:HAS_ACCESS]-> (root:Root)
+    MATCH (prof:UserProfile{username:$username}) 
+        -[:HAS_ACCESS|:DOES_AUDIT]-> (root:Root)
     WITH root
 """
 

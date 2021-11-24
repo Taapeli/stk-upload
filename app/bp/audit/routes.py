@@ -29,28 +29,28 @@ import logging
 from io import StringIO, BytesIO
 import os.path
 
-logger = logging.getLogger("stkserver")
-
-from . import bp
-
 from flask import render_template, request, redirect, url_for, flash
 from flask import send_file, send_from_directory
 from flask import session
 from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
+import urllib.parse
+
+from . import bp
 
 import shareds
 from bl.root import Root, State, BatchUpdater
 from bl.base import Status
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
-from bl.material import Material
+#from bl.material import Material
 from bp.admin.csv_refnames import load_refnames
 from bp.admin import uploads
 from models import syslog, loadfile
 from ui.context import UserContext
 from ui.util import error_print
 
+logger = logging.getLogger("stkserver")
 
 def _get_server_location():
     # Returns server address as a str
@@ -204,13 +204,14 @@ def audit_selected_op():
     """
     try:
         u_context = UserContext()
-        _breed, _state, _material_type, batch_id = u_context.material.get_current()
+        _breed, state, material_type, batch_id = u_context.material.get_current()
         owner_id = u_context.material.request_args.get("user")
         auditor = current_user.username
         operation = "cancel"
 
         if request.form.get("browse"):
-            return redirect("/scene/material/batch?batch_id=" + batch_id)
+            args = {"batch_id": batch_id, "material_type": material_type, "state": state}
+            return redirect("/scene/material/batch?" + urllib.parse.urlencode(args))
         elif request.form.get("start"):
             operation = "start"
         elif request.form.get("accept"):

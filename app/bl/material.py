@@ -45,11 +45,15 @@ class Material():
         """
         self.request_args = Material.get_request_args(session, request)
         self.breed = session.get("current_context", "")
-        
+
         self.m_type = session.get("material_type")
+        if "material_type" in self.request_args:
+            self.m_type = self.request_args.get("material_type")
         self.state = session.get("state", "")
+        if "state" in self.request_args:
+            self.state = self.request_args.get("state")
         self.batch_id = session.get("batch_id")
-        if not self.batch_id:
+        if "batch_id" in self.request_args:
             self.batch_id = self.request_args.get("batch_id")
 
         # print(f"#Material(): {self.get_current()} REQUEST values={self.request_args}")

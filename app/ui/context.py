@@ -67,7 +67,7 @@ class UserContext:
         self.material = Material(session, request)
         self.lang = session.get("lang", "")  # User language
 
-        print(f"#UserContext: session={session}")
+        # print(f"#UserContext: session={session}")
         # print(f"#UserContext: {self.get_current()} SESSION")
         self.first = ""
         self.last = self.NEXT_END
