@@ -106,7 +106,7 @@ div.starters button {
 <!--                 <p>{{ _('View your own candidate materials') }}.</p> -->
     {% for root in batches | sort(attribute='state')  %}
             {% if not loop.previtem %}
-                <p>Vaiheessa {{ _(root.state) }}</p>
+                <p>{{ _("In state") }} {{ _(root.state) }}</p>
                 <div class="starters">
             {% else %}
                 {% if loop.previtem.state != root.state %}
@@ -142,6 +142,22 @@ div.starters button {
 {% endif %}
 
 
+{% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
+        <div class="startbox audit">
+            <div style="display: inline-block;">
+                <form method="get" action="/audit">
+
+                    <h2>{{ _('Isotammi auditor') }}</h2>
+
+                    <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
+                    <div class="submit"> 
+                        <button type="submit">{{ _('Audit materials') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+{% endif %}
+
 {% if current_user.is_authenticated and 
             (current_user.has_role('admin') or current_user.has_role('master') ) %}
         <div class="startbox admin">
@@ -153,22 +169,6 @@ div.starters button {
                     <p>{{ _('Manage users, reference data sets and do database maintenance tasks') }}.</p>
                     <div class="submit"> 
                         <button type="submit">{{ _('Maintenance') }}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-{% endif %}
-
-{% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
-        <div class="startbox audit">
-            <div style="display: inline-block;">
-                <form method="get" action="/audit">
-
-                    <h2>{{ _('Isotammi auditor') }}</h2>
-
-                    <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
-                    <div class="submit"> 
-                        <button type="submit">{{ _('Audit materials') }}</button>
                     </div>
                 </form>
             </div>

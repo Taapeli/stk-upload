@@ -102,10 +102,11 @@ class Material():
             --> "GET /scene/material/common?material_type=Family+Tree HTTP/1.1" 200 -
         """
         args = Material.get_request_args(session, request)
-        print(f"#Material.set_session_material: request {args}")
+        print(f"#Material.set_session_material/{request.endpoint}: request {args}")
         session["breed"] = breed
         session["set_scope"] = True  # Reset material and scope
         session["current_context"] = breed
+        # Remove obsolete var:
         if "material" in session:
             print(
                 f"ui.context.Material.set_session_material: "
@@ -114,9 +115,12 @@ class Material():
 
         if breed == "batch":
             # request args:  {'batch_id': '2021-10-09.001'}
-            session["state"] = args.get("state")
-            session["material_type"] = args.get("material_type")
-            session["batch_id"] = args.get("batch_id")
+            if "state" in args:
+                session["state"] = args.get("state")
+            if "material_type" in args:
+                session["material_type"] = args.get("material_type")
+            if "batch_id" in args:
+                session["batch_id"] = args.get("batch_id")
 
             # Missing material type or state?
             # - optional args: {'material_type': 'Family Tree', 'state': 'Candidate'}
@@ -134,7 +138,7 @@ class Material():
             )
             # if not ("batch_id" in session and session["batch_id"]):
             #     return {"status": Status.ERROR, "statustext": _("Missing batch id")}
-            return {"status": Status.OK, "breed": breed, "args": args}
+            return {"status": Status.OK, "args": args}
 
         elif breed == "common":
             # request args: {'state': 'Candidate', 'material_type': 'Place Data', 'batch_id': '2021-10-26.001'}
@@ -156,14 +160,15 @@ class Material():
                     "status": Status.ERROR,
                     "statustext": _("Missing material_type or state"),
                 }
-            return {"status": Status.OK, "breed": breed, "args": args}
+            return {"status": Status.OK, "args": args}
         return {
             "status": Status.ERROR,
             "statustext": _("Undefined breed of materials"),
+            "args": args,
         }
 
     def get_current(self):
-        """Return current material properties.
+        """Return current material properties [breed, state, material_type, batch_id].
         """
         return [
             self.breed,   # "batch" / "common"

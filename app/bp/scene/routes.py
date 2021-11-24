@@ -30,8 +30,7 @@ import json
 import time
 from datetime import datetime
 from operator import itemgetter
-from pprint import pprint
-
+#from pprint import pprint
 # from types import SimpleNamespace
 
 import logging
@@ -40,28 +39,30 @@ logger = logging.getLogger("stkserver")
 
 from flask import send_file, Response, jsonify, render_template
 from flask import request, redirect, url_for, flash
-from flask import session as session
+from flask import session
 from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
 
 import shareds
 from . import bp
 from bl.base import Status, StkEncoder
-from bl.material import Material
-from bl.place import PlaceReader
-from bl.source import SourceReader
-from bl.family import FamilyReader
+from bl.comment import Comment, CommentReader, CommentsUpdater
 from bl.event import EventReader, EventWriter
+from bl.family import FamilyReader
+from bl.material import Material
+from bl.media import MediaReader
 from bl.note import NoteReader
 from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
-from bl.media import MediaReader
-from bl.comment import Comment, CommentReader, CommentsUpdater
+from bl.place import PlaceReader
+from bl.source import SourceReader
+
 from bp.graph.models.fanchart import FanChart
-from ui.context import UserContext
-from ui import jinja_filters
-from ui.util import error_print, stk_logger
 from models import mediafile
+
+from ui import jinja_filters
+from ui.context import UserContext
+from ui.util import error_print, stk_logger
 
 calendars = [_("Julian"), _("Hebrew")]  # just for translations
 

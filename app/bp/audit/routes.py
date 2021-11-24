@@ -35,7 +35,7 @@ from . import bp
 
 from flask import render_template, request, redirect, url_for, flash
 from flask import send_file, send_from_directory
-from flask import session as user_session
+from flask import session
 from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
 
@@ -44,11 +44,11 @@ from bl.root import Root, State, BatchUpdater
 from bl.base import Status
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
-#from bl.audit.models.batch_merge import BatchMerger
-
+from bl.material import Material
 from bp.admin.csv_refnames import load_refnames
 from bp.admin import uploads
 from models import syslog, loadfile
+from ui.context import UserContext
 from ui.util import error_print
 
 
@@ -95,9 +95,9 @@ def audit_research_op(oper=None, batch_id=None):
         user_id = current_user.username
         operation = oper
         if not batch_id:
-            batch_id = user_session.get('batch_id')
+            batch_id = session.get('batch_id')
         if not oper:
-            operation = user_session.get('oper')
+            operation = session.get('oper')
             #request.form["oper"]
     
         if operation == "request":
@@ -203,13 +203,15 @@ def audit_selected_op():
         x. - "cancel"
     """
     try:
+        u_context = UserContext()
+        _breed, _state, _material_type, batch_id = u_context.material.get_current()
+        owner_id = u_context.material.request_args.get("user")
         auditor = current_user.username
-        user_id = request.form["user"]
-        batch_id = request.form["batch"]
         operation = "cancel"
-        #request.form["oper"]
+
         if request.form.get("browse"):
-            return redirect("/scene/material/batch?batch_id=" + batch_id)
+            return redirect("/scene/material/batch")
+            # return redirect("/scene/material/batch?batch_id=" + batch_id)
             # return redirect(url_for("scene.search_material", 
             #                         set_scope="1", batch_id=batch_id))
         elif request.form.get("start"):
@@ -218,7 +220,7 @@ def audit_selected_op():
             operation = "accept"
         elif request.form.get("reject"):
             operation = "reject"
-        logger.info(f"--> bp.audit.routes.audit_selected u={user_id} b={batch_id} {operation}")
+        logger.info(f"--> bp.audit.routes.audit_selected u={owner_id} b={batch_id} {operation}")
     
         with BatchUpdater("update") as batch_service:
     
@@ -230,14 +232,14 @@ def audit_selected_op():
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
                 res = batch_service.change_state(batch_id, 
-                                                 user_id, 
+                                                 owner_id, 
                                                  State.ROOT_ACCEPTED)
                 msg = _("Audit batch accepted: ") + batch_id
     
             elif operation == "reject":
                 # 7. Move from "Auditing" to "Rejected" state
                 res = batch_service.change_state(batch_id, 
-                                                 user_id, 
+                                                 owner_id, 
                                                  State.ROOT_REJECTED)
                 msg = _("You have rejected the batch ") + batch_id
     
@@ -255,7 +257,7 @@ def audit_selected_op():
         return redirect(url_for("audit.list_uploads"))
 
     syslog.log(type="Audit state change", 
-               batch=batch_id, by=user_id, msg=msg, op=operation)
+               batch=batch_id, by=owner_id, msg=msg, op=operation)
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 
