@@ -58,7 +58,7 @@ td {
 	</tr>
    	</table>
    	<p>
-{% if user_context.is_auditor %}
+{% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
    	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
 {% endif %}   
 

@@ -517,6 +517,9 @@ def batch_update_description():
 @roles_accepted("audit")
 def scripting(batch_id=None):
     from pprint import pprint
+    enabled = shareds.app.config.get("SCRIPTING_TOOL_ENABLED")
+    if enabled is not True:
+        raise RuntimeError(_("Scripting tool is not enabled"))
     if request.method == "POST":
         batch_id = request.form.get("batch_id")
     with BatchReader("update") as batch_service:
