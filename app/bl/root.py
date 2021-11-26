@@ -370,8 +370,7 @@ class Root(NodeObject):
             audited = approved.get(batch_id)
             if audited:
                 user_data[key]["Audit"] = audited
-
-        print(f"bl.root.Root.get_user_stats: user_data[{key}] {user_data[key]}")
+            #print(f"bl.root.Root.get_user_stats: user_data[{key}] {user_data[key]}")
 
         return sorted(titles), user_data
 

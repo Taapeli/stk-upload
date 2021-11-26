@@ -121,7 +121,7 @@ class Material():
             # Missing material type or state?
             # - optional args: {'material_type': 'Family Tree', 'state': 'Candidate'}
             if session["batch_id"] and (
-                not session["material_type"] or not session["state"]
+                not session.get("material_type") or not session.get("state")
             ):
                 # Get from database
                 root = Root.get_batch(username, session["batch_id"])

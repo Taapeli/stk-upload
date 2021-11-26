@@ -22,11 +22,9 @@ div.props > div > span:nth-child(1) {
 
 <div id="startdiv">
     <div>
-        <h1>{{ _("User Material") }}</h1>
+        <h1>{{ _("Auditing Researcher's Material") }}</h1>
 
 {% include "flash_messages.html" %}
-
-        <h2>{{ _("Material for Auditing") }}</h2>
 
 		<div class="props">
 		
@@ -104,7 +102,9 @@ div.props > div > span:nth-child(1) {
 <!-- {{root.state}} {{user}}/{{current_user.username}} -->
                 <div class="submit">
                    <input type="submit" value="{{ _('Return') }}" name="cancel" /> 
-                   <input type="submit" value="{{ _('Browse this material') }}" name="browse" /> 
+                   <input type="submit" value="{{ _('Browse this material') }}" name="browse"
+    {% if not can_browse %} disabled {% endif -%} />
+                   <input type="submit" value="{{ _('Download file') }}" name="download" /> 
                    <span style="font-size:large; color:gray;"> | </span>
 {% if total %}
                    <input type="submit" name="start"

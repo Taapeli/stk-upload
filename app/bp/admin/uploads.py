@@ -353,12 +353,12 @@ def list_uploads(username:str) -> List[Upload]:
     return sorted(uploads, key=lambda upload: upload.batch_id)
 
 def list_uploads_all(users) -> List[Upload]:
-    """ Get named setups.User objects. """
+    """ Get named setups.User objects by descending batch_id. """
     uploads = []
     for user in users:
         for upload in list_uploads(user.username):
             uploads.append(upload)
-    return sorted(uploads, key=lambda upload: upload.batch_id)
+    return sorted(uploads, key=lambda upload: upload.batch_id, reverse=True)
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.

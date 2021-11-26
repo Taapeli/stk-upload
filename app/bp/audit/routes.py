@@ -151,7 +151,7 @@ def list_uploads(batch_id=None):
 @login_required
 @roles_accepted("audit")
 def audit_pick(batch_id=None):
-    """ 4. Pick Batch for selecting auditor operation.
+    """ 4. Pick Batch for auditor operations.
     """
     try:
         username, root, labels = Root.get_batch_stats(batch_id)
@@ -166,6 +166,9 @@ def audit_pick(batch_id=None):
         timestamp = root.timestamp_str()
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
+        can_browse = (root.state == State.ROOT_AUDITING or 
+                      root.state == State.ROOT_ACCEPTED or 
+                      root.state == State.ROOT_REJECTED)
         can_start = (root.state == State.ROOT_AUDIT_REQUESTED or
                      root.state == State.ROOT_REJECTED or
                      root.state == State.ROOT_AUDITING and not i_am_auditor)
@@ -182,6 +185,7 @@ def audit_pick(batch_id=None):
         user=username, 
         root=root,
         basename=os.path.basename(root.file),
+        can_browse=can_browse,
         can_start=can_start,
         can_accept=can_accept,
         can_remove=can_remove,

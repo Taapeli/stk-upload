@@ -374,7 +374,7 @@ class PersonBl(Person):
         if not 'batch_id':
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
         self.uuid = self.newUuid()
-        self.isotammi_id = self.new_isotammi_id(dataservice, "H")
+        #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "H")
 
         # Save the Person node under UserProfile; all attributes are replaced
 
