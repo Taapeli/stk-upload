@@ -333,16 +333,16 @@ def xml_to_stkbase(batch: Root):
         if is_gpkg:
             extract_media(batch.file, batch.id)
 
-        res = handler.handle_repositories()
-        res = handler.handle_sources()
-        res = handler.handle_citations()
+        res = handler.run_tx(handler.handle_repositories)
+        res = handler.run_tx(handler.handle_sources)
+        res = handler.run_tx(handler.handle_citations)
 
-        res = handler.handle_notes()
-        res = handler.handle_media()
-        res = handler.handle_places()
-        res = handler.handle_events()
-        res = handler.handle_people()
-        res = handler.handle_families()
+        res = handler.run_tx(handler.handle_notes)
+        res = handler.run_tx(handler.handle_media)
+        res = handler.run_tx(handler.handle_places)
+        res = handler.run_tx(handler.handle_events)
+        res = handler.run_tx(handler.handle_people)
+        res = handler.run_tx(handler.handle_families)
 
         #       for k in handler.handle_to_node.keys():
         #             print (f'\t{k} –> {handler.handle_to_node[k]}')
