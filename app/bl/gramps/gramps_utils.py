@@ -813,19 +813,20 @@ done
 
 test_output = None
 
-def gramps_verify(gramps_runner, username, xmlfile):
+def gramps_verify(gramps_runner, lang, username, batch_id, xmlfile, newfile):
     if test_output:
         lines = test_output.splitlines()
         import time
         time.sleep(3)
     else:
         upload_folder = get_upload_folder(username) 
-        pathname = os.path.join(upload_folder, xmlfile)
+        pathname = os.path.join(upload_folder, batch_id, xmlfile)
+        export_file = os.path.join(upload_folder, batch_id, newfile)
         #cmd = f"unset PYTHONPATH;env;"
         #cmd += f"rm -rf ~/{xmlfile}.media;"
         #cmd += f"/usr/bin/gramps -i {pathname} -a tool -p name=verify" #.split()
-        cmd = [gramps_runner, xmlfile, pathname]
-        cmd = f"{gramps_runner} '{xmlfile}' '{pathname}'"
+        cmd = [gramps_runner, lang, xmlfile, pathname]
+        cmd = f"{gramps_runner} '{lang}' '{xmlfile}' '{pathname}' '{export_file}'"
         print("cmd:",cmd)
         res = subprocess.run(cmd, shell=True, capture_output=True, encoding="utf-8")
         print(res.stderr)

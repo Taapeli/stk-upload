@@ -35,7 +35,7 @@ from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
 
 from pe.dataservice import ConcreteService
-from .cypher.cy_batch_audit import CypherRoot #, CypherAudit
+from .cypher.cy_root import CypherRoot #, CypherAudit
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_family import CypherFamily
@@ -798,7 +798,7 @@ class Neo4jUpdateService(ConcreteService):
 
         Comment.timestamp is created in the Cypher clause.
         
-        TODO: Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
+        Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
         """
         is_reply = attr.get("reply")
         if is_reply:

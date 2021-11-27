@@ -44,7 +44,7 @@ from models import email, util, syslog
 from bl.root import Root, State
 from bl.base import IsotammiException
 from bl.gramps import gramps_loader
-from pe.neo4j.cypher.cy_batch_audit import CypherRoot
+from pe.neo4j.cypher.cy_root import CypherRoot
 
 # ===============================================================================
 # Background loading of a Gramps XML file
@@ -344,7 +344,7 @@ def list_uploads(username:str) -> List[Upload]:
             status=_(state),
             is_candidate=1 if (b.state == State.ROOT_CANDIDATE) else 0,
             for_auditor=1 if b.for_auditor() else 0,
-            material_type=b.material,
+            material_type=b.material_type,
             description=b.description,
         )
         #print(f"#bp.admin.uploads.list_uploads: {upload}")
@@ -353,12 +353,12 @@ def list_uploads(username:str) -> List[Upload]:
     return sorted(uploads, key=lambda upload: upload.batch_id)
 
 def list_uploads_all(users) -> List[Upload]:
-    """ Get named setups.User objects. """
+    """ Get named setups.User objects by descending batch_id. """
     uploads = []
     for user in users:
         for upload in list_uploads(user.username):
             uploads.append(upload)
-    return sorted(uploads, key=lambda upload: upload.batch_id)
+    return sorted(uploads, key=lambda upload: upload.batch_id, reverse=True)
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.

@@ -89,7 +89,7 @@ class Neo4jReadServiceTx(ConcreteService):
         
             args = dict {use_user, fw, limit, rule, key, years}
         """
-        material = args.get('material_type')
+        material_type = args.get('material_type')
         state = args.get('state')
         username = args.get('use_user')
         rule = args.get('rule')
@@ -111,18 +111,18 @@ class Neo4jReadServiceTx(ConcreteService):
         elif args.get('pg') == 'all':
             # Show persons, no search form
             cypher = CypherPerson.get_person_list
-            print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
+            print(f"tx_get_person_list: Show '{state}' '{material_type}' @{username} fw={fw_from}")
         elif rule == 'freetext':
             cypher_prefix = CypherPerson.read_persons_w_events_by_name1
             cypher = CypherPerson.read_persons_w_events_by_name2
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
             cypher = CypherPerson.read_persons_w_events_by_refname
-            print(f"tx_get_person_list: Show '{state}' '{material}' data @{username}, {rule} ~ \"{key}*\"")
+            print(f"tx_get_person_list: Show '{state}' '{material_type}' data @{username}, {rule} ~ \"{key}*\"")
         elif rule == 'years':
             # Search persons matching <years>
             cypher = CypherPerson.read_persons_w_events_by_years
-            print(f"tx_get_person_list: Show '{state}' '{material}', years {years}")
+            print(f"tx_get_person_list: Show '{state}' '{material_type}', years {years}")
         elif rule == 'ref':
             #TODO: Search persons where a reference name = <key> value
             return {'items': [], 'status': Status.ERROR,
@@ -209,15 +209,15 @@ class Neo4jReadServiceTx(ConcreteService):
                 return res
 
             # Store original researcher data 
-            #    root = dict {material, root_user, id}
-            #    - material     root material type
+            #    root = dict {material_type, root_user, id}
+            #    - material_type root material type
             #    - root_user    the (original) owner of this object
             #    - bid          Batch id
-            root_node = record['root']
-            material_type = root_node.get('material', "")
-            root_state = root_node.get('state', "")
-            root_user = root_node.get('user', "")
-            bid = root_node.get('id', "")
+            node = record['root']
+            material_type = node.get('material', "")
+            root_state = node.get('state', "")
+            root_user = node.get('user', "")
+            bid = node.get('id', "")
 
             person_node = record['p']
             puid = person_node.id
@@ -567,7 +567,9 @@ class Neo4jReadServiceTx(ConcreteService):
 
     def tx_note_search(self, args):
         """Free text search in Notes"""
-        #material = args.get('material')
+        print("Neo4jReadServiceTx.tx_note_search: TODO - MUST limit by material_type !!")
+#TODO tx_note_search() - Should limit by material_type
+        #material_type = args.get('material_type')
         #state = args.get('state')
         username = args.get('use_user')
         searchtext = args.get('key')

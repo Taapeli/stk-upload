@@ -68,7 +68,7 @@ tr > td > img {
                         <div style="display:flex;">
                             <div><img alt="({{ _('Thumbnail') }})" align="left"
                                 src="/scene/thumbnail?id={{media.uuid}}" 
-                                title="key = {{media.uuid_str()}}"/></div>
+                                title="key = {{media.uuid_short()}}"/></div>
                             <div>
                                  <p style="nowrap;">
                                  {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
@@ -149,7 +149,7 @@ tr > td > img {
         <div class="pic">
             	<img alt="picture {{media.description}}" 
             		 src="/scene/media/{{media.name}}?id={{media.uuid}}" 
-                 	 title="key = {{media.uuid_str()}}"/>
+                 	 title="key = {{media.uuid_short()}}"/>
         </div>
 	</div>
  {% endif %}

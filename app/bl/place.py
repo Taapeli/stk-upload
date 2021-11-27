@@ -233,6 +233,7 @@ class PlaceBl(Place):
         # Create or update this Place
 
         self.uuid = self.newUuid()
+        #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "P")
         pl_attr = {
             "uuid": self.uuid,
             "handle": self.handle,

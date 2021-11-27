@@ -51,7 +51,7 @@ from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
 
-from pe.neo4j.cypher.cy_batch_audit import CypherRoot
+from pe.neo4j.cypher.cy_root import CypherRoot
 #from models.cypher_gramps import Cypher_mixed
 from .batchlogger import LogItem
 
@@ -176,7 +176,12 @@ class DOM_handler:
             for node in header.childNodes:
                 #print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
                 if node.nodeName == "isotammi":
-                    return self.get_isotammi_metadata(node)
+                    material_type, description = self.get_isotammi_metadata(node)
+                    self.blog.log_event(
+                        {"title": _("Material type"), "level": "TITLE", 
+                         "count": f"{material_type} {description!r}\n"}
+                    )
+                    return material_type, description
         return None
 
     def get_isotammi_metadata(self, isotammi_node):

@@ -21,54 +21,43 @@ Created on 11.11.2021
 
 @author: jm
 '''
-from flask import session, request
-#from flask_security import current_user
 from flask_babelex import _
 
 from bl.base import Status
 from bl.root import State, Root
 
+MATERIAL_COMMON = "common"  # Multi-batch data like Approved data
+MATERIAL_BATCH = "batch"  # Selected candidate or approved batch
+
 class Material():
     '''
-    Material defines a seleced view to Root data objects and data behind that.
+    Material defines a selected view to Root and data objects.
+    
+    breed="batch"   -> selection by Root.batch_id only
+                       Store also request.material_type and request.state, if given;
+                       else clear old session.material_type and session.state
+    breed="common"  -> selection by Root.material_type and Root.state
+                       Ignore and clear session.batch_id
     '''
 
-    def __init__(self):
+    def __init__(self, session, request):
         """ Initialize Material object using session and request information.
         """
-
+        self.request_args = Material.get_request_args(session, request)
         self.breed = session.get("current_context", "")
-        
+
         self.m_type = session.get("material_type")
+        if "material_type" in self.request_args:
+            self.m_type = self.request_args.get("material_type")
         self.state = session.get("state", "")
-        self.batch_id = session.get("batch_id", "")
+        if "state" in self.request_args:
+            self.state = self.request_args.get("state")
+        self.batch_id = session.get("batch_id")
+        if "batch_id" in self.request_args:
+            self.batch_id = self.request_args.get("batch_id")
 
-        self.request_args = Material.get_request_args()
-        
-        # # 2. From current_user (login data)
-        #
-        # self.user = None
-        # self.allow_edit = False  # By default data edit is not allowed
-        # self.is_auditor = False
-        # """ Set active user, if any username """
-        # if current_user.is_active and current_user.is_authenticated:
-        #     self.user = current_user.username
-        #     self.is_auditor = current_user.has_role("audit")
-        print(
-            f"#bl.material.Material: {self.get_tuple()}"
-            f" REQUEST values={self.request_args}"
-        )
+        # print(f"#Material(): {self.get_current()} REQUEST values={self.request_args}")
         return
-
-    def get_tuple(self):
-        """Return current material properties.
-        """
-        return [
-            self.breed,   # "batch" / "common"
-            self.state,             # Root.state "Candidate", ... "Accepted"
-            self.m_type,     # "Family Tree", ...
-            self.batch_id           # Root.batch_id
-        ]
 
     def to_display(self):
         """ Return current material and batch choice for display. """
@@ -93,7 +82,7 @@ class Material():
     #----- Static methods
     
     @staticmethod
-    def set_session_material(breed, username):
+    def set_session_material(session, request, breed, username):
         """
         Save material selection from request to session.
 
@@ -111,42 +100,43 @@ class Material():
             From /start/logged HTTP/1.1
             --> "GET /scene/material/common?material_type=Family+Tree HTTP/1.1" 200 -
         """
-        args = Material.get_request_args()
-        print(f"#Material.set_session_material: request {args}")
+        args = Material.get_request_args(session, request)
+        print(f"#Material.set_session_material/{request.endpoint}: request {args}")
         session["breed"] = breed
         session["set_scope"] = True  # Reset material and scope
         session["current_context"] = breed
+        # Remove obsolete var:
         if "material" in session:
-            print(
-                f"ui.context.Material.set_session_material: "
-                f'Removed obsolete session.material={session.pop("material")!r}'
-            )
+            print(f'Removed obsolete session.material={session.pop("material")!r}')
 
-        if breed == "batch":
+        if breed == MATERIAL_BATCH:
             # request args:  {'batch_id': '2021-10-09.001'}
-            session["state"] = args.get("state")
-            session["material_type"] = args.get("material_type")
-            session["batch_id"] = args.get("batch_id")
+            if "state" in args:
+                session["state"] = args.get("state")
+            if "material_type" in args:
+                session["material_type"] = args.get("material_type")
+            if "batch_id" in args:
+                session["batch_id"] = args.get("batch_id")
 
             # Missing material type or state?
             # - optional args: {'material_type': 'Family Tree', 'state': 'Candidate'}
             if session["batch_id"] and (
-                not session["material_type"] or not session["state"]
+                not session.get("material_type") or not session.get("state")
             ):
                 # Get from database
                 root = Root.get_batch(username, session["batch_id"])
-                session["material_type"] = root.material
+                session["material_type"] = root.material_type
                 session["state"] = root.state
 
             print(
-                "Material.select_material: the material is single batch "
-                f'{Material.get_session_material_tuple()})'
+                "Material.select_material: The material is single batch "
+                f'{Material.get_from_session(session)})'
             )
             # if not ("batch_id" in session and session["batch_id"]):
             #     return {"status": Status.ERROR, "statustext": _("Missing batch id")}
-            return {"status": Status.OK, "breed": breed, "args": args}
+            return {"status": Status.OK, "args": args}
 
-        elif breed == "common":
+        elif breed == MATERIAL_COMMON:
             # request args: {'state': 'Candidate', 'material_type': 'Place Data', 'batch_id': '2021-10-26.001'}
             session["state"] = args.get("state", State.ROOT_DEFAULT_STATE)
             session["material_type"] = args.get("material_type")
@@ -154,7 +144,7 @@ class Material():
 
             print(
                 "Material.select_material: The material is batch collection "
-                f'{Material.get_session_material_tuple()}'
+                f'{Material.get_from_session(session)}'
             )
             if not (
                 "material_type" in session
@@ -164,16 +154,28 @@ class Material():
             ):
                 return {
                     "status": Status.ERROR,
-                    "statustext": _("Missing material type or state"),
+                    "statustext": _("Missing material_type or state"),
                 }
-            return {"status": Status.OK, "breed": breed, "args": args}
+            return {"status": Status.OK, "args": args}
+
         return {
             "status": Status.ERROR,
             "statustext": _("Undefined breed of materials"),
+            "args": args,
         }
 
+    def get_current(self):
+        """Return current material tuple [breed, state, material_type, batch_id].
+        """
+        return [
+            self.breed,     # "batch" / "common"
+            self.state,     # Root.state "Candidate", ... "Accepted"
+            self.m_type,    # "Family Tree", ...
+            self.batch_id   # Root.batch_id
+        ]
+                            #
     @staticmethod
-    def get_session_material_tuple():
+    def get_from_session(session):
         """Return session material properties.
         """
         if "current_context" in session: cc = session["current_context"]
@@ -187,7 +189,7 @@ class Material():
         return [ cc, st, mt, bi ]
 
     @staticmethod
-    def get_request_args():
+    def get_request_args(session, request):
         """Return request arguments from request.args or request.form.
         """
         if request is None:

@@ -15,11 +15,10 @@ div.starters {
     /*height: 120px;*/
     align-items: center;
 }
-div.starters span {
+div.starters span.strow {
     padding: 2pt;
     display: inline-flex;
 }
-div.starters span.typedesc { color: brown; }
 div.starters button {
     min-height: 36px;
 }
@@ -79,12 +78,16 @@ div.starters button {
 
                 <p>{{ _('View different approved common data') }}.</p>
                 <form method="get" action="/scene/material/common">
-<!--                <input type="hidden" name="set_scope" value="1"> -->
-<!--                <input type="hidden" name="state" value="Accepted"> -->
                     <div class="starters">
-                        <button type="submit" name="material_type" value="Family Tree"
-                            >{{ _("Browse") }}:<br>{{ _('Approved Isotammi tree') }}
+    {% for material_type in commons  %}
+                        <input type="hidden" name="state" value="Accepted">
+                        <button type="submit" name="material_type" value="{{material_type}}"
+                            >{{ _(material_type) }}
+        {% if material_type == "Family Tree" %}
+                            <br>{{ _('Approved Isotammi tree') }}
+        {% endif -%}
                         </button>
+    {% endfor %}
                     </div>
                 </form>
             </div>
@@ -99,35 +102,62 @@ div.starters button {
     {% endif -%}>
             <div style="display: inline-block;">
 
-                <h2>{{ _('My candidate material') }}</h2>
+                <h2>{{ _('My materials') }}</h2>
 
-                <p>{{ _('View your own candidate materials') }}.</p>
+<!--                 <p>{{ _('View your own candidate materials') }}.</p> -->
+    {% for root in batches | sort(attribute='state')  %}
+            {% if not loop.previtem %}
+                <p>{{ _("In state") }} {{ _(root.state) }}</p>
                 <div class="starters">
-    {% for b in batches %}
+            {% else %}
+                {% if loop.previtem.state != root.state %}
+                </div>
+                <p>{{ _("In state") }} {{ _(root.state) }}</p>
+                <div class="starters">
+                {% endif %}
+            {% endif %}
+        {# if root.state == "Candidate" #}
                 <form method="post" action="/scene/material/batch">
-        {% if b.description %}
-                  {% set title = _(b.material) + " / " + b.description %}
-        {% else %}{% set title = _(b.material) %}
-        {% endif -%}
-                        <span>
-                            <input type="hidden" name="material_type" value="{{b.material}}">
-                            <input type="hidden" name="state" value="{{b.state}}">
-                            <button type="submit" name="batch_id" value="{{ b.id }}"
-           {% if batch_id == b.id %}autofocus{% endif %}
+            {% if root.description %}
+                  {% set title = _(root.material_type) + " / " + root.description %}
+            {% else %}{% set title = _(root.material_type) %}
+            {% endif -%}
+                        <span class="strow">
+                            <input type="hidden" name="material_type" value="{{root.material_type}}">
+                            <input type="hidden" name="state" value="{{root.state}}">
+                            <button type="submit" name="batch_id" value="{{ root.id }}"
+            {% if batch_id == root.id %}autofocus{% endif %}
                              title="{{ title }}">
-           {% if b.material != "Family Tree" %}
-                                <span class="typedesc">{{ _(b.material) }}</span>
-           {% endif %}
-                            {{ b.id }}<br>{{ b.filename|replace('_',' ') }}
+            {% if root.material_type != "Family Tree" %}
+                                <span class="typetag">{{ _(root.material_type) }}</span>
+            {% endif -%}
+                            {{ root.id }}<br>{{ root.filename()|replace('_',' ') }}
                             </button>
                         </span>
                     </form>
+        {# endif -#}
     {% endfor -%}
                  </div>
              </div>
         </div>
 {% endif %}
 
+
+{% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
+        <div class="startbox audit">
+            <div style="display: inline-block;">
+                <form method="get" action="/audit">
+
+                    <h2>{{ _('Isotammi auditor') }}</h2>
+
+                    <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
+                    <div class="submit"> 
+                        <button type="submit">{{ _('Audit materials') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+{% endif %}
 
 {% if current_user.is_authenticated and 
             (current_user.has_role('admin') or current_user.has_role('master') ) %}
@@ -140,22 +170,6 @@ div.starters button {
                     <p>{{ _('Manage users, reference data sets and do database maintenance tasks') }}.</p>
                     <div class="submit"> 
                         <button type="submit">{{ _('Maintenance') }}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-{% endif %}
-
-{% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
-        <div class="startbox audit">
-            <div style="display: inline-block;">
-                <form method="get" action="/audit">
-
-                    <h2>{{ _('Isotammi auditor') }}</h2>
-
-                    <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
-                    <div class="submit"> 
-                        <button type="submit">{{ _('Audit materials') }}</button>
                     </div>
                 </form>
             </div>

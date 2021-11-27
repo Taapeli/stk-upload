@@ -30,7 +30,7 @@ import json
 import time
 from datetime import datetime
 from operator import itemgetter
-
+#from pprint import pprint
 # from types import SimpleNamespace
 
 import logging
@@ -39,29 +39,30 @@ logger = logging.getLogger("stkserver")
 
 from flask import send_file, Response, jsonify, render_template
 from flask import request, redirect, url_for, flash
-from flask import session as session
+from flask import session
 from flask_security import current_user, login_required, roles_accepted
 from flask_babelex import _
 
 import shareds
 from . import bp
 from bl.base import Status, StkEncoder
-#from bl.root import State, Root, DEFAULT_MATERIAL
-from bl.material import Material
-from bl.place import PlaceReader
-from bl.source import SourceReader
-from bl.family import FamilyReader
+from bl.comment import Comment, CommentReader, CommentsUpdater
 from bl.event import EventReader, EventWriter
+from bl.family import FamilyReader
+from bl.material import Material
+from bl.media import MediaReader
 from bl.note import NoteReader
 from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
-from bl.media import MediaReader
-from bl.comment import Comment, CommentReader, CommentsUpdater
+from bl.place import PlaceReader
+from bl.source import SourceReader
+
 from bp.graph.models.fanchart import FanChart
-from ui.context import UserContext
-from ui import jinja_filters
-from ui.util import error_print, stk_logger
 from models import mediafile
+
+from ui import jinja_filters
+from ui.context import UserContext
+from ui.util import error_print, stk_logger
 
 calendars = [_("Julian"), _("Hebrew")]  # just for translations
 
@@ -72,22 +73,24 @@ calendars = [_("Julian"), _("Hebrew")]  # just for translations
 @bp.route("/scene/material/<breed>", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def material_select(breed):  # set_scope=False, batch_id="", material=None):
+def material_select(breed):
     """Select material for browsing and go to Search page.
     
        Parameters for database access and displaying current material
        - breed="common": Browsing Accepted materials (= a collection of multiple batches)
-         - input: material and state – no uniq_id
+         - arguments: material_type, state – no batch_id
        - breed="batch": Browsing other material types:
-         - input: batch id
-         - figure from database: material and state
+         - arguments: batch id; optional material_type, state
+         - may figure from database: material_type and state
     """
     # 1. User and data context from session and current_user
-    ret = Material.set_session_material(breed, current_user.username)
+    ret = Material.set_session_material(session, request, breed, current_user.username)
     # return f"<p>TODO {ret.get('args')}</p><p><a href='/'>Alkuun</a></p>"
     if Status.has_failed(ret):
-        flash(f"{ _('Opening material failed: ') }: "
-              f"{ _(ret.get('statustext')) }", "error")
+        flash(
+            f"{ _('Could not open Material: ') }: { _(ret.get('statustext')) }",
+            "error",
+        )
         return redirect("/")
 
     return redirect(url_for("scene.show_person_search"))
@@ -96,40 +99,46 @@ def material_select(breed):  # set_scope=False, batch_id="", material=None):
 # ------------------------- Menu 1: Material search ------------------------------
 
 
-def _note_item_format(rec, searchtext, min_length=100):
-    """ Display an excerpt from Note.text that is at least this long
-    """
-    import re
-
-    def generate_choices(q):
-        choices = []
-        for i, _c in enumerate(q):
-            choice = fr"{q[0:i]}\w{q[i:]}"  # add any character
-            choices.append(choice)
-            choice = fr"{q[0:i]}\w{q[i+1:]}"  # replace any character
-            choices.append(choice)
-            choice = fr"{q[0:i]}{q[i+1:]}"  # remove any character
-            choices.append(choice)
-        return choices
-
-    # print(rec)
-    note = rec.get("note")
-    # id = note.get('id')
-    text = note.get("text")
-    labels = rec.get("labels")
-    startpos = -1
+def _note_generate_regexes(searchtext):
+    def generate_choices(q, n):
+        """
+        Naive algorithm trying to generate regexes 
+        for all words that have a Damerau-Levenshtein distance 
+        of at most n from the word q.
+        """
+        def generate_choices1(q, n):
+            if n == 0: 
+                yield q
+                return
+            for i, c in enumerate(q):
+                choice = fr"{q[0:i]}.{q[i:]}"  # add any character
+                yield from generate_choices1(choice,n-1)
+                choice = fr"{q}."  # add any character after the word
+                yield from generate_choices1(choice,n-1)
+                choice = fr"{q[0:i]}.{q[i+1:]}"  # replace any character
+                yield from generate_choices1(choice,n-1)
+                choice = fr"{q[0:i]}{q[i+1:]}"  # remove any character
+                yield from generate_choices1(choice,n-1)
+                if i > 0:
+                    choice = fr"{q[0:i-1]}{q[i]}{q[i-1]}{q[i+1:]}"  # swap any characters
+                    yield from generate_choices1(choice,n-1)
+        choices = list(set([choice.replace(".",r"\w") for choice in generate_choices1(q, n)]))
+        return sorted(choices, key=lambda x: len(x), reverse=True)
+        #return [choice.replace(".",r"\w") for choice in generate_choices1(q, n)]
+        
+    regexes = []
     if searchtext.startswith("'") and searchtext.endswith("'"):
         searchtext = searchtext[1:-1]
     if searchtext.startswith('"') and searchtext.endswith('"'):
         searchwords = [searchtext[1:-1]]
     else:
         searchwords = [searchtext] + searchtext.split()
-    for wordnum, searchword in enumerate(searchwords):
+    for searchword in set(searchwords):
         if searchword.endswith("~"):
             searchword = searchword[:-1]
-            choices = generate_choices(searchword)
+            choices = generate_choices(searchword, 2)
             choices = [searchword] + choices
-            print(choices)
+            #pprint(choices)
             regextext = "(" + "|".join(choices) + ")"
         else:
             regextext = searchword
@@ -141,7 +150,19 @@ def _note_item_format(rec, searchtext, min_length=100):
             )  # asterisk means word characters only, ? indicate non-greedy search
 
         regex = fr"\W({regextext})\W"
+        regexes.append(regex)
+    return regexes
 
+def _note_item_format(rec, regexes, min_length=100):
+    """ Display an excerpt from Note.text that is at least this long
+    """
+    import re
+    note = rec.get("note")
+    # id = note.get('id')
+    text = note.get("text")
+    labels = rec.get("labels")
+    startpos = -1
+    for wordnum,regex in enumerate(regexes):
         m = re.search(
             regex, f" {text.lower()} "
         )  # add delimiters to start and end (will match \W)
@@ -183,7 +204,7 @@ def _note_item_format(rec, searchtext, min_length=100):
             break  # found a match
         else:
             excerpt = text[0:min_length]
-            if wordnum < len(searchwords) - 1:
+            if wordnum < len(regexes) - 1:
                 continue  # try again except for last word
     referrers = rec.get("referrers")
     score = rec.get("score")
@@ -203,25 +224,25 @@ def _note_search(args):
     print(args)
     u_context = UserContext()
     u_context.count = request.args.get("c", 100, type=int)
-
+    searchtext = args["key"].lower()
+    displaylist = []
+    regexes = _note_generate_regexes(searchtext)
     try:
         with NoteReader("read_tx", u_context) as service:
             res = service.note_search(args)
-
-        searchtext = args["key"].lower()
-        items = res["items"]
-        displaylist = []
-        for item in items:
-            # print("item", item)
-            # note = item[0]
-            # x = item[1]
-            displaylist.append(_note_item_format(item, searchtext))
+            for item in res["items"]:
+                # print("item", item)
+                # note = item[0]
+                # x = item[1]
+                displaylist.append(_note_item_format(item, regexes))
 
         # from pprint import  pprint
         # pprint(displaylist[0:5])
     except Exception as e:
-        displaylist = []
+        traceback.print_exc()
         flash(str(e))
+        stk_logger(u_context, f"-> bp.scene.routes._note_search FAILED")
+
     return render_template(
         "/scene/persons_search.html",
         menuno=0,
@@ -258,7 +279,6 @@ def _do_get_persons(u_context, args):
     #     Search by name & years
     #         POST   /search rule=<rule>,key=<str>,years=<y1-y2> --> args={pg:search,rule:ref,key:str,years:y1_y2}
     """
-    #u_context = args["u_context"]
     if args.get("pg") == "search":
         # No scope
         # u_context.set_scope_from_request()
@@ -270,10 +290,10 @@ def _do_get_persons(u_context, args):
                 # "u_context": u_context,
             }
     else:  # pg:'all'
-        #u_context.set_scope_from_request("person_scope")
+        # u_context.set_scope_from_request("person_scope")
         args["rule"] = "all"
     # request_args = UserContext.get_request_args()
-    u_context.set_scope("person_scope")
+    u_context.set_scope_from_request("person_scope")
     u_context.count = int(u_context.get("c", 100))
 
     with PersonReaderTx("read_tx", u_context) as service:
@@ -333,7 +353,7 @@ def show_persons():
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_person_search():   #(set_scope=None, batch_id=None):
+def show_person_search():  # (set_scope=None, batch_id=None):
     """
     Start material browsing with Persons search page.
 
@@ -341,22 +361,25 @@ def show_person_search():   #(set_scope=None, batch_id=None):
     """
     t0 = time.time()
     try:
-        
+
         # 1. User and data context from session and current_user
         u_context = UserContext()
         run_args = {"pg": "search"}
         rule = u_context.get("rule", "init")
         run_args["rule"] = rule
         key = u_context.get("key", "")
-        if key: run_args["key"] = key
+        if key:
+            run_args["key"] = key
 
         # Breed from routes.material_select:
-        new_breed = session.pop("breed", "")    # Remove from session
+        new_breed = session.pop("breed", "")  # Remove from session
         if new_breed:
             # Select another material (batch or common data)
             u_context.breed = new_breed
             # ['batch', 'Candidate', 'Family Tree', '2021-10-20.004']
-            _current_context, new_state, new_material, new_batch_id = u_context.material.get_tuple()
+            _current_context, new_state, new_material, new_batch_id = (
+                u_context.material.get_current()
+            )
             run_args["set_scope"] = True
             run_args["state"] = new_state
             run_args["material"] = new_material
@@ -364,24 +387,24 @@ def show_person_search():   #(set_scope=None, batch_id=None):
 
         logger.debug(
             "#(1)bp.scene.routes.show_person_search: "
-            f"{request.method} {u_context.material.get_request_args()} => "
+            f"{request.method} {u_context.material.get_request_args(session, request)} => "
             f'({session["current_context"]!r}, {session["state"]!r}, '
             f'{session["material_type"]!r}, {session["batch_id"]!r})'
         )
 
-        #------ Free text search by Note texts
+        # ------ Free text search by Note texts
         if rule == "notetext":
             return _note_search(run_args)
 
-        #------ Person search by names or years
+        # ------ Person search by names or years
         # 'person_scope': ('Manninen#Matti#', '> end') from request
         new_args = u_context.set_scope_from_request("person_scope")
         run_args.update(new_args)
-        
+
         res = _do_get_persons(u_context, run_args)
         logger.info(
             f"#(2)bp.scene.routes.show_person_search: "
-            f"{ u_context.material.get_tuple() } Persons with {run_args} "
+            f"{ u_context.material.get_current() } Persons with {run_args} "
         )
         if Status.has_failed(res, strict=False):
             flash(f'{res.get("statustext","error")}', "error")
@@ -416,8 +439,9 @@ def show_person_search():   #(set_scope=None, batch_id=None):
                 # {name, count, uuid}
                 for i, stat in enumerate(surnamestats):
                     stat["order"] = i
-                    stat["fontsize"] = \
-                        maxfont - i * (maxfont - minfont) / len( surnamestats)
+                    stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(
+                        surnamestats
+                    )
                 surnamestats.sort(key=itemgetter("surname"))
 
             # Most common place names cloud
@@ -746,7 +770,7 @@ def json_get_event():
     """Get Event page data."""
     t0 = time.time()
     u_context = UserContext()
-    args = Material.get_request_args()
+    args = Material.get_request_args(session, request)
     try:
         if args:
             print(f"got request args: {args}")

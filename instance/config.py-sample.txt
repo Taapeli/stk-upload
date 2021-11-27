@@ -50,4 +50,5 @@ MAX_CONTENT_LENGTH = 30 * 1024 * 1024 # = 30MB    # change also LimitRequestBody
 LIBSVM_FOLDER = "/var/www/webroot/libsvm-3.23"
 DEMO_URL = "https://demo.isotammi.net"
 
+SCRIPTING_TOOL_ENABLED = False
 

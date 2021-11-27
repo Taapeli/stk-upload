@@ -41,7 +41,7 @@ from models.util import format_ms_timestamp
 from bl.admin.models.cypher_adm import Cypher_adm
 from bl.base import Status, NodeObject
 from pe.dataservice import DataService
-from pe.neo4j.cypher.cy_batch_audit import CypherRoot, CypherAudit
+from pe.neo4j.cypher.cy_root import CypherRoot, CypherAudit
 from pe.neo4j.util import run_cypher
 
 DEFAULT_MATERIAL = "Family Tree"
@@ -108,7 +108,7 @@ class Root(NodeObject):
         self.user = userid
         self.file = None
         self.id = ""  # batch_id
-        self.material = DEFAULT_MATERIAL      # Material type "Family Tree" or other
+        self.material_type = DEFAULT_MATERIAL      # Material type "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
         self.timestamp = 0 # Milliseconds; Convert to string by 
@@ -118,7 +118,7 @@ class Root(NodeObject):
         self.logname = ""
 
     def __str__(self):
-        return f"Root {self.user} / {self.id} {self.material}({self.state})"
+        return f"Root {self.user} / {self.id} {self.material_type}({self.state})"
 
     def for_auditor(self):
         """ Is relevant for auditor? """
@@ -130,12 +130,19 @@ class Root(NodeObject):
             return True
         return False
 
+    def filename(self):
+        """ Get filenname of Root.file. """
+        try:
+            return os.path.split(self.file)[1]
+        except Exception:
+            return ""
+        
     def save(self, dataservice):
         """Create or update Root node.
 
         Returns {'id':self.id, 'status':Status.OK}
         """
-        # print(f"Batch.save with {self.dataservice.__class__.__name__}")
+        # Root node variables
         attr = {
             "id": self.id,
             "user": self.user,
@@ -144,7 +151,7 @@ class Root(NodeObject):
             # timestamp": <to be set in cypher>,
             # id: <uniq_id from result>,
             "state": self.state,
-            "material": self.material,
+            "material": self.material_type,
             "description": self.description,
             "xmlname": self.xmlname,
             "metaname": self.metaname,
@@ -172,7 +179,7 @@ class Root(NodeObject):
         obj.timestamp = node.get("timestamp", 0)
         obj.upload = format_ms_timestamp(obj.timestamp)
         #obj.auditor = node.get("auditor", None)
-        obj.material = node.get("material", DEFAULT_MATERIAL)
+        obj.material_type = node.get("material", DEFAULT_MATERIAL)
         obj.description = node.get("description", "")
         obj.xmlname = node.get("xmlname", "")
         obj.metaname = node.get("metaname", "")
@@ -262,17 +269,53 @@ class Root(NodeObject):
         for rec in result:
             yield dict(rec.get("b"))
 
+    # @staticmethod
+    # def get_batch_pallette(username):
+    #     """ Get my batches and batch collections.
+    #  -- Ei toimi näin, hyväksyttyjä materiaaleja ei voi palauttaa Root-solmuina
+    #
+    #         my_batches      batches loaded by username
+    #         collections     sets of accepted batches by material type
+    #     """
+    #     batches = []
+    #     commons = []
+    #     result = shareds.driver.session().run(CypherRoot.get_root_pallette, 
+    #                                           user=username)
+    #     for record in result:
+    #         # Record: <Record  user='juha' material_type='Place Data' 
+    #         #    state='Candidate' batch_id='2021-11-14.005' 
+    #         #    description='Käkisalmi, Catharina Javanaisen esivanhemmat'>
+    #         user = record.get("user")
+    #         root = Root.from_node(record.get("root"))
+    #         if user:
+    #             print(f"#Root.get_batch_pallette: batch {root}")
+    #             batches.append(root)
+    #         else:
+    #             print(f"#Root.get_batch_pallette: common {root}")
+    #             commons.append(root)
+    #
+    #     return batches, commons
+
     @staticmethod
     def get_my_batches(username):
+        """ Returns user's batches, which are in Candidate state. """
         with shareds.driver.session() as session:
             result = run_cypher(session, CypherRoot.get_my_batches, username)
             for rec in result:
-                #print(rec.get("root"))
-                values = dict(rec.get("root"))
-                fname = values["file"]
-                filename = os.path.split(fname)[1]
-                values["filename"] = filename
-                yield values
+                root = Root.from_node(rec["root"])
+                print(f"#get_my_batches: {root}")
+                yield root
+
+    @staticmethod
+    def get_materials_accepted():
+        """ Returns list of accepted material_types. """
+        with shareds.driver.session() as session:
+            result = session.run(CypherRoot.get_materials_accepted)
+            for rec in result:
+                # Record: <Record root.material='Family Tree' count(*)=6>
+                m_type = rec.get("material_type")
+                print(f"#get_batches_accepted: {m_type} ({rec.get('nodes')} nodes)")
+                yield m_type
 
     @staticmethod
     def get_user_stats(user):
@@ -327,8 +370,7 @@ class Root(NodeObject):
             audited = approved.get(batch_id)
             if audited:
                 user_data[key]["Audit"] = audited
-
-        print(f"bl.root.Root.get_user_stats: user_data[{key}] {user_data[key]}")
+            #print(f"bl.root.Root.get_user_stats: user_data[{key}] {user_data[key]}")
 
         return sorted(titles), user_data
 

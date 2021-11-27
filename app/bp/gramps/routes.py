@@ -16,6 +16,8 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from types import SimpleNamespace
+from ui.context import UserContext
 
 """
     Gramps xml file upload
@@ -34,6 +36,7 @@ logger = logging.getLogger("stkserver")
 
 from flask import (
     render_template,
+    session,
     request,
     redirect,
     url_for,
@@ -106,8 +109,8 @@ def upload_gramps():
     """
     try:
         infile = request.files["filenm"]
-        material = request.form["material"]
-        # logger.debug("Got a {} file '{}'".format(material, infile.filename))
+        material_type = request.form["material"]
+        # logger.debug("Got a {} file '{}'".format(material_type, infile.filename))
 
         t0 = time.time()
         with BatchUpdater("update") as batch_service:
@@ -141,7 +144,7 @@ def upload_gramps():
             open(batch.logname, "w", encoding="utf-8").write(msg)
             syslog.log(type="gramps file uploaded", file=infile.filename, batch=batch.id)
             logger.info(
-                f'-> bp.gramps.routes.upload_gramps/{material} f="{infile.filename}"'
+                f'-> bp.gramps.routes.upload_gramps/{material_type} f="{infile.filename}"'
                 f" e={shareds.tdiff:.3f}sek"
             )
 
@@ -181,24 +184,32 @@ def xml_analyze(xmlfile):
     )
 
 
-@bp.route("/gramps/gramps_analyze/<xmlfile>")
+@bp.route("/gramps/gramps_analyze/<batch_id>")
 @login_required
 @roles_accepted("research", "admin", "audit")
-def gramps_analyze(xmlfile):
-    logger.info(f'bp.gramps.routes.gramps_analyze f="{os.path.basename(xmlfile)}"')
-    return render_template("/gramps/gramps_analyze.html", file=xmlfile)
+def gramps_analyze(batch_id):
+    batch = Root.get_batch(current_user.username, batch_id)
+    logger.info(f'bp.gramps.routes.gramps_analyze b="{batch_id}"')
+    base, ext = os.path.splitext(batch.xmlname)
+    newfile = base + "_checked" + ext
+    
+    return render_template("/gramps/gramps_analyze.html", batch_id=batch_id, file=batch.xmlname, newfile=newfile)
 
 
-@bp.route("/gramps/gramps_analyze_json/<xmlfile>")
+@bp.route("/gramps/gramps_analyze_json/<batch_id>/<newfile>")
 @login_required
 @roles_accepted("research", "admin", "audit")
-def gramps_analyze_json(xmlfile):
+def gramps_analyze_json(batch_id, newfile):
+    batch = Root.get_batch(current_user.username, batch_id)
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
+    print("gramps_runner",gramps_runner)
     if gramps_runner:
-        msgs = gramps_utils.gramps_verify(gramps_runner, current_user.username, xmlfile)
+        lang = session.get("lang","")
+        print("lang",lang)
+        msgs = gramps_utils.gramps_verify(gramps_runner, lang, current_user.username, batch_id, batch.xmlname, newfile)
     else:
         msgs = {}
-    logger.info(f'bp.gramps.routes.gramps_analyze_json f="{os.path.basename(xmlfile)}"')
+    logger.info(f'bp.gramps.routes.gramps_analyze_json f="{os.path.basename(batch.xmlname)}"')
     return jsonify(msgs)
 
 
@@ -246,6 +257,30 @@ def gramps_batch_download(batch_id):
             flash(msg)
             return redirect(url_for("gramps.list_uploads"))
             
+@bp.route("/gramps/download_checked_file/<batch_id>")
+@login_required
+@roles_accepted("research", "admin")
+def download_checked_file(batch_id):
+    batch = Root.get_batch(current_user.username, batch_id)
+    if batch:
+        xml_folder, xname = os.path.split(batch.file)
+        if batch.xmlname:
+            xname = batch.xmlname
+        base,ext = os.path.splitext(xname)
+        xname = base + "_checked" + ext
+        xml_folder = os.path.abspath(xml_folder)
+        try:
+            return send_from_directory(xml_folder, xname,
+                mimetype="application/gzip",
+                as_attachment=True,
+                cache_timeout=0,  # change to max_age in Flask 2.x
+            )
+        except Exception as e:
+            traceback.print_exc()
+            print(f"bp.gramps.routes.gramps_batch_download: {e}")
+            msg = _("The file \"%(n)s\" does not exist", n=xname)
+            flash(msg)
+            return redirect(url_for("gramps.list_uploads"))
 
 @bp.route("/gramps/show_upload_log/<batch_id>")
 @login_required
@@ -426,6 +461,7 @@ def get_commands(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def batch_details(batch_id):
+    user_context = UserContext()
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
@@ -445,6 +481,7 @@ def batch_details(batch_id):
         "/gramps/details.html",
        #batch_id=batch_id, 
        batch=batch,
+       user_context=user_context,
        object_stats=sorted(object_stats),
        event_stats=sorted(event_stats),
     )
@@ -471,3 +508,41 @@ def batch_update_description():
 
     #return description
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
+
+# =================== experimental scripting tool ======================
+
+@bp.route("/scripting/<batch_id>", methods=["get"])
+@bp.route("/scripting", methods=["post"])
+@login_required
+@roles_accepted("audit")
+def scripting(batch_id=None):
+    from pprint import pprint
+    enabled = shareds.app.config.get("SCRIPTING_TOOL_ENABLED")
+    if enabled is not True:
+        raise RuntimeError(_("Scripting tool is not enabled"))
+    if request.method == "POST":
+        batch_id = request.form.get("batch_id")
+    with BatchReader("update") as batch_service:
+        res = batch_service.batch_get_one(current_user.username, batch_id)
+        if Status.has_failed(res):
+            raise RuntimeError(_("Failed to retrieve batch"))
+ 
+        batch = res['item']
+    if request.method == "POST":
+        #pprint(request.form)
+        from bl.scripting.scripting_tool import Executor
+        executor = Executor(batch_id)
+        return executor.execute(SimpleNamespace(**request.form))
+    else:
+        return render_template(
+            "/gramps/scripting.html",
+           batch=batch,
+    )
+
+@bp.route("/scripting_attrs", methods=["post"])
+@login_required
+@roles_accepted("audit")
+def scripting_attrs(batch_id=None):
+    from bl.scripting.scripting_tool import get_attrs
+    attrs = get_attrs(request.form.get("scope"))
+    return ",".join(attrs)

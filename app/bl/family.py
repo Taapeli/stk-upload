@@ -142,6 +142,7 @@ class FamilyBl(Family):
             # raise RuntimeError(f"bl.family.FamilyBl.save needs batch_id for {self.id}")
 
         self.uuid = self.newUuid()
+        #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "F")
         f_attr = {
             "uuid": self.uuid,
             "handle": self.handle,

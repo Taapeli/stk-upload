@@ -10,11 +10,15 @@
 h2 {margin-bottom: 0;}
 div.startbox { height: 280px; }
 div.startbox > table { width: 280px; }
-td,th {
+tbody {
     background: whitesmoke;
 }
 td {
     position: relative;
+}
+#description { 
+    width: 266px;
+    height: 5em;
 }
 .visible { display: inline; }
 .hidden { display:none; }
@@ -41,19 +45,23 @@ td {
 	</tr>
 	<tr>
 		<th>{{ _("Material") }}</th>
-		<td class="typedesc">{{ _(batch.material) }}</td>
+		<td class="typedesc">{{ _(batch.material_type) }}</td>
 	</tr>
 	<tr>
-		<th>{{ _("Description") }}</th>
-		<td>
+		<th colspan="2">{{ _("Description") }}<br>
 			<form>
 			<input type="hidden" name="batch_id" value="{{ batch.id }}">
 			<textarea id="description" name="description">{{ batch.description }}</textarea>
 			<button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
 			</form>
+        </th>
 	</tr>
    	</table>
-   
+   	<p>
+{% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
+   	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
+{% endif %}   
+
 </div>
 
 <div class="startbox">
