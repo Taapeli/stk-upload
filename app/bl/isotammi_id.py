@@ -10,14 +10,14 @@ class IsotammiId(object):
     '''
 
 
-    def __init__(self, db_session, obj_name: str, count: int = 1):
+    def __init__(self, obj_name: str, count: int = 1):
         '''
         Define an id generator for objects named obj_name.
         '''
         first_id = "Todo"
         return first_id
 
-    def next_id(self):
+    def next_id(self, tx):
         ''' Gives next isotammi_id value from reserved pool.
             Returns None, if pool is empty.
             - Or fethes next key from db?
