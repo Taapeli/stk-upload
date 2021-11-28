@@ -119,10 +119,17 @@ class DOM_handler:
         #         self.batch = None                   # Batch node to be created
         #         self.mediapath = None               # Directory for media files
         self.file = os.path.basename(pathname)  # for messages
-        self.progress = defaultdict(
-            int
-        )  # key=object type, value=count of objects processed
+        self.progress = defaultdict(int)
         self.obj_counter = 0
+
+    def run_tx(self, func):
+        """ Restart transaction and run given function. """
+        self.dataservice.tx.commit()
+        self.dataservice.tx = shareds.driver.session().begin_transaction()
+        logger.debug(f'#~~~{func.__name__} tx restart')
+        # Run the function
+        func()
+
 
     def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
@@ -153,7 +160,7 @@ class DOM_handler:
         obj.save(self.dataservice, **kwargs)
         self.obj_counter += 1 
         if self.obj_counter % 1000 == 0:
-            #print(self.obj_counter, "Transaction restart")
+            print(self.obj_counter, "Transaction restart")
             self.dataservice.tx.commit()
             self.dataservice.tx = shareds.driver.session().begin_transaction()
 
@@ -937,7 +944,7 @@ class DOM_handler:
 
         self.blog.log_event(
             {"title": _("Repositories"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
+        )
         return {"status": status, "message": message}
 
     def handle_sources(self):
