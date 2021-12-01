@@ -180,25 +180,27 @@ class Note(NodeObject):
         if self.handle:
             n_attr["handle"] = self.handle
         if not parent_id is None:
-            #print(f"Note.save: (Root {batch_id}) --> (Note {self.id}) <-- (parent {parent_id})")
-            self.uniq_id = dataservice.tx.run(
+            # print(f"Note.save: (Root {batch_id}) --> (Note {self.id}) <-- (parent {parent_id})")
+            result = dataservice.tx.run(
                 CypherNote.create_in_batch_as_leaf,
                 bid=batch_id,
                 parent_id=parent_id,
                 n_attr=n_attr,
-            ).single()[0]
+            )
         elif not batch_id is None:
-            #print(f"Note.save: (Root {batch_id}) --> (Note {self.id})")
-            self.uniq_id = dataservice.tx.run(
+            # print(f"Note.save: (Root {batch_id}) --> (Note {self.id})")
+            result = dataservice.tx.run(
                 CypherNote.create_in_batch, 
                 bid=batch_id, 
                 n_attr=n_attr
-            ).single()[0]
+            )
         else:
             raise RuntimeError(
                 f"Note.save needs batch_id or parent_id for {self.id}"
             )
-
+        record = result.single()
+        # print(f"Note.save: summary={result.summary().counters}")
+        self.uniq_id = record[0]
 
 class NoteReader(DataService):
     """
