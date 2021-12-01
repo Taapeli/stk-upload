@@ -681,48 +681,12 @@ class BatchUpdater(DataService):
         """ Commit transaction. """
         self.dataservice.ds_rollback()
 
-    # def restart_tx(self):   # Ei toimi ainakaan tässä!
-    #     """ Start a new transaction. """
-    #     if self.dataservice.tx:
-    #         self.dataservice.tx.commit()
-    #         self.dataservice.tx = shareds.driver.session().begin_transaction()
-    #         logger.debug(f'#~~~{self.idstr} restart "{self.service_name}"') # tx={obj_addr(self.dataservice.tx)}')
-
     def media_create_and_link_by_handles(self, uniq_id, media_refs):
         """Save media object and it's Note and Citation references
         using their Gramps handles.
         """
         if media_refs:
             self.dataservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
-
-
-# class DataServiceBase: # use --> pe.dataservice.DataService ?
-#     def __enter__(self):
-#         self.idstr = f"{self.__class__.__name__}>DataServiceBase"
-#         self.dataservice.tx = shareds.driver.session().begin_transaction()
-#         logger.debug(f'#~~~{self.idstr} init tx={id(self.dataservice.tx)}')
-#         return self
-#
-#     def __exit__(self, exc_type=None, exc_value=None, traceback=None):
-#         """Exit the runtime context related to this object.
-#
-#         The parameters describe the exception that caused the context to be
-#         exited. If the context was exited without an exception, all three
-#         arguments will be None.
-#         """
-#         #print(f"--{self.idstr} exit tx={obj_addr(self.dataservice.tx)} prev {obj_addr(self.old_tx)}")
-#         if self.dataservice.tx:
-#             if exc_type:
-#                 print(f"--{self.idstr} exit rollback {exc_type}")
-#                 self.dataservice.tx.rollback()
-#             else:
-#                 logger.debug(f'#~~~{self.idstr} exit commit tx={id(self.dataservice.tx)}')
-#                 try:
-#                     self.dataservice.tx.commit()
-#                 except Exception as e:
-#                     logger.debug(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
-#         else:
-#             logger.debug(f'#~~~{self.idstr} exit {id(self.old_tx)}')
 
 
 class BatchReader(DataService):

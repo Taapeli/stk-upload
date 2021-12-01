@@ -488,7 +488,9 @@ class PersonReaderTx(DataService):
                                 "Citation, Note or Media excepted, got {label}"
                             )
 
-            # print(f'#+ - found {len(citations)} Citations, {len(notes)} Notes, {len(medias)} Medias from {cnt} nodes')
+            print(f'#+ - found {len(citations)} Citations, {len(notes)} Notes, {len(medias)} Medias from {len(new_ids)} nodes')
+            # for uniq_id, note in notes.items():
+            #     print(f'#+ - {uniq_id}: {note}')
             all_citations.update(citations)
             self.obj_catalog.update(citations)
             self.obj_catalog.update(notes)
@@ -561,8 +563,7 @@ class PersonReaderTx(DataService):
         """
 
         def unquote(s):
-            """Change quites (") to fancy quotes (“)
-            Change new lines to '¤' symbol
+            """Change quotes (") to fancy quotes (“), change new lines to '¤' symbol.
             """
             return s.replace('"', "“").replace("\n", "¤")
 

@@ -366,6 +366,7 @@ def get_progress(batch_id):
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
+            print(f"bp.gramps.routes.get_progress: error {res.get('statustext')}")
             rsp = {
                 "status": 'Failed',
                 "progress": 0,
@@ -375,6 +376,7 @@ def get_progress(batch_id):
  
         batch = res['item']
         if not batch.metaname:
+            print(f"bp.gramps.routes.get_progress: no metaname")
             rsp = {
                 "status": 'Failed',
                 "progress": 0,
@@ -389,10 +391,12 @@ def get_progress(batch_id):
     
         counts = meta.get("counts")
         if counts is None:
+            print(f"bp.gramps.routes.get_progress: no counts")
             return jsonify({"status": status, "progress": 0})
     
         progress = meta.get("progress")
         if progress is None:
+            print(f"bp.gramps.routes.get_progress: no progress")
             return jsonify({"status": status, "progress": 0})
     
         total = 0
@@ -422,6 +426,7 @@ def get_progress(batch_id):
             "progress": 99 * done // total if total else 50,
             "batch_id": meta.get("batch_id"),
         }
+        print(f"bp.gramps.routes.get_progress: {rsp}")
         return jsonify(rsp)
 
 @bp.route("/gramps/commands/<batch_id>")

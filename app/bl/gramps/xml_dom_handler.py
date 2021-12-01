@@ -122,13 +122,13 @@ class DOM_handler:
         self.progress = defaultdict(int)
         self.obj_counter = 0
 
-    def run_tx(self, func):
-        """ Restart transaction and run given function. """
-        self.dataservice.tx.commit()
-        self.dataservice.tx = shareds.driver.session().begin_transaction()
-        logger.debug(f'#~~~{func.__name__} tx restart')
-        # Run the function
-        func()
+    # def run_tx(self, func):
+    #     """ Restart transaction and run given function. """
+    #     self.dataservice.tx.commit()
+    #     self.dataservice.tx = shareds.driver.session().begin_transaction()
+    #     logger.debug(f'#~~~{func.__name__} tx restart')
+    #     # Run the function
+    #     func()
 
 
     def remove_handles(self):
@@ -232,13 +232,6 @@ class DOM_handler:
                 c.dates = self._extract_daterange(citation)
             except:
                 c.dates = None
-            #             if len(citation.getElementsByTagName('dateval') ) == 1:
-            #                 citation_dateval = citation.getElementsByTagName('dateval')[0]
-            #                 if citation_dateval.hasAttribute("val"):
-            #                     c.dateval = citation_dateval.getAttribute("val")
-            #             elif len(citation.getElementsByTagName('dateval') ) > 1:
-            #                 self.blog.log_event({'title':"More than one dateval tag in a citation",
-            #                                      'level':"WARNING", 'count':c.id})
 
             if len(citation.getElementsByTagName("page")) == 1:
                 citation_page = citation.getElementsByTagName("page")[0]
