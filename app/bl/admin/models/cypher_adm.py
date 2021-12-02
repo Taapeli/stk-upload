@@ -163,3 +163,8 @@ match (p:Person) --> (n:Name)
 with p,collect(n.firstname + " " + n.suffix + " " + n.surname) as names
 set p.searchattr = reduce(s="", n in names | s + " " + n) 
     """
+    build_indexes_for_batch = """
+match (r:Root{id:$batch_id}) --> (p:Person) --> (n:Name) 
+with p,collect(n.firstname + " " + n.suffix + " " + n.surname) as names
+set p.searchattr = reduce(s="", n in names | s + " " + n) 
+    """    

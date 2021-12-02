@@ -357,7 +357,7 @@ def xml_to_stkbase(batch: Root):
 
         # print("build_free_text_search_indexes")
         t1 = time.time()
-        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx)
+        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
         handler.blog.log_event(
             {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
         )
