@@ -8,8 +8,8 @@ from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
 logger = logging.getLogger('stkserver')
 
-from .cypher_place import CypherPlace
-from .cypher_gramps import CypherObjectWHandle
+from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.neo4j.cypher.cy_gramps import CypherObjectWHandle
 
 
 class Neo4jWriteDriver(object):

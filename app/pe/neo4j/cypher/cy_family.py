@@ -123,24 +123,24 @@ MERGE (b) -[r:OBJ_FAMILY]-> (f:Family {handle: $f_attr.handle})
 RETURN ID(f) as uniq_id"""
 
     link_parent = """
-MATCH (n:Family) WHERE n.handle=$f_handle
-MATCH (m:Person) WHERE m.handle=$p_handle
+MATCH (n:Family {handle:$f_handle})
+MATCH (m:Person {handle:$p_handle})
 MERGE (n) -[r:PARENT {role:$role}]-> (m)"""
 
     link_event = """
-MATCH (n:Family) WHERE n.handle=$f_handle
-MATCH (m:Event)  WHERE m.handle=$e_handle
+MATCH (n:Family {handle:$f_handle})
+MATCH (m:Event {handle:$e_handle})
 MERGE (n)-[r:EVENT]->(m)
     SET r.role = $role"""
 
     link_child = """
-MATCH (n:Family) WHERE n.handle=$f_handle
-MATCH (m:Person) WHERE m.handle=$p_handle
+MATCH (n:Family {handle:$f_handle})
+MATCH (m:Person {handle:$p_handle})
 MERGE (n)-[r:CHILD]->(m)"""
 
     link_note = """
-MATCH (n:Family) WHERE n.handle=$f_handle
-MATCH (m:Note)   WHERE m.handle=$n_handle
+MATCH (n:Family {handle:$f_handle})
+MATCH (m:Note {handle:$n_handle})
 CREATE (n)-[r:NOTE]->(m)"""
 
 #     link_citation = # --> CypherObject.link_citation
