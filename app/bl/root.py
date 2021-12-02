@@ -710,6 +710,7 @@ class BatchReader(DataService):
         try:
             ret = self.dataservice.ds_get_batch(user, batch_id)
             # returns {"status":Status.OK, "node":record}
+            # print(f"bl.root.BatchReader.batch_get_one: return {ret}")
             node = ret['node']
             batch = Root.from_node(node)
             return {"status":Status.OK, "item":batch}
