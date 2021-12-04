@@ -188,7 +188,7 @@ DETACH DELETE c"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_obj_remove_gramps_handles
     remove_all_handles = """
-match (b:Root {id:$batch_id}) -[*2..3]-> (a)
+match (b:Root {id:$batch_id}) -[*1..3]-> (a)
 where a.handle is not null
 with distinct a
     remove a.handle

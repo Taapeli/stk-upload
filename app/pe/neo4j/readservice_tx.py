@@ -464,7 +464,7 @@ class Neo4jReadServiceTx(ConcreteService):
             for record in results:
                 # Returns 
                 #    - src      source node
-                #    - r        relation: CITATION|NOTE|MEDIA
+                #    - r        relation CITATION|NOTE|MEDIA properties
                 #    - target   target object Citation|Note|Media
 
                 # Create a reference to target object including node, order and crop

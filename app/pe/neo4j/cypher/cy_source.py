@@ -106,8 +106,8 @@ MERGE (b) -[r:OBJ_SOURCE]-> (s:Source {handle: $s_attr.handle})
 RETURN ID(s) as uniq_id"""
 
     link_note = """
-MATCH (n:Source) WHERE n.handle=$handle
-MATCH (m:Note)   WHERE m.handle=$hlink
+MATCH (n:Source {handle:$handle})
+MATCH (m:Note {handle:$hlink})
 CREATE (n) -[r:NOTE]-> (m)"""
 
     link_repository = """

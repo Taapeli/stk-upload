@@ -33,12 +33,12 @@ MERGE (b) -[r:OBJ_OTHER]-> (c:Citation {handle: $c_attr.handle})
 RETURN ID(c) as uniq_id"""
 
     link_source = """
-MERGE (n:Citation {handle: $handle})
-MERGE (m:Source   {handle: $hlink})
+MATCH (n:Citation {handle: $handle})
+MATCH (m:Source   {handle: $hlink})
 MERGE (n) -[r:SOURCE]-> (m)"""
 
     # Create Note node and link (Citation) --> (Note)
     link_note = """
-MERGE (n:Citation {handle: $handle})
-MERGE (m:Note     {handle: $hlink})
+MATCH (n:Citation {handle: $handle})
+MATCH (m:Note     {handle: $hlink})
 CREATE (n) -[r:NOTE]-> (m)"""

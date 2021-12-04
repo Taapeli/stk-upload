@@ -200,9 +200,9 @@ MATCH (m:Media  {handle: $m_handle})
 # MERGE (p)-[r:CITATION]->(c)"""
 
     link_note = """
-MATCH (n) WHERE n.handle=$p_handle
-MATCH (m:Note)   WHERE m.handle=$n_handle
-CREATE (n)-[r:NOTE]->(m)"""
+MATCH (n {handle:$p_handle})
+MATCH (m:Note {handle:$n_handle})
+CREATE (n) -[r:NOTE]-> (m)"""
 
 # ----- Other -----
 

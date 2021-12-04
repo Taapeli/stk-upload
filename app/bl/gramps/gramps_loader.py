@@ -333,15 +333,14 @@ def xml_to_stkbase(batch: Root):
         if is_gpkg:
             extract_media(batch.file, batch.id)
 
+        res = handler.handle_notes()
         res = handler.handle_repositories()
         res = handler.handle_sources()
         res = handler.handle_citations()
-
-        res = handler.handle_notes()
         res = handler.handle_media()
-        res = handler.handle_places()
+        res = handler.handle_places() # With Place_names
         res = handler.handle_events()
-        res = handler.handle_people()
+        res = handler.handle_people() # With Names
         res = handler.handle_families()
 
         #       for k in handler.handle_to_node.keys():
@@ -358,15 +357,15 @@ def xml_to_stkbase(batch: Root):
 
         # print("build_free_text_search_indexes")
         t1 = time.time()
-        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx)
+        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
         handler.blog.log_event(
             {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
         )
         # print("build_free_text_search_indexes done")
             
         res = handler.remove_handles()
-            # The missing links counted in remove_handles
-        ##TODO      res = handler.add_missing_links()
+        # The missing links counted in remove_handles?
+        ##TODO      res = handler.add_missing_links()?
 
         res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
         #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
