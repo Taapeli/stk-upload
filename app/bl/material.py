@@ -78,6 +78,15 @@ class Material():
         except Exception as e:
             return "Error: " + str(e)
 
+    def get_current(self):
+        """Return current material tuple [breed, state, material_type, batch_id].
+        """
+        return [
+            self.breed,     # "batch" / "common"
+            self.state,     # Root.state "Candidate", ... "Accepted"
+            self.m_type,    # "Family Tree", ...
+            self.batch_id   # Root.batch_id
+        ]
 
     #----- Static methods
     
@@ -85,6 +94,8 @@ class Material():
     def set_session_material(session, request, breed, username):
         """
         Save material selection from request to session.
+
+        When the material is changed, also reset the context scope.
 
         1.1 The material is single batch (breed="batch")
             From /gramps/commands/2021-10-09.001 HTTP/1.1
@@ -100,10 +111,29 @@ class Material():
             From /start/logged HTTP/1.1
             --> "GET /scene/material/common?material_type=Family+Tree HTTP/1.1" 200 -
         """
+        def reset_scope(session, params):
+            """ Check, if any of session [state, material_type, batch_id] is changed """
+            if (
+                params[0] != session["state"] or \
+                params[1] != session["material_type"] or \
+                params[2] != session["batch_id"]
+                ):
+                print ("#Material.set_session_material: RESET scope!")
+                print(f'**     from {params}\n'
+                      f'** to batch {[session["state"], session["material_type"], session["batch_id"]]}')
+                for scope in [a for a in session.keys() if a.endswith("_scope")]:
+                    print(f" - Cleared: {scope}")
+                    session.pop(scope)
+            else:
+                print ("#Material.set_session_material: No scope change")
+            return
+
         args = Material.get_request_args(session, request)
         print(f"#Material.set_session_material/{request.endpoint}: request {args}")
+        old_params = [session.get("state"), session.get("material_type"), session.get("batch_id")]
+
         session["breed"] = breed
-        session["set_scope"] = True  # Reset material and scope
+        #session["set_scope"] = True  # Reset material and scope
         session["current_context"] = breed
         # Remove obsolete var:
         if "material" in session:
@@ -127,6 +157,7 @@ class Material():
                 root = Root.get_batch(username, session["batch_id"])
                 session["material_type"] = root.material_type
                 session["state"] = root.state
+            reset_scope(session, old_params)
 
             print(
                 "Material.select_material: The material is single batch "
@@ -141,6 +172,7 @@ class Material():
             session["state"] = args.get("state", State.ROOT_DEFAULT_STATE)
             session["material_type"] = args.get("material_type")
             session["batch_id"] = None
+            reset_scope(session, old_params)
 
             print(
                 "Material.select_material: The material is batch collection "
@@ -164,16 +196,6 @@ class Material():
             "args": args,
         }
 
-    def get_current(self):
-        """Return current material tuple [breed, state, material_type, batch_id].
-        """
-        return [
-            self.breed,     # "batch" / "common"
-            self.state,     # Root.state "Candidate", ... "Accepted"
-            self.m_type,    # "Family Tree", ...
-            self.batch_id   # Root.batch_id
-        ]
-                            #
     @staticmethod
     def get_from_session(session):
         """Return session material properties.
