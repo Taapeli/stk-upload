@@ -28,14 +28,15 @@ from bl.root import State
 # List of functions available for researcher
 
 RESEARCHER_FUNCTIONS = [ # (URL, title)
-    ("/scene/material/batch?batch_id=", "Browse this material"),
-    ("/audit/user/request/",     _("Send for auditing")),
-    ("/audit/user/withdraw/",    _("Withdraw auditing")),
-    ("/gramps/batch_download/",  _("Download the Gramps file")),
-    ("/gramps/show_upload_log/", _("Show upload log")),
-    ("/gramps/gramps_analyze/",  _("Gramps Verify Tool")),
-    ("/gramps/details/",         _("Details")),
-    ("/gramps/batch_delete/",    _("Delete from database")),
+    ("/scene/material/batch?state={state}&batch_id={batch_id}", 
+     "Browse this material"),
+    ("/audit/user/request/{batch_id}",     _("Send for auditing")),
+    ("/audit/user/withdraw/{batch_id}",    _("Withdraw auditing")),
+    ("/gramps/batch_download/{batch_id}",  _("Download the Gramps file")),
+    ("/gramps/show_upload_log/{batch_id}", _("Show upload log")),
+    ("/gramps/gramps_analyze/{batch_id}",  _("Gramps Verify Tool")),
+    ("/gramps/details/{batch_id}",         _("Details")),
+    ("/gramps/batch_delete/{batch_id}",    _("Delete from database")),
     ]
 
 # A boolean vector, which RESEARCHER_FUNCTIONS are allowed for any Root.status

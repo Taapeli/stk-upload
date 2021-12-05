@@ -169,7 +169,7 @@ class UserContext:
             value = session.get(var_name)
         if not value:
             value = default
-        print(f"#Material.get({var_name}) = {value!r}")
+        # print(f"#Material.get({var_name}) = {value!r}")
         return value
 
     def is_common(self):

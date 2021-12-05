@@ -118,9 +118,9 @@ class Material():
                 params[1] != session["material_type"] or \
                 params[2] != session["batch_id"]
                 ):
-                print ("#Material.set_session_material: RESET scope!")
-                print(f'**     from {params}\n'
-                      f'** to batch {[session["state"], session["material_type"], session["batch_id"]]}')
+                print ("#Material.set_session_material.reset_scope:")
+                print(f' - session     from {params}\n'
+                      f' - session to batch {[session["state"], session["material_type"], session["batch_id"]]}')
                 for scope in [a for a in session.keys() if a.endswith("_scope")]:
                     print(f" - Cleared: {scope}")
                     session.pop(scope)
@@ -135,7 +135,7 @@ class Material():
         session["breed"] = breed
         #session["set_scope"] = True  # Reset material and scope
         session["current_context"] = breed
-        # Remove obsolete var:
+        # Remove obsolete var: #TODO Remove after next production version at 2022
         if "material" in session:
             print(f'Removed obsolete session.material={session.pop("material")!r}')
 
