@@ -20,7 +20,7 @@
     User Context for Scene pages has information of 
     - current user,
     - the material concerned
-    - view properties enabling multi page object listing pages.
+    - view properties enabling multiple page object listing pages.
 
 Created on 1.11.2021
 
@@ -31,7 +31,7 @@ from flask import session, request
 from flask_security import current_user
 from urllib.parse import unquote_plus
 
-from bl.root import State
+#from bl.root import State
 from bl.material import Material, MATERIAL_BATCH, MATERIAL_COMMON
 
 
@@ -169,7 +169,7 @@ class UserContext:
             value = session.get(var_name)
         if not value:
             value = default
-        print(f"#Material.get({var_name}) = {value!r}")
+        # print(f"#Material.get({var_name}) = {value!r}")
         return value
 
     def is_common(self):
@@ -179,6 +179,14 @@ class UserContext:
             - False, if current material is limited by batch_id
         """
         return self.material.breed == MATERIAL_COMMON
+
+    def use_case(self):
+        """ Return current use case (owner choice) as code.
+        """
+        if self.material.batch_id:
+            return MATERIAL_BATCH  # Selected candidate or approved batch
+        else:
+            return MATERIAL_COMMON  # Approved data
 
     def batch_user(self):
         """ Return current user id, if my candidate data is chosen. """
@@ -198,15 +206,6 @@ class UserContext:
             except:  # No privacy limit for this kind of object
                 pass
         return True
-
-    def use_case(self):
-        """ Return current use case (owner choice) as code.
-        """
-        if self.material.batch_id:
-            return MATERIAL_BATCH  # Selected candidate or approved batch
-        else:
-            return MATERIAL_COMMON  # Approved data
-        # else self.OWN - Collection of own data not in use
 
     def next_name(self, direction="fw"):
         """ For template pages, tells the next page starting name.
@@ -242,74 +241,6 @@ class UserContext:
         """ For template pages, tells if page contains the first name of data.
         """
         return self.first == "" or self.first.startswith(self.NEXT_START)
-
-    # def set_scope(self, browse_var: str):
-    #     """ Store data context from request for listing page.
-    #
-    #         Define self.material.breed "common"/"batch", if set_scope is given in args. 
-    #         set a new scope: common material or a specific user batch 
-    #
-    #         Optional browse settings from request args:
-    #         - first         Lower limit of display scope for 'browse_var' view
-    #         - last          Higher limit of display scope
-    #         - years         optional time limits like [1800, 1899]
-    #         - series        optional Source data theme like "birth"
-    #         - count         Max count of objects to display
-    #         - allow_edit    User is granted to edit objects
-    #     """
-    #     print(f"#Material.set_scope: {browse_var}")
-    #     # Defaults values
-    #     # self.first = ""
-    #     # self.last = self.NEXT_END
-    #     # self.direction = "fw"  # or "bw"
-    #
-    #     if self.material.request_args:
-    #         # Selected years [from,to] years=1111-2222
-    #         self.years = []
-    #         years = self.material.request_args.get("years", None)
-    #         if years:
-    #             y1, y2 = years.split("-")
-    #             if y1:
-    #                 yi1 = int(y1)
-    #             else:
-    #                 yi1 = 0
-    #             if y2:
-    #                 yi2 = int(y2)
-    #             else:
-    #                 yi2 = 9999
-    #             self.years = [yi1, yi2]
-    #             print(f"#Material.set_scope: Objects between years {self.years}")
-    #
-    #         if self.material.request_args.get("set_scope"):
-    #             session[browse_var] = ("< start", "> end")
-    #         else:
-    #             # If got no request user_context, use session values
-    #             print(
-    #                 "#UserContext: Uses same or default user_context: "
-    #                 f"{self.material.get_current()})"
-    #             )
-    #     else:
-    #         # self.material.request_args = {}
-    #         self.years = []  # example [1800, 1899]
-    #         self.series = None  # 'Source' data theme like "birth"
-    #         self.count = 10000  # Max count ow objects to display
-    #
-    #     #   For logging of scene area pages, set User.breed variable:
-    #     #   are you browsing common, audited data or your own batches?
-    #     if not self.is_common():  # self.user and self.material.batch_id:
-    #         # Data selection by Root.batch_id and username
-    #         self.material.breed = MATERIAL_BATCH  # "batch"
-    #         # May edit data, if user has appropriate role
-    #         self.allow_edit = self.is_auditor
-    #     else:
-    #         # Data selection by Root.state and Root.material_type
-    #         # self.material.breed = MATERIAL_COMMON  # "common"
-    #         self.material.state = State.ROOT_ACCEPTED
-    #     current_user.breed = self.material.breed
-    #
-    #     # State selection, if any
-    #     self.material.state = session.get("state", None)
-    #     return
 
     def display_current_material(self):
         """ Return current material and batch choice for display. """

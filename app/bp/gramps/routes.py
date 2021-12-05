@@ -30,6 +30,7 @@ import time
 import logging
 import traceback
 from types import SimpleNamespace
+from urllib.parse import unquote_plus
 
 logger = logging.getLogger("stkserver")
 
@@ -454,8 +455,9 @@ def get_commands(batch_id):
                     confirm = False
                     if cmd == "/gramps/batch_delete/":
                         confirm = True
-
-                    commands.append( (cmd + batch.id, _(title), confirm) )
+                    # Add parameters
+                    cmd = unquote_plus(cmd.format(state=batch.state, batch_id=batch.id))
+                    commands.append( (cmd, _(title), confirm) )
 
         return render_template("/gramps/commands.html", 
                                batch_id=batch_id, 
@@ -521,7 +523,7 @@ def batch_update_description():
 @login_required
 @roles_accepted("audit")
 def scripting(batch_id=None):
-    from pprint import pprint
+    #from pprint import pprint
     enabled = shareds.app.config.get("SCRIPTING_TOOL_ENABLED")
     if enabled is not True:
         raise RuntimeError(_("Scripting tool is not enabled"))

@@ -380,7 +380,7 @@ def show_person_search():  # (set_scope=None, batch_id=None):
             _current_context, new_state, new_material, new_batch_id = (
                 u_context.material.get_current()
             )
-            run_args["set_scope"] = True
+            # Not used: run_args["set_scope"] = True
             run_args["state"] = new_state
             run_args["material"] = new_material
             run_args["batch_id"] = new_batch_id

@@ -303,7 +303,7 @@ class Root(NodeObject):
             result = run_cypher(session, CypherRoot.get_my_batches, username)
             for rec in result:
                 root = Root.from_node(rec["root"])
-                print(f"#get_my_batches: {root}")
+                # print(f"#get_my_batches: {root}")
                 yield root
 
     @staticmethod
