@@ -49,7 +49,7 @@ import shareds
 from .base import NodeObject, Status
 from pe.dataservice import DataService
 
-# from pe.db_writer import DbWriter
+# from pe.obsolete_db_writer import DbWriter
 from pe.neo4j.cypher.cy_event import CypherEvent
 
 from bl.dates import DateRange
