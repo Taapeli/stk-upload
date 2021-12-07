@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#from pe import dataservice
 
 """
     Data Root node to access Batch data sets.
@@ -137,7 +138,7 @@ class Root(NodeObject):
         except Exception:
             return ""
         
-    def save(self, dataservice):
+    def save(self, tx, dataservice):
         """Create or update Root node.
 
         Returns {'id':self.id, 'status':Status.OK}
@@ -158,7 +159,7 @@ class Root(NodeObject):
             "logname": self.logname,
         }
         #TODO Create new root_save()
-        res = dataservice.ds_batch_save(attr)
+        res = dataservice.ds_batch_save(tx, attr)
         # returns {status, identity}
 
         self.uniq_id = res.get("identity")
@@ -590,103 +591,8 @@ class Root(NodeObject):
         )
         return msg, deleted
 
-class BatchUpdater(DataService):
-    """
-    Root datastore for write and update in transaction.
-    """
-
-    def __init__(self, service_name: str, u_context=None, tx=None):
-        """
-        Initiate datastore for update in given transaction or without transaction.
-        """
-        super().__init__(service_name, user_context=u_context, tx=tx)
-        self.batch = None
-
-    def new_batch(self, username):
-        """
-        Initiate new Batch.
-        """
-        # Lock db to avoid concurent Batch loads
-        self.dataservice.ds_aqcuire_lock("batch_id")
-        # TODO check res
-
-        # Find the next free Batch id
-        batch = Root()
-        res = self.dataservice.ds_new_batch_id()
-
-        batch.id = res.get("id")
-        batch.user = username
-
-        res = batch.save(self.dataservice)
-        return batch
-
-#     def xxxstart_data_batch(self, userid, file, mediapath, tx=None):
-#         """
-#         Initiate new Batch.
-# 
-#         :param: userid    user
-#         :param: file      input file name
-#         :param: mediapath media file store path
-#         """
-#         
-#         self.dataservice.ds_aqcuire_lock("batch_id")
-# 
-#         batch = self.new_batch()
-# 
-#         batch.user = userid
-#         batch.file = file.replace("_clean.", ".")
-#         batch.mediapath = mediapath
-# 
-#         self.batch = batch
-# 
-#         return {"batch": batch, "status": Status.OK}
-
-    def batch_get_one(self, user, batch_id):
-        """Get Root object by username and batch id (in BatchUpdater). """
-        try:
-            ret = self.dataservice.ds_get_batch(user, batch_id)
-            # returns {"status":Status.OK, "node":record}
-            node = ret['node']
-            batch = Root.from_node(node)
-            return {"status":Status.OK, "item":batch}
-        except Exception as e:
-            statustext = (
-                f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
-            )
-            return {"status": Status.ERROR, "statustext": statustext}
-
-    def change_state(self, batch_id, username, b_state):
-        """ Set this data batch status. """
-        res = self.dataservice.ds_batch_set_state(batch_id, username, b_state)
-        return res
-
-    def select_auditor(self, batch_id, auditor_username):
-        """ Mark auditor for this data batch and set status. """
-
-        allowed_states = [State.ROOT_AUDIT_REQUESTED,
-                          State.ROOT_AUDITING,
-                          State.ROOT_REJECTED]
-        res = self.dataservice.ds_batch_set_auditor(batch_id, auditor_username, 
-                                                    allowed_states)
-        return res
-
-# def batch_mark_status(self, batch, b_status): --> change_state
-#     """ Mark this data batch status. """
-
-    def commit(self):
-        """ Commit transaction. """
-        self.dataservice.ds_commit()
-
-    def rollback(self):
-        """ Commit transaction. """
-        self.dataservice.ds_rollback()
-
-    def media_create_and_link_by_handles(self, uniq_id, media_refs):
-        """Save media object and it's Note and Citation references
-        using their Gramps handles.
-        """
-        if media_refs:
-            self.dataservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
+# class BatchUpdater(DataService): # -> bl.root.root_updater.RootUpdater
+#     """ Root data store for write and update. 
 
 
 class BatchReader(DataService):

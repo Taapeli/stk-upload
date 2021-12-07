@@ -99,19 +99,18 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Batch Audit -----
 
-    def ds_aqcuire_lock(self, lock_id):
+    def ds_aqcuire_lock(self, tx, lock_id):
         """Create a lock"""
-        self.tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
+        tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
         return True  # value > 0
 
-    def ds_find_last_used_batch_seq(self):
+    def ds_find_last_used_batch_seq(self, tx):
         """Find last used Batch id sequence number for today or zero.
         """
-
         # 1. Find the latest Batch id from the BatchId singleton node
         base = str(date.today())
         print("base="+base)
-        record = self.tx.run(CypherRoot.read_batch_id).single()
+        record = tx.run(CypherRoot.read_batch_id).single()
         if record:
             node = record["n"]
             print("BatchId node",node)
@@ -122,7 +121,7 @@ class Neo4jUpdateService(ConcreteService):
                 return 0        
 
         # 2. Find the latest Batch id of today from the db
-        record = self.tx.run(CypherRoot.batch_find_last_id, batch_base=base).single()
+        record = tx.run(CypherRoot.batch_find_last_id, batch_base=base).single()
         if record:
             batch_id = record.get("bid")
             print(f"# Previous batch_id='{batch_id}'")
@@ -130,16 +129,16 @@ class Neo4jUpdateService(ConcreteService):
             return seq
         return 0
 
-    def ds_new_batch_id(self):
+    def ds_new_batch_id(self, tx):
         """Find next unused Batch id using BatchId node.
 
         Returns {id, status, [statustext]}
         """
         base = str(date.today())
-        seq = self.ds_find_last_used_batch_seq()
+        seq = self.ds_find_last_used_batch_seq(tx)
         seq += 1
         batch_id = "{}.{:03d}".format(base, seq)
-        self.tx.run(CypherRoot.save_batch_id, prefix=base, seq=seq)
+        tx.run(CypherRoot.save_batch_id, prefix=base, seq=seq)
         print("# New batch_id='{}'".format(batch_id))
         return {"status": Status.OK, "id": batch_id}
 
@@ -158,20 +157,20 @@ class Neo4jUpdateService(ConcreteService):
                         "statustext": "Batch not found"}
        
 
-    def ds_batch_save(self, attr):
+    def ds_batch_save(self, tx, attr):
         """Creates a Batch node.
 
         attr = {"mediapath", "file", "id", "user", "status"}
 
         Batch.timestamp is created in the Cypher clause.
         """
-        result = self.tx.run(CypherRoot.batch_merge, b_attr=attr).single()
-        if not result:
+        record = tx.run(CypherRoot.batch_merge, b_attr=attr).single()
+        if not record:
             raise IsotammiException("Unable to save Batch",
                             cypher=CypherRoot.batch_merge,
                             b_attr=attr,
                             )
-        uniq_id = result[0]
+        uniq_id = record[0]
         return {"status": Status.OK, "identity": uniq_id}
 
 

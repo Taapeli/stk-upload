@@ -24,7 +24,7 @@ Created on 11.11.2021
 from flask_babelex import _
 
 from bl.base import Status
-from bl.root import State, Root
+from bl.root.root import State, Root
 
 MATERIAL_COMMON = "common"  # Multi-batch data like Approved data
 MATERIAL_BATCH = "batch"  # Selected candidate or approved batch

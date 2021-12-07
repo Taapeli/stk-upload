@@ -25,7 +25,7 @@ from unittest.mock import Mock
 
 sys.path.append("../app")
 import shareds
-from bl.root import Root
+from bl.root.root import Root
 
 def load_config(configfile):
     shareds.app = Mock()

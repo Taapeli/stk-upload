@@ -51,7 +51,8 @@ from flask_babelex import _
 
 import shareds
 from bl.base import Status
-from bl.root import State, Root, BatchUpdater, BatchReader
+from bl.root.root import State, Root, BatchReader # , BatchUpdater
+from bl.root.root_updater import RootUpdater
 from models import loadfile, util, syslog
 
 from ui.batch_ops import RESEARCHER_FUNCTIONS, RESEARCHER_OPERATIONS
@@ -114,9 +115,9 @@ def upload_gramps():
         # logger.debug("Got a {} file '{}'".format(material_type, infile.filename))
 
         t0 = time.time()
-        with BatchUpdater("update") as batch_service:
+        with RootUpdater("update") as root_service:
             # Create Root with next free batch id
-            batch = batch_service.new_batch(current_user.username)
+            batch = root_service.new_batch(current_user.username)
             # Prepare uploads folder
             upload_folder = uploads.get_upload_folder(current_user.username)
             batch_upload_folder = os.path.join(upload_folder, batch.id)
@@ -127,7 +128,7 @@ def upload_gramps():
             batch.xmlname = infile.filename
             batch.metaname = batch.file + ".meta"
             batch.logname = batch.file + ".log"
-            batch.save(batch_service.dataservice) #todo: batch_service.save_batch(batch) ?
+            batch.save(tx, root_service.dataservice) #todo: root_service.save_batch(batch) ?
             shareds.tdiff = time.time() - t0
 
             # Create metafile
@@ -500,14 +501,14 @@ def batch_update_description():
     batch_id = request.form["batch_id"]
     description = request.form["description"]
     try:
-        with BatchUpdater("update") as batch_service:
-            res = batch_service.batch_get_one(current_user.username, batch_id)
+        with RootUpdater("update") as root_service:
+            res = root_service.batch_get_one(current_user.username, batch_id)
             if Status.has_failed(res):
                 raise RuntimeError(_("Failed to retrieve batch"))
      
             batch = res['item']
             batch.description = description
-            batch.save(batch_service.dataservice)
+            batch.save(root_service.dataservice)
 
     except Exception as e:
         error_print("audit_selected_op", e)
@@ -529,8 +530,8 @@ def scripting(batch_id=None):
         raise RuntimeError(_("Scripting tool is not enabled"))
     if request.method == "POST":
         batch_id = request.form.get("batch_id")
-    with BatchReader("update") as batch_service:
-        res = batch_service.batch_get_one(current_user.username, batch_id)
+    with BatchReader("update") as root_service:
+        res = root_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
             raise RuntimeError(_("Failed to retrieve batch"))
  

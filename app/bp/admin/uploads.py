@@ -41,7 +41,7 @@ logger = logging.getLogger("stkserver")
 
 import shareds
 from models import email, util, syslog
-from bl.root import Root, State
+from bl.root.root import Root, State
 from bl.base import IsotammiException
 from bl.gramps import gramps_loader
 from pe.neo4j.cypher.cy_root import CypherRoot

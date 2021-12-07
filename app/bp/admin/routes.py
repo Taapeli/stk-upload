@@ -49,7 +49,7 @@ from setups import User
 from bp.admin.forms import UpdateUserProfileForm, UpdateUserForm
 from bl.admin.models.data_admin import DataAdmin
 from bl.admin.models.user_admin import UserAdmin
-from bl.root import Root
+from bl.root.root import Root
 
 from . import bp
 from . import uploads

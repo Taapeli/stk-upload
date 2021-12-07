@@ -43,7 +43,7 @@ from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
 
 from bl.base import Status
-from bl.root import Root, State, DEFAULT_MATERIAL 
+from bl.root.root import Root, State, DEFAULT_MATERIAL 
 
 def get_upload_folder(username):
     """ Returns upload directory for given user"""
@@ -286,12 +286,12 @@ def xml_to_stkbase(batch: Root):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.root import BatchUpdater
+    from bl.root.root_updater import RootUpdater
 
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(batch.file)
 
-    with BatchUpdater("update") as batch_service:
+    with RootUpdater("update") as batch_service:
         # Get XML DOM parser and start DOM elements handler transaction
         handler = DOM_handler(file_cleaned, batch.user, batch.file, batch_service.dataservice)
     

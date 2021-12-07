@@ -25,7 +25,7 @@ Created on 19.5.2021
 # blacked 2021-05-01 JMä
 #import shareds
 from bl.base import NodeObject, Status
-from bl.root import Root
+from bl.root.root import Root
 from bl.person import PersonBl
 from bl.family import FamilyBl
 from bl.place import PlaceBl

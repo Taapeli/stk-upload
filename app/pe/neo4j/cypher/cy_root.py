@@ -78,12 +78,12 @@ MATCH (audi:UserProfile {username: $audi})
     SET r.timestamp = timestamp()
 RETURN ID(b) AS id"""
 
-#-bl.root.Root.get_filename
+#-bl.root.root.Root.get_filename
     get_filename = """
 MATCH (u:UserProfile{username: $username}) -[:HAS_LOADED]-> (b:Root {id: $batch_id})
 RETURN b.filename, u.username as username"""
 
-#-bl.root.Root.get_batch
+#-bl.root.root.Root.get_batch
     get_batch = """
 MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Root {id:$batch_id})
 RETURN b, u.username as username"""
@@ -111,7 +111,7 @@ return "" as user,
     "" as description
 """
 
-#-bl.root.Root.get_batches
+#-bl.root.root.Root.get_batches
     get_batches = '''
 match (b:Root) 
     where b.user = $user and b.state = $status // "completed"
@@ -120,7 +120,7 @@ return b as batch,
     labels(x)[0] as label, count(x) as cnt 
     order by batch.user, batch.id'''
 
-#-bl.root.Root.get_my_batches
+#-bl.root.root.Root.get_my_batches
     get_materials_accepted = """
 match (root:Root) 
 where root.state='Accepted' 
@@ -130,7 +130,7 @@ return root.material as material_type, count(*) as nodes order by material_type"
 where root.state='Candidate' 
 return root order by root.id desc"""
 
-#-bl.root.Root.get_user_stats
+#-bl.root.root.Root.get_user_stats
     get_passed = '''
 match (u:UserProfile) --> (b:Root) 
     where u.username = $user and b.state = 'Auditing'
@@ -138,8 +138,8 @@ optional match (b) --> (x)
 return b as batch, count(x) as cnt 
     order by batch.id'''
 
-#-bl.root.Root.get_batch_stats
-#-bl.root.Root.list_empty_batches.Upload.get_stats
+#-bl.root.root.Root.get_batch_stats
+#-bl.root.root.Root.list_empty_batches.Upload.get_stats
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_get_batch
     get_single_batch = '''
 match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch})
@@ -167,7 +167,7 @@ return u.name as u_name,
     collect(distinct [auditor,a_time]) as auditors
 order by root.id"""
 
-# #-bl.root.Root.list_empty_batches
+# #-bl.root.root.Root.list_empty_batches
 #     TODO_get_empty_batches = '''
 # MATCH (a:Root) 
 # WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
@@ -181,7 +181,7 @@ WITH a LIMIT 2000
     DETACH DELETE b
     DETACH DELETE a"""
 
-#-bl.root.Root.delete_batch
+#-bl.root.root.Root.delete_batch
     delete_batch_node = """
 MATCH (:UserProfile{username:$user}) -[:HAS_LOADED]-> (c:Root{id:$batch_id})
 DETACH DELETE c"""

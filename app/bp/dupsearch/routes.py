@@ -30,7 +30,7 @@ from flask_security import current_user
 from flask_babelex import _
 from . import bp
 
-from bl.root import Root, State
+from bl.root.root import Root, State
 from bp.dupsearch.models import search
 from ui.context import UserContext
 from bl.person_reader import PersonReaderTx
