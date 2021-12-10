@@ -23,7 +23,7 @@ Created on 23.9.2021
 @author: jm
 '''
 from flask_babelex import _
-from bl.root.root import State
+from bl.batch.root import State
 
 # List of functions available for researcher
 

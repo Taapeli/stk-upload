@@ -134,7 +134,7 @@ class Citation(NodeObject):
     #             print ("Sourceref_hlink: " + self.source_handle)
     #         return True
 
-    def save(self, dataservice, **kwargs):
+    def save(self, tx, **kwargs):
         """Saves this Citation and connects it to it's Notes and Sources."""
         if "batch_id" in kwargs:
             batch_id = kwargs["batch_id"]
@@ -154,7 +154,7 @@ class Citation(NodeObject):
         if self.dates:
             c_attr.update(self.dates.for_db())
 
-        result = dataservice.tx.run(
+        result = tx.run(
             CypherCitation.create_to_batch,
             batch_id=batch_id,
             c_attr=c_attr,
@@ -172,13 +172,13 @@ class Citation(NodeObject):
 
         # Make relations to the Note nodes
         for handle in self.note_handles:
-            dataservice.tx.run(
+            tx.run(
                 CypherCitation.link_note, handle=self.handle, hlink=handle
             )
 
         # Make relation to the Source node
         if self.source_handle != "":
-            dataservice.tx.run(
+            tx.run(
                 CypherCitation.link_source,
                 handle=self.handle,
                 hlink=self.source_handle,

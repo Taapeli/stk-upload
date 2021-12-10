@@ -127,7 +127,7 @@ class FamilyBl(Family):
         # from multiple events and other objects
         self.note_ref = []
 
-    def save(self, dataservice, **kwargs):
+    def save(self, tx, **kwargs):
         """Saves the family node to db with its relations.
 
         Connects the family to parent, child, citation and note nodes.
@@ -150,7 +150,7 @@ class FamilyBl(Family):
             "id": self.id,
             "rel_type": self.rel_type,
         }
-        result = dataservice.tx.run(
+        result = tx.run(
             CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
         )
         ids = []
@@ -165,7 +165,7 @@ class FamilyBl(Family):
         # Make father and mother relations to Person nodes
 
         if hasattr(self, "father") and self.father:
-            dataservice.tx.run(
+            tx.run(
                 CypherFamily.link_parent,
                 role="father",
                 f_handle=self.handle,
@@ -173,7 +173,7 @@ class FamilyBl(Family):
             )
 
         if hasattr(self, "mother") and self.mother:
-            dataservice.tx.run(
+            tx.run(
                 CypherFamily.link_parent,
                 role="mother",
                 f_handle=self.handle,
@@ -184,7 +184,7 @@ class FamilyBl(Family):
 
         for handle_role in self.event_handle_roles:
             # a tuple (event_handle, role)
-            dataservice.tx.run(
+            tx.run(
                 CypherFamily.link_event,
                 f_handle=self.handle,
                 e_handle=handle_role[0],
@@ -194,19 +194,19 @@ class FamilyBl(Family):
         # Make child relations to Person nodes
 
         for handle in self.child_handles:
-            dataservice.tx.run(CypherFamily.link_child, f_handle=self.handle, p_handle=handle)
+            tx.run(CypherFamily.link_child, f_handle=self.handle, p_handle=handle)
 
         # Make relation(s) to the Note node
 
         # print(f"Family_gramps.save: linking Notes {self.handle} -> {self.note_handles}")
         for handle in self.note_handles:
-            dataservice.tx.run(CypherFamily.link_note, f_handle=self.handle, n_handle=handle)
+            tx.run(CypherFamily.link_note, f_handle=self.handle, n_handle=handle)
 
         # Make relation(s) to the Citation node
 
         # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
         for handle in self.citation_handles:
-            dataservice.tx.run(
+            tx.run(
                 CypherObject.link_citation, handle=self.handle, c_handle=handle
             )
 
@@ -228,7 +228,6 @@ class FamilyWriter(DataService):
 
     def __init__(self, service_name: str, u_context=None, tx=None):
         super().__init__(service_name, u_context, tx=tx)
-        # self.dataservice.tx = None # already ok
         pass  # print(f"#FamilyWriter: {dir(self)}")
 
     # def set_calculated_attributes(self, uniq_id):

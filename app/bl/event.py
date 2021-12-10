@@ -226,7 +226,7 @@ class EventBl(Event):
         self.place = None  # Place node, if included
         self.person = None  # Persons names connected; for creating display
 
-    def save(self, dataservice, **kwargs):
+    def save(self, tx, **kwargs):
         """Saves event to database:
         - Creates a new db node for this Event
         - Sets self.uniq_id
@@ -235,11 +235,9 @@ class EventBl(Event):
         - Does not link it from UserProfile or Person
         """
 
-        if "batch_id" in kwargs:
-            batch_id = kwargs["batch_id"]
-        else:
-            raise RuntimeError(f"Event_gramps.save needs batch_id for {self.id}")
-
+        batch_id = kwargs["batch_id"]
+        dataservice = kwargs["dataservice"]
+        
         self.uuid = self.newUuid()
         e_attr = {
             "uuid": self.uuid,
@@ -258,7 +256,7 @@ class EventBl(Event):
         if self.dates:
             e_attr.update(self.dates.for_db())
 
-        result = dataservice.tx.run(
+        result = tx.run(
             CypherEvent.create_to_batch, batch_id=batch_id, e_attr=e_attr
         )
         ids = []
@@ -274,13 +272,13 @@ class EventBl(Event):
 
         # Make relation to the Place node
         for pl_handle in self.place_handles:
-            dataservice.tx.run(
+            tx.run(
                 CypherEvent.link_place, handle=self.handle, place_handle=pl_handle
             )
 
         # Make relations to the Note nodes
         if self.note_handles:
-            result = dataservice.tx.run(
+            result = tx.run(
                 CypherEvent.link_notes,
                 handle=self.handle,
                 note_handles=self.note_handles,
@@ -290,7 +288,7 @@ class EventBl(Event):
 
         # Make relations to the Citation nodes
         if self.citation_handles:  #  citation_handles != '':
-            dataservice.tx.run(
+            tx.run(
                 CypherEvent.link_citations,
                 handle=self.handle,
                 citation_handles=self.citation_handles,

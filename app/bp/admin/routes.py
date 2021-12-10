@@ -49,7 +49,6 @@ from setups import User
 from bp.admin.forms import UpdateUserProfileForm, UpdateUserForm
 from bl.admin.models.data_admin import DataAdmin
 from bl.admin.models.user_admin import UserAdmin
-from bl.root.root import Root
 
 from . import bp
 from . import uploads
@@ -123,6 +122,8 @@ def start_initiate():
 @roles_accepted("research", "admin", "audit")
 def clear_empty_batches():
     """ Show or clear unused batches. """
+    from bl.batch.root import Root
+
     user = None
     clear = False
     cnt = -1

@@ -65,7 +65,7 @@ function checkFileSize() {
 }
 
 // Progress bar
-var PROGRESS_INTERVAL = {{interval}}; {# 10000 #}
+var PROGRESS_INTERVAL = {{interval}}; // 10000
 
 function update_progress(batch_id) {
 	// see http://jsfiddle.net/kedctfmj/3/
@@ -82,8 +82,8 @@ function update_progress(batch_id) {
 		progress_div.css("border-radius","6px 0 0 6px");
 		if (rsp.progress == 0) rsp.progress = 1;
 		progress_div.get(0).style.width = rsp.progress + "%";
-		if (rsp.status == "Loading") 
-			setTimeout(function() {update_progress(batch_id)}, PROGRESS_INTERVAL);
+        if (rsp.status == "Loading") 
+            setTimeout(function() {update_progress(batch_id)}, PROGRESS_INTERVAL);
 		else 
 			location.reload();
 	});
@@ -183,7 +183,7 @@ function doconfirm( command, title ) { // used in commands.html
 
             <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
             </td>
-            <td>{{upload.status}}
+            <td>{{upload.loc_state}}
     {% if upload.auditors %}
                     <br><i>{{ _("Auditor") }}:
         {% for auditor, ts, ts_str in upload.auditors %}

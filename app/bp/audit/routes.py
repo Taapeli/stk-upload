@@ -40,8 +40,8 @@ from . import bp
 
 import shareds
 from bl.base import Status
-from bl.root.root import Root, State #, BatchUpdater
-from bl.root.root_updater import RootUpdater
+from bl.batch.root import Root, State #, BatchUpdater
+from bl.batch.root_updater import RootUpdater
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
 #from bl.material import Material

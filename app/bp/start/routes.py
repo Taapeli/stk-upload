@@ -33,7 +33,7 @@ from flask_babelex import _, get_locale
 
 import shareds
 from bl.person import PersonReader
-from bl.root.root import Root
+from bl.batch.root import Root
 from bp.api import api
 from bp.gedcom.models import gedcom_utils
 from bp.start.forms import JoinForm

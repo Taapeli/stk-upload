@@ -41,7 +41,6 @@ logger = logging.getLogger("stkserver")
 
 import shareds
 from models import email, util, syslog
-from bl.root.root import Root, State
 from bl.base import IsotammiException
 from bl.gramps import gramps_loader
 from pe.neo4j.cypher.cy_root import CypherRoot
@@ -115,14 +114,13 @@ def get_upload_folder(username):
     """ Returns upload directory for given user. """
     return os.path.join("uploads", username)
 
-
 def set_meta(username, batch_id, filename, **kwargs):
     """ Stores status information from kwargs to .meta file. """
     upload_folder = get_upload_folder(username)
     name = "{}.meta".format(filename)
     metaname = os.path.join(upload_folder, batch_id, name)
     update_metafile(metaname, **kwargs)
-
+    return
 
 def update_metafile(metaname, **kwargs):
     """ Create or update meta data. """
@@ -132,12 +130,13 @@ def update_metafile(metaname, **kwargs):
         meta = {}
     meta.update(kwargs)
     open(metaname, "w").write(pprint.pformat(meta))
-    # print(f"bp.admin.uploads.update_metafile: state={meta.get('status','-')}, "
-    #       f"object groups={len(meta.get('progress',{}))}")
+    print(f"bp.admin.uploads.update_metafile: state={meta.get('status','-')}, "
+          f"object groups={len(meta.get('progress',{}))}")
 
 def get_meta(root):
     """ Reads status information from .meta file """
-    
+    from bl.batch.root import State
+
     try:
         metaname = root.metaname
         meta = eval(open(metaname).read())
@@ -172,8 +171,9 @@ def i_am_alive(metaname, parent_thread):
         time.sleep(shareds.PROGRESS_UPDATE_RATE)
 
 
-def background_load_to_stkbase(batch:Root) -> None:
+def background_load_to_stkbase(batch) -> None: # batch::bl.batch.root.Root
     """ Imports gramps xml data to database """
+    from bl.batch.root import State
 
     update_metafile(batch.metaname, progress={})
     steps = []
@@ -193,7 +193,9 @@ def background_load_to_stkbase(batch:Root) -> None:
                 name="i_am_alive for " + batch.xmlname,
             ).start()
 
+        #
         # Read the Gramps xml file, and save the information to db
+        #
         res = gramps_loader.xml_to_stkbase(batch)
 
         steps = res.get("steps", [])
@@ -265,7 +267,7 @@ class Upload:
     batch_id: str
     xmlname: str
     state: str
-    status: str
+    loc_state: str
     material_type: str
     description: str
     user: str
@@ -287,6 +289,8 @@ class Upload:
 
     def for_auditor(self):
         """ Is relevant for auditor? """
+        from bl.batch.root import State
+
         if self.material.state in [
             State.ROOT_AUDIT_REQUESTED, 
             State.ROOT_AUDITING, 
@@ -298,6 +302,7 @@ class Upload:
 def list_uploads(username:str) -> List[Upload]:
     """ Gets a list of uploaded batches
     """
+    from bl.batch.root import Root, State
 
     # 1. List Batches from db, their status and Person count
     result = shareds.driver.session().run(
@@ -320,6 +325,7 @@ def list_uploads(username:str) -> List[Upload]:
         u_name = record["u_name"]
 
         meta = get_meta(b)
+        # meta file 'status' ~ Uploads.state!
         status = meta.get("status", State.FILE_UPLOADED)
         if status == State.FILE_LOAD_FAILED:
             state = State.FILE_LOAD_FAILED
@@ -342,7 +348,7 @@ def list_uploads(username:str) -> List[Upload]:
             u_name=u_name,
             auditors=auditors,
             state=state,
-            status=_(state),
+            loc_state=_(state),
             is_candidate=1 if (b.state == State.ROOT_CANDIDATE) else 0,
             for_auditor=1 if b.for_auditor() else 0,
             material_type=b.material_type,

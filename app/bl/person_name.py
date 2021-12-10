@@ -98,7 +98,7 @@ class Name(NodeObject):
         n.order = node["order"]
         return n
 
-    def save(self, dataservice, **kwargs):
+    def save(self, tx, **kwargs):
         """Creates or updates this Name node. (There is no handle)
         If parent_id is given, a link (parent) -[:NAME]-> (Name) is created
 
@@ -116,7 +116,7 @@ class Name(NodeObject):
             "suffix": self.suffix,
             "title": self.title,
         }
-        dataservice.tx.run(
+        tx.run(
             CypherPerson.create_name_as_leaf,
             n_attr=n_attr,
             parent_id=kwargs["parent_id"],

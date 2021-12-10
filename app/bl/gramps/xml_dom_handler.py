@@ -155,9 +155,7 @@ class DOM_handler:
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
-        #print(f"DOM_handler.save_and_link_handle: {obj} {kwargs}")
-        #obj.save(self.dataservice, self.dataservice.tx, **kwargs)
-        obj.save(self.dataservice, **kwargs)
+        obj.save(self.dataservice.tx, **kwargs)
         self.obj_counter += 1 
         if self.obj_counter % 1000 == 0:
             print(self.obj_counter, "Transaction restart")
@@ -373,7 +371,8 @@ class DOM_handler:
             e.media_refs = self._extract_mediaref(event)
 
             try:
-                self.save_and_link_handle(e, batch_id=self.batch.id)
+                self.save_and_link_handle(e, batch_id=self.batch.id, 
+                                          dataservice=self.dataservice)
                 counter += 1
             except RuntimeError as e:
                 self.blog.log_event(
@@ -731,7 +730,8 @@ class DOM_handler:
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
             # for ref in p.media_refs: print(f'# saving Person {p.id}: media_ref {ref}')
-            self.save_and_link_handle(p, batch_id=self.batch.id)
+            self.save_and_link_handle(p, batch_id=self.batch.id,
+                                      dataservice=self.dataservice)
             # print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
             # The refnames will be set for these persons
@@ -874,7 +874,8 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys)
+            self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys, 
+                                          dataservice=self.dataservice)
             # The place_keys has been updated
             counter += 1
 

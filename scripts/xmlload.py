@@ -29,7 +29,7 @@ sys.path.append("../app")
 import shareds
 from bl.base import Status, IsotammiException
 from bl.gramps.gramps_loader import xml_to_stkbase
-from bl.root.root_updater import RootUpdater
+from bl.batch.root_updater import RootUpdater
 #from bl.root import BatchUpdater
 
 import shareds

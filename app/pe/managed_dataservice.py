@@ -25,6 +25,7 @@ Created on 7.12.2021
 import shareds
 import logging
 #from bl.base import IsotammiException
+from pe.neo4j.updateservice import Neo4jUpdateService
 
 logger = logging.getLogger('stkserver')
 
@@ -33,7 +34,7 @@ def obj_addr(tx):
     return str(tx).split(" ", 3)[-1][:-1] if tx else 'None'
 
 
-class ManagedDataService:
+class ManagedDataService(Neo4jUpdateService):
     """Public methods for accessing active database using managed write transactions.
     The current database is defined in /setups.py.
 
@@ -58,14 +59,15 @@ class ManagedDataService:
         - 1. if tx is given                  Use the given, opened transaction
         - 2. else                            No transaction
         """
-        self.idstr = f"{self.__class__.__name__}>DataService"
+        txstr = "+tx" if tx else ""
+        self.idstr = f"{self.__class__.__name__}>ManagedDataService{txstr}"
         logger.debug(f'#~~~{self.idstr} init')
         # Find <class 'pe.neo4j.*service'> and initialize it
         self.service_name = service_name
         service_class = shareds.dataservices.get(self.service_name)
         if not service_class:
             raise KeyError(
-                f"pe.dataservice.DataService.__init__: name {self.service_name} not found"
+                f"pe.dataservice.ManagedDataService.__init__: name {self.service_name} not found"
             )
         # Initiate selected service object
         self.dataservice = service_class(shareds.driver)

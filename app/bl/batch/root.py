@@ -41,6 +41,7 @@ import shareds
 from models.util import format_ms_timestamp
 from bl.admin.models.cypher_adm import Cypher_adm
 from bl.base import Status, NodeObject
+from .root_updater import RootUpdater
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_root import CypherRoot, CypherAudit
 from pe.neo4j.util import run_cypher
@@ -109,7 +110,7 @@ class Root(NodeObject):
         self.user = userid
         self.file = None
         self.id = ""  # batch_id
-        self.material_type = DEFAULT_MATERIAL      # Material type "Family Tree" or other
+        self.material_type = None   #DEFAULT_MATERIAL "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
         self.timestamp = 0 # Milliseconds; Convert to string by 
@@ -138,7 +139,7 @@ class Root(NodeObject):
         except Exception:
             return ""
         
-    def save(self, tx, dataservice):
+    def save(self, tx):
         """Create or update Root node.
 
         Returns {'id':self.id, 'status':Status.OK}
@@ -158,12 +159,9 @@ class Root(NodeObject):
             "metaname": self.metaname,
             "logname": self.logname,
         }
-        #TODO Create new root_save()
-        res = dataservice.ds_batch_save(tx, attr)
-        # returns {status, identity}
 
-        self.uniq_id = res.get("identity")
-        return res
+        self.uniq_id = RootUpdater.md_batch_save(tx, attr)
+        return {"status": Status.OK, "identity": self.uniq_id}
 
 
     @classmethod
@@ -270,8 +268,7 @@ class Root(NodeObject):
         for rec in result:
             yield dict(rec.get("b"))
 
-    # @staticmethod
-    # def get_batch_pallette(username):
+    # @staticmethod # def get_batch_pallette(username):
     #     """ Get my batches and batch collections.
     #  -- Ei toimi näin, hyväksyttyjä materiaaleja ei voi palauttaa Root-solmuina
     #
@@ -371,7 +368,7 @@ class Root(NodeObject):
             audited = approved.get(batch_id)
             if audited:
                 user_data[key]["Audit"] = audited
-            #print(f"bl.root.Root.get_user_stats: user_data[{key}] {user_data[key]}")
+            #print(f"bl.batch.Root.get_user_stats: user_data[{key}] {user_data[key]}")
 
         return sorted(titles), user_data
 
@@ -591,7 +588,7 @@ class Root(NodeObject):
         )
         return msg, deleted
 
-# class BatchUpdater(DataService): # -> bl.root.root_updater.RootUpdater
+# class BatchUpdater(DataService): # -> bl.batch.root_updater.RootUpdater
 #     """ Root data store for write and update. 
 
 
@@ -616,7 +613,7 @@ class BatchReader(DataService):
         try:
             ret = self.dataservice.ds_get_batch(user, batch_id)
             # returns {"status":Status.OK, "node":record}
-            # print(f"bl.root.BatchReader.batch_get_one: return {ret}")
+            # print(f"bl.batch.BatchReader.batch_get_one: return {ret}")
             node = ret['node']
             batch = Root.from_node(node)
             return {"status":Status.OK, "item":batch}
