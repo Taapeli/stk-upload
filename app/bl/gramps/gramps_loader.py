@@ -17,6 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from bl.admin.models.data_admin import DataAdmin
+from flask.globals import session
 
 """
     Methods to import all data from Gramps xml file
@@ -43,7 +44,7 @@ from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
 
 from bl.base import Status
-from bl.root.root import Root, State, DEFAULT_MATERIAL 
+#from bl.batch.root import State, DEFAULT_MATERIAL 
 
 def get_upload_folder(username):
     """ Returns upload directory for given user"""
@@ -255,7 +256,7 @@ def analyze(username, filename):
     return references
 
 
-def xml_to_stkbase(batch: Root):
+def xml_to_stkbase(batch):  # :Root):
     """
     Reads a Gramps xml file, and saves the information to db
 
@@ -286,12 +287,14 @@ def xml_to_stkbase(batch: Root):
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
-    from bl.root.root_updater import RootUpdater
+    from bl.batch.root_updater import RootUpdater
+    from bl.batch.root import State, DEFAULT_MATERIAL
 
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(batch.file)
 
-    with RootUpdater("update") as batch_service:
+    tx = shareds.driver.session().begin_transaction()
+    with RootUpdater("update", tx=tx) as batch_service:
         # Get XML DOM parser and start DOM elements handler transaction
         handler = DOM_handler(file_cleaned, batch.user, batch.file, batch_service.dataservice)
     
@@ -304,7 +307,6 @@ def xml_to_stkbase(batch: Root):
         handler.blog.log(cleaning_log)
     
         handler.batch = batch
-    
         batch.mediapath = handler.get_mediapath_from_header()
     
         metadata = handler.get_metadata_from_header()
@@ -313,20 +315,12 @@ def xml_to_stkbase(batch: Root):
             if metadata[0]:
                 batch.material_type = metadata[0]
                 print(f"- got material type {batch.material_type} {metadata[1]!r}")
-            else:
-                batch.material_type = DEFAULT_MATERIAL
-                print(f"- default material type {batch.material_type} {metadata[1]!r}")
-            # batch.material_type = metadata[0] if metadata[0] else DEFAULT_MATERIAL
-            batch.description = metadata[1]
+        if batch.material_type is None:
+            batch.material_type = DEFAULT_MATERIAL
+            print(f"- default material type {batch.material_type}")
         handler.handle_suffix = "_" + handler.batch.id  
-        # Open database connection as Neo4jDataService instance and start transaction
     
-        # Initiate BatchUpdater and Batch node data
-        ##shareds.datastore = BatchUpdater(shareds.driver, handler.dataservice)
-    
-            # print(f'#> bp.gramps.gramps_loader.xml_to_stkbase: "{batch_service.service_name}" service')
-
-        batch.save(batch_service.dataservice)
+        batch.save(batch_service.dataservice.tx)
         
         t0 = time.time()
 
@@ -346,8 +340,6 @@ def xml_to_stkbase(batch: Root):
         #       for k in handler.handle_to_node.keys():
         #             print (f'\t{k} –> {handler.handle_to_node[k]}')
 
-        # Set person confidence values
-        # TODO: Only for imported persons (now for all persons!)
         res = handler.set_all_person_confidence_values()
         res = handler.set_person_calculated_attributes()
         res = handler.set_person_estimated_dates()
@@ -370,13 +362,16 @@ def xml_to_stkbase(batch: Root):
         res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
         #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
 
-        # batch_service.commit()
+        if not tx.closed():
+            print(f"bl.gramps.gramps_loader.xml_to_stkbase: commit")
+            tx.commit()
         logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
 
         handler.blog.log_event(
             {"title": "Total time", "level": "TITLE", "elapsed": time.time() - t0}
         )
-    # End with BatchUpdater transaction
+
+    # End with BatchUpdater
 
     return {
         "status": Status.OK,

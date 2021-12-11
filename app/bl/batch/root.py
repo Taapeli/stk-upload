@@ -597,7 +597,7 @@ class BatchReader(DataService):
     def __init__(self, service_name: str):
         super().__init__(service_name)
         self.idstr = f"{self.__class__.__name__}"
-        logger.debug(f'#~~~{self.idstr} init')
+        # logger.debug(f'#~~~{self.idstr} init')
         # Find <class 'pe.neo4j.*service'> and initialize it
         self.service_name = service_name
         service_class = shareds.dataservices.get(self.service_name)

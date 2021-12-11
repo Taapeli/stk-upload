@@ -130,8 +130,8 @@ def update_metafile(metaname, **kwargs):
         meta = {}
     meta.update(kwargs)
     open(metaname, "w").write(pprint.pformat(meta))
-    print(f"bp.admin.uploads.update_metafile: state={meta.get('status','-')}, "
-          f"object groups={len(meta.get('progress',{}))}")
+    # print(f"bp.admin.uploads.update_metafile: state={meta.get('status','-')}, "
+    #       f"object groups={len(meta.get('progress',{}))}")
 
 def get_meta(root):
     """ Reads status information from .meta file """
@@ -166,7 +166,7 @@ def get_meta(root):
 def i_am_alive(metaname, parent_thread):
     """ Checks if background thread is still alive """
     while os.path.exists(metaname) and parent_thread.is_alive():
-        print("bp.admin.uploads.i_am_alive: counts {list(parent_thread.progress.values())}")
+        print(f"bp.admin.uploads.i_am_alive: counts {list(parent_thread.progress.values())}")
         update_metafile(metaname, progress=parent_thread.progress)
         time.sleep(shareds.PROGRESS_UPDATE_RATE)
 
