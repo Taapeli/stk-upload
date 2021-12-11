@@ -21,33 +21,27 @@
 # @ Sss 2016
 # JMä 29.12.2015
 
-# Blacked 2021-05-18 / JMä
+# Blacked 22.11.2021 / JMä
 import logging
 import traceback
 from operator import itemgetter
-
 from werkzeug.utils import redirect
 from flask.helpers import url_for
+from flask import render_template, request, session, flash
+from flask_security import login_required, current_user, utils as secutils
+from flask_babelex import _, get_locale
 
-from ..gedcom.models import gedcom_utils
-from ui.user_context import UserContext
-from bl.person import PersonReader
 import shareds
+from bl.person import PersonReader
 from bl.root import Root
-#from bp.dupsearch.models.search import batches
+from bp.api import api
+from bp.gedcom.models import gedcom_utils
+from bp.start.forms import JoinForm
+from models import email
+from ui.context import UserContext
 
 logger = logging.getLogger("stkserver")
 
-from flask import render_template, request, session, flash
-from flask_security import login_required, current_user, utils as secutils
-
-# rom flask_security import login_required, roles_accepted, current_user, utils as secutils
-from flask_babelex import _, get_locale
-
-from models import email
-from bp.api import api
-
-from bp.start.forms import JoinForm
 
 """ Application route definitions
 """
@@ -105,8 +99,7 @@ def start_guest_search():
 @login_required
 # @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def start_logged():
-    """Opening the home page for logged in user (from login page or home button)
-    or anonymous user (home).
+    """Opening the home page for logged in user (from login page or home button).
 
     Note. The home page for anonymous user is routes.entry in app/routes.py
     """
@@ -122,18 +115,20 @@ def start_logged():
         f" roles= {role_names}"
     )
 
-    print(f"start_logged: is_authenticated={current_user.is_authenticated}, "\
-          f"to_be_approved={current_user.has_role('to_be_approved')}")
+    print(
+        f"bp.start.routes.start_logged: is_authenticated={current_user.is_authenticated}, "
+        f"to_be_approved={current_user.has_role('to_be_approved')}"
+    )
     if current_user.is_authenticated and current_user.has_role("to_be_approved"):
         # Home page for logged in user
-        logger.info(f"-> start.routes.entry/join")
+        logger.info(f"-> bp.start.routes.start_logged > start.routes.entry/join")
         return redirect(url_for("join"))
 
     surnamestats = []
     is_demo = shareds.app.config.get("DEMO", False)
     if is_demo:
         # Get surname cloud data
-        u_context = UserContext(session, current_user, request)
+        u_context = UserContext()
         u_context.user = None
 
         with PersonReader("read", u_context) as service:
@@ -148,10 +143,15 @@ def start_logged():
                 stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
             surnamestats.sort(key=itemgetter("surname"))
 
-    my_batches = Root.get_my_batches(current_user.username)
+    material_types = Root.get_materials_accepted()
+    my_batches = list(Root.get_my_batches(current_user.username))
+
     return render_template(
-        "/start/index_logged.html", is_demo=is_demo, surnamestats=surnamestats,
-        batches=my_batches # sorted(my_batches, key=itemgetter("id"))
+        "/start/index_logged.html",
+        is_demo=is_demo,
+        surnamestats=surnamestats,
+        batches=my_batches,  # sorted(my_batches, key=itemgetter("id"))
+        commons=material_types,
     )
 
 
@@ -177,9 +177,7 @@ def join():
                 continue
             msg += f"\n{name}: {value}"
         msg += f"\n\nApprove user: http://{request.host}/admin/update_user/{username}"
-        if email.email_admin(
-            "New user request for Isotammi", msg, sender=request.form.get("email")
-        ):
+        if email.email_admin("New user request", msg, sender=request.form.get("email")):
             flash(_("Join message sent"))
         else:
             flash(_("Sending join message failed"))
@@ -215,7 +213,7 @@ def send_email():
     subject = request.form["subject"]
     body = request.form["message"]
     ok = email.email_admin(
-        _(subject), body, sender=(current_user.name, current_user.email)
+        subject, body, sender=(current_user.name, current_user.email)
     )
     if ok:
         return "ok"
@@ -263,19 +261,17 @@ def my_settings():
         userprofile=userprofile,
     )
 
-# @shareds.app.route("/my_batches/", methods=["GET"])
-# @shareds.app.route("/my_batches/<selected_batch_id>", methods=["GET"])
-# @login_required
-# def my_batches(selected_batch_id=None):
-#     batches = [
-#         {"batch_id": "2021-08-07.501","batch_file":"X1testtree.gramps"},
-#         {"batch_id": "2021-08-07.502","batch_file":"X2testtree.gramps"},
-#     ]
-#     return render_template(
-#         "/start/hx-batches.html",
-#     batches=batches
-#     )
-    
+
+@shareds.app.route("/my_batches/", methods=["GET"])
+@shareds.app.route("/my_batches/<selected_batch_id>", methods=["GET"])
+@login_required
+def my_batches(selected_batch_id=None):
+    batches = [
+        {"batch_id": "2021-08-07.501", "batch_file": "X1testtree.gramps"},
+        {"batch_id": "2021-08-07.502", "batch_file": "X2testtree.gramps"},
+    ]
+    return render_template("/start/hx-batches.html", batches=batches)
+
 
 # # Admin start page in bp.admin
 # @shareds.app.route('/admin',  methods=['GET', 'POST'])

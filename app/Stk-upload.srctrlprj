@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<config>
+    <source_groups>
+        <source_group_5c7298ff-6a75-4c46-917f-023ebb86de1a>
+            <exclude_filters>
+                <exclude_filter>unit_test</exclude_filter>
+            </exclude_filters>
+            <name>Python Source Group</name>
+            <python_environment_path>../venv</python_environment_path>
+            <source_extensions>
+                <source_extension>.py</source_extension>
+            </source_extensions>
+            <source_paths>
+                <source_path>./</source_path>
+            </source_paths>
+            <status>enabled</status>
+            <type>Python Source Group</type>
+        </source_group_5c7298ff-6a75-4c46-917f-023ebb86de1a>
+    </source_groups>
+    <version>8</version>
+</config>

@@ -35,7 +35,7 @@ def email(mail_from,mail_to,subject,body):
     try:
         mail = Mail()
         sysname = get_sysname()
-        msg = Message(f"{subject} ({sysname})",
+        msg = Message(f"{sysname.title()}: {subject}",
                       body=body,
                       sender=mail_from,
                       reply_to=mail_from,

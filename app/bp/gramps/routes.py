@@ -29,11 +29,14 @@ import os
 import time
 import logging
 import traceback
+from types import SimpleNamespace
+from urllib.parse import unquote_plus
 
 logger = logging.getLogger("stkserver")
 
 from flask import (
     render_template,
+    session,
     request,
     redirect,
     url_for,
@@ -49,45 +52,24 @@ from flask_babelex import _
 import shareds
 from bl.base import Status
 from bl.root import State, Root, BatchUpdater, BatchReader
-from models import loadfile, email, util, syslog
+from models import loadfile, util, syslog
 
 from ui.batch_ops import RESEARCHER_FUNCTIONS, RESEARCHER_OPERATIONS
+from ui.context import UserContext
+from ui.util import error_print
 from ..admin import uploads
 
 from . import bp
 from bl.gramps import gramps_loader
 from bl.gramps import gramps_utils
-
+from bl.stats import get_stats
 
 # @bp.route("/gramps")
-# @login_required
-# @roles_accepted("research", "admin")
 # def obsolete_gramps_index():
-#     return "Error: bp.gramps.routes.gramps_index is obsolete!"
-#     """ Home page gramps input file processing """
-#     logger.info("-> bp.start.routes.gramps_index")
-#     return render_template("/gramps/obsolete_index_gramps.html")
-
 
 # @bp.route("/gramps/show_log/<xmlfile>")
 # @bp.route("/gramps/show_log/")
-# @login_required
-# @roles_accepted("research")
 # def obsolete_show_upload_log(xmlfile=""):
-#     msg=""
-#     try:
-#         upload_folder = uploads.get_upload_folder(current_user.username)
-#         fname = os.path.join(upload_folder, xmlfile + ".log")
-#         msg = open(fname, encoding="utf-8").read()
-#         logger.info(f"-> bp.gramps.routes.obsolete_show_upload_log f='{xmlfile}'")
-#     except Exception as e:
-#         print(f"bp.gramps.routes.obsolete_show_upload_log: {e}")
-#         if not msg:
-#             msg = f'{_("The uploaded file does not exist any more.")}'
-#         flash(msg)
-#         return redirect(url_for("gramps.list_uploads"))
-#
-#     return render_template("/admin/load_result.html", msg=msg)
 
 
 @bp.route("/gramps/uploads")
@@ -124,12 +106,12 @@ def list_uploads():
 @login_required
 @roles_accepted("research", "admin")
 def upload_gramps():
-    """Load a gramps xml file to temp directory for processing in the server"""
-
+    """Load a gramps xml file to temp directory for processing in the server
+    """
     try:
         infile = request.files["filenm"]
-        material = request.form["material"]
-        # logger.debug("Got a {} file '{}'".format(material, infile.filename))
+        material_type = request.form["material"]
+        # logger.debug("Got a {} file '{}'".format(material_type, infile.filename))
 
         t0 = time.time()
         with BatchUpdater("update") as batch_service:
@@ -145,7 +127,7 @@ def upload_gramps():
             batch.xmlname = infile.filename
             batch.metaname = batch.file + ".meta"
             batch.logname = batch.file + ".log"
-            batch.save(batch_service.dataservice) # todo: batch_service.save_batch(batch) ?
+            batch.save(batch_service.dataservice) #todo: batch_service.save_batch(batch) ?
             shareds.tdiff = time.time() - t0
 
             # Create metafile
@@ -161,10 +143,9 @@ def upload_gramps():
             # Create upload log file
             msg = f"{util.format_timestamp()}: User {current_user.name} ({current_user.username}) uploaded the file {batch.file} for batch {batch.id}"
             open(batch.logname, "w", encoding="utf-8").write(msg)
-            email.email_admin("Stk: Gramps XML file uploaded", msg)
             syslog.log(type="gramps file uploaded", file=infile.filename, batch=batch.id)
             logger.info(
-                f'-> bp.gramps.routes.upload_gramps/{material} f="{infile.filename}"'
+                f'-> bp.gramps.routes.upload_gramps/{material_type} f="{infile.filename}"'
                 f" e={shareds.tdiff:.3f}sek"
             )
 
@@ -181,18 +162,7 @@ def upload_gramps():
 
 
 # @bp.route("/gramps/start_upload/<xmlname>")
-# @login_required
-# @roles_accepted("research")
 # def start_load_to_stkbase(xmlname):
-#     """The uploaded Gramps xml file is imported to database in background process.
-#     A 'i_am_alive' process for monitoring the bg process is also started.
-#     """
-#     uploads.initiate_background_load_to_stkbase(current_user.username, xmlname)
-#     logger.info(
-#         f'-> bp.gramps.routes.start_load_to_stkbase f="{os.path.basename(xmlname)}"'
-#     )
-#     flash(_("Data import from %(i)s to database has been started.", i=xmlname), "info")
-#     return redirect(url_for("gramps.list_uploads"))
 
 
 @bp.route("/gramps/virhe_lataus/<int:code>/<text>")
@@ -215,24 +185,32 @@ def xml_analyze(xmlfile):
     )
 
 
-@bp.route("/gramps/gramps_analyze/<xmlfile>")
+@bp.route("/gramps/gramps_analyze/<batch_id>")
 @login_required
 @roles_accepted("research", "admin", "audit")
-def gramps_analyze(xmlfile):
-    logger.info(f'bp.gramps.routes.gramps_analyze f="{os.path.basename(xmlfile)}"')
-    return render_template("/gramps/gramps_analyze.html", file=xmlfile)
+def gramps_analyze(batch_id):
+    batch = Root.get_batch(current_user.username, batch_id)
+    logger.info(f'bp.gramps.routes.gramps_analyze b="{batch_id}"')
+    base, ext = os.path.splitext(batch.xmlname)
+    newfile = base + "_checked" + ext
+    
+    return render_template("/gramps/gramps_analyze.html", batch_id=batch_id, file=batch.xmlname, newfile=newfile)
 
 
-@bp.route("/gramps/gramps_analyze_json/<xmlfile>")
+@bp.route("/gramps/gramps_analyze_json/<batch_id>/<newfile>")
 @login_required
 @roles_accepted("research", "admin", "audit")
-def gramps_analyze_json(xmlfile):
+def gramps_analyze_json(batch_id, newfile):
+    batch = Root.get_batch(current_user.username, batch_id)
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
+    print("gramps_runner",gramps_runner)
     if gramps_runner:
-        msgs = gramps_utils.gramps_verify(gramps_runner, current_user.username, xmlfile)
+        lang = session.get("lang","")
+        print("lang",lang)
+        msgs = gramps_utils.gramps_verify(gramps_runner, lang, current_user.username, batch_id, batch.xmlname, newfile)
     else:
         msgs = {}
-    logger.info(f'bp.gramps.routes.gramps_analyze_json f="{os.path.basename(xmlfile)}"')
+    logger.info(f'bp.gramps.routes.gramps_analyze_json f="{os.path.basename(batch.xmlname)}"')
     return jsonify(msgs)
 
 
@@ -280,6 +258,30 @@ def gramps_batch_download(batch_id):
             flash(msg)
             return redirect(url_for("gramps.list_uploads"))
             
+@bp.route("/gramps/download_checked_file/<batch_id>")
+@login_required
+@roles_accepted("research", "admin")
+def download_checked_file(batch_id):
+    batch = Root.get_batch(current_user.username, batch_id)
+    if batch:
+        xml_folder, xname = os.path.split(batch.file)
+        if batch.xmlname:
+            xname = batch.xmlname
+        base,ext = os.path.splitext(xname)
+        xname = base + "_checked" + ext
+        xml_folder = os.path.abspath(xml_folder)
+        try:
+            return send_from_directory(xml_folder, xname,
+                mimetype="application/gzip",
+                as_attachment=True,
+                cache_timeout=0,  # change to max_age in Flask 2.x
+            )
+        except Exception as e:
+            traceback.print_exc()
+            print(f"bp.gramps.routes.gramps_batch_download: {e}")
+            msg = _("The file \"%(n)s\" does not exist", n=xname)
+            flash(msg)
+            return redirect(url_for("gramps.list_uploads"))
 
 @bp.route("/gramps/show_upload_log/<batch_id>")
 @login_required
@@ -302,6 +304,7 @@ def show_upload_log_from_batch_id(batch_id):
 
     return render_template("/admin/load_result.html", msg=msg)
 
+
 @bp.route("/gramps/batch_delete/<batch_id>")
 @login_required
 @roles_accepted("research", "admin")
@@ -311,12 +314,12 @@ def batch_delete(batch_id):
             os.remove(path)
 
     def remove_old_style_files(path):  
-        xremove(batch.file)
-        xremove(batch.file.replace("_clean.", ".") )
-        xremove(batch.file.replace(".gramps", "_clean.gramps") )
-        xremove(batch.file.replace(".gpkg", "_clean.gpkg"))  
-        xremove(batch.file + ".meta")  
-        xremove(batch.file + ".log")  
+        xremove(path)
+        xremove(path.replace("_clean.", ".") )
+        xremove(path.replace(".gramps", "_clean.gramps") )
+        xremove(path.replace(".gpkg", "_clean.gpkg"))  
+        xremove(path + ".meta")  
+        xremove(path + ".log")  
         
     referrer = request.headers.get("Referer")
 
@@ -364,6 +367,7 @@ def get_progress(batch_id):
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
+            print(f"bp.gramps.routes.get_progress: error {res.get('statustext')}")
             rsp = {
                 "status": 'Failed',
                 "progress": 0,
@@ -373,6 +377,7 @@ def get_progress(batch_id):
  
         batch = res['item']
         if not batch.metaname:
+            print(f"bp.gramps.routes.get_progress: no metaname")
             rsp = {
                 "status": 'Failed',
                 "progress": 0,
@@ -387,10 +392,12 @@ def get_progress(batch_id):
     
         counts = meta.get("counts")
         if counts is None:
+            print(f"bp.gramps.routes.get_progress: no counts")
             return jsonify({"status": status, "progress": 0})
     
         progress = meta.get("progress")
         if progress is None:
+            print(f"bp.gramps.routes.get_progress: no progress")
             return jsonify({"status": status, "progress": 0})
     
         total = 0
@@ -418,8 +425,9 @@ def get_progress(batch_id):
         rsp = {
             "status": status,
             "progress": 99 * done // total if total else 50,
-            "batch_id": meta.get("batch_id"),
+            "batch_id": batch_id,
         }
+        print(f"bp.gramps.routes.get_progress: {rsp}")
         return jsonify(rsp)
 
 @bp.route("/gramps/commands/<batch_id>")
@@ -447,11 +455,101 @@ def get_commands(batch_id):
                     confirm = False
                     if cmd == "/gramps/batch_delete/":
                         confirm = True
-
-                    commands.append( (cmd + batch.id, _(title), confirm) )
+                    # Add parameters
+                    cmd = unquote_plus(cmd.format(state=batch.state, batch_id=batch.id))
+                    commands.append( (cmd, _(title), confirm) )
 
         return render_template("/gramps/commands.html", 
                                batch_id=batch_id, 
                                description=batch.description, 
                                commands=commands)
 
+@bp.route("/gramps/details/<batch_id>")
+@login_required
+@roles_accepted("research", "admin")
+def batch_details(batch_id):
+    user_context = UserContext()
+    with BatchReader("update") as batch_service:
+        res = batch_service.batch_get_one(current_user.username, batch_id)
+        if Status.has_failed(res):
+            raise RuntimeError(_("Failed to retrieve batch"))
+ 
+        batch = res['item']
+    stats = get_stats(batch_id)
+    # localize:
+    object_stats = [(_(label),has_citations,data) for (label,has_citations,data) in stats.object_stats]
+    SELECTED_EVENT_TYPES = (
+        'Birth',
+        'Death',
+        'Marriage',
+    )
+    event_stats = [(_(label),data) for (label,data) in stats.event_stats if label in SELECTED_EVENT_TYPES]
+    return render_template(
+        "/gramps/details.html",
+       #batch_id=batch_id, 
+       batch=batch,
+       user_context=user_context,
+       object_stats=sorted(object_stats),
+       event_stats=sorted(event_stats),
+    )
+
+@bp.route("/gramps/details/update_description", methods=["post"])
+@login_required
+@roles_accepted("research", "admin")
+def batch_update_description():
+    batch_id = request.form["batch_id"]
+    description = request.form["description"]
+    try:
+        with BatchUpdater("update") as batch_service:
+            res = batch_service.batch_get_one(current_user.username, batch_id)
+            if Status.has_failed(res):
+                raise RuntimeError(_("Failed to retrieve batch"))
+     
+            batch = res['item']
+            batch.description = description
+            batch.save(batch_service.dataservice)
+
+    except Exception as e:
+        error_print("audit_selected_op", e)
+        return redirect(url_for("audit.list_uploads"))
+
+    #return description
+    return redirect(url_for("audit.list_uploads", batch_id=batch_id))
+
+# =================== experimental scripting tool ======================
+
+@bp.route("/scripting/<batch_id>", methods=["get"])
+@bp.route("/scripting", methods=["post"])
+@login_required
+@roles_accepted("audit")
+def scripting(batch_id=None):
+    #from pprint import pprint
+    enabled = shareds.app.config.get("SCRIPTING_TOOL_ENABLED")
+    if enabled is not True:
+        raise RuntimeError(_("Scripting tool is not enabled"))
+    if request.method == "POST":
+        batch_id = request.form.get("batch_id")
+    with BatchReader("update") as batch_service:
+        res = batch_service.batch_get_one(current_user.username, batch_id)
+        if Status.has_failed(res):
+            raise RuntimeError(_("Failed to retrieve batch"))
+ 
+        batch = res['item']
+    if request.method == "POST":
+        #pprint(request.form)
+        from bl.scripting.scripting_tool import Executor
+        executor = Executor(batch_id)
+        return executor.execute(SimpleNamespace(**request.form))
+    else:
+        return render_template(
+            "/gramps/scripting.html",
+           batch=batch,
+    )
+
+@bp.route("/scripting_attrs", methods=["post"])
+@login_required
+@roles_accepted("audit")
+def scripting_attrs(batch_id=None):
+    from bl.scripting.scripting_tool import get_attrs
+    attrs = get_attrs(request.form.get("scope"))
+    return ",".join(attrs)

@@ -11,6 +11,7 @@ from sys import stderr
 
 from bl.base import NodeObject
 from pe.neo4j.cypher.cy_note import CypherNote
+from pe.dataservice import DataService
 
 # from models.gen.cypher import Cypher_note
 # from models.cypher_gramps import Cypher_note_in_batch # Cypher_note_w_handle,
@@ -146,11 +147,15 @@ class Note(NodeObject):
                 if not note.id:
                     n_cnt += 1
                     note.id = f"N{n_cnt}-{parent.id}"
-                note.save(dataservice, dataservice.tx, parent_id=parent.uniq_id, batch_id=batch_id)
+                    attr = {
+                        "parent_id": parent.uniq_id, 
+                        "batch_id": batch_id,
+                        }
+                note.save(dataservice, **attr)
             else:
                 raise AttributeError("note.save_note_list: Argument not a Note")
 
-    def save(self, dataservice, tx, **kwargs):  # batch_id=None, parent_id=None):
+    def save(self, dataservice, **kwargs):
         """Creates this Note object as a Note node
 
         Arguments:
@@ -160,43 +165,61 @@ class Note(NodeObject):
         """
         self.uuid = self.newUuid()
         batch_id = kwargs.get("batch_id", None)
+        parent_id = kwargs.get("parent_id", None)
         if not "batch_id":
             raise RuntimeError(f"Note.save needs batch_id for {self.id}")
-        n_attr = {}
-#        try:
-        if 1:
-            n_attr = {
-                "uuid": self.uuid,
-                "change": self.change,
-                "id": self.id,
-                "priv": self.priv,
-                "type": self.type,
-                "text": self.text,
-                "url": self.url,
-            }
-            if self.handle:
-                n_attr["handle"] = self.handle
-            if "parent_id" in kwargs:
-                print(
-                    f"Note_save: parent (uid={kwargs['parent_id']}) --> (id={self.id})"
-                    " [No link Batch-->Note created!]"
-                )
-                self.uniq_id = tx.run(
-                    CypherNote.create_in_batch_as_leaf,
-                    bid=batch_id,
-                    parent_id=kwargs["parent_id"],
-                    n_attr=n_attr,
-                ).single()[0]
-            elif "batch_id" in kwargs:
-                # print(f"Note_save: batch ({kwargs['batch_id']}) --> ({self.id})")
-                self.uniq_id = tx.run(
-                    CypherNote.create_in_batch, bid=batch_id, n_attr=n_attr
-                ).single()[0]
-            else:
-                raise RuntimeError(
-                    f"Note.save needs batch_id or parent_id for {self.id}"
-                )
+        n_attr = {
+            "uuid": self.uuid,
+            #"change": self.change,
+            "id": self.id,
+            "priv": self.priv,
+            "type": self.type,
+            "text": self.text,
+            "url": self.url,
+        }
+        if self.handle:
+            n_attr["handle"] = self.handle
+        if not parent_id is None:
+            # print(f"Note.save: (Root {batch_id}) --> (Note {self.id}) <-- (parent {parent_id})")
+            result = dataservice.tx.run(
+                CypherNote.create_in_batch_as_leaf,
+                bid=batch_id,
+                parent_id=parent_id,
+                n_attr=n_attr,
+            )
+        elif not batch_id is None:
+            # print(f"Note.save: (Root {batch_id}) --> (Note {self.id})")
+            result = dataservice.tx.run(
+                CypherNote.create_in_batch, 
+                bid=batch_id, 
+                n_attr=n_attr
+            )
+        else:
+            raise RuntimeError(
+                f"Note.save needs batch_id or parent_id for {self.id}"
+            )
+        record = result.single()
+        # print(f"Note.save: summary={result.summary().counters}")
+        self.uniq_id = record[0]
 
-#         except Exception as err:
-#             print(f"iError Note_save: {err} attr={n_attr}", file=stderr)
-#             raise RuntimeError(f"Could not save Note {self.id}")
+class NoteReader(DataService):
+    """
+    Data reading class for Note objects. Used with free text search.
+    """
+
+    def __init__(self, service_name: str, u_context=None):
+        super().__init__(service_name, u_context)
+
+    def note_search(self, args):
+        context = self.user_context
+        args["use_user"] = self.use_user
+        args["fw"] = context.first  # From here forward
+        args["limit"] = context.count
+        args["batch_id"] = context.material.batch_id
+        args["material_type"] = context.material.m_type
+        args["state"] = context.material.state
+        res = self.dataservice.tx_note_search(args)
+        #print(res)
+        return res
+    
+    

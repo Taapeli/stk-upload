@@ -42,7 +42,13 @@ tr > td:nth-child(1), tr > td:nth-child(5) {
                </td>
     	  {% endif -%}
 
-	           <td>{{upload.batch_id}}
+	           <td>
+          {% if upload.material_type != "Family Tree" %}
+                    <span class="typetag">
+                        {{ _(upload.material_type) }}
+                    </span>
+          {% endif -%}
+                    {{upload.batch_id}}
 	      {% if upload.count %}
 	           	   <br>– {{upload.count}}&nbsp;{{ _("persons") }}
 	      {% endif %}

@@ -308,9 +308,15 @@ def xml_to_stkbase(batch: Root):
         batch.mediapath = handler.get_mediapath_from_header()
     
         metadata = handler.get_metadata_from_header()
-        print("metadata:", metadata)
+        print("gramps_loader.xml_to_stkbase: metadata:", metadata)
         if metadata:
-            batch.material = metadata[0] if metadata[0] else DEFAULT_MATERIAL
+            if metadata[0]:
+                batch.material_type = metadata[0]
+                print(f"- got material type {batch.material_type} {metadata[1]!r}")
+            else:
+                batch.material_type = DEFAULT_MATERIAL
+                print(f"- default material type {batch.material_type} {metadata[1]!r}")
+            # batch.material_type = metadata[0] if metadata[0] else DEFAULT_MATERIAL
             batch.description = metadata[1]
         handler.handle_suffix = "_" + handler.batch.id  
         # Open database connection as Neo4jDataService instance and start transaction
@@ -329,14 +335,12 @@ def xml_to_stkbase(batch: Root):
 
         res = handler.handle_notes()
         res = handler.handle_repositories()
-        res = handler.handle_media()
-
-        res = handler.handle_places()
         res = handler.handle_sources()
         res = handler.handle_citations()
-
+        res = handler.handle_media()
+        res = handler.handle_places() # With Place_names
         res = handler.handle_events()
-        res = handler.handle_people()
+        res = handler.handle_people() # With Names
         res = handler.handle_families()
 
         #       for k in handler.handle_to_node.keys():
@@ -351,13 +355,17 @@ def xml_to_stkbase(batch: Root):
         # Copy date and name information from Person and Event nodes to Family nodes
         res = handler.set_family_calculated_attributes()
 
-        print("build_free_text_search_indexes")
-        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx)
-        print("build_free_text_search_indexes done")
+        # print("build_free_text_search_indexes")
+        t1 = time.time()
+        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
+        handler.blog.log_event(
+            {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
+        )
+        # print("build_free_text_search_indexes done")
             
         res = handler.remove_handles()
-            # The missing links counted in remove_handles
-        ##TODO      res = handler.add_missing_links()
+        # The missing links counted in remove_handles?
+        ##TODO      res = handler.add_missing_links()?
 
         res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
         #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)

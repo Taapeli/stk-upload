@@ -28,12 +28,6 @@ class CypherSource():
 
     # ------------------------ Cypher fragments ------------------------
 
-    # Select Source from audited data / researcher's own data
-    _match_audited = "MATCH (s:Source) <-[owner:PASSED]- ()"
-    _match_my_access = """MATCH (s:Source) <-[owner:OWNS]- (b:Batch) 
-        <-[:HAS_ACCESS]- (u:UserProfile {username:$user})"""
-#   _match_my_own = "MATCH (s:Source) <-[owner:OWNS|OWNS_OTHER]- ()"
-
     get_sources = """
 MATCH (root) -[:OBJ_SOURCE]-> (s:Source)
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
@@ -112,8 +106,8 @@ MERGE (b) -[r:OBJ_SOURCE]-> (s:Source {handle: $s_attr.handle})
 RETURN ID(s) as uniq_id"""
 
     link_note = """
-MATCH (n:Source) WHERE n.handle=$handle
-MATCH (m:Note)   WHERE m.handle=$hlink
+MATCH (n:Source {handle:$handle})
+MATCH (m:Note {handle:$hlink})
 CREATE (n) -[r:NOTE]-> (m)"""
 
     link_repository = """

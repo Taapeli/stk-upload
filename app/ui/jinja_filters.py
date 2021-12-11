@@ -318,8 +318,8 @@ def translate(term, var_name, show_table=False):
         # Root.material types
         tabl = {
             "Family Tree": _("Family Tree"),
-            "Demo Material": _("Demo Material"),
-            "Example Material": _("Example type"),
+            "Place Data": _("Place Data"),
+            "Hiski Tree": _("Hiski Tree"),
         }
         #print(f"#jinja_filters:get {var_name}({term})")
 

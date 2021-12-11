@@ -28,7 +28,7 @@ import traceback
 from flask import flash
 from flask_babelex import _
 
-from ui.user_context import UserContext
+from ui.context import UserContext
 
 
 def stk_logger(context: UserContext, msg: str):

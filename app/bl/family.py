@@ -23,7 +23,6 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm 
 """
 # blacked
-import shareds
 from ui.jinja_filters import translate
 import logging
 
@@ -36,6 +35,7 @@ from .person_name import Name
 
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_family import CypherFamily
+from pe.neo4j.cypher.cy_object import CypherObject
 
 from bl.dates import DateRange
 
@@ -127,7 +127,7 @@ class FamilyBl(Family):
         # from multiple events and other objects
         self.note_ref = []
 
-    def save(self, dataservice, tx, **kwargs):
+    def save(self, dataservice, **kwargs):
         """Saves the family node to db with its relations.
 
         Connects the family to parent, child, citation and note nodes.
@@ -142,100 +142,73 @@ class FamilyBl(Family):
             # raise RuntimeError(f"bl.family.FamilyBl.save needs batch_id for {self.id}")
 
         self.uuid = self.newUuid()
-        f_attr = {}
-        try:
-            f_attr = {
-                "uuid": self.uuid,
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "rel_type": self.rel_type,
-            }
-            result = tx.run(
-                CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
-            )
-            ids = []
-            for record in result:
-                self.uniq_id = record[0]
-                ids.append(self.uniq_id)
-                if len(ids) > 1:
-                    logger.warning(
-                        f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}"
-                    )
-        except Exception as err:
-            msg = f"bl.family.FamilyBl.save: {err} in #{self.uniq_id} - {f_attr}"
-            logger.error(msg)
-            return {"status": Status.ERROR, "statustext": msg}
+        #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "F")
+        f_attr = {
+            "uuid": self.uuid,
+            "handle": self.handle,
+            "change": self.change,
+            "id": self.id,
+            "rel_type": self.rel_type,
+        }
+        result = dataservice.tx.run(
+            CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
+        )
+        ids = []
+        for record in result:
+            self.uniq_id = record[0]
+            ids.append(self.uniq_id)
+            if len(ids) > 1:
+                logger.warning(
+                    f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}"
+                )
 
         # Make father and mother relations to Person nodes
-        try:
-            if hasattr(self, "father") and self.father:
-                tx.run(
-                    CypherFamily.link_parent,
-                    role="father",
-                    f_handle=self.handle,
-                    p_handle=self.father,
-                )
 
-            if hasattr(self, "mother") and self.mother:
-                tx.run(
-                    CypherFamily.link_parent,
-                    role="mother",
-                    f_handle=self.handle,
-                    p_handle=self.mother,
-                )
-        except Exception as e:
-            msg = (
-                f"bl.family.FamilyBl.save: family={self.id}: {e.__class__.__name__} {e}"
+        if hasattr(self, "father") and self.father:
+            dataservice.tx.run(
+                CypherFamily.link_parent,
+                role="father",
+                f_handle=self.handle,
+                p_handle=self.father,
             )
-            print(msg)
-            return {"status": Status.ERROR, "statustext": msg}
+
+        if hasattr(self, "mother") and self.mother:
+            dataservice.tx.run(
+                CypherFamily.link_parent,
+                role="mother",
+                f_handle=self.handle,
+                p_handle=self.mother,
+            )
 
         # Make relations to Event nodes
-        try:
-            for handle_role in self.event_handle_roles:
-                # a tuple (event_handle, role)
-                tx.run(
-                    CypherFamily.link_event,
-                    f_handle=self.handle,
-                    e_handle=handle_role[0],
-                    role=handle_role[1],
-                )
-        except Exception as e:
-            msg = f"bl.family.FamilyBl.save events: family={self.id}: {e.__class__.__name__} {e}"
-            print(msg)
-            return {"status": Status.ERROR, "statustext": msg}
+
+        for handle_role in self.event_handle_roles:
+            # a tuple (event_handle, role)
+            dataservice.tx.run(
+                CypherFamily.link_event,
+                f_handle=self.handle,
+                e_handle=handle_role[0],
+                role=handle_role[1],
+            )
 
         # Make child relations to Person nodes
-        try:
-            for handle in self.child_handles:
-                tx.run(CypherFamily.link_child, f_handle=self.handle, p_handle=handle)
-        except Exception as e:
-            msg = f"bl.family.FamilyBl.save children: family={self.id}: {e.__class__.__name__} {e}"
-            print(msg)
-            return {"status": Status.ERROR, "statustext": msg}
+
+        for handle in self.child_handles:
+            dataservice.tx.run(CypherFamily.link_child, f_handle=self.handle, p_handle=handle)
 
         # Make relation(s) to the Note node
-        try:
-            # print(f"Family_gramps.save: linking Notes {self.handle} -> {self.note_handles}")
-            for handle in self.note_handles:
-                tx.run(CypherFamily.link_note, f_handle=self.handle, n_handle=handle)
-        except Exception as e:
-            msg = f"bl.family.FamilyBl.save notes: family={self.id}: {e.__class__.__name__} {e}"
-            print(msg)
-            return {"status": Status.ERROR, "statustext": msg}
+
+        # print(f"Family_gramps.save: linking Notes {self.handle} -> {self.note_handles}")
+        for handle in self.note_handles:
+            dataservice.tx.run(CypherFamily.link_note, f_handle=self.handle, n_handle=handle)
 
         # Make relation(s) to the Citation node
-        try:
-            # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
-            for handle in self.citation_handles:
-                tx.run(
-                    CypherFamily.link_citation, f_handle=self.handle, c_handle=handle
-                )
-        except Exception as e:
-            msg = f"bl.family.FamilyBl.save citations: family={self.id}: {e.__class__.__name__} {e}"
-            print(msg)
-            return {"status": Status.ERROR, "statustext": msg}
+
+        # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
+        for handle in self.citation_handles:
+            dataservice.tx.run(
+                CypherObject.link_citation, handle=self.handle, c_handle=handle
+            )
 
         return
 
@@ -278,7 +251,7 @@ class FamilyReader(DataService):
             # For reader only; writer has no context?
             self.user_context = u_context
             self.username = u_context.user
-            if u_context.context_code == u_context.ChoicesOfView.COMMON:
+            if u_context.is_common():
                 self.use_user = None
             else:
                 self.use_user = u_context.user
@@ -300,7 +273,7 @@ class FamilyReader(DataService):
             "name": self.user_context.first,  # From here forward
             "order": order,
             "limit": limit,
-            "batch_id": self.user_context.batch_id,
+            "batch_id": self.user_context.material.batch_id,
         }
         ustr = "user " + args["use_user"] if args["use_user"] else "no user"
         print(
@@ -358,7 +331,7 @@ class FamilyReader(DataService):
                 if record["no_of_children"]:
                     family.no_of_children = record["no_of_children"]
                 family.num_hidden_children = 0
-                if not self.user_context.use_common():
+                if not self.user_context.is_common():
                     if family.father:
                         family.father.too_new = False
                     if family.mother:
@@ -385,7 +358,7 @@ class FamilyReader(DataService):
                     len(families),
                 )
             self.user_context.order = order
-        if self.user_context.use_common():
+        if self.user_context.is_common():
             families = self.hide_privacy_protected_families(families)
         return families
 

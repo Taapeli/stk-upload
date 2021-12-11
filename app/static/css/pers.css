@@ -179,6 +179,17 @@ tr:hover {background-color: #f5f5f5}
     text-transform: uppercase;
     font-size: 84%;
 }
+.typetag {
+    font-variant: small-caps;
+    text-transform: uppercase;
+    font-size: 84%;
+    color: brown;
+    background: linen;
+    font-weight: bold;
+    border: solid 1pt brown;
+    border-radius: 6pt;
+    padding: 1pt 3pt;
+}
 
 ul.event {
     list-style:circle;

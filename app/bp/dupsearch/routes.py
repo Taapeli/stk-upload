@@ -19,15 +19,23 @@
 
 import json
 import time
+
+from collections import defaultdict
+from difflib import HtmlDiff, _mdiff
 from types import SimpleNamespace
 
-from flask import render_template, request, jsonify #, redirect, url_for, session
+from flask import render_template, request, jsonify, flash,  session as user_session
 from flask_security import login_required, roles_required
-#from flask_babelex import _
+from flask_security import current_user
+from flask_babelex import _
 from . import bp
 
 from bl.root import Root, State
 from bp.dupsearch.models import search
+from ui.context import UserContext
+from bl.person_reader import PersonReaderTx
+from bl.base import Status
+
 
 @bp.route('/dupsearch',  methods=['GET'])
 @login_required
@@ -61,7 +69,7 @@ def batches():
         #print(b)
         file = b.get('file')
         status = b.get('state')
-        if file and status == State.ROOT_CANDIDATE:
+        if file: # and status == State.ROOT_CANDIDATE:
             file = file.split("/")[-1].replace("_clean.gramps",".gramps")
             file = file.split("/")[-1].replace("_clean.gpkg",".gpkg")
             b['file'] = file 
@@ -120,10 +128,272 @@ def get_models():
     return jsonify(res)
 
 @bp.route('/dupsearch/upload', methods=['POST'])
-@login_required
 @roles_required('audit')
+@login_required
 def upload():
     file = request.files['file']
     res = search.upload(file)
     return jsonify(res)
 
+
+@bp.route('/dupsearch/compare', methods=['GET'])
+@login_required
+@roles_required('audit')
+def compare():
+    uuid1 = request.args.get("uuid1")
+    uuid2 = request.args.get("uuid2")
+    batch_id1 = request.args.get("batch_id1")
+    batch_id2 = request.args.get("batch_id2")
+    state1 = request.args.get("state1")
+    state2 = request.args.get("state2")
+    
+    def get_person(service, uuid):
+        result = service.get_person_data(uuid)
+
+        # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+        if Status.has_failed(result):
+            flash(f'{result.get("statustext","error")}', "error")
+            person = None
+            objs = []
+        else:
+            person = result.get("person")
+            objs = result.get("objs", [])
+            person.root = result.get("root")
+            return person, objs
+        
+    u_context1 = UserContext()
+    u_context2 = UserContext()
+    if state1 == "Accepted":        
+        u_context1.user = None
+        
+    if state2 == "Accepted":        
+        u_context2.user = None
+
+    u_context1.batch_id = batch_id1
+    with PersonReaderTx("read_tx", u_context1) as service:
+        person1,objs1 = get_person(service, uuid1)
+
+    u_context2.batch_id = batch_id2
+    with PersonReaderTx("read_tx", u_context2) as service:
+        person2,objs2 = get_person(service, uuid2)
+    
+#     return render_template('/compare.html',
+#                            batch_id1=batch_id1, 
+#                            person1=person1,
+#                            objs1=objs1,
+#                            batch_id2=batch_id2, 
+#                            person2=person2,
+#                            objs2=objs2)
+
+    SEP = "###"
+    def person_name(p):
+        n = p.names[0]
+        return f"{n.firstname} {n.suffix} {n.surname}" 
+    
+    def person_names(p):
+        for n in p.names:
+            yield f"{n.firstname} {n.suffix} {n.surname}" 
+
+    def events1(p,lines, objs):
+        for e in p.events:
+            places = [objs[ref].names[0].name for ref in e.place_ref]
+            place = "/".join(places)
+            lines.append(f"{e.type}{SEP}{e.dates}{SEP}{place}{SEP}{e.description}")
+        
+    def events(p,lines, objs,eventtypes, mod=False):
+        for e in p.events:
+            places = [objs[ref].names[0].name for ref in e.place_ref]
+            place = "/".join(places)
+            #if mod: place = place.replace("a","x")
+            eventtypes[_(e.type).lower()].append(f"{e.dates}{SEP}{place}{SEP}{e.description}")
+
+    def eventsort(etype):
+        if etype == _("Birth"): return (0,etype)
+        if etype == _("Baptism"): return (1,etype)
+        if etype == _("Death"): return (3,etype)
+        if etype == _("Burial"): return (4,etype)
+        # all others:
+        return (2,etype)
+
+    def fixline(line):
+        line = line.strip()
+        print("line:",line)
+        KEYS = ['\0+','\0-','\0^']
+        for key in KEYS:
+            i = 0
+            while True:
+                i = line.find(key, i)
+                if i < 0:
+                    break
+                j = line.find('\1',i)
+                span = line[i+2:j]
+                span2 = span.replace(SEP,'\1'+SEP+key)
+                line = line[0:i+2] + span2 + line[j:]
+                i = i+2+len(span2)
+        print("line2:",line)
+        return line
+    
+    return render_template('/compare.html',
+                           batch_id1=batch_id1, 
+                           person1=person1,
+                           objs1=objs1,
+                           batch_id2=batch_id2, 
+                           person2=person2,
+                           objs2=objs2)
+
+@bp.route('/dupsearch/compare2', methods=['GET'])
+@login_required
+@roles_required('audit')
+def compare2():
+    uuid1 = request.args.get("uuid1")
+    uuid2 = request.args.get("uuid2")
+    batch_id1 = request.args.get("batch_id1")
+    batch_id2 = request.args.get("batch_id2")
+    state1 = request.args.get("state1")
+    state2 = request.args.get("state2")
+    
+    def get_person(service, uuid):
+        result = service.get_person_data(uuid)
+
+        # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+        if Status.has_failed(result):
+            flash(f'{result.get("statustext","error")}', "error")
+            person = None
+            objs = []
+        else:
+            person = result.get("person")
+            objs = result.get("objs", [])
+            person.root = result.get("root")
+            return person, objs
+        
+    u_context1 = UserContext(user_session, current_user, request)
+    u_context2 = UserContext(user_session, current_user, request)
+    if state1 == "Accepted":        
+        u_context1.user = None
+        
+    if state2 == "Accepted":        
+        u_context2.user = None
+
+    u_context1.batch_id = batch_id1
+    with PersonReaderTx("read_tx", u_context1) as service:
+        person1,objs1 = get_person(service, uuid1)
+
+    u_context2.batch_id = batch_id2
+    with PersonReaderTx("read_tx", u_context2) as service:
+        person2,objs2 = get_person(service, uuid2)
+    
+#     return render_template('/compare.html',
+#                            batch_id1=batch_id1, 
+#                            person1=person1,
+#                            objs1=objs1,
+#                            batch_id2=batch_id2, 
+#                            person2=person2,
+#                            objs2=objs2)
+
+    SEP = "###"
+    def person_name(p):
+        n = p.names[0]
+        return f"{n.firstname} {n.suffix} {n.surname}" 
+    
+    def person_names(p):
+        for n in p.names:
+            yield f"{n.firstname} {n.suffix} {n.surname}" 
+
+    def events1(p,lines, objs):
+        for e in p.events:
+            places = [objs[ref].names[0].name for ref in e.place_ref]
+            place = "/".join(places)
+            lines.append(f"{e.type}{SEP}{e.dates}{SEP}{place}{SEP}{e.description}")
+        
+    def events(p,lines, objs,eventtypes, mod=False):
+        for e in p.events:
+            places = [objs[ref].names[0].name for ref in e.place_ref]
+            place = "/".join(places)
+            #if mod: place = place.replace("a","x")
+            eventtypes[_(e.type).lower()].append(f"{e.dates}{SEP}{place}{SEP}{e.description}")
+
+    def eventsort(etype):
+        if etype == _("Birth"): return (0,etype)
+        if etype == _("Baptism"): return (1,etype)
+        if etype == _("Death"): return (3,etype)
+        if etype == _("Burial"): return (4,etype)
+        # all others:
+        return (2,etype)
+
+    def fixline(line):
+        line = line.strip()
+        print("line:",line)
+        KEYS = ['\0+','\0-','\0^']
+        for key in KEYS:
+            i = 0
+            while True:
+                i = line.find(key, i)
+                if i < 0:
+                    break
+                j = line.find('\1',i)
+                span = line[i+2:j]
+                span2 = span.replace(SEP,'\1'+SEP+key)
+                line = line[0:i+2] + span2 + line[j:]
+                i = i+2+len(span2)
+        print("line2:",line)
+        return line
+    
+    name1 = person_name(person1)
+    name2 = person_name(person2)
+    lines1 = []
+    lines2 = []
+    
+    #lines1.append("Names")
+    #lines1.append(name1)
+    #lines1.append(name1)
+    for name in person_names(person1):
+        lines1.append(name)
+    for name in person_names(person2):
+        lines2.append(name)
+
+    #lines2.append("Names")
+    #lines2.append(name2)
+    namelines = HtmlDiff().make_table(lines1,lines2,context=False)
+    namelines = ""
+    for (linenum1,line1),(linenum2,line2),flag in _mdiff(lines1,lines2):
+        if line1 == '\n': line1 = ""  # placeholders for the missing columns
+        line = f"<tr><td><td colspan=3>" + fixline(line1) + "</td>\n<td colspan=3>" + fixline(line2) + "</td></tr>\n"
+        namelines += line
+    namelines = namelines.replace('\0+','<span class="diff_add">'). \
+                 replace('\0-','<span class="diff_sub">'). \
+                 replace('\0^','<span class="diff_chg">'). \
+                 replace('\1','</span>'). \
+                 replace('\t','&nbsp;'). \
+                 replace(SEP,"<td>")
+    print(namelines)
+    eventtypes1 = defaultdict(list)
+    eventtypes2 = defaultdict(list)
+    events(person1,lines1, objs1, eventtypes1)
+    events(person2,lines2, objs2, eventtypes2, 1)
+    table = ""
+    eventtypes = sorted(set(eventtypes1).union(set(eventtypes2)), key=eventsort)
+    for etype in eventtypes:
+        lines1 = []
+        lines2 = []
+        lines1.extend(eventtypes1[etype])
+        lines2.extend(eventtypes2[etype])
+        for (linenum1,line1),(linenum2,line2),flag in _mdiff(lines1,lines2):
+            if line1 == '\n': line1 = "<td><td>"  # placeholders for the missing columns
+            line = f"<tr><td class=ColumnEvent>{etype}<td class=ColumnDate>" + fixline(line1) + "</td>\n<td class=ColumnDate>" + fixline(line2) + "</td></tr>\n"
+            table += line
+    difftable = table.replace('\0+','<span class="diff_add">'). \
+                 replace('\0-','<span class="diff_sub">'). \
+                 replace('\0^','<span class="diff_chg">'). \
+                 replace('\1','</span>'). \
+                 replace('\t','&nbsp;'). \
+                 replace(SEP,"<td>")
+
+    return render_template('/compare2.html',
+                           namelines=namelines,
+                           difftable=difftable,
+                           batch_id1=batch_id1, 
+                           person1=person1,
+                           objs1=objs1,
+                           batch_id2=batch_id2, 
+                           person2=person2,
+                           objs2=objs2)

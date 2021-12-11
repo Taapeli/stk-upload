@@ -8,4 +8,4 @@ Flask==2.0.1
 Flask-BabelEx==0.9.4
 Flask-Security==3.0.0
 email-validator==1.1.2
-
+base32-lib

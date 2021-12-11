@@ -27,18 +27,18 @@ def user_env():
 
 
 def test_ownerfilter_nouser():
-    # UserContext(user_session)
+    # UserContext()
     user_session = {}
-    user_session['user_context'] = 1
+    user_session['user_context'] = "common"
 
-    f = UserContext(user_session)
+    f = UserContext()
 
-    assert f.context_code == 1
-    assert f.owner_str() == 'Isotammi database'
+    assert f.breed == "common"
+    assert f.display_current_material() == 'Isotammi database'
 
-    user_session['user_context'] = 2
-    assert f.context_code == 1
-    assert f.owner_str() == 'Isotammi database', "No user gets wrong data"
+    user_session['user_context'] = "batch"
+    assert f.breed == "common"
+    assert f.display_current_material() == 'Isotammi database', "No user gets wrong data"
 
 
 def test_ownerfilter_user_selection(user_env):
@@ -52,14 +52,14 @@ def test_ownerfilter_user_selection(user_env):
     '''
     user_session, current_user, request = user_env
 
-    f = UserContext(user_session, current_user, request)
+    f = UserContext()
 
-    assert f.context_code == 1
-    assert f.owner_str() == 'Isotammi database'
+    assert f.breed == "common"
+    assert f.display_current_material() == 'Isotammi database'
     # x = f.use_owner_filter()
     # assert x == False, "use_owner_filter() failed"
-    x = f.use_common()
-    assert x == True, "use_common() failed"
+    x = f.is_common()
+    assert x == True, "is_common() failed"
 
 
 def test_ownerfilter_next_item(user_env):
@@ -76,11 +76,11 @@ def test_ownerfilter_next_item(user_env):
     user_session, current_user, request = user_env
 
     # 0. Initialize UserContext with current session, user and request info
-    f = UserContext(user_session, current_user, request)
+    f = UserContext()
     
     # 1. In the beginning
     user_session['person_scope'] = ['', '<']
-    f.set_scope_from_request(request, 'person_scope')
+    f.set_scope_from_request('person_scope')
     #    Read data here --> got required amount
     f.update_session_scope('person_name', '##Elisabet', '#Hansson#Lars', 100, 100)
     
@@ -89,7 +89,7 @@ def test_ownerfilter_next_item(user_env):
     
     # 2. At given point
     user_session['person_scope'] = ['Za', None]
-    f.set_scope_from_request(request, 'person_scope')
+    f.set_scope_from_request('person_scope')
     #    Read data here --> reached end
     f.update_session_scope('person_name', 'Zakrevski##Arseni', 'Östling##Carl', 50, 28)
     
@@ -99,7 +99,7 @@ def test_ownerfilter_next_item(user_env):
     # 3. At end
     user_session['person_scope'] = ['>', None]
     #    Read data here --> reached end
-    f.set_scope_from_request(request, 'person_scope')
+    f.set_scope_from_request('person_scope')
     
     x = f.next_name('fw')
     assert x == '> end', "next fw not at end"

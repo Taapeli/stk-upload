@@ -102,7 +102,7 @@ class MediaBl(Media):
         self.mime = None
         self.name = ""
 
-    def save(self, dataservice, tx, **kwargs):  # batch_id=None):
+    def save(self, dataservice, **kwargs):
         """Saves this new Media object to db.
 
         #TODO: Process also Notes for media?
@@ -112,28 +112,24 @@ class MediaBl(Media):
             raise RuntimeError(f"Media.save needs batch_id for parent {self.id}")
 
         self.uuid = self.newUuid()
-        m_attr = {}
-        try:
-            m_attr = {
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "src": self.src,
-                "mime": self.mime,
-                "name": self.name,
-                "description": self.description,
-            }
-            m_attr["batch_id"] = kwargs["batch_id"]
-            result = tx.run(
-                CypherMedia.create_in_batch,
-                bid=kwargs["batch_id"],
-                uuid=self.uuid,
-                m_attr=m_attr,
-            )
-            self.uniq_id = result.single()[0]
-        except Exception as e:
-            print(f"MediaBl.save: {e.__class__.__name__} {e}, id={self.id}")
-            raise RuntimeError(f"Could not save Media {self.id}")
+        m_attr = {
+            "handle": self.handle,
+            "change": self.change,
+            "id": self.id,
+            "src": self.src,
+            "mime": self.mime,
+            "name": self.name,
+            "description": self.description,
+        }
+        m_attr["batch_id"] = kwargs["batch_id"]
+        result = dataservice.tx.run(
+            CypherMedia.create_in_batch,
+            bid=kwargs["batch_id"],
+            uuid=self.uuid,
+            m_attr=m_attr,
+        )
+        self.uniq_id = result.single()[0]
+
         return
 
 
@@ -155,7 +151,7 @@ class MediaReader(DataService):
             f"MediaReader.read_my_media_list: Get max {limit} medias {ustr}starting {fw!r}"
         )
 
-        res = self.dataservice.dr_get_media_list(self.use_user, self.user_context.batch_id, fw, limit)
+        res = self.dataservice.dr_get_media_list(self.use_user, self.user_context.material.batch_id, fw, limit)
         if Status.has_failed(res):
             return res
         for record in res.get("recs", None):
@@ -217,7 +213,7 @@ class MediaReader(DataService):
         # (media) <-[crop()]-   (Event  'E9999' id=99999) <-- (Person 'I9999' id=999)
 
         user = self.user_context.batch_user()
-        res = self.dataservice.dr_get_media_single(user, self.user_context.batch_id, oid)
+        res = self.dataservice.dr_get_media_single(user, self.user_context.material.batch_id, oid)
         # returns {status, items}
         if Status.has_failed(res):
             return res

@@ -31,26 +31,20 @@ import pprint
 import time
 import threading
 import traceback
-import logging
-from datetime import datetime
 from dataclasses import dataclass
 from typing import List
+from flask_babelex import _
+from flask import flash
+import logging
 
 logger = logging.getLogger("stkserver")
 
-from flask_babelex import _
-
 import shareds
+from models import email, util, syslog
 from bl.root import Root, State
 from bl.base import IsotammiException
-from models import email, util, syslog
 from bl.gramps import gramps_loader
-from pe.neo4j.cypher.cy_batch_audit import CypherRoot
-
-# ==> bl.batch.Batch.BATCH_* 7.5.2021 / JMä
-# STATUS_UPLOADED = "uploaded", STATUS_LOADING = "loading", STATUS_DONE = "done"
-# STATUS_FAILED = "failed", STATUS_ERROR = "error", STATUS_REMOVED = "removed"
-
+from pe.neo4j.cypher.cy_root import CypherRoot
 
 # ===============================================================================
 # Background loading of a Gramps XML file
@@ -118,12 +112,12 @@ from pe.neo4j.cypher.cy_batch_audit import CypherRoot
 
 
 def get_upload_folder(username):
-    """ Returns upload directory for given user"""
+    """ Returns upload directory for given user. """
     return os.path.join("uploads", username)
 
 
 def set_meta(username, batch_id, filename, **kwargs):
-    """ Stores status information in .meta file """
+    """ Stores status information from kwargs to .meta file. """
     upload_folder = get_upload_folder(username)
     name = "{}.meta".format(filename)
     metaname = os.path.join(upload_folder, batch_id, name)
@@ -131,13 +125,15 @@ def set_meta(username, batch_id, filename, **kwargs):
 
 
 def update_metafile(metaname, **kwargs):
+    """ Create or update meta data. """
     try:
         meta = eval(open(metaname).read())
     except FileNotFoundError:
         meta = {}
     meta.update(kwargs)
     open(metaname, "w").write(pprint.pformat(meta))
-
+    # print(f"bp.admin.uploads.update_metafile: state={meta.get('status','-')}, "
+    #       f"object groups={len(meta.get('progress',{}))}")
 
 def get_meta(root):
     """ Reads status information from .meta file """
@@ -148,16 +144,17 @@ def get_meta(root):
         status = meta.get("status")
         if status == State.FILE_LOADING:
             stat = os.stat(metaname)
-            if (
-                stat.st_mtime < time.time() - 60
-            ):  # not updated within last minute -> assume failure
+            max_sec = 2*60
+            if (stat.st_mtime < time.time() - max_sec): 
+                # not updated within last minute -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
+                msg1= f"{_('Load failed, no progress in %(n)s seconds', n=max_sec)}"
+                msg = f"{util.format_timestamp()}: {msg1}"
                 with open(root.logname,"a") as f:
                     print("", file=f)
-                    msg = "{}: {}".format(
-                            util.format_timestamp(),
-                            _("Load failed, no progress in 60 seconds")) 
                     print(msg, file=f)
+                print(f"bp.admin.uploads.get_meta: {msg}")
+                flash(msg1)
                 update_metafile(metaname, status=State.FILE_LOAD_FAILED)
     except FileNotFoundError as e:
         meta = {}
@@ -170,7 +167,7 @@ def get_meta(root):
 def i_am_alive(metaname, parent_thread):
     """ Checks if background thread is still alive """
     while os.path.exists(metaname) and parent_thread.is_alive():
-        print(parent_thread.progress)
+        print(f"bp.admin.uploads.i_am_alive: counts {list(parent_thread.progress.values())}")
         update_metafile(metaname, progress=parent_thread.progress)
         time.sleep(shareds.PROGRESS_UPDATE_RATE)
 
@@ -215,7 +212,7 @@ def background_load_to_stkbase(batch:Root) -> None:
             msg += "\n{}".format(step)
         msg += "\n"
         open(batch.logname, "w", encoding="utf-8").write(msg)
-        email.email_admin("Stk: Gramps XML file stored", msg)
+        email.email_admin("Gramps file stored", msg)
         syslog.log(type="completed save to database", file=batch.xmlname, user=batch.user)
     except Exception as e:
         # traceback.print_exc()
@@ -234,7 +231,7 @@ def background_load_to_stkbase(batch:Root) -> None:
             pprint.pprint(e.kwargs)
             msg += pprint.pformat(e.kwargs)
         open(batch.logname, "w", encoding="utf-8").write(msg)
-        email.email_admin("Stk: Gramps XML file storing FAILED", msg)
+        email.email_admin("Gramps file storing FAILED", msg)
         syslog.log(type="gramps store to database failed", file=batch.xmlname, user=batch.user)
 
 
@@ -286,11 +283,11 @@ class Upload:
             s += f", counts {self.count}"
         if self.auditors:
             s += f", auditors: {[a[0] for a in self.auditors]}"
-        return f"{self.material_type}/{self.state}, {s}" #, found {has_file}, {has_log}"
+        return f"{self.material_type}/{self.material.state}, {s}" #, found {has_file}, {has_log}"
 
     def for_auditor(self):
         """ Is relevant for auditor? """
-        if self.state in [
+        if self.material.state in [
             State.ROOT_AUDIT_REQUESTED, 
             State.ROOT_AUDITING, 
             State.ROOT_ACCEPTED, 
@@ -348,7 +345,7 @@ def list_uploads(username:str) -> List[Upload]:
             status=_(state),
             is_candidate=1 if (b.state == State.ROOT_CANDIDATE) else 0,
             for_auditor=1 if b.for_auditor() else 0,
-            material_type=b.material,
+            material_type=b.material_type,
             description=b.description,
         )
         #print(f"#bp.admin.uploads.list_uploads: {upload}")
@@ -357,12 +354,12 @@ def list_uploads(username:str) -> List[Upload]:
     return sorted(uploads, key=lambda upload: upload.batch_id)
 
 def list_uploads_all(users) -> List[Upload]:
-    """ Get named setups.User objects. """
+    """ Get named setups.User objects by descending batch_id. """
     uploads = []
     for user in users:
         for upload in list_uploads(user.username):
             uploads.append(upload)
-    return sorted(uploads, key=lambda upload: upload.batch_id)
+    return sorted(uploads, key=lambda upload: upload.batch_id, reverse=True)
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.

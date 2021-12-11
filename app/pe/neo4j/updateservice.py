@@ -29,12 +29,13 @@ logger = logging.getLogger("stkserver")
 from datetime import date  # , datetime
 
 from bl.base import Status, IsotammiException
+from bl.comment import Comment
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
-from bl.comment import Comment
+from bl.source import SourceBl
 
 from pe.dataservice import ConcreteService
-from .cypher.cy_batch_audit import CypherRoot #, CypherAudit
+from .cypher.cy_root import CypherRoot #, CypherAudit
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_family import CypherFamily
@@ -59,7 +60,7 @@ class Neo4jUpdateService(ConcreteService):
 
         :param: driver             neo4j.DirectDriver object
         """
-        print(f"#~~~~{self.__class__.__name__} init")
+        logger.info(f"#~~~~{self.__class__.__name__} init")
         self.driver = driver
         self.tx = None  # Until started in Dataservice.__enter__()
 
@@ -143,21 +144,18 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK, "id": batch_id}
 
     def ds_get_batch(self, user, batch_id):
-        """Get Batch node by username and batch id. """
-        try:
-            result = self.tx.run(CypherRoot.get_single_batch, batch=batch_id)
-            for record in result:
-                node = record.get("root")
-                if node:
-                    return {"status":Status.OK, "node":record["root"]}
-                else:
-                    return {"status":Status.NOT_FOUND, "node":None,
-                            "statustext": "Batch not found"}
-        except Exception as e:
-            statustext = (
-                f"Neo4jUpdateService.ds_get_batch failed: {e.__class__.__name__} {e}"
-            )
-            return {"status": Status.ERROR, "statustext": statustext}
+        """Get Batch node by username and batch id. 
+           Note. 'user' not used!
+        """
+        result = self.tx.run(CypherRoot.get_single_batch, 
+                             user=user, batch=batch_id)
+        for record in result:
+            node = record.get("root")
+            if node:
+                return {"status":Status.OK, "node":node}
+            else:
+                return {"status":Status.NOT_FOUND, "node":None,
+                        "statustext": "Batch not found"}
        
 
     def ds_batch_save(self, attr):
@@ -167,10 +165,10 @@ class Neo4jUpdateService(ConcreteService):
 
         Batch.timestamp is created in the Cypher clause.
         """
-        result = self.tx.run(CypherRoot.batch_create, b_attr=attr).single()
+        result = self.tx.run(CypherRoot.batch_merge, b_attr=attr).single()
         if not result:
             raise IsotammiException("Unable to save Batch",
-                            cypher=CypherRoot.batch_create,
+                            cypher=CypherRoot.batch_merge,
                             b_attr=attr,
                             )
         uniq_id = result[0]
@@ -185,10 +183,6 @@ class Neo4jUpdateService(ConcreteService):
         )
         uniq_id = result.single()[0]
         return {"status": Status.OK, "identity": uniq_id}
-
-        # except Exception as e:
-        #     statustext = f"Neo4jUpdateService.ds_batch_set_state failed: {e.__class__.__name__} {e}"
-        #     return {"status": Status.ERROR, "statustext": statustext}
 
 
     def ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
@@ -417,7 +411,21 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Source -----
 
-    # ----- Citation -----
+    def mergesources(self, id1, id2):
+        cypher_mergesources = """
+            match (p1:Source)        where id(p1) = $id1 
+            match (p2:Source)        where id(p2) = $id2
+            call apoc.refactor.mergeNodes([p1,p2],
+                {properties:'discard',mergeRels:true})
+            yield node
+            return node
+        """
+        rec = self.tx.run(cypher_mergesources,id1=id1,id2=id2).single()
+        if rec is None: return None
+        node = rec['node']
+        source = SourceBl.from_node(node)
+        return source
+            # ----- Citation -----
 
     # ----- Event -----
 
@@ -790,7 +798,7 @@ class Neo4jUpdateService(ConcreteService):
 
         Comment.timestamp is created in the Cypher clause.
         
-        TODO: Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
+        Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
         """
         is_reply = attr.get("reply")
         if is_reply:

@@ -47,7 +47,7 @@ if not app:
     raise RuntimeError("Start this application in '..' from 'run.py' or 'runssl.py'")
 
 from bl.person import PersonReader
-from ui.user_context import UserContext
+from ui.context import UserContext
 
 
 @app.before_request
@@ -102,7 +102,7 @@ def entry():
     is_demo = shareds.app.config.get("DEMO", False)
     if is_demo:
         # Get surname cloud data
-        u_context = UserContext(session, current_user, request)
+        u_context = UserContext()
         u_context.user = None
 
         with PersonReader("read", u_context) as service:

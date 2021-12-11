@@ -226,7 +226,7 @@ class EventBl(Event):
         self.place = None  # Place node, if included
         self.person = None  # Persons names connected; for creating display
 
-    def save(self, dataservice, tx, **kwargs):
+    def save(self, dataservice, **kwargs):
         """Saves event to database:
         - Creates a new db node for this Event
         - Sets self.uniq_id
@@ -257,60 +257,44 @@ class EventBl(Event):
                 e_attr.update({"attr": a})
         if self.dates:
             e_attr.update(self.dates.for_db())
-        try:
-            result = tx.run(
-                CypherEvent.create_to_batch, batch_id=batch_id, e_attr=e_attr
-            )
-            ids = []
-            for record in result:
-                self.uniq_id = record[0]
-                ids.append(self.uniq_id)
-                if len(ids) > 1:
-                    print(
-                        "iError updated multiple Events {} - {}, attr={}".format(
-                            self.id, ids, e_attr
-                        )
+
+        result = dataservice.tx.run(
+            CypherEvent.create_to_batch, batch_id=batch_id, e_attr=e_attr
+        )
+        ids = []
+        for record in result:
+            self.uniq_id = record[0]
+            ids.append(self.uniq_id)
+            if len(ids) > 1:
+                print(
+                    "iError updated multiple Events {} - {}, attr={}".format(
+                        self.id, ids, e_attr
                     )
-        except Exception as err:
-            # traceback.print_exc()
-            print(f"iError: Event_save: {err} attr={e_attr}")  # , file=stderr)
-            raise RuntimeError(f"Could not save Event {self.id}")
-
-        try:
-            # Make relation to the Place node
-            for pl_handle in self.place_handles:
-                tx.run(
-                    CypherEvent.link_place, handle=self.handle, place_handle=pl_handle
                 )
-        except Exception as err:
-            print("iError: Event_link_place: {0}".format(err))  # , file=stderr)
 
-        try:
-            # Make relations to the Note nodes
-            if self.note_handles:
-                result = tx.run(
-                    CypherEvent.link_notes,
-                    handle=self.handle,
-                    note_handles=self.note_handles,
-                )
-                _cnt = result.single()["cnt"]
-                # print(f"##Luotiin {cnt} Note-yhteyttä: {self.id}->{self.note_handles}")
-        except Exception as err:
-            logger.error(
-                f"{err}: in creating Note links: {self.id}->{self.note_handles}"
+        # Make relation to the Place node
+        for pl_handle in self.place_handles:
+            dataservice.tx.run(
+                CypherEvent.link_place, handle=self.handle, place_handle=pl_handle
             )
-            # print("iError: Event_link_notes: {0}".format(err), file=stderr)
 
-        try:
-            # Make relations to the Citation nodes
-            if self.citation_handles:  #  citation_handles != '':
-                tx.run(
-                    CypherEvent.link_citations,
-                    handle=self.handle,
-                    citation_handles=self.citation_handles,
-                )
-        except Exception as err:
-            print("iError: Event_link_citations: {0}".format(err))  # , file=stderr)
+        # Make relations to the Note nodes
+        if self.note_handles:
+            result = dataservice.tx.run(
+                CypherEvent.link_notes,
+                handle=self.handle,
+                note_handles=self.note_handles,
+            )
+            _cnt = result.single()["cnt"]
+            # print(f"##Luotiin {cnt} Note-yhteyttä: {self.id}->{self.note_handles}")
+
+        # Make relations to the Citation nodes
+        if self.citation_handles:  #  citation_handles != '':
+            dataservice.tx.run(
+                CypherEvent.link_citations,
+                handle=self.handle,
+                citation_handles=self.citation_handles,
+            )
 
         # Make relations to the Media nodes and their Note and Citation references
         if self.media_refs:

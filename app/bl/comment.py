@@ -120,7 +120,7 @@ class CommentReader(DataService):
             f"CommentReader.read_my_comment_list: Get max {limit} topics {ustr} starting {fw!r}"
         )
 
-        res = self.dataservice.dr_get_topic_list(self.use_user, self.user_context.batch_id, fw, limit)
+        res = self.dataservice.dr_get_topic_list(self.use_user, self.user_context.material.batch_id, fw, limit)
         if Status.has_failed(res):
             return res
         for record in res['recs']:

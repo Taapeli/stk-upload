@@ -93,17 +93,11 @@
     {#  Show and change data: researcher data or approved common data. #}
     {#  call show_use_case(no_change=true) if you want to deny change. #}
     {% if user_context and not config['DEMO'] %}
-        {{ user_context.owner_str() }}
-{#
-#        {% if user_context.user %}
-#           {% if not no_change %}
-#               {% if user_context.context_code == 1 %}{%set newdiv = 2%}
-#               {%else%}{% set newdiv=1 %}
-#               {%endif%}
-#            <i>(<a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a>)</i>
-#           {% endif %}
-#        {% endif %}
-#}
+        {% if user_context.material.batch_id %}
+            <a href="/gramps/details/{{user_context.material.batch_id}}" title="{{ _('Show material details') }}">
+               {{ user_context.display_current_material() }}</a>
+        {% else %}{{ user_context.display_current_material() }}
+        {% endif -%}
     {% endif %}
 {%- endmacro %}
 
@@ -154,14 +148,14 @@
     <span id="changetime" title="{{ _('latest change time and contributor') }}"
         {% if margin %}style='margin-right:{{margin}}'{% endif %}
         >{{ _("edited") }} {{obj.change_str()}}
-        {%- if obj.root %}{# Batch node data like {'root_type', 'root_user', 'id'} #}
+        {%- if obj.root %}{# Batch node data like {'material', 'root_user', 'id'} #}
         , <span>
         {% if obj.root.root_state == 'Candidate' %}
         	{{ _('User data') }}:
-            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.root_type}}
+            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.material_type}}
         {% else %}
         	{{ _('origin from') }}
-            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.root_type}}
+            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{ _(obj.root.material_type) }}
         {% endif %}
         </span>
         {% endif %}

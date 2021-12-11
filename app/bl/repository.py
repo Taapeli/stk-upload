@@ -7,7 +7,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 """
 
 # blacked 25.5.2021/JMä
-from sys import stderr
+#from sys import stderr
 
 from bl.base import NodeObject
 from pe.neo4j.cypher.cy_repository import CypherRepository
@@ -125,7 +125,7 @@ class Repository(NodeObject):
     #         print ("Type: " + self.type)
     #         return True
 
-    def save(self, dataservice,  tx, **kwargs):
+    def save(self, dataservice, **kwargs):
         """Saves this Repository to db under given batch."""
         if not "batch_id" in kwargs:
             raise RuntimeError(f"Repository.save needs batch_id for {self.id}")
@@ -133,32 +133,24 @@ class Repository(NodeObject):
         self.uuid = self.newUuid()
         batch_id = kwargs.get("batch_id", None)
         r_attr = {}
-        try:
-            r_attr = {
-                "uuid": self.uuid,
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "rname": self.rname,
-                "type": self.type,
-            }
-            result = tx.run(
-                CypherRepository.create_in_batch,
-                bid=batch_id,
-                r_attr=r_attr
-            )
-            self.uniq_id = result.single()[0]
-        except Exception as err:
-            print(f"iError Repository_save: {err} attr={r_attr}", file=stderr)
-            raise RuntimeError("Could not save Repository {}".format(self.id))
+        r_attr = {
+            "uuid": self.uuid,
+            "handle": self.handle,
+            "change": self.change,
+            "id": self.id,
+            "rname": self.rname,
+            "type": self.type,
+        }
+        result = dataservice.tx.run(
+            CypherRepository.create_in_batch,
+            bid=batch_id,
+            r_attr=r_attr
+        )
+        self.uniq_id = result.single()[0]
 
-        try:
-            # Save the notes attached to self
-            if self.notes:
-                Note.save_note_list(dataservice, parent=self, batch_id=batch_id)
-        except Exception as err:
-            print(f"iError Repository.save note: {err}", file=stderr)
-            raise SystemExit("Stopped due to errors")  # Stop processing
-            # TODO raise ConnectionError("Repository.save: {0}".format(err))
+        # Save the notes attached to self
+        if self.notes:
+            attr = {"parent":self, "batch_id":batch_id}
+            Note.save_note_list(dataservice, **attr)
 
         return

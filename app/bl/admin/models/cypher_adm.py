@@ -153,9 +153,18 @@ RETURN COUNT(a) AS cnt'''
     create_freetext_index = """
 CALL db.index.fulltext.createNodeIndex("searchattr",["Person"],["searchattr"])
     """
+    
+    create_freetext_index_for_notes = """
+CALL db.index.fulltext.createNodeIndex("notetext",["Note"],["text"])     
+    """
 
     build_indexes = """
 match (p:Person) --> (n:Name) 
 with p,collect(n.firstname + " " + n.suffix + " " + n.surname) as names
 set p.searchattr = reduce(s="", n in names | s + " " + n) 
     """
+    build_indexes_for_batch = """
+match (r:Root{id:$batch_id}) --> (p:Person) --> (n:Name) 
+with p,collect(n.firstname + " " + n.suffix + " " + n.surname) as names
+set p.searchattr = reduce(s="", n in names | s + " " + n) 
+    """    

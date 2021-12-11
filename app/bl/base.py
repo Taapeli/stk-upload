@@ -27,7 +27,7 @@ import uuid
 import json
 import traceback
 from datetime import datetime
-
+import base32_lib as base32
 
 class Status:
     """Status code values for result dictionary.
@@ -97,7 +97,7 @@ class NodeObject:
 
         Optional uniq_id may be uuid identifier (str) or database key (int).
         """
-        self.uuid = None  # UUID
+        self.uuid = None  # UUID / isotammi_id
         self.uniq_id = None  # Neo4j object id
         self.change = 0  # Object change time
         self.id = ""  # Gedcom object id like "I1234"
@@ -132,14 +132,6 @@ class NodeObject:
     # @staticmethod
     # def timestamp_str(timestamp, opt="m"): --> models.util.format_timestamp
     #     """ Converts a Neo4j timestamp to display format (by 'm' minute or 'd' day). """
-    #     if timestamp:
-    #         t = float(timestamp) / 1000.0
-    #         if opt == "d":
-    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y")
-    #         else:
-    #             return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
-    #     else:
-    #         return ""
 
 
     @classmethod
@@ -199,6 +191,31 @@ class NodeObject:
         return False
 
     @staticmethod
+    def split_with_hyphen(id_str):
+        """Inserts a hyphen into the id string."""
+        """Examples: H-1, H-1234, H1-2345, H1234-5678."""
+
+        return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
+
+    @staticmethod
+    def new_isotammi_id(dataservice, obj_type_letter):
+        """Generates a new Isotammi id."""
+
+        get_new_id ="""
+MERGE (a:Isotammi_id {id:$id_type})
+ON CREATE SET a.counter = 1
+ON MATCH SET a.counter = a.counter + 1
+RETURN a.counter AS n_Isotammi_id"""
+
+        result = dataservice.tx.run(get_new_id, id_type=obj_type_letter)
+        iid = result.single()[0]
+##        print(f"new_isotammi_id lock value: {iid}")
+        isotammi_id = NodeObject.split_with_hyphen(obj_type_letter + base32.encode(iid, checksum=False))
+
+        print(f"new_isotammi_id: {iid} -> {isotammi_id}")
+        return isotammi_id
+
+    @staticmethod
     def newUuid():
         """Generates a new uuid key.
 
@@ -207,11 +224,23 @@ class NodeObject:
         return uuid.uuid4().hex
 
     def uuid_short(self):
-        """ Display uuid in short form. """
+        """ Display uuid (or isotammi_id) in short form. 
+        
+            Real uuid shortened, isotammi_id need is not too long
+        """
         if self.uuid:
-            return self.uuid[:6]
+            if len(self.uuid) > 20:
+                return self.uuid[:6]
+            return self.uuid
         else:
             return ""
+
+    # def uuid_str(self):
+    #     """ Display uuid in short form, or show self.uniq_id is missing. """
+    #     if self.uuid:
+    #         return self.uuid[:6]
+    #     else:
+    #         return f"({self.uniq_id})"
 
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """
@@ -219,13 +248,6 @@ class NodeObject:
             return datetime.fromtimestamp(self.change).strftime("%d.%m.%Y %H:%M:%S")
         except TypeError:
             return ""
-
-    def uuid_str(self):
-        """ Display uuid in short form, or show self.uniq_id is missing. """
-        if self.uuid:
-            return self.uuid[:6]
-        else:
-            return f"({self.uniq_id})"
 
     def _json_encode(self):
         """Creates a dictionary of class parameters, if JSON serializable.

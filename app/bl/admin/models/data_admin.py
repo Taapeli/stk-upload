@@ -114,9 +114,12 @@ class DataAdmin():
 
     
     @classmethod
-    def build_free_text_search_indexes(cls, tx=None):
+    def build_free_text_search_indexes(cls, tx=None, batch_id=None):
         if not tx:
             tx = shareds.driver.session()
-        result = tx.run(Cypher_adm.build_indexes)
+        if batch_id:
+            result = tx.run(Cypher_adm.build_indexes_for_batch, batch_id=batch_id)
+        else:
+            result = tx.run(Cypher_adm.build_indexes)
     
         

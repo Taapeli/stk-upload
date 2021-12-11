@@ -13,7 +13,7 @@ from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
 
-from .util import run_cypher_batch, run_cypher_batch2
+from .util import run_cypher_batch
 
 class PersonRecord:
     ''' Object to return person display data. '''
@@ -80,7 +80,7 @@ class Neo4jReadServiceTx(ConcreteService):
     '''
     def __init__(self, driver=None):
         
-        print(f'#~~~~{self.__class__.__name__} init')
+        logger.debug(f'#~~~~{self.__class__.__name__} init')
         self.driver = driver if driver else shareds.driver
 
 
@@ -89,7 +89,7 @@ class Neo4jReadServiceTx(ConcreteService):
         
             args = dict {use_user, fw, limit, rule, key, years}
         """
-        material = args.get('material')
+        material_type = args.get('material_type')
         state = args.get('state')
         username = args.get('use_user')
         rule = args.get('rule')
@@ -104,34 +104,25 @@ class Neo4jReadServiceTx(ConcreteService):
 
         #if not username: username = ""
 
-        freetext_search = False
+        cypher_prefix = ""
         if restart:
             # Show search form only
             return {'items': [], 'status': Status.NOT_STARTED }
         elif args.get('pg') == 'all':
             # Show persons, no search form
             cypher = CypherPerson.get_person_list
-            print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
+            print(f"tx_get_person_list: Show '{state}' '{material_type}' @{username} fw={fw_from}")
         elif rule == 'freetext':
-            cypher1 = CypherPerson.read_persons_w_events_by_name1
-            cypher2 = CypherPerson.read_persons_w_events_by_name2
-            freetext_search = True
+            cypher_prefix = CypherPerson.read_persons_w_events_by_name1
+            cypher = CypherPerson.read_persons_w_events_by_name2
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
             cypher = CypherPerson.read_persons_w_events_by_refname
-            print(f"tx_get_person_list: Show '{state}' '{material}' data @{username}, {rule} ~ \"{key}*\"")
+            print(f"tx_get_person_list: Show '{state}' '{material_type}' data @{username}, {rule} ~ \"{key}*\"")
         elif rule == 'years':
             # Search persons matching <years>
             cypher = CypherPerson.read_persons_w_events_by_years
-            print(f"tx_get_person_list: Show '{state}' '{material}', years {years}")
-            # if show_approved:
-            #     print(f'tx_get_person_list: Show approved common data years {years}')
-            #     result = self.tx.run(CypherPerson.get_common_events_by_years,
-            #                          years=years)
-            # else:
-            #     print(f'tx_get_person_list: Show candidate data  years {years}')
-            #     result = self.tx.run(CypherPerson.get_my_events_by_years,
-            #                          years=years, user=user)
+            print(f"tx_get_person_list: Show '{state}' '{material_type}', years {years}")
         elif rule == 'ref':
             #TODO: Search persons where a reference name = <key> value
             return {'items': [], 'status': Status.ERROR,
@@ -149,18 +140,12 @@ class Neo4jReadServiceTx(ConcreteService):
  
         persons = []
         #logger.debug(f"tx_get_person_list: cypher: {cypher}")
-        if freetext_search:
-            result = run_cypher_batch2(self.tx, cypher1, cypher2, username, batch_id,
-                                use=rule, name=key,
-                                years=years,
-                                start_name=fw_from, 
-                                limit=limit)
-        else:
-            result = run_cypher_batch(self.tx, cypher, username, batch_id,
-                                use=rule, name=key,
-                                years=years,
-                                start_name=fw_from, 
-                                limit=limit)
+        result = run_cypher_batch(self.tx, cypher, username, batch_id,
+                            cypher_prefix=cypher_prefix,
+                            use=rule, name=key,
+                            years=years,
+                            start_name=fw_from, 
+                            limit=limit)
         # result: person, names, events
         for record in result:
             #  <Record 
@@ -207,17 +192,16 @@ class Neo4jReadServiceTx(ConcreteService):
         #    results: person, root
 
         try:
-            record = run_cypher_batch(self.tx, CypherPerson.get_person, active_user, batch_id, uuid=uuid).single()
+            record = run_cypher_batch(self.tx, CypherPerson.get_person,
+                                      active_user, batch_id, uuid=uuid).single()
             # <Record 
             #    p=<Node id=25651 labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
             #            'sex': 1, 'confidence': '', 'change': 1585409698, 'birth_low': 1783,
             #            'birth_high': 1783, 'id': 'I1135', 'uuid': 'dc6a05ca6b2249bfbdd9708c2ee6ef2b',
             #            'death_low': 1865}>
-            #    root_type='PASSED'
             #    root=<Node id=31100 labels=frozenset({'Audit'})
-            #        properties={'auditor': 'juha', 'id': '2020-07-28.001', 'user': 'juha',
-            #            'timestamp': 1596463360673}>
+            #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
             # >
             if record is None:
                 print(f'dx_get_person_by_uuid: person={uuid} not found')
@@ -225,20 +209,20 @@ class Neo4jReadServiceTx(ConcreteService):
                 return res
 
             # Store original researcher data 
-            #    root = dict {root_type, root_user, id}
-            #    - root_type    which kind of owner link points to this object (PASSED / OWNER)
+            #    root = dict {material_type, root_user, id}
+            #    - material_type root material type
             #    - root_user    the (original) owner of this object
             #    - bid          Batch id
-            root_node = record['root']
-            root_type = root_node.get('material', "")
-            root_state = root_node.get('state', "")
-            root_user = root_node.get('user', "")
-            bid = root_node.get('id', "")
+            node = record['root']
+            material_type = node.get('material', "")
+            root_state = node.get('state', "")
+            root_user = node.get('user', "")
+            bid = node.get('id', "")
 
             person_node = record['p']
             puid = person_node.id
             res['person_node'] = person_node
-            res['root'] = {'root_type':root_type, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
+            res['root'] = {'material':material_type, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
 
 #                 # Add to list of all objects connected to this person
 #                 self.objs[person.uniq_id] = person
@@ -271,7 +255,8 @@ class Neo4jReadServiceTx(ConcreteService):
                 #            'type': 'Birth Name', 'suffix': '', 'title': '', 'order': 0}>
                 #    role=None
                 # >
-                person_rel = record['rel_type']     # NAME / EVENT
+
+                #person_rel = record['rel_type']     # NAME / EVENT
                 node = record['node']
                 role = record['role']               # Event: Primary ...
                 label, = node.labels
@@ -351,11 +336,11 @@ class Neo4jReadServiceTx(ConcreteService):
 
                 for event_node in record['events']:
 #                         f_event = EventBl.from_node(event_node)
-                    eid = event_node.get('id')
                     relation_type = event_node.get('type')
                     # Add family events to person events, too
                     if family_rel == "PARENT":
-                        event_role = "Family"
+                        #eid = event_node.get('id')
+                        #event_role = "Family"
                         #print(f"#+3.2 ({puid}) -[:EVENT {event_role}]-> (:Event {event_node.id} {eid})")
                         family_events.append(event_node)
 
@@ -479,7 +464,7 @@ class Neo4jReadServiceTx(ConcreteService):
             for record in results:
                 # Returns 
                 #    - src      source node
-                #    - r        relation: CITATION|NOTE|MEDIA
+                #    - r        relation CITATION|NOTE|MEDIA properties
                 #    - target   target object Citation|Note|Media
 
                 # Create a reference to target object including node, order and crop
@@ -488,7 +473,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 # The existing object src
                 src_node = record['src']
                 src_uniq_id = src_node.id
-                src_label, = src_node.labels
+                #src_label, = src_node.labels
                 #src = obj_catalog[record['uniq_id']]
 
                 # Target is a Citation, Note or Media
@@ -578,3 +563,67 @@ class Neo4jReadServiceTx(ConcreteService):
                 references[uniq_id] = ref
 
         return {'status': Status.OK, 'sources': references}
+
+
+    def tx_note_search(self, args):
+        """Free text search in Notes"""
+        print("Neo4jReadServiceTx.tx_note_search: TODO - MUST limit by material_type !!")
+#TODO tx_note_search() - Should limit by material_type
+        #material_type = args.get('material_type')
+        #state = args.get('state')
+        username = args.get('use_user')
+        searchtext = args.get('key')
+        limit = args.get('limit', 100)
+        batch_id = args.get('batch_id')
+
+        cypher_prefix = """
+            CALL db.index.fulltext.queryNodes("notetext",$searchtext) 
+                YIELD node as note, score
+            with note,score
+            order by score desc
+        """
+        #cypher_prefix = ""
+        cypher = """
+            match (root) --> (note) 
+            match (x) --> (note)
+                where not "Root" in labels(x)
+            return distinct note, collect([x,labels(x)]) as referrers, score
+            limit $limit
+            """
+        result = run_cypher_batch(self.tx, cypher, username, batch_id,
+                            cypher_prefix=cypher_prefix,
+                            searchtext=searchtext,
+                            limit=limit)
+        rsp = []
+        for record in result:
+            #item = record.get('item')
+            #note = item[0]
+            #x = item[1]
+            note = record.get('note')
+            #x = record.get('x')
+            referrers = record.get('referrers')
+            score = record.get('score')
+            referrerlist = []
+            for r in referrers:
+                refdata = dict(r[0])
+                url = ""
+                label = r[1][0]
+                if label == "Place": label = "location"
+                if label in ["Person","Family","Source","Media"]:
+                    url = f"/scene/{label.lower()}?uuid=" + refdata["uuid"]
+                else:
+                    url = f"/scene/{label.lower()}/uuid=" + refdata["uuid"]
+#                     url = "/scene/person?uuid=" + refdata["uuid"]
+#                 if r[1] == ["Event"]:
+#                     url = "/scene/event/uuid=" + refdata["uuid"]
+                #url = f"/scene/{labels[0].lower()}?uuid=" + refdata["uuid"]
+                refdata['url'] = url 
+                referrerlist.append(refdata)
+            d = dict(
+                note=dict(note),
+                #x=dict(x),
+                referrers=referrerlist,
+                score=score)
+            rsp.append(d) 
+        return {'items': rsp, 'status': Status.OK}
+

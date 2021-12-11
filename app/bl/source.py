@@ -33,7 +33,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 """
 # blacked 2021-05-01 JMä
-import shareds
+#import shareds
 import logging
 
 from .base import NodeObject, Status
@@ -113,7 +113,7 @@ class SourceBl(Source):
         self.note_ref = []
 
 
-    def save(self, dataservice, tx, **kwargs):
+    def save(self, dataservice, **kwargs):
         """ Saves this Source and connect it to Notes and Repositories.
 
             :param: batch_id      batch id where this place is linked
@@ -137,8 +137,8 @@ class SourceBl(Source):
                 "spubinfo": self.spubinfo
             }
 
-            result = tx.run(CypherSourceByHandle.create_to_batch,
-                            batch_id=batch_id, s_attr=s_attr)
+            result = dataservice.tx.run(CypherSourceByHandle.create_to_batch,
+                                        batch_id=batch_id, s_attr=s_attr)
             ids = []
             for record in result:
                 self.uniq_id = record[0]
@@ -153,8 +153,8 @@ class SourceBl(Source):
         # Make relation to the Note nodes
         for note_handle in self.note_handles:
             try:
-                tx.run(CypherSourceByHandle.link_note,
-                       handle=self.handle, hlink=note_handle)
+                dataservice.tx.run(CypherSourceByHandle.link_note,
+                                   handle=self.handle, hlink=note_handle)
             except Exception as err:
                 logger.error(f"Source_gramps.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
                 #print("iError Source.save note: {0}".format(err), file=stderr)
@@ -162,8 +162,10 @@ class SourceBl(Source):
         # Make relation to the Repository nodes
         for repo in self.repositories:
             try:
-                tx.run(CypherSourceByHandle.link_repository,
-                       handle=self.handle, hlink=repo.handle, medium=repo.medium)
+                dataservice.tx.run(CypherSourceByHandle.link_repository,
+                                   handle=self.handle, 
+                                   hlink=repo.handle, 
+                                   medium=repo.medium)
             except Exception as err:
                 print("iError Source.save Repository: {0}".format(err))
                 
@@ -184,7 +186,7 @@ class SourceReader(DataService):
             # For reader only; writer has no context?
             self.user_context = u_context
             self.username = u_context.user
-            if u_context.context_code == u_context.ChoicesOfView.COMMON:
+            if u_context.is_common():
                 self.use_user = None
             else:
                 self.use_user = u_context.user
@@ -195,7 +197,7 @@ class SourceReader(DataService):
         fw = context.first  # From here forward
         use_user = context.batch_user()
         args = {"user": use_user, "fw": fw, "count": context.count}
-        args['batch_id'] = context.batch_id
+        args['batch_id'] = context.material.batch_id
         if context.series:
             # Filtering by series (Lähdesarja)
             THEMES = {
@@ -277,3 +279,9 @@ class SourceReader(DataService):
         res["citations"] = cit
 
         return res
+        
+class SourceWriter(DataService):
+        
+    def mergesources(self, id1, id2):
+        source = self.dataservice.mergesources(id1,id2)
+        return source        

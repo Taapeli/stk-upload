@@ -8,144 +8,187 @@
   {{ hamburger_menu( (
    ) ) }}
 <style>
-p.bullet {
-    text-indent: -2em;
-    padding-left: 2em;
-    margin: 0;
+div.starters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    /*height: 120px;*/
+    align-items: center;
 }
-p > span {
-    font-size: smaller;
-    white-space: nowrap;
-}</style>
+div.starters span.strow {
+    padding: 2pt;
+    display: inline-flex;
+}
+div.starters button {
+    min-height: 36px;
+}
+</style>
 
 <div id="startdiv">
   <div>
     <h1>{{ _("User's home page for Isotammi Services") }}</h1>
 
 {% include "flash_messages.html" %}
+{% set batch_id = session['batch_id'] %}<!-- current batch '{{batch_id}}' -->
 
-{#  <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
-       {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
-       <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
-          <i>{{ 'git'|app_date }}</i></span></p>
-#}
     <div class="row">
 
 {% if current_user.is_authenticated and 
    (current_user.has_role('gedcom') or current_user.has_role('research')) %}
-         <div class="startbox gedtools">
+        <div class="startbox gedtools">
             <div style="display: inline-block;">
-            <form method="get" action="/gedcom">
-               <h2>{{ _('Gedcom tools') }}</h2>
-               <p>{{ _('Use these Gedcom tools to improve the quality of your own file or any file you have recieved.') }}</p>
-               <p>{{ _('Return the improved file back to your genealogy software.') }}</p>
-              <div class="submit"> 
-                 <button type="submit">{{ _('Gedcom tools') }}</button>
-              </div>
-            </form>
+                <form method="get" action="/gedcom">
+
+                    <h2>{{ _('Gedcom tools') }}</h2>
+
+                    <p>{{ _('Use these Gedcom tools to improve the quality of your own file or any file you have recieved.') }}</p>
+                    <p>{{ _('Return the improved file back to your genealogy software.') }}</p>
+                    <div class="submit"> 
+                        <button type="submit">{{ _('Gedcom tools') }}</button>
+                    </div>
+                </form>
             </div>
-         </div>
+        </div>
 {% endif %}
 
 {% if current_user.is_authenticated and current_user.has_role('research') %}
-           <div class="startbox">
-             <div style="display: inline-block;">
+        <div class="startbox">
+            <div style="display: inline-block;">
+
                 <h2>{{ _('Manage Materials') }}</h2>
-                  <form action="/gramps/uploads">
-                 <p>{{ _('You may import your new material to Isotammi and work with existing materials.') }}</p>
-                 <p>{{ _('You may also check in which phase your materials are.') }}</p>
-                 <div class="submit"> 
-                    <input type="submit" value="{{ _('Look at your materials') }}" />
-                 </div>
-                 </form>
-             </div>
-           </div>
+
+                <form action="/gramps/uploads">
+                    <p>{{ _('You may import your new material to Isotammi and work with existing materials.') }}</p>
+                    <p>{{ _('You may also check in which phase your materials are.') }}</p>
+                    <div class="submit"> 
+                        <input type="submit" value="{{ _('Look at your materials') }}" />
+                    </div>
+                </form>
+            </div>
+        </div>
 {% endif %}           
 
-           <div class="startbox">
-             <div style="display: inline-block;">
-               <form method="get" action="/scene/persons/search">
-                   <input type="hidden" name="set_scope" value="1">
 
 {% if current_user.is_authenticated and 
    ( current_user.has_role('research') or current_user.has_role('admin') ) %}
-    {% set batch_id = session['batch_id'] %}<!-- '{{batch_id}}' -->
-    {% set ctxt = session['user_context'] %}
+        <div class="startbox">
+            <div style="display: inline-block;">
 
-                 <h2>{{ _('Browse Materials') }}</h2>
-                 <p>{{ _('View your own candidate material or all approved common data') }}.</p>
+                <h2>{{ _('Browse Common Materials') }}</h2>
 
-                 <p class="bullet">
-					<b><input type="radio" name="batch_id" value=""
-        {% if batch_id == "" %}checked{% endif %}
-                       >{{ _('Approved Isotammi tree') }}</b>
-                 </p>
-
-				 <p style="margin-bottom: .5em;"><b>{{ _('My candidate material') }}</b></p>
-    {% for batch in batches %}
-                 <p class="bullet">
-                    <input type="radio" name="batch_id" value="{{ batch.id }}"
-        {% if batch_id == batch.id %}checked{% endif %}
-                    >
-                    {{ batch.id }}
-					<span>{{ batch.filename }}</span>
-                 </p>
-    {% endfor -%}
-{% else %}
-                 <h2>{{ _('The Browsed Material') }}</h2>
-                 <p>{{ _('You can view only approved and public material in Demo Database') }}.</p>
-                 <input name="div" type="hidden" value="1">
+                <p>{{ _('View different approved common data') }}.</p>
+                <form method="get" action="/scene/material/common">
+                    <div class="starters">
+    {% for material_type in commons  %}
+                        <input type="hidden" name="state" value="Accepted">
+                        <button type="submit" name="material_type" value="{{material_type}}"
+                            >{{ _(material_type) }}
+        {% if material_type == "Family Tree" %}
+                            <br>{{ _('Approved Isotammi tree') }}
+        {% endif -%}
+                        </button>
+    {% endfor %}
+                    </div>
+                </form>
+            </div>
+        </div>
 {% endif %}
 
-                 <div class="submit"> 
-                    <button type="submit">{{ _('Browse') }}</button>
+{% if current_user.is_authenticated and 
+   ( current_user.has_role('research') or current_user.has_role('admin') ) %}
+        <div
+    {% if batches|count > 3 %} class="startbox2"
+    {% else %} class="startbox"
+    {% endif -%}>
+            <div style="display: inline-block;">
+
+                <h2>{{ _('My materials') }}</h2>
+
+<!--                 <p>{{ _('View your own candidate materials') }}.</p> -->
+    {% for root in batches | sort(attribute='state')  %}
+            {% if not loop.previtem %}
+                <p>{{ _("In state") }} {{ _(root.state) }}</p>
+                <div class="starters">
+            {% else %}
+                {% if loop.previtem.state != root.state %}
+                </div>
+                <p>{{ _("In state") }} {{ _(root.state) }}</p>
+                <div class="starters">
+                {% endif %}
+            {% endif %}
+        {# if root.state == "Candidate" #}
+                <form method="post" action="/scene/material/batch">
+            {% if root.description %}
+                  {% set title = _(root.material_type) + " / " + root.description %}
+            {% else %}{% set title = _(root.material_type) %}
+            {% endif -%}
+                        <span class="strow">
+                            <input type="hidden" name="material_type" value="{{root.material_type}}">
+                            <input type="hidden" name="state" value="{{root.state}}">
+                            <button type="submit" name="batch_id" value="{{ root.id }}"
+            {% if batch_id == root.id %}autofocus{% endif %}
+                             title="{{ title }}">
+            {% if root.material_type != "Family Tree" %}
+                                <span class="typetag">{{ _(root.material_type) }}</span>
+            {% endif -%}
+                            {{ root.id }}<br>{{ root.filename()|replace('_',' ') }}
+                            </button>
+                        </span>
+                    </form>
+        {# endif -#}
+    {% endfor -%}
                  </div>
-                 
-               </form>
              </div>
-           </div>
+        </div>
+{% endif %}
+
+
+{% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
+        <div class="startbox audit">
+            <div style="display: inline-block;">
+                <form method="get" action="/audit">
+
+                    <h2>{{ _('Isotammi auditor') }}</h2>
+
+                    <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
+                    <div class="submit"> 
+                        <button type="submit">{{ _('Audit materials') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+{% endif %}
 
 {% if current_user.is_authenticated and 
             (current_user.has_role('admin') or current_user.has_role('master') ) %}
-      <div class="startbox admin">
-        <div style="display: inline-block;">
-          <form method="get" action="/admin">
-            <h2>{{ _('Admin Operations') }}</h2>
-            <p>{{ _('Manage users, reference data sets and do database maintenance tasks') }}.</p>
-            <div class="submit"> 
-               <button type="submit">{{ _('Maintenance') }}</button>
+        <div class="startbox admin">
+            <div style="display: inline-block;">
+                <form method="get" action="/admin">
+
+                    <h2>{{ _('Admin Operations') }}</h2>
+
+                    <p>{{ _('Manage users, reference data sets and do database maintenance tasks') }}.</p>
+                    <div class="submit"> 
+                        <button type="submit">{{ _('Maintenance') }}</button>
+                    </div>
+                </form>
             </div>
-          </form>
         </div>
-      </div>
 {% endif %}
 
-{% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
-      <div class="startbox audit">
-        <div style="display: inline-block;">
-          <form method="get" action="/audit">
-             <h2>{{ _('Isotammi auditor') }}</h2>
-             <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
-             <div class="submit"> 
-                <button type="submit">{{ _('Audit materials') }}</button>
-             </div>
-          </form>
-        </div>
-      </div>
-{% endif %}
+        <div class="startbox">
+            <div style="display: inline-block;">
+                <form method="get" action="http://wiki.isotammi.net/wiki/Työkaluja" target="_blank">
 
-       <div class="startbox">
-         <div style="display: inline-block;">
-           <form method="get" action="http://wiki.isotammi.net/wiki/Työkaluja" target="_blank">
-              <h2>{{ _('Tools and Links') }}</h2>
-   <!--       <p>Ohjesivuitamme voit löytää hyödyllisiä varusohjelmia ja Grampsin lisätoimintoja (grampletteja).</p> -->
-              <p>{{ _('Study our supplementary stand-alone and Gramps utilities in our tools page') }}.</p>
-              <div class="submit"> 
-               <button type="submit">{{ _('Help page') }}</button>
-              </div>
-            </form>
-         </div>
-       </div>
+                    <h2>{{ _('Tools and Links') }}</h2>
+
+                    <p>{{ _('Study our supplementary stand-alone and Gramps utilities in our tools page') }}.</p>
+                    <div class="submit"> 
+                        <button type="submit">{{ _('Help page') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
     </div>{# row #}
 

@@ -42,14 +42,15 @@ Todo:
 # blacked 2021-05-01 JMä
 import traceback
 import logging
-import shareds
+#import shareds
 
 logger = logging.getLogger("stkserver")
 
 from .base import NodeObject, Status
 from bl.dates import DateRange
-from pe.neo4j.cypher.cy_place import CypherPlace
 from pe.dataservice import DataService
+from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.neo4j.cypher.cy_object import CypherObject
 
 
 class Place(NodeObject):
@@ -198,7 +199,7 @@ class PlaceBl(Place):
             logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
             return {"status": Status.ERROR, "items": selection}
 
-    def save(self, dataservice, tx, **kwargs):
+    def save(self, dataservice, **kwargs):
         """Save Place, Place_names, Notes and connect to hierarchy.
 
         :param: place_keys    dict {handle: uniq_id}
@@ -232,73 +233,64 @@ class PlaceBl(Place):
         # Create or update this Place
 
         self.uuid = self.newUuid()
-        pl_attr = {}
-        try:
-            pl_attr = {
-                "uuid": self.uuid,
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "type": self.type,
-                "pname": self.pname,
-            }
-            if self.coord:
-                # If no coordinates, don't set coord attribute
-                pl_attr["coord"] = self.coord.get_coordinates()
+        #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "P")
+        pl_attr = {
+            "uuid": self.uuid,
+            "handle": self.handle,
+            "change": self.change,
+            "id": self.id,
+            "type": self.type,
+            "pname": self.pname,
+        }
+        if self.coord:
+            # If no coordinates, don't set coord attribute
+            pl_attr["coord"] = self.coord.get_coordinates()
 
-            # Create Place self
+        # Create Place self
 
-            if "place_keys" in kwargs:
-                # Check if this Place node is already created
-                place_keys = kwargs["place_keys"]
-                plid = place_keys.get(self.handle)
+        if "place_keys" in kwargs:
+            # Check if this Place node is already created
+            place_keys = kwargs["place_keys"]
+            plid = place_keys.get(self.handle)
+        else:
+            plid = None
+
+        if plid:
+            # 1) node has been created but not connected to Batch.
+            #    update known Place node parameters and link from Batch
+            self.uniq_id = plid
+            if self.type:
+                # print(f">Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
+                result = dataservice.tx.run(
+                    CypherPlace.complete,  # TODO
+                    batch_id=batch_id,
+                    plid=plid,
+                    p_attr=pl_attr,
+                )
             else:
-                plid = None
-
-            if plid:
-                # 1) node has been created but not connected to Batch.
-                #    update known Place node parameters and link from Batch
-                self.uniq_id = plid
-                if self.type:
-                    # print(f">Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
-                    result = tx.run(
-                        CypherPlace.complete,  # TODO
-                        batch_id=batch_id,
-                        plid=plid,
-                        p_attr=pl_attr,
-                    )
-                else:
-                    # print(f">Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
-                    pass
-            else:
-                # 2) new node: create and link from Batch
-                # print(f">Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
-                result = tx.run(CypherPlace.create, batch_id=batch_id, p_attr=pl_attr)
-                self.uniq_id = result.single()[0]
-                place_keys[self.handle] = self.uniq_id
-
-        except Exception as err:
-            print(f"iError Place.create: {err} attr={pl_attr}")  # , file=stderr)
-            raise
+                # print(f">Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
+                pass
+        else:
+            # 2) new node: create and link from Batch
+            # print(f">Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
+            result = dataservice.tx.run(CypherPlace.create, batch_id=batch_id, p_attr=pl_attr)
+            self.uniq_id = result.single()[0]
+            place_keys[self.handle] = self.uniq_id
 
         # Create Place_names
 
-        try:
-            for name in self.names:
-                n_attr = {"name": name.name, "lang": name.lang}
-                if name.dates:
-                    n_attr.update(name.dates.for_db())
-                result = tx.run(
-                    CypherPlace.add_name,
-                    pid=self.uniq_id,
-                    order=name.order,
-                    n_attr=n_attr,
-                )
-                name.uniq_id = result.single()[0]
-                # print(f"# ({self.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
-        except Exception as err:
-            print("iError Place.add_name: {err}")  # , file=stderr)
-            raise
+        for name in self.names:
+            n_attr = {"name": name.name, "lang": name.lang}
+            if name.dates:
+                n_attr.update(name.dates.for_db())
+            result = dataservice.tx.run(
+                CypherPlace.add_name,
+                pid=self.uniq_id,
+                order=name.order,
+                n_attr=n_attr,
+            )
+            name.uniq_id = result.single()[0]
+            # print(f"# ({self.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
 
         # Select default names for default languages
         ret = PlaceBl.find_default_names(self.names, ["fi", "sv"])
@@ -309,80 +301,67 @@ class PlaceBl(Place):
         # Make hierarchy relations to upper Place nodes
 
         for ref in self.surround_ref:
-            try:
-                up_handle = ref["hlink"]
-                # print(f"Pl_save-surrounding {self} -[{ref['dates']}]-> {up_handle}")
-                if "dates" in ref and isinstance(ref["dates"], DateRange):
-                    rel_attr = ref["dates"].for_db()
-                    # _r = f"-[{ref['dates']}]->"
-                else:
-                    rel_attr = {}
-                    # _r = f"-->"
+            up_handle = ref["hlink"]
+            # print(f"Pl_save-surrounding {self} -[{ref['dates']}]-> {up_handle}")
+            if "dates" in ref and isinstance(ref["dates"], DateRange):
+                rel_attr = ref["dates"].for_db()
+                # _r = f"-[{ref['dates']}]->"
+            else:
+                rel_attr = {}
+                # _r = f"-->"
 
-                # Link to upper node
+            # Link to upper node
 
-                uid = place_keys.get(up_handle) if place_keys else None
-                if uid:
-                    # 3) Link to a known upper Place
-                    #    The upper node is already created: create a link to that
-                    #    upper Place node
-                    # print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {_r} (#{uid})")
-                    result = tx.run(
-                        CypherPlace.link_hier,
-                        plid=self.uniq_id,
-                        up_id=uid,
-                        r_attr=rel_attr,
-                    )
-                else:
-                    # 4) Link to unknown place
-                    #    A new upper node: create a Place with only handle
-                    #    parameter and link hierarchy to Place self
-                    # print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {_r} {up_handle}")
-                    result = tx.run(
-                        CypherPlace.link_create_hier,
-                        plid=self.uniq_id,
-                        r_attr=rel_attr,
-                        up_handle=up_handle,
-                    )
-                    place_keys[up_handle] = result.single()[0]
-
-            except Exception as err:
-                print(
-                    f"iError Place.link_hier: {err} at {self.id} --> {up_handle}"
-                )  # , file=stderr)
-                raise
-
-        try:
-            for note in self.notes:
-                n_attr = {"url": note.url, "type": note.type, "text": note.text}
-                result = tx.run(
-                    CypherPlace.add_urls,
-                    batch_id=batch_id,
-                    pid=self.uniq_id,
-                    n_attr=n_attr,
+            uid = place_keys.get(up_handle) if place_keys else None
+            if uid:
+                # 3) Link to a known upper Place
+                #    The upper node is already created: create a link to that
+                #    upper Place node
+                # print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {_r} (#{uid})")
+                result = dataservice.tx.run(
+                    CypherPlace.link_hier,
+                    plid=self.uniq_id,
+                    up_id=uid,
+                    r_attr=rel_attr,
                 )
-        except Exception as err:
-            traceback.print_exc()
-            print(f"iError Place.add_urls: {err}")  # , file=stderr)
-            raise
+            else:
+                # 4) Link to unknown place
+                #    A new upper node: create a Place with only handle
+                #    parameter and link hierarchy to Place self
+                # print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {_r} {up_handle}")
+                result = dataservice.tx.run(
+                    CypherPlace.link_create_hier,
+                    plid=self.uniq_id,
+                    r_attr=rel_attr,
+                    up_handle=up_handle,
+                )
+                place_keys[up_handle] = result.single()[0]
+
+
+        for note in self.notes:
+            n_attr = {"url": note.url, "type": note.type, "text": note.text}
+            result = dataservice.tx.run(
+                CypherPlace.add_urls,
+                batch_id=batch_id, pid=self.uniq_id, n_attr=n_attr)
 
         # Make the place note relations; the Notes have been stored before
         # TODO: There may be several Notes for the same handle! You shold use uniq_id!
-        try:
-            for n_handle in self.note_handles:
-                result = tx.run(CypherPlace.link_note, pid=self.uniq_id, hlink=n_handle)
-        except Exception as err:
-            logger.error(
-                f"Place_gramps.save: {err} in linking Notes {self.handle} -> {self.note_handles}"
-            )
-            # print(f"iError Place.link_notes {self.note_handles}: {err}", file=stderr)
-            raise
+
+        for n_handle in self.note_handles:
+            result = dataservice.tx.run(
+                CypherPlace.link_note,
+                pid=self.uniq_id, hlink=n_handle)
+
+        for handle in self.citation_handles:
+            # Link to existing Citation
+            result = dataservice.tx.run(
+                CypherObject.link_citation, 
+                handle=self.handle, c_handle=handle)
 
         if self.media_refs:
             # Make relations to the Media nodes and their Note and Citation references
-            dataservice.ds_create_link_medias_w_handles(
-                self.uniq_id, self.media_refs
-            )
+            result = dataservice.ds_create_link_medias_w_handles(
+                self.uniq_id, self.media_refs)
 
         return
 
@@ -551,7 +530,7 @@ class PlaceReader(DataService):
         use_user = context.batch_user()
         places = self.dataservice.dr_get_place_list_fw(
             use_user, fw, context.count, lang=context.lang,
-            batch_id=context.batch_id,
+            batch_id=context.material.batch_id,
         )
 
         # Update the page scope according to items really found
@@ -585,6 +564,7 @@ class PlaceReader(DataService):
         """
         # Get a Place with Names, Notes and Medias
         use_user = self.user_context.batch_user()
+        privacy = self.user_context.is_common()
         lang = self.user_context.lang
         res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
         place = res.get("place")
@@ -615,7 +595,7 @@ class PlaceReader(DataService):
                 "statustext": f"Place tree value for {place.uniq_id}: {e}",
             }
 
-        res = self.dataservice.dr_get_place_events(place.uniq_id)
+        res = self.dataservice.dr_get_place_events(place.uniq_id, privacy)
         results["events"] = res["items"]
         return results
 
@@ -623,8 +603,9 @@ class PlaceReader(DataService):
         """
         Return placename stats so that the names can be displayed in a name cloud.
         """
-        placenames = self.dataservice.dr_get_placename_list(self.use_user, 
-                                                            self.user_context.batch_id, count=count)
+        ds = self.dataservice
+        placenames = ds.dr_get_placename_list(self.use_user, 
+                                              self.user_context.material.batch_id, count=count)
         # Returns [{'surname': surname, 'count': count},...]
 
         # if self.use_user:

@@ -86,7 +86,7 @@
                    <div>
                       <a href="/scene/location/uuid={{p.uuid}}"
                     {% if not p.ref_cnt %} class="dimmed" 
-                        title="{{  _('No references to place %(uuid)s', uuid=p.uuid_str()) }}"
+                        title="{{  _('No references to place %(uuid)s', uuid=p.uuid_short()) }}"
                     {% else %} class="inlink"
                         title="{{ _('see details of place %(id)s', id=p.uniq_id) }}"
                     {%- endif %}>

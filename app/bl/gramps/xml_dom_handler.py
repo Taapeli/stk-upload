@@ -51,7 +51,7 @@ from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
 
-from pe.neo4j.cypher.cy_batch_audit import CypherRoot
+from pe.neo4j.cypher.cy_root import CypherRoot
 #from models.cypher_gramps import Cypher_mixed
 from .batchlogger import LogItem
 
@@ -119,10 +119,17 @@ class DOM_handler:
         #         self.batch = None                   # Batch node to be created
         #         self.mediapath = None               # Directory for media files
         self.file = os.path.basename(pathname)  # for messages
-        self.progress = defaultdict(
-            int
-        )  # key=object type, value=count of objects processed
+        self.progress = defaultdict(int)
         self.obj_counter = 0
+
+    # def run_tx(self, func):
+    #     """ Restart transaction and run given function. """
+    #     self.dataservice.tx.commit()
+    #     self.dataservice.tx = shareds.driver.session().begin_transaction()
+    #     logger.debug(f'#~~~{func.__name__} tx restart')
+    #     # Run the function
+    #     func()
+
 
     def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
@@ -149,10 +156,11 @@ class DOM_handler:
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
         #print(f"DOM_handler.save_and_link_handle: {obj} {kwargs}")
-        obj.save(self.dataservice, self.dataservice.tx, **kwargs)
+        #obj.save(self.dataservice, self.dataservice.tx, **kwargs)
+        obj.save(self.dataservice, **kwargs)
         self.obj_counter += 1 
         if self.obj_counter % 1000 == 0:
-            #print(self.obj_counter, "Transaction restart")
+            print(self.obj_counter, "Transaction restart")
             self.dataservice.tx.commit()
             self.dataservice.tx = shareds.driver.session().begin_transaction()
 
@@ -175,7 +183,12 @@ class DOM_handler:
             for node in header.childNodes:
                 #print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
                 if node.nodeName == "isotammi":
-                    return self.get_isotammi_metadata(node)
+                    material_type, description = self.get_isotammi_metadata(node)
+                    self.blog.log_event(
+                        {"title": _("Material type"), "level": "TITLE", 
+                         "count": f"{material_type} {description!r}\n"}
+                    )
+                    return material_type, description
         return None
 
     def get_isotammi_metadata(self, isotammi_node):
@@ -219,13 +232,6 @@ class DOM_handler:
                 c.dates = self._extract_daterange(citation)
             except:
                 c.dates = None
-            #             if len(citation.getElementsByTagName('dateval') ) == 1:
-            #                 citation_dateval = citation.getElementsByTagName('dateval')[0]
-            #                 if citation_dateval.hasAttribute("val"):
-            #                     c.dateval = citation_dateval.getAttribute("val")
-            #             elif len(citation.getElementsByTagName('dateval') ) > 1:
-            #                 self.blog.log_event({'title':"More than one dateval tag in a citation",
-            #                                      'level':"WARNING", 'count':c.id})
 
             if len(citation.getElementsByTagName("page")) == 1:
                 citation_page = citation.getElementsByTagName("page")[0]
@@ -756,6 +762,7 @@ class DOM_handler:
 
             pl = PlaceBl()
             pl.note_handles = []
+            pl.citation_handles = []
 
             # Extract handle, change and id
             self._extract_base(placeobj, pl)
@@ -859,8 +866,12 @@ class DOM_handler:
 
             # Handle <objref>
             pl.media_refs = self._extract_mediaref(placeobj)
-
             # if pl.media_refs: print(f'#> saving Place {pl.id} with {len(pl.media_refs)} media_refs')
+
+            for ref in placeobj.getElementsByTagName("citationref"):
+                if ref.hasAttribute("hlink"):
+                    pl.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
+                    ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
             self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys)
@@ -926,7 +937,7 @@ class DOM_handler:
 
         self.blog.log_event(
             {"title": _("Repositories"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
+        )
         return {"status": status, "message": message}
 
     def handle_sources(self):
