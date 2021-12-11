@@ -32,21 +32,18 @@ from operator import itemgetter
 
 logger = logging.getLogger("stkserver")
 
-from flask import render_template, request, redirect, url_for, session
+from flask import render_template, request, redirect, url_for# , session
 from flask_security import login_required, logout_user, current_user
 from flask_babelex import get_locale
-
 from werkzeug.exceptions import HTTPException
 
 import shareds
+from bl.person import PersonReader
+from ui.context import UserContext
 
 app = shareds.app
 if not app:
     raise RuntimeError("Start this application in '..' from 'run.py' or 'runssl.py'")
-
-from bl.person import PersonReader
-from ui.context import UserContext
-
 
 @app.before_request
 def before_request():

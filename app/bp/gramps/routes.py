@@ -402,7 +402,7 @@ def get_progress(batch_id):
         rsp = {
             "status": status,
             "progress": 99 * done // total if total else 50,
-            "batch_id": meta.get("batch_id"),
+            "batch_id": batch_id,
         }
         print(f"bp.gramps.routes.get_progress: {rsp}")
         return jsonify(rsp)
