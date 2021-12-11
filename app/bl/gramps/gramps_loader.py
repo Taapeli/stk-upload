@@ -362,6 +362,7 @@ def xml_to_stkbase(batch):  # :Root):
         res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
         #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
 
+        tx = batch_service.dataservice.tx
         if not tx.closed():
             print(f"bl.gramps.gramps_loader.xml_to_stkbase: commit")
             tx.commit()
