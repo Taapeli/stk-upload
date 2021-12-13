@@ -65,69 +65,77 @@ def xml_to_stkbase(batch):  # :Root):
         handler.handle_suffix = "_" + handler.batch.id  
     
         batch.save(batch_service.dataservice.tx)
-        
-        t0 = time.time()
 
         if is_gpkg:
             extract_media(batch.file, batch.id)
+        
+    """ DOM-objektit pätkitään 1000 joukkoihin ja tarjotaan handlerille
+    """
+    def get_first(objs:list, amount:int):
+        #TODO Sijoita handler-metodiksi ja pätki lista
+        return objs
 
-        """ DOM-objektit pätkitään 1000 joukkoihin ja tarjotaan handlerille
-        """
-        def get_first(objs:list, amount:int):
-            #TODO Sijoita handler-metodiksi ja pätki lista
-            return objs
+    """ 
+    ---- Notes transaktioiden sisällä 
+    """
+    notes = handler.xml_tree.getElementsByTagName("note")
+    message = f"{len(notes)} Notes"
+    print(f"***** {message} *****")
 
-        """ Notes transaktioiden sisällä """
-        notes = handler.xml_tree.getElementsByTagName("note")
-        for dom_notes in get_first(notes, 1000):
-            with shareds.driver.session() as session:
-                session.write_transaction(handle_notes_tx, dom_objs=dom_notes, ...)
-                """ sisältää handler.handle_notes -toiminnot
-                """
-        """ Toiset samalla tavalla """
-        res = handler.handle_repositories()
-        res = handler.handle_sources()
-        res = handler.handle_citations()
-        res = handler.handle_media()
-        res = handler.handle_places() # With Place_names
-        res = handler.handle_events()
-        res = handler.handle_people() # With Names
-        res = handler.handle_families()
+    for dom_notes in get_first(notes, 1000):
+        with shareds.driver.session() as session:
+            session.write_transaction(handler.handle_notes, 
+                                      dom_objs=dom_notes, ...)
+            """ def handle_notes(self, tx, dom_objs):
+            """
+    """ 
+    ----- Notes tehty 
 
-        #       for k in handler.handle_to_node.keys():
-        #             print (f'\t{k} –> {handler.handle_to_node[k]}')
+    Toiset samalla tavalla
+    """
+    handler.handle_repositories()
+    handler.handle_sources()
+    handler.handle_citations()
+    handler.handle_media()
+    handler.handle_places() # With Place_names
+    handler.handle_events()
+    handler.handle_people() # With Names
+    handler.handle_families()
 
-        res = handler.set_all_person_confidence_values()
-        res = handler.set_person_calculated_attributes()
-        res = handler.set_person_estimated_dates()
+    #       for k in handler.handle_to_node.keys():
+    #             print (f'\t{k} –> {handler.handle_to_node[k]}')
 
-        # Copy date and name information from Person and Event nodes to Family nodes
-        res = handler.set_family_calculated_attributes()
+    res = handler.set_all_person_confidence_values()
+    res = handler.set_person_calculated_attributes()
+    res = handler.set_person_estimated_dates()
 
-        # print("build_free_text_search_indexes")
-        t1 = time.time()
-        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
-        handler.blog.log_event(
-            {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
-        )
-        # print("build_free_text_search_indexes done")
-            
-        res = handler.remove_handles()
-        # The missing links counted in remove_handles?
-        ##TODO      res = handler.add_missing_links()?
+    # Copy date and name information from Person and Event nodes to Family nodes
+    res = handler.set_family_calculated_attributes()
 
-        res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
-        #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
+    # print("build_free_text_search_indexes")
+    t1 = time.time()
+    res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
+    handler.blog.log_event(
+        {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
+    )
+    # print("build_free_text_search_indexes done")
+        
+    res = handler.remove_handles()
+    # The missing links counted in remove_handles?
+    ##TODO      res = handler.add_missing_links()?
 
-        tx = batch_service.dataservice.tx
-        if not tx.closed():
-            print(f"bl.gramps.gramps_loader.xml_to_stkbase: commit")
-            tx.commit()
-        logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
+    res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
+    #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
 
-        handler.blog.log_event(
-            {"title": "Total time", "level": "TITLE", "elapsed": time.time() - t0}
-        )
+    tx = batch_service.dataservice.tx
+    if not tx.closed():
+        print(f"bl.gramps.gramps_loader.xml_to_stkbase: commit")
+        tx.commit()
+    logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
+
+    handler.blog.log_event(
+        {"title": "Total time", "level": "TITLE", "elapsed": time.time() - t0}
+    )
 
     # End with BatchUpdater
 
