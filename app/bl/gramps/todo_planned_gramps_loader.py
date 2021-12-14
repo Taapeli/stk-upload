@@ -68,7 +68,7 @@ def xml_to_stkbase(batch):  # :Root):
 
         if is_gpkg:
             extract_media(batch.file, batch.id)
-        
+
     """ DOM-objektit pätkitään 1000 joukkoihin ja tarjotaan handlerille
     """
     def get_first(objs:list, amount:int):
@@ -82,13 +82,15 @@ def xml_to_stkbase(batch):  # :Root):
     message = f"{len(notes)} Notes"
     print(f"***** {message} *****")
 
-    for dom_notes in get_first(notes, 1000):
-        with shareds.driver.session() as session:
+    with shareds.driver.session() as session:
+        for dom_notes in get_first(notes, 1000):
+            isotammi_id_list = session.read_transaction(..., amount=1000)
             session.write_transaction(handler.handle_notes, 
-                                      dom_objs=dom_notes, ...)
+                                      dom_objs=dom_notes, 
+                                      iids=isotammi_id_list ...)
             """ def handle_notes(self, tx, dom_objs):
             """
-    """ 
+    """
     ----- Notes tehty 
 
     Toiset samalla tavalla

@@ -105,11 +105,11 @@ class DOM_handler:
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
         obj.save(self.dataservice.tx, **kwargs)
-        self.obj_counter += 1 
-        if self.obj_counter % 1000 == 0:
-            print(self.obj_counter, "Transaction restart")
-            self.dataservice.tx.commit()
-            self.dataservice.tx = shareds.driver.session().begin_transaction()
+        # self.obj_counter += 1 
+        # if self.obj_counter % 1000 == 0:
+        #     print(self.obj_counter, "Transaction restart")
+        #     self.dataservice.tx.commit()
+        #     self.dataservice.tx = shareds.driver.session().begin_transaction()
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
@@ -436,9 +436,9 @@ class DOM_handler:
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
-    def handle_notes(self):
+    def handle_notes(self, notes):
         """ Get all the notes in the xml_tree. """
-        notes = self.xml_tree.getElementsByTagName("note")
+        # notes = self.xml_tree.getElementsByTagName("note")
         status = Status.OK
         for_test = ""
 
