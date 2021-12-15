@@ -8,7 +8,6 @@
   {{ hamburger_menu( (
    ) ) }}
 <style>
-/*
   div.starters {
       display: flex;
       flex-wrap: wrap;
@@ -22,7 +21,7 @@
   div.starters button {
       min-height: 36px;
   }
-*/
+
 ul li {
     list-style-type: none;
     margin-left: -25px;
@@ -102,8 +101,8 @@ div.strow2 {
             <div style="display: inline-block;">
 
                 <h2>{{ _('Browse Common Materials') }}</h2>
-{#              <p>{{ _('View different approved common data') }}.</p>
-#}
+                <p>{{ _('View different approved common data') }}.</p>
+{% if false %}<!-- Show list format -->
                 <ul>
                     <li>
                         <form method="get" action="/scene/material/common">
@@ -111,24 +110,26 @@ div.strow2 {
     {% for m in commons  %}
                                 <div class="typedesc strow1">{{ _(m.material_type) }}</div>
                                 <div class="strow2">
-                                    <input type="hidden" name="material_type" value="{{material_type}}">
                                     <input type="hidden" name="state" value="Accepted">
-                                    <button class="buttonToLink" type="submit" name="material_type"
-                                        value="{{material_type}}" title="{{ _('Open') }}"
+                                    <button class="buttonToLink" type="submit"  title="{{ _(m.material_type) }}"
+                                        name="material_type" value="{{m.material_type}}"
+            {% if not batch_id %}       style="color:fuchsia; font-weight: bold;"
+            {% endif %}
                                         >{{ _('View approved data') }}</button>
-                                        <br/>{{ m.count }} {{ _('batches') }}
+                                        <br/>{{ m.count }} {{ _('approved batches') }}
                                 </div>
     {% endfor %}
                             </div>
                         </form>
                     </li>
                 </ul>
-{#
+{% else %}<!-- Show as buttons -->
                     <form method="get" action="/scene/material/common">
                         <div class="starters">
     {% for m in commons  %}
                             <input type="hidden" name="state" value="Accepted">
                             <button type="submit" name="material_type" value="{{m.material_type}}"
+                                title="{{ m.count }} {{ _('approved batches') }}"
                                 >{{ _(m.material_type) }}
         {% if m.material_type == "Family Tree" %}
                                 <br>{{ _('Approved Isotammi tree') }}
@@ -137,7 +138,7 @@ div.strow2 {
     {% endfor %}
                         </div>
                     </form>
-#}
+{% endif %}<!-- Show style -->
             </div>
         </div>
 {% endif %}
@@ -150,7 +151,7 @@ div.strow2 {
     {% endif -%}>
             <div style="display: inline-block;">
 
-                <h2>{{ _('My materials') }}</h2>
+                <h2>{{ _('Browse My Materials') }}</h2>
 
 <!--                 <p>{{ _('View your own candidate materials') }}.</p> -->
                 <ul>
@@ -179,11 +180,9 @@ div.strow2 {
                                 <input type="hidden" name="material_type" value="{{root.material_type}}">
                                 <input type="hidden" name="state" value="{{root.state}}">
                                 <button class="buttonToLink" type="submit" name="batch_id" value="{{ root.id }}"
-            {% if batch_id == root.id %}
-                                    autofocus; style="color:red; font-weight: bold;"
-            {% endif -%}
-                             title="{{ title }}">{{ root.id }}</button>
-                             {{ root.filename()|replace('_',' ') }}
+            {% if batch_id == root.id %}style="color:fuchsia; font-weight: bold;"{% endif %}
+                                    title="{{ title }}">{{ root.id }}</button>
+                                {{ root.filename()|replace('_',' ') }}
             {% if root.description %}
                                 <br/><i>{{ root.description }}</i>
             {% endif -%}
