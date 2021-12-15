@@ -22,7 +22,32 @@ div.starters span.strow {
 div.starters button {
     min-height: 36px;
 }
-</style>
+ul li {
+    list-style-type: none;
+    margin-left: -25px;
+}
+div.strow1, div.strow2 {
+    display: inline-block;
+/*     border: solid 1px pink; */
+    vertical-align: text-top;
+}
+div.strow1 {
+    width: 90px;
+    padding-top: 3px;
+    text-align: right; 
+}
+div.strow2 { 
+    width: calc(100% - 100px);
+}
+.buttonToLink{
+   background: none;
+   border: none;
+   color: blue;
+}
+.buttonToLink:hover{
+   background: none;
+   text-decoration: underline;
+}</style>
 
 <div id="startdiv">
   <div>
@@ -105,41 +130,48 @@ div.starters button {
                 <h2>{{ _('My materials') }}</h2>
 
 <!--                 <p>{{ _('View your own candidate materials') }}.</p> -->
+                <ul>
     {% for root in batches | sort(attribute='state')  %}
-            {% if not loop.previtem %}
-                <p>{{ _("In state") }} {{ _(root.state) }}</p>
-                <div class="starters">
+{#            {% if not loop.previtem %}
+                    <p>{{ _("In state") }} {{ _(root.state) }}</p>
+                    <div class="starters">
             {% else %}
                 {% if loop.previtem.state != root.state %}
-                </div>
-                <p>{{ _("In state") }} {{ _(root.state) }}</p>
-                <div class="starters">
+                    </div>
+                    <p>{{ _("In state") }} {{ _(root.state) }}</p>
+                    <div class="starters">
                 {% endif %}
             {% endif %}
+#}
         {# if root.state == "Candidate" #}
-                <form method="post" action="/scene/material/batch">
+                    <li>
+                    <form method="post" action="/scene/material/batch">
             {% if root.description %}
                   {% set title = _(root.material_type) + " / " + root.description %}
             {% else %}{% set title = _(root.material_type) %}
             {% endif -%}
-                        <span class="strow">
-                            <input type="hidden" name="material_type" value="{{root.material_type}}">
-                            <input type="hidden" name="state" value="{{root.state}}">
-                            <button type="submit" name="batch_id" value="{{ root.id }}"
+                        <div class="strow">
+                            <div class="typedesc strow1">{{ _(root.material_type) }}</div>
+                            <div class="strow2">
+                                <input type="hidden" name="material_type" value="{{root.material_type}}">
+                                <input type="hidden" name="state" value="{{root.state}}">
+                                <button class="buttonToLink" type="submit" name="batch_id" value="{{ root.id }}"
             {% if batch_id == root.id %}autofocus{% endif %}
-                             title="{{ title }}">
-            {% if root.material_type != "Family Tree" %}
-                                <span class="typetag">{{ _(root.material_type) }}</span>
+                             title="{{ title }}">{{ root.id }}</button>
+                             {{ root.filename()|replace('_',' ') }}
+            {% if root.description %}
+                                <br/><i>{{ root.description }}</i>
             {% endif -%}
-                            {{ root.id }}<br>{{ root.filename()|replace('_',' ') }}
-                            </button>
-                        </span>
+                            </div>
+                        </div>
                     </form>
+                    </li>
         {# endif -#}
     {% endfor -%}
-                 </div>
-             </div>
+                </ul>
+            </div>
         </div>
+    </div>
 {% endif %}
 
 
