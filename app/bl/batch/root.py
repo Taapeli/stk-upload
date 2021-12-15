@@ -312,8 +312,9 @@ class Root(NodeObject):
             for rec in result:
                 # Record: <Record root.material='Family Tree' count(*)=6>
                 m_type = rec.get("material_type")
+                m_count = rec.get("nodes")
                 print(f"#get_batches_accepted: {m_type} ({rec.get('nodes')} nodes)")
-                yield m_type
+                yield {"material_type": m_type, "count": m_count }
 
     @staticmethod
     def get_user_stats(user):

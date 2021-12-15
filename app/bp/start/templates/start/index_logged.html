@@ -8,20 +8,21 @@
   {{ hamburger_menu( (
    ) ) }}
 <style>
-div.starters {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    /*height: 120px;*/
-    align-items: center;
-}
-div.starters span.strow {
-    padding: 2pt;
-    display: inline-flex;
-}
-div.starters button {
-    min-height: 36px;
-}
+/*
+  div.starters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+  }
+  div.starters span.strow {
+      padding: 2pt;
+      display: inline-flex;
+  }
+  div.starters button {
+      min-height: 36px;
+  }
+*/
 ul li {
     list-style-type: none;
     margin-left: -25px;
@@ -43,6 +44,7 @@ div.strow2 {
    background: none;
    border: none;
    color: blue;
+   font-size: 110%;
 }
 .buttonToLink:hover{
    background: none;
@@ -100,21 +102,42 @@ div.strow2 {
             <div style="display: inline-block;">
 
                 <h2>{{ _('Browse Common Materials') }}</h2>
-
-                <p>{{ _('View different approved common data') }}.</p>
-                <form method="get" action="/scene/material/common">
-                    <div class="starters">
-    {% for material_type in commons  %}
-                        <input type="hidden" name="state" value="Accepted">
-                        <button type="submit" name="material_type" value="{{material_type}}"
-                            >{{ _(material_type) }}
-        {% if material_type == "Family Tree" %}
-                            <br>{{ _('Approved Isotammi tree') }}
-        {% endif -%}
-                        </button>
+{#              <p>{{ _('View different approved common data') }}.</p>
+#}
+                <ul>
+                    <li>
+                        <form method="get" action="/scene/material/common">
+                            <div>
+    {% for m in commons  %}
+                                <div class="typedesc strow1">{{ _(m.material_type) }}</div>
+                                <div class="strow2">
+                                    <input type="hidden" name="material_type" value="{{material_type}}">
+                                    <input type="hidden" name="state" value="Accepted">
+                                    <button class="buttonToLink" type="submit" name="material_type"
+                                        value="{{material_type}}" title="{{ _('Open') }}"
+                                        >{{ _('View approved data') }}</button>
+                                        <br/>{{ m.count }} {{ _('batches') }}
+                                </div>
     {% endfor %}
-                    </div>
-                </form>
+                            </div>
+                        </form>
+                    </li>
+                </ul>
+{#
+                    <form method="get" action="/scene/material/common">
+                        <div class="starters">
+    {% for m in commons  %}
+                            <input type="hidden" name="state" value="Accepted">
+                            <button type="submit" name="material_type" value="{{m.material_type}}"
+                                >{{ _(m.material_type) }}
+        {% if m.material_type == "Family Tree" %}
+                                <br>{{ _('Approved Isotammi tree') }}
+        {% endif -%}
+                            </button>
+    {% endfor %}
+                        </div>
+                    </form>
+#}
             </div>
         </div>
 {% endif %}
@@ -150,13 +173,15 @@ div.strow2 {
                   {% set title = _(root.material_type) + " / " + root.description %}
             {% else %}{% set title = _(root.material_type) %}
             {% endif -%}
-                        <div class="strow">
+                        <div>
                             <div class="typedesc strow1">{{ _(root.material_type) }}</div>
                             <div class="strow2">
                                 <input type="hidden" name="material_type" value="{{root.material_type}}">
                                 <input type="hidden" name="state" value="{{root.state}}">
                                 <button class="buttonToLink" type="submit" name="batch_id" value="{{ root.id }}"
-            {% if batch_id == root.id %}autofocus{% endif %}
+            {% if batch_id == root.id %}
+                                    autofocus; style="color:red; font-weight: bold;"
+            {% endif -%}
                              title="{{ title }}">{{ root.id }}</button>
                              {{ root.filename()|replace('_',' ') }}
             {% if root.description %}

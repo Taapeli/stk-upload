@@ -143,7 +143,7 @@ def start_logged():
                 stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
             surnamestats.sort(key=itemgetter("surname"))
 
-    material_types = Root.get_materials_accepted()
+    material_types = list(Root.get_materials_accepted())
     my_batches = list(Root.get_my_batches(current_user.username))
 
     return render_template(
