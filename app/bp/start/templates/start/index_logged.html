@@ -8,23 +8,19 @@
   {{ hamburger_menu( (
    ) ) }}
 <style>
-  div.starters {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-  }
   div.starters span.strow {
       padding: 2pt;
       display: inline-flex;
   }
-  div.starters button {
-      min-height: 36px;
-  }
-
+.startbox ul, startbox2 ul {
+    list-style-type: none;
+    margin-left: -1.5em;
+}
 ul li {
     list-style-type: none;
-    margin-left: -25px;
+}
+ul p {
+    margin-left: -1em;
 }
 div.strow1, div.strow2 {
     display: inline-block;
@@ -32,23 +28,13 @@ div.strow1, div.strow2 {
     vertical-align: text-top;
 }
 div.strow1 {
-    width: 90px;
-    padding-top: 3px;
-    text-align: right; 
+    width: 8.5em;
+    min-height: 2em;
 }
 div.strow2 { 
-    width: calc(100% - 100px);
+    width: calc(100% - 9em);
 }
-.buttonToLink{
-   background: none;
-   border: none;
-   color: blue;
-   font-size: 110%;
-}
-.buttonToLink:hover{
-   background: none;
-   text-decoration: underline;
-}</style>
+</style>
 
 <div id="startdiv">
   <div>
@@ -102,43 +88,29 @@ div.strow2 {
 
                 <h2>{{ _('Browse Common Materials') }}</h2>
                 <p>{{ _('View different approved common data') }}.</p>
-{% if false %}<!-- Show list format -->
+
                 <ul>
                     <li>
                         <form method="get" action="/scene/material/common">
                             <div>
     {% for m in commons  %}
-                                <div class="typedesc strow1">{{ _(m.material_type) }}</div>
-                                <div class="strow2">
+                                <div class="typedesc strow1">
                                     <input type="hidden" name="state" value="Accepted">
-                                    <button class="buttonToLink" type="submit"  title="{{ _(m.material_type) }}"
+                                    <button type="submit"  title="{{ _(m.material_type) }}"
                                         name="material_type" value="{{m.material_type}}"
-            {% if not batch_id %}       style="color:fuchsia; font-weight: bold;"
-            {% endif %}
-                                        >{{ _('View approved data') }}</button>
-                                        <br/>{{ m.count }} {{ _('approved batches') }}
+        {% if not batch_id %}           autofocus{% endif %}
+                                        >{{ _(m.material_type) }}</button>
+                                </div>
+                                <div class="strow2">
+        {% if m.material_type == "Family Tree" %}{{ _('Approved Isotammi tree') }}<br/>
+        {% endif -%}
+                                    {{ m.count }} {{ _('approved batches') }}
                                 </div>
     {% endfor %}
                             </div>
                         </form>
                     </li>
                 </ul>
-{% else %}<!-- Show as buttons -->
-                    <form method="get" action="/scene/material/common">
-                        <div class="starters">
-    {% for m in commons  %}
-                            <input type="hidden" name="state" value="Accepted">
-                            <button type="submit" name="material_type" value="{{m.material_type}}"
-                                title="{{ m.count }} {{ _('approved batches') }}"
-                                >{{ _(m.material_type) }}
-        {% if m.material_type == "Family Tree" %}
-                                <br>{{ _('Approved Isotammi tree') }}
-        {% endif -%}
-                            </button>
-    {% endfor %}
-                        </div>
-                    </form>
-{% endif %}<!-- Show style -->
             </div>
         </div>
 {% endif %}
@@ -156,7 +128,7 @@ div.strow2 {
 <!--                 <p>{{ _('View your own candidate materials') }}.</p> -->
                 <ul>
     {% for root in batches | sort(attribute='state')  %}
-{#            {% if not loop.previtem %}
+            {% if not loop.previtem %}
                     <p>{{ _("In state") }} {{ _(root.state) }}</p>
                     <div class="starters">
             {% else %}
@@ -166,22 +138,23 @@ div.strow2 {
                     <div class="starters">
                 {% endif %}
             {% endif %}
-#}
+
         {# if root.state == "Candidate" #}
                     <li>
-                    <form method="post" action="/scene/material/batch">
+                        <form method="post" action="/scene/material/batch">
             {% if root.description %}
                   {% set title = _(root.material_type) + " / " + root.description %}
             {% else %}{% set title = _(root.material_type) %}
             {% endif -%}
                         <div>
-                            <div class="typedesc strow1">{{ _(root.material_type) }}</div>
-                            <div class="strow2">
+                            <div class="strow1">
                                 <input type="hidden" name="material_type" value="{{root.material_type}}">
                                 <input type="hidden" name="state" value="{{root.state}}">
-                                <button class="buttonToLink" type="submit" name="batch_id" value="{{ root.id }}"
-            {% if batch_id == root.id %}style="color:fuchsia; font-weight: bold;"{% endif %}
+                                <button type="submit" name="batch_id" value="{{ root.id }}"
+            {% if batch_id == root.id %}autofocus{% endif %}
                                     title="{{ title }}">{{ root.id }}</button>
+                            </div>
+                            <div class="strow2"><span class="typedesc">{{ _(root.material_type) }}</span>
                                 {{ root.filename()|replace('_',' ') }}
             {% if root.description %}
                                 <br/><i>{{ root.description }}</i>

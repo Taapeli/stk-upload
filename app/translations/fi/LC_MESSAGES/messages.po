@@ -1287,6 +1287,12 @@ msgstr "Tutkijan aineiston tarkastus"
 msgid "In state"
 msgstr "Tilassa"
 
+msgid "approved batches"
+msgstr "hyväksyttyä aineistoa"
+
+msgid "Browse My Materials"
+msgstr "Omat aineistoni"
+
 #: bp/audit/templates/audit/pick_auditing.html:42
 #: bp/scene/templates/scene/medias.html:42
 #: bp/scene/templates/scene/medias.html:64
