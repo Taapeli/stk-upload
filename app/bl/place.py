@@ -199,7 +199,7 @@ class PlaceBl(Place):
             logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
             return {"status": Status.ERROR, "items": selection}
 
-    def save(self, dataservice, **kwargs):
+    def save(self, tx, **kwargs):
         """Save Place, Place_names, Notes and connect to hierarchy.
 
         :param: place_keys    dict {handle: uniq_id}
@@ -225,10 +225,8 @@ class PlaceBl(Place):
         NOT Raises an error, if write fails.
         """
 
-        if "batch_id" in kwargs:
-            batch_id = kwargs["batch_id"]
-        else:
-            raise RuntimeError(f"bl.place.PlaceBl.save needs a batch_id for {self.id}")
+        batch_id = kwargs["batch_id"]
+        dataservice = kwargs["dataservice"]
 
         # Create or update this Place
 
@@ -261,7 +259,7 @@ class PlaceBl(Place):
             self.uniq_id = plid
             if self.type:
                 # print(f">Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
-                result = dataservice.tx.run(
+                result = tx.run(
                     CypherPlace.complete,  # TODO
                     batch_id=batch_id,
                     plid=plid,
@@ -273,7 +271,7 @@ class PlaceBl(Place):
         else:
             # 2) new node: create and link from Batch
             # print(f">Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
-            result = dataservice.tx.run(CypherPlace.create, batch_id=batch_id, p_attr=pl_attr)
+            result = tx.run(CypherPlace.create, batch_id=batch_id, p_attr=pl_attr)
             self.uniq_id = result.single()[0]
             place_keys[self.handle] = self.uniq_id
 
@@ -283,7 +281,7 @@ class PlaceBl(Place):
             n_attr = {"name": name.name, "lang": name.lang}
             if name.dates:
                 n_attr.update(name.dates.for_db())
-            result = dataservice.tx.run(
+            result = tx.run(
                 CypherPlace.add_name,
                 pid=self.uniq_id,
                 order=name.order,
@@ -318,7 +316,7 @@ class PlaceBl(Place):
                 #    The upper node is already created: create a link to that
                 #    upper Place node
                 # print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {_r} (#{uid})")
-                result = dataservice.tx.run(
+                result = tx.run(
                     CypherPlace.link_hier,
                     plid=self.uniq_id,
                     up_id=uid,
@@ -329,7 +327,7 @@ class PlaceBl(Place):
                 #    A new upper node: create a Place with only handle
                 #    parameter and link hierarchy to Place self
                 # print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {_r} {up_handle}")
-                result = dataservice.tx.run(
+                result = tx.run(
                     CypherPlace.link_create_hier,
                     plid=self.uniq_id,
                     r_attr=rel_attr,
@@ -340,7 +338,7 @@ class PlaceBl(Place):
 
         for note in self.notes:
             n_attr = {"url": note.url, "type": note.type, "text": note.text}
-            result = dataservice.tx.run(
+            result = tx.run(
                 CypherPlace.add_urls,
                 batch_id=batch_id, pid=self.uniq_id, n_attr=n_attr)
 
@@ -348,13 +346,13 @@ class PlaceBl(Place):
         # TODO: There may be several Notes for the same handle! You shold use uniq_id!
 
         for n_handle in self.note_handles:
-            result = dataservice.tx.run(
+            result = tx.run(
                 CypherPlace.link_note,
                 pid=self.uniq_id, hlink=n_handle)
 
         for handle in self.citation_handles:
             # Link to existing Citation
-            result = dataservice.tx.run(
+            result = tx.run(
                 CypherObject.link_citation, 
                 handle=self.handle, c_handle=handle)
 

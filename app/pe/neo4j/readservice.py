@@ -69,7 +69,7 @@ class Neo4jReadService(ConcreteService):
 
     def __init__(self, driver):
         self.driver = driver
-        print(f"#{self.__class__.__name__} init")
+        # print(f"#{self.__class__.__name__} init")
 
     def _set_birth_death(self, person, birth_node, death_node):
         """

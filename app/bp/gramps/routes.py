@@ -26,7 +26,7 @@ Created on 15.8.2018
 """
 # blacked 2021-07-25 JMä
 import os
-import time
+#import time
 import logging
 import traceback
 from types import SimpleNamespace
@@ -51,8 +51,9 @@ from flask_babelex import _
 
 import shareds
 from bl.base import Status
-from bl.root import State, Root, BatchUpdater, BatchReader
-from models import loadfile, util, syslog
+from bl.batch.root import Root, BatchReader #, State, BatchUpdater
+from bl.batch.root_updater import RootUpdater
+from models import syslog, util #, loadfile
 
 from ui.batch_ops import RESEARCHER_FUNCTIONS, RESEARCHER_OPERATIONS
 from ui.context import UserContext
@@ -110,55 +111,31 @@ def upload_gramps():
     """
     try:
         infile = request.files["filenm"]
-        material_type = request.form["material"]
-        # logger.debug("Got a {} file '{}'".format(material_type, infile.filename))
+        file_type = request.form["material"]    # = 'xml_file' !
 
-        t0 = time.time()
-        with BatchUpdater("update") as batch_service:
-            # Create Root with next free batch id
-            batch = batch_service.new_batch(current_user.username)
-            # Prepare uploads folder
-            upload_folder = uploads.get_upload_folder(current_user.username)
-            batch_upload_folder = os.path.join(upload_folder, batch.id)
-            os.makedirs(batch_upload_folder, exist_ok=True)
-            # Load user's XML file
-            batch.file = loadfile.upload_file(infile, batch_upload_folder)
+        # Create Root node in managed transaction
+        root = RootUpdater.create_batch(current_user.username, infile)
 
-            batch.xmlname = infile.filename
-            batch.metaname = batch.file + ".meta"
-            batch.logname = batch.file + ".log"
-            batch.save(batch_service.dataservice) #todo: batch_service.save_batch(batch) ?
-            shareds.tdiff = time.time() - t0
-
-            # Create metafile
-            uploads.set_meta(
-                current_user.username,
-                batch.id,
-                infile.filename,
-                status=State.FILE_UPLOADED,
-                upload_time=time.time(),
-#               material_type=material_type, description=description,
-            )
-
-            # Create upload log file
-            msg = f"{util.format_timestamp()}: User {current_user.name} ({current_user.username}) uploaded the file {batch.file} for batch {batch.id}"
-            open(batch.logname, "w", encoding="utf-8").write(msg)
-            syslog.log(type="gramps file uploaded", file=infile.filename, batch=batch.id)
-            logger.info(
-                f'-> bp.gramps.routes.upload_gramps/{material_type} f="{infile.filename}"'
-                f" e={shareds.tdiff:.3f}sek"
-            )
+        # Create upload log file
+        msg = f"{util.format_timestamp()}: User {current_user.name} "\
+              f"({current_user.username}) uploaded the file {root.file!r} "\
+              f"for id={root.id}"
+        open(root.logname, "w", encoding="utf-8").write(msg)
+        syslog.log(type="gramps file uploaded", file=infile.filename, batch=root.id)
+        logger.info(
+            f'-> bp.gramps.routes.upload_gramps/{file_type} f="{infile.filename}"'
+            f" e={shareds.tdiff:.3f}sek"
+        )
 
         # Start storing the XML file objects as database nodes in background
-        uploads.initiate_background_load_to_stkbase(batch)
+        uploads.initiate_background_load_to_stkbase(root)
 
-        # Return to the uploads page
-        return redirect(url_for("gramps.list_uploads"))
-            #return redirect(url_for("gramps.start_load_to_stkbase", xmlname=infile.filename))
     except Exception as e:
         traceback.print_exc()
-        return redirect(url_for("gramps.error_page", code=1, text=str(e)))
+        flash( _("Failed to create a new batch - ") + str(e) )
 
+    # Return to the uploads page
+    return redirect(url_for("gramps.list_uploads"))
 
 
 # @bp.route("/gramps/start_upload/<xmlname>")
@@ -425,7 +402,7 @@ def get_progress(batch_id):
         rsp = {
             "status": status,
             "progress": 99 * done // total if total else 50,
-            "batch_id": meta.get("batch_id"),
+            "batch_id": batch_id,
         }
         print(f"bp.gramps.routes.get_progress: {rsp}")
         return jsonify(rsp)
@@ -500,14 +477,14 @@ def batch_update_description():
     batch_id = request.form["batch_id"]
     description = request.form["description"]
     try:
-        with BatchUpdater("update") as batch_service:
-            res = batch_service.batch_get_one(current_user.username, batch_id)
+        with RootUpdater("update") as root_service:
+            res = root_service.batch_get_one(current_user.username, batch_id)
             if Status.has_failed(res):
                 raise RuntimeError(_("Failed to retrieve batch"))
      
             batch = res['item']
             batch.description = description
-            batch.save(batch_service.dataservice)
+            batch.save(root_service.dataservice)
 
     except Exception as e:
         error_print("audit_selected_op", e)
@@ -529,8 +506,8 @@ def scripting(batch_id=None):
         raise RuntimeError(_("Scripting tool is not enabled"))
     if request.method == "POST":
         batch_id = request.form.get("batch_id")
-    with BatchReader("update") as batch_service:
-        res = batch_service.batch_get_one(current_user.username, batch_id)
+    with BatchReader("update") as root_service:
+        res = root_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
             raise RuntimeError(_("Failed to retrieve batch"))
  

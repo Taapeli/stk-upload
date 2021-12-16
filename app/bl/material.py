@@ -24,9 +24,8 @@ Created on 11.11.2021
 from flask_babelex import _
 
 from bl.base import Status
-from bl.root import State, Root
 
-MATERIAL_COMMON = "common"  # Multi-batch data like Approved data
+MATERIAL_COMMON = "common"  # Multiple batch data like Approved data
 MATERIAL_BATCH = "batch"  # Selected candidate or approved batch
 
 class Material():
@@ -61,6 +60,7 @@ class Material():
 
     def to_display(self):
         """ Return current material and batch choice for display. """
+        from bl.batch.root import State
         try:
             m = self.m_type or "Unknown material"
             # if m == "Place": m = "Places"
@@ -111,6 +111,7 @@ class Material():
             From /start/logged HTTP/1.1
             --> "GET /scene/material/common?material_type=Family+Tree HTTP/1.1" 200 -
         """
+        from bl.batch.root import State, Root
         def reset_scope(session, params):
             """ Check, if any of session [state, material_type, batch_id] is changed """
             if (

@@ -23,7 +23,7 @@ from bl.dates import DateRange
 #import pprint
 from bl.place import PlaceBl, PlaceName
 #from pe.neo4j.updateservice import Neo4jDataService
-#from pe.db_writer import DbWriter
+#from pe.obsolete_db_writer import DbWriter
 #import json
 from operator import attrgetter
 

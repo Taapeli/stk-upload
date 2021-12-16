@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#from pe import dataservice
 
 """
     Data Root node to access Batch data sets.
@@ -40,6 +41,7 @@ import shareds
 from models.util import format_ms_timestamp
 from bl.admin.models.cypher_adm import Cypher_adm
 from bl.base import Status, NodeObject
+from .root_updater import RootUpdater
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_root import CypherRoot, CypherAudit
 from pe.neo4j.util import run_cypher
@@ -108,7 +110,7 @@ class Root(NodeObject):
         self.user = userid
         self.file = None
         self.id = ""  # batch_id
-        self.material_type = DEFAULT_MATERIAL      # Material type "Family Tree" or other
+        self.material_type = None   #DEFAULT_MATERIAL "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
         self.timestamp = 0 # Milliseconds; Convert to string by 
@@ -137,7 +139,7 @@ class Root(NodeObject):
         except Exception:
             return ""
         
-    def save(self, dataservice):
+    def save(self, tx):
         """Create or update Root node.
 
         Returns {'id':self.id, 'status':Status.OK}
@@ -157,12 +159,9 @@ class Root(NodeObject):
             "metaname": self.metaname,
             "logname": self.logname,
         }
-        #TODO Create new root_save()
-        res = dataservice.ds_batch_save(attr)
-        # returns {status, identity}
 
-        self.uniq_id = res.get("identity")
-        return res
+        self.uniq_id = RootUpdater.md_batch_save(tx, attr)
+        return {"status": Status.OK, "identity": self.uniq_id}
 
 
     @classmethod
@@ -269,8 +268,7 @@ class Root(NodeObject):
         for rec in result:
             yield dict(rec.get("b"))
 
-    # @staticmethod
-    # def get_batch_pallette(username):
+    # @staticmethod # def get_batch_pallette(username):
     #     """ Get my batches and batch collections.
     #  -- Ei toimi näin, hyväksyttyjä materiaaleja ei voi palauttaa Root-solmuina
     #
@@ -314,8 +312,9 @@ class Root(NodeObject):
             for rec in result:
                 # Record: <Record root.material='Family Tree' count(*)=6>
                 m_type = rec.get("material_type")
+                m_count = rec.get("nodes")
                 print(f"#get_batches_accepted: {m_type} ({rec.get('nodes')} nodes)")
-                yield m_type
+                yield {"material_type": m_type, "count": m_count }
 
     @staticmethod
     def get_user_stats(user):
@@ -370,7 +369,7 @@ class Root(NodeObject):
             audited = approved.get(batch_id)
             if audited:
                 user_data[key]["Audit"] = audited
-            #print(f"bl.root.Root.get_user_stats: user_data[{key}] {user_data[key]}")
+            #print(f"bl.batch.Root.get_user_stats: user_data[{key}] {user_data[key]}")
 
         return sorted(titles), user_data
 
@@ -590,103 +589,8 @@ class Root(NodeObject):
         )
         return msg, deleted
 
-class BatchUpdater(DataService):
-    """
-    Root datastore for write and update in transaction.
-    """
-
-    def __init__(self, service_name: str, u_context=None, tx=None):
-        """
-        Initiate datastore for update in given transaction or without transaction.
-        """
-        super().__init__(service_name, user_context=u_context, tx=tx)
-        self.batch = None
-
-    def new_batch(self, username):
-        """
-        Initiate new Batch.
-        """
-        # Lock db to avoid concurent Batch loads
-        self.dataservice.ds_aqcuire_lock("batch_id")
-        # TODO check res
-
-        # Find the next free Batch id
-        batch = Root()
-        res = self.dataservice.ds_new_batch_id()
-
-        batch.id = res.get("id")
-        batch.user = username
-
-        res = batch.save(self.dataservice)
-        return batch
-
-#     def xxxstart_data_batch(self, userid, file, mediapath, tx=None):
-#         """
-#         Initiate new Batch.
-# 
-#         :param: userid    user
-#         :param: file      input file name
-#         :param: mediapath media file store path
-#         """
-#         
-#         self.dataservice.ds_aqcuire_lock("batch_id")
-# 
-#         batch = self.new_batch()
-# 
-#         batch.user = userid
-#         batch.file = file.replace("_clean.", ".")
-#         batch.mediapath = mediapath
-# 
-#         self.batch = batch
-# 
-#         return {"batch": batch, "status": Status.OK}
-
-    def batch_get_one(self, user, batch_id):
-        """Get Root object by username and batch id (in BatchUpdater). """
-        try:
-            ret = self.dataservice.ds_get_batch(user, batch_id)
-            # returns {"status":Status.OK, "node":record}
-            node = ret['node']
-            batch = Root.from_node(node)
-            return {"status":Status.OK, "item":batch}
-        except Exception as e:
-            statustext = (
-                f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
-            )
-            return {"status": Status.ERROR, "statustext": statustext}
-
-    def change_state(self, batch_id, username, b_state):
-        """ Set this data batch status. """
-        res = self.dataservice.ds_batch_set_state(batch_id, username, b_state)
-        return res
-
-    def select_auditor(self, batch_id, auditor_username):
-        """ Mark auditor for this data batch and set status. """
-
-        allowed_states = [State.ROOT_AUDIT_REQUESTED,
-                          State.ROOT_AUDITING,
-                          State.ROOT_REJECTED]
-        res = self.dataservice.ds_batch_set_auditor(batch_id, auditor_username, 
-                                                    allowed_states)
-        return res
-
-# def batch_mark_status(self, batch, b_status): --> change_state
-#     """ Mark this data batch status. """
-
-    def commit(self):
-        """ Commit transaction. """
-        self.dataservice.ds_commit()
-
-    def rollback(self):
-        """ Commit transaction. """
-        self.dataservice.ds_rollback()
-
-    def media_create_and_link_by_handles(self, uniq_id, media_refs):
-        """Save media object and it's Note and Citation references
-        using their Gramps handles.
-        """
-        if media_refs:
-            self.dataservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
+# class BatchUpdater(DataService): # -> bl.batch.root_updater.RootUpdater
+#     """ Root data store for write and update. 
 
 
 class BatchReader(DataService):
@@ -694,7 +598,7 @@ class BatchReader(DataService):
     def __init__(self, service_name: str):
         super().__init__(service_name)
         self.idstr = f"{self.__class__.__name__}"
-        logger.debug(f'#~~~{self.idstr} init')
+        # logger.debug(f'#~~~{self.idstr} init')
         # Find <class 'pe.neo4j.*service'> and initialize it
         self.service_name = service_name
         service_class = shareds.dataservices.get(self.service_name)
@@ -710,7 +614,7 @@ class BatchReader(DataService):
         try:
             ret = self.dataservice.ds_get_batch(user, batch_id)
             # returns {"status":Status.OK, "node":record}
-            # print(f"bl.root.BatchReader.batch_get_one: return {ret}")
+            # print(f"bl.batch.BatchReader.batch_get_one: return {ret}")
             node = ret['node']
             batch = Root.from_node(node)
             return {"status":Status.OK, "item":batch}

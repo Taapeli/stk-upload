@@ -39,8 +39,9 @@ import urllib.parse
 from . import bp
 
 import shareds
-from bl.root import Root, State, BatchUpdater
 from bl.base import Status
+from bl.batch.root import Root, State #, BatchUpdater
+from bl.batch.root_updater import RootUpdater
 from bl.person import Person, PersonWriter
 from bl.refname import Refname
 #from bl.material import Material
@@ -109,7 +110,7 @@ def audit_research_op(oper=None, batch_id=None):
         else:
             return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
-        with BatchUpdater("update") as batch_service:
+        with RootUpdater("update") as batch_service:
             res = batch_service.change_state(batch_id, user_id, new_state)
 
     except Exception as e:
@@ -224,7 +225,7 @@ def audit_selected_op():
             operation = "reject"
         logger.info(f"--> bp.audit.routes.audit_selected u={owner_id} b={batch_id} {operation}")
     
-        with BatchUpdater("update") as batch_service:
+        with RootUpdater("update") as batch_service:
     
             if operation == "start":
                 # 5. Move from "Audit Requested" to "Auditing" state to "Accepted"

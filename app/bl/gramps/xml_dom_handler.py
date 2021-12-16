@@ -34,6 +34,7 @@ import re
 import time
 import os
 import xml.dom.minidom
+import threading
 from flask_babelex import _
 
 import shareds
@@ -50,58 +51,13 @@ from bl.dates import Gramps_DateRange
 from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
-
-from pe.neo4j.cypher.cy_root import CypherRoot
-#from models.cypher_gramps import Cypher_mixed
 from .batchlogger import LogItem
 
 
-import threading
-
-
-def pick_url(src):
-    """Extract an url from the text src, if any
-
-    Returns (text, url), where the url is removed from text
-    """
-    # TODO: Jos url päättyy merkkeihin '").,' ne tulee poistaa ja siirrää end-tekstiin
-    # TODO: Pitäsikö varautua siihen että tekstikenttä sisältää monta url:ia?
-
-    match = re.search("(?P<url>https?://[^\s'\"]+)", src)
-    url = None
-    text = src
-    if match is not None:
-        url = match.group("url")
-        start = match.start()
-        end = match.end()
-        #         start = ''   if start == 0
-        #         end = ''     if end == len(src) - 1:
-        #         print("[{}:{}] url='{}'".format(start, end, url))
-        text = ""
-        if start:
-            text = src[:start]
-        if end < len(src):
-            text = "{}{}".format(text, src[end:])
-    #         if text:
-    #             print("    '{}'".format(text.rstrip()))
-    #     elif len(src) > 0 and not src.isspace():
-    #         print("{} ...".format(src[:72].rstrip()))
-
-    return (text.rstrip(), url)
-
-
-def get_priv(dom_obj):
-    """Gives priv property value as int, if it is not '0' """
-    if dom_obj.hasAttribute("priv"):
-        priv = int(dom_obj.getAttribute("priv"))
-        if priv:
-            return priv
-    return None
 
 
 class DOM_handler:
     """XML DOM elements handler
-    - creates transaction
     - processes different data groups from given xml file to database
     - collects status log
     """
@@ -116,20 +72,11 @@ class DOM_handler:
         self.handle_to_node = {}  # {handle:(uuid, uniq_id)}
         self.person_ids = []  # List of processed Person node unique id's
         self.family_ids = []  # List of processed Family node unique id's
-        #         self.batch = None                   # Batch node to be created
-        #         self.mediapath = None               # Directory for media files
+        # self.batch = None                     # Batch node to be created
+        # self.mediapath = None                 # Directory for media files
         self.file = os.path.basename(pathname)  # for messages
         self.progress = defaultdict(int)
         self.obj_counter = 0
-
-    # def run_tx(self, func):
-    #     """ Restart transaction and run given function. """
-    #     self.dataservice.tx.commit()
-    #     self.dataservice.tx = shareds.driver.session().begin_transaction()
-    #     logger.debug(f'#~~~{func.__name__} tx restart')
-    #     # Run the function
-    #     func()
-
 
     def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
@@ -139,6 +86,8 @@ class DOM_handler:
 
     def add_missing_links(self):
         """Link the Nodes without OWNS link to Batch"""
+        from pe.neo4j.cypher.cy_root import CypherRoot
+
         result = self.tx.run(CypherRoot.add_missing_links, batch_id=self.batch_id)
         counters = shareds.db.consume_counters(result)
         if counters.relationships_created:
@@ -155,14 +104,12 @@ class DOM_handler:
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
-        #print(f"DOM_handler.save_and_link_handle: {obj} {kwargs}")
-        #obj.save(self.dataservice, self.dataservice.tx, **kwargs)
-        obj.save(self.dataservice, **kwargs)
-        self.obj_counter += 1 
-        if self.obj_counter % 1000 == 0:
-            print(self.obj_counter, "Transaction restart")
-            self.dataservice.tx.commit()
-            self.dataservice.tx = shareds.driver.session().begin_transaction()
+        obj.save(self.dataservice.tx, **kwargs)
+        # self.obj_counter += 1 
+        # if self.obj_counter % 1000 == 0:
+        #     print(self.obj_counter, "Transaction restart")
+        #     self.dataservice.tx.commit()
+        #     self.dataservice.tx = shareds.driver.session().begin_transaction()
 
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
@@ -373,7 +320,8 @@ class DOM_handler:
             e.media_refs = self._extract_mediaref(event)
 
             try:
-                self.save_and_link_handle(e, batch_id=self.batch.id)
+                self.save_and_link_handle(e, batch_id=self.batch.id, 
+                                          dataservice=self.dataservice)
                 counter += 1
             except RuntimeError as e:
                 self.blog.log_event(
@@ -488,9 +436,9 @@ class DOM_handler:
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
-    def handle_notes(self):
+    def handle_notes(self, notes):
         """ Get all the notes in the xml_tree. """
-        notes = self.xml_tree.getElementsByTagName("note")
+        # notes = self.xml_tree.getElementsByTagName("note")
         status = Status.OK
         for_test = ""
 
@@ -504,7 +452,7 @@ class DOM_handler:
             # Extract handle, change and id
             self._extract_base(note, n)
 
-            n.priv = get_priv(note)
+            n.priv = self._get_priv(note)
             if note.hasAttribute("type"):
                 n.type = note.getAttribute("type")
 
@@ -512,7 +460,7 @@ class DOM_handler:
                 note_text = note.getElementsByTagName("text")[0]
                 n.text = note_text.childNodes[0].data
                 # Pick possible url
-                n.text, n.url = pick_url(n.text)
+                n.text, n.url = self._pick_url_from_text(n.text)
 
             # self.save_and_link_handle(n, batch_id=self.batch.id)
             for_test = self.save_and_link_handle(n, batch_id=self.batch.id)
@@ -709,7 +657,7 @@ class DOM_handler:
 
             for person_url in person.getElementsByTagName("url"):
                 n = Note()
-                n.priv = get_priv(person_url)
+                n.priv = self._get_priv(person_url)
                 n.url = person_url.getAttribute("href")
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
@@ -731,7 +679,8 @@ class DOM_handler:
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
             # for ref in p.media_refs: print(f'# saving Person {p.id}: media_ref {ref}')
-            self.save_and_link_handle(p, batch_id=self.batch.id)
+            self.save_and_link_handle(p, batch_id=self.batch.id,
+                                      dataservice=self.dataservice)
             # print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
             # The refnames will be set for these persons
@@ -843,7 +792,7 @@ class DOM_handler:
 
             for placeobj_url in placeobj.getElementsByTagName("url"):
                 n = Note()
-                n.priv = get_priv(placeobj_url)
+                n.priv = self._get_priv(placeobj_url)
                 n.url = placeobj_url.getAttribute("href")
                 n.type = placeobj_url.getAttribute("type")
                 n.text = placeobj_url.getAttribute("description")
@@ -874,7 +823,8 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys)
+            self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys, 
+                                          dataservice=self.dataservice)
             # The place_keys has been updated
             counter += 1
 
@@ -1172,6 +1122,44 @@ class DOM_handler:
 
     # --------------------------- DOM subtree procesors ----------------------------
 
+    def _get_priv(self, dom_obj):
+        """Gives priv property value as int, if it is not '0' """
+        if dom_obj.hasAttribute("priv"):
+            priv = int(dom_obj.getAttribute("priv"))
+            if priv:
+                return priv
+        return None
+
+    def _pick_url_from_text(self, src):
+        """Extract an url from the text src, if any
+    
+        Returns (text, url), where the url is removed from text
+        """
+        # TODO: Jos url päättyy merkkeihin '").,' ne tulee poistaa ja siirrää end-tekstiin
+        # TODO: Pitäsikö varautua siihen että tekstikenttä sisältää monta url:ia?
+    
+        match = re.search("(?P<url>https?://[^\s'\"]+)", src)
+        url = None
+        text = src
+        if match is not None:
+            url = match.group("url")
+            start = match.start()
+            end = match.end()
+            #         start = ''   if start == 0
+            #         end = ''     if end == len(src) - 1:
+            #         print("[{}:{}] url='{}'".format(start, end, url))
+            text = ""
+            if start:
+                text = src[:start]
+            if end < len(src):
+                text = "{}{}".format(text, src[end:])
+        #         if text:
+        #             print("    '{}'".format(text.rstrip()))
+        #     elif len(src) > 0 and not src.isspace():
+        #         print("{} ...".format(src[:72].rstrip()))
+    
+        return (text.rstrip(), url)
+    
     def _extract_daterange(self, obj):
         """Extract date information from these kind of date formats:
             <daterange start="1820" stop="1825" quality="estimated"/>

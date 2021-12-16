@@ -179,10 +179,8 @@ class Refname(NodeObject):
         if not self.name:
             raise ValueError("No name for Refname")
 
-        if tx:  # Use transaction
-            session = tx
-        else:  # No transaction
-            session = shareds.driver.session()
+        if not tx:  # No transaction
+            tx = shareds.driver.session()
 
         # Setting attributes for 'A'
         a_attr = {"name": self.name}
@@ -199,7 +197,7 @@ class Refname(NodeObject):
             else:  # ['firstname', 'surname', 'patronyme']
                 query = CypherRefname.link_basename
             try:
-                result = session.run(
+                result = tx.run(
                     query,
                     use=self.reftype,
                     a_name=self.name,
@@ -231,7 +229,7 @@ class Refname(NodeObject):
         else:
             # Create (A:{name:name}) only (if needed)
             try:
-                result = session.run(
+                result = tx.run(
                     CypherRefname.save_single, a_name=self.name, a_attr=a_attr
                 )
 

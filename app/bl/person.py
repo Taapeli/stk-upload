@@ -361,7 +361,7 @@ class PersonBl(Person):
         self.events = []  # bl.event.EventBl
         self.notes = []  #
 
-    def save(self, dataservice, **kwargs):
+    def save(self, tx, **kwargs):
         """Saves the Person object and possibly the Names, Events ja Citations.
 
         On return, the self.uniq_id is set
@@ -371,8 +371,7 @@ class PersonBl(Person):
         """
 
         batch_id = kwargs.get('batch_id', None)
-        if not 'batch_id':
-            raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
+        dataservice = kwargs["dataservice"]
         self.uuid = self.newUuid()
         #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "H")
 
@@ -391,9 +390,8 @@ class PersonBl(Person):
         if self.dates:
             p_attr.update(self.dates.for_db())
 
-        result = dataservice.tx.run(CypherPerson.create_to_batch, 
-                                    batch_id=batch_id, 
-                                    p_attr=p_attr)
+        result = tx.run(CypherPerson.create_to_batch, 
+                        batch_id=batch_id, p_attr=p_attr)
         ids = []
         for record in result:
             self.uniq_id = record[0]
@@ -410,16 +408,16 @@ class PersonBl(Person):
 
         # Save Name nodes under the Person node
         for name in self.names:
-            name.save(dataservice, parent_id=self.uniq_id)
+            name.save(tx, parent_id=self.uniq_id)
 
         # Save web urls as Note nodes connected under the Person
         if self.notes:
-            Note.save_note_list(dataservice, parent=self, batch_id=batch_id)
+            Note.save_note_list(tx, parent=self, batch_id=batch_id)
 
         """ Connect to each Event loaded from Gramps """
         # for i in range(len(self.eventref_hlink)):
         for event_handle, role in self.event_handle_roles:
-            dataservice.tx.run(
+            tx.run(
                 CypherPerson.link_event,
                 p_handle=self.handle,
                 e_handle=event_handle,

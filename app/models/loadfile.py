@@ -24,35 +24,33 @@ shareds.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 def upload_file(infile,folder=None, secure=False):
-    """ Save file 'infile' in the upload folder 
-        and return the final full name of the file 
+    """ Save file 'infile' in the upload folder and return full pathname. 
     """
     if not folder:
         folder = shareds.app.config['UPLOAD_FOLDER']
     try:
         filename = normalized_name(infile.filename)
     except Exception:
-        logging.debug('Normalizing file name "' + infile.filename + '" fails')
+        logging.debug('models.loadfile.upload_file: Normalizing file name "' + infile.filename + '" fails')
         raise
     if secure:    
         fullname =  os.path.join(folder, secure_filename(filename))
     else:    
         fullname =  os.path.join(folder, filename)
     infile.save(fullname)
-    logging.debug('Tiedosto "' + fullname + '" talletettu')
+    logging.debug(f"models.loadfile.upload_file: File \"{fullname}\" stored to {UPLOAD_FOLDER}")
     return fullname
 
 def normalized_name(in_name, secure=False):
-    """ Tarkastetaan tiedostonimi ja palautetaan täysi polkunimi """
+    """ Check filename and return full pathname """
     # Tiedostonimi saatu?
     if not in_name:
-        raise IOError('Tiedostonimi puuttuu')
+        raise IOError('Missing filename')
     # Tiedostopääte ok?
     ok_name = '.' in in_name and \
            in_name.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
     if not ok_name:
-        raise ValueError('Tiedostopääte nimessä "' + in_name + \
-              '" pitää olla .gramps .csv .txt tai .xml ')
+        raise ValueError("Allowed filesnames end with .gramps .csv .txt or .xml, got " + in_name)
     # Palautetaan nimi ilman ylimääräisiä hakemistotasoja
     if secure:
         return secure_filename(in_name)

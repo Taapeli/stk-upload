@@ -102,7 +102,7 @@ class MediaBl(Media):
         self.mime = None
         self.name = ""
 
-    def save(self, dataservice, **kwargs):
+    def save(self, tx, **kwargs):
         """Saves this new Media object to db.
 
         #TODO: Process also Notes for media?
@@ -122,7 +122,7 @@ class MediaBl(Media):
             "description": self.description,
         }
         m_attr["batch_id"] = kwargs["batch_id"]
-        result = dataservice.tx.run(
+        result = tx.run(
             CypherMedia.create_in_batch,
             bid=kwargs["batch_id"],
             uuid=self.uuid,

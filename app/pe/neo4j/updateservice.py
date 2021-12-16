@@ -99,49 +99,59 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Batch Audit -----
 
-    def ds_aqcuire_lock(self, lock_id):
+    @staticmethod
+    def md_aqcuire_lock(tx, lock_id):
         """Create a lock"""
-        self.tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
+        tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
         return True  # value > 0
 
-    def ds_find_last_used_batch_seq(self):
-        """Find last used Batch id sequence number for today or zero.
-        """
+    # def ds_find_last_used_batch_seq(self, tx): # --> md_new_batch_id
+    #     """Find last used Batch id sequence number for today or zero.
+    #     """
+    #     # 1. Find the latest Batch id from the BatchId singleton node
+    #     base = str(date.today())
+    #     # print("base="+base)
+    #     record = tx.run(CypherRoot.read_batch_id).single()
+    #     if record:
+    #         node = record["n"]
+    #         print("BatchId node",node)
+    #         if node.get("prefix") == base:
+    #             seq = node.get("seq")
+    #             return seq
+    #         else:
+    #             return 0        
+    #
+    #     # 2. Find the latest Batch id of today from the db
+    #     record = tx.run(CypherRoot.batch_find_last_id, batch_base=base).single()
+    #     if record:
+    #         batch_id = record.get("bid")
+    #         print(f"# Previous batch_id='{batch_id}'")
+    #         seq = int(batch_id.split(".")[-1])
+    #         return seq
+    #     return 0
 
-        # 1. Find the latest Batch id from the BatchId singleton node
-        base = str(date.today())
-        print("base="+base)
-        record = self.tx.run(CypherRoot.read_batch_id).single()
-        if record:
-            node = record["n"]
-            print("BatchId node",node)
-            if node.get("prefix") == base:
-                seq = node.get("seq")
-                return seq
-            else:
-                return 0        
-
-        # 2. Find the latest Batch id of today from the db
-        record = self.tx.run(CypherRoot.batch_find_last_id, batch_base=base).single()
-        if record:
-            batch_id = record.get("bid")
-            print(f"# Previous batch_id='{batch_id}'")
-            seq = int(batch_id.split(".")[-1])
-            return seq
-        return 0
-
-    def ds_new_batch_id(self):
+    @staticmethod
+    def md_new_batch_id(tx):
         """Find next unused Batch id using BatchId node.
 
-        Returns {id, status, [statustext]}
+        Returns batch_id
         """
         base = str(date.today())
-        seq = self.ds_find_last_used_batch_seq()
+        # seq = self.ds_find_last_used_batch_seq(tx)
+        # 1. Find the latest Batch id from the BatchId singleton node
+        # print("base="+base)
+        seq = 0
+        record = tx.run(CypherRoot.read_batch_id).single()
+        if record:
+            node = record["n"]
+            # print("#md_new_batch_id: BatchId node",node)
+            if node.get("prefix") == base:
+                seq = node.get("seq")
         seq += 1
         batch_id = "{}.{:03d}".format(base, seq)
-        self.tx.run(CypherRoot.save_batch_id, prefix=base, seq=seq)
-        print("# New batch_id='{}'".format(batch_id))
-        return {"status": Status.OK, "id": batch_id}
+        tx.run(CypherRoot.save_batch_id, prefix=base, seq=seq)
+        print("#Neo4jUpdateService.md_new_batch_id: id='{}'".format(batch_id))
+        return batch_id
 
     def ds_get_batch(self, user, batch_id):
         """Get Batch node by username and batch id. 
@@ -156,23 +166,22 @@ class Neo4jUpdateService(ConcreteService):
             else:
                 return {"status":Status.NOT_FOUND, "node":None,
                         "statustext": "Batch not found"}
-       
 
-    def ds_batch_save(self, attr):
+    @staticmethod
+    def md_batch_save(tx, attr):
         """Creates a Batch node.
 
         attr = {"mediapath", "file", "id", "user", "status"}
 
         Batch.timestamp is created in the Cypher clause.
         """
-        result = self.tx.run(CypherRoot.batch_merge, b_attr=attr).single()
-        if not result:
+        record = tx.run(CypherRoot.batch_merge, b_attr=attr).single()
+        if not record:
             raise IsotammiException("Unable to save Batch",
                             cypher=CypherRoot.batch_merge,
                             b_attr=attr,
                             )
-        uniq_id = result[0]
-        return {"status": Status.OK, "identity": uniq_id}
+        return record[0] #{"status": Status.OK, "identity": uniq_id}
 
 
     def ds_batch_set_state(self, batch_id, user, state):

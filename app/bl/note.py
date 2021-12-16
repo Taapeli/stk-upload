@@ -128,7 +128,7 @@ class Note(NodeObject):
     #         return 0
 
     @staticmethod
-    def save_note_list(dataservice, **kwargs):
+    def save_note_list(tx, **kwargs):
         """Save the parent.notes[] objects as a descendant of the parent node.
 
         Arguments:
@@ -151,11 +151,11 @@ class Note(NodeObject):
                         "parent_id": parent.uniq_id, 
                         "batch_id": batch_id,
                         }
-                note.save(dataservice, **attr)
+                note.save(tx, **attr)
             else:
                 raise AttributeError("note.save_note_list: Argument not a Note")
 
-    def save(self, dataservice, **kwargs):
+    def save(self, tx, **kwargs):
         """Creates this Note object as a Note node
 
         Arguments:
@@ -181,7 +181,7 @@ class Note(NodeObject):
             n_attr["handle"] = self.handle
         if not parent_id is None:
             # print(f"Note.save: (Root {batch_id}) --> (Note {self.id}) <-- (parent {parent_id})")
-            result = dataservice.tx.run(
+            result = tx.run(
                 CypherNote.create_in_batch_as_leaf,
                 bid=batch_id,
                 parent_id=parent_id,
@@ -189,7 +189,7 @@ class Note(NodeObject):
             )
         elif not batch_id is None:
             # print(f"Note.save: (Root {batch_id}) --> (Note {self.id})")
-            result = dataservice.tx.run(
+            result = tx.run(
                 CypherNote.create_in_batch, 
                 bid=batch_id, 
                 n_attr=n_attr

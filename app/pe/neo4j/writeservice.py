@@ -31,8 +31,8 @@ from bl.dates import DateRange
 from bl.event import EventBl
 
 from pe.dataservice import ConcreteService
-from pe.neo4j.cypher.cy_event import CypherEvent
-from pe.neo4j.cypher.cy_person import CypherPerson
+from .cypher.cy_event import CypherEvent
+from .cypher.cy_person import CypherPerson
 
 def parsedate(datestr, attrs):
     try:

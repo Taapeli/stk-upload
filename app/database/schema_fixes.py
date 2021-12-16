@@ -31,7 +31,6 @@ logger = logging.getLogger('stkserver')
 from neo4j.exceptions import ClientError #, ConstraintError
 
 import shareds
-from bl.root import State
 
 def do_schema_fixes():
     """ Search current obsolete terms and structures in schema and fix them.
@@ -41,6 +40,7 @@ def do_schema_fixes():
 
         @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
     """
+    from bl.batch.root import State
 
     # Batch: Root.state depends on b.status; Root.material = b.material_type
     change_Batch_to_Root = f"""

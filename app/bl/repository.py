@@ -125,14 +125,13 @@ class Repository(NodeObject):
     #         print ("Type: " + self.type)
     #         return True
 
-    def save(self, dataservice, **kwargs):
+    def save(self, tx, **kwargs):
         """Saves this Repository to db under given batch."""
         if not "batch_id" in kwargs:
             raise RuntimeError(f"Repository.save needs batch_id for {self.id}")
 
         self.uuid = self.newUuid()
         batch_id = kwargs.get("batch_id", None)
-        r_attr = {}
         r_attr = {
             "uuid": self.uuid,
             "handle": self.handle,
@@ -141,7 +140,7 @@ class Repository(NodeObject):
             "rname": self.rname,
             "type": self.type,
         }
-        result = dataservice.tx.run(
+        result = tx.run(
             CypherRepository.create_in_batch,
             bid=batch_id,
             r_attr=r_attr
@@ -151,6 +150,6 @@ class Repository(NodeObject):
         # Save the notes attached to self
         if self.notes:
             attr = {"parent":self, "batch_id":batch_id}
-            Note.save_note_list(dataservice, **attr)
+            Note.save_note_list(tx, **attr)
 
         return

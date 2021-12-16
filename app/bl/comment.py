@@ -25,7 +25,6 @@ Created on 19.5.2021
 # blacked 2021-05-01 JMä
 #import shareds
 from bl.base import NodeObject, Status
-from bl.root import Root
 from bl.person import PersonBl
 from bl.family import FamilyBl
 from bl.place import PlaceBl
@@ -112,6 +111,8 @@ class CommentReader(DataService):
 
     def read_my_comment_list(self):
         """Read Comment object list using u_context."""
+        from bl.batch.root import Root
+
         topics = []
         fw = self.user_context.first  # next name
         limit = self.user_context.count

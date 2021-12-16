@@ -29,7 +29,6 @@ Created on 4.1.2018
 from urllib.parse import urlparse
 from flask_babelex import _
 from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKNOWN
-from bl.root import State
 
 def translate(term, var_name, show_table=False):
     """ Given term is translated depending of var_name name.
@@ -325,6 +324,7 @@ def translate(term, var_name, show_table=False):
 
     elif var_name == "state":
         # Root.state types
+        from bl.batch.root import State
         tabl = {
             State.ROOT_REMOVED: _("File"),
             State.ROOT_STORING: _("Storing"),
