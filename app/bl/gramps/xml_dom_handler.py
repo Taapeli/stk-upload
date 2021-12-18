@@ -436,9 +436,9 @@ class DOM_handler:
         )  # , 'percent':1})
         return {"status": status, "message": message}
 
-    def handle_notes(self, notes):
+    def handle_notes(self):
         """ Get all the notes in the xml_tree. """
-        # notes = self.xml_tree.getElementsByTagName("note")
+        notes = self.xml_tree.getElementsByTagName("note")
         status = Status.OK
         for_test = ""
 
