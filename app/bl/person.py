@@ -427,7 +427,7 @@ class PersonBl(Person):
         # Make relations to the Media nodes and it's Note and Citation references
         if self.media_refs:
             dataservice.ds_create_link_medias_w_handles(
-                self.uniq_id, self.media_refs
+                tx, self.uniq_id, self.media_refs
             )
 
         # The relations to the Family node will be created in Family.save(),
@@ -436,18 +436,18 @@ class PersonBl(Person):
         # Make relations to the Note nodes
 
         for handle in self.note_handles:
-            dataservice.tx.run(CypherPerson.link_note, p_handle=self.handle, n_handle=handle)
+            tx.run(CypherPerson.link_note, p_handle=self.handle, n_handle=handle)
 
         # Make relations to the Citation nodes
 
         for handle in self.citation_handles:
-            dataservice.tx.run(
+            tx.run(
                 CypherObject.link_citation, handle=self.handle, c_handle=handle
             )
         return
 
     @staticmethod
-    def update_person_confidences(dataservice, person_ids: list):
+    def update_person_confidences(tx, dataservice, person_ids: list):
         """Sets a quality rating for given list of Person.uniq_ids.
 
         Person.confidence is calculated as a mean of confidences in
@@ -455,7 +455,7 @@ class PersonBl(Person):
         """
         counter = 0
         for uniq_id in person_ids:
-            res = dataservice.ds_update_person_confidences(uniq_id)
+            res = dataservice.ds_update_person_confidences(tx, uniq_id)
             # returns {confidence, status, statustext}
             stat = res.get("status")
             if stat == Status.UPDATED:

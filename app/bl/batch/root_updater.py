@@ -26,7 +26,7 @@ import os
 import time
 
 import shareds
-from bl.base import IsotammiException
+from bl.base import IsotammiException, Status
 from bp.admin import uploads
 from models import loadfile #, util, syslog
 from pe.managed_dataservice import ManagedDataService

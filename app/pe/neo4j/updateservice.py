@@ -275,20 +275,20 @@ class Neo4jUpdateService(ConcreteService):
     #     _param: parent_id   Parent object to link (parent) --> (obj)"""
     #     obj.save(self.tx, **kwargs)
 
-    def ds_obj_remove_gramps_handles(self, batch_id):
+    def ds_obj_remove_gramps_handles(self, tx, batch_id):
         """Remove all Gramps handles."""
         status = Status.OK
         total = 0
         unlinked = 0
         # Remove handles from nodes connected to given Batch
-        result = self.tx.run(CypherRoot.remove_all_handles, batch_id=batch_id)
+        result = tx.run(CypherRoot.remove_all_handles, batch_id=batch_id)
         for count, label in result:
             print(f"# - cleaned {count} {label} handles")
             total += count
         # changes = result.summary().counters.properties_set
 
         # Find handles left: missing link (:Batch) --> (x)
-        result = self.tx.run(CypherRoot.find_unlinked_nodes)
+        result = tx.run(CypherRoot.find_unlinked_nodes)
         for count, label in result:
             print(
                 f"Neo4jUpdateService.ds_obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch"
@@ -300,7 +300,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Media -----
 
-    def ds_create_link_medias_w_handles(self, uniq_id: int, media_refs: list):
+    def ds_create_link_medias_w_handles(self, tx, uniq_id: int, media_refs: list):
         """Save media object and it's Note and Citation references
         using their Gramps handles.
 
@@ -322,7 +322,7 @@ class Neo4jUpdateService(ConcreteService):
                     r_attr["lower"] = resu.crop[3]
                 doing = f"(src:{uniq_id}) -[{r_attr}]-> Media {resu.media_handle}"
                 # print(doing)
-                result = self.tx.run(
+                result = tx.run(
                     CypherObjectWHandle.link_media,
                     root_id=uniq_id,
                     handle=resu.media_handle,
@@ -343,26 +343,27 @@ class Neo4jUpdateService(ConcreteService):
 
                 for handle in resu.note_handles:
                     doing = f"{media_uid}->Note {handle}"
-                    self.tx.run(
+                    tx.run(
                         CypherObjectWHandle.link_note, root_id=media_uid, handle=handle
                     )
 
                 for handle in resu.citation_handles:
                     doing = f"{media_uid}->Citation {handle}"
-                    self.tx.run(
+                    tx.run(
                         CypherObjectWHandle.link_citation,
                         root_id=media_uid,
                         handle=handle,
                     )
 
         except Exception as err:
+            traceback.print_exc()
             logger.error(
                 f"Neo4jUpdateService.create_link_medias_by_handles {doing}: {err}"
             )
 
     # ----- Place -----
 
-    def ds_place_set_default_names(self, place_id, fi_id, sv_id):
+    def ds_place_set_default_names(self, tx, place_id, fi_id, sv_id):
         """Creates default links from Place to fi and sv PlaceNames.
 
         - place_id      Place object id
@@ -371,11 +372,11 @@ class Neo4jUpdateService(ConcreteService):
         """
         try:
             if fi_id == sv_id:
-                result = self.tx.run(
+                result = tx.run(
                     CypherPlace.link_name_lang_single, place_id=place_id, fi_id=fi_id
                 )
             else:
-                result = self.tx.run(
+                result = tx.run(
                     CypherPlace.link_name_lang,
                     place_id=place_id,
                     fi_id=fi_id,
@@ -628,7 +629,7 @@ class Neo4jUpdateService(ConcreteService):
         #xxx
         return {"status": Status.OK, "count": count}
 
-    def ds_update_person_confidences(self, uniq_id: int):
+    def ds_update_person_confidences(self, tx, uniq_id: int):
         """Collect Person confidence from Person and Event nodes and store result in Person.
 
         Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
@@ -652,7 +653,6 @@ class Neo4jUpdateService(ConcreteService):
             self.tx.run(
                 CypherPerson.set_confidence, id=uniq_id, confidence=new_conf
             )
-
             return {"confidence": new_conf, "status": Status.UPDATED}
         return {"confidence": new_conf, "status": Status.OK}
 

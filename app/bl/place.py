@@ -143,7 +143,7 @@ class PlaceBl(Place):
         self.media_ref = []  # uniq_id of models.gen.media.Media
         self.ref_cnt = None  # for display: count of referencing objects
 
-    def set_default_names(self, def_names: dict, dataservice):
+    def set_default_names(self, tx, def_names: dict, dataservice):
         """Creates default links from Place to fi and sv PlaceNames.
 
         The objects are referred with database id numbers.
@@ -152,7 +152,7 @@ class PlaceBl(Place):
         - - .names      PlaceName objects
         - def_names     dict {lang, uid} uniq_id's of PlaceName objects
         """
-        dataservice.ds_place_set_default_names(self.uniq_id, def_names["fi"], def_names["sv"])
+        dataservice.ds_place_set_default_names(tx, self.uniq_id, def_names["fi"], def_names["sv"])
 
     @staticmethod
     def find_default_names(names: list, use_langs: list):
@@ -294,7 +294,7 @@ class PlaceBl(Place):
         ret = PlaceBl.find_default_names(self.names, ["fi", "sv"])
         if ret.get("status") == Status.OK:
             # Update default language name links
-            self.set_default_names(ret.get("ids"), dataservice)
+            self.set_default_names(tx, ret.get("ids"), dataservice)
 
         # Make hierarchy relations to upper Place nodes
 
@@ -359,7 +359,7 @@ class PlaceBl(Place):
         if self.media_refs:
             # Make relations to the Media nodes and their Note and Citation references
             result = dataservice.ds_create_link_medias_w_handles(
-                self.uniq_id, self.media_refs)
+                tx, self.uniq_id, self.media_refs)
 
         return
 

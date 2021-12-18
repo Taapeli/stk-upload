@@ -259,42 +259,20 @@ def analyze(username, filename):
 def xml_to_stkbase(batch):  # :Root):
     """
     Reads a Gramps xml file, and saves the information to db
-
-    Metacode for batch log creation UserProfile --> Batch.
-
-    # Start a Batch
-        routes.upload_gramps / models.loadfile.upload_file >
-            # Create id / bp.gramps.batchlogger.Batch._create_id
-            match (p:UserProfile {username:"jussi"});
-            create (p) -[:HAS_LOADED]-> (b:Batch {id:"2018-06-02.0", status:"started"})
-            return b
-    # Load the file (in routes.save_loaded_gramps)
-        models.loadfile.upload_file > status:"started"
-        # Clean apostrophes
-        file clean > status:"loading"
-    # Käsittele tietoryhmä 1
-        models.gramps.gramps_loader.xml_to_stkbase > status:"storing"
-    # Käsittele tietoryhmä 2 ...
-    # ...
-    # Käsittele henkilöt
-        models.gramps.gramps_loader.xml_to_stkbase > status:"storing"
-    # Viimeistele data
-        models.gramps.gramps_loader.xml_to_stkbase > status:"storing"
-    # Merkitse valmiiksi
-        status:"done"
-
-        match (p:UserProfile {username:"jussi"});
-        match (p) -[r:CURRENT_LOAD]-> () delete r
-        create (p) -[:CURRENT_LOAD]-> (b)
     """
     from bl.batch.root_updater import RootUpdater
     from bl.batch.root import State, DEFAULT_MATERIAL
 
+    t0 = time.time()
+
     # Uncompress and hide apostrophes (and save log)
     file_cleaned, file_displ, cleaning_log, is_gpkg = file_clean(batch.file)
 
-    tx = shareds.driver.session().begin_transaction()
-    with RootUpdater("update", tx=tx) as batch_service:
+    """
+        Root-solmun luonti aivan kuin viime versiossa, mutta transaktion
+        luonti jää RootUpdaterin asiaksi
+    """
+    with RootUpdater("update") as batch_service:
         # Get XML DOM parser and start DOM elements handler transaction
         handler = DOM_handler(file_cleaned, batch.user, batch.file, batch_service.dataservice)
     
@@ -319,34 +297,34 @@ def xml_to_stkbase(batch):  # :Root):
             batch.material_type = DEFAULT_MATERIAL
             print(f"- default material type {batch.material_type}")
         handler.handle_suffix = "_" + handler.batch.id  
-    
-        batch.save(batch_service.dataservice.tx)
-        
-        t0 = time.time()
+
+        # batch.save(batch_service.dataservice.tx)
+        with shareds.driver.session() as session:
+            session.write_transaction(batch.save) 
 
         if is_gpkg:
             extract_media(batch.file, batch.id)
 
-        res = handler.handle_notes()
-        res = handler.handle_repositories()
-        res = handler.handle_sources()
-        res = handler.handle_citations()
-        res = handler.handle_media()
-        res = handler.handle_places() # With Place_names
-        res = handler.handle_events()
-        res = handler.handle_people() # With Names
-        res = handler.handle_families()
+    handler.handle_notes()
+    handler.handle_repositories()
+    handler.handle_sources()
+    handler.handle_citations()
+    handler.handle_media()
+    handler.handle_places() # With Place_names
+    handler.handle_events()
+    handler.handle_people() # With Names
+    handler.handle_families()
 
-        #       for k in handler.handle_to_node.keys():
-        #             print (f'\t{k} –> {handler.handle_to_node[k]}')
+    #       for k in handler.handle_to_node.keys():
+    #             print (f'\t{k} –> {handler.handle_to_node[k]}')
 
-        res = handler.set_all_person_confidence_values()
+    if 0:
         res = handler.set_person_calculated_attributes()
         res = handler.set_person_estimated_dates()
-
+    
         # Copy date and name information from Person and Event nodes to Family nodes
         res = handler.set_family_calculated_attributes()
-
+    
         # print("build_free_text_search_indexes")
         t1 = time.time()
         res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
@@ -355,22 +333,37 @@ def xml_to_stkbase(batch):  # :Root):
         )
         # print("build_free_text_search_indexes done")
             
-        res = handler.remove_handles()
-        # The missing links counted in remove_handles?
-        ##TODO      res = handler.add_missing_links()?
+    
 
+    tx = shareds.driver.session().begin_transaction()
+    with RootUpdater("update", tx=tx) as batch_service:
+        handler.dataservice = batch_service.dataservice
+        res = handler.set_all_person_confidence_values(tx)
+        res = handler.set_person_calculated_attributes()
+        res = handler.set_person_estimated_dates()
+    
+        # Copy date and name information from Person and Event nodes to Family nodes
+        res = handler.set_family_calculated_attributes()
+    
+        # print("build_free_text_search_indexes")
+        t1 = time.time()
+        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
+        handler.blog.log_event(
+            {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
+        )
+
+        res = handler.remove_handles(tx)
         res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
-        #es = batch_service.batch_mark_status(batch, State.ROOT_CANDIDATE)
-
-        tx = batch_service.dataservice.tx
+#        tx = batch_service.dataservice.tx
         if not tx.closed():
             print(f"bl.gramps.gramps_loader.xml_to_stkbase: commit")
             tx.commit()
-        logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
 
-        handler.blog.log_event(
-            {"title": "Total time", "level": "TITLE", "elapsed": time.time() - t0}
-        )
+    logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
+
+    handler.blog.log_event(
+        {"title": "Total time", "level": "TITLE", "elapsed": time.time() - t0}
+    )
 
     # End with BatchUpdater
 
@@ -379,7 +372,6 @@ def xml_to_stkbase(batch):  # :Root):
         "steps": handler.blog.list(),
         "batch_id": handler.batch.id,
     }
-
 
 def file_clean(pathname):
     # Decompress file and clean problematic delimiter (').
