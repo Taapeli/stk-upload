@@ -357,7 +357,7 @@ def list_uploads(username:str) -> List[Upload]:
         #print(f"#bp.admin.uploads.list_uploads: {upload}")
         uploads.append(upload)
 
-    return sorted(uploads, key=lambda upload: upload.batch_id)
+    return sorted(uploads, reverse=True, key=lambda upload: upload.batch_id)
 
 def list_uploads_all(users) -> List[Upload]:
     """ Get named setups.User objects by descending batch_id. """
