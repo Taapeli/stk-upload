@@ -29,7 +29,7 @@ def obj_addr(tx):
 
 
 class DataService:
-    """Public methods for accessing active database.
+    """Public methods for accessing active database with or without transaction.
     The current database is defined in /setups.py.
 
     Follows Context Manager pattern allowing automatic transaction management

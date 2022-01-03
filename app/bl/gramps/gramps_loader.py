@@ -318,32 +318,29 @@ def xml_to_stkbase(batch):  # :Root):
     #       for k in handler.handle_to_node.keys():
     #             print (f'\t{k} –> {handler.handle_to_node[k]}')
 
-    if 0:
-        res = handler.set_person_calculated_attributes()
-        res = handler.set_person_estimated_dates()
-    
-        # Copy date and name information from Person and Event nodes to Family nodes
-        res = handler.set_family_calculated_attributes()
-    
-        # print("build_free_text_search_indexes")
-        t1 = time.time()
-        res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
-        handler.blog.log_event(
-            {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
-        )
-        # print("build_free_text_search_indexes done")
+    # if 0:
+    #     res = handler.set_person_calculated_attributes()
+    #     res = handler.set_person_estimated_dates()
+    #
+    #     # Copy date and name information from Person and Event nodes to Family nodes
+    #     res = handler.set_family_calculated_attributes()
+    #
+    #     # print("build_free_text_search_indexes")
+    #     t1 = time.time()
+    #     res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
+    #     handler.blog.log_event(
+    #         {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
+    #     )
+    #     # print("build_free_text_search_indexes done")
             
-    
-
-    tx = shareds.driver.session().begin_transaction()
-    with RootUpdater("update", tx=tx) as batch_service:
+    with RootUpdater("update") as batch_service:
         handler.dataservice = batch_service.dataservice
-        res = handler.set_all_person_confidence_values(tx)
-        res = handler.set_person_calculated_attributes()
-        res = handler.set_person_estimated_dates()
+        handler.set_all_person_confidence_values()
+        handler.set_person_calculated_attributes()
+        handler.set_person_estimated_dates()
     
         # Copy date and name information from Person and Event nodes to Family nodes
-        res = handler.set_family_calculated_attributes()
+        handler.set_family_calculated_attributes()
     
         # print("build_free_text_search_indexes")
         t1 = time.time()
@@ -352,12 +349,8 @@ def xml_to_stkbase(batch):  # :Root):
             {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
         )
 
-        res = handler.remove_handles(tx)
-        res = batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
-#        tx = batch_service.dataservice.tx
-        if not tx.closed():
-            print(f"bl.gramps.gramps_loader.xml_to_stkbase: commit")
-            tx.commit()
+        handler.remove_handles()
+        batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
 
     logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
 

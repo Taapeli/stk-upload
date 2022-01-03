@@ -78,7 +78,7 @@ class DOM_handler:
         self.progress = defaultdict(int)
         self.obj_counter = 0
 
-    def remove_handles(self, tx):
+    def remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
         res = self.dataservice.ds_obj_remove_gramps_handles(tx, self.batch.id)
         print(f'# --- removed handles from {res.get("count")} nodes')
@@ -1012,43 +1012,41 @@ class DOM_handler:
         )
         return {"status": status, "message": f"{message}, {count} changed"}
 
-    def set_all_person_confidence_values(self, tx):
+    def set_all_person_confidence_values(self):
         """Sets a quality ratings for collected list of Persons.
-
-        Asettaa henkilöille laatuarvion.
 
         Person.confidence is mean of all Citations used for Person's Events
         """
         message = f"{len(self.person_ids)} Person confidence values"
         print(f"***** {message} *****")
-
         t0 = time.time()
 
-        res = PersonBl.update_person_confidences(tx, self.dataservice, self.person_ids)
-        # returns {status, count, statustext}
-        status = res.get("status")
-        count = res.get("count", 0)
-        if status == Status.OK or status == Status.UPDATED:
-            self.blog.log_event(
-                {
-                    "title": "Confidences set",
-                    "count": count,
-                    "elapsed": time.time() - t0,
-                }
-            )
-            return {"status": status, "message": f"{message}, {count} changed"}
-        else:
-            msg = res.get("statustext")
-            self.blog.log_event(
-                {
-                    "title": "Confidences not set",
-                    "count": count,
-                    "elapsed": time.time() - t0,
-                    "level": "ERROR",
-                }
-            )
-            print(f"DOM_handler.set_all_person_confidence_values: FAILED: {msg}")
-            return {"status": status, "statustext": msg}
+        with PersonWriter("update", tx=self.dataservice.tx) as service:
+            res = service.update_person_confidences(self.person_ids)
+            # returns {status, count, statustext}
+            status = res.get("status")
+            count = res.get("count", 0)
+            if status == Status.OK or status == Status.UPDATED:
+                self.blog.log_event(
+                    {
+                        "title": "Confidences set",
+                        "count": count,
+                        "elapsed": time.time() - t0,
+                    }
+                )
+                return {"status": status, "message": f"{message}, {count} changed"}
+            else:
+                msg = res.get("statustext")
+                self.blog.log_event(
+                    {
+                        "title": "Confidences not set",
+                        "count": count,
+                        "elapsed": time.time() - t0,
+                        "level": "ERROR",
+                    }
+                )
+                print(f"DOM_handler.set_all_person_confidence_values: FAILED: {msg}")
+                return {"status": status, "statustext": msg}
 
     # --------------------------- DOM subtree procesors ----------------------------
 
