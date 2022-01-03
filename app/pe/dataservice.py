@@ -32,6 +32,19 @@ class DataService:
     """Public methods for accessing active database with or without transaction.
     The current database is defined in /setups.py.
 
+    Usage:
+        with XxxWriter(service_name, tx) as service:
+            service.do_xxx_work(args)
+            service.do_more_work(args)
+
+    Select use of transaction by arguments (where tx defaults None):
+        1) if tx is given
+            --> use existing transaction
+        2) if service_name in ["update", "read_tx"]
+            --> create and end transaction
+        3) else (tx is None and service_name in ["read", "simple"])
+            --> do not use transaction
+
     Follows Context Manager pattern allowing automatic transaction management
     by 'with' statement.
 
@@ -44,10 +57,6 @@ class DataService:
         :param: service_name    str - one of service names (update, read, read_tx, simple)
         :param: user_context    <ui.context.UserContext object>
         :param: tx              None or <neo4j.work.transaction.Transaction object>
-
-        - 1. if tx is given                              Use the given, opened transaction
-        - 2. if service_name is 'update' or 'read_tx'    Create transaction
-        - 3. else                                        No transaction
         """
         self.idstr = f"{self.__class__.__name__}>DataService"
         logger.debug(f'#~~~{self.idstr} init')

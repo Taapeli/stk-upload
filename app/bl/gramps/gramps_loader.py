@@ -16,8 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from bl.admin.models.data_admin import DataAdmin
-from flask.globals import session
 
 """
     Methods to import all data from Gramps xml file
@@ -44,6 +42,7 @@ from .xml_dom_handler import DOM_handler
 from .batchlogger import BatchLog, LogItem
 
 from bl.base import Status
+from bl.admin.models.data_admin import DataAdmin
 #from bl.batch.root import State, DEFAULT_MATERIAL 
 
 def get_upload_folder(username):

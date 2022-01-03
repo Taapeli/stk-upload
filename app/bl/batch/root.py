@@ -160,7 +160,8 @@ class Root(NodeObject):
             "logname": self.logname,
         }
 
-        self.uniq_id = RootUpdater.md_batch_save(tx, attr)
+        with RootUpdater("update", tx=tx) as bl_service:
+            self.uniq_id = bl_service.dataservice.md_batch_save(tx, attr)
         return {"status": Status.OK, "identity": self.uniq_id}
 
 

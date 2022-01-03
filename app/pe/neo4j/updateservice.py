@@ -106,29 +106,6 @@ class Neo4jUpdateService(ConcreteService):
         return True  # value > 0
 
     # def ds_find_last_used_batch_seq(self, tx): # --> md_new_batch_id
-    #     """Find last used Batch id sequence number for today or zero.
-    #     """
-    #     # 1. Find the latest Batch id from the BatchId singleton node
-    #     base = str(date.today())
-    #     # print("base="+base)
-    #     record = tx.run(CypherRoot.read_batch_id).single()
-    #     if record:
-    #         node = record["n"]
-    #         print("BatchId node",node)
-    #         if node.get("prefix") == base:
-    #             seq = node.get("seq")
-    #             return seq
-    #         else:
-    #             return 0        
-    #
-    #     # 2. Find the latest Batch id of today from the db
-    #     record = tx.run(CypherRoot.batch_find_last_id, batch_base=base).single()
-    #     if record:
-    #         batch_id = record.get("bid")
-    #         print(f"# Previous batch_id='{batch_id}'")
-    #         seq = int(batch_id.split(".")[-1])
-    #         return seq
-    #     return 0
 
     @staticmethod
     def md_new_batch_id(tx):
