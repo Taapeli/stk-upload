@@ -770,38 +770,6 @@ class Neo4jUpdateService(ConcreteService):
             "statustext": ret.get("statustext", ""),
         }
 
-
-    # ----- Discussions -----
-
-    def ds_comment_save(self, attr):
-        """Creates a Comment node linked from commenting object and the commenter.
-
-        attr = {object_id:int, username:str, title:str, text:str, reply:bool}
-
-        Comment.timestamp is created in the Cypher clause.
-        
-        Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
-        """
-        is_reply = attr.get("reply")
-        if is_reply:
-            cypher = CypherComment.create_comment
-        else: # default
-            cypher = CypherComment.create_topic
-
-        record = self.tx.run(cypher, attr=attr).single()
-        if not record:
-            raise IsotammiException(
-                "Unable to save " + "Comment" if is_reply else "Topic",
-                cypher=cypher, attr=attr)
-
-        node = record.get("comment")
-        if not node:
-            return {"status": Status.ERROR, "statustext": _("Could not save a comment")}
-        comment = Comment.from_node(node)
-        comment.obj_type = record.get("obj_type")
-        comment.user = attr.get("username")
-        return {"status": Status.OK, "comment": comment}
-
     def ds_save_family(self, tx, f:FamilyBl, batch_id):
         """Saves the family node to db with its relations.
 
@@ -875,4 +843,36 @@ class Neo4jUpdateService(ConcreteService):
             tx.run(
                 CypherObject.link_citation, handle=f.handle, c_handle=handle
             )
+
+
+    # ----- Discussions -----
+
+    def ds_comment_save(self, attr):
+        """Creates a Comment node linked from commenting object and the commenter.
+
+        attr = {object_id:int, username:str, title:str, text:str, reply:bool}
+
+        Comment.timestamp is created in the Cypher clause.
+        
+        Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
+        """
+        is_reply = attr.get("reply")
+        if is_reply:
+            cypher = CypherComment.create_comment
+        else: # default
+            cypher = CypherComment.create_topic
+
+        record = self.tx.run(cypher, attr=attr).single()
+        if not record:
+            raise IsotammiException(
+                "Unable to save " + "Comment" if is_reply else "Topic",
+                cypher=cypher, attr=attr)
+
+        node = record.get("comment")
+        if not node:
+            return {"status": Status.ERROR, "statustext": _("Could not save a comment")}
+        comment = Comment.from_node(node)
+        comment.obj_type = record.get("obj_type")
+        comment.user = attr.get("username")
+        return {"status": Status.OK, "comment": comment}
 
