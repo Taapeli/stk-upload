@@ -106,29 +106,6 @@ class Neo4jUpdateService(ConcreteService):
         return True  # value > 0
 
     # def ds_find_last_used_batch_seq(self, tx): # --> md_new_batch_id
-    #     """Find last used Batch id sequence number for today or zero.
-    #     """
-    #     # 1. Find the latest Batch id from the BatchId singleton node
-    #     base = str(date.today())
-    #     # print("base="+base)
-    #     record = tx.run(CypherRoot.read_batch_id).single()
-    #     if record:
-    #         node = record["n"]
-    #         print("BatchId node",node)
-    #         if node.get("prefix") == base:
-    #             seq = node.get("seq")
-    #             return seq
-    #         else:
-    #             return 0        
-    #
-    #     # 2. Find the latest Batch id of today from the db
-    #     record = tx.run(CypherRoot.batch_find_last_id, batch_base=base).single()
-    #     if record:
-    #         batch_id = record.get("bid")
-    #         print(f"# Previous batch_id='{batch_id}'")
-    #         seq = int(batch_id.split(".")[-1])
-    #         return seq
-    #     return 0
 
     @staticmethod
     def md_new_batch_id(tx):
@@ -269,12 +246,6 @@ class Neo4jUpdateService(ConcreteService):
                 f"{id1}<-{id2} failed: {e.__class__.__name__} {e}",
             }
 
-    # def ds_obj_save_and_link(self, obj, **kwargs): # -> bp.gramps.xml_dom_handler.DOM_handler.save_and_link_handle
-    #     """ Saves given object to database
-    #     :param: batch_id    Current Batch (batch) --> (obj)
-    #     _param: parent_id   Parent object to link (parent) --> (obj)"""
-    #     obj.save(self.tx, **kwargs)
-
     def ds_obj_remove_gramps_handles(self, batch_id):
         """Remove all Gramps handles."""
         status = Status.OK
@@ -300,7 +271,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Media -----
 
-    def ds_create_link_medias_w_handles(self, uniq_id: int, media_refs: list):
+    def ds_create_link_medias_w_handles(self, tx, uniq_id: int, media_refs: list):
         """Save media object and it's Note and Citation references
         using their Gramps handles.
 
@@ -322,7 +293,7 @@ class Neo4jUpdateService(ConcreteService):
                     r_attr["lower"] = resu.crop[3]
                 doing = f"(src:{uniq_id}) -[{r_attr}]-> Media {resu.media_handle}"
                 # print(doing)
-                result = self.tx.run(
+                result = tx.run(
                     CypherObjectWHandle.link_media,
                     root_id=uniq_id,
                     handle=resu.media_handle,
@@ -343,26 +314,27 @@ class Neo4jUpdateService(ConcreteService):
 
                 for handle in resu.note_handles:
                     doing = f"{media_uid}->Note {handle}"
-                    self.tx.run(
+                    tx.run(
                         CypherObjectWHandle.link_note, root_id=media_uid, handle=handle
                     )
 
                 for handle in resu.citation_handles:
                     doing = f"{media_uid}->Citation {handle}"
-                    self.tx.run(
+                    tx.run(
                         CypherObjectWHandle.link_citation,
                         root_id=media_uid,
                         handle=handle,
                     )
 
         except Exception as err:
+            traceback.print_exc()
             logger.error(
                 f"Neo4jUpdateService.create_link_medias_by_handles {doing}: {err}"
             )
 
     # ----- Place -----
 
-    def ds_place_set_default_names(self, place_id, fi_id, sv_id):
+    def ds_place_set_default_names(self, tx, place_id, fi_id, sv_id):
         """Creates default links from Place to fi and sv PlaceNames.
 
         - place_id      Place object id
@@ -371,11 +343,11 @@ class Neo4jUpdateService(ConcreteService):
         """
         try:
             if fi_id == sv_id:
-                result = self.tx.run(
+                result = tx.run(
                     CypherPlace.link_name_lang_single, place_id=place_id, fi_id=fi_id
                 )
             else:
-                result = self.tx.run(
+                result = tx.run(
                     CypherPlace.link_name_lang,
                     place_id=place_id,
                     fi_id=fi_id,
@@ -652,7 +624,6 @@ class Neo4jUpdateService(ConcreteService):
             self.tx.run(
                 CypherPerson.set_confidence, id=uniq_id, confidence=new_conf
             )
-
             return {"confidence": new_conf, "status": Status.UPDATED}
         return {"confidence": new_conf, "status": Status.OK}
 

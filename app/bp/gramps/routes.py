@@ -114,7 +114,8 @@ def upload_gramps():
         file_type = request.form["material"]    # = 'xml_file' !
 
         # Create Root node in managed transaction
-        root = RootUpdater.create_batch(current_user.username, infile)
+        with RootUpdater("update") as bl_service:
+            root = bl_service.create_batch(current_user.username, infile)
 
         # Create upload log file
         msg = f"{util.format_timestamp()}: User {current_user.name} "\

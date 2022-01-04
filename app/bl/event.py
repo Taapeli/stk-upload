@@ -297,7 +297,7 @@ class EventBl(Event):
         # Make relations to the Media nodes and their Note and Citation references
         if self.media_refs:
             dataservice.ds_create_link_medias_w_handles(
-                self.uniq_id, self.media_refs
+                tx, self.uniq_id, self.media_refs
             )
         return
 

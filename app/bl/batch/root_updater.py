@@ -26,13 +26,13 @@ import os
 import time
 
 import shareds
-from bl.base import IsotammiException
+from bl.base import IsotammiException #, Status
 from bp.admin import uploads
 from models import loadfile #, util, syslog
-from pe.managed_dataservice import ManagedDataService
-#from pe.dataservice import DataService
+#from pe.managed_dataservice import ManagedDataService
+from pe.dataservice import DataService
 
-class RootUpdater(ManagedDataService):
+class RootUpdater(DataService):
     """
     Root data store for write and update. 
     """
@@ -48,20 +48,22 @@ class RootUpdater(ManagedDataService):
     # def root_save(tx, attr):
     #     return RootUpdater.md_batch_save(tx, attr)
 
-    @staticmethod
-    def create_batch(username, infile):
+    def create_batch(self, username, infile):
         """ Create a new Root node for given user and infile. 
         """
         from .root import Root, State, Status
-        def new_batch_tx(tx, username):
-            """ A session.write_transaction function. """
-
+        def new_batch_tx(tx, dataservice, username):
+            """ A session.write_transaction function.
+                :param:    dataservice    Neo4jUpdateService
+                :param:    username   str
+            """
             # Lock db to avoid concurrent Batch loads
-            RootUpdater.md_aqcuire_lock(tx, "batch_id")
+            if not dataservice.md_aqcuire_lock(tx, "batch_id"):
+                return None
 
             # New Root object with next free batch id
             root = Root()
-            root.id = RootUpdater.md_new_batch_id(tx)
+            root.id = dataservice.md_new_batch_id(tx)
             root.user = username
             # root.material_type is still unknown
             res = root.save(tx) #, self.dataservice)
@@ -98,7 +100,8 @@ class RootUpdater(ManagedDataService):
         with shareds.driver.session() as session:
 
             # Create Root node with next free batch id
-            root = session.write_transaction(new_batch_tx, username)
+            root = session.write_transaction(new_batch_tx,
+                                             self.dataservice, username)
 
             shareds.tdiff = time.time() - t0
             return root

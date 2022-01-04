@@ -17,7 +17,15 @@ h2 {margin-bottom: 0;}
 td {
     position: relative;
 }
-#upload_xml div {display: inline;}
+div#upload_xml {
+    border: solid 1.5pt silver;
+    background-color: seashell;
+    padding: .5em;
+    margin: 0 1em 1em .1em;
+    width: fit-content;
+}
+div#upload_xml div {display: inline;}
+
 form div {margin:.25em;}
 .progress {
 	position: absolute;
@@ -122,17 +130,34 @@ function doconfirm( command, title ) { // used in commands.html
 
 {% include "flash_messages.html" %}
 
-	<table class="fileselect">
+{% if current_user.is_authenticated and current_user.has_role('research') %}
+        <div id="upload_xml"
+            title="{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.">
+            <form action="/gramps/upload" method="post" enctype="multipart/form-data">
+                <div><b>{{ _("Send a new Gramps file") }}</b>
+                </div>
+                <div>
+                    <input type="hidden" name="material" value="xml_file">
+                    <input type="file" name="filenm" accept=".gramps,.gpkg"/>
+                </div>
+                <div class="submit"> 
+                    <input type="submit" value="{{ _('Send to database') }}" onclick="checkFileSize()"/>
+                </div>
+                </td>
+            </form>
+        </div>
+{% endif %}
+
 {% if uploads %}
+	<table class="fileselect">
        	<tr> 
                <th>{{ _("Batch operations") }}</th>
                <th>{{ _("Gramps file") }}</th>
                <th>{{ _("Person count") }}</th>
                <th>{{ _("Status") }} {{ state_info() }} </th>
   		</tr>
-{% endif %}
  
-{% for upload in uploads %}
+  {% for upload in uploads %}
         <tr
           {% if batch_id == upload.batch_id %}style="background: bisque;"{% endif %}
         >
@@ -192,30 +217,9 @@ function doconfirm( command, title ) { // used in commands.html
     {% endif %}
             </td>
         </tr>
-{% endfor %}
-
-{% if current_user.is_authenticated and current_user.has_role('research') %}
-  		<tr id="upload_xml"
-            title="{{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.">
-            <form action="/gramps/upload" method="post" enctype="multipart/form-data">
-  				<td><b>{{ _("Send a new Gramps file") }}</b>
-  				</td>
-  				<td colspan="4" style="padding: 10pt;">
-  					<div>
-	   					<div>
-				        	<input type="hidden" name="material" value="xml_file">
-				        	<input type="file" name="filenm" accept=".gramps,.gpkg"/>
-				        </div>
-				        <div class="submit"> 
-				        	<input type="submit" value="{{ _('Send to database') }}" onclick="checkFileSize()"/>
-				        </div>
-  					</div>
-  				</td>
-            </form>
-  		</tr>
-{% endif %}
-
+  {% endfor %}
    	</table>
+{% endif %}
    
   </div>
     <p>&rtrif; <a href="/">{{ _("Back") }}</a></p>

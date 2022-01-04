@@ -114,6 +114,15 @@ class DOM_handler:
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
+    def save_and_link_handle2(self, tx, obj, **kwargs):
+        """Save object and store its identifiers in the dictionary by handle.
+
+        Some objects may accept arguments like batch_id="2019-08-26.004" and others
+        """
+        obj.save(tx, **kwargs)
+        self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
+        self.update_progress(obj.__class__.__name__)
+
     # ---------------------   XML subtree handlers   --------------------------
 
     def get_mediapath_from_header(self):
@@ -155,20 +164,77 @@ class DOM_handler:
             else:
                 print("Unsupported element in <isotammi>: {node.nodeName}")
         return (material_type, description)
-        
-    def handle_citations(self):
-        # Get all the citations in the xml_tree
-        citations = self.xml_tree.getElementsByTagName("citation")
-        status = Status.OK
-        for_test = ""
 
-        message = f"{len(citations)} Citations"
+    def handle_dom_nodes(self, tag, title, transaction_function, chunk_max_size):
+        """ Get all the notes in the xml_tree. """
+
+        """ DOM-objektit pätkitään chunk_max_size-kokoisiin joukkoihin ja tarjotaan handlerille
+        """
+        def get_next(objs:list, amount:int):
+            i = 0
+            while i < len(objs):
+                yield objs[i:i+amount]
+                i += amount
+
+        """ 
+        ---- Notes transaktioiden sisällä 
+        """
+        nodes = self.xml_tree.getElementsByTagName(tag)
+#         print("nt",type(nodes))
+#         print(nodes[0:5])
+        message = f"{tag}: {len(nodes)} kpl"
         print(f"***** {message} *****")
         t0 = time.time()
         counter = 0
+    
+        with shareds.driver.session() as session:
+            for dom_nodes in get_next(nodes, chunk_max_size):
+                chunk_size = len(dom_nodes)
+                #isotammi_id_list = session.read_transaction(..., amount=chunk_size)
+                session.write_transaction(transaction_function, 
+                                          nodes=dom_nodes)
+#                                          iids=isotammi_id_list ...)
+                """ def handle_notes(self, tx, dom_objs):
+                """
+                counter += chunk_size
+                
+        self.blog.log_event(
+            {"title": title, "count": counter, "elapsed": time.time() - t0}
+        )  # , 'percent':1})
+        # return {'status':status, 'message': message}
+        return counter
 
-        # Print detail of each citation
-        for citation in citations:
+        
+    def handle_citations(self):
+        self.handle_dom_nodes("citation", _("Citations"), self.handle_citations_list, chunk_max_size=1000)
+
+    def handle_events(self):
+        self.handle_dom_nodes("event", _("Events"), self.handle_event_list, chunk_max_size=1000)
+
+    def handle_families(self):
+        self.handle_dom_nodes("family", _("Families"), self.handle_family_list, chunk_max_size=1000)
+
+    def handle_media(self):
+        self.handle_dom_nodes("object", _("Media"), self.handle_media_list, chunk_max_size=1000)
+
+    def handle_notes(self):
+        self.handle_dom_nodes("note", _("Notes"), self.handle_note_list, chunk_max_size=1000)
+
+    def handle_people(self):
+        self.handle_dom_nodes("person", _("People"), self.handle_people_list, chunk_max_size=1000)
+
+    def handle_places(self):
+        self.place_keys = {}
+        self.handle_dom_nodes("placeobj", _("Places"), self.handle_place_list, chunk_max_size=1000)
+
+    def handle_repositories(self):
+        self.handle_dom_nodes("repository", _("Repositories"), self.handle_repositories_list, chunk_max_size=1000)
+
+    def handle_sources(self):
+        self.handle_dom_nodes("source", _("Sources"), self.handle_source_list, chunk_max_size=1000)
+
+    def handle_citations_list(self, tx, nodes):
+        for citation in nodes:
 
             c = Citation()
             # Extract handle, change and id
@@ -223,26 +289,10 @@ class DOM_handler:
                     }
                 )
 
-            for_test = self.save_and_link_handle(c, batch_id=self.batch.id)
-            counter += 1
+            self.save_and_link_handle2(tx, c, batch_id=self.batch.id)
 
-        self.blog.log_event(
-            {"title": _("Citations"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        return {"status": status, "message": message, "for_test": for_test}
-
-    def handle_events(self):
-        """ Get all the events in the xml_tree """
-        events = self.xml_tree.getElementsByTagName("event")
-        status = Status.OK
-
-        message = f"{len(events)} Events"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        counter = 0
-
-        # Print detail of each event
-        for event in events:
+    def handle_event_list(self, tx, nodes):
+        for event in nodes:
             # Create an event with Gramps attributes
             e = EventBl()
             # Extract handle, change and id
@@ -319,37 +369,11 @@ class DOM_handler:
             # Handle <objref> with citations and notes
             e.media_refs = self._extract_mediaref(event)
 
-            try:
-                self.save_and_link_handle(e, batch_id=self.batch.id, 
-                                          dataservice=self.dataservice)
-                counter += 1
-            except RuntimeError as e:
-                self.blog.log_event(
-                    {
-                        "title": "Events",
-                        "count": counter,
-                        "level": "ERROR",
-                        "elapsed": time.time() - t0,
-                    }
-                )  # , 'percent':1})
-                raise
+            self.save_and_link_handle2(tx, e, batch_id=self.batch.id, 
+                                      dataservice=self.dataservice)
 
-        self.blog.log_event(
-            {"title": _("Events"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        return {"status": status, "message": message}
-
-    def handle_families(self):
-        """ Get all the families in the xml_tree. """
-        families = self.xml_tree.getElementsByTagName("family")
-        status = Status.OK
-
-        message = f"{len(families)} Families"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        counter = 0
-
-        for family in families:
+    def handle_family_list(self, tx, nodes):
+        for family in nodes:
 
             f = FamilyBl()
             f.child_handles = []
@@ -426,28 +450,14 @@ class DOM_handler:
                     f.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has cite {f.citation_handles[-1]}')
 
-            self.save_and_link_handle(f, batch_id=self.batch.id)
-            counter += 1
+            self.save_and_link_handle2(tx, f, batch_id=self.batch.id)
             # The sortnames and dates will be set for these families
             self.family_ids.append(f.uniq_id)
 
-        self.blog.log_event(
-            {"title": _("Families"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        return {"status": status, "message": message}
+    
+    def handle_note_list(self, tx, nodes):
 
-    def handle_notes(self):
-        """ Get all the notes in the xml_tree. """
-        notes = self.xml_tree.getElementsByTagName("note")
-        status = Status.OK
-        for_test = ""
-
-        message = f"{len(notes)} Notes"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        counter = 0
-
-        for note in notes:
+        for note in nodes:
             n = Note()
             # Extract handle, change and id
             self._extract_base(note, n)
@@ -463,27 +473,10 @@ class DOM_handler:
                 n.text, n.url = self._pick_url_from_text(n.text)
 
             # self.save_and_link_handle(n, batch_id=self.batch.id)
-            for_test = self.save_and_link_handle(n, batch_id=self.batch.id)
-            counter += 1
+            self.save_and_link_handle2(tx, n, batch_id=self.batch.id)
 
-        self.blog.log_event(
-            {"title": _("Notes"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        # return {'status':status, 'message': message}
-        return {"status": status, "message": message, "for_test": for_test}
-
-    def handle_media(self):
-        """ Get all the media in the xml_tree (Gramps term 'object'). """
-        media = self.xml_tree.getElementsByTagName("object")
-        status = Status.OK
-
-        message = f"{len(media)} Medias"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        counter = 0
-
-        # Details of each media object
-        for obj in media:
+    def handle_media_list(self, tx, nodes):
+        for obj in nodes:
             o = MediaBl()
             # Extract handle, change and id
             self._extract_base(obj, o)
@@ -506,26 +499,10 @@ class DOM_handler:
                     o.description = obj_file.getAttribute("description")
 
             # TODO: Varmista, ettei mediassa voi olla Note
-            self.save_and_link_handle(o, batch_id=self.batch.id)
-            counter += 1
+            self.save_and_link_handle2(tx, o, batch_id=self.batch.id)
 
-        self.blog.log_event(
-            {"title": _("Media objects"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        return {"status": status, "message": message}
-
-    def handle_people(self):
-        """ Get all the people in the xml_tree. """
-        people = self.xml_tree.getElementsByTagName("person")
-        status = Status.OK
-
-        message = f"{len(people)} Persons"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        counter = 0
-
-        # Get details of each person
-        for person in people:
+    def handle_people_list(self, tx, nodes):
+        for person in nodes:
             name_order = 0
 
             p = PersonBl()
@@ -679,35 +656,21 @@ class DOM_handler:
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
             # for ref in p.media_refs: print(f'# saving Person {p.id}: media_ref {ref}')
-            self.save_and_link_handle(p, batch_id=self.batch.id,
+            self.save_and_link_handle2(tx, p, batch_id=self.batch.id,
                                       dataservice=self.dataservice)
-            # print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
-            counter += 1
             # The refnames will be set for these persons
             self.person_ids.append(p.uniq_id)
 
-        self.blog.log_event(
-            {"title": _("Persons"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        return {"status": status, "message": message}
 
-    def handle_places(self):
+    def handle_place_list(self, tx, nodes):
         """Get all the places in the xml_tree.
 
         To create place hierarchy links, there must be a dictionary of
         Place handles and uniq_ids created so far. The link may use
         previous node or create a new one.
         """
-        place_keys = {}  # place_keys[handle] = uniq_id
-        places = self.xml_tree.getElementsByTagName("placeobj")
-        status = Status.OK
-
-        message = f"{len(places)} Places"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        counter = 0
-
-        for placeobj in places:
+        #place_keys = {}  # place_keys[handle] = uniq_id
+        for placeobj in nodes:
 
             pl = PlaceBl()
             pl.note_handles = []
@@ -823,28 +786,14 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            self.save_and_link_handle(pl, batch_id=self.batch.id, place_keys=place_keys, 
+            self.save_and_link_handle2(tx, pl, batch_id=self.batch.id, place_keys=self.place_keys, 
                                           dataservice=self.dataservice)
             # The place_keys has been updated
-            counter += 1
 
-        self.blog.log_event(
-            {"title": _("Places"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        return {"status": status, "message": message}
-
-    def handle_repositories(self):
+    def handle_repositories_list(self, tx, nodes):
         """ Get all the repositories in the xml_tree. """
-        repositories = self.xml_tree.getElementsByTagName("repository")
-        status = Status.OK
-
-        message = f"{len(repositories)} Repositories"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        counter = 0
-
         # Print detail of each repository
-        for repository in repositories:
+        for repository in nodes:
 
             r = Repository()
             # Extract handle, change and id
@@ -882,26 +831,13 @@ class DOM_handler:
                 if n.url:
                     r.notes.append(n)
 
-            self.save_and_link_handle(r, batch_id=self.batch.id)
-            counter += 1
+            self.save_and_link_handle2(tx, r, batch_id=self.batch.id)
 
-        self.blog.log_event(
-            {"title": _("Repositories"), "count": counter, "elapsed": time.time() - t0}
-        )
-        return {"status": status, "message": message}
 
-    def handle_sources(self):
+    def handle_source_list(self, tx, nodes):
         """ Get all the sources in the xml_tree. """
-        sources = self.xml_tree.getElementsByTagName("source")
-        status = Status.OK
-
-        message = f"{len(sources)} Sources"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        counter = 0
-
         # Print detail of each source
-        for source in sources:
+        for source in nodes:
 
             s = SourceBl()
             s.note_handles = []  # allow multiple; prev. noteref_hlink = ''
@@ -980,13 +916,7 @@ class DOM_handler:
                 s.repositories.append(r)
 
             # elf.save_and_link_handle(r, self.batch.id)
-            self.save_and_link_handle(s, batch_id=self.batch.id)
-            counter += 1
-
-        self.blog.log_event(
-            {"title": _("Sources"), "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        return {"status": status, "message": message}
+            self.save_and_link_handle2(tx, s, batch_id=self.batch.id)
 
     # -------------------------- Finishing process steps -------------------------------
 
@@ -1085,40 +1015,38 @@ class DOM_handler:
     def set_all_person_confidence_values(self):
         """Sets a quality ratings for collected list of Persons.
 
-        Asettaa henkilöille laatuarvion.
-
         Person.confidence is mean of all Citations used for Person's Events
         """
         message = f"{len(self.person_ids)} Person confidence values"
         print(f"***** {message} *****")
-
         t0 = time.time()
 
-        res = PersonBl.update_person_confidences(self.dataservice, self.person_ids)
-        # returns {status, count, statustext}
-        status = res.get("status")
-        count = res.get("count", 0)
-        if status == Status.OK or status == Status.UPDATED:
-            self.blog.log_event(
-                {
-                    "title": "Confidences set",
-                    "count": count,
-                    "elapsed": time.time() - t0,
-                }
-            )
-            return {"status": status, "message": f"{message}, {count} changed"}
-        else:
-            msg = res.get("statustext")
-            self.blog.log_event(
-                {
-                    "title": "Confidences not set",
-                    "count": count,
-                    "elapsed": time.time() - t0,
-                    "level": "ERROR",
-                }
-            )
-            print(f"DOM_handler.set_all_person_confidence_values: FAILED: {msg}")
-            return {"status": status, "statustext": msg}
+        with PersonWriter("update", tx=self.dataservice.tx) as service:
+            res = service.update_person_confidences(self.person_ids)
+            # returns {status, count, statustext}
+            status = res.get("status")
+            count = res.get("count", 0)
+            if status == Status.OK or status == Status.UPDATED:
+                self.blog.log_event(
+                    {
+                        "title": "Confidences set",
+                        "count": count,
+                        "elapsed": time.time() - t0,
+                    }
+                )
+                return {"status": status, "message": f"{message}, {count} changed"}
+            else:
+                msg = res.get("statustext")
+                self.blog.log_event(
+                    {
+                        "title": "Confidences not set",
+                        "count": count,
+                        "elapsed": time.time() - t0,
+                        "level": "ERROR",
+                    }
+                )
+                print(f"DOM_handler.set_all_person_confidence_values: FAILED: {msg}")
+                return {"status": status, "statustext": msg}
 
     # --------------------------- DOM subtree procesors ----------------------------
 

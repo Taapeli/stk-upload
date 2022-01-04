@@ -276,7 +276,7 @@ class PersonReader(DataService):
 
 class PersonWriter(DataService):
     """
-    Person datastore for update without transaction.
+    Person data store for update possibly without transaction.
     """
 
     def __init__(self, service_name: str, u_context=None, tx=None):
@@ -347,6 +347,24 @@ class PersonWriter(DataService):
 
         print(f"Estimated lifetime for {res['count']} persons")
         return res
+
+    def update_person_confidences(self, person_ids: list):
+        """Sets a quality rating for given list of Person.uniq_ids.
+
+        Person.confidence is calculated as a mean of confidences in
+        all Citations used for Person's Events.
+        """
+        counter = 0
+        for uniq_id in person_ids:
+            res = self.dataservice.ds_update_person_confidences(uniq_id)
+            # returns {confidence, status, statustext}
+            stat = res.get("status")
+            if stat == Status.UPDATED:
+                counter += 1
+            elif stat != Status.OK:
+                return {"status": stat, "statustext": res.get("statustext")}
+
+        return {"status": Status.OK, "count": counter}
 
 
 class PersonBl(Person):
@@ -427,7 +445,7 @@ class PersonBl(Person):
         # Make relations to the Media nodes and it's Note and Citation references
         if self.media_refs:
             dataservice.ds_create_link_medias_w_handles(
-                self.uniq_id, self.media_refs
+                tx, self.uniq_id, self.media_refs
             )
 
         # The relations to the Family node will be created in Family.save(),
@@ -436,43 +454,19 @@ class PersonBl(Person):
         # Make relations to the Note nodes
 
         for handle in self.note_handles:
-            dataservice.tx.run(CypherPerson.link_note, p_handle=self.handle, n_handle=handle)
+            tx.run(CypherPerson.link_note, p_handle=self.handle, n_handle=handle)
 
         # Make relations to the Citation nodes
 
         for handle in self.citation_handles:
-            dataservice.tx.run(
+            tx.run(
                 CypherObject.link_citation, handle=self.handle, c_handle=handle
             )
         return
 
-    @staticmethod
-    def update_person_confidences(dataservice, person_ids: list):
-        """Sets a quality rating for given list of Person.uniq_ids.
-
-        Person.confidence is calculated as a mean of confidences in
-        all Citations used for Person's Events.
-        """
-        counter = 0
-        for uniq_id in person_ids:
-            res = dataservice.ds_update_person_confidences(uniq_id)
-            # returns {confidence, status, statustext}
-            stat = res.get("status")
-            if stat == Status.UPDATED:
-                counter += 1
-            elif stat != Status.OK:
-                # Update failed
-                return {"status": stat, "statustext": res.get("statustext")}
-
-        return {"status": Status.OK, "count": counter}
-
-    #     @staticmethod --> bl.person.PersonWriter.set_person_name_properties
-    #     def set_person_name_properties(uniq_id=None, ops=['refname', 'sortname']):
-    #     @staticmethod --> pe.neo4j.updateservice.Neo4jUpdateService ??
-    #     def get_confidence (uniq_id=None):
-    #     def set_confidence (self, tx):
-    #     @staticmethod # --> bl.person.PersonWriter.set_estimated_lifetimes
-    #     def estimate_lifetimes(uids=[]):
+    # @staticmethod --> bl.person.PersonWriter.update_person_confidences
+    # def update_person_confidences(tx, dataservice, person_ids: list):
+    #     """Sets a quality rating for given list of Person.uniq_ids.
 
     def remove_privacy_limit_from_families(self):
         """Clear privacy limitations from self.person's families.
