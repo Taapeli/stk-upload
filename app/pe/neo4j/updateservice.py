@@ -808,7 +808,6 @@ class Neo4jUpdateService(ConcreteService):
         Connects the family to parent, child, citation and note nodes.
         """
         f.uuid = NodeObject.newUuid()
-        print("ds_save_family")
         #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "F")
         f_attr = {
             "uuid": f.uuid,
