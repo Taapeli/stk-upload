@@ -8,15 +8,16 @@
 # pylint: disable=too-many-branches
 # pylint: disable=no-member
 
+import datetime
 from lifetime import Event
 from lifetime import calculate_estimates
-from lifetime import BIRTH, DEATH, MARRIAGE, BURIAL, BAPTISM, MIN, MAX
 import lifetime
 
 lifetime.MAX_AGE = 100
 lifetime.MAX_BAPTISM_DELAY = 0
 lifetime.MAX_BURIAL_DELAY = 0
 lifetime.MAX_PARENT_DEATH_CHILD_BIRTH_GAP = 0
+from lifetime import BIRTH, DEATH, MARRIAGE, BURIAL, BAPTISM, MIN, MAX, CURRENT_YEAR, MAX_AGE
 
 class Person(lifetime.Person):
     def __init__(self, pid=None):
@@ -98,9 +99,9 @@ def test_none():
     persons = [p1]
     calculate_estimates(persons)
     assert p1.birth_low is MIN
-    assert p1.birth_high is MAX
+    assert p1.birth_high == CURRENT_YEAR
     assert p1.death_low is MIN
-    assert p1.death_high is MAX
+    assert p1.death_high == CURRENT_YEAR + MAX_AGE
     
 
 def test0():
@@ -110,9 +111,9 @@ def test0():
     persons = [p1]
     calculate_estimates(persons)
     assert p1.birth_low is MIN
-    assert p1.birth_high is MAX
+    assert p1.birth_high == CURRENT_YEAR
     assert p1.death_low is MIN
-    assert p1.death_high is MAX
+    assert p1.death_high == CURRENT_YEAR + MAX_AGE
     
 
 def test1():
@@ -399,9 +400,9 @@ def test13f():
     persons = [p1,p2]
     calculate_estimates(persons)
     assert p1.birth_low == 1885
-    assert p1.birth_high is MAX
+    assert p1.birth_high == CURRENT_YEAR - lifetime.MIN_CHILD_AGE
     assert p1.death_low == 1950
-    assert p1.death_high is MAX
+    assert p1.death_high == CURRENT_YEAR - lifetime.MIN_CHILD_AGE + MAX_AGE
 
 def test13g():
     p1 = Person()

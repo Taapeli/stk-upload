@@ -133,6 +133,8 @@ class Year:
 
 MIN = Year("min", None)
 MAX = Year("max", None)
+current_year = datetime.date.today().year
+CURRENT_YEAR = Year("normal", current_year)
 
 
 @dataclass
@@ -307,10 +309,6 @@ def __calculate_estimates_family(p):
 
 
 def calculate_estimates(personlist):
-    global CURRENT_YEAR 
-    current_year = datetime.date.today().year
-    CURRENT_YEAR = Year("normal", current_year)
-
     for p in personlist:
         __calculate_estimates1(p)
     n = 0
