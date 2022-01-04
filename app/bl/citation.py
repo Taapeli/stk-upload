@@ -14,12 +14,7 @@ from bl.dates import DateRange
 
 logger = logging.getLogger("stkserver")
 
-# import shareds
 from bl.base import NodeObject
-from pe.neo4j.cypher.cy_citation import CypherCitation
-#from models.cypher_gramps import Cypher_citation_w_handle
-# from .cypher import Cypher_citation
-
 
 class Citation(NodeObject):
     """Lähdeviittaus
@@ -134,57 +129,6 @@ class Citation(NodeObject):
     #             print ("Sourceref_hlink: " + self.source_handle)
     #         return True
 
-    def save(self, tx, **kwargs):
-        """Saves this Citation and connects it to it's Notes and Sources."""
-        if "batch_id" in kwargs:
-            batch_id = kwargs["batch_id"]
-        else:
-            raise RuntimeError(f"Citation_gramps.save needs batch_id for {self.id}")
-
-        self.uuid = self.newUuid()
-
-        c_attr = {
-            "uuid": self.uuid,
-            "handle": self.handle,
-            "change": self.change,
-            "id": self.id,
-            "page": self.page,
-            "confidence": self.confidence,
-        }
-        if self.dates:
-            c_attr.update(self.dates.for_db())
-
-        result = tx.run(
-            CypherCitation.create_to_batch,
-            batch_id=batch_id,
-            c_attr=c_attr,
-        )
-        ids = []
-        for record in result:
-            self.uniq_id = record[0]
-            ids.append(self.uniq_id)
-            if len(ids) > 1:
-                print(
-                    "iError updated multiple Citations {} - {}, attr={}".format(
-                        self.id, ids, c_attr
-                    )
-                )
-
-        # Make relations to the Note nodes
-        for handle in self.note_handles:
-            tx.run(
-                CypherCitation.link_note, handle=self.handle, hlink=handle
-            )
-
-        # Make relation to the Source node
-        if self.source_handle != "":
-            tx.run(
-                CypherCitation.link_source,
-                handle=self.handle,
-                hlink=self.source_handle,
-            )
-
-        return
 
 
 # ==== removed 25.5.2021/JMä ===================================================

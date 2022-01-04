@@ -33,8 +33,6 @@ from bl.place import PlaceBl
 from bl.event import EventBl
 
 from pe.dataservice import DataService
-from pe.neo4j.cypher.cy_media import CypherMedia
-
 
 class Media(NodeObject):
     """A media object with description, file link and mime information.
@@ -102,35 +100,6 @@ class MediaBl(Media):
         self.mime = None
         self.name = ""
 
-    def save(self, tx, **kwargs):
-        """Saves this new Media object to db.
-
-        #TODO: Process also Notes for media?
-        #TODO: Use MediaWriteService
-        """
-        if not "batch_id" in kwargs:
-            raise RuntimeError(f"Media.save needs batch_id for parent {self.id}")
-
-        self.uuid = self.newUuid()
-        m_attr = {
-            "handle": self.handle,
-            "change": self.change,
-            "id": self.id,
-            "src": self.src,
-            "mime": self.mime,
-            "name": self.name,
-            "description": self.description,
-        }
-        m_attr["batch_id"] = kwargs["batch_id"]
-        result = tx.run(
-            CypherMedia.create_in_batch,
-            bid=kwargs["batch_id"],
-            uuid=self.uuid,
-            m_attr=m_attr,
-        )
-        self.uniq_id = result.single()[0]
-
-        return
 
 
 class MediaReader(DataService):

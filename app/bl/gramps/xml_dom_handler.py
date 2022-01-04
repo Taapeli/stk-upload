@@ -293,7 +293,8 @@ class DOM_handler:
                     }
                 )
 
-            self.save_and_link_handle2(tx, c, batch_id=self.batch.id)
+            self.dataservice.ds_save_citation(tx, c, self.batch.id)
+            self.complete(c)
 
     def handle_event_list(self, tx, nodes):
         for event in nodes:
@@ -373,8 +374,8 @@ class DOM_handler:
             # Handle <objref> with citations and notes
             e.media_refs = self._extract_mediaref(event)
 
-            self.save_and_link_handle2(tx, e, batch_id=self.batch.id, 
-                                      dataservice=self.dataservice)
+            self.dataservice.ds_save_event(tx, e, self.batch.id)
+            self.complete(e)
 
     def handle_family_list(self, tx, nodes):
         for family in nodes:
@@ -478,8 +479,8 @@ class DOM_handler:
                 # Pick possible url
                 n.text, n.url = self._pick_url_from_text(n.text)
 
-            # self.save_and_link_handle(n, batch_id=self.batch.id)
-            self.save_and_link_handle2(tx, n, batch_id=self.batch.id)
+            self.dataservice.ds_save_note(tx, n, self.batch.id)
+            self.complete(n)
 
     def handle_media_list(self, tx, nodes):
         for obj in nodes:
@@ -505,7 +506,8 @@ class DOM_handler:
                     o.description = obj_file.getAttribute("description")
 
             # TODO: Varmista, ettei mediassa voi olla Note
-            self.save_and_link_handle2(tx, o, batch_id=self.batch.id)
+            self.dataservice.ds_save_media(tx, o, self.batch.id)
+            self.complete(o)
 
     def handle_people_list(self, tx, nodes):
         for person in nodes:
@@ -661,9 +663,9 @@ class DOM_handler:
                     p.citation_handles.append(person_citationref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
-            # for ref in p.media_refs: print(f'# saving Person {p.id}: media_ref {ref}')
-            self.save_and_link_handle2(tx, p, batch_id=self.batch.id,
-                                      dataservice=self.dataservice)
+            self.dataservice.ds_save_person(tx, p, self.batch.id)
+            self.complete(p)
+
             # The refnames will be set for these persons
             self.person_ids.append(p.uniq_id)
 
@@ -792,9 +794,10 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            self.save_and_link_handle2(tx, pl, batch_id=self.batch.id, place_keys=self.place_keys, 
-                                          dataservice=self.dataservice)
+            self.dataservice.ds_save_place(tx, pl, self.batch.id, place_keys=self.place_keys)
             # The place_keys has been updated
+
+            self.complete(pl)
 
     def handle_repositories_list(self, tx, nodes):
         """ Get all the repositories in the xml_tree. """
@@ -837,7 +840,8 @@ class DOM_handler:
                 if n.url:
                     r.notes.append(n)
 
-            self.save_and_link_handle2(tx, r, batch_id=self.batch.id)
+            self.dataservice.ds_save_repository(tx, r, self.batch.id)
+            self.complete(r)
 
 
     def handle_source_list(self, tx, nodes):
@@ -921,8 +925,8 @@ class DOM_handler:
                 # Mostly 1 repository!
                 s.repositories.append(r)
 
-            # elf.save_and_link_handle(r, self.batch.id)
-            self.save_and_link_handle2(tx, s, batch_id=self.batch.id)
+            self.dataservice.ds_save_source(tx, s, self.batch.id)
+            self.complete(s)
 
     # -------------------------- Finishing process steps -------------------------------
 

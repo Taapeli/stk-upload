@@ -34,10 +34,6 @@ logger = logging.getLogger("stkserver")
 import shareds
 from bl.base import NodeObject
 
-from pe.neo4j.cypher.cy_person import CypherPerson
-#from models.gen.cypher import Cypher_name
-
-
 class Name(NodeObject):
     """Person name.
 
@@ -98,30 +94,6 @@ class Name(NodeObject):
         n.order = node["order"]
         return n
 
-    def save(self, tx, **kwargs):
-        """Creates or updates this Name node. (There is no handle)
-        If parent_id is given, a link (parent) -[:NAME]-> (Name) is created
-
-        #TODO: Check, if this name exists; then update or create new
-        """
-        if not "parent_id" in kwargs:
-            raise ValueError("Name.save: no base person defined")
-
-        n_attr = {
-            "order": self.order,
-            "type": self.type,
-            "firstname": self.firstname,
-            "surname": self.surname,
-            "prefix": self.prefix,
-            "suffix": self.suffix,
-            "title": self.title,
-        }
-        tx.run(
-            CypherPerson.create_name_as_leaf,
-            n_attr=n_attr,
-            parent_id=kwargs["parent_id"],
-            citation_handles=self.citation_handles,
-        )
 
     @staticmethod
     def get_people_with_same_name():

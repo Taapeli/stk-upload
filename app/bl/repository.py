@@ -7,15 +7,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 """
 
 # blacked 25.5.2021/JMä
-#from sys import stderr
-
 from bl.base import NodeObject
-from pe.neo4j.cypher.cy_repository import CypherRepository
-
-# from models.cypher_gramps import Cypher_repository_in_batch
-# from models.gen.cypher import Cypher_repository
 from bl.note import Note
-
 
 class Repository(NodeObject):
     """Repository / Arkisto.
@@ -125,31 +118,3 @@ class Repository(NodeObject):
     #         print ("Type: " + self.type)
     #         return True
 
-    def save(self, tx, **kwargs):
-        """Saves this Repository to db under given batch."""
-        if not "batch_id" in kwargs:
-            raise RuntimeError(f"Repository.save needs batch_id for {self.id}")
-
-        self.uuid = self.newUuid()
-        batch_id = kwargs.get("batch_id", None)
-        r_attr = {
-            "uuid": self.uuid,
-            "handle": self.handle,
-            "change": self.change,
-            "id": self.id,
-            "rname": self.rname,
-            "type": self.type,
-        }
-        result = tx.run(
-            CypherRepository.create_in_batch,
-            bid=batch_id,
-            r_attr=r_attr
-        )
-        self.uniq_id = result.single()[0]
-
-        # Save the notes attached to self
-        if self.notes:
-            attr = {"parent":self, "batch_id":batch_id}
-            Note.save_note_list(tx, **attr)
-
-        return

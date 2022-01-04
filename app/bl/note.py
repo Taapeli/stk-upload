@@ -10,7 +10,6 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 from sys import stderr
 
 from bl.base import NodeObject
-from pe.neo4j.cypher.cy_note import CypherNote
 from pe.dataservice import DataService
 
 # from models.gen.cypher import Cypher_note
@@ -127,80 +126,6 @@ class Note(NodeObject):
     #                 return str(result[0])
     #         return 0
 
-    @staticmethod
-    def save_note_list(tx, **kwargs):
-        """Save the parent.notes[] objects as a descendant of the parent node.
-
-        Arguments:
-            parent          NodeObject  Object to link: (parent) --> (Note)
-            - parent.notes  list        Note objects
-            batch_id        str         Batch id, alternative object to link:
-                                        (:Batch{id:batch_id}) --> (Note)
-
-        Called from bl.person.PersonBl.save, models.gen.repository.Repository.save
-        """
-        n_cnt = 0
-        batch_id = kwargs.get("batch_id", None)
-        parent = kwargs.get("parent", None)
-        for note in parent.notes:
-            if isinstance(note, Note):
-                if not note.id:
-                    n_cnt += 1
-                    note.id = f"N{n_cnt}-{parent.id}"
-                    attr = {
-                        "parent_id": parent.uniq_id, 
-                        "batch_id": batch_id,
-                        }
-                note.save(tx, **attr)
-            else:
-                raise AttributeError("note.save_note_list: Argument not a Note")
-
-    def save(self, tx, **kwargs):
-        """Creates this Note object as a Note node
-
-        Arguments:
-            parent_uid      uniq_id     Object to link: (parent) --> (Note)
-            batch_id        str         Batch id, alternative object to link:
-                                        (:Batch{id:batch_id}) --> (Note)
-        """
-        self.uuid = self.newUuid()
-        batch_id = kwargs.get("batch_id", None)
-        parent_id = kwargs.get("parent_id", None)
-        if not "batch_id":
-            raise RuntimeError(f"Note.save needs batch_id for {self.id}")
-        n_attr = {
-            "uuid": self.uuid,
-            #"change": self.change,
-            "id": self.id,
-            "priv": self.priv,
-            "type": self.type,
-            "text": self.text,
-            "url": self.url,
-        }
-        if self.handle:
-            n_attr["handle"] = self.handle
-        if not parent_id is None:
-            # print(f"Note.save: (Root {batch_id}) --> (Note {self.id}) <-- (parent {parent_id})")
-            result = tx.run(
-                CypherNote.create_in_batch_as_leaf,
-                bid=batch_id,
-                parent_id=parent_id,
-                n_attr=n_attr,
-            )
-        elif not batch_id is None:
-            # print(f"Note.save: (Root {batch_id}) --> (Note {self.id})")
-            result = tx.run(
-                CypherNote.create_in_batch, 
-                bid=batch_id, 
-                n_attr=n_attr
-            )
-        else:
-            raise RuntimeError(
-                f"Note.save needs batch_id or parent_id for {self.id}"
-            )
-        record = result.single()
-        # print(f"Note.save: summary={result.summary().counters}")
-        self.uniq_id = record[0]
 
 class NoteReader(DataService):
     """

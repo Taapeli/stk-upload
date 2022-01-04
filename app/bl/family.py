@@ -34,8 +34,6 @@ from .person import PersonBl
 from .person_name import Name
 
 from pe.dataservice import DataService
-from pe.neo4j.cypher.cy_family import CypherFamily
-from pe.neo4j.cypher.cy_object import CypherObject
 
 from bl.dates import DateRange
 
