@@ -28,14 +28,16 @@ from neo4j.exceptions import ClientError
 logger = logging.getLogger("stkserver")
 from datetime import date  # , datetime
 
-from bl.base import Status, IsotammiException
+from bl.base import Status, IsotammiException, NodeObject
 from bl.comment import Comment
 from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
+from bl.family import FamilyBl
 
 from pe.dataservice import ConcreteService
 from .cypher.cy_root import CypherRoot #, CypherAudit
+from .cypher.cy_object import CypherObject
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_family import CypherFamily
@@ -799,3 +801,79 @@ class Neo4jUpdateService(ConcreteService):
         comment.obj_type = record.get("obj_type")
         comment.user = attr.get("username")
         return {"status": Status.OK, "comment": comment}
+
+    def ds_save_family(self, tx, f:FamilyBl, batch_id):
+        """Saves the family node to db with its relations.
+
+        Connects the family to parent, child, citation and note nodes.
+        """
+        f.uuid = NodeObject.newUuid()
+        print("ds_save_family")
+        #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "F")
+        f_attr = {
+            "uuid": f.uuid,
+            "handle": f.handle,
+            "change": f.change,
+            "id": f.id,
+            "rel_type": f.rel_type,
+        }
+        result = tx.run(
+            CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
+        )
+        ids = []
+        for record in result:
+            f.uniq_id = record[0]
+            ids.append(f.uniq_id)
+            if len(ids) > 1:
+                logger.warning(
+                    f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}"
+                )
+
+        # Make father and mother relations to Person nodes
+
+        if hasattr(f, "father") and f.father:
+            tx.run(
+                CypherFamily.link_parent,
+                role="father",
+                f_handle=f.handle,
+                p_handle=f.father,
+            )
+
+        if hasattr(f, "mother") and f.mother:
+            tx.run(
+                CypherFamily.link_parent,
+                role="mother",
+                f_handle=f.handle,
+                p_handle=f.mother,
+            )
+
+        # Make relations to Event nodes
+
+        for handle_role in f.event_handle_roles:
+            # a tuple (event_handle, role)
+            tx.run(
+                CypherFamily.link_event,
+                f_handle=f.handle,
+                e_handle=handle_role[0],
+                role=handle_role[1],
+            )
+
+        # Make child relations to Person nodes
+
+        for handle in f.child_handles:
+            tx.run(CypherFamily.link_child, f_handle=f.handle, p_handle=handle)
+
+        # Make relation(s) to the Note node
+
+        # print(f"Family_gramps.save: linking Notes {self.handle} -> {self.note_handles}")
+        for handle in f.note_handles:
+            tx.run(CypherFamily.link_note, f_handle=f.handle, n_handle=handle)
+
+        # Make relation(s) to the Citation node
+
+        # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
+        for handle in f.citation_handles:
+            tx.run(
+                CypherObject.link_citation, handle=f.handle, c_handle=handle
+            )
+

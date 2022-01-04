@@ -123,6 +123,10 @@ class DOM_handler:
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
+    def complete(self, obj):
+        self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
+        self.update_progress(obj.__class__.__name__)
+
     # ---------------------   XML subtree handlers   --------------------------
 
     def get_mediapath_from_header(self):
@@ -450,7 +454,9 @@ class DOM_handler:
                     f.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has cite {f.citation_handles[-1]}')
 
-            self.save_and_link_handle2(tx, f, batch_id=self.batch.id)
+            self.dataservice.ds_save_family(tx, f, self.batch.id)
+            self.complete(f)
+
             # The sortnames and dates will be set for these families
             self.family_ids.append(f.uniq_id)
 
