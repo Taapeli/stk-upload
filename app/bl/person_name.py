@@ -128,12 +128,3 @@ class Name(NodeObject):
             names.append("{} {} {} {} {}".format(ti, fn, pn, vn, sn))
         return " • ".join(names)
 
-    # Removed / 2021 JMä
-    #     @staticmethod
-    #     def get_people_with_surname(surname):     # Not needed
-    #     @staticmethod
-    #     def get_personnames(tx=None, uniq_id=None):    # Not needed?
-    #         """ Picks all Name versions of this Person or all persons.
-    #     @staticmethod
-    #     def get_surnames():    # Not needed
-    #         """ Listaa kaikki sukunimet tietokannassa """

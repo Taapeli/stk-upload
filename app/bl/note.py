@@ -63,69 +63,6 @@ class Note(NodeObject):
         n.url = node.get("url", "")
         return n
 
-    # @staticmethod def get_persons_notes(uniq_id):
-    # """ Read 'Person -> Event -> Note' and 'Person -> Note' paths
-
-    # ===> removed 21.5.2021/JMä ===================================================
-    #     @staticmethod
-    #     def get_notes(uniq_ids):
-    #         """ Reads Note nodes data from db using given Note uniq_ids
-    #
-    #             Called from models.datareader.get_person_data_by_id
-    #         """
-    #         notes = []
-    #         with shareds.driver.session() as session:
-    #             # """MATCH (n:Note) WHERE ID(n) in $nid RETURN ID(n) AS uniq_id, n"""
-    #             result = session.run(Cypher_note.get_by_ids, nid=uniq_ids)
-    #             for record in result:
-    #                 # Create a Note object from record
-    #                 node = record['n']
-    #                 n = Note.from_node(node)
-    #                 notes.append(n)
-    #         return notes
-    # ==============================================================================
-    #     @staticmethod
-    #     def get_note_list(uniq_id):
-    #         """ Reads all Note nodes or selected Note node from db
-    #             Also counts references to each Note
-    #
-    #             Called only from models.datareader.get_notes for "table_of_data.html"
-    #         """
-    #         result = None
-    #         with shareds.driver.session() as session:
-    #             if uniq_id:
-    #                 query = """
-    # MATCH (n:Note) WHERE ID(note)=$nid
-    #     OPTIONAL MATCH (a) --> (n)
-    # RETURN ID(n) AS uniq_id, n, count(a) AS ref"""
-    #                 result =  session.run(query, nid=uniq_id)
-    #             else:
-    #                 query = """
-    # MATCH (n:Note)
-    #     OPTIONAL MATCH (a) --> (n)
-    # RETURN ID(n) AS uniq_id, n, count(a) AS ref
-    #     ORDER BY n.type"""
-    #                 result =  session.run(query)
-    #         titles = ['uniq_id', 'change', 'id', 'priv', 'type', 'text', 'url', 'ref']
-    #         notes = []
-    #         for record in result:
-    #             # Create a Note object from record
-    #             node = record['n']
-    #             n = Note.from_node(node)
-    #             n.ref = record['ref']
-    #             notes.append(n)
-    #         return (titles, notes)
-    # ===============================================================================
-    #     @staticmethod
-    #     def get_total():
-    #         """ Tulostaa huomautusten määrän tietokannassa """
-    #
-    #         with shareds.driver.session() as session:
-    #             results =  session.run("MATCH (n:Note) RETURN COUNT(n)")
-    #             for result in results:
-    #                 return str(result[0])
-    #         return 0
-
 
 class NoteReader(DataService):
     """

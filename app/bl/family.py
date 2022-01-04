@@ -144,11 +144,6 @@ class FamilyWriter(DataService):
         super().__init__(service_name, u_context, tx=tx)
         pass  # print(f"#FamilyWriter: {dir(self)}")
 
-    # def set_calculated_attributes(self, uniq_id):
-    #     """Set Family event dates and sortnames."""
-    #     return self.dataservice.ds_set_family_calculated_attributes(uniq_id)
-    #     # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
-
 
 class FamilyReader(DataService):
     """
