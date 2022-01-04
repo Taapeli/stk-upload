@@ -65,7 +65,7 @@ def run_cypher(session, cypher, username, **kwargs):
     return session.run(full_cypher, username=username, **kwargs)
 
 
-def run_cypher_batch(session, cypher, username, batch_id, **kwargs):
+def run_cypher_batch(session, cypher, username, batch_id, material_type, **kwargs):
     """
     Runs the given Cypher query returning only the appropriate/allowed objects
     of given batch.
@@ -73,7 +73,7 @@ def run_cypher_batch(session, cypher, username, batch_id, **kwargs):
     1) if username is given, then return objects from all 
        candidate materials that the user has access to
     2) if username is None or empty, the return objects only from the 
-       Accepted material
+       Accepted material of material_type
     
     The cypher query should access all other nodes through the node (root). 
     For example

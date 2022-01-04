@@ -332,6 +332,7 @@ class Neo4jReadService(ConcreteService):
         fw = args.get("name")  # first name
         limit = args.get("limit", 50)
         order = args.get("order", "man")  # "man" or "wife" name order
+        material = args.get("material")
 
         # Select True = filter by this user False = filter approved data
         # show_candidate = self.user_context.use_owner_filter()
@@ -342,7 +343,9 @@ class Neo4jReadService(ConcreteService):
                 )
                 result = run_cypher_batch(session,
                     CypherFamily.get_families_by_father,
-                    user, args["batch_id"],
+                    user,
+                    material.batch_id, 
+                    material.m_type,
                     fw=fw,
                     limit=limit,
                 )
@@ -352,7 +355,9 @@ class Neo4jReadService(ConcreteService):
                 )
                 result = run_cypher_batch(session,
                     CypherFamily.get_families_by_mother,
-                    user, args["batch_id"],
+                    user,
+                    material.batch_id, 
+                    material.m_type,
                     fw=fw,
                     limit=limit,
                 )
@@ -728,7 +733,7 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": list(families.values()), "status": Status.OK}
 
-    def dr_get_place_list_fw(self, user, fw_from, limit, lang="fi", batch_id=None):
+    def dr_get_place_list_fw(self, user, fw_from, limit, lang, material):
         """Read place list from given start point"""
         ret = []
         if lang not in ["fi", "sv"]:
@@ -739,7 +744,8 @@ class Neo4jReadService(ConcreteService):
                 session,
                 CypherPlace.get_name_hierarchies,
                 user,
-                batch_id,
+                material.batch_id, 
+                material.m_type,
                 fw=fw_from,
                 limit=limit,
                 lang=lang,
@@ -985,7 +991,7 @@ class Neo4jReadService(ConcreteService):
         """
         sources = []
         user = args.get("user")
-        batch_id = args.get("batch_id")
+        material = args.get("material")
 
         with self.driver.session(default_access_mode="READ") as session:
             if args.get("theme1"):
@@ -997,7 +1003,8 @@ class Neo4jReadService(ConcreteService):
                 result = run_cypher_batch(session,
                     CypherSource.get_sources_with_selections,
                     user,
-                    batch_id,
+                    material.batch_id, 
+                    material.m_type,
                     key1=key1,
                     key2=key2,
                 )
@@ -1006,7 +1013,8 @@ class Neo4jReadService(ConcreteService):
                 result = run_cypher_batch(session,
                     CypherSource.get_sources,
                     user,
-                    batch_id,
+                    material.batch_id, 
+                    material.m_type,
                 )
 
             for record in result:
@@ -1103,7 +1111,7 @@ class Neo4jReadService(ConcreteService):
                 "statustext": f"source uuid={uuid} not found",
             }
 
-    def dr_get_media_list(self, user, batch_id, fw_from, limit):
+    def dr_get_media_list(self, user, material, fw_from, limit):
         """Reads Media objects from user batch or common data using context.
 
         :param: user    Active user or None, if approved data is requested
@@ -1115,7 +1123,8 @@ class Neo4jReadService(ConcreteService):
             result = run_cypher_batch(session,
                 CypherMedia.get_media_list,
                 user,
-                batch_id,
+                material.batch_id, 
+                material.m_type,
                 start_name=fw_from,
                 limit=limit,
             )
@@ -1129,7 +1138,7 @@ class Neo4jReadService(ConcreteService):
             else:
                 return {"recs": recs, "status": Status.NOT_FOUND}
 
-    def dr_get_media_single(self, user, batch_id, uuid):
+    def dr_get_media_single(self, user, material, uuid):
         """Read a Media object, selected by UUID or uniq_id.
 
         :param: user    username, who has access
@@ -1139,7 +1148,11 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             try:
                 result = run_cypher_batch(session,
-                    CypherMedia.get_media_by_uuid, user, batch_id, uuid=uuid
+                    CypherMedia.get_media_by_uuid, 
+                    user,
+                    material.batch_id, 
+                    material.m_type, 
+                    uuid=uuid
                 )
                 # RETURN media, r, ref, ref2
                 for record in result:
@@ -1156,7 +1169,7 @@ class Neo4jReadService(ConcreteService):
         status = Status.OK if recs else Status.NOT_FOUND
         return {"status": status, "items": recs}
 
-    def dr_get_topic_list(self, user, batch_id, fw_from, limit):
+    def dr_get_topic_list(self, user, material, fw_from, limit):
         """Reads Comment objects from user batch or common data using context.
 
         :param: user    Active user or None, if approved data is requested
@@ -1168,7 +1181,8 @@ class Neo4jReadService(ConcreteService):
             result = run_cypher_batch(session,
                 CypherComment.get_topics,
                 user,
-                batch_id,
+                material.batch_id, 
+                material.m_type,
                 start_timestamp=fw_from,
                 limit=limit,
             )
@@ -1297,7 +1311,7 @@ class Neo4jReadService(ConcreteService):
         return
 
     #   @functools.lru_cache
-    def dr_get_surname_list(self, username, batch_id, count):
+    def dr_get_surname_list(self, username, material, count):
         """ List most common surnames """
         result_list = []
         with self.driver.session(default_access_mode="READ") as session:
@@ -1306,7 +1320,8 @@ class Neo4jReadService(ConcreteService):
 #                   f'{self.material.m_type}", state:"{self.material.state}", username:"{username}", count:{count}''}')
 #             print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
             result = run_cypher_batch(session, cypher,
-                username, batch_id,
+                username,
+                material.batch_id, material.m_type,
                 count=count,
             )
             for record in result:
@@ -1341,7 +1356,7 @@ class Neo4jReadService(ConcreteService):
     #             result_list.append({"surname": surname, "count": count})
     #     return result_list
 
-    def dr_get_placename_list(self, username, batch_id, count=50): 
+    def dr_get_placename_list(self, username, material, count=50): 
         """List most referenced Places by name. 
         
         If username is defined, filter by user. 
@@ -1351,7 +1366,12 @@ class Neo4jReadService(ConcreteService):
             # Select Batches by user, if defined
             cypher = CypherPlaceStats.get_place_list
             #logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
-            result = run_cypher_batch(session, cypher, username, batch_id, count=count)
+            result = run_cypher_batch(session, 
+                                      cypher, 
+                                      username,
+                                      material.batch_id, 
+                                      material.m_type,
+                                      count=count)
             for record in result:
                 place = record["place"]
                 placename = place["pname"]

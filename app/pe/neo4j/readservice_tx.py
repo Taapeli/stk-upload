@@ -89,7 +89,7 @@ class Neo4jReadServiceTx(ConcreteService):
         
             args = dict {use_user, fw, limit, rule, key, years}
         """
-        material_type = args.get('material_type')
+        material = args.get('material')
         state = args.get('state')
         username = args.get('use_user')
         rule = args.get('rule')
@@ -97,7 +97,6 @@ class Neo4jReadServiceTx(ConcreteService):
         fw_from = args.get('fw','')
         years= args.get('years',[-9999,9999])
         limit = args.get('limit', 100)
-        batch_id = args.get('batch_id')
         restart = (rule == 'start')
 
         # Select cypher clause by arguments
@@ -111,18 +110,18 @@ class Neo4jReadServiceTx(ConcreteService):
         elif args.get('pg') == 'all':
             # Show persons, no search form
             cypher = CypherPerson.get_person_list
-            print(f"tx_get_person_list: Show '{state}' '{material_type}' @{username} fw={fw_from}")
+            print(f"tx_get_person_list: Show '{state}' '{material.m_type}' @{username} fw={fw_from}")
         elif rule == 'freetext':
             cypher_prefix = CypherPerson.read_persons_w_events_by_name1
             cypher = CypherPerson.read_persons_w_events_by_name2
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
             cypher = CypherPerson.read_persons_w_events_by_refname
-            print(f"tx_get_person_list: Show '{state}' '{material_type}' data @{username}, {rule} ~ \"{key}*\"")
+            print(f"tx_get_person_list: Show '{state}' '{material.m_type}' data @{username}, {rule} ~ \"{key}*\"")
         elif rule == 'years':
             # Search persons matching <years>
             cypher = CypherPerson.read_persons_w_events_by_years
-            print(f"tx_get_person_list: Show '{state}' '{material_type}', years {years}")
+            print(f"tx_get_person_list: Show '{state}' '{material.m_type}', years {years}")
         elif rule == 'ref':
             #TODO: Search persons where a reference name = <key> value
             return {'items': [], 'status': Status.ERROR,
@@ -140,12 +139,14 @@ class Neo4jReadServiceTx(ConcreteService):
  
         persons = []
         #logger.debug(f"tx_get_person_list: cypher: {cypher}")
-        result = run_cypher_batch(self.tx, cypher, username, batch_id,
-                            cypher_prefix=cypher_prefix,
-                            use=rule, name=key,
-                            years=years,
-                            start_name=fw_from, 
-                            limit=limit)
+        result = run_cypher_batch(self.tx, cypher, username,
+                                  material.batch_id, 
+                                  material.m_type,
+                                  cypher_prefix=cypher_prefix,
+                                  use=rule, name=key,
+                                  years=years,
+                                  start_name=fw_from, 
+                                  limit=limit)
         # result: person, names, events
         for record in result:
             #  <Record 
@@ -179,7 +180,7 @@ class Neo4jReadServiceTx(ConcreteService):
         return {'items': persons, 'status': Status.OK}
 
 
-    def tx_get_person_by_uuid(self, uuid:str, active_user:str, batch_id):
+    def tx_get_person_by_uuid(self, uuid:str, active_user:str, material):
         ''' Read a person from common data or user's own Batch.
 
         :param: uuid        str
@@ -192,8 +193,12 @@ class Neo4jReadServiceTx(ConcreteService):
         #    results: person, root
 
         try:
-            record = run_cypher_batch(self.tx, CypherPerson.get_person,
-                                      active_user, batch_id, uuid=uuid).single()
+            record = run_cypher_batch(self.tx,
+                                      CypherPerson.get_person,
+                                      active_user,
+                                      material.batch_id, 
+                                      material.m_type,
+                                      uuid=uuid).single()
             # <Record 
             #    p=<Node id=25651 labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
@@ -574,7 +579,7 @@ class Neo4jReadServiceTx(ConcreteService):
         username = args.get('use_user')
         searchtext = args.get('key')
         limit = args.get('limit', 100)
-        batch_id = args.get('batch_id')
+        material = args.get('material')
 
         cypher_prefix = """
             CALL db.index.fulltext.queryNodes("notetext",$searchtext) 
@@ -590,10 +595,12 @@ class Neo4jReadServiceTx(ConcreteService):
             return distinct note, collect([x,labels(x)]) as referrers, score
             limit $limit
             """
-        result = run_cypher_batch(self.tx, cypher, username, batch_id,
-                            cypher_prefix=cypher_prefix,
-                            searchtext=searchtext,
-                            limit=limit)
+        result = run_cypher_batch(self.tx, cypher, username,
+                                  material.batch_id, 
+                                  material.m_type,
+                                  cypher_prefix=cypher_prefix,
+                                  searchtext=searchtext,
+                                  limit=limit)
         rsp = []
         for record in result:
             #item = record.get('item')
