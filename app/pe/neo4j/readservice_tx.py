@@ -594,10 +594,10 @@ class Neo4jReadServiceTx(ConcreteService):
             return distinct note, collect([x,labels(x)]) as referrers, score
             limit $limit
             """
-        result = run_cypher_batch(self.tx, cypher, username, batch_id,
-                            cypher_prefix=cypher_prefix,
-                            searchtext=searchtext,
-                            limit=limit)
+        result = run_cypher_batch(self.tx, cypher, username, material,
+                                  cypher_prefix=cypher_prefix,
+                                  searchtext=searchtext,
+                                  limit=limit)
         rsp = []
         for record in result:
             #item = record.get('item')

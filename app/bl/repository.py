@@ -7,15 +7,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 """
 
 # blacked 25.5.2021/JMä
-#from sys import stderr
-
 from bl.base import NodeObject
-from pe.neo4j.cypher.cy_repository import CypherRepository
-
-# from models.cypher_gramps import Cypher_repository_in_batch
-# from models.gen.cypher import Cypher_repository
 from bl.note import Note
-
 
 class Repository(NodeObject):
     """Repository / Arkisto.
@@ -63,93 +56,3 @@ class Repository(NodeObject):
         n.type = node["type"] or ""
         return n
 
-    # ====== Removed 25.5.2021 / JMä ===============================================
-    #     def get_repo_w_notes(self):
-    #         """ Luetaan arkiston tiedot
-    #             Get Repository with linked Notes
-    #
-    #             returns: repo, collect(w) as notes
-    #         """
-    #         with shareds.driver.session() as session:
-    #             return session.run(Cypher_repository.get_w_notes, rid=self.uniq_id)
-    #
-    #     @staticmethod
-    #     def obsolete_get_repositories(uniq_id):
-    #         """ Reads all Repository nodes or selected Repository node from db
-    #
-    #             OBSOLETE: called only from models.obsolete_datareader.obsolete_get_repositories for
-    #             "table_of_objects.html"
-    #         """
-    #         result = None
-    #         with shareds.driver.session() as session:
-    #             if uniq_id:
-    #                 result =  session.run(Cypher_repository.get_one, rid=uniq_id)
-    #             else:
-    #                 result =  session.run(Cypher_repository.get_all)
-    #         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 'name']
-    #         repositories = []
-    #         for record in result:
-    #             # Create a Note object from db Node
-    #             node = record['r']
-    #             n = Repository.from_node(node)
-    #             repositories.append(n)
-    #         return (titles, repositories)
-    #
-    #     @staticmethod
-    #     def get_w_source (uniq_id):
-    #         """ Read repository/repositories from database with their referencing sources.
-    #             For each repository, there may be some sources with different medium.
-    #             Voidaan lukea repositoreja sourceneen kannasta.
-    #         """
-    #         with shareds.driver.session() as session:
-    #             if uniq_id:
-    #                 return session.run(Cypher_repository.get_w_sources, rid=uniq_id)
-    #             else:
-    #                 return session.run(Cypher_repository.get_w_sources_all)
-    #
-    #     @staticmethod
-    #     def get_total():
-    #         """ Tulostaa arkistojen määrän tietokannassa """
-    #         query = "MATCH (r:Repository) RETURN COUNT(r)"
-    #         results =  shareds.driver.session().run(query)
-    #         for result in results:
-    #             return str(result[0])
-    #
-    #     def print_data(self):
-    #         """ Tulostaa tiedot """
-    #         print ("*****Repository*****")
-    #         print ("Handle: " + self.handle)
-    #         print ("Change: {}".format(self.change))
-    #         print ("Id: " + self.id)
-    #         print ("Rname: " + self.rname)
-    #         print ("Type: " + self.type)
-    #         return True
-
-    def save(self, tx, **kwargs):
-        """Saves this Repository to db under given batch."""
-        if not "batch_id" in kwargs:
-            raise RuntimeError(f"Repository.save needs batch_id for {self.id}")
-
-        self.uuid = self.newUuid()
-        batch_id = kwargs.get("batch_id", None)
-        r_attr = {
-            "uuid": self.uuid,
-            "handle": self.handle,
-            "change": self.change,
-            "id": self.id,
-            "rname": self.rname,
-            "type": self.type,
-        }
-        result = tx.run(
-            CypherRepository.create_in_batch,
-            bid=batch_id,
-            r_attr=r_attr
-        )
-        self.uniq_id = result.single()[0]
-
-        # Save the notes attached to self
-        if self.notes:
-            attr = {"parent":self, "batch_id":batch_id}
-            Note.save_note_list(tx, **attr)
-
-        return

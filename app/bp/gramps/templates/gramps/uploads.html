@@ -117,6 +117,10 @@ function doconfirm( command, title ) { // used in commands.html
 		document.location.href = command;
 	}
 }
+
+function filenm_changed(input) {
+    document.forms[0].submit.disabled = !input.value;    
+}
 </script>
 
 <script src="/static/js/hyperscript.org@0.8.1.js"></script>
@@ -138,10 +142,10 @@ function doconfirm( command, title ) { // used in commands.html
                 </div>
                 <div>
                     <input type="hidden" name="material" value="xml_file">
-                    <input type="file" name="filenm" accept=".gramps,.gpkg"/>
+                    <input type="file" name="filenm" accept=".gramps,.gpkg" onchange="filenm_changed(this)"/>
                 </div>
                 <div class="submit"> 
-                    <input type="submit" value="{{ _('Send to database') }}" onclick="checkFileSize()"/>
+                    <input type="submit" name="submit" value="{{ _('Send to database') }}" onclick="checkFileSize()" disabled/>
                 </div>
                 </td>
             </form>
