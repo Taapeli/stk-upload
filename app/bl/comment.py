@@ -33,8 +33,6 @@ from bl.source import SourceBl
 from bl.media import MediaBl
 
 from pe.dataservice import DataService
-#from pe.neo4j.cypher.cy_comment import CypherComment
-
 
 class Comment(NodeObject):
     """A comment object with description, file link and mime information.
@@ -58,21 +56,6 @@ class Comment(NodeObject):
 
         return f"{self.text}: {self.timestr} {self.user}" # {self.timestamp}"
 
-    @classmethod
-    def from_node(cls, node):
-        """
-        Transforms a db node to an object of type Comment.
-
-        <Node id=164 labels={'Comment'}
-            properties={'text': 'Amanda syntyi Porvoossa'}>
-        """
-        n = super(Comment, cls).from_node(node)
-        n.title = node.get("title","")
-        n.text = node["text"]
-        #n.user = node["user"]
-        n.timestamp = node["timestamp"]
-        #n.timestr = n.timestamp_str()        # node["timestr"]
-        return n
 
 
 class CommentsUpdater(DataService):
@@ -127,59 +110,9 @@ class CommentReader(DataService):
                                                  limit)
         if Status.has_failed(res):
             return res
-        for record in res['recs']:
-            # <Record 
-            #    o=<Node id=189486 labels=frozenset({'Person'})
-            #        properties={...}> 
-            #    c=<Node id=189551 labels=frozenset({'Comment'})
-            #        properties={'text': 'testi Gideon', 'timestamp': 1631965129453}>
-            #    commenter='juha'
-            #    count=0
-            #    root=<Node id=189427 labels=frozenset({'Root'}) 
-            #        properties={'xmlname': 'A-testi 2021 koko kanta.gpkg', 
-            #            'material': 'Family Tree', 'state': 'Candidate', 
-            #            'id': '2021-09-16.001', 'user': 'juha', ...}>
-            # >
-
-            node = record["c"]
-            c = Comment.from_node(node)
-            #c.label = list(node.labels).pop()
-            if not c.title:
-                # Show shortened text without line breaks as title
-                text = c.text.replace("\n", " ")
-                if len(text) > 50:
-                    n = text[:50].rfind(" ")
-                    if n < 2:
-                        n = 50
-                    c.title = text[:n]
-                else:
-                    c.title = c.text
-            c.obj_label = list(record['o'].labels).pop()
-            c.count = record.get("count", 0)
-            c.credit = record.get("commenter")
-
-            node = record['root']
-            c.root = Root.from_node(node)
-            #c.batch = record.get("batch_id")
-
-            node = record["o"]
-            c.obj_label = list(node.labels).pop()
-            if c.obj_label == "Family":
-                c.object = FamilyBl.from_node(node)
-            elif c.obj_label == "Person":
-                c.object = PersonBl.from_node(node)
-            elif c.obj_label == "Place":
-                c.object = PlaceBl.from_node(node)
-            elif c.obj_label == "Source":
-                c.object = SourceBl.from_node(node)
-            elif c.obj_label == "Media":
-                c.object = MediaBl.from_node(node)
-            else:
-                print(f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'")
-                next
-            topics.append(c)
 
         # Update the page scope according to items really found
+        topics = res['topics']
         if topics:
             self.user_context.update_session_scope(
                 "comment_scope",

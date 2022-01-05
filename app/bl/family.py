@@ -182,6 +182,7 @@ class FamilyReader(DataService):
             "order": order,
             "limit": limit,
             "material": self.user_context.material,
+            "is_common": self.user_context.is_common(),
         }
         ustr = "user " + args["use_user"] if args["use_user"] else "no user"
         print(
@@ -194,58 +195,8 @@ class FamilyReader(DataService):
         # returns {'recs':recs, 'status':Status.OK/NOT_FOUND}
         if Status.has_failed(res, False):
             return res
-
-        families = []
-        for record in res["recs"]:
-            # record.keys() = ['f', 'marriage_place', 'parent', 'child', 'no_of_children']
-            if record["f"]:
-                # <Node id=55577 labels={'Family'}
-                #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d',
-                #    'id': 'F0000', 'change': 1507492602}>
-                f_node = record["f"]
-                family = FamilyBl.from_node(f_node)
-                family.marriage_place = record["marriage_place"]
-
-                uniq_id = -1
-                for role, parent_node, name_node in record["parent"]:
-                    if parent_node:
-                        # <Node id=214500 labels={'Person'}
-                        #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa',
-                        #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496,
-                        #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008',
-                        #    'date2': 1997946, 'date1': 1929380}>
-                        if uniq_id != parent_node.id:
-                            # Skip person with double default name
-                            pp = PersonBl.from_node(parent_node)
-                            if role == "father":
-                                family.father = pp
-                            elif role == "mother":
-                                family.mother = pp
-
-                        pname = Name.from_node(name_node)
-                        pp.names = [pname]
-
-                for ch in record["child"]:
-                    # <Node id=60320 labels={'Person'}
-                    #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19,
-                    #    'confidence': '', 'sex': 0, 'change': 1507492602,
-                    #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001',
-                    #    'date2': 1609920, 'date1': 1609920}>
-                    #                         child = Person_as_member()
-                    child = PersonBl.from_node(ch)
-                    family.children.append(child)
-                family.children.sort(key=lambda x: x.birth_low)
-
-                if record["no_of_children"]:
-                    family.no_of_children = record["no_of_children"]
-                family.num_hidden_children = 0
-                if not self.user_context.is_common():
-                    if family.father:
-                        family.father.too_new = False
-                    if family.mother:
-                        family.mother.too_new = False
-                families.append(family)
-
+        families = res['families']
+        
         # Update the page scope according to items really found
         if families:
             up_scope = self.user_context.update_session_scope

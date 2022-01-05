@@ -12,11 +12,6 @@ from sys import stderr
 from bl.base import NodeObject
 from pe.dataservice import DataService
 
-# from models.gen.cypher import Cypher_note
-# from models.cypher_gramps import Cypher_note_in_batch # Cypher_note_w_handle,
-# import shareds
-
-
 class Note(NodeObject):
     """Note / Huomautus
     including eventual web link

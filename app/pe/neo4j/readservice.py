@@ -16,7 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from pe.neo4j.util import run_cypher, run_cypher_batch
 
 """
 Created on 17.3.2020
@@ -38,10 +37,13 @@ from bl.family import FamilyBl
 from bl.event import EventBl
 from bl.person import PersonBl
 from bl.media import MediaBl
+from bl.event import Event
+from bl.note import Note
+from bl.citation import Citation
+from bl.repository import Repository
 
 from ui.place import place_names_local_from_nodes
 
-from pe.dataservice import ConcreteService
 from .cypher.cy_place import CypherPlace, CypherPlaceStats
 from .cypher.cy_source import CypherSource
 from .cypher.cy_family import CypherFamily
@@ -50,10 +52,10 @@ from .cypher.cy_person import CypherPerson
 from .cypher.cy_media import CypherMedia
 from .cypher.cy_comment import CypherComment
 
-from bl.event import Event
-from bl.note import Note
-from bl.citation import Citation
-from bl.repository import Repository
+from pe.dataservice import ConcreteService
+from pe.neo4j.util import run_cypher, run_cypher_batch
+from pe.neo4j.nodereaders import MediaBl_from_node, Comment_from_node
+
 from models.dbtree import DbTree
 
 
@@ -276,7 +278,7 @@ class Neo4jReadService(ConcreteService):
                     for _rel_prop, node in record["medias"]:
                         # _rel_prop may be {"order":0} (not used)
                         if node:
-                            medias.append(MediaBl.from_node(node))
+                            medias.append(MediaBl_from_node(node))
 
         except Exception as e:
             return {
@@ -362,13 +364,58 @@ class Neo4jReadService(ConcreteService):
                     limit=limit,
                 )
 
-            recs = []
+            families = []
             for record in result:
                 # record.keys() = ['f', 'marriage_place', 'parent', 'child', 'no_of_children']
-                recs.append(record)
-
-            status = Status.OK if recs else Status.NOT_FOUND
-            return {"recs": recs, "status": status}
+                if record["f"]:
+                    # <Node id=55577 labels={'Family'}
+                    #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d',
+                    #    'id': 'F0000', 'change': 1507492602}>
+                    f_node = record["f"]
+                    family = FamilyBl.from_node(f_node)
+                    family.marriage_place = record["marriage_place"]
+    
+                    uniq_id = -1
+                    for role, parent_node, name_node in record["parent"]:
+                        if parent_node:
+                            # <Node id=214500 labels={'Person'}
+                            #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa',
+                            #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496,
+                            #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008',
+                            #    'date2': 1997946, 'date1': 1929380}>
+                            if uniq_id != parent_node.id:
+                                # Skip person with double default name
+                                pp = PersonBl.from_node(parent_node)
+                                if role == "father":
+                                    family.father = pp
+                                elif role == "mother":
+                                    family.mother = pp
+    
+                            pname = Name.from_node(name_node)
+                            pp.names = [pname]
+    
+                    for ch in record["child"]:
+                        # <Node id=60320 labels={'Person'}
+                        #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19,
+                        #    'confidence': '', 'sex': 0, 'change': 1507492602,
+                        #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001',
+                        #    'date2': 1609920, 'date1': 1609920}>
+                        #                         child = Person_as_member()
+                        child = PersonBl.from_node(ch)
+                        family.children.append(child)
+                    family.children.sort(key=lambda x: x.birth_low)
+    
+                    if record["no_of_children"]:
+                        family.no_of_children = record["no_of_children"]
+                    family.num_hidden_children = 0
+                    if not args.get("is_common"):
+                        if family.father:
+                            family.father.too_new = False
+                        if family.mother:
+                            family.mother.too_new = False
+                    families.append(family)
+            status = Status.OK if families else Status.NOT_FOUND
+            return {"families": families, "status": status}
 
     def dr_get_family_parents(self, uniq_id: int, with_name=True):
         """
@@ -829,7 +876,7 @@ class Neo4jReadService(ConcreteService):
                     node_ids.append(pl.notes[-1].uniq_id)
 
                 for medias_node in record["medias"]:
-                    m = MediaBl.from_node(medias_node)
+                    m = MediaBl_from_node(medias_node)
                     # Todo: should replace pl.media_ref[] <-- pl.medias[]
                     pl.media_ref.append(m)
                     node_ids.append(pl.media_ref[-1].uniq_id)
@@ -1129,14 +1176,26 @@ class Neo4jReadService(ConcreteService):
                 limit=limit,
             )
 
-            recs = []
+            media = []
             for record in result:
-                recs.append(record)
-            #             recs = [record for record in result]
-            if recs:
-                return {"recs": recs, "status": Status.OK}
+                # <Record o=<Node id=393949 labels={'Media'}
+                #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
+                #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
+                #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
+                #            'id': 'O0001', 'uuid': 'b4b11fbd8c054252b51703769e7a6850'}>
+                #    credit='juha'
+                #    batch_id='2020-01-02.001'
+                #    count=1>
+                node = record["o"]
+                m = MediaBl_from_node(node)
+                m.conn = record.get("count", 0)
+                m.credit = record.get("credit")
+                m.batch = record.get("batch_id")
+                media.append(m)
+            if media:
+                return {"media": media, "status": Status.OK}
             else:
-                return {"recs": recs, "status": Status.NOT_FOUND}
+                return {"media": media, "status": Status.NOT_FOUND}
 
     def dr_get_media_single(self, user, material, uuid):
         """Read a Media object, selected by UUID or uniq_id.
@@ -1144,7 +1203,27 @@ class Neo4jReadService(ConcreteService):
         :param: user    username, who has access
         :parma: uuid    Media node uuid
         """
-        recs = []
+        class MediaReferrer:
+            """ Carrier for a referee of media object. """
+
+            def __init__(self):
+                # Referencing object, label, cropping
+                self.obj = None
+                self.label = None
+                self.crop = None
+                # If the referring obj is Event, there is a list of connected objects
+                self.next_objs = []
+
+            def __str__(self):
+                s = ""
+                if self.obj:
+                    if self.next_objs:
+                        s = " ".join([x.id for x in self.next_objs]) + "-> "
+                    s += f" {self.label} {self.obj.id} -{self.crop}-> (Media)"
+                return s
+
+        media = None
+        event_refs = {}  # The Person or Family nodes behind referencing Event
         with self.driver.session(default_access_mode="READ") as session:
             try:
                 result = run_cypher_batch(session,
@@ -1156,9 +1235,60 @@ class Neo4jReadService(ConcreteService):
                 )
                 # RETURN media, r, ref, ref2
                 for record in result:
-                    recs.append(
-                        (record["media"], record["prop"], record["ref"], record["ref2"])
-                    )
+                    media_node = record["media"]
+                    crop = record["prop"]
+                    ref_node = record["ref"]
+                    ref2_node = record["ref2"]
+
+                    # - Media node
+                    # - cropping
+                    # - referring Person, Family or Event
+                    # - optional Person or Family behind the referring Event
+        
+                    if not media:
+                        media = MediaBl_from_node(media_node)
+                        media.ref = []
+        
+                    #   The referring object
+        
+                    mref = MediaReferrer()
+                    (mref.label,) = ref_node.labels  # Get the 1st label
+                    if mref.label == "Person":
+                        mref.obj = PersonBl.from_node(ref_node)
+                    elif mref.label == "Place":
+                        mref.obj = PlaceBl.from_node(ref_node)
+                    elif mref.label == "Event":
+                        mref.obj = EventBl.from_node(ref_node)
+                    mref.obj.label = mref.label
+                    media.ref.append(mref)
+        
+                    # Has the relation cropping properties?
+                    left = crop.get("left")
+                    if not left is None:
+                        upper = crop.get("upper")
+                        right = crop.get("right")
+                        lower = crop.get("lower")
+                        mref.crop = (left, upper, right, lower)
+        
+                    #    The next object behind the Event
+        
+                    if ref2_node:
+                        if ref2_node.id in event_refs:
+                            obj2 = event_refs[ref2_node.id]
+                        else:
+                            if "Person" in ref2_node.labels:
+                                obj2 = PersonBl.from_node(ref2_node)
+                                obj2.label = "Person"
+                            elif "Family" in ref2_node.labels:
+                                obj2 = FamilyBl.from_node(ref2_node)
+                                obj2.label = "Family"
+                            else:
+                                raise TypeError(
+                                    f"MediaReader.get_one: unknown type {list(ref2_node.labels)}"
+                                )
+                            event_refs[obj2.uniq_id] = obj2
+        
+                        mref.next_objs.append(obj2)
 
             except Exception as e:
                 return {
@@ -1166,8 +1296,8 @@ class Neo4jReadService(ConcreteService):
                     "statustext": f"Neo4jReadService.dr_get_media_single: {e.__class__.__name__} {e}",
                 }
 
-        status = Status.OK if recs else Status.NOT_FOUND
-        return {"status": status, "items": recs}
+        status = Status.OK if media else Status.NOT_FOUND
+        return {"status": status, "media": media}
 
     def dr_get_topic_list(self, user, material, fw_from, limit):
         """Reads Comment objects from user batch or common data using context.
@@ -1187,14 +1317,64 @@ class Neo4jReadService(ConcreteService):
                 limit=limit,
             )
 
-            recs = []
+            topics = []
             for record in result:
-                recs.append(record)
-            #recs = [record for record in result]
-            if recs:
-                return {"recs": recs, "status": Status.OK}
+                # <Record 
+                #    o=<Node id=189486 labels=frozenset({'Person'})
+                #        properties={...}> 
+                #    c=<Node id=189551 labels=frozenset({'Comment'})
+                #        properties={'text': 'testi Gideon', 'timestamp': 1631965129453}>
+                #    commenter='juha'
+                #    count=0
+                #    root=<Node id=189427 labels=frozenset({'Root'}) 
+                #        properties={'xmlname': 'A-testi 2021 koko kanta.gpkg', 
+                #            'material': 'Family Tree', 'state': 'Candidate', 
+                #            'id': '2021-09-16.001', 'user': 'juha', ...}>
+                # >
+    
+                node = record["c"]
+                c = Comment_from_node(node)
+                #c.label = list(node.labels).pop()
+                if not c.title:
+                    # Show shortened text without line breaks as title
+                    text = c.text.replace("\n", " ")
+                    if len(text) > 50:
+                        n = text[:50].rfind(" ")
+                        if n < 2:
+                            n = 50
+                        c.title = text[:n]
+                    else:
+                        c.title = c.text
+                c.obj_label = list(record['o'].labels).pop()
+                c.count = record.get("count", 0)
+                c.credit = record.get("commenter")
+    
+                node = record['root']
+                from bl.batch.root import Root  # temporary
+                c.root = Root.from_node(node)
+                #c.batch = record.get("batch_id")
+    
+                node = record["o"]
+                c.obj_label = list(node.labels).pop()
+                if c.obj_label == "Family":
+                    c.object = FamilyBl.from_node(node)
+                elif c.obj_label == "Person":
+                    c.object = PersonBl.from_node(node)
+                elif c.obj_label == "Place":
+                    c.object = PlaceBl.from_node(node)
+                elif c.obj_label == "Source":
+                    c.object = SourceBl.from_node(node)
+                elif c.obj_label == "Media":
+                    c.object = MediaBl.from_node(node)
+                else:
+                    print(f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'")
+                    next
+                topics.append(c)
+            
+            if topics:
+                return {"topics": topics, "status": Status.OK}
             else:
-                return {"recs": recs, "status": Status.NOT_FOUND}
+                return {"topics": topics, "status": Status.NOT_FOUND}
 
     def dr_get_source_citations(self, sourceid: int):
         """Read Events and Person, Family and Media citating this Source.
