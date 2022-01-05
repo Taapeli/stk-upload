@@ -897,7 +897,7 @@ class Executor:
             </script>
             """
         if self.format == "json":
-            return json.dumps({"status":"OK","rows":json_result,"headers":hdrs})
+            return json.dumps({"status":"OK","rows":json_result,"headers":self.hdrs})
         else:
             return self.result_string
 
