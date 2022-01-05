@@ -12,6 +12,7 @@ from pe.dataservice import ConcreteService
 from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_source import CypherSource
 from bl.base import Status
+from bl.material import Material
 
 from .util import run_cypher_batch
 
@@ -89,7 +90,7 @@ class Neo4jReadServiceTx(ConcreteService):
         
             args = dict {use_user, fw, limit, rule, key, years}
         """
-        material_type = args.get('material_type')
+        material = args.get('material')
         state = args.get('state')
         username = args.get('use_user')
         rule = args.get('rule')
@@ -97,7 +98,6 @@ class Neo4jReadServiceTx(ConcreteService):
         fw_from = args.get('fw','')
         years= args.get('years',[-9999,9999])
         limit = args.get('limit', 100)
-        batch_id = args.get('batch_id')
         restart = (rule == 'start')
 
         # Select cypher clause by arguments
@@ -111,22 +111,22 @@ class Neo4jReadServiceTx(ConcreteService):
         elif args.get('pg') == 'all':
             # Show persons, no search form
             cypher = CypherPerson.get_person_list
-            print(f"tx_get_person_list: Show '{state}' '{material_type}' @{username} fw={fw_from}")
+            print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
         elif rule == 'freetext':
             cypher_prefix = CypherPerson.read_persons_w_events_by_name1
             cypher = CypherPerson.read_persons_w_events_by_name2
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
             cypher = CypherPerson.read_persons_w_events_by_refname
-            print(f"tx_get_person_list: Show '{state}' '{material_type}' data @{username}, {rule} ~ \"{key}*\"")
+            print(f"tx_get_person_list: Show '{state}' '{material}' data @{username}, {rule} ~ \"{key}*\"")
         elif rule == 'years':
             # Search persons matching <years>
             cypher = CypherPerson.read_persons_w_events_by_years
-            print(f"tx_get_person_list: Show '{state}' '{material_type}', years {years}")
+            print(f"tx_get_person_list: Show '{state}' '{material}', years {years}")
         elif rule == 'ref':
             #TODO: Search persons where a reference name = <key> value
-            return {'items': [], 'status': Status.ERROR,
-                    'statustext': f'tx_get_person_list: TODO: Show approved common data {rule}={key}'}
+            return {'items': [], 'status': Status.ERROR, 'statustext': 
+                        f'tx_get_person_list: TODO: Show approved common data {rule}={key}'}
             #return session.run(Cypher_person.get_events_by_refname, name=key)
             # if show_approved:
             #     print(f'tx_get_person_list: TODO: Show approved common data {rule}={key}')
@@ -140,7 +140,8 @@ class Neo4jReadServiceTx(ConcreteService):
  
         persons = []
         #logger.debug(f"tx_get_person_list: cypher: {cypher}")
-        result = run_cypher_batch(self.tx, cypher, username, batch_id,
+        result = run_cypher_batch(self.tx, cypher, username, 
+                            material=material,
                             cypher_prefix=cypher_prefix,
                             use=rule, name=key,
                             years=years,
@@ -179,12 +180,14 @@ class Neo4jReadServiceTx(ConcreteService):
         return {'items': persons, 'status': Status.OK}
 
 
-    def tx_get_person_by_uuid(self, uuid:str, active_user:str, batch_id):
+    def tx_get_person_by_uuid(self, uuid:str, active_user:str, material:Material):
         ''' Read a person from common data or user's own Batch.
 
         :param: uuid        str
-        :param: active_user str if "": read from approved data
-                                else:  read user's candidate data
+        :param: active_user str         if "": read from approved data
+                                        else:  read user's candidate data
+        :param: material    Material    defines the material 
+                                        (state,  material_type, batch_id)
          '''
         res = {'status':Status.OK}
 
@@ -193,7 +196,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
         try:
             record = run_cypher_batch(self.tx, CypherPerson.get_person,
-                                      active_user, batch_id, uuid=uuid).single()
+                                      active_user, material, uuid=uuid).single()
             # <Record 
             #    p=<Node id=25651 labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
@@ -568,13 +571,14 @@ class Neo4jReadServiceTx(ConcreteService):
     def tx_note_search(self, args):
         """Free text search in Notes"""
         print("Neo4jReadServiceTx.tx_note_search: TODO - MUST limit by material_type !!")
-#TODO tx_note_search() - Should limit by material_type
-        #material_type = args.get('material_type')
+#TODO tx_note_search() - Should limit by material_type 
+        material = args.get('material')
+        batch_id = material.batch_id
+        material_type = material.m_type
         #state = args.get('state')
         username = args.get('use_user')
         searchtext = args.get('key')
         limit = args.get('limit', 100)
-        batch_id = args.get('batch_id')
 
         cypher_prefix = """
             CALL db.index.fulltext.queryNodes("notetext",$searchtext) 

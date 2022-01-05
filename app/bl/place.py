@@ -603,7 +603,8 @@ class PlaceReader(DataService):
         """
         ds = self.dataservice
         placenames = ds.dr_get_placename_list(self.use_user, 
-                                              self.user_context.material.batch_id, count=count)
+                                              self.user_context.material,
+                                              count=count)
         # Returns [{'surname': surname, 'count': count},...]
 
         # if self.use_user:

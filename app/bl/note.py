@@ -216,7 +216,7 @@ class NoteReader(DataService):
         args["fw"] = context.first  # From here forward
         args["limit"] = context.count
         args["batch_id"] = context.material.batch_id
-        args["material_type"] = context.material.m_type
+        args["material"] = context.material
         args["state"] = context.material.state
         res = self.dataservice.tx_note_search(args)
         #print(res)

@@ -37,7 +37,13 @@ from bl.source import SourceBl
 from bl.family import FamilyBl
 from bl.event import EventBl
 from bl.person import PersonBl
+from bl.material import Material
 from bl.media import MediaBl
+from bl.event import Event
+from bl.note import Note
+from bl.citation import Citation
+from bl.repository import Repository
+from models.dbtree import DbTree
 
 from ui.place import place_names_local_from_nodes
 
@@ -49,12 +55,6 @@ from .cypher.cy_event import CypherEvent
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_media import CypherMedia
 from .cypher.cy_comment import CypherComment
-
-from bl.event import Event
-from bl.note import Note
-from bl.citation import Citation
-from bl.repository import Repository
-from models.dbtree import DbTree
 
 
 class Neo4jReadService(ConcreteService):
@@ -1297,7 +1297,7 @@ class Neo4jReadService(ConcreteService):
         return
 
     #   @functools.lru_cache
-    def dr_get_surname_list(self, username, batch_id, count):
+    def dr_get_surname_list(self, username:str, material:Material, count:int):
         """ List most common surnames """
         result_list = []
         with self.driver.session(default_access_mode="READ") as session:
@@ -1306,8 +1306,9 @@ class Neo4jReadService(ConcreteService):
 #                   f'{self.material.m_type}", state:"{self.material.state}", username:"{username}", count:{count}''}')
 #             print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
             result = run_cypher_batch(session, cypher,
-                username, batch_id,
-                count=count,
+                                      username,
+                                      material,
+                                      count=count,
             )
             for record in result:
                 surname = record["surname"]
@@ -1341,7 +1342,7 @@ class Neo4jReadService(ConcreteService):
     #             result_list.append({"surname": surname, "count": count})
     #     return result_list
 
-    def dr_get_placename_list(self, username, batch_id, count=50): 
+    def dr_get_placename_list(self, username, material, count=50): 
         """List most referenced Places by name. 
         
         If username is defined, filter by user. 
@@ -1351,7 +1352,9 @@ class Neo4jReadService(ConcreteService):
             # Select Batches by user, if defined
             cypher = CypherPlaceStats.get_place_list
             #logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
-            result = run_cypher_batch(session, cypher, username, batch_id, count=count)
+            result = run_cypher_batch(session, cypher, username, 
+                                      material.batch_id, material.m_type,
+                                      count=count)
             for record in result:
                 place = record["place"]
                 placename = place["pname"]

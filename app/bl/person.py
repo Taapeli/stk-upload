@@ -219,7 +219,7 @@ class PersonReader(DataService):
         """
         ds = self.dataservice
         surnames = ds.dr_get_surname_list(self.use_user,
-                                          self.user_context.material.batch_id,
+                                          self.user_context.material,
                                           count)
         # Returns [{'surname': surname, 'count': count},...]
 
