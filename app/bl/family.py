@@ -34,8 +34,6 @@ from .person import PersonBl
 from .person_name import Name
 
 from pe.dataservice import DataService
-from pe.neo4j.cypher.cy_family import CypherFamily
-from pe.neo4j.cypher.cy_object import CypherObject
 
 from bl.dates import DateRange
 
@@ -127,90 +125,6 @@ class FamilyBl(Family):
         # from multiple events and other objects
         self.note_ref = []
 
-    def save(self, tx, **kwargs):
-        """Saves the family node to db with its relations.
-
-        Connects the family to parent, child, citation and note nodes.
-        """
-        if "batch_id" in kwargs:
-            batch_id = kwargs["batch_id"]
-        else:
-            return {
-                "status": Status.ERROR,
-                "statustext": f"bl.family.FamilyBl.save needs batch_id for {self.id}",
-            }
-            # raise RuntimeError(f"bl.family.FamilyBl.save needs batch_id for {self.id}")
-
-        self.uuid = self.newUuid()
-        #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "F")
-        f_attr = {
-            "uuid": self.uuid,
-            "handle": self.handle,
-            "change": self.change,
-            "id": self.id,
-            "rel_type": self.rel_type,
-        }
-        result = tx.run(
-            CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
-        )
-        ids = []
-        for record in result:
-            self.uniq_id = record[0]
-            ids.append(self.uniq_id)
-            if len(ids) > 1:
-                logger.warning(
-                    f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}"
-                )
-
-        # Make father and mother relations to Person nodes
-
-        if hasattr(self, "father") and self.father:
-            tx.run(
-                CypherFamily.link_parent,
-                role="father",
-                f_handle=self.handle,
-                p_handle=self.father,
-            )
-
-        if hasattr(self, "mother") and self.mother:
-            tx.run(
-                CypherFamily.link_parent,
-                role="mother",
-                f_handle=self.handle,
-                p_handle=self.mother,
-            )
-
-        # Make relations to Event nodes
-
-        for handle_role in self.event_handle_roles:
-            # a tuple (event_handle, role)
-            tx.run(
-                CypherFamily.link_event,
-                f_handle=self.handle,
-                e_handle=handle_role[0],
-                role=handle_role[1],
-            )
-
-        # Make child relations to Person nodes
-
-        for handle in self.child_handles:
-            tx.run(CypherFamily.link_child, f_handle=self.handle, p_handle=handle)
-
-        # Make relation(s) to the Note node
-
-        # print(f"Family_gramps.save: linking Notes {self.handle} -> {self.note_handles}")
-        for handle in self.note_handles:
-            tx.run(CypherFamily.link_note, f_handle=self.handle, n_handle=handle)
-
-        # Make relation(s) to the Citation node
-
-        # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
-        for handle in self.citation_handles:
-            tx.run(
-                CypherObject.link_citation, handle=self.handle, c_handle=handle
-            )
-
-        return
 
     def remove_privacy_limits(self):
         if self.father:
@@ -229,11 +143,6 @@ class FamilyWriter(DataService):
     def __init__(self, service_name: str, u_context=None, tx=None):
         super().__init__(service_name, u_context, tx=tx)
         pass  # print(f"#FamilyWriter: {dir(self)}")
-
-    # def set_calculated_attributes(self, uniq_id):
-    #     """Set Family event dates and sortnames."""
-    #     return self.dataservice.ds_set_family_calculated_attributes(uniq_id)
-    #     # return tx.run(CypherFamily.get_dates_parents,id=uniq_id)
 
 
 class FamilyReader(DataService):
@@ -415,7 +324,9 @@ class FamilyReader(DataService):
             1. Get Family node by user/common
                res is dict {item, status, statustext}
         """
-        ret_results = self.dataservice.dr_get_family_by_uuid(self.use_user, uuid)
+        material = self.user_context.material
+        ret_results = self.dataservice.dr_get_family_by_uuid(self.use_user,
+                                                             material, uuid)
         # ret_results {'item': <bl.family.FamilyBl>, 'status': Status}
         if Status.has_failed(ret_results):
             return ret_results

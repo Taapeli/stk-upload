@@ -45,17 +45,11 @@ import logging
 logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
-import shareds
-from .base import NodeObject, Status
+from bl.base import NodeObject, Status
+from bl.material import Material
 from pe.dataservice import DataService
 
-# from pe.obsolete_db_writer import DbWriter
-from pe.neo4j.cypher.cy_event import CypherEvent
-
 from bl.dates import DateRange
-
-# from models.gen.person_combo import Person_combo, Name
-# from models.gen.family_combo import Family_combo
 
 
 class Event(NodeObject):
@@ -135,7 +129,7 @@ class EventReader(DataService):
     - Returns a Result object.
     """
 
-    def get_event_data(self, uuid, args):
+    def get_event_data(self, uuid, material:Material, args):
         """
         Get event data and participants: Persons and Families.
 
@@ -146,7 +140,7 @@ class EventReader(DataService):
         """
         statustext = ""
         res_dict = {}
-        res = self.dataservice.dr_get_event_by_uuid(self.use_user, uuid)
+        res = self.dataservice.dr_get_event_by_uuid(self.use_user, uuid, material)
         if Status.has_failed(res):
             return {
                 "item": None,
@@ -225,81 +219,6 @@ class EventBl(Event):
         #       self.notes = []         # TODO: Note objects <- note_handles[]
         self.place = None  # Place node, if included
         self.person = None  # Persons names connected; for creating display
-
-    def save(self, tx, **kwargs):
-        """Saves event to database:
-        - Creates a new db node for this Event
-        - Sets self.uniq_id
-
-        - links to existing Place, Note, Citation, Media objects
-        - Does not link it from UserProfile or Person
-        """
-
-        batch_id = kwargs["batch_id"]
-        dataservice = kwargs["dataservice"]
-        
-        self.uuid = self.newUuid()
-        e_attr = {
-            "uuid": self.uuid,
-            "handle": self.handle,
-            "change": self.change,
-            "id": self.id,
-            "type": self.type,
-            "description": self.description,
-        }
-        if self.attr:
-            # Convert 'attr' dict to list for db
-            a = []
-            for key, value in self.attr.items():
-                a = a + [key, value]
-                e_attr.update({"attr": a})
-        if self.dates:
-            e_attr.update(self.dates.for_db())
-
-        result = tx.run(
-            CypherEvent.create_to_batch, batch_id=batch_id, e_attr=e_attr
-        )
-        ids = []
-        for record in result:
-            self.uniq_id = record[0]
-            ids.append(self.uniq_id)
-            if len(ids) > 1:
-                print(
-                    "iError updated multiple Events {} - {}, attr={}".format(
-                        self.id, ids, e_attr
-                    )
-                )
-
-        # Make relation to the Place node
-        for pl_handle in self.place_handles:
-            tx.run(
-                CypherEvent.link_place, handle=self.handle, place_handle=pl_handle
-            )
-
-        # Make relations to the Note nodes
-        if self.note_handles:
-            result = tx.run(
-                CypherEvent.link_notes,
-                handle=self.handle,
-                note_handles=self.note_handles,
-            )
-            _cnt = result.single()["cnt"]
-            # print(f"##Luotiin {cnt} Note-yhteyttä: {self.id}->{self.note_handles}")
-
-        # Make relations to the Citation nodes
-        if self.citation_handles:  #  citation_handles != '':
-            tx.run(
-                CypherEvent.link_citations,
-                handle=self.handle,
-                citation_handles=self.citation_handles,
-            )
-
-        # Make relations to the Media nodes and their Note and Citation references
-        if self.media_refs:
-            dataservice.ds_create_link_medias_w_handles(
-                tx, self.uniq_id, self.media_refs
-            )
-        return
 
 
 class EventWriter:

@@ -39,7 +39,6 @@ import logging
 from .base import NodeObject, Status
 from .person import Person
 from pe.dataservice import DataService
-from pe.neo4j.cypher.cy_source import CypherSourceByHandle
 
 logger = logging.getLogger("stkserver")
 
@@ -113,64 +112,6 @@ class SourceBl(Source):
         self.note_ref = []
 
 
-    def save(self, tx, **kwargs):
-        """ Saves this Source and connect it to Notes and Repositories.
-
-            :param: batch_id      batch id where this place is linked
-
-        """
-        if 'batch_id' in kwargs:
-            batch_id = kwargs['batch_id']
-        else:
-            raise RuntimeError(f"Source_gramps.save needs batch_id for {self.id}")
-            
-        self.uuid = self.newUuid()
-        s_attr = {}
-        try:
-            s_attr = {
-                "uuid": self.uuid,
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "stitle": self.stitle,
-                "sauthor": self.sauthor,
-                "spubinfo": self.spubinfo
-            }
-
-            result = tx.run(CypherSourceByHandle.create_to_batch,
-                            batch_id=batch_id, s_attr=s_attr)
-            ids = []
-            for record in result:
-                self.uniq_id = record[0]
-                ids.append(self.uniq_id)
-                if len(ids) > 1:
-                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, s_attr))
-
-        except Exception as err:
-            print("iError source_save: {0} attr={1}".format(err, s_attr))
-            raise RuntimeError("Could not save Source {}".format(self.id))
-
-        # Make relation to the Note nodes
-        for note_handle in self.note_handles:
-            try:
-                tx.run(CypherSourceByHandle.link_note, 
-                       handle=self.handle, hlink=note_handle)
-            except Exception as err:
-                logger.error(f"Source_gramps.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
-                #print("iError Source.save note: {0}".format(err), file=stderr)
-
-        # Make relation to the Repository nodes
-        for repo in self.repositories:
-            try:
-                tx.run(CypherSourceByHandle.link_repository, 
-                       handle=self.handle, 
-                       hlink=repo.handle, 
-                       medium=repo.medium)
-            except Exception as err:
-                print("iError Source.save Repository: {0}".format(err))
-                
-        return
-
 
 class SourceReader(DataService):
     """
@@ -241,7 +182,9 @@ class SourceReader(DataService):
                             as [label, object] tuples(?)
         """
         use_user = self.user_context.batch_user()
-        res = self.dataservice.dr_get_source_w_repository(use_user, uuid)
+        res = self.dataservice.dr_get_source_w_repository(use_user, 
+                                                          u_context.material, 
+                                                          uuid)
         if Status.has_failed(res):
             return res
         source = res.get("item")

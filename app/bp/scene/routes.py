@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from bl import material
 
 """
 Created on 12.8.2018
@@ -721,7 +722,7 @@ def obsolete_show_event_v1(uuid):
 
     with EventReader("read", u_context) as service:
         # reader = EventReader(readservice, u_context)
-        res = service.get_event_data(uuid)
+        res = service.get_event_data(uuid, u_context.material)
 
     status = res.get("status")
     if status != Status.OK:
@@ -742,7 +743,7 @@ def edit_event(uuid):
     with EventReader("read", u_context) as service:
         # datastore = EventReader(readservice, u_context)
         print(f"#> bp.scene.routes.edit_event: with {service}")
-        res = service.get_event_data(uuid, {})
+        res = service.get_event_data(uuid, u_context.material, {})
 
     status = res.get("status")
     if status != Status.OK:
@@ -786,7 +787,7 @@ def json_get_event():
 
         with EventReader("read", u_context) as service:
             # reader = EventReader(readservice, u_context)
-            res = service.get_event_data(uuid, args)
+            res = service.get_event_data(uuid, u_context.material, args)
 
         status = res.get("status")
         if status != Status.OK:
