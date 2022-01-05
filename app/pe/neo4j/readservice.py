@@ -145,7 +145,7 @@ class Neo4jReadService(ConcreteService):
         persons = []
         return {"items": persons, "status": Status.ERROR, "statustext":"obsolete dr_get_person_list"}
 
-    def dr_get_event_by_uuid(self, user: str, uuid: str):
+    def dr_get_event_by_uuid(self, user:str, uuid:str, material:Material):
         """
         Read an Event using uuid and username.
 
@@ -154,7 +154,8 @@ class Neo4jReadService(ConcreteService):
         event = None
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher(session, CypherEvent.get_an_event, user, uuid=uuid)
+                result = run_cypher(session, CypherEvent.get_an_event,
+                                    user, material, uuid=uuid)
                 for record in result:
                     if record["e"]:
                         # Record: <Record
@@ -286,7 +287,7 @@ class Neo4jReadService(ConcreteService):
 
         return {"notes": notes, "medias": medias, "status": Status.OK}
 
-    def dr_get_family_by_uuid(self, user: str, uuid: str):
+    def dr_get_family_by_uuid(self, user: str, material:Material, uuid: str):
         """
         Read a Family using uuid and user info.
 
@@ -295,7 +296,8 @@ class Neo4jReadService(ConcreteService):
         family = None
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher( session, CypherFamily.get_a_family, user, f_uuid=uuid)
+            result = run_cypher(session, CypherFamily.get_a_family, 
+                                user, material, f_uuid=uuid)
             for record in result:
                 if record["f"]:
                     # <Record
@@ -344,8 +346,7 @@ class Neo4jReadService(ConcreteService):
                 result = run_cypher_batch(session,
                     CypherFamily.get_families_by_father,
                     user,
-                    material.batch_id, 
-                    material.m_type,
+                    material,
                     fw=fw,
                     limit=limit,
                 )
@@ -356,8 +357,7 @@ class Neo4jReadService(ConcreteService):
                 result = run_cypher_batch(session,
                     CypherFamily.get_families_by_mother,
                     user,
-                    material.batch_id, 
-                    material.m_type,
+                    material,
                     fw=fw,
                     limit=limit,
                 )
@@ -744,8 +744,7 @@ class Neo4jReadService(ConcreteService):
                 session,
                 CypherPlace.get_name_hierarchies,
                 user,
-                material.batch_id, 
-                material.m_type,
+                material,
                 fw=fw_from,
                 limit=limit,
                 lang=lang,
@@ -789,13 +788,14 @@ class Neo4jReadService(ConcreteService):
         # Return sorted by first name in the list p.names -> p.pname
         return sorted(ret, key=lambda x: x.pname)
 
-    def dr_get_place_w_names_notes_medias(self, user, uuid, lang="fi"):
+    def dr_get_place_w_names_notes_medias(self, user, uuid, lang, material):
         """Returns the PlaceBl with PlaceNames, Notes and Medias included."""
         pl = None
         node_ids = []  # List of uniq_is for place, name, note and media nodes
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(session,
-                CypherPlace.get_w_names_notes, user, uuid=uuid, lang=lang
+                CypherPlace.get_w_names_notes, user, material, 
+                uuid=uuid, lang=lang
             )
             for record in result:
                 # <Record
@@ -969,11 +969,12 @@ class Neo4jReadService(ConcreteService):
                 e.indi = FamilyBl.from_node(record["indi"])
                 ##ret.append({'event':e, 'indi':e.indi, 'label':'Family'})
                 ret.append(e)
-            else:  # Audit or Batch
-                print(
-                    f"dr_get_place_events No Person or Family:"
-                    f" {e.id} {record['indi'].labels} {record['indi'].get('id')}"
-                )
+            else:  # Root
+                pass
+                # print(
+                #     f"dr_get_place_events: No Person or Family:"
+                #     f" {e.id} {list(record['indi'].labels)[0]} {record['indi'].get('id')}"
+                # )
         return {"items": ret, "status": Status.OK}
 
     def dr_get_source_list_fw(self, args):
@@ -1003,8 +1004,7 @@ class Neo4jReadService(ConcreteService):
                 result = run_cypher_batch(session,
                     CypherSource.get_sources_with_selections,
                     user,
-                    material.batch_id, 
-                    material.m_type,
+                    material,
                     key1=key1,
                     key2=key2,
                 )
@@ -1013,8 +1013,7 @@ class Neo4jReadService(ConcreteService):
                 result = run_cypher_batch(session,
                     CypherSource.get_sources,
                     user,
-                    material.batch_id, 
-                    material.m_type,
+                    material,
                 )
 
             for record in result:
@@ -1070,12 +1069,12 @@ class Neo4jReadService(ConcreteService):
 
         return sources
 
-    def dr_get_source_w_repository(self, user, uuid):
+    def dr_get_source_w_repository(self, user:str, material:Material, uuid:str):
         """Returns the PlaceBl with Notes and PlaceNames included."""
         source = None
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(session,
-                CypherSource.get_single_selection, user, uuid=uuid 
+                CypherSource.get_single_selection, user, material, uuid=uuid 
             )
             for record in result:
                 # <Record
@@ -1123,8 +1122,7 @@ class Neo4jReadService(ConcreteService):
             result = run_cypher_batch(session,
                 CypherMedia.get_media_list,
                 user,
-                material.batch_id, 
-                material.m_type,
+                material,
                 start_name=fw_from,
                 limit=limit,
             )
@@ -1150,8 +1148,7 @@ class Neo4jReadService(ConcreteService):
                 result = run_cypher_batch(session,
                     CypherMedia.get_media_by_uuid, 
                     user,
-                    material.batch_id, 
-                    material.m_type, 
+                    material, 
                     uuid=uuid
                 )
                 # RETURN media, r, ref, ref2
@@ -1181,8 +1178,7 @@ class Neo4jReadService(ConcreteService):
             result = run_cypher_batch(session,
                 CypherComment.get_topics,
                 user,
-                material.batch_id, 
-                material.m_type,
+                material,
                 start_timestamp=fw_from,
                 limit=limit,
             )
@@ -1367,7 +1363,7 @@ class Neo4jReadService(ConcreteService):
             cypher = CypherPlaceStats.get_place_list
             #logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
             result = run_cypher_batch(session, cypher, username, 
-                                      material.batch_id, material.m_type,
+                                      material,
                                       count=count)
             for record in result:
                 place = record["place"]

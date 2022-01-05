@@ -39,9 +39,14 @@ class Material():
                        Ignore and clear session.batch_id
     '''
 
-    def __init__(self, session, request):
+    def __init__(self, session, request=None):
         """ Initialize Material object using session and request information.
         """
+        if request is None:
+            # Dummy material
+            self.breed, self.m_type, self.state, self.batch_id = ("", "", "", "")
+            return
+
         self.request_args = Material.get_request_args(session, request)
         self.breed = session.get("current_context", "")
 
@@ -58,6 +63,9 @@ class Material():
         # print(f"#Material(): {self.get_current()} REQUEST values={self.request_args}")
         return
 
+    def __str__(self):
+        return f"({self.breed}/{self.state}/{self.m_type}/{self.batch_id})"
+    
     def to_display(self):
         """ Return current material and batch choice for display. """
         from bl.batch.root import State

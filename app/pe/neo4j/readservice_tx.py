@@ -180,7 +180,7 @@ class Neo4jReadServiceTx(ConcreteService):
         return {'items': persons, 'status': Status.OK}
 
 
-    def tx_get_person_by_uuid(self, uuid:str, active_user:str, material:Material):
+    def tx_get_person_by_uuid(self, uuid:str, material:Material, active_user:str):
         ''' Read a person from common data or user's own Batch.
 
         :param: uuid        str

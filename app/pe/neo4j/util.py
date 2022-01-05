@@ -45,7 +45,7 @@ MERGE (a:Isotammi_id {id:$id_type})
 RETURN a.counter AS n_Isotammi_id"""
 
 
-def run_cypher(session, cypher, username, **kwargs):
+def run_cypher(session, cypher:str, username:str, material:Material, **kwargs):
     """
     Runs the given Cypher query returning only the appropriate/allowed objects.
 
@@ -66,9 +66,12 @@ def run_cypher(session, cypher, username, **kwargs):
     else:
         # By (state and) material type
         full_cypher = cypher_material_prefix + cypher
-        if not "material_type" in kwargs.keys():
-            kwargs.update({"material_type":"Family Tree"})
-    return session.run(full_cypher, username=username, **kwargs)
+    if not isinstance(material, Material):
+        raise IsotammiException("pe.neo4j.util.run_cypher: invalid material")
+
+    return session.run(full_cypher, username=username, 
+                       material_type=material.m_type,
+                       **kwargs)
 
 
 def run_cypher_batch(session, cypher, username, material, **kwargs):
@@ -94,15 +97,13 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
     else:
         # By username and batch_id
         full_cypher = cypher_prefix + cypher_user_batch_prefix + cypher
-
-    # Todo: remove this test
     if not isinstance(material, Material):
         raise IsotammiException("pe.neo4j.util.run_cypher_batch: invalid material")
 
     if True:
-        print("----------- run_cypher_batch -------------")
+        print("----------- pe.neo4j.util.run_cypher_batch -------------")
         print(full_cypher)
-        pprint(locals())
+        #pprint(locals())
     return session.run(full_cypher,
                        username=username, 
                        batch_id=material.batch_id, 

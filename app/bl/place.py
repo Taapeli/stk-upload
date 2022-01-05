@@ -399,7 +399,9 @@ class PlaceReader(DataService):
         use_user = self.user_context.batch_user()
         privacy = self.user_context.is_common()
         lang = self.user_context.lang
-        res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid, lang)
+        material = self.user_context.material
+        res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid,
+                                                                 lang, material)
         place = res.get("place")
         results = {"place": place, "status": Status.OK}
 

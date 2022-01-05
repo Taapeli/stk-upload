@@ -98,7 +98,9 @@ div.strow2 {
                                     <input type="hidden" name="state" value="Accepted">
                                     <button type="submit"  title="{{ _(m.material_type) }}"
                                         name="material_type" value="{{m.material_type}}"
-        {% if not batch_id %}           autofocus{% endif %}
+        {% if m.material_type == last_material_type %}
+                                        autofocus
+        {% endif -%}
                                         >{{ _(m.material_type) }}</button>
                                 </div>
                                 <div class="strow2">

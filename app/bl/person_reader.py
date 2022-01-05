@@ -268,8 +268,8 @@ class PersonReaderTx(DataService):
 
         res = self.dataservice.tx_get_person_by_uuid(
             uuid, 
-            active_user=self.use_user, 
-            material=self.user_context.material
+            self.user_context.material,
+            self.use_user, 
         )
         if Status.has_failed(res):
             # Not found, not allowed (person.too_new) or error
