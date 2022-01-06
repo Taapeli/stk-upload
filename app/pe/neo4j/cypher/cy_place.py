@@ -194,6 +194,13 @@ return p as place, count(p) as count
 order by count desc
 limit $count"""
 
+    get_place_list_for_place_data = """
+match (root) -[:OBJ_PLACE]-> (p:Place) <-[:IS_INSIDE*]- (p2:Place) 
+return p as place,count(p2) as count 
+order by count desc
+limit $count
+"""
+
 class CypherPlaceMerge:
 
     delete_namelinks = """
