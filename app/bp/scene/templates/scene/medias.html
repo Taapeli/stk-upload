@@ -93,7 +93,7 @@
         </tr>
     {% endfor %}
 
-    {% if next_fw == None or next_at_end %}
+    {% if next_at_end or not next_fw %}
         <tr><td colspan="4" id="lastitem_badge">
                 <i>{{ _('The last item found') }}</i>
             </td>
@@ -103,8 +103,8 @@
 {% else %}
 	    <tr><td colspan="4">
 		  <div class="NotFound">
-    {% if next_bw %}
-		      <p>{{ _('No media found starting from "%(name)s"', name=next_bw) }}.</p>
+    {% if next_fw %}
+              <p>{{ _('The last item found') }}.</i>
 		      <p>&nbsp;&#9656; <a href="/scene/medias?fw=%20" 
 		          title="{{ _('first page') }}">{{ _("Go to the first media") }}</a></p>
     {% else %}

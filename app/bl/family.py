@@ -275,7 +275,9 @@ class FamilyReader(DataService):
             1. Get Family node by user/common
                res is dict {item, status, statustext}
         """
-        ret_results = self.dataservice.dr_get_family_by_uuid(self.use_user, uuid)
+        material = self.user_context.material
+        ret_results = self.dataservice.dr_get_family_by_uuid(self.use_user,
+                                                             material, uuid)
         # ret_results {'item': <bl.family.FamilyBl>, 'status': Status}
         if Status.has_failed(ret_results):
             return ret_results

@@ -114,6 +114,7 @@ def start_logged():
         f" user={current_user.username}/{current_user.email}"
         f" roles= {role_names}"
     )
+    u_context = UserContext()
 
     print(
         f"bp.start.routes.start_logged: is_authenticated={current_user.is_authenticated}, "
@@ -128,7 +129,6 @@ def start_logged():
     is_demo = shareds.app.config.get("DEMO", False)
     if is_demo:
         # Get surname cloud data
-        u_context = UserContext()
         u_context.user = None
 
         with PersonReader("read", u_context) as service:
@@ -144,7 +144,10 @@ def start_logged():
             surnamestats.sort(key=itemgetter("surname"))
 
     material_types = list(Root.get_materials_accepted())
-    my_batches = list(Root.get_my_batches(current_user.username))
+    last_type=None if u_context.material.batch_id else u_context.material.m_type
+    my_batches = list(
+        Root.get_my_batches(current_user.username, u_context.material)
+        )
 
     return render_template(
         "/start/index_logged.html",
@@ -152,6 +155,7 @@ def start_logged():
         surnamestats=surnamestats,
         batches=my_batches,  # sorted(my_batches, key=itemgetter("id"))
         commons=material_types,
+        last_material_type=last_type
     )
 
 

@@ -45,13 +45,11 @@ import logging
 logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
-from .base import NodeObject, Status
+from bl.base import NodeObject, Status
+from bl.material import Material
 from pe.dataservice import DataService
 
 from bl.dates import DateRange
-
-# from models.gen.person_combo import Person_combo, Name
-# from models.gen.family_combo import Family_combo
 
 
 class Event(NodeObject):
@@ -131,7 +129,7 @@ class EventReader(DataService):
     - Returns a Result object.
     """
 
-    def get_event_data(self, uuid, args):
+    def get_event_data(self, uuid, material:Material, args):
         """
         Get event data and participants: Persons and Families.
 
@@ -142,7 +140,7 @@ class EventReader(DataService):
         """
         statustext = ""
         res_dict = {}
-        res = self.dataservice.dr_get_event_by_uuid(self.use_user, uuid)
+        res = self.dataservice.dr_get_event_by_uuid(self.use_user, uuid, material)
         if Status.has_failed(res):
             return {
                 "item": None,

@@ -41,6 +41,8 @@ import shareds
 from models.util import format_ms_timestamp
 from bl.admin.models.cypher_adm import Cypher_adm
 from bl.base import Status, NodeObject
+from bl.material import Material
+
 from .root_updater import RootUpdater
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_root import CypherRoot, CypherAudit
@@ -296,10 +298,10 @@ class Root(NodeObject):
     #     return batches, commons
 
     @staticmethod
-    def get_my_batches(username):
+    def get_my_batches(username:str, material:Material):
         """ Returns user's batches, which are in Candidate state. """
         with shareds.driver.session() as session:
-            result = run_cypher(session, CypherRoot.get_my_batches, username)
+            result = run_cypher(session, CypherRoot.get_my_batches, username, material)
             for rec in result:
                 root = Root.from_node(rec["root"])
                 # print(f"#get_my_batches: {root}")

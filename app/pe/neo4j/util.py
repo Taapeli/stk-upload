@@ -20,18 +20,20 @@
 # blacked 15.11.2021/JMä
 from pprint import pprint
 import base32_lib as base32
+from bl.base import IsotammiException
+from bl.material import Material
 
-cypher_prefix = """
+cypher_user_prefix = """
     MATCH (prof:UserProfile{username:$username}) 
         -[:HAS_ACCESS|:DOES_AUDIT]-> (root:Root)
     WITH root
 """
 
-cypher_common_prefix = """
-    MATCH (root:Root {state:"Accepted"})
+cypher_material_prefix = """
+    MATCH (root:Root {state:"Accepted", material:$material_type})
 """
 
-cypher_batch_prefix = """
+cypher_user_batch_prefix = """
     MATCH (prof:UserProfile{username:$username})
         -[:HAS_ACCESS|:DOES_AUDIT]-> (root:Root{id:$batch_id})
 """
@@ -43,14 +45,14 @@ MERGE (a:Isotammi_id {id:$id_type})
 RETURN a.counter AS n_Isotammi_id"""
 
 
-def run_cypher(session, cypher, username, **kwargs):
+def run_cypher(session, cypher:str, username:str, material:Material, **kwargs):
     """
     Runs the given Cypher query returning only the appropriate/allowed objects.
 
     1) if username is not None or empty, then return objects from all 
-       candidate materials that the user has access to
+       different materials that the user has access to
     2) if username is None or empty, the return objects only from the 
-       Accepted material
+       Accepted material of type kwargs["material_type"]
     
     The cypher query should access all other nodes through the node (root). 
     For example
@@ -59,13 +61,20 @@ def run_cypher(session, cypher, username, **kwargs):
 
     """
     if username:
-        full_cypher = cypher_prefix + cypher
+        # By username
+        full_cypher = cypher_user_prefix + cypher
     else:
-        full_cypher = cypher_common_prefix + cypher
-    return session.run(full_cypher, username=username, **kwargs)
+        # By (state and) material type
+        full_cypher = cypher_material_prefix + cypher
+    if not isinstance(material, Material):
+        raise IsotammiException("pe.neo4j.util.run_cypher: invalid material")
+
+    return session.run(full_cypher, username=username, 
+                       material_type=material.m_type,
+                       **kwargs)
 
 
-def run_cypher_batch(session, cypher, username, batch_id, material_type, **kwargs):
+def run_cypher_batch(session, cypher, username, material, **kwargs):
     """
     Runs the given Cypher query returning only the appropriate/allowed objects
     of given batch.
@@ -83,19 +92,28 @@ def run_cypher_batch(session, cypher, username, batch_id, material_type, **kwarg
     """
     cypher_prefix = kwargs.get("cypher_prefix", "")
     if not username:
-        full_cypher = cypher_prefix + cypher_common_prefix + cypher
+        # By (state and) material_type
+        full_cypher = cypher_prefix + cypher_material_prefix + cypher
     else:
-        full_cypher = cypher_prefix + cypher_batch_prefix + cypher
-    if False:
-        print("----------- run_cypher_batch -------------")
+        # By username and batch_id
+        full_cypher = cypher_prefix + cypher_user_batch_prefix + cypher
+    if not isinstance(material, Material):
+        raise IsotammiException("pe.neo4j.util.run_cypher_batch: invalid material")
+
+    if True:
+        print("----------- pe.neo4j.util.run_cypher_batch -------------")
         print(full_cypher)
-        pprint(locals())
-    return session.run(full_cypher, username=username, batch_id=batch_id, **kwargs)
+        #pprint(locals())
+    return session.run(full_cypher,
+                       username=username, 
+                       batch_id=material.batch_id, 
+                       material_type=material.m_type,
+                       **kwargs)
 
 
 def new_isotammi_id(session, obj_name: str):  # obj_type_letter):
     """ Creates new unique isotammi_id keys when creating objects. 
-    """
+   """
 
     def iid_groupper(id_str):
         """Inserts a hyphen into the id string.

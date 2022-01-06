@@ -182,7 +182,9 @@ class SourceReader(DataService):
                             as [label, object] tuples(?)
         """
         use_user = self.user_context.batch_user()
-        res = self.dataservice.dr_get_source_w_repository(use_user, uuid)
+        res = self.dataservice.dr_get_source_w_repository(use_user, 
+                                                          u_context.material, 
+                                                          uuid)
         if Status.has_failed(res):
             return res
         source = res.get("item")
