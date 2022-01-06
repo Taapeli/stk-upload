@@ -7,6 +7,7 @@ from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 import app
 import shareds
 from utils import get_test_values
+from bl.material import Material
 values = get_test_values(shareds.driver)
 
 # user = "kku"
@@ -56,7 +57,11 @@ def test_tx_get_person_list0(svc):
 
 def test_tx_get_person_list1(svc):
     # all persons
-    args = {"batch_id": values.batch_id, "pg":"all", "use_user":values.user}
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    args = {"pg":"all", 
+            "use_user": values.user, 
+            "material": material}
     rsp = svc.tx_get_person_list(args)
     print(rsp)
     # rsp = {'items': [], 'status': 'Error', 'statustext': 'tx_get_person_list: Invalid rule'}
@@ -68,8 +73,13 @@ def test_tx_get_person_list1(svc):
     assert len(items) == 100
     
 def test_tx_get_person_list2(svc):
-    # limit
-    args = {"batch_id": values.batch_id, "pg":"all", "use_user":values.user, "limit":10}
+    # limit = 10
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    args = {"pg":"all", 
+            "use_user": values.user, 
+            "material": material,
+            "limit":10}
     rsp = svc.tx_get_person_list(args)
     print(rsp)
     # rsp = {'items': [], 'status': 'Error', 'statustext': 'tx_get_person_list: Invalid rule'}

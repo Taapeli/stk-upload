@@ -3,6 +3,7 @@ import pytest
 
 from bl.family import FamilyBl
 from bl.place import PlaceBl
+from bl.material import Material
 
 INVALID_BATCH_ID = "xxx"
 INVALID_USER = "xxx"
@@ -22,21 +23,33 @@ def svc():
     
 # ==================== Families ==========================
 def test_get_families(svc):    
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
     rsp = svc.dr_get_families(
-        {"batch_id":values.batch_id,"name":"","use_user":values.user})
-    assert set(rsp.keys()) == {'recs', 'status'}
+        {"material":material,"name":"","use_user":values.user})
+    assert set(rsp.keys()) == {'families', 'status'}
     assert rsp['status'] == 'OK'
-    recs = rsp['recs']
-    assert len(recs) == 50
-    rec = recs[0]
-    #print(rec)
-    #assert type(rec) == neo4j.data.Record
-    assert set(rec.keys()) == {'f', 'marriage_place',"parent","child","no_of_children"}
+    families = rsp['families']
+    assert len(families) == 50
+    f = families[0]
+    assert type(f) == FamilyBl
+    print(f)
+    print(dir(f))
+    attrs = [
+        'change', 'change_str', 'children', 'dates', 'events', 'father', 'father_sortname', 
+        'handle', 'id', 'isotammi_id', 'marriage_dates', 'marriage_place', 'mother', 'mother_sortname', 
+        'no_of_children', 'note_ref', 'notes', 'num_hidden_children', 'priv', 
+        'rel_type', 'remove_privacy_limits', 'sources', 'split_with_hyphen', 'state', 'timestamp_str', 'uniq_id', 'uuid', 
+        'uuid_short']
+    for attr in attrs:
+        assert attr in dir(f)
     
     
 def test_get_family_by_uuid0(svc):    
     # valid user, invalid uuid
-    rsp = svc.dr_get_family_by_uuid(values.user, uuid=INVALID_UUID)
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_family_by_uuid(values.user, uuid=INVALID_UUID, material=material)
     print(rsp)
     assert rsp is not None
     assert rsp['status'] == 'Not found'
@@ -44,7 +57,9 @@ def test_get_family_by_uuid0(svc):
 
 def test_get_family_by_uuid1(svc):    
     # valid user, valid uuid
-    rsp = svc.dr_get_family_by_uuid(values.user, uuid=values.family_uuid)
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_family_by_uuid(values.user, uuid=values.family_uuid, material=material)
     print(rsp)    
     assert rsp is not None
     assert rsp['status'] == 'OK'
@@ -55,7 +70,7 @@ def test_get_family_by_uuid1(svc):
              'father', 'father_sortname', 'handle', 'id', 
              'isotammi_id', 'marriage_dates', 'mother', 'mother_sortname', 
              'note_ref', 'notes', 'priv', 
-             'rel_type', 'remove_privacy_limits', 'save', 'sources', 
+             'rel_type', 'remove_privacy_limits', 'sources', 
              'state', 'timestamp_str', 'uniq_id', 'uuid', 'uuid_short']
     for attr in attrs:
         assert attr in dir(f)
@@ -108,7 +123,7 @@ def test_get_family_children0(svc):
     assert isinstance(children, list)
     assert len(children) == 0
 
-def test_get_family_children0(svc):    
+def test_get_family_children1(svc):    
     # valid uniq id
     rsp = svc.dr_get_family_children(uniq_id=values.family_uniq_id, with_events=True, with_names=True)
     print(rsp)    
@@ -122,7 +137,9 @@ def test_get_family_children0(svc):
 
 # ==================== Places ==========================
 def test_get_place_list_fw(svc):    
-    rsp = svc.dr_get_place_list_fw(values.user, fw_from="", limit=10, batch_id=values.batch_id)
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_place_list_fw(values.user, fw_from="", limit=10, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, list)
     assert len(rsp) == 10
@@ -131,7 +148,9 @@ def test_get_place_list_fw(svc):
 
 def test_get_place_w_names_notes_medias0a(svc):    
     # invalid user, invalid uuid
-    rsp = svc.dr_get_place_w_names_notes_medias(INVALID_USER, uuid="x", lang="fi")
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_place_w_names_notes_medias(INVALID_USER, uuid="x", lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'place', 'uniq_ids'}
@@ -142,7 +161,9 @@ def test_get_place_w_names_notes_medias0a(svc):
 
 def test_get_place_w_names_notes_medias0b(svc):    
     # valid user, invalid uuid
-    rsp = svc.dr_get_place_w_names_notes_medias(values.user, uuid=INVALID_UUID, lang="fi")
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_place_w_names_notes_medias(values.user, uuid=INVALID_UUID, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'place', 'uniq_ids'}
@@ -153,7 +174,9 @@ def test_get_place_w_names_notes_medias0b(svc):
 
 def test_get_place_w_names_notes_medias0c(svc):    
     # invalid user, valid uuid
-    rsp = svc.dr_get_place_w_names_notes_medias(user=INVALID_USER, uuid=values.place_uuid, lang="fi")
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_place_w_names_notes_medias(user=INVALID_USER, uuid=values.place_uuid, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'place', 'uniq_ids'}
@@ -164,7 +187,9 @@ def test_get_place_w_names_notes_medias0c(svc):
 
 def test_get_place_w_names_notes_medias1(svc):    
     # valid user, valid uuid
-    rsp = svc.dr_get_place_w_names_notes_medias(values.user, uuid=values.place_uuid, lang="fi")
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_place_w_names_notes_medias(values.user, uuid=values.place_uuid, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'place', 'uniq_ids'}
