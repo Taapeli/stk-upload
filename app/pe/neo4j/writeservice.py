@@ -33,6 +33,7 @@ from bl.event import EventBl
 from pe.dataservice import ConcreteService
 from .cypher.cy_event import CypherEvent
 from .cypher.cy_person import CypherPerson
+from .nodereaders import EventBl_from_node
 
 def parsedate(datestr, attrs):
     try:
@@ -67,7 +68,7 @@ class Neo4jWriteService(ConcreteService):
                 statusText = "Database update failed"
                 return {"item":None, "status":Status.ERROR, "statusText":statusText}
             eventnode = record['e']
-            event = EventBl.from_node(eventnode)
+            event = EventBl_from_node(eventnode)
             return {"item":event, "status":Status.OK, "statusText":statusText}
 
     def dr_set_primary_name(self, uuid, old_order):

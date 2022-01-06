@@ -29,11 +29,9 @@ logger = logging.getLogger("stkserver")
 from datetime import date  # , datetime
 
 from bl.base import Status, IsotammiException, NodeObject
-from bl.comment import Comment
 from bl.dates import DateRange
 from bl.person_name import Name
-from bl.place import PlaceBl, PlaceName
-from bl.source import SourceBl
+from bl.place import PlaceBl
 from bl.family import FamilyBl
 from bl.note import Note
 
@@ -54,7 +52,10 @@ from .cypher.cy_repository import CypherRepository
 from .cypher.cy_root import CypherRoot #, CypherAudit
 from .cypher.cy_source import CypherSourceByHandle
 
-
+from pe.neo4j.nodereaders import Comment_from_node
+from pe.neo4j.nodereaders import PlaceBl_from_node
+from pe.neo4j.nodereaders import PlaceName_from_node
+from pe.neo4j.nodereaders import SourceBl_from_node
 
 
 
@@ -689,9 +690,9 @@ class Neo4jUpdateService(ConcreteService):
                 CypherPlaceMerge.merge_places, id1=id1, id2=id2
             ).single()
             node = record["node"]
-            place = PlaceBl.from_node(node)
+            place = PlaceBl_from_node(node)
             name_nodes = record["names"]
-            place.names = [PlaceName.from_node(n) for n in name_nodes]
+            place.names = [PlaceName_from_node(n) for n in name_nodes]
         except ClientError as e:
             # traceback.print_exc()
             return {
@@ -793,7 +794,7 @@ class Neo4jUpdateService(ConcreteService):
         rec = self.tx.run(cypher_mergesources,id1=id1,id2=id2).single()
         if rec is None: return None
         node = rec['node']
-        source = SourceBl.from_node(node)
+        source = SourceBl_from_node(node)
         return source
             # ----- Citation -----
 
@@ -1434,7 +1435,7 @@ class Neo4jUpdateService(ConcreteService):
         node = record.get("comment")
         if not node:
             return {"status": Status.ERROR, "statustext": _("Could not save a comment")}
-        comment = Comment.from_node(node)
+        comment = Comment_from_node(node)
         comment.obj_type = record.get("obj_type")
         comment.user = attr.get("username")
         return {"status": Status.OK, "comment": comment}

@@ -56,7 +56,20 @@ from .cypher.cy_comment import CypherComment
 
 from pe.dataservice import ConcreteService
 from pe.neo4j.util import run_cypher, run_cypher_batch
-from pe.neo4j.nodereaders import MediaBl_from_node, Comment_from_node
+
+from pe.neo4j.nodereaders import Citation_from_node
+from pe.neo4j.nodereaders import Comment_from_node
+from pe.neo4j.nodereaders import DateRange_from_node
+from pe.neo4j.nodereaders import EventBl_from_node
+from pe.neo4j.nodereaders import FamilyBl_from_node
+from pe.neo4j.nodereaders import MediaBl_from_node
+from pe.neo4j.nodereaders import Note_from_node
+from pe.neo4j.nodereaders import Name_from_node
+from pe.neo4j.nodereaders import PersonBl_from_node
+from pe.neo4j.nodereaders import PlaceBl_from_node
+from pe.neo4j.nodereaders import PlaceName_from_node
+from pe.neo4j.nodereaders import Repository_from_node
+from pe.neo4j.nodereaders import SourceBl_from_node
 
 from models.dbtree import DbTree
 
@@ -80,21 +93,21 @@ class Neo4jReadService(ConcreteService):
         Set person.birth and person.death events from db nodes
         """
         if birth_node:
-            person.event_birth = EventBl.from_node(birth_node)
+            person.event_birth = EventBl_from_node(birth_node)
         if death_node:
-            person.event_death = EventBl.from_node(death_node)
+            person.event_death = EventBl_from_node(death_node)
 
     def _obj_from_node(self, node, role=None):
         """Create Person or Family object from db node."""
         if "Person" in node.labels:
-            obj = PersonBl.from_node(node)
+            obj = PersonBl_from_node(node)
         elif "Family" in node.labels:
-            obj = FamilyBl.from_node(node)
+            obj = FamilyBl_from_node(node)
             fn = obj.father_sortname if obj.father_sortname else "?"
             mn = obj.mother_sortname if obj.mother_sortname else "?"
             obj.clearname = fn + " & " + mn
         elif "Event" in node.labels:
-            obj = EventBl.from_node(node)
+            obj = EventBl_from_node(node)
             obj.clearname = _(obj.type) + " " + obj.description + str(obj.dates)
         else:
             # raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
@@ -126,7 +139,7 @@ class Neo4jReadService(ConcreteService):
                         #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
                         # >
                         node = record["e"]
-                        event = EventBl.from_node(node)
+                        event = EventBl_from_node(node)
                 if event:
                     return {"item": event, "status": Status.OK}
 
@@ -171,7 +184,7 @@ class Neo4jReadService(ConcreteService):
                         #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
                         # >
                         node = record["e"]
-                        event = EventBl.from_node(node)
+                        event = EventBl_from_node(node)
                 if event:
                     return {"item": event, "status": Status.OK}
 
@@ -222,7 +235,7 @@ class Neo4jReadService(ConcreteService):
                         )
                     # Person may have Name
                     if name_node:
-                        name = Name.from_node(name_node)
+                        name = Name_from_node(name_node)
                         referee.names.append(name)
                     parts.append(referee)
 
@@ -245,12 +258,12 @@ class Neo4jReadService(ConcreteService):
                 result = session.run(CypherEvent.get_event_place, uid=uid, lang="fi")
                 for record in result:
                     # Returns place, name, COLLECT(DISTINCT [properties(r), upper,uname]) as upper_n
-                    pl = PlaceBl.from_node(record["place"])
-                    pl_name = PlaceName.from_node(record["name"])
+                    pl = PlaceBl_from_node(record["place"])
+                    pl_name = PlaceName_from_node(record["name"])
                     pl.names.append(pl_name)
                     for _rel_prop, upper, uname in record["upper_n"]:
-                        pl_upper = PlaceBl.from_node(upper)
-                        pl_upper.names.append(PlaceName.from_node(uname))
+                        pl_upper = PlaceBl_from_node(upper)
+                        pl_upper.names.append(PlaceName_from_node(uname))
                         pl.uppers.append(pl_upper)
                     places.append(pl)
 
@@ -277,7 +290,7 @@ class Neo4jReadService(ConcreteService):
                     #        COLLECT(DISTINCT [properties(rel_m), media]) AS medias
                     for _rel_prop, node in record["notes"]:
                         if node:
-                            notes.append(Note.from_node(node))
+                            notes.append(Note_from_node(node))
                     for _rel_prop, node in record["medias"]:
                         # _rel_prop may be {"order":0} (not used)
                         if node:
@@ -315,7 +328,7 @@ class Neo4jReadService(ConcreteService):
                     #            'id': '2020-05-09.001', 'user': 'juha', 'timestamp': 1589022866282, 'status': 'completed'}>
                     # >
                     node = record["f"]
-                    family = FamilyBl.from_node(node)
+                    family = FamilyBl_from_node(node)
                 return {"item": family, "status": Status.OK}
         return {
             "item": None,
@@ -374,7 +387,7 @@ class Neo4jReadService(ConcreteService):
                     #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d',
                     #    'id': 'F0000', 'change': 1507492602}>
                     f_node = record["f"]
-                    family = FamilyBl.from_node(f_node)
+                    family = FamilyBl_from_node(f_node)
                     family.marriage_place = record["marriage_place"]
     
                     uniq_id = -1
@@ -387,13 +400,13 @@ class Neo4jReadService(ConcreteService):
                             #    'date2': 1997946, 'date1': 1929380}>
                             if uniq_id != parent_node.id:
                                 # Skip person with double default name
-                                pp = PersonBl.from_node(parent_node)
+                                pp = PersonBl_from_node(parent_node)
                                 if role == "father":
                                     family.father = pp
                                 elif role == "mother":
                                     family.mother = pp
     
-                            pname = Name.from_node(name_node)
+                            pname = Name_from_node(name_node)
                             pp.names = [pname]
     
                     for ch in record["child"]:
@@ -403,7 +416,7 @@ class Neo4jReadService(ConcreteService):
                         #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001',
                         #    'date2': 1609920, 'date1': 1609920}>
                         #                         child = Person_as_member()
-                        child = PersonBl.from_node(ch)
+                        child = PersonBl_from_node(ch)
                         family.children.append(child)
                     family.children.sort(key=lambda x: x.birth_low)
     
@@ -452,11 +465,11 @@ class Neo4jReadService(ConcreteService):
                     if person_node:
                         if uniq_id != person_node.id:
                             # Skip person with double default name
-                            p = PersonBl.from_node(person_node)
+                            p = PersonBl_from_node(person_node)
                             p.role = role
                             name_node = record["name"]
                             if name_node:
-                                p.names.append(Name.from_node(name_node))
+                                p.names.append(Name_from_node(name_node))
 
                             birth_node = record["birth"]
                             death_node = record["death"]
@@ -494,10 +507,10 @@ class Neo4jReadService(ConcreteService):
                     # >
                     person_node = record["person"]
                     if person_node:
-                        p = PersonBl.from_node(person_node)
+                        p = PersonBl_from_node(person_node)
                         name_node = record["name"]
                         if name_node:
-                            p.names.append(Name.from_node(name_node))
+                            p.names.append(Name_from_node(name_node))
                         birth_node = record["birth"]
                         death_node = record["death"]
                         self._set_birth_death(p, birth_node, death_node)
@@ -531,7 +544,7 @@ class Neo4jReadService(ConcreteService):
                         #        properties={'datetype': 0, 'change': 1585409702, 'description': '',
                         #            'id': 'E0170', 'date2': 1860684, 'type': 'Marriage', 'date1': 1860684,
                         #            'uuid': '38c0d5bdc0f245c88bfb1083228db219'}>
-                        e = EventBl.from_node(event_node)
+                        e = EventBl_from_node(event_node)
 
                         place_node = record["place"]
                         if place_node:
@@ -541,7 +554,7 @@ class Neo4jReadService(ConcreteService):
                             #    names=[ <Node id=531913 labels={'Place_name'}
                             #                properties={'name': 'Loviisan srk', 'lang': ''}>
                             #        ]
-                            e.place = PlaceBl.from_node(place_node)
+                            e.place = PlaceBl_from_node(place_node)
                             e.place.names = place_names_local_from_nodes(
                                 record["names"]
                             )
@@ -568,9 +581,9 @@ class Neo4jReadService(ConcreteService):
                                 #     <Node id=5496 labels=frozenset({'Place_name'}) properties={'name': 'Ryssland', 'lang': 'sv'}>
                                 #     <Node id=5495 labels=frozenset({'Place_name'}) properties={'name': 'Venäjä', 'lang': ''}>
                                 # ]
-                                pl_in = PlaceBl.from_node(inside_node)
+                                pl_in = PlaceBl_from_node(inside_node)
                                 if len(inside_rel._properties):
-                                    pl_in.dates = DateRange.from_node(
+                                    pl_in.dates = DateRange_from_node(
                                         inside_rel._properties
                                     )
 
@@ -617,18 +630,13 @@ class Neo4jReadService(ConcreteService):
                         citation_node = record["citation"]
                         src_id = record["src_id"]
 
-                        source = SourceBl.from_node(source_node)
-                        cita = Citation.from_node(citation_node)
-                        repo = Repository.from_node(repository_node)
+                        source = SourceBl_from_node(source_node)
+                        cita = Citation_from_node(citation_node)
+                        repo = Repository_from_node(repository_node)
                         source.repositories.append(repo)
                         source.citations.append(cita)
                         source.referrer = src_id
                         sources.append(source)
-
-            #                     for node in record['note']:
-            #                         note = Note.from_node(node)
-            #                         family.notes.append(note)
-
             except Exception as e:
                 return {
                     "status": Status.ERROR,
@@ -663,7 +671,7 @@ class Neo4jReadService(ConcreteService):
                     note_node = record["note"]
                     if note_node:
                         src_id = record["src_id"]
-                        note = Note.from_node(note_node)
+                        note = Note_from_node(note_node)
                         note.referrer = src_id
                         notes.append(note)
 
@@ -738,15 +746,15 @@ class Neo4jReadService(ConcreteService):
                     fid = family_node.id
                     if not fid in families:
                         # New family
-                        family = FamilyBl.from_node(family_node)
+                        family = FamilyBl_from_node(family_node)
                         family.parents = []
                         families[fid] = family
                     family = families[fid]
                     person_node = record["person"]
-                    person = PersonBl.from_node(person_node)
+                    person = PersonBl_from_node(person_node)
                     birth_node = record["birth"]
                     if birth_node:
-                        birth = EventBl.from_node(birth_node)
+                        birth = EventBl_from_node(birth_node)
                         person.event_birth = birth
                     if record["type"] == "PARENT":
                         person.role = record["role"]
@@ -816,15 +824,15 @@ class Neo4jReadService(ConcreteService):
                 #    ]
                 #    lower=[[None, None, None, None, None]]>
                 node = record["place"]
-                p = PlaceBl.from_node(node)
+                p = PlaceBl_from_node(node)
                 p.ref_cnt = record["uses"]
 
                 # Set place names and default display name pname
                 node = record["name"]
-                p.names.append(PlaceName.from_node(node))
+                p.names.append(PlaceName_from_node(node))
                 oth_names = []
                 for node in record["names"]:
-                    oth_names.append(PlaceName.from_node(node))
+                    oth_names.append(PlaceName_from_node(node))
                 # Arrage names by local language first
                 lst = PlaceName.arrange_names(oth_names)
 
@@ -861,19 +869,19 @@ class Neo4jReadService(ConcreteService):
                 # >
 
                 node = record["place"]
-                pl = PlaceBl.from_node(node)
+                pl = PlaceBl_from_node(node)
                 node_ids.append(pl.uniq_id)
                 # Default lang name
                 name_node = record["name"]
                 if name_node:
-                    pl.names.append(PlaceName.from_node(name_node))
+                    pl.names.append(PlaceName_from_node(name_node))
                 # Other name versions
                 for name_node in record["names"]:
-                    pl.names.append(PlaceName.from_node(name_node))
+                    pl.names.append(PlaceName_from_node(name_node))
                     node_ids.append(pl.names[-1].uniq_id)
 
                 for notes_node in record["notes"]:
-                    n = Note.from_node(notes_node)
+                    n = Note_from_node(notes_node)
                     pl.notes.append(n)
                     node_ids.append(pl.notes[-1].uniq_id)
 
@@ -954,10 +962,10 @@ class Neo4jReadService(ConcreteService):
                 p.uuid = n.data["uuid"]
                 node = record["name"]
                 if node:
-                    p.names.append(PlaceName.from_node(node))
+                    p.names.append(PlaceName_from_node(node))
                 oth_names = []
                 for node in record["names"]:
-                    oth_names.append(PlaceName.from_node(node))
+                    oth_names.append(PlaceName_from_node(node))
                 # Arrage names by local language first
                 lst = PlaceName.arrange_names(oth_names)
                 p.names += lst
@@ -995,7 +1003,7 @@ class Neo4jReadService(ConcreteService):
             #                'id': 'E0080', 'date2': 1885458, 'type': 'Birth', 'date1': 1885458,
             #                'uuid': '160a0c75659145a4ac09809823fca5f9'}>
             # >
-            e = EventBl.from_node(record["event"])
+            e = EventBl_from_node(record["event"])
             # Fields uid (person uniq_id) and names are on standard in EventBl
             e.role = record["role"]
             indi_label = list(record["indi"].labels)[0]
@@ -1003,19 +1011,19 @@ class Neo4jReadService(ConcreteService):
             #     continue
             if "Person" == indi_label:
                 e.indi_label = "Person"
-                e.indi = PersonBl.from_node(record["indi"])
+                e.indi = PersonBl_from_node(record["indi"])
                 # Reading confidental person data which is available to this user?
                 if not privacy: 
                     e.indi.too_new = False
                 elif e.indi.too_new:  # Check privacy
                     continue
                 for node in record["names"]:
-                    e.indi.names.append(Name.from_node(node))
+                    e.indi.names.append(Name_from_node(node))
                 ##ret.append({'event':e, 'indi':e.indi, 'label':'Person'})
                 ret.append(e)
             elif "Family" == indi_label:
                 e.indi_label = "Family"
-                e.indi = FamilyBl.from_node(record["indi"])
+                e.indi = FamilyBl_from_node(record["indi"])
                 ##ret.append({'event':e, 'indi':e.indi, 'label':'Family'})
                 ret.append(e)
             else:  # Root
@@ -1101,15 +1109,15 @@ class Neo4jReadService(ConcreteService):
                 # 5  ref_cnt=1
                 # >
                 node = record["source"]
-                s = SourceBl.from_node(node)
+                s = SourceBl_from_node(node)
                 notes = record["notes"]
                 for node in notes:
-                    n = Note.from_node(node)
+                    n = Note_from_node(node)
                     s.notes.append(n)
                 repositories = record["repositories"]
                 for medium, node in repositories:
                     if node:
-                        rep = Repository.from_node(node)
+                        rep = Repository_from_node(node)
                         rep.medium = medium
                         s.repositories.append(rep)
                 s.cit_cnt = record["cit_cnt"]
@@ -1140,15 +1148,15 @@ class Neo4jReadService(ConcreteService):
                 #                'change': 1585409708}>]]
                 # >
                 source_node = record["source"]
-                source = SourceBl.from_node(source_node)
+                source = SourceBl_from_node(source_node)
                 notes = record["notes"]
                 for note_node in notes:
-                    n = Note.from_node(note_node)
+                    n = Note_from_node(note_node)
                     source.notes.append(n)
                 repositories = record["reps"]
                 for medium, repo_node in repositories:
                     if repo_node != None:
-                        rep = Repository.from_node(repo_node)
+                        rep = Repository_from_node(repo_node)
                         rep.medium = medium
                         source.repositories.append(rep)
 
@@ -1253,11 +1261,11 @@ class Neo4jReadService(ConcreteService):
                     mref = MediaReferrer()
                     (mref.label,) = ref_node.labels  # Get the 1st label
                     if mref.label == "Person":
-                        mref.obj = PersonBl.from_node(ref_node)
+                        mref.obj = PersonBl_from_node(ref_node)
                     elif mref.label == "Place":
-                        mref.obj = PlaceBl.from_node(ref_node)
+                        mref.obj = PlaceBl_from_node(ref_node)
                     elif mref.label == "Event":
-                        mref.obj = EventBl.from_node(ref_node)
+                        mref.obj = EventBl_from_node(ref_node)
                     mref.obj.label = mref.label
                     media.ref.append(mref)
         
@@ -1276,10 +1284,10 @@ class Neo4jReadService(ConcreteService):
                             obj2 = event_refs[ref2_node.id]
                         else:
                             if "Person" in ref2_node.labels:
-                                obj2 = PersonBl.from_node(ref2_node)
+                                obj2 = PersonBl_from_node(ref2_node)
                                 obj2.label = "Person"
                             elif "Family" in ref2_node.labels:
-                                obj2 = FamilyBl.from_node(ref2_node)
+                                obj2 = FamilyBl_from_node(ref2_node)
                                 obj2.label = "Family"
                             else:
                                 raise TypeError(
@@ -1355,15 +1363,15 @@ class Neo4jReadService(ConcreteService):
                 node = record["o"]
                 c.obj_label = list(node.labels).pop()
                 if c.obj_label == "Family":
-                    c.object = FamilyBl.from_node(node)
+                    c.object = FamilyBl_from_node(node)
                 elif c.obj_label == "Person":
-                    c.object = PersonBl.from_node(node)
+                    c.object = PersonBl_from_node(node)
                 elif c.obj_label == "Place":
-                    c.object = PlaceBl.from_node(node)
+                    c.object = PlaceBl_from_node(node)
                 elif c.obj_label == "Source":
-                    c.object = SourceBl.from_node(node)
+                    c.object = SourceBl_from_node(node)
                 elif c.obj_label == "Media":
-                    c.object = MediaBl.from_node(node)
+                    c.object = MediaBl_from_node(node)
                 else:
                     print(f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'")
                     next
@@ -1430,12 +1438,12 @@ class Neo4jReadService(ConcreteService):
                 note_nodes = record["notes"]
 
                 uniq_id = citation_node.id
-                citation = Citation.from_node(citation_node)
+                citation = Citation_from_node(citation_node)
                 citations[uniq_id] = citation
 
                 notelist = []
                 for node in note_nodes:
-                    notelist.append(Note.from_node(node))
+                    notelist.append(Note_from_node(node))
                 if notelist:
                     notes[uniq_id] = notelist
 
@@ -1478,10 +1486,10 @@ class Neo4jReadService(ConcreteService):
                 #    ]
                 # >
                 name_node = record["name"]
-                person.names.append(Name.from_node(name_node))
+                person.names.append(Name_from_node(name_node))
                 events = record["events"]
                 for node in events:
-                    e = Event.from_node(node)
+                    e = EventBl_from_node(node)
                     if e.type == "Birth":
                         person.event_birth = e
                     else:

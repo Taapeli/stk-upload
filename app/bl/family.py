@@ -69,33 +69,6 @@ class Family(NodeObject):
             rel = _("undefined relation")
         return "{} {}".format(self.id, rel, self.dates)
 
-    @classmethod
-    def from_node(cls, node):
-        """
-        Transforms a db node to an object of type Family.
-
-        You can create a Family or FamilyBl instance. (cls is the class
-        where we are, either Family or FamilyBl)
-
-        <Node id=99991 labels={'Family'}
-            properties={'rel_type': 'Married', 'handle': '_da692e4ca604cf37ac7973d7778',
-            'id': 'F0031', 'change': 1507492602}>
-        """
-        n = cls()
-        n.uniq_id = node.id
-        n.id = node.get("id", "")
-        n.uuid = node["uuid"]
-        n.handle = node["handle"]
-        n.change = node["change"]
-        n.rel_type = node.get("rel_type", "")
-        n.father_sortname = node.get("father_sortname", "")
-        n.mother_sortname = node.get("mother_sortname", "")
-        if "datetype" in node:
-            n.dates = DateRange(node["datetype"], node["date1"], node["date2"])
-        else:
-            n.dates = DateRange()
-        return n
-
 
 class FamilyBl(Family):
     """Family business logic object carries the family and connected data.

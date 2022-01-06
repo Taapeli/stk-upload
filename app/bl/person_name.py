@@ -73,27 +73,6 @@ class Name(NodeObject):
         # Standard sort order key "Klick#Brita Helena#Jönsdotter"
         return f"{self.surname}#{self.firstname}#{self.suffix}"
 
-    @classmethod
-    def from_node(cls, node):
-        """
-        Transforms a db node to an object of type Name
-
-        <Node id=80308 labels={'Name'}
-            properties={'title': 'Sir', 'firstname': 'Brita Helena', 'suffix': '', 'order': 0,
-                'surname': 'Klick', '': 'Birth Name'}>
-        """
-        n = cls()
-        n.uniq_id = node.id
-        # n.id = node.id    # Name has no id "N0000"
-        n.type = node["type"]
-        n.firstname = node.get("firstname", "")
-        n.prefix = node.get("prefix", "")
-        n.suffix = node.get("suffix", "")
-        n.title = node.get("title", "")
-        n.surname = node.get("surname", "")
-        n.order = node["order"]
-        return n
-
 
     @staticmethod
     def get_people_with_same_name():

@@ -33,6 +33,7 @@ from operator import itemgetter
 import functools
 import time
 from pprint import pprint
+from pe.neo4j.nodereaders import EventBl_from_node
 
 # https://neo4j.com/developer/kb/fulltext-search-in-neo4j/
 # https://neo4j.com/docs/cypher-manual/3.5/schema/index/#schema-index-fulltext-search
@@ -127,6 +128,7 @@ def normalize_name(name_normalizer,name,nametype):
     #print("name_normalizer",name1,"->",name)
     return name
 
+
 def generate_searchkey1(name_normalizer, n,count,rec, kwargs):   
     """
     generates searchkey1 for all persons
@@ -156,7 +158,7 @@ def generate_searchkey1(name_normalizer, n,count,rec, kwargs):
                 keys.append("X"+patronyme)
     for e,pl in rec.get('events'):
         if e is None: continue
-        event = Event.from_node(e)
+        event = EventBl_from_node(e)
         etype = event.type
         if etype not in {'Birth','Death'}: continue
         edate = event.dates.estimate()

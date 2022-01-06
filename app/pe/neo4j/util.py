@@ -100,7 +100,7 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
     if not isinstance(material, Material):
         raise IsotammiException("pe.neo4j.util.run_cypher_batch: invalid material")
 
-    if True:
+    if False:
         print("----------- pe.neo4j.util.run_cypher_batch -------------")
         print(full_cypher)
         #pprint(locals())

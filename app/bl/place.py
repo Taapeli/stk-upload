@@ -85,26 +85,6 @@ class Place(NodeObject):
     def __str__(self):
         return f"{self.uniq_id} {self.pname} ({self.type})"
 
-    @classmethod
-    def from_node(cls, node):
-        """Creates a node object of type Place from a Neo4j node.
-
-        Example node:
-        <Node id=78279 labels={'Place'}
-            properties={'handle': '_da68e12a415d936f1f6722d57a', 'id': 'P0002',
-                'change': 1500899931, 'pname': 'Kangasalan srk', 'type': 'Parish'}>
-        """
-        p = cls()
-        p.uniq_id = node.id
-        p.uuid = node["uuid"]
-        p.handle = node.get("handle", None)
-        p.change = node["change"]
-        p.id = node.get("id", "")
-        p.type = node.get("type", "")
-        p.pname = node.get("pname", "")
-        p.coord = node.get("coord", None)
-        return p
-
 
 class PlaceBl(Place):
     """Place / Paikka:
@@ -259,19 +239,6 @@ class PlaceName(NodeObject):
         else:
             return f"'{self.name}'{d}"
 
-    @classmethod
-    def from_node(cls, node):
-        """Transforms a db node to an object of type Place_name.
-
-        <Node id=78278 labels={'Place_name'}
-            properties={'lang': '', 'name': 'Kangasalan srk'}>
-        """
-        pn = cls()  # Place_name()
-        pn.uniq_id = node.id
-        pn.name = node.get("name", "?")
-        pn.lang = node.get("lang", "")
-        pn.dates = node.get("dates")
-        return pn
 
     @staticmethod
     def arrange_names(namelist: list, lang: str = None):

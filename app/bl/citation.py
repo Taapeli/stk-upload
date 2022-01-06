@@ -54,20 +54,3 @@ class Citation(NodeObject):
     def __str__(self):
         return f"{self.mark} {self.id} '{self.page}'"
 
-    @classmethod
-    def from_node(cls, node):
-        """
-        Transforms a db node to an object of type Citation.
-        """
-        n = cls()
-        n.uniq_id = node.id
-        if "handle" in node:
-            n.handle = node["handle"]
-        n.change = node["change"]
-        n.id = node["id"]
-        n.uuid = node["uuid"]
-        n.confidence = node["confidence"]
-        n.page = node["page"]
-        n.dates = DateRange.from_node(node)
-
-        return n

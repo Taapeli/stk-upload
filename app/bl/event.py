@@ -92,35 +92,6 @@ class Event(NodeObject):
     def __str__(self):
         return f"{self.uniq_id} {self.type} {self.description}"
 
-    @classmethod
-    def from_node(cls, node, obj=None):
-        """
-        Transforms a db node to an object of type Event or EventBl.
-
-        <Node id=88532 labels={'Event'}
-            properties={'type': 'Birth', 'change': 1500907890, attr_value': '',
-                'id': 'E0161', 'attr_type': '', 'description': ''
-                'datetype': 0, 'date1': 1754183, 'date2': 1754183}>
-        """
-        if not node:
-            return None
-        if not obj:
-            obj = cls()
-        obj.uniq_id = node.id
-        obj.id = node["id"]
-        obj.uuid = node["uuid"]
-        obj.type = node["type"]
-        obj.handle = node.get("handle", None)
-        obj.change = node.get("change", None)
-        if "datetype" in node:
-            obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
-        else:
-            obj.dates = DateRange()
-        obj.dates.calendar = node["calendar"]
-        obj.description = node["description"] or ""
-        obj.attr = node.get("attr", dict())
-        return obj
-
 
 class EventReader(DataService):
     """

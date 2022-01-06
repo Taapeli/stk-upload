@@ -55,8 +55,6 @@ from bl.base import NodeObject, Status
 from bl.person_name import Name
 from bl.note import Note
 from pe.dataservice import DataService
-# Privacy rule: how many years after death
-PRIVACY_LIMIT = 0
 
 # Sex code values
 SEX_UNKNOWN = 0
@@ -64,6 +62,7 @@ SEX_MALE = 1
 SEX_FEMALE = 2
 SEX_NOT_APPLICABLE = 9
 
+from bl.base import PRIVACY_LIMIT
 
 class Person(NodeObject):
     """Person object
@@ -148,38 +147,6 @@ class Person(NodeObject):
         if ss == "F" or ss == "N" or ss == str(SEX_FEMALE):
             return SEX_FEMALE
         return 0
-
-    @classmethod
-    def from_node(cls, node, obj=None):
-        """
-        Transforms a db node to an object of type Person.
-
-        Youc can create a Person or Person_node instance. (cls is the class
-        where we are, either Person or PersonBl)
-
-        <Node id=80307 labels={'Person'}
-            properties={'id': 'I0119', 'confidence': '2.5', 'sex': '2', 'change': 1507492602,
-            'handle': '_da692a09bac110d27fa326f0a7', 'priv': 1}>
-        """
-        if not obj:
-            obj = cls()
-        obj.uuid = node.get("uuid")
-        obj.uniq_id = node.id
-        obj.id = node["id"]
-        obj.sex = node.get("sex", "UNKNOWN")
-        obj.change = node["change"]
-        obj.confidence = node.get("confidence", "")
-        obj.sortname = node["sortname"]
-        obj.priv = node["priv"]
-        obj.birth_low = node["birth_low"]
-        obj.birth_high = node["birth_high"]
-        obj.death_low = node["death_low"]
-        obj.death_high = node["death_high"]
-        last_year_allowed = datetime.now().year - PRIVACY_LIMIT
-        #         if obj.death_high < 9999:
-        #             print('ok? uniq_id=',obj.uniq_id,obj.death_high)
-        obj.too_new = obj.death_high > last_year_allowed
-        return obj
 
 
 class PersonReader(DataService):
@@ -305,7 +272,8 @@ class PersonWriter(DataService):
 
         # Get each Name object (with person_uid)
         for pid, name_node in self.dataservice.ds_get_personnames(uniq_id):
-            name = Name.from_node(name_node)
+            from pe.neo4j.nodereaders import Name_from_node # import here to avoid import cycle
+            name = Name_from_node(name_node)
             name.person_uid = pid
             names.append(name)
 

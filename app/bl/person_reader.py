@@ -25,20 +25,13 @@ Created on 30.1.2021
 #import shareds
 from pe.dataservice import DataService
 from bl.base import Status
-from bl.dates import DateRange
-from bl.person import PersonBl
-from bl.person_name import Name
-from bl.event import EventBl
-from bl.family import FamilyBl
-from bl.place import PlaceBl, PlaceName
-from bl.media import Media
+
 from bl.source import SourceBl
-from bl.note import Note
 from bl.citation import Citation
 from bl.repository import Repository
 
 # Pick a PlaceName by user language
-from ui.place import place_names_local_from_nodes
+from ui.place import place_names_local_from_placenames
 
 # TODO Should be somewhere else!
 from ui.jinja_filters import translate
@@ -134,35 +127,7 @@ class PersonReaderTx(DataService):
             }
         if status != Status.OK:
             return res
-        persons = []
-
-        # got {'items': [PersonRecord], 'status': Status.OK}
-        #    - PersonRecord = object with fields person_node, names, events_w_role, owners
-        #    -    events_w_role = list of tuples (event_node, place_name, role)
-        for p_record in res.get("items"):
-            # print(p_record)
-            node = p_record.person_node
-            p = PersonBl.from_node(node)
-
-            # if take_refnames and record['refnames']:
-            #     refnlist = sorted(record['refnames'])
-            #     p.refnames = ", ".join(refnlist)
-
-            for node in p_record.names:
-                pname = Name.from_node(node)
-                pname.initial = pname.surname[0] if pname.surname else ""
-                p.names.append(pname)
-
-            # Events
-            for node, pname, role in p_record.events_w_role:
-                if not node is None:
-                    e = EventBl.from_node(node)
-                    e.place = pname or ""
-                    if role and role != "Primary":
-                        e.role = role
-                    p.events.append(e)
-
-            persons.append(p)
+        persons = res['persons']
 
         # Update the page scope according to items really found
         if len(persons) > 0:
@@ -257,10 +222,10 @@ class PersonReaderTx(DataService):
             :param:    pl_reference   tuple (Place_node, [PlaceName_node])
             :return:   PlaceBl        created Place node
             """
-            place_node, name_nodes = pl_reference
+            place_node, placenames = pl_reference
             if place_node:
                 place = self.obj_catalog[place_node.id]
-                place.names = place_names_local_from_nodes(name_nodes)
+                place.names = place_names_local_from_placenames(placenames)
                 return place
             return None
 
@@ -269,7 +234,7 @@ class PersonReaderTx(DataService):
         res = self.dataservice.tx_get_person_by_uuid(
             uuid, 
             self.user_context.material,
-            self.use_user, 
+            self.use_user,
         )
         if Status.has_failed(res):
             # Not found, not allowed (person.too_new) or error
@@ -292,32 +257,41 @@ class PersonReaderTx(DataService):
 
         # 1-2. Person, names and events
 
-        person = PersonBl.from_node(res.get("person_node"))
-        person.families_as_parent = []
-        person.families_as_child = []
-        person.citation_ref = []
-        person.note_ref = []
-        person.media_ref = []
-        self._catalog(person)
-
-        # Info about linked Root node
+# KKu: moved to readservice_tx, except self._catalog calls and root_dict
+#         root_dict = res.get("root")  # {material, root_user, batch_id}
+#         person = PersonBl.from_node(res.get("person_node"))
+#         person.families_as_parent = []
+#         person.families_as_child = []
+#         person.citation_ref = []
+#         person.note_ref = []
+#         person.media_ref = []
+#         self._catalog(person)
+# 
+#         # Info about linked Root node
+#         for name_node in res.get("name_nodes"):
+#             name = Name.from_node(name_node)
+#             person.names.append(name)
+#             self._catalog(name)
+#         # Events
+#         for event_node, event_role in res.get("event_node_roles"):
+#             event = EventBl.from_node(event_node)
+#             event.role = event_role
+#             event.citation_ref = []
+#             person.events.append(event)
+#             self._catalog(event)
+#         node = res.get("cause_of_death")
+#         if node:
+#             person.cause_of_death = EventBl.from_node(node)
+#             self._catalog(person.cause_of_death)
+        person = res['person']
         root_dict = res.get("root")  # {material, root_user, batch_id}
-        for name_node in res.get("name_nodes"):
-            name = Name.from_node(name_node)
-            person.names.append(name)
+        self._catalog(person)
+        for name in person.names:
             self._catalog(name)
-        # Events
-        for event_node, event_role in res.get("event_node_roles"):
-            event = EventBl.from_node(event_node)
-            event.role = event_role
-            event.citation_ref = []
-            person.events.append(event)
+        for event in person.events:
             self._catalog(event)
-        node = res.get("cause_of_death")
-        if node:
-            person.cause_of_death = EventBl.from_node(node)
-            self._catalog(person.cause_of_death)
-
+        self._catalog(person.cause_of_death)
+         
         # 3. Person's families as child or parent
 
         res = self.dataservice.tx_get_person_families(person.uniq_id)
@@ -328,48 +302,56 @@ class PersonReaderTx(DataService):
             )
             return res
 
-        for f in res.get("families"):
-            family = FamilyBl.from_node(f["family_node"])
-            family_role = f["family_role"]  # Main person's role in family
+# KKu: moved to readservice_tx:
+#         for f in res.get("families"):
+#             family = FamilyBl.from_node(f["family_node"])
+#             family_role = f["family_role"]  # Main person's role in family
+#             self._catalog(family)
+#             for event_node in f["family_events"]:
+#                 event = EventBl.from_node(event_node)
+#                 if event.type == "Marriage":
+#                     family.marriage_dates = event.dates
+#                 family.events.append(event)
+#                 self._catalog(event)
+#             for m in f["family_members"]:
+#                 # Family member
+#                 member = PersonBl.from_node(m["member_node"])
+#                 self._catsalog(member)
+#                 name_node = m["name_node"]
+#                 if name_node:
+#                     name = Name.from_node(name_node)
+#                     member.names.append(name)
+#                     self._catalog(name)
+#                 event_node = m["birth_node"]
+#                 if event_node:
+#                     event = EventBl.from_node(event_node)
+#                     member.birth_date = event.dates
+#                     member.dates = event.dates
+#                 else:
+#                     member.dates = DateRange()
+#                     # self._catalog(event)
+#                 # Add member to family
+#                 parental_role = m["parental_role"]  # Family member's role
+#                 if parental_role == "father":
+#                     family.father = member
+#                 elif parental_role == "mother":
+#                     family.mother = member
+#                 else:  # child
+#                     family.children.append(member)
+# 
+        families = res['families']
+        for family in families:
             self._catalog(family)
-            for event_node in f["family_events"]:
-                event = EventBl.from_node(event_node)
-                if event.type == "Marriage":
-                    family.marriage_dates = event.dates
-                family.events.append(event)
+            for event in family.events:
                 self._catalog(event)
-            for m in f["family_members"]:
-                # Family member
-                member = PersonBl.from_node(m["member_node"])
+            for member in family.members:
                 self._catalog(member)
-                name_node = m["name_node"]
-                if name_node:
-                    name = Name.from_node(name_node)
-                    member.names.append(name)
-                    self._catalog(name)
-                event_node = m["birth_node"]
-                if event_node:
-                    event = EventBl.from_node(event_node)
-                    member.birth_date = event.dates
-                    member.dates = event.dates
-                else:
-                    member.dates = DateRange()
-                    # self._catalog(event)
-                # Add member to family
-                parental_role = m["parental_role"]  # Family member's role
-                if parental_role == "father":
-                    family.father = member
-                elif parental_role == "mother":
-                    family.mother = member
-                else:  # child
-                    family.children.append(member)
-
-            if family_role:  # main person is a father or mother
+            if family.family_role:  # main person is a father or mother
                 person.families_as_parent.append(family)
                 person.events += family.events
             else:  # child
                 person.families_as_child.append(family)
-
+ 
             if not self.user_context.is_common():
                 family.remove_privacy_limits()
 
@@ -390,12 +372,16 @@ class PersonReaderTx(DataService):
         place_references = res.get("place_references", {})
         # Got dictionary {object_id:  (place_node, (name_nodes))
 
-        # Convert nodes and store them as PlaceBl objects with PlaceNames included
-        for pl_node, pn_nodes in place_references.values():
-            place = PlaceBl.from_node(pl_node)
-            for pn_node in pn_nodes:
-                name = PlaceName.from_node(pn_node)
-                place.names.append(name)
+# KKu: moved to readservice_tx:
+#         # Convert nodes and store them as PlaceBl objects with PlaceNames included
+#         for pl_node, pn_nodes in place_references.values():
+#             place = PlaceBl.from_node(pl_node)
+#             for pn_node in pn_nodes:
+#                 name = PlaceName.from_node(pn_node)
+#                 place.names.append(name)
+#             self._catalog(place)
+
+        for place in res['places']:
             self._catalog(place)
 
         for e in person.events:
@@ -441,10 +427,9 @@ class PersonReaderTx(DataService):
                 refs = references.get(src_id)
                 if refs:
                     for current in refs:
-                        node = current.node
                         order = current.order
                         crop = current.crop
-                        label, = node.labels
+                        label = current.label
                         # print (f'Link ({src.__class__.__name__} {src_id}:{src.id}) {current}')
 
                         target_obj = None
@@ -452,27 +437,27 @@ class PersonReaderTx(DataService):
                             # If id is in the dictionary, return its value.
                             # If not, insert id with a value of 2nd argument.
                             target_obj = citations.setdefault(
-                                node.id, Citation.from_node(node)
+                                current.obj.uniq_id, current.obj
                             )
                             if hasattr(src, "citation_ref"):
-                                src.citation_ref.append(node.id)
+                                src.citation_ref.append(current.obj.uniq_id)
                             else:
-                                src.citation_ref = [node.id]
+                                src.citation_ref = [current.obj.uniq_id]
                         elif label == "Note":
-                            target_obj = notes.setdefault(node.id, Note.from_node(node))
+                            target_obj = notes.setdefault(current.obj.uniq_id, current.obj)
                             if hasattr(src, "note_ref"):
-                                src.note_ref.append(node.id)
+                                src.note_ref.append(current.obj.uniq_id)
                             else:
-                                src.note_ref = [node.id]
+                                src.note_ref = [current.obj.uniq_id]
                             target_obj.citation_ref = []
                         elif label == "Media":
                             target_obj = medias.setdefault(
-                                node.id, Media.from_node(node)
+                                current.obj.uniq_id, current.obj
                             )
                             if hasattr(src, "media_ref"):
-                                src.media_ref.append((node.id, crop, order))
+                                src.media_ref.append((current.obj.uniq_id, crop, order))
                             else:
-                                src.media_ref = [(node.id, crop, order)]
+                                src.media_ref = [(current.obj.uniq_id, crop, order)]
                             target_obj.citation_ref = []
                             # Sort the Media references by order
                             # print(f'#\tMedia ref {target_obj.uniq_id} order={order}, crop={crop}')
@@ -522,14 +507,12 @@ class PersonReaderTx(DataService):
                 cita = self.obj_catalog[uniq_id]
 
                 # 2. The Source node
-                node = ref.source_node
-                source = SourceBl.from_node(node)
+                source = ref.source_obj
                 self._catalog(source)
 
                 # 3.-4. The Repository node and medium from REPOSITORY relation
-                node = ref.repository_node
-                if node:
-                    repo = Repository.from_node(node)
+                repo = ref.repository_obj
+                if repo:
                     repo.medium = ref.medium
                     self._catalog(repo)
                     # This source is in this repository

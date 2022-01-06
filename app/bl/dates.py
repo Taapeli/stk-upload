@@ -353,16 +353,6 @@ class DateRange:
         # TODO calculate
         return d1
 
-    @classmethod
-    def from_node(cls, node):
-        """
-        Extracts a DateRange value from any db node, if present.
-        """
-        if node["datetype"] != None:
-            return DateRange(node["datetype"], node["date1"], node["date2"])
-
-        return DateRange()
-
     def estimate(self):
         """ Gives a date estimate """
         return self.date1.long_date()

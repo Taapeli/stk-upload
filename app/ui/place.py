@@ -26,6 +26,13 @@ from flask_security import current_user
 
 
 def place_names_local_from_nodes(nodes):
+    from pe.neo4j.nodereaders import PlaceName_from_node
+    return place_names_local_from_placenames([
+        PlaceName_from_node(pn)
+        for pn in nodes
+    ])
+    
+def place_names_local_from_placenames(placenames):
     ''' Filter Name objects from a list of Cypher nodes.
 
         :param:     nodes     list of Neo4j Nodes
@@ -42,13 +49,11 @@ def place_names_local_from_nodes(nodes):
             <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
         ]>
     '''
-    from bl.place import PlaceName
     ret = []
     own_lang = []
     no_lang = []
     alien_lang = []
-    for node in nodes:
-        pn = PlaceName.from_node(node)
+    for pn in placenames:
         if pn.lang == "":
             no_lang.append(pn)
             ##print(f"# - no lang {len(place_bl.names)} (Place_name {pn.uniq_id} {pn})")

@@ -26,6 +26,7 @@ from bl.place import PlaceBl, PlaceName
 #from pe.obsolete_db_writer import DbWriter
 #import json
 from operator import attrgetter
+from pe.neo4j.nodereaders import PlaceBl_from_node, PlaceName_from_node
 
 
 cypher_test_create = """
@@ -117,8 +118,8 @@ def list_top_level_places():
     places = []
     for rec in  result:
         place_node = rec['p']
-        place = PlaceBl.from_node(place_node)
-        place.names = [PlaceName.from_node(pn) for (_r,pn) in rec['names']]
+        place = PlaceBl_from_node(place_node)
+        place.names = [PlaceName_from_node(pn) for (_r,pn) in rec['names']]
         places.append(place) 
     return {"status":"OK",
          "statusText":"OK",
@@ -131,8 +132,8 @@ def list_subordinate_places(parent_id):
     places = []
     for rec in  result:
         place_node = rec['p']
-        place = PlaceBl.from_node(place_node)
-        place.names = [PlaceName.from_node(pn) for (place,pn) in rec['names']]
+        place = PlaceBl_from_node(place_node)
+        place.names = [PlaceName_from_node(pn) for (place,pn) in rec['names']]
         places.append(place) 
     return {"status":"OK",
          "statusText":"OK",
@@ -193,12 +194,12 @@ def getplace(id1):
             place['timespan'] = timespan
         places2.append(place)
     #names = [dict(name=pn['name'],lang=pn['lang']) for pn in result['names']]
-    place = PlaceBl.from_node(p)
-    place.names = [PlaceName.from_node(pn) for pn in result['names']]
+    place = PlaceBl_from_node(p)
+    place.names = [PlaceName_from_node(pn) for pn in result['names']]
     place.batch = batch
     print(smallerPlaces)
     if smallerPlaces == [[None,None,None]]: smallerPlaces = []
-    place.surrounds = [PlaceName.from_node(p2) for (h2,p2,id2) in smallerPlaces]
+    place.surrounds = [PlaceName_from_node(p2) for (h2,p2,id2) in smallerPlaces]
     place.surrounds=sorted(places2,key=itemgetter('name'))
     return {"status":"OK",
      "statusText":"OK",

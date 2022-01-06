@@ -16,7 +16,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from bl import material
 
 """
 Created on 12.8.2018
@@ -46,6 +45,8 @@ from flask_babelex import _
 
 import shareds
 from . import bp
+from bl import material
+
 from bl.base import Status, StkEncoder
 from bl.comment import Comment, CommentReader, CommentsUpdater
 from bl.event import EventReader, EventWriter
@@ -1415,6 +1416,7 @@ def comments_header():
 def fetch_comments():
     """Fetch topics and comments to given object """
     from pe.neo4j.cypher.cy_comment import CypherComment
+    from pe.neo4j.nodereaders import Comment_from_node
 
     u_context = UserContext()
     uniq_id = int(request.args.get("uniq_id"))
@@ -1433,7 +1435,7 @@ def fetch_comments():
         last_timestamp = None
         for record in result:
             node = record["comment"]
-            c = Comment.from_node(node)
+            c = Comment_from_node(node)
             c.user = record["commenter"]
             comments.append(c)
             last_timestamp = c.timestamp

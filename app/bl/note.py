@@ -40,24 +40,6 @@ class Note(NodeObject):
         url = "" if self.url == None else self.url
         return "{} {} {!r} {}".format(self.id, self.type, desc, url)
 
-    @classmethod
-    def from_node(cls, node):
-        """
-        Transforms a db node to an object of type Note.
-        """
-        n = cls()
-        n.uniq_id = node.id
-        n.id = node["id"] or ""
-        if "handle" in node:
-            n.handle = node["handle"]
-        n.change = node["change"]
-        if "priv" in node:
-            n.priv = node["priv"]
-        n.type = node.get("type", "")
-        n.text = node.get("text", "")
-        n.url = node.get("url", "")
-        return n
-
 
 class NoteReader(DataService):
     """

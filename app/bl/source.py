@@ -65,29 +65,6 @@ class Source(NodeObject):
             self.id, self.stitle, self.sauthor, self.spubinfo
         )
 
-    @classmethod
-    def from_node(cls, node):
-        """
-        Transforms a db node to an object of type Source.
-        """
-        # <Node id=355993 labels={'Source'}
-        #     properties={'id': 'S0296', 'stitle': 'Hämeenlinnan lyseo 1873-1972',
-        #         'uuid': 'c1367bbdc6e54297b0ef12d0dff6884f', 'spubinfo': 'Karisto 1973',
-        #         'sauthor': 'toim. Mikko Uola', 'change': 1585409705}>
-
-        s = cls()  # create a new Source or SourceBl
-        s.uniq_id = node.id
-        s.id = node["id"]
-        s.uuid = node["uuid"]
-        if "handle" in node:
-            s.handle = node["handle"]
-        s.stitle = node["stitle"]
-        s.sauthor = node["sauthor"]
-        s.spubinfo = node["spubinfo"]
-        s.sabbrev = node.get("sabbrev", "")
-        s.change = node["change"]
-        return s
-
 
 class SourceBl(Source):
     """Source with optional referenced data.

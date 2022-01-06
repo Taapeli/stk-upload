@@ -50,8 +50,8 @@ def test_tx_get_person_list0(svc):
     print(rsp)
     # rsp = {'items': [], 'status': 'Error', 'statustext': 'tx_get_person_list: Invalid rule'}
     assert isinstance(rsp, dict)
-    assert set(rsp.keys()) == {'items', 'status', 'statustext'}
-    assert rsp['items'] == []
+    assert set(rsp.keys()) == {'persons', 'status', 'statustext'}
+    assert rsp['persons'] == []
     assert rsp['status'] == 'Error'
     assert rsp['statustext'] == 'tx_get_person_list: Invalid rule'
 
@@ -66,9 +66,9 @@ def test_tx_get_person_list1(svc):
     print(rsp)
     # rsp = {'items': [], 'status': 'Error', 'statustext': 'tx_get_person_list: Invalid rule'}
     assert isinstance(rsp, dict)
-    assert set(rsp.keys()) == {'items', 'status'}
+    assert set(rsp.keys()) == {'persons', 'status'}
     assert rsp['status'] == 'OK'
-    items = rsp['items'] 
+    items = rsp['persons'] 
     assert isinstance(items, list)
     assert len(items) == 100
     
@@ -84,9 +84,9 @@ def test_tx_get_person_list2(svc):
     print(rsp)
     # rsp = {'items': [], 'status': 'Error', 'statustext': 'tx_get_person_list: Invalid rule'}
     assert isinstance(rsp, dict)
-    assert set(rsp.keys()) == {'items', 'status'}
+    assert set(rsp.keys()) == {'persons', 'status'}
     assert rsp['status'] == 'OK'
-    items = rsp['items'] 
+    items = rsp['persons'] 
     assert isinstance(items, list)
     assert len(items) == 10
     

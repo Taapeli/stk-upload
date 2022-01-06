@@ -6,11 +6,13 @@ Created on 23.3.2020
 import logging 
 from bl.place import PlaceBl, PlaceName
 from bl.source import SourceBl
-logger = logging.getLogger('stkserver')
+from pe.neo4j.nodereaders import PlaceName_from_node, PlaceBl_from_node,\
+    SourceBl_from_node
 
 from pe.neo4j.cypher.cy_place import CypherPlace
 from pe.neo4j.cypher.cy_gramps import CypherObjectWHandle
 
+logger = logging.getLogger('stkserver')
 
 class Neo4jWriteDriver(object):
     '''
@@ -119,9 +121,9 @@ class Neo4jWriteDriver(object):
         self.tx.run(cypher_delete_namelinks,id=id1).single()
         rec = self.tx.run(cypher_mergeplaces,id1=id1,id2=id2).single()
         node = rec['node']
-        place = PlaceBl.from_node(node)
+        place = PlaceBl_from_node(node)
         name_nodes = rec['names']
-        name_objects = [PlaceName.from_node(n) for n in name_nodes]
+        name_objects = [PlaceName_from_node(n) for n in name_nodes]
         return place, name_objects
 
     def mergesources(self, id1, id2):
@@ -136,6 +138,6 @@ class Neo4jWriteDriver(object):
         rec = self.tx.run(cypher_mergesources,id1=id1,id2=id2).single()
         if rec is None: return None
         node = rec['node']
-        source = SourceBl.from_node(node)
+        source = SourceBl_from_node(node)
         return source
         

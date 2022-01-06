@@ -3,10 +3,26 @@ Created on 30.1.2021
 
 @author: jm
 '''
-import shareds
 import logging
+import traceback
 
-logger = logging.getLogger("stkserver")
+import shareds
+from bl.person_name import Name
+from bl.dates import DateRange
+
+from pe.neo4j.nodereaders import Citation_from_node
+from pe.neo4j.nodereaders import Comment_from_node
+from pe.neo4j.nodereaders import DateRange_from_node
+from pe.neo4j.nodereaders import EventBl_from_node
+from pe.neo4j.nodereaders import FamilyBl_from_node
+from pe.neo4j.nodereaders import MediaBl_from_node
+from pe.neo4j.nodereaders import Note_from_node
+from pe.neo4j.nodereaders import Name_from_node
+from pe.neo4j.nodereaders import PersonBl_from_node
+from pe.neo4j.nodereaders import PlaceBl_from_node
+from pe.neo4j.nodereaders import PlaceName_from_node
+from pe.neo4j.nodereaders import Repository_from_node
+from pe.neo4j.nodereaders import SourceBl_from_node
 
 from pe.dataservice import ConcreteService
 from pe.neo4j.cypher.cy_person import CypherPerson
@@ -15,6 +31,8 @@ from bl.base import Status
 from bl.material import Material
 
 from .util import run_cypher_batch
+
+logger = logging.getLogger("stkserver")
 
 class PersonRecord:
     ''' Object to return person display data. '''
@@ -69,6 +87,8 @@ class SourceReference:
         else:
             repo_str = ""
         return f'{source_str}-{self.medium}->({repo_str})'
+
+
 
 class Neo4jReadServiceTx(ConcreteService):
     ''' 
@@ -135,7 +155,7 @@ class Neo4jReadServiceTx(ConcreteService):
             #     print(f'tx_get_person_list: TODO: Show candidate data {rule}={key}')
             #     #return session.run(Cypher_person.get_events_by_refname, name=key)
         else:
-            return {'items': [], 'status': Status.ERROR,
+            return {'persons': [], 'status': Status.ERROR,
                     'statustext': 'tx_get_person_list: Invalid rule'}
  
         persons = []
@@ -166,18 +186,44 @@ class Neo4jReadServiceTx(ConcreteService):
             #        'Voipala',
             #        'Primary']
             #  >
-            p = PersonRecord()
-            p.person_node = record.get('person')
-            p.names = record.get('names')           # list(name_nodes)
-            p.events_w_role = record.get('events')  # list of tuples (event_node, place_name, role)
-            p.owners = record.get('owners')
+            prec = PersonRecord()
+            prec.person_node = record.get('person')
+            prec.names = record.get('names')           # list(name_nodes)
+            prec.events_w_role = record.get('events')  # list of tuples (event_node, place_name, role)
+            prec.owners = record.get('owners')
 
-            persons.append(p)   
+        # got {'items': [PersonRecord], 'status': Status.OK}
+        #    - PersonRecord = object with fields person_node, names, events_w_role, owners
+        #    -    events_w_role = list of tuples (event_node, place_name, role)
+
+            # print(p_record)
+            node = prec.person_node
+            person = PersonBl_from_node(node)
+
+            # if take_refnames and record['refnames']:
+            #     refnlist = sorted(record['refnames'])
+            #     p.refnames = ", ".join(refnlist)
+
+            for node in prec.names:
+                pname = Name_from_node(node)
+                pname.initial = pname.surname[0] if pname.surname else ""
+                person.names.append(pname)
+
+            # Events
+            for node, pname, role in prec.events_w_role:
+                if not node is None:
+                    e = EventBl_from_node(node)
+                    e.place = pname or ""
+                    if role and role != "Primary":
+                        e.role = role
+                    person.events.append(e)
+
+            persons.append(person)
 
         if len(persons) == 0:
-            return {'items': [], 'status': Status.NOT_FOUND,
+            return {'persons': [], 'status': Status.NOT_FOUND,
                     'statustext': f'No persons found by "{args}"'}
-        return {'items': persons, 'status': Status.OK}
+        return {'persons': persons, 'status': Status.OK}
 
 
     def tx_get_person_by_uuid(self, uuid:str, material:Material, active_user:str):
@@ -224,7 +270,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
             person_node = record['p']
             puid = person_node.id
-            res['person_node'] = person_node
+            #res['person_node'] = person_node
             res['root'] = {'material':material_type, 'root_state':root_state, 'root_user': root_user, 'batch_id':bid}
 
 #                 # Add to list of all objects connected to this person
@@ -283,6 +329,34 @@ class Neo4jReadServiceTx(ConcreteService):
             res.update({'status': Status.ERROR, 'statustext': f"Could not read names and events: {msg}"})
             return res
 
+        person = PersonBl_from_node(person_node)
+        person.families_as_parent = []
+        person.families_as_child = []
+        person.citation_ref = []
+        person.note_ref = []
+        person.media_ref = []
+        #self._catalog(person)
+
+        # Info about linked Root node
+        for name_node in res.get("name_nodes"):
+            name = Name_from_node(name_node)
+            person.names.append(name)
+            #self._catalog(name)
+        # Events
+        for event_node, event_role in res.get("event_node_roles"):
+            event = EventBl_from_node(event_node)
+            event.role = event_role
+            event.citation_ref = []
+            person.events.append(event)
+            #self._catalog(event)
+        node = res.get("cause_of_death")
+        if node:
+            person.cause_of_death = EventBl_from_node(node)
+            #self._catalog(person.cause_of_death)
+        else:
+            person.cause_of_death = None
+            
+        res['person'] = person
         return res
 
     def tx_get_person_families(self, puid:int):
@@ -338,7 +412,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 # 3.2. Family Events
 
                 for event_node in record['events']:
-#                         f_event = EventBl.from_node(event_node)
+#                         f_event = EventBl_from_node(event_node)
                     relation_type = event_node.get('type')
                     # Add family events to person events, too
                     if family_rel == "PARENT":
@@ -372,7 +446,46 @@ class Neo4jReadServiceTx(ConcreteService):
                           'family_members': family_members
                           }
                 #print(f"#+3.4 ({puid}) -[:{family_rel} {family_role}]-> (:Family {family_node.id} {family_node.get('id')})")
+
+                family = FamilyBl_from_node(family_node)
+                family.members = []
+                #self._catalog(family)
+                for event_node in family_events:
+                    event = EventBl_from_node(event_node)
+                    if event.type == "Marriage":
+                        family.marriage_dates = event.dates
+                    family.events.append(event)
+                    #self._catalog(event)
+                for m in family_members:
+                    # Family member
+                    member = PersonBl_from_node(m["member_node"])
+                    #self._catalog(member)
+                    name_node = m["name_node"]
+                    if name_node:
+                        name = Name_from_node(name_node)
+                        member.names.append(name)
+                        #self._catalog(name)
+                    event_node = m["birth_node"]
+                    if event_node:
+                        event = EventBl_from_node(event_node)
+                        member.birth_date = event.dates
+                        member.dates = event.dates
+                    else:
+                        member.dates = DateRange()
+                        # self._catalog(event)
+                    # Add member to family
+                    family.members.append(member)
+                    parental_role = m["parental_role"]  # Family member's role
+                    if parental_role == "father":
+                        family.father = member
+                    elif parental_role == "mother":
+                        family.mother = member
+                    else:  # child
+                        family.children.append(member)
+
+                family.family_role = family_role
                 families.append(family)
+
 
         except Exception as e:
             msg = f'person={puid} {e}' #{e.__class__.name} {e}'
@@ -413,21 +526,32 @@ class Neo4jReadServiceTx(ConcreteService):
                 place_node = record['pl']
                 place_uniq_id = place_node.id
                 pn_nodes = record['pnames']
-                references[event_uniq_id] = (place_node, pn_nodes)
+                placenames = [PlaceName_from_node(node) for node in pn_nodes]
+                references[event_uniq_id] = (place_node, placenames)
 
                 # Upper Place node and names linked to this Place
                 upper_place_node = record['pi']
                 if upper_place_node:
                     pn_nodes = record['pinames']
-                    references[place_uniq_id] = (upper_place_node, pn_nodes)
+                    placenames = [PlaceName_from_node(node) for node in pn_nodes]
+                    references[place_uniq_id] = (upper_place_node, placenames)
                 pass
+
+            # Convert nodes and store them as PlaceBl objects with PlaceNames included
+            places = []
+            for pl_node, placenames in references.values():
+                place = PlaceBl_from_node(pl_node)
+                place.names = placenames
+                #self._catalog(place)
+                places.append(place)
  
         except Exception as e:
+            traceback.print_exc()
             print(f"Could not read places for {len(base_objs)} objects: {e.__class__.__name__} {e}")
             return {'status': Status.ERROR, 'statustext':f'{e.__class__.__name__}: {e}'}
 
         #print(f'#+tx_get_object_places: Got {len(references)} place references') 
-        return {'status': Status.OK, 'place_references': references}
+        return {'status': Status.OK, 'place_references': references, 'places':places}
 
     def tx_get_object_citation_note_media(self, obj_catalog:dict, active_objs=[]):
         ''' 
@@ -479,16 +603,19 @@ class Neo4jReadServiceTx(ConcreteService):
                 #src_label, = src_node.labels
                 #src = obj_catalog[record['uniq_id']]
 
+                rel = record['r']
+                ref.order = rel.get('order')
                 # Target is a Citation, Note or Media
                 target_node = record['target']
                 target_uniq_id = target_node.id
                 target_label, = target_node.labels
-                ref.node = target_node
-
-                # Relation r between (src_node) --> (target)
-                rel = record['r']
-                ref.order = rel.get('order')
-                if target_label == "Media":
+                #ref.node = target_node
+                if target_label == 'Citation':
+                    ref.obj = Citation_from_node(target_node)
+                if target_label == 'Note':
+                    ref.obj = Note_from_node(target_node)
+                if target_label == 'Media':
+                    ref.obj = MediaBl_from_node(target_node)
                     # Media crop attributes used in this relation
                     left = rel.get('left')
                     if left != None:
@@ -496,6 +623,8 @@ class Neo4jReadServiceTx(ConcreteService):
                         right = rel.get('right')
                         lower = rel.get('lower')
                         ref.crop = (left, upper, right, lower)
+                ref.label = target_label
+                # Relation r between (src_node) --> (target)
                 #print(f'# Cita/Note/Media: ({src_uniq_id}:{src_label} {src_node["id"]}) {ref}')
 
                 # Add current target reference to objects referred 
@@ -513,6 +642,7 @@ class Neo4jReadServiceTx(ConcreteService):
                     new_obj_ids.append(target_uniq_id)
 
         except Exception as e:
+            traceback.print_exc()
             msg = f"Could not read 'Citations, Notes, Medias': {e.__class__.__name__} {e}"
             print(f"dx_get_object_citation_note_media: {msg}")
             return {'status': Status.ERROR, 'statustext': msg}
@@ -559,10 +689,14 @@ class Neo4jReadServiceTx(ConcreteService):
                 uniq_id = record['uniq_id']
 
                 # 2. The Source node
-                ref.source_node = record['source']
-                ref.repository_node = record['repo']
-                if ref.repository_node:
+                source_node = record['source']
+                ref.source_obj = SourceBl_from_node(source_node)
+                repository_node = record['repo']
+                if repository_node:
+                    ref.repository_obj = Repository_from_node(repository_node)
                     ref.medium = record['rel'].get('medium', "")
+                else:
+                    ref.repository_obj = None
                 references[uniq_id] = ref
 
         return {'status': Status.OK, 'sources': references}

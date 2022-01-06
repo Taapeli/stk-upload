@@ -29,6 +29,9 @@ import traceback
 from datetime import datetime
 import base32_lib as base32
 
+# Privacy rule: how many years after death
+PRIVACY_LIMIT = 0
+
 class Status:
     """Status code values for result dictionary.
 
@@ -129,26 +132,6 @@ class NodeObject:
         else:
             return ""
 
-    # @staticmethod
-    # def timestamp_str(timestamp, opt="m"): --> models.util.format_timestamp
-    #     """ Converts a Neo4j timestamp to display format (by 'm' minute or 'd' day). """
-
-
-    @classmethod
-    def from_node(cls, node):
-        """
-        Starts Transforming a db node to an undefined type object.
-
-        Call from an inherited class, f.ex. n = Media.from_node(node)
-        """
-        n = cls()
-        n.uniq_id = node.id
-        n.id = node["id"]
-        n.uuid = node["uuid"]
-        if node["handle"]:
-            n.handle = node["handle"]
-        n.change = node.get("change")
-        return n
 
     """
         Compare 
