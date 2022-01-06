@@ -285,7 +285,7 @@ class Upload:
             s += f", counts {self.count}"
         if self.auditors:
             s += f", auditors: {[a[0] for a in self.auditors]}"
-        return f"{self.material_type}/{self.material.state}, {s}" #, found {has_file}, {has_log}"
+        return f"{self.material_type}/{self.state}, {s}" #, found {has_file}, {has_log}"
 
     def for_auditor(self):
         """ Is relevant for auditor? """
@@ -325,12 +325,14 @@ def list_uploads(username:str) -> List[Upload]:
         u_name = record["u_name"]
 
         meta = get_meta(b)
-        # meta file 'status' ~ Uploads.state!
+        # NOTE: meta file 'status' ~ Uploads.state!
+
         status = meta.get("status", State.FILE_UPLOADED)
-        if status == State.FILE_LOAD_FAILED:
-            state = State.FILE_LOAD_FAILED
-        else:
-            state = b.state
+        print(f"#bp.admin.uploads.list_uploads: root:{b.state}, meta:{meta.get('status')}")
+        # if status == State.FILE_LOADING:
+        #     state = State.FILE_LOADING
+        # else:
+        state = b.state
         audi_rec = record['auditors']
         auditors = []
         for au_user, ts in audi_rec:

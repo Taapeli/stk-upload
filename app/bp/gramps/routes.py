@@ -426,6 +426,7 @@ def get_commands(batch_id):
         ops = RESEARCHER_OPERATIONS.get(batch.state)
         if ops:
             for i in range(len(RESEARCHER_FUNCTIONS)):
+                #print("#bp.gramps.routes.get_commands:",batch.state,ops[i],RESEARCHER_FUNCTIONS[i])
                 if ops[i]:
                     # If allowed function, add (url, title) tuple to commands
                     cmd, title = RESEARCHER_FUNCTIONS[i]

@@ -49,7 +49,7 @@ RESEARCHER_OPERATIONS = { #    browse     request   withdraw  download log     v
     State.ROOT_CANDIDATE:      (True,     True,     False,    True,    True,   True,    True,    True),
     State.ROOT_REJECTED:       (True,     False,    False,    True,    True,   True,    True,    True),
     State.ROOT_AUDIT_REQUESTED:(True,     False,    True,     True,    True,   True,    True,    True),
-    State.ROOT_AUDITING:       (True,     False,    False,    True,    True,   True,    True,    True),
+    State.ROOT_AUDITING:       (True,     False,    True,     True,    True,   True,    False,    True),
     State.ROOT_ACCEPTED:       (True,     False,    False,    True,    True,   True,    True,    False),
     }
 
