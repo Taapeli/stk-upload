@@ -4,6 +4,10 @@ import pytest
 from bl.family import FamilyBl
 from bl.place import PlaceBl
 from bl.material import Material
+from bl.event import EventBl
+from bl.person import PersonBl
+from bl.media import Media
+from bl.note import Note
 
 INVALID_BATCH_ID = "xxx"
 INVALID_USER = "xxx"
@@ -198,6 +202,120 @@ def test_get_place_w_names_notes_medias1(svc):
     assert isinstance(place, PlaceBl)
     assert isinstance(uniq_ids, list)
     assert len(uniq_ids) == 1
+
+def test_get_event_by_uuid0(svc):    
+    # valid user, invalid uuid
+    # def dr_get_event_by_uuid(self, user:str, uuid:str, material:Material):
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_event_by_uuid(values.user, uuid=INVALID_UUID, material=material)
+    print(rsp)    
+    assert isinstance(rsp, dict)
+    assert set(rsp.keys()) == {'item', 'status', 'statustext'}
+    assert rsp['item'] is None 
+    assert rsp['status'] == 'Not found'
+    assert rsp['statustext'] == 'No Event found'
+
+def test_get_event_by_uuid1(svc):    
+    # valid user, valid uuid
+    # def dr_get_event_by_uuid(self, user:str, uuid:str, material:Material):
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_event_by_uuid(values.user, uuid=values.event_uuid, material=material)
+    print(rsp)    
+    assert isinstance(rsp, dict)
+    assert set(rsp.keys()) == {'item', 'status'}
+    event = rsp['item'] 
+    assert isinstance(event, EventBl)
+    assert event.uuid == values.event_uuid
+
+def test_get_event_participants0(svc):    
+    # invalid uid
+    # def dr_get_event_participants(self, uid):
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_event_participants(INVALID_UNIQ_ID)
+    print(rsp)    
+    assert isinstance(rsp, dict)
+    assert set(rsp.keys()) == {'items', 'status'}
+    items = rsp['items']
+    assert type(items) == list
+    assert len(items) == 0 
+
+def test_get_event_participants1(svc):    
+    # valid uid
+    # def dr_get_event_participants(self, uid):
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_event_participants(values.event_uniq_id)
+    print(rsp)    
+    assert isinstance(rsp, dict)
+    assert set(rsp.keys()) == {'items', 'status'}
+    items = rsp['items']
+    assert type(items) == list
+    assert len(items) == 1 
+    item = items[0]
+    assert isinstance(item, PersonBl)
+    assert item.id == 'I0044'
+
+def test_get_event_place0(svc):    
+    # invalid uid
+    # def dr_get_event_place(self, uid):
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_event_place(INVALID_UNIQ_ID)
+    print(rsp)    
+    assert isinstance(rsp, dict)
+    assert set(rsp.keys()) == {'items', 'status'}
+    items = rsp['items']
+    assert type(items) == list
+    assert len(items) == 0
+
+def test_get_event_place1(svc):    
+    # valid uid
+    # def dr_get_event_place(self, uid):
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_event_place(values.event_uniq_id)
+    print(rsp)    
+    assert isinstance(rsp, dict)
+    assert set(rsp.keys()) == {'items', 'status'}
+    items = rsp['items']
+    assert type(items) == list
+    assert len(items) == 1 
+    item = items[0]
+    assert isinstance(item, PlaceBl)
+    assert item.id == 'P1435'
+
+def test_dr_get_event_notes_medias0(svc):    
+    # invalid uid
+    # def dr_get_event_notes_medias(self, uid):
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_event_notes_medias(INVALID_UNIQ_ID)
+    print(rsp)    
+    assert isinstance(rsp, dict)
+    assert set(rsp.keys()) == {'medias', 'notes', 'status'}
+    assert rsp['status'] == 'OK'   # !!!
+    assert rsp['medias'] == []
+    assert rsp['notes'] == []
+
+def test_dr_get_event_notes_medias1(svc):    
+    # valid uid
+    # def dr_get_event_notes_medias(self, uid):
+    material = Material(session=None, request=None)
+    material.batch_id = values.batch_id 
+    rsp = svc.dr_get_event_notes_medias(values.event_uniq_id)
+    print(rsp)    
+    assert isinstance(rsp, dict)
+    assert set(rsp.keys()) == {'medias', 'notes', 'status'}
+    medias = rsp['medias']
+    assert type(medias) == list
+    assert len(medias) == 1 
+    media = medias[0]
+    assert isinstance(media, Media)
+    assert media.id == 'O0000'
+    assert rsp['notes'] == []   # no notes
 
 """
     def dr_get_material_batches(self, user: str, uuid: str):

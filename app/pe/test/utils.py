@@ -15,7 +15,7 @@ return * limit 1
 """
 
 # This Cypher query will find the objects used by the test functions. 
-# Assumes that the Gramps example family tree (example.gramps) has been loaded to the Neo4j database (at least once).
+# Assumes that the Gramps example family tree (example.gramps) has been loaded to the Neo4j database as a Candidate material.
 cypher = """
 match (root:Root)
     --> (f:Family{id:'F0017'})  -[:PARENT]-> (p:Person{id:'I0044'})
