@@ -1192,6 +1192,7 @@ def show_source_page(sourceid=None):
         )
 
     except KeyError as e:
+        traceback.print_exc()
         msg = f"bp.scene.routes.show_source_page: {e.__class__.__name__} {e}"
         flash(f'{ _("Program error")}', "error")
         logger.error(msg)
