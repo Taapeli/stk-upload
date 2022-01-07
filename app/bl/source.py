@@ -186,7 +186,7 @@ class SourceReader(DataService):
         for c_id, citation in citations.items():
             if c_id in notes:
                 citation.notes = notes[c_id]
-            for target in targets[c_id]:
+            for target in targets.get(c_id,[]):
                 if u_context.privacy_ok(target):
                     # Insert person name and life events
                     if isinstance(target, Person):
