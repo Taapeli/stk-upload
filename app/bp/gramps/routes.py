@@ -81,6 +81,9 @@ def list_uploads():
         Steps 1.& 3. of audit path: The user can  select one to Audit queue
         Step 2. /audit/requested/<batch_id>
     """
+    u_context = UserContext()
+    active_batch=u_context.material.batch_id
+
     upload_list = uploads.list_uploads(current_user.username)
     logger.info(f"-> bp.gramps.routes.list_uploads n={len(upload_list)}")
     gramps_runner = shareds.app.config.get("GRAMPS_RUNNER")
@@ -94,11 +97,11 @@ def list_uploads():
 
     # for upl in upload_list:
     #     print(f"#bp.gramps.routes.list_uploads: {upl}")
-
     return render_template(
         "/gramps/uploads.html",
         interval=inter,
         uploads=upload_list,
+        active_batch=active_batch,
         gramps_verify=gramps_verify,
     )
 
@@ -405,7 +408,7 @@ def get_progress(batch_id):
             "progress": 99 * done // total if total else 50,
             "batch_id": batch_id,
         }
-        print(f"bp.gramps.routes.get_progress: {rsp}")
+        # print(f"bp.gramps.routes.get_progress: {rsp}")
         return jsonify(rsp)
 
 @bp.route("/gramps/commands/<batch_id>")

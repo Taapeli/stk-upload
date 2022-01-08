@@ -114,10 +114,11 @@ class LogItem():
 
     def __str__(self):
         if self.count == None:
-            c = ''
+            c = " "
         else:
             c = self.count
         if self.elapsed:
-            e = "{:.4f}".format(self.elapsed)
-            return f"{self.level} {self.title}: {c} / {e} sek"
-        return f"{self.level} {self.title}: {c}"
+            m,s = divmod(self.elapsed,60)
+            e = f"{int(m)} min {s:5.3f} sec" if m else f"{s:5.3f} sec"
+            return f"{self.level:5} {self.title+':':26} {c:4} / {e}"
+        return f"{self.level:5} {self.title+':':26} {c:4}"

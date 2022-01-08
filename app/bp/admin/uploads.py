@@ -324,14 +324,9 @@ def list_uploads(username:str) -> List[Upload]:
         b: Root = Root.from_node(node)
         u_name = record["u_name"]
 
-        meta = get_meta(b)
+        # meta = get_meta(b)
         # NOTE: meta file 'status' ~ Uploads.state!
-
-        status = meta.get("status", State.FILE_UPLOADED)
-        print(f"#bp.admin.uploads.list_uploads: root:{b.state}, meta:{meta.get('status')}")
-        # if status == State.FILE_LOADING:
-        #     state = State.FILE_LOADING
-        # else:
+        # print(f"#bp.admin.uploads.list_uploads: root:{b.state}, meta:{meta.get('status')}")
         state = b.state
         audi_rec = record['auditors']
         auditors = []

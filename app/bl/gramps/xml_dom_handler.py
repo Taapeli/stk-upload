@@ -1016,7 +1016,7 @@ class DOM_handler:
         res = self.dataservice.ds_set_people_lifetime_estimates(self.person_ids)
 
         count = res.get("count")
-        message = _("Estimated person lifetimes")
+        message = _("Estimated lifetimes")
         self.blog.log_event(
             {"title": message, "count": count, "elapsed": time.time() - t0}
         )

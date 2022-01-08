@@ -344,8 +344,8 @@ msgid "Person sorting names"
 msgstr "Henkilöiden lajitteluavaimet"
 
 #: bl/gramps/xml_dom_handler.py:1136
-msgid "Estimated person lifetimes"
-msgstr "Henkilöiden elinaika-arviot"
+msgid "Estimated lifetimes"
+msgstr "Elinaika-arviot"
 
 #: bp/admin/csv_refnames.py:72
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"

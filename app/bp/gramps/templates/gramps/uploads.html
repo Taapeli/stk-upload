@@ -163,7 +163,7 @@ function filenm_changed(input) {
  
   {% for upload in uploads %}
         <tr
-          {% if batch_id == upload.batch_id %}style="background: bisque;"{% endif %}
+          {% if active_batch == upload.batch_id %}style="background: bisque;"{% endif %}
         >
             <td id='{{upload.batch_id}}'>
             	<a href="#" id="a-{{loop.index}}" class="a"
