@@ -24,6 +24,14 @@ td {
 .hidden { display:none; }
 </style>
 
+<script>
+function doconfirm( command, title ) { // used in commands.html
+	if (confirm(title)) {
+		document.location.href = command;
+	}
+}
+</script>
+
 {{ hamburger_menu( (
    ) ) }}
 
@@ -66,6 +74,13 @@ td {
    	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
 {% endif %}   
 
+</div>
+
+<div class="startbox">
+	<h2 class="center">{{ _("Operations") }}</h2>
+	<div hx-trigger="load"
+		hx-get="/gramps/commands/{{batch.id}}"> 
+	</div>
 </div>
 
 <div class="startbox">

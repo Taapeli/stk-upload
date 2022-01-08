@@ -121,12 +121,6 @@ function confirm_delete(subj, name) {
     return true;
 }
 
-function doconfirm( command, title ) { // used in commands.html
-	if (confirm(title)) {
-		document.location.href = command;
-	}
-}
-
 function filenm_changed(input) {
     document.forms[0].submit.disabled = !input.value;    
 }

@@ -338,7 +338,8 @@ def batch_delete(batch_id):
             ),
             "info",
         )
-    return redirect(referrer)
+    #return redirect(referrer)
+    return redirect(url_for("gramps.list_uploads"))
 
 
 @bp.route("/gramps/get_progress/<batch_id>")
@@ -435,7 +436,7 @@ def get_commands(batch_id):
                     cmd, title = RESEARCHER_FUNCTIONS[i]
                     # The batch_id is appended to given command
                     confirm = False
-                    if cmd == "/gramps/batch_delete/":
+                    if cmd.startswith("/gramps/batch_delete/"):
                         confirm = True
                     # Add parameters
                     cmd = unquote_plus(cmd.format(state=batch.state, batch_id=batch.id))
