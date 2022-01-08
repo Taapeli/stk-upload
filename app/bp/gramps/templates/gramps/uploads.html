@@ -52,6 +52,15 @@ li > button, a, a1 {
 }
 .visible { display: inline; }
 .hidden { display:none; }
+
+.op_buttons {
+  display: flex;
+}
+.op_buttons form input {
+    float: left;
+    margin: 2pt;
+}
+.selected-material { background: bisque; }
 </style>
 
 <script>
@@ -155,32 +164,30 @@ function filenm_changed(input) {
 {% if uploads %}
 	<table class="fileselect">
        	<tr> 
-               <th>{{ _("Batch operations") }}</th>
+               <th>{{ _("Batch") }}</th>
                <th>{{ _("Gramps file") }}</th>
                <th>{{ _("Person count") }}</th>
                <th>{{ _("Status") }} {{ state_info() }} </th>
   		</tr>
- 
+
   {% for upload in uploads %}
         <tr
-          {% if active_batch == upload.batch_id %}style="background: bisque;"{% endif %}
+          {% if active_batch == upload.batch_id %}class="selected-material"{% endif %}
         >
             <td id='{{upload.batch_id}}'>
-            	<a href="#" id="a-{{loop.index}}" class="a"
-            		hx-get="commands/{{upload.batch_id}}" hx-target="#commands-{{loop.index}}" 
-            		_="on click hide .b 
-                		then show #b-{{loop.index}} 
-                		then show .a 
-                		then hide me">
-            		▸ {{upload.batch_id}}
-            	</a>
-            	<span class="b hidden" id="b-{{loop.index}}">
-                	▾ <a href="#" class="a1" _="on click hide .b then show .a">
-                		{{upload.batch_id}}
-                	</a>
-            		<div class="cmd" id="commands-{{loop.index}}"></div>
-				</span>
-				
+                <div class="op_buttons">
+                    <form method="GET" action="/scene/material/batch">
+                        <input type="hidden" name="state" value="Candidate">
+                        <input type="hidden" name="batch_id" value="{{upload.batch_id}}">
+                        <input type="submit" value="{{upload.batch_id}}"
+                            title="Browse this material">
+                    </form>
+                    <form method="GET" action="/gramps/details/{{upload.batch_id}}">
+                        <input type="submit" value="info" style="font-style: italic"
+                            title="Details and operations">
+                    </form>
+                </div>
+
                 <div class="progress" data-name='{{upload.batch_id}}'></div>
     {% if upload.state == 'Loading' %}
                      <script>
