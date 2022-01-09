@@ -7,7 +7,7 @@
 {% from "start/s_macros.html" import hamburger_menu, state_info with context %}
 
 <style>
-h2 {margin-bottom: 0;}
+startbox h2 {margin-bottom: 0;}
 div.startbox { height: 280px; }
 div.startbox > table { width: 280px; }
 tbody {
@@ -49,7 +49,7 @@ function doconfirm( command, title ) { // used in commands.html
 	</tr>
     <tr>
         <th>{{ _("Material type") }}</th>
-        <td class="typedesc">{{ _(batch.material_type) }}</td>
+        <td class="typedesc" style="font-size:110%">{{ _(batch.material_type) }}</td>
     </tr>
     <tr>
         <th>{{ _("Status") }}</th>
@@ -74,13 +74,6 @@ function doconfirm( command, title ) { // used in commands.html
    	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
 {% endif %}   
 
-</div>
-
-<div class="startbox">
-	<h2 class="center">{{ _("Operations") }}</h2>
-	<div hx-trigger="load"
-		hx-get="/gramps/commands/{{batch.id}}"> 
-	</div>
 </div>
 
 <div class="startbox">
@@ -121,6 +114,13 @@ function doconfirm( command, title ) { // used in commands.html
 			<td class="right">{{ pct }}%
 	{% endfor %}
 	</table>
+</div>
+
+<div>
+    <h2>{{ _("Actions") }}</h2>
+    <div hx-trigger="load"
+        hx-get="/gramps/commands/{{batch.id}}"> 
+    </div>
 </div>
 
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
