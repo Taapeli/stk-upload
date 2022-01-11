@@ -277,7 +277,7 @@ def xml_to_stkbase(batch):  # :Root):
     
         # Initialize Run report
         handler.blog = BatchLog(batch.user)
-        handler.blog.log_event({"title": "Storing data from Gramps", "level": "TITLE"})
+        handler.blog.log_event({"title": "Statistic of Gramps data storing", "level": "TITLE"})
         handler.blog.log_event(
             {"title": "Loaded file '{}'".format(file_displ), "elapsed": shareds.tdiff}
         )

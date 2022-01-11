@@ -31,6 +31,7 @@ import logging
 import traceback
 from types import SimpleNamespace
 from urllib.parse import unquote_plus
+from time import sleep
 
 logger = logging.getLogger("stkserver")
 
@@ -346,6 +347,8 @@ def batch_delete(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def get_progress(batch_id):
+    """ Calculate upload process status.
+    """
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
@@ -375,30 +378,33 @@ def get_progress(batch_id):
         counts = meta.get("counts")
         if counts is None:
             print(f"bp.gramps.routes.get_progress: no counts")
+            sleep(3)
             return jsonify({"status": status, "progress": 0})
     
         progress = meta.get("progress")
         if progress is None:
             print(f"bp.gramps.routes.get_progress: no progress")
+            sleep(3)
             return jsonify({"status": status, "progress": 0})
     
+        # Some object types are weighted because of long execution time
         total = 0
         total += counts["citation_cnt"]
         total += counts["event_cnt"]
-        total += counts["family_cnt"]
+        total += counts["family_cnt"] * 2
         total += counts["note_cnt"]
-        total += 2 * counts["person_cnt"]  # include refnames update
-        total += counts["place_cnt"]
+        total += counts["person_cnt"] * 3 # '2' should include refnames update
+        total += counts["place_cnt"] * 2
         total += counts["object_cnt"]
         total += counts["source_cnt"]
         total += counts["repository_cnt"]
         done = 0
         done += progress.get("Citation", 0)
         done += progress.get("EventBl", 0)
-        done += progress.get("FamilyBl", 0)
+        done += progress.get("FamilyBl", 0) * 2
         done += progress.get("Note", 0)
-        done += progress.get("PersonBl", 0)
-        done += progress.get("PlaceBl", 0)
+        done += progress.get("PersonBl", 0) * 3
+        done += progress.get("PlaceBl", 0) * 2
         done += progress.get("MediaBl", 0)
         done += progress.get("Source_gramps", 0)
         done += progress.get("Repository", 0)
