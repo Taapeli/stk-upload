@@ -7,6 +7,7 @@
 <style>
 div#summaryarea ul li p { margin: 0 0 0.3em 0; }
 td.Citation {padding:.3em;}
+td.Citation > div {display: inline }
 td.Citation div ol {padding-top:.3em;}
 </style>
 
@@ -74,11 +75,8 @@ td.Citation div ol {padding-top:.3em;}
         <form>
 			<input type="hidden" name="uniq_id" value="{{ source.uniq_id }}">
         </form>
-
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
-<style>
-td.Citation > div {display: inline }
-</style>
+
 	        <div class="subsection" id="citations">
 	            <h3>{{ _('Source References') }}</h3>
 	            <table class="infolist eventlist" width="100%">

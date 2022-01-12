@@ -458,6 +458,14 @@ def get_commands(batch_id):
 @roles_accepted("research", "admin")
 def batch_details(batch_id):
     user_context = UserContext()
+    if batch_id == "scene":
+        # Select scene style template
+        my_template = "/scene/material_details.html"
+        batch_id = session.get("batch_id")
+    else:
+        # Gramps style template
+        my_template = "/gramps/details.html"
+
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
@@ -474,8 +482,7 @@ def batch_details(batch_id):
     )
     event_stats = [(_(label),data) for (label,data) in stats.event_stats if label in SELECTED_EVENT_TYPES]
     return render_template(
-        "/gramps/details.html",
-       #batch_id=batch_id, 
+       my_template,
        batch=batch,
        user_context=user_context,
        object_stats=sorted(object_stats),

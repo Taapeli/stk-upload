@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-01-11 18:45+0200\n"
+"POT-Creation-Date: 2022-01-12 17:47+0200\n"
 "PO-Revision-Date: 2021-09-16 11:23+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -257,36 +257,37 @@ msgstr "Angiven giltig epost address finns redan"
 msgid "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted"
 msgstr "Godkänt batch-ID %(batch_id)s med %(deleted)d-noder har tagits bort"
 
-#: bl/gramps/gramps_loader.py:167
+#: bl/gramps/gramps_loader.py:168
 msgid "Events with no references to"
 msgstr "Händelser utan referenser till"
 
-#: bl/gramps/gramps_loader.py:247
+#: bl/gramps/gramps_loader.py:248
 msgid "Estimated time"
 msgstr "Beräknad tid"
 
-#: bl/gramps/gramps_loader.py:250
+#: bl/gramps/gramps_loader.py:251
 msgid "sec"
 msgstr "sek"
 
-#: bl/gramps/gramps_loader.py:348 bl/gramps/todo_planned_gramps_loader.py:121
+#: bl/gramps/gramps_loader.py:349 bl/gramps/todo_planned_gramps_loader.py:121
 msgid "Free text search indexes"
 msgstr "Fritt namnsökning index"
 
-#: bl/gramps/gramps_loader.py:435
+#: bl/gramps/gramps_loader.py:436
 msgid "Unable to open Gramps file"
 msgstr "Kan inte öppna Gramps fil"
 
-#: bl/gramps/xml_dom_handler.py:148 bp/gramps/templates/gramps/details.html:51
+#: bl/gramps/xml_dom_handler.py:157 bp/gramps/templates/gramps/details.html:51
+#: bp/scene/templates/scene/material_details.html:62
 #, fuzzy
 msgid "Material type"
 msgstr "Materialet"
 
-#: bl/gramps/xml_dom_handler.py:213
+#: bl/gramps/xml_dom_handler.py:222
 msgid "Citations"
 msgstr "Citerings"
 
-#: bl/gramps/xml_dom_handler.py:216 bp/dupsearch/templates/compare.html:196
+#: bl/gramps/xml_dom_handler.py:225 bp/dupsearch/templates/compare.html:196
 #: bp/dupsearch/templates/compare2.html:195
 #: bp/scene/templates/scene/person.html:221
 #: bp/scene/templates/scene/persons_list.html:77
@@ -294,7 +295,7 @@ msgstr "Citerings"
 msgid "Events"
 msgstr "Händelser"
 
-#: bl/gramps/xml_dom_handler.py:219 bp/dupsearch/templates/compare.html:191
+#: bl/gramps/xml_dom_handler.py:228 bp/dupsearch/templates/compare.html:191
 #: bp/dupsearch/templates/compare2.html:190
 #: bp/scene/templates/scene/hx-person/famtree.html:4
 #: bp/scene/templates/scene/hx-person/famtree.html:11
@@ -303,54 +304,54 @@ msgstr "Händelser"
 msgid "Families"
 msgstr "Familjer"
 
-#: bl/gramps/xml_dom_handler.py:222
+#: bl/gramps/xml_dom_handler.py:231
 #: bp/gramps/templates/gramps/scripting.html:38
 #: bp/scene/templates/scene/event_vue.html:83
 #: bp/scene/templates/scene/place.html:135
 msgid "Media"
 msgstr "Media"
 
-#: bl/gramps/xml_dom_handler.py:225 bp/scene/templates/scene/family.html:121
+#: bl/gramps/xml_dom_handler.py:234 bp/scene/templates/scene/family.html:121
 #: bp/scene/templates/scene/place.html:86
-#: bp/scene/templates/scene/source_events.html:64
+#: bp/scene/templates/scene/source_events.html:65
 msgid "Notes"
 msgstr "Anteckningar"
 
-#: bl/gramps/xml_dom_handler.py:228
+#: bl/gramps/xml_dom_handler.py:237
 #, fuzzy
 msgid "People"
 msgstr "Svaren"
 
-#: bl/gramps/xml_dom_handler.py:232 bp/gedcom/transforms/places.py:30
+#: bl/gramps/xml_dom_handler.py:241 bp/gedcom/transforms/places.py:30
 #: bp/scene/templates/scene/macros.html:67
 #: bp/scene/templates/scene/places.html:3
 msgid "Places"
 msgstr "Platser"
 
-#: bl/gramps/xml_dom_handler.py:235 templates/cite_sour_repo.html:55
+#: bl/gramps/xml_dom_handler.py:244 templates/cite_sour_repo.html:55
 msgid "Repositories"
 msgstr "Arkiv"
 
-#: bl/gramps/xml_dom_handler.py:238 bp/scene/templates/scene/family.html:76
+#: bl/gramps/xml_dom_handler.py:247 bp/scene/templates/scene/family.html:76
 #: bp/scene/templates/scene/macros.html:71
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:39
 #: templates/repo_sources.html:38
 msgid "Sources"
 msgstr "Källor"
 
-#: bl/gramps/xml_dom_handler.py:966 bp/gedcom/transforms/dates.py:33
+#: bl/gramps/xml_dom_handler.py:975 bp/gedcom/transforms/dates.py:33
 msgid "Dates"
 msgstr "Datum"
 
-#: bl/gramps/xml_dom_handler.py:968
+#: bl/gramps/xml_dom_handler.py:977
 msgid "Family sorting names"
 msgstr "Familj sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1003
+#: bl/gramps/xml_dom_handler.py:1012
 msgid "Person sorting names"
 msgstr "Person sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1019
+#: bl/gramps/xml_dom_handler.py:1028
 #, fuzzy
 msgid "Estimated lifetimes"
 msgstr "Beräkna person livstider"
@@ -612,6 +613,7 @@ msgstr "Användare"
 #: bp/gramps/templates/gramps/details.html:47
 #: bp/gramps/templates/gramps/uploads.html:111
 #: bp/gramps/templates/gramps/uploads.html:159
+#: bp/scene/templates/scene/material_details.html:58
 msgid "Batch"
 msgstr "Batch"
 
@@ -977,7 +979,9 @@ msgstr "Tid"
 
 #: bp/admin/templates/admin/syslog.html:15
 #: bp/gramps/templates/gramps/details.html:83
-#: bp/gramps/templates/gramps/details.html:106
+#: bp/gramps/templates/gramps/details.html:107
+#: bp/scene/templates/scene/material_details.html:93
+#: bp/scene/templates/scene/material_details.html:117
 #: bp/scene/templates/scene/place.html:112 templates/cite_sour_repo.html:15
 #: templates/cite_sour_repo.html:59 templates/repo_sources.html:19
 msgid "Type"
@@ -996,9 +1000,10 @@ msgid "Newer events"
 msgstr "Nyare händelser"
 
 #: bp/admin/templates/admin/syslog.html:43
-#: bp/gramps/templates/gramps/details.html:126
+#: bp/gramps/templates/gramps/details.html:129
 #: bp/gramps/templates/gramps/scripting.html:78
 #: bp/gramps/templates/gramps/uploads.html:228
+#: bp/scene/templates/scene/material_details.html:144
 msgid "Back"
 msgstr "Tillbaka"
 
@@ -1037,6 +1042,7 @@ msgstr "Typ / beskrivining"
 #: bp/audit/templates/audit/batches.html:25
 #: bp/gramps/templates/gramps/details.html:55
 #: bp/gramps/templates/gramps/uploads.html:162
+#: bp/scene/templates/scene/material_details.html:66
 msgid "Status"
 msgstr "Stadium"
 
@@ -1179,6 +1185,7 @@ msgstr "Materialen"
 #: bp/audit/templates/audit/pick_auditing.html:48
 #: bp/gramps/templates/gramps/details.html:59
 #: bp/gramps/templates/gramps/uploads.html:160
+#: bp/scene/templates/scene/material_details.html:70
 msgid "Gramps file"
 msgstr "Gramps fil"
 
@@ -1627,9 +1634,11 @@ msgstr[1] "antal =%(num)d, rad %(lines)s"
 
 #: bp/gedcom/gedcom_analyze.py:185 bp/gedcom/transforms/places.py:162
 #: bp/gramps/templates/gramps/details.html:84
-#: bp/gramps/templates/gramps/details.html:107
+#: bp/gramps/templates/gramps/details.html:108
 #: bp/gramps/templates/gramps/gramps_analyze.html:29
 #: bp/gramps/templates/gramps/result.html:12
+#: bp/scene/templates/scene/material_details.html:94
+#: bp/scene/templates/scene/material_details.html:118
 msgid "Count"
 msgstr "Antal"
 
@@ -1848,6 +1857,7 @@ msgstr "användare"
 #: bp/scene/templates/scene/edit_event.html:4
 #: bp/scene/templates/scene/event.html:45
 #: bp/scene/templates/scene/event_vue.html:62
+#: bp/scene/templates/scene/material_details.html:74
 #: bp/scene/templates/scene/person.html:228
 #: bp/scene/templates/scene/place.html:171
 #: bp/start/templates/start/my_settings.html:169
@@ -1947,7 +1957,8 @@ msgid "Number of multimedia objects"
 msgstr "Antal multimedia objekt"
 
 #: bp/gedcom/templates/gedcom_info.html:133
-#: bp/gramps/templates/gramps/details.html:120
+#: bp/gramps/templates/gramps/details.html:123
+#: bp/scene/templates/scene/material_details.html:139
 msgid "Actions"
 msgstr "Åtgärder"
 
@@ -2413,12 +2424,12 @@ msgstr "Batch %(batch_id)s har tagits bort, %(n)s noder"
 msgid "Failed to retrieve commands"
 msgstr "Det gick inte att hämta kommandon"
 
-#: bp/gramps/routes.py:464 bp/gramps/routes.py:495 bp/gramps/routes.py:524
+#: bp/gramps/routes.py:472 bp/gramps/routes.py:503 bp/gramps/routes.py:532
 #, fuzzy
 msgid "Failed to retrieve batch"
 msgstr "Det gick inte att hämta kommandon"
 
-#: bp/gramps/routes.py:518
+#: bp/gramps/routes.py:526
 msgid "Scripting tool is not enabled"
 msgstr ""
 
@@ -2444,15 +2455,18 @@ msgid "Batch Details"
 msgstr "Plats detaljer"
 
 #: bp/gramps/templates/gramps/details.html:39
+#: bp/scene/templates/scene/material_details.html:40
 #, fuzzy
 msgid "Material Details"
 msgstr "Familj detaljer"
 
-#: bp/gramps/templates/gramps/details.html:44 ui/jinja_filters.py:163
+#: bp/gramps/templates/gramps/details.html:44
+#: bp/scene/templates/scene/material_details.html:55 ui/jinja_filters.py:163
 msgid "General"
 msgstr "Allmänt"
 
 #: bp/gramps/templates/gramps/details.html:67
+#: bp/scene/templates/scene/material_details.html:78
 #, fuzzy
 msgid "Save"
 msgstr "sparade"
@@ -2460,22 +2474,27 @@ msgstr "sparade"
 #: bp/gramps/templates/gramps/details.html:74
 #: bp/gramps/templates/gramps/scripting.html:3
 #: bp/gramps/templates/gramps/scripting.html:18
+#: bp/scene/templates/scene/material_details.html:84
 #, fuzzy
 msgid "Scripting tool"
 msgstr "Beskrivning"
 
 #: bp/gramps/templates/gramps/details.html:80
+#: bp/scene/templates/scene/material_details.html:90
 #, fuzzy
 msgid "Object Statistics"
 msgstr "Ladda upp statistik"
 
 #: bp/gramps/templates/gramps/details.html:85
-#: bp/gramps/templates/gramps/details.html:108
+#: bp/gramps/templates/gramps/details.html:109
+#: bp/scene/templates/scene/material_details.html:95
+#: bp/scene/templates/scene/material_details.html:119
 #, fuzzy
 msgid "Source citations"
 msgstr "Antal citeringar"
 
-#: bp/gramps/templates/gramps/details.html:103
+#: bp/gramps/templates/gramps/details.html:104
+#: bp/scene/templates/scene/material_details.html:114
 #, fuzzy
 msgid "Event Statistics"
 msgstr "Serverstatistik"
@@ -2547,7 +2566,7 @@ msgid "Citation"
 msgstr "Citering"
 
 #: bp/gramps/templates/gramps/scripting.html:36
-#: bp/scene/templates/scene/source_events.html:21
+#: bp/scene/templates/scene/source_events.html:22
 #: bp/scene/templates/scene/sources.html:71
 msgid "Source"
 msgstr "Källa"
@@ -2681,6 +2700,7 @@ msgstr "Inga kommentarer"
 
 #: bp/scene/templates/scene/comments.html:3
 #: bp/scene/templates/scene/comments.html:12
+#: bp/scene/templates/scene/material_details.html:3
 msgid "List of Discussion Topics"
 msgstr "Lista av diskussion ämnen"
 
@@ -2696,7 +2716,7 @@ msgid "Displaying %(num)s distinct topics"
 msgstr "Visning av %(num)s distinkta ämnen"
 
 #: bp/scene/templates/scene/comments.html:37
-#: bp/scene/templates/scene/source_events.html:50
+#: bp/scene/templates/scene/source_events.html:51
 msgid "Author"
 msgstr "Författare"
 
@@ -2743,7 +2763,7 @@ msgstr "Det hittades ingen kommentar som startar från %(name)s"
 
 #: bp/scene/templates/scene/comments.html:98
 #: bp/scene/templates/scene/families.html:160
-#: bp/scene/templates/scene/macros.html:113
+#: bp/scene/templates/scene/macros.html:119
 #: bp/scene/templates/scene/medias.html:109
 #: bp/scene/templates/scene/persons_list.html:168
 msgid "first page"
@@ -2779,7 +2799,7 @@ msgstr "Händelse detaljer"
 #: bp/scene/templates/scene/media.html:63
 #: bp/scene/templates/scene/person.html:115
 #: bp/scene/templates/scene/place.html:77
-#: bp/scene/templates/scene/source_events.html:44
+#: bp/scene/templates/scene/source_events.html:45
 msgid "Identifiers"
 msgstr "Identifierare"
 
@@ -2920,13 +2940,13 @@ msgid "Family Events"
 msgstr "Familje händelser"
 
 #: bp/scene/templates/scene/family.html:81
-#: bp/scene/templates/scene/source_events.html:95
+#: bp/scene/templates/scene/source_events.html:93
 #: templates/cite_sour_repo.html:29
 msgid "Page"
 msgstr "Sida"
 
 #: bp/scene/templates/scene/family.html:85
-#: bp/scene/templates/scene/source_events.html:33
+#: bp/scene/templates/scene/source_events.html:34
 msgid "in the repository"
 msgstr "i arkivet"
 
@@ -2957,67 +2977,77 @@ msgstr "Miniatyrer"
 msgid "Pictures"
 msgstr "Bilder"
 
-#: bp/scene/templates/scene/macros.html:85
+#: bp/scene/templates/scene/macros.html:86
+#, fuzzy
+msgid "Material details and actions"
+msgstr "Administrativa åtgärder"
+
+#: bp/scene/templates/scene/macros.html:86
+#, fuzzy
+msgid "Material details"
+msgstr "Familj detaljer"
+
+#: bp/scene/templates/scene/macros.html:91
 msgid "Get more info"
 msgstr "Få mer information"
 
-#: bp/scene/templates/scene/macros.html:85
+#: bp/scene/templates/scene/macros.html:91
 msgid "Log in to Isotammi"
 msgstr "Logga in på Isotammi"
 
-#: bp/scene/templates/scene/macros.html:97
+#: bp/scene/templates/scene/macros.html:103
 #, fuzzy
 msgid "Show material details"
 msgstr "Familj detaljer"
 
-#: bp/scene/templates/scene/macros.html:117
+#: bp/scene/templates/scene/macros.html:123
 msgid "previous page"
 msgstr "föregående sida"
 
-#: bp/scene/templates/scene/macros.html:125
+#: bp/scene/templates/scene/macros.html:131
 msgid "no next page"
 msgstr "följande sida finns ej"
 
-#: bp/scene/templates/scene/macros.html:131
+#: bp/scene/templates/scene/macros.html:137
 msgid "next page starting"
 msgstr "nästa sida startas"
 
-#: bp/scene/templates/scene/macros.html:143
+#: bp/scene/templates/scene/macros.html:149
 msgid "Copy UUID key"
 msgstr "Kopiera nyckeln"
 
-#: bp/scene/templates/scene/macros.html:146
+#: bp/scene/templates/scene/macros.html:152
 msgid "number"
 msgstr "nummer"
 
-#: bp/scene/templates/scene/macros.html:148
+#: bp/scene/templates/scene/macros.html:154
 msgid "latest change time and contributor"
 msgstr "sist förändringen och original bidragsgivare"
 
-#: bp/scene/templates/scene/macros.html:150
+#: bp/scene/templates/scene/macros.html:156
 msgid "edited"
 msgstr "redigerad"
 
-#: bp/scene/templates/scene/macros.html:154
+#: bp/scene/templates/scene/macros.html:160
 #: bp/stat/templates/stat/layout.html:43
 msgid "User data"
 msgstr "Anvädardata"
 
-#: bp/scene/templates/scene/macros.html:157
+#: bp/scene/templates/scene/macros.html:163
 msgid "origin from"
 msgstr "bidragsgivare"
 
-#: bp/scene/templates/scene/macros.html:194
-#: bp/scene/templates/scene/macros.html:227
+#: bp/scene/templates/scene/macros.html:200
+#: bp/scene/templates/scene/macros.html:233
 msgid "See Person's Details"
 msgstr "Se personens detaljer"
 
 #: bp/scene/templates/scene/hx-person/famtree.html:40
-#: bp/scene/templates/scene/macros.html:234
+#: bp/scene/templates/scene/macros.html:240
 msgid "self"
 msgstr "själv"
 
-#: bp/scene/templates/scene/macros.html:237
+#: bp/scene/templates/scene/macros.html:243
 #: bp/scene/templates/scene/media.html:102
 #: bp/scene/templates/scene/media.html:116
 #: bp/scene/templates/scene/person_search_result.html:35
@@ -3025,25 +3055,30 @@ msgstr "själv"
 msgid "see details of person %(id)s"
 msgstr "se detaljer om person %(id)s"
 
-#: bp/scene/templates/scene/macros.html:240
+#: bp/scene/templates/scene/macros.html:246
 msgid "Anonymous"
 msgstr "Anonym"
 
-#: bp/scene/templates/scene/macros.html:257
+#: bp/scene/templates/scene/macros.html:263
 msgid "born"
 msgstr "född"
 
-#: bp/scene/templates/scene/macros.html:259
+#: bp/scene/templates/scene/macros.html:265
 msgid "died"
 msgstr "dog"
 
-#: bp/scene/templates/scene/macros.html:273
+#: bp/scene/templates/scene/macros.html:279
 msgid "See Family Details"
 msgstr "Se familjen"
 
-#: bp/scene/templates/scene/macros.html:342
+#: bp/scene/templates/scene/macros.html:348
 msgid "Copy to clipboard"
 msgstr "Kopiera till clipboard"
+
+#: bp/scene/templates/scene/material_details.html:48
+#, fuzzy, python-format
+msgid "Statistics for Material %(id)s"
+msgstr "se detaljer om familjen %(id)s"
 
 #: bp/scene/templates/scene/media.html:3 bp/scene/templates/scene/media.html:45
 msgid "Media data"
@@ -3492,49 +3527,49 @@ msgstr "Min profil med roller: "
 msgid "Events of a Source"
 msgstr "Händelser av en källa"
 
-#: bp/scene/templates/scene/source_events.html:15
+#: bp/scene/templates/scene/source_events.html:16
 #: templates/cite_sour_repo.html:3
 msgid "Source Details"
 msgstr "Käll detaljer"
 
-#: bp/scene/templates/scene/source_events.html:31
+#: bp/scene/templates/scene/source_events.html:32
 msgid "Archieved"
 msgstr "Arkiverad"
 
-#: bp/scene/templates/scene/source_events.html:40
+#: bp/scene/templates/scene/source_events.html:41
 #: bp/stk_security/templates/security/register_user.html:20
 msgid "Note!"
 msgstr "Märk!"
 
-#: bp/scene/templates/scene/source_events.html:40
+#: bp/scene/templates/scene/source_events.html:41
 msgid "Archieve not defined!"
 msgstr "Arkiv inte definierat!"
 
-#: bp/scene/templates/scene/source_events.html:54
+#: bp/scene/templates/scene/source_events.html:55
 msgid "Publishing info"
 msgstr "Utgivare info"
 
-#: bp/scene/templates/scene/source_events.html:58
+#: bp/scene/templates/scene/source_events.html:59
 msgid "Abbreviation"
 msgstr "Förkortning"
 
-#: bp/scene/templates/scene/source_events.html:83
+#: bp/scene/templates/scene/source_events.html:81
 msgid "Source References"
 msgstr "Käll referenser"
 
-#: bp/scene/templates/scene/source_events.html:95
+#: bp/scene/templates/scene/source_events.html:93
 msgid "Copy citation to clipboard"
 msgstr "Kopiera citergingen till clipboard"
 
-#: bp/scene/templates/scene/source_events.html:97
+#: bp/scene/templates/scene/source_events.html:95
 msgid "confidence"
 msgstr "konfidens"
 
-#: bp/scene/templates/scene/source_events.html:118
+#: bp/scene/templates/scene/source_events.html:116
 msgid "see details of family"
 msgstr "se detaljer om familjen"
 
-#: bp/scene/templates/scene/source_events.html:122
+#: bp/scene/templates/scene/source_events.html:120
 msgid "see details of event"
 msgstr "se detaljer om händelsen"
 
@@ -4265,7 +4300,7 @@ msgstr "Det gick inte att spara databasen"
 msgid "Database save failed due to {}"
 msgstr "Databas sparningen misslyckats på grund av {}"
 
-#: pe/neo4j/updateservice.py:1437
+#: pe/neo4j/updateservice.py:1438
 msgid "Could not save a comment"
 msgstr "Commentarens sparningen misslyckats"
 

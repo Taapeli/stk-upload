@@ -36,92 +36,95 @@ function doconfirm( command, title ) { // used in commands.html
    ) ) }}
 
 <div id="startdiv">
-		<h1>{{ _('Material Details') }}</h1>
+	<h1>{{ _('Material Details') }}</h1>
 
 {% include "flash_messages.html" %}
 
-<div class="startbox" style="width:auto">
-	<h2 class="center">{{ _("General")|title() }}</h2>
-	<table>
-	<tr>
-		<th>{{ _("Batch") }}</th>
-		<td>{{ batch.id }}</td>
-	</tr>
-    <tr>
-        <th>{{ _("Material type") }}</th>
-        <td class="typedesc" style="font-size:110%">{{ _(batch.material_type) }}</td>
-    </tr>
-    <tr>
-        <th>{{ _("Status") }}</th>
-        <td><b>{{ _(batch.state) }}</b></td>
-    </tr>
-    <tr>
-        <th>{{ _("Gramps file") }}</th>
-        <td style="overflow: auto">{{ batch.xmlname }}</td>
-    </tr>
-	<tr>
-		<th colspan="2">{{ _("Description") }}<br>
-			<form>
-			<input type="hidden" name="batch_id" value="{{ batch.id }}">
-			<textarea id="description" name="description">{{ batch.description }}</textarea>
-			<button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
-			</form>
-        </th>
-	</tr>
-   	</table>
-   	<p>
-{% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
-   	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
-{% endif %}   
-
-</div>
-
-<div class="startbox">
-	<h2 class="center">{{ _("Object Statistics") }}</h2>
-	<table>
-	<tr>
-		<th>{{ _("Type") }}</th>
-		<th>{{ _("Count") }}</th>
-		<th colspan="2">{{ _("Source citations") }}</th>
-	{% for label,do_citations,(c_obj,c_ref) in object_stats %}
-		<tr><!-- {{label}}, {{do_citations}}, ({{c_obj}},{{c_ref}}) -->
-			<td>{{ label|title }}</td>
-			<td class="right">{{ c_obj }}</td>
-       {% if do_citations %}
- 		    <td class="right">{{ c_ref }}</td>
-            <td class="right">
-            {% if c_obj %}{{ (100 * c_ref/c_obj)|int }}% {% endif %}
-            </td>
-       {% else %}
-            <td colspan="2"> </td>
-       {% endif %}
-	{% endfor %}
-	</table>
-</div>
-
-<div class="startbox">
-	<h2 class="center">{{ _("Event Statistics") }}</h2>
-	<table>
-	<tr>
-		<th>{{ _("Type") }}
-        <th>{{ _("Count") }}
-        <th colspan="2">{{ _("Source citations") }}
-	{% for label,(c_obj,c_ref,pct) in event_stats %}
-		<tr>
-			<td>{{ label }}
-			<td class="right">{{ c_obj }}
-			<td class="right">{{ c_ref }}
-			<td class="right">{{ pct }}%
-	{% endfor %}
-	</table>
-</div>
-
-<div>
-    <h2>{{ _("Actions") }}</h2>
-    <div hx-trigger="load"
-        hx-get="/gramps/commands/{{batch.id}}"> 
+    <div class="startbox" style="width:auto">
+    	<h2 class="center">{{ _("General")|title() }}</h2>
+    	<table>
+        	<tr>
+        		<th>{{ _("Batch") }}</th>
+        		<td>{{ batch.id }}</td>
+        	</tr>
+            <tr>
+                <th>{{ _("Material type") }}</th>
+                <td class="typedesc" style="font-size:110%">{{ _(batch.material_type) }}</td>
+            </tr>
+            <tr>
+                <th>{{ _("Status") }}</th>
+                <td><b>{{ _(batch.state) }}</b></td>
+            </tr>
+            <tr>
+                <th>{{ _("Gramps file") }}</th>
+                <td style="overflow: auto">{{ batch.xmlname }}</td>
+            </tr>
+        	<tr>
+        		<th colspan="2">{{ _("Description") }}<br>
+        			<form>
+        			<input type="hidden" name="batch_id" value="{{ batch.id }}">
+        			<textarea id="description" name="description">{{ batch.description }}</textarea>
+        			<button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
+        			</form>
+                </th>
+        	</tr>
+       	</table>
+       	<p>
+    {% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
+       	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
+    {% endif %}   
+    
     </div>
-</div>
+    
+    <div class="startbox">
+    	<h2 class="center">{{ _("Object Statistics") }}</h2>
+    	<table>
+         	<tr>
+         		<th>{{ _("Type") }}</th>
+         		<th>{{ _("Count") }}</th>
+         		<th colspan="2">{{ _("Source citations") }}</th>
+            <tr>
+    {% for label,do_citations,(c_obj,c_ref) in object_stats %}
+    		<tr><!-- {{label}}, {{do_citations}}, ({{c_obj}},{{c_ref}}) -->
+    			<td>{{ label|title }}</td>
+    			<td class="right">{{ c_obj }}</td>
+       {% if do_citations %}
+     		    <td class="right">{{ c_ref }}</td>
+                <td class="right">
+                {% if c_obj %}{{ (100 * c_ref/c_obj)|int }}% {% endif %}
+                </td>
+       {% else %}
+                <td colspan="2"> </td>
+       {% endif %}
+    {% endfor %}
+    	</table>
+    </div>
+    
+    <div class="startbox">
+    	<h2 class="center">{{ _("Event Statistics") }}</h2>
+    	<table>
+            <tr>
+            	<th>{{ _("Type") }}</th>
+                <th>{{ _("Count") }}</th>
+                <th colspan="2">{{ _("Source citations") }}</th>
+            </tr>
+    {% for label,(c_obj,c_ref,pct) in event_stats %}
+    		<tr>
+    			<td>{{ label }}</td>
+    			<td class="right">{{ c_obj }}</td>
+    			<td class="right">{{ c_ref }}</td>
+    			<td class="right">{{ pct }}%</td>
+            </tr>
+    {% endfor %}
+    	</table>
+    </div>
+    
+    <div>
+        <h2>{{ _("Actions") }}</h2>
+        <div hx-trigger="load"
+            hx-get="/gramps/commands/{{batch.id}}"> 
+        </div>
+    </div>
 
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
 
