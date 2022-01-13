@@ -58,12 +58,12 @@ class RootUpdater(DataService):
                 :param:    username   str
             """
             # Lock db to avoid concurrent Batch loads
-            if not dataservice.md_aqcuire_lock(tx, "batch_id"):
+            if not dataservice.ds_aqcuire_lock(tx, "batch_id"):
                 return None
 
             # New Root object with next free batch id
             root = Root()
-            root.id = dataservice.md_new_batch_id(tx)
+            root.id = dataservice.ds_new_batch_id(tx)
             root.user = username
             # root.material_type is still unknown
             res = root.save(tx) #, self.dataservice)
@@ -77,7 +77,7 @@ class RootUpdater(DataService):
 
             # Load user's XML file
             root.file = loadfile.upload_file(infile, batch_upload_folder)
-    
+
             root.xmlname = infile.filename
             root.metaname = root.file + ".meta"
             root.logname = root.file + ".log"
@@ -102,35 +102,10 @@ class RootUpdater(DataService):
             # Create Root node with next free batch id
             root = session.write_transaction(new_batch_tx,
                                              self.dataservice, username)
-
             shareds.tdiff = time.time() - t0
             return root
-    
+
     # @staticmethod def new_batch(username): # -> create_batch
-    #     """
-    #     Initiate new Batch.
-    #     """
-    #     def new_batch_tx(tx, username):
-    #         """ A session.write_transaction function. """
-    #         # Lock db to avoid concurent Batch loads
-    #         self.dataservice.md_aqcuire_lock(tx, "batch_id")
-    #         # Find the next free Batch id
-    #         res = self.dataservice.md_new_batch_id(tx)
-    #         batch = Root()
-    #         batch.id = res.get("id")
-    #         batch.user = username
-    #         if batch.id:
-    #             res = batch.save(tx, self.dataservice) #, self.dataservice)
-    #             if not Status.has_failed(res):
-    #                 return batch
-    #         return None
-    #
-    #     # Creates neo4j.work.simple.Session object and 
-    #     # runs write_transaction function 'new_batch_id_tx'
-    #     with self.dataservice.driver.session() as session:
-    #         batch = session.write_transaction(new_batch_tx, username)
-    #
-    #     return batch
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id (in BatchUpdater). """

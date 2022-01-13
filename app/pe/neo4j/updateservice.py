@@ -112,15 +112,15 @@ class Neo4jUpdateService(ConcreteService):
     # ----- Batch Audit -----
 
     @staticmethod
-    def md_aqcuire_lock(tx, lock_id):
+    def ds_aqcuire_lock(tx, lock_id):
         """Create a lock"""
         tx.run(CypherRoot.acquire_lock, lock_id=lock_id).single()
         return True  # value > 0
 
-    # def ds_find_last_used_batch_seq(self, tx): # --> md_new_batch_id
+    # def ds_find_last_used_batch_seq(self, tx): # --> ds_new_batch_id
 
     @staticmethod
-    def md_new_batch_id(tx):
+    def ds_new_batch_id(tx):
         """Find next unused Batch id using BatchId node.
 
         Returns batch_id
@@ -133,13 +133,13 @@ class Neo4jUpdateService(ConcreteService):
         record = tx.run(CypherRoot.read_batch_id).single()
         if record:
             node = record["n"]
-            # print("#md_new_batch_id: BatchId node",node)
+            # print("#ds_new_batch_id: BatchId node",node)
             if node.get("prefix") == base:
                 seq = node.get("seq")
         seq += 1
         batch_id = "{}.{:03d}".format(base, seq)
         tx.run(CypherRoot.save_batch_id, prefix=base, seq=seq)
-        print("#Neo4jUpdateService.md_new_batch_id: id='{}'".format(batch_id))
+        print("#Neo4jUpdateService.ds_new_batch_id: id='{}'".format(batch_id))
         return batch_id
 
     def ds_get_batch(self, user, batch_id):
@@ -157,7 +157,7 @@ class Neo4jUpdateService(ConcreteService):
                         "statustext": "Batch not found"}
 
     @staticmethod
-    def md_batch_save(tx, attr):
+    def ds_batch_save(tx, attr):
         """Creates a Batch node.
 
         attr = {"mediapath", "file", "id", "user", "status"}
@@ -917,7 +917,7 @@ class Neo4jUpdateService(ConcreteService):
 
         # Save Name nodes under the Person node
         for name in person.names:
-            self.__save_name(tx, name, parent_id=person.uniq_id)
+            self.ds_save_name(tx, name, parent_id=person.uniq_id)
 
         # Save web urls as Note nodes connected under the Person
         if person.notes:
@@ -955,7 +955,7 @@ class Neo4jUpdateService(ConcreteService):
             )
         return
 
-    def __save_name(self, tx, name, parent_id):
+    def ds_save_name(self, tx, name, parent_id):
         """Creates or updates this Name node. (There is no handle)
         If parent_id is given, a link (parent) -[:NAME]-> (Name) is created
 

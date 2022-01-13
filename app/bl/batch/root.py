@@ -163,7 +163,7 @@ class Root(NodeObject):
         }
 
         with RootUpdater("update", tx=tx) as bl_service:
-            self.uniq_id = bl_service.dataservice.md_batch_save(tx, attr)
+            self.uniq_id = bl_service.dataservice.ds_batch_save(tx, attr)
         return {"status": Status.OK, "identity": self.uniq_id}
 
 
