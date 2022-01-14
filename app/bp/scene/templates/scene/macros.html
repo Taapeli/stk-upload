@@ -154,14 +154,12 @@
     <span id="changetime" title="{{ _('latest change time and contributor') }}"
         {% if margin %}style='margin-right:{{margin}}'{% endif %}
         >{{ _("edited") }} {{obj.change_str()}}
-        {%- if obj.root %}{# Batch node data like {'material', 'root_user', 'id'} #}
-        , <span>
-        {% if obj.root.root_state == 'Candidate' %}
-        	{{ _('User data') }}:
-            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{obj.root.material_type}}
+        {%- if user_context.material %}
+        – <span>
+        {% if user_context.material.breed == 'batch' %}
+        	{{ _('User data')|lower }}
         {% else %}
-        	{{ _('origin from') }}
-            <b>{{obj.root.root_user}}</b> {{obj.root.batch_id}} {{ _(obj.root.material_type) }}
+        	{{ _('origin from') }}: {{user_context.user}}
         {% endif %}
         </span>
         {% endif %}

@@ -188,6 +188,35 @@ def profile_exists(name):
         num_of_users = result[0]
     return(num_of_users > 0)    
 
+def remove_unlinked_nodes():
+    """    Find and remove nodes with no link (:Batch) --> (x).
+    """
+    is_loading = "MATCH (b:Root{state:'Storing'}) RETURN count(b)"
+    # 
+    delete_unlinked_nodes = """
+        MATCH (n) WHERE n.handle IS NOT NULL 
+        OPTIONAL MATCH (root) --> (n) 
+        WITH n, root WHERE root IS NULL
+             DETACH DELETE n
+             RETURN count(n), LABELS(n)[0] AS label ORDER BY label"""
+    deleted = 0
+
+    running = shareds.driver.session().run(is_loading).single()
+    if running:
+        print(f"database.accessDB.remove_unlinked_nodes: Not run because of 'Storing' batch!")
+    else:
+        del_d = 0
+        while del_d:
+            del_d = 0
+            result = shareds.driver.session().run(delete_unlinked_nodes)
+            for count, label in result:
+                print(
+                    f"database.accessDB.remove_unlinked_nodes: Deleted {count} {label} not linked to Root"
+                )
+                del_d += count
+                deleted += count
+
+    return deleted
 
 def build_master_user():
     with shareds.app.app_context():

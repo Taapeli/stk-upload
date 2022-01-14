@@ -10,6 +10,11 @@
 startbox h2 {margin-bottom: 0;}
 div.startbox { height: 280px; }
 div.startbox > table { width: 280px; }
+div.actions {
+    border: solid 2pt silver;
+    background-color: whitesmoke;
+    height: auto;
+}
 tbody {
     background: whitesmoke;
 }
@@ -118,14 +123,21 @@ function doconfirm( command, title ) { // used in commands.html
     {% endfor %}
     	</table>
     </div>
-    
+
+    <div class="startbox actions">
+        <h2 class="center">{{ _("Operations") }}</h2>
+        <div hx-trigger="load"
+            hx-get="/gramps/commands/{{batch.id}}">
+        </div>
+    </div>
+{#
     <div>
         <h2>{{ _("Actions") }}</h2>
         <div hx-trigger="load"
             hx-get="/gramps/commands/{{batch.id}}"> 
         </div>
     </div>
-
+#}
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
 
 <!-- Startdiv ends -->
