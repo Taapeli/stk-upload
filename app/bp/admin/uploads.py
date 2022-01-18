@@ -141,11 +141,11 @@ def get_meta(root):
         metaname = root.metaname
         meta = eval(open(metaname).read())
         status = meta.get("status")
-        if status == State.FILE_LOADING:
+        if status == State.FILE_LOADING or root.state ==  State.FILE_LOADING:
             stat = os.stat(metaname)
             max_sec = 2*60
             if (stat.st_mtime < time.time() - max_sec): 
-                # not updated within last minute -> assume failure
+                # not updated within last two minutes -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
                 msg1= f"{_('Load failed, no progress in %(n)s seconds', n=max_sec)}"
                 msg = f"{util.format_timestamp()}: {msg1}"
@@ -155,6 +155,10 @@ def get_meta(root):
                 print(f"bp.admin.uploads.get_meta: {msg}")
                 flash(msg1)
                 update_metafile(metaname, status=State.FILE_LOAD_FAILED)
+                from bl.batch.root_updater import RootUpdater
+                with RootUpdater("update") as batch_service:
+                    print("------------->", root.id, root.user, State.FILE_LOAD_FAILED)
+                    batch_service.change_state( root.id, root.user, State.FILE_LOAD_FAILED)
     except FileNotFoundError as e:
         meta = {}
     except Exception as e:
@@ -224,6 +228,9 @@ def background_load_to_stkbase(batch) -> None: # batch::bl.batch.root.Root
         res = traceback.format_exc()
         print(res)
         update_metafile(batch.metaname, status=State.FILE_LOAD_FAILED)
+        from bl.batch.root_updater import RootUpdater
+        with RootUpdater("update") as batch_service:
+            batch_service.change_state( batch.id, batch.user, State.FILE_LOAD_FAILED)
         msg = f"{util.format_timestamp()}:\nStoring the file {batch.file} from user {batch.user} to database FAILED"
         msg += f"\nLog file: {batch.logname}\n" + res
         for step in steps:
