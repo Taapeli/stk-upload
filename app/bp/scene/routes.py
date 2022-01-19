@@ -1109,10 +1109,19 @@ def show_place(locid):
         return redirect(url_for("virhesivu", code=1, text=str(e)))
 
     cnt = len(res.get("events")) if res.get("events", False) else 0
+    pl = res.get("place")
+    level = 1
+    for p in res.get("hierarchy"):
+        if p.uuid == pl.uuid:
+            level = p.level
+    zoom = 19 - 48.5*level + 30*level*level
+    print(f"bp.scene.routes.show_place: level={level}, zoom={zoom}")
+
     stk_logger(u_context, f"-> bp.scene.routes.show_place n={cnt}")
     return render_template(
         "/scene/place.html",
-        place=res.get("place"),
+        place=pl,
+        level=level, zoom=zoom,
         pl_hierarchy=res.get("hierarchy"),
         events=res.get("events"),
         user_context=u_context,
