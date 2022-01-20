@@ -472,15 +472,18 @@ def batch_details(batch_id):
             raise RuntimeError(_("Failed to retrieve batch"))
  
         batch = res['item']
-    stats = get_stats(batch_id)
-    # localize:
-    object_stats = [(_(label),has_citations,data) for (label,has_citations,data) in stats.object_stats]
+    stats = get_stats(batch_id, batch.timestamp)
     SELECTED_EVENT_TYPES = (
         'Birth',
         'Death',
         'Marriage',
     )
-    event_stats = [(_(label),data) for (label,data) in stats.event_stats if label in SELECTED_EVENT_TYPES]
+    # localize:
+    object_stats = [(_(label),has_citations,data) 
+                    for (label,has_citations,data) in stats.object_stats]
+    event_stats = [(_(label),data) 
+                   for (label,data) in stats.event_stats 
+                      if label in SELECTED_EVENT_TYPES]
     return render_template(
        my_template,
        batch=batch,
