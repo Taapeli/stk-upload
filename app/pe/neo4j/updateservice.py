@@ -1017,11 +1017,11 @@ class Neo4jUpdateService(ConcreteService):
         res = {"status": Status.OK}
         # print(f"### ds_set_people_lifetime_estimates: self.tx = {self.tx}")
 
-        if uids:
+        if uids is not None:
             result = self.tx.run(
                 CypherPerson.fetch_selected_for_lifetime_estimates, idlist=uids
             )
-        else:
+        else: # for whole database, this is not actually used?
             result = self.tx.run(CypherPerson.fetch_all_for_lifetime_estimates)
         # RETURN p, id(p) as pid,
         #     COLLECT(DISTINCT [e,r.role]) AS events,

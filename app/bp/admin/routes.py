@@ -159,7 +159,7 @@ def estimate_dates(uid=None):
     if uid:
         uids = list(uid)
     else:
-        uids = []
+        uids = None # whole database!
     # message = dataupdater.set_person_estimated_dates(uids)
     # ext = _("estimated lifetime")
     # return render_template("/talletettu.html", text=msg, info=ext)
