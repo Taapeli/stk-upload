@@ -46,6 +46,11 @@ LABEL_SET = [   # values (label, has_citations)
 
 @dataclass
 class Stats:
+    """ Carries statistic tables. 
+    
+        Objects: [(label, has_citations, (cnt_objs,cnt_citations)), ...)]
+        Events: [(typename, (cnt_events, cnt_citations, pct)), ...]
+    """
     object_stats: List
     event_stats: List
     timestamp: int
@@ -53,7 +58,8 @@ class Stats:
 class StatsBuilder:
     def __init__(self, session):
         self.session = session
-        
+
+
     def get_object_stats(self, batch_id, label, has_citations):
         """ Calculate number of different objects in this batch. """
         cypher = """
@@ -75,7 +81,8 @@ class StatsBuilder:
         rec = self.session.run(cypher2,batch_id=batch_id, lb=label).single()
         cnt2 = rec.get("cnt")
         return (cnt,cnt2)
-    
+
+
     def get_object_stats_name(self, batch_id, label, has_citations):
         """ Calculate number of label type objects and citations referred from Persons. """
         cypher = """
@@ -97,9 +104,9 @@ class StatsBuilder:
         rec = self.session.run(cypher2, batch_id=batch_id, lb=label).single()
         cnt2 = rec.get("cnt")
         return (cnt,cnt2)
-    
-    
-    def get_event_stats(self, batch_id, event_types=[]):
+
+
+    def count_events(self, batch_id, event_types=[]):
         """ Calculate number of different Events and their Citation links. 
 
             #Todo: Limit results by event_types 
@@ -124,21 +131,22 @@ class StatsBuilder:
             event_stats.append(data)
             
         return event_stats
-    
-    
-    def create_stats_node(self, batch_id:str):
-        """ Read or create Stats node. """
-        cypher = """
-            match (b:Root {id:$batch_id})
-            merge (b) -[:STATS]-> (stats:Stats)
-                on create set
-                    stats.event_stats = [],
-                    stats.object_stats = []
-            return stats
-        """ 
-        rec = self.session.run(cypher, batch_id=batch_id).single()
-        print("build_stats_node",rec)
-        return rec['stats']
+
+
+    # def create_stats_node(self, batch_id:str):
+    #     """ Read or create Stats node. """
+    #     cypher = """
+    #         match (b:Root {id:$batch_id})
+    #         merge (b) -[:STATS]-> (stats:Stats)
+    #             on create set
+    #                 stats.event_stats = [],
+    #                 stats.object_stats = []
+    #         return stats
+    #     """ 
+    #     record = self.session.run(cypher, batch_id=batch_id).single()
+    #     node = record['stats']
+    #     return node
+
 
     def get_stats_node(self, batch_id):
         """ Read Stats node for batch_id. """
@@ -147,13 +155,15 @@ class StatsBuilder:
                 --> (stats:Stats)
             return stats
         """ 
-        rec = self.session.run(cypher, batch_id=batch_id).single()
-        logger.debug(f"bl.stats.StatsBuilder.get_stats_node {rec}")
-        if rec is None: return None
-        return rec.get('stats')
+        record = self.session.run(cypher, batch_id=batch_id).single()
+        #logger.debug(f"bl.stats.StatsBuilder.get_stats_node {rec}")
+        if record is None: return None
+        node = record['stats']
+        return node
 
-    def build_stats_object(self, batch_id, timestamp):
-        """ Calculate number of objects by object type.  """
+
+    def count_objects_events(self, batch_id, timestamp):
+        """ Calculate number of objects and events by object type. """
         object_stats = []
         for label, has_citations in LABEL_SET:
             if label == 'Name':
@@ -161,47 +171,55 @@ class StatsBuilder:
             else:
                 ret = self.get_object_stats(batch_id, label, has_citations)
             object_stats.append((label,has_citations,ret))
-        event_stats = self.get_event_stats(batch_id)
+        event_stats = self.count_events(batch_id)
         return Stats(object_stats, event_stats, timestamp)
 
 
-    def save_stats(self, batch_id, stats):
+    def save_stats(self, batch_id:str, stats:Stats):
+        """ Create or update Stats node.
+            stats.timestamp is from Root node.
+        """
         cypher = """
-            match (b:Root {id:$batch_id}) --> (stats:Stats)
+            merge (b:Root {id:$batch_id}) -[:STATS]-> (stats:Stats)
             set stats.object_stats=$object_stats, 
                 stats.event_stats=$event_stats,
                 stats.timestamp=$ts
         """ 
-        object_stats = json.dumps(stats.object_stats)
-        event_stats = json.dumps(stats.event_stats)
+        object_stats_js = json.dumps(stats.object_stats)
+        event_stats_js = json.dumps(stats.event_stats)
         self.session.run(cypher,
                          batch_id=batch_id, 
-                         object_stats=object_stats, 
-                         event_stats=event_stats,
+                         object_stats=object_stats_js, 
+                         event_stats=event_stats_js,
                          ts=stats.timestamp
-                    ).single()
-    
-    
+                    )
+
+
     def get_stats_from_node(self, node):
-        object_stats = node['object_stats']
-        event_stats = node['event_stats']
+        """ Convert node to Stats node. """
         timestamp = node.get('timestamp', 0)
-        object_stats = json.loads(object_stats)
-        event_stats = json.loads(event_stats)
+        object_stats = json.loads(node['object_stats'])
+        event_stats = json.loads(node['event_stats'])
         return Stats(object_stats, event_stats, timestamp)
-    
-    
+
+
     def get_stats(self, batch_id, timestamp):
+        """ Read or create statistics for batch_id, depending of Root.timestamp. """
         node = self.get_stats_node(batch_id)
         if node is None or node.get("timestamp",0) < timestamp:
-            node = self.create_stats_node(batch_id)
-            stats = self.build_stats_object(batch_id, timestamp)
+            #node = self.create_stats_node(batch_id)
+            stats = self.count_objects_events(batch_id, timestamp)
             self.save_stats(batch_id, stats)
+            fn = "count_objects_events"
         else:
             stats = self.get_stats_from_node(node)
+            fn = "get_stats_from_node"
+        print(f"#bl.stats.StatsBuilder.{fn}: obj_types={len(stats.object_stats)}, "
+              f"event_types={len(stats.event_stats)}")
         return stats
-    
-def get_stats(batch_id, timestamp:int):
+
+
+def get_stats(batch_id:str, timestamp:int):
     """ Get Stats object by given Root.id and Root.timestamp.
 
         If the Root has no Stats node or Stats is older than Root,
@@ -211,13 +229,3 @@ def get_stats(batch_id, timestamp:int):
         handler = StatsBuilder(session)
         stats = handler.get_stats(batch_id, timestamp)
         return stats
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        

@@ -72,10 +72,8 @@ class Material():
         try:
             m = self.m_type or "Unknown material"
             # if m == "Place": m = "Places"
-            print(
-                f"#bl.material.Material.to_display: "
-                f'[{self.breed!r}, {self.state!r}, {m!r}, {self.batch_id!r}]'
-                )
+            # print(f"#bl.material.Material.to_display: "
+            #       f'[{self.breed!r}, {self.state!r}, {m!r}, {self.batch_id!r}]')
             if self.state is None:
                 return f"{ _(m) }: {self.batch_id}"
             elif self.state == State.ROOT_ACCEPTED:

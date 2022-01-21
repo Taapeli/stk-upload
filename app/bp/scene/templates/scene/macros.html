@@ -99,11 +99,7 @@
     {#  Show and change data: researcher data or approved common data. #}
     {#  call show_use_case(no_change=true) if you want to deny change. #}
     {% if user_context and not config['DEMO'] %}
-        {% if user_context.material.batch_id %}
-            <a href="/gramps/details/{{user_context.material.batch_id}}" title="{{ _('Show material details') }}">
-               {{ user_context.display_current_material() }}</a>
-        {% else %}{{ user_context.display_current_material() }}
-        {% endif -%}
+        {{ user_context.display_current_material() }}
     {% endif %}
 {%- endmacro %}
 

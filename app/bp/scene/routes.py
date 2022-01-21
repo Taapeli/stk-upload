@@ -418,8 +418,9 @@ def show_person_search():  # (set_scope=None, batch_id=None):
         elapsed = time.time() - t0
         stk_logger(
             u_context,
-            "-> bp.scene.routes.show_person_search/"
-            f"{rule} n={len(found)}{hidden_txt} e={elapsed:.3f}",
+            f"-> bp.scene.routes.show_person_search/{rule} "
+            f"n={len(found)}{hidden_txt} e={elapsed:.3f} "
+            f"f={u_context.material.batch_id}"
         )
         print(
             f"bp.scene.routes.show_person_search: Got {len(found)} persons "

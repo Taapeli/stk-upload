@@ -26,7 +26,7 @@ Created on 15.8.2018
 """
 # blacked 2021-07-25 JMä
 import os
-#import time
+import time
 import logging
 import traceback
 from types import SimpleNamespace
@@ -58,7 +58,7 @@ from models import syslog, util #, loadfile
 
 from ui.batch_ops import RESEARCHER_FUNCTIONS, RESEARCHER_OPERATIONS
 from ui.context import UserContext
-from ui.util import error_print
+from ui.util import error_print, stk_logger
 from ..admin import uploads
 
 from . import bp
@@ -422,8 +422,12 @@ def get_progress(batch_id):
 @login_required
 @roles_accepted("research")
 def get_commands(batch_id):
-    """ Available commands for gramps/uploads page.
+    """ Available commands for details page.
+    
+        If has argument '?caller=scene', don't show browse command
     """
+    caller = request.args.get('caller', 'uploads')
+
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
         if Status.has_failed(res):
@@ -436,7 +440,7 @@ def get_commands(batch_id):
         ops = RESEARCHER_OPERATIONS.get(batch.state)
         if ops:
             for i in range(len(RESEARCHER_FUNCTIONS)):
-                #print("#bp.gramps.routes.get_commands:",batch.state,ops[i],RESEARCHER_FUNCTIONS[i])
+                #print("#bp.gramps.routes.get_commands:",caller,batch.state,ops[i],RESEARCHER_FUNCTIONS[i])
                 if ops[i]:
                     # If allowed function, add (url, title) tuple to commands
                     cmd, title = RESEARCHER_FUNCTIONS[i]
@@ -444,9 +448,10 @@ def get_commands(batch_id):
                     confirm = False
                     if cmd.startswith("/gramps/batch_delete/"):
                         confirm = True
-                    # Add parameters
-                    cmd = unquote_plus(cmd.format(state=batch.state, batch_id=batch.id))
-                    commands.append( (cmd, _(title), confirm) )
+                    if not (caller == "scene" and cmd.startswith("/scene/material/batch")):
+                        # Add parameters
+                        cmd = unquote_plus(cmd.format(state=batch.state, batch_id=batch.id))
+                        commands.append( (cmd, _(title), confirm) )
 
         return render_template("/gramps/commands.html", 
                                batch_id=batch_id, 
@@ -457,14 +462,17 @@ def get_commands(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def batch_details(batch_id):
+    t0 = time.time()
     user_context = UserContext()
     if batch_id == "scene":
         # Select scene style template
         my_template = "/scene/material_details.html"
         batch_id = session.get("batch_id")
+        f = ""
     else:
         # Gramps style template
         my_template = "/gramps/details.html"
+        f = f"f={batch_id} "
 
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
@@ -484,12 +492,16 @@ def batch_details(batch_id):
     event_stats = [(_(label),data) 
                    for (label,data) in stats.event_stats 
                       if label in SELECTED_EVENT_TYPES]
+    elapsed = time.time() - t0
+    stk_logger(user_context, 
+               f"-> bp.gramps.routes.batch_details {f}e={elapsed:.3f}")
     return render_template(
        my_template,
        batch=batch,
        user_context=user_context,
        object_stats=sorted(object_stats),
        event_stats=sorted(event_stats),
+       elapsed=elapsed,
     )
 
 @bp.route("/gramps/details/update_description", methods=["post"])
@@ -506,7 +518,7 @@ def batch_update_description():
      
             batch = res['item']
             batch.description = description
-            batch.save(root_service.dataservice)
+            batch.save(root_service.dataservice.tx)
 
     except Exception as e:
         error_print("audit_selected_op", e)
