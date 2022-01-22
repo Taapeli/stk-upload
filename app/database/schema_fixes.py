@@ -40,141 +40,146 @@ def do_schema_fixes():
 
         @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
     """
-    from bl.batch.root import State
+    return
 
-    # Batch: Root.state depends on b.status; Root.material = b.material_type
-    change_Batch_to_Root = f"""
-        MATCH (b:Batch) WITH b LIMIT 1
-        SET b:Root
-        SET b.material=
-            CASE b.material_type
-                WHEN "" THEN $default_material
-                WHEN NULL THEN $default_material
-                ELSE b.material
-            END
-        SET b.state=CASE
-                WHEN b.status = 'started' THEN '{State.ROOT_STORING}'
-                WHEN b.status = 'completed' THEN '{State.ROOT_CANDIDATE}'
-                WHEN b.status = 'audit_requested' THEN '{State.ROOT_AUDIT_REQUESTED}'
-                ELSE '{State.ROOT_REMOVED}'
-            END
-        REMOVE b:Batch, b.status, b.material_type"""
-    # Audit: Root.state = "Audit Requested"; Root.material = "Family Tree"
-    change_Audit_to_Root = f"""
-        MATCH (b:Audit) WITH b LIMIT 1
-        SET b:Root
-        SET b.material=
-            CASE b.material_type
-                WHEN "" THEN $default_material
-                WHEN NULL THEN $default_material
-                ELSE b.material
-            END
-        SET b.state='{State.ROOT_AUDITING}'
-        REMOVE b:Audit, b.status, b.material_type"""
+    # --- For DB_SCHEMA_VERSION = '2021.2.0.4', deleted 22.1.2022/JMä
+    # from bl.batch.root import State
+    #
+    # # Batch: Root.state depends on b.status; Root.material = b.material_type
+    # change_Batch_to_Root = f"""
+    #     MATCH (b:Batch) WITH b LIMIT 1
+    #     SET b:Root
+    #     SET b.material=
+    #         CASE b.material_type
+    #             WHEN "" THEN $default_material
+    #             WHEN NULL THEN $default_material
+    #             ELSE b.material
+    #         END
+    #     SET b.state=CASE
+    #             WHEN b.status = 'started' THEN '{State.ROOT_STORING}'
+    #             WHEN b.status = 'completed' THEN '{State.ROOT_CANDIDATE}'
+    #             WHEN b.status = 'audit_requested' THEN '{State.ROOT_AUDIT_REQUESTED}'
+    #             ELSE '{State.ROOT_REMOVED}'
+    #         END
+    #     REMOVE b:Batch, b.status, b.material_type"""
+    # # Audit: Root.state = "Audit Requested"; Root.material = "Family Tree"
+    # change_Audit_to_Root = f"""
+    #     MATCH (b:Audit) WITH b LIMIT 1
+    #     SET b:Root
+    #     SET b.material=
+    #         CASE b.material_type
+    #             WHEN "" THEN $default_material
+    #             WHEN NULL THEN $default_material
+    #             ELSE b.material
+    #         END
+    #     SET b.state='{State.ROOT_AUDITING}'
+    #     REMOVE b:Audit, b.status, b.material_type"""
     # {object_label: relation_type}
-    root_relations = {
-        ":Person": ":OBJ_PERSON",
-        ":Family": ":OBJ_FAMILY",
-        ":Place": ":OBJ_PLACE",
-        ":Source": ":OBJ_SOURCE",
-        "" : ":OBJ_OTHER"
-        }
-    # Root relation to objects (types OWNS or PASSED) are split to types
-    # OBJ_PERSON, OBJ_FAMILY, OBJ_PLACE, OBJ_SOURCE" and OBJ_OTHER
-    OWNS_to_OBJ_x = """
-        MATCH (b:Root) -[r{old_type}]-> (x{label})
-        WITH b,r,x
-            CREATE (b) -[{new_type}]-> (x)
-            DELETE r"""
+    # root_relations = {
+    #     ":Person": ":OBJ_PERSON",
+    #     ":Family": ":OBJ_FAMILY",
+    #     ":Place": ":OBJ_PLACE",
+    #     ":Source": ":OBJ_SOURCE",
+    #     "" : ":OBJ_OTHER"
+    #     }
+    # # Root relation to objects (types OWNS or PASSED) are split to types
+    # # OBJ_PERSON, OBJ_FAMILY, OBJ_PLACE, OBJ_SOURCE" and OBJ_OTHER
+    # OWNS_to_OBJ_x = """
+    #     MATCH (b:Root) -[r{old_type}]-> (x{label})
+    #     WITH b,r,x
+    #         CREATE (b) -[{new_type}]-> (x)
+    #         DELETE r"""
 
-    # Comment and Topic:
-    #  - Identify old Comments by existing c.user
-    # a) Delete object comments except the 1st one
-    # b) Connect remaining comments to UserProfile,
-    #    change label to Topic and
-    #    remove c.user
-    Delete_comment_tails = """
-        MATCH (x) -[:COMMENT]-> (c:Comment) WHERE c.user IS NOT null 
-        WITH x, c ORDER BY id(x), c.timestamp
-        WITH x, collect(c)[1..] as coms
-        UNWIND coms AS com
-            DETACH DELETE com
-    """
-    Rename_label_Comment_to_Topic = """
-        MATCH (root:Root) --> (x) -[:COMMENT]-> (c:Comment) WHERE c.user IS NOT null
-        MATCH (up:UserProfile) WHERE up.username = root.user
-        WITH up, c                                             LIMIT 3
-            MERGE (up) -[:COMMENTED]-> (c)
-            SET c.user = null
-            SET c:Topic
-            REMOVE c:Comment
-    """
+    # # Comment and Topic:
+    # #  - Identify old Comments by existing c.user
+    # # a) Delete object comments except the 1st one
+    # # b) Connect remaining comments to UserProfile,
+    # #    change label to Topic and
+    # #    remove c.user
+    # Delete_comment_tails = """
+    #     MATCH (x) -[:COMMENT]-> (c:Comment) WHERE c.user IS NOT null 
+    #     WITH x, c ORDER BY id(x), c.timestamp
+    #     WITH x, collect(c)[1..] as coms
+    #     UNWIND coms AS com
+    #         DETACH DELETE com
+    # """
+    # Rename_label_Comment_to_Topic = """
+    #     MATCH (root:Root) --> (x) -[:COMMENT]-> (c:Comment) WHERE c.user IS NOT null
+    #     MATCH (up:UserProfile) WHERE up.username = root.user
+    #     WITH up, c                                             LIMIT 3
+    #         MERGE (up) -[:COMMENTED]-> (c)
+    #         SET c.user = null
+    #         SET c:Topic
+    #         REMOVE c:Comment
+    # """
 
-    with shareds.driver.session() as session: 
-        try:
-            for old_root, cypher_to_root, old_type in [
-                ("Batch", change_Batch_to_Root, ":OWNS"), 
-                ("Audit", change_Audit_to_Root, ":PASSED")]:
-                # 1. Change Batch label to Root
-                #
-                # Change (:Batch {"material_type":"Family Tree", "status":"completed"})
-                # to     (:Root  {material:'Family Tree', state:'Candidate'}) etc
-                labels_added = -1 
-                while labels_added != 0:
-                    result = session.run(cypher_to_root, default_material="Family Tree")
-                    counters = shareds.db.consume_counters(result)
-                    labels_added = counters.labels_added 
-                    #properties_set = counters.properties_set
-                    print(f"do_schema_fixes: change {labels_added} {old_root} nodes to Root")
-    
-                    # 2. Change OWNS OR PASSED links to distinct OBJ_* links
-                    #
-                    #    Change (:Root) -[r]-> (:Label) 
-                    #    to     (:Root) -[:OBJ_LABEL]-> (:Label)
-                    #    using root_relations dictionary
-                    for label, rtype in root_relations.items():
-                        cypher = OWNS_to_OBJ_x.format(label=label, old_type=old_type, new_type=rtype)
-                        result = session.run(cypher)
-                        counters = shareds.db.consume_counters(result)
-                        relationships_created = counters.relationships_created
-                        if relationships_created:
-                            print(f" -- created {relationships_created} links (:Root) -[{rtype}]-> ({label})")
-
-        except Exception as e:
-            logger.error(f"do_schema_fixes: {e} in database.schema_fixes.do_schema_fixes"
-                         f" Failed {e.__class__.__name__} {e}")
-            return
+    # with shareds.driver.session() as session: 
+    # --- For DB_SCHEMA_VERSION = '2021.2.0.4', deleted 22.1.2022/JMä
+    #     try:
+    #         for old_root, cypher_to_root, old_type in [
+    #             ("Batch", change_Batch_to_Root, ":OWNS"), 
+    #             ("Audit", change_Audit_to_Root, ":PASSED")]:
+    #             # 1. Change Batch label to Root
+    #             #
+    #             # Change (:Batch {"material_type":"Family Tree", "status":"completed"})
+    #             # to     (:Root  {material:'Family Tree', state:'Candidate'}) etc
+    #             labels_added = -1 
+    #             while labels_added != 0:
+    #                 result = session.run(cypher_to_root, default_material="Family Tree")
+    #                 counters = shareds.db.consume_counters(result)
+    #                 labels_added = counters.labels_added 
+    #                 #properties_set = counters.properties_set
+    #                 print(f"do_schema_fixes: change {labels_added} {old_root} nodes to Root")
+    #
+    #                 # 2. Change OWNS OR PASSED links to distinct OBJ_* links
+    #                 #
+    #                 #    Change (:Root) -[r]-> (:Label) 
+    #                 #    to     (:Root) -[:OBJ_LABEL]-> (:Label)
+    #                 #    using root_relations dictionary
+    #                 for label, rtype in root_relations.items():
+    #                     cypher = OWNS_to_OBJ_x.format(label=label, old_type=old_type, new_type=rtype)
+    #                     result = session.run(cypher)
+    #                     counters = shareds.db.consume_counters(result)
+    #                     relationships_created = counters.relationships_created
+    #                     if relationships_created:
+    #                         print(f" -- created {relationships_created} links (:Root) -[{rtype}]-> ({label})")
+    #
+    #     except Exception as e:
+    #         logger.error(f"do_schema_fixes: {e} in database.schema_fixes.do_schema_fixes"
+    #                      f" Failed {e.__class__.__name__} {e}")
+    #         return
 
         # 3. Create index for Root.material, Root.state
 
-        try:
-            result = session.run(f'CREATE INDEX FOR (b:Root) ON (b.material, b.state)')
-            counters = shareds.db.consume_counters(result)
-            indexes_added = counters.indexes_added
-            print(f"do_schema_fixes: created {indexes_added} indexes for (:Root)")
-        except ClientError as e:
-            msgs = e.message.split(',')
-            print(f'do_schema_fixes: New index for Root ok: {msgs[0]}')
-        except Exception as e: 
-            logger.warning(f"do_schema_fixes: Indexes for Root not created." 
-                           f" Failed {e.__class__.__name__} {e.message}") 
+        # --- For DB_SCHEMA_VERSION = '2021.2.0.4', deleted 22.1.2022/JMä
+        # try:
+        #     result = session.run(f'CREATE INDEX FOR (b:Root) ON (b.material, b.state)')
+        #     counters = shareds.db.consume_counters(result)
+        #     indexes_added = counters.indexes_added
+        #     print(f"do_schema_fixes: created {indexes_added} indexes for (:Root)")
+        # except ClientError as e:
+        #     msgs = e.message.split(',')
+        #     print(f'do_schema_fixes: New index for Root ok: {msgs[0]}')
+        # except Exception as e: 
+        #     logger.warning(f"do_schema_fixes: Indexes for Root not created." 
+        #                    f" Failed {e.__class__.__name__} {e.message}") 
 
         # 4. Change 1st Comments to Topic and remove others
 
-        try:
-            result = session.run(Delete_comment_tails)
-            counters = shareds.db.consume_counters(result)
-            comments_removed = counters.nodes_deleted
-            print(f"do_schema_fixes: removed {comments_removed} old Comments")
-
-            result = session.run(Rename_label_Comment_to_Topic)
-            counters = shareds.db.consume_counters(result)
-            labels_changed = counters.labels_added
-            print(f"do_schema_fixes: changed {labels_changed} Comments to Topics")
-        except Exception as e: 
-            msg = f"do_schema_fixes: Comments to Topic failed. {e.__class__.__name__} {e.message}"
-            print (msg)
-            logger.warning(msg) 
+        # try:
+        #     result = session.run(Delete_comment_tails)
+        #     counters = shareds.db.consume_counters(result)
+        #     comments_removed = counters.nodes_deleted
+        #     print(f"do_schema_fixes: removed {comments_removed} old Comments")
+        #
+        #     result = session.run(Rename_label_Comment_to_Topic)
+        #     counters = shareds.db.consume_counters(result)
+        #     labels_changed = counters.labels_added
+        #     print(f"do_schema_fixes: changed {labels_changed} Comments to Topics")
+        # except Exception as e: 
+        #     msg = f"do_schema_fixes: Comments to Topic failed. {e.__class__.__name__} {e.message}"
+        #     print (msg)
+        #     logger.warning(msg) 
 
 
 # Removed 5.6.2021

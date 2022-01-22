@@ -47,22 +47,8 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 
 # ====== Database schema ======
 # Change (increment) this, if schema must be updated
-DB_SCHEMA_VERSION = '2021.2.0.4'
+DB_SCHEMA_VERSION = '2022.1.0'
 # =============================
-
-
-# def get_dataservice(opt="update"):
-#     ''' Returns a data service of selected type.
-#     
-#         :param: opt    service selection
-#             "read"     Neo4jReadService
-#             "read_tx"  Neo4jReadServiceTx
-#             "update"   Neo4jDataService
-#     '''
-#     service = shareds.dataservices[opt]
-#     return service(shareds.driver)
-
-
 
 
 def initialize_db():
@@ -92,11 +78,15 @@ def initialize_db():
         if not profile_exists('_Stk_'):
             create_single_profile('_Stk_')
 
+        # Fix possible Root.id uniqueness
+        try_fixing_duplicate_roots()
+
         create_lock_w_constraint()
 
         create_year_indexes()
 
         constr_list = {
+            "Root":{"id"},
             "Citation":{"uuid"},
             "Event":{"uuid"},
             "Family":{"uuid"},
@@ -379,11 +369,28 @@ def re_initiate_nodes_constraints_fixes():
         print('Initial Lock removed')
         return
 
+def try_fixing_duplicate_roots():
+    """ Remove possible empty (duplicate?) root nodes, to fix Root.id uniqueness.
+    
+        Reason was missing unique constraint.
+    """
+    uniq_ids = []
+    with shareds.driver.session() as session:
+        result = session.run(SetupCypher.find_empty_roots)
+        for uniq_id, id in result:
+            uniq_ids.append(uniq_id)
+            logger.info(f'database.accessDB.try_fixing_duplicate_roots: empty Root: {uniq_id}:{id}')
+        if uniq_ids:
+            session.run(SetupCypher.remove_empty_roots, uniq_ids=uniq_ids).single()
+            logger.info(f'database.accessDB.try_fixing_duplicate_roots: deleted {len(uniq_ids)} empty Root nodes')
+        print(f'Deleted {len(uniq_ids)} empty Root nodes')
+        return
+
 def create_unique_constraint(label, prop):
     ' Create given constraint for given label and property.'
     with shareds.driver.session() as session:
         query = f"create constraint on (n:{label}) assert n.{prop} is unique"
-        try:  
+        try:
             session.run(query)
             print(f'Unique constraint for {label}.{prop} created')
         except ClientError as e:
@@ -414,7 +421,7 @@ def create_constraint(label, prop):
 
 def create_freetext_index():
     try:
-        result = shareds.driver.session().run(Cypher_adm.create_freetext_index)
+        _result = shareds.driver.session().run(Cypher_adm.create_freetext_index)
     except ClientError as e:
         msgs = e.message.split(',')
         print(f'Create_freetext_index ok: {msgs[0]}')
@@ -426,7 +433,7 @@ def create_freetext_index():
 
 def create_freetext_index_for_notes():
     try:
-        result = shareds.driver.session().run(Cypher_adm.create_freetext_index_for_notes)
+        _result = shareds.driver.session().run(Cypher_adm.create_freetext_index_for_notes)
     except ClientError as e:
         msgs = e.message.split(',')
         print(f'Create_freetext_index for notes, ok: {msgs[0]}')

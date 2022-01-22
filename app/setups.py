@@ -261,13 +261,13 @@ if True:
 
 print('Neo4j and security set up')
 
+# Check and initiate important nodes and constraints and schema fixes.
+accessDB.initialize_db() 
+
 
 @shareds.security.register_context_processor
 def security_register_processor():
     return {"username": _('User name'), "name": _('Name'), "language": _('Language')}
-
-# Check and initiate important nodes and constraints and schema fixes.
-accessDB.initialize_db() 
 
 
 """ 
