@@ -91,6 +91,7 @@ class StatsBuilder:
                 where $lb in labels(x)
             return count(x) as cnt
         """
+        # 1) cnt: Number of (Person) --> (label) links
         rec = self.session.run(cypher, batch_id=batch_id, lb=label).single()
         cnt = rec.get("cnt")
         if not has_citations:
@@ -101,10 +102,60 @@ class StatsBuilder:
                 where $lb in labels(x)
             return count(distinct x) as cnt
         """
+        # 2) cnt2: Number of (Person) --> (label) --> (:Citation) links
         rec = self.session.run(cypher2, batch_id=batch_id, lb=label).single()
         cnt2 = rec.get("cnt")
         return (cnt,cnt2)
 
+
+    def count_objects(self, batch_id):
+        """ Calculate number of different Events and their Citation links.
+        """
+        def emit_data(type_name, data):
+            if data[0] == 0 and data[1] == 0:
+                return
+            w_cite, wo_cite = data
+            total = w_cite + wo_cite
+            pct = round(100*w_cite / total)
+            print(f"{type_name:20.20} {total:5} {w_cite:5} {pct:3}%")
+            data_out = (type_name, (total, w_cite, pct))
+            event_stats.append(data_out)
+
+        cypher = """
+            match (b:Root {id:"2021-08-29.003"})
+                match (b) --> (e)
+                optional match (e) -[:CITATION]-> (c)
+            with e, count(c) > 0 as has_c
+                return labels(e)[0] as lbl, count(e) as cnt_e, has_c order by lbl
+        """ 
+        event_stats = []
+        result = self.session.run(cypher, batch_id=batch_id)
+        # Returns number of different objects a) with citations and b) without citations
+        # ╒════════════╤═══════╤═══════╕
+        # │"lbl"       │"cnt_e"│"has_c"│
+        # ╞════════════╪═══════╪═══════╡
+        # │"Citation"  │4112   │false  │
+        # │"Event"     │6178   │true   │
+        # │"Event"     │1650   │false  │
+        # │"Family"    │826    │false  │
+        # │"Family"    │8      │true   │
+        # └────────────┴───────┴───────┘
+        data = [0,0]
+        typename = ""
+        for record in result:
+            if typename != record["lbl"]:
+                emit_data(typename, data)
+                data = [0, 0]
+            typename = record["lbl"]
+            cnt_events = record['cnt_e']
+            has_citations = record['has_e']
+            if has_citations:
+                data[1] = cnt_events
+            else:
+                data[0] = cnt_events
+
+        emit_data(typename, data)
+        return event_stats
 
     def count_events(self, batch_id, event_types=[]):
         """ Calculate number of different Events and their Citation links. 
@@ -180,7 +231,8 @@ class StatsBuilder:
             stats.timestamp is from Root node.
         """
         cypher = """
-            merge (b:Root {id:$batch_id}) -[:STATS]-> (stats:Stats)
+            match (b:Root {id:$batch_id})
+            merge (b) -[:STATS]-> (stats:Stats)
             set stats.object_stats=$object_stats, 
                 stats.event_stats=$event_stats,
                 stats.timestamp=$ts
