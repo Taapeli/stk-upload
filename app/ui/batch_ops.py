@@ -43,7 +43,7 @@ RESEARCHER_FUNCTIONS = [ # (URL, title)
 RESEARCHER_OPERATIONS = { #    browse     request   withdraw  download log     verify  delete
     State.ROOT_UNKNOWN:        (False,    False,    False,    False,   True,   False,   True),
     State.FILE_LOADING:        (False,    False,    False,    False,   True,   False,   True),
-    #State.FILE_LOAD_FAILED:   (No Root node),                                                  
+    State.FILE_LOAD_FAILED:    (True,     False,    False,    True,    True,   False,   True),                                                  
     State.ROOT_STORING:        (False,    False,    False,    True,    True,   True,    True),
     State.ROOT_CANDIDATE:      (True,     True,     False,    True,    True,   True,    True),
     State.ROOT_REJECTED:       (True,     False,    False,    True,    True,   True,    True),

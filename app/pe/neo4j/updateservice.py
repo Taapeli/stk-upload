@@ -1172,6 +1172,7 @@ class Neo4jUpdateService(ConcreteService):
         Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
         sumc = 0
+        confs = []
         result = self.tx.run(CypherPerson.get_confidences, id=uniq_id)
         for record in result:
             # Returns person.uniq_id, COLLECT(confidence) AS list

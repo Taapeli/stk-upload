@@ -604,6 +604,7 @@ def fetch_users():
 @login_required
 @roles_accepted("admin")
 def fetch_batches():
+    from bl.batch.root import Root
     batch_list = list(Root.get_batches())
     for b in batch_list:
         file = b.get("file")
