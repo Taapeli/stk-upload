@@ -962,6 +962,7 @@ class DOM_handler:
                     dates_count += res.get("dates")
                     sortname_count += res.get("sortnames")
 
+        # Two data groups, one elapsed time!
         self.blog.log_event(
             {"title": _("Dates"), "count": dates_count, "elapsed": time.time() - t0}
         )
@@ -993,14 +994,12 @@ class DOM_handler:
                     refname_count += res.get("refnames")
                     sortname_count += res.get("sortnames")
 
-        self.blog.log_event(
-            {
-                "title": "Refname references",
-                "count": refname_count,
-                "elapsed": time.time() - t0,
-            }
-        )
-        self.blog.log_event({"title": _("Person sorting names"), "count": sortname_count})
+        self.blog.log_event({"title": "Refname references",
+                             "count": refname_count,
+                             "elapsed": time.time() - t0})
+        self.blog.log_event({"title": _("Person sorting names"), 
+                             "count": sortname_count, 
+                             "elapsed": time.time() - t0})
         return {"status": status, "message": message}
 
     def set_person_estimated_dates(self):

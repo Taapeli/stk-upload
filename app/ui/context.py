@@ -85,7 +85,7 @@ class UserContext:
                 self.is_auditor = current_user.has_role("audit")
 
         print(
-            f"#UserContext()/{request.endpoint}: material={self.material.get_current()}"
+            f"#ui.context.UserContext/{request.endpoint}: material={self.material.get_current()}"
             f" REQUEST values={self.material.request_args}"
         )
         return

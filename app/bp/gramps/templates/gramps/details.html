@@ -8,7 +8,7 @@
 
 <style>
 startbox h2 {margin-bottom: 0;}
-div.startbox { height: 280px; }
+div.startbox { height: 300px; }
 div.startbox > table { width: 280px; }
 div.actions {
     border: solid 2pt silver;
@@ -23,7 +23,7 @@ td {
 }
 #description { 
     width: 266px;
-    height: 5em;
+    height: 4em;
 }
 .visible { display: inline; }
 .hidden { display:none; }
@@ -58,7 +58,12 @@ function doconfirm( command, title ) { // used in commands.html
             </tr>
             <tr>
                 <th>{{ _("Status") }}</th>
-                <td><b>{{ _(batch.state) }}</b></td>
+                <td><b>{{ _(batch.state) }}</b>
+                </td>
+            </tr>
+            <tr>
+                <th>{{ _("Changed") }} </th>
+                <td>{{ _(batch.timestamp_str()) }}</td>
             </tr>
             <tr>
                 <th>{{ _("Gramps file") }}</th>

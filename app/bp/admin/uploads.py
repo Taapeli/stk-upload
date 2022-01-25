@@ -136,18 +136,17 @@ def update_metafile(metaname, **kwargs):
 def get_meta(root):
     """ Reads status information from .meta file """
     from bl.batch.root import State
-
     try:
         metaname = root.metaname
         meta = eval(open(metaname).read())
         status = meta.get("status")
         if status == State.FILE_LOADING or root.state ==  State.FILE_LOADING:
             stat = os.stat(metaname)
-            max_sec = 2*60
-            if (stat.st_mtime < time.time() - max_sec): 
+            MAX_SEC = 2*60
+            if (stat.st_mtime < time.time() - MAX_SEC): 
                 # not updated within last two minutes -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
-                msg1= f"{_('Load failed, no progress in %(n)s seconds', n=max_sec)}"
+                msg1= f"{_('Load failed, no progress in %(n)s seconds', n=MAX_SEC)}"
                 msg = f"{util.format_timestamp()}: {msg1}"
                 with open(root.logname,"a") as f:
                     print("", file=f)

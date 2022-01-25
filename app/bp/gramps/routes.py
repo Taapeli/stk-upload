@@ -131,9 +131,13 @@ def upload_gramps():
             f'-> bp.gramps.routes.upload_gramps/{file_type} f="{infile.filename}"'
             f" e={shareds.tdiff:.3f}sek"
         )
-
         # Start storing the XML file objects as database nodes in background
         uploads.initiate_background_load_to_stkbase(root)
+        flash(
+            _("The batch %(id)s upload has started in background. ", id=root.id) +
+            _("You can follow the process below, but you can also leave or do something else. ") +
+            _("Come back later to see the results.")
+        )
 
     except Exception as e:
         traceback.print_exc()
@@ -176,7 +180,10 @@ def gramps_analyze(batch_id):
     base, ext = os.path.splitext(batch.xmlname)
     newfile = base + "_checked" + ext
     
-    return render_template("/gramps/gramps_analyze.html", batch_id=batch_id, file=batch.xmlname, newfile=newfile)
+    return render_template("/gramps/gramps_analyze.html",
+                           batch_id=batch_id,
+                           file=batch.xmlname,
+                           newfile=newfile)
 
 
 @bp.route("/gramps/gramps_analyze_json/<batch_id>/<newfile>")
@@ -409,13 +416,13 @@ def get_progress(batch_id):
         done += progress.get("Source_gramps", 0)
         done += progress.get("Repository", 0)
         done += progress.get("refnames", 0)
-#TODO: Why total may be 0? Now indicates it as 50% progress!
+        # Why total may be 0? The default is set to 50% progress!
         rsp = {
             "status": status,
             "progress": 99 * done // total if total else 50,
             "batch_id": batch_id,
         }
-        # print(f"bp.gramps.routes.get_progress: {rsp}")
+        print(f"# bp.gramps.routes.get_progress: {done}/{total}, {rsp}")
         return jsonify(rsp)
 
 @bp.route("/gramps/commands/<batch_id>")
