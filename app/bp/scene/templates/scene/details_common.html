@@ -11,7 +11,7 @@
     padding-right: 1ex;
 }
 .infolist, .infolist td, .infolist th {
-    padding: 0.5em;
+    padding: 0.2em;
     border: solid 1pt gray;
 }
 </style>
@@ -40,13 +40,15 @@
                 <tr>
                     <th>{{ _('User') }}</th>
                     <th>{{ _('Batch')}}</th>
-                    <th>{{ _('File') }}, {{ _('Description') }}</i></th>
+                    <th>{{ _('File') }}, {{ _('Description')|lower }}</i></th>
                     <th>{{ _('Status') }}</th>
                 </tr>
        {% for root in materials %}
                 <tr>
-                    <td>{{root.user.username}}<br>
-                        <i>{{root.user.name}}</i></td>
+                    <td>
+                        <i>{{root.user.name}}</i><br>
+                        {{root.user.username}}
+                    </td>
                     <td>{{root.id}}</td>
                     <td>{{ root.file.rsplit("/", 1) | last }}
             {% if root.description %}
