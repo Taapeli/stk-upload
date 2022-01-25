@@ -308,15 +308,32 @@ class Root(NodeObject):
                 yield root
 
     @staticmethod
-    def get_materials_accepted():
-        """ Returns list of accepted material_types. """
+    def get_materials_accepted(material_type):
+        """ Returns list of accepted materials of material_type. 
+        """
+        roots = []
         with shareds.driver.session() as session:
-            result = session.run(CypherRoot.get_materials_accepted)
+            result = session.run(CypherRoot.get_materials_accepted,
+                                 m_type=material_type)
+            for rec in result:
+                root = Root.from_node(rec.get("root"))
+                user = rec.get("user")
+                root.user = dict(user.items())
+                roots.append(root)
+        print(f"#get_materials_accepted: {len(roots)} nodes of {material_type})")
+        return roots
+
+    @staticmethod
+    def count_materials_accepted():
+        """ Returns number of accepted materials by material_type. 
+        """
+        with shareds.driver.session() as session:
+            result = session.run(CypherRoot.count_materials_accepted)
             for rec in result:
                 # Record: <Record root.material='Family Tree' count(*)=6>
                 m_type = rec.get("material_type")
                 m_count = rec.get("nodes")
-                print(f"#get_batches_accepted: {m_type} ({rec.get('nodes')} nodes)")
+                print(f"#count_materials_accepted: {m_type} ({rec.get('nodes')} nodes)")
                 yield {"material_type": m_type, "count": m_count }
 
     @staticmethod

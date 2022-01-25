@@ -1,0 +1,68 @@
+{# /scene/templates/scene/comments.html_ #}
+{% extends "/scene/sc_layout.html" %}
+{% block title %}{{ _('Material Details') }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+<script src="/static/infobox.js"></script>
+<style>
+.right {
+    text-align: right;
+    padding-right: 1ex;
+}
+.infolist, .infolist td, .infolist th {
+    padding: 0.5em;
+    border: solid 1pt gray;
+}
+</style>
+
+<div id="startdiv">
+	<h1>{{ _('Material Details') }}</h1>
+    <div>{{ macro.show_use_case(no_change=true) }}</div>
+</div>
+
+{{ macro.menu(8) }}
+<div id="Material"  class="content">
+    
+    <div id="summaryarea">
+        <h2>{{ _('Statistics for Common Materials', id=user_context.material.m_type) }}</h2>
+ 
+{% include "flash_messages.html" %}
+
+        <p><b>{{ _('Materials of type') }}:</b>
+           <span class="typedesc" style="font-size:110%">
+               {{ _(user_context.material.m_type )}}
+           </span>
+        </p>
+
+        <div>
+            <table class="infolist">
+                <tr>
+                    <th>{{ _('User') }}</th>
+                    <th>{{ _('Batch')}}</th>
+                    <th>{{ _('File') }}, {{ _('Description') }}</i></th>
+                    <th>{{ _('Status') }}</th>
+                </tr>
+       {% for root in materials %}
+                <tr>
+                    <td>{{root.user.username}}<br>
+                        <i>{{root.user.name}}</i></td>
+                    <td>{{root.id}}</td>
+                    <td>{{ root.file.rsplit("/", 1) | last }}
+            {% if root.description %}
+                        <br><i>{{root.description}}</i>
+            {% endif %}
+                    </td>
+                    <td>{{ _(root.state) }}</td>
+                </tr>
+       {% endfor %}
+            </table>
+         </div>
+
+<!-- Startdiv ends -->
+</div>
+
+
+
+<!-- </div> {# content #} -->
+{% endblock %}

@@ -122,6 +122,11 @@ return b as batch,
 
 #-bl.batch.root.Root.get_my_batches
     get_materials_accepted = """
+match (root:Root) <-[:HAS_LOADED]- (user:UserProfile)
+where root.state='Accepted' and root.material = $m_type
+return user, root order by root.id"""
+
+    count_materials_accepted = """
 match (root:Root) 
 where root.state='Accepted' 
 return root.material as material_type, count(*) as nodes order by material_type"""

@@ -80,7 +80,7 @@
                    title="{{ _('Discussions') }}">{{ _('Discussions') }}</a></li>
         {% endif %}
 
-        {% if user_context.material.batch_id %}
+        {% if current_user.is_authenticated %}
                 <li{% if value == 8 %} class="CurrentSection"
                   {% endif %}><a href="/gramps/details/scene"
                    title="{{ _('Material details and actions') }}">{{ _('Material details') }}</a></li>

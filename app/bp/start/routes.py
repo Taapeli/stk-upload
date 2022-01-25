@@ -143,7 +143,7 @@ def start_logged():
                 stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(surnamestats)
             surnamestats.sort(key=itemgetter("surname"))
 
-    material_types = list(Root.get_materials_accepted())
+    material_types = list(Root.count_materials_accepted())
     last_type=None if u_context.material.batch_id else u_context.material.m_type
     my_batches = list(
         Root.get_my_batches(current_user.username, u_context.material)
