@@ -1366,7 +1366,7 @@ def fetch_thumbnail():
     return ret
 
 
-# ------------------------------ Menu 7: Comment --------------------------------
+# ------------------------------ Menu 7: Details --------------------------------
 
 @bp.route("/scene/details/")
 @login_required
@@ -1374,12 +1374,12 @@ def fetch_thumbnail():
 def batch_details():
     """ Show details page by batch_id.
     
-        opt == "scene"    -> Show a batch by user_context
-        opt == None       -> Show list of accepted batches of type in user_context
+        Optional msg is shown near description field
     """
     t0 = time.time()
     user_context = UserContext()
     batch_id = user_context.material.batch_id
+    msg=request.args.get("msg","",type=str)
     
     if batch_id:
         # 1. A batch by batch_id
@@ -1392,9 +1392,9 @@ def batch_details():
                 raise RuntimeError(_("Failed to retrieve batch"))
      
             batch = res['item']
-        stats = get_stats(batch_id, batch.timestamp)
+            stats = get_stats(batch_id, batch.timestamp)
+        # localize and filter types:
         SELECTED_EVENT_TYPES = ('Birth', 'Death', 'Marriage')
-        # localize:
         object_stats = [(_(label),has_citations,data) 
                         for (label,has_citations,data) in stats.object_stats]
         event_stats = [(_(label),data) 
@@ -1410,6 +1410,7 @@ def batch_details():
            object_stats=sorted(object_stats),
            event_stats=sorted(event_stats),
            elapsed=elapsed,
+           msg=msg,
         )
     else:
         # 2. List of batches of this material_type and state
@@ -1417,7 +1418,6 @@ def batch_details():
         
         mtype = user_context.material.m_type
         materials = Root.get_materials_accepted(user_context.material.m_type)
-
         elapsed = time.time() - t0
         stk_logger(user_context, 
                    f"-> bp.gramps.routes.batch_details {mtype} e={elapsed:.3f}")
@@ -1429,7 +1429,7 @@ def batch_details():
         )
 
 
-@bp.route("/scene/details/update_description", methods=["post"])
+@bp.route("/scene/details/update_description", methods=["POST"])
 @login_required
 @roles_accepted("research", "admin")
 def batch_update_description():
@@ -1438,7 +1438,6 @@ def batch_update_description():
  
     batch_id = request.form["batch_id"]
     description = request.form["description"]
-    return_url = url_for("scene.batch_details")
     try:
         with RootUpdater("update") as root_service:
             res = root_service.batch_get_one(current_user.username, batch_id)
@@ -1448,13 +1447,13 @@ def batch_update_description():
             batch = res['item']
             batch.description = description
             batch.save(root_service.dataservice.tx)
-            flash(_("The description of this material has been updated."))
 
     except Exception as e:
         error_print("audit_selected_op", e)
-        return redirect(return_url)
+        return redirect(url_for("scene.batch_details"))
 
-    return redirect(return_url)
+    return redirect(url_for("scene.batch_details", 
+                            msg=_("The description of this material has been updated.")))
 
 # ------------------------------ Menu 8: Comment --------------------------------
 

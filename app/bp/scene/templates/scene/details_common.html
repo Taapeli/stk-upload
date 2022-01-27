@@ -10,9 +10,11 @@
     text-align: right;
     padding-right: 1ex;
 }
+.person_name {
+    font-style: italic;
+}
 .infolist, .infolist td, .infolist th {
-    padding: 0.2em;
-    border: solid 1pt gray;
+    padding: 0.2em 1em;
 }
 </style>
 
@@ -46,10 +48,19 @@
        {% for root in materials %}
                 <tr>
                     <td>
-                        <i>{{root.user.name}}</i><br>
+                        <span class="person_name">{{root.user.name}}</span><br>
                         {{root.user.username}}
                     </td>
-                    <td>{{root.id}}</td>
+                    <td>
+            {% if user_context.is_auditor %}
+                    <a href="/scene/material/batch?&batch_id=2021-10-17.001"
+                       title="{{ _('As an auditor, you may browse this material') }}"
+                       class="auditor">{{root.id}}</a><br>
+            {% else %}
+                    {{root.id}}<br>
+            {% endif %}
+                        <span id="changetime">{{ _(root.timestamp_str()) }}</span>
+                    </td>
                     <td>{{ root.file.rsplit("/", 1) | last }}
             {% if root.description %}
                         <br><i>{{root.description}}</i>
