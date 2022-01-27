@@ -13,7 +13,7 @@
 .person_name {
     font-style: italic;
 }
-.infolist, .infolist td, .infolist th {
+.IndividualList, .IndividualList td, .IndividualList th {
     padding: 0.2em 1em;
 }
 </style>
@@ -38,7 +38,7 @@
         </p>
 
         <div>
-            <table class="infolist">
+            <table class="IndividualList">
                 <tr>
                     <th>{{ _('User') }}</th>
                     <th>{{ _('Batch')}}</th>
@@ -51,14 +51,7 @@
                         <span class="person_name">{{root.user.name}}</span><br>
                         {{root.user.username}}
                     </td>
-                    <td>
-            {% if user_context.is_auditor %}
-                    <a href="/scene/material/batch?&batch_id=2021-10-17.001"
-                       title="{{ _('As an auditor, you may browse this material') }}"
-                       class="auditor">{{root.id}}</a><br>
-            {% else %}
-                    {{root.id}}<br>
-            {% endif %}
+                    <td>{{root.id}}<br>
                         <span id="changetime">{{ _(root.timestamp_str()) }}</span>
                     </td>
                     <td>{{ root.file.rsplit("/", 1) | last }}
