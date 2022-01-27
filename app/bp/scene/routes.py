@@ -112,7 +112,7 @@ def _note_generate_regexes(searchtext):
             if n == 0: 
                 yield q
                 return
-            for i, c in enumerate(q):
+            for i, _c in enumerate(q):
                 choice = fr"{q[0:i]}.{q[i:]}"  # add any character
                 yield from generate_choices1(choice,n-1)
                 choice = fr"{q}."  # add any character after the word
@@ -1368,6 +1368,7 @@ def fetch_thumbnail():
 
 # ------------------------------ Menu 7: Details --------------------------------
 
+
 @bp.route("/scene/details/")
 @login_required
 @roles_accepted("research", "admin")
@@ -1382,33 +1383,19 @@ def batch_details():
     msg=request.args.get("msg","",type=str)
     
     if batch_id:
-        # 1. A batch by batch_id
-        from bl.batch.root import BatchReader
-        from bl.stats import get_stats
+        from bl.stats import create_stats_data
 
-        with BatchReader("update") as batch_service:
-            res = batch_service.batch_get_one(current_user.username, batch_id)
-            if Status.has_failed(res):
-                raise RuntimeError(_("Failed to retrieve batch"))
-     
-            batch = res['item']
-            stats = get_stats(batch_id, batch.timestamp)
-        # localize and filter types:
-        SELECTED_EVENT_TYPES = ('Birth', 'Death', 'Marriage')
-        object_stats = [(_(label),has_citations,data) 
-                        for (label,has_citations,data) in stats.object_stats]
-        event_stats = [(_(label),data) 
-                       for (label,data) in stats.event_stats 
-                          if label in SELECTED_EVENT_TYPES]
+        res = create_stats_data(batch_id, current_user)
+        # { "batch", "objects", "events" }
         elapsed = time.time() - t0
         stk_logger(user_context, 
                    f"-> bp.gramps.routes.batch_details e={elapsed:.3f}")
         return render_template(
            "/scene/details_batch.html",
-           batch=batch,
+           batch=res["batch"],
            user_context=user_context,
-           object_stats=sorted(object_stats),
-           event_stats=sorted(event_stats),
+           object_stats=res["objects"],
+           event_stats=res["events"],
            elapsed=elapsed,
            msg=msg,
         )
@@ -1434,26 +1421,19 @@ def batch_details():
 @roles_accepted("research", "admin")
 def batch_update_description():
     """ Update material description. """
-    from bl.batch.root import RootUpdater
- 
+    from bl.batch.root_updater import RootUpdater
+
     batch_id = request.form["batch_id"]
     description = request.form["description"]
-    try:
-        with RootUpdater("update") as root_service:
-            res = root_service.batch_get_one(current_user.username, batch_id)
-            if Status.has_failed(res):
-                raise RuntimeError(_("Failed to retrieve batch"))
-     
-            batch = res['item']
-            batch.description = description
-            batch.save(root_service.dataservice.tx)
+    msg = ""
+    with RootUpdater("update") as service:
+        ret = service.batch_update_descr(batch_id, description, current_user.username)
+        if Status.has_failed(ret):
+            msg = _("Update did not succeed: " + ret["errortext"])
+        else:
+            msg = _("The description of this material has been updated.")
 
-    except Exception as e:
-        error_print("audit_selected_op", e)
-        return redirect(url_for("scene.batch_details"))
-
-    return redirect(url_for("scene.batch_details", 
-                            msg=_("The description of this material has been updated.")))
+    return redirect(url_for("scene.batch_details", msg=msg))
 
 # ------------------------------ Menu 8: Comment --------------------------------
 

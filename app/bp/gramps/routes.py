@@ -472,28 +472,19 @@ def batch_details(batch_id):
     """ Show details page by batch_id. """
     t0 = time.time()
     user_context = UserContext()
-    with BatchReader("update") as batch_service:
-        res = batch_service.batch_get_one(current_user.username, batch_id)
-        if Status.has_failed(res):
-            raise RuntimeError(_("Failed to retrieve batch"))
-        batch = res['item']
-    stats = get_stats(batch_id, batch.timestamp)
-    SELECTED_EVENT_TYPES = ('Birth', 'Death', 'Marriage')
-    # localize:
-    object_stats = [(_(label),has_citations,data) 
-                    for (label,has_citations,data) in stats.object_stats]
-    event_stats = [(_(label),data) 
-                   for (label,data) in stats.event_stats 
-                      if label in SELECTED_EVENT_TYPES]
+    from bl.stats import create_stats_data
+
+    res = create_stats_data(batch_id, current_user)
+    # { "batch", "objects", "events" }
     elapsed = time.time() - t0
     stk_logger(user_context, 
                f"-> bp.gramps.routes.batch_details e={elapsed:.3f}")
     return render_template(
        "/gramps/details.html",
-       batch=batch,
+       batch=res["batch"],
        user_context=user_context,
-       object_stats=sorted(object_stats),
-       event_stats=sorted(event_stats),
+       object_stats=res["objects"],
+       event_stats=res["events"],
        elapsed=elapsed,
     )
 
@@ -501,24 +492,17 @@ def batch_details(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def batch_update_description():
+    from bl.batch.root_updater import RootUpdater
     batch_id = request.form["batch_id"]
     description = request.form["description"]
-    try:
-        with RootUpdater("update") as root_service:
-            res = root_service.batch_get_one(current_user.username, batch_id)
-            if Status.has_failed(res):
-                raise RuntimeError(_("Failed to retrieve batch"))
-     
-            batch = res['item']
-            batch.description = description
-            batch.save(root_service.dataservice.tx)
+    msg = ""
+    with RootUpdater("update") as service:
+        ret = service.batch_update_descr(batch_id, description, current_user.username)
+        if Status.has_failed(ret):
+            flash(_("Update did not succeed: " + ret["errortext"]))
+        else:
             flash(_("The description of this material has been updated."))
 
-    except Exception as e:
-        error_print("audit_selected_op", e)
-        return redirect(url_for("audit.list_uploads"))
-
-    #return description
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 # =================== experimental scripting tool ======================

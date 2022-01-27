@@ -19,7 +19,7 @@
     font-size: 10pt;
 }
 .sc-startbox h2, .sc-startbox2 h2 {
-margin: .3em;
+    margin: .3em;
 }
 .sc-startbox2 {
     width: 603px;
@@ -37,6 +37,7 @@ margin: .3em;
     text-align: left;
 }
 tr:hover {background-color: #f5f5f5}
+.filename {overflow-wrap: anywhere;}
 #description {
     width: 245px;
     height: 4em;
@@ -83,7 +84,7 @@ tr:hover {background-color: #f5f5f5}
                     </tr>
                     <tr>
                         <th>{{ _("Gramps file") }}</th>
-                        <td style="overflow: auto">{{ batch.xmlname }}</td>
+                        <td class="filename">{{ batch.xmlname }}</td>
                     </tr>
                     <tr>
                         <th colspan="2">{{ _("Description") }}<br>

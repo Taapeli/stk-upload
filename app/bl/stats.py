@@ -23,8 +23,8 @@ Batch Statistics
 
 import json
 from dataclasses import dataclass
-#from pprint import pprint
 from typing import List
+from flask_babelex import _
 
 import shareds
 import logging
@@ -266,3 +266,28 @@ def get_stats(batch_id:str, timestamp:int):
         handler = StatsBuilder(session)
         stats = handler.get_current_stats(batch_id, timestamp)
         return stats
+
+def create_stats_data(batch_id, current_user):
+    """ Get statistics of given batch_id for Material Details page.
+    """
+    from bl.batch.root import BatchReader 
+    from bl.base import Status
+
+    with BatchReader("update") as batch_service:
+        res = batch_service.batch_get_one(current_user.username, batch_id)
+        if Status.has_failed(res):
+            raise RuntimeError(_("Failed to retrieve batch"))
+        batch = res['item']
+        stats = get_stats(batch_id, batch.timestamp)
+
+    # localize and filter types:
+    SELECTED_EVENT_TYPES = 'Birth', 'Death', 'Marriage'
+    object_stats = [(_(label), has_citations, data) for label, has_citations, data in stats.object_stats]
+    event_stats = [(_(label), data) for 
+        label, data in stats.event_stats if 
+        label in SELECTED_EVENT_TYPES]
+
+    return {"batch":batch, 
+            "objects":sorted(object_stats), 
+            "events":sorted(event_stats)
+    }

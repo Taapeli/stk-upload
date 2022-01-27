@@ -138,8 +138,17 @@ class RootUpdater(DataService):
                                                     allowed_states)
         return res
 
-# def batch_mark_status(self, batch, b_status): --> change_state
-#     """ Mark this data batch status. """
+    def batch_update_descr(self, batch_id, description, username):
+        """ Update Root.description. """
+        from bl.base import Status
+    
+        res = self.batch_get_one(username, batch_id)
+        if Status.has_failed(res):
+            raise RuntimeError(_("Failed to retrieve batch"))
+        batch = res['item']
+        batch.description = description
+        res = batch.save(self.dataservice.tx)
+        return res
 
     def commit(self):
         """ Commit transaction. """
