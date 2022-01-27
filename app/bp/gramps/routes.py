@@ -469,70 +469,33 @@ def get_commands(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def batch_details(batch_id):
-    """ Show details page by batch_id.
-    
-        batch_id:
-        - "scene"    -> Show a batch by user_context
-        - None       -> Show list of accepted batches of type in user_context
-        - <valid id> -> Show given batch
-    """
+    """ Show details page by batch_id. """
     t0 = time.time()
     user_context = UserContext()
-    if batch_id == "scene":
-        # Select scene style template
-        my_template = "/scene/details_batch.html"
-        batch_id = session.get("batch_id")
-        f = ""
-    if batch_id is None:
-        # Select scene style template
-        my_template = "/scene/details_common.html"
-        batch_id = None
-        f = user_context.material.m_type + " "
-    else:
-        # Gramps style template
-        my_template = "/gramps/details.html"
-        f = f"f={batch_id} "
-
-    if batch_id:
-        # 1. A batch by batch_id
-        with BatchReader("update") as batch_service:
-            res = batch_service.batch_get_one(current_user.username, batch_id)
-            if Status.has_failed(res):
-                raise RuntimeError(_("Failed to retrieve batch"))
-     
-            batch = res['item']
-        stats = get_stats(batch_id, batch.timestamp)
-        SELECTED_EVENT_TYPES = ('Birth', 'Death', 'Marriage')
-        # localize:
-        object_stats = [(_(label),has_citations,data) 
-                        for (label,has_citations,data) in stats.object_stats]
-        event_stats = [(_(label),data) 
-                       for (label,data) in stats.event_stats 
-                          if label in SELECTED_EVENT_TYPES]
-        elapsed = time.time() - t0
-        stk_logger(user_context, 
-                   f"-> bp.gramps.routes.batch_details {f}e={elapsed:.3f}")
-        return render_template(
-           my_template,
-           batch=batch,
-           user_context=user_context,
-           object_stats=sorted(object_stats),
-           event_stats=sorted(event_stats),
-           elapsed=elapsed,
-        )
-    else:
-        # 2. List of batches of this material_type
-        materials = Root.get_materials_accepted(user_context.material.m_type)
-
-        elapsed = time.time() - t0
-        stk_logger(user_context, 
-                   f"-> bp.gramps.routes.batch_details {f}e={elapsed:.3f}")
-        return render_template(
-           my_template,
-           user_context=user_context,
-           materials=materials,
-           elapsed=elapsed,
-        )
+    with BatchReader("update") as batch_service:
+        res = batch_service.batch_get_one(current_user.username, batch_id)
+        if Status.has_failed(res):
+            raise RuntimeError(_("Failed to retrieve batch"))
+        batch = res['item']
+    stats = get_stats(batch_id, batch.timestamp)
+    SELECTED_EVENT_TYPES = ('Birth', 'Death', 'Marriage')
+    # localize:
+    object_stats = [(_(label),has_citations,data) 
+                    for (label,has_citations,data) in stats.object_stats]
+    event_stats = [(_(label),data) 
+                   for (label,data) in stats.event_stats 
+                      if label in SELECTED_EVENT_TYPES]
+    elapsed = time.time() - t0
+    stk_logger(user_context, 
+               f"-> bp.gramps.routes.batch_details e={elapsed:.3f}")
+    return render_template(
+       "/gramps/details.html",
+       batch=batch,
+       user_context=user_context,
+       object_stats=sorted(object_stats),
+       event_stats=sorted(event_stats),
+       elapsed=elapsed,
+    )
 
 @bp.route("/gramps/details/update_description", methods=["post"])
 @login_required
@@ -549,6 +512,7 @@ def batch_update_description():
             batch = res['item']
             batch.description = description
             batch.save(root_service.dataservice.tx)
+            flash(_("The description of this material has been updated."))
 
     except Exception as e:
         error_print("audit_selected_op", e)

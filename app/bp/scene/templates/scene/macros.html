@@ -74,16 +74,16 @@
                   {% endif %}><a href="/scene/medias"
                    title="{{ _('Thumbnails') }}">{{ _('Pictures') }}</a></li>
 
-        {% if user_context.is_auditor %}
+        {% if current_user.is_authenticated %}
                 <li{% if value == 7 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/topics" class="Auditor"
-                   title="{{ _('Discussions') }}">{{ _('Discussions') }}</a></li>
+                  {% endif %}><a href="/scene/details/"
+                   title="{{ _('Material details and actions') }}">{{ _('Material details') }}</a></li>
         {% endif %}
 
-        {% if current_user.is_authenticated %}
+        {% if user_context.is_auditor %}
                 <li{% if value == 8 %} class="CurrentSection"
-                  {% endif %}><a href="/gramps/details/scene"
-                   title="{{ _('Material details and actions') }}">{{ _('Material details') }}</a></li>
+                  {% endif %}><a href="/scene/topics" class="Auditor"
+                   title="{{ _('Discussions') }}">{{ _('Discussions') }}</a></li>
         {% endif %}
 
         {% if not current_user or not current_user.is_authenticated %}

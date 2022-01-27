@@ -45,10 +45,10 @@ from flask_babelex import _
 
 import shareds
 from . import bp
-from bl import material
+#from bl import material
 
 from bl.base import Status, StkEncoder
-from bl.comment import Comment, CommentReader, CommentsUpdater
+from bl.comment import CommentReader, CommentsUpdater #, Comment
 from bl.event import EventReader, EventWriter
 from bl.family import FamilyReader
 from bl.material import Material
@@ -1368,6 +1368,95 @@ def fetch_thumbnail():
 
 # ------------------------------ Menu 7: Comment --------------------------------
 
+@bp.route("/scene/details/")
+@login_required
+@roles_accepted("research", "admin")
+def batch_details():
+    """ Show details page by batch_id.
+    
+        opt == "scene"    -> Show a batch by user_context
+        opt == None       -> Show list of accepted batches of type in user_context
+    """
+    t0 = time.time()
+    user_context = UserContext()
+    batch_id = user_context.material.batch_id
+    
+    if batch_id:
+        # 1. A batch by batch_id
+        from bl.batch.root import BatchReader
+        from bl.stats import get_stats
+
+        with BatchReader("update") as batch_service:
+            res = batch_service.batch_get_one(current_user.username, batch_id)
+            if Status.has_failed(res):
+                raise RuntimeError(_("Failed to retrieve batch"))
+     
+            batch = res['item']
+        stats = get_stats(batch_id, batch.timestamp)
+        SELECTED_EVENT_TYPES = ('Birth', 'Death', 'Marriage')
+        # localize:
+        object_stats = [(_(label),has_citations,data) 
+                        for (label,has_citations,data) in stats.object_stats]
+        event_stats = [(_(label),data) 
+                       for (label,data) in stats.event_stats 
+                          if label in SELECTED_EVENT_TYPES]
+        elapsed = time.time() - t0
+        stk_logger(user_context, 
+                   f"-> bp.gramps.routes.batch_details e={elapsed:.3f}")
+        return render_template(
+           "/scene/details_batch.html",
+           batch=batch,
+           user_context=user_context,
+           object_stats=sorted(object_stats),
+           event_stats=sorted(event_stats),
+           elapsed=elapsed,
+        )
+    else:
+        # 2. List of batches of this material_type and state
+        from bl.batch.root import Root
+        
+        mtype = user_context.material.m_type
+        materials = Root.get_materials_accepted(user_context.material.m_type)
+
+        elapsed = time.time() - t0
+        stk_logger(user_context, 
+                   f"-> bp.gramps.routes.batch_details {mtype} e={elapsed:.3f}")
+        return render_template(
+           "/scene/details_common.html",
+           user_context=user_context,
+           materials=materials,
+           elapsed=elapsed,
+        )
+
+
+@bp.route("/scene/details/update_description", methods=["post"])
+@login_required
+@roles_accepted("research", "admin")
+def batch_update_description():
+    """ Update material description. """
+    from bl.batch.root import RootUpdater
+ 
+    batch_id = request.form["batch_id"]
+    description = request.form["description"]
+    return_url = url_for("scene.batch_details")
+    try:
+        with RootUpdater("update") as root_service:
+            res = root_service.batch_get_one(current_user.username, batch_id)
+            if Status.has_failed(res):
+                raise RuntimeError(_("Failed to retrieve batch"))
+     
+            batch = res['item']
+            batch.description = description
+            batch.save(root_service.dataservice.tx)
+            flash(_("The description of this material has been updated."))
+
+    except Exception as e:
+        error_print("audit_selected_op", e)
+        return redirect(return_url)
+
+    return redirect(return_url)
+
+# ------------------------------ Menu 8: Comment --------------------------------
 
 @bp.route("/scene/topics")
 @login_required

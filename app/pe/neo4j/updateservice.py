@@ -170,7 +170,7 @@ class Neo4jUpdateService(ConcreteService):
                             cypher=CypherRoot.batch_merge,
                             b_attr=attr,
                             )
-        return record[0] #{"status": Status.OK, "identity": uniq_id}
+        return record["id"] #{"status": Status.OK, "identity": uniq_id}
 
 
     def ds_batch_set_state(self, batch_id, user, state):

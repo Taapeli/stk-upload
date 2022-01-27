@@ -184,22 +184,7 @@ class StatsBuilder:
         return event_stats
 
 
-    # def create_stats_node(self, batch_id:str):
-    #     """ Read or create Stats node. """
-    #     cypher = """
-    #         match (b:Root {id:$batch_id})
-    #         merge (b) -[:STATS]-> (stats:Stats)
-    #             on create set
-    #                 stats.event_stats = [],
-    #                 stats.object_stats = []
-    #         return stats
-    #     """ 
-    #     record = self.session.run(cypher, batch_id=batch_id).single()
-    #     node = record['stats']
-    #     return node
-
-
-    def get_stats_node(self, batch_id):
+    def read_stats_node(self, batch_id):
         """ Read Stats node for batch_id. """
         cypher = """
             match (b:Root {id:$batch_id})
@@ -207,7 +192,7 @@ class StatsBuilder:
             return stats
         """ 
         record = self.session.run(cypher, batch_id=batch_id).single()
-        #logger.debug(f"bl.stats.StatsBuilder.get_stats_node {rec}")
+        #logger.debug(f"bl.stats.StatsBuilder.read_stats_node {rec}")
         if record is None: return None
         node = record['stats']
         return node
@@ -255,9 +240,9 @@ class StatsBuilder:
         return Stats(object_stats, event_stats, timestamp)
 
 
-    def get_stats(self, batch_id, timestamp):
+    def get_current_stats(self, batch_id, timestamp):
         """ Read or create statistics for batch_id, depending of Root.timestamp. """
-        node = self.get_stats_node(batch_id)
+        node = self.read_stats_node(batch_id)
         if node is None or node.get("timestamp",0) < timestamp:
             #node = self.create_stats_node(batch_id)
             stats = self.count_objects_events(batch_id, timestamp)
@@ -275,9 +260,9 @@ def get_stats(batch_id:str, timestamp:int):
     """ Get Stats object by given Root.id and Root.timestamp.
 
         If the Root has no Stats node or Stats is older than Root,
-        calculate new statistics info.
+        calculate new statistics info and save to Stats node.
     """ 
     with shareds.driver.session() as session:
         handler = StatsBuilder(session)
-        stats = handler.get_stats(batch_id, timestamp)
+        stats = handler.get_current_stats(batch_id, timestamp)
         return stats

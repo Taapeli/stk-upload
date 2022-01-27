@@ -193,10 +193,10 @@ def PersonBl_from_node(node, obj=None):
     obj.confidence = node.get("confidence", "")
     obj.sortname = node["sortname"]
     obj.priv = node["priv"]
-    obj.birth_low = node["birth_low"]
-    obj.birth_high = node["birth_high"]
-    obj.death_low = node["death_low"]
-    obj.death_high = node["death_high"]
+    obj.birth_low = node.get("birth_low", 0)
+    obj.birth_high = node.get("birth_high", 9999)
+    obj.death_low = node.get("death_low", 9999)
+    obj.death_high = node.get("death_high", 0)
     last_year_allowed = datetime.now().year - PRIVACY_LIMIT
     #         if obj.death_high < 9999:
     #             print('ok? uniq_id=',obj.uniq_id,obj.death_high)
