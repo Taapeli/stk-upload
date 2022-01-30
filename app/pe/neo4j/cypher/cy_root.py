@@ -74,6 +74,7 @@ RETURN ID(b) AS id"""
 MATCH (b:Root {id: $bid}) WHERE b.state IN $states
 MATCH (audi:UserProfile {username: $audi})
     SET b.state = "Auditing"
+    MERGE (audi) -[:HAS_ACCESS]-> (b)
     MERGE (audi) -[r:DOES_AUDIT]-> (b)
     SET r.timestamp = timestamp()
 RETURN ID(b) AS id"""

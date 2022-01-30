@@ -167,7 +167,7 @@ def audit_pick(batch_id=None):
         timestamp = root.timestamp_str()
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
-        can_browse = (root.state == State.ROOT_AUDIT_REQUESTED or
+        can_browse = (#root.state == State.ROOT_AUDIT_REQUESTED or
                       root.state == State.ROOT_AUDITING or 
                       root.state == State.ROOT_ACCEPTED or 
                       root.state == State.ROOT_REJECTED)
@@ -177,7 +177,9 @@ def audit_pick(batch_id=None):
         can_accept = (i_am_auditor and root.state  == State.ROOT_AUDITING)
         can_remove = (total == 0 \
                       and root.state in [State.ROOT_ACCEPTED, State.ROOT_REJECTED])
-
+        print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
+              f"can_browse={can_browse} can_start={can_start} "
+              f"can_accept={can_accept} can_remove={can_remove}")
     except Exception as e:
         error_print("audit_pick", e)
         return redirect(url_for("audit.list_uploads"))
@@ -218,6 +220,11 @@ def audit_selected_op():
         if request.form.get("browse"):
             args = {"batch_id": batch_id, "material_type": material_type, "state": state}
             return redirect("/scene/material/batch?" + urllib.parse.urlencode(args))
+        elif request.form.get("download"):
+            return redirect(url_for("audit.audit_batch_download", 
+                                    batch_id=batch_id, 
+                                    username=current_user.username))
+            #return redirect(f"/audit/batch_download/{batch_id}/{current_user.username}")
         elif request.form.get("start"):
             operation = "start"
         elif request.form.get("accept"):

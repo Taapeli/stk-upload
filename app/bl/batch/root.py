@@ -400,6 +400,7 @@ class Root(NodeObject):
         labels = []
         user = None
         b = None
+        node = None
         result = shareds.driver.session().run(
             CypherRoot.get_single_batch, batch=batch_id
         )
@@ -420,15 +421,18 @@ class Root(NodeObject):
             #    auditors=['juha',1620570475208]
             #    has_access=['jpek']
             # >
-
-            user = record['profile']['username']
-            node = record["root"]
-            b = Root.from_node(node)
-            b.has_access = record['has_access']
-            b.auditors = []
-            for au_user, ms in record["auditors"]:
-                if au_user:
-                    b.auditors.append([au_user, ms, format_ms_timestamp(ms)])
+            if node is None or \
+               (node.id != record["root"].id and \
+                user != record['profile']['username']):
+                # Not same user and root
+                user = record['profile']['username']
+                node = record["root"]
+                b = Root.from_node(node)
+                b.has_access = record['has_access'] # Users granted special access
+                b.auditors = []
+                for au_user, ms in record["auditors"]:
+                    if au_user:
+                        b.auditors.append([au_user, ms, format_ms_timestamp(ms)])
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
