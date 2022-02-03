@@ -971,6 +971,10 @@ class Neo4jUpdateService(ConcreteService):
             "suffix": name.suffix,
             "title": name.title,
         }
+        
+        if name.dates:
+            n_attr.update(name.dates.for_db())
+            
         tx.run(
             CypherPerson.create_name_as_leaf,
             n_attr=n_attr,

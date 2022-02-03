@@ -44,12 +44,13 @@ class Name(NodeObject):
             surname             str sukunimi
             prefix              str etuliite
             suffix              str patronyme / patronyymi
+            dates               DateRange date expression
             title               str titteli, esim. Sir, Dr.
             # citation_handles[]  str gramps handles for citations
             # citation_ref[]      int uniq_ids of citation nodes
     """
 
-    def __init__(self, givn="", surn="", pref="", suff="", titl=""):
+    def __init__(self, givn="", surn="", pref="", suff="", dates="", titl=""):
         """ Luo uuden name-instanssin """
         self.type = ""
         self.order = None
@@ -57,6 +58,7 @@ class Name(NodeObject):
         self.surname = surn
         self.prefix = pref
         self.suffix = suff
+        self.dates = dates
         self.title = titl
         # # Set in bp.gramps.xml_dom_handler.DOM_handler.handle_people
         # self.citation_handles = []

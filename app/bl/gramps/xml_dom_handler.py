@@ -599,6 +599,13 @@ class DOM_handler:
                             "count": p.id,
                         }
                     )
+                    
+                try:
+                    # Return Gramps_DateRange or None
+                    pname.dates = self._extract_daterange(person_name)
+                    # TODO: val="1700-luvulla" muutettava Noteksi
+                except:
+                    pname.dates = None
 
                 if len(person_name.getElementsByTagName("title")) == 1:
                     person_title = person_name.getElementsByTagName("title")[0]
