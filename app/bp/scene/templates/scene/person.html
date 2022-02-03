@@ -103,6 +103,10 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
             <i>{{person.names[0].suffix}}</i>
             {{person.names[0].prefix}}
             <b>{{person.names[0].surname}}</b>
+            
+            {% if person.names[0].dates %}
+            	({{person.names[0].dates}})
+            {% endif %}
         </span>
             </a>
             {{macro.citation_link(person.citation_ref, obj)}}
@@ -151,6 +155,10 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	                                <i title="{{ _('patronymic') }}">{{p_name.suffix}}</i>
 	                                {% if p_name.prefix %}<span title="etuliite">{{p_name.prefix}}</span>{% endif %}
 	                                <b title="{{ _('surname') }}">{{p_name.surname}}</b>
+	                                
+	                                {% if p_name.dates %}
+	                                	<span title="{{ _('dates') }}">({{p_name.dates}})</span>
+	                                {% endif %}
 	        
 	        	                    {{macro.citation_link(p_name.citation_ref, obj)}}
 	        	                    <input type="hidden" name="order" value="{{p_name.uniq_id}}">

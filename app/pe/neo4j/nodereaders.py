@@ -162,6 +162,10 @@ def Name_from_node(node):
     n.title = node.get("title", "")
     n.surname = node.get("surname", "")
     n.order = node["order"]
+    
+    if "datetype" in node:
+        n.dates = DateRange(node["datetype"], node["date1"], node["date2"])
+        n.dates.calendar = node["calendar"]
     return n
 
 
