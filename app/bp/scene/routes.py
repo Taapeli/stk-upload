@@ -56,7 +56,7 @@ from bl.media import MediaReader
 from bl.note import NoteReader
 from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
-from bl.place import PlaceReader
+from bl.place import PlaceReaderTx
 from bl.source import SourceReader
 
 from bp.graph.models.fanchart import FanChart
@@ -448,7 +448,7 @@ def show_person_search():  # (set_scope=None, batch_id=None):
                 surnamestats.sort(key=itemgetter("surname"))
 
             # Most common place names cloud
-            with PlaceReader("read", u_context) as service:
+            with PlaceReaderTx("read_tx", u_context) as service:
                 placenamestats = service.get_placename_list(40)
                 # {name, count, uuid}
                 for i, stat in enumerate(placenamestats):
@@ -712,28 +712,28 @@ def sort_names():
 
 
 # @bp.route('/scene/event/<int:uniq_id>')
-@bp.route("/older/event/uuid=<string:uuid>")
-@login_required
-@roles_accepted("guest", "research", "audit", "admin")
-def obsolete_show_event_v1(uuid):
-    """Event page with accompanied persons and families.
-
-    Derived from bp.obsolete_tools.routes.show_baptism_data()
-    """
-    u_context = UserContext()
-
-    with EventReader("read", u_context) as service:
-        # reader = EventReader(readservice, u_context)
-        res = service.get_event_data(uuid, u_context.material)
-
-    status = res.get("status")
-    if status != Status.OK:
-        flash(f'{_("Event not found")}: {res.get("statustext")}', "error")
-    event = res.get("event", None)
-    members = res.get("members", [])
-
-    stk_logger(u_context, f"-> bp.scene.routes.show_event_page n={len(members)}")
-    return render_template("/scene/event_htmx.html", event=event, participants=members)
+# @bp.route("/older/event/uuid=<string:uuid>")
+# @login_required
+# @roles_accepted("guest", "research", "audit", "admin")
+# def obsolete_show_event_v1(uuid):
+#     """Event page with accompanied persons and families.
+#
+#     Derived from bp.obsolete_tools.routes.show_baptism_data()
+#     """
+#     u_context = UserContext()
+#
+#     with EventReader("read", u_context) as service:
+#         # reader = EventReader(readservice, u_context)
+#         res = service.get_event_data(uuid, u_context.material)
+#
+#     status = res.get("status")
+#     if status != Status.OK:
+#         flash(f'{_("Event not found")}: {res.get("statustext")}', "error")
+#     event = res.get("event", None)
+#     members = res.get("members", [])
+#
+#     stk_logger(u_context, f"-> bp.scene.routes.show_event_page n={len(members)}")
+#     return render_template("/scene/event_htmx.html", event=event, participants=members)
 
 
 @bp.route("/scene/edit_event/uuid=<string:uuid>")
@@ -1059,8 +1059,8 @@ def show_places():
     u_context.set_scope_from_request("place_scope")
     u_context.count = request.args.get("c", 50, type=int)
 
-    with PlaceReader("read", u_context) as service:
-        # reader = PlaceReader(readservice, u_context)
+    with PlaceReaderTx("read_tx", u_context) as service:
+        # reader = PlaceReaderTx(readservice, u_context)
         # The 'items' list has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
         res = service.get_place_list()
@@ -1090,41 +1090,48 @@ def show_places():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_place(locid):
-    """Home page for a Place, shows events and place hierarchy."""
+    """Home page for a Place uuid=locid, shows events and place hierarchy."""
     t0 = time.time()
     u_context = UserContext()
     try:
-        with PlaceReader("read", u_context) as service:
-            # reader = PlaceReader(readservice, u_context)
+        with PlaceReaderTx("read_tx", u_context) as service:
             res = service.get_places_w_events(locid)
 
-        if res["status"] == Status.NOT_FOUND:
-            print(f'bp.scene.routes.show_place: {_("Place not found")}')
-        elif res["status"] != Status.OK:
-            print(
-                f'bp.scene.routes.show_place: {_("Place not found")}: {res.get("statustext")}'
-            )
+            if res["status"] == Status.NOT_FOUND:
+                print(f'bp.scene.routes.show_place: {_("Place not found")}')
+            elif res["status"] != Status.OK:
+                print(
+                    f'bp.scene.routes.show_place: {_("Place not found")}: {res.get("statustext")}'
+                )
+            cnt = len(res.get("events")) if res.get("events", False) else 0
+            pl = res.get("place")
+            pl_hierarchy=res.get("hierarchy")
+            events=res.get("events")
+            # Map scaling
+            level = 1
+            for p in res.get("hierarchy"):
+                if p.uuid == pl.uuid:
+                    level = p.level
+            zoom = 19 - 48.5*level + 30*level*level
+            print(f"bp.scene.routes.show_place: level={level}, zoom={zoom}")
+
+            # Find Source references
+            res = service.get_place_source_citations(pl)
+            sources = res.get("sources")
 
     except KeyError as e:
         traceback.print_exc()
         return redirect(url_for("virhesivu", code=1, text=str(e)))
 
-    cnt = len(res.get("events")) if res.get("events", False) else 0
-    pl = res.get("place")
-    level = 1
-    for p in res.get("hierarchy"):
-        if p.uuid == pl.uuid:
-            level = p.level
-    zoom = 19 - 48.5*level + 30*level*level
-    print(f"bp.scene.routes.show_place: level={level}, zoom={zoom}")
 
     stk_logger(u_context, f"-> bp.scene.routes.show_place n={cnt}")
     return render_template(
         "/scene/place.html",
         place=pl,
         level=level, zoom=zoom,
-        pl_hierarchy=res.get("hierarchy"),
-        events=res.get("events"),
+        pl_hierarchy=pl_hierarchy,
+        events=events,
+        sources=sources,
         user_context=u_context,
         elapsed=time.time() - t0,
     )

@@ -9,7 +9,15 @@ import traceback
 import shareds
 from bl.person_name import Name
 from bl.dates import DateRange
+from bl.base import Status
+from bl.material import Material
+from bl.place import PlaceBl, PlaceName
 
+from ui.place import place_names_local_from_nodes
+
+from pe.dataservice import ConcreteService
+from pe.neo4j.util import run_cypher
+from pe.neo4j.util import run_cypher_batch
 from pe.neo4j.nodereaders import Citation_from_node
 from pe.neo4j.nodereaders import Comment_from_node
 from pe.neo4j.nodereaders import DateRange_from_node
@@ -23,14 +31,11 @@ from pe.neo4j.nodereaders import PlaceBl_from_node
 from pe.neo4j.nodereaders import PlaceName_from_node
 from pe.neo4j.nodereaders import Repository_from_node
 from pe.neo4j.nodereaders import SourceBl_from_node
-
-from pe.dataservice import ConcreteService
 from pe.neo4j.cypher.cy_person import CypherPerson
+from pe.neo4j.cypher.cy_place import CypherPlace
 from pe.neo4j.cypher.cy_source import CypherSource
-from bl.base import Status
-from bl.material import Material
 
-from .util import run_cypher_batch
+from models.dbtree import DbTree
 
 logger = logging.getLogger("stkserver")
 
@@ -104,6 +109,8 @@ class Neo4jReadServiceTx(ConcreteService):
         logger.debug(f'#~~~~{self.__class__.__name__} init')
         self.driver = driver if driver else shareds.driver
 
+
+    # ------ Persons -----
 
     def tx_get_person_list(self, args):
         """ Read Person data from given fw_from.
@@ -495,6 +502,254 @@ class Neo4jReadServiceTx(ConcreteService):
 
         res['families'] = families
         return res
+
+    # ------ Places -----
+
+    def dr_get_place_list_fw(self, user, fw_from, limit, lang, material):
+        """Read place list from given start point"""
+        ret = []
+        if lang not in ["fi", "sv"]:
+            lang = "fi"
+        with self.driver.session(default_access_mode="READ") as session:
+            print("Neo4jReadService.dr_get_place_list_fw")
+            result = run_cypher_batch(
+                session,
+                CypherPlace.get_name_hierarchies,
+                user,
+                material,
+                fw=fw_from,
+                limit=limit,
+                lang=lang,
+            )
+            for record in result:
+                # <Record
+                #    place=<Node id=514341 labels={'Place'}
+                #        properties={'coord': [61.49, 23.76],
+                #            'id': 'P0300', 'type': 'City', 'uuid': '8fbe632144584d30aa75701b49f15484',
+                #            'pname': 'Tampere', 'change': 1585409704}>
+                #    name=<Node id=514342 labels={'Place_name'}
+                #        properties={'name': 'Tampere', 'lang': ''}>
+                #    names=[<Node id=514344 labels={'Place_name'}
+                #            properties={'name': 'Tampereen kaupunki', 'lang': ''}>,
+                #        <Node id=514343 ...>]
+                #    uses=4
+                #    upper=[[514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finnland', 'de'],
+                #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finland', 'sv'],
+                #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Suomi', '']
+                #    ]
+                #    lower=[[None, None, None, None, None]]>
+                node = record["place"]
+                p = PlaceBl_from_node(node)
+                p.ref_cnt = record["uses"]
+
+                # Set place names and default display name pname
+                # 1. defaut name
+                p.names.append(PlaceName_from_node(record["name"]))
+                # 2. other names arranged by language
+                lst = place_names_local_from_nodes(record["names"])
+                p.names += lst
+                p.pname = p.names[0].name
+                
+                # Combined names for upper and lower places
+                p.uppers = PlaceBl.combine_places(record["upper"], lang)
+                p.lowers = PlaceBl.combine_places(record["lower"], lang)
+                ret.append(p)
+
+        # Return sorted by first name in the list p.names -> p.pname
+        return sorted(ret, key=lambda x: x.pname)
+
+    def dr_get_place_w_names_notes_medias(self, user, uuid, lang, material):
+        """Returns the PlaceBl with PlaceNames, Notes and Medias included."""
+        pl = None
+        node_ids = []  # List of uniq_is for place, name, note and media nodes
+        with self.driver.session(default_access_mode="READ") as session:
+            result = run_cypher(
+                session,
+                CypherPlace.get_w_names_notes,
+                user,
+                material,
+                uuid=uuid,
+                lang=lang,
+            )
+            for record in result:
+                # <Record
+                #    place=<Node id=514286 labels={'Place'}
+                #        properties={'coord': [60.45138888888889, 22.266666666666666],
+                #            'id': 'P0007', 'type': 'City', 'uuid': '494a748a2730417ca02ccaa11685e21a',
+                #            'pname': 'Turku', 'change': 1585409704}>
+                #    name=<Node id=514288 labels={'Place_name'}
+                #        properties={'name': 'Åbo', 'lang': 'sv'}>
+                #    names=[<Node id=514287 labels={'Place_name'}
+                #                properties={'name': 'Turku', 'lang': ''}>]
+                #    notes=[<Node id=582777 labels=frozenset({'Note'}) properties=...>]
+                #    medias=[]
+                # >
+
+                node = record["place"]
+                pl = PlaceBl_from_node(node)
+                node_ids.append(pl.uniq_id)
+                # Default lang name
+                name_node = record["name"]
+                if name_node:
+                    pl.names.append(PlaceName_from_node(name_node))
+                # Other name versions
+                for name_node in record["names"]:
+                    pl.names.append(PlaceName_from_node(name_node))
+                    node_ids.append(pl.names[-1].uniq_id)
+
+                for notes_node in record["notes"]:
+                    n = Note_from_node(notes_node)
+                    pl.notes.append(n)
+                    node_ids.append(pl.notes[-1].uniq_id)
+
+                for medias_node in record["medias"]:
+                    m = MediaBl_from_node(medias_node)
+                    # Todo: should replace pl.media_ref[] <-- pl.medias[]
+                    pl.media_ref.append(m)
+                    node_ids.append(pl.media_ref[-1].uniq_id)
+
+        return {"place": pl, "uniq_ids": node_ids}
+
+    def dr_get_place_tree(self, locid, lang="fi"):
+        """Read upper and lower places around this place.
+
+        Haetaan koko paikkojen ketju paikan locid ympärillä
+        Palauttaa listan paikka-olioita ylimmästä alimpaan.
+        Jos hierarkiaa ei ole, listalla on vain oma Place_combo.
+
+        Esim. Tuutarin hierarkia
+              2 Venäjä -> 1 Inkeri -> 0 Tuutari -> -1 Nurkkala
+              tulee tietokannasta näin:
+        ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
+        │"lv"│"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"  │
+        ╞════╪═══════╪═════════╪══════════╪═══════╪═════════╪═════════╡
+        │"2" │"21774"│"Region" │"Tuutari" │"21747"│"Country"│"Venäjä" │
+        ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
+        │"1" │"21774"│"Region" │"Tuutari" │"21773"│"State"  │"Inkeri" │
+        ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
+        │"-1"│"21775"│"Village"│"Nurkkala"│"21774"│"Region" │"Tuutari"│
+        └────┴───────┴─────────┴──────────┴───────┴─────────┴─────────┘
+        Metodi palauttaa siitä listan
+            Place(result[0].id2) # Artjärvi City
+            Place(result[0].id1) # Männistö Village
+            Place(result[1].id1) # Pekkala Farm
+        Muuttuja lv on taso:
+            >0 = ylemmät,
+             0 = tämä,
+            <0 = alemmat
+        """
+        t = DbTree(self.driver, CypherPlace.read_pl_hierarchy, "pname", "type")
+        t.load_to_tree_struct(locid)
+        if t.tree.depth() == 0:
+            # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
+            # Hae oman paikan tiedot ilman yhteyksiä
+            with self.driver.session(default_access_mode="READ") as session:
+                result = session.run(CypherPlace.root_query, locid=int(locid))
+                record = result.single()
+                t.tree.create_node(
+                    record["name"],
+                    locid,
+                    parent=0,
+                    data={"type": record["type"], "uuid": record["uuid"]},
+                )
+        ret = []
+        for tnode in t.tree.expand_tree(mode=t.tree.DEPTH):
+            logger.debug(
+                f"{t.tree.depth(t.tree[tnode])} {t.tree[tnode]} {t.tree[tnode].bpointer}"
+            )
+            if tnode != 0:
+                n = t.tree[tnode]
+
+                # Get all names: default lang: 'name' and others: 'names'
+                with self.driver.session(default_access_mode="READ") as session:
+                    result = session.run(
+                        CypherPlace.read_pl_names, locid=tnode, lang=lang
+                    )
+                    record = result.single()
+                    # <Record
+                    #    name=<Node id=514413 labels={'Place_name'}
+                    #        properties={'name': 'Suomi', 'lang': ''}>
+                    #    names=[<Node id=514415 labels={'Place_name'}
+                    #            properties={'name': 'Finnland', 'lang': 'de'}>,
+                    #        <Node id=514414 labels={'Place_name'} ...}>
+                    #    ]
+                    # >
+                lv = t.tree.depth(n)
+                p = PlaceBl(uniq_id=tnode, ptype=n.data["type"], level=lv)
+                p.uuid = n.data["uuid"]
+                node = record["name"]
+                if node:
+                    p.names.append(PlaceName_from_node(node))
+                oth_names = []
+                for node in record["names"]:
+                    oth_names.append(PlaceName_from_node(node))
+                # Arrage names by local language first
+                lst = PlaceName.arrange_names(oth_names)
+                p.names += lst
+
+                p.pname = p.names[0].name
+                # logger.info("# {}".format(p))
+                p.parent = n.bpointer
+                ret.append(p)
+        return ret
+
+    def dr_get_place_events(self, uniq_id, privacy):
+        """Find events and persons associated to given Place.
+
+            :param: uniq_id    current place uniq_id
+            :param: privacy    True, if not showing live people
+        """
+        result = self.driver.session(default_access_mode="READ").run(
+            CypherPlace.get_person_family_events, locid=uniq_id
+        )
+        ret = []
+        for record in result:
+            # <Record
+            #    indi=<Node id=523974 labels={'Person'}
+            #        properties={'sortname': 'Borg#Maria Charlotta#', 'death_high': 1897,
+            #            'confidence': '', 'sex': 2, 'change': 1585409709, 'birth_low': 1841,
+            #            'birth_high': 1841, 'id': 'I0029', 'uuid': 'e9bc18f7e9b34f1e8291de96002689cd',
+            #            'death_low': 1897}>
+            #    role='Primary'
+            #    names=[<Node id=523975 labels={'Name'}
+            #            properties={'firstname': 'Maria Charlotta', 'type': 'Birth Name',
+            #                'suffix': '', 'surname': 'Borg', 'prefix': '', 'order': 0}>,
+            #        <Node id=523976 labels={'Name'} properties={...}>]
+            #    event=<Node id=523891 labels={'Event'}
+            #            properties={'datetype': 0, 'change': 1585409700, 'description': '',
+            #                'id': 'E0080', 'date2': 1885458, 'type': 'Birth', 'date1': 1885458,
+            #                'uuid': '160a0c75659145a4ac09809823fca5f9'}>
+            # >
+            e = EventBl_from_node(record["event"])
+            # Fields uid (person uniq_id) and names are on standard in EventBl
+            e.role = record["role"]
+            indi_label = list(record["indi"].labels)[0]
+            # if indi_label in ["Audit", "Batch"]:
+            #     continue
+            if "Person" == indi_label:
+                e.indi_label = "Person"
+                e.indi = PersonBl_from_node(record["indi"])
+                # Reading confidental person data which is available to this user?
+                if not privacy:
+                    e.indi.too_new = False
+                elif e.indi.too_new:  # Check privacy
+                    continue
+                for node in record["names"]:
+                    e.indi.names.append(Name_from_node(node))
+                ##ret.append({'event':e, 'indi':e.indi, 'label':'Person'})
+                ret.append(e)
+            elif "Family" == indi_label:
+                e.indi_label = "Family"
+                e.indi = FamilyBl_from_node(record["indi"])
+                ##ret.append({'event':e, 'indi':e.indi, 'label':'Family'})
+                ret.append(e)
+            else:  # Root
+                pass
+                # print(
+                #     f"dr_get_place_events: No Person or Family:"
+                #     f" {e.id} {list(record['indi'].labels)[0]} {record['indi'].get('id')}"
+                # )
+        return {"items": ret, "status": Status.OK}
 
 
     def tx_get_object_places(self, base_objs:dict):

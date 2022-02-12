@@ -24,7 +24,7 @@ Created on 30.1.2021
 # blacked
 #import shareds
 from pe.dataservice import DataService
-from bl.base import Status
+from bl.base import Status, NodeObject
 
 from bl.source import SourceBl
 from bl.citation import Citation
@@ -54,9 +54,9 @@ class PersonReaderTx(DataService):
     def __init__(self, service_name: str, u_context=None):
         # print(f'#~~{self.__class__.__name__} init')
         super().__init__(service_name, u_context)
-        self.obj_catalog = {}  # dict {uniq_id: Connected_object}
+        self.obj_catalog = {}  # dict {uniq_id: Connected_object: NodeObject}
 
-    def _catalog(self, obj):
+    def _catalog(self, obj: NodeObject):
         """ Add the object to collection of referenced objects. """
         if obj is None:
             return

@@ -22,7 +22,7 @@
 
     - Place        represents Place Node in database
     - PlaceBl      represents Place and connected data (was Place_combo)
-    - PlaceReader  has methods for reading Place and connected data
+    - PlaceReaderTx  has methods for reading Place and connected data
                    called from ui routes.py
 
 Created on 11.3.2020 in bl.place
@@ -47,7 +47,6 @@ import logging
 logger = logging.getLogger("stkserver")
 
 from .base import NodeObject, Status
-from bl.dates import DateRange
 from pe.dataservice import DataService
 
 
@@ -182,10 +181,11 @@ class PlaceBl(Place):
     def combine_places(pn_tuples, lang):
         """Creates a list of Places with names combined from given names.
 
-        The pl_tuple has Places data as a tuple [[28101, "City", "Lovisa", "sv"]].
+        The pl_tuple has Places data as a tuple 
+        [[28101, "b16a6ee2c7a24e399d45554faa8fb094", "City", "Lovisa", "sv"]].
 
-        Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
-        Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
+        If a Place exists twice, their names are combined.
+        If there is a language code, it is appended in parenthesis.
 
         TODO. Lajittele paikannimet kielen mukaan (si, sv, <muut>, "")
               ja aakkosjärjestykseen
@@ -242,7 +242,7 @@ class PlaceName(NodeObject):
 
     @staticmethod
     def arrange_names(namelist: list, lang: str = None):
-        """Arrange Place_name objects by name usefullness.
+        """Arrange Place_name objects by name usefulness.
 
         If lang attribute is present, the default language name is processed
         outside this method.
@@ -311,7 +311,7 @@ class PlaceName(NodeObject):
         return self._lang_key(self) != self._lang_key(other)
 
 
-class PlaceReader(DataService):
+class PlaceReaderTx(DataService):
     """
     Abstracted Place datastore for reading.
 
@@ -319,6 +319,12 @@ class PlaceReader(DataService):
 
     - Methods return a dict result object {'status':Status, ...}
     """
+
+    def __init__(self, service_name: str, u_context=None):
+        # print(f'#~~{self.__class__.__name__} init')
+        super().__init__(service_name, u_context)
+        self.obj_catalog = {}  # dict {uniq_id: Connected_object: NodeObject}
+
 
     def get_place_list(self):
         """Get a list on PlaceBl objects with nearest hierarchy neighbors.
@@ -332,11 +338,21 @@ class PlaceReader(DataService):
             use_user, fw, context.count, lang=context.lang,
             material=context.material,
         )
+        # for p in places:
+        #     oth_names = []
+        #     for node in record["names"]:
+        #         oth_names.append(PlaceName_from_node(node))            # Arrage names by local language first
+        #     lst = PlaceName.arrange_names(oth_names)
+        #
+        #     p.names += lst
+        #     p.pname = p.names[0].name
+        #     p.uppers = PlaceBl.combine_places(record["upper"], lang)
+        #     p.lowers = PlaceBl.combine_places(record["lower"], lang)
 
         # Update the page scope according to items really found
         if places:
             print(
-                f"PlaceReader.get_place_list: {len(places)} places "
+                f"PlaceReaderTx.get_place_list: {len(places)} places "
                 f'{context.direction} "{places[0].pname}" – "{places[-1].pname}"'
             )
             context.update_session_scope(
@@ -347,7 +363,7 @@ class PlaceReader(DataService):
                 len(places),
             )
         else:
-            print(f"bl.place.PlaceReader.get_place_list: no places")
+            print(f"bl.place.PlaceReaderTx.get_place_list: no places")
             return {
                 "status": Status.NOT_FOUND,
                 "items": [],
@@ -369,6 +385,8 @@ class PlaceReader(DataService):
         material = self.user_context.material
         res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid,
                                                                  lang, material)
+        # res{place:Place, uniq_ids:list(uniq_ids)}
+        # The uniq_ids includes all references to names, notes and medias
         place = res.get("place")
         results = {"place": place, "status": Status.OK}
 
@@ -400,6 +418,17 @@ class PlaceReader(DataService):
         res = self.dataservice.dr_get_place_events(place.uniq_id, privacy)
         results["events"] = res["items"]
         return results
+
+    def get_place_source_citations(self, place):
+        """ Get source citations for given Place. """
+        if place is None:
+            return []
+
+        # Find (place) --> (c:Citation) -> (s:Source) --> (a:Archive)
+        # tx_get_object_citation_note_media(obj_catalog:dict, active_objs=[])
+        self.obj_catalog[place.uniq_id] = place
+        res = self.dataservice.tx_get_object_citation_note_media(self.obj_catalog)
+        return res
 
     def get_placename_list(self, count=40):
         """
