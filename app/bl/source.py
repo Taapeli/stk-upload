@@ -193,7 +193,7 @@ class SourceReader(DataService):
                         self.dataservice.dr_inlay_person_lifedata(target)
                     citation.citators.append(target)
                 else:
-                    print(f"DbReader.get_source_with_references: hide {target}")
+                    print(f"bSourceReader.get_source_with_references: hide {target}")
 
             cit.append(citation)
         res["citations"] = cit

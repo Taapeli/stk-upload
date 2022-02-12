@@ -22,27 +22,28 @@ Created on 17.3.2020
 
 @author: jm
 """
-# blacked 25.5.2021/JMä
+# blacked 12.2.2022/JMä
 import logging
 
 logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
 from bl.base import Status
-from bl.dates import DateRange
-from bl.person_name import Name
 from bl.place import PlaceBl, PlaceName
-from bl.source import SourceBl
-from bl.family import FamilyBl
-from bl.event import EventBl
-from bl.person import PersonBl
 from bl.material import Material
-from bl.media import MediaBl
-from bl.event import Event
-from bl.note import Note
-from bl.citation import Citation
-from bl.repository import Repository
-from models.dbtree import DbTree
+
+# from bl.dates import DateRange
+# from bl.person_name import Name
+# from bl.source import SourceBl
+# from bl.family import FamilyBl
+# from bl.event import EventBl
+# from bl.person import PersonBl
+# from bl.media import MediaBl
+# from bl.event import Event
+# from bl.note import Note
+# from bl.citation import Citation
+# from bl.repository import Repository
+# from models.dbtree import DbTree
 
 from ui.place import place_names_local_from_nodes
 
@@ -152,7 +153,9 @@ class Neo4jReadService(ConcreteService):
             "statustext": "No Event found",
         }
 
-    def dr_get_person_list(self, _args):
+    # ------ Persons -----
+
+    def obsolete_dr_get_person_list(self, _args):
         """Read Person data from given fw_from.
 
         NOT USED --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_list
@@ -160,9 +163,43 @@ class Neo4jReadService(ConcreteService):
         args = dict {use_user, fw, limit, rule, key, years}
         """
         persons = []
-        return {"items": persons, "status": Status.ERROR, "statustext":"obsolete dr_get_person_list"}
+        return {
+            "items": persons,
+            "status": Status.ERROR,
+            "statustext": "obsolete obsolete_dr_get_person_list",
+        }
 
-    def dr_get_event_by_uuid(self, user:str, uuid:str, material:Material):
+    def dr_inlay_person_lifedata(self, person):
+        """Reads person's def. name, birth and death event into Person obj."""
+
+        with self.driver.session(default_access_mode="READ") as session:
+            result = session.run(CypherSource.get_person_lifedata, pid=person.uniq_id)
+            for record in result:
+                # <Record
+                #    name=<Node id=379934 labels={'Name'}
+                #        properties={'firstname': 'Gustaf', 'type': 'Also Known As', 'suffix': '', 'prefix': '',
+                #            'surname': 'Johansson', 'order': 0}>
+                #    events=[
+                #        <Node id=492911 labels={'Event'}
+                #            properties={'datetype': 0, 'change': 1577803201, 'description': '',
+                #                'id': 'E7750', 'date2': 1853836, 'type': 'Birth', 'date1': 1853836,
+                #                'uuid': '794e0c9e6f15479cb5d33dc4cf245a7d'}>
+                #    ]
+                # >
+                name_node = record["name"]
+                person.names.append(Name_from_node(name_node))
+                events = record["events"]
+                for node in events:
+                    e = EventBl_from_node(node)
+                    if e.type == "Birth":
+                        person.event_birth = e
+                    else:
+                        person.event_death = e
+        return
+
+    # ------ Events -----
+
+    def dr_get_event_by_uuid(self, user: str, uuid: str, material: Material):
         """
         Read an Event using uuid and username.
 
@@ -171,8 +208,9 @@ class Neo4jReadService(ConcreteService):
         event = None
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher(session, CypherEvent.get_an_event,
-                                    user, material, uuid=uuid)
+                result = run_cypher(
+                    session, CypherEvent.get_an_event, user, material, uuid=uuid
+                )
                 for record in result:
                     if record["e"]:
                         # Record: <Record
@@ -304,7 +342,9 @@ class Neo4jReadService(ConcreteService):
 
         return {"notes": notes, "medias": medias, "status": Status.OK}
 
-    def dr_get_family_by_uuid(self, user: str, material:Material, uuid: str):
+    # ------ Families -----
+
+    def dr_get_family_by_uuid(self, user: str, material: Material, uuid: str):
         """
         Read a Family using uuid and user info.
 
@@ -313,8 +353,9 @@ class Neo4jReadService(ConcreteService):
         family = None
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher(session, CypherFamily.get_a_family, 
-                                user, material, f_uuid=uuid)
+            result = run_cypher(
+                session, CypherFamily.get_a_family, user, material, f_uuid=uuid
+            )
             for record in result:
                 if record["f"]:
                     # <Record
@@ -357,10 +398,9 @@ class Neo4jReadService(ConcreteService):
         # show_candidate = self.user_context.use_owner_filter()
         with self.driver.session(default_access_mode="READ") as session:
             if order == "man":
-                print(
-                    "Neo4jReadService.dr_get_families: candidate ordered by man"
-                )
-                result = run_cypher_batch(session,
+                print("Neo4jReadService.dr_get_families: candidate ordered by man")
+                result = run_cypher_batch(
+                    session,
                     CypherFamily.get_families_by_father,
                     user,
                     material,
@@ -368,10 +408,9 @@ class Neo4jReadService(ConcreteService):
                     limit=limit,
                 )
             elif order == "wife":
-                print(
-                    "Neo4jReadService.dr_get_families: candidate ordered by wife"
-                )
-                result = run_cypher_batch(session,
+                print("Neo4jReadService.dr_get_families: candidate ordered by wife")
+                result = run_cypher_batch(
+                    session,
                     CypherFamily.get_families_by_mother,
                     user,
                     material,
@@ -389,7 +428,7 @@ class Neo4jReadService(ConcreteService):
                     f_node = record["f"]
                     family = FamilyBl_from_node(f_node)
                     family.marriage_place = record["marriage_place"]
-    
+
                     uniq_id = -1
                     for role, parent_node, name_node in record["parent"]:
                         if parent_node:
@@ -405,10 +444,10 @@ class Neo4jReadService(ConcreteService):
                                     family.father = pp
                                 elif role == "mother":
                                     family.mother = pp
-    
+
                             pname = Name_from_node(name_node)
                             pp.names = [pname]
-    
+
                     for ch in record["child"]:
                         # <Node id=60320 labels={'Person'}
                         #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19,
@@ -419,7 +458,7 @@ class Neo4jReadService(ConcreteService):
                         child = PersonBl_from_node(ch)
                         family.children.append(child)
                     family.children.sort(key=lambda x: x.birth_low)
-    
+
                     if record["no_of_children"]:
                         family.no_of_children = record["no_of_children"]
                     family.num_hidden_children = 0
@@ -790,6 +829,8 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": list(families.values()), "status": Status.OK}
 
+    # ------ Places -----
+
     def dr_get_place_list_fw(self, user, fw_from, limit, lang, material):
         """Read place list from given start point"""
         ret = []
@@ -850,9 +891,13 @@ class Neo4jReadService(ConcreteService):
         pl = None
         node_ids = []  # List of uniq_is for place, name, note and media nodes
         with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher(session,
-                CypherPlace.get_w_names_notes, user, material, 
-                uuid=uuid, lang=lang
+            result = run_cypher(
+                session,
+                CypherPlace.get_w_names_notes,
+                user,
+                material,
+                uuid=uuid,
+                lang=lang,
             )
             for record in result:
                 # <Record
@@ -1013,7 +1058,7 @@ class Neo4jReadService(ConcreteService):
                 e.indi_label = "Person"
                 e.indi = PersonBl_from_node(record["indi"])
                 # Reading confidental person data which is available to this user?
-                if not privacy: 
+                if not privacy:
                     e.indi.too_new = False
                 elif e.indi.too_new:  # Check privacy
                     continue
@@ -1033,6 +1078,8 @@ class Neo4jReadService(ConcreteService):
                 #     f" {e.id} {list(record['indi'].labels)[0]} {record['indi'].get('id')}"
                 # )
         return {"items": ret, "status": Status.OK}
+
+    # ------ Sources -----
 
     def dr_get_source_list_fw(self, args):
         """Read all sources with notes and repositories, optionally limited by keywords.
@@ -1058,7 +1105,8 @@ class Neo4jReadService(ConcreteService):
                 key2 = args.get("theme2")
                 # Show my researcher data
                 print("dr_get_source_list_fw: my researcher data")
-                result = run_cypher_batch(session,
+                result = run_cypher_batch(
+                    session,
                     CypherSource.get_sources_with_selections,
                     user,
                     material,
@@ -1067,10 +1115,8 @@ class Neo4jReadService(ConcreteService):
                 )
             else:
                 # Show all themes
-                result = run_cypher_batch(session,
-                    CypherSource.get_sources,
-                    user,
-                    material,
+                result = run_cypher_batch(
+                    session, CypherSource.get_sources, user, material
                 )
 
             for record in result:
@@ -1126,12 +1172,12 @@ class Neo4jReadService(ConcreteService):
 
         return sources
 
-    def dr_get_source_w_repository(self, user:str, material:Material, uuid:str):
+    def dr_get_source_w_repository(self, user: str, material: Material, uuid: str):
         """Returns the PlaceBl with Notes and PlaceNames included."""
         source = None
         with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher(session,
-                CypherSource.get_single_selection, user, material, uuid=uuid 
+            result = run_cypher(
+                session, CypherSource.get_single_selection, user, material, uuid=uuid
             )
             for record in result:
                 # <Record
@@ -1166,221 +1212,6 @@ class Neo4jReadService(ConcreteService):
                 "status": Status.NOT_FOUND,
                 "statustext": f"source uuid={uuid} not found",
             }
-
-    def dr_get_media_list(self, user, material, fw_from, limit):
-        """Reads Media objects from user batch or common data using context.
-
-        :param: user    Active user or None, if approved data is requested
-        :param: fw_from The name from which the list is requested
-        :param: limit   How many items per page
-        """
-
-        with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher_batch(session,
-                CypherMedia.get_media_list,
-                user,
-                material,
-                start_name=fw_from,
-                limit=limit,
-            )
-
-            media = []
-            for record in result:
-                # <Record o=<Node id=393949 labels={'Media'}
-                #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
-                #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
-                #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
-                #            'id': 'O0001', 'uuid': 'b4b11fbd8c054252b51703769e7a6850'}>
-                #    credit='juha'
-                #    batch_id='2020-01-02.001'
-                #    count=1>
-                node = record["o"]
-                m = MediaBl_from_node(node)
-                m.conn = record.get("count", 0)
-                m.credit = record.get("credit")
-                m.batch = record.get("batch_id")
-                media.append(m)
-            if media:
-                return {"media": media, "status": Status.OK}
-            else:
-                return {"media": media, "status": Status.NOT_FOUND}
-
-    def dr_get_media_single(self, user, material, uuid):
-        """Read a Media object, selected by UUID or uniq_id.
-
-        :param: user    username, who has access
-        :parma: uuid    Media node uuid
-        """
-        class MediaReferrer:
-            """ Carrier for a referee of media object. """
-
-            def __init__(self):
-                # Referencing object, label, cropping
-                self.obj = None
-                self.label = None
-                self.crop = None
-                # If the referring obj is Event, there is a list of connected objects
-                self.next_objs = []
-
-            def __str__(self):
-                s = ""
-                if self.obj:
-                    if self.next_objs:
-                        s = " ".join([x.id for x in self.next_objs]) + "-> "
-                    s += f" {self.label} {self.obj.id} -{self.crop}-> (Media)"
-                return s
-
-        media = None
-        event_refs = {}  # The Person or Family nodes behind referencing Event
-        with self.driver.session(default_access_mode="READ") as session:
-            try:
-                result = run_cypher_batch(session,
-                    CypherMedia.get_media_by_uuid, 
-                    user,
-                    material, 
-                    uuid=uuid
-                )
-                # RETURN media, r, ref, ref2
-                for record in result:
-                    media_node = record["media"]
-                    crop = record["prop"]
-                    ref_node = record["ref"]
-                    ref2_node = record["ref2"]
-
-                    # - Media node
-                    # - cropping
-                    # - referring Person, Family or Event
-                    # - optional Person or Family behind the referring Event
-        
-                    if not media:
-                        media = MediaBl_from_node(media_node)
-                        media.ref = []
-        
-                    #   The referring object
-        
-                    mref = MediaReferrer()
-                    (mref.label,) = ref_node.labels  # Get the 1st label
-                    if mref.label == "Person":
-                        mref.obj = PersonBl_from_node(ref_node)
-                    elif mref.label == "Place":
-                        mref.obj = PlaceBl_from_node(ref_node)
-                    elif mref.label == "Event":
-                        mref.obj = EventBl_from_node(ref_node)
-                    mref.obj.label = mref.label
-                    media.ref.append(mref)
-        
-                    # Has the relation cropping properties?
-                    left = crop.get("left")
-                    if not left is None:
-                        upper = crop.get("upper")
-                        right = crop.get("right")
-                        lower = crop.get("lower")
-                        mref.crop = (left, upper, right, lower)
-        
-                    #    The next object behind the Event
-        
-                    if ref2_node:
-                        if ref2_node.id in event_refs:
-                            obj2 = event_refs[ref2_node.id]
-                        else:
-                            if "Person" in ref2_node.labels:
-                                obj2 = PersonBl_from_node(ref2_node)
-                                obj2.label = "Person"
-                            elif "Family" in ref2_node.labels:
-                                obj2 = FamilyBl_from_node(ref2_node)
-                                obj2.label = "Family"
-                            else:
-                                raise TypeError(
-                                    f"MediaReader.get_one: unknown type {list(ref2_node.labels)}"
-                                )
-                            event_refs[obj2.uniq_id] = obj2
-        
-                        mref.next_objs.append(obj2)
-
-            except Exception as e:
-                return {
-                    "status": Status.ERROR,
-                    "statustext": f"Neo4jReadService.dr_get_media_single: {e.__class__.__name__} {e}",
-                }
-
-        status = Status.OK if media else Status.NOT_FOUND
-        return {"status": status, "media": media}
-
-    def dr_get_topic_list(self, user, material, fw_from, limit):
-        """Reads Comment objects from user batch or common data using context.
-
-        :param: user    Active user or None, if approved data is requested
-        :param: fw_from The timestamp from which the list is requested
-        :param: limit   How many items per page
-        """
-
-        with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher_batch(session,
-                CypherComment.get_topics,
-                user,
-                material,
-                start_timestamp=fw_from,
-                limit=limit,
-            )
-
-            topics = []
-            for record in result:
-                # <Record 
-                #    o=<Node id=189486 labels=frozenset({'Person'})
-                #        properties={...}> 
-                #    c=<Node id=189551 labels=frozenset({'Comment'})
-                #        properties={'text': 'testi Gideon', 'timestamp': 1631965129453}>
-                #    commenter='juha'
-                #    count=0
-                #    root=<Node id=189427 labels=frozenset({'Root'}) 
-                #        properties={'xmlname': 'A-testi 2021 koko kanta.gpkg', 
-                #            'material': 'Family Tree', 'state': 'Candidate', 
-                #            'id': '2021-09-16.001', 'user': 'juha', ...}>
-                # >
-    
-                node = record["c"]
-                c = Comment_from_node(node)
-                #c.label = list(node.labels).pop()
-                if not c.title:
-                    # Show shortened text without line breaks as title
-                    text = c.text.replace("\n", " ")
-                    if len(text) > 50:
-                        n = text[:50].rfind(" ")
-                        if n < 2:
-                            n = 50
-                        c.title = text[:n]
-                    else:
-                        c.title = c.text
-                c.obj_label = list(record['o'].labels).pop()
-                c.count = record.get("count", 0)
-                c.credit = record.get("commenter")
-    
-                node = record['root']
-                from bl.batch.root import Root  # temporary
-                c.root = Root.from_node(node)
-                #c.batch = record.get("batch_id")
-    
-                node = record["o"]
-                c.obj_label = list(node.labels).pop()
-                if c.obj_label == "Family":
-                    c.object = FamilyBl_from_node(node)
-                elif c.obj_label == "Person":
-                    c.object = PersonBl_from_node(node)
-                elif c.obj_label == "Place":
-                    c.object = PlaceBl_from_node(node)
-                elif c.obj_label == "Source":
-                    c.object = SourceBl_from_node(node)
-                elif c.obj_label == "Media":
-                    c.object = MediaBl_from_node(node)
-                else:
-                    print(f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'")
-                    next
-                topics.append(c)
-            
-            if topics:
-                return {"topics": topics, "status": Status.OK}
-            else:
-                return {"topics": topics, "status": Status.NOT_FOUND}
 
     def dr_get_source_citations(self, sourceid: int):
         """Read Events and Person, Family and Media citating this Source.
@@ -1469,47 +1300,240 @@ class Neo4jReadService(ConcreteService):
         # Result dictionaries using key = Citation uniq_id
         return citations, notes, targets
 
-    def dr_inlay_person_lifedata(self, person):
-        """Reads person's default name, birth event and death event into Person obj."""
+    # ------ Media -----
+
+    def dr_get_media_list(self, user, material, fw_from, limit):
+        """Reads Media objects from user batch or common data using context.
+
+        :param: user    Active user or None, if approved data is requested
+        :param: fw_from The name from which the list is requested
+        :param: limit   How many items per page
+        """
+
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(CypherSource.get_person_lifedata, pid=person.uniq_id)
+            result = run_cypher_batch(
+                session,
+                CypherMedia.get_media_list,
+                user,
+                material,
+                start_name=fw_from,
+                limit=limit,
+            )
+
+            media = []
+            for record in result:
+                # <Record o=<Node id=393949 labels={'Media'}
+                #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
+                #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
+                #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
+                #            'id': 'O0001', 'uuid': 'b4b11fbd8c054252b51703769e7a6850'}>
+                #    credit='juha'
+                #    batch_id='2020-01-02.001'
+                #    count=1>
+                node = record["o"]
+                m = MediaBl_from_node(node)
+                m.conn = record.get("count", 0)
+                m.credit = record.get("credit")
+                m.batch = record.get("batch_id")
+                media.append(m)
+            if media:
+                return {"media": media, "status": Status.OK}
+            else:
+                return {"media": media, "status": Status.NOT_FOUND}
+
+    def dr_get_media_single(self, user, material, uuid):
+        """Read a Media object, selected by UUID or uniq_id.
+
+        :param: user    username, who has access
+        :parma: uuid    Media node uuid
+        """
+
+        class MediaReferrer:
+            """ Carrier for a referee of media object. """
+
+            def __init__(self):
+                # Referencing object, label, cropping
+                self.obj = None
+                self.label = None
+                self.crop = None
+                # If the referring obj is Event, there is a list of connected objects
+                self.next_objs = []
+
+            def __str__(self):
+                s = ""
+                if self.obj:
+                    if self.next_objs:
+                        s = " ".join([x.id for x in self.next_objs]) + "-> "
+                    s += f" {self.label} {self.obj.id} -{self.crop}-> (Media)"
+                return s
+
+        media = None
+        event_refs = {}  # The Person or Family nodes behind referencing Event
+        with self.driver.session(default_access_mode="READ") as session:
+            try:
+                result = run_cypher_batch(
+                    session, CypherMedia.get_media_by_uuid, user, material, uuid=uuid
+                )
+                # RETURN media, r, ref, ref2
+                for record in result:
+                    media_node = record["media"]
+                    crop = record["prop"]
+                    ref_node = record["ref"]
+                    ref2_node = record["ref2"]
+
+                    # - Media node
+                    # - cropping
+                    # - referring Person, Family or Event
+                    # - optional Person or Family behind the referring Event
+
+                    if not media:
+                        media = MediaBl_from_node(media_node)
+                        media.ref = []
+
+                    #   The referring object
+
+                    mref = MediaReferrer()
+                    (mref.label,) = ref_node.labels  # Get the 1st label
+                    if mref.label == "Person":
+                        mref.obj = PersonBl_from_node(ref_node)
+                    elif mref.label == "Place":
+                        mref.obj = PlaceBl_from_node(ref_node)
+                    elif mref.label == "Event":
+                        mref.obj = EventBl_from_node(ref_node)
+                    mref.obj.label = mref.label
+                    media.ref.append(mref)
+
+                    # Has the relation cropping properties?
+                    left = crop.get("left")
+                    if not left is None:
+                        upper = crop.get("upper")
+                        right = crop.get("right")
+                        lower = crop.get("lower")
+                        mref.crop = (left, upper, right, lower)
+
+                    #    The next object behind the Event
+
+                    if ref2_node:
+                        if ref2_node.id in event_refs:
+                            obj2 = event_refs[ref2_node.id]
+                        else:
+                            if "Person" in ref2_node.labels:
+                                obj2 = PersonBl_from_node(ref2_node)
+                                obj2.label = "Person"
+                            elif "Family" in ref2_node.labels:
+                                obj2 = FamilyBl_from_node(ref2_node)
+                                obj2.label = "Family"
+                            else:
+                                raise TypeError(
+                                    f"MediaReader.get_one: unknown type {list(ref2_node.labels)}"
+                                )
+                            event_refs[obj2.uniq_id] = obj2
+
+                        mref.next_objs.append(obj2)
+
+            except Exception as e:
+                return {
+                    "status": Status.ERROR,
+                    "statustext": f"Neo4jReadService.dr_get_media_single: {e.__class__.__name__} {e}",
+                }
+
+        status = Status.OK if media else Status.NOT_FOUND
+        return {"status": status, "media": media}
+
+    # ------ Comment -----
+
+    def dr_get_topic_list(self, user, material, fw_from, limit):
+        """Reads Comment objects from user batch or common data using context.
+
+        :param: user    Active user or None, if approved data is requested
+        :param: fw_from The timestamp from which the list is requested
+        :param: limit   How many items per page
+        """
+
+        with self.driver.session(default_access_mode="READ") as session:
+            result = run_cypher_batch(
+                session,
+                CypherComment.get_topics,
+                user,
+                material,
+                start_timestamp=fw_from,
+                limit=limit,
+            )
+
+            topics = []
             for record in result:
                 # <Record
-                #    name=<Node id=379934 labels={'Name'}
-                #        properties={'firstname': 'Gustaf', 'type': 'Also Known As', 'suffix': '', 'prefix': '',
-                #            'surname': 'Johansson', 'order': 0}>
-                #    events=[
-                #        <Node id=492911 labels={'Event'}
-                #            properties={'datetype': 0, 'change': 1577803201, 'description': '',
-                #                'id': 'E7750', 'date2': 1853836, 'type': 'Birth', 'date1': 1853836,
-                #                'uuid': '794e0c9e6f15479cb5d33dc4cf245a7d'}>
-                #    ]
+                #    o=<Node id=189486 labels=frozenset({'Person'})
+                #        properties={...}>
+                #    c=<Node id=189551 labels=frozenset({'Comment'})
+                #        properties={'text': 'testi Gideon', 'timestamp': 1631965129453}>
+                #    commenter='juha'
+                #    count=0
+                #    root=<Node id=189427 labels=frozenset({'Root'})
+                #        properties={'xmlname': 'A-testi 2021 koko kanta.gpkg',
+                #            'material': 'Family Tree', 'state': 'Candidate',
+                #            'id': '2021-09-16.001', 'user': 'juha', ...}>
                 # >
-                name_node = record["name"]
-                person.names.append(Name_from_node(name_node))
-                events = record["events"]
-                for node in events:
-                    e = EventBl_from_node(node)
-                    if e.type == "Birth":
-                        person.event_birth = e
+
+                node = record["c"]
+                c = Comment_from_node(node)
+                # c.label = list(node.labels).pop()
+                if not c.title:
+                    # Show shortened text without line breaks as title
+                    text = c.text.replace("\n", " ")
+                    if len(text) > 50:
+                        n = text[:50].rfind(" ")
+                        if n < 2:
+                            n = 50
+                        c.title = text[:n]
                     else:
-                        person.event_death = e
-        return
+                        c.title = c.text
+                c.obj_label = list(record["o"].labels).pop()
+                c.count = record.get("count", 0)
+                c.credit = record.get("commenter")
+
+                node = record["root"]
+                from bl.batch.root import Root  # temporary
+
+                c.root = Root.from_node(node)
+                # c.batch = record.get("batch_id")
+
+                node = record["o"]
+                c.obj_label = list(node.labels).pop()
+                if c.obj_label == "Family":
+                    c.object = FamilyBl_from_node(node)
+                elif c.obj_label == "Person":
+                    c.object = PersonBl_from_node(node)
+                elif c.obj_label == "Place":
+                    c.object = PlaceBl_from_node(node)
+                elif c.obj_label == "Source":
+                    c.object = SourceBl_from_node(node)
+                elif c.obj_label == "Media":
+                    c.object = MediaBl_from_node(node)
+                else:
+                    print(
+                        f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'"
+                    )
+                    next
+                topics.append(c)
+
+            if topics:
+                return {"topics": topics, "status": Status.OK}
+            else:
+                return {"topics": topics, "status": Status.NOT_FOUND}
+
+    # ------ Start page statistics -----
 
     #   @functools.lru_cache
-    def dr_get_surname_list(self, username:str, material:Material, count:int):
+    def dr_get_surname_list(self, username: str, material: Material, count: int):
         """ List most common surnames """
         result_list = []
         with self.driver.session(default_access_mode="READ") as session:
             cypher = CypherPerson.get_surname_list
-#             print('#  Neo4jReadService.dr_get_surname_list: with \n{ material:"'
-#                   f'{self.material.m_type}", state:"{self.material.state}", username:"{username}", count:{count}''}')
-#             print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
-            result = run_cypher_batch(session, cypher,
-                                      username,
-                                      material,
-                                      count=count,
-            )
+            #             print('#  Neo4jReadService.dr_get_surname_list: with \n{ material:"'
+            #                   f'{self.material.m_type}", state:"{self.material.state}", username:"{username}", count:{count}''}')
+            #             print(f"#  Neo4jReadService.dr_get_surname_list: cypher \n{cypher}\n")
+            result = run_cypher_batch(session, cypher, username, material, count=count)
             for record in result:
                 surname = record["surname"]
                 count = record["count"]
@@ -1542,7 +1566,7 @@ class Neo4jReadService(ConcreteService):
     #             result_list.append({"surname": surname, "count": count})
     #     return result_list
 
-    def dr_get_placename_list(self, username, material, count=50): 
+    def dr_get_placename_list(self, username, material, count=50):
         """List most referenced Places by name. 
         
         If username is defined, filter by user. 
@@ -1550,14 +1574,12 @@ class Neo4jReadService(ConcreteService):
         result_list = []
         with self.driver.session(default_access_mode="READ") as session:
             # Select Batches by user, if defined
-            if material.m_type == 'Place Data':
+            if material.m_type == "Place Data":
                 cypher = CypherPlaceStats.get_place_list_for_place_data
             else:
                 cypher = CypherPlaceStats.get_place_list
-            #logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
-            result = run_cypher_batch(session, cypher, username, 
-                                      material,
-                                      count=count)
+            # logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
+            result = run_cypher_batch(session, cypher, username, material, count=count)
             for record in result:
                 place = record["place"]
                 placename = place["pname"]
