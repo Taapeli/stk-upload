@@ -33,6 +33,7 @@ from pe.neo4j.nodereaders import Repository_from_node
 from pe.neo4j.nodereaders import SourceBl_from_node
 from pe.neo4j.cypher.cy_person import CypherPerson
 from pe.neo4j.cypher.cy_place import CypherPlace
+from pe.neo4j.cypher.cy_place import CypherPlaceStats
 from pe.neo4j.cypher.cy_source import CypherSource
 
 from models.dbtree import DbTree
@@ -504,6 +505,30 @@ class Neo4jReadServiceTx(ConcreteService):
         return res
 
     # ------ Places -----
+
+    def dr_get_placename_list(self, username, material, count=50):
+        """List most referenced Places by name. 
+        
+        If username is defined, filter by user. 
+        """
+        result_list = []
+        with self.driver.session(default_access_mode="READ") as session:
+            # Select Batches by user, if defined
+            if material.m_type == "Place Data":
+                cypher = CypherPlaceStats.get_place_list_for_place_data
+            else:
+                cypher = CypherPlaceStats.get_place_list
+            # logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
+            result = run_cypher_batch(session, cypher, username, material, count=count)
+            for record in result:
+                place = record["place"]
+                placename = place["pname"]
+                uuid = place["uuid"]
+                count = record["count"]
+                result_list.append(
+                    {"placename": placename, "count": count, "uuid": uuid}
+                )
+        return result_list
 
     def dr_get_place_list_fw(self, user, fw_from, limit, lang, material):
         """Read place list from given start point"""

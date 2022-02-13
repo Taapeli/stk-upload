@@ -12,6 +12,7 @@ div#summaryarea div.scrollbox {
     margin-left: 15px;
 /*     border: 1px solid #CCC; */
     padding: .5em;
+    background-color: #eee;
 }
 div.scrollbox ul { margin: 0 }
 
@@ -66,6 +67,16 @@ div#events div.scrollbox {
         </div>
 
         <div id="summaryarea">
+            <table><tbody>
+                <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+        {% if place.coord -%}
+                    <td class="Value TwoRows">{{macro.all_obj_ids(place,"300px")}}</td>
+        {% else %}
+                    <td class="Value TwoRows">{{macro.all_obj_ids(place)}}</td>
+        {% endif %}
+                    <td></td>
+                </tr>
+            </tbody></table>
             <div class="scrollbox">
                 <ul>{% for p in pl_hierarchy %}
                     <li style="margin-left: {{p.level * 2 - 2}}em;">
@@ -78,14 +89,6 @@ div#events div.scrollbox {
                 {% endfor %}</ul>
             </div>
             <table><tbody>
-                <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-        {% if place.coord -%}
-                    <td class="Value TwoRows">{{macro.all_obj_ids(place,"300px")}}</td>
-        {% else %}
-                    <td class="Value TwoRows">{{macro.all_obj_ids(place)}}</td>
-        {% endif %}
-                    <td></td>
-                </tr>
     {% if place.notes %}
                 <tr><td class="ColumnAttribute">{{ _('Notes') }}</td>
                     <td class="Value"><ul>

@@ -47,7 +47,7 @@ from bl.material import Material
 
 from ui.place import place_names_local_from_nodes
 
-from .cypher.cy_place import CypherPlace, CypherPlaceStats
+#from .cypher.cy_place import CypherPlace, CypherPlaceStats
 from .cypher.cy_source import CypherSource
 from .cypher.cy_family import CypherFamily
 from .cypher.cy_event import CypherEvent
@@ -1566,29 +1566,29 @@ class Neo4jReadService(ConcreteService):
     #             result_list.append({"surname": surname, "count": count})
     #     return result_list
 
-    def dr_get_placename_list(self, username, material, count=50):
-        """List most referenced Places by name. 
-        
-        If username is defined, filter by user. 
-        """
-        result_list = []
-        with self.driver.session(default_access_mode="READ") as session:
-            # Select Batches by user, if defined
-            if material.m_type == "Place Data":
-                cypher = CypherPlaceStats.get_place_list_for_place_data
-            else:
-                cypher = CypherPlaceStats.get_place_list
-            # logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
-            result = run_cypher_batch(session, cypher, username, material, count=count)
-            for record in result:
-                place = record["place"]
-                placename = place["pname"]
-                uuid = place["uuid"]
-                count = record["count"]
-                result_list.append(
-                    {"placename": placename, "count": count, "uuid": uuid}
-                )
-        return result_list
+    # def dr_get_placename_list(self, username, material, count=50): # -> Neo4jReadServiceTx
+    #     """List most referenced Places by name. 
+    #
+    #     If username is defined, filter by user. 
+    #     """
+    #     result_list = []
+    #     with self.driver.session(default_access_mode="READ") as session:
+    #         # Select Batches by user, if defined
+    #         if material.m_type == "Place Data":
+    #             cypher = CypherPlaceStats.get_place_list_for_place_data
+    #         else:
+    #             cypher = CypherPlaceStats.get_place_list
+    #         # logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
+    #         result = run_cypher_batch(session, cypher, username, material, count=count)
+    #         for record in result:
+    #             place = record["place"]
+    #             placename = place["pname"]
+    #             uuid = place["uuid"]
+    #             count = record["count"]
+    #             result_list.append(
+    #                 {"placename": placename, "count": count, "uuid": uuid}
+    #             )
+    #     return result_list
 
     # def dr_get_placename_stats_by_user(self, username, count):
     #     result_list = []
