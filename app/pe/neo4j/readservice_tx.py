@@ -506,7 +506,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
     # ------ Places -----
 
-    def dr_get_placename_list(self, username, material, count=50):
+    def tx_get_placename_list(self, username, material, count=50):
         """List most referenced Places by name. 
         
         If username is defined, filter by user. 
@@ -518,7 +518,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 cypher = CypherPlaceStats.get_place_list_for_place_data
             else:
                 cypher = CypherPlaceStats.get_place_list
-            # logger.debug(f"#  Neo4jReadService.dr_get_placename_list: cypher \n{cypher}\n")
+            # logger.debug(f"#  Neo4jReadService.tx_get_placename_list: cypher \n{cypher}\n")
             result = run_cypher_batch(session, cypher, username, material, count=count)
             for record in result:
                 place = record["place"]
@@ -530,13 +530,13 @@ class Neo4jReadServiceTx(ConcreteService):
                 )
         return result_list
 
-    def dr_get_place_list_fw(self, user, fw_from, limit, lang, material):
+    def tx_get_place_list_fw(self, user, fw_from, limit, lang, material):
         """Read place list from given start point"""
         ret = []
         if lang not in ["fi", "sv"]:
             lang = "fi"
         with self.driver.session(default_access_mode="READ") as session:
-            print("Neo4jReadService.dr_get_place_list_fw")
+            print("Neo4jReadService.tx_get_place_list_fw")
             result = run_cypher_batch(
                 session,
                 CypherPlace.get_name_hierarchies,
@@ -583,7 +583,7 @@ class Neo4jReadServiceTx(ConcreteService):
         # Return sorted by first name in the list p.names -> p.pname
         return sorted(ret, key=lambda x: x.pname)
 
-    def dr_get_place_w_names_notes_medias(self, user, uuid, lang, material):
+    def tx_get_place_w_names_notes_medias(self, user, uuid, lang, material):
         """Returns the PlaceBl with PlaceNames, Notes and Medias included."""
         pl = None
         node_ids = []  # List of uniq_is for place, name, note and media nodes
@@ -635,7 +635,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
         return {"place": pl, "uniq_ids": node_ids}
 
-    def dr_get_place_tree(self, locid, lang="fi"):
+    def tx_get_place_tree(self, locid, lang="fi"):
         """Read upper and lower places around this place.
 
         Haetaan koko paikkojen ketju paikan locid ympärillä
@@ -718,7 +718,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 ret.append(p)
         return ret
 
-    def dr_get_place_events(self, uniq_id, privacy):
+    def tx_get_place_events(self, uniq_id, privacy):
         """Find events and persons associated to given Place.
 
             :param: uniq_id    current place uniq_id
@@ -771,11 +771,12 @@ class Neo4jReadServiceTx(ConcreteService):
             else:  # Root
                 pass
                 # print(
-                #     f"dr_get_place_events: No Person or Family:"
+                #     f"tx_get_place_events: No Person or Family:"
                 #     f" {e.id} {list(record['indi'].labels)[0]} {record['indi'].get('id')}"
                 # )
         return {"items": ret, "status": Status.OK}
 
+    # ------ Other -----
 
     def tx_get_object_places(self, base_objs:dict):
         ''' Read Place hierarchies for given Event objects.

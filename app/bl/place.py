@@ -334,7 +334,7 @@ class PlaceReaderTx(DataService):
         context = self.user_context
         fw = context.first  # From here forward
         use_user = context.batch_user()
-        places = self.dataservice.dr_get_place_list_fw(
+        places = self.dataservice.tx_get_place_list_fw(
             use_user, fw, context.count, lang=context.lang,
             material=context.material,
         )
@@ -383,7 +383,7 @@ class PlaceReaderTx(DataService):
         privacy = self.user_context.is_common()
         lang = self.user_context.lang
         material = self.user_context.material
-        res = self.dataservice.dr_get_place_w_names_notes_medias(use_user, uuid,
+        res = self.dataservice.tx_get_place_w_names_notes_medias(use_user, uuid,
                                                                  lang, material)
         # res{place:Place, uniq_ids:list(uniq_ids)}
         # The uniq_ids includes all references to names, notes and medias
@@ -399,7 +399,7 @@ class PlaceReaderTx(DataService):
 
         # TODO: Find Citation -> Source -> Repository for each uniq_ids
         try:
-            results["hierarchy"] = self.dataservice.dr_get_place_tree(
+            results["hierarchy"] = self.dataservice.tx_get_place_tree(
                 place.uniq_id, lang=lang
             )
 
@@ -415,7 +415,7 @@ class PlaceReaderTx(DataService):
                 "statustext": f"Place tree value for {place.uniq_id}: {e}",
             }
 
-        res = self.dataservice.dr_get_place_events(place.uniq_id, privacy)
+        res = self.dataservice.tx_get_place_events(place.uniq_id, privacy)
         results["events"] = res["items"]
         return results
 
@@ -435,7 +435,7 @@ class PlaceReaderTx(DataService):
         Return placename stats so that the names can be displayed in a name cloud.
         """
         ds = self.dataservice
-        placenames = ds.dr_get_placename_list(self.use_user, 
+        placenames = ds.tx_get_placename_list(self.use_user, 
                                               self.user_context.material,
                                               count=count)
         # Returns [{'surname': surname, 'count': count},...]

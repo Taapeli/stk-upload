@@ -19,7 +19,7 @@ def is_neo_40():
                 return ver[:3] >= "1.7"
     return False
 
-def dr_get_place_list_fw(driver):
+def tx_get_place_list_fw(driver):
     ''' Read place list from given start point
     '''
     with driver.session(default_access_mode='READ') as session: 
@@ -57,6 +57,6 @@ if __name__ == '__main__':
     driver = GraphDatabase.driver("bolt://localhost:7687", auth=(user,passwd),
                                   connection_timeout=15, encrypted=False)
 
-    dr_get_place_list_fw(driver)
+    tx_get_place_list_fw(driver)
 
 
