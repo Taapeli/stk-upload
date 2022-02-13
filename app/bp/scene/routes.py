@@ -1118,6 +1118,8 @@ def show_place(locid):
             # Find Source references
             res = service.get_place_source_citations(pl)
             sources = res.get("sources")
+            for n, obj in sources.items():
+                print(f"# Citation {n}: {obj}")
 
     except KeyError as e:
         traceback.print_exc()

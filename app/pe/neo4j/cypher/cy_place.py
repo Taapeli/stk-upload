@@ -69,21 +69,21 @@ MERGE (place) -[:NAME_LANG {lang:'sv'}]-> (n)
 RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
 
 # For place page
-    _get_w_names_notes_tail = """
+    get_w_citas_names_notes = """
+MATCH  (root) -[:OBJ_PLACE]-> (place:Place)
+    WHERE place.uuid=$uuid
 OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
 WITH place, name
     OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 
         WHERE name is null or not n = name
     OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
     OPTIONAL MATCH (place) -[mr:MEDIA]-> (media:Media)
+    OPTIONAL MATCH (place) -[cr:CITATION]-> (cita:Citation)
 RETURN place, name,
     COLLECT(DISTINCT n) AS names,
     COLLECT (DISTINCT note) AS notes,
-    COLLECT (DISTINCT media) AS medias"""
-
-    get_w_names_notes = """
-MATCH  (root) -[:OBJ_PLACE]-> (place:Place)
-    WHERE place.uuid=$uuid""" + _get_w_names_notes_tail
+    COLLECT (DISTINCT media) AS medias,
+    COLLECT (DISTINCT cita) AS citas"""
 
     # Result indi is a Person or Family
     get_person_family_events = """

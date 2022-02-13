@@ -154,7 +154,7 @@ def test_get_place_w_names_notes_medias0a(svc):
     # invalid user, invalid uuid
     material = Material(session=None, request=None)
     material.batch_id = values.batch_id 
-    rsp = svc.tx_get_place_w_names_notes_medias(INVALID_USER, uuid="x", lang="fi", material=material)
+    rsp = svc.tx_get_place_w_names_citations_notes_medias(INVALID_USER, uuid="x", lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'place', 'uniq_ids'}
@@ -167,7 +167,7 @@ def test_get_place_w_names_notes_medias0b(svc):
     # valid user, invalid uuid
     material = Material(session=None, request=None)
     material.batch_id = values.batch_id 
-    rsp = svc.tx_get_place_w_names_notes_medias(values.user, uuid=INVALID_UUID, lang="fi", material=material)
+    rsp = svc.tx_get_place_w_names_citations_notes_medias(values.user, uuid=INVALID_UUID, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'place', 'uniq_ids'}
@@ -180,7 +180,7 @@ def test_get_place_w_names_notes_medias0c(svc):
     # invalid user, valid uuid
     material = Material(session=None, request=None)
     material.batch_id = values.batch_id 
-    rsp = svc.tx_get_place_w_names_notes_medias(user=INVALID_USER, uuid=values.place_uuid, lang="fi", material=material)
+    rsp = svc.tx_get_place_w_names_citations_notes_medias(user=INVALID_USER, uuid=values.place_uuid, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'place', 'uniq_ids'}
@@ -193,7 +193,7 @@ def test_get_place_w_names_notes_medias1(svc):
     # valid user, valid uuid
     material = Material(session=None, request=None)
     material.batch_id = values.batch_id 
-    rsp = svc.tx_get_place_w_names_notes_medias(values.user, uuid=values.place_uuid, lang="fi", material=material)
+    rsp = svc.tx_get_place_w_names_citations_notes_medias(values.user, uuid=values.place_uuid, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'place', 'uniq_ids'}
@@ -335,7 +335,7 @@ def test_dr_get_event_notes_medias1(svc):
     def dr_get_person_families_uuid(self, uuid):
 
     def tx_get_place_list_fw(self, user, fw_from, limit, lang="fi", batch_id=None):
-    def tx_get_place_w_names_notes_medias(self, user, uuid, lang="fi"):
+    def tx_get_place_w_names_citations_notes_medias(self, user, uuid, lang="fi"):
     def dr_get_place_tree(self, locid, lang="fi"):
     def dr_get_place_events(self, uniq_id, privacy):
 

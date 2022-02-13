@@ -487,7 +487,7 @@ class PersonReaderTx(DataService):
         #    for c in z:Citation
         #        (c) --> (s:Source) --> (r:Repository)
 
-        res = self.dataservice.tx_get_object_sources_repositories(
+        res = self.dataservice.tx_get_citation_sources_repositories(
             list(all_citations.keys())
         )
         if Status.has_failed(res, strict=False):
