@@ -78,9 +78,9 @@ class Material():
                 return f"{ _(m) }: {self.batch_id}"
             elif self.state == State.ROOT_ACCEPTED:
                 batch = self.batch_id if self.batch_id else ""
-                return f"{ _(m) }: { _('Approved Isotammi tree') } {batch}"
+                return f"{ _(m) } / { _('Approved Isotammi tree') } {batch}"
             else:
-                return f"{ _(m) }: { _(self.state) } {self.batch_id}"
+                return f"{ _(m) } / { _(self.state) } {self.batch_id}"
         except Exception as e:
             return "Error: " + str(e)
 

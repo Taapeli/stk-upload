@@ -77,6 +77,7 @@ div#events div.scrollbox {
                     <td></td>
                 </tr>
             </tbody></table>
+
             <div class="scrollbox">
                 <ul>{% for p in pl_hierarchy %}
                     <li style="margin-left: {{p.level * 2 - 2}}em;">
@@ -88,6 +89,7 @@ div#events div.scrollbox {
                     {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
                 {% endfor %}</ul>
             </div>
+
             <table><tbody>
     {% if place.notes %}
                 <tr><td class="ColumnAttribute">{{ _('Notes') }}</td>
@@ -101,27 +103,32 @@ div#events div.scrollbox {
     {% endif %}
             </tbody></table>
         </div>
+
     {% if citations %}
         <div class="subsection" id="sourcerefs">
             <h3>{{ _("Source references") }}</h3>
 
             <div id="sourcerefContent">
+        {% for cita in citations %}
+            {% for ref in cita.source_refs %}
                 <div class="sourceDesc">
                     <a href="/scene/source?uuid=9c6961c9b0bd448f86011f444d85fb17"
                        class="inlink" title="Lähteen S1207 tiedot">
-                       DEMO lähdetieto
+                       {{ ref.source_obj.stitle }}
                     </a>
-                    – <span class="typedesc">kirja</span>
-                    DEMO arkisto
+                    – <span class="typedesc">{{ref.medium|transl('medium')}}</span>
+                    {{ ref.repository_obj.rname }}
                     <div id="sref1a" class="citaDesc">
-                        <span title="C3129 luottamustaso 2"><b>1a </b>sivu 496 ★★☆☆</span>
+                        <span">{{cita.page}}</span>
                          –► <i>  </i>
                          <a class="outlink" target="_blank" 
                             href="http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=23471&amp;pnum=496">
-                                www.sukuhistoria.fi</a>
+                                TODO.url-puuttuu.fi</a>
                     </div>
                 </div>
+            {% endfor %}
             </div>
+        {% endfor %}
         </div>
     {% endif %}
 
