@@ -42,7 +42,6 @@ Todo:
 # blacked 2021-05-01 JMä
 import traceback
 import logging
-#import shareds
 
 logger = logging.getLogger("stkserver")
 
@@ -320,10 +319,11 @@ class PlaceReaderTx(DataService):
     - Methods return a dict result object {'status':Status, ...}
     """
 
-    def __init__(self, service_name: str, u_context=None):
-        # print(f'#~~{self.__class__.__name__} init')
-        super().__init__(service_name, u_context)
-        self.obj_catalog = {}  # dict {uniq_id: Connected_object: NodeObject}
+    # def __init__(self, service_name: str, u_context=None):
+    #     # print(f'#~~{self.__class__.__name__} init')
+    #     super().__init__(service_name, u_context)
+    #     # obj_catalog maps object uniq_id to connected objects
+    #     self.obj_catalog = {}  # dict {uniq_id: Connected_object: NodeObject}
 
 
     def get_place_list(self):
@@ -383,10 +383,10 @@ class PlaceReaderTx(DataService):
         privacy = self.user_context.is_common()
         lang = self.user_context.lang
         material = self.user_context.material
-        res = self.dataservice.tx_get_place_w_names_notes_medias(use_user, uuid,
-                                                                 lang, material)
-        # res{place:Place, uniq_ids:list(uniq_ids)}
-        # The uniq_ids includes all references to names, notes and medias
+        res = self.dataservice.tx_get_place_w_names_citations_notes_medias(
+                    use_user, uuid, lang, material)
+        # res {place:Place, uniq_ids:list(uniq_ids), "citas": list(Citations)}
+        # The uniq_ids includes all references to names, notes, medias and citations
         place = res.get("place")
         results = {"place": place, "status": Status.OK}
 
@@ -397,7 +397,6 @@ class PlaceReaderTx(DataService):
             }
             return res
 
-        # TODO: Find Citation -> Source -> Repository for each uniq_ids
         try:
             results["hierarchy"] = self.dataservice.tx_get_place_tree(
                 place.uniq_id, lang=lang
@@ -415,19 +414,28 @@ class PlaceReaderTx(DataService):
                 "statustext": f"Place tree value for {place.uniq_id}: {e}",
             }
 
+        results["uniq_ids"]= res.get("uniq_ids",[])
+        citations = res.get("citas", [])
+        if citations:
+            results["citations"] = citations
+
         res = self.dataservice.tx_get_place_events(place.uniq_id, privacy)
         results["events"] = res["items"]
         return results
 
-    def get_place_source_citations(self, place):
+    def get_citation_sources_repositories(self, citations):
         """ Get source citations for given Place. """
-        if place is None:
+        if not citations:
             return []
 
-        # Find (place) --> (c:Citation) -> (s:Source) --> (a:Archive)
-        # tx_get_object_citation_note_media(obj_catalog:dict, active_objs=[])
-        self.obj_catalog[place.uniq_id] = place
-        res = self.dataservice.tx_get_object_citation_note_media(self.obj_catalog)
+        # Find (c:Citation) -> (s:Source) --> (a:Repository)
+        res = self.dataservice.tx_get_citation_sources_repositories(citations)
+        refs = res.get("sources", [])
+        for c in citations:
+            if hasattr(c, 'source_refs'):
+                c.source_refs.append(refs[c.uniq_id])
+            else:
+                c.source_refs = [refs[c.uniq_id]]
         return res
 
     def get_placename_list(self, count=40):

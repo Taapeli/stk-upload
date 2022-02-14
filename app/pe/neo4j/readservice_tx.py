@@ -7,7 +7,7 @@ import logging
 import traceback
 
 import shareds
-from bl.person_name import Name
+#from bl.person_name import Name
 from bl.dates import DateRange
 from bl.base import Status
 from bl.material import Material
@@ -77,22 +77,22 @@ class MediaReference:
 class SourceReference:
     ''' Object to return Source and Repository reference data. '''
     def __init__(self):
-        self.source_node = None
-        self.repository_node = None
+        self.source_obj = None
+        self.repository_obj = None
         self.medium = ""
 
     def __str__(self):
-        if self.source_node:
-            label, = self.source_node.labels
-            source_str = f'{label} {self.source_node.id}:{self.source_node["id"]}'
+        if self.source_obj:
+            label = self.source_obj.__class__.__name__
+            source_str = f'{label} {self.source_obj.uniq_id}:{self.source_obj.id}'
         else:
             source_str = ""
-        if self.repository_node:
-            label, = self.repository_node.labels
-            repo_str = f'{label} {self.repository_node.id}:{self.repository_node["id"]}'
+        if self.repository_obj:
+            label = self.repository_obj.__class__.__name__
+            repo_str = f'{label} {self.repository_obj.uniq_id}:{self.repository_obj.id}'
         else:
             repo_str = ""
-        return f'{source_str}-{self.medium}->({repo_str})'
+        return f'({source_str}) -[{self.medium}]-> ({repo_str})'
 
 
 
@@ -568,7 +568,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 p.ref_cnt = record["uses"]
 
                 # Set place names and default display name pname
-                # 1. defaut name
+                # 1. default name
                 p.names.append(PlaceName_from_node(record["name"]))
                 # 2. other names arranged by language
                 lst = place_names_local_from_nodes(record["names"])
@@ -583,14 +583,16 @@ class Neo4jReadServiceTx(ConcreteService):
         # Return sorted by first name in the list p.names -> p.pname
         return sorted(ret, key=lambda x: x.pname)
 
-    def tx_get_place_w_names_notes_medias(self, user, uuid, lang, material):
-        """Returns the PlaceBl with PlaceNames, Notes and Medias included."""
+    def tx_get_place_w_names_citations_notes_medias(self, user, uuid, lang, material):
+        """Returns the PlaceBl with PlaceNames, Notes and Medias included.
+        """
         pl = None
+        citations = [] # Citation objects referenced from this Place
         node_ids = []  # List of uniq_is for place, name, note and media nodes
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(
                 session,
-                CypherPlace.get_w_names_notes,
+                CypherPlace.get_w_citas_names_notes,
                 user,
                 material,
                 uuid=uuid,
@@ -608,12 +610,13 @@ class Neo4jReadServiceTx(ConcreteService):
                 #                properties={'name': 'Turku', 'lang': ''}>]
                 #    notes=[<Node id=582777 labels=frozenset({'Note'}) properties=...>]
                 #    medias=[]
+                #    citas=[]
                 # >
 
                 node = record["place"]
                 pl = PlaceBl_from_node(node)
                 node_ids.append(pl.uniq_id)
-                # Default lang name
+                # Default language name
                 name_node = record["name"]
                 if name_node:
                     pl.names.append(PlaceName_from_node(name_node))
@@ -633,7 +636,12 @@ class Neo4jReadServiceTx(ConcreteService):
                     pl.media_ref.append(m)
                     node_ids.append(pl.media_ref[-1].uniq_id)
 
-        return {"place": pl, "uniq_ids": node_ids}
+                for citas_node in record["citas"]:
+                    n = Citation_from_node(citas_node)
+                    citations.append(n)
+                    node_ids.append(citations[-1].uniq_id)
+
+        return {"place": pl, "uniq_ids": node_ids, "citas": citations}
 
     def tx_get_place_tree(self, locid, lang="fi"):
         """Read upper and lower places around this place.
@@ -749,12 +757,10 @@ class Neo4jReadServiceTx(ConcreteService):
             # Fields uid (person uniq_id) and names are on standard in EventBl
             e.role = record["role"]
             indi_label = list(record["indi"].labels)[0]
-            # if indi_label in ["Audit", "Batch"]:
-            #     continue
             if "Person" == indi_label:
                 e.indi_label = "Person"
                 e.indi = PersonBl_from_node(record["indi"])
-                # Reading confidental person data which is available to this user?
+                # Reading confidential person data which is available to this user?
                 if not privacy:
                     e.indi.too_new = False
                 elif e.indi.too_new:  # Check privacy
@@ -768,12 +774,6 @@ class Neo4jReadServiceTx(ConcreteService):
                 e.indi = FamilyBl_from_node(record["indi"])
                 ##ret.append({'event':e, 'indi':e.indi, 'label':'Family'})
                 ret.append(e)
-            else:  # Root
-                pass
-                # print(
-                #     f"tx_get_place_events: No Person or Family:"
-                #     f" {e.id} {list(record['indi'].labels)[0]} {record['indi'].get('id')}"
-                # )
         return {"items": ret, "status": Status.OK}
 
     # ------ Other -----
@@ -932,24 +932,22 @@ class Neo4jReadServiceTx(ConcreteService):
                 'new_objects': new_obj_ids, 
                 'references': coll}
 
-    def tx_get_object_sources_repositories(self, citation_uids:list):
-        ''' Get Sources and Repositories udes by listed objects
+    def tx_get_citation_sources_repositories(self, citations:list):
+        ''' Get Sources and Repositories for given Citations.
         
             Read Source -> Repository hierarchies for given list of citations
                             
             - session       neo4j.session   for database access
-            - citations[]   list int        list of citation.uniq_ids
-            - objs{}        dict            objs[uniq_id] = NodeObject
+            - citations[]   list Citation   list of Citation objects
             
-            * The Citations mentioned must be in objs dictionary
-            * On return, the new Sources and Repositories found are added to objs{} 
-            
-            --> Origin from models.obsolete_source_citation_reader.read_sources_repositories
+            On return res['sources'] gives references as a dict 
+            {uniq_id: SourceReference}
         '''
-        if len(citation_uids) == 0:
+        if len(citations) == 0:
             return {'status':Status.NOT_FOUND}
         references = {} # {Citation.unid_id: SourceReference}
 
+        citation_uids = [cita.uniq_id for cita in citations]
         with self.driver.session(default_access_mode='READ') as session:
             results = session.run(CypherSource.get_citation_sources_repositories, 
                                   uid_list=citation_uids)
@@ -964,10 +962,9 @@ class Neo4jReadServiceTx(ConcreteService):
                 #        properties={'id': 'R0157', 'rname': 'Hauhon seurakunnan arkisto', 'type': 'Archive', 
                 #            'uuid': '7ac1615894ea4457ba634c644e8921d6', 'change': 1563727817}>
                 # >
-                ref = SourceReference()
-
-                # 1. Citation
+                # 1. Current Citation
                 uniq_id = record['uniq_id']
+                ref = SourceReference()
 
                 # 2. The Source node
                 source_node = record['source']

@@ -1096,7 +1096,9 @@ def show_place(locid):
     try:
         with PlaceReaderTx("read_tx", u_context) as service:
             res = service.get_places_w_events(locid)
-
+            # res {place: PlaceBl, status: 'OK', hierarchy: list(PlaceBl),
+            #      citations: list(Citation), events: list(EventBl),
+            #      uniq_ids: list(uniq_ids)}
             if res["status"] == Status.NOT_FOUND:
                 print(f'bp.scene.routes.show_place: {_("Place not found")}')
             elif res["status"] != Status.OK:
@@ -1107,6 +1109,7 @@ def show_place(locid):
             pl = res.get("place")
             pl_hierarchy=res.get("hierarchy")
             events=res.get("events")
+            citations = res.get("citations", [])
             # Map scaling
             level = 1
             for p in res.get("hierarchy"):
@@ -1116,10 +1119,10 @@ def show_place(locid):
             print(f"bp.scene.routes.show_place: level={level}, zoom={zoom}")
 
             # Find Source references
-            res = service.get_place_source_citations(pl)
-            sources = res.get("sources")
-            for n, obj in sources.items():
-                print(f"# Citation {n}: {obj}")
+            res = service.get_citation_sources_repositories(citations)
+            for c in citations:
+                for ref in c.source_refs:
+                    print(f"# Citation {ref}")
 
     except KeyError as e:
         traceback.print_exc()
@@ -1133,7 +1136,7 @@ def show_place(locid):
         level=level, zoom=zoom,
         pl_hierarchy=pl_hierarchy,
         events=events,
-        sources=sources,
+        citations=citations,
         user_context=u_context,
         elapsed=time.time() - t0,
     )
