@@ -85,6 +85,11 @@ RETURN place, name,
     COLLECT (DISTINCT media) AS medias,
     COLLECT (DISTINCT cita) AS citas"""
 
+    get_notes_for_citas = """
+MATCH (root) -[:OBJ_OTHER]-> (cita) -[:NOTE]-> (note:Note)
+    WHERE ID(cita) in $citas
+RETURN ID(cita) AS cid, note"""
+
     # Result indi is a Person or Family
     get_person_family_events = """
 MATCH (e:Event) -[:PLACE]-> (l:Place)

@@ -5072,7 +5072,7 @@ msgstr "alus"
 
 #: ui/jinja_filters.py:207
 msgid "Borough"
-msgstr "aluehallintoyksikkö"
+msgstr "kaupunginosa"
 
 #: ui/jinja_filters.py:208
 msgid "Building"

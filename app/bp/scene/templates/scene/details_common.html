@@ -51,7 +51,17 @@
                         <span class="person_name">{{root.user.name}}</span><br>
                         {{root.user.username}}
                     </td>
-                    <td>{{root.id}}<br>
+                    <td>
+            {% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
+                        <form method="post" action="/scene/material/batch">
+                            <input type="hidden" name="material_type" value="{{root.material_type}}">
+                            <input type="hidden" name="state" value="{{root.state}}">
+                            <button type="submit" name="batch_id" value="{{ root.id }}"
+                                    class="Auditor">{{ root.id }}</button>
+                        </form>
+            {% else %}
+                        {{root.id}}<br>
+            {% endif -%}
                         <span id="changetime">{{ _(root.timestamp_str()) }}</span>
                     </td>
                     <td>{{ root.file.rsplit("/", 1) | last }}

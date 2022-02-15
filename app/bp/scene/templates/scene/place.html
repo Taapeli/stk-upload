@@ -105,28 +105,35 @@ div#events div.scrollbox {
         </div>
 
     {% if citations %}
-        <div class="subsection" id="sourcerefs">
+        <div id="sourcerefs">
             <h3>{{ _("Source references") }}</h3>
 
             <div id="sourcerefContent">
+                <ul>
         {% for cita in citations %}
             {% for ref in cita.source_refs %}
-                <div class="sourceDesc">
-                    <a href="/scene/source?uuid=9c6961c9b0bd448f86011f444d85fb17"
+                <li class="sourceDesc">
+                    <a href="/scene/source?uuid={{ref.source_obj.uuid}}"
                        class="inlink" title="Lähteen S1207 tiedot">
                        {{ ref.source_obj.stitle }}
                     </a>
+                {% if ref.repository %}
                     – <span class="typedesc">{{ref.medium|transl('medium')}}</span>
                     {{ ref.repository_obj.rname }}
-                    <div id="sref1a" class="citaDesc">
+                {% endif %}
+                    <ul class="citaDesc"><li>
                         <span">{{cita.page}}</span>
-                         –► <i>  </i>
+                {% for note in cita.notes %}
+                         –► <i>{{note.text}}</i>
+                    {% if note.url %}
                          <a class="outlink" target="_blank" 
-                            href="http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=23471&amp;pnum=496">
-                                TODO.url-puuttuu.fi</a>
-                    </div>
-                </div>
+                            href="{{note.url}}">{{note.url|transl('urldomain')}}</a>
+                    {% endif %}
+                {% endfor %}
+                    </li></ul>
+                </li>
             {% endfor %}
+                </ul>
             </div>
         {% endfor %}
         </div>

@@ -1115,19 +1115,21 @@ def show_place(locid):
             for p in res.get("hierarchy"):
                 if p.uuid == pl.uuid:
                     level = p.level
+                    break
             zoom = 19 - 48.5*level + 30*level*level
             print(f"bp.scene.routes.show_place: level={level}, zoom={zoom}")
 
             # Find Source references
             res = service.get_citation_sources_repositories(citations)
-            for c in citations:
-                for ref in c.source_refs:
-                    print(f"# Citation {ref}")
 
     except KeyError as e:
         traceback.print_exc()
         return redirect(url_for("virhesivu", code=1, text=str(e)))
 
+    for c in citations:
+        for ref in c.source_refs:
+            notes = ",".join([n.id for n in c.notes])
+            print(f"# Citation {ref} {notes}")
 
     stk_logger(u_context, f"-> bp.scene.routes.show_place n={cnt}")
     return render_template(

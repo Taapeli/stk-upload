@@ -66,8 +66,8 @@ def run_cypher(session, cypher:str, username:str, material:Material, **kwargs):
     else:
         # By (state and) material type
         full_cypher = cypher_material_prefix + cypher
-    if not isinstance(material, Material):
-        raise IsotammiException("pe.neo4j.util.run_cypher: invalid material")
+        if not isinstance(material, Material):
+            raise IsotammiException("pe.neo4j.util.run_cypher: invalid material")
 
     return session.run(full_cypher, username=username, 
                        material_type=material.m_type,

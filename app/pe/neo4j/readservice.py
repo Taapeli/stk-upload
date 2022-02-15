@@ -99,7 +99,7 @@ class Neo4jReadService(ConcreteService):
             person.event_death = EventBl_from_node(death_node)
 
     def _obj_from_node(self, node, role=None):
-        """Create Person or Family object from db node."""
+        """Create a Place, Event, Person or Family object from db node."""
         if "Person" in node.labels:
             obj = PersonBl_from_node(node)
         elif "Family" in node.labels:
@@ -110,6 +110,9 @@ class Neo4jReadService(ConcreteService):
         elif "Event" in node.labels:
             obj = EventBl_from_node(node)
             obj.clearname = _(obj.type) + " " + obj.description + str(obj.dates)
+        elif "Place" in node.labels:
+            obj = PlaceBl_from_node(node)
+            obj.clearname = _(obj.type) + " " + obj.pname
         else:
             # raise NotImplementedError(f'Person or Family expexted: {list(node.labels})')
             logger.warning(

@@ -92,7 +92,7 @@ td.Citation div ol {padding-top:.3em;}
             {% set ind = loop.index %}
             {{ macro.source_clip(ind, c, source, repo_name, _( "Page" ), _("Copy citation to clipboard")) }}
 
-	        		    <div title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
+	        		    <div title="{{c.confidence|transl('conf')}} – {{ _('confidence') }} ({{c.confidence}}/4)"
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
 	   					  <b>{{c.page}}</b> 
 	   					  {{ macro.stars(c.confidence|float) }}
@@ -119,6 +119,10 @@ td.Citation div ol {padding-top:.3em;}
                                  <a href="/scene/event/uuid={{indi.uuid}}" class="inlink"
                                     title="{{ _('see details of event') }}">
                                     {{ indi.clearname | title }}
+                          {% elif indi.id[0] == "P" %}{# _('Place') #}
+                                 <a href="/scene/location/uuid={{indi.uuid}}" class="inlink"
+                                    title="{{ _('see details of place') }}">
+                                    {{ indi.clearname }}
                           {% else %}
                                  {{ macro.person_name_by_sortname_anon(indi) }}
                              {% if indi.event_birth and indi.event_birth.dates %}

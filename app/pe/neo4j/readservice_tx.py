@@ -584,12 +584,20 @@ class Neo4jReadServiceTx(ConcreteService):
         return sorted(ret, key=lambda x: x.pname)
 
     def tx_get_place_w_names_citations_notes_medias(self, user, uuid, lang, material):
-        """Returns the PlaceBl with PlaceNames, Notes and Medias included.
+        """
+        Returns the PlaceBl with PlaceNames, Notes, Medias and Citations.
+
+        The connected Notes for Citations are saved in Citation.notes[]
+        for accessing citation urls.
         """
         pl = None
         citations = [] # Citation objects referenced from this Place
+        cita_dict = {}
         node_ids = []  # List of uniq_is for place, name, note and media nodes
         with self.driver.session(default_access_mode="READ") as session:
+
+            # 1. Get names, notes, medias and citations
+
             result = run_cypher(
                 session,
                 CypherPlace.get_w_citas_names_notes,
@@ -617,29 +625,47 @@ class Neo4jReadServiceTx(ConcreteService):
                 pl = PlaceBl_from_node(node)
                 node_ids.append(pl.uniq_id)
                 # Default language name
-                name_node = record["name"]
-                if name_node:
-                    pl.names.append(PlaceName_from_node(name_node))
+                node = record["name"]
+                if node:
+                    pl.names.append(PlaceName_from_node(node))
                 # Other name versions
-                for name_node in record["names"]:
-                    pl.names.append(PlaceName_from_node(name_node))
+                for node in record["names"]:
+                    pl.names.append(PlaceName_from_node(node))
                     node_ids.append(pl.names[-1].uniq_id)
 
-                for notes_node in record["notes"]:
-                    n = Note_from_node(notes_node)
+                for node in record["notes"]:
+                    n = Note_from_node(node)
                     pl.notes.append(n)
-                    node_ids.append(pl.notes[-1].uniq_id)
+                    node_ids.append(n.uniq_id)
 
-                for medias_node in record["medias"]:
-                    m = MediaBl_from_node(medias_node)
+                for node in record["medias"]:
+                    m = MediaBl_from_node(node)
                     # Todo: should replace pl.media_ref[] <-- pl.medias[]
                     pl.media_ref.append(m)
-                    node_ids.append(pl.media_ref[-1].uniq_id)
+                    node_ids.append(m.uniq_id)
 
-                for citas_node in record["citas"]:
-                    n = Citation_from_node(citas_node)
-                    citations.append(n)
-                    node_ids.append(citations[-1].uniq_id)
+                for node in record["citas"]:
+                    c = Citation_from_node(node)
+                    c.notes = [] # To be set below
+                    citations.append(c)
+                    cita_dict[c.uniq_id] = c
+                    node_ids.append(c.uniq_id)
+
+            # 2. Get Notes for Citations
+
+            result = run_cypher(
+                session, 
+                CypherPlace.get_notes_for_citas,
+                user,
+                material,
+                citas=list(cita_dict.keys()),
+            )
+            for record in result:
+                # Set Note to active Citation
+                cita_uid = record["cid"]
+                cita_obj = cita_dict[cita_uid]
+                note_obj = Note_from_node(record["note"])
+                cita_obj.notes.append(note_obj)
 
         return {"place": pl, "uniq_ids": node_ids, "citas": citations}
 
