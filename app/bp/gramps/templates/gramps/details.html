@@ -25,6 +25,12 @@ td {
     width: 266px;
     height: 4em;
 }
+#msg {
+    color: blueviolet;
+    font-weight: normal;
+    padding-left: 8em;
+    background: white;
+}
 .visible { display: inline; }
 .hidden { display:none; }
 </style>
@@ -74,16 +80,16 @@ function doconfirm( command, title ) { // used in commands.html
         			<form>
         			<input type="hidden" name="batch_id" value="{{ batch.id }}">
         			<textarea id="description" name="description">{{ batch.description }}</textarea>
-        			<button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
-        			</form>
+        			<button hx-post="update_description" hx-target="#msg">{{ _("Save") }}</button>
+        			</form> <span id="msg"></span>
                 </th>
         	</tr>
        	</table>
        	<p>
     {% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
        	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
-    {% endif %}   
-    
+    {% endif %}
+
     </div>
     
     <div class="startbox">
@@ -135,7 +141,7 @@ function doconfirm( command, title ) { // used in commands.html
             hx-get="/gramps/commands/{{batch.id}}">
         </div>
     </div>
-    <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
+    <p>&rtrif; <a href="{{request.referrer}}">{{ _("Back") }}</a></p>
 
 <!-- Startdiv ends -->
 </div>

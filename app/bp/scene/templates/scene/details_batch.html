@@ -42,6 +42,11 @@ tr:hover {background-color: #f5f5f5}
     width: 245px;
     height: 4em;
 }
+#msg {
+    color: blueviolet;
+    font-weight: normal;
+    padding-left: 8em;
+}
 #actions {padding-bottom: 2pt;}
 #actions a { color: blue; }
 </style>
@@ -92,8 +97,8 @@ tr:hover {background-color: #f5f5f5}
                             <form>
                             <input type="hidden" name="batch_id" value="{{ batch.id }}">
                             <textarea id="description" name="description">{{ batch.description }}</textarea>
-                            <button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
-                            </form>
+                            <button hx-post="update_description" hx-target="#msg">{{ _("Save") }}</button>
+                            </form> <span id="msg"></span>
                         </th>
                     </tr>
                 </table>
@@ -155,7 +160,7 @@ tr:hover {background-color: #f5f5f5}
         <div id="actions">
             <h3>{{ _("Actions") }}</h3>
             <div hx-trigger="load"
-                hx-get="/gramps/commands/{{batch.id}}"> 
+                hx-get="/gramps/commands/{{batch.id}}?caller=scene"> 
             </div>
         </div>
     </div>

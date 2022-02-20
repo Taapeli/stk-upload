@@ -46,15 +46,16 @@ td.progress-td { padding: 0; }
     margin: 2pt;
 }
 .submitLink {
-  background-color: transparent;
   text-decoration: none;
-  border: none;
   color: blue;
   cursor: pointer;
+  border: gray solid 1pt;
+  border-radius: 6pt;
+  background: antiquewhite;
+  padding: 2pt;
 }
 .submitLink:hover {
-  text-decoration: underline;
-  /*outline: none;*/
+  background: burlywood;
 }
 </style>
 
@@ -175,7 +176,7 @@ function filenm_changed(input) {
                             title="{{ _('Browse this material') }}">
                     </form>
                     <form method="GET" action="/gramps/details/{{upload.batch_id}}">
-                        <input type="submit" value="{{ _('Show more...') }}"
+                        <input type="submit" value="info"
                             title="{{ _('Details and operations') }}" class="submitLink">
                     </form>
                 </div>

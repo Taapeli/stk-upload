@@ -1443,11 +1443,11 @@ def batch_update_description():
     with RootUpdater("update") as service:
         ret = service.batch_update_descr(batch_id, description, current_user.username)
         if Status.has_failed(ret):
-            msg = _("Update did not succeed: " + ret["errortext"])
+            msg = (_("Update did not succeed: " + ret["errortext"]))
         else:
-            msg = _("The description of this material has been updated.")
+            msg = (_("Updated"))
 
-    return redirect(url_for("scene.batch_details", msg=msg))
+    return msg
 
 # ------------------------------ Menu 8: Comment --------------------------------
 
