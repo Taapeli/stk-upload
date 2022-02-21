@@ -364,6 +364,7 @@ def translate(term, var_name, show_table=False):
 def list_translations():
     ''' Get list of all translations '''
     
+    key = _("Root") # To get a translation for comments page
     return_dict = {}
     keywords = {
         'nt': "Name types",

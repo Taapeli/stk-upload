@@ -1457,8 +1457,6 @@ def batch_update_description():
 def show_topics():
     """List of Discussions for menu(7)"""
     t0 = time.time()
-    print(f"--- {request}")
-    print(f"--- {session}")
     # Set context by owner and the data selections
     u_context = UserContext()
     # Which range of data is shown

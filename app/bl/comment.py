@@ -94,9 +94,9 @@ class CommentReader(DataService):
 
     def read_my_comment_list(self):
         """Read Comment object list using u_context."""
-        from bl.batch.root import Root
+        # from bl.batch.root import Root
+        # topics = []
 
-        topics = []
         fw = self.user_context.first  # next name
         limit = self.user_context.count
         ustr = "for user " + self.use_user if self.use_user else "approved"
