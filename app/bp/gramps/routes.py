@@ -492,16 +492,16 @@ def batch_details(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def batch_update_description():
-    """ Update description field in detail page. """
+    """ Update description field in details page. """
     batch_id = request.form["batch_id"]
     description = request.form["description"]
     msg = ""
     with RootUpdater("update") as service:
         ret = service.batch_update_descr(batch_id, description, current_user.username)
         if Status.has_failed(ret):
-            msg = (_("Update did not succeed: " + ret["errortext"]))
+            msg = _("ERROR: Update did not succeed: ") + ret["errortext"]
         else:
-            msg = (_("Updated"))
+            msg = _("Updated")
 
     return msg
 

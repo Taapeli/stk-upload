@@ -68,12 +68,12 @@ RETURN c AS comment, u.username AS commenter
 // 1. Batch object comments
 MATCH (root) --> (o) -[:COMMENT]-> (c)  <-[:COMMENTED]- (u:UserProfile)
     OPTIONAL MATCH repl = ( (c) -[:COMMENT*]-> () )
-WITH root, COLLECT([o, c, u.username, length(repl)]) AS rows
+WITH root, COLLECT(DISTINCT [o, c, u.username, length(repl)]) AS rows
 // 2. Comments to Root self
 MATCH (root) -[:COMMENT]-> (c1)  <-[:COMMENTED]- (u1:UserProfile)
     OPTIONAL MATCH repl1 = ( (c1) -[:COMMENT*]-> () )
 // 3. Combined
-WITH root, rows, COLLECT([null, c1, u1.username, length(repl1)]) AS rows_root
+WITH root, rows, COLLECT(DISTINCT [null, c1, u1.username, length(repl1)]) AS rows_root
 WITH root, rows + rows_root AS all_rows
     UNWIND all_rows AS row
 
