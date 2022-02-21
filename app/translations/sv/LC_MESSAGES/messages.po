@@ -2485,14 +2485,13 @@ msgstr "Allmänt"
 
 #: bp/gramps/templates/gramps/details.html:71
 #: bp/scene/templates/scene/details_batch.html:87
-#, fuzzy
 msgid "Changed"
-msgstr "förendrats"
+msgstr "Förendrats"
 
 #: bp/gramps/templates/gramps/details.html:83
 #: bp/scene/templates/scene/details_batch.html:100
 msgid "Save"
-msgstr "spara"
+msgstr "Spara"
 
 #: bp/gramps/templates/gramps/details.html:90
 #: bp/gramps/templates/gramps/scripting.html:3
@@ -2652,7 +2651,6 @@ msgid "Person count"
 msgstr "Personer"
 
 #: bp/gramps/templates/gramps/uploads.html:180
-#, fuzzy
 msgid "Details and operations"
 msgstr "Statistiken och åtgärder"
 
@@ -2787,12 +2785,11 @@ msgstr "Inga kommentarer hittades"
 #: bp/scene/templates/scene/details_batch.html:63
 #, python-format
 msgid "Statistics for Material %(id)s"
-msgstr "se detaljer om materialet %(id)s"
+msgstr "Statistik om materialet %(id)s"
 
 #: bp/scene/templates/scene/details_common.html:30
-#, fuzzy
 msgid "Statistics for Common Materials"
-msgstr "se detaljer om förenad %(id)s"
+msgstr "Statistik om förenad %(id)s"
 
 #: bp/scene/templates/scene/details_common.html:34
 msgid "Materials of type"
@@ -2999,7 +2996,6 @@ msgid "Pictures"
 msgstr "Bilder"
 
 #: bp/scene/templates/scene/macros.html:80
-#, fuzzy
 msgid "Material details and actions"
 msgstr "Materialstatistik ock åtgärder"
 
@@ -3447,9 +3443,8 @@ msgstr ""
 "trunkering med '*')"
 
 #: bp/scene/templates/scene/persons_search.html:108
-#, fuzzy
 msgid "Search from notes"
-msgstr "Sökning från noten"
+msgstr "Sök från noten"
 
 #: bp/scene/templates/scene/persons_search.html:112
 msgid "A year (1750) or years range (1700-1750) where persons might live"
@@ -3793,7 +3788,6 @@ msgid "Browse Common Materials"
 msgstr "Bläddra i förenad material"
 
 #: bp/start/templates/start/index_logged.html:90
-#, fuzzy
 msgid "View different approved common data"
 msgstr "Lista godkända gemensamma materialer"
 

@@ -8,8 +8,11 @@
 
 <style>
 startbox h2 {margin-bottom: 0;}
-div.startbox { height: 300px; }
-div.startbox > table { width: 280px; }
+div.startbox {
+    height: 300px;
+    width: 280px;
+}
+div.startbox table { width: 100%; }
 div.actions {
     border: solid 2pt silver;
     background-color: whitesmoke;
@@ -28,8 +31,7 @@ td {
 #msg {
     color: blueviolet;
     font-weight: normal;
-    padding-left: 8em;
-    background: white;
+    padding-left: 4em;
 }
 .visible { display: inline; }
 .hidden { display:none; }
@@ -51,7 +53,7 @@ function doconfirm( command, title ) { // used in commands.html
 
 {% include "flash_messages.html" %}
 
-    <div class="startbox" style="width:auto">
+    <div class="startbox" style="width: min-content">
     	<h2 class="center">{{ _("General")|title() }}</h2>
     	<table>
         	<tr>
@@ -78,10 +80,11 @@ function doconfirm( command, title ) { // used in commands.html
         	<tr>
         		<th colspan="2">{{ _("Description") }}<br>
         			<form>
-        			<input type="hidden" name="batch_id" value="{{ batch.id }}">
-        			<textarea id="description" name="description">{{ batch.description }}</textarea>
-        			<button hx-post="update_description" hx-target="#msg">{{ _("Save") }}</button>
-        			</form> <span id="msg"></span>
+            			<input type="hidden" name="batch_id" value="{{ batch.id }}">
+            			<textarea id="description" name="description">{{ batch.description }}</textarea>
+            			<button hx-post="update_description" hx-target="#msg">{{ _("Save") }}</button>
+            			<span id="msg"></span>
+                    </form> 
                 </th>
         	</tr>
        	</table>
