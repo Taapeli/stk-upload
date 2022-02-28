@@ -292,7 +292,7 @@ def audit_batch_download(batch_id, username):
             as_attachment=True,
         )
     else:
-        msg = _("Not allowed to load this batch ")+batch_id+"/"+username
+        msg = _("Not allowed to load this batch: ")+batch_id+"/"+username
         flash(msg)
         return msg
 
