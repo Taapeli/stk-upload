@@ -1455,7 +1455,7 @@ def batch_update_description():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_topics():
-    """List of Discussions for menu(7)"""
+    """List of Discussions for menu(7) 'Keskustelut'. """
     t0 = time.time()
     # Set context by owner and the data selections
     u_context = UserContext()
