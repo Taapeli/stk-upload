@@ -156,6 +156,7 @@ def translate(term, var_name, show_table=False):
     elif var_name == "notet":
         # Note types
         tabl = {
+            "ALTNAMES": _("Alternative names"), #"muita nimiä"
             "Cause Of Death": _("Cause Of Death"), #"kuolinsyy"
             "Citation": _("Citation"), #"viitteen lisätieto"
             "Event Note": _("Event Note"), #"tapahtuman lisätieto"

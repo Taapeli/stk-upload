@@ -4728,6 +4728,9 @@ msgstr "arvonimen myöntäminen"
 msgid "Cause Of Death"
 msgstr "Kuolinsyy"
 
+msgid "Alternative names"
+msgstr "Muita nimiä"
+
 #: ui/jinja_filters.py:76
 msgid "Census"
 msgstr "henkikirjamerkintä"

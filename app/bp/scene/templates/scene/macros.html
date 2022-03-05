@@ -18,7 +18,7 @@
       - WHITE FROWNING FACE &#9785; BLACK FLAG &#9873;
       - SOUTH EAST ARROW TO CORNER &#8690; (outlink)
    #}
-   {% if value < 2 %}
+   {% if value <= 1 %}
      {% if value == 0 %}&#9873;&#9873;
      {% else %}&#9873;
      {% endif %}
@@ -186,7 +186,7 @@
 {% macro person_names(person, names) -%}
     {#  Formats a Person name with link. Shows altername names also. #}
     {% for pn in names|sort(attribute='order') %}
-     {% if loop.index == 1 %}
+     {% if loop.first %}
          {% if pn.type != "Birth Name" %}
             <span class="typedesc">{{pn.type|transl('nt')}}</span>
          {% endif %}
@@ -274,7 +274,7 @@
             {% for name in [family.father_sortname, family.mother_sortname] %}
                 {% set a = name.split('#') %}
                 {{a[1]}} <i>{{a[2]}}</i> <b>{{a[0]}}</b>
-                {% if not loop.last %}&lt;&gt;{% endif %}
+                {% if not loop.last %}&amp;{% endif %}
             {%- endfor %}
             </a>
 {%- endmacro %}
@@ -291,7 +291,7 @@
     {% if note.text %}
 	    {% set lines = note.text.split('\n') %}
 	    {% for l in lines %}
-	       {% if loop.index > 1 %}<br>{% endif %}
+	       {% if not loop.first %}<br>{% endif %}
 	       <i>{{ l }}</i>
 	    {% endfor %}
     {% endif %}
