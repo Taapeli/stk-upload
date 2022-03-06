@@ -125,7 +125,7 @@ div#events div.scrollbox {
                             <li>
                                 <span">{{ _("Page")}} {{cita.page}}</span>
                 {% for note in cita.notes %}
-                                –► <i>{{note.text}}</i>
+                                <br>–► <i>{{note.text}}</i>
                         {% if note.url %}
                                 <a class="outlink" target="_blank" 
                                    href="{{note.url}}">{{note.url|transl('urldomain')}}</a>

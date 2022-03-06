@@ -352,6 +352,9 @@
                     {% else %}{% set ns.url = "; URL: " + note.url %}
                     {% endif %}
                 {% endif %}
+                {% if note.text %}
+                    {% set ns.url = ns.url + " " + note.text %}
+                {% endif -%}
             {% endif %}
         {% endfor %}
     {% endif -%}
