@@ -162,7 +162,7 @@ return up as profile, b as root,
 
 #-bp.admin.uploads.list_uploads
     get_user_roots_summary = """
-match (u:UserProfile) -[:HAS_ACCESS]-> (root:Root)
+match (u:UserProfile) -[:HAS_LOADED]-> (root:Root)
     where u.username = $user
 optional match (audi:UserProfile) -[ar:DOES_AUDIT]-> (root)
 optional match (root) -[r:OBJ_PERSON]-> (:Person)
