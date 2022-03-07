@@ -9,10 +9,9 @@ td.td-hdr {
   background: white;
   padding-left: 5em;
 }
-tr > td:nth-child(1), tr > td:nth-child(5) {
+tr > td:nth-child(1), tr > td:nth-child(6) {
     white-space: nowrap;
 }
-td.cmds { white-space: nowrap; }
 .typedesc {
   font-size: 100%;
 }
@@ -65,7 +64,7 @@ td.cmds { white-space: nowrap; }
                </td>
                <td>{{upload.batch_id}}
 	      {% if upload.count %}
-	           	   <br>– {{upload.count}}&nbsp;{{ _("persons") }}
+	           	   <br>–&nbsp;{{upload.count}}&nbsp;{{ _("persons") }}
 	      {% endif %}
 	           </td>
 
@@ -76,14 +75,14 @@ td.cmds { white-space: nowrap; }
 	           	   {{upload.state|transl('state')}} 
 	      {% endif %}
 			{% if upload.auditors %}
-                    <br><i>{{ _("Auditor") }}:
+                    <br><i>
             	{% for auditor, ts, ts_str in upload.auditors %}
             			<span title="{{ _('Audit start date') }}">{{auditor}}&nbsp;{{ts_str}}</span>
             	{% endfor %}</i>
 			{% endif %}
 	           </td>
 
-			   <td>{{upload.xmlname}}
+			   <td>"{{upload.xmlname}}"
 			{% if upload.description %} 
                     <br><i>{{ upload.description[0:29] }}
 				{% if upload.description|length > 29  %}
@@ -99,7 +98,7 @@ td.cmds { white-space: nowrap; }
 			{% endif %}
 			   </td>
 
-	           <td class="cmds">
+	           <td>
 	        {% if upload.xmlname %}
 	            ▸ <a href="/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}/{{upload.batch_id}}">
 	           			{{ _("Show upload log") }}</a>
