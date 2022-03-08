@@ -422,8 +422,8 @@ class Root(NodeObject):
             #    has_access=['jpek']
             # >
             if node is None or \
-               (node.id != record["root"].id and \
-                user != record['profile']['username']):
+                    (node.id != record["root"].id and \
+                     user != record['profile']['username']):
                 # Not same user and root
                 user = record['profile']['username']
                 node = record["root"]
@@ -434,6 +434,8 @@ class Root(NodeObject):
                     if au_user:
                         b.auditors.append([au_user, ms, format_ms_timestamp(ms)])
             label = record.get("label", "-")
+            if label == "Stats":
+                continue
             # Trick: Set Person as first in sort order!
             if label == "Person":
                 label = " Person"

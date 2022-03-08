@@ -5,16 +5,29 @@
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
 <style>
-div.props {
-	display: inline-box;
+.box {
+  box-sizing: border-box;
+  float: left;
+  width: 25%;
+  padding: 5pt;
+  height: 60pt;
+  border: 1pt solid silver;
+  background-color: #eee;
 }
-div.props > div { 
-    margin: 2pt;
-}
-div.props > div > span:nth-child(1) {
-    display: inline-block;
-    width: 12em;
-    vertical-align:top;
+.box2 { width: 50%; }
+.box3 { width: 37.5%; }
+.box p {
+    /*font-size:12pt;*/
+    margin-top: 6pt;
+    overflow: auto;
+ }
+.box div  {font-size:9pt; }
+table     { width: 750px; }
+.clearfix { width: 750px; }
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
 }
 </style>
 
@@ -26,69 +39,68 @@ div.props > div > span:nth-child(1) {
 
 {% include "flash_messages.html" %}
 
-		<div class="props">
-		
-            <div>
-                <span>{{ _('Material') }}:</span>
-                
-                <span><span 
-                    {% if root.material_type == "Family Tree" %} class="typedesc"
-                    {% else %} class="typetag"{% endif %}
-                    >{{ _(root.material_type) }}</span>
-                {{ _('In state')|lower }} {{ _(root.state) }}</span>
-            </div>
-    {% if root.description %}
-			<div style="margin: 6pt 2pt;">
-                <span>{{ _('Title') }}:</span>
-				<span style="font-size:larger; font-style:italic;">
-                    {{root.description}}</span>
-			</div>
-	{% endif %}
-            <div>
-                <span>{{ _('Gramps file') }}:</span>
-                <span><a href="/audit/batch_download/{{root.id}}/{{user}}">{{basename}}</a>
-                </span>
-            </div>
-            <div>
-                <span>{{ _('Total nodes') }}:</span>
-                <span>{{total|int_thousands}}</span>
-            </div>
-            <div>
-                <span>{{_('Researcher')}}:</span>
-                <span><b>{{user}}</b></span>
-            </div>
-
-    {% for auditor, ts, ts_str in root.auditors %}
-            <div style="color: brown;">
-                <span>{% if loop.first %}{{ _("Current auditors") }}:{% endif %}</span>
-                <span><b>{{auditor}}</b>
-                    <span  title="{{ _('Audit start date') }}">{{ts_str}}</span>
-                </span>
-            </div>
-    {% endfor %}
-    {% for access in root.has_access %}
-            <div><span>{{ _("Access is given also to") }}:</span>
-                <span><b>{{access}}</b> </span>
-            </div>
-    {% endfor %}
-		</div>
+        <div class="clearfix">
+          <div class="box">
+            <div>{{ _('Batch id') }}</div>
+            <p><b>{{root.id}}</b>
+               {% if time %}<br><small>{{ _('saved at') }} {{time}}</small>{% endif -%}
+            </p>
+          </div>
+          <div class="box">
+            <div>{{ _('Material') }}</div>
+            <p><b>{{ _(root.state) }}</b><br>
+               <span class="typedesc">{{ _(root.material_type) }}</span>       
+            </p>
+          </div>
+          <div class="box">
+            <div>{{_('Researcher')}}</div>
+            <p><b><a href="/audit/profile/{{user}}" title="{{ _('User Profile') }}"
+                    >{{user}}</a></b></p>
+          </div>
+          <div class="box" style="background-color: seashell;">
+            <div>{{ _("Current auditors") }}</div>
+            <p>
+            {% for auditor, ts, ts_str in root.auditors %}
+               <b><a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
+                    >{{auditor}}</a></b>
+               <span title="{{ _('Audit start date') }}">{{ts_str}}</span>
+            {% endfor %}
+            </p>
+          </div>
+          <div class="box box3">
+            <div>{{ _('Gramps file') }}</div>
+            <p><a href="/audit/batch_download/{{root.id}}/{{user}}">{{basename}}</a></p>
+          </div>
+          <div class="box box3">
+            <div>{{ _('Title') }}</div>
+            <p><i>{{root.description}}</i></p>
+          </div>
+          <div class="box">
+            <div>{{ _("Access is given also to") }}</div>
+            <p>
+            {% for access in root.has_access %}<b><a href="/audit/profile/{{access}}" title="{{ _('User Profile') }}"
+                    >{{access}}</a></b>
+            {% endfor %}
+            </p>
+          </div>
+        </div>
 
         <div style="width: min-content;">
 
-			<table style="min-width: 35em; margin: 1em 0;">
+            <table style="width:750px; margin:2em 0;"><!-- Must be pixels! -->
 				<tr>
-					<th>{{ _('Batch id') }}</th>
+        {% set w = (750 / (label_nodes|length + 2.5) | round(1,'floor') ) %}
         {% for label, cnt in label_nodes %}
-					<th>{{ _(label|trim) | title }}</th>
+					<th style="width: {{w}}px">{{ _(label|trim) | title }}</th>
         {% endfor -%}
+                    <th style="width: {{w}}px">{{ _('Total') }}</th>
                 </tr>
 
                 <tr>
-                    <td class="nowrap"><b>{{root.id}}</b>
-                    {% if time %}<br><small>{{ _('saved at') }} {{time}}</small>{% endif -%}
-                    </td>
                     {% for label, cnt in label_nodes %}
-                    <td class="right nowrap">{{cnt|int_thousands}}</td> {% endfor -%}
+                    <td class="right nowrap">{{cnt|int_thousands}}</td>
+                    {% endfor -%}
+                    <td class="right nowrap">{{total|int_thousands}}</td>
                 </tr>
             </table>
 
