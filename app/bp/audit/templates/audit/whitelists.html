@@ -1,0 +1,93 @@
+{% extends "/scene/sc_layout.html" %}
+{% block title %}Standard types{% endblock %}
+{% block body %}
+{{ super() }}
+
+<style>
+	#vue_app {
+		margin-left: 20px;
+	}
+
+	.tab-list {
+		border-bottom: solid 3px #eee;
+	}
+
+	.tab-list a {
+		display: inline-block;
+		padding: 5px 10px;
+		cursor:pointer;
+	}
+
+	.tab-list a.selected {
+		background-color: #aaa;
+	}
+</style>
+
+
+<style>form { display: inline-block; }</style>
+
+<div id="vue_app">
+    <div>
+        <h1>Standard types white lists</h1>
+        <div class="tab-list">
+	        <a v-for="scope in scopes" href="#" @click="select(scope)" :class="{selected: selected_scope==scope}">
+	        	${ scope }
+	        </a>
+        </div>
+        <form>
+	        <textarea name="white_list" id="white_list" :disabled="selected_scope == ''"
+	        	rows="20" cols="20" v-model="whitelist">
+	        </textarea>
+	        <br>
+	        <button type="button" @click="save" :disabled="selected_scope == ''">
+	        	{{ _("Set white list") }}
+        	</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+
+var vm = new Vue({
+    el: '#vue_app',
+    delimiters: ['${', '}'],
+    data: {
+        scopes: [],
+        whitelist: "",
+        selected_scope: "",
+    },
+    created: function() {
+		axios.get("/audit/get_whitelist_scopes")
+		.then(rsp => {
+				console.log(rsp);
+				this.scopes = rsp.data.scopes;
+			});  
+  	},
+  	methods: {
+    	alert1: function() {
+        	alert(22);
+    	},
+    	select: function(scope) {
+			console.log("set scope",scope); 
+			this.selected_scope = scope;
+			axios.get("/audit/get_whitelist/" + scope)
+			.then(rsp => {
+					console.log(rsp);
+					this.whitelist = rsp.data;
+				});  
+    	},
+    	save: function() {
+			console.log("save",this.selected_scope); 
+			axios.post("/audit/set_whitelist", {scope:this.selected_scope, whitelist: this.whitelist})
+			.then(rsp => {
+					console.log(rsp);
+				});  
+    	},
+  	}
+});
+
+</script>
+
+
+{% endblock %}

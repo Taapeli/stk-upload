@@ -360,11 +360,33 @@ def xml_to_stkbase(batch):  # :Root):
 
     # End with BatchUpdater
 
+    run_supertool(batch, "nonstandard-types.script","nonstandard-types.csv")
+    
     return {
         "status": Status.OK,
         "steps": handler.blog.list(),
         "batch_id": handler.batch.id,
     }
+
+def run_supertool(batch, script, outputfile):
+    from bl.batch.root import Root
+    from bl.gramps import gramps_utils
+    batch = Root.get_batch(batch.user, batch.id)
+    supertool_runner = shareds.app.config.get("SUPERTOOL_RUNNER")
+    scriptfile = "app/supertool_scripts/" + script 
+    
+    print("supertool_runner",supertool_runner)
+    if supertool_runner:
+        lang = "en"
+        print("lang",lang)
+        msgs = gramps_utils.run_supertool(supertool_runner, lang, batch.user, batch.id, batch.xmlname, scriptfile, outputfile)
+    else:
+        msgs = {}
+    logger.info(f'bp.gramps.routes.run_supertool f="{os.path.basename(batch.xmlname)}"')
+    import csv
+    from pprint import pprint
+    print("run_supertool")
+    pprint(msgs)
 
 def file_clean(pathname):
     # Decompress file and clean problematic delimiter (').
