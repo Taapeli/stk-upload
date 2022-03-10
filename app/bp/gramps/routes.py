@@ -555,6 +555,7 @@ def run_supertool(batch_id):
     batch = Root.get_batch(current_user.username, batch_id)
     supertool_runner = shareds.app.config.get("SUPERTOOL_RUNNER")
     scriptfile = "app/supertool_scripts/nonstandard-types.script"
+<<<<<<< Upstream, based on branch 'master' of ssh://git@github.com/Taapeli/stk-upload.git
     outputfile = "supertool.csv"
     print("supertool_runner",supertool_runner)
     if supertool_runner:
@@ -572,3 +573,15 @@ def run_supertool(batch_id):
     #pprint(rows)
     #return jsonify(rows)
     return "ok"
+=======
+    outputfile = "nonstandard-types.csv"
+    print("supertool_runner",supertool_runner)
+    if supertool_runner:
+        lang = session.get("lang","")
+        print("lang",lang)
+        msgs = gramps_utils.run_supertool(supertool_runner, lang, current_user.username, batch_id, batch.xmlname, scriptfile, outputfile)
+    else:
+        msgs = {}
+    logger.info(f'bp.gramps.routes.run_supertool f="{os.path.basename(batch.xmlname)}"')
+    return redirect(url_for("gramps.batch_details", batch_id=batch_id))
+>>>>>>> e2195bb Nonstandard types update
