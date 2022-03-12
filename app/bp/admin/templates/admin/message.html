@@ -1,6 +1,6 @@
 {# _start/my_message.html_ #}
 {% extends "start/s_layout.html" %}
-{% block title %}{{ _("Write email to users") }} (start/my_message){% endblock %}
+{% block title %}{{ _("Write Email to Users") }} (start/my_message){% endblock %}
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
@@ -14,11 +14,13 @@ span.rec {
     border-right-width: 2pt;
     border-radius: 4pt;
     padding: 1pt 4pt;
+    white-space: nowrap;
+    line-height: 2;
 }
 table.normal, td {
 	border: none;
 	vertical-align: top;
-    margin: 4pt;
+    margin: 1em 10em 1em 1em;
     padding: 3pt;
 }
 tr:hover {background-color: white;}
@@ -27,13 +29,19 @@ tr:hover {background-color: white;}
 <script>
 $(document).ready( function() {
     $('#send').click( function() {
-		$.post("send_emails",$("form").serialize(), 
+    	if (document.getElementById('message').value == "") {
+    		alert("{{ _('Empty message – not sent!') }}");
+    		return;
+    	};
+    	$.post("send_emails",$("form").serialize(), 
 		function(rsp) {
-			alert("{{ _('Message sent') }}");
+			document.getElementById("sending").innerHTML = "{{ _('Message sent') }}!";
+			document.getElementById("sending").style.color = "blue";
 		}
 	).fail(
 		function(rsp) {
-			alert("{{ _('Message send failed') }}");
+            document.getElementById("sending").innerHTML = "{{ _('Message send failed') }}!";
+            document.getElementById("sending").style.color = "red";
 		}
 	);
     });
@@ -43,8 +51,11 @@ $(document).ready( function() {
 
 <div id="startdiv">
   <div>
-    <h1>{{ _("Write email to users") }}
-    </h1>
+{% if users|length == 1 %}
+    <h1>{{ _("Write Email to a User") }}</h1>
+{% else %}
+    <h1>{{ _("Write Email to Users") }}</h1>
+{% endif %}
 
 {% include "flash_messages.html" %}
 
@@ -79,8 +90,9 @@ $(document).ready( function() {
          	  <td><textarea id="message" name="message" rows="12" cols="80" style="width:100%"></textarea></td>
             </tr>
             <tr>
-                <td colspan="2">
-                    <div class="right-button"> 
+                <td>&rtrif; <a onclick="history.back()" href="#">{{ _("Return") }}</a>
+                </td>
+                <td><div id="sending" class="right-button"> 
                        <input type="button" id="send" value="{{ _('Apply') }}" />
                     </div>
                 </td>
@@ -89,6 +101,6 @@ $(document).ready( function() {
          </form>
     </div>
   </div>
-  <div>&rtrif; <a onclick="history.back()" href="#">{{ _("Return") }}</a></div>
+  
 </div>
 {% endblock %}

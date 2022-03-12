@@ -926,7 +926,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/message.html:3
 #: bp/admin/templates/admin/message.html:36
-msgid "Write email to users"
+msgid "Write Email to Users"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:22

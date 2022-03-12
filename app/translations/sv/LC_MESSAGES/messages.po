@@ -930,7 +930,10 @@ msgstr "Log av Gramps XML uppladdning"
 
 #: bp/admin/templates/admin/message.html:3
 #: bp/admin/templates/admin/message.html:36
-msgid "Write email to users"
+msgid "Write Email to a User"
+msgstr "Skriv e-post till en användare"
+
+msgid "Write Email to Users"
 msgstr "Skriv e-post till användare"
 
 #: bp/admin/templates/admin/message.html:22

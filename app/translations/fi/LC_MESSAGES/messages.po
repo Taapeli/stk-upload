@@ -926,8 +926,14 @@ msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
 
 #: bp/admin/templates/admin/message.html:3
 #: bp/admin/templates/admin/message.html:36
-msgid "Write email to users"
+msgid "Write Email to a User"
+msgstr "Sähköpostia käyttäjälle"
+
+msgid "Write Email to Users"
 msgstr "Sähköpostia käyttäjille"
+
+msgid "Empty message – not sent!"
+msgstr "Tyhjä viesti – ei lähetetty!"
 
 #: bp/admin/templates/admin/message.html:22
 #: bp/start/templates/start/my_message.html:24
@@ -1053,6 +1059,9 @@ msgstr "Vaihe"
 #: bp/gramps/templates/gramps/details.html:139
 msgid "Operations"
 msgstr "Toimenpiteet"
+
+msgid "Message from Isotammi auditor %(u)s"
+msgstr "Viesti Isotammen tarkastajalta %(u)s"
 
 #: bp/admin/templates/admin/uploads.html:43
 #: bp/audit/templates/audit/batches.html:36
