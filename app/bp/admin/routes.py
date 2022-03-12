@@ -458,14 +458,15 @@ def list_gedcoms_for_users():
 @roles_accepted("admin", "audit")
 def send_email():
     requested_users = request.form.getlist("select_user")
-    emails = [
-        user.email
+    subject = request.form.get("subject")
+    to = [
+        user
         for user in shareds.user_datastore.get_users()
         if user.username in requested_users
     ]
     logger.info(f"-> bp.admin.routes.send_email n={len(requested_users)}")
-    return render_template(
-        "/admin/message.html", users=", ".join(requested_users), emails=emails
+    return render_template("/admin/message.html",
+        usernames=", ".join(requested_users), users=to, subject=subject,
     )
 
 

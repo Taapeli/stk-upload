@@ -913,8 +913,8 @@ msgid "Uploaded GEDCOMs"
 msgstr "Ladatut gedcomit"
 
 #: bp/admin/templates/admin/list_users.html:127
-msgid "Send email"
-msgstr "Lähetä sähköposti"
+msgid "Write email"
+msgstr "Laadi sähköpostia"
 
 #: bp/admin/templates/admin/load_result.html:3
 msgid "Gramps to Neo4j log"
@@ -926,7 +926,7 @@ msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
 
 #: bp/admin/templates/admin/message.html:3
 #: bp/admin/templates/admin/message.html:36
-msgid "Send email to users"
+msgid "Write email to users"
 msgstr "Sähköpostia käyttäjille"
 
 #: bp/admin/templates/admin/message.html:22
@@ -947,6 +947,9 @@ msgstr "Kirjoita viesti"
 
 #: bp/admin/templates/admin/message.html:48
 #: bp/start/templates/start/my_message.html:58
+msgid "Recievers"
+msgstr "Vastaanottajat "
+
 msgid "Subject"
 msgstr "Aihe"
 
@@ -1304,6 +1307,9 @@ msgstr "Tutkijan aineiston tarkastus"
 msgid "In state"
 msgstr "Tilassa"
 
+msgid "State"
+msgstr "Vaihe"
+
 #: bp/audit/templates/audit/pick_auditing.html:42
 #: bp/scene/templates/scene/medias.html:42
 #: bp/scene/templates/scene/medias.html:64
@@ -1322,6 +1328,9 @@ msgstr "Tarkastajat"
 #: bp/audit/templates/audit/pick_auditing.html:70
 msgid "Access is given also to"
 msgstr "Käyttöoikeus myös"
+
+msgid "Objects Count"
+msgstr "Kohteiden määrät"
 
 #: bp/audit/templates/audit/pick_auditing.html:88
 msgid "saved at"

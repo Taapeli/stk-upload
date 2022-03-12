@@ -29,6 +29,10 @@ table     { width: 750px; }
   clear: both;
   display: table;
 }
+.mail-button {
+    margin-top: -6pt;
+    text-align: right;
+}
 </style>
 
 {{ hamburger_menu() }}
@@ -41,21 +45,30 @@ table     { width: 750px; }
 
         <div class="clearfix">
           <div class="box">
-            <div>{{ _('Batch id') }}</div>
-            <p><b>{{root.id}}</b>
-               {% if time %}<br><small>{{ _('saved at') }} {{time}}</small>{% endif -%}
+            <div>{{ _('Material') }}</div>
+            <p>
+               <span class="typedesc">{{ _(root.material_type) }}</span>
+               <br><b>{{root.id}}</b>
             </p>
           </div>
           <div class="box">
-            <div>{{ _('Material') }}</div>
-            <p><b>{{ _(root.state) }}</b><br>
-               <span class="typedesc">{{ _(root.material_type) }}</span>       
+            <div>{{ _('State') }}</div>
+            <p><b>{{ _(root.state) }}</b>
+               {% if time %}<br><small>{{time}}</small>{% endif -%}
             </p>
           </div>
           <div class="box">
             <div>{{_('Researcher')}}</div>
             <p><b><a href="/audit/profile/{{user}}" title="{{ _('User Profile') }}"
                     >{{user}}</a></b></p>
+             <form id="form" action="/admin/send_email" method="post">
+                <div class="mail-button">
+                    <input type="hidden" class="user" name="select_user" value="{{user}}">
+                    <input type="hidden" name="subject"
+                        value="{{ _('Message from Isotammi auditor %(u)s', u=auditor_name) }}">
+                    <button id="send_email">{{ _("Write email") }}</button>
+                </div>
+            </form>
           </div>
           <div class="box" style="background-color: seashell;">
             <div>{{ _("Current auditors") }}</div>
@@ -87,6 +100,7 @@ table     { width: 750px; }
 
         <div style="width: min-content;">
 
+            <h2>{{ _("Objects Count") }}</h2>
             <table style="width:750px; margin:2em 0;"><!-- Must be pixels! -->
 				<tr>
         {% set w = (750 / (label_nodes|length + 2.5) | round(1,'floor') ) %}

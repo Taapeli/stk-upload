@@ -917,8 +917,8 @@ msgid "Uploaded GEDCOMs"
 msgstr "Uppladdade Gedcom"
 
 #: bp/admin/templates/admin/list_users.html:127
-msgid "Send email"
-msgstr "Skicka e-post"
+msgid "Write email"
+msgstr "Skiv e-post"
 
 #: bp/admin/templates/admin/load_result.html:3
 msgid "Gramps to Neo4j log"
@@ -930,8 +930,8 @@ msgstr "Log av Gramps XML uppladdning"
 
 #: bp/admin/templates/admin/message.html:3
 #: bp/admin/templates/admin/message.html:36
-msgid "Send email to users"
-msgstr "Skicka e-post till användare"
+msgid "Write email to users"
+msgstr "Skriv e-post till användare"
 
 #: bp/admin/templates/admin/message.html:22
 #: bp/start/templates/start/my_message.html:24

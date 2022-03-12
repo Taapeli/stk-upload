@@ -913,7 +913,7 @@ msgid "Uploaded GEDCOMs"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:127
-msgid "Send email"
+msgid "Write email"
 msgstr ""
 
 #: bp/admin/templates/admin/load_result.html:3
@@ -926,7 +926,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/message.html:3
 #: bp/admin/templates/admin/message.html:36
-msgid "Send email to users"
+msgid "Write email to users"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:22
