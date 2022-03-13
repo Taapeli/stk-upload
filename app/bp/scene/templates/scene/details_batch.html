@@ -1,4 +1,4 @@
-{# /scene/templates/scene/comments.html_ #}
+{# /scene/templates/scene/details_batch.html_ #}
 {% extends "/scene/sc_layout.html" %}
 {% block title %}{{ _('Material Details') }}{% endblock %}
 {% block body %}
@@ -28,6 +28,7 @@
     text-align: right;
     padding-right: 1ex;
 }
+.sc-startbox table { width: 100%; }
 .sc-startbox table, .sc-startbox tr, .sc-startbox th,
 .sc-startbox2 table, .sc-startbox2 tr, .sc-startbox2 th {
     border: 1px solid silver;
@@ -41,6 +42,11 @@ tr:hover {background-color: #f5f5f5}
 #description {
     width: 245px;
     height: 4em;
+}
+#msg {
+    color: blueviolet;
+    font-weight: normal;
+    padding-left: 4em;
 }
 #actions {padding-bottom: 2pt;}
 #actions a { color: blue; }
@@ -88,11 +94,11 @@ tr:hover {background-color: #f5f5f5}
                     </tr>
                     <tr>
                         <th colspan="2">{{ _("Description") }}<br>
-            {% if msg %}    <span style="color:darkgreen">{{msg}}</span><br>{% endif %}
                             <form>
-                            <input type="hidden" name="batch_id" value="{{ batch.id }}">
-                            <textarea id="description" name="description">{{ batch.description }}</textarea>
-                            <button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
+                                <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                                <textarea id="description" name="description">{{ batch.description }}</textarea>
+                                <button hx-post="update_description" hx-target="#msg">{{ _("Save") }}</button>
+                                <span id="msg"></span>
                             </form>
                         </th>
                     </tr>
@@ -155,7 +161,7 @@ tr:hover {background-color: #f5f5f5}
         <div id="actions">
             <h3>{{ _("Actions") }}</h3>
             <div hx-trigger="load"
-                hx-get="/gramps/commands/{{batch.id}}"> 
+                hx-get="/gramps/commands/{{batch.id}}?caller=scene"> 
             </div>
         </div>
     </div>

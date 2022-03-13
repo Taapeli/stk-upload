@@ -1,6 +1,6 @@
 {# _start/my_message.html_ #}
 {% extends "start/s_layout.html" %}
-{% block title %}{{ _("Send email to users") }} (start/my_message){% endblock %}
+{% block title %}{{ _("Write Email to Users") }} (start/my_message){% endblock %}
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
@@ -8,10 +8,22 @@
 {{ hamburger_menu() }}
 
 <style>
-table, td {
+span.rec {
+    border: 1pt solid goldenrod;
+    border-bottom-width: 2pt;
+    border-right-width: 2pt;
+    border-radius: 4pt;
+    padding: 1pt 4pt;
+    white-space: nowrap;
+    line-height: 2;
+}
+table.normal, td {
 	border: none;
 	vertical-align: top;
+    margin: 1em 10em 1em 1em;
+    padding: 3pt;
 }
+tr:hover {background-color: white;}
 </style>
 
 <script>
@@ -33,31 +45,56 @@ $(document).ready( function() {
 
 <div id="startdiv">
   <div>
-    <h1>{{ _("Send email to users") }}: {{users}}</h1>
+{% if users|length == 1 %}
+    <h1>{{ _("Write Email to a User") }}</h1>
+{% else %}
+    <h1>{{ _("Write Email to Users") }}</h1>
+{% endif %}
 
 {% include "flash_messages.html" %}
 
     <div>
         <h2>{{ _('Write a message') }}</h2>
          <form action="#">
-		 {% for email in emails %}
-	         <input type="hidden" name="email" value="{{email}}">
-         {% endfor %}
-         <table>
-         <tr>
-         	<td>{{ _("Subject") }}: 
-         	<td><input name="subject" size="80" value="{{ _('Message from Isotammi admin') }}">
-         <tr>
-         	<td>{{ _("Message") }}:
-         	<td><textarea id="message" name="message" rows="20" cols="80"></textarea>
+    {% for user in users %}
+	         <input type="hidden" name="email" value="{{user.email}}">
+    {% endfor %}
+         <table class="normal">
+            <tr>
+              <td>{{ _("Recievers") }} </td>
+              <td>
+    {% for user in users %}
+                    <span class="rec" title="user={{user.username}}"
+                     ><b>{{user.name}}</b> &lt;{{user.email}}&gt;</span>
+    {% endfor %}
+              </td>
+            </tr>
+            <tr>
+         	  <td>{{ _("Subject") }} </td>
+         	  <td><input name="subject" size="80" 
+            {% if subject %}
+                    value="{{ subject }}"
+            {% else %}
+                    value="{{ _('Message from Isotammi admin') }}"
+            {% endif %}
+                    style="width:100%"></td>
+            </tr>
+            <tr>
+         	  <td>{{ _("Message") }} </td>
+         	  <td><textarea id="message" name="message" rows="12" cols="80" style="width:100%"></textarea></td>
+            </tr>
+            <tr>
+                <td>&rtrif; <a onclick="history.back()" href="#">{{ _("Return") }}</a>
+                </td>
+                <td><div class="right-button"> 
+                       <input type="button" id="send" value="{{ _('Apply') }}" />
+                    </div>
+                </td>
+            </tr>
      	 </table>
-         <p>
-         <div> 
-            <input type="button" id="send" value="{{ _('Apply') }}" />
-         </div>
          </form>
     </div>
   </div>
-  <p>&rtrif; <a href="list_users">{{ _("List of users") }}</a></p>
+  
 </div>
 {% endblock %}

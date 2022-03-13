@@ -136,6 +136,7 @@ def list_uploads(batch_id=None):
 
         In the list of Gramps batches the row of batch_id is highlighted.
     """
+    t0 = time.time()
     try:
         users = shareds.user_datastore.get_users()
         root_list = list(uploads.list_uploads_all(users))
@@ -145,7 +146,8 @@ def list_uploads(batch_id=None):
         error_print("list_uploads", e)
         return redirect(url_for("audit.audit_home"))
 
-    return render_template("/audit/batches.html", uploads=root_list, batch_id=batch_id)
+    return render_template("/audit/batches.html",
+                           uploads=root_list, batch_id=batch_id, elapsed=time.time() - t0)
 
 
 @bp.route("/audit/pick/<batch_id>", methods=["GET"])
@@ -196,6 +198,7 @@ def audit_pick(batch_id=None):
         label_nodes=labels,
         total=total,
         time=timestamp,
+        auditor_name=current_user.name,
     )
 
 
@@ -291,6 +294,10 @@ def audit_batch_download(batch_id, username):
             mimetype="application/gzip",
             as_attachment=True,
         )
+    else:
+        msg = _("Not allowed to load this batch: ")+batch_id+"/"+username
+        flash(msg)
+        return msg
 
 
 # --------------------- Delete an approved data batch ----------------------------
@@ -358,6 +365,7 @@ def user_profile(user):
     """Show user profile.
        - From original method: my_settings()
     """
+    t0 = time.time()
     labels, user_batches = Root.get_user_stats(user)
     userprofile = shareds.user_datastore.get_userprofile(user, roles=True)
 
@@ -370,6 +378,7 @@ def user_profile(user):
         batches=user_batches,
         gedcoms=[],
         userprofile=userprofile,
+        elapsed=time.time() - t0,
     )
 
 

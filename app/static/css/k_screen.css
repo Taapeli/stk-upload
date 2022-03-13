@@ -176,7 +176,7 @@ img#logo {
     border-radius: 5px;
 }
 .notmy {color:blue;}
-.Auditor { color:DarkGreen; } # Only for Auditor's eyes
+.Auditor { color:DarkGreen; } /* Only for Auditor's eyes */
 
 .detail_link {
 	display: inline;

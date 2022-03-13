@@ -54,11 +54,30 @@ MATCH (p) -[:COMMENT] -> (c) <-[:COMMENTED]- (u:UserProfile)
 RETURN c AS comment, u.username AS commenter 
     ORDER BY c.timestamp DESC LIMIT 5"""
 
-    # Topic list with count limit
+#     # Topic list for objects with count limit
+#     get_topics = """
+# MATCH (root) --> (o) -[:COMMENT]-> (c)  <-[:COMMENTED]- (u:UserProfile)
+# OPTIONAL MATCH repl = ( (c) -[:COMMENT*]-> () )
+# RETURN o, c, u.username as commenter, 
+#     coalesce(length(repl),0) AS count,
+#     root
+# ORDER BY c.timestamp desc LIMIT $limit"""
+
+    # Topic list including 1) batch object comments + 2) root comments
     get_topics = """
+// 1. Batch object comments
 MATCH (root) --> (o) -[:COMMENT]-> (c)  <-[:COMMENTED]- (u:UserProfile)
-OPTIONAL MATCH repl = ( (c) -[:COMMENT*]-> () )
-RETURN o, c, u.username as commenter, 
-    coalesce(length(repl),0) AS count,
-    root
-ORDER BY c.timestamp desc LIMIT $limit"""
+    OPTIONAL MATCH repl = ( (c) -[:COMMENT*]-> () )
+WITH root, COLLECT(DISTINCT [o, c, u.username, length(repl)]) AS rows
+// 2. Comments to Root self
+MATCH (root) -[:COMMENT]-> (c1)  <-[:COMMENTED]- (u1:UserProfile)
+    OPTIONAL MATCH repl1 = ( (c1) -[:COMMENT*]-> () )
+// 3. Combined
+WITH root, rows, COLLECT(DISTINCT [null, c1, u1.username, length(repl1)]) AS rows_root
+WITH root, rows + rows_root AS all_rows
+    UNWIND all_rows AS row
+
+WITH root, row[0] AS o, row[1] AS c, row[2] AS commenter, row[3] AS count
+    RETURN o, c, commenter, COALESCE(count,0) AS COUNT, root
+        ORDER BY c.timestamp DESC
+        LIMIT $limit"""

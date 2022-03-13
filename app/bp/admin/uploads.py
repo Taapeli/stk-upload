@@ -326,17 +326,14 @@ def list_uploads(username:str) -> List[Upload]:
         #    person_count=64
         #    auditors=[["juha",1630474129763]]
         # >
-        node = record["root"]
-        b: Root = Root.from_node(node)
+        b: Root = Root.from_node(record["root"])
         u_name = record["u_name"]
 
         # meta = get_meta(b)
         # NOTE: meta file 'status' ~ Uploads.state!
         # print(f"#bp.admin.uploads.list_uploads: root:{b.state}, meta:{meta.get('status')}")
-        state = b.state
-        audi_rec = record['auditors']
         auditors = []
-        for au_user, ts in audi_rec:
+        for au_user, ts in record['auditors']:
             # ["juha",1630474129763]
             if au_user:
                 ts_str = util.format_ms_timestamp(ts, "d")
@@ -350,8 +347,8 @@ def list_uploads(username:str) -> List[Upload]:
             user=b.user,
             u_name=u_name,
             auditors=auditors,
-            state=state,
-            loc_state=_(state),
+            state=b.state,
+            loc_state=_(b.state),
             is_candidate=1 if (b.state == State.ROOT_CANDIDATE) else 0,
             for_auditor=1 if b.for_auditor() else 0,
             material_type=b.material_type,

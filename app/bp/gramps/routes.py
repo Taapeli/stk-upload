@@ -492,18 +492,18 @@ def batch_details(batch_id):
 @login_required
 @roles_accepted("research", "admin")
 def batch_update_description():
-    from bl.batch.root_updater import RootUpdater
+    """ Update description field in details page. """
     batch_id = request.form["batch_id"]
     description = request.form["description"]
     msg = ""
     with RootUpdater("update") as service:
         ret = service.batch_update_descr(batch_id, description, current_user.username)
         if Status.has_failed(ret):
-            flash(_("Update did not succeed: " + ret["errortext"]))
+            msg = _("ERROR: Update did not succeed: ") + ret["errortext"]
         else:
-            flash(_("The description of this material has been updated."))
+            msg = _("Updated")
 
-    return redirect(url_for("audit.list_uploads", batch_id=batch_id))
+    return msg
 
 # =================== experimental scripting tool ======================
 

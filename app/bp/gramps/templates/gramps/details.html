@@ -8,8 +8,11 @@
 
 <style>
 startbox h2 {margin-bottom: 0;}
-div.startbox { height: 300px; }
-div.startbox > table { width: 280px; }
+div.startbox {
+    height: 300px;
+    width: 280px;
+}
+div.startbox table { width: 100%; }
 div.actions {
     border: solid 2pt silver;
     background-color: whitesmoke;
@@ -24,6 +27,11 @@ td {
 #description { 
     width: 266px;
     height: 4em;
+}
+#msg {
+    color: blueviolet;
+    font-weight: normal;
+    padding-left: 4em;
 }
 .visible { display: inline; }
 .hidden { display:none; }
@@ -45,7 +53,7 @@ function doconfirm( command, title ) { // used in commands.html
 
 {% include "flash_messages.html" %}
 
-    <div class="startbox" style="width:auto">
+    <div class="startbox" style="width: min-content">
     	<h2 class="center">{{ _("General")|title() }}</h2>
     	<table>
         	<tr>
@@ -72,18 +80,19 @@ function doconfirm( command, title ) { // used in commands.html
         	<tr>
         		<th colspan="2">{{ _("Description") }}<br>
         			<form>
-        			<input type="hidden" name="batch_id" value="{{ batch.id }}">
-        			<textarea id="description" name="description">{{ batch.description }}</textarea>
-        			<button hx-post="update_description" hx-target="#description">{{ _("Save") }}</button>
-        			</form>
+            			<input type="hidden" name="batch_id" value="{{ batch.id }}">
+            			<textarea id="description" name="description">{{ batch.description }}</textarea>
+            			<button hx-post="update_description" hx-target="#msg">{{ _("Save") }}</button>
+            			<span id="msg"></span>
+                    </form> 
                 </th>
         	</tr>
        	</table>
        	<p>
     {% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
        	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
-    {% endif %}   
-    
+    {% endif %}
+
     </div>
     
     <div class="startbox">
@@ -135,7 +144,7 @@ function doconfirm( command, title ) { // used in commands.html
             hx-get="/gramps/commands/{{batch.id}}">
         </div>
     </div>
-    <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
+    <p>&rtrif; <a href="{{request.referrer}}">{{ _("Back") }}</a></p>
 
 <!-- Startdiv ends -->
 </div>

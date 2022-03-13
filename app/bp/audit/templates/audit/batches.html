@@ -5,8 +5,15 @@
 {% from "start/s_macros.html" import state_info with context %}
 {% block body %}
 <style>
-tr > td:nth-child(1), tr > td:nth-child(5) {
+td.td-hdr {
+  background: white;
+  padding-left: 5em;
+}
+tr > td:nth-child(1), tr > td:nth-child(6) {
     white-space: nowrap;
+}
+.typedesc {
+  font-size: 100%;
 }
 </style>
     {{ super() }}
@@ -21,13 +28,19 @@ tr > td:nth-child(1), tr > td:nth-child(5) {
 	{% if not user %}
 	                <th>{{ _("User") }}</th>
 	{% endif %}
+                <th>{{ _("Batch type") }}</th>
                 <th>{{ _("Batch") }}</th>
                 <th>{{ _("Status") }} {{ state_info() }}</th>
                 <th>{{ _("Gramps file") }}</th>
                 <th>{{ _("Operations") }}</th>
            </tr>
-    {% for upload in uploads %}
-	   {% if upload.batch_id and current_user.has_role('audit') %}
+    {% if current_user.has_role('audit') %}
+       {% for upload in uploads|sort(attribute='state') %}
+          {% if loop.changed(upload.state) %}
+            <tr><td colspan="6" class="td-hdr">
+                <h3>{{upload.state|transl('state')}}</h3></td>
+            </tr>
+          {% endif %}
 	       <tr
 	      {% if batch_id == upload.batch_id %}style="background: bisque;"{% endif %}
 	       >
@@ -43,14 +56,15 @@ tr > td:nth-child(1), tr > td:nth-child(5) {
     	  {% endif -%}
 
 	           <td>
-          {% if upload.material_type != "Family Tree" %}
-                    <span class="typetag">
+          {# if upload.material_type != "Family Tree" #}
+                    <span class="typedesc">
                         {{ _(upload.material_type) }}
                     </span>
-          {% endif -%}
-                    {{upload.batch_id}}
+          {# endif -#}
+               </td>
+               <td>{{upload.batch_id}}
 	      {% if upload.count %}
-	           	   <br>– {{upload.count}}&nbsp;{{ _("persons") }}
+	           	   <br>–&nbsp;{{upload.count}}&nbsp;{{ _("persons") }}
 	      {% endif %}
 	           </td>
 
@@ -61,14 +75,14 @@ tr > td:nth-child(1), tr > td:nth-child(5) {
 	           	   {{upload.state|transl('state')}} 
 	      {% endif %}
 			{% if upload.auditors %}
-                    <br><i>{{ _("Auditor") }}:
+                    <br><i>
             	{% for auditor, ts, ts_str in upload.auditors %}
             			<span title="{{ _('Audit start date') }}">{{auditor}}&nbsp;{{ts_str}}</span>
             	{% endfor %}</i>
 			{% endif %}
 	           </td>
 
-			   <td>{{upload.xmlname}}
+			   <td>"{{upload.xmlname}}"
 			{% if upload.description %} 
                     <br><i>{{ upload.description[0:29] }}
 				{% if upload.description|length > 29  %}
@@ -96,8 +110,8 @@ tr > td:nth-child(1), tr > td:nth-child(5) {
             {% endif -%}
 	           	</td>
 	       </tr>
-        {% endif %}
-    {% endfor %}
+        {% endfor %}
+    {% endif %}
 	    </table>
     <p>&rtrif; <a href="/admin/readlog">{{ _('Display application log') }}</a></p>
     </div>

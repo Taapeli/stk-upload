@@ -449,6 +449,7 @@ class Neo4jUserDatastore(UserDatastore):
         from setups import Role
 
         profile = None
+        p = None
         with self.driver.session() as session:
             if roles:
                 cypher = Cypher.get_userprofile_w_roles

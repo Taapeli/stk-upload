@@ -29,7 +29,7 @@ logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
 from bl.base import Status
-from bl.place import PlaceBl, PlaceName
+#from bl.place import PlaceBl, PlaceName
 from bl.material import Material
 
 # from bl.dates import DateRange
@@ -72,7 +72,7 @@ from pe.neo4j.nodereaders import PlaceName_from_node
 from pe.neo4j.nodereaders import Repository_from_node
 from pe.neo4j.nodereaders import SourceBl_from_node
 
-from models.dbtree import DbTree
+#from models.dbtree import DbTree
 
 
 class Neo4jReadService(ConcreteService):
@@ -158,19 +158,19 @@ class Neo4jReadService(ConcreteService):
 
     # ------ Persons -----
 
-    def obsolete_dr_get_person_list(self, _args):
-        """Read Person data from given fw_from.
-
-        NOT USED --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_list
-
-        args = dict {use_user, fw, limit, rule, key, years}
-        """
-        persons = []
-        return {
-            "items": persons,
-            "status": Status.ERROR,
-            "statustext": "obsolete dr_get_person_list",
-        }
+    # def obsolete_dr_get_person_list(self, _args):
+    #     """Read Person data from given fw_from.
+    #
+    #     NOT USED --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_list
+    #
+    #     args = dict {use_user, fw, limit, rule, key, years}
+    #     """
+    #     persons = []
+    #     return {
+    #         "items": persons,
+    #         "status": Status.ERROR,
+    #         "statustext": "obsolete dr_get_person_list",
+    #     }
 
     def dr_inlay_person_lifedata(self, person):
         """Reads person's def. name, birth and death event into Person obj."""
@@ -1491,28 +1491,31 @@ class Neo4jReadService(ConcreteService):
                         c.title = text[:n]
                     else:
                         c.title = c.text
-                c.obj_label = list(record["o"].labels).pop()
+                o_node = record.get("o")
+                if o_node:
+                    c.obj_label, = o_node.labels
+                else:
+                    c.obj_label = "Root"
                 c.count = record.get("count", 0)
                 c.credit = record.get("commenter")
 
                 node = record["root"]
-                from bl.batch.root import Root  # temporary
-
+                #Todo: Refactor to Root_from_node()
+                from bl.batch.root import Root
                 c.root = Root.from_node(node)
-                # c.batch = record.get("batch_id")
 
-                node = record["o"]
-                c.obj_label = list(node.labels).pop()
                 if c.obj_label == "Family":
-                    c.object = FamilyBl_from_node(node)
+                    c.object = FamilyBl_from_node(o_node)
                 elif c.obj_label == "Person":
-                    c.object = PersonBl_from_node(node)
+                    c.object = PersonBl_from_node(o_node)
                 elif c.obj_label == "Place":
-                    c.object = PlaceBl_from_node(node)
+                    c.object = PlaceBl_from_node(o_node)
                 elif c.obj_label == "Source":
-                    c.object = SourceBl_from_node(node)
+                    c.object = SourceBl_from_node(o_node)
                 elif c.obj_label == "Media":
-                    c.object = MediaBl_from_node(node)
+                    c.object = MediaBl_from_node(o_node)
+                elif c.obj_label == "Root":
+                    c.object = c.root
                 else:
                     print(
                         f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'"

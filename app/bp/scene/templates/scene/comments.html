@@ -61,6 +61,9 @@
                 {% elif c.obj_label == 'Media' %}
                     <a href="/scene/media?uuid={{c.object.uuid}}" class="inlink"
                        title="{{ _('Go to commented page') }}">{{ c.object.description }}</a>
+                {% elif c.obj_label == 'Root' %}
+                    <a href="/scene/details" class="inlink"
+                       title="{{ _('Go to commented page') }}">{{c.object.id}}</a>
          		{% else %}
          			<i>{{ _('Unknown object') }}</i>
         		{% endif -%}

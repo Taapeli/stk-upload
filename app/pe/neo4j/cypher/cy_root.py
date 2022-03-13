@@ -81,12 +81,12 @@ RETURN ID(b) AS id"""
 
 #-bl.batch.root.Root.get_filename
     get_filename = """
-MATCH (u:UserProfile{username: $username}) -[:HAS_LOADED]-> (b:Root {id: $batch_id})
+MATCH (u:UserProfile{username: $username}) -[:HAS_ACCESS]-> (b:Root {id: $batch_id})
 RETURN b.filename, u.username as username"""
 
 #-bl.batch.root.Root.get_batch
     get_batch = """
-MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Root {id:$batch_id})
+MATCH (u:UserProfile{username:$username}) -[:HAS_ACCESS]-> (b:Root {id:$batch_id})
 RETURN b, u.username as username"""
      
     list_all = """
@@ -123,7 +123,7 @@ return b as batch,
 
 #-bl.batch.root.Root.get_my_batches
     get_materials_accepted = """
-match (root:Root) <-[:HAS_LOADED]- (user:UserProfile)
+match (root:Root) <-[:HAS_ACCESS]- (user:UserProfile)
 where root.state='Accepted' and root.material = $m_type
 return user, root order by root.id"""
 
@@ -189,7 +189,7 @@ WITH a LIMIT 2000
 
 #-bl.batch.root.Root.delete_batch
     delete_batch_node = """
-MATCH (:UserProfile{username:$user}) -[:HAS_LOADED]-> (c:Root{id:$batch_id})
+MATCH (:UserProfile{username:$user}) -[:HAS_ACCESS]-> (c:Root{id:$batch_id})
 DETACH DELETE c"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_obj_remove_gramps_handles

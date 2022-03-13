@@ -112,30 +112,32 @@ div#events div.scrollbox {
                 <ul>
         {% for cita in citations %}
             {% for ref in cita.source_refs %}
-                <li class="sourceDesc">
-                    <a href="/scene/source?uuid={{ref.source_obj.uuid}}"
-                       class="inlink" title="Lähteen S1207 tiedot">
-                       {{ ref.source_obj.stitle }}
-                    </a>
+                    <li class="sourceDesc">
+                        <a href="/scene/source?uuid={{ref.source_obj.uuid}}"
+                           class="inlink" title="Lähteen S1207 tiedot">
+                           {{ ref.source_obj.stitle }}
+                        </a>
                 {% if ref.repository %}
-                    – <span class="typedesc">{{ref.medium|transl('medium')}}</span>
-                    {{ ref.repository_obj.rname }}
+                        – <span class="typedesc">{{ref.medium|transl('medium')}}</span>
+                        {{ ref.repository_obj.rname }}
                 {% endif %}
-                    <ul class="citaDesc"><li>
-                        <span">{{cita.page}}</span>
+                        <ul class="citaDesc">
+                            <li>
+                                <span">{{ _("Page")}} {{cita.page}}</span>
                 {% for note in cita.notes %}
-                         –► <i>{{note.text}}</i>
-                    {% if note.url %}
-                         <a class="outlink" target="_blank" 
-                            href="{{note.url}}">{{note.url|transl('urldomain')}}</a>
-                    {% endif %}
+                                <br>–► <i>{{note.text}}</i>
+                        {% if note.url %}
+                                <a class="outlink" target="_blank" 
+                                   href="{{note.url}}">{{note.url|transl('urldomain')}}</a>
+                        {% endif %}
                 {% endfor %}
-                    </li></ul>
-                </li>
+                            </li>
+                        </ul>
+                    </li>
             {% endfor %}
+        {% endfor %}
                 </ul>
             </div>
-        {% endfor %}
         </div>
     {% endif %}
 

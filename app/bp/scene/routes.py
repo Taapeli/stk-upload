@@ -1221,10 +1221,13 @@ def show_source_page(sourceid=None):
         flash(f'{ _("Program error")}', "error")
         logger.error(msg)
 
-    #     for c in res['citations']:
-    #         for i in c.citators:
-    #             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
-    #             else:               print(f'{c} – person {i} {i.sortname}')
+    for c in res['citations']:
+        # for i in c.citators:
+        #     if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
+        #     else:               print(f'{c} – person {i} {i.sortname}')
+        if hasattr(c, "notes"):
+            for n in c.notes:
+                print(f'     {c.id} note {n.url} "{n.text}"')
     return render_template(
         "/scene/source_events.html",
         source=res["item"],
@@ -1443,11 +1446,11 @@ def batch_update_description():
     with RootUpdater("update") as service:
         ret = service.batch_update_descr(batch_id, description, current_user.username)
         if Status.has_failed(ret):
-            msg = _("Update did not succeed: " + ret["errortext"])
+            msg = _("ERROR: Update did not succeed: ") + ret["errortext"]
         else:
-            msg = _("The description of this material has been updated.")
+            msg = _("Updated")
 
-    return redirect(url_for("scene.batch_details", msg=msg))
+    return msg
 
 # ------------------------------ Menu 8: Comment --------------------------------
 
@@ -1455,10 +1458,8 @@ def batch_update_description():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_topics():
-    """List of Discussions for menu(7)"""
+    """List of Discussions for menu(7) 'Keskustelut'. """
     t0 = time.time()
-    print(f"--- {request}")
-    print(f"--- {session}")
     # Set context by owner and the data selections
     u_context = UserContext()
     # Which range of data is shown

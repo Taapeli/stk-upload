@@ -156,6 +156,7 @@ def translate(term, var_name, show_table=False):
     elif var_name == "notet":
         # Note types
         tabl = {
+            "ALTNAMES": _("Alternative names"), #"muita nimiä"
             "Cause Of Death": _("Cause Of Death"), #"kuolinsyy"
             "Citation": _("Citation"), #"viitteen lisätieto"
             "Event Note": _("Event Note"), #"tapahtuman lisätieto"
@@ -364,6 +365,7 @@ def translate(term, var_name, show_table=False):
 def list_translations():
     ''' Get list of all translations '''
     
+    key = _("Root") # To get a translation for comments page
     return_dict = {}
     keywords = {
         'nt': "Name types",
