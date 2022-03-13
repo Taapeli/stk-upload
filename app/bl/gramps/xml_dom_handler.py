@@ -52,7 +52,7 @@ from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
 from .batchlogger import LogItem
-
+from pe.neo4j.util import IsotammiId
 
 
 
@@ -192,9 +192,11 @@ class DOM_handler:
         counter = 0
     
         with shareds.driver.session() as session:
+            ids = IsotammiId(session, )
             for dom_nodes in get_next(nodes, chunk_max_size):
                 chunk_size = len(dom_nodes)
                 #isotammi_id_list = session.read_transaction(..., amount=chunk_size)
+                .get_new
                 session.write_transaction(transaction_function, 
                                           nodes=dom_nodes)
 #                                          iids=isotammi_id_list ...)
