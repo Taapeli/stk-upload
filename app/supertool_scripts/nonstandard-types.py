@@ -106,19 +106,10 @@ def check(obj, objtype, name, TypeClass):
     classname = TypeClass.__name__
     standard_values = get_standard_values(TypeClass)
     typename = objtype.xml_str()
-    if classname.startswith("EventRole"):
-<<<<<<< Upstream, based on branch 'master' of ssh://git@github.com/Taapeli/stk-upload.git
-        print("standard_values",standard_values)
-        print("objtype",typename)
-=======
-        #print("standard_values",standard_values)
-        print("objtype '%s'" % typename)
->>>>>>> e2195bb Nonstandard types update
     if typename not in standard_values:
         types[classname][typename] += 1
     return
     if value[0] == TypeClass.CUSTOM:
-        #print(TypeClass._S2IMAP)
         intvalue = TypeClass._S2IMAP.get(value[1])
         if intvalue is not None:
             t = TypeClass(intvalue)
