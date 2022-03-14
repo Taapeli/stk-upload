@@ -24,6 +24,7 @@ Created on 28.11.2019
 """
 # blacked 2021-07-25 JMä
 import csv
+import json
 import time
 import logging
 from io import StringIO, BytesIO
@@ -544,3 +545,47 @@ def save_loaded_csv(filename, subj):
             text=_("Missing proper column title: ") + str(e),
         )
     return render_template("/talletettu.html", text=status, uri=dburi)
+
+
+
+#===============================================================================================================
+#
+# White lists for types
+#
+#===============================================================================================================
+WHITELIST_DIR = "instance/whitelists"
+
+@bp.route("/audit/manage_whitelists", methods=["GET"])
+@login_required
+@roles_accepted("audit")
+def manage_whitelists():
+    return render_template("/audit/whitelists.html")
+
+@bp.route("/audit/get_whitelist/<scope>", methods=["GET"])
+@login_required
+@roles_accepted("audit")
+def get_whitelist(scope):
+    try:
+        return open(f"{WHITELIST_DIR}/{scope}").read().strip()
+    except:
+        return ""
+
+@bp.route("/audit/get_whitelist_scopes", methods=["GET"])
+@login_required
+@roles_accepted("audit")
+def get_whitelist_scopes():
+    try:
+        return {"scopes":sorted(os.listdir(WHITELIST_DIR))}
+    except:
+        return []
+
+@bp.route("/audit/set_whitelist", methods=["POST"])
+@login_required
+@roles_accepted("audit")
+def set_white_list():
+    data = json.loads(request.data)
+    scope = data.get("scope")
+    with open(f"{WHITELIST_DIR}/{scope}","w") as f:
+        print(data.get("whitelist",""), file=f)
+    return "ok"
+

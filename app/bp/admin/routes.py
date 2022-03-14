@@ -658,3 +658,4 @@ def delete_accesses():
 def build_indexes():
     res = DataAdmin.build_free_text_search_indexes()
     return render_template("/admin/free_text_indexes.html", res=res)
+
