@@ -287,12 +287,13 @@ def xml_to_stkbase(batch):  # :Root):
         handler.batch = batch
         batch.mediapath = handler.get_mediapath_from_header()
     
-        metadata = handler.get_metadata_from_header()
-        print("gramps_loader.xml_to_stkbase: metadata:", metadata)
-        if metadata:
-            if metadata[0]:
-                batch.material_type = metadata[0]
-                print(f"- got material type {batch.material_type} {metadata[1]!r}")
+        meta_type, meta_desc = handler.get_metadata_from_header()
+        print("gramps_loader.xml_to_stkbase: metadata:", (meta_type, meta_desc))
+        if meta_type:
+            batch.material_type = meta_type
+        if meta_desc:
+            batch.description = meta_desc
+        print(f"- got material type {meta_type!r}, descr {meta_desc!r}")
         if batch.material_type is None:
             batch.material_type = DEFAULT_MATERIAL
             print(f"- default material type {batch.material_type}")
