@@ -293,7 +293,7 @@ def xml_to_stkbase(batch):  # :Root):
             batch.material_type = meta_type
         if meta_desc:
             batch.description = meta_desc
-        print(f"- got material type {meta_type!r}, descr {meta_desc!r}")
+        print(f"gramps_loader.xml_to_stkbase: got material type={meta_type!r}, desc={meta_desc!r}")
         if batch.material_type is None:
             batch.material_type = DEFAULT_MATERIAL
             print(f"- default material type {batch.material_type}")

@@ -1445,6 +1445,7 @@ class Neo4jReadService(ConcreteService):
 
     # ------ Comment -----
 
+
     def dr_get_topic_list(self, user, material, fw_from, limit):
         """Reads Comment objects from user batch or common data using context.
 
@@ -1452,20 +1453,11 @@ class Neo4jReadService(ConcreteService):
         :param: fw_from The timestamp from which the list is requested
         :param: limit   How many items per page
         """
+        from bl.batch.root import Root
 
-        with self.driver.session(default_access_mode="READ") as session:
-            result = run_cypher_batch(
-                session,
-                CypherComment.get_topics,
-                user,
-                material,
-                start_timestamp=fw_from,
-                limit=limit,
-            )
-
-            topics = []
-            for record in result:
-                # <Record
+        def record_to_topics(result):
+            res = []
+            for record in result: # <Record
                 #    o=<Node id=189486 labels=frozenset({'Person'})
                 #        properties={...}>
                 #    c=<Node id=189551 labels=frozenset({'Comment'})
@@ -1477,7 +1469,6 @@ class Neo4jReadService(ConcreteService):
                 #            'material': 'Family Tree', 'state': 'Candidate',
                 #            'id': '2021-09-16.001', 'user': 'juha', ...}>
                 # >
-
                 node = record["c"]
                 c = Comment_from_node(node)
                 # c.label = list(node.labels).pop()
@@ -1498,12 +1489,9 @@ class Neo4jReadService(ConcreteService):
                     c.obj_label = "Root"
                 c.count = record.get("count", 0)
                 c.credit = record.get("commenter")
-
                 node = record["root"]
                 #Todo: Refactor to Root_from_node()
-                from bl.batch.root import Root
                 c.root = Root.from_node(node)
-
                 if c.obj_label == "Family":
                     c.object = FamilyBl_from_node(o_node)
                 elif c.obj_label == "Person":
@@ -1518,15 +1506,44 @@ class Neo4jReadService(ConcreteService):
                     c.object = c.root
                 else:
                     print(
-                        f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'"
-                    )
+                        f"CommentReader.read_my_comment_list: Discarded referring object '{c.obj_label}'")
                     next
-                topics.append(c)
+                res.append(c)
+            return res
+            # --- end record_to_topics()
 
+
+        with self.driver.session(default_access_mode="READ") as session:
+            # Comment topics for batch objects
+            result = run_cypher_batch(
+                session,
+                CypherComment.get_topics,
+                user,
+                material,
+                start_timestamp=fw_from,
+                limit=limit,
+            )
+            topics_objs = record_to_topics(result)
+
+            # Comment topics for batch itself
+            result = run_cypher_batch(
+                session,
+                CypherComment.get_topics_for_root,
+                user,
+                material,
+                start_timestamp=fw_from,
+                limit=limit,
+            )
+            topics_root = record_to_topics(result)
+            #print(f"#Neo4jReadService.dr_get_topic_list: objects {len(topics_objs)}, root {len(topics_root)}")
+
+            # Sort concatenated data and truncate by limit
+            topics = topics_root + topics_objs
+            topics = sorted(topics, key=lambda x: x.timestamp, reverse=True)[:limit]
             if topics:
                 return {"topics": topics, "status": Status.OK}
             else:
-                return {"topics": topics, "status": Status.NOT_FOUND}
+                return {"topics": [], "status": Status.NOT_FOUND}
 
     # ------ Start page statistics -----
 

@@ -170,7 +170,7 @@ def audit_pick(batch_id=None):
         timestamp = root.timestamp_str()
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
-        can_browse = (#root.state == State.ROOT_AUDIT_REQUESTED or
+        can_browse = (root.state == State.ROOT_AUDIT_REQUESTED or
                       root.state == State.ROOT_AUDITING or 
                       root.state == State.ROOT_ACCEPTED or 
                       root.state == State.ROOT_REJECTED)

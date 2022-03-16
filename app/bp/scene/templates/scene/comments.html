@@ -74,7 +74,7 @@
 
        {% if user_context.is_auditor %}
                 <td class="Auditor">
-                	<span class="typedesc">{{ _(c.root.state|upper) }}</span>
+                	<span class="typedesc">{{ _(c.root.state) }}</span>
                     {{c.root.id}}
                 	<i>{{c.root.user}}</i>
                 {% if c.root.description %}
