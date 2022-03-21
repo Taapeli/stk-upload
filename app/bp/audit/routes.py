@@ -178,8 +178,11 @@ def audit_pick(batch_id=None):
                      root.state == State.ROOT_REJECTED or
                      root.state == State.ROOT_AUDITING and not i_am_auditor)
         can_accept = (i_am_auditor and root.state  == State.ROOT_AUDITING)
-        can_remove = (total == 0 \
-                      and root.state in [State.ROOT_ACCEPTED, State.ROOT_REJECTED])
+        can_reject = (root.state == State.ROOT_AUDITING )
+        if total == 0:
+            can_remove = root.state in [State.ROOT_ACCEPTED, State.ROOT_REJECTED]
+        else:
+            can_remove = root.state == State.ROOT_REJECTED
         print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
               f"can_browse={can_browse} can_start={can_start} "
               f"can_accept={can_accept} can_remove={can_remove}")
@@ -196,6 +199,7 @@ def audit_pick(batch_id=None):
         can_start=can_start,
         can_accept=can_accept,
         can_remove=can_remove,
+        can_reject=can_reject,
         label_nodes=labels,
         total=total,
         time=timestamp,

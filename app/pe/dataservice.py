@@ -62,13 +62,13 @@ class DataService:
         logger.debug(f'#~~~{self.idstr} init')
         # Find <class 'pe.neo4j.*service'> and initialize it
         self.service_name = service_name
-        service_class = shareds.dataservices.get(self.service_name)
-        if not service_class:
+        self.service_class = shareds.dataservices.get(self.service_name)
+        if not self.service_class:
             raise KeyError(
                 f"pe.dataservice.DataService.__init__: name {self.service_name} not found"
             )
         # Initiate selected service object
-        self.dataservice = service_class(shareds.driver)
+        self.dataservice = self.service_class(shareds.driver)
         self.old_tx = tx
 
         if user_context:

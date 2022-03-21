@@ -31,7 +31,6 @@ from flask import session, request
 from flask_security import current_user
 from urllib.parse import unquote_plus
 
-#from bl.root import State
 from bl.material import Material, MATERIAL_BATCH, MATERIAL_COMMON
 
 
@@ -172,21 +171,25 @@ class UserContext:
         # print(f"#Material.get({var_name}) = {value!r}")
         return value
 
-    def is_common(self):
-        """ Tells, if current material may be formed from multiple batches.
+    def is_common(self) -> bool:
+        """ Tells, if current material is available for all users.
 
-            - True, if current material may have multiple batches
-            - False, if current material is limited by batch_id
+            - True,  if current material is included in accepted materials
+            - False, if current material is a batch of current researcher,
+                     (where also privacy restricted data may be shown)
+            #TODO: The privacy rules must be defined more accurately?
         """
-        return self.material.breed == MATERIAL_COMMON
+        from bl.batch.root import State
+        return self.material.breed == MATERIAL_COMMON or \
+            self.material.state == State.ROOT_ACCEPTED
 
-    def use_case(self):
-        """ Return current use case (owner choice) as code.
+    def use_case(self) -> str:
+        """ Return current use case ("common" or "batch") as string.
         """
-        if self.material.batch_id:
-            return MATERIAL_BATCH  # Selected candidate or approved batch
-        else:
+        if self.is_common():
             return MATERIAL_COMMON  # Approved data
+        else:
+            return MATERIAL_BATCH  # Selected candidate or approved batch
 
     def batch_user(self):
         """ Return current user id, if my candidate data is chosen. """
