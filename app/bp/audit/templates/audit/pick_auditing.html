@@ -130,20 +130,29 @@ table     { width: 750px; }
                    <input type="submit" value="{{ _('Return') }}" name="cancel" /> 
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse"
     {% if not can_browse %} disabled {% endif -%} />
-                   <input type="submit" value="{{ _('Download file') }}" name="download" /> 
+                   <input type="submit" value="{{ _('Download file') }}" name="download" 
+    {% if not can_browse %} disabled {% endif -%} />
+
                    <span style="font-size:large; color:gray;"> | </span>
-{% if total %}
+
                    <input type="submit" name="start"
-    {% if root.state == "Rejected" %}value="{{ _('Start auditing again') }}"
-    {% else %} value="{{ _('Start auditing') }}"{% endif %}
+    {% if root.state != "Rejected" %}value="{{ _('Start auditing') }}"
+    {% else %}                       value="{{ _('Start auditing again') }}"
+    {% endif %}
     {% if not can_start %} disabled {% endif -%} />
+{% if i_am_auditor %}
                    <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
 	{% if not can_accept %} disabled {% endif %} />
                    <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
 	{% if not can_accept %} disabled {% endif %} />
-{% else %}
+                   <input type="submit" value="{{ _('Hold') }}" name="hold"
+    {% if not can_reject %} disabled {% endif %} />
+{% endif -%}
                    <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
-	{% if not can_remove %} disabled {% endif %} />
+	{% if not can_reject %} disabled {% endif %} />
+{% if i_am_auditor %}
+                   <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
+    {% if not can_remove %} disabled {% endif %} />
 {% endif -%}
                 </div>
             </form>

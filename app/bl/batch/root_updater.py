@@ -138,6 +138,15 @@ class RootUpdater(DataService):
                                                     allowed_states)
         return res
 
+    def remove_auditor(self, batch_id, auditor_username):
+        """ Mark auditor for this data batch and set status. """
+        from .root import State
+
+        new_state = State.ROOT_AUDIT_REQUESTED
+        res = self.dataservice.ds_batch_remove_auditor(batch_id, auditor_username, 
+                                                       new_state)
+        return res
+
     def batch_update_descr(self, batch_id, description, username):
         """ Update Root.description. """
         from bl.base import Status

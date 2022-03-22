@@ -170,22 +170,17 @@ def audit_pick(batch_id=None):
         timestamp = root.timestamp_str()
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
-        can_browse = (root.state == State.ROOT_AUDIT_REQUESTED or
-                      root.state == State.ROOT_AUDITING or 
-                      root.state == State.ROOT_ACCEPTED or 
-                      root.state == State.ROOT_REJECTED)
-        can_start = (root.state == State.ROOT_AUDIT_REQUESTED or
-                     root.state == State.ROOT_REJECTED or
-                     root.state == State.ROOT_AUDITING and not i_am_auditor)
-        can_accept = (i_am_auditor and root.state  == State.ROOT_AUDITING)
-        can_reject = (root.state == State.ROOT_AUDITING )
-        if total == 0:
-            can_remove = root.state in [State.ROOT_ACCEPTED, State.ROOT_REJECTED]
-        else:
-            can_remove = root.state == State.ROOT_REJECTED
+        
+        can_browse = root.state_transition("browse")
+        can_start = root.state_transition("start", i_am_auditor)
+        can_accept = root.state_transition("accept")
+        can_browse = root.state_transition("browse")
+        can_browse = root.state_transition("browse")
+        can_hold = root.state_transition("hold")
+        can_reject = root.state_transition("reject")
         print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
               f"can_browse={can_browse} can_start={can_start} "
-              f"can_accept={can_accept} can_remove={can_remove}")
+              f"can_accept={can_accept} can_reject={can_reject}")
     except Exception as e:
         error_print("audit_pick", e)
         return redirect(url_for("audit.list_uploads"))
@@ -198,8 +193,8 @@ def audit_pick(batch_id=None):
         can_browse=can_browse,
         can_start=can_start,
         can_accept=can_accept,
-        can_remove=can_remove,
-        can_reject=can_reject,
+        #can_remove=can_reject,
+        can_reject=can_hold,
         label_nodes=labels,
         total=total,
         time=timestamp,
@@ -256,7 +251,8 @@ def audit_selected_op():
                 msg = _("Audit batch accepted: ") + batch_id
     
             elif operation == "reject":
-                # 7. Move from "Auditing" to "Rejected" state
+                # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
+                res = batch_service.remove_auditor(batch_id, owner_id)
                 res = batch_service.change_state(batch_id, 
                                                  owner_id, 
                                                  State.ROOT_REJECTED)

@@ -188,9 +188,25 @@ class Neo4jUpdateService(ConcreteService):
            We also check that the state is expected.
         """
         result = self.tx.run(
-            CypherRoot.batch_set_auditor, bid=batch_id, audi=auditor_user, states=old_states
+            CypherRoot.batch_set_auditor, 
+            bid=batch_id, audi=auditor_user, states=old_states
         )
         uniq_id = result.single()[0]
+        return {"status": Status.OK, "identity": uniq_id}
+
+    def ds_batch_remove_auditor(self, batch_id, auditor_user, new_state):
+        """Updates Batch node selected by Batch id and user.
+           We also check that the state is expected.
+        """
+        result = self.tx.run(
+            CypherRoot.batch_remove_auditor, 
+            bid=batch_id, audi=auditor_user, new_state=new_state
+        )
+        uniq_id = result.single()[0]
+        print("#ds_batch_remove_auditor: TODO create relation (me:UserProfile) -[:DID_AUDIT]-> (batch:Root)")
+        # result = self.tx.run(
+        #     CypherRoot.batch_old_auditor, bid=batch_id, audi=auditor_user
+        # )
         return {"status": Status.OK, "identity": uniq_id}
 
     # ----- Common objects -----

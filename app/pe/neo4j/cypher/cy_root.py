@@ -74,10 +74,24 @@ RETURN ID(b) AS id"""
 MATCH (b:Root {id: $bid}) WHERE b.state IN $states
 MATCH (audi:UserProfile {username: $audi})
     SET b.state = "Auditing"
-    MERGE (audi) -[:HAS_ACCESS]-> (b)
+    //MERGE (audi) -[:HAS_ACCESS]-> (b)
     MERGE (audi) -[r:DOES_AUDIT]-> (b)
     SET r.timestamp = timestamp()
 RETURN ID(b) AS id"""
+
+#TODO: parameter new_state = "Audit Requested"
+#TODO: Create relation DID_AUDIT
+    batch_remove_auditor = """
+MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
+OPTIONAL MATCH (oth:UserProfile) -[:DOES_AUDIT]-> (b)
+    WHERE oth.username <> $audi
+OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[oldr:DOES_AUDIT]-> (b)
+//MERGE (audi) -[newr:DID_AUDIT]-> (b)
+//SET newr.timestamp = timestamp()
+WITH b, oth, audi, oldr, COUNT(oth) AS oth_cnt
+  SET (CASE WHEN oth_cnt = 0 THEN b END).state = $new_state
+  DELETE oldr
+RETURN b, oth, audi, oth_cnt"""
 
 #-bl.batch.root.Root.get_filename
     get_filename = """
