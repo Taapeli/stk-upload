@@ -175,12 +175,13 @@ def audit_pick(batch_id=None):
         can_start = root.state_transition("start", i_am_auditor)
         can_accept = root.state_transition("accept")
         can_browse = root.state_transition("browse")
-        can_browse = root.state_transition("browse")
+        can_remove = root.state_transition("remove")
         can_hold = root.state_transition("hold")
         can_reject = root.state_transition("reject")
         print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
               f"can_browse={can_browse} can_start={can_start} "
-              f"can_accept={can_accept} can_reject={can_reject}")
+              f"can_accept={can_accept} can_remove={can_remove} "
+              f"can_reject={can_reject}")
     except Exception as e:
         error_print("audit_pick", e)
         return redirect(url_for("audit.list_uploads"))
@@ -190,6 +191,7 @@ def audit_pick(batch_id=None):
         user=username, 
         root=root,
         basename=os.path.basename(root.file),
+        i_am_auditor=i_am_auditor,
         can_browse=can_browse,
         can_start=can_start,
         can_accept=can_accept,
