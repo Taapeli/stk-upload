@@ -105,9 +105,19 @@ def audit_research_op(oper=None, batch_id=None):
         if operation == "request":
             new_state = State.ROOT_AUDIT_REQUESTED
             msg = _("Audit request for ") + batch_id
+        elif operation == "start":
+            new_state = State.ROOT_AUDITING
+            msg = _("Start auditing ") + batch_id
+        elif operation == "accept":
+            new_state = State.ROOT_ACCEPTED
+            msg = _("Accept auditing of ") + batch_id
         elif operation == "withdraw":
-            new_state = State.ROOT_CANDIDATE
+            new_state = State.ROOT_AUDIT_REQUESTED
             msg = _("Withdrawing audit request for ") + batch_id
+        elif operation == "reject":
+            new_state = State.ROOT_REJECTED
+            msg = _("Reject ") + batch_id
+        # operation == "delete" -> delete_approved?
         else:
             return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
@@ -170,23 +180,19 @@ def audit_pick(batch_id=None):
         timestamp = root.timestamp_str()
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
-        
+        print(f"bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, "
+              f"auditor={i_am_auditor}, user={current_user.username}")
         can_browse = root.state_transition("browse")
-        can_start = root.state_transition("start", i_am_auditor)
-        can_accept = root.state_transition("accept")
-        can_browse = root.state_transition("browse")
-        can_remove = root.state_transition("remove")
-        can_hold = root.state_transition("hold")
-        can_reject = root.state_transition("reject")
+        can_start = root.state_transition("start")
+        can_accept = root.state_transition("accept") and i_am_auditor
+        can_delete = root.state_transition("delete")
         print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
-              f"can_browse={can_browse} can_start={can_start} "
-              f"can_accept={can_accept} can_remove={can_remove} "
-              f"can_reject={can_reject}")
+              f"can browse={can_browse} start={can_start} "
+              f"accept/withdraw/reject={can_accept} delete={can_delete}")
     except Exception as e:
         error_print("audit_pick", e)
         return redirect(url_for("audit.list_uploads"))
 
-    print(f"bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, user={current_user.username}")
     return render_template("/audit/pick_auditing.html",
         user=username, 
         root=root,
@@ -194,9 +200,7 @@ def audit_pick(batch_id=None):
         i_am_auditor=i_am_auditor,
         can_browse=can_browse,
         can_start=can_start,
-        can_accept=can_accept,
-        #can_remove=can_reject,
-        can_reject=can_hold,
+        can_accept=can_accept, # + withdraw and reject
         label_nodes=labels,
         total=total,
         time=timestamp,

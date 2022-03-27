@@ -142,38 +142,28 @@ class Root(NodeObject):
         except Exception:
             return ""
 
-    def state_transition(self, input_oper:str, i_am_auditor=True):
+    def state_transition(self, oper:str) -> bool:
         """ Allowed auditor operations and state transitions.
 
         Some operations may be depending on i_am_auditor (if you are
         registered as auditor for this batch).
 
-        For current (self.state, input_oper) returns one of following -
-            1) next allowed state
-            2) True, if allowed operation but no state change
-            3) False, if not allowed
+        For current (self.state, oper) returns one of following -
+            - True, if allowed operation
+            - False, if not allowed
         """
         # Allowed transitions
-        next_state = { # state/input_oper: next_state
-            State.ROOT_CANDIDATE+"+request":    State.ROOT_AUDIT_REQUESTED,
-            State.ROOT_CANDIDATE+"+delete":     State.ROOT_DELETED,
-            State.ROOT_AUDIT_REQUESTED+"+start":State.ROOT_AUDITING,
-            State.ROOT_AUDIT_REQUESTED+"+browse": True,
-            State.ROOT_AUDITING+"+accept":      State.ROOT_ACCEPTED,
-            State.ROOT_AUDITING+"+hold":        State.ROOT_AUDIT_REQUESTED,
-            State.ROOT_AUDITING+"+reject":      State.ROOT_REJECTED,
-            State.ROOT_AUDITING+"+browse":      True,
-            State.ROOT_AUDITING+"+start":
-                State.ROOT_AUDITING if not i_am_auditor else False,
-            State.ROOT_ACCEPTED+"+start":       State.ROOT_AUDITING,
-            State.ROOT_ACCEPTED+"+browse":      True,
-            State.ROOT_REJECTED+"+start":       State.ROOT_AUDITING,
-            State.ROOT_REJECTED+"+browse":      True,
-            State.ROOT_REJECTED+"+delete":      State.ROOT_DELETED,
-        }
-        key = self.state +"+"+ input_oper
-        ret = next_state.get(key, False)
-        print(f"#bl.batch.root.Root.state_transition: {key} -> {ret}")
+        if self.state == State.ROOT_AUDIT_REQUESTED:
+            ret = oper in ["browse", "start"]
+        elif self.state == State.ROOT_AUDITING:
+            # Presuming you are one of auditors. (withdraw/reject not used)
+            ret = oper in ["browse", "accept", "withdraw", "reject"]
+        elif self.state == State.ROOT_ACCEPTED:
+            ret = oper in ["browse", "start"]
+        elif self.state == State.ROOT_REJECTED:
+            ret = oper in ["browse", "start", "delete"]
+
+        # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
         return ret
         
 
