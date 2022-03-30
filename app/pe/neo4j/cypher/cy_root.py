@@ -100,8 +100,8 @@ RETURN b.filename, u.username as username"""
 
 #-bl.batch.root.Root.get_batch
     get_batch = """
-MATCH (u:UserProfile{username:$username}) -[:HAS_ACCESS]-> (b:Root {id:$batch_id})
-RETURN b, u.username as username"""
+MATCH (u:UserProfile{username:$username}) -[r:HAS_ACCESS|DOES_AUDIT]-> (b:Root {id:$batch_id})
+RETURN b, type(r) AS rel_type"""
      
     list_all = """
 MATCH (b:Root) 

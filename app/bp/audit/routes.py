@@ -295,7 +295,8 @@ def audit_batch_download(batch_id, username):
 
         logger.info(f"--> bp.audit.routes.audit_batch_download u={username} b={batch_id} {xname}")
         syslog.log(type="Auditor xml download", 
-                   batch=batch_id, by=username, file=xname)
+                   batch=batch_id, by=f"{username} ({batch.rel_type})",
+                   file=xname)
 
         return send_from_directory(abs_folder, xname,
             mimetype="application/gzip",

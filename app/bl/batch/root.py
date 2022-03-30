@@ -280,14 +280,15 @@ class Root(NodeObject):
 
     @staticmethod
     def get_batch(username: str, batch_id: str):
-        # type: (str, str) -> Optional[Root]
+        # Returns None or Root object with user and rel_type fields
         with shareds.driver.session() as session:
             record = session.run(
                 CypherRoot.get_batch, username=username, batch_id=batch_id
             ).single()
             if record:
                 root = Root.from_node(record['b'])
-                root.user = record.get('username')
+                root.user = username
+                root.rel_type = record.get('rel_type')
                 return root
         return None
 

@@ -60,13 +60,13 @@ from models import syslog, util #, loadfile
 
 from ui.batch_ops import RESEARCHER_FUNCTIONS, RESEARCHER_OPERATIONS
 from ui.context import UserContext
-from ui.util import error_print, stk_logger
+from ui.util import stk_logger #, error_print
 from ..admin import uploads
 
 from . import bp
 from bl.gramps import gramps_loader
 from bl.gramps import gramps_utils
-from bl.stats import get_stats
+#from bl.stats import get_stats
 
 # @bp.route("/gramps")
 # def obsolete_gramps_index():
@@ -560,8 +560,8 @@ def run_supertool(batch_id):
     if supertool_runner:
         lang = session.get("lang","")
         print("lang",lang)
-        msgs = gramps_utils.run_supertool(supertool_runner, lang, current_user.username, batch_id, batch.xmlname, scriptfile, outputfile)
+        _msgs = gramps_utils.run_supertool(supertool_runner, lang, current_user.username, batch_id, batch.xmlname, scriptfile, outputfile)
     else:
-        msgs = {}
+        _msgs = {}
     logger.info(f'bp.gramps.routes.run_supertool f="{os.path.basename(batch.xmlname)}"')
     return redirect(url_for("gramps.batch_details", batch_id=batch_id))
