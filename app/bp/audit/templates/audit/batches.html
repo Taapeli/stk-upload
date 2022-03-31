@@ -58,7 +58,7 @@ tr > td:nth-child(1), tr > td:nth-child(6) {
 	           <td>
           {# if upload.material_type != "Family Tree" #}
                     <span class="typedesc">
-                        {{ _(upload.material_type) }}
+                        {{ _(upload.material_type|transl('material')) }}
                     </span>
           {# endif -#}
                </td>

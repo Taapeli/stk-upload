@@ -134,16 +134,24 @@ class RootUpdater(DataService):
         allowed_states = [State.ROOT_AUDIT_REQUESTED,
                           State.ROOT_AUDITING,
                           State.ROOT_REJECTED]
-        res = self.dataservice.ds_batch_set_auditor(batch_id, auditor_username, 
+        res = self.dataservice.ds_batch_set_auditor(batch_id,
+                                                    auditor_username, 
                                                     allowed_states)
         return res
 
     def remove_auditor(self, batch_id, auditor_username):
-        """ Mark auditor for this data batch and set status. """
+        """ Mark auditor for this data batch and set status.
+        
+            If no other is auditing, the status is changed.
+        
+            Returns {status, identity, d_days}, where identity = Root.id
+            and d_days duration of (last) audition in days.
+        """
         from .root import State
 
         new_state = State.ROOT_AUDIT_REQUESTED
-        res = self.dataservice.ds_batch_remove_auditor(batch_id, auditor_username, 
+        res = self.dataservice.ds_batch_remove_auditor(batch_id,
+                                                       auditor_username, 
                                                        new_state)
         return res
 

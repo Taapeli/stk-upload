@@ -195,19 +195,40 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK, "identity": uniq_id}
 
     def ds_batch_remove_auditor(self, batch_id, auditor_user, new_state):
-        """Updates Batch node selected by Batch id and user.
+        """Updates Root node and relation from UserProfile.
            We also check that the state is expected.
         """
-        result = self.tx.run(
+        record = self.tx.run(
             CypherRoot.batch_remove_auditor, 
-            bid=batch_id, audi=auditor_user, new_state=new_state
-        )
-        uniq_id = result.single()[0]
-        print("#ds_batch_remove_auditor: TODO create relation (me:UserProfile) -[:DID_AUDIT]-> (batch:Root)")
-        # result = self.tx.run(
-        #     CypherRoot.batch_old_auditor, bid=batch_id, audi=auditor_user
-        # )
-        return {"status": Status.OK, "identity": uniq_id}
+            bid=batch_id, 
+            audi=auditor_user, 
+            new_state=new_state,
+        ).single()
+        # Got root node, auditor node and the removed DOES_AUDIT relation
+        # creation time from (audi:UserProfile) -[r:DOES_AUDIT]-> (b:Root)
+        node_root = record["b"]
+        node_audi = record["audi"]
+        root_id = node_root.id
+        audi_id = node_audi.id
+        oldtime = record["time"] # = r.timestamp
+        print("#ds_batch_remove_auditor: "
+              f"Removed ({audi_id}:{node_audi['username']}) "
+              f"-[DOES_AUDIT time {oldtime}]-> ({root_id}:Root)")
+
+        record = self.tx.run(
+            CypherRoot.link_old_auditor, 
+            uid=root_id, 
+            audi_id=audi_id,
+            fromtime = oldtime,
+        ).single()
+        rel = record[0] # Relationship object
+        newtime = rel["timestamp"]
+        d_days = (newtime-oldtime) / (1000*60*60*24)
+        print("#ds_batch_remove_auditor: "
+              f"Added ({audi_id}:{node_audi['username']}) "
+              f"-[DID_AUDIT time {oldtime}..{newtime}]-> (Root)")
+
+        return {"status": Status.OK, "identity": root_id, "d_days": d_days}
 
     # ----- Common objects -----
 

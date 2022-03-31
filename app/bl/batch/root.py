@@ -446,6 +446,7 @@ class Root(NodeObject):
             #    label='Person'
             #    cnt=6
             #    auditors=['juha',1620570475208]
+            #    prev_audits=['joku',1648739430163,1630402986262]
             #    has_access=['jpek']
             # >
             if node is None or \
@@ -458,8 +459,14 @@ class Root(NodeObject):
                 b.has_access = record['has_access'] # Users granted special access
                 b.auditors = []
                 for au_user, ms in record["auditors"]:
+                    # [username, time_start]
                     if au_user:
-                        b.auditors.append([au_user, ms, format_ms_timestamp(ms)])
+                        b.auditors.append([au_user, ms]) #, format_ms_timestamp(ms)])
+                b.prev_audits = []
+                for au_user, ms1, ms0 in record["prev_audits"]:
+                    # [username, time_end, time_start]
+                    if au_user:
+                        b.prev_audits.append([au_user, ms1, ms0])
             label = record.get("label", "-")
             if label == "Stats":
                 continue

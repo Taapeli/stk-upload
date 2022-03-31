@@ -86,12 +86,18 @@ MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
 OPTIONAL MATCH (oth:UserProfile) -[:DOES_AUDIT]-> (b)
     WHERE oth.username <> $audi
 OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[oldr:DOES_AUDIT]-> (b)
-//MERGE (audi) -[newr:DID_AUDIT]-> (b)
-//SET newr.timestamp = timestamp()
-WITH b, oth, audi, oldr, COUNT(oth) AS oth_cnt
+WITH b, oth, audi, oldr, oldr.timestamp AS time, COUNT(oth) AS oth_cnt
   SET (CASE WHEN oth_cnt = 0 THEN b END).state = $new_state
   DELETE oldr
-RETURN b, oth, audi, oth_cnt"""
+RETURN b, oth, audi, oth_cnt, time"""
+    link_old_auditor = """
+MATCH (b:Root) WHERE ID(b) = $uid
+MATCH (o:Role) <-[:HAS_ROLE]- (us:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
+    WHERE o.name = "audit" and id(audi) = $audi_id
+MERGE (audi) -[newr:DID_AUDIT]-> (b)
+SET newr.timestamp = timestamp()
+SET newr.timefrom = $fromtime
+RETURN newr"""
 
 #-bl.batch.root.Root.get_filename
     get_filename = """
@@ -167,10 +173,12 @@ optional match (acc:UserProfile) -[:HAS_ACCESS]-> (b)
     where not up.username = acc.username
 optional match (b) --> (x)
 optional match (ap:UserProfile) -[ar:DOES_AUDIT]-> (b)
+optional match (pap:UserProfile) -[par:DID_AUDIT]-> (b)
 return up as profile, b as root,
     labels(x)[0] as label, 
     count(x) as cnt,
     collect(distinct [ap.username,ar.timestamp]) as auditors,
+    collect(distinct [pap.username,par.timestamp,par.timefrom]) as prev_audits,
     collect(distinct acc.username) as has_access
 '''
 

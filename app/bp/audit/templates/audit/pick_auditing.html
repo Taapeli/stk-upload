@@ -73,10 +73,17 @@ table     { width: 750px; }
           <div class="box" style="background-color: seashell;">
             <div>{{ _("Current auditors") }}</div>
             <p>
-            {% for auditor, ts, ts_str in root.auditors %}
+            {% for auditor, ts in root.auditors %}
                <b><a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a></b>
-               <span title="{{ _('Audit start date') }}">{{ts_str}}</span>
+               <span title="{{ _('Audit start date') }}">{{ts|format_ts}}</span>
+            {% endfor %}
+            {% for auditor, ts1, ts0 in root.prev_audits %}
+               <a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
+                    >{{auditor}}</a>
+               <span title="{{ _('Ended audit duration') }}" style="color:gray;">
+                  {{ts0|format_ts}} – {{ts1|format_ts}}
+               </span>
             {% endfor %}
             </p>
           </div>

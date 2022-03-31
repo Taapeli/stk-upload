@@ -214,59 +214,73 @@ def audit_pick(batch_id=None):
 def audit_selected_op():
     """ Select Auditor operation for Batch.
     Auditor operations:
-        5. - "start"     Audit request -> Auditing
-        6. - "accept"    Auditing -> Accepted
-        7. - "reject"    Auditing -> Rejected
-        x. - "cancel"
+        0a "browse"    - no change
+        0b "download"  - no change
+        5. "start"     Audit request -> Auditing
+        6. "accept"    Auditing -> Accepted
+        7. "reject"    Auditing -> Rejected
+        8. "withdraw"  Auditing -> Audit requested
+        9. "delete"    Rejected -> (does not exist)
+        x. "cancel"
     """
     try:
         u_context = UserContext()
         _breed, state, material_type, batch_id = u_context.material.get_current()
-        owner_id = u_context.material.request_args.get("user")
-        auditor = current_user.username
+        user_owner = u_context.material.request_args.get("user")
+        user_audit = current_user.username
         operation = "cancel"
 
         if request.form.get("browse"):
+            # 0a. Go to scene views
             args = {"batch_id": batch_id, "material_type": material_type, "state": state}
             return redirect("/scene/material/batch?" + urllib.parse.urlencode(args))
         elif request.form.get("download"):
+            # 0b. Download Gramps file
             return redirect(url_for("audit.audit_batch_download", 
                                     batch_id=batch_id, 
                                     username=current_user.username))
-            #return redirect(f"/audit/batch_download/{batch_id}/{current_user.username}")
         elif request.form.get("start"):
             operation = "start"
         elif request.form.get("accept"):
             operation = "accept"
         elif request.form.get("reject"):
             operation = "reject"
-        logger.info(f"--> bp.audit.routes.audit_selected u={owner_id} b={batch_id} {operation}")
+        elif request.form.get("withdraw"):
+            operation = "withdraw"
+        logger.info(f"--> bp.audit.routes.audit_selected u={user_owner} b={batch_id} {operation}")
     
         with RootUpdater("update") as batch_service:
     
             if operation == "start":
                 # 5. Move from "Audit Requested" to "Auditing" state to "Accepted"
-                res = batch_service.select_auditor(batch_id, auditor)
+                res = batch_service.select_auditor(batch_id, user_audit)
                 msg = _("You are now an auditor for batch ") + batch_id
-    
+
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
                 res = batch_service.change_state(batch_id, 
-                                                 owner_id, 
+                                                 user_owner, 
                                                  State.ROOT_ACCEPTED)
                 msg = _("Audit batch accepted: ") + batch_id
-    
+
             elif operation == "reject":
                 # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
-                res = batch_service.remove_auditor(batch_id, owner_id)
-                res = batch_service.change_state(batch_id, 
-                                                 owner_id, 
-                                                 State.ROOT_REJECTED)
-                msg = _("You have rejected the batch ") + batch_id
-    
+                res = batch_service.remove_auditor(batch_id, user_audit)
+                # res = batch_service.change_state(batch_id, user_owner, State.ROOT_REJECTED)
+                msg = _("You have rejected the audition of batch %(bid)s",
+                        bid=batch_id)
+            elif operation == "withdraw":
+                # 8. Stop auditing this batch. New state is "Audit requested", 
+                #    if no one else is auditing.
+                #    Auditor relation changed from DOES_AUDIT to DID_AUDIT.
+                res = batch_service.remove_auditor(batch_id, user_audit)
+                d_days = int(round(res.get('d_days', 0.0), 0))
+                msg = _("You did audit the batch %(bid)s for %(d)s days",
+                        bid=batch_id, d=d_days)
+
             else:
                 return redirect(url_for("audit.list_uploads", batch_id=batch_id))
-    
+
         if Status.has_failed(res):
             msg = f"Audit request {operation} failed"
             flash(_(msg), "error")
@@ -278,7 +292,7 @@ def audit_selected_op():
         return redirect(url_for("audit.list_uploads"))
 
     syslog.log(type="Audit state change", 
-               batch=batch_id, by=owner_id, msg=msg, op=operation)
+               batch=batch_id, by=user_owner, msg=msg, op=operation)
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 
