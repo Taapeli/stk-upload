@@ -40,6 +40,18 @@ def do_schema_fixes():
 
         @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
     """
+
+    # --- For DB_SCHEMA_VERSION = '2022.2.0', 1.4.2022/JMä
+    STATS_link_to_from = """
+        MATCH (b:Root) -[:STATS]-> (x:Stats)
+        DETACH DELETE x"""
+    with shareds.driver.session() as session: 
+        result = session.run(STATS_link_to_from)
+        counters = shareds.db.consume_counters(result)
+        stats_removed = counters.nodes_deleted
+        if stats_removed:
+            print(f" -- removed {stats_removed} old stats with forwards link (:Root) -[:STATS]-> (:Stats)")
+            # New stats are created with backwards link (:Root) <-[:STATS]- (:Stats)")
     return
 
     # --- For DB_SCHEMA_VERSION = '2021.2.0.4', deleted 22.1.2022/JMä

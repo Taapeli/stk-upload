@@ -18,7 +18,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Batch Statistics 
+Batch Statistics
 """
 
 import json
@@ -187,8 +187,7 @@ class StatsBuilder:
     def read_stats_node(self, batch_id):
         """ Read Stats node for batch_id. """
         cypher = """
-            match (b:Root {id:$batch_id})
-                --> (stats:Stats)
+            match (b:Root {id:$batch_id}) <-[:STATS]- (stats:Stats)
             return stats
         """ 
         record = self.session.run(cypher, batch_id=batch_id).single()
@@ -213,14 +212,14 @@ class StatsBuilder:
 
     def save_stats(self, batch_id:str, stats:Stats):
         """ Create or update Stats node.
-            stats.timestamp is from Root node.
+            Sets stats.timestamp to current save moment.
         """
         cypher = """
             match (b:Root {id:$batch_id})
-            merge (b) -[:STATS]-> (stats:Stats)
+            merge (b) <-[:STATS]- (stats:Stats)
             set stats.object_stats=$object_stats, 
                 stats.event_stats=$event_stats,
-                stats.timestamp=$ts
+                stats.timestamp=timestamp()
         """ 
         object_stats_js = json.dumps(stats.object_stats)
         event_stats_js = json.dumps(stats.event_stats)
@@ -228,7 +227,6 @@ class StatsBuilder:
                          batch_id=batch_id, 
                          object_stats=object_stats_js, 
                          event_stats=event_stats_js,
-                         ts=stats.timestamp
                     )
 
 
@@ -241,10 +239,11 @@ class StatsBuilder:
 
 
     def get_current_stats(self, batch_id, timestamp):
-        """ Read or create statistics for batch_id, depending of Root.timestamp. """
+        """ Read or create statistics for batch_id.
+            If Root.timestamp > Stats.timestamp, calculate new statistics.
+        """
         node = self.read_stats_node(batch_id)
         if node is None or node.get("timestamp",0) < timestamp:
-            #node = self.create_stats_node(batch_id)
             stats = self.count_objects_events(batch_id, timestamp)
             self.save_stats(batch_id, stats)
             fn = "count_objects_events"

@@ -468,8 +468,6 @@ class Root(NodeObject):
                     if au_user:
                         b.prev_audits.append([au_user, ms1, ms0])
             label = record.get("label", "-")
-            if label == "Stats":
-                continue
             # Trick: Set Person as first in sort order!
             if label == "Person":
                 label = " Person"
