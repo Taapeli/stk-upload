@@ -29,6 +29,10 @@ Created on 4.1.2018
 from urllib.parse import urlparse
 from flask_babelex import _
 from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKNOWN
+from models.util import format_ms_timestamp
+
+def timestamp_ms(ts_ms, opt="m"):
+    return format_ms_timestamp(ts_ms, opt)
 
 def translate(term, var_name, show_table=False):
     """ Given term is translated depending of var_name name.
@@ -37,6 +41,8 @@ def translate(term, var_name, show_table=False):
         local_lang_text = translate('Birth', 'evt')
         # Get full term translations dict
         my_dict = translate(None, 'evt', True)
+        # Call in Jinja template:
+        {{upload.state|transl('state')}}
 
         'nt'   = Name types
         'evt'  = Event types

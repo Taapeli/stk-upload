@@ -88,6 +88,7 @@ class State:
     ROOT_AUDITING = "Auditing"
     ROOT_ACCEPTED = "Accepted"
     ROOT_REJECTED = "Rejected"
+    ROOT_DELETED = "Deleted"
     ROOT_UNKNOWN = "Unknown"
     ROOT_DEFAULT_STATE = ROOT_ACCEPTED
 
@@ -140,7 +141,32 @@ class Root(NodeObject):
             return os.path.split(self.file)[1]
         except Exception:
             return ""
+
+    def state_transition(self, oper:str) -> bool:
+        """ Allowed auditor operations and state transitions.
+
+        Some operations may be depending on i_am_auditor (if you are
+        registered as auditor for this batch).
+
+        For current (self.state, oper) returns one of following -
+            - True, if allowed operation
+            - False, if not allowed
+        """
+        # Allowed transitions
+        if self.state == State.ROOT_AUDIT_REQUESTED:
+            ret = oper in ["browse", "start"]
+        elif self.state == State.ROOT_AUDITING:
+            # Presuming you are one of auditors. (withdraw/reject not used)
+            ret = oper in ["browse", "accept", "withdraw", "reject"]
+        elif self.state == State.ROOT_ACCEPTED:
+            ret = oper in ["browse", "start"]
+        elif self.state == State.ROOT_REJECTED:
+            ret = oper in ["browse", "start", "delete"]
+
+        # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
+        return ret
         
+
     def save(self, tx):
         """Create or update Root node.
 
@@ -254,14 +280,15 @@ class Root(NodeObject):
 
     @staticmethod
     def get_batch(username: str, batch_id: str):
-        # type: (str, str) -> Optional[Root]
+        # Returns None or Root object with user and rel_type fields
         with shareds.driver.session() as session:
             record = session.run(
                 CypherRoot.get_batch, username=username, batch_id=batch_id
             ).single()
             if record:
                 root = Root.from_node(record['b'])
-                root.user = record.get('username')
+                root.user = username
+                root.rel_type = record.get('rel_type')
                 return root
         return None
 
@@ -419,6 +446,7 @@ class Root(NodeObject):
             #    label='Person'
             #    cnt=6
             #    auditors=['juha',1620570475208]
+            #    prev_audits=['joku',1648739430163,1630402986262]
             #    has_access=['jpek']
             # >
             if node is None or \
@@ -431,11 +459,15 @@ class Root(NodeObject):
                 b.has_access = record['has_access'] # Users granted special access
                 b.auditors = []
                 for au_user, ms in record["auditors"]:
+                    # [username, time_start]
                     if au_user:
-                        b.auditors.append([au_user, ms, format_ms_timestamp(ms)])
+                        b.auditors.append([au_user, ms]) #, format_ms_timestamp(ms)])
+                b.prev_audits = []
+                for au_user, ms1, ms0 in record["prev_audits"]:
+                    # [username, time_end, time_start]
+                    if au_user:
+                        b.prev_audits.append([au_user, ms1, ms0])
             label = record.get("label", "-")
-            if label == "Stats":
-                continue
             # Trick: Set Person as first in sort order!
             if label == "Person":
                 label = " Person"

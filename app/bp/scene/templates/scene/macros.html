@@ -96,8 +96,7 @@
 {%- endmacro %}
 
 {% macro show_use_case(no_change) -%}
-    {#  Show and change data: researcher data or approved common data. #}
-    {#  call show_use_case(no_change=true) if you want to deny change. #}
+    {#  Show material description. (no_change is obsolete!) #}
     {% if user_context and not config['DEMO'] %}
         {{ user_context.display_current_material() }}
     {% endif %}
@@ -152,10 +151,10 @@
         >{{ _("edited") }} {{obj.change_str()}}
         {%- if user_context.material %}
         – <span>
-        {% if user_context.material.breed == 'batch' %}
-        	{{ _('User data')|lower }}
+        {% if user_context.is_common() %}
+            {{ _('origin from') }}: {{user_context.user}}
         {% else %}
-        	{{ _('origin from') }}: {{user_context.user}}
+            {{ _('User data')|lower }}
         {% endif %}
         </span>
         {% endif %}

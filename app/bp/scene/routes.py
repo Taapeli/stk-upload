@@ -361,6 +361,12 @@ def show_person_search():  # (set_scope=None, batch_id=None):
 
     Uses the material defined in SecureCookieSession session
     """
+    def name_cloud_size(stats, i):
+        """ Name cloud font size for name stats[i]. """
+        minfont = 6
+        maxfont = 20
+        return maxfont - i * (maxfont - minfont) / len(stats)
+
     t0 = time.time()
     try:
 
@@ -433,8 +439,6 @@ def show_person_search():  # (set_scope=None, batch_id=None):
             # Start material search page:
             #    - show name clouds and
             #    - store material type to session.material_type
-            minfont = 6
-            maxfont = 20
 
             # Most common surnames cloud
             with PersonReader("read", u_context) as service:
@@ -442,9 +446,7 @@ def show_person_search():  # (set_scope=None, batch_id=None):
                 # {name, count, uuid}
                 for i, stat in enumerate(surnamestats):
                     stat["order"] = i
-                    stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(
-                        surnamestats
-                    )
+                    stat["fontsize"] = name_cloud_size(surnamestats, i)
                 surnamestats.sort(key=itemgetter("surname"))
 
             # Most common place names cloud
@@ -453,9 +455,7 @@ def show_person_search():  # (set_scope=None, batch_id=None):
                 # {name, count, uuid}
                 for i, stat in enumerate(placenamestats):
                     stat["order"] = i
-                    stat["fontsize"] = maxfont - i * (maxfont - minfont) / len(
-                        placenamestats
-                    )
+                    stat["fontsize"] = name_cloud_size(placenamestats, i)
                 placenamestats.sort(key=itemgetter("placename"))
 
     except Exception as e:

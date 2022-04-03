@@ -138,6 +138,30 @@ function doconfirm( command, title ) { // used in commands.html
     	</table>
     </div>
 
+{% if nonstandard_types or user_context.is_auditor %}
+    <div class="startbox">
+    	<h2 class="center">{{ _("Nonstandard types") }}</h2>
+    	<div style="overflow: auto; height: 250px">
+    	<table>
+    		<tr>
+    			<th>{{ _("Category") }}
+    			<th>{{ _("Type") }}
+    			<th>{{ _("Count") }}
+    	{% for type in nonstandard_types %}
+    		<tr>
+    			<td>{{ type.1 }}
+    			<td>{{ type.2 }}
+    			<td>{{ type.3 }}
+    	{% endfor %}
+		</table>
+		</div>
+    {% if user_context.is_auditor %}
+    	<br>
+       	<a href="/gramps/run_supertool/{{ batch.id }}">{{ _("Refresh nonstandard types") }}</a>
+    {% endif %}
+    </div>
+{% endif %}
+
     <div class="startbox actions">
         <h2 class="center">{{ _("Operations") }}</h2>
         <div hx-trigger="load"

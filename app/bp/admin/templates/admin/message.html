@@ -29,13 +29,19 @@ tr:hover {background-color: white;}
 <script>
 $(document).ready( function() {
     $('#send').click( function() {
-		$.post("send_emails",$("form").serialize(), 
+    	if (document.getElementById('message').value == "") {
+    		alert("{{ _('Empty message – not sent!') }}");
+    		return;
+    	};
+    	$.post("send_emails",$("form").serialize(), 
 		function(rsp) {
-			alert("{{ _('Message sent') }}");
+			document.getElementById("sending").innerHTML = "{{ _('Message sent') }}!";
+			document.getElementById("sending").style.color = "blue";
 		}
 	).fail(
 		function(rsp) {
-			alert("{{ _('Message send failed') }}");
+            document.getElementById("sending").innerHTML = "{{ _('Message send failed') }}!";
+            document.getElementById("sending").style.color = "red";
 		}
 	);
     });
@@ -86,7 +92,7 @@ $(document).ready( function() {
             <tr>
                 <td>&rtrif; <a onclick="history.back()" href="#">{{ _("Return") }}</a>
                 </td>
-                <td><div class="right-button"> 
+                <td><div id="sending" class="right-button"> 
                        <input type="button" id="send" value="{{ _('Apply') }}" />
                     </div>
                 </td>

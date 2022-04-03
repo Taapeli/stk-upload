@@ -54,17 +54,19 @@ import shareds
 from bl.base import Status
 from bl.batch.root import Root, BatchReader #, State, BatchUpdater
 from bl.batch.root_updater import RootUpdater
+from bl.gramps.gramps_utils import get_nonstandard_types
+
 from models import syslog, util #, loadfile
 
 from ui.batch_ops import RESEARCHER_FUNCTIONS, RESEARCHER_OPERATIONS
 from ui.context import UserContext
-from ui.util import error_print, stk_logger
+from ui.util import stk_logger #, error_print
 from ..admin import uploads
 
 from . import bp
 from bl.gramps import gramps_loader
 from bl.gramps import gramps_utils
-from bl.stats import get_stats
+#from bl.stats import get_stats
 
 # @bp.route("/gramps")
 # def obsolete_gramps_index():
@@ -475,6 +477,7 @@ def batch_details(batch_id):
     from bl.stats import create_stats_data
 
     res = create_stats_data(batch_id, current_user)
+    nonstandard_types = get_nonstandard_types(current_user.username, batch_id)
     # { "batch", "objects", "events" }
     elapsed = time.time() - t0
     stk_logger(user_context, 
@@ -485,8 +488,10 @@ def batch_details(batch_id):
        user_context=user_context,
        object_stats=res["objects"],
        event_stats=res["events"],
+       nonstandard_types=nonstandard_types,
        elapsed=elapsed,
     )
+
 
 @bp.route("/gramps/details/update_description", methods=["post"])
 @login_required
@@ -542,3 +547,21 @@ def scripting_attrs(batch_id=None):
     from bl.scripting.scripting_tool import get_attrs
     attrs = get_attrs(request.form.get("scope"))
     return ",".join(attrs)
+
+@bp.route("/gramps/run_supertool/<batch_id>")
+@login_required
+@roles_accepted("research", "admin", "audit")
+def run_supertool(batch_id):
+    batch = Root.get_batch(current_user.username, batch_id)
+    supertool_runner = shareds.app.config.get("SUPERTOOL_RUNNER")
+    scriptfile = "app/supertool_scripts/nonstandard-types.script"
+    outputfile = "nonstandard-types.csv"
+    print("supertool_runner",supertool_runner)
+    if supertool_runner:
+        lang = session.get("lang","")
+        print("lang",lang)
+        _msgs = gramps_utils.run_supertool(supertool_runner, lang, current_user.username, batch_id, batch.xmlname, scriptfile, outputfile)
+    else:
+        _msgs = {}
+    logger.info(f'bp.gramps.routes.run_supertool f="{os.path.basename(batch.xmlname)}"')
+    return redirect(url_for("gramps.batch_details", batch_id=batch_id))

@@ -28,3 +28,4 @@ stk_server.egg-info/
 build/
 dist/
 logs/
+instance/whitelists

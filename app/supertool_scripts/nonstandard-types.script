@@ -1,0 +1,31 @@
+[Gramps SuperTool script file]
+version=1
+
+[title]
+epästandardit-tyypit
+
+[category]
+Dashboard
+
+[initial_statements]
+@include nonstandard-types.py
+nonstandard_types()
+
+[statements]
+
+[filter]
+
+[expressions]
+
+[scope]
+selected
+
+[unwind_lists]
+False
+
+[commit_changes]
+False
+
+[summary_only]
+True
+

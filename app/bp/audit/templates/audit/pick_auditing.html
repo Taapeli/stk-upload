@@ -10,9 +10,10 @@
   float: left;
   width: 25%;
   padding: 5pt;
-  height: 60pt;
+  height: 64pt;
   border: 1pt solid silver;
   background-color: #eee;
+  overflow-y: auto;
 }
 .box2 { width: 50%; }
 .box3 { width: 37.5%; }
@@ -73,10 +74,19 @@ table     { width: 750px; }
           <div class="box" style="background-color: seashell;">
             <div>{{ _("Current auditors") }}</div>
             <p>
-            {% for auditor, ts, ts_str in root.auditors %}
+            {% for auditor, ts in root.auditors %}
+                {% if not loop.first %}<br>{% endif %}
                <b><a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a></b>
-               <span title="{{ _('Audit start date') }}">{{ts_str}}</span>
+               <span title="{{ _('Audit start date') }}">{{ts|format_ts}}</span>
+            {% endfor %}
+            {% for auditor, ts1, ts0 in root.prev_audits %}
+                {% if not loop.first %}<br>{% endif %}
+               <a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
+                    >{{auditor}}</a>
+               <span title="{{ _('Duration of audition') }}" style="color:gray;">
+                  {{ts0|format_ts}} – {{ts1|format_ts}}
+               </span>
             {% endfor %}
             </p>
           </div>
@@ -85,7 +95,7 @@ table     { width: 750px; }
             <p><a href="/audit/batch_download/{{root.id}}/{{user}}">{{basename}}</a></p>
           </div>
           <div class="box box3">
-            <div>{{ _('Title') }}</div>
+            <div>{{ _('Description') }}</div>
             <p><i>{{root.description}}</i></p>
           </div>
           <div class="box">
@@ -118,32 +128,38 @@ table     { width: 750px; }
                 </tr>
             </table>
 
-
             <form action="/audit/selected" method="post">
                 <input type="hidden" value="{{root.id}}" name="batch_id">
                 <input type="hidden" value="{{root.material_type}}" name="material_type">
                 <input type="hidden" value="{{root.state}}" name="state">
                 <input type="hidden" value="{{user}}" name="user">
-<!-- [ breed=batch, {{root.state}}, {{root.material_type}}, {{root.id}} ] -->
-<!-- {{root.state}} {{user}}/{{current_user.username}} -->
+
                 <div class="submit">
                    <input type="submit" value="{{ _('Return') }}" name="cancel" /> 
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse"
-    {% if not can_browse %} disabled {% endif -%} />
-                   <input type="submit" value="{{ _('Download file') }}" name="download" /> 
+                    {% if not can_browse %} disabled {% endif -%} />
+                   <input type="submit" value="{{ _('Download file') }}" name="download" 
+                    {% if not can_browse %} disabled {% endif -%} />
+
                    <span style="font-size:large; color:gray;"> | </span>
-{% if total %}
+
                    <input type="submit" name="start"
-    {% if root.state == "Rejected" %}value="{{ _('Start auditing again') }}"
-    {% else %} value="{{ _('Start auditing') }}"{% endif %}
-    {% if not can_start %} disabled {% endif -%} />
+                    {% if root.state == "Accepted" %}
+                       value="{{ _('Start auditing again') }}"
+                       title="{{ _('Start as auditor (also the only way to delete the material)') }}"
+                    {% else %}{# "Audit requested" #}
+                       value="{{ _('Start auditing') }}" title="{{ _('Become an auditor') }}"
+                    {% endif -%}{% if not can_start %} disabled {% endif -%} />
+{% if i_am_auditor %}
                    <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
-	{% if not can_accept %} disabled {% endif %} />
+                       title="{{ _('Include to accepted materials') }}"
+	                {% if not can_accept %} disabled {% endif -%} />
+                   <input type="submit" value="{{ _('Withdraw') }}" name="withdraw"
+                       title="{{ _('Give up for now') }}"
+                    {% if not can_accept %} disabled {% endif -%} />
                    <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
-	{% if not can_accept %} disabled {% endif %} />
-{% else %}
-                   <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
-	{% if not can_remove %} disabled {% endif %} />
+                       title="{{ _('Dicard this material') }}"
+                    {% if not can_accept %} disabled {% endif -%} />
 {% endif -%}
                 </div>
             </form>

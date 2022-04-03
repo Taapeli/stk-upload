@@ -74,10 +74,30 @@ RETURN ID(b) AS id"""
 MATCH (b:Root {id: $bid}) WHERE b.state IN $states
 MATCH (audi:UserProfile {username: $audi})
     SET b.state = "Auditing"
-    MERGE (audi) -[:HAS_ACCESS]-> (b)
+    //MERGE (audi) -[:HAS_ACCESS]-> (b)
     MERGE (audi) -[r:DOES_AUDIT]-> (b)
     SET r.timestamp = timestamp()
 RETURN ID(b) AS id"""
+
+#TODO: parameter new_state = "Audit Requested"
+#TODO: Create relation DID_AUDIT
+    batch_remove_auditor = """
+MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
+OPTIONAL MATCH (oth:UserProfile) -[:DOES_AUDIT]-> (b)
+    WHERE oth.username <> $audi
+OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[oldr:DOES_AUDIT]-> (b)
+WITH b, oth, audi, oldr, oldr.timestamp AS time, COUNT(oth) AS oth_cnt
+  SET (CASE WHEN oth_cnt = 0 THEN b END).state = $new_state
+  DELETE oldr
+RETURN b, oth, audi, oth_cnt, time"""
+    link_old_auditor = """
+MATCH (b:Root) WHERE ID(b) = $uid
+MATCH (o:Role) <-[:HAS_ROLE]- (us:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
+    WHERE o.name = "audit" and id(audi) = $audi_id
+MERGE (audi) -[newr:DID_AUDIT]-> (b)
+SET newr.timestamp = timestamp()
+SET newr.timefrom = $fromtime
+RETURN newr"""
 
 #-bl.batch.root.Root.get_filename
     get_filename = """
@@ -86,8 +106,8 @@ RETURN b.filename, u.username as username"""
 
 #-bl.batch.root.Root.get_batch
     get_batch = """
-MATCH (u:UserProfile{username:$username}) -[:HAS_ACCESS]-> (b:Root {id:$batch_id})
-RETURN b, u.username as username"""
+MATCH (u:UserProfile{username:$username}) -[r:HAS_ACCESS|DOES_AUDIT]-> (b:Root {id:$batch_id})
+RETURN b, type(r) AS rel_type"""
      
     list_all = """
 MATCH (b:Root) 
@@ -153,10 +173,12 @@ optional match (acc:UserProfile) -[:HAS_ACCESS]-> (b)
     where not up.username = acc.username
 optional match (b) --> (x)
 optional match (ap:UserProfile) -[ar:DOES_AUDIT]-> (b)
+optional match (pap:UserProfile) -[par:DID_AUDIT]-> (b)
 return up as profile, b as root,
     labels(x)[0] as label, 
     count(x) as cnt,
     collect(distinct [ap.username,ar.timestamp]) as auditors,
+    collect(distinct [pap.username,par.timestamp,par.timefrom]) as prev_audits,
     collect(distinct acc.username) as has_access
 '''
 

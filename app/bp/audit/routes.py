@@ -24,6 +24,7 @@ Created on 28.11.2019
 """
 # blacked 2021-07-25 JMä
 import csv
+import json
 import time
 import logging
 from io import StringIO, BytesIO
@@ -104,9 +105,19 @@ def audit_research_op(oper=None, batch_id=None):
         if operation == "request":
             new_state = State.ROOT_AUDIT_REQUESTED
             msg = _("Audit request for ") + batch_id
+        elif operation == "start":
+            new_state = State.ROOT_AUDITING
+            msg = _("Start auditing ") + batch_id
+        elif operation == "accept":
+            new_state = State.ROOT_ACCEPTED
+            msg = _("Accept auditing of ") + batch_id
         elif operation == "withdraw":
-            new_state = State.ROOT_CANDIDATE
+            new_state = State.ROOT_AUDIT_REQUESTED
             msg = _("Withdrawing audit request for ") + batch_id
+        elif operation == "reject":
+            new_state = State.ROOT_REJECTED
+            msg = _("Reject ") + batch_id
+        # operation == "delete" -> delete_approved?
         else:
             return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
@@ -169,32 +180,27 @@ def audit_pick(batch_id=None):
         timestamp = root.timestamp_str()
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
-        can_browse = (#root.state == State.ROOT_AUDIT_REQUESTED or
-                      root.state == State.ROOT_AUDITING or 
-                      root.state == State.ROOT_ACCEPTED or 
-                      root.state == State.ROOT_REJECTED)
-        can_start = (root.state == State.ROOT_AUDIT_REQUESTED or
-                     root.state == State.ROOT_REJECTED or
-                     root.state == State.ROOT_AUDITING and not i_am_auditor)
-        can_accept = (i_am_auditor and root.state  == State.ROOT_AUDITING)
-        can_remove = (total == 0 \
-                      and root.state in [State.ROOT_ACCEPTED, State.ROOT_REJECTED])
+        print(f"bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, "
+              f"auditor={i_am_auditor}, user={current_user.username}")
+        can_browse = root.state_transition("browse")
+        can_start = root.state_transition("start")
+        can_accept = root.state_transition("accept") and i_am_auditor
+        can_delete = root.state_transition("delete")
         print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
-              f"can_browse={can_browse} can_start={can_start} "
-              f"can_accept={can_accept} can_remove={can_remove}")
+              f"can browse={can_browse} start={can_start} "
+              f"accept/withdraw/reject={can_accept} delete={can_delete}")
     except Exception as e:
         error_print("audit_pick", e)
         return redirect(url_for("audit.list_uploads"))
 
-    print(f"bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, user={current_user.username}")
     return render_template("/audit/pick_auditing.html",
         user=username, 
         root=root,
         basename=os.path.basename(root.file),
+        i_am_auditor=i_am_auditor,
         can_browse=can_browse,
         can_start=can_start,
-        can_accept=can_accept,
-        can_remove=can_remove,
+        can_accept=can_accept, # + withdraw and reject
         label_nodes=labels,
         total=total,
         time=timestamp,
@@ -208,58 +214,73 @@ def audit_pick(batch_id=None):
 def audit_selected_op():
     """ Select Auditor operation for Batch.
     Auditor operations:
-        5. - "start"     Audit request -> Auditing
-        6. - "accept"    Auditing -> Accepted
-        7. - "reject"    Auditing -> Rejected
-        x. - "cancel"
+        0a "browse"    - no change
+        0b "download"  - no change
+        5. "start"     Audit request -> Auditing
+        6. "accept"    Auditing -> Accepted
+        7. "reject"    Auditing -> Rejected
+        8. "withdraw"  Auditing -> Audit requested
+        9. "delete"    Rejected -> (does not exist)
+        x. "cancel"
     """
     try:
         u_context = UserContext()
         _breed, state, material_type, batch_id = u_context.material.get_current()
-        owner_id = u_context.material.request_args.get("user")
-        auditor = current_user.username
+        user_owner = u_context.material.request_args.get("user")
+        user_audit = current_user.username
         operation = "cancel"
 
         if request.form.get("browse"):
+            # 0a. Go to scene views
             args = {"batch_id": batch_id, "material_type": material_type, "state": state}
             return redirect("/scene/material/batch?" + urllib.parse.urlencode(args))
         elif request.form.get("download"):
+            # 0b. Download Gramps file
             return redirect(url_for("audit.audit_batch_download", 
                                     batch_id=batch_id, 
                                     username=current_user.username))
-            #return redirect(f"/audit/batch_download/{batch_id}/{current_user.username}")
         elif request.form.get("start"):
             operation = "start"
         elif request.form.get("accept"):
             operation = "accept"
         elif request.form.get("reject"):
             operation = "reject"
-        logger.info(f"--> bp.audit.routes.audit_selected u={owner_id} b={batch_id} {operation}")
+        elif request.form.get("withdraw"):
+            operation = "withdraw"
+        logger.info(f"--> bp.audit.routes.audit_selected u={user_owner} b={batch_id} {operation}")
     
         with RootUpdater("update") as batch_service:
     
             if operation == "start":
                 # 5. Move from "Audit Requested" to "Auditing" state to "Accepted"
-                res = batch_service.select_auditor(batch_id, auditor)
+                res = batch_service.select_auditor(batch_id, user_audit)
                 msg = _("You are now an auditor for batch ") + batch_id
-    
+
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
                 res = batch_service.change_state(batch_id, 
-                                                 owner_id, 
+                                                 user_owner, 
                                                  State.ROOT_ACCEPTED)
                 msg = _("Audit batch accepted: ") + batch_id
-    
+
             elif operation == "reject":
-                # 7. Move from "Auditing" to "Rejected" state
-                res = batch_service.change_state(batch_id, 
-                                                 owner_id, 
-                                                 State.ROOT_REJECTED)
-                msg = _("You have rejected the batch ") + batch_id
-    
+                # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
+                res = batch_service.remove_auditor(batch_id, user_audit)
+                # res = batch_service.change_state(batch_id, user_owner, State.ROOT_REJECTED)
+                msg = _("You have rejected the audition of batch %(bid)s",
+                        bid=batch_id)
+            elif operation == "withdraw":
+                # 8. Stop auditing this batch. New state is "Audit requested", 
+                #    if no one else is auditing.
+                #    Auditor relation changed from DOES_AUDIT to DID_AUDIT.
+                res = batch_service.remove_auditor(batch_id, user_audit)
+                d_days = int(round(res.get('d_days', 0.0), 0))
+                msg = _("You did audit the batch %(bid)s for %(d)s days",
+                        bid=batch_id, d=d_days)
+
             else:
                 return redirect(url_for("audit.list_uploads", batch_id=batch_id))
-    
+
         if Status.has_failed(res):
             msg = f"Audit request {operation} failed"
             flash(_(msg), "error")
@@ -271,7 +292,7 @@ def audit_selected_op():
         return redirect(url_for("audit.list_uploads"))
 
     syslog.log(type="Audit state change", 
-               batch=batch_id, by=owner_id, msg=msg, op=operation)
+               batch=batch_id, by=user_owner, msg=msg, op=operation)
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 
@@ -288,7 +309,8 @@ def audit_batch_download(batch_id, username):
 
         logger.info(f"--> bp.audit.routes.audit_batch_download u={username} b={batch_id} {xname}")
         syslog.log(type="Auditor xml download", 
-                   batch=batch_id, by=username, file=xname)
+                   batch=batch_id, by=f"{username} ({batch.rel_type})",
+                   file=xname)
 
         return send_from_directory(abs_folder, xname,
             mimetype="application/gzip",
@@ -544,3 +566,47 @@ def save_loaded_csv(filename, subj):
             text=_("Missing proper column title: ") + str(e),
         )
     return render_template("/talletettu.html", text=status, uri=dburi)
+
+
+
+#===============================================================================================================
+#
+# White lists for types
+#
+#===============================================================================================================
+WHITELIST_DIR = "instance/whitelists"
+
+@bp.route("/audit/manage_whitelists", methods=["GET"])
+@login_required
+@roles_accepted("audit")
+def manage_whitelists():
+    return render_template("/audit/whitelists.html")
+
+@bp.route("/audit/get_whitelist/<scope>", methods=["GET"])
+@login_required
+@roles_accepted("audit")
+def get_whitelist(scope):
+    try:
+        return open(f"{WHITELIST_DIR}/{scope}").read().strip()
+    except:
+        return ""
+
+@bp.route("/audit/get_whitelist_scopes", methods=["GET"])
+@login_required
+@roles_accepted("audit")
+def get_whitelist_scopes():
+    try:
+        return {"scopes":sorted(os.listdir(WHITELIST_DIR))}
+    except:
+        return []
+
+@bp.route("/audit/set_whitelist", methods=["POST"])
+@login_required
+@roles_accepted("audit")
+def set_white_list():
+    data = json.loads(request.data)
+    scope = data.get("scope")
+    with open(f"{WHITELIST_DIR}/{scope}","w") as f:
+        print(data.get("whitelist",""), file=f)
+    return "ok"
+
