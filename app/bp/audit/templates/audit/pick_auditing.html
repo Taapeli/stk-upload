@@ -136,7 +136,7 @@ table     { width: 750px; }
                 <input type="hidden" value="{{user}}" name="user">
 
                 <div class="submit">
-                   <input type="submit" value="{{ _('Return') }}" name="cancel" /> 
+                   <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" /> 
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse"
                     {% if not can_browse %} disabled {% endif -%} />
                    <input type="submit" value="{{ _('Download file') }}" name="download" 
@@ -161,6 +161,10 @@ table     { width: 750px; }
                    <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
                        title="{{ _('Dicard this material') }}"
                     {% if not can_accept %} disabled {% endif -%} />
+{% endif -%}
+{% if can_delete %}
+                   <input type="submit" value="{{ _('Delete batch') }}" name="delete"
+                       title="{{ _('The material and files are deleted permanetly') }}"/>
 {% endif -%}
                 </div>
             </form>

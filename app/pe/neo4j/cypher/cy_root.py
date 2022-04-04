@@ -86,12 +86,12 @@ MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
 OPTIONAL MATCH (oth:UserProfile) -[:DOES_AUDIT]-> (b)
     WHERE oth.username <> $audi
 OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[oldr:DOES_AUDIT]-> (b)
-WITH b, oth, audi, oldr, 
-    oldr.ts_from AS time, 
-    COUNT(oth) AS oth_cnt
-  SET (CASE WHEN oth_cnt = 0 THEN b END).state = $new_state
-  DELETE oldr
-RETURN b, oth, audi, oth_cnt, time"""
+WITH b, oth, audi, oldr, COUNT(oth) AS oth_cnt,
+    oldr.ts_from AS ts_from, 
+    oldr.ts_to AS ts_to
+SET (CASE WHEN oth_cnt = 0 THEN b END).state = $new_state
+DELETE oldr
+RETURN b, oth, audi, oth_cnt, ts_from, ts_to"""
     link_old_auditor = """
 MATCH (b:Root) WHERE ID(b) = $uid
 MATCH (o:Role) <-[:HAS_ROLE]- (us:User) -[:SUPPLEMENTED]-> (audi:UserProfile)

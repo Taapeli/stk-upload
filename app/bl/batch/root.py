@@ -142,26 +142,28 @@ class Root(NodeObject):
         except Exception:
             return ""
 
-    def state_transition(self, oper:str) -> bool:
-        """ Allowed auditor operations and state transitions.
+    def state_transition(self, oper:str, active_auditor:bool=False) -> bool:
+        """ Allowed auditor operations.
 
-        Some operations may be depending on i_am_auditor (if you are
+        Some operations may require active auditor role (you are
         registered as auditor for this batch).
 
-        For current (self.state, oper) returns one of following -
-            - True, if allowed operation
-            - False, if not allowed
+        Returns True, if allowed operation
         """
-        # Allowed transitions
         if self.state == State.ROOT_AUDIT_REQUESTED:
             ret = oper in ["browse", "start"]
         elif self.state == State.ROOT_AUDITING:
-            # Presuming you are one of auditors. (withdraw/reject not used)
-            ret = oper in ["browse", "accept", "withdraw", "reject"]
+            if active_auditor:
+                # Withdraw/reject not used?
+                ret = oper in ["browse", "accept", "withdraw", "reject"]
+            else:
+                ret = oper in ["browse", "start"]
         elif self.state == State.ROOT_ACCEPTED:
-            ret = oper in ["browse", "start"]
+            if active_auditor:
+                ret = oper in ["browse", "start"]
         elif self.state == State.ROOT_REJECTED:
-            ret = oper in ["browse", "start", "delete"]
+            ret = ( oper in ["browse", "start"] or \
+                (oper == "delete" and active_auditor) )
 
         # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
         return ret
@@ -670,18 +672,17 @@ class BatchReader(DataService):
         # Initiate selected service object
         self.dataservice = service_class(shareds.driver)
 
-    # Not used! / JMä 3.4.2022
-    # def batch_get_one(self, user, batch_id):
-    #     """Get Root object by username and batch id (in BatchReader). """
-    #     try:
-    #         ret = self.dataservice.ds_get_batch(user, batch_id)
-    #         # returns {"status":Status.OK, "node":record}
-    #         # print(f"bl.batch.BatchReader.batch_get_one: return {ret}")
-    #         node = ret['node']
-    #         batch = Root.from_node(node)
-    #         return {"status":Status.OK, "item":batch}
-    #     except Exception as e:
-    #         statustext = (
-    #             f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
-    #         )
-    #         return {"status": Status.ERROR, "statustext": statustext}
+    def batch_get_one(self, user, batch_id):
+        """Get Root object by username and batch id (in BatchReader). """
+        try:
+            ret = self.dataservice.ds_get_batch(user, batch_id)
+            # returns {"status":Status.OK, "node":record}
+            # print(f"bl.batch.BatchReader.batch_get_one: return {ret}")
+            node = ret['node']
+            batch = Root.from_node(node)
+            return {"status":Status.OK, "item":batch}
+        except Exception as e:
+            statustext = (
+                f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
+            )
+            return {"status": Status.ERROR, "statustext": statustext}

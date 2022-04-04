@@ -182,10 +182,10 @@ def audit_pick(batch_id=None):
         i_am_auditor = (current_user.username in auditor_names)
         print(f"bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, "
               f"auditor={i_am_auditor}, user={current_user.username}")
-        can_browse = root.state_transition("browse")
-        can_start = root.state_transition("start")
-        can_accept = root.state_transition("accept") and i_am_auditor
-        can_delete = root.state_transition("delete")
+        can_browse = root.state_transition("browse", i_am_auditor)
+        can_start = root.state_transition("start", i_am_auditor)
+        can_accept = root.state_transition("accept", i_am_auditor)
+        can_delete = root.state_transition("delete", i_am_auditor)
         print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
               f"can browse={can_browse} start={can_start} "
               f"accept/withdraw/reject={can_accept} delete={can_delete}")

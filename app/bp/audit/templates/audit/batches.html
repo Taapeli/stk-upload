@@ -82,7 +82,7 @@ tr > td:nth-child(5) {
                 {% for auditor, ts_from, ts_to in upload.auditors %}
                     {% if not loop.first %}<br>{% endif %}
                     <span title="{{ _('Auditing time') }}">
-                       {{auditor}}&nbsp;{{ts_from|format_ts_day}} – {{ts_to|format_ts_day}}</span>
+                       {{auditor}}&nbsp;{{ts_from|format_ts_day}}&nbsp;– {{ts_to|format_ts_day}}</span>
             	{% endfor %}</i>
 			{% endif %}
 	           </td>
