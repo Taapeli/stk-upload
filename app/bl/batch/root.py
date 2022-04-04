@@ -422,7 +422,9 @@ class Root(NodeObject):
 
     @staticmethod
     def get_batch_stats(batch_id):
-        """Get statistics of given Batch contents (for bp.audit.routes.audit_pick).
+        """Get statistics of given Batch contents.
+
+           Called from bp.audit.routes.audit_pick
         """
         labels = []
         user = None
@@ -445,8 +447,8 @@ class Root(NodeObject):
             #            'user': 'aku', 'timestamp': 1622140130273}>
             #    label='Person'
             #    cnt=6
-            #    auditors=['juha',1620570475208]
-            #    prev_audits=['joku',1648739430163,1630402986262]
+            #    auditors=['juha',1620570475208,None]
+            #    prev_audits=['joku',1630402986262,1648739430163]
             #    has_access=['jpek']
             # >
             if node is None or \
@@ -456,17 +458,18 @@ class Root(NodeObject):
                 user = record['profile']['username']
                 node = record["root"]
                 b = Root.from_node(node)
-                b.has_access = record['has_access'] # Users granted special access
+                # Users granted special access
+                b.has_access = record['has_access'] 
                 b.auditors = []
-                for au_user, ms in record["auditors"]:
+                for au_user, ms_from, ms_to in record["auditors"]:
                     # [username, time_start]
                     if au_user:
-                        b.auditors.append([au_user, ms]) #, format_ms_timestamp(ms)])
+                        b.auditors.append([au_user, ms_from, ms_to])
                 b.prev_audits = []
-                for au_user, ms1, ms0 in record["prev_audits"]:
+                for au_user, ms_from, ms_to in record["prev_audits"]:
                     # [username, time_end, time_start]
                     if au_user:
-                        b.prev_audits.append([au_user, ms1, ms0])
+                        b.prev_audits.append([au_user, ms_from, ms_to])
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -667,17 +670,18 @@ class BatchReader(DataService):
         # Initiate selected service object
         self.dataservice = service_class(shareds.driver)
 
-    def batch_get_one(self, user, batch_id):
-        """Get Root object by username and batch id (in BatchReader). """
-        try:
-            ret = self.dataservice.ds_get_batch(user, batch_id)
-            # returns {"status":Status.OK, "node":record}
-            # print(f"bl.batch.BatchReader.batch_get_one: return {ret}")
-            node = ret['node']
-            batch = Root.from_node(node)
-            return {"status":Status.OK, "item":batch}
-        except Exception as e:
-            statustext = (
-                f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
-            )
-            return {"status": Status.ERROR, "statustext": statustext}
+    # Not used! / JMä 3.4.2022
+    # def batch_get_one(self, user, batch_id):
+    #     """Get Root object by username and batch id (in BatchReader). """
+    #     try:
+    #         ret = self.dataservice.ds_get_batch(user, batch_id)
+    #         # returns {"status":Status.OK, "node":record}
+    #         # print(f"bl.batch.BatchReader.batch_get_one: return {ret}")
+    #         node = ret['node']
+    #         batch = Root.from_node(node)
+    #         return {"status":Status.OK, "item":batch}
+    #     except Exception as e:
+    #         statustext = (
+    #             f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
+    #         )
+    #         return {"status": Status.ERROR, "statustext": statustext}

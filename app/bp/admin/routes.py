@@ -298,8 +298,10 @@ def update_user(username):
 @login_required
 @roles_accepted("admin", "audit")
 def list_uploads(username):
-    """ List uploads; also from '/audit/list_uploads' page. """
+    """ List uploads; also from '/audit/list_uploads' page.
+    """
     upload_list = uploads.list_uploads(username)
+    # No auditors info used.
     logger.info(f"-> bp.admin.routes.list_uploads u={username}")
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
 

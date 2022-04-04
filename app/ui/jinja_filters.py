@@ -31,8 +31,8 @@ from flask_babelex import _
 from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKNOWN
 from models.util import format_ms_timestamp
 
-def timestamp_ms(ts_ms, opt="m"):
-    return format_ms_timestamp(ts_ms, opt)
+def timestamp_ms(ts_ms, minutes=True):
+    return format_ms_timestamp(ts_ms, minutes)
 
 def translate(term, var_name, show_table=False):
     """ Given term is translated depending of var_name name.

@@ -142,19 +142,21 @@ class Neo4jUpdateService(ConcreteService):
         print("#Neo4jUpdateService.ds_new_batch_id: id='{}'".format(batch_id))
         return batch_id
 
-    def ds_get_batch(self, user, batch_id):
-        """Get Batch node by username and batch id. 
-           Note. 'user' not used!
-        """
-        result = self.tx.run(CypherRoot.get_single_batch, 
-                             user=user, batch=batch_id)
-        for record in result:
-            node = record.get("root")
-            if node:
-                return {"status":Status.OK, "node":node}
-            else:
-                return {"status":Status.NOT_FOUND, "node":None,
-                        "statustext": "Batch not found"}
+
+    # Not used! / JMä 3.4.2022
+    # def ds_get_batch(self, user, batch_id):
+    #     """Get Batch node by username and batch id. 
+    #        Note. 'user' not used!
+    #     """
+    #     result = self.tx.run(CypherRoot.get_single_batch, 
+    #                          user=user, batch=batch_id)
+    #     for record in result:
+    #         node = record.get("root")
+    #         if node:
+    #             return {"status":Status.OK, "node":node}
+    #         else:
+    #             return {"status":Status.NOT_FOUND, "node":None,
+    #                     "statustext": "Batch not found"}
 
     @staticmethod
     def ds_batch_save(tx, attr):

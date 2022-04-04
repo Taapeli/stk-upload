@@ -74,18 +74,19 @@ table     { width: 750px; }
           <div class="box" style="background-color: seashell;">
             <div>{{ _("Current auditors") }}</div>
             <p>
-            {% for auditor, ts in root.auditors %}
+            {% for auditor, ts_from, ts_to in root.auditors %}
                 {% if not loop.first %}<br>{% endif %}
                <b><a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a></b>
-               <span title="{{ _('Audit start date') }}">{{ts|format_ts}}</span>
+               <span title="{{ _('Auditing time') }}">
+                  {{ts_from|format_ts_min}} – {{ts_to|format_ts_day}}</span>
             {% endfor %}
-            {% for auditor, ts1, ts0 in root.prev_audits %}
+            {% for auditor, ts_from, ts_to in root.prev_audits %}
                 {% if not loop.first %}<br>{% endif %}
                <a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a>
                <span title="{{ _('Duration of audition') }}" style="color:gray;">
-                  {{ts0|format_ts}} – {{ts1|format_ts}}
+                  {{ts_from|format_ts_day}} – {{ts_to|format_ts_day}}
                </span>
             {% endfor %}
             </p>
