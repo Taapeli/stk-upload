@@ -102,27 +102,16 @@ def audit_research_op(oper=None, batch_id=None):
             operation = session.get('oper')
             #request.form["oper"]
     
-        if operation == "request":
-            new_state = State.ROOT_AUDIT_REQUESTED
-            msg = _("Audit request for ") + batch_id
-        elif operation == "start":
-            new_state = State.ROOT_AUDITING
-            msg = _("Start auditing ") + batch_id
-        elif operation == "accept":
-            new_state = State.ROOT_ACCEPTED
-            msg = _("Accept auditing of ") + batch_id
-        elif operation == "withdraw":
-            new_state = State.ROOT_AUDIT_REQUESTED
-            msg = _("Withdrawing audit request for ") + batch_id
-        elif operation == "reject":
-            new_state = State.ROOT_REJECTED
-            msg = _("Reject ") + batch_id
-        # operation == "delete" -> delete_approved?
-        else:
-            return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
-
-        with RootUpdater("update") as batch_service:
-            res = batch_service.change_state(batch_id, user_id, new_state)
+        with RootUpdater("update") as serv: 
+            if operation == "request":
+                msg = _("Audit request for ") + batch_id
+                res = serv.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
+            elif operation == "withdraw":
+                msg = _("Withdrawing audit request for ") + batch_id
+                res = serv.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
+            # operation == "delete" -> delete_approved?
+            else:
+                return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
     except Exception as e:
         error_print("audit_research_op", e)
@@ -249,35 +238,28 @@ def audit_selected_op():
             operation = "withdraw"
         logger.info(f"--> bp.audit.routes.audit_selected u={user_owner} b={batch_id} {operation}")
     
-        with RootUpdater("update") as batch_service:
-    
+        with RootUpdater("update") as serv:
             if operation == "start":
                 # 5. Move from "Audit Requested" to "Auditing" state to "Accepted"
-                res = batch_service.select_auditor(batch_id, user_audit)
+                res = serv.select_auditor(batch_id, user_audit)
                 msg = _("You are now an auditor for batch ") + batch_id
-
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
-                res = batch_service.change_state(batch_id, 
-                                                 user_owner, 
-                                                 State.ROOT_ACCEPTED)
+                res = serv.change_state(batch_id, user_owner, State.ROOT_ACCEPTED)
                 msg = _("Audit batch accepted: ") + batch_id
-
             elif operation == "reject":
                 # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
-                res = batch_service.remove_auditor(batch_id, user_audit)
-                # res = batch_service.change_state(batch_id, user_owner, State.ROOT_REJECTED)
+                res = serv.remove_auditor(batch_id, user_audit)
                 msg = _("You have rejected the audition of batch %(bid)s",
                         bid=batch_id)
             elif operation == "withdraw":
                 # 8. Stop auditing this batch. New state is "Audit requested", 
                 #    if no one else is auditing.
-                #    Auditor relation changed from DOES_AUDIT to DID_AUDIT.
-                res = batch_service.remove_auditor(batch_id, user_audit)
-                d_days = int(round(res.get('d_days', 0.0), 0))
+                #    Auditor relation change from DOES_AUDIT to DID_AUDIT.
+                res = serv.remove_auditor(batch_id, user_audit)
+                d_days = int(round(res.get('d_days', 0.0)+0.5, 0))
                 msg = _("You did audit the batch %(bid)s for %(d)s days",
                         bid=batch_id, d=d_days)
-
             else:
                 return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 

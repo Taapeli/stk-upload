@@ -1434,7 +1434,7 @@ msgstr "Lopeta tarkastus (toistaiseksi)"
 
 #: bp/audit/templates/audit/pick_auditing.html:157
 msgid "Reject auditing"
-msgstr "Palauta aineisto"
+msgstr "Hylkää aineisto"
 
 #: bp/audit/templates/audit/pick_auditing.html:158
 msgid "Dicard this material"
