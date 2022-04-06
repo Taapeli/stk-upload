@@ -44,6 +44,7 @@ table     { width: 750px; }
 
 {% include "flash_messages.html" %}
 
+{# Boxes #}
         <div class="clearfix">
           <div class="box">
             <div>{{ _('Material') }}</div>
@@ -109,6 +110,7 @@ table     { width: 750px; }
           </div>
         </div>
 
+{# Statistics #}
         <div style="width: min-content;">
 
             <h2>{{ _("Objects Count") }}</h2>
@@ -129,6 +131,7 @@ table     { width: 750px; }
                 </tr>
             </table>
 
+{# Buttons #}
             <form action="/audit/selected" method="post">
                 <input type="hidden" value="{{root.id}}" name="batch_id">
                 <input type="hidden" value="{{root.material_type}}" name="material_type">

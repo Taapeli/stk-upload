@@ -284,24 +284,33 @@ def audit_selected_op():
 def audit_batch_download(batch_id, username):
     batch = Root.get_batch(username, batch_id)
     if batch:
-        xml_folder, xname = os.path.split(batch.file)
-        if batch.xmlname:
-            xname = batch.xmlname
-        abs_folder = os.path.abspath(xml_folder)
-
-        logger.info(f"--> bp.audit.routes.audit_batch_download u={username} b={batch_id} {xname}")
-        syslog.log(type="Auditor xml download", 
-                   batch=batch_id, by=f"{username} ({batch.rel_type})",
-                   file=xname)
-
-        return send_from_directory(abs_folder, xname,
-            mimetype="application/gzip",
-            as_attachment=True,
-        )
+        try:
+            xml_folder, xname = os.path.split(batch.file)
+            if batch.xmlname:
+                xname = batch.xmlname
+            abs_folder = os.path.abspath(xml_folder)
+            logger.info("--> bp.audit.routes.audit_batch_download "
+                        f"u={username} b='{batch_id}' {xname}")
+            syslog.log(type="Auditor xml download", 
+                       batch=batch_id, by=f"{username} ({batch.rel_type})",
+                       file=xname)
+    
+            return send_from_directory(
+                abs_folder, xname,
+                mimetype="application/gzip",
+                as_attachment=True,
+            )
+        except Exception as e:
+            print(f"audit_batch_download: {e.__class__.__name__}: {e}")
+            msg = _("The file does not exist any more: ") + xname
+            print(f"audit_batch_download: {msg}")
     else:
         msg = _("Not allowed to load this batch: ")+batch_id+"/"+username
-        flash(msg)
-        return msg
+
+    title = _('Error in file loading')
+    return f"<h1>{title}</h1><p><b>{msg}</b></p>"\
+        f"<p><a href='javascript:history.back()'>{ _('Return') }</a></p>"
+    return msg
 
 
 # --------------------- Delete an approved data batch ----------------------------

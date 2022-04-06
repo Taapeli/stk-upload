@@ -289,7 +289,6 @@ class Root(NodeObject):
             ).single()
             if record:
                 root = Root.from_node(record['b'])
-                root.user = username
                 root.rel_type = record.get('rel_type')
                 return root
         return None
