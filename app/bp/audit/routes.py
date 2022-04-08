@@ -172,11 +172,12 @@ def audit_pick(batch_id=None):
         print(f"bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, "
               f"auditor={i_am_auditor}, user={current_user.username}")
         can_browse = root.state_transition("browse", i_am_auditor)
+        can_download = root.state_transition("download", i_am_auditor)
         can_start = root.state_transition("start", i_am_auditor)
         can_accept = root.state_transition("accept", i_am_auditor)
         can_delete = root.state_transition("delete", i_am_auditor)
         print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
-              f"can browse={can_browse} start={can_start} "
+              f"can browse={can_browse} download={can_download} start={can_start} "
               f"accept/withdraw/reject={can_accept} delete={can_delete}")
     except Exception as e:
         error_print("audit_pick", e)
@@ -188,6 +189,7 @@ def audit_pick(batch_id=None):
         basename=os.path.basename(root.file),
         i_am_auditor=i_am_auditor,
         can_browse=can_browse,
+        can_download=can_download,
         can_start=can_start,
         can_accept=can_accept, # + withdraw and reject
         label_nodes=labels,

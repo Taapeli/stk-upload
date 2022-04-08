@@ -155,14 +155,15 @@ class Root(NodeObject):
         elif self.state == State.ROOT_AUDITING:
             if active_auditor:
                 # Withdraw/reject not used?
-                ret = oper in ["browse", "accept", "withdraw", "reject"]
+                ret = oper in \
+                ["browse", "download", "accept", "withdraw", "reject"]
             else:
-                ret = oper in ["browse", "start"]
+                ret = oper == "start"
         elif self.state == State.ROOT_ACCEPTED:
-            if active_auditor:
-                ret = oper in ["browse", "start"]
+            ret = oper == "start" or \
+                  (active_auditor and oper in ["browse", "download"])
         elif self.state == State.ROOT_REJECTED:
-            ret = ( oper in ["browse", "start"] or \
+            ret = ( oper in ["browse", "download", "start"] or \
                 (oper == "delete" and active_auditor) )
 
         # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")

@@ -1396,6 +1396,9 @@ msgstr "Selaa aineistoa"
 msgid "Download file"
 msgstr "Lataa tiedosto"
 
+msgid "You can download, if you are currently auditing"
+msgstr "Voit ladata, jos olet auditoimassa"
+
 #: bp/audit/templates/audit/pick_auditing.html:152
 msgid "Start auditing again"
 msgstr "Aloita tarkastus uudestaan"

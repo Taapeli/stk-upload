@@ -127,7 +127,7 @@ table     { width: 750px; }
                     {% for label, cnt in label_nodes %}
                     <td class="right nowrap">{{cnt|int_thousands}}</td>
                     {% endfor -%}
-                    <td class="right nowrap">{{total|int_thousands}}</td>
+                    <td class="right nowrap"><b>{{total|int_thousands}}</b></td>
                 </tr>
             </table>
 
@@ -142,17 +142,18 @@ table     { width: 750px; }
                    <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" /> 
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse"
                     {% if not can_browse %} disabled {% endif -%} />
-                   <input type="submit" value="{{ _('Download file') }}" name="download" 
-                    {% if not can_browse %} disabled {% endif -%} />
+                   <input type="submit" value="{{ _('Download file') }}" name="download"
+                       title="{{ _('You can download, if you are currently auditing') }}"
+                    {% if not can_download %} disabled {% endif -%} />
 
                    <span style="font-size:large; color:gray;"> | </span>
 
                    <input type="submit" name="start"
-                    {% if root.state == "Accepted" %}
-                       value="{{ _('Start auditing again') }}"
                        title="{{ _('Start as auditor (also the only way to delete the material)') }}"
-                    {% else %}{# "Audit requested" #}
-                       value="{{ _('Start auditing') }}" title="{{ _('Become an auditor') }}"
+                    {% if root.state == "Audit Requested" %}
+                       value="{{ _('Start auditing') }}"
+                    {% else %}{# "Accepted" #}
+                       value="{{ _('Start auditing again') }}"
                     {% endif -%}{% if not can_start %} disabled {% endif -%} />
 {% if i_am_auditor %}
                    <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
