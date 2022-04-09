@@ -141,7 +141,7 @@ match (b:Root)
 optional match (b) --> (x)
 return b as batch,
     labels(x)[0] as label, count(x) as cnt 
-    order by batch.user, batch.id'''
+    order by batch.user, batch.id desc'''
 
 #-bl.batch.root.Root.get_my_batches
     get_materials_accepted = """
@@ -164,7 +164,7 @@ match (u:UserProfile) --> (b:Root)
     where u.username = $user and b.state = 'Auditing'
 optional match (b) --> (x)
 return b as batch, count(x) as cnt 
-    order by batch.id'''
+    order by batch.id desc'''
 
 #-bl.batch.root.Root.get_batch_stats
 #-bl.batch.root.Root.list_empty_batches.Upload.get_stats
