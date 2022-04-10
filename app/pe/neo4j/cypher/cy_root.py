@@ -65,9 +65,22 @@ RETURN ID(b) AS id"""
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_state
     batch_set_state = """
 MATCH (u:UserProfile {username: $user})
-MATCH (u) -[:HAS_LOADED]-> (b:Root {id: $bid})
+MATCH (u) -[r:HAS_LOADED]-> (b:Root {id: $bid})
     SET b.state=$state
 RETURN ID(b) AS id"""
+
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_audited
+    batch_set_audited = """
+MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
+OPTIONAL MATCH (audi:UserProfile) -[r1:DOES_AUDIT]-> (b)
+WITH b, audi, r1, r1.ts_from AS fromtime
+        ORDER BY fromtime
+    CREATE (audi) -[r2:DID_AUDIT]-> (b)
+    SET r2.ts_from=fromtime
+    SET r2.ts_to=timestamp()
+    SET b.state=$state
+    DELETE r1
+RETURN COLLECT(DISTINCT audi.username) AS auditors"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
     batch_set_auditor = """
@@ -96,7 +109,7 @@ RETURN b, oth, audi, oth_cnt, ts_from, ts_to"""
 MATCH (b:Root) WHERE ID(b) = $uid
 MATCH (o:Role) <-[:HAS_ROLE]- (us:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
     WHERE o.name = "audit" and id(audi) = $audi_id
-MERGE (audi) -[newr:DID_AUDIT]-> (b)
+MERGE (audi) -[newr:DID_AUDIT]-> (b) WHERE newr.tr_to IS NULL
 SET newr.ts_to = timestamp()
 SET newr.ts_from = $fromtime
 RETURN newr"""
@@ -105,6 +118,11 @@ RETURN newr"""
     get_filename = """
 MATCH (u:UserProfile{username: $username}) -[:HAS_ACCESS]-> (b:Root {id: $batch_id})
 RETURN b.filename, u.username as username"""
+
+#-bl.batch.root.Root.get_batch_filename
+    get_batch_filename = """
+MATCH (u:UserProfile) -[:HAS_LOADED]-> (b:Root {id: $batch_id})
+RETURN b.logname as log, b.file as file, u.username as username"""
 
 #-bl.batch.root.Root.get_batch
     get_batch = """

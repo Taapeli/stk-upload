@@ -94,7 +94,7 @@ table     { width: 750px; }
           </div>
           <div class="box box3">
             <div>{{ _('Gramps file') }}</div>
-            <p><a href="/audit/batch_download/{{root.id}}/{{user}}">{{basename}}</a></p>
+            <p>{{basename}}</p>
           </div>
           <div class="box box3">
             <div>{{ _('Description') }}</div>
@@ -140,7 +140,10 @@ table     { width: 750px; }
 
                 <div class="submit">
                    <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" /> 
+                   <input type="submit" value="{{ _('Upload log') }}" name="upload_log"
+                       title="{{ _('Show upload log') }}"/>
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse"
+                       title="{{ _('You can browse, if you are currently auditing') }}"
                     {% if not can_browse %} disabled {% endif -%} />
                    <input type="submit" value="{{ _('Download file') }}" name="download"
                        title="{{ _('You can download, if you are currently auditing') }}"
@@ -150,7 +153,7 @@ table     { width: 750px; }
 
                    <input type="submit" name="start"
                        title="{{ _('Start as auditor (also the only way to delete the material)') }}"
-                    {% if root.state == "Audit Requested" %}
+                    {% if root.state == "Audit Requested" or not i_am_auditor %}
                        value="{{ _('Start auditing') }}"
                     {% else %}{# "Accepted" #}
                        value="{{ _('Start auditing again') }}"

@@ -207,6 +207,7 @@ def audit_selected_op():
     Auditor operations:
         0a "browse"    - no change
         0b "download"  - no change
+        0c "upload_log"  no change
         5. "start"     Audit request -> Auditing
         6. "accept"    Auditing -> Accepted
         7. "reject"    Auditing -> Rejected
@@ -230,6 +231,10 @@ def audit_selected_op():
             return redirect(url_for("audit.audit_batch_download", 
                                     batch_id=batch_id, 
                                     username=current_user.username))
+        elif request.form.get("upload_log"):
+            # 0b. Download Gramps file
+            return redirect(url_for("gramps.show_upload_log_from_batch_id", 
+                                    batch_id=batch_id))
         elif request.form.get("start"):
             operation = "start"
         elif request.form.get("accept"):
@@ -247,11 +252,14 @@ def audit_selected_op():
                 msg = _("You are now an auditor for batch ") + batch_id
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
-                res = serv.change_state(batch_id, user_owner, State.ROOT_ACCEPTED)
+                res = serv.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
+                auditors_list = res.get("auditors")
+                print(f"audit_selected_op: Batch {batch_id} accepted by {user_audit}, "
+                      f"auditors: {auditors_list}")
                 msg = _("Audit batch accepted: ") + batch_id
             elif operation == "reject":
                 # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
-                res = serv.remove_auditor(batch_id, user_audit)
+                res = serv.set_audited(batch_id, user_audit, State.ROOT_REJECTED)
                 msg = _("You have rejected the audition of batch %(bid)s",
                         bid=batch_id)
             elif operation == "withdraw":
@@ -292,7 +300,7 @@ def audit_batch_download(batch_id, username):
                 xname = batch.xmlname
             abs_folder = os.path.abspath(xml_folder)
             logger.info("--> bp.audit.routes.audit_batch_download "
-                        f"u={username} b='{batch_id}' {xname}")
+                        f"u={username} b={batch_id} {xname!r}")
             syslog.log(type="Auditor xml download", 
                        batch=batch_id, by=f"{username} ({batch.rel_type})",
                        file=xname)

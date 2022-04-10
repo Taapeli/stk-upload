@@ -163,8 +163,8 @@ class Root(NodeObject):
             ret = oper == "start" or \
                   (active_auditor and oper in ["browse", "download"])
         elif self.state == State.ROOT_REJECTED:
-            ret = ( oper in ["browse", "download", "start"] or \
-                (oper == "delete" and active_auditor) )
+            ret = oper == "start" or \
+                (oper == "delete" and active_auditor)
 
         # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
         return ret
@@ -272,7 +272,7 @@ class Root(NodeObject):
             return {"status": Status.ERROR, "statustext": msg}
 
     @staticmethod
-    def get_filename(username, batch_id):
+    def get_filename(username: str, batch_id: str):
         with shareds.driver.session() as session:
             record = session.run(
                 CypherRoot.get_filename, username=username, batch_id=batch_id
@@ -280,6 +280,19 @@ class Root(NodeObject):
             if record:
                 return record[0]
             return None
+
+    @staticmethod
+    def get_log_filename(batch_id: str):
+        # Returns None or Root object with user and rel_type fields
+        with shareds.driver.session() as session:
+            record = session.run(CypherRoot.get_batch_filename, 
+                                 batch_id=batch_id).single()
+            if record:
+                logname = record['log']
+                if not logname:
+                    logname = record['file'] + ".log"
+                return logname
+        return None
 
     @staticmethod
     def get_batch(username: str, batch_id: str):
@@ -596,8 +609,12 @@ class Root(NodeObject):
 
     @staticmethod
     def delete_audit(username, batch_id):
-        """Delete an audited batch having the given id."""
-        label_sets = [  # Grouped for decent size chunks in logical order
+        """Delete an audited batch having the given id.
+        
+            Process is run in multiple transactions by to save server recurses.
+            #TODO: Do not remove Root node but update state
+        """
+        label_sets = [ # Logical order
             ["Note"],
             ["Repository", "Media"],
             ["Place"],
@@ -622,12 +639,6 @@ class Root(NodeObject):
                     f"bl.audit.delete_audit: deleted {this_delete} place name nodes"
                 )
                 deleted += this_delete
-
-                # result = tx.run(CypherAudit.delete_citations,
-                #                 batch=batch_id)
-                # this_delete = result.single()[0]
-                # print(f"bl.audit.delete_audit: deleted {this_delete} citation nodes")
-                # deleted += this_delete
 
             # Delete the directly connected node types as defined by the labels
             for labels in label_sets:

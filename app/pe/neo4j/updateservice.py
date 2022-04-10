@@ -185,6 +185,19 @@ class Neo4jUpdateService(ConcreteService):
         uniq_id = result.single()[0]
         return {"status": Status.OK, "identity": uniq_id}
 
+    def ds_batch_set_audited(self, batch_id, user, state):
+        """Updates the auditing Batch node selected by Batch id and auditor links.
+           For each auditor, DOES_AUDIT relation is replaced by DID_AUDIT with
+           also ending timestamp.
+        
+            #TODO. Should also mark some way, who did accept/reject this!
+        """
+        result = self.tx.run(
+            CypherRoot.batch_set_audited, bid=batch_id, user=user, state=state
+        )
+        auditors = result.single()[0]
+        return {"status": Status.OK, "auditors": auditors}
+
 
     def ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
         """Updates Batch node selected by Batch id and user.

@@ -123,6 +123,12 @@ class RootUpdater(DataService):
     #         )
     #         return {"status": Status.ERROR, "statustext": statustext}
 
+    def set_audited(self, batch_id, user_audit, b_state):
+        """ Set batch status and mark all auditions completed.
+        """
+        res = self.dataservice.ds_batch_set_audited(batch_id, user_audit, b_state)
+        return res
+
     def change_state(self, batch_id, username, b_state):
         """ Set this data batch status. """
         res = self.dataservice.ds_batch_set_state(batch_id, username, b_state)
@@ -134,6 +140,7 @@ class RootUpdater(DataService):
 
         allowed_states = [State.ROOT_AUDIT_REQUESTED,
                           State.ROOT_AUDITING,
+                          State.ROOT_ACCEPTED,
                           State.ROOT_REJECTED]
         res = self.dataservice.ds_batch_set_auditor(batch_id,
                                                     auditor_username, 

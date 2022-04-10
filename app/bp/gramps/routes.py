@@ -214,20 +214,6 @@ def xml_delete(xmlfile):
     syslog.log(type="gramps file deleted", file=xmlfile)
     return redirect(url_for("gramps.list_uploads"))
 
-
-# @bp.route("/gramps/xml_download/<xmlfile>")
-# @login_required
-# @roles_accepted("research", "admin")
-# def xml_download(xmlfile):
-#     xml_folder = uploads.get_upload_folder(current_user.username)
-#     xml_folder = os.path.abspath(xml_folder)
-#     return send_from_directory(
-#         directory=xml_folder,
-#         filename=xmlfile,
-#         mimetype="application/gzip",
-#         as_attachment=True,
-#     )
-
 @bp.route("/gramps/batch_download/<batch_id>")
 @login_required
 @roles_accepted("research", "admin")
@@ -280,18 +266,18 @@ def download_checked_file(batch_id):
 def show_upload_log_from_batch_id(batch_id):
     msg=""
     try:
-        batch = Root.get_batch(current_user.username, batch_id)
-        if batch.file and not batch.logname:
-            # Old style v2021.1 Root without logname info
-            batch.logname = batch.file + ".log"        
-        msg = open(batch.logname, encoding="utf-8").read()
-        logger.info(f"-> bp.gramps.routes.show_upload_log_from_batch_id f='{batch.logname}'")
+        logname = Root.get_log_filename(batch_id)
+        msg = open(logname, encoding="utf-8").read()
+        logger.info(f"-> bp.gramps.routes.show_upload_log_from_batch_id f='{logname}'")
     except Exception as e:
         print(f"bp.gramps.routes.show_upload_log_from_batch_id: {e}")
         if not msg:
             msg = _("The log file for \"%(n)s\" does not exist any more", n=batch_id)
-        flash(msg)
-        return redirect(url_for("gramps.list_uploads"))
+        #flash(msg)
+        #return redirect(url_for("gramps.list_uploads"))
+        title = _('Error in file loading')
+        return f"<h1>{title}</h1><p><b>{msg}</b></p>"\
+            f"<p><a href='javascript:history.back()'>{ _('Return') }</a></p>"
 
     return render_template("/admin/load_result.html", msg=msg)
 

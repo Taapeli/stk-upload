@@ -1240,6 +1240,8 @@ msgid "Auditing time"
 msgstr "Tarkastuksen kesto"
 
 #: bp/audit/templates/audit/batches.html:109 ui/batch_ops.py:36
+msgid "Upload log"
+msgstr "Latausloki"
 msgid "Show upload log"
 msgstr "Näytä latauksen loki"
 
@@ -1340,7 +1342,7 @@ msgstr "Valitse Tarkastajan toiminto"
 
 #: bp/audit/templates/audit/pick_auditing.html:43
 msgid "Auditing Researcher's Material"
-msgstr "Tutkijan aineiston tarkastus"
+msgstr "Aineiston tarkastus"
 
 #: bp/audit/templates/audit/pick_auditing.html:57 ui/jinja_filters.py:246
 msgid "State"
@@ -1398,7 +1400,9 @@ msgstr "Lataa tiedosto"
 
 #: bp/audit/templates/audit/pick_auditing.html:146
 msgid "You can download, if you are currently auditing"
-msgstr "Voit ladata, jos olet auditoimassa"
+msgstr "Voit ladata Gramps-tiedoston, jos olet auditoimassa"
+msgid "You can browse, if you are currently auditing"
+msgstr "Voit selata, jos olet auditoimassa"
 
 #: bp/audit/templates/audit/pick_auditing.html:152
 msgid "Start as auditor (also the only way to delete the material)"
