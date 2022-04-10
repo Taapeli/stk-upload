@@ -52,6 +52,19 @@ def do_schema_fixes():
         if stats_removed:
             print(f" -- removed {stats_removed} old stats with forwards link (:Root) -[:STATS]-> (:Stats)")
             # New stats are created with backwards link (:Root) <-[:STATS]- (:Stats)")
+
+    DOES_AUDIT_ts = """
+        MATCH () -[r:DOES_AUDIT]-> () WHERE NOT r.timestamp IS null
+            SET r.ts_from = r.timestamp
+            SET r.timestamp = null        
+        """
+    with shareds.driver.session() as session: 
+        result = session.run(DOES_AUDIT_ts)
+        counters = shareds.db.consume_counters(result)
+        rel_changed = int(counters.properties_set / 2)
+        if rel_changed:
+            print(f" -- updated properties in {rel_changed} DOES_AUDIT relations")
+
     return
 
     # --- For DB_SCHEMA_VERSION = '2021.2.0.4', deleted 22.1.2022/JMä

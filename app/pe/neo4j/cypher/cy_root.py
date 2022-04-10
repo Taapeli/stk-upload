@@ -65,9 +65,22 @@ RETURN ID(b) AS id"""
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_state
     batch_set_state = """
 MATCH (u:UserProfile {username: $user})
-MATCH (u) -[:HAS_LOADED]-> (b:Root {id: $bid})
+MATCH (u) -[r:HAS_LOADED]-> (b:Root {id: $bid})
     SET b.state=$state
 RETURN ID(b) AS id"""
+
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_audited
+    batch_set_audited = """
+MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
+OPTIONAL MATCH (audi:UserProfile) -[r1:DOES_AUDIT]-> (b)
+WITH b, audi, r1, r1.ts_from AS fromtime
+        ORDER BY fromtime
+    CREATE (audi) -[r2:DID_AUDIT]-> (b)
+    SET r2.ts_from=fromtime
+    SET r2.ts_to=timestamp()
+    SET b.state=$state
+    DELETE r1
+RETURN COLLECT(DISTINCT audi.username) AS auditors"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
     batch_set_auditor = """
@@ -76,7 +89,7 @@ MATCH (audi:UserProfile {username: $audi})
     SET b.state = "Auditing"
     //MERGE (audi) -[:HAS_ACCESS]-> (b)
     MERGE (audi) -[r:DOES_AUDIT]-> (b)
-    SET r.timestamp = timestamp()
+    SET r.ts_from = timestamp()
 RETURN ID(b) AS id"""
 
 #TODO: parameter new_state = "Audit Requested"
@@ -86,23 +99,30 @@ MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
 OPTIONAL MATCH (oth:UserProfile) -[:DOES_AUDIT]-> (b)
     WHERE oth.username <> $audi
 OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[oldr:DOES_AUDIT]-> (b)
-WITH b, oth, audi, oldr, oldr.timestamp AS time, COUNT(oth) AS oth_cnt
-  SET (CASE WHEN oth_cnt = 0 THEN b END).state = $new_state
-  DELETE oldr
-RETURN b, oth, audi, oth_cnt, time"""
+WITH b, oth, audi, oldr, COUNT(oth) AS oth_cnt,
+    oldr.ts_from AS ts_from, 
+    oldr.ts_to AS ts_to
+SET (CASE WHEN oth_cnt = 0 THEN b END).state = $new_state
+DELETE oldr
+RETURN b, oth, audi, oth_cnt, ts_from, ts_to"""
     link_old_auditor = """
 MATCH (b:Root) WHERE ID(b) = $uid
 MATCH (o:Role) <-[:HAS_ROLE]- (us:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
     WHERE o.name = "audit" and id(audi) = $audi_id
-MERGE (audi) -[newr:DID_AUDIT]-> (b)
-SET newr.timestamp = timestamp()
-SET newr.timefrom = $fromtime
+MERGE (audi) -[newr:DID_AUDIT]-> (b) WHERE newr.tr_to IS NULL
+SET newr.ts_to = timestamp()
+SET newr.ts_from = $fromtime
 RETURN newr"""
 
 #-bl.batch.root.Root.get_filename
     get_filename = """
 MATCH (u:UserProfile{username: $username}) -[:HAS_ACCESS]-> (b:Root {id: $batch_id})
 RETURN b.filename, u.username as username"""
+
+#-bl.batch.root.Root.get_batch_filename
+    get_batch_filename = """
+MATCH (u:UserProfile) -[:HAS_LOADED]-> (b:Root {id: $batch_id})
+RETURN b.logname as log, b.file as file, u.username as username"""
 
 #-bl.batch.root.Root.get_batch
     get_batch = """
@@ -139,7 +159,7 @@ match (b:Root)
 optional match (b) --> (x)
 return b as batch,
     labels(x)[0] as label, count(x) as cnt 
-    order by batch.user, batch.id'''
+    order by batch.user, batch.id desc'''
 
 #-bl.batch.root.Root.get_my_batches
     get_materials_accepted = """
@@ -162,23 +182,23 @@ match (u:UserProfile) --> (b:Root)
     where u.username = $user and b.state = 'Auditing'
 optional match (b) --> (x)
 return b as batch, count(x) as cnt 
-    order by batch.id'''
+    order by batch.id desc'''
 
 #-bl.batch.root.Root.get_batch_stats
 #-bl.batch.root.Root.list_empty_batches.Upload.get_stats
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_get_batch
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_get_batch (Obsolete!)
     get_single_batch = '''
 match (up:UserProfile) -[r:HAS_LOADED]-> (b:Root {id:$batch})
 optional match (acc:UserProfile) -[:HAS_ACCESS]-> (b)
     where not up.username = acc.username
 optional match (b) --> (x)
-optional match (ap:UserProfile) -[ar:DOES_AUDIT]-> (b)
+optional match (aup:UserProfile) -[aur:DOES_AUDIT]-> (b)
 optional match (pap:UserProfile) -[par:DID_AUDIT]-> (b)
 return up as profile, b as root,
     labels(x)[0] as label, 
     count(x) as cnt,
-    collect(distinct [ap.username,ar.timestamp]) as auditors,
-    collect(distinct [pap.username,par.timestamp,par.timefrom]) as prev_audits,
+    collect(distinct [aup.username,aur.ts_from,aur.ts_to]) as auditors,
+    collect(distinct [pap.username,par.ts_from,par.ts_to]) as prev_audits,
     collect(distinct acc.username) as has_access
 '''
 
@@ -189,10 +209,12 @@ match (u:UserProfile) -[:HAS_LOADED]-> (root:Root)
 optional match (audi:UserProfile) -[ar:DOES_AUDIT]-> (root)
 optional match (root) -[r:OBJ_PERSON]-> (:Person)
 with u, audi, root, count(r) as person_count,
-    audi.username as auditor, ar.timestamp as a_time
+    audi.username as auditor,
+    ar.ts_from as ts_from,
+    ar.ts_to as ts_to
 return u.name as u_name, 
     root, person_count,
-    collect(distinct [auditor,a_time]) as auditors
+    collect(distinct [auditor, ts_from, ts_to]) as auditors
 order by root.id"""
 
 # #-bl.batch.root.Root.list_empty_batches

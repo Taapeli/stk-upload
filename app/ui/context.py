@@ -181,7 +181,9 @@ class UserContext:
         """
         from bl.batch.root import State
         return self.material.breed == MATERIAL_COMMON or \
-            self.material.state == State.ROOT_ACCEPTED
+            self.material.state == State.ROOT_ACCEPTED or \
+            (self.is_auditor and \
+             self.material.state == State.ROOT_AUDIT_REQUESTED)
 
     def use_case(self) -> str:
         """ Return current use case ("common" or "batch") as string.

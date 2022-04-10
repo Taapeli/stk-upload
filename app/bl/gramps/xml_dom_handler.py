@@ -149,7 +149,7 @@ class DOM_handler:
                          "count": f"{material_type} {description!r}\n"}
                     )
                     return material_type, description
-        return None
+        return None, None
 
     def get_isotammi_metadata(self, isotammi_node):
         material_type = None

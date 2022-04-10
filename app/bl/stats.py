@@ -177,7 +177,7 @@ class StatsBuilder:
             cnt_events = record['cnt_events']
             cnt_citations = record['cnt_citations']
             pct = round(100*cnt_citations / cnt_events)
-            print(f"{typename:20.20} {cnt_events:5} {cnt_citations:5} {pct}%")
+            print(f"{typename:20.20} {cnt_events:5} {cnt_citations:5} {pct:5}%")
             data = (typename, (cnt_events, cnt_citations, pct))
             event_stats.append(data)
             

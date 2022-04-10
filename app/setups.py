@@ -334,13 +334,15 @@ def _jinja2_filter_translate(term, var_name):
     """
     return jinja_filters.translate(term, var_name)
 
-@shareds.app.template_filter('format_ts')
-def _jinja2_filter_timestamp_ms(ms):
-    """ Given term is translated depending of var_name name.
+@shareds.app.template_filter('format_ts_min')
+def _jinja2_filter_timestamp_ms_min(ms):
+    """ Neo4j timestamp to string with minute precision. """
+    return jinja_filters.timestamp_ms(ms, minutes=True)
 
-        Example: event type code e.type in jinja template: {{e.type|transl('evt')}}
-    """
-    return jinja_filters.timestamp_ms(ms)
+@shareds.app.template_filter('format_ts_day')
+def _jinja2_filter_timestamp_ms_day(ms):
+    """ Neo4j timestamp to string with day precision. """
+    return jinja_filters.timestamp_ms(ms, minutes=False)
 
 @shareds.app.template_filter('is_list') # Not in use?
 def _is_list(value):

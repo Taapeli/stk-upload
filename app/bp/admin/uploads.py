@@ -324,7 +324,7 @@ def list_uploads(username:str) -> List[Upload]:
         #            'id': '2021-05-07.001', 'user': 'jpek', 
         #            'timestamp': 1620403991562, ...}> 
         #    person_count=64
-        #    auditors=[["juha",1630474129763]]
+        #    auditors=[["juha",1630474129763,None]]
         # >
         b: Root = Root.from_node(record["root"])
         u_name = record["u_name"]
@@ -333,12 +333,12 @@ def list_uploads(username:str) -> List[Upload]:
         # NOTE: meta file 'status' ~ Uploads.state!
         # print(f"#bp.admin.uploads.list_uploads: root:{b.state}, meta:{meta.get('status')}")
         auditors = []
-        for au_user, ts in record['auditors']:
-            # ["juha",1630474129763]
+        for au_user, ts_from, ts_to in record['auditors']:
+            # ["juha",1630474129763,None]
             if au_user:
-                ts_str = util.format_ms_timestamp(ts, "d")
+                #ts_str = util.format_ms_timestamp(ts, "d")
                 # ["juha",1630474129763,"1.9.2021"]
-                auditors.append((au_user, ts, ts_str))
+                auditors.append((au_user, ts_from, ts_to))
 
         upload = Upload(
             batch_id=b.id,

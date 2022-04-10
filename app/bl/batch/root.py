@@ -142,26 +142,29 @@ class Root(NodeObject):
         except Exception:
             return ""
 
-    def state_transition(self, oper:str) -> bool:
-        """ Allowed auditor operations and state transitions.
+    def state_transition(self, oper:str, active_auditor:bool=False) -> bool:
+        """ Allowed auditor operations.
 
-        Some operations may be depending on i_am_auditor (if you are
+        Some operations may require active auditor role (you are
         registered as auditor for this batch).
 
-        For current (self.state, oper) returns one of following -
-            - True, if allowed operation
-            - False, if not allowed
+        Returns True, if allowed operation
         """
-        # Allowed transitions
         if self.state == State.ROOT_AUDIT_REQUESTED:
             ret = oper in ["browse", "start"]
         elif self.state == State.ROOT_AUDITING:
-            # Presuming you are one of auditors. (withdraw/reject not used)
-            ret = oper in ["browse", "accept", "withdraw", "reject"]
+            if active_auditor:
+                # Withdraw/reject not used?
+                ret = oper in \
+                ["browse", "download", "accept", "withdraw", "reject"]
+            else:
+                ret = oper == "start"
         elif self.state == State.ROOT_ACCEPTED:
-            ret = oper in ["browse", "start"]
+            ret = oper == "start" or \
+                  (active_auditor and oper in ["browse", "download"])
         elif self.state == State.ROOT_REJECTED:
-            ret = oper in ["browse", "start", "delete"]
+            ret = oper == "start" or \
+                (oper == "delete" and active_auditor)
 
         # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
         return ret
@@ -269,7 +272,7 @@ class Root(NodeObject):
             return {"status": Status.ERROR, "statustext": msg}
 
     @staticmethod
-    def get_filename(username, batch_id):
+    def get_filename(username: str, batch_id: str):
         with shareds.driver.session() as session:
             record = session.run(
                 CypherRoot.get_filename, username=username, batch_id=batch_id
@@ -277,6 +280,19 @@ class Root(NodeObject):
             if record:
                 return record[0]
             return None
+
+    @staticmethod
+    def get_log_filename(batch_id: str):
+        # Returns None or Root object with user and rel_type fields
+        with shareds.driver.session() as session:
+            record = session.run(CypherRoot.get_batch_filename, 
+                                 batch_id=batch_id).single()
+            if record:
+                logname = record['log']
+                if not logname:
+                    logname = record['file'] + ".log"
+                return logname
+        return None
 
     @staticmethod
     def get_batch(username: str, batch_id: str):
@@ -287,7 +303,6 @@ class Root(NodeObject):
             ).single()
             if record:
                 root = Root.from_node(record['b'])
-                root.user = username
                 root.rel_type = record.get('rel_type')
                 return root
         return None
@@ -422,7 +437,9 @@ class Root(NodeObject):
 
     @staticmethod
     def get_batch_stats(batch_id):
-        """Get statistics of given Batch contents (for bp.audit.routes.audit_pick).
+        """Get statistics of given Batch contents.
+
+           Called from bp.audit.routes.audit_pick
         """
         labels = []
         user = None
@@ -445,8 +462,8 @@ class Root(NodeObject):
             #            'user': 'aku', 'timestamp': 1622140130273}>
             #    label='Person'
             #    cnt=6
-            #    auditors=['juha',1620570475208]
-            #    prev_audits=['joku',1648739430163,1630402986262]
+            #    auditors=['juha',1620570475208,None]
+            #    prev_audits=['joku',1630402986262,1648739430163]
             #    has_access=['jpek']
             # >
             if node is None or \
@@ -456,17 +473,18 @@ class Root(NodeObject):
                 user = record['profile']['username']
                 node = record["root"]
                 b = Root.from_node(node)
-                b.has_access = record['has_access'] # Users granted special access
+                # Users granted special access
+                b.has_access = record['has_access'] 
                 b.auditors = []
-                for au_user, ms in record["auditors"]:
+                for au_user, ms_from, ms_to in record["auditors"]:
                     # [username, time_start]
                     if au_user:
-                        b.auditors.append([au_user, ms]) #, format_ms_timestamp(ms)])
+                        b.auditors.append([au_user, ms_from, ms_to])
                 b.prev_audits = []
-                for au_user, ms1, ms0 in record["prev_audits"]:
+                for au_user, ms_from, ms_to in record["prev_audits"]:
                     # [username, time_end, time_start]
                     if au_user:
-                        b.prev_audits.append([au_user, ms1, ms0])
+                        b.prev_audits.append([au_user, ms_from, ms_to])
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -591,8 +609,12 @@ class Root(NodeObject):
 
     @staticmethod
     def delete_audit(username, batch_id):
-        """Delete an audited batch having the given id."""
-        label_sets = [  # Grouped for decent size chunks in logical order
+        """Delete an audited batch having the given id.
+        
+            Process is run in multiple transactions by to save server recurses.
+            #TODO: Do not remove Root node but update state
+        """
+        label_sets = [ # Logical order
             ["Note"],
             ["Repository", "Media"],
             ["Place"],
@@ -617,12 +639,6 @@ class Root(NodeObject):
                     f"bl.audit.delete_audit: deleted {this_delete} place name nodes"
                 )
                 deleted += this_delete
-
-                # result = tx.run(CypherAudit.delete_citations,
-                #                 batch=batch_id)
-                # this_delete = result.single()[0]
-                # print(f"bl.audit.delete_audit: deleted {this_delete} citation nodes")
-                # deleted += this_delete
 
             # Delete the directly connected node types as defined by the labels
             for labels in label_sets:

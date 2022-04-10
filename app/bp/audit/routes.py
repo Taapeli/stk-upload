@@ -102,27 +102,16 @@ def audit_research_op(oper=None, batch_id=None):
             operation = session.get('oper')
             #request.form["oper"]
     
-        if operation == "request":
-            new_state = State.ROOT_AUDIT_REQUESTED
-            msg = _("Audit request for ") + batch_id
-        elif operation == "start":
-            new_state = State.ROOT_AUDITING
-            msg = _("Start auditing ") + batch_id
-        elif operation == "accept":
-            new_state = State.ROOT_ACCEPTED
-            msg = _("Accept auditing of ") + batch_id
-        elif operation == "withdraw":
-            new_state = State.ROOT_AUDIT_REQUESTED
-            msg = _("Withdrawing audit request for ") + batch_id
-        elif operation == "reject":
-            new_state = State.ROOT_REJECTED
-            msg = _("Reject ") + batch_id
-        # operation == "delete" -> delete_approved?
-        else:
-            return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
-
-        with RootUpdater("update") as batch_service:
-            res = batch_service.change_state(batch_id, user_id, new_state)
+        with RootUpdater("update") as serv: 
+            if operation == "request":
+                msg = _("Audit request for ") + batch_id
+                res = serv.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
+            elif operation == "withdraw":
+                msg = _("Withdrawing audit request for ") + batch_id
+                res = serv.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
+            # operation == "delete" -> delete_approved?
+            else:
+                return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
     except Exception as e:
         error_print("audit_research_op", e)
@@ -182,12 +171,13 @@ def audit_pick(batch_id=None):
         i_am_auditor = (current_user.username in auditor_names)
         print(f"bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, "
               f"auditor={i_am_auditor}, user={current_user.username}")
-        can_browse = root.state_transition("browse")
-        can_start = root.state_transition("start")
-        can_accept = root.state_transition("accept") and i_am_auditor
-        can_delete = root.state_transition("delete")
+        can_browse = root.state_transition("browse", i_am_auditor)
+        can_download = root.state_transition("download", i_am_auditor)
+        can_start = root.state_transition("start", i_am_auditor)
+        can_accept = root.state_transition("accept", i_am_auditor)
+        can_delete = root.state_transition("delete", i_am_auditor)
         print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
-              f"can browse={can_browse} start={can_start} "
+              f"can browse={can_browse} download={can_download} start={can_start} "
               f"accept/withdraw/reject={can_accept} delete={can_delete}")
     except Exception as e:
         error_print("audit_pick", e)
@@ -199,6 +189,7 @@ def audit_pick(batch_id=None):
         basename=os.path.basename(root.file),
         i_am_auditor=i_am_auditor,
         can_browse=can_browse,
+        can_download=can_download,
         can_start=can_start,
         can_accept=can_accept, # + withdraw and reject
         label_nodes=labels,
@@ -216,6 +207,7 @@ def audit_selected_op():
     Auditor operations:
         0a "browse"    - no change
         0b "download"  - no change
+        0c "upload_log"  no change
         5. "start"     Audit request -> Auditing
         6. "accept"    Auditing -> Accepted
         7. "reject"    Auditing -> Rejected
@@ -239,6 +231,10 @@ def audit_selected_op():
             return redirect(url_for("audit.audit_batch_download", 
                                     batch_id=batch_id, 
                                     username=current_user.username))
+        elif request.form.get("upload_log"):
+            # 0b. Download Gramps file
+            return redirect(url_for("gramps.show_upload_log_from_batch_id", 
+                                    batch_id=batch_id))
         elif request.form.get("start"):
             operation = "start"
         elif request.form.get("accept"):
@@ -249,35 +245,31 @@ def audit_selected_op():
             operation = "withdraw"
         logger.info(f"--> bp.audit.routes.audit_selected u={user_owner} b={batch_id} {operation}")
     
-        with RootUpdater("update") as batch_service:
-    
+        with RootUpdater("update") as serv:
             if operation == "start":
                 # 5. Move from "Audit Requested" to "Auditing" state to "Accepted"
-                res = batch_service.select_auditor(batch_id, user_audit)
+                res = serv.select_auditor(batch_id, user_audit)
                 msg = _("You are now an auditor for batch ") + batch_id
-
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
-                res = batch_service.change_state(batch_id, 
-                                                 user_owner, 
-                                                 State.ROOT_ACCEPTED)
+                res = serv.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
+                auditors_list = res.get("auditors")
+                print(f"audit_selected_op: Batch {batch_id} accepted by {user_audit}, "
+                      f"auditors: {auditors_list}")
                 msg = _("Audit batch accepted: ") + batch_id
-
             elif operation == "reject":
                 # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
-                res = batch_service.remove_auditor(batch_id, user_audit)
-                # res = batch_service.change_state(batch_id, user_owner, State.ROOT_REJECTED)
+                res = serv.set_audited(batch_id, user_audit, State.ROOT_REJECTED)
                 msg = _("You have rejected the audition of batch %(bid)s",
                         bid=batch_id)
             elif operation == "withdraw":
                 # 8. Stop auditing this batch. New state is "Audit requested", 
                 #    if no one else is auditing.
-                #    Auditor relation changed from DOES_AUDIT to DID_AUDIT.
-                res = batch_service.remove_auditor(batch_id, user_audit)
-                d_days = int(round(res.get('d_days', 0.0), 0))
+                #    Auditor relation change from DOES_AUDIT to DID_AUDIT.
+                res = serv.remove_auditor(batch_id, user_audit)
+                d_days = int(round(res.get('d_days', 0.0)+0.5, 0))
                 msg = _("You did audit the batch %(bid)s for %(d)s days",
                         bid=batch_id, d=d_days)
-
             else:
                 return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
@@ -302,24 +294,33 @@ def audit_selected_op():
 def audit_batch_download(batch_id, username):
     batch = Root.get_batch(username, batch_id)
     if batch:
-        xml_folder, xname = os.path.split(batch.file)
-        if batch.xmlname:
-            xname = batch.xmlname
-        abs_folder = os.path.abspath(xml_folder)
-
-        logger.info(f"--> bp.audit.routes.audit_batch_download u={username} b={batch_id} {xname}")
-        syslog.log(type="Auditor xml download", 
-                   batch=batch_id, by=f"{username} ({batch.rel_type})",
-                   file=xname)
-
-        return send_from_directory(abs_folder, xname,
-            mimetype="application/gzip",
-            as_attachment=True,
-        )
+        try:
+            xml_folder, xname = os.path.split(batch.file)
+            if batch.xmlname:
+                xname = batch.xmlname
+            abs_folder = os.path.abspath(xml_folder)
+            logger.info("--> bp.audit.routes.audit_batch_download "
+                        f"u={username} b={batch_id} {xname!r}")
+            syslog.log(type="Auditor xml download", 
+                       batch=batch_id, by=f"{username} ({batch.rel_type})",
+                       file=xname)
+    
+            return send_from_directory(
+                abs_folder, xname,
+                mimetype="application/gzip",
+                as_attachment=True,
+            )
+        except Exception as e:
+            print(f"audit_batch_download: {e.__class__.__name__}: {e}")
+            msg = _("The file does not exist any more: ") + xname
+            print(f"audit_batch_download: {msg}")
     else:
         msg = _("Not allowed to load this batch: ")+batch_id+"/"+username
-        flash(msg)
-        return msg
+
+    title = _('Error in file loading')
+    return f"<h1>{title}</h1><p><b>{msg}</b></p>"\
+        f"<p><a href='javascript:history.back()'>{ _('Return') }</a></p>"
+    return msg
 
 
 # --------------------- Delete an approved data batch ----------------------------

@@ -51,7 +51,7 @@ def format_timestamp(ts=None):
     if ts is None: ts = time.time()
     return time.strftime("%d.%m.%Y %H:%M", time.localtime(ts))
 
-def format_ms_timestamp(ts_ms=None, opt="m"):
+def format_ms_timestamp(ts_ms=None, minutes=True):
     """Converts timestamp (ms since the Epoch) to string (by 'm' minute or 'd' day)
        Returns "", is no ts is given.
 
@@ -59,10 +59,10 @@ def format_ms_timestamp(ts_ms=None, opt="m"):
     """
     if ts_ms:
         ts = float(ts_ms) / 1000.
-        if opt == "d":
-            return time.strftime("%-d.%-m.%Y", time.localtime(ts))
-        else:
+        if minutes:
             return time.strftime("%-d.%-m.%Y %H:%M", time.localtime(ts))
+        else:
+            return time.strftime("%-d.%-m.%Y", time.localtime(ts))
     return ""
 
 def format_date(ts=None):

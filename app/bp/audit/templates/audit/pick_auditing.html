@@ -44,6 +44,7 @@ table     { width: 750px; }
 
 {% include "flash_messages.html" %}
 
+{# Boxes #}
         <div class="clearfix">
           <div class="box">
             <div>{{ _('Material') }}</div>
@@ -74,25 +75,26 @@ table     { width: 750px; }
           <div class="box" style="background-color: seashell;">
             <div>{{ _("Current auditors") }}</div>
             <p>
-            {% for auditor, ts in root.auditors %}
+            {% for auditor, ts_from, ts_to in root.auditors %}
                 {% if not loop.first %}<br>{% endif %}
                <b><a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a></b>
-               <span title="{{ _('Audit start date') }}">{{ts|format_ts}}</span>
+               <span title="{{ _('Auditing time') }}">
+                  {{ts_from|format_ts_day}} – {{ts_to|format_ts_day}}</span>
             {% endfor %}
-            {% for auditor, ts1, ts0 in root.prev_audits %}
-                {% if not loop.first %}<br>{% endif %}
+            {% for auditor, ts_from, ts_to in root.prev_audits %}
+                {% if root.auditors or not loop.first %}<br>{% endif %}
                <a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a>
                <span title="{{ _('Duration of audition') }}" style="color:gray;">
-                  {{ts0|format_ts}} – {{ts1|format_ts}}
+                  {{ts_from|format_ts_day}} – {{ts_to|format_ts_day}}
                </span>
             {% endfor %}
             </p>
           </div>
           <div class="box box3">
             <div>{{ _('Gramps file') }}</div>
-            <p><a href="/audit/batch_download/{{root.id}}/{{user}}">{{basename}}</a></p>
+            <p>{{basename}}</p>
           </div>
           <div class="box box3">
             <div>{{ _('Description') }}</div>
@@ -108,6 +110,7 @@ table     { width: 750px; }
           </div>
         </div>
 
+{# Statistics #}
         <div style="width: min-content;">
 
             <h2>{{ _("Objects Count") }}</h2>
@@ -124,10 +127,11 @@ table     { width: 750px; }
                     {% for label, cnt in label_nodes %}
                     <td class="right nowrap">{{cnt|int_thousands}}</td>
                     {% endfor -%}
-                    <td class="right nowrap">{{total|int_thousands}}</td>
+                    <td class="right nowrap"><b>{{total|int_thousands}}</b></td>
                 </tr>
             </table>
 
+{# Buttons #}
             <form action="/audit/selected" method="post">
                 <input type="hidden" value="{{root.id}}" name="batch_id">
                 <input type="hidden" value="{{root.material_type}}" name="material_type">
@@ -135,20 +139,24 @@ table     { width: 750px; }
                 <input type="hidden" value="{{user}}" name="user">
 
                 <div class="submit">
-                   <input type="submit" value="{{ _('Return') }}" name="cancel" /> 
+                   <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" /> 
+                   <input type="submit" value="{{ _('Upload log') }}" name="upload_log"
+                       title="{{ _('Show upload log') }}"/>
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse"
+                       title="{{ _('You can browse, if you are currently auditing') }}"
                     {% if not can_browse %} disabled {% endif -%} />
-                   <input type="submit" value="{{ _('Download file') }}" name="download" 
-                    {% if not can_browse %} disabled {% endif -%} />
+                   <input type="submit" value="{{ _('Download file') }}" name="download"
+                       title="{{ _('You can download, if you are currently auditing') }}"
+                    {% if not can_download %} disabled {% endif -%} />
 
                    <span style="font-size:large; color:gray;"> | </span>
 
                    <input type="submit" name="start"
-                    {% if root.state == "Accepted" %}
-                       value="{{ _('Start auditing again') }}"
                        title="{{ _('Start as auditor (also the only way to delete the material)') }}"
-                    {% else %}{# "Audit requested" #}
-                       value="{{ _('Start auditing') }}" title="{{ _('Become an auditor') }}"
+                    {% if root.state == "Audit Requested" or not i_am_auditor %}
+                       value="{{ _('Start auditing') }}"
+                    {% else %}{# "Accepted" #}
+                       value="{{ _('Start auditing again') }}"
                     {% endif -%}{% if not can_start %} disabled {% endif -%} />
 {% if i_am_auditor %}
                    <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
@@ -160,6 +168,10 @@ table     { width: 750px; }
                    <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
                        title="{{ _('Dicard this material') }}"
                     {% if not can_accept %} disabled {% endif -%} />
+{% endif -%}
+{% if can_delete %}
+                   <input type="submit" value="{{ _('Delete batch') }}" name="delete"
+                       title="{{ _('The material and files are deleted permanetly') }}"/>
 {% endif -%}
                 </div>
             </form>
