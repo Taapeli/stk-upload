@@ -70,17 +70,27 @@ MATCH (u) -[r:HAS_LOADED]-> (b:Root {id: $bid})
 RETURN ID(b) AS id"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_audited
-    batch_set_audited = """
-MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
-OPTIONAL MATCH (audi:UserProfile) -[r1:DOES_AUDIT]-> (b)
-WITH b, audi, r1, r1.ts_from AS fromtime
-        ORDER BY fromtime
+    batch_set_i_audited = """
+MATCH (audi:UserProfile) -[r1:DOES_AUDIT]-> (root:Root)
+    WHERE audi.username = $audi AND root.id = $bid AND root.state = "Auditing"
+WITH root, audi, r1, r1.ts_from AS fromtime1
     CREATE (audi) -[r2:DID_AUDIT]-> (b)
-    SET r2.ts_from=fromtime
+    SET r2.ts_from=fromtime1
     SET r2.ts_to=timestamp()
-    SET b.state=$state
+    SET root.state=$state
+    SET root.audited=$audi
     DELETE r1
-RETURN COLLECT(DISTINCT audi.username) AS auditors"""
+RETURN root, r2 AS relation_new"""
+    batch_compelete_auditors = """
+MATCH (audi:UserProfile) -[r3:DOES_AUDIT|DID_AUDIT]-> (root)
+    WHERE id(root) = $uid AND r3.ts_end IS NULL
+WITH audi, r3
+    CREATE (audi) -[r4:DID_AUDIT]-> (root)
+    SET r4.ts_from=r3.ts_from
+    SET r4.ts_to=$ts
+    DELETE r3
+RETURN audi.username AS user, r4 as relation_new"""
+
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
     batch_set_auditor = """

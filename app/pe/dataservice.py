@@ -116,15 +116,15 @@ class DataService:
                     self.dataservice.tx.rollback()
             else:
                 if self.old_tx is None:
-                    logger.info(f'#~~~{self.idstr} exit commit tx={obj_addr(self.dataservice.tx)}')
+                    logger.debug(f'#~~~{self.idstr} exit commit tx={obj_addr(self.dataservice.tx)}')
                     try:
                         self.dataservice.tx.commit()
                     except Exception as e:
                         logger.error(f'#~~~{self.idstr} exit commit FAILED, {e.__class__.__name__} {e}')
                 else:
-                    logger.info(f'#~~~{self.idstr} exit continue tx={obj_addr(self.dataservice.tx)}')
+                    logger.debug(f'#~~~{self.idstr} exit continue tx={obj_addr(self.dataservice.tx)}')
         else:
-            logger.info(f'#~~~{self.idstr} exit {obj_addr(self.old_tx)}')
+            logger.debug(f'#~~~{self.idstr} exit {obj_addr(self.old_tx)}')
 
 
 class ConcreteService:

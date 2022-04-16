@@ -72,7 +72,7 @@ class Neo4jUpdateService(ConcreteService):
 
         :param: driver             neo4j.DirectDriver object
         """
-        logger.info(f"#~~~~{self.__class__.__name__} init")
+        logger.debug(f"#~~~~{self.__class__.__name__} init")
         self.driver = driver
         self.tx = None  # Until started in Dataservice.__enter__()
 
@@ -185,17 +185,40 @@ class Neo4jUpdateService(ConcreteService):
         uniq_id = result.single()[0]
         return {"status": Status.OK, "identity": uniq_id}
 
-    def ds_batch_set_audited(self, batch_id, user, state):
+    def ds_batch_set_audited(self, batch_id, user, new_state):
         """Updates the auditing Batch node selected by Batch id and auditor links.
            For each auditor, DOES_AUDIT relation is replaced by DID_AUDIT with
            also ending timestamp.
-        
-            #TODO. Should also mark some way, who did accept/reject this!
         """
-        result = self.tx.run(
-            CypherRoot.batch_set_audited, bid=batch_id, user=user, state=state
-        )
-        auditors = result.single()[0]
+        auditors=[]
+        # 1. Change Root state and mark my auditing completed
+        result = self.tx.run(CypherRoot.batch_set_i_audited, 
+                             bid=batch_id, audi=user, state=new_state)
+        # _Record__keys (uniq_id, relation_new)
+        for record in result:
+            root_id = record["root"].id
+            root_audited = record["root"]["audited"]
+            auditors = [root_audited]
+            r_new = record["relation_new"]
+            ts_to = r_new.get("ts_to")
+            print(f"ds_batch_set_audited: Auditor {root_audited} "
+                  f"{type(r_new).__name__} {r_new.get('ts_from')}-{r_new.get('ts_to','')}")
+        if not auditors:
+            auditors = [root_audited]
+            return {"status": Status.ERROR, "auditors": auditors}
+        
+        # 2. Mark other auditor's work completed
+        result = self.tx.run(CypherRoot.batch_compelete_auditors, 
+                             uid=root_id, ts=ts_to)
+        # _Record__keys <(user, relation_new)
+        for record in result:
+            auditor = record['user']
+            auditors.append(auditor)
+            #myself = record['myself']
+            r_new = record["relation_new"]
+            print(f"ds_batch_set_audited: others {auditor} "
+                  f"{type(r_new).__name__} {r_new.get('ts_from')}-{r_new.get('ts_to','')}")
+
         return {"status": Status.OK, "auditors": auditors}
 
 

@@ -253,10 +253,15 @@ def audit_selected_op():
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
                 res = serv.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
-                auditors_list = res.get("auditors")
-                print(f"audit_selected_op: Batch {batch_id} accepted by {user_audit}, "
-                      f"auditors: {auditors_list}")
-                msg = _("Audit batch accepted: ") + batch_id
+                if Status.has_failed(res):
+                    msg = f"Audit request {operation} failed"
+                    flash(_(msg), "error")
+                    return redirect(url_for("audit.audit_pick", batch_id=batch_id))
+                else:
+                    auditors_list = res.get("auditors")
+                    print(f"audit_selected_op: Batch {batch_id} accepted by {user_audit!r}, "
+                          f"auditors: {auditors_list}")
+                    msg = _("Audit batch accepted: ") + batch_id
             elif operation == "reject":
                 # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
                 res = serv.set_audited(batch_id, user_audit, State.ROOT_REJECTED)
@@ -284,7 +289,7 @@ def audit_selected_op():
         return redirect(url_for("audit.list_uploads"))
 
     syslog.log(type="Audit state change", 
-               batch=batch_id, by=user_owner, msg=msg, op=operation)
+               batch=batch_id, by=user_audit, msg=msg, op=operation)
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 

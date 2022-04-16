@@ -160,8 +160,7 @@ class Root(NodeObject):
             else:
                 ret = oper == "start"
         elif self.state == State.ROOT_ACCEPTED:
-            ret = oper == "start" or \
-                  (active_auditor and oper in ["browse", "download"])
+            ret = oper in ["start", "browse", "download"]
         elif self.state == State.ROOT_REJECTED:
             ret = oper == "start" or \
                 (oper == "delete" and active_auditor)
