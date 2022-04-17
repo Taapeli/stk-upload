@@ -1237,7 +1237,7 @@ msgstr "Käyttäjäprofiili"
 #: bp/audit/templates/audit/pick_auditing.html:82
 #: bp/gramps/templates/gramps/uploads.html:220
 msgid "Auditing time"
-msgstr "Tarkastuksen kesto"
+msgstr "Tarkastus alkanut"
 
 #: bp/audit/templates/audit/batches.html:109 ui/batch_ops.py:36
 msgid "Upload log"
@@ -1359,7 +1359,7 @@ msgstr "Tarkastajat"
 
 #: bp/audit/templates/audit/pick_auditing.html:89
 msgid "Duration of audition"
-msgstr "Keskeytetyn tarkastuksen kesto"
+msgstr "Tarkastuksen aikaväli"
 
 #: bp/audit/templates/audit/pick_auditing.html:100
 #: bp/gedcom/templates/gedcom_info.html:31

@@ -169,7 +169,7 @@ def audit_pick(batch_id=None):
         timestamp = root.timestamp_str()
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
-        print(f"bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, "
+        print(f"#bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, "
               f"auditor={i_am_auditor}, user={current_user.username}")
         can_browse = root.state_transition("browse", i_am_auditor)
         can_download = root.state_transition("download", i_am_auditor)
@@ -243,6 +243,7 @@ def audit_selected_op():
             operation = "reject"
         elif request.form.get("withdraw"):
             operation = "withdraw"
+        print(f"#audit_selected_op: {user_audit} {batch_id} {operation}")
         logger.info(f"--> bp.audit.routes.audit_selected u={user_owner} b={batch_id} {operation}")
     
         with RootUpdater("update") as serv:

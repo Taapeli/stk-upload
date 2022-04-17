@@ -199,10 +199,11 @@ class Neo4jUpdateService(ConcreteService):
             root_id = record["root"].id
             root_audited = record["root"]["audited"]
             auditors = [root_audited]
-            r_new = record["relation_new"]
-            ts_to = r_new.get("ts_to")
-            print(f"ds_batch_set_audited: Auditor {root_audited} "
-                  f"{type(r_new).__name__} {r_new.get('ts_from')}-{r_new.get('ts_to','')}")
+            r = record["relation_new"]
+            ts_from = r.get("ts_from")
+            ts_to = r.get("ts_to")
+            print(f"#ds_batch_set_audited: Auditor {root_audited} "
+                  f"{type(r).__name__} {r.get('ts_from')}-{r.get('ts_to','')}")
         if not auditors:
             auditors = [root_audited]
             return {"status": Status.ERROR, "auditors": auditors}
@@ -215,9 +216,9 @@ class Neo4jUpdateService(ConcreteService):
             auditor = record['user']
             auditors.append(auditor)
             #myself = record['myself']
-            r_new = record["relation_new"]
-            print(f"ds_batch_set_audited: others {auditor} "
-                  f"{type(r_new).__name__} {r_new.get('ts_from')}-{r_new.get('ts_to','')}")
+            r = record["relation_new"]
+            print(f"#ds_batch_set_audited: others {auditor} "
+                  f"{type(r).__name__} {r.get('ts_from')}-{r.get('ts_to','')}")
 
         return {"status": Status.OK, "auditors": auditors}
 
@@ -243,8 +244,9 @@ class Neo4jUpdateService(ConcreteService):
             audi=auditor_user, 
             new_state=new_state,
         ).single()
-        # Got root node, auditor node and the removed DOES_AUDIT relation data
-        # creation time from (audi:UserProfile) -[r:DOES_AUDIT]-> (b:Root)
+        # Returns: b: Root node, audi: UserProfile, oth_cnt: cnt of other auditors,
+        #          ts_from: time from the removed DOES_AUDIT relation data
+        #          ts_to:   creation time of (audi) -[r:DOES_AUDIT]-> (b)
         node_root = record["b"]
         node_audi = record["audi"]
         root_id = node_root.id
@@ -253,14 +255,14 @@ class Neo4jUpdateService(ConcreteService):
         ts_to = record["ts_to"] # probably None
         print("#ds_batch_remove_auditor: "
               f"Removed r ({audi_id}:{node_audi['username']}) "
-              f"-[r:DOES_AUDIT {ts_from}..{ts_to}]-> ({root_id}:Root)")
+              f"-[r:DOES_AUDIT {ts_from},{ts_to}]-> ({root_id}:Root)")
 
         relation = self.tx.run(
             CypherRoot.link_old_auditor, 
             audi_id=audi_id,
             uid=root_id, 
             fromtime = ts_from,
-        ).single()[0] # Relationship object
+        ).single()[0] # Returns r: Relationship object
         ts_to = relation["ts_to"]
         d_days = ""
         try:

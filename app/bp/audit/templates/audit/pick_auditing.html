@@ -80,14 +80,16 @@ table     { width: 750px; }
                <b><a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a></b>
                <span title="{{ _('Auditing time') }}">
-                  {{ts_from|format_ts_day}} – {{ts_to|format_ts_day}}</span>
+                   {{ts_from|format_ts_day}}
+               </span>
             {% endfor %}
             {% for auditor, ts_from, ts_to in root.prev_audits %}
                 {% if root.auditors or not loop.first %}<br>{% endif %}
                <a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a>
                <span title="{{ _('Duration of audition') }}" style="color:gray;">
-                  {{ts_from|format_ts_day}} – {{ts_to|format_ts_day}}
+                {% if ts_to %}({{ts_from|format_ts_day}} .. {{ts_to|format_ts_day}})
+                {% else %}{{ts_from|format_ts_day}} –{% endif %}
                </span>
             {% endfor %}
             </p>

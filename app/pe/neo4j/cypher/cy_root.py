@@ -83,7 +83,7 @@ WITH root, audi, r1, r1.ts_from AS fromtime1
 RETURN root, r2 AS relation_new"""
     batch_compelete_auditors = """
 MATCH (audi:UserProfile) -[r3:DOES_AUDIT|DID_AUDIT]-> (root)
-    WHERE id(root) = $uid AND r3.ts_end IS NULL
+    WHERE id(root) = $uid AND r3.ts_to IS NULL
 WITH audi, r3
     CREATE (audi) -[r4:DID_AUDIT]-> (root)
     SET r4.ts_from=r3.ts_from
@@ -97,8 +97,7 @@ RETURN audi.username AS user, r4 as relation_new"""
 MATCH (b:Root {id: $bid}) WHERE b.state IN $states
 MATCH (audi:UserProfile {username: $audi})
     SET b.state = "Auditing"
-    //MERGE (audi) -[:HAS_ACCESS]-> (b)
-    MERGE (audi) -[r:DOES_AUDIT]-> (b)
+    CREATE (audi) -[r:DOES_AUDIT]-> (b)
     SET r.ts_from = timestamp()
 RETURN ID(b) AS id"""
 
@@ -109,19 +108,20 @@ MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
 OPTIONAL MATCH (oth:UserProfile) -[:DOES_AUDIT]-> (b)
     WHERE oth.username <> $audi
 OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[oldr:DOES_AUDIT]-> (b)
-WITH b, oth, audi, oldr, COUNT(oth) AS oth_cnt,
+WITH b, audi, oth, oldr, COUNT(oth) AS oth_cnt,
     oldr.ts_from AS ts_from, 
     oldr.ts_to AS ts_to
 SET (CASE WHEN oth_cnt = 0 THEN b END).state = $new_state
 DELETE oldr
-RETURN b, oth, audi, oth_cnt, ts_from, ts_to"""
+RETURN b, audi, oth_cnt, ts_from, ts_to"""
     link_old_auditor = """
 MATCH (b:Root) WHERE ID(b) = $uid
 MATCH (o:Role) <-[:HAS_ROLE]- (us:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
-    WHERE o.name = "audit" and id(audi) = $audi_id
-MERGE (audi) -[newr:DID_AUDIT]-> (b) WHERE newr.tr_to IS NULL
-SET newr.ts_to = timestamp()
-SET newr.ts_from = $fromtime
+    WHERE o.name = "audit" AND id(audi) = $audi_id
+WITH audi, b
+    CREATE (audi) -[newr:DID_AUDIT]-> (b)
+    SET newr.ts_to = timestamp()
+    SET newr.ts_from = $fromtime
 RETURN newr"""
 
 #-bl.batch.root.Root.get_filename
