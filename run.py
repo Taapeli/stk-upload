@@ -38,5 +38,7 @@ else:
         import logging
         neo4j_log = logging.getLogger("neo4j.bolt")
         neo4j_log.setLevel(logging.WARNING)
+        # werkzeug_log = logging.getLogger("werkzeug")
+        # werkzeug_log.setLevel(logging.WARNING)
         from app import app
         app.run()
