@@ -162,7 +162,7 @@ class Root(NodeObject):
         elif self.state == State.ROOT_ACCEPTED:
             ret = oper in ["start", "browse", "download"]
         elif self.state == State.ROOT_REJECTED:
-            ret = oper == "start" or \
+            ret = oper in ["browse", "start"] or \
                 (oper == "delete" and active_auditor)
 
         # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")

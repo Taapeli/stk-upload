@@ -289,8 +289,7 @@ def audit_selected_op():
         error_print("audit_selected_op", e)
         return redirect(url_for("audit.list_uploads"))
 
-    syslog.log(type="Audit state change", 
-               batch=batch_id, by=user_audit, msg=msg, op=operation)
+    syslog.log(type="Audit state change", batch=batch_id, op=operation, msg=msg)
     return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 

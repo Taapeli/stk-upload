@@ -188,10 +188,11 @@ class Neo4jUpdateService(ConcreteService):
     def ds_batch_set_audited(self, batch_id, user, new_state):
         """Updates the auditing Batch node selected by Batch id and auditor links.
            For each auditor, DOES_AUDIT relation is replaced by DID_AUDIT with
-           also ending timestamp.
+           ending timestamp added.
         """
         auditors=[]
-        # 1. Change Root state and mark my auditing completed
+        # 1. Change Root state and 
+        #    replace my auditing [DOES_AUDIT] with completed [DID_AUDIT]
         result = self.tx.run(CypherRoot.batch_set_i_audited, 
                              bid=batch_id, audi=user, state=new_state)
         # _Record__keys (uniq_id, relation_new)
@@ -208,8 +209,8 @@ class Neo4jUpdateService(ConcreteService):
             auditors = [root_audited]
             return {"status": Status.ERROR, "auditors": auditors}
         
-        # 2. Mark other auditor's work completed
-        result = self.tx.run(CypherRoot.batch_compelete_auditors, 
+        # 3. Update other auditors [DOES_AUDIT] with completed [DID_AUDIT]
+        result = self.tx.run(CypherRoot.batch_compelete_does_audits, 
                              uid=root_id, ts=ts_to)
         # _Record__keys <(user, relation_new)
         for record in result:
@@ -247,7 +248,7 @@ class Neo4jUpdateService(ConcreteService):
         # Returns: b: Root node, audi: UserProfile, oth_cnt: cnt of other auditors,
         #          ts_from: time from the removed DOES_AUDIT relation data
         #          ts_to:   creation time of (audi) -[r:DOES_AUDIT]-> (b)
-        node_root = record["b"]
+        node_root = record["root"]
         node_audi = record["audi"]
         root_id = node_root.id
         audi_id = node_audi.id

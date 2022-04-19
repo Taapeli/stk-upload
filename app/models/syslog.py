@@ -72,6 +72,7 @@ def log(type,**kwargs):
     try:
         shareds.driver.session().run(syslog_cypher_write, type=type, user=user,
                                      msg=msg, time=timestamp, timestr=timestr)
+        return msg # Helps debugging
     except Exception:
         traceback.print_exc()
     
