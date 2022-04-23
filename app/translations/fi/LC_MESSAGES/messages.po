@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-04-09 19:41+0300\n"
+"POT-Creation-Date: 2022-04-23 13:09+0300\n"
 "PO-Revision-Date: 2021-09-21 12:12+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -223,7 +223,7 @@ msgstr "Ketään ei löytynyt"
 msgid "Requested person not found"
 msgstr "Pyydettyä henkilöä ei ole"
 
-#: bl/batch/root_updater.py:165 bl/stats.py:278 bp/gramps/routes.py:529
+#: bl/batch/root_updater.py:167 bl/stats.py:278 bp/gramps/routes.py:515
 msgid "Failed to retrieve batch"
 msgstr "Aineiston avaaminen ei onnistunut"
 
@@ -253,10 +253,15 @@ msgstr "Poistettu %(cnt)d nodea"
 msgid "Given allowed email address already exists"
 msgstr "Annettu sähköpostiosoite jo käytössä"
 
-#: bl/batch/root.py:648
+#: bl/batch/root.py:640
 #, python-format
 msgid "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted"
 msgstr "Hyväksytty aineisto %(batch_id)s poistettu (%(deleted)d solmua)"
+
+#: bl/batch/root.py:657
+#, python-format
+msgid "Superseded auditor '%(a)s' from batch %(b)s"
+msgstr "Auditoija %(bid)s on syrjäytetty aineistosta %(b)s"
 
 #: bl/gramps/gramps_loader.py:167
 msgid "Events with no references to"
@@ -718,7 +723,7 @@ msgstr "Sovelluksen hallinta"
 #: bp/admin/templates/admin/admin.html:103
 #: bp/audit/templates/audit/approvals.html:103
 #: bp/audit/templates/audit/batches.html:121
-#: bp/audit/templates/audit/index.html:19
+#: bp/audit/templates/audit/index.html:31
 msgid "Display application log"
 msgstr "Näytä sovelluksen loki"
 
@@ -1011,7 +1016,7 @@ msgid "Newer events"
 msgstr "Uudemmat tapahtumat"
 
 #: bp/admin/templates/admin/syslog.html:43
-#: bp/audit/templates/audit/pick_auditing.html:142
+#: bp/audit/templates/audit/pick_auditing.html:144
 #: bp/gramps/templates/gramps/details.html:171
 #: bp/gramps/templates/gramps/scripting.html:78
 #: bp/gramps/templates/gramps/uploads.html:231
@@ -1060,7 +1065,7 @@ msgstr "Vaihe"
 
 #: bp/admin/templates/admin/uploads.html:35
 #: bp/audit/templates/audit/batches.html:38
-#: bp/audit/templates/audit/index.html:31
+#: bp/audit/templates/audit/index.html:17
 #: bp/gramps/templates/gramps/details.html:166
 msgid "Operations"
 msgstr "Toimenpiteet"
@@ -1108,49 +1113,49 @@ msgstr " epäonnistui"
 msgid " succeeded"
 msgstr " suoritettu"
 
-#: bp/audit/routes.py:163
+#: bp/audit/routes.py:167
 msgid "No such batch "
 msgstr "Aineistoa ei ole"
 
-#: bp/audit/routes.py:247
+#: bp/audit/routes.py:268
 msgid "You are now an auditor for batch "
 msgstr "Olet nyt tarkastajana aineistolle "
 
-#: bp/audit/routes.py:251
+#: bp/audit/routes.py:280
 msgid "Audit batch accepted: "
 msgstr "Tarkastus läpäisty: "
 
-#: bp/audit/routes.py:255
+#: bp/audit/routes.py:284
 #, python-format
 msgid "You have rejected the audition of batch %(bid)s"
 msgstr "Hylkäsit aineiston %(bid)s tarkastuksessa"
 
-#: bp/audit/routes.py:263
+#: bp/audit/routes.py:292
 #, python-format
 msgid "You did audit the batch %(bid)s for %(d)s days"
 msgstr "Tarkastit aineistoa %(bid)s (%(d)s päivän ajan)"
 
-#: bp/audit/routes.py:307
+#: bp/audit/routes.py:335
 msgid "The file does not exist any more: "
 msgstr "Tiedostoa ei enää ole: "
 
-#: bp/audit/routes.py:310
+#: bp/audit/routes.py:338
 msgid "Not allowed to load this batch: "
 msgstr "Et voi ladata itsellesi aineistoa "
 
-#: bp/audit/routes.py:312
+#: bp/audit/routes.py:340 bp/gramps/routes.py:278
 msgid "Error in file loading"
 msgstr "Tiedoston lataaminen ei onnistunut"
 
-#: bp/audit/routes.py:463
+#: bp/audit/routes.py:491
 msgid "Done"
 msgstr "Tehty"
 
-#: bp/audit/routes.py:552
+#: bp/audit/routes.py:580
 msgid "Data type '{}' is not supported"
 msgstr "Tietotyyppiä '{}' ei tueta"
 
-#: bp/audit/routes.py:559
+#: bp/audit/routes.py:587
 msgid "Missing proper column title: "
 msgstr "Kelvollinen sarakeotsikko puuttuu:"
 
@@ -1216,7 +1221,7 @@ msgid "Batch type"
 msgstr "Aineiston laatu"
 
 #: bp/audit/templates/audit/batches.html:37
-#: bp/audit/templates/audit/pick_auditing.html:96
+#: bp/audit/templates/audit/pick_auditing.html:98
 #: bp/gramps/templates/gramps/details.html:77
 #: bp/gramps/templates/gramps/uploads.html:161
 #: bp/scene/templates/scene/details_batch.html:104
@@ -1226,8 +1231,8 @@ msgstr "Gramps-tiedosto"
 #: bp/audit/templates/audit/batches.html:54
 #: bp/audit/templates/audit/pick_auditing.html:64
 #: bp/audit/templates/audit/pick_auditing.html:80
-#: bp/audit/templates/audit/pick_auditing.html:87
-#: bp/audit/templates/audit/pick_auditing.html:106
+#: bp/audit/templates/audit/pick_auditing.html:88
+#: bp/audit/templates/audit/pick_auditing.html:108
 #: bp/audit/templates/audit/user_profile.html:34
 #: bp/scene/templates/scene/details_batch.html:86
 msgid "User Profile"
@@ -1235,13 +1240,11 @@ msgstr "Käyttäjäprofiili"
 
 #: bp/audit/templates/audit/batches.html:84
 #: bp/audit/templates/audit/pick_auditing.html:82
-#: bp/gramps/templates/gramps/uploads.html:220
-msgid "Auditing time"
+msgid "Auditing started"
 msgstr "Tarkastus alkanut"
 
-#: bp/audit/templates/audit/batches.html:109 ui/batch_ops.py:36
-msgid "Upload log"
-msgstr "Latausloki"
+#: bp/audit/templates/audit/batches.html:109
+#: bp/audit/templates/audit/pick_auditing.html:146 ui/batch_ops.py:36
 msgid "Show upload log"
 msgstr "Näytä latauksen loki"
 
@@ -1271,52 +1274,52 @@ msgstr "Inessiivi"
 msgid "Isotammi auditor"
 msgstr "Tarkastaja"
 
-#: bp/audit/templates/audit/index.html:17
+#: bp/audit/templates/audit/index.html:19
+msgid "Batch list"
+msgstr "Aineistojen luettelo"
+
+#: bp/audit/templates/audit/index.html:20
+msgid "Remove empty batches"
+msgstr "Poista tyhjät tuontierät"
+
+#: bp/audit/templates/audit/index.html:21
+msgid "Experimental place merge"
+msgstr "Paikkojen yhdistely (kokeellinen)"
+
+#: bp/audit/templates/audit/index.html:22
+msgid "Experimental duplicate person search"
+msgstr "Tuplahenkilöiden haku (kokeellinen)"
+
+#: bp/audit/templates/audit/index.html:23
+msgid "Manage standard types"
+msgstr "Hallinnoi vakiotyyppejä"
+
+#: bp/audit/templates/audit/index.html:29
 msgid "Queries"
 msgstr "Kyselyt"
 
-#: bp/audit/templates/audit/index.html:20
+#: bp/audit/templates/audit/index.html:32
 msgid "List approved common data sets"
 msgstr "Yhteisen sukukannan aineistoerät"
 
-#: bp/audit/templates/audit/index.html:21
+#: bp/audit/templates/audit/index.html:33
 #: bp/scene/templates/scene/sources.html:27
 msgid "all"
 msgstr "kaikki"
 
-#: bp/audit/templates/audit/index.html:22
+#: bp/audit/templates/audit/index.html:34
 msgid "approved by me"
 msgstr "itse hyväksymäni"
 
-#: bp/audit/templates/audit/index.html:24
+#: bp/audit/templates/audit/index.html:36
 #: bp/scene/templates/scene/person_search_result.html:43
 #: templates/join_persons.html:68
 msgid "Reference names"
 msgstr "Referenssinimet"
 
-#: bp/audit/templates/audit/index.html:25
+#: bp/audit/templates/audit/index.html:37
 msgid "Classifier values"
 msgstr "Luokittelijoiden arvojoukot"
-
-#: bp/audit/templates/audit/index.html:33
-msgid "Batch list"
-msgstr "Aineistojen luettelo"
-
-#: bp/audit/templates/audit/index.html:34
-msgid "Remove empty batches"
-msgstr "Poista tyhjät tuontierät"
-
-#: bp/audit/templates/audit/index.html:35
-msgid "Experimental place merge"
-msgstr "Paikkojen yhdistely (kokeellinen)"
-
-#: bp/audit/templates/audit/index.html:36
-msgid "Experimental duplicate person search"
-msgstr "Tuplahenkilöiden haku (kokeellinen)"
-
-#: bp/audit/templates/audit/index.html:37
-msgid "Manage standard types"
-msgstr "Hallinnoi vakiotyyppejä"
 
 #: bp/audit/templates/audit/layout.html:54 bp/gedcom/templates/g_layout.html:25
 #: bp/scene/templates/scene/sc_layout.html:37
@@ -1357,11 +1360,12 @@ msgstr "Viesti Isotammen tarkastajalta %(u)s"
 msgid "Current auditors"
 msgstr "Tarkastajat"
 
-#: bp/audit/templates/audit/pick_auditing.html:89
+#: bp/audit/templates/audit/pick_auditing.html:90
+#: bp/gramps/templates/gramps/uploads.html:220
 msgid "Duration of audition"
 msgstr "Tarkastuksen aikaväli"
 
-#: bp/audit/templates/audit/pick_auditing.html:100
+#: bp/audit/templates/audit/pick_auditing.html:102
 #: bp/gedcom/templates/gedcom_info.html:31
 #: bp/gedcom/templates/gedcom_info.html:181
 #: bp/gedcom/templates/gedcom_list.html:44
@@ -1377,74 +1381,80 @@ msgstr "Tarkastuksen aikaväli"
 msgid "Description"
 msgstr "Kuvaus"
 
-#: bp/audit/templates/audit/pick_auditing.html:104
+#: bp/audit/templates/audit/pick_auditing.html:106
 msgid "Access is given also to"
 msgstr "Käyttöoikeus myös"
 
-#: bp/audit/templates/audit/pick_auditing.html:116
+#: bp/audit/templates/audit/pick_auditing.html:118
 msgid "Objects Count"
 msgstr "Kohteiden määrät"
 
-#: bp/audit/templates/audit/pick_auditing.html:123
+#: bp/audit/templates/audit/pick_auditing.html:125
 msgid "Total"
 msgstr "Yhteensä"
 
-#: bp/audit/templates/audit/pick_auditing.html:143
+#: bp/audit/templates/audit/pick_auditing.html:145
+msgid "Upload log"
+msgstr "Latausloki"
+
+#: bp/audit/templates/audit/pick_auditing.html:147
 #: bp/gramps/templates/gramps/uploads.html:176
 msgid "Browse this material"
 msgstr "Selaa aineistoa"
 
-#: bp/audit/templates/audit/pick_auditing.html:145
-msgid "Download file"
-msgstr "Lataa tiedosto"
-
-#: bp/audit/templates/audit/pick_auditing.html:146
-msgid "You can download, if you are currently auditing"
-msgstr "Voit ladata Gramps-tiedoston, jos olet auditoimassa"
+#: bp/audit/templates/audit/pick_auditing.html:148
 msgid "You can browse, if you are currently auditing"
 msgstr "Voit selata, jos olet auditoimassa"
 
-#: bp/audit/templates/audit/pick_auditing.html:152
+#: bp/audit/templates/audit/pick_auditing.html:150
+msgid "Download file"
+msgstr "Lataa tiedosto"
+
+#: bp/audit/templates/audit/pick_auditing.html:151
+msgid "You can download, if you are currently auditing"
+msgstr "Voit ladata Gramps-tiedoston, jos olet auditoimassa"
+
+#: bp/audit/templates/audit/pick_auditing.html:157
 msgid "Start as auditor (also the only way to delete the material)"
 msgstr "Aloita tarkastaminen (tätä kautta pääset myös poistamaan aineiston)"
 
-#: bp/audit/templates/audit/pick_auditing.html:154
-msgid "Start auditing"
-msgstr "Aloita tarkastus"
-
-#: bp/audit/templates/audit/pick_auditing.html:156
+#: bp/audit/templates/audit/pick_auditing.html:159
 msgid "Start auditing again"
 msgstr "Aloita tarkastus uudestaan"
 
-#: bp/audit/templates/audit/pick_auditing.html:159
+#: bp/audit/templates/audit/pick_auditing.html:161
+msgid "Start auditing"
+msgstr "Aloita tarkastus"
+
+#: bp/audit/templates/audit/pick_auditing.html:165
 msgid "Accept auditing"
 msgstr "Hyväksy aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:160
+#: bp/audit/templates/audit/pick_auditing.html:166
 msgid "Include to accepted materials"
 msgstr "Liitä hyväksyttyihin aineistoihin"
 
-#: bp/audit/templates/audit/pick_auditing.html:162
+#: bp/audit/templates/audit/pick_auditing.html:168
 msgid "Withdraw"
 msgstr "Luovu"
 
-#: bp/audit/templates/audit/pick_auditing.html:163
+#: bp/audit/templates/audit/pick_auditing.html:169
 msgid "Give up for now"
 msgstr "Lopeta tarkastus (toistaiseksi)"
 
-#: bp/audit/templates/audit/pick_auditing.html:165
+#: bp/audit/templates/audit/pick_auditing.html:171
 msgid "Reject auditing"
 msgstr "Hylkää aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:166
+#: bp/audit/templates/audit/pick_auditing.html:172
 msgid "Dicard this material"
 msgstr "Aineisto hylätään"
 
-#: bp/audit/templates/audit/pick_auditing.html:170
+#: bp/audit/templates/audit/pick_auditing.html:176
 msgid "Delete batch"
 msgstr "Poista aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:171
+#: bp/audit/templates/audit/pick_auditing.html:177
 msgid "The material and files are deleted permanetly"
 msgstr "Aineisto tiedostoineen poistetaan pysyvästi"
 
@@ -2487,43 +2497,43 @@ msgstr "Palaa myöhemmin takaisin nähdäksesi tulokset."
 msgid "Failed to create a new batch - "
 msgstr "Uuden aineiston luonti ei onnistunut"
 
-#: bp/gramps/routes.py:248 bp/gramps/routes.py:273
+#: bp/gramps/routes.py:234 bp/gramps/routes.py:259
 #, python-format
 msgid "The file \"%(n)s\" does not exist"
 msgstr "Tiedostoa \"%(n)s\" ei ole"
 
-#: bp/gramps/routes.py:292
+#: bp/gramps/routes.py:275
 #, python-format
 msgid "The log file for \"%(n)s\" does not exist any more"
 msgstr "Lokitiedostoa aineistolle \"%(n)s\" ei enää ole"
 
-#: bp/gramps/routes.py:319
+#: bp/gramps/routes.py:305
 msgid "Batch not found"
 msgstr "Aineistoa ei ole"
 
-#: bp/gramps/routes.py:336
+#: bp/gramps/routes.py:322
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr "Aineiston %(batch_id)s poistaminen ei onnistunut"
 
-#: bp/gramps/routes.py:344
+#: bp/gramps/routes.py:330
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr "Aineisto %(batch_id)s on poistettu (%(n)s kohdetta)"
 
-#: bp/gramps/routes.py:443
+#: bp/gramps/routes.py:429
 msgid "Failed to retrieve commands"
 msgstr "Komentoja ei saatu esiin"
 
-#: bp/gramps/routes.py:507 bp/scene/routes.py:1449
+#: bp/gramps/routes.py:493 bp/scene/routes.py:1449
 msgid "ERROR: Update did not succeed: "
 msgstr "VIRHE: Päivitys ei onnistunut: "
 
-#: bp/gramps/routes.py:509 bp/scene/routes.py:1451
+#: bp/gramps/routes.py:495 bp/scene/routes.py:1451
 msgid "Updated"
 msgstr "Päivitetty"
 
-#: bp/gramps/routes.py:523
+#: bp/gramps/routes.py:509
 msgid "Scripting tool is not enabled"
 msgstr "Scripting tool ei ole käytettävissä"
 
@@ -4389,7 +4399,7 @@ msgstr "Talletus tietokantaan epäonnistui"
 msgid "Database save failed due to {}"
 msgstr "Tallennus tietokantaan epäonnistui, syy {}"
 
-#: pe/neo4j/updateservice.py:1487
+#: pe/neo4j/updateservice.py:1551
 msgid "Could not save a comment"
 msgstr "Kommentin tallettaminen ei onnistunut"
 

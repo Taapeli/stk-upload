@@ -79,7 +79,7 @@ table     { width: 750px; }
                 {% if not loop.first %}<br>{% endif %}
                <b><a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a></b>
-               <span title="{{ _('Auditing time') }}">
+               <span title="{{ _('Auditing started') }}">
                    {{ts_from|format_ts_day}}
                </span>
             {% endfor %}
@@ -153,14 +153,15 @@ table     { width: 750px; }
 
                    <span style="font-size:large; color:gray;"> | </span>
 
+{% if can_start %}
                    <input type="submit" name="start"
                        title="{{ _('Start as auditor (also the only way to delete the material)') }}"
                     {% if root.state == "Accepted" or root.state == "Rejected" %}
                        value="{{ _('Start auditing again') }}"
                     {% else %}{# "Audit Requested" #}
                        value="{{ _('Start auditing') }}"
-                    {% endif -%}{% if not can_start %} disabled {% endif -%} />
-
+                    {% endif -%}/>
+{% endif %}
 {% if i_am_auditor %}
                    <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
                        title="{{ _('Include to accepted materials') }}"

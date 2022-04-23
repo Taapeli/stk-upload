@@ -109,16 +109,14 @@ MATCH (audi:UserProfile) -[ra:DOES_AUDIT]-> (root)
     WHERE NOT audi.username = $me
 WITH me, COLLECT(ID(r)) AS my_rels,
     audi, root, ra, ID(ra) as rel_id, type(ra) AS rtype
-    //DELETE ra, rh
-RETURN root.id AS batch_id, me.username AS me, my_rels, 
-    audi.username AS user, rtype, rel_id
+        DELETE ra
+RETURN audi.username AS user, rel_id
+    //root.id AS batch_id, me.username AS me, my_rels, rtype
+    
 """
-#Returns:
-# ╒════════════════╤══════╤════════════════╤═══════╤════════════╤════════╕
+#Returned:
 # │"batch_id"      │"me"  │"my_rels"       │"user" │"rtype"     │"rel_id"│
-# ╞════════════════╪══════╪════════════════╪═══════╪════════════╪════════╡
 # │"2021-09-05.007"│"juha"│[268031,1487411]│"valta"│"DOES_AUDIT"│113743  │
-# └────────────────┴──────┴────────────────┴───────┴────────────┴────────┘
 
 #TODO: parameter new_state = "Audit Requested"
 #TODO: Create relation DID_AUDIT

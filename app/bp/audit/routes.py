@@ -165,20 +165,15 @@ def audit_pick(batch_id=None):
             flash(_("No such batch ") + str(batch_id), "error")
             return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
-        # Schema fix: If there is multiple auditors, purge others but current
-        with RootUpdater("update") as serv: 
-            res = serv.purge_other_auditors(batch_id, username)
-            # Got {status, removed_auditors}
-            removed_auditors = res.get("removed_auditors",[])
-            count = len(removed_auditors)
-            if count > 0:
-                auditors = ", ".join(removed_auditors)
-                msg = _("Removed auditor '%(a)s' from batch %(b)s",
-                        a=auditors, b=batch_id)
+        res = Root.fix_purge_auditors(batch_id, username)
+        # Got {status, removed_auditors, text}
+        status = res.get("status")
+        if status == Status.UPDATED:
+                msg = res.get("text")
                 flash(msg)
                 print(f"bp.audit.routes.audit_pick: {msg}")
                 syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg)
-                # Get new auditor list
+                # Get updated auditor list root.auditors
                 username, root, labels = Root.get_batch_stats(batch_id)
 
         total = 0

@@ -317,28 +317,6 @@ class Root(NodeObject):
     # @staticmethod # def get_batch_pallette(username):
     #     """ Get my batches and batch collections.
     #  -- Ei toimi näin, hyväksyttyjä materiaaleja ei voi palauttaa Root-solmuina
-    #
-    #         my_batches      batches loaded by username
-    #         collections     sets of accepted batches by material type
-    #     """
-    #     batches = []
-    #     commons = []
-    #     result = shareds.driver.session().run(CypherRoot.get_root_pallette, 
-    #                                           user=username)
-    #     for record in result:
-    #         # Record: <Record  user='juha' material_type='Place Data' 
-    #         #    state='Candidate' batch_id='2021-11-14.005' 
-    #         #    description='Käkisalmi, Catharina Javanaisen esivanhemmat'>
-    #         user = record.get("user")
-    #         root = Root.from_node(record.get("root"))
-    #         if user:
-    #             print(f"#Root.get_batch_pallette: batch {root}")
-    #             batches.append(root)
-    #         else:
-    #             print(f"#Root.get_batch_pallette: common {root}")
-    #             commons.append(root)
-    #
-    #     return batches, commons
 
     @staticmethod
     def get_my_batches(username:str, material:Material):
@@ -665,6 +643,24 @@ class Root(NodeObject):
                 deleted=deleted,
         )
         return msg, deleted
+
+    @staticmethod
+    def fix_purge_auditors(batch_id, username):
+        """ Schema fix: If there is multiple auditors, purge others but current
+        """
+        with RootUpdater("update") as serv:
+            res = serv.purge_other_auditors(batch_id, username) # Got {status, removed_auditors}
+            removed_auditors = res.get("removed_auditors", [])
+            count = len(removed_auditors)
+            if count > 0:
+                auditors = ", ".join(removed_auditors)
+                msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
+                # Return removed auditors
+                return {"status":Status.UPDATED, 
+                        "removed_auditors":removed_auditors,
+                        "text":msg}
+        # No removed auditors
+        return {"status":Status.OK}
 
 # class BatchUpdater(DataService): # -> bl.batch.root_updater.RootUpdater
 #     """ Root data store for write and update. 
