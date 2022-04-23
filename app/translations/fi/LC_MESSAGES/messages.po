@@ -261,7 +261,11 @@ msgstr "Hyväksytty aineisto %(batch_id)s poistettu (%(deleted)d solmua)"
 #: bl/batch/root.py:657
 #, python-format
 msgid "Superseded auditor '%(a)s' from batch %(b)s"
-msgstr "Auditoija %(bid)s on syrjäytetty aineistosta %(b)s"
+msgstr "Tarkastaja '%(a)s' on syrjäytetty aineistosta %(b)s"
+
+#: bp/audit/templates/audit/pick_auditing.html:160
+msgid "Supersede other auditor"
+msgstr "Syrjäytä nykyinen tarkastaja"
 
 #: bl/gramps/gramps_loader.py:167
 msgid "Events with no references to"

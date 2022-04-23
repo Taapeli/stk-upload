@@ -450,9 +450,11 @@ class Root(NodeObject):
             #    has_access=['jpek']
             # >
             if node is None or \
-                    (node.id != record["root"].id and \
-                     username != record['profile']['username']):
+               (node.id != record["root"].id and \
+               username != record['profile']['username']):
                 # Not same user and root
+
+                # profile is the researcher uploaded the material
                 username = record['profile']['username']
                 root = Root.from_node(record["root"])
                 # Users granted special access
@@ -658,7 +660,7 @@ class Root(NodeObject):
                 # Return removed auditors
                 return {"status":Status.UPDATED, 
                         "removed_auditors":removed_auditors,
-                        "text":msg}
+                        "msg":msg}
         # No removed auditors
         return {"status":Status.OK}
 

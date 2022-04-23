@@ -159,17 +159,18 @@ def audit_pick(batch_id=None):
         NOTE. Also removes other auditors, if there are multiple auditors.
     """
     try:
+        user_audit = current_user.username
         username, root, labels = Root.get_batch_stats(batch_id)
         # labels = [(' Person', 9), ('Citation', 39), ...]
         if not root:
             flash(_("No such batch ") + str(batch_id), "error")
             return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
-        res = Root.fix_purge_auditors(batch_id, username)
+        res = Root.fix_purge_auditors(batch_id, user_audit)
         # Got {status, removed_auditors, text}
         status = res.get("status")
         if status == Status.UPDATED:
-                msg = res.get("text")
+                msg = res.get("msg")
                 flash(msg)
                 print(f"bp.audit.routes.audit_pick: {msg}")
                 syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg)
@@ -179,11 +180,11 @@ def audit_pick(batch_id=None):
         total = 0
         for _label, cnt in labels:
             total += cnt
-        timestamp = root.timestamp_str()
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
         print(f"#bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, "
               f"auditor={i_am_auditor}, user={current_user.username}")
+        other_auditor = len(auditor_names) > 0 and not i_am_auditor
         can_browse = root.state_transition("browse", i_am_auditor)
         can_download = root.state_transition("download", i_am_auditor)
         can_start = root.state_transition("start", i_am_auditor)
@@ -201,13 +202,13 @@ def audit_pick(batch_id=None):
         root=root,
         basename=os.path.basename(root.file),
         i_am_auditor=i_am_auditor,
+        other_auditor=other_auditor,
         can_browse=can_browse,
         can_download=can_download,
         can_start=can_start,
         can_accept=can_accept, # + withdraw and reject
         label_nodes=labels,
         total=total,
-        time=timestamp,
         auditor_name=current_user.name,
     )
 
@@ -264,6 +265,13 @@ def auditor_ops():
                 # 5. Move from "Audit Requested" to "Auditing" state to "Accepted"
                 res = serv.select_auditor(batch_id, user_audit)
                 msg = _("You are now an auditor for batch ") + batch_id
+                res = Root.fix_purge_auditors(batch_id, user_audit)
+                status = res.get("status")
+                if status == Status.UPDATED:
+                        msg1 = res.get("msg")
+                        flash(msg1)
+                        print(f"bp.audit.routes.audit_pick: {msg1}")
+                        syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg1)
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
                 res = serv.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
@@ -303,7 +311,8 @@ def auditor_ops():
         return redirect(url_for("audit.list_uploads"))
 
     syslog.log(type="Audit state change", batch=batch_id, op=operation, msg=msg)
-    return redirect(url_for("audit.list_uploads", batch_id=batch_id))
+    return redirect(url_for("audit.audit_pick", batch_id=batch_id))
+    #return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
 
 @bp.route("/audit/batch_download/<batch_id>/<username>")
