@@ -147,6 +147,14 @@ class RootUpdater(DataService):
                                                     allowed_states)
         return res
 
+    def purge_other_auditors(self, batch_id, auditor_username):
+        """ Removes other auditors, if there are multiple auditors. 
+            (Used to revert multi-auditor operations.)
+        """
+        res = self.dataservice.ds_batch_purge_auditors(batch_id, 
+                                                       auditor_username)
+        return res
+
     def remove_auditor(self, batch_id, auditor_username):
         """ Mark auditor for this data batch and set status.
         

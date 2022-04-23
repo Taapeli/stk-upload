@@ -101,6 +101,25 @@ MATCH (audi:UserProfile {username: $audi})
     SET r.ts_from = timestamp()
 RETURN ID(root) AS id"""
 
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_auditors
+    batch_purge_auditors = """
+MATCH (me:UserProfile) -[r:DOES_AUDIT]-> (root:Root)
+    WHERE me.username = $me AND root.id = $bid
+MATCH (audi:UserProfile) -[ra:DOES_AUDIT]-> (root)
+    WHERE NOT audi.username = $me
+WITH me, COLLECT(ID(r)) AS my_rels,
+    audi, root, ra, ID(ra) as rel_id, type(ra) AS rtype
+    //DELETE ra, rh
+RETURN root.id AS batch_id, me.username AS me, my_rels, 
+    audi.username AS user, rtype, rel_id
+"""
+#Returns:
+# ╒════════════════╤══════╤════════════════╤═══════╤════════════╤════════╕
+# │"batch_id"      │"me"  │"my_rels"       │"user" │"rtype"     │"rel_id"│
+# ╞════════════════╪══════╪════════════════╪═══════╪════════════╪════════╡
+# │"2021-09-05.007"│"juha"│[268031,1487411]│"valta"│"DOES_AUDIT"│113743  │
+# └────────────────┴──────┴────────────────┴───────┴────────────┴────────┘
+
 #TODO: parameter new_state = "Audit Requested"
 #TODO: Create relation DID_AUDIT
     batch_remove_auditor = """
@@ -111,11 +130,11 @@ OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[r2:DOES_AUDIT]-> (root)
 WITH root, audi, other, r2, COUNT(other) AS oth_cnt,
     r2.ts_from AS ts_from, 
     r2.ts_to AS ts_to
-SET (CASE WHEN oth_cnt = 0 THEN root END).state = $new_state
-SET (CASE WHEN oth_cnt = 0 THEN root END).audited = none
-DELETE r2
+    SET (CASE WHEN oth_cnt = 0 THEN root END).state = $new_state
+    SET (CASE WHEN oth_cnt = 0 THEN root END).audited = null
+    DELETE r2
 RETURN root, audi, oth_cnt, ts_from, ts_to"""
-    link_old_auditor = """
+    link_did_audit = """
 MATCH (root:Root) WHERE ID(root) = $uid
 MATCH (role:Role) <-[:HAS_ROLE]- (u:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
     WHERE role.name = "audit" AND id(audi) = $audi_id

@@ -155,14 +155,32 @@ def list_uploads(batch_id=None):
 @roles_accepted("audit")
 def audit_pick(batch_id=None):
     """ 4. Pick Batch for auditor operations.
+    
+        NOTE. Also removes other auditors, if there are multiple auditors.
     """
     try:
         username, root, labels = Root.get_batch_stats(batch_id)
-        
+        # labels = [(' Person', 9), ('Citation', 39), ...]
         if not root:
             flash(_("No such batch ") + str(batch_id), "error")
             return redirect(url_for("audit.list_uploads", batch_id=batch_id))
-    
+
+        # Schema fix: If there is multiple auditors, purge others but current
+        with RootUpdater("update") as serv: 
+            res = serv.purge_other_auditors(batch_id, username)
+            # Got {status, removed_auditors}
+            removed_auditors = res.get("removed_auditors",[])
+            count = len(removed_auditors)
+            if count > 0:
+                auditors = ", ".join(removed_auditors)
+                msg = _("Removed auditor '%(a)s' from batch %(b)s",
+                        a=auditors, b=batch_id)
+                flash(msg)
+                print(f"bp.audit.routes.audit_pick: {msg}")
+                syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg)
+                # Get new auditor list
+                username, root, labels = Root.get_batch_stats(batch_id)
+
         total = 0
         for _label, cnt in labels:
             total += cnt
@@ -202,7 +220,7 @@ def audit_pick(batch_id=None):
 @bp.route("/audit/selected", methods=["POST"])
 @login_required
 @roles_accepted("audit")
-def audit_selected_op():
+def auditor_ops():
     """ Select Auditor operation for Batch.
     Auditor operations:
         0a "browse"    - no change
@@ -243,7 +261,7 @@ def audit_selected_op():
             operation = "reject"
         elif request.form.get("withdraw"):
             operation = "withdraw"
-        print(f"#audit_selected_op: {user_audit} {batch_id} {operation}")
+        print(f"#auditor_ops: {user_audit} {batch_id} {operation}")
         logger.info(f"--> bp.audit.routes.audit_selected u={user_owner} b={batch_id} {operation}")
     
         with RootUpdater("update") as serv:
@@ -260,7 +278,7 @@ def audit_selected_op():
                     return redirect(url_for("audit.audit_pick", batch_id=batch_id))
                 else:
                     auditors_list = res.get("auditors")
-                    print(f"audit_selected_op: Batch {batch_id} accepted by {user_audit!r}, "
+                    print(f"auditor_ops: Batch {batch_id} accepted by {user_audit!r}, "
                           f"auditors: {auditors_list}")
                     msg = _("Audit batch accepted: ") + batch_id
             elif operation == "reject":
@@ -286,7 +304,7 @@ def audit_selected_op():
             flash(_(msg))
 
     except Exception as e:
-        error_print("audit_selected_op", e)
+        error_print("auditor_ops", e)
         return redirect(url_for("audit.list_uploads"))
 
     syslog.log(type="Audit state change", batch=batch_id, op=operation, msg=msg)
