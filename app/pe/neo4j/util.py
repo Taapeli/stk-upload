@@ -48,7 +48,7 @@ RETURN a.counter AS n_Isotammi_id"""
 cypher_block_of_iids = """
 MERGE (a:Isotammi_id {id:$iid_type})
     ON CREATE SET a.counter = 1
-    ON MATCH SET a.counter = a.counter + {count:$iid_count}
+    ON MATCH SET a.counter = a.counter + $iid_count
 RETURN a.counter AS n_Isotammi_id"""
 
 

@@ -51,9 +51,8 @@ from bl.dates import Gramps_DateRange
 from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
-from .batchlogger import LogItem
 from pe.neo4j.util import IsotammiId
-
+from .batchlogger import LogItem
 
 
 class DOM_handler:
@@ -192,12 +191,12 @@ class DOM_handler:
         counter = 0
     
         with shareds.driver.session() as session:
-###            isotammi_id_list = IsotammiID.reserve_batch(session, obj_name=title, iid_count=chunk_size)
+            isotammi_id_list = IsotammiId(session, obj_name=title, iid_count=chunk_max_size)
             for dom_nodes in get_next(nodes, chunk_max_size):
                 chunk_size = len(dom_nodes)
                 session.write_transaction(transaction_function, 
-                                          nodes=dom_nodes)
-#                                          iids=isotammi_id_list ...)
+                                          nodes=dom_nodes,
+                                          iids=isotammi_id_list)
                 """ def handle_notes(self, tx, dom_objs):
                 """
                 counter += chunk_size
@@ -237,7 +236,7 @@ class DOM_handler:
     def handle_sources(self):
         self.handle_dom_nodes("source", _("Sources"), self.handle_source_list, chunk_max_size=1000)
 
-    def handle_citations_list(self, tx, nodes):
+    def handle_citations_list(self, tx, nodes, iids):
         for citation in nodes:
 
             c = Citation()
@@ -296,7 +295,7 @@ class DOM_handler:
             self.dataservice.ds_save_citation(tx, c, self.batch.id)
             self.complete(c)
 
-    def handle_event_list(self, tx, nodes):
+    def handle_event_list(self, tx, nodes, iids):
         for event in nodes:
             # Create an event with Gramps attributes
             e = EventBl()
@@ -377,7 +376,7 @@ class DOM_handler:
             self.dataservice.ds_save_event(tx, e, self.batch.id)
             self.complete(e)
 
-    def handle_family_list(self, tx, nodes):
+    def handle_family_list(self, tx, nodes, iids):
         for family in nodes:
 
             f = FamilyBl()
@@ -455,14 +454,14 @@ class DOM_handler:
                     f.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has cite {f.citation_handles[-1]}')
 
-            self.dataservice.ds_save_family(tx, f, self.batch.id)
+            self.dataservice.ds_save_family(tx, f, self.batch.id, iids)
             self.complete(f)
 
             # The sortnames and dates will be set for these families
             self.family_ids.append(f.uniq_id)
 
     
-    def handle_note_list(self, tx, nodes):
+    def handle_note_list(self, tx, nodes, iids):
 
         for note in nodes:
             n = Note()
@@ -482,7 +481,7 @@ class DOM_handler:
             self.dataservice.ds_save_note(tx, n, self.batch.id)
             self.complete(n)
 
-    def handle_media_list(self, tx, nodes):
+    def handle_media_list(self, tx, nodes, iids):
         for obj in nodes:
             o = MediaBl()
             # Extract handle, change and id
@@ -509,7 +508,7 @@ class DOM_handler:
             self.dataservice.ds_save_media(tx, o, self.batch.id)
             self.complete(o)
 
-    def handle_people_list(self, tx, nodes):
+    def handle_people_list(self, tx, nodes, iids):
         for person in nodes:
             name_order = 0
 
@@ -677,7 +676,7 @@ class DOM_handler:
             self.person_ids.append(p.uniq_id)
 
 
-    def handle_place_list(self, tx, nodes):
+    def handle_place_list(self, tx, nodes, iids):
         """Get all the places in the xml_tree.
 
         To create place hierarchy links, there must be a dictionary of
@@ -806,7 +805,7 @@ class DOM_handler:
 
             self.complete(pl)
 
-    def handle_repositories_list(self, tx, nodes):
+    def handle_repositories_list(self, tx, nodes, iids):
         """ Get all the repositories in the xml_tree. """
         # Print detail of each repository
         for repository in nodes:
@@ -851,7 +850,7 @@ class DOM_handler:
             self.complete(r)
 
 
-    def handle_source_list(self, tx, nodes):
+    def handle_source_list(self, tx, nodes, iids):
         """ Get all the sources in the xml_tree. """
         # Print detail of each source
         for source in nodes:

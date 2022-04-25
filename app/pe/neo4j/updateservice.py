@@ -1420,19 +1420,20 @@ class Neo4jUpdateService(ConcreteService):
             "statustext": ret.get("statustext", ""),
         }
 
-    def ds_save_family(self, tx, f:FamilyBl, batch_id):
+    def ds_save_family(self, tx, f:FamilyBl, batch_id, iids):
         """Saves the family node to db with its relations.
 
         Connects the family to parent, child, citation and note nodes.
         """
         f.uuid = NodeObject.newUuid()
-        #TODO self.isotammi_id = self.new_isotammi_id(dataservice, "F")
+        f.isotammi_id = iids.get_new()
         f_attr = {
             "uuid": f.uuid,
             "handle": f.handle,
             "change": f.change,
             "id": f.id,
             "rel_type": f.rel_type,
+            "Isotammi_ID": f.isotammi_id,
         }
         result = tx.run(
             CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
