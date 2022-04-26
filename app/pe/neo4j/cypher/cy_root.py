@@ -78,7 +78,7 @@ WITH root, me, r1, r1.ts_from AS fromtime1
         SET r2.ts_from=fromtime1
         SET r2.ts_to=timestamp()
         SET root.state=$state
-        SET root.audited=$audi
+        //SET root.audited=$audi
     DELETE r1
 RETURN root, r2 AS relation_new"""
     batch_compelete_does_audits = """

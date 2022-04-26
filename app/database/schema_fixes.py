@@ -28,7 +28,7 @@ moved from database.accessDB.do_schema_fixes
 import logging
 logger = logging.getLogger('stkserver') 
 
-from neo4j.exceptions import ClientError #, ConstraintError
+#from neo4j.exceptions import ClientError #, ConstraintError
 
 import shareds
 
@@ -41,7 +41,7 @@ def do_schema_fixes():
         @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
     """
 
-    # --- For DB_SCHEMA_VERSION = '2022.2.0', 1.4.2022/JMä
+    # --- For DB_SCHEMA_VERSION = '2022.1.1', 1.4.2022/JMä
     STATS_link_to_from = """
         MATCH (b:Root) -[:STATS]-> (x:Stats)
         DETACH DELETE x"""
@@ -64,6 +64,17 @@ def do_schema_fixes():
         rel_changed = int(counters.properties_set / 2)
         if rel_changed:
             print(f" -- updated properties in {rel_changed} DOES_AUDIT relations")
+
+    clear_root_audited = """
+        MATCH (r:Root) WHERE NOT r.audited IS null
+            SET r.audited = null        
+        """
+    with shareds.driver.session() as session: 
+        result = session.run(clear_root_audited)
+        counters = shareds.db.consume_counters(result)
+        removed = int(counters.properties_set)
+        if removed:
+            print(f" -- updated properties in {removed} Root objects")
 
     return
 

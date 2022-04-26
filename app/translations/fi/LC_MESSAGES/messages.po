@@ -4133,11 +4133,11 @@ msgstr "Liitetty yhteiseen sukukantaan"
 
 #: bp/start/templates/start/s_macros.html:65 ui/jinja_filters.py:342
 msgid "Rejected"
-msgstr "Palautettu"
+msgstr "Hylätty"
 
 #: bp/start/templates/start/s_macros.html:65
 msgid "Returned to researcher with comments"
-msgstr "Palautettu tutkijalle kommentein"
+msgstr "Hylätty tutkijalle kommentein"
 
 #: bp/start/templates/start/thankyou.html:3
 msgid "Thank You"

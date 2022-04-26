@@ -186,9 +186,9 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK, "identity": uniq_id}
 
     def ds_batch_set_audited(self, batch_id, user, new_state):
-        """Updates the auditing Batch node selected by Batch id and auditor links.
-           For each auditor, DOES_AUDIT relation is replaced by DID_AUDIT with
-           ending timestamp added.
+        """Updates the auditing Batch node and auditor links.
+           For existing auditor, DOES_AUDIT relation is replaced by DID_AUDIT
+           with ending timestamp added.
         """
         auditors=[]
         # 1. Change Root state and 
@@ -198,15 +198,15 @@ class Neo4jUpdateService(ConcreteService):
         # _Record__keys (uniq_id, relation_new)
         for record in result:
             root_id = record["root"].id
-            root_audited = record["root"]["audited"]
-            auditors = [root_audited]
+            #root_audited = record["root"]["audited"]
+            auditors = [user]
             r = record["relation_new"]
             ts_from = r.get("ts_from")
-            ts_to = r.get("ts_to")
-            print(f"#ds_batch_set_audited: Auditor {root_audited} "
-                  f"{type(r).__name__} {r.get('ts_from')}-{r.get('ts_to','')}")
+            ts_to = r.get("ts_to","")
+            print(f"#ds_batch_set_audited: Auditor {user} "
+                  f"{type(r).__name__} {ts_from}-{ts_to}")
         if not auditors:
-            auditors = [root_audited]
+            auditors = [user]
             return {"status": Status.ERROR, "auditors": auditors}
         
         # 3. Update other auditors [DOES_AUDIT] with completed [DID_AUDIT]
