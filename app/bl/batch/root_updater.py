@@ -107,14 +107,20 @@ class RootUpdater(DataService):
 
     # @staticmethod def new_batch(username): # -> create_batch
 
-    # def batch_get_one(self, user, batch_id): # Not used! / JMä 3.4.2022
-    #     """Get Root object by username and batch id (in BatchUpdater). """
-
-    def set_audited(self, batch_id, user_audit, b_state):
-        """ Set batch status and mark all auditions completed.
-        """
-        res = self.dataservice.ds_batch_set_audited(batch_id, user_audit, b_state)
-        return res
+    def batch_get_one(self, user, batch_id):
+        """Get Root object by username and batch id (in BatchUpdater). """
+        from .root import Root,  Status
+        try:
+            ret = self.dataservice.ds_get_batch(user, batch_id)
+            # returns {"status":Status.OK, "node":record}
+            node = ret['node']
+            batch = Root.from_node(node)
+            return {"status":Status.OK, "item":batch}
+        except Exception as e:
+            statustext = (
+                f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
+            )
+            return {"status": Status.ERROR, "statustext": statustext}
 
     def change_state(self, batch_id, username, b_state):
         """ Set this data batch status. """
