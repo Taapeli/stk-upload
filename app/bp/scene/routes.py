@@ -396,8 +396,8 @@ def show_person_search():  # (set_scope=None, batch_id=None):
         logger.debug(
             "#(1)bp.scene.routes.show_person_search: "
             f"{request.method} {u_context.material.get_request_args(session, request)} => "
-            f'({session["current_context"]!r}, {session["state"]!r}, '
-            f'{session["material_type"]!r}, {session["batch_id"]!r})'
+            f'({session.get("current_context")!r}, {session["state"]!r}, '
+            f'{session["material_type"]!r}, {session.get("batch_id")!r})'
         )
 
         # ------ Free text search by Note texts
