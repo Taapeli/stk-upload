@@ -65,6 +65,7 @@ class Material():
 
     def __str__(self):
         return f"({self.breed}/{self.state}/{self.m_type}/{self.batch_id})"
+    __repr__ = __str__
     
     def to_display(self):
         """ Return current material and batch choice for display. """

@@ -56,7 +56,7 @@ table     { width: 750px; }
           <div class="box">
             <div>{{ _('State') }}</div>
             <p><b>{{ _(root.state) }}</b>
-               {% if time %}<br><small>{{time}}</small>{% endif -%}
+               <br><small>{{root.timestamp_str()}}</small>
             </p>
           </div>
           <div class="box">
@@ -79,15 +79,17 @@ table     { width: 750px; }
                 {% if not loop.first %}<br>{% endif %}
                <b><a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a></b>
-               <span title="{{ _('Auditing time') }}">
-                  {{ts_from|format_ts_day}} – {{ts_to|format_ts_day}}</span>
+               <span title="{{ _('Auditing started') }}">
+                   {{ts_from|format_ts_day}}
+               </span>
             {% endfor %}
             {% for auditor, ts_from, ts_to in root.prev_audits %}
                 {% if root.auditors or not loop.first %}<br>{% endif %}
                <a href="/audit/profile/{{auditor}}" title="{{ _('User Profile') }}"
                     >{{auditor}}</a>
                <span title="{{ _('Duration of audition') }}" style="color:gray;">
-                  {{ts_from|format_ts_day}} – {{ts_to|format_ts_day}}
+                {% if ts_to %}({{ts_from|format_ts_day}} .. {{ts_to|format_ts_day}})
+                {% else %}{{ts_from|format_ts_day}} –{% endif %}
                </span>
             {% endfor %}
             </p>
@@ -151,13 +153,17 @@ table     { width: 750px; }
 
                    <span style="font-size:large; color:gray;"> | </span>
 
+{% if can_start %}
                    <input type="submit" name="start"
                        title="{{ _('Start as auditor (also the only way to delete the material)') }}"
-                    {% if root.state == "Audit Requested" or not i_am_auditor %}
-                       value="{{ _('Start auditing') }}"
-                    {% else %}{# "Accepted" #}
+                    {% if other_auditor %}
+                       value="{{ _('Supersede other auditor') }}"
+                    {% elif root.state == "Accepted" or root.state == "Rejected" %}
                        value="{{ _('Start auditing again') }}"
-                    {% endif -%}{% if not can_start %} disabled {% endif -%} />
+                    {% else %}{# "Audit Requested" #}
+                       value="{{ _('Start auditing') }}"
+                    {% endif -%}/>
+{% endif %}
 {% if i_am_auditor %}
                    <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
                        title="{{ _('Include to accepted materials') }}"

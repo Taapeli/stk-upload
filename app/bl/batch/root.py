@@ -38,7 +38,6 @@ import logging
 logger = logging.getLogger('stkserver')
 
 import shareds
-from models.util import format_ms_timestamp
 from bl.admin.models.cypher_adm import Cypher_adm
 from bl.base import Status, NodeObject
 from bl.material import Material
@@ -162,7 +161,7 @@ class Root(NodeObject):
         elif self.state == State.ROOT_ACCEPTED:
             ret = oper in ["start", "browse", "download"]
         elif self.state == State.ROOT_REJECTED:
-            ret = oper == "start" or \
+            ret = oper in ["browse", "start"] or \
                 (oper == "delete" and active_auditor)
 
         # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
@@ -197,8 +196,11 @@ class Root(NodeObject):
 
     @classmethod
     def from_node(cls, node):
-        # type: (Any) -> Root
-        """Convert a Neo4j node to Root object."""
+        """Convert a Neo4j node to Root object.
+        
+           type: (Any) -> Root
+        """
+        from models.util import format_ms_timestamp
         obj = cls()
         obj.uniq_id = node.id
         obj.user = node.get("user", "")
@@ -315,28 +317,6 @@ class Root(NodeObject):
     # @staticmethod # def get_batch_pallette(username):
     #     """ Get my batches and batch collections.
     #  -- Ei toimi näin, hyväksyttyjä materiaaleja ei voi palauttaa Root-solmuina
-    #
-    #         my_batches      batches loaded by username
-    #         collections     sets of accepted batches by material type
-    #     """
-    #     batches = []
-    #     commons = []
-    #     result = shareds.driver.session().run(CypherRoot.get_root_pallette, 
-    #                                           user=username)
-    #     for record in result:
-    #         # Record: <Record  user='juha' material_type='Place Data' 
-    #         #    state='Candidate' batch_id='2021-11-14.005' 
-    #         #    description='Käkisalmi, Catharina Javanaisen esivanhemmat'>
-    #         user = record.get("user")
-    #         root = Root.from_node(record.get("root"))
-    #         if user:
-    #             print(f"#Root.get_batch_pallette: batch {root}")
-    #             batches.append(root)
-    #         else:
-    #             print(f"#Root.get_batch_pallette: common {root}")
-    #             commons.append(root)
-    #
-    #     return batches, commons
 
     @staticmethod
     def get_my_batches(username:str, material:Material):
@@ -439,10 +419,18 @@ class Root(NodeObject):
         """Get statistics of given Batch contents.
 
            Called from bp.audit.routes.audit_pick
+           
+           Returns a Root node and object statistics
+           Added Root members:
+           - root.has_access   list    user names with access permission
+           - root.auditors     list    user descriptors performing audition
+           - root.prev_audits  list    user descriptors who did audition
+                where descriptors are of format
+                [u.username, r.ts_from, r.ts_to]
         """
         labels = []
-        user = None
-        b = None
+        username = None
+        root = None
         node = None
         result = shareds.driver.session().run(
             CypherRoot.get_single_batch, batch=batch_id
@@ -450,11 +438,7 @@ class Root(NodeObject):
         for record in result:
             # <Record
             #    profile=<Node id=21 labels=frozenset({'UserProfile'})
-            #        properties={'apikey': '05dba9c9bfb643b39bf385de8dcac272', 'software': 'Gramps', 
-            #            'research_years': '11', 'created_at': 1620043583370, 'language': 'fi', 
-            #            'researched_names': 'Ankka, Hanhi', 'text_message': 'Jos olet ...', 
-            #            'GSF_membership': 'yes', 'name': 'Aku Ankka', 'email': 'aku@ankkalinna.com',
-            #            'researched_places': 'Ankkalinna', 'username': 'aku', 'agreed_at': 1620032783307}>
+            #        properties={...}>
             #    root=<Node id=119472 labels=frozenset({'Root'})
             #        properties={'file': 'uploads/juha/Untitled_1.isotammi.gpkg', 'material':'Family Tree',
             #            'description': 'Pieni koeaineisto', 'id': '2021-05-27.002', 'state': 'Candidate', 
@@ -466,24 +450,24 @@ class Root(NodeObject):
             #    has_access=['jpek']
             # >
             if node is None or \
-                    (node.id != record["root"].id and \
-                     user != record['profile']['username']):
+               (node.id != record["root"].id and \
+               username != record['profile']['username']):
                 # Not same user and root
-                user = record['profile']['username']
-                node = record["root"]
-                b = Root.from_node(node)
+
+                # profile is the researcher uploaded the material
+                username = record['profile']['username']
+                root = Root.from_node(record["root"])
                 # Users granted special access
-                b.has_access = record['has_access'] 
-                b.auditors = []
-                for au_user, ms_from, ms_to in record["auditors"]:
-                    # [username, time_start]
+                root.has_access = record['has_access'] 
+                root.auditors = []
+                for au_user, ts_from, ts_to in record["auditors"]:
+                    # [username, timestamp_from, timestamp_to]
                     if au_user:
-                        b.auditors.append([au_user, ms_from, ms_to])
-                b.prev_audits = []
-                for au_user, ms_from, ms_to in record["prev_audits"]:
-                    # [username, time_end, time_start]
+                        root.auditors.append([au_user, ts_from, ts_to])
+                root.prev_audits = []
+                for au_user, ts_from, ts_to in record["prev_audits"]:
                     if au_user:
-                        b.prev_audits.append([au_user, ms_from, ms_to])
+                        root.prev_audits.append([au_user, ts_from, ts_to])
             label = record.get("label", "-")
             # Trick: Set Person as first in sort order!
             if label == "Person":
@@ -491,7 +475,7 @@ class Root(NodeObject):
             cnt = record["cnt"]
             labels.append((label, cnt))
 
-        return user, b, sorted(labels)
+        return username, root, sorted(labels)
 
 
     @staticmethod
@@ -661,6 +645,24 @@ class Root(NodeObject):
                 deleted=deleted,
         )
         return msg, deleted
+
+    @staticmethod
+    def fix_purge_auditors(batch_id, username):
+        """ Schema fix: If there is multiple auditors, purge others but current
+        """
+        with RootUpdater("update") as serv:
+            res = serv.purge_other_auditors(batch_id, username) # Got {status, removed_auditors}
+            removed_auditors = res.get("removed_auditors", [])
+            count = len(removed_auditors)
+            if count > 0:
+                auditors = ", ".join(removed_auditors)
+                msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
+                # Return removed auditors
+                return {"status":Status.UPDATED, 
+                        "removed_auditors":removed_auditors,
+                        "msg":msg}
+        # No removed auditors
+        return {"status":Status.OK}
 
 # class BatchUpdater(DataService): # -> bl.batch.root_updater.RootUpdater
 #     """ Root data store for write and update. 

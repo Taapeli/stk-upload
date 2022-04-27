@@ -74,7 +74,7 @@
                   {% endif %}><a href="/scene/medias"
                    title="{{ _('Thumbnails') }}">{{ _('Pictures') }}</a></li>
 
-        {% if current_user.is_authenticated %}
+        {% if current_user.is_authenticated and current_user.username != "guest" %}
                 <li{% if value == 7 %} class="CurrentSection"
                   {% endif %}><a href="/scene/details/"
                    title="{{ _('Material details and actions') }}">{{ _('Material details') }}</a></li>

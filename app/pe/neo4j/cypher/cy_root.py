@@ -71,58 +71,76 @@ RETURN ID(b) AS id"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_audited
     batch_set_i_audited = """
-MATCH (audi:UserProfile) -[r1:DOES_AUDIT]-> (root:Root)
-    WHERE audi.username = $audi AND root.id = $bid AND root.state = "Auditing"
-WITH root, audi, r1, r1.ts_from AS fromtime1
-    CREATE (audi) -[r2:DID_AUDIT]-> (b)
-    SET r2.ts_from=fromtime1
-    SET r2.ts_to=timestamp()
-    SET root.state=$state
-    SET root.audited=$audi
+MATCH (me:UserProfile) -[r1:DOES_AUDIT]-> (root:Root)
+    WHERE me.username = $audi AND root.id = $bid AND root.state = "Auditing"
+WITH root, me, r1, r1.ts_from AS fromtime1
+    CREATE (me) -[r2:DID_AUDIT]-> (root)
+        SET r2.ts_from=fromtime1
+        SET r2.ts_to=timestamp()
+        SET root.state=$state
+        //SET root.audited=$audi
     DELETE r1
 RETURN root, r2 AS relation_new"""
-    batch_compelete_auditors = """
-MATCH (audi:UserProfile) -[r3:DOES_AUDIT|DID_AUDIT]-> (root)
-    WHERE id(root) = $uid AND r3.ts_end IS NULL
+    batch_compelete_does_audits = """
+MATCH (audi:UserProfile) -[r3:DOES_AUDIT]-> (root)
+    WHERE id(root) = $uid
 WITH audi, r3
     CREATE (audi) -[r4:DID_AUDIT]-> (root)
-    SET r4.ts_from=r3.ts_from
-    SET r4.ts_to=$ts
+        SET r4.ts_from=r3.ts_from
+        SET r4.ts_to=$ts
     DELETE r3
 RETURN audi.username AS user, r4 as relation_new"""
 
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
     batch_set_auditor = """
-MATCH (b:Root {id: $bid}) WHERE b.state IN $states
+MATCH (root:Root {id: $bid}) WHERE root.state IN $states
 MATCH (audi:UserProfile {username: $audi})
-    SET b.state = "Auditing"
-    //MERGE (audi) -[:HAS_ACCESS]-> (b)
-    MERGE (audi) -[r:DOES_AUDIT]-> (b)
+    SET root.state = "Auditing"
+    CREATE (audi) -[r:DOES_AUDIT]-> (root)
     SET r.ts_from = timestamp()
-RETURN ID(b) AS id"""
+RETURN ID(root) AS id"""
+
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_auditors
+    batch_purge_auditors = """
+MATCH (me:UserProfile) -[r:DOES_AUDIT]-> (root:Root)
+    WHERE me.username = $me AND root.id = $bid
+MATCH (audi:UserProfile) -[ra:DOES_AUDIT]-> (root)
+    WHERE NOT audi.username = $me
+WITH me, COLLECT(ID(r)) AS my_rels,
+    audi, root, ra, ID(ra) as rel_id, type(ra) AS rtype
+        DELETE ra
+RETURN audi.username AS user, rel_id
+    //root.id AS batch_id, me.username AS me, my_rels, rtype
+    
+"""
+#Returned:
+# │"batch_id"      │"me"  │"my_rels"       │"user" │"rtype"     │"rel_id"│
+# │"2021-09-05.007"│"juha"│[268031,1487411]│"valta"│"DOES_AUDIT"│113743  │
 
 #TODO: parameter new_state = "Audit Requested"
 #TODO: Create relation DID_AUDIT
     batch_remove_auditor = """
-MATCH (b:Root {id: $bid}) WHERE b.state = "Auditing"
-OPTIONAL MATCH (oth:UserProfile) -[:DOES_AUDIT]-> (b)
-    WHERE oth.username <> $audi
-OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[oldr:DOES_AUDIT]-> (b)
-WITH b, oth, audi, oldr, COUNT(oth) AS oth_cnt,
-    oldr.ts_from AS ts_from, 
-    oldr.ts_to AS ts_to
-SET (CASE WHEN oth_cnt = 0 THEN b END).state = $new_state
-DELETE oldr
-RETURN b, oth, audi, oth_cnt, ts_from, ts_to"""
-    link_old_auditor = """
-MATCH (b:Root) WHERE ID(b) = $uid
-MATCH (o:Role) <-[:HAS_ROLE]- (us:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
-    WHERE o.name = "audit" and id(audi) = $audi_id
-MERGE (audi) -[newr:DID_AUDIT]-> (b) WHERE newr.tr_to IS NULL
-SET newr.ts_to = timestamp()
-SET newr.ts_from = $fromtime
-RETURN newr"""
+MATCH (root:Root {id: $bid}) WHERE root.state = "Auditing"
+OPTIONAL MATCH (other:UserProfile) -[:DOES_AUDIT]-> (root)
+    WHERE other.username <> $audi
+OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[r2:DOES_AUDIT]-> (root)
+WITH root, audi, other, r2, COUNT(other) AS oth_cnt,
+    r2.ts_from AS ts_from, 
+    r2.ts_to AS ts_to
+    SET (CASE WHEN oth_cnt = 0 THEN root END).state = $new_state
+    SET (CASE WHEN oth_cnt = 0 THEN root END).audited = null
+    DELETE r2
+RETURN root, audi, oth_cnt, ts_from, ts_to"""
+    link_did_audit = """
+MATCH (root:Root) WHERE ID(root) = $uid
+MATCH (role:Role) <-[:HAS_ROLE]- (u:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
+    WHERE role.name = "audit" AND id(audi) = $audi_id
+WITH audi, root
+    CREATE (audi) -[r3:DID_AUDIT]-> (root)
+    SET r3.ts_to = timestamp()
+    SET r3.ts_from = $fromtime
+RETURN r3 AS newr"""
 
 #-bl.batch.root.Root.get_filename
     get_filename = """
