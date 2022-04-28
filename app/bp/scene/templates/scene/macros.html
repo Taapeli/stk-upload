@@ -140,6 +140,11 @@
     {#  Formats object keys and timestamp for display. Positioned at right margin.
         If 2nd arguments (like "350px") is present, leave the given right margin.
      #}
+    {% if obj.isotammi_id %}
+    <input id="isotammi_id" type="text" value="{{obj.isotammi_id}}" style="display:None">
+    <span class="isotammi_id copy-fld" title="Isotammi ID"
+        onclick="toClipboard('isotammi_id')">{{obj.isotammi_id}}</span> /
+    {% endif -%}
     <input id="my_uuid" type="text" value="{{obj.uuid}}" style="display:None">
     <tt title="{{ _('Copy UUID key') }}" class="copy-fld" 
         onclick="toClipboard('my_uuid')">{{obj.uuid_short()}}</tt> /
