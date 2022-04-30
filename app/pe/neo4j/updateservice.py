@@ -1426,14 +1426,14 @@ class Neo4jUpdateService(ConcreteService):
         Connects the family to parent, child, citation and note nodes.
         """
         f.uuid = NodeObject.newUuid()
-        f.isotammi_id = iids.get_new()
+        f.isotammi_id = iids.get_one()
         f_attr = {
             "uuid": f.uuid,
             "handle": f.handle,
             "change": f.change,
             "id": f.id,
             "rel_type": f.rel_type,
-            "Isotammi_ID": f.isotammi_id,
+            "iid": f.isotammi_id,
         }
         result = tx.run(
             CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
