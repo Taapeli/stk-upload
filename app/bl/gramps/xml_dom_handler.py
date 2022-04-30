@@ -293,7 +293,7 @@ class DOM_handler:
                     }
                 )
 
-            self.dataservice.ds_save_citation(tx, c, self.batch.id)
+            self.dataservice.ds_save_citation(tx, c, self.batch.id, iids)
             self.complete(c)
 
     def handle_event_list(self, tx, nodes, iids):
@@ -374,7 +374,7 @@ class DOM_handler:
             # Handle <objref> with citations and notes
             e.media_refs = self._extract_mediaref(event)
 
-            self.dataservice.ds_save_event(tx, e, self.batch.id)
+            self.dataservice.ds_save_event(tx, e, self.batch.id, iids)
             self.complete(e)
 
     def handle_family_list(self, tx, nodes, iids):
@@ -479,7 +479,7 @@ class DOM_handler:
                 # Pick possible url
                 n.text, n.url = self._pick_url_from_text(n.text)
 
-            self.dataservice.ds_save_note(tx, n, self.batch.id)
+            self.dataservice.ds_save_note(tx, n, self.batch.id, iids)
             self.complete(n)
 
     def handle_media_list(self, tx, nodes, iids):
@@ -506,7 +506,7 @@ class DOM_handler:
                     o.description = obj_file.getAttribute("description")
 
             # TODO: Varmista, ettei mediassa voi olla Note
-            self.dataservice.ds_save_media(tx, o, self.batch.id)
+            self.dataservice.ds_save_media(tx, o, self.batch.id, iids)
             self.complete(o)
 
     def handle_people_list(self, tx, nodes, iids):
@@ -670,7 +670,7 @@ class DOM_handler:
                     p.citation_handles.append(person_citationref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
-            self.dataservice.ds_save_person(tx, p, self.batch.id)
+            self.dataservice.ds_save_person(tx, p, self.batch.id, iids)
             self.complete(p)
 
             # The refnames will be set for these persons
@@ -801,7 +801,7 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            self.dataservice.ds_save_place(tx, pl, self.batch.id, place_keys=self.place_keys)
+            self.dataservice.ds_save_place(tx, pl, self.batch.id, iids, place_keys=self.place_keys)
             # The place_keys has been updated
 
             self.complete(pl)
@@ -847,7 +847,7 @@ class DOM_handler:
                 if n.url:
                     r.notes.append(n)
 
-            self.dataservice.ds_save_repository(tx, r, self.batch.id)
+            self.dataservice.ds_save_repository(tx, r, self.batch.id, iids)
             self.complete(r)
 
 
@@ -932,7 +932,7 @@ class DOM_handler:
                 # Mostly 1 repository!
                 s.repositories.append(r)
 
-            self.dataservice.ds_save_source(tx, s, self.batch.id)
+            self.dataservice.ds_save_source(tx, s, self.batch.id, iids)
             self.complete(s)
 
     # -------------------------- Finishing process steps -------------------------------

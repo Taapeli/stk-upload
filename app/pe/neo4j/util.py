@@ -157,5 +157,5 @@ class IsotammiId:
         isotammi_id = format_iid(self.iid_type + base32.encode(self.n_iid, checksum=False))
         self.n_iid += 1
 
-        print(f"new_isotammi_id: {self.n_iid} -> {isotammi_id}")
+##        print(f"new_isotammi_id: {self.n_iid} -> {isotammi_id}")
         return isotammi_id
