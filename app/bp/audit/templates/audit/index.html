@@ -14,6 +14,18 @@
 {% include "flash_messages.html" %}
 
         <div class="startbox">
+            <h2>{{ _('Operations') }}</h2>
+            <ul>
+            <li><a href="/audit/list_uploads">{{ _("Batch list") }}</a></li>
+<!--             <li><a href="/admin/clear_batches">{{ _("Remove empty batches") }}</a></li> -->
+            <li><a href="/refplace_editor">{{ _('Experimental place merge') }}</a></li>
+            <li><a href="/dupsearch">{{ _('Experimental duplicate person search') }}</a></li>
+            <li><a href="/audit/manage_whitelists">{{ _('Manage standard types') }}</a></li>
+            </ul>
+            </p>
+        </div>
+
+        <div class="startbox">
             <h2>{{ _('Queries') }}</h2>
             <ul>
             <li><a href="/admin/readlog">{{ _('Display application log') }}</a></li>
@@ -24,18 +36,6 @@
             <li><a href="/audit/refnames">{{ _('Reference names') }}</a></li>
             <li><a href="/audit/classifiers">{{ _('Classifier values') }}</a></li>
            </ul>
-            </p>
-        </div>
-
-        <div class="startbox">
-            <h2>{{ _('Operations') }}</h2>
-            <ul>
-            <li><a href="/audit/list_uploads">{{ _("Batch list") }}</a></li>
-<!--             <li><a href="/admin/clear_batches">{{ _("Remove empty batches") }}</a></li> -->
-            <li><a href="/refplace_editor">{{ _('Experimental place merge') }}</a></li>
-            <li><a href="/dupsearch">{{ _('Experimental duplicate person search') }}</a></li>
-            <li><a href="/audit/manage_whitelists">{{ _('Manage standard types') }}</a></li>
-            </ul>
             </p>
         </div>
 

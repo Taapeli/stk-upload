@@ -74,6 +74,8 @@ def start_guest():
     lang = request.args.get("lang")
     if lang:
         session["lang"] = lang
+    session["material_type"] = "Family Tree"
+    session["state"] = "Accepted"
 
     logger.info(f"-> bp.start.routes.start_guest, lang={lang}")
     return redirect("/scene/persons/search")
@@ -89,6 +91,8 @@ def start_guest_search():
     lang = request.args.get("lang")
     if lang:
         session["lang"] = lang
+    session["material_type"] = "Family Tree"
+    session["state"] = "Accepted"
 
     logger.info(f"-> bp.start.routes.start_guest_search, lang={lang}")
     # See: https://stackoverflow.com/questions/15473626/make-a-post-request-while-redirecting-in-flask/15480983#15480983
