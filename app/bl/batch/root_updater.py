@@ -148,6 +148,12 @@ class RootUpdater(DataService):
                                                        auditor_username)
         return res
 
+    def set_audited(self, batch_id, user_audit, b_state):
+        """ Set batch status and mark all auditions completed.
+        """
+        res = self.dataservice.ds_batch_set_audited(batch_id, user_audit, b_state)
+        return res
+
     def remove_auditor(self, batch_id, auditor_username):
         """ Mark auditor for this data batch and set status.
         
