@@ -1215,6 +1215,9 @@ msgstr "Poistetaan"
 msgid "Delete from database"
 msgstr "Poista tietokannasta"
 
+msgid " wait..."
+msgstr " odota ..."
+
 #: bp/audit/templates/audit/batches.html:4
 #: bp/audit/templates/audit/batches.html:24
 msgid "Batches"

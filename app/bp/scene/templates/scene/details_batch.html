@@ -4,7 +4,7 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-<script src="/static/infobox.js"></script>
+<!-- script src="/static/infobox.js"></script -->
 <style>
 #sc-startdiv div { position:relative }
 .sc-startbox, .sc-startbox2 {
@@ -53,9 +53,10 @@ tr:hover {background-color: #f5f5f5}
 </style>
 
 <script>
-function doconfirm( command, title ) { // used in commands.html
+function doconfirm( command, title, caller, message ) { // used in commands.html
     if (confirm(title)) {
         document.location.href = command;
+        document.getElementById(caller).append("{{ _(' wait...') }}");
     }
 }
 </script>

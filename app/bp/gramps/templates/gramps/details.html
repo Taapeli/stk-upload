@@ -38,9 +38,10 @@ td {
 </style>
 
 <script>
-function doconfirm( command, title ) { // used in commands.html
+function doconfirm( command, title, caller, message ) { // used in commands.html
 	if (confirm(title)) {
 		document.location.href = command;
+		document.getElementById(caller).append("{{ _(' wait...') }}");
 	}
 }
 </script>
