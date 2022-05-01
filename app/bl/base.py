@@ -181,24 +181,6 @@ class NodeObject:
         return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
 
     @staticmethod
-    def new_isotammi_id(dataservice, obj_type_letter):
-        """Generates a new Isotammi id."""
-
-        get_new_id ="""
-MERGE (a:Isotammi_id {id:$id_type})
-ON CREATE SET a.counter = 1
-ON MATCH SET a.counter = a.counter + 1
-RETURN a.counter AS n_Isotammi_id"""
-
-        result = dataservice.tx.run(get_new_id, id_type=obj_type_letter)
-        iid = result.single()[0]
-##        print(f"new_isotammi_id lock value: {iid}")
-        isotammi_id = NodeObject.split_with_hyphen(obj_type_letter + base32.encode(iid, checksum=False))
-
-        print(f"new_isotammi_id: {iid} -> {isotammi_id}")
-        return isotammi_id
-
-    @staticmethod
     def newUuid():
         """Generates a new uuid key.
 

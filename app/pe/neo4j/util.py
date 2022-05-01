@@ -39,17 +39,11 @@ cypher_user_batch_prefix = """
         -[:HAS_ACCESS|:DOES_AUDIT]-> (root:Root{id:$batch_id})
 """
 
-cypher_new_iid = """
-MERGE (a:Isotammi_id {id:$id_type})
-    ON CREATE SET a.counter = 1
-    ON MATCH SET a.counter = a.counter + 1
-RETURN a.counter AS n_Isotammi_id"""
-
 cypher_block_of_iids = """
-MERGE (a:Isotammi_id {id:$iid_type})
-    ON CREATE SET a.counter = 1
+MERGE (a:iid {id:$iid_type})
+    ON CREATE SET a.counter = $iid_count
     ON MATCH SET a.counter = a.counter + $iid_count
-RETURN a.counter AS n_Isotammi_id"""
+RETURN a.counter - $iid_count AS new_iid"""
 
 
 def run_cypher(session, cypher:str, username:str, material:Material, **kwargs):
@@ -122,47 +116,31 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
                        **kwargs)
 
 
-def new_isotammi_id(session, obj_name: str):  # obj_type_letter):
-    """ Creates new unique isotammi_id keys when creating objects. 
-   """
-
-    def iid_groupper(id_str):
-        """Inserts a hyphen into the id string.
-
-         Examples: H-1, H-1234, H1-2345, H1234-5678
-        """
-        return (
-            id_str[: max(1, len(id_str) - 4)] + "-" + id_str[max(1, len(id_str) - 4) :]
-        )
-
-    if obj_name.startswith("Person"):
-        id_type = "H"
-    else:
-        id_type = obj_name[:1]
-    result = session.run(cypher_new_iid, id_type=id_type)
-    n_iid = result.single()[0]
-    isotammi_id = iid_groupper(id_type + base32.encode(n_iid, checksum=False))
-
-    print(f"new_isotammi_id: {n_iid} -> {isotammi_id}")
-    return isotammi_id
-
-
 class IsotammiId:
     """
     Object for reserving a sequence of unique ID numbers from the database, and then
     yielding them on by one in a base32 coded format.
     """
-    def __init__(self, session, obj_name: str, iid_count: int):
+    def __init__(self, session, obj_name: str):
         """
         Create an object with a reservation of 'id_count' ID values from the
         datbase counter fot the type of 'obj_name'.
         """
-        self.iid_type = "H" if obj_name.startswith("Person") else obj_name[:1]
-        result = session.run(cypher_block_of_iids, iid_type=self.iid_type, iid_count = iid_count)
+        self.iid_type = "H" if obj_name.startswith("People") else obj_name[:1]
+        self.session = session
+        self.n_iid = 0
+        self.max_iid = 0
+
+    def get_batch(self, iid_count: int):
+        """
+        Create an object with a reservation of 'id_count' ID values from the
+        datbase counter fot the type of 'obj_name'.
+        """
+        result = self.session.run(cypher_block_of_iids, iid_type=self.iid_type, iid_count = iid_count)
         self.n_iid = result.single()[0]
         self.max_iid = self.n_iid + iid_count - 1
 
-    def get_new(self) -> str:
+    def get_one(self) -> str:
         """
         Yield the next Isotammi ID properly formatted.
         """
@@ -179,5 +157,5 @@ class IsotammiId:
         isotammi_id = format_iid(self.iid_type + base32.encode(self.n_iid, checksum=False))
         self.n_iid += 1
 
-        print(f"new_isotammi_id: {self.n_iid} -> {isotammi_id}")
+##        print(f"new_isotammi_id: {self.n_iid} -> {isotammi_id}")
         return isotammi_id
