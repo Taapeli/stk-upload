@@ -114,7 +114,7 @@ class DOM_handler:
         self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
-    def save_and_link_handle2(self, tx, obj, **kwargs):
+    def unused_save_and_link_handle2(self, tx, obj, **kwargs):
         """Save object and store its identifiers in the dictionary by handle.
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others

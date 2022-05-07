@@ -89,8 +89,8 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
                     </tr>
                     <tr>
                         <th>{{ _("Material type") }}</th>
-                        <td>
-                            <span class="typedesc" style="font-size:110%">{{ _(batch.material_type) }}</span>
+                        <td>{% set m_code = batch.material_type | lower | replace(" ","") %}
+                            <span class="typedesc matr_{{m_code}}" style="font-size:110%">{{ _(batch.material_type) }}</span>
                         </td>
                     </tr>
                     <tr>

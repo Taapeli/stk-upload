@@ -58,12 +58,10 @@ tr > td:nth-child(5) {
                </td>
     	  {% endif -%}
 
-	           <td>
-          {# if upload.material_type != "Family Tree" #}
-                    <span class="typedesc">
+	           <td>{% set m_code = upload.material_type | lower | replace(" ","") %}
+                    <span class="typedesc matr_{{m_code}}">
                         {{ _(upload.material_type|transl('material')) }}
                     </span>
-          {# endif -#}
                </td>
                <td>{{upload.batch_id}}
 	      {% if upload.count %}
