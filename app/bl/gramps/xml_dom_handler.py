@@ -654,7 +654,8 @@ class DOM_handler:
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
                 if n.url:
-                    p.notes.append(n)
+                    print(f"##TODO: {p.id}: ignored url {n.url}")
+                    #p.notes.append(n)
             # Not used
             #             for person_parentin in person.getElementsByTagName('parentin'):
             #                 if person_parentin.hasAttribute("hlink"):
@@ -775,7 +776,8 @@ class DOM_handler:
                 n.type = placeobj_url.getAttribute("type")
                 n.text = placeobj_url.getAttribute("description")
                 if n.url:
-                    pl.notes.append(n)
+                    print(f"##TODO: {pl.id}: ignored url {n.url}")
+                    #pl.notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName("placeref"):
                 # Traverse links to surrounding (upper) places
@@ -845,7 +847,8 @@ class DOM_handler:
                 n.type = repository_url.getAttribute("type")
                 n.text = repository_url.getAttribute("description")
                 if n.url:
-                    r.notes.append(n)
+                    print(f"##TODO: {r.id}: ignored url {n.url}")
+                    #r.notes.append(n)
 
             self.dataservice.ds_save_repository(tx, r, self.batch.id, iids)
             self.complete(r)
