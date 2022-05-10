@@ -943,6 +943,37 @@ def show_families():
     )
 
 
+@bp.route("/family/<iid>", methods=["GET"])
+@login_required
+@roles_accepted("guest", "research", "audit", "admin")
+def show_family_iid(iid=None):
+    """One Family."""
+    if not iid:
+        flash("Missing isotammi_id", "error")
+        return redirect(url_for("show_families"))
+    t0 = time.time()
+    u_context = UserContext()
+
+    with FamilyReader("read", u_context) as service:
+        # reader = FamilyReader(readservice, u_context)
+        res = service.get_family_data(iid)
+
+    stk_logger(u_context, "-> bp.scene.routes.show_family_page")
+    status = res.get("status")
+    if status != Status.OK:
+        if status == Status.ERROR:
+            flash(f'{res.get("statustext")}', "error")
+        else:
+            flash(f'{ _("This item is not available") } {iid}', "warning")
+
+    return render_template(
+        "/scene/family.html",
+        menuno=3,
+        family=res["item"],
+        user_context=u_context,
+        elapsed=time.time() - t0,
+    )
+
 @bp.route("/scene/family", methods=["GET"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")

@@ -347,17 +347,21 @@ class Neo4jReadService(ConcreteService):
 
     # ------ Families -----
 
-    def dr_get_family_by_uuid(self, user: str, material: Material, uuid: str):
+    def dr_get_family_by_id(self, user: str, material: Material, iid: str):
         """
-        Read a Family using uuid and user info.
+        Read a Family using isotammi_id or uuid and user info.
 
         Returns dict {item, status, statustext}
         """
         family = None
+        if "-" in iid:
+            cypher=CypherFamily.get_family_iid
+        else:
+            cypher=CypherFamily.get_family_uuid
 
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(
-                session, CypherFamily.get_a_family, user, material, f_uuid=uuid
+                session, cypher, user, material, f_id=iid
             )
             for record in result:
                 if record["f"]:

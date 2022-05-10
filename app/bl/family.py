@@ -30,8 +30,8 @@ logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
 from .base import NodeObject, Status
-from .person import PersonBl
-from .person_name import Name
+#from .person import PersonBl
+#from .person_name import Name
 
 from pe.dataservice import DataService
 
@@ -194,7 +194,7 @@ class FamilyReader(DataService):
             families = self.hide_privacy_protected_families(families)
         return families
 
-    def get_family_data(self, uuid: str, wanted=[]):
+    def get_family_data(self, iid: str, wanted=[]):
         """Read Family information including Events, Children, Notes and Sources.
 
         Returns a dict {item:Family, status=0, statustext:None}
@@ -249,8 +249,8 @@ class FamilyReader(DataService):
                res is dict {item, status, statustext}
         """
         material = self.user_context.material
-        ret_results = self.dataservice.dr_get_family_by_uuid(self.use_user,
-                                                             material, uuid)
+        ret_results = self.dataservice.dr_get_family_by_id(self.use_user,
+                                                           material, iid)
         # ret_results {'item': <bl.family.FamilyBl>, 'status': Status}
         if Status.has_failed(ret_results):
             return ret_results

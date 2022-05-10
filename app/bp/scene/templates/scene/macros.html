@@ -144,12 +144,13 @@
     <input id="isotammi_id" type="text" value="{{obj.isotammi_id}}" style="display:None">
     <span class="isotammi_id copy-fld" title="Isotammi ID"
         onclick="toClipboard('isotammi_id')">{{obj.isotammi_id}}</span> /
-    {% endif -%}
+    {% else %}
     <input id="my_uuid" type="text" value="{{obj.uuid}}" style="display:None">
     <tt title="{{ _('Copy UUID key') }}" class="copy-fld" 
         onclick="toClipboard('my_uuid')">{{obj.uuid_short()}}</tt> /
+    {% endif -%}
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
-    <span class="id" title="{{ _('number') }}">{{obj.uniq_id}}</span>
+    <span class="id" title="{{ _('number') }}">#{{obj.uniq_id}}</span>
     {% if obj.change %}
     <span id="changetime" title="{{ _('latest change time and contributor') }}"
         {% if margin %}style='margin-right:{{margin}}'{% endif %}

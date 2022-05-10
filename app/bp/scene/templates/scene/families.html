@@ -115,7 +115,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
     {% for f in families %}
         <tr>
             <td class="ColumnFamily">
-                <a href="/scene/family?uuid={{f.uuid}}" class="inlink"
+                <a href="/family/{{f.isotammi_id}}" class="inlink"
                    title="{{ _('Go to family page') }}">&rarr; {{f.rel_type|transl('marr')}}</a>
         {% if f.marriage_place %} {{f.marriage_place}} {% endif -%}
         {% if f.dates %}
@@ -125,7 +125,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
         {% if f.isotammi_id %}
                 <span class="idno" title="Isotammi ID">{{f.isotammi_id}}</span>
         {% else %}
-                <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
+                <span class="idno" title="{{ _('Key') }}">#{{f.uniq_id}}</span>
         {% endif %}
                 </td>
 
