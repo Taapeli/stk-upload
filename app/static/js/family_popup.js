@@ -110,7 +110,7 @@ var vm = new Vue({
 						fam.dates = rec.dates;
 						fam.role = rec.role;
 						fam.role_lang = rec.role_lang;
-						fam.href = "/scene/family?uuid="+rec.uuid;
+						fam.href = "/family/"+rec.isotammi_id;
 						fam.parents = [];
 						fam.children = [];
 						fam.title = "Perhe "+fam.id;

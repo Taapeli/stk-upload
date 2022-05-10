@@ -13,7 +13,7 @@
                     {% for fam in person.families_as_child %}
                     <div class="groupbox">
                         <div class="familybox" title="{{ _('family') }} {{fam.id}}">
-                            <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
+                            <p><a href="/family/{{fam.isotammi_id}}" title="{{fam.id}}" class="inlink">
                                     {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                                 {{fam.marriage_dates}}</p>
                             <ul>
@@ -56,7 +56,7 @@
                     <div class="groupbox">
                         {% for fam in person.families_as_parent %}
                         <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-                            <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
+                            <p><a href="/family/{{fam.isotammi_id}}" title="{{fam.id}}" class="inlink">
                                     {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                                 {{fam.marriage_dates}}</p>
                             <ul>

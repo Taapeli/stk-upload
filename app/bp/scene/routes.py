@@ -978,7 +978,8 @@ def show_family_iid(iid=None):
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_family_page(uuid=None):
-    """One Family."""
+    """One Family, only for by /scene/json/event from person.html
+    """
     uuid = request.args.get("uuid", uuid)
     if not uuid:
         return redirect(url_for("virhesivu", code=1, text="Missing Family key"))

@@ -116,7 +116,7 @@ tr > td > img {
                                     title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
                                 {{ macro.person_name_by_sortname(p) }}</a>
                             {% elif p.label == "Family" %}
-                                <a href="/scene/family?uuid={{p.uuid}}" class="inlink"
+                                <a href="/family/{{p.isotammi_id}}" class="inlink"
                                     title="{{ _('see details of family %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
                                 {{ macro.family_name(p) }}</a>
                             {% endif %}

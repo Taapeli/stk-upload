@@ -53,8 +53,7 @@
                 	<a href="/scene/location/uuid={{c.object.uuid}}" class="inlink"
                        title="{{ _('Go to comment page') }}">{{ c.object.pname }}</a>
                 {% elif c.obj_label == 'Family' %}
-                	<a href="/scene/family?uuid={{c.object.uuid}}" class="inlink"
-                       title="{{ _('Go to comment page') }}">{{ c.object.father_sortname }} / {{ c.object.mother_sortname }}</a>
+                    {{ macro.family_name(c.object) }}
                 {% elif c.obj_label == 'Source' %}
                 	<a href="/scene/source?uuid={{c.object.uuid}}" class="inlink"
                        title="{{ _('Go to commented page') }}">{{ c.object.stitle }}</a>
