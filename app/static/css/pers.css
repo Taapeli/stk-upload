@@ -180,6 +180,10 @@ tr:hover {background-color: #f5f5f5}
     font-size: 84%;
     color: darkmagenta;
 }
+.matr_familytree { color: darkolivegreen; }
+.matr_placedata  { color: indianred; }
+.matr_hiskitree  { color: slateblue; }
+
 .typetag {
     font-variant: small-caps;
     text-transform: uppercase;

@@ -1029,7 +1029,8 @@ class Neo4jReadServiceTx(ConcreteService):
             match (root) --> (note) 
             match (x) --> (note)
                 where not "Root" in labels(x)
-            return distinct note, collect([x,labels(x)]) as referrers, score
+            optional match (x:Person) --> (n:Name{order:0})
+            return distinct note, collect([x,labels(x),n]) as referrers, score
             limit $limit
             """
         result = run_cypher_batch(self.tx, cypher, username, material,
@@ -1050,15 +1051,17 @@ class Neo4jReadServiceTx(ConcreteService):
                 refdata = dict(r[0])
                 url = ""
                 label = r[1][0]
-                if label == "Place": label = "location"
+                name = r[2]
+                if name:
+                    fullname = f"{name['firstname']} {name['suffix']} {name['surname']}"
+                    refdata['pname'] = fullname 
+                uuid = refdata["uuid"]
                 if label in ["Person","Family","Source","Media"]:
-                    url = f"/scene/{label.lower()}?uuid=" + refdata["uuid"]
-                else:
-                    url = f"/scene/{label.lower()}/uuid=" + refdata["uuid"]
-#                     url = "/scene/person?uuid=" + refdata["uuid"]
-#                 if r[1] == ["Event"]:
-#                     url = "/scene/event/uuid=" + refdata["uuid"]
-                #url = f"/scene/{labels[0].lower()}?uuid=" + refdata["uuid"]
+                    url = f"/scene/{label.lower()}?uuid={uuid}"
+                if label == "Event":
+                    url = f"/scene/event/uuid={uuid}"
+                if label == "Place":
+                    url = f"/scene/location?uuid={uuid}"
                 refdata['url'] = url 
                 referrerlist.append(refdata)
             d = dict(

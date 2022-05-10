@@ -192,7 +192,8 @@ function filenm_changed(input) {
             <td>{{upload.xmlname}}
 
     {% if upload.material_type or upload.description %}
-                <br><span class="typedesc">{{upload.material_type|transl('material')}}</span>
+        {% set m_code = upload.material_type | lower | replace(" ","") -%}
+                <br><span class="typedesc matr_{{m_code}}">{{upload.material_type|transl('material')}}</span>
     {% endif -%}
     {% if upload.description %} 
                 <i>{{ upload.description[0:19] }}

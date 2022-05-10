@@ -2154,7 +2154,7 @@ msgstr "Valitse käsiteltävä tiedosto"
 
 #: bp/gedcom/templates/gedcom_list.html:37
 msgid "Upload a new GEDCOM file"
-msgstr "Lataa uusi Gedcom-tiedosto"
+msgstr "Tuo uusi Gedcom-tiedosto"
 
 #: bp/gedcom/templates/gedcom_list.html:54
 msgid "Return main page"
@@ -5532,7 +5532,7 @@ msgstr "Paikat"
 
 #: ui/jinja_filters.py:328
 msgid "Hiski Tree"
-msgstr "Hiski"
+msgstr "Hiskipuut"
 
 #: ui/jinja_filters.py:343
 msgid "Loading"

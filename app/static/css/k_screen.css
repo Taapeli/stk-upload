@@ -212,6 +212,10 @@ td.ColumnEvent ul li i {
     font-size: 84%;
     color: darkmagenta;
 }
+.matr_familytree { color: darkolivegreen; }
+.matr_placedata  { color: indianred; }
+.matr_hiskitree  { color: slateblue; }
+
 .langcode {
     font-variant: small-caps;
     text-transform: uppercase;

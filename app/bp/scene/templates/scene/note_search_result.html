@@ -48,10 +48,15 @@ item:
 	    		<td>{{ item.excerpt|safe }}
 	    		{% for r in item.referrers %}
 	    			<br>
-	    			<a href={{ r.url }} class="inlink">
-	    			{{ r.id }} {{ r.description }}
-	    			</a>
+	    			{% if r.url %}
+		    			<a href={{ r.url }} class="inlink">
+		    			{{ r.id }} {{ r.description }} {{ r.pname }}
+		    			</a>
+	    			{% else %}
+	    				{{ r.id }}
+    				{% endif %}
 	    		{% endfor %}
+	    		
 	    {% endfor %}
     {% else %}
             <tr><td colspan="4" id="lastitem_badge">

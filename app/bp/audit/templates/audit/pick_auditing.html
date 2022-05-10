@@ -48,8 +48,8 @@ table     { width: 750px; }
         <div class="clearfix">
           <div class="box">
             <div>{{ _('Material') }}</div>
-            <p>
-               <span class="typedesc">{{ _(root.material_type) }}</span>
+            <p>{% set m_code = root.material_type | lower | replace(" ","") %}
+               <span class="typedesc matr_{{m_code}}">{{ _(root.material_type) }}</span>
                <br><b>{{root.id}}</b>
             </p>
           </div>
