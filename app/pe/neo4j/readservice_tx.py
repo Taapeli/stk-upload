@@ -523,10 +523,10 @@ class Neo4jReadServiceTx(ConcreteService):
             for record in result:
                 place = record["place"]
                 placename = place["pname"]
-                uuid = place["uuid"]
+                iid = place["iid"]
                 count = record["count"]
                 result_list.append(
-                    {"placename": placename, "count": count, "uuid": uuid}
+                    {"placename": placename, "count": count, "iid": iid}
                 )
         return result_list
 
@@ -583,7 +583,7 @@ class Neo4jReadServiceTx(ConcreteService):
         # Return sorted by first name in the list p.names -> p.pname
         return sorted(ret, key=lambda x: x.pname)
 
-    def tx_get_place_w_names_citations_notes_medias(self, user, uuid, lang, material):
+    def tx_get_place_w_names_citations_notes_medias(self, user, iid, lang, material):
         """
         Returns the PlaceBl with PlaceNames, Notes, Medias and Citations.
 
@@ -603,7 +603,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 CypherPlace.get_w_citas_names_notes,
                 user,
                 material,
-                uuid=uuid,
+                iid=iid,
                 lang=lang,
             )
             for record in result:
@@ -735,7 +735,7 @@ class Neo4jReadServiceTx(ConcreteService):
                     # >
                 lv = t.tree.depth(n)
                 p = PlaceBl(uniq_id=tnode, ptype=n.data["type"], level=lv)
-                p.uuid = n.data["uuid"]
+                p.iid = n.data["iid"]
                 node = record["name"]
                 if node:
                     p.names.append(PlaceName_from_node(node))
@@ -1056,12 +1056,13 @@ class Neo4jReadServiceTx(ConcreteService):
                     fullname = f"{name['firstname']} {name['suffix']} {name['surname']}"
                     refdata['pname'] = fullname 
                 uuid = refdata["uuid"]
+                iid = refdata["iid"]
                 if label in ["Person","Family","Source","Media"]:
                     url = f"/scene/{label.lower()}?uuid={uuid}"
                 if label == "Event":
                     url = f"/scene/event/uuid={uuid}"
                 if label == "Place":
-                    url = f"/scene/location?uuid={uuid}"
+                    url = f"/place/{iid}"
                 refdata['url'] = url 
                 referrerlist.append(refdata)
             d = dict(

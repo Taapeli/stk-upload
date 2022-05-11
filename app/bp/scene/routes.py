@@ -810,10 +810,10 @@ def json_get_event():
         # Actually there is one place and one pl.uppers
         places = res.get("places", [])
         for pl in places:
-            pl.href = "/scene/location/uuid=" + pl.uuid
+            pl.href = "/place/" + pl.iid
             pl.type_lang = jinja_filters.translate(pl.type, "lt").title()
             for up in pl.uppers:
-                up.href = "/scene/location/uuid=" + up.uuid
+                up.href = "/place/" + up.iid
                 up.type_lang = jinja_filters.translate(up.type, "lt_in").title()
         # Event notes
         notes = res.get("notes", [])
@@ -1102,10 +1102,11 @@ def show_places():
 
 
 @bp.route("/scene/location/uuid=<locid>")
+@bp.route("/place/<locid>")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_place(locid):
-    """Home page for a Place uuid=locid, shows events and place hierarchy."""
+    """Home page for a Place by iid or uuid, shows events and place hierarchy."""
     t0 = time.time()
     u_context = UserContext()
     try:
@@ -1128,7 +1129,7 @@ def show_place(locid):
             # Map scaling
             level = 1
             for p in res.get("hierarchy"):
-                if p.uuid == pl.uuid:
+                if p.iid == pl.isotammi_id:
                     level = p.level
                     break
             zoom = 19 - 48.5*level + 30*level*level

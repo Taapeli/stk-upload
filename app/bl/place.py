@@ -371,7 +371,7 @@ class PlaceReaderTx(DataService):
             }
         return {"items": places, "status": Status.OK}
 
-    def get_places_w_events(self, uuid):
+    def get_places_w_events(self, iid):
         """Read the place hierarchy and events connected to this place.
 
         Luetaan annettuun paikkaan liittyvä hierarkia ja tapahtumat
@@ -384,7 +384,7 @@ class PlaceReaderTx(DataService):
         lang = self.user_context.lang
         material = self.user_context.material
         res = self.dataservice.tx_get_place_w_names_citations_notes_medias(
-                    use_user, uuid, lang, material)
+                    use_user, iid, lang, material)
         # res {place:Place, uniq_ids:list(uniq_ids), "citas": list(Citations)}
         # The uniq_ids includes all references to names, notes, medias and citations
         place = res.get("place")
@@ -393,7 +393,7 @@ class PlaceReaderTx(DataService):
         if not place:
             res = {
                 "status": Status.ERROR,
-                "statustext": f"get_places_w_events: No Place with uuid={uuid}",
+                "statustext": f"get_places_w_events: No Place '{iid}'",
             }
             return res
 
@@ -446,16 +446,7 @@ class PlaceReaderTx(DataService):
         placenames = ds.tx_get_placename_list(self.use_user, 
                                               self.user_context.material,
                                               count=count)
-        # Returns [{'surname': surname, 'count': count},...]
-
-        # if self.use_user:
-        #     placename_stats = self.dataservice.dr_get_placename_stats_by_user(
-        #         self.use_user, count=count
-        #     )
-        # else:
-        #     placename_stats = self.dataservice.dr_get_placename_stats_common(
-        #         count=count
-        #     )
+        # Returns [{placename, count, iid},...]
         return placenames
 
 

@@ -134,7 +134,7 @@ tr:nth-child(even) {
                         <td class="ColumnPlace">{% set br=0 %}
     	{% for pref in e.place_ref %}{% set pl = objs[pref] %}
     	    {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
-                            <a href="/scene/location/uuid={{pl.uuid}}" class="inlink"
+                            <a href="/place/{{pl.isotammi_id}}" class="inlink"
                              title="{{ _('of type') }} {{pl.type}}; {{ _('see details of place') }}">
                               {{macro.place_names_lang(pl)}}</a
                             >{% if pl.uppers %},

@@ -122,8 +122,11 @@ class DbTree():
         for nodes, _level, relations in hierarchy_result:
             for node in nodes:
                 if not self.tree.contains(node.id):
-                    self.tree.create_node(node.get(self.name_field_name), node.id, parent=0, 
-                                          data={self.type_field_name:node.get(self.type_field_name),'uuid':node.get('uuid')})
+                    self.tree.create_node(node.get(self.name_field_name), 
+                                          node.id, 
+                                          parent=0, 
+                                          data={self.type_field_name:node.get(self.type_field_name),
+                                                'iid':node.get('iid')})
     
         # then move all nodes under correct parent
         for nodes, _level, relations in hierarchy_result:

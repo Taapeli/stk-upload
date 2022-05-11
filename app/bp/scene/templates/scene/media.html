@@ -102,7 +102,7 @@ tr > td > img {
 			               title="{{ _('see details of person %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
 			               {{ref.obj.sortname|replace("#", " ")}}</a>
                 {% elif ref.label == 'Place' %}
-                    <a href="/scene/location/uuid={{ref.obj.uuid}}" class="inlink"
+                    <a href="/place/{{ref.obj.isotammi_id}}" class="inlink"
                            title="{{ _('see details of place %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
                            {{ref.obj.pname}}</a>
                 {% elif ref.label == 'Event' %}
