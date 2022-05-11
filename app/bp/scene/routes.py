@@ -713,26 +713,8 @@ def sort_names():
 
 # @bp.route('/scene/event/<int:uniq_id>')
 # @bp.route("/older/event/uuid=<string:uuid>")
-# @login_required
-# @roles_accepted("guest", "research", "audit", "admin")
 # def obsolete_show_event_v1(uuid):
 #     """Event page with accompanied persons and families.
-#
-#     Derived from bp.obsolete_tools.routes.show_baptism_data()
-#     """
-#     u_context = UserContext()
-#
-#     with EventReader("read", u_context) as service:
-#         # reader = EventReader(readservice, u_context)
-#         res = service.get_event_data(uuid, u_context.material)
-#
-#     status = res.get("status")
-#     if status != Status.OK:
-#         flash(f'{_("Event not found")}: {res.get("statustext")}', "error")
-#     event = res.get("event", None)
-#     members = res.get("members", [])
-#
-#     stk_logger(u_context, f"-> bp.scene.routes.show_event_page n={len(members)}")
 #     return render_template("/scene/event_htmx.html", event=event, participants=members)
 
 
@@ -822,7 +804,8 @@ def json_get_event():
                 m.href = "/scene/person?uuid=" + m.uuid
                 m.names[0].type_lang = jinja_filters.translate(m.names[0].type, "nt")
             elif m.label == "Family":
-                m.href = "/scene/family?uuid=" + m.uuid
+                m.href = "/family/" + m.isotammi_id
+                #m.href = "/scene/family?uuid=" + m.uuid
             m.role_lang = jinja_filters.translate(m.role, "role") if m.role else ""
         # Actually there is one place and one pl.uppers
         places = res.get("places", [])
