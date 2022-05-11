@@ -190,7 +190,7 @@ class PlaceBl(Place):
               ja aakkosjärjestykseen
         """
         placedict = {}
-        for nid, nuuid, ntype, name, nlang in pn_tuples:
+        for nid, iid, ntype, name, nlang in pn_tuples:
             if nid:  # id of a lower place
                 pn = PlaceName(name=name, lang=nlang)
                 if nid in placedict:
@@ -200,7 +200,7 @@ class PlaceBl(Place):
                 else:
                     # Add a new PlaceBl
                     p = PlaceBl(nid)
-                    p.uuid = nuuid
+                    p.iid = iid
                     p.type = ntype
                     p.names.append(pn)
                     placedict[nid] = p
