@@ -99,7 +99,7 @@ class DOM_handler:
         this_thread = threading.current_thread()
         this_thread.progress = dict(self.progress)
 
-    def save_and_link_handle(self, obj, **kwargs):
+    def test_only_save_and_link_handle(self, obj, **kwargs):
         """Save object and store its identifiers in the dictionary by handle.
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others

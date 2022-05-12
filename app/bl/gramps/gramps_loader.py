@@ -261,6 +261,7 @@ def xml_to_stkbase(batch):  # :Root):
     """
     from bl.batch.root_updater import RootUpdater
     from bl.batch.root import State, DEFAULT_MATERIAL
+    import re
 
     t0 = time.time()
 
@@ -297,7 +298,9 @@ def xml_to_stkbase(batch):  # :Root):
         if batch.material_type is None:
             batch.material_type = DEFAULT_MATERIAL
             print(f"- default material type {batch.material_type}")
-        handler.handle_suffix = "_" + handler.batch.id  
+        # Shortened batch id "2022-05-07.001" -> "2205071"
+        handler.handle_suffix = \
+            "_" + batch.id[2:4] + re.sub("\-|(\.0*)","",batch.id[5:])
 
         # batch.save(batch_service.dataservice.tx)
         with shareds.driver.session() as session:
@@ -350,7 +353,8 @@ def xml_to_stkbase(batch):  # :Root):
             {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
         )
 
-        handler.remove_handles()
+        # The gramps handles are not removed any more / 15.5.2022/JMä
+        # handler.remove_handles()
         batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
 
     logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')

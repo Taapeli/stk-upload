@@ -47,7 +47,7 @@ def fixture_mock_func():
 
 
 def test_xml_with_citation(mock_func):
-    mock_patch = "bp.gramps.xml_dom_handler.DOM_handler.save_and_link_handle"
+    mock_patch = "bp.gramps.xml_dom_handler.DOM_handler.test_only_save_and_link_handle"
     with mock.patch(mock_patch) as mck:
         mck.side_effect = mock_func
         
