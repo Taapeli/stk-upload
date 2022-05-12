@@ -264,13 +264,13 @@ WITH a LIMIT 2000
 MATCH (:UserProfile{username:$user}) -[:HAS_ACCESS]-> (c:Root{id:$batch_id})
 DETACH DELETE c"""
 
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_obj_remove_gramps_handles
-    remove_all_handles = """
-match (b:Root {id:$batch_id}) -[*1..3]-> (a)
-where a.handle is not null
-with distinct a
-    remove a.handle
-return count(a),labels(a)[0]"""
+# #-pe.neo4j.updateservice.Neo4jUpdateService.ds_obj_remove_gramps_handles
+#     remove_all_handles = """
+# match (b:Root {id:$batch_id}) -[*1..3]-> (a)
+# where a.handle is not null
+# with distinct a
+#     remove a.handle
+# return count(a),labels(a)[0]"""
 
 #-bl.gramps.xml_dom_handler.DOM_handler.add_missing_links
     add_missing_links = """

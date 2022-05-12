@@ -288,16 +288,17 @@ def xml_to_stkbase(batch):  # :Root):
         batch.mediapath = handler.get_mediapath_from_header()
     
         meta_type, meta_desc = handler.get_metadata_from_header()
-        print("gramps_loader.xml_to_stkbase: metadata:", (meta_type, meta_desc))
+        print("gramps_loader.xml_to_stkbase: XML metadata:", (meta_type, meta_desc))
         if meta_type:
             batch.material_type = meta_type
         if meta_desc:
             batch.description = meta_desc
-        print(f"gramps_loader.xml_to_stkbase: got material type={meta_type!r}, desc={meta_desc!r}")
+        #print(f"gramps_loader.xml_to_stkbase: got material type={meta_type!r}, desc={meta_desc!r}")
         if batch.material_type is None:
             batch.material_type = DEFAULT_MATERIAL
             print(f"- default material type {batch.material_type}")
-        handler.handle_suffix = "_" + handler.batch.id  
+        # Shortened batch id "2022-05-07.001" -> "2205071"
+        handler.handle_suffix = batch.handle_suffix()
 
         # batch.save(batch_service.dataservice.tx)
         with shareds.driver.session() as session:
@@ -350,7 +351,8 @@ def xml_to_stkbase(batch):  # :Root):
             {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
         )
 
-        handler.remove_handles()
+        # The gramps handles are not removed any more / 15.5.2022/JMä
+        # handler.remove_handles()
         batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
 
     logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
@@ -384,7 +386,7 @@ def run_supertool(batch, script, outputfile):
     else:
         msgs = {}
     logger.info(f'bp.gramps.routes.run_supertool f="{os.path.basename(batch.xmlname)}"')
-    import csv
+    #import csv
     from pprint import pprint
     print("run_supertool")
     pprint(msgs)
