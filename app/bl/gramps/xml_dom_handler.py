@@ -155,9 +155,9 @@ class DOM_handler:
         material_type = None
         description = None
         for node in isotammi_node.childNodes:
-            print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
-            if node.nodeName == "#text": print("- data:",node.data)
+            #print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
             if node.nodeName == "#text":
+                #print("- data:",node.data)
                 pass
             elif node.nodeName == "researcher-info":
                 pass
@@ -166,7 +166,7 @@ class DOM_handler:
             elif node.nodeName == "user_description":
                 description = node.childNodes[0].data.strip()
             else:
-                print("Unsupported element in <isotammi>: {node.nodeName}")
+                print(f"DOM_handler.get_isotammi_metadata: Unsupported element in <isotammi>: {node.nodeName}")
         return (material_type, description)
 
     def handle_dom_nodes(self, tag, title, transaction_function, chunk_max_size):

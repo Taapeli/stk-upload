@@ -141,6 +141,16 @@ class Root(NodeObject):
         except Exception:
             return ""
 
+    def handle_suffix(self) -> str:
+        """ Shortened batch id "2022-05-07.001" -> "2205071" """
+        import re
+        if len(self.id) == 14:
+            suffix = "_" + self.id[2:4] + re.sub("\-|(\.0*)","",self.id[5:])
+            print(f"#Root.handle_suffix: {self.id!r} -> {suffix!r}")
+            return suffix
+        else:
+            return ""
+
     def state_transition(self, oper:str, active_auditor:bool=False) -> bool:
         """ Allowed auditor operations.
 
