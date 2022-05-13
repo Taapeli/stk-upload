@@ -70,8 +70,7 @@ RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
 
 # For place page
     get_w_citas_names_notes = """
-MATCH  (root) -[:OBJ_PLACE]-> (place:Place)
-    WHERE place.iid=$iid
+MATCH  (root) -[:OBJ_PLACE]-> (place:Place{iid:$iid})
 OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
 WITH place, name
     OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 

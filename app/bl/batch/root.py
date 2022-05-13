@@ -364,7 +364,7 @@ class Root(NodeObject):
                 # Record: <Record root.material='Family Tree' count(*)=6>
                 m_type = rec.get("material_type")
                 m_count = rec.get("nodes")
-                print(f"#count_materials_accepted: {m_type} ({rec.get('nodes')} nodes)")
+                print(f"#Root.count_materials_accepted: {m_type} ({rec.get('nodes')} nodes)")
                 yield {"material_type": m_type, "count": m_count }
 
     @staticmethod

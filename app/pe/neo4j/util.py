@@ -118,13 +118,17 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
 
 class IsotammiId:
     """
-    Object for reserving a sequence of unique ID numbers from the database, and then
-    yielding them on by one in a base32 coded format.
+    Serves a sequences of unique ID keys by object type from the database.
+
+    Usage:
+    - a = IsotammiId(tx, "People") Create an ID generator using given transaction
+    - a.get_batch(100)             Allocates given number of keys
+    - key = a.get_one()            Get next key
     """
     def __init__(self, session, obj_name: str):
         """
         Create an object with a reservation of 'id_count' ID values from the
-        datbase counter fot the type of 'obj_name'.
+        database counter for the type of 'obj_name'.
         """
         self.iid_type = "H" if obj_name.startswith("People") else obj_name[:1]
         self.session = session
@@ -134,7 +138,7 @@ class IsotammiId:
     def get_batch(self, iid_count: int):
         """
         Create an object with a reservation of 'id_count' ID values from the
-        datbase counter fot the type of 'obj_name'.
+        database counter fot the type of 'obj_name'.
         """
         result = self.session.run(cypher_block_of_iids, iid_type=self.iid_type, iid_count = iid_count)
         self.n_iid = result.single()[0]

@@ -1108,7 +1108,7 @@ def show_places():
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
 def show_place(locid):
-    """Home page for a Place by iid or uuid, shows events and place hierarchy."""
+    """Home page for a Place by iid, shows events and place hierarchy."""
     t0 = time.time()
     u_context = UserContext()
     try:

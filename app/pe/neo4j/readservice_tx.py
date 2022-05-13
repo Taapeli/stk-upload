@@ -653,19 +653,20 @@ class Neo4jReadServiceTx(ConcreteService):
 
             # 2. Get Notes for Citations
 
-            result = run_cypher(
-                session, 
-                CypherPlace.get_notes_for_citas,
-                user,
-                material,
-                citas=list(cita_dict.keys()),
-            )
-            for record in result:
-                # Set Note to active Citation
-                cita_uid = record["cid"]
-                cita_obj = cita_dict[cita_uid]
-                note_obj = Note_from_node(record["note"])
-                cita_obj.notes.append(note_obj)
+            if len(cita_dict) > 0:
+                result = run_cypher(
+                    session, 
+                    CypherPlace.get_notes_for_citas,
+                    user,
+                    material,
+                    citas=list(cita_dict.keys()),
+                )
+                for record in result:
+                    # Set Note to active Citation
+                    cita_uid = record["cid"]
+                    cita_obj = cita_dict[cita_uid]
+                    note_obj = Note_from_node(record["note"])
+                    cita_obj.notes.append(note_obj)
 
         return {"place": pl, "uniq_ids": node_ids, "citas": citations}
 
@@ -709,7 +710,7 @@ class Neo4jReadServiceTx(ConcreteService):
                     record["name"],
                     locid,
                     parent=0,
-                    data={"type": record["type"], "uuid": record["uuid"]},
+                    data={"type": record["type"], "iid": record["iid"]},
                 )
         ret = []
         for tnode in t.tree.expand_tree(mode=t.tree.DEPTH):

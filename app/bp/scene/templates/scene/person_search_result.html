@@ -38,7 +38,7 @@
             {% if p.names[0].surname %}
                           <b>{{p.names[0].surname}}</b>{% else %}
                           <i>{{p.names[0].suffix}}</i>{% endif -%}</a>
-		                <small class="idno">[{{ p.uuid_short() }}]</small>
+		                <small class="idno">[{{ p.iid }}]</small>
 		    {% if p.refnames %}
 		                <br><small class="refname" title="{{ _('Reference names') }}">
 		                  {{ _('Keywords') }}: {{p.refnames}}</small>

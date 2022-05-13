@@ -197,8 +197,6 @@ class DOM_handler:
                 session.write_transaction(transaction_function, 
                                           nodes=nodes_chunk,
                                           iids=isotammi_id_list)
-                """ def handle_notes(self, tx, dom_objs):
-                """
                 counter += chunk_size
                 
         self.blog.log_event(
@@ -685,7 +683,7 @@ class DOM_handler:
             self.person_ids.append(p.uniq_id)
 
 
-    def handle_place_list(self, tx, nodes, iids):
+    def handle_place_list(self, tx, nodes, iids:IsotammiId):
         """Get all the places in the xml_tree.
 
         To create place hierarchy links, there must be a dictionary of

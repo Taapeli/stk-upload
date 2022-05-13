@@ -91,17 +91,17 @@ class StkEncoder(json.JSONEncoder):
 
 class NodeObject:
     """
-    Class representing Neo4j node type objects
+    Class representing Neo4j Node type objects.
     """
 
     def __init__(self, uniq_id:int=None):
         """
         Constructor.
 
-        Optional uniq_id may be uuid identifier (str) or database key (int).
+        Optional uniq_id may be database key (int).
         """
-        self.uuid = None  # UUID / isotammi_id
-        self.uniq_id = None  # Neo4j object id
+        self.uuid = None 
+        self.uniq_id = uniq_id  # Neo4j object id
         self.change = 0  # Object change time
         self.id = ""  # Gedcom object id like "I1234"
         self.handle = ""  # Gramps handle (?)
@@ -114,11 +114,12 @@ class NodeObject:
         # - object type id ("H" = Human person etc.)
         # - running number in Crockford Base 32 format
         # - ISO 7064 checksum (2 digits)
-        if uniq_id:
-            if isinstance(uniq_id, int):
-                self.uniq_id = uniq_id
-            else:
-                self.uuid = uniq_id
+
+        # if uniq_id:
+        #     if isinstance(uniq_id, int):
+        #         self.uniq_id = uniq_id
+        #     else:
+        #         self.uuid = uniq_id
 
     def __str__(self):
         uuid = self.uuid if self.uuid else "-"
