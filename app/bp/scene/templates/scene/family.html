@@ -61,7 +61,7 @@ td { padding-right:1em;}
                 <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
                     <td class="ColumnDate {{e.dates.calendar_css()}}">{{e.dates}}</td>
                     <td class="ColumnPlace">
-                    <a href="/place/{{e.place.isotammi_id}}" class="inlink"
+                    <a href="/place/{{e.place.iid}}" class="inlink"
                        title="{{ _('of type') }} {{e.place.type}}; {{ _('see details of place') }}">
                       {{macro.place_names_lang(e.place)}}
             </a>{% if e.place.uppers %},

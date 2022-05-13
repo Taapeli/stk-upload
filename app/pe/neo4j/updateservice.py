@@ -393,7 +393,7 @@ class Neo4jUpdateService(ConcreteService):
     def ds_save_citation(self, tx, citation, batch_id, iids):
         """Saves this Citation and connects it to it's Notes and Sources."""
         citation.uuid = NodeObject.newUuid()
-        citation.isotammi_id = iids.get_one()
+        citation.iid = iids.get_one()
 
         c_attr = {
             "uuid": citation.uuid,
@@ -402,7 +402,7 @@ class Neo4jUpdateService(ConcreteService):
             "id": citation.id,
             "page": citation.page,
             "confidence": citation.confidence,
-            "iid": citation.isotammi_id,
+            "iid": citation.iid,
         }
         if citation.dates:
             c_attr.update(citation.dates.for_db())
@@ -470,7 +470,7 @@ class Neo4jUpdateService(ConcreteService):
                                         (:Batch{id:batch_id}) --> (Note)
         """
         note.uuid = NodeObject.newUuid()
-        note.isotammi_id = iids.get_one()
+        note.iid = iids.get_one()
         if not "batch_id":
             raise RuntimeError(f"Note.save needs batch_id for {note.id}")
         n_attr = {
@@ -481,7 +481,7 @@ class Neo4jUpdateService(ConcreteService):
             "type": note.type,
             "text": note.text,
             "url": note.url,
-            "iid": note.isotammi_id,
+            "iid": note.iid,
         }
         if note.handle:
             n_attr["handle"] = note.handle
@@ -517,7 +517,7 @@ class Neo4jUpdateService(ConcreteService):
         #TODO: Use MediaWriteService
         """
         media.uuid = NodeObject.newUuid()
-        media.isotammi_id = iids.get_one()
+        media.iid = iids.get_one()
         m_attr = {
             "handle": media.handle,
             "change": media.change,
@@ -526,7 +526,7 @@ class Neo4jUpdateService(ConcreteService):
             "mime": media.mime,
             "name": media.name,
             "description": media.description,
-            "iid": media.isotammi_id,
+            "iid": media.iid,
         }
         m_attr["batch_id"] = batch_id
         result = tx.run(
@@ -630,8 +630,7 @@ class Neo4jUpdateService(ConcreteService):
         # Create or update this Place
 
         place.uuid = place.newUuid()
-        place.isotammi_id = iids.get_one()
-        #TODO place.isotammi_id = place.new_isotammi_id(dataservice, "P")
+        place.iid = iids.get_one()
         pl_attr = {
             "uuid": place.uuid,
             "handle": place.handle,
@@ -639,7 +638,7 @@ class Neo4jUpdateService(ConcreteService):
             "id": place.id,
             "type": place.type,
             "pname": place.pname,
-            "iid": place.isotammi_id,
+            "iid": place.iid,
         }
         if place.coord:
             # If no coordinates, don't set coord attribute
@@ -824,7 +823,7 @@ class Neo4jUpdateService(ConcreteService):
         """Saves this Repository to db under given batch."""
 
         repository.uuid = NodeObject.newUuid()
-        repository.isotammi_id = iids.get_one()
+        repository.iid = iids.get_one()
         r_attr = {
             "uuid": repository.uuid,
             "handle": repository.handle,
@@ -832,7 +831,7 @@ class Neo4jUpdateService(ConcreteService):
             "id": repository.id,
             "rname": repository.rname,
             "type": repository.type,
-            "iid": repository.isotammi_id,
+            "iid": repository.iid,
         }
         result = tx.run(
             CypherRepository.create_in_batch,
@@ -856,7 +855,7 @@ class Neo4jUpdateService(ConcreteService):
 
         """
         source.uuid = NodeObject.newUuid()
-        source.isotammi_id = iids.get_one()
+        source.iid = iids.get_one()
         s_attr = {}
         try:
             s_attr = {
@@ -867,7 +866,7 @@ class Neo4jUpdateService(ConcreteService):
                 "stitle": source.stitle,
                 "sauthor": source.sauthor,
                 "spubinfo": source.spubinfo,
-                "iid": source.isotammi_id,
+                "iid": source.iid,
             }
 
             result = tx.run(CypherSourceByHandle.create_to_batch,
@@ -930,7 +929,7 @@ class Neo4jUpdateService(ConcreteService):
         """
 
         event.uuid = NodeObject.newUuid()
-        event.isotammi_id = iids.get_one()
+        event.iid = iids.get_one()
         e_attr = {
             "uuid": event.uuid,
             "handle": event.handle,
@@ -938,7 +937,7 @@ class Neo4jUpdateService(ConcreteService):
             "id": event.id,
             "type": event.type,
             "description": event.description,
-            "iid": event.isotammi_id,
+            "iid": event.iid,
         }
         if event.attr:
             # Convert 'attr' dict to list for db
@@ -1005,7 +1004,7 @@ class Neo4jUpdateService(ConcreteService):
         """
 
         person.uuid = NodeObject.newUuid()
-        person.isotammi_id = iids.get_one()
+        person.iid = iids.get_one()
 
         # Save the Person node under UserProfile; all attributes are replaced
 
@@ -1018,7 +1017,7 @@ class Neo4jUpdateService(ConcreteService):
             "sex": person.sex,
             "confidence": person.confidence,
             "sortname": person.sortname,
-            "iid": person.isotammi_id,
+            "iid": person.iid,
         }
         if person.dates:
             p_attr.update(person.dates.for_db())
@@ -1470,14 +1469,14 @@ class Neo4jUpdateService(ConcreteService):
         Connects the family to parent, child, citation and note nodes.
         """
         f.uuid = NodeObject.newUuid()
-        f.isotammi_id = iids.get_one()
+        f.iid = iids.get_one()
         f_attr = {
             "uuid": f.uuid,
             "handle": f.handle,
             "change": f.change,
             "id": f.id,
             "rel_type": f.rel_type,
-            "iid": f.isotammi_id,
+            "iid": f.iid,
         }
         result = tx.run(
             CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr

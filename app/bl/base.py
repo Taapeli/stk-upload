@@ -110,8 +110,8 @@ class NodeObject:
         # TODO Define constants for values:
         #     candicate, audit_requested, auditing, accepted,
         #     mergeing, common, rejected
-        self.isotammi_id = None  # Containing
-        # - object type id ("I" = Person etc.)
+        self.iid = None  # Containing
+        # - object type id ("H" = Human person etc.)
         # - running number in Crockford Base 32 format
         # - ISO 7064 checksum (2 digits)
         if uniq_id:
@@ -189,9 +189,9 @@ class NodeObject:
         return uuid.uuid4().hex
 
     def uuid_short(self):
-        """ Display uuid (or isotammi_id) in short form. 
+        """ Display uuid (or iid) in short form. 
         
-            Real uuid shortened, isotammi_id need is not too long
+            Real uuid shortened, iid need is not too long
         """
         if self.uuid:
             if len(self.uuid) > 20:

@@ -255,7 +255,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                         <td class="ColumnPlace">{% set br=0 %}
     	{% for pref in e.place_ref %}{% set pl = obj[pref] %}
     	    {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
-                            <a href="/place/{{pl.isotammi_id}}" class="inlink"
+                            <a href="/place/{{pl.iid}}" class="inlink"
                              title="{{ _('of type') }} {{pl.type}}; {{ _('see details of place') }}">
                               {{macro.place_names_lang(pl)}}</a
                             >{{macro.note_link(pl.note_ref, obj)}}{% if pl.uppers %},

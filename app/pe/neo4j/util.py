@@ -154,8 +154,8 @@ class IsotammiId:
         if self.n_iid > self.max_iid:
             raise IsotammiException("Whole batch of allocated Isotammi IDs already used.")
 
-        isotammi_id = format_iid(self.iid_type + base32.encode(self.n_iid, checksum=False))
+        iid = format_iid(self.iid_type + base32.encode(self.n_iid, checksum=False))
         self.n_iid += 1
 
-##        print(f"new_isotammi_id: {self.n_iid} -> {isotammi_id}")
-        return isotammi_id
+##        print(f"new_isotammi_id: {self.n_iid} -> {iid}")
+        return iid

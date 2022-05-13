@@ -102,7 +102,7 @@ tr > td > img {
 			               title="{{ _('see details of person %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
 			               {{ref.obj.sortname|replace("#", " ")}}</a>
                 {% elif ref.label == 'Place' %}
-                    <a href="/place/{{ref.obj.isotammi_id}}" class="inlink"
+                    <a href="/place/{{ref.obj.iid}}" class="inlink"
                            title="{{ _('see details of place %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
                            {{ref.obj.pname}}</a>
                 {% elif ref.label == 'Event' %}
@@ -116,7 +116,7 @@ tr > td > img {
                                     title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
                                 {{ macro.person_name_by_sortname(p) }}</a>
                             {% elif p.label == "Family" %}
-                                <a href="/family/{{p.isotammi_id}}" class="inlink"
+                                <a href="/family/{{p.iid}}" class="inlink"
                                     title="{{ _('see details of family %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
                                 {{ macro.family_name(p) }}</a>
                             {% endif %}

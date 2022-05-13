@@ -140,10 +140,10 @@
     {#  Formats object keys and timestamp for display. Positioned at right margin.
         If 2nd arguments (like "350px") is present, leave the given right margin.
      #}
-    {% if obj.isotammi_id %}
-    <input id="isotammi_id" type="text" value="{{obj.isotammi_id}}" style="display:None">
+    {% if obj.iid %}
+    <input id="isotammi_id" type="text" value="{{obj.iid}}" style="display:None">
     <span class="isotammi_id copy-fld" title="Isotammi ID"
-        onclick="toClipboard('isotammi_id')">{{obj.isotammi_id}}</span> /
+        onclick="toClipboard('isotammi_id')">{{obj.iid}}</span> /
     {% else %}
     <input id="my_uuid" type="text" value="{{obj.uuid}}" style="display:None">
     <tt title="{{ _('Copy UUID key') }}" class="copy-fld" 
@@ -274,7 +274,7 @@
 {% macro family_name(family) -%}
     {#  Formats a Family name with link. #}
          {# <span class="typedesc">{{family.rel_type|transl('marr')}}</span> #}
-         <a href="/family/{{family.isotammi_id}}" class="inlink"
+         <a href="/family/{{family.iid}}" class="inlink"
             title="{{ _('See Family Details') }}">
             {% for name in [family.father_sortname, family.mother_sortname] %}
                 {% set a = name.split('#') %}

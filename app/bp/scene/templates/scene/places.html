@@ -84,7 +84,7 @@
                 </td>
                 <td class="ColumnPerson">
                    <div>
-                      <a href="/place/{{p.isotammi_id}}"
+                      <a href="/place/{{p.iid}}"
                     {% if not p.ref_cnt %} class="dimmed" 
                         title="{{  _('No references to place %(uuid)s', uuid=p.uuid_short()) }}"
                     {% else %} class="inlink"

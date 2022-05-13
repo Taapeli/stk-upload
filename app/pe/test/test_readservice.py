@@ -41,7 +41,7 @@ def test_get_families(svc):
     print(dir(f))
     attrs = [
         'change', 'change_str', 'children', 'dates', 'events', 'father', 'father_sortname', 
-        'handle', 'id', 'isotammi_id', 'marriage_dates', 'marriage_place', 'mother', 'mother_sortname', 
+        'handle', 'id', 'iid', 'marriage_dates', 'marriage_place', 'mother', 'mother_sortname', 
         'no_of_children', 'note_ref', 'notes', 'num_hidden_children', 'priv', 
         'rel_type', 'remove_privacy_limits', 'sources', 'split_with_hyphen', 'state', 'timestamp_str', 'uniq_id', 'uuid', 
         'uuid_short']
@@ -72,7 +72,7 @@ def test_get_family_by_uuid1(svc):
     print(dir(f))
     attrs = ['change', 'change_str', 'children', 'dates', 'events', 
              'father', 'father_sortname', 'handle', 'id', 
-             'isotammi_id', 'marriage_dates', 'mother', 'mother_sortname', 
+             'iid', 'marriage_dates', 'mother', 'mother_sortname', 
              'note_ref', 'notes', 'priv', 
              'rel_type', 'remove_privacy_limits', 'sources', 
              'state', 'timestamp_str', 'uniq_id', 'uuid', 'uuid_short']

@@ -60,7 +60,8 @@ class DOM_handler:
     - processes different data groups from given xml file to database
     - collects status log
     """
-
+    TX_SIZE=1000     # Transaction max size
+    
     def __init__(self, infile, current_user, pathname, dataservice):
         """ Set DOM xml_tree and username """
         DOMTree = xml.dom.minidom.parse(open(infile, encoding="utf-8"))
@@ -180,23 +181,21 @@ class DOM_handler:
                 i += amount
 
         """ 
-        ---- Notes transaktioiden sisällä 
+        ---- Process DOM nodes inside transaction 
         """
-        nodes = self.xml_tree.getElementsByTagName(tag)
-#         print("nt",type(nodes))
-#         print(nodes[0:5])
-        message = f"{tag}: {len(nodes)} kpl"
+        dom_nodes = self.xml_tree.getElementsByTagName(tag)
+        message = f"{tag}: {len(dom_nodes)} kpl"
         print(f"***** {message} *****")
         t0 = time.time()
         counter = 0
     
         with shareds.driver.session() as session:
             isotammi_id_list = IsotammiId(session, obj_name=title)
-            for dom_nodes in get_next(nodes, chunk_max_size):
-                chunk_size = len(dom_nodes)
+            for nodes_chunk in get_next(dom_nodes, chunk_max_size):
+                chunk_size = len(nodes_chunk)
                 isotammi_id_list.get_batch(iid_count=chunk_size)
                 session.write_transaction(transaction_function, 
-                                          nodes=dom_nodes,
+                                          nodes=nodes_chunk,
                                           iids=isotammi_id_list)
                 """ def handle_notes(self, tx, dom_objs):
                 """
@@ -204,38 +203,46 @@ class DOM_handler:
                 
         self.blog.log_event(
             {"title": title, "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        # return {'status':status, 'message': message}
+        )
         return counter
 
         
     def handle_citations(self):
-        self.handle_dom_nodes("citation", _("Citations"), self.handle_citations_list, chunk_max_size=1000)
+        self.handle_dom_nodes("citation", _("Citations"),
+                              self.handle_citations_list, chunk_max_size=self.TX_SIZE)
 
     def handle_events(self):
-        self.handle_dom_nodes("event", _("Events"), self.handle_event_list, chunk_max_size=1000)
+        self.handle_dom_nodes("event", _("Events"),
+                              self.handle_event_list, chunk_max_size=self.TX_SIZE)
 
     def handle_families(self):
-        self.handle_dom_nodes("family", _("Families"), self.handle_family_list, chunk_max_size=1000)
+        self.handle_dom_nodes("family", _("Families"),
+                              self.handle_family_list, chunk_max_size=self.TX_SIZE)
 
     def handle_media(self):
-        self.handle_dom_nodes("object", _("Media"), self.handle_media_list, chunk_max_size=1000)
+        self.handle_dom_nodes("object", _("Media"),
+                              self.handle_media_list, chunk_max_size=self.TX_SIZE)
 
     def handle_notes(self):
-        self.handle_dom_nodes("note", _("Notes"), self.handle_note_list, chunk_max_size=1000)
+        self.handle_dom_nodes("note", _("Notes"),
+                              self.handle_note_list, chunk_max_size=self.TX_SIZE)
 
     def handle_people(self):
-        self.handle_dom_nodes("person", _("People"), self.handle_people_list, chunk_max_size=1000)
+        self.handle_dom_nodes("person", _("People"),
+                              self.handle_people_list, chunk_max_size=self.TX_SIZE)
 
     def handle_places(self):
         self.place_keys = {}
-        self.handle_dom_nodes("placeobj", _("Places"), self.handle_place_list, chunk_max_size=1000)
+        self.handle_dom_nodes("placeobj", _("Places"),
+                              self.handle_place_list, chunk_max_size=self.TX_SIZE)
 
     def handle_repositories(self):
-        self.handle_dom_nodes("repository", _("Repositories"), self.handle_repositories_list, chunk_max_size=1000)
+        self.handle_dom_nodes("repository", _("Repositories"),
+                              self.handle_repositories_list, chunk_max_size=self.TX_SIZE)
 
     def handle_sources(self):
-        self.handle_dom_nodes("source", _("Sources"), self.handle_source_list, chunk_max_size=1000)
+        self.handle_dom_nodes("source", _("Sources"),
+                              self.handle_source_list, chunk_max_size=self.TX_SIZE)
 
     def handle_citations_list(self, tx, nodes, iids):
         for citation in nodes:

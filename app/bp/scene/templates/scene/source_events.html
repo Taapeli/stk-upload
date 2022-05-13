@@ -114,7 +114,7 @@ td.Citation div ol {padding-top:.3em;}
                                  <i>{{indi.role|transl('role')}}</i>{% endif -%}:
                           {% endif -%}
                           {% if indi.id[0] == "F" %}
-                                 <a href="/family/{{indi.isotammi_id}}" class="inlink"
+                                 <a href="/family/{{indi.iid}}" class="inlink"
                                     title="{{ _('see details of family') }}"> 
                                     {{ indi.clearname | replace("#", " ") }}</a>
                           {% elif indi.id[0] == "E" %}{# _('Event') #}
@@ -122,7 +122,7 @@ td.Citation div ol {padding-top:.3em;}
                                     title="{{ _('see details of event') }}">
                                     {{ indi.clearname | title }}
                           {% elif indi.id[0] == "P" %}{# _('Place') #}
-                                 <a href="/place/{{indi.isotammi_id}}" class="inlink"
+                                 <a href="/place/{{indi.iid}}" class="inlink"
                                     title="{{ _('see details of place') }}">
                                     {{ indi.clearname }}
                           {% else %}

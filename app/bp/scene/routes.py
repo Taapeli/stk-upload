@@ -764,9 +764,10 @@ def json_get_event():
             print(f"got request data: {args}")
         uuid = args.get("uuid")
         if not uuid:
-            print("bp.scene.routes.json_get_person_families: Missing uuid")
+            print("bp.scene.routes.json_get_event: Missing uuid")
             return jsonify(
-                {"records": [], "status": Status.ERROR, "statusText": "Missing uuid"}
+                {"records": [], "status": Status.ERROR, 
+                 "statusText": "Missing uuid"}
             )
 
         with EventReader("read", u_context) as service:
@@ -804,7 +805,7 @@ def json_get_event():
                 m.href = "/scene/person?uuid=" + m.uuid
                 m.names[0].type_lang = jinja_filters.translate(m.names[0].type, "nt")
             elif m.label == "Family":
-                m.href = "/family/" + m.isotammi_id
+                m.href = "/family/" + m.iid
                 #m.href = "/scene/family?uuid=" + m.uuid
             m.role_lang = jinja_filters.translate(m.role, "role") if m.role else ""
         # Actually there is one place and one pl.uppers
@@ -835,7 +836,8 @@ def json_get_event():
         # print(response)
         t1 = time.time() - t0
         stk_logger(
-            u_context, f"-> bp.scene.routes.json_get_event n={len(members)} e={t1:.3f}"
+            u_context,
+            f"-> bp.scene.routes.json_get_event n={len(members)} e={t1:.3f}"
         )
         return response
 
@@ -1129,7 +1131,7 @@ def show_place(locid):
             # Map scaling
             level = 1
             for p in res.get("hierarchy"):
-                if p.iid == pl.isotammi_id:
+                if p.iid == pl.iid:
                     level = p.level
                     break
             zoom = 19 - 48.5*level + 30*level*level

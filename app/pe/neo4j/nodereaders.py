@@ -40,7 +40,7 @@ def init(cls, node):
     n.uniq_id = node.id
     n.id = node["id"]
     n.uuid = node.get("uuid","")
-    n.isotammi_id = node.get("iid","")
+    n.iid = node.get("iid","")
     if node["handle"]:
         n.handle = node["handle"]
     n.change = node.get("change")
