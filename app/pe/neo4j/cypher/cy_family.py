@@ -33,9 +33,9 @@ class CypherFamily():
     get_family_iid = '''
 MATCH (root) -[r:OBJ_FAMILY]-> (f:Family {iid:$f_id}) 
 RETURN f, root'''
-    get_family_uuid = '''
-MATCH (root) -[r:OBJ_FAMILY]-> (f:Family {uuid:$f_id}) 
-RETURN f, root'''
+#     get_family_uuid = '''
+# MATCH (root) -[r:OBJ_FAMILY]-> (f:Family {uuid:$f_id}) 
+# RETURN f, root'''
 
     get_family_parents = """
 MATCH (f:Family) -[r:PARENT]-> (pp:Person) WHERE ID(f) = $fuid

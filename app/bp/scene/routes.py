@@ -1103,17 +1103,17 @@ def show_places():
     )
 
 
-@bp.route("/scene/location/uuid=<locid>")
-@bp.route("/place/<locid>")
+#@bp.route("/scene/location/uuid=<locid>")
+@bp.route("/place/<iid>")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_place(locid):
+def show_place(iid):
     """Home page for a Place by iid, shows events and place hierarchy."""
     t0 = time.time()
     u_context = UserContext()
     try:
         with PlaceReaderTx("read_tx", u_context) as service:
-            res = service.get_places_w_events(locid)
+            res = service.get_places_w_events(iid)
             # res {place: PlaceBl, status: 'OK', hierarchy: list(PlaceBl),
             #      citations: list(Citation), events: list(EventBl),
             #      uniq_ids: list(uniq_ids)}
@@ -1209,19 +1209,19 @@ def show_sources(series=None):
     )
 
 
-@bp.route("/scene/source", methods=["GET"])
-# @bp.route('/scene/source=<string:sourceid>')
+#@bp.route("/scene/source", methods=["GET"])
+@bp.route("/source/<iid>")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_source_page(sourceid=None):
+def show_source_page(iid:str):
     """Home page for a Source with referring Event and Person data"""
-    uuid = request.args.get("uuid", sourceid)
-    if not uuid:
-        return redirect(url_for("virhesivu", code=1, text="Missing Source key"))
+    # if not iid:
+    #     flash(_("Invalid source id"), "error")
+    #     return redirect(url_for("scene.show_sources"))
     u_context = UserContext()
     try:
         with SourceReader("read", u_context) as service:
-            res = service.get_source_with_references(uuid, u_context)
+            res = service.get_source_with_references(iid, u_context)
 
         if res["status"] == Status.NOT_FOUND:
             msg = res.get("statustext", _("No objects found"))

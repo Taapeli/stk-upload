@@ -629,10 +629,10 @@ class Neo4jUpdateService(ConcreteService):
 
         # Create or update this Place
 
-        place.uuid = place.newUuid()
+        # No uuid: place.uuid = place.newUuid()
         place.iid = iids.get_one()
         pl_attr = {
-            "uuid": place.uuid,
+            # "uuid": place.uuid,
             "handle": place.handle,
             "change": place.change,
             "id": place.id,
@@ -1468,10 +1468,10 @@ class Neo4jUpdateService(ConcreteService):
 
         Connects the family to parent, child, citation and note nodes.
         """
-        f.uuid = NodeObject.newUuid()
+        # No uuid: f.uuid = NodeObject.newUuid()
         f.iid = iids.get_one()
         f_attr = {
-            "uuid": f.uuid,
+            # "uuid": f.uuid,
             "handle": f.handle,
             "change": f.change,
             "id": f.id,

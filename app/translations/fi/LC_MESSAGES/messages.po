@@ -3660,7 +3660,7 @@ msgstr "Huomaa!"
 
 #: bp/scene/templates/scene/source_events.html:42
 msgid "Archieve not defined!"
-msgstr "Arkistoa ei ole annettu!"
+msgstr "Arkistoa ei ole määritelty!"
 
 #: bp/scene/templates/scene/source_events.html:58
 msgid "Publishing info"

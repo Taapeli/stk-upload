@@ -19,8 +19,8 @@ from pe.dataservice import ConcreteService
 from pe.neo4j.util import run_cypher
 from pe.neo4j.util import run_cypher_batch
 from pe.neo4j.nodereaders import Citation_from_node
-from pe.neo4j.nodereaders import Comment_from_node
-from pe.neo4j.nodereaders import DateRange_from_node
+# from pe.neo4j.nodereaders import Comment_from_node
+# from pe.neo4j.nodereaders import DateRange_from_node
 from pe.neo4j.nodereaders import EventBl_from_node
 from pe.neo4j.nodereaders import FamilyBl_from_node
 from pe.neo4j.nodereaders import MediaBl_from_node
@@ -1012,8 +1012,8 @@ class Neo4jReadServiceTx(ConcreteService):
         print("Neo4jReadServiceTx.tx_note_search: TODO - MUST limit by material_type !!")
 #TODO tx_note_search() - Should limit by material_type 
         material = args.get('material')
-        batch_id = material.batch_id
-        material_type = material.m_type
+        # batch_id = material.batch_id
+        # material_type = material.m_type
         #state = args.get('state')
         username = args.get('use_user')
         searchtext = args.get('key')

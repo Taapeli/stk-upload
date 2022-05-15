@@ -570,7 +570,7 @@ class PersonReaderTx(DataService):
                 js += f'id:"{o.id}", note_ref:{o.note_ref}, '
                 js += f'repositories:{o.repositories}, sauthor:"{sauthor}", '
                 js += f'spubinfo:"{spubinfo}", stitle:"{stitle}", '
-                js += f'uuid:"{o.uuid}" '
+                js += f'iid:"{o.iid}" '
                 js += "};\n"
                 notes.extend(o.note_ref)
 

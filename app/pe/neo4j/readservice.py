@@ -354,14 +354,13 @@ class Neo4jReadService(ConcreteService):
         Returns dict {item, status, statustext}
         """
         family = None
-        if "-" in iid:
-            cypher=CypherFamily.get_family_iid
-        else:
-            cypher=CypherFamily.get_family_uuid
+        #if "-" in iid:
+        #    cypher=CypherFamily.get_family_iid
+        #else: cypher=CypherFamily.get_family_uuid
 
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(
-                session, cypher, user, material, f_id=iid
+                session, CypherFamily.get_family_iid, user, material, f_id=iid
             )
             for record in result:
                 if record["f"]:
@@ -1179,25 +1178,25 @@ class Neo4jReadService(ConcreteService):
 
         return sources
 
-    def dr_get_source_w_repository(self, user: str, material: Material, uuid: str):
+    def dr_get_source_w_repository(self, user: str, material: Material, iid: str):
         """Returns the PlaceBl with Notes and PlaceNames included."""
         source = None
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(
-                session, CypherSource.get_single_selection, user, material, uuid=uuid
+                session, CypherSource.get_single_selection, user, material, iid=iid
             )
             for record in result:
                 # <Record
                 #    owner_type='PASSED'
                 #    source=<Node id=340694 labels={'Source'}
                 #        properties={'id': 'S1112', 'stitle': 'Aamulehti (sanomalehti)',
-                #            'uuid': '3ac9c9e3c3a0490f8e064225b90139e1', 'spubinfo': '',
+                #            'iid': 'S-e1', 'spubinfo': '',
                 #            'sauthor': '', 'change': 1585409705}>
                 #    notes=[]
                 #    reps=[
                 #        ['Book', <Node id=337715 labels={'Repository'}
                 #            properties={'id': 'R0002', 'rname': 'Kansalliskirjaston digitoidut sanomalehdet',
-                #                'type': 'Collection', 'uuid': '2fc57cc64197461eb94a4bcc02da9ff9',
+                #                'type': 'Collection', 'iid': 'R-f9',
                 #                'change': 1585409708}>]]
                 # >
                 source_node = record["source"]
@@ -1217,7 +1216,7 @@ class Neo4jReadService(ConcreteService):
                 return {"item": source, "status": Status.OK}
             return {
                 "status": Status.NOT_FOUND,
-                "statustext": f"source uuid={uuid} not found",
+                "statustext": f"source iid={iid} not found",
             }
 
     def dr_get_source_citations(self, sourceid: int):
