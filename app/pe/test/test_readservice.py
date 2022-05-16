@@ -205,10 +205,10 @@ def test_get_place_w_names_notes_medias1(svc):
 
 def test_get_event_by_uuid0(svc):    
     # valid user, invalid uuid
-    # def dr_get_event_by_uuid(self, user:str, uuid:str, material:Material):
+    # def dr_get_event_by_iid(self, user:str, uuid:str, material:Material):
     material = Material(session=None, request=None)
     material.batch_id = values.batch_id 
-    rsp = svc.dr_get_event_by_uuid(values.user, uuid=INVALID_UUID, material=material)
+    rsp = svc.dr_get_event_by_iid(values.user, uuid=INVALID_UUID, material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'item', 'status', 'statustext'}
@@ -218,10 +218,10 @@ def test_get_event_by_uuid0(svc):
 
 def test_get_event_by_uuid1(svc):    
     # valid user, valid uuid
-    # def dr_get_event_by_uuid(self, user:str, uuid:str, material:Material):
+    # def dr_get_event_by_iid(self, user:str, uuid:str, material:Material):
     material = Material(session=None, request=None)
     material.batch_id = values.batch_id 
-    rsp = svc.dr_get_event_by_uuid(values.user, uuid=values.event_uuid, material=material)
+    rsp = svc.dr_get_event_by_iid(values.user, uuid=values.event_uuid, material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'item', 'status'}
@@ -320,7 +320,7 @@ def test_dr_get_event_notes_medias1(svc):
 """
     def dr_get_material_batches(self, user: str, uuid: str):
 
-    def dr_get_event_by_uuid(self, user: str, uuid: str):
+    def dr_get_event_by_iid(self, user: str, uuid: str):
     def dr_get_event_participants(self, uid):
     def dr_get_event_place(self, uid):
     def dr_get_event_notes_medias(self, uid):

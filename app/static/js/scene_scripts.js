@@ -43,10 +43,10 @@ function copyTextToClipboard(text) {
 function toClipboard(myvar) {
 	  // Copy text to clipboard. - Usage:
 	  // 1. Define the copy field by
-	  //    <span class="copy-fld" onclick="toClipboard('my_uuid')"
-	  //          title="copy uuid value">7429e9</span>
+	  //    <span class="copy-fld" onclick="toClipboard('my_iid')"
+	  //          title="copy iid value">7429e9</span>
 	  // 2. Define the copied text by
-	  //    <input id="my_uuid" type="text" value="7429e9..." style="display:None">
+	  //    <input id="my_iid" type="text" value="7429e9..." style="display:None">
 	  var copyText = document.getElementById(myvar);
 	  if (copyText) {
 	  	copyTextToClipboard(copyText.value);
@@ -308,7 +308,7 @@ function refTable() {
 				// Show Citations defined by
 				// 	citations[395801] = { confidence:"2", dates:"–", id:"C0867", 
 				//		note_ref:[442899], page:"sivu 115", source_id:312820, 
-				//		source_medium:"Book",uuid:"5eab898287ed42289890d5b9020ec2e3"};
+				//		source_medium:"Book",iid:"C-c2e3"};
 				//
 				// <div class="citaDesc" id="sref 2b">
 	            //   <span title="[C0866] normaali luottamustaso (2)">

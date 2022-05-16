@@ -263,7 +263,7 @@ def SourceBl_from_node(node):
     """
     # <Node id=355993 labels={'Source'}
     #     properties={'id': 'S0296', 'stitle': 'Hämeenlinnan lyseo 1873-1972',
-    #         'uuid': 'c1367bbdc6e54297b0ef12d0dff6884f', 'spubinfo': 'Karisto 1973',
+    #         'iid': 'P-84f', 'spubinfo': 'Karisto 1973',
     #         'sauthor': 'toim. Mikko Uola', 'change': 1585409705}>
 
     s = init(SourceBl, node)

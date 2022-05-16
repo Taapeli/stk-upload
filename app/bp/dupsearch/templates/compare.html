@@ -92,7 +92,7 @@ tr:nth-child(even) {
 {% macro families(person) -%}
     {% for fam in person.families_as_parent %}
     <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-        <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
+        <p><a href="/family/{{fam.iid}}" title="{{fam.id}}" class="inlink">
                 {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
             {{fam.marriage_dates}}</p>
         <ul>
@@ -119,9 +119,9 @@ tr:nth-child(even) {
 		<table>
     {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
-                        <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
+                        <td class="ColumnEvent" title="{{e.id}} {{e.iid}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
-                                <a href="/scene/event/uuid={{e.uuid}}" class="inlink">
+                                <a href="/event/<{{e.iid}}" class="inlink">
                                    {{e.type|transl('evt')}}</a>
         {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>

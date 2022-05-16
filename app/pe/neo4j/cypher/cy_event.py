@@ -28,7 +28,7 @@ Created on 2.9.2020
 class CypherEvent(object):
 
     get_an_event = '''
-MATCH (root) -[r:OBJ_OTHER]-> (e:Event {uuid:$uuid}) 
+MATCH (root) -[r:OBJ_OTHER]-> (e:Event {iid:$iid}) 
 RETURN e, type(r) AS root_type, root'''
 
     get_event_place = """
@@ -100,7 +100,7 @@ with c
     merge (e) -[r:CITATION]-> (c)"""
 
     update_event = """
-match (e:Event{uuid:$uuid})
+match (e:Event{iid:$iid})
 set e += $attrs
 return e
     """

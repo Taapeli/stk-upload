@@ -45,7 +45,6 @@ class Family(NodeObject):
             change
             id              esim. "F0001"
             uniq_id         int database key
-            uuid            str UUID key
             rel_type        str suhteen tyyppi
             priv            str private if exists
             father_sortname str search key
@@ -77,7 +76,6 @@ class FamilyBl(Family):
             change
             id              esim. "F0001"
             uniq_id         int database key
-            uuid            str UUID key
             rel_type        str "marriage" etc.
             father_sortname str search key
             mother_sortname str search key
@@ -320,9 +318,9 @@ class FamilyReader(DataService):
 
         return ret_results
 
-    def get_person_families(self, uuid: str):
+    def get_person_families(self, iid: str):
         """Get all families for given person in marriage date order."""
-        res = self.dataservice.dr_get_person_families_uuid(uuid)
+        res = self.dataservice.dr_get_person_families_iid(iid)
         items = res.get("items")
         if items:
             items.sort(key=lambda x: x.dates)

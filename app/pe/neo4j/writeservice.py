@@ -55,7 +55,7 @@ class Neo4jWriteService(ConcreteService):
         self.driver = driver
         self.tx = None
 
-    def dr_update_event(self, uuid, data):
+    def dr_update_event(self, iid, data):
         with self.driver.session(default_access_mode='WRITE') as session:
             statusText = ""
             attrs = {}
@@ -63,7 +63,7 @@ class Neo4jWriteService(ConcreteService):
             ok = parsedate(data["date"], attrs)
             if not ok:
                 statusText = "Invalid date"
-            record = session.run(CypherEvent.update_event, uuid=uuid, attrs=attrs).single()
+            record = session.run(CypherEvent.update_event, iid=iid, attrs=attrs).single()
             if not record:
                 statusText = "Database update failed"
                 return {"item":None, "status":Status.ERROR, "statusText":statusText}
@@ -71,9 +71,9 @@ class Neo4jWriteService(ConcreteService):
             event = EventBl_from_node(eventnode)
             return {"item":event, "status":Status.OK, "statusText":statusText}
 
-    def dr_set_primary_name(self, uuid, old_order):
+    def dr_set_primary_name(self, iid, old_order):
         with self.driver.session(default_access_mode='WRITE') as session:
-            session.run(CypherPerson.set_primary_name, uuid=uuid, old_order=old_order).single()
+            session.run(CypherPerson.set_primary_name, iid=iid, old_order=old_order).single()
 
     def dr_set_name_orders(self, uid_order_list):
         with self.driver.session(default_access_mode='WRITE') as session:

@@ -69,7 +69,7 @@ class DOM_handler:
         self.username = current_user  # current username
         self.dataservice = dataservice
         
-        self.handle_to_node = {}  # {handle:(uuid, uniq_id)}
+        self.handle_to_node = {}  # {handle:(iid, uniq_id)}
         self.person_ids = []  # List of processed Person node unique id's
         self.family_ids = []  # List of processed Family node unique id's
         # self.batch = None                     # Batch node to be created
@@ -111,7 +111,7 @@ class DOM_handler:
         #     self.dataservice.tx.commit()
         #     self.dataservice.tx = shareds.driver.session().begin_transaction()
 
-        self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
+        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
     def unused_save_and_link_handle2(self, tx, obj, **kwargs):
@@ -120,11 +120,11 @@ class DOM_handler:
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
         obj.save(tx, **kwargs)
-        self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
+        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
     def complete(self, obj):
-        self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
+        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
     # ---------------------   XML subtree handlers   --------------------------

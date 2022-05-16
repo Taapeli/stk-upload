@@ -3612,7 +3612,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/places.html:89
 #, python-format
-msgid "No references to place %(uuid)s"
+msgid "No references to place %(iid)s"
 msgstr ""
 
 #: bp/scene/templates/scene/places.html:98

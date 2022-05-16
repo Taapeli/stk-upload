@@ -113,7 +113,7 @@ div#events div.scrollbox {
         {% for cita in citations %}
             {% for ref in cita.source_refs %}
                     <li class="sourceDesc">
-                        <a href="/scene/source?uuid={{ref.source_obj.uuid}}"
+                        <a href="/source/{{ref.source_obj.iid}}"
                            class="inlink" title="Lähteen S1207 tiedot">
                            {{ ref.source_obj.stitle }}
                         </a>
@@ -187,13 +187,13 @@ div#events div.scrollbox {
                 <tbody>
         {% for m in place.media_ref %}
                     <tr>
-                        <td class="ColumnDescription"><a href="/scene/media?uuid={{m.uuid}}" class="inlink"
+                        <td class="ColumnDescription"><a href="/media/{{m.iid}}" class="inlink"
                    title="{{ _('Go to media page') }}">{{m.description}}</a></td>
                         <td class="ColumnDescription">
                         	<div class="thumbnail">
 					            <img alt="({{ _('Photo') }})" 
-					                 src="/scene/thumbnail?id={{m.uuid}}" 
-					                 title="key = {{m.uuid_short()}}"/>
+					                 src="/scene/thumbnail?id={{m.iid}}" 
+					                 title="key = {{m.iid}}"/>
 				        	</div></td>
                     </tr>
          {% endfor %}

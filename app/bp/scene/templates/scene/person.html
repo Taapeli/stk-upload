@@ -86,8 +86,8 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
             <div class="thumbnail">
                 <div><a href="#indivgallery" class="zoom">
 	                <img alt="({{ _('Photo') }})" 
-                         src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
-	                     src="/scene/thumbnail?id={{photo.uuid}}" 
+                         src="/scene/thumbnail?id={{photo.iid}}&crop={{crop}}" 
+	                     src="/scene/thumbnail?id={{photo.iid}}" 
 	                     title="{{ _('Photo') }} {{ord}}, id={{photo.id}}"/>
                 </a></div>
                 <p style="margin:0;">{{photo.description}}</p>
@@ -132,7 +132,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 				<tr><td colspan="2">
 
 				<form>
-	    			<input type="hidden" name="uuid" value="{{ person.uuid }}">
+	    			<input type="hidden" name="iid" value="{{ person.iid }}">
 	    			
 	                {% if edit_names %}
 	                    <table id="tableNames"><tbody id="names" 
@@ -239,9 +239,9 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                 <tbody>
     {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
-                        <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
+                        <td class="ColumnEvent" title="{{e.id}} {{e.iid}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
-                                <a href="/scene/event/uuid={{e.uuid}}" class="inlink">
+                                <a href="/event/{{e.iid}}" class="inlink">
                                    {{e.type|transl('evt')}}</a>
         {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>
@@ -308,7 +308,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 
 <h3 id="relations">{{ _("Relations") }}</h3>
     <div id="tabs"
-         hx-get="/scene/hx-person/{{'fanchart' if fanchart_shown else 'famtree'}}?uuid={{person.uuid}}"
+         hx-get="/scene/hx-person/{{'fanchart' if fanchart_shown else 'famtree'}}/{{person.iid}}"
          hx-trigger="load delay:100ms"
          hx-target="#tabs"
          hx-swap="innerHTML">
@@ -321,12 +321,12 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	       {% set photo=obj[ref] %}
 	       {% set crop=crop0|replace(" ", "") %}
             <div class="thumbnail">
-                <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}" class="zoom">
+                <a href="/scene/media/{{photo.name}}?id={{photo.iid}}" class="zoom">
 	                <img alt="({{ _('Photo') }} {{ord}})" 
-	                     src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
+	                     src="/scene/thumbnail?id={{photo.iid}}&crop={{crop}}" 
 	                     title="{{ _('Show fullscreen') }}"/>
                 </a>
-                <p><a href="/scene/media?uuid={{photo.uuid}}" class="inlink"
+                <p><a href="/media/{{photo.iid}}" class="inlink"
                       title="{{ _('Go to photo page') }}">
                       ▸ {{photo.description}}</a> {{ macro.notelink(photo) }}
 	       {% if crop and not crop == "None" -%}<br>

@@ -140,15 +140,15 @@ def upload():
 @login_required
 @roles_required('audit')
 def compare():
-    uuid1 = request.args.get("uuid1")
-    uuid2 = request.args.get("uuid2")
+    iid1 = request.args.get("iid1")
+    iid2 = request.args.get("iid2")
     batch_id1 = request.args.get("batch_id1")
     batch_id2 = request.args.get("batch_id2")
     state1 = request.args.get("state1")
     state2 = request.args.get("state2")
     
-    def get_person(service, uuid):
-        result = service.get_person_data(uuid)
+    def get_person(service, iid):
+        result = service.get_person_data(iid)
 
         # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
         if Status.has_failed(result):
@@ -171,11 +171,11 @@ def compare():
 
     u_context1.batch_id = batch_id1
     with PersonReaderTx("read_tx", u_context1) as service:
-        person1,objs1 = get_person(service, uuid1)
+        person1,objs1 = get_person(service, iid1)
 
     u_context2.batch_id = batch_id2
     with PersonReaderTx("read_tx", u_context2) as service:
-        person2,objs2 = get_person(service, uuid2)
+        person2,objs2 = get_person(service, iid2)
     
 #     return render_template('/compare.html',
 #                            batch_id1=batch_id1, 
@@ -245,15 +245,15 @@ def compare():
 @login_required
 @roles_required('audit')
 def compare2():
-    uuid1 = request.args.get("uuid1")
-    uuid2 = request.args.get("uuid2")
+    iid1 = request.args.get("iid1")
+    iid2 = request.args.get("iid2")
     batch_id1 = request.args.get("batch_id1")
     batch_id2 = request.args.get("batch_id2")
     state1 = request.args.get("state1")
     state2 = request.args.get("state2")
     
-    def get_person(service, uuid):
-        result = service.get_person_data(uuid)
+    def get_person(service, iid):
+        result = service.get_person_data(iid)
 
         # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
         if Status.has_failed(result):
@@ -276,11 +276,11 @@ def compare2():
 
     u_context1.batch_id = batch_id1
     with PersonReaderTx("read_tx", u_context1) as service:
-        person1,objs1 = get_person(service, uuid1)
+        person1,objs1 = get_person(service, iid1)
 
     u_context2.batch_id = batch_id2
     with PersonReaderTx("read_tx", u_context2) as service:
-        person2,objs2 = get_person(service, uuid2)
+        person2,objs2 = get_person(service, iid2)
     
 #     return render_template('/compare.html',
 #                            batch_id1=batch_id1, 

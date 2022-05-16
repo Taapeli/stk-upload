@@ -3641,8 +3641,8 @@ msgstr "Plats, relaterade platser"
 
 #: bp/scene/templates/scene/places.html:89
 #, python-format
-msgid "No references to place %(uuid)s"
-msgstr "Inga referenser till plats %(uuid)s"
+msgid "No references to place %(iid)s"
+msgstr "Inga referenser till plats %(iid)s"
 
 #: bp/scene/templates/scene/places.html:98
 #: bp/scene/templates/scene/places.html:105

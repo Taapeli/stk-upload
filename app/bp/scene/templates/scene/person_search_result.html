@@ -31,8 +31,8 @@
 				</td>
 	            <td class="ColumnPerson">
                     <div>
-	                    <a href="/scene/person?uuid={{p.uuid}}"
-	                      title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
+	                    <a href="/person/{{p.iid}}"
+	                      title="{{ _('see details of person %(id)s', id=p.iid) }} (nr={{p.uniq_id}})">
                           {{p.names[0].firstname}} 
             {% if p.names[0].prefix %} {{p.names[0].prefix}}{% endif %}
             {% if p.names[0].surname %}

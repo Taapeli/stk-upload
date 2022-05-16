@@ -3623,8 +3623,8 @@ msgstr "Paikka, liittyvät paikat"
 
 #: bp/scene/templates/scene/places.html:89
 #, python-format
-msgid "No references to place %(uuid)s"
-msgstr "Paikkaan %(uuid)s ei ole viittauksia"
+msgid "No references to place %(iid)s"
+msgstr "Paikkaan %(iid)s ei ole viittauksia"
 
 #: bp/scene/templates/scene/places.html:98
 #: bp/scene/templates/scene/places.html:105

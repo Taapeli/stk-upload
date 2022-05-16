@@ -131,12 +131,12 @@ th span.man-man, th span.wife-wife { color: #020299;}
 
             <td class="ColumnSpouse">
                 <div class="man-{{user_context.order}}">&#9794;
-        {% if f.father.uuid %}
+        {% if f.father.iid %}
 				{{ macro.person_names_anon(f.father, f.father.names[0:1]) }}
         {% endif -%}
                 </div>
                 <div class="wife-{{user_context.order}}">&#9792;
-        {% if f.mother.uuid %}
+        {% if f.mother.iid %}
 				{{ macro.person_names_anon(f.mother, f.mother.names[0:1]) }}
         {% endif -%}
                 </div>

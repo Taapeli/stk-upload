@@ -251,7 +251,7 @@ var app = new Vue({
 	        	index[p.uniq_id] = i;
         	});
         	this.selected.forEach( function(p) {
-	            axios.get('/merge/sources/get/' + p.uuid ).
+	            axios.get('/merge/sources/get/' + p.iid ).
 	                then(function(rsp, status) {
 	                	var p = rsp.data.item;
 			        	app.to_be_merged[index[p.uniq_id]] = p;
@@ -265,7 +265,7 @@ var app = new Vue({
                 then(function(rsp, status) {
 		        	app.to_be_merged = [];
 		        	var p = app.selected[0];
-		            axios.get('/merge/sources/get/' + p.uuid ).
+		            axios.get('/merge/sources/get/' + p.iid ).
 		                then(function(rsp, status) {
 		                	var source = rsp.data.item;
 				        	app.to_be_merged.push(source);

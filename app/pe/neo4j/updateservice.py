@@ -367,26 +367,26 @@ class Neo4jUpdateService(ConcreteService):
                 f"{id1}<-{id2} failed: {e.__class__.__name__} {e}",
             }
 
-    def ds_obj_remove_gramps_handles(self, batch_id):
-        """Remove all Gramps handles."""
-        status = Status.OK
-        total = 0
-        unlinked = 0
-        # Remove handles from nodes connected to given Batch
-        result = self.tx.run(CypherRoot.remove_all_handles, batch_id=batch_id)
-        for count, label in result:
-            print(f"# - cleaned {count} {label} handles")
-            total += count
-        # changes = result.summary().counters.properties_set
-
-        # Find handles left: missing link (:Batch) --> (x)
-        result = self.tx.run(CypherRoot.find_unlinked_nodes)
-        for count, label in result:
-            print(
-                f"Neo4jUpdateService.ds_obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch"
-            )
-            unlinked += count
-        return {"status": status, "count": total, "unlinked": unlinked}
+    # def ds_obj_remove_gramps_handles(self, batch_id):
+    #     """Remove all Gramps handles."""
+    #     status = Status.OK
+    #     total = 0
+    #     unlinked = 0
+    #     # Remove handles from nodes connected to given Batch
+    #     result = self.tx.run(CypherRoot.remove_all_handles, batch_id=batch_id)
+    #     for count, label in result:
+    #         print(f"# - cleaned {count} {label} handles")
+    #         total += count
+    #     # changes = result.summary().counters.properties_set
+    #
+    #     # Find handles left: missing link (:Batch) --> (x)
+    #     result = self.tx.run(CypherRoot.find_unlinked_nodes)
+    #     for count, label in result:
+    #         print(
+    #             f"Neo4jUpdateService.ds_obj_remove_gramps_handles WARNING: Found {count} {label} not linked to batch"
+    #         )
+    #         unlinked += count
+    #     return {"status": status, "count": total, "unlinked": unlinked}
 
     # ----- Citation -----
 
@@ -396,13 +396,12 @@ class Neo4jUpdateService(ConcreteService):
         citation.iid = iids.get_one()
 
         c_attr = {
-            "uuid": citation.uuid,
+            "iid": citation.iid,
             "handle": citation.handle,
             "change": citation.change,
             "id": citation.id,
             "page": citation.page,
             "confidence": citation.confidence,
-            "iid": citation.iid,
         }
         if citation.dates:
             c_attr.update(citation.dates.for_db())
@@ -474,14 +473,13 @@ class Neo4jUpdateService(ConcreteService):
         if not "batch_id":
             raise RuntimeError(f"Note.save needs batch_id for {note.id}")
         n_attr = {
-            "uuid": note.uuid,
+            "iid": note.iid,
             #"change": note.change,
             "id": note.id,
             "priv": note.priv,
             "type": note.type,
             "text": note.text,
             "url": note.url,
-            "iid": note.iid,
         }
         if note.handle:
             n_attr["handle"] = note.handle
@@ -519,6 +517,7 @@ class Neo4jUpdateService(ConcreteService):
         media.uuid = NodeObject.newUuid()
         media.iid = iids.get_one()
         m_attr = {
+            "iid": media.iid,
             "handle": media.handle,
             "change": media.change,
             "id": media.id,
@@ -526,13 +525,12 @@ class Neo4jUpdateService(ConcreteService):
             "mime": media.mime,
             "name": media.name,
             "description": media.description,
-            "iid": media.iid,
         }
         m_attr["batch_id"] = batch_id
         result = tx.run(
             CypherMedia.create_in_batch,
             bid=batch_id,
-            uuid=media.uuid,
+            iid=media.iid,
             m_attr=m_attr,
         )
         media.uniq_id = result.single()[0]
@@ -629,16 +627,15 @@ class Neo4jUpdateService(ConcreteService):
 
         # Create or update this Place
 
-        # No uuid: place.uuid = place.newUuid()
+        # No uuid: place.iid = place.newUuid()
         place.iid = iids.get_one()
         pl_attr = {
-            # "uuid": place.uuid,
+            "iid": place.iid,
             "handle": place.handle,
             "change": place.change,
             "id": place.id,
             "type": place.type,
             "pname": place.pname,
-            "iid": place.iid,
         }
         if place.coord:
             # If no coordinates, don't set coord attribute
@@ -825,13 +822,12 @@ class Neo4jUpdateService(ConcreteService):
         repository.uuid = NodeObject.newUuid()
         repository.iid = iids.get_one()
         r_attr = {
-            "uuid": repository.uuid,
+            "iid": repository.iid,
             "handle": repository.handle,
             "change": repository.change,
             "id": repository.id,
             "rname": repository.rname,
             "type": repository.type,
-            "iid": repository.iid,
         }
         result = tx.run(
             CypherRepository.create_in_batch,
@@ -859,14 +855,13 @@ class Neo4jUpdateService(ConcreteService):
         s_attr = {}
         try:
             s_attr = {
-                "uuid": source.uuid,
+                "iid": source.iid,
                 "handle": source.handle,
                 "change": source.change,
                 "id": source.id,
                 "stitle": source.stitle,
                 "sauthor": source.sauthor,
                 "spubinfo": source.spubinfo,
-                "iid": source.iid,
             }
 
             result = tx.run(CypherSourceByHandle.create_to_batch,
@@ -931,13 +926,13 @@ class Neo4jUpdateService(ConcreteService):
         event.uuid = NodeObject.newUuid()
         event.iid = iids.get_one()
         e_attr = {
+            "iid": event.iid,
             "uuid": event.uuid,
             "handle": event.handle,
             "change": event.change,
             "id": event.id,
             "type": event.type,
             "description": event.description,
-            "iid": event.iid,
         }
         if event.attr:
             # Convert 'attr' dict to list for db
@@ -1009,7 +1004,7 @@ class Neo4jUpdateService(ConcreteService):
         # Save the Person node under UserProfile; all attributes are replaced
 
         p_attr = {
-            "uuid": person.uuid,
+            "iid": person.iid,
             "handle": person.handle,
             "change": person.change,
             "id": person.id,
@@ -1017,7 +1012,6 @@ class Neo4jUpdateService(ConcreteService):
             "sex": person.sex,
             "confidence": person.confidence,
             "sortname": person.sortname,
-            "iid": person.iid,
         }
         if person.dates:
             p_attr.update(person.dates.for_db())
@@ -1471,12 +1465,11 @@ class Neo4jUpdateService(ConcreteService):
         # No uuid: f.uuid = NodeObject.newUuid()
         f.iid = iids.get_one()
         f_attr = {
-            # "uuid": f.uuid,
+            "iid": f.iid,
             "handle": f.handle,
             "change": f.change,
             "id": f.id,
             "rel_type": f.rel_type,
-            "iid": f.iid,
         }
         result = tx.run(
             CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr

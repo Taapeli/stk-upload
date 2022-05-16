@@ -101,7 +101,7 @@
                                  {{p.sex_symbol()}} 
                                 {{ macro.person(p) }}
                                 <div class="pop-open-family" 
-                                    v-on:click="showPopup(uuid='{{p.uuid}}',$event)"
+                                    v-on:click="showPopup(iid='{{p.iid}}',$event)"
                                     title="Näytä perheet">👪</div>
                             </div>
                  {% else %}{% set _x = not_mine.append(not not_mine.pop()) %}
@@ -116,7 +116,7 @@
                                 {{p.sex_symbol()}} 
                                 {{ macro.person(p) }}
                                  <div class="pop-open-family" 
-                                    v-on:mouseover="showPopup(uuid='{{p.uuid}}',$event)"
+                                    v-on:mouseover="showPopup(iid='{{p.iid}}',$event)"
                                     title="Näytä perheet">👪</div>                            
 	       {% endif %}
 
@@ -124,7 +124,7 @@
            {% if p.iid %}
                              <span class="idno" title="Isotammi ID">{{p.iid}}</span>
            {% else %}
-                             <span class="idno" title="{{ _('Key') }}">{{p.uuid_short()}}</span>
+                             <span class="idno" title="{{ _('Key') }}">{{p.iid}}</span>
            {% endif %}
                              <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
 	                    </div>
@@ -193,7 +193,7 @@
               ${current.rel_type} ${datesStr(current.dates)}
           </p>
           <ul>
-              <li v-for="p in current.parents" :key="p.uuid">
+              <li v-for="p in current.parents" :key="p.iid">
                 ${p.role} 
                 <a v-bind:href="p.href" title="Katso henkilöä"
                    v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
@@ -202,7 +202,7 @@
               </li>
               <li v-if="current.has_children">${translations['children']}:
                  <ul>
-                     <li v-for="p in current.children" :key="p.uuid">${p.gender}
+                     <li v-for="p in current.children" :key="p.iid">${p.gender}
                        <a v-bind:href="p.href" title="Katso henkilöä"
                           v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
                           ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>

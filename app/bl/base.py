@@ -201,13 +201,6 @@ class NodeObject:
         else:
             return ""
 
-    # def uuid_str(self):
-    #     """ Display uuid in short form, or show self.uniq_id is missing. """
-    #     if self.uuid:
-    #         return self.uuid[:6]
-    #     else:
-    #         return f"({self.uniq_id})"
-
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """
         try:

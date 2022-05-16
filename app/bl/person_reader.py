@@ -147,7 +147,7 @@ class PersonReaderTx(DataService):
             num_hidden = 0
         return {"items": persons2, "num_hidden": num_hidden, "status": status}
 
-    def get_person_data(self, uuid: str):
+    def get_person_data(self, iid: str):
         """
         Get a Person with all connected nodes for display in Person page as object tree.
         """
@@ -231,8 +231,8 @@ class PersonReaderTx(DataService):
 
         # ---/
 
-        res = self.dataservice.tx_get_person_by_uuid(
-            uuid, 
+        res = self.dataservice.tx_get_person_by_iid(
+            iid, 
             self.user_context.material,
             self.use_user,
         )
@@ -558,7 +558,7 @@ class PersonReaderTx(DataService):
                 js += f"citations[{o.uniq_id}] = {{ "
                 js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
                 js += f'id:"{o.id}", note_ref:{o.note_ref}, '
-                js += f'page:"{page}", source_id:{o.source_id}, uuid:"{o.uuid}" '
+                js += f'page:"{page}", source_id:{o.source_id}, iid:"{o.iid}" '
                 js += "};\n"
                 notes.extend(o.note_ref)
 
@@ -579,7 +579,7 @@ class PersonReaderTx(DataService):
                 atype = translate(o.type, "rept")
                 js += f"repositories[{o.uniq_id}] = {{ "
                 js += (
-                    f'uuid:"{o.uuid}", id:"{o.id}", type:"{atype}", rname:"{o.rname}", '
+                    f'iid:"{o.iid}", id:"{o.id}", type:"{atype}", rname:"{o.rname}", '
                 )
                 # Media type
                 js += f'medium:"{medium}", notes:{o.notes}, sources:{o.sources}'
@@ -595,7 +595,7 @@ class PersonReaderTx(DataService):
             text = unquote(o.text)
             url = unquote(o.url)
             js += f"notes[{o.uniq_id}] = {{ "
-            js += f'uuid:"{o.uuid}", id:"{o.id}", type:"{o.type}", '
+            js += f'iid:"{o.iid}", id:"{o.id}", type:"{o.type}", '
             js += f'priv:"{o.priv}", text:"{text}", url:"{url}" '
             js += "};\n"
 

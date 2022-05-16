@@ -86,7 +86,7 @@
                    <div>
                       <a href="/place/{{p.iid}}"
                     {% if not p.ref_cnt %} class="dimmed" 
-                        title="{{  _('No references to place %(uuid)s', uuid=p.uuid_short()) }}"
+                        title="{{  _('No references to place %(iid)s', iid=p.iid) }}"
                     {% else %} class="inlink"
                         title="{{ _('see details of place %(id)s', id=p.uniq_id) }}"
                     {%- endif %}>

@@ -11,7 +11,7 @@ from PIL import Image
 import shareds
 
 media_base_folder = "media"
-cypher_get_medium = "MATCH (m:Media{uuid:$uuid}) RETURN m"
+cypher_get_medium = "MATCH (m:Media{iid:$iid}) RETURN m"
 
 
 def make_thumbnail(src_file, dst_file, crop=None):
@@ -40,9 +40,9 @@ def get_media_thumbnails_folder(batch_id):
     media_thumbnails_folder = os.path.join(media_folder,"thumbnails")
     return os.path.abspath(media_thumbnails_folder)
 
-def get_fullname(uuid):
+def get_fullname(iid):
     rec = shareds.driver.session(default_access_mode='READ').run(cypher_get_medium,
-                                                                 uuid=uuid).single()
+                                                                 iid=iid).single()
     m = rec['m']
     batch_id = m.get('batch_id','no-batch')
     src = m['src']
@@ -51,21 +51,21 @@ def get_fullname(uuid):
     fullname = os.path.join(media_files_folder,src)
     return fullname,mimetype
 
-def get_thumbname(uuid, crop=None):
+def get_thumbname(iid, crop=None):
     ''' Find stored thumbnail file name; create a new file, if needed.
         If there is crop parameter, its value is added to thumb file name.
     '''
-    if not uuid:
-        raise FileNotFoundError('models.mediafile.get_thumbname: no uuid')
+    if not iid:
+        raise FileNotFoundError('models.mediafile.get_thumbname: no iid')
 
     rec = shareds.driver.session(default_access_mode='READ').run(cypher_get_medium,
-                                                                 uuid=uuid).single()
+                                                                 iid=iid).single()
     if rec:
         # <Record
         #    m=<Node id=29198 labels=frozenset({'Media'}) 
         #        properties={'batch_id': '2020-08-30.001', 'src': 'Dok/Silius-hauta Tampereella.pdf', 
         #            'mime': 'application/pdf', 'change': 1515865209, 'description': 'Silius-hauta pdf', 
-        #            'id': 'O0077', 'uuid': '33a96ff532a4467fac86af58bc80dc1a'}>
+        #            'id': 'O0077', 'iid': 'M-dc1a'}>
         # >
         m = rec['m']
         batch_id = m.get('batch_id','no-batch')
@@ -101,7 +101,7 @@ def get_thumbname(uuid, crop=None):
         return dst_file, "jpg"
 
     # No db Media node
-    print(f"#models.mediafile.get_thumbname: No media {uuid}")
+    print(f"#models.mediafile.get_thumbname: No media {iid}")
     return "", None
 
 def get_image_size(path):

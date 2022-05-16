@@ -81,7 +81,7 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 				<!-- td><a href="#" @click=show_persons($event)>Show</a -->
 				<td><zzza 
 						target=_blank 
-						v-bind:href="'/scene/person?uuid=' + match.p1.uuid"
+						v-bind:href="'/person/' + match.p1.iid"
 						class="plink"
 					>
 					${ match.p1.name } ${ match.p1.id }
@@ -96,7 +96,7 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 					#} 
 				<td><zzza 
 						target=_blank 
-						v-bind:href="'/scene/person?uuid=' + match.p2.uuid"
+						v-bind:href="'/person/' + match.p2.iid"
 						class="plink"
 					>
 					${ match.p2.name } ${ match.p2.id }
@@ -111,7 +111,7 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 					#} 
 				<td><a 
 						target=_blank 
-						v-bind:href="'/dupsearch/compare?uuid1=' + match.p1.uuid + '&uuid2=' + match.p2.uuid +
+						v-bind:href="'/dupsearch/compare?iid1=' + match.p1.iid + '&iid2=' + match.p2.iid +
 						'&batch_id1=' + batch1.id + '&batch_id2=' + batch2.id +
 						'&state1=' + batch1.state + '&state2=' + batch2.state
 						"
@@ -120,7 +120,7 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 					</a>
 				<td><a 
 						target=_blank 
-						v-bind:href="'/dupsearch/compare2?uuid1=' + match.p1.uuid + '&uuid2=' + match.p2.uuid +
+						v-bind:href="'/dupsearch/compare2?iid1=' + match.p1.iid + '&iid2=' + match.p2.iid +
 						'&batch_id1=' + batch1.id + '&batch_id2=' + batch2.id +
 						'&state1=' + batch1.state + '&state2=' + batch2.state
 						"
@@ -305,13 +305,13 @@ var app = new Vue({
                 });
         },
 
-        person_page: function(uuid) {
-        	var url = "/scene/person?uuid=" + uuid;
+        person_page: function(iid) {
+        	var url = "/person/" + iid;
         	return url;
     	},
         show_persons: function(event) {
         	log(event.target);
-        	var url = "/scene/person?uuid=" + uuid;
+        	var url = "/person/" + iid;
         	return url;
     	}
     } // methods

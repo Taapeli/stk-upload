@@ -44,15 +44,15 @@ def list_sources(series=None):
 
 
 
-@bp.route('/merge/sources/get/<uuid1>')
+@bp.route('/merge/sources/get/<iid1>')
 @roles_accepted('audit')
-def getsource(uuid1):
+def getsource(iid1):
     # Set context by owner and the data selections
     u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
     with SourceReader("read", u_context) as reader: 
         try:
-            results = reader.get_source_with_references(uuid1, u_context)
+            results = reader.get_source_with_references(iid1, u_context)
         except KeyError as e:
             results = {}
             results['status'] = Status.ERROR

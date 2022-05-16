@@ -317,12 +317,6 @@ def show_persons():
     # Request may include fw, bw, count or years
     run_args = u_context.set_scope_from_request("person_scope")
     run_args["pg"] = "all"
-    # years = request.args.get('years')
-    # if years: run_args['years'] = years
-    # fw = request.args.get("fw")
-    # if fw: run_args["fw"] = fw
-    # c = request.args.get("c")
-    # if c: run_args["c"] = c
 
     # 1. User and data context from session and current_user
     print(f"{request.method} All persons {run_args}")
@@ -443,7 +437,7 @@ def show_person_search():  # (set_scope=None, batch_id=None):
             # Most common surnames cloud
             with PersonReader("read", u_context) as service:
                 surnamestats = service.get_surname_list(47)
-                # {name, count, uuid}
+                # {name, count, iid}
                 for i, stat in enumerate(surnamestats):
                     stat["order"] = i
                     stat["fontsize"] = name_cloud_size(surnamestats, i)
@@ -452,7 +446,7 @@ def show_person_search():  # (set_scope=None, batch_id=None):
             # Most common place names cloud
             with PlaceReaderTx("read_tx", u_context) as service:
                 placenamestats = service.get_placename_list(40)
-                # {name, count, uuid}
+                # {name, count, iid}
                 for i, stat in enumerate(placenamestats):
                     stat["order"] = i
                     stat["fontsize"] = name_cloud_size(placenamestats, i)
@@ -488,23 +482,25 @@ def show_person_search():  # (set_scope=None, batch_id=None):
 
 
 @bp.route("/scene/person", methods=["GET"])
+@bp.route("/person/<iid>")
 #     @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_person(uuid=None, fanchart=False):
+def show_person(iid=None, fanchart=False):
     """One Person with all connected nodes - NEW version 3.
 
     Arguments:
-    - uuid=     persons uuid
+    - iid=     persons iid or uuid
     - fanchart= by default family details shown, fanchart navigation uses this
     """
     t0 = time.time()
-    uuid = request.args.get("uuid", uuid)
+    if not iid:
+        iid = request.args.get("iid")
     fanchart_shown = request.args.get("fanchart", fanchart)
     dbg = request.args.get("debug", None)
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
-        result = service.get_person_data(uuid)
+        result = service.get_person_data(iid)
 
     # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
@@ -541,18 +537,17 @@ def show_person(uuid=None, fanchart=False):
     )
 
 
-@bp.route("/scene/hx-person/famtree", methods=["GET"])
+@bp.route("/scene/hx-person/famtree/<iid>", methods=["GET"])
 #     @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_person_family_tree_hx(uuid=None):
+def show_person_family_tree_hx(iid):
     """
     Htmx-component for displaying selected relatives tab: the families details.
     """
-    uuid = request.args.get("uuid", uuid)
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
-        result = service.get_person_data(uuid)
+        result = service.get_person_data(iid)
 
     # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
@@ -580,26 +575,25 @@ def show_person_family_tree_hx(uuid=None):
     )
 
 
-@bp.route("/scene/hx-person/fanchart", methods=["GET"])
+@bp.route("/scene/hx-person/fanchart/<iid>", methods=["GET"])
 #     @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_person_fanchart_hx(uuid=None):
+def show_person_fanchart_hx(iid):
     """
     Htmx-component for displaying selected relatives tab: fanchart.
     """
     t0 = time.time()
-    uuid = request.args.get("uuid", uuid)
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
-        result = service.get_person_data(uuid)
+        result = service.get_person_data(iid)
 
     # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")
 
-    fanchart = FanChart().get(uuid)
+    fanchart = FanChart().get(iid)
     n = len(fanchart.get("children", []))
     t1 = time.time() - t0
     stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
@@ -651,14 +645,14 @@ def person_name_changetype(uniq_id):
         return _("type change FAILED")  # will be displayed in <span class='msg' ...>
 
 
-@bp.route("/scene/get_person_names/<uuid>", methods=["PUT"])
+@bp.route("/scene/get_person_names/<iid>", methods=["PUT"])
 @roles_accepted("guest", "research", "audit", "admin")
-def get_person_names(uuid):
+def get_person_names(iid):
     u_context = UserContext()
 
     args = {}
     with PersonReader("read", u_context) as service:
-        result = service.get_person_data(uuid, args)
+        result = service.get_person_data(iid, args)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
@@ -671,13 +665,13 @@ def get_person_names(uuid):
     )
 
 
-@bp.route("/scene/get_person_primary_name/<uuid>", methods=["PUT"])
+@bp.route("/scene/get_person_primary_name/<iid>", methods=["PUT"])
 @roles_accepted("guest", "research", "audit", "admin")
-def get_person_primary_name(uuid):
+def get_person_primary_name(iid):
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
-        result = service.get_person_data(uuid)
+        result = service.get_person_data(iid)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
@@ -686,21 +680,21 @@ def get_person_primary_name(uuid):
     return render_template("/scene/person_name.html", person=person)
 
 
-@bp.route("/scene/set_primary_name/<uuid>/<int:old_order>", methods=["PUT"])
+@bp.route("/scene/set_primary_name/<iid>/<int:old_order>", methods=["PUT"])
 @roles_accepted("audit", "admin")
-def set_primary_name(uuid, old_order):
+def set_primary_name(iid, old_order):
     u_context = UserContext()
 
     # writeservice = get_dataservice("update")
     with PersonWriter("update", u_context) as service:
-        service.set_primary_name(uuid, old_order)
-    return get_person_names(uuid)
+        service.set_primary_name(iid, old_order)
+    return get_person_names(iid)
 
 
 @bp.route("/scene/sort_names", methods=["PUT"])
 @roles_accepted("audit", "admin")
 def sort_names():
-    uuid = request.form.get("uuid")
+    iid = request.form.get("iid")
     uid_list = request.form.getlist("order")
     uid_list = [int(uid) for uid in uid_list]
     u_context = UserContext()
@@ -708,26 +702,19 @@ def sort_names():
     # writeservice = get_dataservice("update")
     with PersonWriter("simple", u_context) as service:
         service.set_name_orders(uid_list)
-    return get_person_primary_name(uuid)
+    return get_person_primary_name(iid)
 
 
-# @bp.route('/scene/event/<int:uniq_id>')
-# @bp.route("/older/event/uuid=<string:uuid>")
-# def obsolete_show_event_v1(uuid):
-#     """Event page with accompanied persons and families.
-#     return render_template("/scene/event_htmx.html", event=event, participants=members)
-
-
-@bp.route("/scene/edit_event/uuid=<string:uuid>")
+@bp.route("/scene/edit_event/<string:iid>")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def edit_event(uuid):
+def edit_event(iid):
     u_context = UserContext()
 
     with EventReader("read", u_context) as service:
         # datastore = EventReader(readservice, u_context)
         print(f"#> bp.scene.routes.edit_event: with {service}")
-        res = service.get_event_data(uuid, u_context.material, {})
+        res = service.get_event_data(iid, u_context.material, {})
 
     status = res.get("status")
     if status != Status.OK:
@@ -739,13 +726,13 @@ def edit_event(uuid):
     return render_template("/scene/edit_event.html", event=event, participants=members)
 
 
-@bp.route("/scene/event/uuid=<string:uuid>")
+@bp.route("/event/<string:iid>")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_event_vue(uuid):
+def show_event_vue(iid):
     """ Show Event page template which marshals data by Vue. """
     u_context = UserContext()
-    return render_template("/scene/event_vue.html", uuid=uuid, user_context=u_context)
+    return render_template("/scene/event_vue.html", iid=iid, user_context=u_context)
 
 
 @bp.route("/scene/json/event", methods=["POST", "GET"])
@@ -762,17 +749,17 @@ def json_get_event():
         else:
             args = json.loads(request.data)
             print(f"got request data: {args}")
-        uuid = args.get("uuid")
-        if not uuid:
-            print("bp.scene.routes.json_get_event: Missing uuid")
+        iid = args.get("iid")
+        if not iid:
+            print("bp.scene.routes.json_get_event: Missing iid")
             return jsonify(
                 {"records": [], "status": Status.ERROR, 
-                 "statusText": "Missing uuid"}
+                 "statusText": "Missing iid"}
             )
 
         with EventReader("read", u_context) as service:
             # reader = EventReader(readservice, u_context)
-            res = service.get_event_data(uuid, u_context.material, args)
+            res = service.get_event_data(iid, u_context.material, args)
 
         status = res.get("status")
         if status != Status.OK:
@@ -802,11 +789,10 @@ def json_get_event():
         members = res.get("members", [])
         for m in members:
             if m.label == "Person":
-                m.href = "/scene/person?uuid=" + m.uuid
+                m.href = "/person/" + m.iid
                 m.names[0].type_lang = jinja_filters.translate(m.names[0].type, "nt")
             elif m.label == "Family":
                 m.href = "/family/" + m.iid
-                #m.href = "/scene/family?uuid=" + m.uuid
             m.role_lang = jinja_filters.translate(m.role, "role") if m.role else ""
         # Actually there is one place and one pl.uppers
         places = res.get("places", [])
@@ -821,7 +807,7 @@ def json_get_event():
         # Medias
         medias = res.get("medias", [])
         for m in medias:
-            m.href = "/scene/media?uuid=" + m.uuid
+            m.href = "/scene/media/" + m.iid
 
         res_dict = {
             "event": event,
@@ -847,13 +833,13 @@ def json_get_event():
             {
                 "records": [],
                 "status": Status.ERROR,
-                "member": uuid,
+                "member": iid,
                 "statusText": f"Failed {e.__class__.__name__}",
             }
         )
 
 
-@bp.route("/scene/update/event", methods=["POST"])
+@bp.route("/scene/update/event/<iid>", methods=["POST"])
 @login_required
 @roles_accepted("audit")
 def json_update_event():
@@ -867,12 +853,11 @@ def json_update_event():
         else:
             args = json.loads(request.data)
             # print(f'got request data: {args}')
-        uuid = args.get("uuid")
         u_context = UserContext()
 
         # writeservice = get_dataservice("update")
         with EventWriter("update", u_context) as service:
-            rec = service.update_event(uuid, args)
+            rec = service.update_event(iid, args)
         if rec.get("status") != Status.OK:
             return rec
         event = rec.get("item")
@@ -890,7 +875,7 @@ def json_update_event():
             {
                 "records": [],
                 "status": Status.ERROR,
-                "member": uuid,
+                "member": iid,
                 "statusText": f"Failed: {e}",
             }
         )
@@ -962,34 +947,35 @@ def show_family_iid(iid=None):
 @bp.route("/scene/family", methods=["GET"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_family_page(uuid=None):
+def obsolete_show_family_page(iid=None):
     """One Family, only for by /scene/json/event from person.html
     """
-    uuid = request.args.get("uuid", uuid)
-    if not uuid:
-        return redirect(url_for("virhesivu", code=1, text="Missing Family key"))
-    t0 = time.time()
-    u_context = UserContext()
-
-    with FamilyReader("read", u_context) as service:
-        # reader = FamilyReader(readservice, u_context)
-        res = service.get_family_data(uuid)
-
-    stk_logger(u_context, "-> bp.scene.routes.show_family_page")
-    status = res.get("status")
-    if status != Status.OK:
-        if status == Status.ERROR:
-            flash(f'{res.get("statustext")}', "error")
-        else:
-            flash(f'{ _("This item is not available") }', "warning")
-
-    return render_template(
-        "/scene/family.html",
-        menuno=3,
-        family=res["item"],
-        user_context=u_context,
-        elapsed=time.time() - t0,
-    )
+    return "bp.scene.routes.obsolete_show_family_page: REMOVED"
+    # iid = request.args.get("uuid", iid)
+    # if not iid:
+    #     return redirect(url_for("virhesivu", code=1, text="Missing Family key"))
+    # t0 = time.time()
+    # u_context = UserContext()
+    #
+    # with FamilyReader("read", u_context) as service:
+    #     # reader = FamilyReader(readservice, u_context)
+    #     res = service.get_family_data(iid)
+    #
+    # stk_logger(u_context, "-> bp.scene.routes.show_family_page")
+    # status = res.get("status")
+    # if status != Status.OK:
+    #     if status == Status.ERROR:
+    #         flash(f'{res.get("statustext")}', "error")
+    #     else:
+    #         flash(f'{ _("This item is not available") }', "warning")
+    #
+    # return render_template(
+    #     "/scene/family.html",
+    #     menuno=3,
+    #     family=res["item"],
+    #     user_context=u_context,
+    #     elapsed=time.time() - t0,
+    # )
 
 
 @bp.route("/scene/json/families", methods=["POST", "GET"])
@@ -1008,22 +994,22 @@ def json_get_person_families():
         else:
             args = json.loads(request.data)
             print(f"got request data: {args}")
-        uuid = args.get("uuid")
-        if not uuid:
-            print("bp.scene.routes.json_get_person_families: Missing uuid")
+        iid = args.get("iid")
+        if not iid:
+            print("bp.scene.routes.json_get_person_families: Missing iid")
             return jsonify(
-                {"records": [], "status": Status.ERROR, "statusText": "Missing uuid"}
+                {"records": [], "status": Status.ERROR, "statusText": "Missing iid"}
             )
 
         u_context = UserContext()
         with FamilyReader("read", u_context) as service:
             # reader = FamilyReader(readservice, u_context)
-            res = service.get_person_families(uuid)
+            res = service.get_person_families(iid)
 
         if res.get("status") == Status.NOT_FOUND:
             return jsonify(
                 {
-                    "member": uuid,
+                    "member": iid,
                     "records": [],
                     "statusText": _("No families"),
                     "status": Status.NOT_FOUND,
@@ -1033,7 +1019,7 @@ def json_get_person_families():
         items = res["items"]
         res_dict = {
             "records": items,
-            "member": uuid,
+            "member": iid,
             "statusText": f"Löytyi {len(items)} perhettä",
             "translations": {"family": _("Family"), "children": _("Children")},
         }
@@ -1053,7 +1039,7 @@ def json_get_person_families():
             {
                 "records": [],
                 "status": Status.ERROR,
-                "member": uuid,
+                "member": iid,
                 "statusText": f"Failed {e.__class__.__name__}",
             }
         )
@@ -1103,7 +1089,6 @@ def show_places():
     )
 
 
-#@bp.route("/scene/location/uuid=<locid>")
 @bp.route("/place/<iid>")
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
@@ -1308,7 +1293,7 @@ def show_media(iid):
 
     medium = res.get("item", None)
     if medium:
-        fullname, mimetype = mediafile.get_fullname(medium.uuid)
+        fullname, mimetype = mediafile.get_fullname(medium.iid)
         stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
     else:
         flash(f'{res.get("statustext","error")}', "error")
@@ -1337,15 +1322,15 @@ def fetch_media(fname):
     http://127.0.0.1:5000/scene/media/kuva2?id=63995268bd2348aeb6c70b5259f6743f&crop=0,21,100,91&full=1
 
     Arguments:
-        id    uuid of Media
+        id    iid of Media
         crop  pixel coordinates as "left,upper,right,lower" %
         full  "1" = show full size, "0" thumbnail size (default)
     """
-    uuid = request.args.get("id")
+    iid = request.args.get("id")
     crop = request.args.get("crop")
     # show_thumb for cropped image only
     show_thumb = request.args.get("full", "0") == "0"
-    fullname, mimetype = mediafile.get_fullname(uuid)
+    fullname, mimetype = mediafile.get_fullname(iid)
     try:
         if crop:
             # crop dimensions are diescribed as % of width and height
@@ -1370,14 +1355,14 @@ def fetch_media(fname):
 @roles_accepted("guest", "research", "audit", "admin")
 def fetch_thumbnail():
     """Fetch thumbnail file to display"""
-    uuid = request.args.get("id")
+    iid = request.args.get("id")
     crop = request.args.get("crop")
     if crop == "None":
         crop = None
     thumb_mime = "image/jpg"
     thumbname = "(no file)"
     try:
-        thumbname, cl = mediafile.get_thumbname(uuid, crop)
+        thumbname, cl = mediafile.get_thumbname(iid, crop)
         if cl == "jpg":
             ret = send_file(thumbname, mimetype=thumb_mime)
         elif cl == "pdf":
