@@ -144,7 +144,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	                        <tr{% if edit_names %} class="movable"{% endif %}>
 	                            <td class="ColumnAttribute">
 	                            	{% if may_edit %}
-			                            <select hx-trigger="load" hx-get="nametypes/{{p_name.uniq_id}}/{{ p_name.type }}" hx-swap="outerHTML"></select>
+			                            <select hx-trigger="load" hx-get="/scene/nametypes/{{p_name.uniq_id}}/{{ p_name.type }}" hx-swap="outerHTML"></select>
 		                            {% else %}
 	                            		{{p_name.type|transl('nt')}}
                             		{% endif %}
