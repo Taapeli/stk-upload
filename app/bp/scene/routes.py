@@ -1287,17 +1287,16 @@ def show_medias():
     )
 
 
-@bp.route("/scene/media", methods=["GET"])
+@bp.route("/media/<iid>", methods=["GET"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_media(uuid=None):
+def show_media(iid):
     """
     One Media
     """
-    uuid = request.args.get("uuid", uuid)
     u_context = UserContext()
     with MediaReader("read", u_context) as service:
-        res = service.get_one(uuid)
+        res = service.get_one(iid)
 
     status = res.get("status")
     if status != Status.OK:

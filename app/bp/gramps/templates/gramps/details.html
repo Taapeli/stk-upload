@@ -59,7 +59,7 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
     	<h2 class="center">{{ _("General")|title() }}</h2>
     	<table>
         	<tr>
-        		<th>{{ _("Batch") }}</th>
+        		<th title="Db version {{batch.db_schema}}">{{ _("Batch") }}</th>
         		<td>{{ batch.id }}</td>
         	</tr>
             <tr>
@@ -91,10 +91,13 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
                 </th>
         	</tr>
        	</table>
-       	<p>
+       	
     {% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
-       	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
+       	<p><a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a></p>
     {% endif %}
+    {# if batch.db_schema % }   
+        <div style="font-size:6pt; text-align:end; color:gray;">Db version {{batch.db_schema}}</div>
+    { % endif #}
 
     </div>
     

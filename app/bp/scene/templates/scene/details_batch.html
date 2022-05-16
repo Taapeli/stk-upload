@@ -80,7 +80,7 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
                 <h2 class="center">{{ _("General")|title() }}</h2>
                 <table>
                     <tr>
-                        <th>{{ _("Batch") }}, {{_('Researcher')|lower}}</th>
+                        <th title="Db version {{batch.db_schema}}">{{ _("Batch") }}, {{_('Researcher')|lower}}</th>
                         <td>{{ batch.id }}
                             <a href="/audit/profile/{{batch.user}}"
                              style="text-decoration: underline;"
@@ -119,7 +119,9 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
             {% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
                 <p><a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a></p>
             {% endif %}   
-            
+            {# if batch.db_schema % }   
+                <div style="font-size:6pt; text-align:end; color:gray;">Db version {{batch.db_schema}}</div>
+            { % endif #}   
             </div>
             
             <div class="sc-startbox">

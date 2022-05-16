@@ -26,10 +26,10 @@ import os
 import time
 
 import shareds
+from database.accessDB import DB_SCHEMA_VERSION
 from bl.base import IsotammiException #, Status
 from bp.admin import uploads
 from models import loadfile #, util, syslog
-#from pe.managed_dataservice import ManagedDataService
 from pe.dataservice import DataService
 
 class RootUpdater(DataService):
@@ -65,8 +65,8 @@ class RootUpdater(DataService):
             root = Root()
             root.id = dataservice.ds_new_batch_id(tx)
             root.user = username
-            # root.material_type is still unknown
-            res = root.save(tx) #, self.dataservice)
+            root.db_schema = DB_SCHEMA_VERSION
+            res = root.save(tx)
             if Status.has_failed(res):
                 raise IsotammiException("Could not create Root node")
 

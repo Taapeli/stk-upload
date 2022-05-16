@@ -352,7 +352,7 @@ def xml_to_stkbase(batch):  # :Root):
         )
 
         # The gramps handles are not removed any more / 15.5.2022/JMä
-        # handler.remove_handles()
+        # handler.unused_remove_handles()
         batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
 
     logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')

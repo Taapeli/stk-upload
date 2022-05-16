@@ -31,8 +31,6 @@ Created on 9.6.2021
 import os
 from datetime import date, datetime
 from flask_babelex import _
-#from typing import Any, Optional
-#from bl.base import IsotammiException
 import logging
 
 logger = logging.getLogger('stkserver')
@@ -101,13 +99,12 @@ class Root(NodeObject):
     """
     Data Root node for candidate, auditing and approved material chunks.
     
-    Given timestamp is milliseconds from epoch. Convert to string by 
+    Given timestamp is milliseconds from epoch. You may convert it
+    to string using models.util.format_ms_timestamp()
     """
 
     def __init__(self, userid:str=None):
-        """
-        Creates a Root object
-        """
+        """ Creates an empty Root object. """
         self.uniq_id = None
         self.user = userid
         self.file = None
@@ -115,11 +112,12 @@ class Root(NodeObject):
         self.material_type = None   #DEFAULT_MATERIAL "Family Tree" or other
         self.state = State.FILE_LOADING
         self.mediapath = None  # Directory for media files
-        self.timestamp = 0 # Milliseconds; Convert to string by 
+        self.timestamp = 0 # To be set in database
         self.description = ""
         self.xmlname = ""
         self.metaname = ""
         self.logname = ""
+        self.db_schema = None   # Db schema version of this batch
 
     def __str__(self):
         return f"Root {self.user} / {self.id} {self.material_type}({self.state})"
@@ -135,14 +133,14 @@ class Root(NodeObject):
         return False
 
     def filename(self):
-        """ Get filenname of Root.file. """
+        """ Get file name of Root.file. """
         try:
             return os.path.split(self.file)[1]
         except Exception:
             return ""
 
     def handle_suffix(self) -> str:
-        """ Shortened batch id "2022-05-07.001" -> "2205071" """
+        """ Shortened batch id "2022-05-07.001" -> "2205071" for NodeObject.handle. """
         import re
         if len(self.id) == 14:
             suffix = "@" + self.id[2:4] + re.sub("\-|(\.0*)","",self.id[5:])
@@ -197,6 +195,7 @@ class Root(NodeObject):
             "xmlname": self.xmlname,
             "metaname": self.metaname,
             "logname": self.logname,
+            "db_schema": self.db_schema,
         }
 
         with RootUpdater("update", tx=tx) as bl_service:
@@ -206,9 +205,7 @@ class Root(NodeObject):
 
     @classmethod
     def from_node(cls, node):
-        """Convert a Neo4j node to Root object.
-        
-           type: (Any) -> Root
+        """Convert a Neo4j Node to Root object.
         """
         from models.util import format_ms_timestamp
         obj = cls()
@@ -226,11 +223,12 @@ class Root(NodeObject):
         obj.xmlname = node.get("xmlname", "")
         obj.metaname = node.get("metaname", "")
         obj.logname = node.get("logname", "")
+        obj.db_schema = node.get("db_schema", "")
         return obj
 
     @staticmethod
     def delete_batch(username, batch_id):
-        """Delete a Root batch with reasonable chunks."""
+        """Delete a Root batch in reasonable chunks."""
         total = 0
         try:
             with shareds.driver.session() as session:
@@ -255,7 +253,6 @@ class Root(NodeObject):
                             batch_id=batch_id,
                         )
                         counters = shareds.db.consume_counters(result)
-                        # if counters:
                         d1 = counters.nodes_deleted
                         d2 = counters.relationships_deleted
                         if d1:
@@ -284,6 +281,7 @@ class Root(NodeObject):
 
     @staticmethod
     def get_filename(username: str, batch_id: str):
+        """ Reads XML file name from database. """
         with shareds.driver.session() as session:
             record = session.run(
                 CypherRoot.get_filename, username=username, batch_id=batch_id
@@ -294,7 +292,7 @@ class Root(NodeObject):
 
     @staticmethod
     def get_log_filename(batch_id: str):
-        # Returns None or Root object with user and rel_type fields
+        """ Reads upload file name from database. """
         with shareds.driver.session() as session:
             record = session.run(CypherRoot.get_batch_filename, 
                                  batch_id=batch_id).single()
@@ -307,7 +305,9 @@ class Root(NodeObject):
 
     @staticmethod
     def get_batch(username: str, batch_id: str):
-        # Returns None or Root object with user and rel_type fields
+        """ Reads XML file name from database.
+            Returns Root object with UserProfile's rel_type field.
+        """
         with shareds.driver.session() as session:
             record = session.run(
                 CypherRoot.get_batch, username=username, batch_id=batch_id
@@ -320,6 +320,7 @@ class Root(NodeObject):
 
     @staticmethod
     def get_batches():
+        """ Read all Root nodes. """
         result = shareds.driver.session().run(CypherRoot.list_all)
         for rec in result:
             yield dict(rec.get("b"))
@@ -340,7 +341,7 @@ class Root(NodeObject):
 
     @staticmethod
     def get_materials_accepted(material_type):
-        """ Returns list of accepted materials of material_type. 
+        """ Returns list of accepted materials of given material_type. 
         """
         roots = []
         with shareds.driver.session() as session:
@@ -389,8 +390,7 @@ class Root(NodeObject):
         titles = []
         user_data = {}
         result = shareds.driver.session().run(
-            CypherRoot.get_batches, user=user, status=State.ROOT_CANDIDATE # Batch.BATCH_CANDIDATE
-        )
+            CypherRoot.get_batches, user=user, status=State.ROOT_CANDIDATE        )
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'}
             #    properties={ // 'mediapath': '/home/jm/my_own.media',
@@ -479,7 +479,7 @@ class Root(NodeObject):
                     if au_user:
                         root.prev_audits.append([au_user, ts_from, ts_to])
             label = record.get("label", "-")
-            # Trick: Set Person as first in sort order!
+            # Trick: Set Person to first in sort order!
             if label == "Person":
                 label = " Person"
             cnt = record["cnt"]
@@ -661,7 +661,8 @@ class Root(NodeObject):
         """ Schema fix: If there is multiple auditors, purge others but current
         """
         with RootUpdater("update") as serv:
-            res = serv.purge_other_auditors(batch_id, username) # Got {status, removed_auditors}
+            res = serv.purge_other_auditors(batch_id, username)
+            # Got {status, removed_auditors}
             removed_auditors = res.get("removed_auditors", [])
             count = len(removed_auditors)
             if count > 0:

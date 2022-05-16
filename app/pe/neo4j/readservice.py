@@ -1347,7 +1347,7 @@ class Neo4jReadService(ConcreteService):
             else:
                 return {"media": media, "status": Status.NOT_FOUND}
 
-    def dr_get_media_single(self, user, material, uuid):
+    def dr_get_media_single(self, user, material, iid):
         """Read a Media object, selected by UUID or uniq_id.
 
         :param: user    username, who has access
@@ -1378,14 +1378,14 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             try:
                 result = run_cypher_batch(
-                    session, CypherMedia.get_media_by_uuid, user, material, uuid=uuid
+                    session, CypherMedia.get_media_by_iid, user, material, iid=iid
                 )
                 # RETURN media, r, ref, ref2
                 for record in result:
                     media_node = record["media"]
                     crop = record["prop"]
                     ref_node = record["ref"]
-                    ref2_node = record["ref2"]
+                    event_node = record["eref"]
 
                     # - Media node
                     # - cropping
@@ -1419,19 +1419,19 @@ class Neo4jReadService(ConcreteService):
 
                     #    The next object behind the Event
 
-                    if ref2_node:
-                        if ref2_node.id in event_refs:
-                            obj2 = event_refs[ref2_node.id]
+                    if event_node:
+                        if event_node.id in event_refs:
+                            obj2 = event_refs[event_node.id]
                         else:
-                            if "Person" in ref2_node.labels:
-                                obj2 = PersonBl_from_node(ref2_node)
+                            if "Person" in event_node.labels:
+                                obj2 = PersonBl_from_node(event_node)
                                 obj2.label = "Person"
-                            elif "Family" in ref2_node.labels:
-                                obj2 = FamilyBl_from_node(ref2_node)
+                            elif "Family" in event_node.labels:
+                                obj2 = FamilyBl_from_node(event_node)
                                 obj2.label = "Family"
                             else:
                                 raise TypeError(
-                                    f"MediaReader.get_one: unknown type {list(ref2_node.labels)}"
+                                    f"MediaReader.get_one: unknown type {list(event_node.labels)}"
                                 )
                             event_refs[obj2.uniq_id] = obj2
 

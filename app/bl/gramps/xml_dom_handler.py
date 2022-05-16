@@ -78,7 +78,7 @@ class DOM_handler:
         self.progress = defaultdict(int)
         self.obj_counter = 0
 
-    def remove_handles(self):
+    def unused_remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
         res = self.dataservice.ds_obj_remove_gramps_handles(self.batch.id)
         print(f'# --- removed handles from {res.get("count")} nodes')
