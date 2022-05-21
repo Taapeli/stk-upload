@@ -389,7 +389,7 @@ def __search_dups(n,count,args,rec,matches):
     return 
     
 def search_dups(args):
-    print(args)
+    print("bp.dupsearch.models.search.search_dups: ",args)
     print(args.model)
     global t0
     t0 = time.time()

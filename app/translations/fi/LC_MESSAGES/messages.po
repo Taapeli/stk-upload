@@ -1704,7 +1704,7 @@ msgid "File"
 msgstr "Tiedosto"
 
 #: bp/dupsearch/templates/dupsearch.html:27
-msgid "Has searchkeys"
+msgid "Has search keys"
 msgstr "Sisältää hakuavaimet"
 
 #: bp/dupsearch/templates/dupsearch.html:28

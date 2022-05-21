@@ -11,31 +11,39 @@
 <style>
 div.searchkey { display: none; }
 td.matchvector:hover ~ td > div.searchkey { display: inline; }
+div.scroll {
+    max-height: 600px;
+    overflow-y: scroll;
+    margin-bottom: 1em;
+}
 </style>
 
 <div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
   <h1>{{ _('Find possible duplicates') }}</h1>
 
-    <div class="startbox2">
+    <div class="startbox2" style="overflow-wrap: anywhere;">
         <h2>{{ _('Data Batches') }}</h2>
+        <div class="scroll">
         <table width="100%">
         <tr>
-            <th>{{ _('Select') }}</th>
-            <th>{{ _('Batch') }}</th>
-            <th>{{ _('User') }}</th>
+            <th style="width:50px">{{ _('Select') }}</th>
+            <th style="width:110px">{{ _('Batch') }},
+                {{ _('User') }}</th>
             <th>{{ _('File') }}</th>
-            <th>{{ _('Has searchkeys') }}</th>
+            <th style="width:65px">{{ _('Has search keys') }}</th>
             <th>{{ _('Search in') }}</th>
         </tr>
         <tr v-for="batch in batches">
             <td><input type=radio name=select v-model="batch1" v-bind:value="batch">
         	<td>${ batch.id }
-        	<td>${ batch.user }
+        	    ${ batch.user }
         	<td>${ batch.file }
         	<td>${ batch.has_searchkeys }
             <td><input type=radio name=select2 v-model="batch2" v-bind:value="batch">
         </tr>
         </table>
+        </div>
+        <div>
         <button v-on:click="search_duplicates" v-bind:disabled="!batch1 || !batch2 || !batch1.has_searchkeys || !batch2.has_searchkeys">
         	{{ _('Search duplicates') }}
     	</button>
@@ -46,18 +54,13 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
         	</option>
         </select>
         #}
-        <p>
-        <table v-bind:disabled="!batch1">
-        <tr>
-        <td rowspan=2>
         <button v-on:click="generate_keys" v-bind:disabled="!batch1 || batch1.has_searchkeys">
         	{{ _('Generate comparison keys') }}
     	</button>
-		<tr><td>
         <button v-on:click="remove_keys" v-bind:disabled="!batch1 || !batch1.has_searchkeys">
         	{{ _('Remove comparison keys') }}
     	</button>
-        </table>
+        </div>
     </div>
 
     <div class="startbox2">
@@ -67,7 +70,8 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 		<div v-if="operation == 'remove_keys'">
 		</div>
 		<div v-if="operation == 'search_duplicates'">
-			Search result
+			<h2>Search result</h2>
+            <div class="scroll">
 			<table>
 			<tr>
 				<th>Score
@@ -108,8 +112,15 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 					${ match.p2.death_low }-${ match.p2.death_high }
 					</a> 
 					<div class="xsearchkey">${ match.p2.page }</div>
-					#} 
-				<td><a 
+					#}
+                    </zzza>
+                </td>
+                <td>
+                <template v-if="!match.p1.iid || !match.p2.iid">
+                    <span style="color:red">{{ _("Missing iid values") }}</span>
+                </template>
+                <template v-else>
+				    <a
 						target=_blank 
 						v-bind:href="'/dupsearch/compare?iid1=' + match.p1.iid + '&iid2=' + match.p2.iid +
 						'&batch_id1=' + batch1.id + '&batch_id2=' + batch2.id +
@@ -117,8 +128,8 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 						"
 						class="plink"
 					>{{ _("Compare") }}
-					</a>
-				<td><a 
+					</a><br>
+                    <a 
 						target=_blank 
 						v-bind:href="'/dupsearch/compare2?iid1=' + match.p1.iid + '&iid2=' + match.p2.iid +
 						'&batch_id1=' + batch1.id + '&batch_id2=' + batch2.id +
@@ -127,14 +138,17 @@ td.matchvector:hover ~ td > div.searchkey { display: inline; }
 						class="plink"
 					>{{ _("Compare2") }}
 					</a>
+                </template>
+                </td>
 				<td><span v-if="match.p1.name == match.p2.name">Same name</span>
-				<td><span v-if="match.p1.id == match.p2.id">Same ID</span>
+				    <span v-if="match.p1.id == match.p2.id">Same ID</span>
+                </td>
 			</tr>
 			</table>
+            </div>
 			${ matches.length } matches
 		</div>
 	</div>
-
 
 </div>
 

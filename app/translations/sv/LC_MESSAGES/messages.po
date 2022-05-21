@@ -1715,8 +1715,8 @@ msgid "File"
 msgstr "Filen"
 
 #: bp/dupsearch/templates/dupsearch.html:27
-msgid "Has searchkeys"
-msgstr "Har sök information"
+msgid "Has search keys"
+msgstr "Har sök info"
 
 #: bp/dupsearch/templates/dupsearch.html:28
 msgid "Search in"
