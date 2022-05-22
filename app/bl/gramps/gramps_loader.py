@@ -316,6 +316,7 @@ def xml_to_stkbase(batch):  # :Root):
     handler.handle_events()
     handler.handle_people() # With Names
     handler.handle_families()
+    handler.postprocess_notes() # Separately allocate Isotammi ID batch for URL notes.
 
     #       for k in handler.handle_to_node.keys():
     #             print (f'\t{k} –> {handler.handle_to_node[k]}')

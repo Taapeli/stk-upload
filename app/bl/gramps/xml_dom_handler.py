@@ -38,7 +38,7 @@ import threading
 from flask_babelex import _
 
 import shareds
-from bl.base import Status
+from bl.base import NodeObject, Status
 from bl.person import PersonBl, PersonWriter
 from bl.person_name import Name
 from bl.family import FamilyBl, FamilyWriter
@@ -77,6 +77,9 @@ class DOM_handler:
         self.file = os.path.basename(pathname)  # for messages
         self.progress = defaultdict(int)
         self.obj_counter = 0
+        self.notes_to_postprocess = NodeObject(uniq_id = 0)
+        self.notes_to_postprocess.notes = []
+        self.notes_to_postprocess.id = "URL"
 
     def unused_remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
@@ -241,6 +244,18 @@ class DOM_handler:
     def handle_sources(self):
         self.handle_dom_nodes("source", _("Sources"),
                               self.handle_source_list, chunk_max_size=self.TX_SIZE)
+
+    def postprocess_notes(self):
+        with shareds.driver.session() as session:
+            isotammi_id_list = IsotammiId(session, obj_name="Notes")
+            isotammi_id_list.get_batch(iid_count=len(self.notes_to_postprocess.notes))
+            session.write_transaction(self.handle_postprocessed_note_list,
+                                        nodes=self.notes_to_postprocess,
+                                        iids=isotammi_id_list)
+        self.notes_to_postprocess.notes = []
+
+    def handle_postprocessed_note_list(self, tx, nodes, iids):
+            self.dataservice.ds_save_note_list(tx, nodes, batch_id=self.batch.id, iids=iids)
 
     def handle_citations_list(self, tx, nodes, iids):
         for citation in nodes:
@@ -659,8 +674,10 @@ class DOM_handler:
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
                 if n.url:
-                    print(f"##TODO: {p.id}: ignored url {n.url}")
-                    #p.notes.append(n)
+##                    print(f"##TODO: {p.id}: ignored url {n.url}")
+                    print(f"##debug: {p.id}: url to postprocess {n.url}")
+                    self.notes_to_postprocess.notes.append(n)
+##                    p.notes.append(n)
             # Not used
             #             for person_parentin in person.getElementsByTagName('parentin'):
             #                 if person_parentin.hasAttribute("hlink"):
@@ -781,8 +798,10 @@ class DOM_handler:
                 n.type = placeobj_url.getAttribute("type")
                 n.text = placeobj_url.getAttribute("description")
                 if n.url:
-                    print(f"##TODO: {pl.id}: ignored url {n.url}")
-                    #pl.notes.append(n)
+##                    print(f"##TODO: {pl.id}: ignored url {n.url}")
+                    print(f"##debug: {pl.id}: url to postprocess {n.url}")
+                    self.notes_to_postprocess.notes.append(n)
+##                    pl.notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName("placeref"):
                 # Traverse links to surrounding (upper) places
@@ -852,8 +871,10 @@ class DOM_handler:
                 n.type = repository_url.getAttribute("type")
                 n.text = repository_url.getAttribute("description")
                 if n.url:
-                    print(f"##TODO: {r.id}: ignored url {n.url}")
-                    #r.notes.append(n)
+##                    print(f"##TODO: {r.id}: ignored url {n.url}")
+                    print(f"##debug: {r.id}: url to postprocess {n.url}")
+                    self.notes_to_postprocess.notes.append(n)
+##                    r.notes.append(n)
 
             self.dataservice.ds_save_repository(tx, r, self.batch.id, iids)
             self.complete(r)
