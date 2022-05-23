@@ -77,9 +77,10 @@ class DOM_handler:
         self.file = os.path.basename(pathname)  # for messages
         self.progress = defaultdict(int)
         self.obj_counter = 0
-        self.notes_to_postprocess = NodeObject(uniq_id = 0)
-        self.notes_to_postprocess.notes = []
-        self.notes_to_postprocess.id = "URL"
+        self.noterefs_later = []    # NodeObjects with obj.notes to be saved later
+        # self.notes_to_postprocess = NodeObject(uniq_id = 0)
+        # self.notes_to_postprocess.notes = []
+        # self.notes_to_postprocess.id = "URL"
 
     def unused_remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
@@ -117,7 +118,7 @@ class DOM_handler:
         self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
-    def unused_save_and_link_handle2(self, tx, obj, **kwargs):
+    def obsolete_save_and_link_handle2(self, tx, obj, **kwargs):
         """Save object and store its identifiers in the dictionary by handle.
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
@@ -126,8 +127,19 @@ class DOM_handler:
         self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
-    def complete(self, obj):
+    def complete(self, obj:NodeObject, notes_later = None):
+        """ Complete object saving. """
+        # 1. Store handle to iid, uniq_id conversion
         self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
+        # 2. Note references to be processed later
+        if notes_later:
+            # Create referencing object stub with important parameters
+            parent = NodeObject(obj.uniq_id)
+            parent.id = obj.id
+            parent.notes = notes_later # List of Notes objects
+            self.noterefs_later.append(parent)
+
+        # 3. Progress bar
         self.update_progress(obj.__class__.__name__)
 
     # ---------------------   XML subtree handlers   --------------------------
@@ -193,13 +205,13 @@ class DOM_handler:
         counter = 0
     
         with shareds.driver.session() as session:
-            isotammi_id_list = IsotammiId(session, obj_name=title)
+            iid_generator = IsotammiId(session, obj_name=title)
             for nodes_chunk in get_next(dom_nodes, chunk_max_size):
                 chunk_size = len(nodes_chunk)
-                isotammi_id_list.get_batch(iid_count=chunk_size)
+                iid_generator.get_batch(iid_count=chunk_size)
                 session.write_transaction(transaction_function, 
                                           nodes=nodes_chunk,
-                                          iids=isotammi_id_list)
+                                          iids=iid_generator)
                 counter += chunk_size
                 
         self.blog.log_event(
@@ -247,15 +259,22 @@ class DOM_handler:
 
     def postprocess_notes(self):
         with shareds.driver.session() as session:
-            isotammi_id_list = IsotammiId(session, obj_name="Notes")
-            isotammi_id_list.get_batch(iid_count=len(self.notes_to_postprocess.notes))
-            session.write_transaction(self.handle_postprocessed_note_list,
-                                        nodes=self.notes_to_postprocess,
-                                        iids=isotammi_id_list)
-        self.notes_to_postprocess.notes = []
+            # List self.noterefs_later has obj.notes[] referenced from parent
+            total_notes = 0
+            for obj in self.noterefs_later:
+                total_notes += len(obj.notes)
+            print(f"DOM_handler.postprocess_notes: {total_notes} "\
+                  f"Notes for {len(self.noterefs_later)} objects")
 
-    def handle_postprocessed_note_list(self, tx, nodes, iids):
-            self.dataservice.ds_save_note_list(tx, nodes, batch_id=self.batch.id, iids=iids)
+            iid_generator = IsotammiId(session, obj_name="Notes")
+            iid_generator.get_batch(total_notes)
+            for parent in self.noterefs_later:
+                session.write_transaction(self.handle_postprocessed_note_refs,
+                                          parent, iid_generator)
+        self.noterefs_later = []
+
+    def handle_postprocessed_note_refs(self, tx, parent, iids):
+            self.dataservice.ds_save_note_list(tx, parent, self.batch.id, iids)
 
     def handle_citations_list(self, tx, nodes, iids):
         for citation in nodes:
@@ -539,7 +558,7 @@ class DOM_handler:
             p.event_handle_roles = []
             p.note_handles = []
             p.citation_handles = []
-            # p.parentin_handles = []
+            notes_later = []
 
             for person_gender in person.getElementsByTagName("gender"):
                 if p.sex:
@@ -674,9 +693,9 @@ class DOM_handler:
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
                 if n.url:
-##                    print(f"##TODO: {p.id}: ignored url {n.url}")
+##                    print(f"## {p.id}: ignored url {n.url}")
                     print(f"##debug: {p.id}: url to postprocess {n.url}")
-                    self.notes_to_postprocess.notes.append(n)
+                    notes_later.append(n)
 ##                    p.notes.append(n)
             # Not used
             #             for person_parentin in person.getElementsByTagName('parentin'):
@@ -694,7 +713,7 @@ class DOM_handler:
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
             self.dataservice.ds_save_person(tx, p, self.batch.id, iids)
-            self.complete(p)
+            self.complete(p, notes_later)
 
             # The refnames will be set for these persons
             self.person_ids.append(p.uniq_id)
@@ -707,7 +726,7 @@ class DOM_handler:
         Place handles and uniq_ids created so far. The link may use
         previous node or create a new one.
         """
-        #place_keys = {}  # place_keys[handle] = uniq_id
+        notes_later = []
         for placeobj in nodes:
 
             pl = PlaceBl()
@@ -798,9 +817,9 @@ class DOM_handler:
                 n.type = placeobj_url.getAttribute("type")
                 n.text = placeobj_url.getAttribute("description")
                 if n.url:
-##                    print(f"##TODO: {pl.id}: ignored url {n.url}")
+##                    print(f"## {pl.id}: ignored url {n.url}")
                     print(f"##debug: {pl.id}: url to postprocess {n.url}")
-                    self.notes_to_postprocess.notes.append(n)
+                    notes_later.append(n)
 ##                    pl.notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName("placeref"):
@@ -830,11 +849,12 @@ class DOM_handler:
             self.dataservice.ds_save_place(tx, pl, self.batch.id, iids, place_keys=self.place_keys)
             # The place_keys has been updated
 
-            self.complete(pl)
+            self.complete(pl, notes_later)
 
     def handle_repositories_list(self, tx, nodes, iids):
         """ Get all the repositories in the xml_tree. """
         # Print detail of each repository
+        notes_later = []
         for repository in nodes:
 
             r = Repository()
@@ -873,11 +893,11 @@ class DOM_handler:
                 if n.url:
 ##                    print(f"##TODO: {r.id}: ignored url {n.url}")
                     print(f"##debug: {r.id}: url to postprocess {n.url}")
-                    self.notes_to_postprocess.notes.append(n)
+                    notes_later.append(n)
 ##                    r.notes.append(n)
 
             self.dataservice.ds_save_repository(tx, r, self.batch.id, iids)
-            self.complete(r)
+            self.complete(r, notes_later)
 
 
     def handle_source_list(self, tx, nodes, iids):

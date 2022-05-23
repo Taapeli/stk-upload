@@ -103,7 +103,7 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
 
     if True:
         print("----------- pe.neo4j.util.run_cypher_batch -------------")
-        print("// 1. Copy to cypher console to set parameters:")
+        print("// 1. You may copy to cypher console to set parameters:")
         print(f":param username => {username!r};")
         print(f":param batch_id => {material.batch_id!r};")
         print(f":param material_type => {material.m_type!r};")
