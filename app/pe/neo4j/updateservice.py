@@ -29,7 +29,7 @@ logger = logging.getLogger("stkserver")
 from datetime import date  # , datetime
 
 from bl.base import Status, IsotammiException, NodeObject
-from bl.dates import DateRange
+from bl.dates import DateRange, DR
 from bl.person_name import Name
 from bl.place import PlaceBl
 from bl.family import FamilyBl
@@ -1124,7 +1124,7 @@ class Neo4jUpdateService(ConcreteService):
         """
         from models import lifetime
         from models.lifetime import BIRTH, DEATH, BAPTISM, BURIAL #, MARRIAGE
-        from bl.dates import DR
+        #from bl.dates import DR
         
         def sortkey(event): # sorts events so that BIRTH, DEATH, BAPTISM, BURIAL come first
             if event.eventtype in (BIRTH, DEATH):
@@ -1395,7 +1395,7 @@ class Neo4jUpdateService(ConcreteService):
         Set Family.date1 using the data in marriage Event
         Set Family.datetype and Family.date2 using the data in divorce or death Events
         """
-        from bl.dates import DateRange, DR
+        #from bl.dates import DateRange, DR
 
         dates_count = 0
         sortname_count = 0

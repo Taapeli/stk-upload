@@ -52,7 +52,7 @@ from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
 from pe.neo4j.util import IsotammiId
-from .batchlogger import LogItem
+from bl.gramps.batchlogger import LogItem
 
 
 class DOM_handler:
@@ -81,6 +81,13 @@ class DOM_handler:
         # self.notes_to_postprocess = NodeObject(uniq_id = 0)
         # self.notes_to_postprocess.notes = []
         # self.notes_to_postprocess.id = "URL"
+
+    def get_chunk(self, objs:list, amount:int):
+        """ Split list to chunks of amount. """
+        i = 0
+        while i < len(objs):
+            yield objs[i:i+amount]
+            i += amount
 
     def unused_remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
@@ -138,6 +145,7 @@ class DOM_handler:
             parent.id = obj.id
             parent.notes = notes_later # List of Notes objects
             self.noterefs_later.append(parent)
+        notes_later = []
 
         # 3. Progress bar
         self.update_progress(obj.__class__.__name__)
@@ -189,11 +197,6 @@ class DOM_handler:
 
         """ DOM-objektit pätkitään chunk_max_size-kokoisiin joukkoihin ja tarjotaan handlerille
         """
-        def get_next(objs:list, amount:int):
-            i = 0
-            while i < len(objs):
-                yield objs[i:i+amount]
-                i += amount
 
         """ 
         ---- Process DOM nodes inside transaction 
@@ -206,9 +209,9 @@ class DOM_handler:
     
         with shareds.driver.session() as session:
             iid_generator = IsotammiId(session, obj_name=title)
-            for nodes_chunk in get_next(dom_nodes, chunk_max_size):
+            for nodes_chunk in self.get_chunk(dom_nodes, chunk_max_size):
                 chunk_size = len(nodes_chunk)
-                iid_generator.get_batch(iid_count=chunk_size)
+                iid_generator.get_batch(chunk_size)
                 session.write_transaction(transaction_function, 
                                           nodes=nodes_chunk,
                                           iids=iid_generator)
@@ -258,6 +261,8 @@ class DOM_handler:
                               self.handle_source_list, chunk_max_size=self.TX_SIZE)
 
     def postprocess_notes(self):
+        """ Process url notes using self.noterefs_later parent object list. 
+        """
         with shareds.driver.session() as session:
             # List self.noterefs_later has obj.notes[] referenced from parent
             total_notes = 0
@@ -268,12 +273,18 @@ class DOM_handler:
 
             iid_generator = IsotammiId(session, obj_name="Notes")
             iid_generator.get_batch(total_notes)
-            for parent in self.noterefs_later:
-                session.write_transaction(self.handle_postprocessed_note_refs,
-                                          parent, iid_generator)
+            # Split to chunks, chunk_max_size=self.TX_SIZE
+            for nodes_chunk in self.get_chunk(self.noterefs_later, self.TX_SIZE):
+                print(f"DOM_handler.postprocess_notes: {len(nodes_chunk)} chink")
+                for parent in nodes_chunk:
+                    session.write_transaction(self.handle_postprocessed_notes,
+                                              parent, iid_generator)
         self.noterefs_later = []
 
-    def handle_postprocessed_note_refs(self, tx, parent, iids):
+    def handle_postprocessed_notes(self, tx, parent, iids):
+        if parent.notes:
+            note_msg = [note.url for note in parent.notes]
+            print(f"handle_postprocessed_notes: {parent.id} --> {note_msg}")
             self.dataservice.ds_save_note_list(tx, parent, self.batch.id, iids)
 
     def handle_citations_list(self, tx, nodes, iids):
@@ -694,7 +705,7 @@ class DOM_handler:
                 n.text = person_url.getAttribute("description")
                 if n.url:
 ##                    print(f"## {p.id}: ignored url {n.url}")
-                    print(f"##debug: {p.id}: url to postprocess {n.url}")
+                    print(f"#handle_people_list: {p.id}: post process {n.url}")
                     notes_later.append(n)
 ##                    p.notes.append(n)
             # Not used
@@ -818,7 +829,7 @@ class DOM_handler:
                 n.text = placeobj_url.getAttribute("description")
                 if n.url:
 ##                    print(f"## {pl.id}: ignored url {n.url}")
-                    print(f"##debug: {pl.id}: url to postprocess {n.url}")
+                    print(f"#handle_place_list: {pl.id}: post process {n.url}")
                     notes_later.append(n)
 ##                    pl.notes.append(n)
 
@@ -892,7 +903,7 @@ class DOM_handler:
                 n.text = repository_url.getAttribute("description")
                 if n.url:
 ##                    print(f"##TODO: {r.id}: ignored url {n.url}")
-                    print(f"##debug: {r.id}: url to postprocess {n.url}")
+                    print(f"#handle_repositories_list: {r.id}: post process {n.url}")
                     notes_later.append(n)
 ##                    r.notes.append(n)
 
