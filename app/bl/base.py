@@ -187,7 +187,8 @@ class NodeObject:
 
         See. https://docs.python.org/3/library/uuid.html
         """
-        return uuid.uuid4().hex
+        return None
+        #return uuid.uuid4().hex
 
     def uuid_short(self):
         """ Display uuid (or iid) in short form. 

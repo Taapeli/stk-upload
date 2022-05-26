@@ -455,7 +455,7 @@ class Neo4jUpdateService(ConcreteService):
             if isinstance(note, Note):
                 if not note.id:
                     n_cnt += 1
-                    note.id = f"N{n_cnt}-{parent.id}"
+                    note.id = f"N{n_cnt}.{parent.id}"
                 self.ds_save_note(tx, note, batch_id, iids, parent.uniq_id)
             else:
                 raise AttributeError("note.save_note_list: Argument not a Note")

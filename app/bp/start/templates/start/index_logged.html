@@ -105,8 +105,8 @@ div.strow2 {
                                         >{{ _(m.material_type) }}</button>
                                 </div>
                                 <div class="strow2">
-        {% if m.material_type == "Family Tree" %}{{ _('Approved Isotammi tree') }}<br/>
-        {% endif -%}
+{#      {% if m.material_type == "Family Tree" %}{{ _('Approved Isotammi tree') }}<br/>{% endif -%}
+#}
                                     {{ m.count }} {{ _('approved batches') }}
                                 </div>
     {% endfor %}
