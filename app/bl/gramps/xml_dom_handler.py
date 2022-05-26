@@ -134,18 +134,17 @@ class DOM_handler:
         self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
-    def complete(self, obj:NodeObject, notes_later = None):
+    def complete(self, obj:NodeObject, url_notes = None):
         """ Complete object saving. """
         # 1. Store handle to iid, uniq_id conversion
         self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
-        # 2. Note references to be processed later
-        if notes_later:
+        # 2. Note references from url field must be processed later
+        if url_notes:
             # Create referencing object stub with important parameters
             parent = NodeObject(obj.uniq_id)
             parent.id = obj.id
-            parent.notes = notes_later # List of Notes objects
+            parent.notes = url_notes # List of Notes objects
             self.noterefs_later.append(parent)
-        notes_later = []
 
         # 3. Progress bar
         self.update_progress(obj.__class__.__name__)
@@ -561,6 +560,7 @@ class DOM_handler:
 
     def handle_people_list(self, tx, nodes, iids):
         for person in nodes:
+            url_notes = []
             name_order = 0
 
             p = PersonBl()
@@ -569,7 +569,6 @@ class DOM_handler:
             p.event_handle_roles = []
             p.note_handles = []
             p.citation_handles = []
-            notes_later = []
 
             for person_gender in person.getElementsByTagName("gender"):
                 if p.sex:
@@ -704,10 +703,9 @@ class DOM_handler:
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
                 if n.url:
-##                    print(f"## {p.id}: ignored url {n.url}")
                     print(f"#handle_people_list: {p.id}: post process {n.url}")
-                    notes_later.append(n)
-##                    p.notes.append(n)
+                    url_notes.append(n)
+
             # Not used
             #             for person_parentin in person.getElementsByTagName('parentin'):
             #                 if person_parentin.hasAttribute("hlink"):
@@ -724,7 +722,7 @@ class DOM_handler:
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
             self.dataservice.ds_save_person(tx, p, self.batch.id, iids)
-            self.complete(p, notes_later)
+            self.complete(p, url_notes)
 
             # The refnames will be set for these persons
             self.person_ids.append(p.uniq_id)
@@ -737,8 +735,8 @@ class DOM_handler:
         Place handles and uniq_ids created so far. The link may use
         previous node or create a new one.
         """
-        notes_later = []
         for placeobj in nodes:
+            url_notes = []
 
             pl = PlaceBl()
             pl.note_handles = []
@@ -828,10 +826,8 @@ class DOM_handler:
                 n.type = placeobj_url.getAttribute("type")
                 n.text = placeobj_url.getAttribute("description")
                 if n.url:
-##                    print(f"## {pl.id}: ignored url {n.url}")
                     print(f"#handle_place_list: {pl.id}: post process {n.url}")
-                    notes_later.append(n)
-##                    pl.notes.append(n)
+                    url_notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName("placeref"):
                 # Traverse links to surrounding (upper) places
@@ -860,13 +856,13 @@ class DOM_handler:
             self.dataservice.ds_save_place(tx, pl, self.batch.id, iids, place_keys=self.place_keys)
             # The place_keys has been updated
 
-            self.complete(pl, notes_later)
+            self.complete(pl, url_notes)
 
     def handle_repositories_list(self, tx, nodes, iids):
         """ Get all the repositories in the xml_tree. """
-        # Print detail of each repository
-        notes_later = []
+
         for repository in nodes:
+            url_notes = []
 
             r = Repository()
             # Extract handle, change and id
@@ -902,13 +898,11 @@ class DOM_handler:
                 n.type = repository_url.getAttribute("type")
                 n.text = repository_url.getAttribute("description")
                 if n.url:
-##                    print(f"##TODO: {r.id}: ignored url {n.url}")
                     print(f"#handle_repositories_list: {r.id}: post process {n.url}")
-                    notes_later.append(n)
-##                    r.notes.append(n)
+                    url_notes.append(n)
 
             self.dataservice.ds_save_repository(tx, r, self.batch.id, iids)
-            self.complete(r, notes_later)
+            self.complete(r, url_notes)
 
 
     def handle_source_list(self, tx, nodes, iids):
