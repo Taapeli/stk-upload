@@ -842,7 +842,7 @@ def json_get_event():
 @bp.route("/scene/update/event/<iid>", methods=["POST"])
 @login_required
 @roles_accepted("audit")
-def json_update_event():
+def json_update_event(iid):
     """Update Event"""
     t0 = time.time()
     try:
@@ -855,7 +855,6 @@ def json_update_event():
             # print(f'got request data: {args}')
         u_context = UserContext()
 
-        # writeservice = get_dataservice("update")
         with EventWriter("update", u_context) as service:
             rec = service.update_event(iid, args)
         if rec.get("status") != Status.OK:

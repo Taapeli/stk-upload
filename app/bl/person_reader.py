@@ -244,45 +244,12 @@ class PersonReaderTx(DataService):
                     "statustext": _("Requested person not found"),
                 }
             return res
-        # Got dictionary: Status and following objects:
-        #     - person_node, root, name_nodes, event_node_roles, cause_of_death, families
-        #     - - root = {material, root,user, batch_id}
-        #     - - event_node_roles = [[Event node, role], ...]
-        #     - - cause_of_death = Event node
-        #     - - families = [{family_rel, family_role, family_node,
-        #                      family_events, relation_type, family_members}, ...]
-        #     - - - family_events = [event_node]
-        #     - - - family_members = [{member_node, name_node, parental_role, birth_node}, ...]
-        #     - - - marriage_date = {datetype, date1, date2}
 
         # 1-2. Person, names and events
 
-# KKu: moved to readservice_tx, except self._catalog calls and root_dict
-#         root_dict = res.get("root")  # {material, root_user, batch_id}
-#         person = PersonBl.from_node(res.get("person_node"))
-#         person.families_as_parent = []
-#         person.families_as_child = []
-#         person.citation_ref = []
-#         person.note_ref = []
-#         person.media_ref = []
-#         self._catalog(person)
-# 
-#         # Info about linked Root node
-#         for name_node in res.get("name_nodes"):
-#             name = Name.from_node(name_node)
-#             person.names.append(name)
-#             self._catalog(name)
-#         # Events
-#         for event_node, event_role in res.get("event_node_roles"):
-#             event = EventBl.from_node(event_node)
-#             event.role = event_role
-#             event.citation_ref = []
-#             person.events.append(event)
-#             self._catalog(event)
-#         node = res.get("cause_of_death")
-#         if node:
-#             person.cause_of_death = EventBl.from_node(node)
-#             self._catalog(person.cause_of_death)
+        # KKu: Collecting Person data except self._catalog calls and root_dict
+        #      see -> Neo4jReadServiceTx.tx_get_person_by_iid
+
         person = res['person']
         root_dict = res.get("root")  # {material, root_user, batch_id}
         self._catalog(person)
@@ -302,43 +269,9 @@ class PersonReaderTx(DataService):
             )
             return res
 
-# KKu: moved to readservice_tx:
-#         for f in res.get("families"):
-#             family = FamilyBl.from_node(f["family_node"])
-#             family_role = f["family_role"]  # Main person's role in family
-#             self._catalog(family)
-#             for event_node in f["family_events"]:
-#                 event = EventBl.from_node(event_node)
-#                 if event.type == "Marriage":
-#                     family.marriage_dates = event.dates
-#                 family.events.append(event)
-#                 self._catalog(event)
-#             for m in f["family_members"]:
-#                 # Family member
-#                 member = PersonBl.from_node(m["member_node"])
-#                 self._catsalog(member)
-#                 name_node = m["name_node"]
-#                 if name_node:
-#                     name = Name.from_node(name_node)
-#                     member.names.append(name)
-#                     self._catalog(name)
-#                 event_node = m["birth_node"]
-#                 if event_node:
-#                     event = EventBl.from_node(event_node)
-#                     member.birth_date = event.dates
-#                     member.dates = event.dates
-#                 else:
-#                     member.dates = DateRange()
-#                     # self._catalog(event)
-#                 # Add member to family
-#                 parental_role = m["parental_role"]  # Family member's role
-#                 if parental_role == "father":
-#                     family.father = member
-#                 elif parental_role == "mother":
-#                     family.mother = member
-#                 else:  # child
-#                     family.children.append(member)
-# 
+        # KKu: Collecting Family data
+        #      see -> Neo4jReadServiceTx.tx_get_person_by_iid
+
         families = res['families']
         for family in families:
             self._catalog(family)
@@ -372,14 +305,8 @@ class PersonReaderTx(DataService):
         place_references = res.get("place_references", {})
         # Got dictionary {object_id:  (place_node, (name_nodes))
 
-# KKu: moved to readservice_tx:
-#         # Convert nodes and store them as PlaceBl objects with PlaceNames included
-#         for pl_node, pn_nodes in place_references.values():
-#             place = PlaceBl.from_node(pl_node)
-#             for pn_node in pn_nodes:
-#                 name = PlaceName.from_node(pn_node)
-#                 place.names.append(name)
-#             self._catalog(place)
+        # KKu: Converting nodes to PlaceBl objects with PlaceNames included
+        #      see -> Neo4jReadServiceTx.tx_get_person_by_iid
 
         for place in res['places']:
             self._catalog(place)

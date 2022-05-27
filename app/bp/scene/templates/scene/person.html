@@ -184,20 +184,23 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
     {% endif %}
                     </td>
                 </tr>
-    {% if not (person.death_low - person.birth_high) < 0 %}
+    {% if person.death_dates %}
+        {% if not (person.death_low - person.birth_high) < 0 %}
                <tr>
-                    <td class="ColumnAttribute">{{ _("Age at death") }}</td>
+                    <td class="ColumnAttribute" title="{{person.death_dates}}">
+                        {{ _("Age at death") }}</td>
                     <td class="Value">
-       {% if person.death_high != person.death_low or
+            {% if person.death_high != person.death_low or
                       person.birth_high != person.birth_low %}
                         {{ _('at least') }}
-       {% else %}
+            {% else %}
                         {{ _('about') }}
-       {% endif -%}
+            {% endif -%}
                         {{person.death_low - person.birth_high}}
                         {{ _('years') }}
                     </td>
                 </tr>
+        {% endif %}
     {% endif %}
     {% if person.confidence > '' %}<tr>
                     <td class="ColumnAttribute">{{ _("Confidence of data") }}</td>

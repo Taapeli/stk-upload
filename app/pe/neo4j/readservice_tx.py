@@ -354,11 +354,17 @@ class Neo4jReadServiceTx(ConcreteService):
             person.names.append(name)
             #self._catalog(name)
         # Events
+        observed_death = None
         for event_node, event_role in res.get("event_node_roles"):
             event = EventBl_from_node(event_node)
             event.role = event_role
             event.citation_ref = []
             person.events.append(event)
+            if event.type == "Death" or \
+                    (observed_death is None and \
+                     event.type == "Burial" and event.role == "Primary"):
+                observed_death = event
+                print(f"#tx_get_person_by_iid: {event.type} observed {event.dates}")
             #self._catalog(event)
         node = res.get("cause_of_death")
         if node:
@@ -366,7 +372,8 @@ class Neo4jReadServiceTx(ConcreteService):
             #self._catalog(person.cause_of_death)
         else:
             person.cause_of_death = None
-            
+
+        person.death_dates = observed_death.dates if observed_death else None
         res['person'] = person
         return res
 

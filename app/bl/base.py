@@ -122,8 +122,8 @@ class NodeObject:
         #         self.uuid = uniq_id
 
     def __str__(self):
-        uuid = self.uuid if self.uuid else "-"
-        return f'(NodeObject {uuid}/{self.uniq_id}/{self.id} date {self.dates})"'
+        #uuid = self.uuid if self.uuid else "-"
+        return f'(NodeObject {self.iid}/{self.uniq_id}/{self.id} date {self.dates})"'
 
     def timestamp_str(self):
         """ My timestamp to display format. """
@@ -183,7 +183,7 @@ class NodeObject:
 
     @staticmethod
     def newUuid():
-        """Generates a new uuid key.
+        """Generates a new uuid key. DON'T!
 
         See. https://docs.python.org/3/library/uuid.html
         """
