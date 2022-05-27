@@ -325,9 +325,18 @@ class Root(NodeObject):
         for rec in result:
             yield dict(rec.get("b"))
 
-    # @staticmethod # def get_batch_pallette(username):
-    #     """ Get my batches and batch collections.
-    #  -- Ei toimi näin, hyväksyttyjä materiaaleja ei voi palauttaa Root-solmuina
+    @staticmethod
+    def count_my_batches(username:str):
+        """ Returns user's batches, which are in Candidate state. """
+        ret = []
+        with shareds.driver.session() as session:
+            result = session.run(CypherRoot.count_my_all_batches, user=username)
+            for record in result: # material_type, root.state as state, count(root) as count
+                material_type = record["material_type"]
+                state = record["state"]
+                count = record["count"]
+                ret.append({"material_type":material_type, "state":state, "count":count})
+        return ret
 
     @staticmethod
     def get_my_batches(username:str, material:Material):
@@ -390,7 +399,7 @@ class Root(NodeObject):
         titles = []
         user_data = {}
         result = shareds.driver.session().run(
-            CypherRoot.get_batches, user=user, status=State.ROOT_CANDIDATE        )
+            CypherRoot.get_batches, user=user, status=State.ROOT_CANDIDATE)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'}
             #    properties={ // 'mediapath': '/home/jm/my_own.media',
