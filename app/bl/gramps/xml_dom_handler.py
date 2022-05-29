@@ -82,12 +82,13 @@ class DOM_handler:
         # self.notes_to_postprocess.notes = []
         # self.notes_to_postprocess.id = "URL"
 
-    def get_chunk(self, objs:list, amount:int):
+    def get_chunk(self, objs:list, amount):
         """ Split list to chunks of amount. """
         i = 0
+        i_amount = int(amount)
         while i < len(objs):
-            yield objs[i:i+amount]
-            i += amount
+            yield objs[i:i+i_amount]
+            i += i_amount
 
     def unused_remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
@@ -211,6 +212,7 @@ class DOM_handler:
             for nodes_chunk in self.get_chunk(dom_nodes, chunk_max_size):
                 chunk_size = len(nodes_chunk)
                 iid_generator.get_batch(chunk_size)
+                print(f"#handle_dom_nodes: new tx for {chunk_size} {iid_generator.iid_type} nodes")
                 session.write_transaction(transaction_function, 
                                           nodes=nodes_chunk,
                                           iids=iid_generator)
@@ -244,7 +246,8 @@ class DOM_handler:
 
     def handle_people(self):
         self.handle_dom_nodes("person", _("People"),
-                              self.handle_people_list, chunk_max_size=self.TX_SIZE)
+                              self.handle_people_list, 
+                              chunk_max_size=self.TX_SIZE/2)
 
     def handle_places(self):
         self.place_keys = {}
@@ -262,6 +265,12 @@ class DOM_handler:
     def postprocess_notes(self):
         """ Process url notes using self.noterefs_later parent object list. 
         """
+        title="Notes(url)"
+        message = f"{title}: {len(self.noterefs_later)} kpl"
+        print(f"***** {message} *****")
+        t0 = time.time()
+        counter = 0
+        
         with shareds.driver.session() as session:
             # List self.noterefs_later has obj.notes[] referenced from parent
             total_notes = 0
@@ -278,13 +287,20 @@ class DOM_handler:
                 for parent in nodes_chunk:
                     session.write_transaction(self.handle_postprocessed_notes,
                                               parent, iid_generator)
+                    counter += parent.notes
+
         self.noterefs_later = []
+        self.blog.log_event(
+            {"title": title, "count": counter, "elapsed": time.time() - t0}
+        )
 
     def handle_postprocessed_notes(self, tx, parent, iids):
-        if parent.notes:
-            note_msg = [note.url for note in parent.notes]
-            print(f"handle_postprocessed_notes: {parent.id} --> {note_msg}")
-            self.dataservice.ds_save_note_list(tx, parent, self.batch.id, iids)
+        if not parent.notes:
+            return
+
+        note_msg = [note.url for note in parent.notes]
+        print(f"handle_postprocessed_notes: {parent.id} --> {note_msg}")
+        self.dataservice.ds_save_note_list(tx, parent, self.batch.id, iids)
 
     def handle_citations_list(self, tx, nodes, iids):
         for citation in nodes:
@@ -703,7 +719,7 @@ class DOM_handler:
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
                 if n.url:
-                    #print(f"#handle_people_list: {p.id}: post process {n.url}")
+                    print(f"\t#handle_people_list: {p.id}: post process {n.url}")
                     url_notes.append(n)
 
             # Not used
@@ -721,6 +737,7 @@ class DOM_handler:
                     p.citation_handles.append(person_citationref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
+            print(f"\t# Person {p.id} {p.names[0].firstname} {p.names[0].surname}")
             self.dataservice.ds_save_person(tx, p, self.batch.id, iids)
             self.complete(p, url_notes)
 
@@ -826,7 +843,7 @@ class DOM_handler:
                 n.type = placeobj_url.getAttribute("type")
                 n.text = placeobj_url.getAttribute("description")
                 if n.url:
-                    #print(f"#handle_place_list: {pl.id}: post process {n.url}")
+                    print(f"\t#handle_place_list: {pl.id}: post process {n.url}")
                     url_notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName("placeref"):
@@ -898,7 +915,7 @@ class DOM_handler:
                 n.type = repository_url.getAttribute("type")
                 n.text = repository_url.getAttribute("description")
                 if n.url:
-                    #print(f"#handle_repositories_list: {r.id}: post process {n.url}")
+                    print(f"\t#handle_repositories_list: {r.id}: post process {n.url}")
                     url_notes.append(n)
 
             self.dataservice.ds_save_repository(tx, r, self.batch.id, iids)

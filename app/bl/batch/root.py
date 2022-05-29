@@ -117,7 +117,7 @@ class Root(NodeObject):
         self.xmlname = ""
         self.metaname = ""
         self.logname = ""
-        #self.db_schema = None   # Rejected idea: save Db schema version of this batch
+        self.db_schema = None   # Db schema version of this batch
 
     def __str__(self):
         return f"Root {self.user} / {self.id} {self.material_type}({self.state})"
@@ -195,7 +195,7 @@ class Root(NodeObject):
             "xmlname": self.xmlname,
             "metaname": self.metaname,
             "logname": self.logname,
-            #"db_schema": self.db_schema,
+            "db_schema": self.db_schema,
         }
 
         with RootUpdater("update", tx=tx) as bl_service:
@@ -223,7 +223,7 @@ class Root(NodeObject):
         obj.xmlname = node.get("xmlname", "")
         obj.metaname = node.get("metaname", "")
         obj.logname = node.get("logname", "")
-        #obj.db_schema = node.get("db_schema", "")
+        obj.db_schema = node.get("db_schema", "")
         return obj
 
     @staticmethod
