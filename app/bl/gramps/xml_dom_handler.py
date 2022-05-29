@@ -287,7 +287,7 @@ class DOM_handler:
                 for parent in nodes_chunk:
                     session.write_transaction(self.handle_postprocessed_notes,
                                               parent, iid_generator)
-                    counter += parent.notes
+                    counter += len(parent.notes)
 
         self.noterefs_later = []
         self.blog.log_event(

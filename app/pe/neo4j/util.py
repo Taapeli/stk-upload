@@ -160,7 +160,8 @@ class IsotammiId:
             return f'{id_str[: max(1, len(id_str) - 4)]}-{id_str[max(1, len(id_str) - 4) :]}'
 
         if self.n_iid > self.max_iid:
-            raise IsotammiException("Whole batch of allocated Isotammi IDs already used.")
+            raise IsotammiException("Whole chunk of allocated Isotammi IDs already used."
+                                    f" {self.n_iid} > {self.max_iid}")
 
         iid = format_iid(self.iid_type + base32.encode(self.n_iid, checksum=False))
         self.n_iid += 1
