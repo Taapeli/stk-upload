@@ -15,6 +15,8 @@ u { color: DarkKhaki; text-decoration: none; }
 #citTbl td, #notTbl td { border: 2px solid brown; }
 #tableNames { border: solid 1pt DarkGreen; } /* gray; } */
 #tableNames td { padding-right: 1ex; }
+td.ColumnAttr {width: 12em;}
+td.ColumnAttribute {width: 10em;}
 td.ColumnAttribute select { 
     background-color: white;
     border: solid 1pt #91b991; 
@@ -116,7 +118,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
         <div id="summaryarea">
             <table>
                 <tr>
-                    <td class="ColumnAttribute" style="padding-bottom: .5em;">{{ _("Identifiers") }}</td>
+                    <td class="ColumnAttr" style="padding-bottom: .5em;">{{ _("Identifiers") }}</td>
                     <td class="Value TwoRows">
                         {{macro.all_obj_ids(person)}}
                         / <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
@@ -169,7 +171,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                 </td></tr>
 
                 {% if person.sex %}<tr>
-                    <td class="ColumnAttribute">{{ _("Gender") }}</td>
+                    <td class="ColumnAttr">{{ _("Gender") }}</td>
                     <td class="Value">{{ person.sex_symbol() }} {{ person.sex_str() }}</td>
                 </tr>
     {% endif %}
@@ -177,17 +179,17 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                     <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(person.priv) }}</td>
                 </tr>
     {% endif %}
-                <tr><td class="ColumnAttribute">{{ _('Possible years') }}</td>
+    {% if person.death_dates %}{# dead person #}
+               <tr><td class="ColumnAttr">{{ _('Possible years') }}</td>
                     <td class="Value">{{ macro.lifetimes(person) }}
     {% if person.death_high >= last_year_allowed %}
                         <span style="color:red">{{ _('confidential') }}!</span>
     {% endif %}
                     </td>
-                </tr>
-    {% if person.death_dates %}
+               </tr>
         {% if not (person.death_low - person.birth_high) < 0 %}
                <tr>
-                    <td class="ColumnAttribute" title="{{person.death_dates}}">
+                    <td class="ColumnAttr" title="{{person.death_dates}}">
                         {{ _("Age at death") }}</td>
                     <td class="Value">
             {% if person.death_high != person.death_low or
@@ -196,14 +198,26 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
             {% else %}
                         {{ _('about') }}
             {% endif -%}
-                        {{person.death_low - person.birth_high}}
-                        {{ _('years') }}
+                        {{person.death_low - person.birth_high}} {{ _('years') }}
+                    </td>
+               </tr>
+        {% endif %}
+    {% else %}{# possibly living #}
+        {% if not (now - person.birth_high) < 0 %}
+               <tr>
+                    <td class="ColumnAttr">{{ _("Age this year") }}</td>
+                    <td class="Value">
+            {% if person.birth_high != person.birth_low %}
+                        {{ _('at least') }}
+            {# else % }{{ _('about') }} #}
+            {% endif -%}
+                        {{now - person.birth_high}} {{ _('years') }}
                     </td>
                 </tr>
         {% endif %}
     {% endif %}
     {% if person.confidence > '' %}<tr>
-                    <td class="ColumnAttribute">{{ _("Confidence of data") }}</td>
+                    <td class="ColumnAttr">{{ _("Confidence of data") }}</td>
                     <td class="Value">{{ macro.stars(person.confidence|float) }}</td>
                 </tr>
     {% endif %}

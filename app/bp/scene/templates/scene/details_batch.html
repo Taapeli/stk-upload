@@ -119,9 +119,9 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
             {% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
                 <p><a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a></p>
             {% endif %}   
-            {# if batch.db_schema % }   
+            {% if batch.db_schema %}   
                 <div style="font-size:6pt; text-align:end; color:gray;">Db version {{batch.db_schema}}</div>
-            { % endif #}   
+            {% endif %}   
             </div>
             
             <div class="sc-startbox">

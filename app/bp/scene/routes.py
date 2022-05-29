@@ -492,6 +492,7 @@ def show_person(iid=None, fanchart=False):
     - iid=     persons iid or uuid
     - fanchart= by default family details shown, fanchart navigation uses this
     """
+    from datetime import date
     t0 = time.time()
     if not iid:
         iid = request.args.get("iid")
@@ -530,6 +531,7 @@ def show_person(iid=None, fanchart=False):
         menuno=12,
         debug=dbg,
         last_year_allowed=last_year_allowed,
+        now=date.today().year,
         elapsed=time.time() - t0,
         user_context=u_context,
         may_edit=may_edit,
