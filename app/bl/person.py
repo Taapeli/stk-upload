@@ -339,23 +339,6 @@ class PersonBl(Person):
         Constructor creates a new PersonBl intance.
         """
         Person.__init__(self)
-        self.user = None  # Researcher batch owner, if any
-        self.names = []  # models.gen.person_name.Name
-
+        self.names = []
         self.events = []  # bl.event.EventBl
-        self.notes = []  #
-
-
-    # @staticmethod --> bl.person.PersonWriter.update_person_confidences
-    # def update_person_confidences(tx, dataservice, person_ids: list):
-    #     """Sets a quality rating for given list of Person.uniq_ids.
-
-    def remove_privacy_limit_from_families(self):
-        """Clear privacy limitations from self.person's families.
-
-        Origin from models.person_reader
-        """
-        for family in self.families_as_child:
-            family.remove_privacy_limits()
-        for family in self.families_as_parent:
-            family.remove_privacy_limits()
+        self.notes = []
