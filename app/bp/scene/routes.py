@@ -1407,12 +1407,14 @@ def batch_details():
 
         res = create_stats_data(batch_id, current_user)
         # { "batch", "objects", "events" }
+        batch = res["batch"]
         elapsed = time.time() - t0
         stk_logger(user_context, 
                    f"-> bp.gramps.routes.batch_details e={elapsed:.3f}")
         return render_template(
            "/scene/details_batch.html",
-           batch=res["batch"],
+           batch=batch,
+           state_n=batch.state_number(),
            user_context=user_context,
            object_stats=res["objects"],
            event_stats=res["events"],

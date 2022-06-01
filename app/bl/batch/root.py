@@ -139,6 +139,23 @@ class Root(NodeObject):
         except Exception:
             return ""
 
+    def state_number(self):
+        """ Converts state value to ordinal number enabling comparison.
+        """
+        conv = {
+            State.ROOT_UNKNOWN: 0,
+            State.FILE_LOADING: 5,
+            State.ROOT_STORING: 10,
+            State.ROOT_CANDIDATE: 20,
+            State.ROOT_AUDIT_REQUESTED: 30,
+            State.ROOT_AUDITING: 40,
+            # "Audit done": 50,
+            State.ROOT_ACCEPTED: 60,
+            State.ROOT_REJECTED: 61,
+            # "Merged": 70,
+            }
+        return conv.get(self.state, 0)
+
     def handle_suffix(self) -> str:
         """ Shortened batch id "2022-05-07.001" -> "2205071" for NodeObject.handle. """
         import re
