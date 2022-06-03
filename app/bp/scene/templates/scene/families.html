@@ -115,24 +115,28 @@ th span.man-man, th span.wife-wife { color: #020299;}
     {% for f in families %}
         <tr>
             <td class="ColumnFamily">
-                <a href="/scene/family?uuid={{f.uuid}}" class="inlink"
+                <a href="/family/{{f.iid}}" class="inlink"
                    title="{{ _('Go to family page') }}">&rarr; {{f.rel_type|transl('marr')}}</a>
         {% if f.marriage_place %} {{f.marriage_place}} {% endif -%}
         {% if f.dates %}
                 <span class="{{f.dates.calendar_css()}}">{{f.dates}}</span> 
         {% endif %}
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
-                <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
+        {% if f.iid %}
+                <span class="idno" title="Isotammi ID">{{f.iid}}</span>
+        {% else %}
+                <span class="idno" title="{{ _('Key') }}">#{{f.uniq_id}}</span>
+        {% endif %}
                 </td>
 
             <td class="ColumnSpouse">
                 <div class="man-{{user_context.order}}">&#9794;
-        {% if f.father.uuid %}
+        {% if f.father.iid %}
 				{{ macro.person_names_anon(f.father, f.father.names[0:1]) }}
         {% endif -%}
                 </div>
                 <div class="wife-{{user_context.order}}">&#9792;
-        {% if f.mother.uuid %}
+        {% if f.mother.iid %}
 				{{ macro.person_names_anon(f.mother, f.mother.names[0:1]) }}
         {% endif -%}
                 </div>

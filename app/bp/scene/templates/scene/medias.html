@@ -71,18 +71,18 @@
 {% if cnt %}
     {% for m in medias %}
         <tr>
-            <td><a href="/scene/media?uuid={{m.uuid}}" class="inlink"
+            <td><a href="/media/{{m.iid}}" class="inlink"
                    title="{{ _('Go to media page') }}">{{ m.description }}</a>
                 <br><span class="id" title="{{ _('Original ID') }}">{{m.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{m.uniq_id}}</span>
             </td>
             <td style=" margin-left: auto; margin-right: auto;">
                 <div style="text-align: center;">
-	                <a href="/scene/media?uuid={{m.uuid}}"
+	                <a href="/media/{{m.iid}}"
 	                   title="{{ _('Go to media page') }}">
 	                   <img alt="({{ _('Photo') }})" 
-	                     src="/scene/thumbnail?id={{m.uuid}}" 
-	                     title="key = {{m.uuid_short()}}"/>
+	                     src="/scene/thumbnail?id={{m.iid}}" 
+	                     title="key = {{m.iid}}"/>
 	                </a>
             </div></td>
             <td align="center">{{m.conn}}</td>

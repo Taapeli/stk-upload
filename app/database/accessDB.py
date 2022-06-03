@@ -87,16 +87,16 @@ def initialize_db():
 
         constr_list = {
             "Root":{"id"},
-            "Citation":{"uuid"},
-            "Event":{"uuid"},
-            "Family":{"uuid"},
-            "Media":{"uuid"},
-            "Note":{"uuid"},
-            "Person":{"uuid"},
-            "Place":{"uuid"},
-            "Repository":{"uuid"},
+            "Citation":{"uuid","iid"},
+            "Event":{"uuid","iid"},
+            "Family":{"uuid","iid"},
+            "Media":{"uuid","iid"},
+            "Note":{"uuid","iid"},
+            "Person":{"uuid","iid"},
+            "Place":{"uuid","iid"},
+            "Repository":{"uuid","iid"},
             "Role":{"name"},
-            "Source":{"uuid"},
+            "Source":{"uuid","iid"},
             "User":{"email", "username"}
         }
         check_constraints(constr_list)

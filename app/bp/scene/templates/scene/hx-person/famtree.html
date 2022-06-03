@@ -1,19 +1,19 @@
 {% import '/scene/macros.html' as macro with context %}
 <div class="tab-bottom">
     <div class="tab-list">
-        <a hx-get="/scene/hx-person/famtree?uuid={{person.uuid}}" class="selected"> {{ _("Families") }} </a>
-        <a hx-get="/scene/hx-person/fanchart?uuid={{person.uuid}}"> {{ _("Two-way fanchart") }} </a>
+        <a hx-get="/scene/hx-person/famtree/{{person.iid}}" class="selected"> {{ _("Families") }} </a>
+        <a hx-get="/scene/hx-person/fanchart/{{person.iid}}"> {{ _("Two-way fanchart") }} </a>
     </div>
     <div class="tab-content">
         <div class="subsection" id="families">
-            {% set myid = person.uuid %}
+            {% set myid = person.iid %}
             {% if person.families_as_child %}
             <div class="mainbox" title="{{ _('Families') }}">
                 <p>{{ _("Parents' family") }}</p>
                     {% for fam in person.families_as_child %}
                     <div class="groupbox">
                         <div class="familybox" title="{{ _('family') }} {{fam.id}}">
-                            <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
+                            <p><a href="/family/{{fam.iid}}" title="{{fam.id}}" class="inlink">
                                     {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                                 {{fam.marriage_dates}}</p>
                             <ul>
@@ -56,7 +56,7 @@
                     <div class="groupbox">
                         {% for fam in person.families_as_parent %}
                         <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-                            <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
+                            <p><a href="/family/{{fam.iid}}" title="{{fam.id}}" class="inlink">
                                     {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                                 {{fam.marriage_dates}}</p>
                             <ul>

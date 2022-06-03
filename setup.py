@@ -23,7 +23,7 @@ from setuptools import setup, find_packages
 
 setup (
        name='stk_server',
-       version='2021.1.0',
+       version='2022.1',
        packages=find_packages(),
 
        # Declare your packages' dependencies here, for eg:

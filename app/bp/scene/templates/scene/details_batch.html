@@ -41,7 +41,7 @@ tr:hover {background-color: #f5f5f5}
 .filename {overflow-wrap: anywhere;}
 #description {
     width: 245px;
-    height: 4em;
+    height: 8em;
 }
 #msg {
     color: blueviolet;
@@ -50,6 +50,23 @@ tr:hover {background-color: #f5f5f5}
 }
 #actions {padding-bottom: 2pt;}
 #actions a { color: blue; }
+
+table.plan tr, table.plan td {
+    background: none;
+    border: none;
+}
+ul#states { color:gray; padding:0; margin-top: 5pt; }
+ul#states > li {
+    display: inline;
+    border: solid gray 1pt;
+    padding: 2pt 6pt;
+    margin: 0 2pt;
+    background: cornsilk;
+    border-radius: 0 10pt 10pt 0;
+    box-shadow: 2px 2px 4px gray;
+}
+li.act { color: navy; font-weight: bold; }
+li.done {color: black;}
 </style>
 
 <script>
@@ -73,16 +90,47 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
         <h2>{{ _('Statistics for Material %(id)s', id=batch.id) }}</h2>
     
     {% include "flash_messages.html" %}
-    
+
+        <table class="plain">
+            <tr><td><b>{{ _("Gramps file") }}:</b></td>
+                <td>{{ batch.xmlname }}</td></tr>
+            <tr><td style="vertical-align: middle;"><b>{{ _("Status") }}:</b></td>
+                <td>
+                   <ul id="states">
+                       <li 
+               {% if state_n > 20 %}class="done"{% elif state_n == 20 %}class="act"{% endif -%}
+                          >{{ _("Candidate") }}</li>
+                       <li 
+               {% if state_n > 30 %}class="done"{% elif state_n == 30 %}class="act"{% endif -%}
+                          >{{ _("Audit Requested") }}</li>
+                       <li 
+               {% if state_n > 40 %}class="done"{% elif state_n == 40 %}class="act"{% endif -%}
+                          >{{ _("Auditing") }}</li>
+                       <li 
+               {% if state_n > 60 %}class="done"{% elif state_n == 60 %}class="act"{% endif -%}
+                          >{{ _("Accepted") }}</li>
+               {# if state_n == 61 % }<li class="act">{{ _("Rejected") }}</li>{ % endif -#}
+                       <li 
+               {% if state_n > 61 %}class="done"{% elif state_n == 61 %}class="act"{% endif -%}
+                          >{{ _("Rejected") }}</li>
+                   </ul>
+                 </td>
+             </tr>
+        </table>
+
         <div class="flex_container">
             
             <div class="sc-startbox"><!-- div class="startbox" style="width:auto" -->
                 <h2 class="center">{{ _("General")|title() }}</h2>
                 <table>
                     <tr>
-                        <th>{{ _("Batch") }}, {{_('Researcher')|lower}}</th>
+                        <th>{{ _("Batch") }}</th>
                         <td>{{ batch.id }}
-                            <a href="/audit/profile/{{batch.user}}"
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{{_('Researcher')}}</th>
+                        <td><a href="/audit/profile/{{batch.user}}"
                              style="text-decoration: underline;"
                              title="{{ _('User Profile') }}">{{batch.user}}</a>
                         </td>
@@ -94,16 +142,8 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
                         </td>
                     </tr>
                     <tr>
-                        <th>{{ _("Status") }}</th>
-                        <td><b>{{ _(batch.state) }}</b></td>
-                    </tr>
-                    <tr>
                         <th>{{ _("Changed") }} </th>
                         <td>{{ _(batch.timestamp_str()) }}</td>
-                    </tr>
-                    <tr>
-                        <th>{{ _("Gramps file") }}</th>
-                        <td class="filename">{{ batch.xmlname }}</td>
                     </tr>
                     <tr>
                         <th colspan="2">{{ _("Description") }}<br>
@@ -119,7 +159,9 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
             {% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
                 <p><a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a></p>
             {% endif %}   
-            
+            {% if batch.db_schema %}   
+                <div style="font-size:6pt; text-align:end; color:gray;">Db version {{batch.db_schema}}</div>
+            {% endif %}   
             </div>
             
             <div class="sc-startbox">

@@ -149,7 +149,7 @@ class SourceReader(DataService):
             results = {"status": Status.ERROR, "statustext": f"Source list: {e}"}
         return results
 
-    def get_source_with_references(self, uuid, u_context):
+    def get_source_with_references(self, iid, u_context):
         """Read the source, repository and events etc referencing this source.
 
         Returns a dictionary, where items = Source object.
@@ -161,12 +161,12 @@ class SourceReader(DataService):
         use_user = self.user_context.batch_user()
         res = self.dataservice.dr_get_source_w_repository(use_user, 
                                                           u_context.material, 
-                                                          uuid)
+                                                          iid)
         if Status.has_failed(res):
             return res
         source = res.get("item")
         if not source:
-            res.statustext = f"no Source with uuid={uuid}"
+            res.statustext = f"no Source with iid={iid!r}"
             return res
 
         citations, notes, targets = self.dataservice.dr_get_source_citations(

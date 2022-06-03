@@ -28,10 +28,10 @@ class CypherMedia():
 
 # Read Media data
 
-    get_media_by_uuid = """
-MATCH (root) -[:OBJ_OTHER]-> (media:Media {uuid:$uuid}) <-[r:MEDIA]- (ref)
-OPTIONAL MATCH (ref) <-[:EVENT]- (ref2)
-RETURN media, PROPERTIES(r) AS prop, ref, ref2"""
+    get_media_by_iid = """
+MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid}) <-[r:MEDIA]- (ref)
+OPTIONAL MATCH (ref) <-[:EVENT]- (eref)
+RETURN media, PROPERTIES(r) AS prop, ref, eref"""
 
     get_all = "MATCH (o:Media) RETURN o"
 
@@ -48,7 +48,7 @@ RETURN o, root.user as credit, root.id as batch_id, COUNT(r) AS count
     # Find a batch like '2019-02-24.006' and connect new Media object to that Batch
     create_in_batch = """
 MATCH (u:Root {id:$bid})
-MERGE (u) -[:OBJ_OTHER]-> (a:Media {uuid:$uuid})
+MERGE (u) -[:OBJ_OTHER]-> (a:Media {iid:$iid})
     SET a += $m_attr
 RETURN ID(a) as uniq_id"""
 

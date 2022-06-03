@@ -18,7 +18,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-  hierarkiapuun luonti kannasta
+Creating Place hierarchy tree from database Nodes
 Created on 8.9.2017
 @author: jm
 '''
@@ -122,8 +122,11 @@ class DbTree():
         for nodes, _level, relations in hierarchy_result:
             for node in nodes:
                 if not self.tree.contains(node.id):
-                    self.tree.create_node(node.get(self.name_field_name), node.id, parent=0, 
-                                          data={self.type_field_name:node.get(self.type_field_name),'uuid':node.get('uuid')})
+                    self.tree.create_node(node.get(self.name_field_name), 
+                                          node.id, 
+                                          parent=0, 
+                                          data={self.type_field_name:node.get(self.type_field_name),
+                                                'iid':node.get('iid')})
     
         # then move all nodes under correct parent
         for nodes, _level, relations in hierarchy_result:
@@ -175,10 +178,10 @@ MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
 MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
-    t = DbTree(driver, query, 'pname', 'type')
+    t_test = DbTree(driver, query, 'pname', 'type')
     # Luetaan tiedot muistinvaraiseen puurakenteeseen
-    t.load_to_tree_struct(locid)
-    if t.tree.depth() == 0:
+    t_test.load_to_tree_struct(locid)
+    if t_test.tree.depth() == 0:
         # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa. 
         # Hae oman paikan tiedot ilman yhteyksiä
         query = """
@@ -188,9 +191,9 @@ RETURN p.type AS type, p.pname AS name
         with driver.session() as session:
             result = session.run(query, locid=int(locid))
             record = result.single()
-            t.tree.create_node(record["name"], locid, parent=0, 
+            t_test.tree.create_node(record["name"], locid, parent=0, 
                                       data={'type': record["type"]})
 
-    print(t.tree)
-    t.print_tree()
-#     print(t.to_json())
+    print(t_test.tree)
+    t_test.print_tree()
+#     print(t_test.to_json())

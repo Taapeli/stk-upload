@@ -38,7 +38,7 @@ SET p.sortname=$key"""
 # ----- Person page -----
 
     get_person = """
-MATCH (root) -[r:OBJ_PERSON]-> (p:Person {uuid:$uuid}) 
+MATCH (root) -[r:OBJ_PERSON]-> (p:Person {iid:$iid}) 
 RETURN p, root"""
 
     get_names_events = """
@@ -268,7 +268,7 @@ order by count desc
 limit $count"""
 
     set_primary_name = """
-match (p:Person{uuid:$uuid})  
+match (p:Person{iid:$iid})  
 match (p) -[:NAME]-> (n1:Name{order:0})
 match (p) -[:NAME]-> (n2:Name{order:$old_order})
 set n1.order = $old_order, n2.order = 0
@@ -287,9 +287,9 @@ return n
 
     get_person_for_graph = """
 MATCH (n:Person)
-	WHERE n.uuid in $ids 
+	WHERE n.iid in $ids 
 OPTIONAL MATCH (n) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
-RETURN ID(n) AS uniq_id, n.uuid AS uuid, n.sortname AS sortname, 
+RETURN ID(n) AS uniq_id, n.iid AS iid, n.sortname AS sortname, 
        n.sex as gender, COLLECT([e.type, e.date1/1024]) AS events,
        n.death_high AS death_high"""
 
@@ -297,7 +297,7 @@ RETURN ID(n) AS uniq_id, n.uuid AS uuid, n.sortname AS sortname,
 MATCH (n:Person) <-[:CHILD]- (f:Family) -[:PARENT]-> (p:Person)
 	WHERE ID(n) in $ids 
 OPTIONAL MATCH (p) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
-RETURN ID(p) AS uniq_id, p.uuid AS uuid, p.sortname AS sortname, 
+RETURN ID(p) AS uniq_id, p.iid AS iid, p.sortname AS sortname, 
        p.sex as gender, COLLECT([e.type, e.date1/1024]) AS events,
        p.death_high AS death_high"""
 
@@ -305,6 +305,6 @@ RETURN ID(p) AS uniq_id, p.uuid AS uuid, p.sortname AS sortname,
 MATCH (n:Person) <-[:PARENT]- (f:Family) -[:CHILD]-> (c:Person)
 	WHERE ID(n) in $ids 
 OPTIONAL MATCH (c) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
-RETURN ID(c) AS uniq_id, c.uuid AS uuid, c.sortname AS sortname, 
+RETURN ID(c) AS uniq_id, c.iid AS iid, c.sortname AS sortname, 
        c.sex as gender, COLLECT([e.type, e.date1/1024]) AS events,
        c.death_high AS death_high"""

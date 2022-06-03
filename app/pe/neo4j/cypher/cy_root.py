@@ -204,6 +204,11 @@ return root.material as material_type, count(*) as nodes order by material_type"
 where root.state='Candidate' 
 return root order by root.id desc"""
 
+    count_my_all_batches = """
+match (u:UserProfile{username:$user}) --> (root:Root)
+return root.material as material_type, root.state as state, count(root) as count
+order by material_type, state desc"""
+
 #-bl.batch.root.Root.get_user_stats
     get_passed = '''
 match (u:UserProfile) --> (b:Root) 

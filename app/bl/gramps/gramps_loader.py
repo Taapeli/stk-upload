@@ -316,6 +316,7 @@ def xml_to_stkbase(batch):  # :Root):
     handler.handle_events()
     handler.handle_people() # With Names
     handler.handle_families()
+    handler.postprocess_notes() # Separately allocate Isotammi ID batch for URL notes.
 
     #       for k in handler.handle_to_node.keys():
     #             print (f'\t{k} –> {handler.handle_to_node[k]}')
@@ -352,7 +353,7 @@ def xml_to_stkbase(batch):  # :Root):
         )
 
         # The gramps handles are not removed any more / 15.5.2022/JMä
-        # handler.remove_handles()
+        # handler.unused_remove_handles()
         batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
 
     logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')

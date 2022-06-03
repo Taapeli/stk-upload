@@ -7,7 +7,7 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 """
 
 # blacked 25.5.2021/JMä
-from sys import stderr
+#from sys import stderr
 
 from bl.base import NodeObject
 from pe.dataservice import DataService

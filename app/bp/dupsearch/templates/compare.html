@@ -12,6 +12,7 @@
 <style>
 div.searchkey { display: none; }
 td.matchvector:hover ~ td > div.searchkey { display: inline; }
+tt {color:brown; }
 </style>
 
 
@@ -92,7 +93,7 @@ tr:nth-child(even) {
 {% macro families(person) -%}
     {% for fam in person.families_as_parent %}
     <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-        <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.id}}" class="inlink">
+        <p><a href="/family/{{fam.iid}}" title="{{fam.id}}" class="inlink">
                 {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
             {{fam.marriage_dates}}</p>
         <ul>
@@ -119,9 +120,9 @@ tr:nth-child(even) {
 		<table>
     {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
-                        <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
+                        <td class="ColumnEvent" title="{{e.id}} {{e.iid}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
-                                <a href="/scene/event/uuid={{e.uuid}}" class="inlink">
+                                <a href="/event/{{e.iid}}" class="inlink">
                                    {{e.type|transl('evt')}}</a>
         {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>
@@ -134,7 +135,7 @@ tr:nth-child(even) {
                         <td class="ColumnPlace">{% set br=0 %}
     	{% for pref in e.place_ref %}{% set pl = objs[pref] %}
     	    {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
-                            <a href="/scene/location/uuid={{pl.uuid}}" class="inlink"
+                            <a href="/place/{{pl.iid}}" class="inlink"
                              title="{{ _('of type') }} {{pl.type}}; {{ _('see details of place') }}">
                               {{macro.place_names_lang(pl)}}</a
                             >{% if pl.uppers %},
@@ -170,15 +171,15 @@ tr:nth-child(even) {
 
  <h1>{{ _('Compare possible duplicates') }}</h1>
 
-<div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
+<div id="myApp" style="margin: 0 25px 0 50px; padding-bottom: 2em;">
     <div>
     	<table border>
-    	<tr><th>{{ _("Batch") }}
-    		<td colspan="3">{{ batch_id1 }} 
-    		<td colspan="3">{{ batch_id2 }} 
-    	<tr><th>{{ _("ID") }}
-    		<td colspan="3">{{ person1.id }} 
-    		<td colspan="3">{{ person2.id }} 
+    	<tr><th style="width:10%">{{ _("Batch") }}
+    		<td style="width:45%" colspan="3">{{ batch_id1 }} 
+    		<td style="width:45%" colspan="3">{{ batch_id2 }} 
+    	<tr><th>{{ _("ID") }}, {{ _("iid") }}
+    		<td colspan="3">{{ person1.id }}, <tt>{{ person1.iid }}</tt>
+    		<td colspan="3">{{ person2.id }}, <tt>{{ person2.iid }}</tt>
     	<tr><th class="hdrcol">{{ _("Names") }}
     		<td colspan="3" class="datacol">{{ macro.person_name(person1.names[0]) }}
     		<td colspan="3" class="datacol">{{ macro.person_name(person2.names[0]) }}

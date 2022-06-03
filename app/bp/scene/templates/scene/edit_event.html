@@ -11,7 +11,7 @@
                 {% if event.place %}<tr>
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
                     <td class="ColumnValue">
-                        <a href="/scene/location/uuid={{event.place.uuid}}" class="inlink">
+                        <a href="/place/{{event.place.iid}}" class="inlink">
                             {{event.place.pname}}</a>
                     </td>
                 </tr>{% endif %}

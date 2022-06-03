@@ -53,8 +53,7 @@ RETURN s as source, collect(DISTINCT note) as notes,
 ORDER BY toUpper(s.stitle)"""
 
     get_single_selection = """
-MATCH (root) -[:OBJ_SOURCE]-> (s:Source)
-    WHERE s.uuid=$uuid
+MATCH (root) -[:OBJ_SOURCE]-> (s:Source{iid:$iid})
 WITH s
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (s) -[:NOTE]-> (n)

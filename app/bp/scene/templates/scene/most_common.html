@@ -33,7 +33,7 @@
                     <input name="key" type="hidden">
                      {% for stat in placenamestats %}
                         <span style='font-size:{{ stat.fontsize }}px'>
-                            <a href="/scene/location/uuid={{ stat.uuid }}"
+                            <a href="/place/{{stat.iid}}"
                                title="{{ stat.count }} {{ _('references') }}">{{ stat.placename }}</a>
                         </span>
                      {% endfor %}

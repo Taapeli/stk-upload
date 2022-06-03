@@ -67,14 +67,14 @@ tr > td > img {
                     <td class="Value">
                         <div style="display:flex;">
                             <div><img alt="({{ _('Thumbnail') }})" align="left"
-                                src="/scene/thumbnail?id={{media.uuid}}" 
-                                title="key = {{media.uuid_short()}}"/></div>
+                                src="/scene/thumbnail?id={{media.iid}}" 
+                                title="key = {{media.iid}}"/></div>
                             <div>
                                  <p style="nowrap;">
                                  {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
                                  {%else%}{{media.description}}
                                  {%endif%}
-                                 &rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}"
+                                 &rtrif; <a href="/scene/media/{{media.name}}?id={{media.iid}}"
                                             style="text-decoration:underline;">
                                         {{ _('Show fullscreen') }}</a>
                                  </p>
@@ -98,26 +98,26 @@ tr > td > img {
 		    {% for ref in media.ref %}
 		      <li>{{ _(ref.label) }}:
 		    	{% if ref.label == 'Person' %}
-		    		<a href="/scene/person?uuid={{ref.obj.uuid}}" class="inlink"
-			               title="{{ _('see details of person %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
+		    		<a href="/person/{{ref.obj.iid}}" class="inlink"
+			               title="{{ _('see details of person %(id)s', id=ref.obj.iid) }} (nr={{ref.obj.uniq_id}})">
 			               {{ref.obj.sortname|replace("#", " ")}}</a>
                 {% elif ref.label == 'Place' %}
-                    <a href="/scene/location/uuid={{ref.obj.uuid}}" class="inlink"
-                           title="{{ _('see details of place %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
+                    <a href="/place/{{ref.obj.iid}}" class="inlink"
+                           title="{{ _('see details of place %(id)s', id=ref.obj.iid) }} (nr={{ref.obj.uniq_id}})">
                            {{ref.obj.pname}}</a>
                 {% elif ref.label == 'Event' %}
-                    <a href="/scene/event/uuid={{ref.obj.uuid}}" class="inlink"
-                           title="{{ _('see details of event %(id)s', id=ref.obj.uuid_short()) }} (nr={{ref.obj.uniq_id}})">
+                    <a href="/event/{{ref.obj.iid}}" class="inlink"
+                           title="{{ _('see details of event %(id)s', id=ref.obj.iid) }} (nr={{ref.obj.uniq_id}})">
                            {{ _(ref.obj.type) }}</a> {{ref.obj.description}}
                     {% if ref.next_objs %}<ul>
                         {% for p in ref.next_objs %}<li>
                             {% if p.label == "Person" %}
-                                <a href="/scene/person?uuid={{p.uuid}}" class="inlink"
-                                    title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
+                                <a href="/person/{{p.iid}}" class="inlink"
+                                    title="{{ _('see details of person %(id)s', id=p.iid) }} (nr={{p.uniq_id}})">
                                 {{ macro.person_name_by_sortname(p) }}</a>
                             {% elif p.label == "Family" %}
-                                <a href="/scene/family?uuid={{p.uuid}}" class="inlink"
-                                    title="{{ _('see details of family %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
+                                <a href="/family/{{p.iid}}" class="inlink"
+                                    title="{{ _('see details of family %(id)s', id=p.iid) }} (nr={{p.uniq_id}})">
                                 {{ macro.family_name(p) }}</a>
                             {% endif %}
                             </li>
@@ -131,7 +131,7 @@ tr > td > img {
                     <div><br>{{ _('cropped') }}: &nbsp;</div>
                     <div>{% set cr_str = (ref.crop|join(',')) %}
     			        <img alt="({{ _('Thumbnail') }})"
-                            src="/scene/thumbnail?id={{media.uuid}}&crop={{cr_str}}" 
+                            src="/scene/thumbnail?id={{media.iid}}&crop={{cr_str}}" 
                             title="{{ _('cropped') }} (%): {{ref.crop}}"/>
                     </div>
                 </div>
@@ -148,8 +148,8 @@ tr > td > img {
 	<div class="pic_container">
         <div class="pic">
             	<img alt="picture {{media.description}}" 
-            		 src="/scene/media/{{media.name}}?id={{media.uuid}}" 
-                 	 title="key = {{media.uuid_short()}}"/>
+            		 src="/scene/media/{{media.name}}?id={{media.iid}}" 
+                 	 title="key = {{media.iid}}"/>
         </div>
 	</div>
  {% endif %}

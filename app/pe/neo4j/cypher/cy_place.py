@@ -36,8 +36,8 @@ class CypherPlace():
         OPTIONAL MATCH (place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
         RETURN place, name, COUNT(DISTINCT ref) AS uses,
             COLLECT(DISTINCT pn) AS names,
-            COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
-            COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
+            COLLECT(DISTINCT [ID(up), up.iid, up.type, upn.name, upn.lang]) AS upper,
+            COLLECT(DISTINCT [ID(do), do.iid, do.type, don.name, don.lang]) AS lower
     ORDER BY name.name"""
 
     get_name_hierarchies = """
@@ -70,8 +70,7 @@ RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
 
 # For place page
     get_w_citas_names_notes = """
-MATCH  (root) -[:OBJ_PLACE]-> (place:Place)
-    WHERE place.uuid=$uuid
+MATCH  (root) -[:OBJ_PLACE]-> (place:Place{iid:$iid})
 OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
 WITH place, name
     OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 
@@ -122,7 +121,7 @@ MATCH x= (p:Place)-[:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
     # Query for single Place without hierarchy
     root_query = """
 MATCH (p:Place) WHERE ID(p) = $locid
-RETURN p.type AS type, p.uuid AS uuid, p.pname AS name
+RETURN p.type AS type, p.iid AS iid, p.pname AS name
 """
     # Query to get names for a Place with $locid, $lang
     read_pl_names="""

@@ -248,8 +248,13 @@ def my_settings():
             flash(_("Update did not work"), category="flash_error")
             traceback.print_exc()
 
-    labels, user_batches = Root.get_user_stats(current_user.username)
-    print(f"#bp.start.routes.my_settings: User batches {user_batches}")
+    #labels, user_batches = Root.get_user_stats(current_user.username)
+    batch_stat = Root.count_my_batches(current_user.username)
+    # Returned list of {"material_type", "state", "count"} dictionaries
+    batches = 0
+    for b in batch_stat:
+        batches += b['count']
+    print(f"#bp.start.routes.my_settings: total {batches} user batches")
 
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)
     print(f"#bp.start.routes.my_settings: Gedcoms {gedcoms}")
@@ -263,8 +268,7 @@ def my_settings():
         referrer=referrer,
         roles=current_user.roles,
         apikey=api.get_apikey(current_user),
-        labels=labels,
-        batches=user_batches,
+        batch_stat=batch_stat,
         gedcoms=gedcoms,
         userprofile=userprofile,
     )
