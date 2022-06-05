@@ -737,7 +737,7 @@ class DOM_handler:
                     p.citation_handles.append(person_citationref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
-            print(f"\t# Person {p.id} {p.names[0].firstname} {p.names[0].surname}")
+            #print(f"\t# Person {p.id} {p.names[0].firstname} {p.names[0].surname}")
             self.dataservice.ds_save_person(tx, p, self.batch.id, iids)
             self.complete(p, url_notes)
 
@@ -870,6 +870,7 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
+            print(f"\t# Place {pl.id} {pl.names[0]} +{len(pl.names)-1}")
             self.dataservice.ds_save_place(tx, pl, self.batch.id, iids, place_keys=self.place_keys)
             # The place_keys has been updated
 

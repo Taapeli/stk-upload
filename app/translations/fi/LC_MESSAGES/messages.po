@@ -1068,7 +1068,7 @@ msgstr "Tyyppi / kuvaus"
 #: bp/gramps/templates/gramps/uploads.html:163
 #: bp/scene/templates/scene/details_batch.html:97
 #: bp/scene/templates/scene/details_common.html:47
-msgid "Status"
+msgid "State"
 msgstr "Vaihe"
 
 #: bp/admin/templates/admin/uploads.html:35
@@ -2614,7 +2614,7 @@ msgstr "Lähdeviittauksia"
 #: bp/gramps/templates/gramps/details.html:130
 #: bp/scene/templates/scene/details_batch.html:152
 msgid "Event Statistics"
-msgstr "Tapahtumien määrät"
+msgstr "Tapahtumien määriä"
 
 #: bp/gramps/templates/gramps/details.html:150
 msgid "Nonstandard types"
@@ -4093,8 +4093,8 @@ msgid "Processing steps of Isotammi material"
 msgstr "Aineiston käsittelyvaiheet"
 
 #: bp/start/templates/start/s_macros.html:58
-msgid "the file has been uploaded to server"
-msgstr "tiedosto on talletettu palvelimelle"
+msgid "The file has been uploaded to server"
+msgstr "Tiedosto on talletettu palvelimelle"
 
 #: bp/start/templates/start/s_macros.html:59 ui/jinja_filters.py:337
 msgid "Storing"
@@ -4109,7 +4109,7 @@ msgid "Candidate"
 msgstr "Tutkijan aineisto"
 
 #: bp/start/templates/start/s_macros.html:60
-msgid "the data is stored as candidate material"
+msgid "The data is stored as candidate material"
 msgstr "Talletettu tutkijan aineistona"
 
 #: bp/start/templates/start/s_macros.html:61 ui/jinja_filters.py:339
@@ -4117,7 +4117,7 @@ msgid "Audit Requested"
 msgstr "Tarkastus pyydetty"
 
 #: bp/start/templates/start/s_macros.html:61
-msgid "waiting for audition"
+msgid "Waiting for audition"
 msgstr "Odottaa tarkastusta"
 
 #: bp/start/templates/start/s_macros.html:62 ui/jinja_filters.py:340
@@ -4150,7 +4150,7 @@ msgstr "Hylätty"
 
 #: bp/start/templates/start/s_macros.html:65
 msgid "Returned to researcher with comments"
-msgstr "Hylätty tutkijalle kommentein"
+msgstr "Palautettu tutkijalle kommentein"
 
 #: bp/start/templates/start/thankyou.html:3
 msgid "Thank You"
