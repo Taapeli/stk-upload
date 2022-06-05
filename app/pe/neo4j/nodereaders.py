@@ -18,7 +18,11 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 from datetime import datetime
-from neo4j.graph import Node
+
+try:
+    from neo4j.graph import Node            # Neo4j 4.x
+except:
+    from neo4j.types.graph import Node      # Neo4j 3.x
 
 from bl.base import NodeObject, PRIVACY_LIMIT
 from bl.citation import Citation

@@ -160,7 +160,7 @@ function filenm_changed(input) {
                <th>{{ _("Batch") }}</th>
                <th>{{ _("Gramps file") }}</th>
                <th>{{ _("Person count") }}</th>
-               <th>{{ _("Status") }} {{ state_info() }} </th>
+               <th>{{ _("State") }} {{ state_info() }} </th>
   		</tr>
 
   {% for upload in uploads %}
@@ -236,7 +236,7 @@ function filenm_changed(input) {
 
 {% endblock %}
 <script>
-// Status help text
+// State help text
 var e = document.getElementById('help');
 e.onmouseover = function() {
   document.getElementById('help_box').style.display = 'block';
