@@ -49,64 +49,94 @@ def do_schema_fixes():
             WHERE b.db_schema IS NULL OR NOT b.db_schema = $schema_ver
         OPTIONAL MATCH (b) --> (a) WHERE a.iid IS NULL
         WITH b, labels(a)[0] AS lbl, COUNT(a) AS cnt
-            //ORDER BY b.id DESC, lbl
+            ORDER BY b.id DESC, lbl LIMIT $limit
         RETURN b.id, b.db_schema, COLLECT(DISTINCT [lbl,cnt]) as label_cnts
-                LIMIT 3"""
+    """
     IIDa1_batch_remove_uuids = """
-        MATCH (b:Root{id:bid}) --> (a) WHERE NOT a.uuid IS NULL
-            SET a.uuid = NULL
+        MATCH (b:Root{id:$bid}) --> (a) WHERE NOT a.uuid IS NULL
         WITH a LIMIT $limit
-        RETURN count(a) as cnt"""
-    IIDx2_change_uuid_to_iid = """
-        MATCH (b:Root{id:bid})
-        MATCH (b) --> (a) WHERE a.iid IS NULL
-        WITH b, a LIMIT $limit
-        MATCH (a) WHERE $lbl IN labels(a)
-            SET a.iid=$iid, a.uuid = NULL"""
+            SET a.uuid = NULL
+        RETURN count(a) as cnt
+    """
+    IIDb1_change_an_uuid_to_iid = """
+        MATCH (b:Root{id:$bid}) --> (a)
+            WHERE $lbl IN labels(a) AND a.iid IS NULL
+        WITH a LIMIT 1
+            SET a.iid=$iid, a.uuid = NULL
+    """
+    IIDx2_update_batch_schema = """
+        MATCH (b:Root {id:$bid}) 
+            SET b.db_schema = $schema_ver
+    """
 
     from database.accessDB import DB_SCHEMA_VERSION
+    from pe.neo4j.util import IsotammiId
+
     with shareds.driver.session() as session:
         # List batches and labels to change
+        jobs_a = []
+        jobs_b = []
         result = session.run(IID_list_batches_and_missing_iids,
-                             schema_ver=DB_SCHEMA_VERSION)
+                             limit=10, schema_ver=DB_SCHEMA_VERSION)
         for record in result:
-            # Returned b.id, b.db_schema, label_cnts
+            # Returned batches and statistics of objects to update:
+            # b.id, b.db_schema, label_cnts
             #    where label_cnts = [[null, 0]] 
             #                    or [["Citation", 4], ["Event", 10], ...]
-
             batch = record["b.id"]
             schema = record["b.db_schema"]
             label_cnts = record["label_cnts"]
-            print(f"#do_schema_fixes: {batch}({schema}): {label_cnts}")
-
+            #print(f"#do_schema_fixes: {batch}({schema}): {label_cnts}")
             if label_cnts[0][0] is None:
-                # a) if no objects with missing iid
-                #    Remove uuid values
-                #    a1) for each (b) --> (a)
-                #        - unset a.uuid
-                #    a2) update b.db_schema
-                print(f"MATCH (b:Root(id:{batch!r})) --> (a) WHERE NOT a.uuid IS NULL"
-                      f" SET a.uuid = NULL")
-                print(f"MATCH (b:Root(id:{batch!r}))"
-                      f" SET b.db_schema = {DB_SCHEMA_VERSION!r}")
-                print(f"#do_schema_fixes/a: {batch!r}: X uuids removed")
+                jobs_a.append((batch, schema))
             else:
-                # b) else for each label
-                #    Replace all uuid by iid
-                #    - allocate iids
-                #    b1) for each (b) WHERE lbl in labels[0]
-                #        - set b.iid, unset b.uuid
-                #    b2) update b.db_schema
+                jobs_b.append((batch, schema, label_cnts))
+        print(f"#do_schema_fixes: batch updates: {len(jobs_a)} uuid removals,"
+              f" {len(jobs_b)} iid creations")
 
-                total = 0
-                for lbl, cnt in label_cnts:
-                    # Simulate Isotammi-ids
-                    letter = "H" if lbl == "Person" else lbl[0]
-                    total += cnt
-                    for ids in range(cnt):
-                        iid = f"{letter}-{ids}"
-                        # print (f"MATCH MATCH (b:Root{batch}) --> (a) WHERE {lbl!r} IN labels(a)"
-                        #        f" SET a.iid={iid!r}, SET a.uuid = NULL")
+        # a) Remove uuid values
+
+        for batch, schema in jobs_a:
+            # a) if no objects with missing iid
+            #    a1) for each (b) --> (a)
+            #        - unset a.uuid
+            #    a2) update b.db_schema (if all done)
+            total = session.run(IIDa1_batch_remove_uuids,
+                                bid=batch, limit=10).single()[0]
+            if total > 0:
+                print(f"#               /a: {batch!r}: {total} uuids removed")
+            else:
+                # All uuids removed
+                session.run(IIDx2_update_batch_schema,
+                            bid=batch, schema_ver=DB_SCHEMA_VERSION)
+                print(f"#do_schema_fixes/a: {batch!r}: uuids removed")
+
+        #  b) Replace all uuid by iid
+
+        for batch, schema, label_cnts in jobs_b:
+            # b) else for each label
+            #    - allocate iids
+            #    b1) for each (b) WHERE lbl in labels[0]
+            #        - set b.iid, unset b.uuid
+            #    b2) update b.db_schema (if all done)
+            total = 0
+            for lbl, cnt in label_cnts:
+                # For this batch, a number of objects of label lbl
+                iid_generator = IsotammiId(session, obj_name=lbl)
+                chunck_size = cnt
+                total += chunck_size
+                iid_generator.reserve(chunck_size)
+                for _n in range(chunck_size):
+                    iid = iid_generator.get_one()
+                    session.run(IIDb1_change_an_uuid_to_iid,
+                                bid=batch, lbl=lbl, iid=iid,
+                                schema_ver=DB_SCHEMA_VERSION)
+                    #print(f"#               /b: {batch!r}: {iid}")
+
+            if total == 0:
+                # All iids generated
+                session.run(IIDx2_update_batch_schema,
+                            bid=batch, schema_ver=DB_SCHEMA_VERSION)
                 print(f"#do_schema_fixes/b: {batch!r}: total {total} iids generated")
 
     return      # =========================

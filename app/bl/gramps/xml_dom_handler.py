@@ -211,7 +211,7 @@ class DOM_handler:
             iid_generator = IsotammiId(session, obj_name=title)
             for nodes_chunk in self.get_chunk(dom_nodes, chunk_max_size):
                 chunk_size = len(nodes_chunk)
-                iid_generator.get_batch(chunk_size)
+                iid_generator.reserve(chunk_size)
                 print(f"#handle_dom_nodes: new tx for {chunk_size} {iid_generator.iid_type} nodes")
                 session.write_transaction(transaction_function, 
                                           nodes=nodes_chunk,
@@ -280,7 +280,7 @@ class DOM_handler:
                   f"Notes for {len(self.noterefs_later)} objects")
 
             iid_generator = IsotammiId(session, obj_name="Notes")
-            iid_generator.get_batch(total_notes)
+            iid_generator.reserve(total_notes)
             # Split to chunks, chunk_max_size=self.TX_SIZE
             for nodes_chunk in self.get_chunk(self.noterefs_later, self.TX_SIZE):
                 print(f"DOM_handler.postprocess_notes: {len(nodes_chunk)} chunk")
