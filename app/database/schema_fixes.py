@@ -27,10 +27,162 @@ moved from database.accessDB.do_schema_fixes
 '''
 import logging
 logger = logging.getLogger('stkserver') 
-
+import shareds
 #from neo4j.exceptions import ClientError #, ConstraintError
 
-import shareds
+#---- (change uuid_to_iid) Replace uuid keys by iid and set b.cd_schema ----
+from pe.neo4j.util import IsotammiId
+
+IID_1_batches_with_missing_iids = """
+    MATCH (b:Root)
+        WHERE b.db_schema IS NULL OR NOT b.db_schema = $schema_ver
+    OPTIONAL MATCH (b) --> (a) WHERE a.iid IS NULL
+    WITH b, id(a) AS uid, labels(a)[0] AS lbl
+        ORDER BY b.id DESC, lbl
+        LIMIT $limit
+    RETURN b.id AS batch_id, b.db_schema AS schema, lbl, COLLECT(uid) AS uids
+"""
+IID_a_change_uuid_to_iid = """
+    MATCH (b:Root{id:$bid}) --> (a)
+        WHERE $lbl IN labels(a) AND a.iid IS NULL
+    WITH a LIMIT 1
+        SET a.iid=$iid, a.uuid = NULL
+"""
+IID_b_batch_remove_uuids = """
+    MATCH (b:Root{id:$bid})
+    OPTIONAL MATCH (b) --> (a)
+        WHERE a.iid IS NULL AND a.uuid IS NOT NULL
+    WITH b, a LIMIT $limit
+        SET a.uuid = NULL
+    RETURN COUNT(a)
+"""
+IID_c_update_batch_schema = """
+    MATCH (b:Root {id:$bid}) 
+        SET b.db_schema = $schema_ver
+"""
+
+def uuid_to_iid():
+    """ 1. For all batches b
+            a) for each chunk b of missing a.iid keys
+                - Allocate set of iid keys
+                - for each a: set a.iid, remove a.uuid
+            - update b.db_schema
+            b) for each chunk b with no a.iid key
+                - remove uuid
+            - update b.db_schema
+    """
+    from database.accessDB import DB_SCHEMA_VERSION
+
+
+    def generate_iids(jobs_i):
+        """ For given list of batches b, their node labels and list of node a uniq_ids,
+            - for each node a set a.iid and remove a.uuid
+            - finally set b.db_schema for the batch
+            After that all objects has a.iid key
+        """
+        n_objects = 0
+        n_batches = 0
+        batch_prev = ""
+        for batch_id, schema, label, uids in jobs_i:
+            chunck_size = len(uids)
+            n_objects += chunck_size
+            iid_generator = IsotammiId(session, obj_name=label)
+            iid_generator.reserve(chunck_size)
+            for _n in range(chunck_size):
+                iid = iid_generator.get_one()
+
+                session.run(IID_a_change_uuid_to_iid,
+                            bid=batch_id, lbl=label, iid=iid)
+
+            print(f"# ... generate_iids: set {n_objects} new iid keys for {label!r} in {batch_id!r}")
+            
+            if schema != DB_SCHEMA_VERSION and batch_id != batch_prev:
+                # All iid keys set in this batch. (There are no nodes with both uuid and n iid)
+                n_batches += 1
+                batch_prev = batch_id
+                session.run(IID_c_update_batch_schema,
+                            bid=batch_id, schema_ver=DB_SCHEMA_VERSION)
+                print(f"# ... generate_iids: {batch_id!r} updated")
+        # returns number of batches and objects processed
+        return n_batches, n_objects
+
+
+    def remove_uuids(jobs_u):
+        """ For given list of batches b not having current b.db_schema value
+            - for each node with a.uiid remove a.uuid
+            - finally set b.db_schema for the batch
+            After that no object has a.uuid key
+        """
+        n_objects = 0
+        n_batches = 0
+
+        for batch_id, schema in jobs_u:
+            cnt = -1
+            while cnt != 0: # Loop until no changes in database
+                cnt = 0
+
+                result = session.run(IID_b_batch_remove_uuids,
+                                     bid=batch_id, limit=100)
+
+                for record in result: # Actually 0-1 records
+                    cnt = record[0]
+                    if cnt > 0:
+                        n_objects += cnt
+                        #print(f"#remove_uuids: {cnt} uuid keys removed from {batch_id!r}")
+                if cnt == 0 and schema != DB_SCHEMA_VERSION:
+                    # All uuids removed from this batch
+                    n_batches += 1
+
+                    session.run(IID_c_update_batch_schema,
+                                bid=batch_id, schema_ver=DB_SCHEMA_VERSION)
+
+        print(f"# ...remove_uuids: {n_batches} batches, {n_objects} uuid removals")
+        # returns number of batches and objects processed
+        return n_batches, n_objects
+
+
+    # =========== uuid_to_iid starts here ==============
+    
+    with shareds.driver.session() as session:
+        total_batches = 0
+        total_nodes = 0
+        done = False
+        while not done:
+            # For a chunk of batches find objects having missing a.iid
+            jobs_i = []
+            jobs_u = []
+            done = True
+
+            result = session.run(IID_1_batches_with_missing_iids,
+                                 limit=200, schema_ver=DB_SCHEMA_VERSION)
+
+            for batch_id, schema, label, uids in result:
+
+                if label is None:
+                    # No iids: should remove a.uuid keys
+                    jobs_u.append((batch_id, schema))
+                else:
+                    # Generate a.iid (and remove a.uuid)
+                    # uids is a list of uniq_ids needing new a.iid keys
+                    jobs_i.append((batch_id, schema, label, uids))
+                done = False
+
+            if jobs_i:
+                a_batches, a_nodes = generate_iids(jobs_i)
+                #print(f"#uuid_to_iid: {a_batches} batches, {a_nodes} iid creations")
+                total_batches += a_batches
+                total_nodes += a_nodes
+            if jobs_u:
+                b_batches, b_nodes = remove_uuids(jobs_u)
+                #print(f"#uuid_to_iid: {b_batches} batches, {b_nodes} uuid deletions")
+                total_batches += b_batches
+                total_nodes += b_nodes
+            pass
+
+        print(f"#uuid_to_iid: TOTAL {total_batches} batch updates,"\
+              f" {total_nodes} iid creations")
+    return
+
 
 def do_schema_fixes():
     """ Search current obsolete terms and structures in schema and fix them.
@@ -41,7 +193,17 @@ def do_schema_fixes():
         @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
     """
 
-    # --- For DB_SCHEMA_VERSION = '2022.1.1', 1.4.2022/JMä
+    # --- For DB_SCHEMA_VERSION = '2022.1.2', 4.6.2022/HRo
+
+    # For all batches b:
+    #    - if found objects with missing a.iid: generate a.iid and remove a.uiid
+    #    - else remove a.uuid
+    #    - set b.db_schema version
+    uuid_to_iid()
+
+#---- (change uuid_to_iid) ----
+
+
     STATS_link_to_from = """
         MATCH (b:Root) -[:STATS]-> (x:Stats)
         DETACH DELETE x"""
@@ -77,6 +239,43 @@ def do_schema_fixes():
             print(f" -- updated properties in {removed} Root objects")
 
     return
+
+    # # --- For DB_SCHEMA_VERSION = '2022.1.1', 1.4.2022/JMä
+    # STATS_link_to_from = """
+    #     MATCH (b:Root) -[:STATS]-> (x:Stats)
+    #     DETACH DELETE x"""
+    # with shareds.driver.session() as session: 
+    #     result = session.run(STATS_link_to_from)
+    #     counters = shareds.db.consume_counters(result)
+    #     stats_removed = counters.nodes_deleted
+    #     if stats_removed:
+    #         print(f" -- removed {stats_removed} old stats with forwards link (:Root) -[:STATS]-> (:Stats)")
+    #         # New stats are created with backwards link (:Root) <-[:STATS]- (:Stats)")
+
+    # DOES_AUDIT_ts = """
+    #     MATCH () -[r:DOES_AUDIT]-> () WHERE NOT r.timestamp IS null
+    #         SET r.ts_from = r.timestamp
+    #         SET r.timestamp = null        
+    #     """
+    # with shareds.driver.session() as session: 
+    #     result = session.run(DOES_AUDIT_ts)
+    #     counters = shareds.db.consume_counters(result)
+    #     rel_changed = int(counters.properties_set / 2)
+    #     if rel_changed:
+    #         print(f" -- updated properties in {rel_changed} DOES_AUDIT relations")
+
+    # clear_root_audited = """
+    #     MATCH (r:Root) WHERE NOT r.audited IS null
+    #         SET r.audited = null        
+    #     """
+    # with shareds.driver.session() as session: 
+    #     result = session.run(clear_root_audited)
+    #     counters = shareds.db.consume_counters(result)
+    #     removed = int(counters.properties_set)
+    #     if removed:
+    #         print(f" -- updated properties in {removed} Root objects")
+
+    # return
 
     # --- For DB_SCHEMA_VERSION = '2021.2.0.4', deleted 22.1.2022/JMä
     # from bl.batch.root import State

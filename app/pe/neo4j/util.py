@@ -126,7 +126,7 @@ class IsotammiId:
 
     Usage:
     - a = IsotammiId(tx, "People") Create an ID generator using given transaction
-    - a.get_batch(100)             Allocates given number of keys
+    - a.reserve(100)             Allocates given number of keys
     - key = a.get_one()            Get next key
     """
     def __init__(self, session, obj_name: str):
@@ -134,12 +134,12 @@ class IsotammiId:
         Create an object with a reservation of 'id_count' ID values from the
         database counter for the type of 'obj_name'.
         """
-        self.iid_type = "H" if obj_name.startswith("People") else obj_name[:1]
+        self.iid_type = "H" if obj_name.startswith("Pe") else obj_name[:1]
         self.session = session
         self.n_iid = 0
         self.max_iid = 0
 
-    def get_batch(self, iid_count: int):
+    def reserve(self, iid_count: int):
         """
         Create an object with a reservation of 'id_count' ID values from the
         database counter fot the type of 'obj_name'.
