@@ -31,6 +31,8 @@ import shareds
 #from neo4j.exceptions import ClientError #, ConstraintError
 
 #---- (change uuid_to_iid) Replace uuid keys by iid and set b.cd_schema ----
+# --- For DB_SCHEMA_VERSION = '2022.1.3', 9.6.2022/HRo & JMä
+
 from pe.neo4j.util import IsotammiId
 
 IID_1_batches_with_missing_iids = """
@@ -103,9 +105,8 @@ def uuid_to_iid():
                 session.run(IID_c_update_batch_schema,
                             bid=batch_id, schema_ver=DB_SCHEMA_VERSION)
                 print(f"# ... generate_iids: {batch_id!r} updated")
-        # returns number of batches and objects processed
-        return n_batches, n_objects
 
+        return n_batches, n_objects
 
     def remove_uuids(jobs_u):
         """ For given list of batches b not having current b.db_schema value
@@ -137,7 +138,6 @@ def uuid_to_iid():
                                 bid=batch_id, schema_ver=DB_SCHEMA_VERSION)
 
         print(f"# ...remove_uuids: {n_batches} batches, {n_objects} uuid removals")
-        # returns number of batches and objects processed
         return n_batches, n_objects
 
 
@@ -193,7 +193,7 @@ def do_schema_fixes():
         @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
     """
 
-    # --- For DB_SCHEMA_VERSION = '2022.1.2', 4.6.2022/HRo
+    # --- For DB_SCHEMA_VERSION = '2022.1.3', 9.6.2022/HRo & JMä
 
     # For all batches b:
     #    - if found objects with missing a.iid: generate a.iid and remove a.uiid
@@ -203,6 +203,7 @@ def do_schema_fixes():
 
 #---- (change uuid_to_iid) ----
 
+    #  --- For DB_SCHEMA_VERSION = '2022.1.1', 1.4.2022/JMä
 
     STATS_link_to_from = """
         MATCH (b:Root) -[:STATS]-> (x:Stats)
@@ -239,43 +240,6 @@ def do_schema_fixes():
             print(f" -- updated properties in {removed} Root objects")
 
     return
-
-    # # --- For DB_SCHEMA_VERSION = '2022.1.1', 1.4.2022/JMä
-    # STATS_link_to_from = """
-    #     MATCH (b:Root) -[:STATS]-> (x:Stats)
-    #     DETACH DELETE x"""
-    # with shareds.driver.session() as session: 
-    #     result = session.run(STATS_link_to_from)
-    #     counters = shareds.db.consume_counters(result)
-    #     stats_removed = counters.nodes_deleted
-    #     if stats_removed:
-    #         print(f" -- removed {stats_removed} old stats with forwards link (:Root) -[:STATS]-> (:Stats)")
-    #         # New stats are created with backwards link (:Root) <-[:STATS]- (:Stats)")
-
-    # DOES_AUDIT_ts = """
-    #     MATCH () -[r:DOES_AUDIT]-> () WHERE NOT r.timestamp IS null
-    #         SET r.ts_from = r.timestamp
-    #         SET r.timestamp = null        
-    #     """
-    # with shareds.driver.session() as session: 
-    #     result = session.run(DOES_AUDIT_ts)
-    #     counters = shareds.db.consume_counters(result)
-    #     rel_changed = int(counters.properties_set / 2)
-    #     if rel_changed:
-    #         print(f" -- updated properties in {rel_changed} DOES_AUDIT relations")
-
-    # clear_root_audited = """
-    #     MATCH (r:Root) WHERE NOT r.audited IS null
-    #         SET r.audited = null        
-    #     """
-    # with shareds.driver.session() as session: 
-    #     result = session.run(clear_root_audited)
-    #     counters = shareds.db.consume_counters(result)
-    #     removed = int(counters.properties_set)
-    #     if removed:
-    #         print(f" -- updated properties in {removed} Root objects")
-
-    # return
 
     # --- For DB_SCHEMA_VERSION = '2021.2.0.4', deleted 22.1.2022/JMä
     # from bl.batch.root import State
