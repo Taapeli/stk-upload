@@ -47,7 +47,8 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 
 # ====== Database schema ======
 # Change (increment) this, if schema must be updated
-DB_SCHEMA_VERSION = '2022.1.3'
+# The value is also stored in each Root node
+DB_SCHEMA_VERSION = '2022.1.4'
 # =============================
 
 
@@ -87,16 +88,16 @@ def initialize_db():
 
         constr_list = {
             "Root":{"id"},
-            "Citation":{"uuid","iid"},
-            "Event":{"uuid","iid"},
-            "Family":{"uuid","iid"},
-            "Media":{"uuid","iid"},
-            "Note":{"uuid","iid"},
-            "Person":{"uuid","iid"},
-            "Place":{"uuid","iid"},
-            "Repository":{"uuid","iid"},
+            "Citation":{"iid"},
+            "Event":{"iid"},
+            "Family":{"iid"},
+            "Media":{"iid"},
+            "Note":{"iid"},
+            "Person":{"iid"},
+            "Place":{"iid"},
+            "Repository":{"iid"},
+            "Source":{"iid"},
             "Role":{"name"},
-            "Source":{"uuid","iid"},
             "User":{"email", "username"}
         }
         check_constraints(constr_list)
@@ -341,8 +342,8 @@ def create_year_indexes():
 
 
 def check_constraints(needed:dict):
-    # Create missing UNIQUE constraints from given nodes and parameters.
-
+    ''' Create missing UNIQUE constraints from given nodes and parameters.
+    '''
     for label,props in needed.items():
         for prop in props:
             create_unique_constraint(label, prop)
@@ -415,6 +416,30 @@ def create_constraint(label, prop):
             return
         except Exception as e:
             logger.error(f'database.accessDB.create_constraint: {e.__class__.__name__} {e}' )
+            raise
+    return
+
+def remove_prop_constraints(prop):
+    """ Remove unique constraints for given property.
+    """
+    with shareds.driver.session() as session:
+        try:
+            list_indexes = """
+                SHOW UNIQUE CONSTRAINTS 
+                YIELD name, labelsOrTypes, properties
+                    WHERE $prop IN properties"""
+            names = []
+            result = session.run(list_indexes, prop=prop)
+            for name, labels, props in result:
+                names.append(name)
+                print(f'Removing Unique constraints for {labels[0]}.{props[0]}')
+
+            for name in names:
+                session.run("DROP CONSTRAINT "+name+" IF EXISTS")
+            print(f'Removed {len(names)} Unique constraints for {prop}')
+            
+        except Exception as e:
+            logger.error(f'database.accessDB.remove_all_uuid_constraints: {e.__class__.__name__} {e}' )
             raise
     return
 
