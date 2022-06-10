@@ -35,43 +35,11 @@ import shareds
 
 from pe.neo4j.util import IsotammiId
 
-IID_1_batches_with_missing_iids = """
-    MATCH (b:Root)
-        WHERE b.db_schema IS NULL OR NOT b.db_schema = $schema_ver
-    OPTIONAL MATCH (b) --> (a) WHERE a.iid IS NULL
-    WITH b, id(a) AS uid, labels(a)[0] AS lbl
-        ORDER BY b.id DESC, lbl
-        LIMIT $limit
-    RETURN b.id AS batch_id, b.db_schema AS schema, lbl, COLLECT(uid) AS uids
-"""
-IID_a_change_uuid_to_iid = """
-    MATCH (b:Root{id:$bid}) --> (a)
-        WHERE $lbl IN labels(a) AND a.iid IS NULL
-    WITH a LIMIT 1
-        SET a.iid=$iid, a.uuid = NULL
-"""
-IID_b_batch_remove_uuids = """
-    MATCH (b:Root{id:$bid})
-    OPTIONAL MATCH (b) --> (a)
-        WHERE a.uuid IS NOT NULL
-    WITH b, a LIMIT $limit
-        SET a.uuid = NULL
-    RETURN COUNT(a)
-"""
-IID_c_update_batch_schema = """
-    MATCH (b:Root {id:$bid}) 
-        SET b.db_schema = $schema_ver
-"""
-
 def uuid_to_iid():
-    """ 1. For all batches b
-            a) for each chunk b of missing a.iid keys
-                - Allocate set of iid keys
-                - for each a: set a.iid, remove a.uuid
-            - update b.db_schema
-            b) for each chunk b with no a.iid key
-                - remove uuid
-            - update b.db_schema
+    """ 1. For each batch b browse objects a:
+            - add missing a.iid keys and remove a.uuid keys
+            - remove a.uuid
+            - finally update b.db_schema
     """
     from database.accessDB import DB_SCHEMA_VERSION, remove_prop_constraints
 
@@ -80,120 +48,131 @@ def uuid_to_iid():
         """ Remove all uuid contraints. """
         remove_prop_constraints("uuid")
 
-    def set_iid_keys(jobs_i):
-        """ For given list of batches b, their node labels and list of node a uniq_ids,
+    def set_iid_keys(batch_id, uniq_ids):
+        """ For given list of node labels and list of node a uniq_ids,
             - for each node a set a.iid and remove a.uuid
             - finally set b.db_schema for the batch
             After that all objects has a.iid key
         """
+        q_change_uuid_to_iid = """
+            MATCH (a) WHERE ID(a) = $uid
+            SET a.iid=$iid, a.uuid = NULL"""
         n_objects = 0
-        n_batches = 0
-        batch_prev = ""
-        for batch_id, schema, label, uids in jobs_i:
+        #n_batches = 0
+        for label, uids in uniq_ids:
             chunck_size = len(uids)
             n_objects += chunck_size
             iid_generator = IsotammiId(session, obj_name=label)
             iid_generator.reserve(chunck_size)
             properties_set = 0
-            for _n in range(chunck_size):
+            for n in range(chunck_size):
                 iid = iid_generator.get_one()
+                uniq_id = uids[n]
 
-                result = session.run(IID_a_change_uuid_to_iid,
-                                     bid=batch_id, lbl=label, iid=iid)
-                counters = shareds.db.consume_counters(result)
-                properties_set += counters.properties_set
+                _result = session.run(q_change_uuid_to_iid,
+                                      uid=uniq_id, iid=iid)
 
-            print(f"# ... set_iid_keys: set {properties_set}/{chunck_size} keys for {label!r} in {batch_id!r}")
-            
-            if schema != DB_SCHEMA_VERSION and batch_id != batch_prev:
-                # All iid keys set in this batch. (There are no nodes with both uuid and n iid)
-                n_batches += 1
-                batch_prev = batch_id
-                session.run(IID_c_update_batch_schema,
-                            bid=batch_id, schema_ver=DB_SCHEMA_VERSION)
-                print(f"# ... set_iid_keys: {batch_id!r} updated")
+                #counters = shareds.db.consume_counters(result)
+                #properties_set += counters.properties_set
 
-        return n_batches, n_objects
-
-    def remove_uuid_keys(jobs_u):
-        """ For given list of batches b not having current b.db_schema value
-            - for each node with a.uiid remove a.uuid
-            - finally set b.db_schema for the batch
-            After that no object has a.uuid key
-        """
-        n_objects = 0
-        n_batches = 0
-
-        for batch_id in jobs_u:
-            cnt = -1
-            while cnt != 0: # Loop until no changes in database
-                cnt = 0
-
-                result = session.run(IID_b_batch_remove_uuids,
-                                     bid=batch_id, limit=1000)
-
-                for record in result: # Actually 0 or 1 records
-                    cnt = record[0]
-                    if cnt > 0:
-                        n_objects += cnt
-                        print(f"# ... remove_uuid_keys: {cnt} keys removed from {batch_id!r}")
-                if cnt == 0:
-                    # All uuids removed from this batch
-                    n_batches += 1
-
-                    session.run(IID_c_update_batch_schema,
-                                bid=batch_id, schema_ver=DB_SCHEMA_VERSION)
-
-        if n_objects:
-            print(f"# ... remove_uuid_keys: {n_batches} batches, {n_objects} uuid removals")
-        return n_batches, n_objects
+            #print(f"# ... set_iid_keys: {batch_id!r} set {properties_set}/{chunck_size} {label!r} keys")
+            print(f"# ... set_iid_keys: {batch_id!r} set {chunck_size} {label!r} keys")
+        return n_objects
 
 
     # =========== uuid_to_iid starts here ==============
 
     remove_uuid_contraints()
 
+    q_get_batches = """
+        MATCH (b:Root) 
+        WHERE b.db_schema IS NULL OR NOT b.db_schema = $schema_ver
+        RETURN b.id ORDER BY b.id DESC """
+    q_search_missing_iids = """
+        MATCH (b:Root{id:$bid})
+        OPTIONAL MATCH (b) --> (a) WHERE a.iid IS NULL
+        WITH labels(a)[0] AS lbl, id(a) AS uid
+            ORDER BY lbl LIMIT $limit
+        RETURN lbl, COLLECT(uid) AS uids"""
+    q_remove_uuids = """
+        MATCH (b:Root{id:$bid})
+        OPTIONAL MATCH (b) --> (a) WHERE a.uuid IS NOT NULL
+        WITH b, a LIMIT $limit
+            SET a.uuid = NULL
+        RETURN COUNT(a)"""
+    q_update_batch_schema = """
+        MATCH (b:Root {id:$bid}) 
+            SET b.db_schema = $schema_ver"""
+
+
     with shareds.driver.session() as session:
         total_batches = 0
         total_nodes = 0
-        cnk = 500
-        done = False
-        while not done:
-            # For a chunk of batches find objects having missing a.iid
-            jobs_i = []
-            jobs_u = []
-            done = True
-            prev = ""
-            print(f"#uuid_to_iid: next {cnk} for {DB_SCHEMA_VERSION}")
-            result = session.run(IID_1_batches_with_missing_iids,
-                                 limit=cnk, schema_ver=DB_SCHEMA_VERSION)
+        limit = 1000
+        batches = []
 
-            for batch_id, schema, label, uids in result:
+        # 1. List all batches
 
-                # Should find and remove a.uuid keys
-                if batch_id != prev:
-                    jobs_u.append(batch_id)
-                    prev = batch_id
-                if label:
-                    # Generate a.iid (and remove a.uuid)
-                    # uids is a list of uniq_ids needing new a.iid keys
-                    jobs_i.append((batch_id, schema, label, uids))
-                done = False
+        result = session.run(q_get_batches, schema_ver=DB_SCHEMA_VERSION)
 
-            if jobs_i:
-                a_batches, a_nodes = set_iid_keys(jobs_i)
-                #print(f"#uuid_to_iid: {a_batches} batches, {a_nodes} iid creations")
-                total_batches += a_batches
-                total_nodes += a_nodes
-            if jobs_u:
-                _b_batches, _b_nodes = remove_uuid_keys(jobs_u)
-                #print(f"#uuid_to_iid: {b_batches} batches, {b_nodes} uuid deletions")
-                # total_batches += b_batches
-                # total_nodes += b_nodes
+        for record in result:
+            batch_id = record[0]
+            batches.append(batch_id)
+
+        # 2. For each batch
+
+        for batch_id in batches:
+
+            # 2.1 Find objects without a.iid
+
+            done = False
+            n_iid_set = 0
+            while not done:
+                obj_ids = []
+                done = True
+                #print(f"#uuid_to_iid: next {limit} objects, schema={DB_SCHEMA_VERSION!r}")
+
+                result = session.run(q_search_missing_iids, bid=batch_id, limit=limit)
+
+                for label, uids in result:
+                    if label:
+                        obj_ids.append((label, uids))
+                        done = False
+    
+                # 2.2 Set a.iid to those found
+
+                if obj_ids:
+                    a_nodes = set_iid_keys(batch_id, obj_ids)
+
+                    #print(f"#uuid_to_iid: {batch_id}: {a_nodes} iid creations")
+                    n_iid_set += a_nodes
+                    total_nodes += a_nodes
+                    total_batches += 1
+
+            # 2.3 Remove a.uuid parameters, where still exists
+
+            done = False
+            n_removed = 0
+            while not done:
+                done = True
+    
+                result = session.run(q_remove_uuids, bid=batch_id, limit=1000)
+    
+                cnt = result.single()[0]
+                if cnt > 0:
+                    done = False
+                    n_removed += cnt
+                    print(f"# ... remove_uuid_keys: {batch_id!r}: {cnt} uuid keys removed")
+
+            # 2.4 Batch done; Update Root.db_chema
+
+            session.run(q_update_batch_schema,
+                        bid=batch_id, schema_ver=DB_SCHEMA_VERSION)
+            print(f"#uuid_to_iid: {batch_id!r} complete, {n_iid_set} keys generated")
             pass
 
         print(f"#uuid_to_iid: TOTAL {total_batches} batch updates,"\
-              f" {total_nodes} iid creations")
+              f" {total_nodes} iid creations, {n_removed} uuid removals.")
     return
 
 
