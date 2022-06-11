@@ -48,7 +48,7 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 # ====== Database schema ======
 # Change (increment) this, if schema must be updated
 # The value is also stored in each Root node
-DB_SCHEMA_VERSION = '2022.1.6'
+DB_SCHEMA_VERSION = '2022.1.7'
 # =============================
 
 
@@ -378,7 +378,7 @@ def try_fixing_duplicate_roots():
     uniq_ids = []
     with shareds.driver.session() as session:
         result = session.run(SetupCypher.find_empty_roots)
-        for uniq_id, id in result:
+        for uniq_id, _id in result:
             uniq_ids.append(uniq_id)
             logger.info(f'database.accessDB.try_fixing_duplicate_roots: empty Root: {uniq_id}:{id}')
         if uniq_ids:
@@ -421,6 +421,7 @@ def create_constraint(label, prop):
 
 def remove_prop_constraints(prop):
     """ Remove unique constraints for given property.
+        NOTE. Uses Cypher 4.4 "Show" clause!
     """
     with shareds.driver.session() as session:
         try:

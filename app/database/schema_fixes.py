@@ -44,9 +44,9 @@ def uuid_to_iid():
     from database.accessDB import DB_SCHEMA_VERSION, remove_prop_constraints
 
 
-    def remove_uuid_contraints():
-        """ Remove all uuid contraints. """
-        remove_prop_constraints("uuid")
+    # def remove_uuid_contraints():
+    #     """ Remove all uuid contraints. """
+    #     remove_prop_constraints("uuid")
 
     def set_iid_keys(batch_id, uniq_ids):
         """ For given list of node labels and list of node a uniq_ids,
@@ -82,7 +82,8 @@ def uuid_to_iid():
 
     # =========== uuid_to_iid starts here ==============
 
-    remove_uuid_contraints()
+    #Todo:  NOT Cypher 1.1 compliant!
+    #remove_uuid_contraints()
 
     q_get_batches = """
         MATCH (b:Root) 
