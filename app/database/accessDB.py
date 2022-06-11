@@ -48,7 +48,7 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 # ====== Database schema ======
 # Change (increment) this, if schema must be updated
 # The value is also stored in each Root node
-DB_SCHEMA_VERSION = '2022.1.5'
+DB_SCHEMA_VERSION = '2022.1.6'
 # =============================
 
 
