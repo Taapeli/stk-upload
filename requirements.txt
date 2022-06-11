@@ -1,5 +1,5 @@
 bcrypt==3.1.6
-Flask==1.1.1
+Flask>=2.1.0
 Flask-BabelEx==0.9.4
 Flask-Security==3.0.0
 neo4j==1.7.2
