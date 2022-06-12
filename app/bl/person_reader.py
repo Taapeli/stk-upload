@@ -399,7 +399,8 @@ class PersonReaderTx(DataService):
                                 "Citation, Note or Media excepted, got {label}"
                             )
 
-            print(f'#+ - found {len(citations)} Citations, {len(notes)} Notes, {len(medias)} Medias from {len(new_ids)} nodes')
+            # print(f'#+ - found {len(citations)} Citations, {len(notes)} Notes,"\
+            #       f" {len(medias)} Medias from {len(new_ids)} nodes')
             # for uniq_id, note in notes.items():
             #     print(f'#+ - {uniq_id}: {note}')
             all_citations.update(citations)

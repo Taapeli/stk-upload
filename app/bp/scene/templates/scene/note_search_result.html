@@ -50,10 +50,10 @@ item:
 	    			<br>
 	    			{% if r.url %}
 		    			<a href={{ r.url }} class="inlink">
-		    			{{ r.id }} {{ r.description }} {{ r.pname }}
+		    			<span class="gedcom_id">{{ r.id }}</span> {{ r.description }} {{ r.pname }}
 		    			</a>
 	    			{% else %}
-	    				{{ r.id }}
+	    				<span class="gedcom_id">{{ r.id }}</span>
     				{% endif %}
 	    		{% endfor %}
 	    		

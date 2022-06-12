@@ -311,6 +311,10 @@ msgstr "Tapahtumat"
 msgid "Families"
 msgstr "Perheet"
 
+msgid "See family"
+msgstr "Katso perhe"
+
+
 #: bl/gramps/xml_dom_handler.py:240
 #: bp/gramps/templates/gramps/scripting.html:38
 #: bp/scene/templates/scene/event_vue.html:83

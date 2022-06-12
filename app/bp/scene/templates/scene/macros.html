@@ -140,17 +140,8 @@
     {#  Formats object keys and timestamp for display. Positioned at right margin.
         If 2nd arguments (like "350px") is present, leave the given right margin.
      #}
-    {% if obj.iid %}
-    <input id="isotammi_id" type="text" value="{{obj.iid}}" style="display:None">
-    <span class="isotammi_id copy-fld" title="Isotammi ID"
-        onclick="toClipboard('isotammi_id')">{{obj.iid}}</span> /
-    {% else %}
-    <input id="my_uuid" type="text" value="{{obj.uuid}}" style="display:None">
-    <tt title="{{ _('Copy UUID key') }}" class="copy-fld" 
-        onclick="toClipboard('my_uuid')">{{obj.uuid_short()}}</tt> /
-    {% endif -%}
-    <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
-    <span class="id" title="{{ _('number') }}">#{{obj.uniq_id}}</span>
+    <span class="isotammi_id" title="Isotammi-ID">{{obj.iid}}</span> /
+    <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span>
     {% if obj.change %}
     <span id="changetime" title="{{ _('latest change time and contributor') }}"
         {% if margin %}style='margin-right:{{margin}}'{% endif %}
@@ -196,7 +187,7 @@
             <span class="typedesc">{{pn.type|transl('nt')}}</span>
          {% endif %}
          <a href="/person/{{person.iid}}" class="inlink"
-            title="{{ _('See Person\'s Details') }}">{{ person_name_long(pn) }}</a>
+            title="{{ _('see details of person %(id)s', id=person.iid) }}">{{ person_name_long(pn) }}</a>
      {% else %}
       <small><br> – 
          {% if pn.type != "Birth Name" %}
@@ -239,7 +230,7 @@
     <span class="myself">({{ _('self') }})</span>
     {% else %}
     <a href="/person/{{p.iid}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=p.iid) }} (nr. {{p.uniq_id}})">
+        title="{{ _('see details of person %(id)s', id=p.iid) }}">
         {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
 	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
 	    {% else %}{{ _('Anonymous') }}</a>

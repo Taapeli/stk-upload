@@ -121,12 +121,8 @@ th span.man-man, th span.wife-wife { color: #020299;}
         {% if f.dates %}
                 <span class="{{f.dates.calendar_css()}}">{{f.dates}}</span> 
         {% endif %}
-                <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
-        {% if f.iid %}
-                <span class="idno" title="Isotammi ID">{{f.iid}}</span>
-        {% else %}
-                <span class="idno" title="{{ _('Key') }}">#{{f.uniq_id}}</span>
-        {% endif %}
+                <br><span class="isotammi_id" title="Isotammi-ID">{{f.iid}}</span>
+                <span class="gedcom_id" title="{{ _('Gedcom ID') }}">{{f.id}}</span> 
                 </td>
 
             <td class="ColumnSpouse">
