@@ -1,7 +1,7 @@
 <div class="tab-bottom">
     <div class="tab-list">
-        <a hx-get="/scene/hx-person/famtree?uuid={{person.uuid}}">{{ _("Families") }}</a>
-        <a hx-get="/scene/hx-person/fanchart?uuid={{person.uuid}}" class="selected">{{ _("Two-way fanchart") }}</a>
+        <a hx-get="/scene/hx-person/famtree/{{person.iid}}">{{ _("Families") }}</a>
+        <a hx-get="/scene/hx-person/fanchart/{{person.iid}}" class="selected">{{ _("Two-way fanchart") }}</a>
     </div>
     <div class="tab-content">
     </div>
@@ -77,9 +77,9 @@
     };
 
     const handleClick = (d, i) => {
-        if (d.data.uuid != null) {
+        if (d.data.iid != null) {
             var searchParams = new URLSearchParams(window.location.search);
-            searchParams.set('uuid', d.data.uuid);
+            searchParams.set('iid', d.data.iid);
             searchParams.set('fanchart', true);
             var newParams = searchParams.toString();
             window.location.search = newParams;

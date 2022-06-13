@@ -91,17 +91,17 @@ class StkEncoder(json.JSONEncoder):
 
 class NodeObject:
     """
-    Class representing Neo4j node type objects
+    Class representing Neo4j Node type objects.
     """
 
     def __init__(self, uniq_id:int=None):
         """
         Constructor.
 
-        Optional uniq_id may be uuid identifier (str) or database key (int).
+        Optional uniq_id may be database key (int).
         """
-        self.uuid = None  # UUID / isotammi_id
-        self.uniq_id = None  # Neo4j object id
+        self.uuid = None 
+        self.uniq_id = uniq_id  # Neo4j object id
         self.change = 0  # Object change time
         self.id = ""  # Gedcom object id like "I1234"
         self.handle = ""  # Gramps handle (?)
@@ -110,19 +110,20 @@ class NodeObject:
         # TODO Define constants for values:
         #     candicate, audit_requested, auditing, accepted,
         #     mergeing, common, rejected
-        self.isotammi_id = None  # Containing
-        # - object type id ("I" = Person etc.)
+        self.iid = None  # Containing
+        # - object type id ("H" = Human person etc.)
         # - running number in Crockford Base 32 format
         # - ISO 7064 checksum (2 digits)
-        if uniq_id:
-            if isinstance(uniq_id, int):
-                self.uniq_id = uniq_id
-            else:
-                self.uuid = uniq_id
+
+        # if uniq_id:
+        #     if isinstance(uniq_id, int):
+        #         self.uniq_id = uniq_id
+        #     else:
+        #         self.uuid = uniq_id
 
     def __str__(self):
-        uuid = self.uuid if self.uuid else "-"
-        return f'(NodeObject {uuid}/{self.uniq_id}/{self.id} date {self.dates})"'
+        #uuid = self.uuid if self.uuid else "-"
+        return f'(NodeObject {self.iid}/{self.uniq_id}/{self.id} date {self.dates})"'
 
     def timestamp_str(self):
         """ My timestamp to display format. """
@@ -181,35 +182,18 @@ class NodeObject:
         return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
 
     @staticmethod
-    def new_isotammi_id(dataservice, obj_type_letter):
-        """Generates a new Isotammi id."""
-
-        get_new_id ="""
-MERGE (a:Isotammi_id {id:$id_type})
-ON CREATE SET a.counter = 1
-ON MATCH SET a.counter = a.counter + 1
-RETURN a.counter AS n_Isotammi_id"""
-
-        result = dataservice.tx.run(get_new_id, id_type=obj_type_letter)
-        iid = result.single()[0]
-##        print(f"new_isotammi_id lock value: {iid}")
-        isotammi_id = NodeObject.split_with_hyphen(obj_type_letter + base32.encode(iid, checksum=False))
-
-        print(f"new_isotammi_id: {iid} -> {isotammi_id}")
-        return isotammi_id
-
-    @staticmethod
     def newUuid():
-        """Generates a new uuid key.
+        """Generates a new uuid key. DON'T!
 
         See. https://docs.python.org/3/library/uuid.html
         """
-        return uuid.uuid4().hex
+        return None
+        #return uuid.uuid4().hex
 
     def uuid_short(self):
-        """ Display uuid (or isotammi_id) in short form. 
+        """ Display uuid (or iid) in short form. 
         
-            Real uuid shortened, isotammi_id need is not too long
+            Real uuid shortened, iid need is not too long
         """
         if self.uuid:
             if len(self.uuid) > 20:
@@ -217,13 +201,6 @@ RETURN a.counter AS n_Isotammi_id"""
             return self.uuid
         else:
             return ""
-
-    # def uuid_str(self):
-    #     """ Display uuid in short form, or show self.uniq_id is missing. """
-    #     if self.uuid:
-    #         return self.uuid[:6]
-    #     else:
-    #         return f"({self.uniq_id})"
 
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """

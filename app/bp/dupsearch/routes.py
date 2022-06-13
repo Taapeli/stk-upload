@@ -35,6 +35,7 @@ from bp.dupsearch.models import search
 from ui.context import UserContext
 from bl.person_reader import PersonReaderTx
 from bl.base import Status
+from bl.material import Material
 
 
 @bp.route('/dupsearch',  methods=['GET'])
@@ -135,47 +136,45 @@ def upload():
     res = search.upload(file)
     return jsonify(res)
 
+def _get_person(service, iid):
+    result = service.get_person_data(iid)
+
+    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    if Status.has_failed(result):
+        flash(f'{result.get("statustext","error")}', "error")
+        person = None
+        objs = []
+    else:
+        person = result.get("person")
+        objs = result.get("objs", [])
+        person.root = result.get("root")
+        return person, objs
+
 
 @bp.route('/dupsearch/compare', methods=['GET'])
 @login_required
 @roles_required('audit')
 def compare():
-    uuid1 = request.args.get("uuid1")
-    uuid2 = request.args.get("uuid2")
-    batch_id1 = request.args.get("batch_id1")
-    batch_id2 = request.args.get("batch_id2")
-    state1 = request.args.get("state1")
-    state2 = request.args.get("state2")
-    
-    def get_person(service, uuid):
-        result = service.get_person_data(uuid)
-
-        # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
-        if Status.has_failed(result):
-            flash(f'{result.get("statustext","error")}', "error")
-            person = None
-            objs = []
-        else:
-            person = result.get("person")
-            objs = result.get("objs", [])
-            person.root = result.get("root")
-            return person, objs
-        
+    """ Compare by something? """
+    iid1 = request.args.get("iid1")
     u_context1 = UserContext()
-    u_context2 = UserContext()
-    if state1 == "Accepted":        
+    u_context1.material.batch_id =  request.args.get("batch_id1")
+    u_context1.state = request.args.get("state1")
+    if u_context1.state == State.ROOT_ACCEPTED: # "Accepted":        
         u_context1.user = None
-        
-    if state2 == "Accepted":        
+
+    iid2 = request.args.get("iid2")
+    u_context2 = UserContext()
+    u_context2.material.batch_id =  request.args.get("batch_id2")
+    u_context2.state = request.args.get("state2")
+    if u_context2.state == State.ROOT_ACCEPTED: #"Accepted":        
         u_context2.user = None
 
-    u_context1.batch_id = batch_id1
     with PersonReaderTx("read_tx", u_context1) as service:
-        person1,objs1 = get_person(service, uuid1)
+        person1,objs1 = _get_person(service, iid1)
 
-    u_context2.batch_id = batch_id2
     with PersonReaderTx("read_tx", u_context2) as service:
-        person2,objs2 = get_person(service, uuid2)
+        person2,objs2 = _get_person(service, iid2)
     
 #     return render_template('/compare.html',
 #                            batch_id1=batch_id1, 
@@ -234,10 +233,10 @@ def compare():
         return line
     
     return render_template('/compare.html',
-                           batch_id1=batch_id1, 
+                           batch_id1=u_context1.material.batch_id, 
                            person1=person1,
                            objs1=objs1,
-                           batch_id2=batch_id2, 
+                           batch_id2=u_context2.material.batch_id, 
                            person2=person2,
                            objs2=objs2)
 
@@ -245,42 +244,26 @@ def compare():
 @login_required
 @roles_required('audit')
 def compare2():
-    uuid1 = request.args.get("uuid1")
-    uuid2 = request.args.get("uuid2")
-    batch_id1 = request.args.get("batch_id1")
-    batch_id2 = request.args.get("batch_id2")
-    state1 = request.args.get("state1")
-    state2 = request.args.get("state2")
-    
-    def get_person(service, uuid):
-        result = service.get_person_data(uuid)
-
-        # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
-        if Status.has_failed(result):
-            flash(f'{result.get("statustext","error")}', "error")
-            person = None
-            objs = []
-        else:
-            person = result.get("person")
-            objs = result.get("objs", [])
-            person.root = result.get("root")
-            return person, objs
-        
-    u_context1 = UserContext(user_session, current_user, request)
-    u_context2 = UserContext(user_session, current_user, request)
-    if state1 == "Accepted":        
+    """ Compare by names. """
+    iid1 = request.args.get("iid1")
+    u_context1 = UserContext()
+    u_context1.material.batch_id =  request.args.get("batch_id1")
+    u_context1.state = request.args.get("state1")
+    if u_context1.state == State.ROOT_ACCEPTED: # "Accepted":        
         u_context1.user = None
-        
-    if state2 == "Accepted":        
+
+    iid2 = request.args.get("iid2")
+    u_context2 = UserContext()
+    u_context2.material.batch_id =  request.args.get("batch_id2")
+    u_context2.state = request.args.get("state2")
+    if u_context2.state == State.ROOT_ACCEPTED: #"Accepted":        
         u_context2.user = None
-
-    u_context1.batch_id = batch_id1
+    
     with PersonReaderTx("read_tx", u_context1) as service:
-        person1,objs1 = get_person(service, uuid1)
+        person1,objs1 = _get_person(service, iid1)
 
-    u_context2.batch_id = batch_id2
     with PersonReaderTx("read_tx", u_context2) as service:
-        person2,objs2 = get_person(service, uuid2)
+        person2,objs2 = _get_person(service, iid2)
     
 #     return render_template('/compare.html',
 #                            batch_id1=batch_id1, 
@@ -338,8 +321,8 @@ def compare2():
         print("line2:",line)
         return line
     
-    name1 = person_name(person1)
-    name2 = person_name(person2)
+    # name1 = person_name(person1)
+    # name2 = person_name(person2)
     lines1 = []
     lines2 = []
     
@@ -353,9 +336,9 @@ def compare2():
 
     #lines2.append("Names")
     #lines2.append(name2)
-    namelines = HtmlDiff().make_table(lines1,lines2,context=False)
+    # namelines = HtmlDiff().make_table(lines1,lines2,context=False)
     namelines = ""
-    for (linenum1,line1),(linenum2,line2),flag in _mdiff(lines1,lines2):
+    for (_linenum1,line1),(_linenum2,line2),_flag in _mdiff(lines1,lines2):
         if line1 == '\n': line1 = ""  # placeholders for the missing columns
         line = f"<tr><td><td colspan=3>" + fixline(line1) + "</td>\n<td colspan=3>" + fixline(line2) + "</td></tr>\n"
         namelines += line
@@ -377,7 +360,7 @@ def compare2():
         lines2 = []
         lines1.extend(eventtypes1[etype])
         lines2.extend(eventtypes2[etype])
-        for (linenum1,line1),(linenum2,line2),flag in _mdiff(lines1,lines2):
+        for (_linenum1,line1),(_linenum2,line2),_flag in _mdiff(lines1,lines2):
             if line1 == '\n': line1 = "<td><td>"  # placeholders for the missing columns
             line = f"<tr><td class=ColumnEvent>{etype}<td class=ColumnDate>" + fixline(line1) + "</td>\n<td class=ColumnDate>" + fixline(line2) + "</td></tr>\n"
             table += line
@@ -391,9 +374,9 @@ def compare2():
     return render_template('/compare2.html',
                            namelines=namelines,
                            difftable=difftable,
-                           batch_id1=batch_id1, 
+                           batch_id1=u_context1.material.batch_id, 
                            person1=person1,
                            objs1=objs1,
-                           batch_id2=batch_id2, 
+                           batch_id2=u_context2.material.batch_id, 
                            person2=person2,
                            objs2=objs2)

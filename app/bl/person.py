@@ -196,13 +196,13 @@ class PersonReader(DataService):
         #     surnames = self.dataservice.dr_get_surname_list_common(count=count)
         return surnames
 
-    def get_person_minimal(self, uuid, privacy):
+    def get_person_minimal(self, iid, privacy):
         """
-        Get all parents of the person with given uuid.
+        Get all parents of the person with given iid.
         Returns a list for compatibility with get_parents and get_children.
         """
         last_year_allowed = datetime.now().year - PRIVACY_LIMIT
-        nodes = self.dataservice.dr_get_family_members_by_id(uuid, which="person")
+        nodes = self.dataservice.dr_get_family_members_by_id(iid, which="person")
         for n in nodes:
             n["too_new"] = n["death_high"] > last_year_allowed
         if privacy:
@@ -248,8 +248,8 @@ class PersonWriter(DataService):
         super().__init__(service_name, u_context, tx=tx)
         self.dataservice.tx = None
 
-    def set_primary_name(self, uuid, old_order):
-        self.dataservice.dr_set_primary_name(uuid, old_order)
+    def set_primary_name(self, iid, old_order):
+        self.dataservice.dr_set_primary_name(iid, old_order)
 
     def set_name_orders(self, uid_list):
         self.dataservice.dr_set_name_orders(uid_list)
@@ -339,23 +339,6 @@ class PersonBl(Person):
         Constructor creates a new PersonBl intance.
         """
         Person.__init__(self)
-        self.user = None  # Researcher batch owner, if any
-        self.names = []  # models.gen.person_name.Name
-
+        self.names = []
         self.events = []  # bl.event.EventBl
-        self.notes = []  #
-
-
-    # @staticmethod --> bl.person.PersonWriter.update_person_confidences
-    # def update_person_confidences(tx, dataservice, person_ids: list):
-    #     """Sets a quality rating for given list of Person.uniq_ids.
-
-    def remove_privacy_limit_from_families(self):
-        """Clear privacy limitations from self.person's families.
-
-        Origin from models.person_reader
-        """
-        for family in self.families_as_child:
-            family.remove_privacy_limits()
-        for family in self.families_as_parent:
-            family.remove_privacy_limits()
+        self.notes = []

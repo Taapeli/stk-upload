@@ -410,7 +410,7 @@ def get_progress(batch_id):
             "progress": 99 * done // total if total else 50,
             "batch_id": batch_id,
         }
-        print(f"# bp.gramps.routes.get_progress: {done}/{total}, {rsp}")
+        print(f"#bp.gramps.routes.get_progress: {done}/{total}, {rsp}")
         return jsonify(rsp)
 
 @bp.route("/gramps/commands/<batch_id>")

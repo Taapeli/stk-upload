@@ -12,7 +12,7 @@
     	<tr>
 	{%if may_edit %}    	
     	<td><input type="radio" name="primary_name" 
-    			   hx-put="/scene/set_primary_name/{{ person.uuid }}/{{ pname.order }}"
+    			   hx-put="/scene/set_primary_name/{{ person.iid }}/{{ pname.order }}"
     			   hx-target="#names"
     			   {% if pname.order == 0 %}checked{% endif %}
 		   >

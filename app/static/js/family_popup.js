@@ -19,8 +19,8 @@ var vm = new Vue({
 	delimiters: ['${', '}'],
 	data: {
 		message: 'Not yet run',
-		person_uuid: 'a7388323a535424a8dca5730408628bf', // 'paste here',
-		uuid: '?',
+		person_iid: 'H-8bf', // 'paste here',
+		iid: '?',
 		families: [],
 		currentIndex: 0,	// 1..n, 0 = no familiy selected
 		status: '',
@@ -38,7 +38,7 @@ var vm = new Vue({
 		},
 	},
 	methods: {
-		showPopup(uuid, event) {
+		showPopup(iid, event) {
 			// When the user clicks, open the popup window
 
 			// Set popup position near clicked icon
@@ -47,10 +47,10 @@ var vm = new Vue({
 			var pop = document.getElementById('pop-window');
 			pop.style.left = x+"px";
 			pop.style.top = y+"px";
-			//console.log("showPopup for person "+uuid);
+			//console.log("showPopup for person "+iid);
 
 			// Get vm.families
-			vm.getFamilies(uuid);
+			vm.getFamilies(iid);
 		},
 		hidePopup() {
 			isShow = false;
@@ -90,10 +90,10 @@ var vm = new Vue({
 			return dates['as_str'];
 		},
 
-		getFamilies(q_uuid) {
+		getFamilies(q_iid) {
 			// Asks for data for all families of given person
-			console.log("families for person "+q_uuid);
-			axios.post("/scene/json/families", {uuid:q_uuid})
+			console.log("families for person "+q_iid);
+			axios.post("/scene/json/families", {iid:q_iid})
 			.then (function(rsp) {
 				vm.families = [];
 				vm.status = "Status code: "+String(rsp.status);
@@ -110,18 +110,18 @@ var vm = new Vue({
 						fam.dates = rec.dates;
 						fam.role = rec.role;
 						fam.role_lang = rec.role_lang;
-						fam.href = "/scene/family?uuid="+rec.uuid;
+						fam.href = "/family/"+rec.iid;
 						fam.parents = [];
 						fam.children = [];
 						fam.title = "Perhe "+fam.id;
 
 						for (parent of rec.parents) {
 							var p = {};
-							p.uuid = parent.uuid;
-							p.is_self = (p.uuid == q_uuid);
+							p.iid = parent.iid;
+							p.is_self = (p.iid == q_iid);
 							p.name = parseSortname(parent.sortname);
 							p.role = parent.role_lang;
-							p.href = "/scene/person?uuid="+parent.uuid;
+							p.href = "/person/"+parent.iid;
 							if (parent.event_birth) {
 								p.birth_date = parent.event_birth.dates;
 							} else p.birth_date = null;
@@ -129,10 +129,10 @@ var vm = new Vue({
 						}
 						for (child of rec.children) {
 							fam.has_children = true;
-							var c = {uuid:child.uuid};
-							c.is_self = (c.uuid == q_uuid);
+							var c = {iid:child.iid};
+							c.is_self = (c.iid == q_iid);
 							c.name = parseSortname(child.sortname);
-							c.href = "/scene/person?uuid="+child.uuid
+							c.href = "/person/"+child.iid
 							c.gender = child.role_lang; // Clear text in user language
 							if (child.event_birth) {
 								c.birth_date = child.event_birth.dates;

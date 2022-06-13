@@ -30,8 +30,8 @@ logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
 from .base import NodeObject, Status
-from .person import PersonBl
-from .person_name import Name
+#from .person import PersonBl
+#from .person_name import Name
 
 from pe.dataservice import DataService
 
@@ -45,7 +45,6 @@ class Family(NodeObject):
             change
             id              esim. "F0001"
             uniq_id         int database key
-            uuid            str UUID key
             rel_type        str suhteen tyyppi
             priv            str private if exists
             father_sortname str search key
@@ -77,7 +76,6 @@ class FamilyBl(Family):
             change
             id              esim. "F0001"
             uniq_id         int database key
-            uuid            str UUID key
             rel_type        str "marriage" etc.
             father_sortname str search key
             mother_sortname str search key
@@ -194,7 +192,7 @@ class FamilyReader(DataService):
             families = self.hide_privacy_protected_families(families)
         return families
 
-    def get_family_data(self, uuid: str, wanted=[]):
+    def get_family_data(self, iid: str, wanted=[]):
         """Read Family information including Events, Children, Notes and Sources.
 
         Returns a dict {item:Family, status=0, statustext:None}
@@ -249,8 +247,8 @@ class FamilyReader(DataService):
                res is dict {item, status, statustext}
         """
         material = self.user_context.material
-        ret_results = self.dataservice.dr_get_family_by_uuid(self.use_user,
-                                                             material, uuid)
+        ret_results = self.dataservice.dr_get_family_by_id(self.use_user,
+                                                           material, iid)
         # ret_results {'item': <bl.family.FamilyBl>, 'status': Status}
         if Status.has_failed(ret_results):
             return ret_results
@@ -320,9 +318,9 @@ class FamilyReader(DataService):
 
         return ret_results
 
-    def get_person_families(self, uuid: str):
+    def get_person_families(self, iid: str):
         """Get all families for given person in marriage date order."""
-        res = self.dataservice.dr_get_person_families_uuid(uuid)
+        res = self.dataservice.dr_get_person_families_iid(iid)
         items = res.get("items")
         if items:
             items.sort(key=lambda x: x.dates)

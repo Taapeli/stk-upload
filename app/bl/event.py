@@ -100,18 +100,18 @@ class EventReader(DataService):
     - Returns a Result object.
     """
 
-    def get_event_data(self, uuid, material:Material, args):
+    def get_event_data(self, iid, material:Material, args):
         """
         Get event data and participants: Persons and Families.
 
         The args may include
-        - 'uuid': 'f726974424974652bf6a1e3623c6bad3'
+        - 'iid': 'H-ad3'
         - 'referees': True
         - 'notes': True
         """
         statustext = ""
         res_dict = {}
-        res = self.dataservice.dr_get_event_by_uuid(self.use_user, uuid, material)
+        res = self.dataservice.dr_get_event_by_iid(self.use_user, iid, material)
         if Status.has_failed(res):
             return {
                 "item": None,
@@ -197,6 +197,6 @@ class EventWriter:
         self.writeservice = writeservice
         self.u_context = u_context
 
-    def update_event(self, uuid, args):
-        rec = self.writeservice.dr_update_event(uuid, args)
+    def update_event(self, iid, args):
+        rec = self.writeservice.dr_update_event(iid, args)
         return rec

@@ -4,7 +4,7 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-<script src="/static/infobox.js"></script>
+<!-- script src="/static/infobox.js"></script -->
 <style>
 .right {
     text-align: right;
@@ -32,7 +32,8 @@
 {% include "flash_messages.html" %}
 
         <p><b>{{ _('Materials of type') }}:</b>
-           <span class="typedesc" style="font-size:110%">
+        {% set m_code = user_context.material.m_type | lower | replace(" ","") -%}
+           <span class="typedesc matr_{{m_code}}" style="font-size:110%">
                {{ _(user_context.material.m_type )}}
            </span>
         </p>
@@ -43,7 +44,7 @@
                     <th>{{ _('User') }}</th>
                     <th>{{ _('Batch')}}</th>
                     <th>{{ _('File') }}, {{ _('Description')|lower }}</i></th>
-                    <th>{{ _('Status') }}</th>
+                    <th>{{ _('State') }}</th>
                 </tr>
        {% for root in materials %}
                 <tr>

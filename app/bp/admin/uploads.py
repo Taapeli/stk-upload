@@ -169,7 +169,7 @@ def get_meta(root):
 def i_am_alive(metaname, parent_thread):
     """ Checks if background thread is still alive """
     while os.path.exists(metaname) and parent_thread.is_alive():
-        print(f"bp.admin.uploads.i_am_alive: counts {list(parent_thread.progress.values())}")
+        print(f"#bp.admin.uploads.i_am_alive: counts {list(parent_thread.progress.values())}")
         update_metafile(metaname, progress=parent_thread.progress)
         time.sleep(shareds.PROGRESS_UPDATE_RATE)
 

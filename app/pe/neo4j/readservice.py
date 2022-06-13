@@ -122,7 +122,7 @@ class Neo4jReadService(ConcreteService):
         obj.role = role if role != "Primary" else None
         return obj
 
-    def dr_get_material_batches(self, user: str, uuid: str):
+    def dr_get_material_batches(self, user: str, iid: str):
         """
         Get list of my different materials and accepted all different materials.
 
@@ -131,14 +131,14 @@ class Neo4jReadService(ConcreteService):
         event = None
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher(session, CypherEvent.get_an_event, user, uuid=uuid)
+                result = run_cypher(session, CypherEvent.get_an_event, user, iid=iid)
                 for record in result:
                     if record["e"]:
                         # Record: <Record
                         #    e=<Node id=16580 labels=frozenset({'Event'})
                         #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
                         #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
-                        #            'type': 'Baptism', 'uuid': 'dc969e6831dc47d7b6719edd94fe6007'}>
+                        #            'type': 'Baptism', 'iid': 'E-6007'}>
                         #    root=<Node id=31100 labels=frozenset({'Audit'})
                         #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
                         # >
@@ -186,7 +186,7 @@ class Neo4jReadService(ConcreteService):
                 #        <Node id=492911 labels={'Event'}
                 #            properties={'datetype': 0, 'change': 1577803201, 'description': '',
                 #                'id': 'E7750', 'date2': 1853836, 'type': 'Birth', 'date1': 1853836,
-                #                'uuid': '794e0c9e6f15479cb5d33dc4cf245a7d'}>
+                #                'iid': 'E-a7d'}>
                 #    ]
                 # >
                 name_node = record["name"]
@@ -202,9 +202,9 @@ class Neo4jReadService(ConcreteService):
 
     # ------ Events -----
 
-    def dr_get_event_by_uuid(self, user: str, uuid: str, material: Material):
+    def dr_get_event_by_iid(self, user: str, iid: str, material: Material):
         """
-        Read an Event using uuid and username.
+        Read an Event using iid and username.
 
         Returns dict {item, status, statustext}
         """
@@ -212,7 +212,7 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             try:
                 result = run_cypher(
-                    session, CypherEvent.get_an_event, user, material, uuid=uuid
+                    session, CypherEvent.get_an_event, user, material, iid=iid
                 )
                 for record in result:
                     if record["e"]:
@@ -220,7 +220,7 @@ class Neo4jReadService(ConcreteService):
                         #    e=<Node id=16580 labels=frozenset({'Event'})
                         #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
                         #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
-                        #            'type': 'Baptism', 'uuid': 'dc969e6831dc47d7b6719edd94fe6007'}>
+                        #            'type': 'Baptism', 'iid': 'E-6007'}>
                         #    root=<Node id=31100 labels=frozenset({'Audit'})
                         #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
                         # >
@@ -254,7 +254,7 @@ class Neo4jReadService(ConcreteService):
                     #        properties={'sortname': 'Lekatt#Johan#', 'death_high': 1809,
                     #            'sex': 1, 'change': 1585409698, 'confidence': '2.0',
                     #            'birth_low': 1773, 'birth_high': 1773, 'id': 'I0718',
-                    #            'uuid': '80198ed21942468db2ecf777a3de88fa', 'death_low': 1807}>
+                    #            'iid': 'H-88fa', 'death_low': 1807}>
                     #    name=<Node id=24572 labels=frozenset({'Name'})
                     #        properties={'firstname': 'Johan', 'surname': 'Lekatt', 'prefix': '',
                     #            'suffix': '', 'type': 'Also Known As', 'order': 0}>
@@ -347,17 +347,16 @@ class Neo4jReadService(ConcreteService):
 
     # ------ Families -----
 
-    def dr_get_family_by_uuid(self, user: str, material: Material, uuid: str):
+    def dr_get_family_by_id(self, user: str, material: Material, iid: str):
         """
-        Read a Family using uuid and user info.
+        Read a Family using isotammi_id or iid and user info.
 
         Returns dict {item, status, statustext}
         """
         family = None
-
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(
-                session, CypherFamily.get_a_family, user, material, f_uuid=uuid
+                session, CypherFamily.get_family_iid, user, material, f_id=iid
             )
             for record in result:
                 if record["f"]:
@@ -365,7 +364,7 @@ class Neo4jReadService(ConcreteService):
                     #    f=<Node id=590928 labels={'Family'}
                     #        properties={'datetype': 1, 'father_sortname': 'Gadd#Peter Olofsson#',
                     #            'change': 1560931512, 'rel_type': 'Unknown', 'id': 'F0002',
-                    #            'date2': 1766592, 'date1': 1766592, 'uuid': '9488e3c76c6645f8b024902f2119e15a'}>
+                    #            'date2': 1766592, 'date1': 1766592, 'iid': 'F-e15a'}>
                     #    root=<Node id=384349 labels={'Batch'}
                     #        properties={'mediapath': '/home/rinminlij1l1j1/paikat_pirkanmaa_yhdistetty_06052020.gpkg.media',
                     #            'file': 'uploads/juha/paikat_pirkanmaa_yhdistetty_6.5.2020_clean.gramps',
@@ -490,7 +489,7 @@ class Neo4jReadService(ConcreteService):
                     #    parent=<Node id=550536 labels={'Person'}
                     #        properties={'sortname': 'Linderoos#Johan Wilhelm#', 'death_high': 1844,
                     #            'confidence': '2.0', 'sex': 1, 'change': 1585409699, 'birth_low': 1788,
-                    #            'birth_high': 1788, 'id': 'I1314', 'uuid': '8a4d49509d26434bb3bf63c4657af9e2',
+                    #            'birth_high': 1788, 'id': 'I1314', 'iid': 'F-f9e2',
                     #            'death_low': 1844}>
                     #    name=<Node id=550537 labels={'Name'}
                     #        properties={'firstname': 'Johan Wilhelm', 'type': 'Birth Name',
@@ -498,7 +497,7 @@ class Neo4jReadService(ConcreteService):
                     #    birth=<Node id=543985 labels={'Event'}
                     #        properties={'datetype': 0, 'change': 1585409702, 'description': '',
                     #            'id': 'E4460', 'date2': 1831101, 'type': 'Birth', 'date1': 1831101,
-                    #            'uuid': '5f9b78fe1a644834bc52715d58d61774'}>
+                    #            'iid': 'E-774'}>
                     #   death=<Node id=543986 labels={'Event'} properties={'id': 'E4461', ...}>
                     # >
 
@@ -585,13 +584,13 @@ class Neo4jReadService(ConcreteService):
                         #    event=<Node id=543995 labels={'Event'}
                         #        properties={'datetype': 0, 'change': 1585409702, 'description': '',
                         #            'id': 'E0170', 'date2': 1860684, 'type': 'Marriage', 'date1': 1860684,
-                        #            'uuid': '38c0d5bdc0f245c88bfb1083228db219'}>
+                        #            'iid': 'E-b219'}>
                         e = EventBl_from_node(event_node)
 
                         place_node = record["place"]
                         if place_node:
                             #    place=<Node id=531912 labels={'Place'}
-                            #        properties={'id': 'P1077', 'type': 'Parish', 'uuid': '55c069c9cee54092a88366a15b75d1a4',
+                            #        properties={'id': 'P1077', 'type': 'Parish', 'iid': 'P-1a4',
                             #            'pname': 'Loviisan srk', 'change': 1585562874}>
                             #    names=[ <Node id=531913 labels={'Place_name'}
                             #                properties={'name': 'Loviisan srk', 'lang': ''}>
@@ -604,16 +603,16 @@ class Neo4jReadService(ConcreteService):
                         for inside_node, inside_rel, inside_names in record["inside"]:
                             if inside_node:
                                 # <Node id=5494 labels=frozenset({'Place'})
-                                #     properties={'id': 'P0024', 'type': 'Country', 'uuid': '199338cdcd754760acfe3d2165c2805c',
+                                #     properties={'id': 'P0024', 'type': 'Country', 'iid': 'P-5c',
                                 #         'pname': 'Venäjä', 'change': 1585409705}>
                                 # <Relationship id=6192
                                 #     nodes=(
                                 #         <Node id=5788 labels=frozenset({'Place'})
                                 #             properties={'coord': [60.70911111111111, 28.745330555555558],
                                 #                 'pname': 'Viipuri', 'change': 1585409704, 'id': 'P0011',
-                                #                 'type': 'City', 'uuid': '4bea93a25e7841cfb2160f00dccbfcf5'}>,
+                                #                 'type': 'City', 'iid': 'P-cf5'}>,
                                 #         <Node id=5494 labels=frozenset({'Place'})
-                                #             properties={'id': 'P0024', 'type': 'Country', 'uuid': '199338cdcd754760acfe3d2165c2805c',
+                                #             properties={'id': 'P0024', 'type': 'Country', 'iid': 'P-805c',
                                 #                 'pname': 'Venäjä', 'change': 1585409705}>
                                 #     )
                                 #     type='IS_INSIDE'
@@ -658,12 +657,12 @@ class Neo4jReadService(ConcreteService):
                     # <Record
                     #    src_id=543995
                     #    repository=<Node id=529693 labels={'Repository'}
-                    #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'uuid': 'ef2369ac6e67450abc9ed8c0bd04ce45', 'change': 1585409708}>
+                    #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'iid': 'R-e45', 'change': 1585409708}>
                     #    source=<Node id=534511 labels={'Source'}
-                    #        properties={'id': 'S0876', 'stitle': 'Loviisan srk - vihityt 1794-1837', 'uuid': '8b29ab449849434c984dcf4885b5882b',
+                    #        properties={'id': 'S0876', 'stitle': 'Loviisan srk - vihityt 1794-1837', 'iid': 'S-82b',
                     #            'spubinfo': 'MKO131-133', 'change': 1585409705, 'sauthor': ''}>
                     #    citation=<Node id=537795 labels={'Citation'}
-                    #        properties={'id': 'C2598', 'page': '1817 Mars 13', 'uuid': 'e0841eb28d8143ce92bbb2c9a43f4d23',
+                    #        properties={'id': 'C2598', 'page': '1817 Mars 13', 'iid': 'N-d23',
                     #            'change': 1585409707, 'confidence': '2'}>
                     # >
                     repository_node = record["repository"]
@@ -702,12 +701,12 @@ class Neo4jReadService(ConcreteService):
                     # <Record
                     #    src_id=543995
                     #    repository=<Node id=529693 labels={'Repository'}
-                    #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'uuid': 'ef2369ac6e67450abc9ed8c0bd04ce45', 'change': 1585409708}>
+                    #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'iid': 'R-45', 'change': 1585409708}>
                     #    source=<Node id=534511 labels={'Source'}
-                    #        properties={'id': 'S0876', 'stitle': 'Loviisan srk - vihityt 1794-1837', 'uuid': '8b29ab449849434c984dcf4885b5882b',
+                    #        properties={'id': 'S0876', 'stitle': 'Loviisan srk - vihityt 1794-1837', 'iid': 'S-82b',
                     #            'spubinfo': 'MKO131-133', 'change': 1585409705, 'sauthor': ''}>
                     #    citation=<Node id=537795 labels={'Citation'}
-                    #        properties={'id': 'C2598', 'page': '1817 Mars 13', 'uuid': 'e0841eb28d8143ce92bbb2c9a43f4d23',
+                    #        properties={'id': 'C2598', 'page': '1817 Mars 13', 'iid': 'C-d23',
                     #            'change': 1585409707, 'confidence': '2'}>
                     # >
                     note_node = record["note"]
@@ -730,7 +729,7 @@ class Neo4jReadService(ConcreteService):
         """
         Get the minimal data required for creating graphs with person labels.
         The target depends on which = ('person', 'parents', 'children').
-        For which='person', the oid should contain an uuid.
+        For which='person', the oid should contain an iid.
         For 'parents' and 'children' the oid should contain a database uniq_id.
         The 'death_high' value is always returned for privacy checks.
         """
@@ -746,7 +745,7 @@ class Neo4jReadService(ConcreteService):
                 result_list.append(
                     {
                         "uniq_id": record["uniq_id"],
-                        "uuid": record["uuid"],
+                        "iid": record["iid"],
                         "sortname": record["sortname"],
                         "gender": record["gender"],
                         "events": record["events"],
@@ -755,7 +754,7 @@ class Neo4jReadService(ConcreteService):
                 )
         return result_list
 
-    def dr_get_person_families_uuid(self, uuid):
+    def dr_get_person_families_iid(self, iid):
         """
         Get the Families where Person is a member (parent or child).
 
@@ -767,22 +766,22 @@ class Neo4jReadService(ConcreteService):
         families = {}
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = session.run(CypherFamily.get_person_families, p_uuid=uuid)
+                result = session.run(CypherFamily.get_person_families, p_iid=iid)
                 for record in result:
                     # <Record
                     #    family=<Node id=552768 labels={'Family'}
                     #        properties={'datetype': 3, 'father_sortname': 'Åkerberg#Mathias#Andersson',
                     #            'change': 1585409700, 'rel_type': 'Married', 'mother_sortname': 'Unonius#Catharina Ulrica#',
-                    #            'id': 'F0011', 'date2': 1842189, 'date1': 1834016, 'uuid': '01ddf9439408445fb725d580e060c02a'}>
+                    #            'id': 'F0011', 'date2': 1842189, 'date1': 1834016, 'iid': 'F-2a'}>
                     #    type='PARENT'
                     #    role='father'
                     #    person=<Node id=547514 labels={'Person'}
                     #        properties={'sortname': 'Åkerberg#Mathias#Andersson', 'death_high': 1831, 'confidence': '2.6',
                     #            'sex': 1, 'change': 1585409697, 'birth_low': 1750, 'birth_high': 1750, 'id': 'I0022',
-                    #            'uuid': '265b22a5a1544ce2b66371fa195f9d89', 'death_low': 1831}>
+                    #            'iid': 'P-d89', 'death_low': 1831}>
                     #    birth=<Node id=539796 labels={'Event'}
                     #        properties={'datetype': 0, 'change': 1585409700, 'description': '', 'id': 'E0238',
-                    #            'date2': 1792123, 'type': 'Birth', 'date1': 1792123, 'uuid': 'f6d314f7e47a431e9a7df5bbdd090fa7'}>
+                    #            'date2': 1792123, 'type': 'Birth', 'date1': 1792123, 'iid': 'E-fa7'}>
                     # >
                     family_node = record["family"]
                     fid = family_node.id
@@ -801,7 +800,7 @@ class Neo4jReadService(ConcreteService):
                     if record["type"] == "PARENT":
                         person.role = record["role"]
                         family.parents.append(person)
-                        if uuid == person.uuid:
+                        if iid == person.iid:
                             family.role = "parent"
                             print(
                                 f"# Family {family.id} {family.role} --> {person.id} ({person.role})"
@@ -809,7 +808,7 @@ class Neo4jReadService(ConcreteService):
                     else:
                         person.role = "child"
                         family.children.append(person)
-                        if uuid == person.uuid:
+                        if iid == person.iid:
                             family.role = "child"
                             print(f"# Family {family.id} {family.role} --> {person.id}")
 
@@ -854,7 +853,7 @@ class Neo4jReadService(ConcreteService):
     #             # <Record
     #             #    place=<Node id=514341 labels={'Place'}
     #             #        properties={'coord': [61.49, 23.76],
-    #             #            'id': 'P0300', 'type': 'City', 'uuid': '8fbe632144584d30aa75701b49f15484',
+    #             #            'id': 'P0300', 'type': 'City', 'iid': 'P-484',
     #             #            'pname': 'Tampere', 'change': 1585409704}>
     #             #    name=<Node id=514342 labels={'Place_name'}
     #             #        properties={'name': 'Tampere', 'lang': ''}>
@@ -889,7 +888,7 @@ class Neo4jReadService(ConcreteService):
     #     # Return sorted by first name in the list p.names -> p.pname
     #     return sorted(ret, key=lambda x: x.pname)
     #
-    # def dr_get_place_w_names_notes_medias(self, user, uuid, lang, material):
+    # def dr_get_place_w_names_notes_medias(self, user, iid, lang, material):
     #     """Returns the PlaceBl with PlaceNames, Notes and Medias included."""
     #     pl = None
     #     node_ids = []  # List of uniq_is for place, name, note and media nodes
@@ -899,14 +898,14 @@ class Neo4jReadService(ConcreteService):
     #             CypherPlace.get_w_names_notes,
     #             user,
     #             material,
-    #             uuid=uuid,
+    #             iid=iid,
     #             lang=lang,
     #         )
     #         for record in result:
     #             # <Record
     #             #    place=<Node id=514286 labels={'Place'}
     #             #        properties={'coord': [60.45138888888889, 22.266666666666666],
-    #             #            'id': 'P0007', 'type': 'City', 'uuid': '494a748a2730417ca02ccaa11685e21a',
+    #             #            'id': 'P0007', 'type': 'City', 'iid': 'P-e21a',
     #             #            'pname': 'Turku', 'change': 1585409704}>
     #             #    name=<Node id=514288 labels={'Place_name'}
     #             #        properties={'name': 'Åbo', 'lang': 'sv'}>
@@ -981,7 +980,7 @@ class Neo4jReadService(ConcreteService):
     #                 record["name"],
     #                 locid,
     #                 parent=0,
-    #                 data={"type": record["type"], "uuid": record["uuid"]},
+    #                 data={"type": record["type"], "iid": record["iid"]},
     #             )
     #     ret = []
     #     for tnode in t.tree.expand_tree(mode=t.tree.DEPTH):
@@ -1007,7 +1006,7 @@ class Neo4jReadService(ConcreteService):
     #                 # >
     #             lv = t.tree.depth(n)
     #             p = PlaceBl(uniq_id=tnode, ptype=n.data["type"], level=lv)
-    #             p.uuid = n.data["uuid"]
+    #             p.iid = n.data["iid"]
     #             node = record["name"]
     #             if node:
     #                 p.names.append(PlaceName_from_node(node))
@@ -1039,7 +1038,7 @@ class Neo4jReadService(ConcreteService):
     #         #    indi=<Node id=523974 labels={'Person'}
     #         #        properties={'sortname': 'Borg#Maria Charlotta#', 'death_high': 1897,
     #         #            'confidence': '', 'sex': 2, 'change': 1585409709, 'birth_low': 1841,
-    #         #            'birth_high': 1841, 'id': 'I0029', 'uuid': 'e9bc18f7e9b34f1e8291de96002689cd',
+    #         #            'birth_high': 1841, 'id': 'I0029', 'iid': 'H-9cd',
     #         #            'death_low': 1897}>
     #         #    role='Primary'
     #         #    names=[<Node id=523975 labels={'Name'}
@@ -1049,7 +1048,7 @@ class Neo4jReadService(ConcreteService):
     #         #    event=<Node id=523891 labels={'Event'}
     #         #            properties={'datetype': 0, 'change': 1585409700, 'description': '',
     #         #                'id': 'E0080', 'date2': 1885458, 'type': 'Birth', 'date1': 1885458,
-    #         #                'uuid': '160a0c75659145a4ac09809823fca5f9'}>
+    #         #                'iid': 'E-5f9'}>
     #         # >
     #         e = EventBl_from_node(record["event"])
     #         # Fields uid (person uniq_id) and names are on standard in EventBl
@@ -1127,18 +1126,18 @@ class Neo4jReadService(ConcreteService):
                 #    owner_type='PASSED'
                 #    source=<Node id=333338 labels={'Source'}
                 #        properties={'id': 'S0029', 'stitle': 'Lapinjärvi vihityt 1788-1803 vol  es346',
-                #            'uuid': '4637e07dcc7f42c09236a8482fb01b7c', 'spubinfo': '', 'sauthor': '',
+                #            'iid': 'S-b7c', 'spubinfo': '', 'sauthor': '',
                 #            'change': 1532807569}>
                 #    notes=[
                 #        <Node id=445002 labels={'Note'}
                 #            properties={'id': 'N2207', 'text': '', 'type': 'Source Note',
-                #                'uuid': 'e6efcc1fbcad4dcd85352fd95cd5bf35', 'url': 'http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=3788',
+                #                'iid': 'N-f35', 'url': 'http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=3788',
                 #                'change': 1532807569}>]
                 #    repositories=[
                 #        [   'Book',
                 #            <Node id=393661 labels={'Repository'}
                 #                properties={'id': 'R0003', 'rname': 'Lapinjärven seurakunnan arkisto',
-                #                    'type': 'Archive', 'uuid': 'b6171feb05bc47de87ee509a79821d8f',
+                #                    'type': 'Archive', 'iid': 'R-8f',
                 #                    'change': 1577815469}>]] cit_cnt=0 ref_cnt=0>
 
                 # <Record
@@ -1175,25 +1174,25 @@ class Neo4jReadService(ConcreteService):
 
         return sources
 
-    def dr_get_source_w_repository(self, user: str, material: Material, uuid: str):
+    def dr_get_source_w_repository(self, user: str, material: Material, iid: str):
         """Returns the PlaceBl with Notes and PlaceNames included."""
         source = None
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(
-                session, CypherSource.get_single_selection, user, material, uuid=uuid
+                session, CypherSource.get_single_selection, user, material, iid=iid
             )
             for record in result:
                 # <Record
                 #    owner_type='PASSED'
                 #    source=<Node id=340694 labels={'Source'}
                 #        properties={'id': 'S1112', 'stitle': 'Aamulehti (sanomalehti)',
-                #            'uuid': '3ac9c9e3c3a0490f8e064225b90139e1', 'spubinfo': '',
+                #            'iid': 'S-e1', 'spubinfo': '',
                 #            'sauthor': '', 'change': 1585409705}>
                 #    notes=[]
                 #    reps=[
                 #        ['Book', <Node id=337715 labels={'Repository'}
                 #            properties={'id': 'R0002', 'rname': 'Kansalliskirjaston digitoidut sanomalehdet',
-                #                'type': 'Collection', 'uuid': '2fc57cc64197461eb94a4bcc02da9ff9',
+                #                'type': 'Collection', 'iid': 'R-f9',
                 #                'change': 1585409708}>]]
                 # >
                 source_node = record["source"]
@@ -1213,7 +1212,7 @@ class Neo4jReadService(ConcreteService):
                 return {"item": source, "status": Status.OK}
             return {
                 "status": Status.NOT_FOUND,
-                "statustext": f"source uuid={uuid} not found",
+                "statustext": f"source iid={iid} not found",
             }
 
     def dr_get_source_citations(self, sourceid: int):
@@ -1239,16 +1238,16 @@ class Neo4jReadService(ConcreteService):
                 #                #     referencing directly Citation
                 #    citation=<Node id=342041 labels={'Citation'}
                 #        properties={'id': 'C2840', 'page': '11.10.1907 sivu 2',
-                #            'uuid': '03b2c7a7dac84701b67612bf10f60b6b', 'confidence': '2',
+                #            'iid': 'C-b6b', 'confidence': '2',
                 #            'change': 1585409708}>
                 #    notes=[<Node id=384644 labels={'Note'}
-                #        properties={'id': 'N3556', 'text': '', 'type': 'Citation', 'uuid': '4a377b0e936d4e68a72cad64a4925db9',
+                #        properties={'id': 'N3556', 'text': '', 'type': 'Citation', 'iid': 'C-db9',
                 #            'url': 'https://digi.kansalliskirjasto.fi/sanomalehti/binding/609338?page=2&term=Sommer&term=Maria&term=Sommerin&term=sommer',
                 #            'change': 1585409709}>]
                 #    near=<Node id=347773 labels={'Person'}
                 #            properties={'sortname': 'Johansson#Gustaf#', 'death_high': 1920, 'confidence': '2.0',
                 #                'sex': 1, 'change': 1585409699, 'birth_low': 1810, 'birth_high': 1810,
-                #                'id': 'I1745', 'uuid': 'dfc866bfa9274071b37ccc2f6c33abed',
+                #                'id': 'I1745', 'iid': 'H-bed',
                 #                'death_low': 1852}>
                 #    far=[]
                 # >
@@ -1259,7 +1258,7 @@ class Neo4jReadService(ConcreteService):
                 #    near=<Node id=359150 labels={'Event'}
                 #        properties={'datetype': 0, 'change': 1585409703, 'description': '',
                 #            'id': 'E5451', 'date2': 1953097, 'type': 'Death', 'date1': 1953097,
-                #            'uuid': '467b67c1a0f84b8baed150b030a7bef0'}>
+                #            'iid': 'E-f0'}>
                 #    far=[
                 #         [<Node id=347835 labels={'Person'}
                 #            properties={'sortname': 'Sommer#Arthur#',...}>,
@@ -1329,7 +1328,7 @@ class Neo4jReadService(ConcreteService):
                 #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
                 #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
                 #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
-                #            'id': 'O0001', 'uuid': 'b4b11fbd8c054252b51703769e7a6850'}>
+                #            'id': 'O0001', 'iid': 'M-6850'}>
                 #    credit='juha'
                 #    batch_id='2020-01-02.001'
                 #    count=1>
@@ -1344,11 +1343,11 @@ class Neo4jReadService(ConcreteService):
             else:
                 return {"media": media, "status": Status.NOT_FOUND}
 
-    def dr_get_media_single(self, user, material, uuid):
+    def dr_get_media_single(self, user, material, iid):
         """Read a Media object, selected by UUID or uniq_id.
 
         :param: user    username, who has access
-        :parma: uuid    Media node uuid
+        :parma: iid     Media node iid
         """
 
         class MediaReferrer:
@@ -1375,14 +1374,14 @@ class Neo4jReadService(ConcreteService):
         with self.driver.session(default_access_mode="READ") as session:
             try:
                 result = run_cypher_batch(
-                    session, CypherMedia.get_media_by_uuid, user, material, uuid=uuid
+                    session, CypherMedia.get_media_by_iid, user, material, iid=iid
                 )
                 # RETURN media, r, ref, ref2
                 for record in result:
                     media_node = record["media"]
                     crop = record["prop"]
                     ref_node = record["ref"]
-                    ref2_node = record["ref2"]
+                    event_node = record["eref"]
 
                     # - Media node
                     # - cropping
@@ -1416,19 +1415,19 @@ class Neo4jReadService(ConcreteService):
 
                     #    The next object behind the Event
 
-                    if ref2_node:
-                        if ref2_node.id in event_refs:
-                            obj2 = event_refs[ref2_node.id]
+                    if event_node:
+                        if event_node.id in event_refs:
+                            obj2 = event_refs[event_node.id]
                         else:
-                            if "Person" in ref2_node.labels:
-                                obj2 = PersonBl_from_node(ref2_node)
+                            if "Person" in event_node.labels:
+                                obj2 = PersonBl_from_node(event_node)
                                 obj2.label = "Person"
-                            elif "Family" in ref2_node.labels:
-                                obj2 = FamilyBl_from_node(ref2_node)
+                            elif "Family" in event_node.labels:
+                                obj2 = FamilyBl_from_node(event_node)
                                 obj2.label = "Family"
                             else:
                                 raise TypeError(
-                                    f"MediaReader.get_one: unknown type {list(ref2_node.labels)}"
+                                    f"MediaReader.get_one: unknown type {list(event_node.labels)}"
                                 )
                             event_refs[obj2.uniq_id] = obj2
 
@@ -1606,10 +1605,10 @@ class Neo4jReadService(ConcreteService):
     #         for record in result:
     #             place = record["place"]
     #             placename = place["pname"]
-    #             uuid = place["uuid"]
+    #             iid = place["iid"]
     #             count = record["count"]
     #             result_list.append(
-    #                 {"placename": placename, "count": count, "uuid": uuid}
+    #                 {"placename": placename, "count": count, "iid": iid}
     #             )
     #     return result_list
 
@@ -1624,10 +1623,10 @@ class Neo4jReadService(ConcreteService):
     #         for record in result:
     #             place = record["place"]
     #             placename = place["pname"]
-    #             uuid = place["uuid"]
+    #             iid = place["iid"]
     #             count = record["count"]
     #             result_list.append(
-    #                 {"placename": placename, "count": count, "uuid": uuid}
+    #                 {"placename": placename, "count": count, "iid": iid}
     #             )
     #     return result_list
     #
@@ -1638,9 +1637,9 @@ class Neo4jReadService(ConcreteService):
     #         for record in result:
     #             place = record["place"]
     #             placename = place["pname"]
-    #             uuid = place["uuid"]
+    #             iid = place["iid"]
     #             count = record["count"]
     #             result_list.append(
-    #                 {"placename": placename, "count": count, "uuid": uuid}
+    #                 {"placename": placename, "count": count, "iid": iid}
     #             )
     #     return result_list

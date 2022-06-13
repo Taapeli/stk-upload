@@ -19,8 +19,12 @@
 import os
 from datetime import datetime
 
-from bl.base import PRIVACY_LIMIT
+try:
+    from neo4j.graph import Node            # Neo4j 4.x
+except:
+    from neo4j.types.graph import Node      # Neo4j 3.x
 
+from bl.base import NodeObject, PRIVACY_LIMIT
 from bl.citation import Citation
 from bl.comment import Comment
 from bl.dates import DateRange
@@ -35,11 +39,15 @@ from bl.source import SourceBl
 from bl.person_name import Name
 
 
-def init(cls, node):
+def init(cls:NodeObject, node:Node):
+    """
+    Returns bl.NodeObject instance from a Neo4j.graph.node.
+    """
     n = cls()
     n.uniq_id = node.id
     n.id = node["id"]
-    n.uuid = node["uuid"]
+    n.uuid = node.get("uuid","")
+    n.iid = node.get("iid","")
     if node["handle"]:
         n.handle = node["handle"]
     n.change = node.get("change")
@@ -259,7 +267,7 @@ def SourceBl_from_node(node):
     """
     # <Node id=355993 labels={'Source'}
     #     properties={'id': 'S0296', 'stitle': 'Hämeenlinnan lyseo 1873-1972',
-    #         'uuid': 'c1367bbdc6e54297b0ef12d0dff6884f', 'spubinfo': 'Karisto 1973',
+    #         'iid': 'P-84f', 'spubinfo': 'Karisto 1973',
     #         'sauthor': 'toim. Mikko Uola', 'change': 1585409705}>
 
     s = init(SourceBl, node)

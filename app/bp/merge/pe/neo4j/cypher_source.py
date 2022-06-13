@@ -37,7 +37,7 @@ RETURN owner_type, s as source, collect(DISTINCT note) as notes,
 ORDER BY toUpper(s.stitle)"""
 
     _single_set_selection = """
-        WHERE s.uuid=$uuid
+        WHERE s.iid=$iid
 WITH s, owner
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (s) -[:NOTE]-> (n)

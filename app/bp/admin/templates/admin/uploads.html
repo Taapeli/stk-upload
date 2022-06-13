@@ -31,7 +31,7 @@
     {% endif %}
                 <th>{{ _("Material") }}</th>
                 <th>{{ _("Type / description") }}</th>
-                <th>{{ _("Status") }} {{ state_info() }}</th>
+                <th>{{ _("State") }} {{ state_info() }}</th>
                 <th>{{ _("Operations") }}</th>
            </tr>
 
@@ -52,7 +52,8 @@
 	           </td>
 
                <td class="msg_INFO">
-                    <span class="typedesc">{{upload.material_type|transl('material')}}</span>
+        {% set m_code = upload.m_type | lower | replace(" ","") -%}
+                    <span class="typedesc matr_{{m_code}}">{{upload.material_type|transl('material')}}</span>
         {% if upload.description %} 
                     <br><i>{{ upload.description[0:19] }}
             {% if upload.description|length > 19  %}
@@ -107,7 +108,7 @@
 {% endblock %}
 
 <script>
-// Status help text
+// State help text
 var e = document.getElementById('help');
 e.onmouseover = function() {
   document.getElementById('help_box').style.display = 'block';

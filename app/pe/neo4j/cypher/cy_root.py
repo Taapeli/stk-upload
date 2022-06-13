@@ -204,6 +204,11 @@ return root.material as material_type, count(*) as nodes order by material_type"
 where root.state='Candidate' 
 return root order by root.id desc"""
 
+    count_my_all_batches = """
+match (u:UserProfile{username:$user}) --> (root:Root)
+return root.material as material_type, root.state as state, count(root) as count
+order by material_type, state desc"""
+
 #-bl.batch.root.Root.get_user_stats
     get_passed = '''
 match (u:UserProfile) --> (b:Root) 
@@ -264,13 +269,13 @@ WITH a LIMIT 2000
 MATCH (:UserProfile{username:$user}) -[:HAS_ACCESS]-> (c:Root{id:$batch_id})
 DETACH DELETE c"""
 
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_obj_remove_gramps_handles
-    remove_all_handles = """
-match (b:Root {id:$batch_id}) -[*1..3]-> (a)
-where a.handle is not null
-with distinct a
-    remove a.handle
-return count(a),labels(a)[0]"""
+# #-pe.neo4j.updateservice.Neo4jUpdateService.ds_obj_remove_gramps_handles
+#     remove_all_handles = """
+# match (b:Root {id:$batch_id}) -[*1..3]-> (a)
+# where a.handle is not null
+# with distinct a
+#     remove a.handle
+# return count(a),labels(a)[0]"""
 
 #-bl.gramps.xml_dom_handler.DOM_handler.add_missing_links
     add_missing_links = """

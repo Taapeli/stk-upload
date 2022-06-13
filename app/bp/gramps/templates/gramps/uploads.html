@@ -160,7 +160,7 @@ function filenm_changed(input) {
                <th>{{ _("Batch") }}</th>
                <th>{{ _("Gramps file") }}</th>
                <th>{{ _("Person count") }}</th>
-               <th>{{ _("Status") }} {{ state_info() }} </th>
+               <th>{{ _("State") }} {{ state_info() }} </th>
   		</tr>
 
   {% for upload in uploads %}
@@ -192,7 +192,8 @@ function filenm_changed(input) {
             <td>{{upload.xmlname}}
 
     {% if upload.material_type or upload.description %}
-                <br><span class="typedesc">{{upload.material_type|transl('material')}}</span>
+        {% set m_code = upload.material_type | lower | replace(" ","") -%}
+                <br><span class="typedesc matr_{{m_code}}">{{upload.material_type|transl('material')}}</span>
     {% endif -%}
     {% if upload.description %} 
                 <i>{{ upload.description[0:19] }}
@@ -235,7 +236,7 @@ function filenm_changed(input) {
 
 {% endblock %}
 <script>
-// Status help text
+// State help text
 var e = document.getElementById('help');
 e.onmouseover = function() {
   document.getElementById('help_box').style.display = 'block';

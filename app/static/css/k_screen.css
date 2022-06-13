@@ -155,7 +155,12 @@ img#logo {
 
 /* Stk objects
 ----------------------------------------------------- */
-.gedcom_id { color: sienna; text-align: right; 
+.isotammi_id {
+    color: chocolate; 
+    font-family: monospace
+}
+.gedcom_id {
+	color: tan; /* text-align: right; */
     font-family: monospace
 }
 .id { color: sienna; font-size: 80%; text-align: right; 
@@ -212,6 +217,10 @@ td.ColumnEvent ul li i {
     font-size: 84%;
     color: darkmagenta;
 }
+.matr_familytree { color: darkolivegreen; }
+.matr_placedata  { color: indianred; }
+.matr_hiskitree  { color: slateblue; }
+
 .langcode {
     font-variant: small-caps;
     text-transform: uppercase;

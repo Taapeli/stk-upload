@@ -19,6 +19,7 @@
 
 # blacked 15.11.2021/JMä
 from pprint import pprint
+import string
 import base32_lib as base32
 from bl.base import IsotammiException
 from bl.material import Material
@@ -38,11 +39,11 @@ cypher_user_batch_prefix = """
         -[:HAS_ACCESS|:DOES_AUDIT]-> (root:Root{id:$batch_id})
 """
 
-cypher_new_iid = """
-MERGE (a:Isotammi_id {id:$id_type})
-    ON CREATE SET a.counter = 1
-    ON MATCH SET a.counter = a.counter + 1
-RETURN a.counter AS n_Isotammi_id"""
+cypher_block_of_iids = """
+MERGE (a:iid {id:$iid_type})
+    ON CREATE SET a.counter = $iid_count
+    ON MATCH SET a.counter = a.counter + $iid_count
+RETURN a.counter - $iid_count AS new_iid"""
 
 
 def run_cypher(session, cypher:str, username:str, material:Material, **kwargs):
@@ -100,14 +101,18 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
     if not isinstance(material, Material):
         raise IsotammiException("pe.neo4j.util.run_cypher_batch: invalid material")
 
-    if True:
+    if False:
         print("----------- pe.neo4j.util.run_cypher_batch -------------")
+        print("// 1. You may copy to cypher console to set parameters:")
+        print(f":param username => {username!r};")
+        print(f":param batch_id => {material.batch_id!r};")
+        print(f":param material_type => {material.m_type!r};")
+        print(f":param state => {material.state!r};")
+        for key, value in kwargs.items():
+            print (f":param {key} => {value!r};")
+        print("// 2. Copy to cypher console to run command:")
         print(full_cypher)
-        print(f"username={username}")
-        print(f"batch_id={material.batch_id}")
-        print(f"material_type={material.m_type}")
-        print(f"state={material.state}")
-        print(f"kwargs={kwargs}")
+        print("-----------")
     return session.run(full_cypher,
                        username=username, 
                        batch_id=material.batch_id, 
@@ -115,26 +120,51 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
                        **kwargs)
 
 
-def new_isotammi_id(session, obj_name: str):  # obj_type_letter):
-    """ Creates new unique isotammi_id keys when creating objects. 
-   """
+class IsotammiId:
+    """
+    Serves a sequences of unique ID keys by object type from the database.
 
-    def iid_groupper(id_str):
-        """Inserts a hyphen into the id string.
-
-         Examples: H-1, H-1234, H1-2345, H1234-5678
+    Usage:
+    - a = IsotammiId(tx, "People") Create an ID generator using given transaction
+    - a.reserve(100)             Allocates given number of keys
+    - key = a.get_one()            Get next key
+    """
+    def __init__(self, session, obj_name: str):
         """
-        return (
-            id_str[: max(1, len(id_str) - 4)] + "-" + id_str[max(1, len(id_str) - 4) :]
-        )
+        Create an object with a reservation of 'id_count' ID values from the
+        database counter for the type of 'obj_name'.
+        """
+        self.iid_type = "H" if obj_name.startswith("Pe") else obj_name[:1]
+        self.session = session
+        self.n_iid = 0
+        self.max_iid = 0
 
-    if obj_name.startswith("Person"):
-        id_type = "H"
-    else:
-        id_type = obj_name[:1]
-    result = session.run(cypher_new_iid, id_type=id_type)
-    n_iid = result.single()[0]
-    isotammi_id = iid_groupper(id_type + base32.encode(n_iid, checksum=False))
+    def reserve(self, iid_count: int):
+        """
+        Create an object with a reservation of 'id_count' ID values from the
+        database counter fot the type of 'obj_name'.
+        """
+        result = self.session.run(cypher_block_of_iids, iid_type=self.iid_type, iid_count = iid_count)
+        self.n_iid = result.single()[0]
+        self.max_iid = self.n_iid + iid_count - 1
 
-    print(f"new_isotammi_id: {n_iid} -> {isotammi_id}")
-    return isotammi_id
+    def get_one(self) -> str:
+        """
+        Yield the next Isotammi ID properly formatted.
+        """
+        def format_iid(id_str: str) -> str:
+            """
+            Inserts a hyphen into the id string.
+            Examples: H-1, H-1234, H1-2345, H1234-5678
+            """
+            return f'{id_str[: max(1, len(id_str) - 4)]}-{id_str[max(1, len(id_str) - 4) :]}'
+
+        if self.n_iid > self.max_iid:
+            raise IsotammiException("Whole chunk of allocated Isotammi IDs already used."
+                                    f" {self.n_iid} > {self.max_iid}")
+
+        iid = format_iid(self.iid_type + base32.encode(self.n_iid, checksum=False))
+        self.n_iid += 1
+
+##        print(f"new_isotammi_id: {self.n_iid} -> {iid}")
+        return iid

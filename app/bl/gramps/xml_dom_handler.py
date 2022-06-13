@@ -38,7 +38,7 @@ import threading
 from flask_babelex import _
 
 import shareds
-from bl.base import Status
+from bl.base import NodeObject, Status
 from bl.person import PersonBl, PersonWriter
 from bl.person_name import Name
 from bl.family import FamilyBl, FamilyWriter
@@ -51,9 +51,8 @@ from bl.dates import Gramps_DateRange
 from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
-from .batchlogger import LogItem
-
-
+from pe.neo4j.util import IsotammiId
+from bl.gramps.batchlogger import LogItem
 
 
 class DOM_handler:
@@ -61,7 +60,8 @@ class DOM_handler:
     - processes different data groups from given xml file to database
     - collects status log
     """
-
+    TX_SIZE=1000     # Transaction max size
+    
     def __init__(self, infile, current_user, pathname, dataservice):
         """ Set DOM xml_tree and username """
         DOMTree = xml.dom.minidom.parse(open(infile, encoding="utf-8"))
@@ -69,7 +69,7 @@ class DOM_handler:
         self.username = current_user  # current username
         self.dataservice = dataservice
         
-        self.handle_to_node = {}  # {handle:(uuid, uniq_id)}
+        self.handle_to_node = {}  # {handle:(iid, uniq_id)}
         self.person_ids = []  # List of processed Person node unique id's
         self.family_ids = []  # List of processed Family node unique id's
         # self.batch = None                     # Batch node to be created
@@ -77,8 +77,20 @@ class DOM_handler:
         self.file = os.path.basename(pathname)  # for messages
         self.progress = defaultdict(int)
         self.obj_counter = 0
+        self.noterefs_later = []    # NodeObjects with obj.notes to be saved later
+        # self.notes_to_postprocess = NodeObject(uniq_id = 0)
+        # self.notes_to_postprocess.notes = []
+        # self.notes_to_postprocess.id = "URL"
 
-    def remove_handles(self):
+    def get_chunk(self, objs:list, amount):
+        """ Split list to chunks of amount. """
+        i = 0
+        i_amount = int(amount)
+        while i < len(objs):
+            yield objs[i:i+i_amount]
+            i += i_amount
+
+    def unused_remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
         res = self.dataservice.ds_obj_remove_gramps_handles(self.batch.id)
         print(f'# --- removed handles from {res.get("count")} nodes')
@@ -99,7 +111,7 @@ class DOM_handler:
         this_thread = threading.current_thread()
         this_thread.progress = dict(self.progress)
 
-    def save_and_link_handle(self, obj, **kwargs):
+    def test_only_save_and_link_handle(self, obj, **kwargs):
         """Save object and store its identifiers in the dictionary by handle.
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
@@ -111,20 +123,31 @@ class DOM_handler:
         #     self.dataservice.tx.commit()
         #     self.dataservice.tx = shareds.driver.session().begin_transaction()
 
-        self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
+        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
-    def save_and_link_handle2(self, tx, obj, **kwargs):
+    def obsolete_save_and_link_handle2(self, tx, obj, **kwargs):
         """Save object and store its identifiers in the dictionary by handle.
 
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
         obj.save(tx, **kwargs)
-        self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
+        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
-    def complete(self, obj):
-        self.handle_to_node[obj.handle] = (obj.uuid, obj.uniq_id)
+    def complete(self, obj:NodeObject, url_notes = None):
+        """ Complete object saving. """
+        # 1. Store handle to iid, uniq_id conversion
+        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
+        # 2. Note references from url field must be processed later
+        if url_notes:
+            # Create referencing object stub with important parameters
+            parent = NodeObject(obj.uniq_id)
+            parent.id = obj.id
+            parent.notes = url_notes # List of Notes objects
+            self.noterefs_later.append(parent)
+
+        # 3. Progress bar
         self.update_progress(obj.__class__.__name__)
 
     # ---------------------   XML subtree handlers   --------------------------
@@ -155,9 +178,9 @@ class DOM_handler:
         material_type = None
         description = None
         for node in isotammi_node.childNodes:
-            print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
-            if node.nodeName == "#text": print("- data:",node.data)
+            #print("node:",node,type(node),node.nodeName,node.nodeType,node.nodeValue)
             if node.nodeName == "#text":
+                #print("- data:",node.data)
                 pass
             elif node.nodeName == "researcher-info":
                 pass
@@ -166,7 +189,7 @@ class DOM_handler:
             elif node.nodeName == "user_description":
                 description = node.childNodes[0].data.strip()
             else:
-                print("Unsupported element in <isotammi>: {node.nodeName}")
+                print(f"DOM_handler.get_isotammi_metadata: Unsupported element in <isotammi>: {node.nodeName}")
         return (material_type, description)
 
     def handle_dom_nodes(self, tag, title, transaction_function, chunk_max_size):
@@ -174,70 +197,112 @@ class DOM_handler:
 
         """ DOM-objektit pätkitään chunk_max_size-kokoisiin joukkoihin ja tarjotaan handlerille
         """
-        def get_next(objs:list, amount:int):
-            i = 0
-            while i < len(objs):
-                yield objs[i:i+amount]
-                i += amount
 
         """ 
-        ---- Notes transaktioiden sisällä 
+        ---- Process DOM nodes inside transaction 
         """
-        nodes = self.xml_tree.getElementsByTagName(tag)
-#         print("nt",type(nodes))
-#         print(nodes[0:5])
-        message = f"{tag}: {len(nodes)} kpl"
+        dom_nodes = self.xml_tree.getElementsByTagName(tag)
+        message = f"{tag}: {len(dom_nodes)} kpl"
         print(f"***** {message} *****")
         t0 = time.time()
         counter = 0
     
         with shareds.driver.session() as session:
-            for dom_nodes in get_next(nodes, chunk_max_size):
-                chunk_size = len(dom_nodes)
-                #isotammi_id_list = session.read_transaction(..., amount=chunk_size)
+            iid_generator = IsotammiId(session, obj_name=title)
+            for nodes_chunk in self.get_chunk(dom_nodes, chunk_max_size):
+                chunk_size = len(nodes_chunk)
+                iid_generator.reserve(chunk_size)
+                print(f"#handle_dom_nodes: new tx for {chunk_size} {iid_generator.iid_type} nodes")
                 session.write_transaction(transaction_function, 
-                                          nodes=dom_nodes)
-#                                          iids=isotammi_id_list ...)
-                """ def handle_notes(self, tx, dom_objs):
-                """
+                                          nodes=nodes_chunk,
+                                          iids=iid_generator)
                 counter += chunk_size
                 
         self.blog.log_event(
             {"title": title, "count": counter, "elapsed": time.time() - t0}
-        )  # , 'percent':1})
-        # return {'status':status, 'message': message}
+        )
         return counter
 
         
     def handle_citations(self):
-        self.handle_dom_nodes("citation", _("Citations"), self.handle_citations_list, chunk_max_size=1000)
+        self.handle_dom_nodes("citation", _("Citations"),
+                              self.handle_citations_list, chunk_max_size=self.TX_SIZE)
 
     def handle_events(self):
-        self.handle_dom_nodes("event", _("Events"), self.handle_event_list, chunk_max_size=1000)
+        self.handle_dom_nodes("event", _("Events"),
+                              self.handle_event_list, chunk_max_size=self.TX_SIZE)
 
     def handle_families(self):
-        self.handle_dom_nodes("family", _("Families"), self.handle_family_list, chunk_max_size=1000)
+        self.handle_dom_nodes("family", _("Families"),
+                              self.handle_family_list, chunk_max_size=self.TX_SIZE)
 
     def handle_media(self):
-        self.handle_dom_nodes("object", _("Media"), self.handle_media_list, chunk_max_size=1000)
+        self.handle_dom_nodes("object", _("Media"),
+                              self.handle_media_list, chunk_max_size=self.TX_SIZE)
 
     def handle_notes(self):
-        self.handle_dom_nodes("note", _("Notes"), self.handle_note_list, chunk_max_size=1000)
+        self.handle_dom_nodes("note", _("Notes"),
+                              self.handle_note_list, chunk_max_size=self.TX_SIZE)
 
     def handle_people(self):
-        self.handle_dom_nodes("person", _("People"), self.handle_people_list, chunk_max_size=1000)
+        self.handle_dom_nodes("person", _("People"),
+                              self.handle_people_list, 
+                              chunk_max_size=self.TX_SIZE/2)
 
     def handle_places(self):
         self.place_keys = {}
-        self.handle_dom_nodes("placeobj", _("Places"), self.handle_place_list, chunk_max_size=1000)
+        self.handle_dom_nodes("placeobj", _("Places"),
+                              self.handle_place_list, chunk_max_size=self.TX_SIZE)
 
     def handle_repositories(self):
-        self.handle_dom_nodes("repository", _("Repositories"), self.handle_repositories_list, chunk_max_size=1000)
+        self.handle_dom_nodes("repository", _("Repositories"),
+                              self.handle_repositories_list, chunk_max_size=self.TX_SIZE)
 
     def handle_sources(self):
-        self.handle_dom_nodes("source", _("Sources"), self.handle_source_list, chunk_max_size=1000)
+        self.handle_dom_nodes("source", _("Sources"),
+                              self.handle_source_list, chunk_max_size=self.TX_SIZE)
 
-    def handle_citations_list(self, tx, nodes):
+    def postprocess_notes(self):
+        """ Process url notes using self.noterefs_later parent object list. 
+        """
+        title="Notes(url)"
+        message = f"{title}: {len(self.noterefs_later)} kpl"
+        print(f"***** {message} *****")
+        t0 = time.time()
+        counter = 0
+        
+        with shareds.driver.session() as session:
+            # List self.noterefs_later has obj.notes[] referenced from parent
+            total_notes = 0
+            for obj in self.noterefs_later:
+                total_notes += len(obj.notes)
+            print(f"DOM_handler.postprocess_notes: {total_notes} "\
+                  f"Notes for {len(self.noterefs_later)} objects")
+
+            iid_generator = IsotammiId(session, obj_name="Notes")
+            iid_generator.reserve(total_notes)
+            # Split to chunks, chunk_max_size=self.TX_SIZE
+            for nodes_chunk in self.get_chunk(self.noterefs_later, self.TX_SIZE):
+                print(f"DOM_handler.postprocess_notes: {len(nodes_chunk)} chunk")
+                for parent in nodes_chunk:
+                    session.write_transaction(self.handle_postprocessed_notes,
+                                              parent, iid_generator)
+                    counter += len(parent.notes)
+
+        self.noterefs_later = []
+        self.blog.log_event(
+            {"title": title, "count": counter, "elapsed": time.time() - t0}
+        )
+
+    def handle_postprocessed_notes(self, tx, parent, iids):
+        if not parent.notes:
+            return
+
+        note_msg = [note.url for note in parent.notes]
+        print(f"handle_postprocessed_notes: {parent.id} --> {note_msg}")
+        self.dataservice.ds_save_note_list(tx, parent, self.batch.id, iids)
+
+    def handle_citations_list(self, tx, nodes, iids):
         for citation in nodes:
 
             c = Citation()
@@ -293,10 +358,10 @@ class DOM_handler:
                     }
                 )
 
-            self.dataservice.ds_save_citation(tx, c, self.batch.id)
+            self.dataservice.ds_save_citation(tx, c, self.batch.id, iids)
             self.complete(c)
 
-    def handle_event_list(self, tx, nodes):
+    def handle_event_list(self, tx, nodes, iids):
         for event in nodes:
             # Create an event with Gramps attributes
             e = EventBl()
@@ -374,10 +439,10 @@ class DOM_handler:
             # Handle <objref> with citations and notes
             e.media_refs = self._extract_mediaref(event)
 
-            self.dataservice.ds_save_event(tx, e, self.batch.id)
+            self.dataservice.ds_save_event(tx, e, self.batch.id, iids)
             self.complete(e)
 
-    def handle_family_list(self, tx, nodes):
+    def handle_family_list(self, tx, nodes, iids):
         for family in nodes:
 
             f = FamilyBl()
@@ -455,14 +520,14 @@ class DOM_handler:
                     f.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has cite {f.citation_handles[-1]}')
 
-            self.dataservice.ds_save_family(tx, f, self.batch.id)
+            self.dataservice.ds_save_family(tx, f, self.batch.id, iids)
             self.complete(f)
 
             # The sortnames and dates will be set for these families
             self.family_ids.append(f.uniq_id)
 
     
-    def handle_note_list(self, tx, nodes):
+    def handle_note_list(self, tx, nodes, iids):
 
         for note in nodes:
             n = Note()
@@ -479,10 +544,10 @@ class DOM_handler:
                 # Pick possible url
                 n.text, n.url = self._pick_url_from_text(n.text)
 
-            self.dataservice.ds_save_note(tx, n, self.batch.id)
+            self.dataservice.ds_save_note(tx, n, self.batch.id, iids)
             self.complete(n)
 
-    def handle_media_list(self, tx, nodes):
+    def handle_media_list(self, tx, nodes, iids):
         for obj in nodes:
             o = MediaBl()
             # Extract handle, change and id
@@ -506,11 +571,12 @@ class DOM_handler:
                     o.description = obj_file.getAttribute("description")
 
             # TODO: Varmista, ettei mediassa voi olla Note
-            self.dataservice.ds_save_media(tx, o, self.batch.id)
+            self.dataservice.ds_save_media(tx, o, self.batch.id, iids)
             self.complete(o)
 
-    def handle_people_list(self, tx, nodes):
+    def handle_people_list(self, tx, nodes, iids):
         for person in nodes:
+            url_notes = []
             name_order = 0
 
             p = PersonBl()
@@ -519,7 +585,6 @@ class DOM_handler:
             p.event_handle_roles = []
             p.note_handles = []
             p.citation_handles = []
-            # p.parentin_handles = []
 
             for person_gender in person.getElementsByTagName("gender"):
                 if p.sex:
@@ -654,12 +719,14 @@ class DOM_handler:
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
                 if n.url:
-                    p.notes.append(n)
+                    print(f"\t#handle_people_list: {p.id}: post process {n.url}")
+                    url_notes.append(n)
+
             # Not used
-            #             for person_parentin in person.getElementsByTagName('parentin'):
-            #                 if person_parentin.hasAttribute("hlink"):
-            #                     p.parentin_handles.append(person_parentin.getAttribute("hlink") + self.handle_suffix)
-            #                     ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
+            # for person_parentin in person.getElementsByTagName('parentin'):
+            #    if person_parentin.hasAttribute("hlink"):
+            #        p.parentin_handles.append(person_parentin.getAttribute("hlink") + self.handle_suffix)
+            #        ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
 
             for person_noteref in person.getElementsByTagName("noteref"):
                 if person_noteref.hasAttribute("hlink"):
@@ -670,22 +737,23 @@ class DOM_handler:
                     p.citation_handles.append(person_citationref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Person {p.id} has cite {p.citation_handles[-1]}')
 
-            self.dataservice.ds_save_person(tx, p, self.batch.id)
-            self.complete(p)
+            #print(f"\t# Person {p.id} {p.names[0].firstname} {p.names[0].surname}")
+            self.dataservice.ds_save_person(tx, p, self.batch.id, iids)
+            self.complete(p, url_notes)
 
             # The refnames will be set for these persons
             self.person_ids.append(p.uniq_id)
 
 
-    def handle_place_list(self, tx, nodes):
+    def handle_place_list(self, tx, nodes, iids:IsotammiId):
         """Get all the places in the xml_tree.
 
         To create place hierarchy links, there must be a dictionary of
         Place handles and uniq_ids created so far. The link may use
         previous node or create a new one.
         """
-        #place_keys = {}  # place_keys[handle] = uniq_id
         for placeobj in nodes:
+            url_notes = []
 
             pl = PlaceBl()
             pl.note_handles = []
@@ -775,7 +843,8 @@ class DOM_handler:
                 n.type = placeobj_url.getAttribute("type")
                 n.text = placeobj_url.getAttribute("description")
                 if n.url:
-                    pl.notes.append(n)
+                    print(f"\t#handle_place_list: {pl.id}: post process {n.url}")
+                    url_notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName("placeref"):
                 # Traverse links to surrounding (upper) places
@@ -801,15 +870,17 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            self.dataservice.ds_save_place(tx, pl, self.batch.id, place_keys=self.place_keys)
+            print(f"\t# Place {pl.id} {pl.names[0]} +{len(pl.names)-1}")
+            self.dataservice.ds_save_place(tx, pl, self.batch.id, iids, place_keys=self.place_keys)
             # The place_keys has been updated
 
-            self.complete(pl)
+            self.complete(pl, url_notes)
 
-    def handle_repositories_list(self, tx, nodes):
+    def handle_repositories_list(self, tx, nodes, iids):
         """ Get all the repositories in the xml_tree. """
-        # Print detail of each repository
+
         for repository in nodes:
+            url_notes = []
 
             r = Repository()
             # Extract handle, change and id
@@ -845,13 +916,14 @@ class DOM_handler:
                 n.type = repository_url.getAttribute("type")
                 n.text = repository_url.getAttribute("description")
                 if n.url:
-                    r.notes.append(n)
+                    print(f"\t#handle_repositories_list: {r.id}: post process {n.url}")
+                    url_notes.append(n)
 
-            self.dataservice.ds_save_repository(tx, r, self.batch.id)
-            self.complete(r)
+            self.dataservice.ds_save_repository(tx, r, self.batch.id, iids)
+            self.complete(r, url_notes)
 
 
-    def handle_source_list(self, tx, nodes):
+    def handle_source_list(self, tx, nodes, iids):
         """ Get all the sources in the xml_tree. """
         # Print detail of each source
         for source in nodes:
@@ -932,7 +1004,7 @@ class DOM_handler:
                 # Mostly 1 repository!
                 s.repositories.append(r)
 
-            self.dataservice.ds_save_source(tx, s, self.batch.id)
+            self.dataservice.ds_save_source(tx, s, self.batch.id, iids)
             self.complete(s)
 
     # -------------------------- Finishing process steps -------------------------------

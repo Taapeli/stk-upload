@@ -92,38 +92,16 @@
 
 	                <td class="ColumnPerson">
 	                    <div>
-           {% if p.owners %}
-              {# Special hack, see "Can a Jinja variable's scope extend beyond in an inner block?" #}
-              {% set not_mine = [False] %}
-	          {% for ow in p.owners %}
-	             {% if config['DEMO'] or ow == user_context.user %}
-                            <div class="detail_link" alt="{{p.uniq_id}}">
-                                 {{p.sex_symbol()}} 
-                                {{ macro.person(p) }}
-                                <div class="pop-open-family" 
-                                    v-on:click="showPopup(uuid='{{p.uuid}}',$event)"
-                                    title="Näytä perheet">👪</div>
-                            </div>
-                 {% else %}{% set _x = not_mine.append(not not_mine.pop()) %}
-                            <span class="owner">&nbsp;{{ow}}&nbsp;</span>
-                            <div class="no_detail" title="Ei katseluoikeutta!">
-                                 {{p.sex_symbol()}} {{ macro.person_name(p.names[0]) }}
-                            </div>
-                 {% endif %}
-	          {% endfor %}
-	       {% else %}
                             <div class="detail_link" alt="{{p.uniq_id}}">
                                 {{p.sex_symbol()}} 
                                 {{ macro.person(p) }}
                                  <div class="pop-open-family" 
-                                    v-on:mouseover="showPopup(uuid='{{p.uuid}}',$event)"
-                                    title="Näytä perheet">👪</div>                            
-	       {% endif %}
+                                    v-on:mouseover="showPopup(iid='{{p.iid}}',$event)"
+                                    >👪</div>                            
 
-           
-           {% if p.uuid %}   <br><span class="idno">uuid:{{p.uuid_short()}} /</span>
-	       {% endif %}
-                             <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
+                             <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                             <span class="isotammi_id" title="Isotammi-ID">{{p.iid}}</span>
+                             <span class="gedcom_id" title="{{ _('Gedcom ID') }}">{{p.id}}</span>
 	                    </div>
 	                </td>
 
@@ -185,12 +163,12 @@
 
     <div class="pop-container">
       <div class="pop-text" v-if="currentIndex">
-          <p><a v-bind:href="current.href" title="See family" class="inlink">
+          <p><a v-bind:href="current.href" title="{{ _('See family') }}" class="inlink">
               ${translations['family']}</a>
               ${current.rel_type} ${datesStr(current.dates)}
           </p>
           <ul>
-              <li v-for="p in current.parents" :key="p.uuid">
+              <li v-for="p in current.parents" :key="p.iid">
                 ${p.role} 
                 <a v-bind:href="p.href" title="Katso henkilöä"
                    v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
@@ -199,7 +177,7 @@
               </li>
               <li v-if="current.has_children">${translations['children']}:
                  <ul>
-                     <li v-for="p in current.children" :key="p.uuid">${p.gender}
+                     <li v-for="p in current.children" :key="p.iid">${p.gender}
                        <a v-bind:href="p.href" title="Katso henkilöä"
                           v-bind:class="{ 'inlink': true, 'link_self': p.is_self }">
                           ${p.name[1]} <i>${p.name[2]}</i> <b>${p.name[0]}</b></a>

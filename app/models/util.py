@@ -44,14 +44,26 @@ def generate_name(name):
     newname = "{}.{}".format(gedcomname,maxnum+1)
     return os.path.join(dirname,newname)
 
-def format_timestamp(ts=None):
+def strtime_nozeros(fmt:str, ts:float) -> str:
+    """String representation of time stamp (seconds since the Epoch)
+       without leading zeros in day, month.
+    """
+    t0 = time.strftime(fmt, time.localtime(ts))
+    # Month: '03.01.2022 16:35' -> '03.1.2022 16:35'
+    t1 = t0[:3]+t0[4:] if t0[3] == "0" else t0
+    # Day: --> '3.1.2022 16:35'
+    t2 = t1[1:] if t1[0] == "0" else t1
+    return t2
+
+def format_timestamp(ts:float=None) -> str:
     """Converts timestamp (seconds since the Epoch) to string like '23.05.2021 15:10'.
        Returns current time, is no ts is given.
     """
     if ts is None: ts = time.time()
-    return time.strftime("%d.%m.%Y %H:%M", time.localtime(ts))
+    return strtime_nozeros("%d.%m.%Y %H:%M", ts)
+    #return time.strftime("%d.%m.%Y %H:%M", time.localtime(ts))
 
-def format_ms_timestamp(ts_ms=None, minutes=True):
+def format_ms_timestamp(ts_ms:int=None, minutes:bool=True):
     """Converts timestamp (ms since the Epoch) to string (by 'm' minute or 'd' day)
        Returns "", is no ts is given.
 
@@ -60,16 +72,19 @@ def format_ms_timestamp(ts_ms=None, minutes=True):
     if ts_ms:
         ts = float(ts_ms) / 1000.
         if minutes:
-            return time.strftime("%-d.%-m.%Y %H:%M", time.localtime(ts))
+            return strtime_nozeros("%d.%m.%Y %H:%M", ts)
+            #return time.strftime("%-d.%-m.%Y %H:%M", time.localtime(ts))
         else:
-            return time.strftime("%-d.%-m.%Y", time.localtime(ts))
+            return strtime_nozeros("%d.%m.%Y", ts)
+            #return time.strftime("%-d.%-m.%Y", time.localtime(ts))
     return ""
 
-def format_date(ts=None):
+def format_date(ts:float=None) -> str:
     """Converts the ts (seconds since the Epoch) to ISO date string like '2021-05-23'.
     """
     if ts is None: ts = time.time()
     return time.strftime("%Y-%m-%d", time.localtime(ts))
+
 
 def guess_encoding(fname):
     encodings = [

@@ -17,6 +17,7 @@ div.actions {
     border: solid 2pt silver;
     background-color: whitesmoke;
     height: auto;
+    min-height: fit-content;
 }
 tbody {
     background: whitesmoke;
@@ -38,9 +39,10 @@ td {
 </style>
 
 <script>
-function doconfirm( command, title ) { // used in commands.html
+function doconfirm( command, title, caller, message ) { // used in commands.html
 	if (confirm(title)) {
 		document.location.href = command;
+		document.getElementById(caller).append("{{ _(' wait...') }}");
 	}
 }
 </script>
@@ -57,15 +59,16 @@ function doconfirm( command, title ) { // used in commands.html
     	<h2 class="center">{{ _("General")|title() }}</h2>
     	<table>
         	<tr>
-        		<th>{{ _("Batch") }}</th>
+        		<th title="Db version {{batch.db_schema}}">{{ _("Batch") }}</th>
         		<td>{{ batch.id }}</td>
         	</tr>
             <tr>
                 <th>{{ _("Material type") }}</th>
-                <td class="typedesc" style="font-size:110%">{{ _(batch.material_type) }}</td>
+                {% set m_code = batch.material_type | lower | replace(" ","") -%}
+                <td class="typedesc matr_{{m_code}}" style="font-size:110%">{{ _(batch.material_type) }}</td>
             </tr>
             <tr>
-                <th>{{ _("Status") }}</th>
+                <th>{{ _("State") }}</th>
                 <td><b>{{ _(batch.state) }}</b>
                 </td>
             </tr>
@@ -88,9 +91,13 @@ function doconfirm( command, title ) { // used in commands.html
                 </th>
         	</tr>
        	</table>
-       	<p>
+       	
     {% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
-       	<a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a>
+       	<p><a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a></p>
+    {% endif %}
+    {% if batch.db_schema %}   
+        <div style="font-size:6pt; text-align:end; color:gray;">
+             Db version {{batch.db_schema}}</div>
     {% endif %}
 
     </div>

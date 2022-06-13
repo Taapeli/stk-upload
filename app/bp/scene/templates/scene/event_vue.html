@@ -17,7 +17,7 @@
 
 {{ macro.menu(12) }}
 
-<div id="vue_app" :args="{uuid:'{{uuid}}'}">
+<div id="vue_app" :args="{iid:'{{iid}}'}">
 <!-- 
  	<ul>
          <li v-show="message != ''" class='flash_info'>${ message }</li>
@@ -50,10 +50,9 @@
             <table v-if="event">
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="Value">
-                        <tt title="uuid-avain">${event.uuid.substring(0,6)}</tt> /
-                        <span class="gedcom_id" title="Gedcom ID">${event.id}</span> /
-                        <span class="id" title="järjestysnumero kannassa">${event.uniq_id}</span>
+                    <td class="Value">  
+                        <span class="isotammi_id" title="Isotammi-ID">${event.iid}</span> /
+                        <span class="gedcom_id" title="Gedcom ID">${event.id}</span>
 {#Todo:                 <span id="changetime" title="viimeisin muutoshetki">[muokattu 28.03.2020 17:34:59]</span>
 #}
                     </td>
@@ -69,12 +68,12 @@
                 <tr v-for="pl in places">
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
                     <td class="Value">
-                        <a v-bind:href="pl.href" :uuid="pl.uuid" class="inlink">
+                        <a v-bind:href="pl.href" :iid="pl.iid" class="inlink">
                             ${pl.names[0].name}</a>
                         <span class="typedesc">${pl.type_lang}</span>
                          <span v-if="pl.uppers">
                            <span class="typedesc">${pl.uppers[0].type_lang}</span>
-                           <a v-bind:href="pl.uppers[0].href" :uuid="pl.uppers[0].uuid" class="inlink">
+                           <a v-bind:href="pl.uppers[0].href" :iid="pl.uppers[0].iid" class="inlink">
                                ${pl.uppers[0].names[0].name}</a>
                         </span>
                     </td>
@@ -82,7 +81,7 @@
                 <tr v-for="m in medias">
                     <td class="ColumnAttribute">{{ _("Media") }}</td>
                     <td class="Value">
-                        <a v-bind:href="m.href" :uuid="m.uuid" class="inlink">
+                        <a v-bind:href="m.href" :iid="m.iid" class="inlink">
                             ${m.description}</a>
                         <span class="typedesc">${m.mime}</span>
                     </td>
@@ -101,7 +100,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="p in referees" :key="p.uuid">
+                    <tr v-for="p in referees" :key="p.iid">
                         <td v-if="p.role">${p.role_lang}</td>
                         <td v-else><span class="myself">&nbsp;${translations["myself"]}&nbsp;</span>
                         </td>
@@ -126,7 +125,7 @@
 </div><!-- div.vue_app -->
 
 <script>
-const uuid = '{{uuid}}';    /*  Another solution, see: 
+const iid = '{{iid}}';    /*  Another solution, see: 
 	https://stackoverflow.com/questions/35914069/how-can-i-get-query-parameters-from-a-url-in-vue-js
 */
 /* --------------------------------- Vue ----------------------------------- */
@@ -138,7 +137,7 @@ var vm = new Vue({
     	args: {},
         message: 'Not yet run',
         error_message: '',
-        uuid: '?',
+        iid: '?',
         event: null,
         referees: [],
         places: [],
@@ -151,14 +150,14 @@ var vm = new Vue({
     },
     created: function () {
         // `this` points to the vm instance
-        //console.log("uuid is: "+uuid);
-        this.getEvent(uuid);
+        //console.log("iid is: "+iid);
+        this.getEvent(iid);
     },
     methods: {
-        getEvent(q_uuid) {
+        getEvent(q_iid) {
             // Asks for data for all families of given person
-            console.log("event "+q_uuid);
-            axios.post("/scene/json/event", {uuid:q_uuid,referees:true,notes:true,places:true})
+            console.log("event "+q_iid);
+            axios.post("/scene/json/event", {iid:q_iid,referees:true,notes:true,places:true})
             .then (function(rsp) {
                 vm.status = "Status code: "+String(rsp.status);
                 //console.log("stk result: "+rsp.data.statusText);
@@ -187,7 +186,7 @@ var vm = new Vue({
         save: function(e) {
             vm.message = "";
             vm.error_message = "";
-            var data = {uuid:vm.event.uuid};
+            var data = {iid:vm.event.iid};
             for (let editable of vm.editables) {
                 data[editable.name] = editable.current_value;
             }

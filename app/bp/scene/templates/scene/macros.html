@@ -140,11 +140,8 @@
     {#  Formats object keys and timestamp for display. Positioned at right margin.
         If 2nd arguments (like "350px") is present, leave the given right margin.
      #}
-    <input id="my_uuid" type="text" value="{{obj.uuid}}" style="display:None">
-    <tt title="{{ _('Copy UUID key') }}" class="copy-fld" 
-        onclick="toClipboard('my_uuid')">{{obj.uuid_short()}}</tt> /
-    <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
-    <span class="id" title="{{ _('number') }}">{{obj.uniq_id}}</span>
+    <span class="isotammi_id" title="Isotammi-ID">{{obj.iid}}</span> /
+    <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span>
     {% if obj.change %}
     <span id="changetime" title="{{ _('latest change time and contributor') }}"
         {% if margin %}style='margin-right:{{margin}}'{% endif %}
@@ -189,8 +186,8 @@
          {% if pn.type != "Birth Name" %}
             <span class="typedesc">{{pn.type|transl('nt')}}</span>
          {% endif %}
-         <a href="/scene/person?uuid={{person.uuid}}" class="inlink"
-            title="{{ _('See Person\'s Details') }}">{{ person_name_long(pn) }}</a>
+         <a href="/person/{{person.iid}}" class="inlink"
+            title="{{ _('see details of person %(id)s', id=person.iid) }}">{{ person_name_long(pn) }}</a>
      {% else %}
       <small><br> – 
          {% if pn.type != "Birth Name" %}
@@ -222,18 +219,18 @@
     {% if p.too_new %}
         N N
     {% else %}
-        <a href="/scene/person?uuid={{p.uuid}}" class="inlink"
+        <a href="/person/{{p.iid}}" class="inlink"
             title="{{ _('See Person\'s Details') }}">{{ person_name_by_sortname(p) }}</a>
      {% endif %}
 {%- endmacro %}
 
-{% macro person(p, uuid="-") -%}
-    {#  Creates a Person name and link using uuid (for family tree graph). #}
-    {% if p.uuid == uuid %}
+{% macro person(p, iid="-") -%}
+    {#  Creates a Person name and link using iid (for family tree graph). #}
+    {% if p.iid == iid %}
     <span class="myself">({{ _('self') }})</span>
     {% else %}
-    <a href="/scene/person?uuid={{p.uuid}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr. {{p.uniq_id}})">
+    <a href="/person/{{p.iid}}" class="inlink" 
+        title="{{ _('see details of person %(id)s', id=p.iid) }}">
         {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
 	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
 	    {% else %}{{ _('Anonymous') }}</a>
@@ -241,12 +238,12 @@
     {% endif %}
 {%- endmacro %}
                     
-{% macro person_anon(p, uuid="-") -%}
-    {#  Creates a Person name and link using uuid (for family tree graph). #}
+{% macro person_anon(p, iid="-") -%}
+    {#  Creates a Person name and link using iid (for family tree graph). #}
     {% if p.too_new %}
 	    N N
     {% else %}
-	    {{ person(p, uuid) }}
+	    {{ person(p, iid) }}
     {% endif %}
 {%- endmacro %}
 
@@ -268,7 +265,7 @@
 {% macro family_name(family) -%}
     {#  Formats a Family name with link. #}
          {# <span class="typedesc">{{family.rel_type|transl('marr')}}</span> #}
-         <a href="/scene/family?uuid={{family.uuid}}" class="inlink"
+         <a href="/family/{{family.iid}}" class="inlink"
             title="{{ _('See Family Details') }}">
             {% for name in [family.father_sortname, family.mother_sortname] %}
                 {% set a = name.split('#') %}

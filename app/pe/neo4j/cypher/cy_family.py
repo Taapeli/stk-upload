@@ -28,10 +28,10 @@ class CypherFamily():
     Cypher clauses for reading and creating Families
     '''
 
-# ----- Get Family node by uuid
+# ----- Get Family node by iid
 
-    get_a_family = '''
-MATCH (root) -[r:OBJ_FAMILY]-> (f:Family {uuid:$f_uuid}) 
+    get_family_iid = '''
+MATCH (root) -[r:OBJ_FAMILY]-> (f:Family {iid:$f_id}) 
 RETURN f, root'''
 
     get_family_parents = """
@@ -90,7 +90,7 @@ RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_da
        event.date1 AS marriage_date, divorce_event.date1 AS divorce_date"""
 
     get_person_families = """
-MATCH (p:Person) <-- (family:Family) WHERE p.uuid = $p_uuid
+MATCH (p:Person) <-- (family:Family) WHERE p.iid = $p_iid
 MATCH (family) -[r]-> (person:Person)
 OPTIONAL MATCH (person) -[:EVENT]-> (birth:Event {type:'Birth'}) 
 RETURN family, TYPE(r) AS type, r.role AS role, person, birth 

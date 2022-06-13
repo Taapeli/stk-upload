@@ -4,7 +4,7 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-<script src="/static/infobox.js"></script>
+<!-- script src="/static/infobox.js"></script -->
 <style>
 #sc-startdiv div { position:relative }
 .sc-startbox, .sc-startbox2 {
@@ -41,7 +41,7 @@ tr:hover {background-color: #f5f5f5}
 .filename {overflow-wrap: anywhere;}
 #description {
     width: 245px;
-    height: 4em;
+    height: 8em;
 }
 #msg {
     color: blueviolet;
@@ -50,12 +50,35 @@ tr:hover {background-color: #f5f5f5}
 }
 #actions {padding-bottom: 2pt;}
 #actions a { color: blue; }
+
+table.plan tr, table.plan td {
+    background: none;
+    border: none;
+}
+div.prelines {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 1em;
+}
+div.prelines div {margin-right: 4pt;}
+div.states {
+    border: solid gray 1pt;
+    padding: 2pt 6pt;
+    margin-right: 4pt;
+    color: gray;
+    background: cornsilk;
+    border-radius: 0 10pt 10pt 0;
+    box-shadow: 2px 2px 4px gray;
+}
+div.act { color: navy; font-weight: bold; }
+div.done {color: black;}
 </style>
 
 <script>
-function doconfirm( command, title ) { // used in commands.html
+function doconfirm( command, title, caller, message ) { // used in commands.html
     if (confirm(title)) {
         document.location.href = command;
+        document.getElementById(caller).append("{{ _(' wait...') }}");
     }
 }
 </script>
@@ -72,37 +95,73 @@ function doconfirm( command, title ) { // used in commands.html
         <h2>{{ _('Statistics for Material %(id)s', id=batch.id) }}</h2>
     
     {% include "flash_messages.html" %}
-    
+
+        <div class="prelines">
+            <div><b>{{ _("Gramps file") }}:&nbsp;</b></div>
+            <div> "{{ batch.xmlname }}"</div>
+        </div>
+        <div class="prelines">
+            <div><b>{{ _("State") }}:</b>
+            </div>
+            <div title='{{ _("Converting the Gramps file to the database") }}'
+    {% if state_n > 10 %}class="states done">
+    {% elif state_n == 10 %}class="states act">
+    {% else %}class="states">
+    {% endif -%}
+               {{ _("Storing") }}</div>
+            <div title='{{ _("The data is stored as candidate material") }}'
+    {% if state_n > 20 %}class="states done"
+    {% elif state_n == 20 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Candidate") }}</div>
+            <div title='{{ _("Waiting for audition") }}'
+    {% if state_n > 30 %}class="states done"
+    {% elif state_n == 30 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Audit Requested") }}</div>
+            <div title='{{ _("In audition") }}'
+    {% if state_n > 40 %}class="states done"
+    {% elif state_n == 40 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Auditing") }}</div>
+            <div title='{{ _("Audit done") }}'
+    {% if state_n > 60 %}class="states done"
+    {% elif state_n == 60 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Accepted") }}</div>
+            <div title='{{ _("Returned to researcher with comments") }}'
+    {% if state_n > 61 %}class="states done"
+    {% elif state_n == 61 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Rejected") }}</div>
+        </div>
+
         <div class="flex_container">
             
             <div class="sc-startbox"><!-- div class="startbox" style="width:auto" -->
                 <h2 class="center">{{ _("General")|title() }}</h2>
                 <table>
                     <tr>
-                        <th>{{ _("Batch") }}, {{_('Researcher')|lower}}</th>
+                        <th>{{ _("Batch") }}</th>
                         <td>{{ batch.id }}
-                            <a href="/audit/profile/{{batch.user}}"
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{{_('Researcher')}}</th>
+                        <td><a href="/audit/profile/{{batch.user}}"
                              style="text-decoration: underline;"
                              title="{{ _('User Profile') }}">{{batch.user}}</a>
                         </td>
                     </tr>
                     <tr>
                         <th>{{ _("Material type") }}</th>
-                        <td>
-                            <span class="typedesc" style="font-size:110%">{{ _(batch.material_type) }}</span>
+                        <td>{% set m_code = batch.material_type | lower | replace(" ","") %}
+                            <span class="typedesc matr_{{m_code}}" style="font-size:110%">{{ _(batch.material_type) }}</span>
                         </td>
-                    </tr>
-                    <tr>
-                        <th>{{ _("Status") }}</th>
-                        <td><b>{{ _(batch.state) }}</b></td>
                     </tr>
                     <tr>
                         <th>{{ _("Changed") }} </th>
                         <td>{{ _(batch.timestamp_str()) }}</td>
-                    </tr>
-                    <tr>
-                        <th>{{ _("Gramps file") }}</th>
-                        <td class="filename">{{ batch.xmlname }}</td>
                     </tr>
                     <tr>
                         <th colspan="2">{{ _("Description") }}<br>
@@ -118,7 +177,9 @@ function doconfirm( command, title ) { // used in commands.html
             {% if config.SCRIPTING_TOOL_ENABLED and user_context.is_auditor %}
                 <p><a href="/scripting/{{ batch.id }}">{{ _("Scripting tool") }}</a></p>
             {% endif %}   
-            
+            {% if batch.db_schema %}   
+                <div style="font-size:6pt; text-align:end; color:gray;">Db version {{batch.db_schema}}</div>
+            {% endif %}   
             </div>
             
             <div class="sc-startbox">

@@ -1,11 +1,15 @@
 
 <ul>
 <form>
+    {% set n=0 %}
 	{% for command, title, confirm in commands %}
+        {% set n=n+1 %}
 		{% if confirm %}
-			<li><a href="javascript:doconfirm('{{command}}', '{{title}}')">{{title}}</a></li>
+    <li id="c_{{n}}">
+       <a href="javascript:doconfirm('{{command}}', '{{title}}', 'c_{{n}}', 'wait ...')">{{title}}</a>
+    </li>
 		{% else %}
-			<li><a href="{{command}}">{{title}}</a></li>
+	<li><a href="{{command}}">{{title}}</a></li>
 		{% endif %}
 	{% endfor %}
 </form>

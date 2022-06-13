@@ -4,7 +4,7 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-<script src="/static/infobox.js"></script>
+<!-- script src="/static/infobox.js"></script -->
 
 {% set cnt = comments|count %}
 
@@ -47,19 +47,18 @@
     
                 <td><span class="typedesc">{{ _(c.obj_label) }}</span>
                 {% if c.obj_label == 'Person' %}
-                	<a href="/scene/person?uuid={{c.object.uuid}}" class="inlink"
+                	<a href="/person/{{c.object.iid}}" class="inlink"
                        title="{{ _('Go to comment page') }}">{{ c.object.sortname | replace("#", " ") }}</a>
                 {% elif c.obj_label == 'Place' %}
-                	<a href="/scene/location/uuid={{c.object.uuid}}" class="inlink"
+                	<a href="/place/{{c.object.iid}}" class="inlink"
                        title="{{ _('Go to comment page') }}">{{ c.object.pname }}</a>
                 {% elif c.obj_label == 'Family' %}
-                	<a href="/scene/family?uuid={{c.object.uuid}}" class="inlink"
-                       title="{{ _('Go to comment page') }}">{{ c.object.father_sortname }} / {{ c.object.mother_sortname }}</a>
+                    {{ macro.family_name(c.object) }}
                 {% elif c.obj_label == 'Source' %}
-                	<a href="/scene/source?uuid={{c.object.uuid}}" class="inlink"
+                	<a href="/source/{{c.object.iid}}" class="inlink"
                        title="{{ _('Go to commented page') }}">{{ c.object.stitle }}</a>
                 {% elif c.obj_label == 'Media' %}
-                    <a href="/scene/media?uuid={{c.object.uuid}}" class="inlink"
+                    <a href="/media/{{c.object.iid}}" class="inlink"
                        title="{{ _('Go to commented page') }}">{{ c.object.description }}</a>
                 {% elif c.obj_label == 'Root' %}
                     <a href="/scene/details" class="inlink"

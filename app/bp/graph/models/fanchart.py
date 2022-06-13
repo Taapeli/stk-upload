@@ -78,7 +78,7 @@ class FanChart:
             "years": f"{birth}-{death}" if birth + death != "" else "",
             "gender": person_attributes["gender"],
             "title": f"{names[1]} {names[0]}, {birth}-{death}",
-            "uuid": person_attributes["uuid"],
+            "iid": person_attributes["iid"],
             "too_new": person_attributes["too_new"]
         }
 
@@ -156,9 +156,9 @@ class FanChart:
             children.append(node)
         return children
 
-    def get(self, uuid):
+    def get(self, iid):
         """
-        Fetch data from the ancestors and descendants of the giving uuid, creating a data
+        Fetch data from the ancestors and descendants of the giving iid, creating a data
         structure that can be fed to the sunburst chart Javascript component for creating
         a simple two-way fanchart.
         """
@@ -168,7 +168,7 @@ class FanChart:
 
         # Fill in basic data from current person
         with PersonReader("read", u_context) as service:
-            result = service.get_person_minimal(uuid, privacy)
+            result = service.get_person_minimal(iid, privacy)
 
         if len(result) == 0:
             return ""
@@ -198,16 +198,16 @@ class FanChart:
                         2 - ancestors[0]["gender"]
                     )  # For father, yields slot 1; for mother, slot 0.
                     fanchart["children"].insert(
-                        slot, {"size": 0.5, "color": "#f2f2f2", "uuid": None}
+                        slot, {"size": 0.5, "color": "#f2f2f2", "iid": None}
                     )
             else:
                 fanchart["children"] = descendants
                 # No ancestors: make two empty quarters to occupy parents' slots (otherwise descendants end up in east!)
                 fanchart["children"].insert(
-                    0, {"size": 0.5, "color": "#f2f2f2", "uuid": None}
+                    0, {"size": 0.5, "color": "#f2f2f2", "iid": None}
                 )  # Can't combine these two!
                 fanchart["children"].insert(
-                    0, {"size": 0.5, "color": "#f2f2f2", "uuid": None}
+                    0, {"size": 0.5, "color": "#f2f2f2", "iid": None}
                 )  # One will be moved next.
         else:
             fanchart["children"] = ancestors
@@ -217,10 +217,10 @@ class FanChart:
                     2 - ancestors[0]["gender"]
                 )  # For father, yields slot 1; for mother, slot 0.
                 fanchart["children"].insert(
-                    slot, {"size": 0.5, "color": "#f2f2f2", "uuid": None}
+                    slot, {"size": 0.5, "color": "#f2f2f2", "iid": None}
                 )
             # No descendants, create empty southern hemisphere
-            fanchart["children"].append({"size": 1, "color": "#f2f2f2", "uuid": None})
+            fanchart["children"].append({"size": 1, "color": "#f2f2f2", "iid": None})
 
         # The sectors are drawn anticlockwise, starting from North. To get the ancestors to occupy the
         # Northern hemisphere, we need to move the first node on top level list (father) to end of list.

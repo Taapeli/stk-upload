@@ -84,25 +84,25 @@
                 </td>
                 <td class="ColumnPerson">
                    <div>
-                      <a href="/scene/location/uuid={{p.uuid}}"
+                      <a href="/place/{{p.iid}}"
                     {% if not p.ref_cnt %} class="dimmed" 
-                        title="{{  _('No references to place %(uuid)s', uuid=p.uuid_short()) }}"
+                        title="{{  _('No references to place %(iid)s', iid=p.iid) }}"
                     {% else %} class="inlink"
-                        title="{{ _('see details of place %(id)s', id=p.uniq_id) }}"
+                        title="{{ _('see details of place %(iid)s', iid=p.iid) }}"
                     {%- endif %}>
                         <b>{{ macro.place_names(p) }}</b></a>
                       <span class="typedesc">{{p.type|transl('lt')}}</span>
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
 						<span class="typedesc">{{e.type|transl('lt_in')}}</span>
-						<a href="/scene/location/uuid={{e.uuid}}" class="inlink"
-						  title="{{ _('Go to location') }} id={{e.uniq_id}}">{{ macro.place_names(e) }}</a> 
+						<a href="/place/{{e.iid}}" class="inlink"
+						  title="{{ _('Go to location') }} {{e.iid}}">{{ macro.place_names(e) }}</a> 
 		        {% endif %}
                    </div>
             {% if p.lowers %}
 		           <ul style="margin:0 0 5px 1em;">
 		        {% for e in p.lowers|sort(attribute='pname') %}    <li>
-	                       <a href="/scene/location/uuid={{e.uuid}}"
-	                         title="{{ _('Go to location') }} id={{e.uniq_id}}">{{ macro.place_names(e) }}</a>
+	                       <a href="/place/{{e.iid}}"
+	                         title="{{ _('Go to location') }} {{e.iid}}">{{ macro.place_names(e) }}</a>
 	                       &nbsp;<span class="typedesc">{{e.type|transl('lt')}}</span>
                       </li>
 		        {% endfor %}
