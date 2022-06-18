@@ -72,13 +72,13 @@ RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
     get_w_citas_names_notes = """
 MATCH  (root) -[:OBJ_PLACE]-> (place:Place{iid:$iid})
 OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
-WITH place, name
+WITH root, place, name
     OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 
         WHERE name is null or not n = name
     OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
     OPTIONAL MATCH (place) -[mr:MEDIA]-> (media:Media)
     OPTIONAL MATCH (place) -[cr:CITATION]-> (cita:Citation)
-RETURN place, name,
+RETURN root, place, name,
     COLLECT(DISTINCT n) AS names,
     COLLECT (DISTINCT note) AS notes,
     COLLECT (DISTINCT media) AS medias,
@@ -90,7 +90,7 @@ MATCH (root) -[:OBJ_OTHER]-> (cita) -[:NOTE]-> (note:Note)
 RETURN ID(cita) AS cid, note"""
 
     # Result indi is a Person or Family
-    get_person_family_events = """
+    get_place_events = """
 MATCH (e:Event) -[:PLACE]-> (l:Place)
     WHERE ID(l) = $locid
 WITH e,l

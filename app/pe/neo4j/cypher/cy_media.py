@@ -31,7 +31,7 @@ class CypherMedia():
     get_media_by_iid = """
 MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid}) <-[r:MEDIA]- (ref)
 OPTIONAL MATCH (ref) <-[:EVENT]- (eref)
-RETURN media, PROPERTIES(r) AS prop, ref, eref"""
+RETURN root, media, PROPERTIES(r) AS prop, ref, eref"""
 
     get_all = "MATCH (o:Media) RETURN o"
 

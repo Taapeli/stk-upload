@@ -372,6 +372,11 @@ class Neo4jReadService(ConcreteService):
                     # >
                     node = record["f"]
                     family = FamilyBl_from_node(node)
+                    root_node = record["root"]
+                    family.root = {'material': root_node["material"], 
+                                   'root_state': root_node["state"], 
+                                   'root_user': root_node["user"], 
+                                   'batch_id': root_node["id"]}
                 return {"item": family, "status": Status.OK}
         return {
             "item": None,
@@ -1179,7 +1184,7 @@ class Neo4jReadService(ConcreteService):
         source = None
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(
-                session, CypherSource.get_single_selection, user, material, iid=iid
+                session, CypherSource.get_source_iid, user, material, iid=iid
             )
             for record in result:
                 # <Record
@@ -1197,6 +1202,11 @@ class Neo4jReadService(ConcreteService):
                 # >
                 source_node = record["source"]
                 source = SourceBl_from_node(source_node)
+                root_node = record["root"]
+                source.root = {'material': root_node["material"], 
+                               'root_state': root_node["state"], 
+                               'root_user': root_node["user"], 
+                               'batch_id': root_node["id"]}
                 notes = record["notes"]
                 for note_node in notes:
                     n = Note_from_node(note_node)
@@ -1382,7 +1392,7 @@ class Neo4jReadService(ConcreteService):
                     crop = record["prop"]
                     ref_node = record["ref"]
                     event_node = record["eref"]
-
+                    
                     # - Media node
                     # - cropping
                     # - referring Person, Family or Event
@@ -1391,6 +1401,12 @@ class Neo4jReadService(ConcreteService):
                     if not media:
                         media = MediaBl_from_node(media_node)
                         media.ref = []
+                        # Original owner
+                        root_node = record["root"]
+                        media.root = {'material': root_node["material"], 
+                                      'root_state': root_node["state"], 
+                                      'root_user': root_node["user"], 
+                                      'batch_id': root_node["id"]}
 
                     #   The referring object
 

@@ -144,15 +144,12 @@
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span>
     {% if obj.change %}
     <span id="changetime" title="{{ _('latest change time and contributor') }}"
-        {% if margin %}style='margin-right:{{margin}}'{% endif %}
+        {%- if margin %}style='margin-right:{{margin}}'{% endif %}
         >{{ _("edited") }} {{obj.change_str()}}
-        {%- if user_context.material %}
-        – <span>
-        {% if user_context.is_common() %}
-            {{ _('origin from') }}: {{user_context.user}}
-        {% else %}
-            {{ _('User data')|lower }}
-        {% endif %}
+        {%- if user_context.material %} – <span>
+            {% if user_context.is_common() %}{{ _('origin from') }}: {{obj.root.root_user}} 
+            {% else %}{{ _('User data')|lower }}
+            {% endif %}
         </span>
         {% endif %}
     </span>

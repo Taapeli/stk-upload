@@ -515,8 +515,7 @@ def show_person(iid=None, fanchart=False):
         objs = result.get("objs", [])
         print(f"# Person with {len(objs)} objects")
         jscode = result.get("jscode", "")
-        # Batch or Audit node data like {'material', 'root_user', 'id'}
-        person.root = result.get("root")
+        # Original Root data is in dict person.root
 
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
@@ -917,7 +916,7 @@ def show_families():
 @bp.route("/family/<iid>", methods=["GET"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_family_iid(iid=None):
+def show_family(iid=None):
     """One Family."""
     if not iid:
         flash("Missing isotammi_id", "error")

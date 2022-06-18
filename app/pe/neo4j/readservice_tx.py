@@ -265,24 +265,19 @@ class Neo4jReadServiceTx(ConcreteService):
                 res.update({'status': Status.NOT_FOUND, 'statustext': 'The person does not exist'})
                 return res
 
-            # Store original researcher data 
-            #    root = dict {material_type, root_user, id}
-            #    - material_type root material type
-            #    - root_user    the (original) owner of this object
-            #    - bid          Batch id
-            root_node = record['root']
-            material_type = root_node.get('material', "")
-            root_state = root_node.get('state', "")
-            root_user = root_node.get('user', "")
-            bid = root_node.get('id', "")
-
             person_node = record['p']
             puid = person_node.id
-            #res['person_node'] = person_node
-            res['root'] = {'material':material_type, 
-                           'root_state':root_state, 
-                           'root_user': root_user, 
-                           'batch_id':bid}
+
+            # Store original researcher data 
+            #    - material_type root material type
+            #    - root_state   batch state
+            #    - root_user    the (original) owner of this object
+            #    - bid          Batch id
+            root_node = record["root"]
+            root_dict = {'material': root_node["material"], 
+                         'root_state': root_node["state"], 
+                         'root_user': root_node["user"], 
+                         'batch_id': root_node["id"]}
 
 #                 # Add to list of all objects connected to this person
 #                 self.objs[person.uniq_id] = person
@@ -341,6 +336,7 @@ class Neo4jReadServiceTx(ConcreteService):
             return res
 
         person = PersonBl_from_node(person_node)
+        person.root = root_dict
         person.families_as_parent = []
         person.families_as_child = []
         person.citation_ref = []
@@ -634,6 +630,12 @@ class Neo4jReadServiceTx(ConcreteService):
                 node = record["place"]
                 pl = PlaceBl_from_node(node)
                 node_ids.append(pl.uniq_id)
+                # Original owner
+                root_node = record["root"]
+                pl.root = {'material': root_node["material"], 
+                           'root_state': root_node["state"], 
+                           'root_user': root_node["user"], 
+                           'batch_id': root_node["id"]}
                 # Default language name
                 node = record["name"]
                 if node:
@@ -770,7 +772,7 @@ class Neo4jReadServiceTx(ConcreteService):
             :param: privacy    True, if not showing live people
         """
         result = self.driver.session(default_access_mode="READ").run(
-            CypherPlace.get_person_family_events, locid=uniq_id
+            CypherPlace.get_place_events, locid=uniq_id
         )
         ret = []
         for record in result:
