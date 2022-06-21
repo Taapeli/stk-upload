@@ -146,13 +146,13 @@
     <span id="changetime" title="{{ _('latest change time and contributor') }}"
         {% if margin %}style='margin-right:{{margin}}'{% endif %}
         >{{ _("edited") }} {{obj.change_str()}}
-        {%- if user_context.material %}
+        {%- if false %} {# Tilapäisesti poistettu: if user_context.material #}
         – <span>
-        {% if user_context.is_common() %}
+            {% if user_context.is_common() %}
             {{ _('origin from') }}: {{user_context.user}}
-        {% else %}
+            {% else %}
             {{ _('User data')|lower }}
-        {% endif %}
+            {% endif %}
         </span>
         {% endif %}
     </span>
