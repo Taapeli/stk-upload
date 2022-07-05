@@ -49,8 +49,8 @@
        {% for root in materials %}
                 <tr>
                     <td>
-                        <span class="person_name">{{root.user.name}}</span><br>
-                        {{root.user.username}}
+                        <span class="person_name">{{root.user_dict.name}}</span><br>
+                        {{root.user_dict.username}}
                     </td>
                     <td>
             {% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
@@ -58,12 +58,13 @@
                             <input type="hidden" name="material_type" value="{{root.material_type}}">
                             <input type="hidden" name="state" value="{{root.state}}">
                             <button type="submit" name="batch_id" value="{{ root.id }}"
+                                    title="{{ _('Browse this material') }}"
                                     class="Auditor">{{ root.id }}</button>
                         </form>
             {% else %}
                         {{root.id}}<br>
             {% endif -%}
-                        <span id="changetime">{{ _(root.timestamp_str()) }}</span>
+                        <!-- span id="changetime">{{ _(root.timestamp_str()) }}</span -->
                     </td>
                     <td>{{ root.file.rsplit("/", 1) | last }}
             {% if root.description %}

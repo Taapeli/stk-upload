@@ -147,7 +147,8 @@
         {%- if margin %}style='margin-right:{{margin}}'{% endif %}
         >{{ _("edited") }} {{obj.change_str()}}
         {%- if user_context.material %} – <span>
-            {% if user_context.is_common() %}{{ _('origin from') }}: {{obj.root.root_user}} 
+            {% if user_context.is_common() %}
+                {{ _('origin from') }}: {{obj.root.root_user}} ({{obj.root.batch_id}})
             {% else %}{{ _('User data')|lower }}
             {% endif %}
         </span>
@@ -184,7 +185,7 @@
             <span class="typedesc">{{pn.type|transl('nt')}}</span>
          {% endif %}
          <a href="/person/{{person.iid}}" class="inlink"
-            title="{{ _('see details of person %(id)s', id=person.iid) }}">{{ person_name_long(pn) }}</a>
+            title="{{ _('See details of person \'%(id)s\'', id=person.iid) }}">{{ person_name_long(pn) }}</a>
      {% else %}
       <small><br> – 
          {% if pn.type != "Birth Name" %}
@@ -227,7 +228,7 @@
     <span class="myself">({{ _('self') }})</span>
     {% else %}
     <a href="/person/{{p.iid}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=p.iid) }}">
+        title="{{ _('See details of person \'%(id)s\'', id=p.iid) }}">
         {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
 	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
 	    {% else %}{{ _('Anonymous') }}</a>

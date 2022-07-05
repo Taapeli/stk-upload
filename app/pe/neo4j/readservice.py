@@ -56,7 +56,7 @@ from .cypher.cy_media import CypherMedia
 from .cypher.cy_comment import CypherComment
 
 from pe.dataservice import ConcreteService
-from pe.neo4j.util import run_cypher, run_cypher_batch
+from pe.neo4j.util import run_cypher, run_cypher_batch, dict_root_node
 
 from pe.neo4j.nodereaders import Citation_from_node
 from pe.neo4j.nodereaders import Comment_from_node
@@ -372,11 +372,8 @@ class Neo4jReadService(ConcreteService):
                     # >
                     node = record["f"]
                     family = FamilyBl_from_node(node)
-                    root_node = record["root"]
-                    family.root = {'material': root_node["material"], 
-                                   'root_state': root_node["state"], 
-                                   'root_user': root_node["user"], 
-                                   'batch_id': root_node["id"]}
+                    family.root = dict_root_node(record["root"])
+
                 return {"item": family, "status": Status.OK}
         return {
             "item": None,
@@ -1202,11 +1199,7 @@ class Neo4jReadService(ConcreteService):
                 # >
                 source_node = record["source"]
                 source = SourceBl_from_node(source_node)
-                root_node = record["root"]
-                source.root = {'material': root_node["material"], 
-                               'root_state': root_node["state"], 
-                               'root_user': root_node["user"], 
-                               'batch_id': root_node["id"]}
+                source.root = dict_root_node(record["root"])
                 notes = record["notes"]
                 for note_node in notes:
                     n = Note_from_node(note_node)
@@ -1402,11 +1395,7 @@ class Neo4jReadService(ConcreteService):
                         media = MediaBl_from_node(media_node)
                         media.ref = []
                         # Original owner
-                        root_node = record["root"]
-                        media.root = {'material': root_node["material"], 
-                                      'root_state': root_node["state"], 
-                                      'root_user': root_node["user"], 
-                                      'batch_id': root_node["id"]}
+                        media.root = dict_root_node(record["root"])
 
                     #   The referring object
 

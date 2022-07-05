@@ -273,7 +273,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
     	{% for pref in e.place_ref %}{% set pl = obj[pref] %}
     	    {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
                             <a href="/place/{{pl.iid}}" class="inlink"
-                             title="{{ _('of type') }} {{pl.type}}; {{ _('see details of place') }}">
+                             title="{{ _('of type') }} {{pl.type}}; {{ _('See details of place \'%(id)s\'', id=pl.iid) }}">
                               {{macro.place_names_lang(pl)}}</a
                             >{{macro.note_link(pl.note_ref, obj)}}{% if pl.uppers %},
                             <small>{{macro.place_names_lang(pl.uppers[0])}}</small>{% endif %}

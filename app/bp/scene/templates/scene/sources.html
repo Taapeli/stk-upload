@@ -68,8 +68,8 @@ td ul li p { margin: 0 0 0.3em 0; }
                <div>
 <!--                  {% set uniq_id = s.uniq_id %}{% set id = s.id %} -->
                   <a href="/source/{{s.iid}}" {% if s.ref_cnt == 0 %} class="dimmed" 
-                     title="{{ _('Source') }} {{s.iid}} ({{s.id}}) {{ _('unused') }}">{% else %}
-                     title="{{ _('see details of source %(uniq_id)s (%(id)s)', uniq_id=uniq_id, id=id) }}">{% endif %}
+                     title="{{ _('See details of source \'%(iid)s\' (%(id)s)', id=iid, id=id)) {{ _('unused') }}">{% else %}
+                     title="{{ _('See details of source \'%(iid)s\' (%(id)s)', id=iid, id=id) }}">{% endif %}
                      {{s.stitle}}</a>
                 </div>
 

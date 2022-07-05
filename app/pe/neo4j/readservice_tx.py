@@ -18,6 +18,8 @@ from ui.place import place_names_local_from_nodes
 from pe.dataservice import ConcreteService
 from pe.neo4j.util import run_cypher
 from pe.neo4j.util import run_cypher_batch
+from pe.neo4j.util import dict_root_node
+
 from pe.neo4j.nodereaders import Citation_from_node
 # from pe.neo4j.nodereaders import Comment_from_node
 # from pe.neo4j.nodereaders import DateRange_from_node
@@ -273,11 +275,7 @@ class Neo4jReadServiceTx(ConcreteService):
             #    - root_state   batch state
             #    - root_user    the (original) owner of this object
             #    - bid          Batch id
-            root_node = record["root"]
-            root_dict = {'material': root_node["material"], 
-                         'root_state': root_node["state"], 
-                         'root_user': root_node["user"], 
-                         'batch_id': root_node["id"]}
+            root = dict_root_node(record["root"])
 
 #                 # Add to list of all objects connected to this person
 #                 self.objs[person.uniq_id] = person
@@ -336,7 +334,7 @@ class Neo4jReadServiceTx(ConcreteService):
             return res
 
         person = PersonBl_from_node(person_node)
-        person.root = root_dict
+        person.root = root
         person.families_as_parent = []
         person.families_as_child = []
         person.citation_ref = []
@@ -572,6 +570,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 node = record["place"]
                 p = PlaceBl_from_node(node)
                 p.ref_cnt = record["uses"]
+                p.root = dict_root_node(record["root"])
 
                 # Set place names and default display name pname
                 # 1. default name

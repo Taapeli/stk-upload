@@ -375,8 +375,9 @@ class Root(NodeObject):
                                  m_type=material_type)
             for rec in result:
                 root = Root.from_node(rec.get("root"))
-                user = rec.get("user")
-                root.user = dict(user.items())
+                user_node = rec.get("loaded")
+                root.user_dict = dict(user_node.items())
+                root.access = rec.get("usernames")
                 roots.append(root)
         print(f"#get_materials_accepted: {len(roots)} nodes of {material_type})")
         return roots

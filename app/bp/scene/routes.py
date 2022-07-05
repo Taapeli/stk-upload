@@ -515,7 +515,8 @@ def show_person(iid=None, fanchart=False):
         objs = result.get("objs", [])
         print(f"# Person with {len(objs)} objects")
         jscode = result.get("jscode", "")
-        # Original Root data is in dict person.root
+        # Batch or Audit node data like {'material', 'root_user', 'id'}
+        person.root = result.get("root")
 
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
@@ -928,7 +929,7 @@ def show_family(iid=None):
         # reader = FamilyReader(readservice, u_context)
         res = service.get_family_data(iid)
 
-    stk_logger(u_context, "-> bp.scene.routes.show_family_page")
+    stk_logger(u_context, "-> bp.scene.routes.show_family")
     status = res.get("status")
     if status != Status.OK:
         if status == Status.ERROR:
@@ -1098,7 +1099,7 @@ def show_place(iid):
     u_context = UserContext()
     try:
         with PlaceReaderTx("read_tx", u_context) as service:
-            res = service.get_places_w_events(iid)
+            res = service.get_place_data(iid)
             # res {place: PlaceBl, status: 'OK', hierarchy: list(PlaceBl),
             #      citations: list(Citation), events: list(EventBl),
             #      uniq_ids: list(uniq_ids)}

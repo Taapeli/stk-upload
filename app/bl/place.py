@@ -371,7 +371,7 @@ class PlaceReaderTx(DataService):
             }
         return {"items": places, "status": Status.OK}
 
-    def get_places_w_events(self, iid):
+    def get_place_data(self, iid):
         """Read the place hierarchy and events connected to this place.
 
         Luetaan annettuun paikkaan liittyvä hierarkia ja tapahtumat
@@ -393,7 +393,7 @@ class PlaceReaderTx(DataService):
         if not place:
             res = {
                 "status": Status.ERROR,
-                "statustext": f"get_places_w_events: No Place '{iid}'",
+                "statustext": f"No Place '{iid}'",
             }
             return res
 

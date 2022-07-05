@@ -31,10 +31,9 @@ class CypherPlace():
     _get_name_hierarchies_tail = """
     OPTIONAL MATCH (place) -[:NAME]-> (pn:Place_name)
         WHERE NOT pn = name
-//  WITH place, name, COLLECT(DISTINCT pn) AS names, COUNT(ref) AS uses
         OPTIONAL MATCH (place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
         OPTIONAL MATCH (place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
-        RETURN place, name, COUNT(DISTINCT ref) AS uses,
+        RETURN root, place, name, COUNT(DISTINCT ref) AS uses,
             COLLECT(DISTINCT pn) AS names,
             COLLECT(DISTINCT [ID(up), up.iid, up.type, upn.name, upn.lang]) AS upper,
             COLLECT(DISTINCT [ID(do), do.iid, do.type, don.name, don.lang]) AS lower
