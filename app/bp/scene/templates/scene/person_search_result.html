@@ -32,15 +32,15 @@
 	            <td class="ColumnPerson">
                     <div>
 	                    <a href="/person/{{p.iid}}"
-	                      title="{{ _('See details of person \'%(id)s\'', id=p.iid) }}">
-                          {{p.names[0].firstname}} 
+                           title="{{ _('Person %(gid)s \'%(id)s\'', gid=p.id, id=p.iid) }}">
+                            {{p.names[0].firstname}} 
             {% if p.names[0].prefix %} {{p.names[0].prefix}}{% endif %}
             {% if p.names[0].surname %}
-                          <b>{{p.names[0].surname}}</b>{% else %}
-                          <i>{{p.names[0].suffix}}</i>{% endif -%}</a>
+                            <b>{{p.names[0].surname}}</b>{% else %}
+                            <i>{{p.names[0].suffix}}</i>{% endif -%}</a>
 		    {% if p.refnames %}
-		                <br><small class="refname" title="{{ _('Reference names') }}">
-		                  {{ _('Keywords') }}: {{p.refnames}}</small>
+		                    <br><small class="refname" title="{{ _('Reference names') }}">
+		                          {{ _('Keywords') }}: {{p.refnames}}</small>
             {% endif %}
                         <br><small style="color:olive">{{ macro.lifetimes(p) }}</small>
             {% if p.too_new %}

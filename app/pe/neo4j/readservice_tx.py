@@ -209,6 +209,7 @@ class Neo4jReadServiceTx(ConcreteService):
             # print(p_record)
             node = prec.person_node
             person = PersonBl_from_node(node)
+            person.root = dict_root_node(record["root"])
 
             # if take_refnames and record['refnames']:
             #     refnlist = sorted(record['refnames'])

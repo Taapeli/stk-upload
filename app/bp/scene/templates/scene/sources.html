@@ -66,10 +66,16 @@ td ul li p { margin: 0 0 0.3em 0; }
                 </td>
             <td class="ColumnSource">
                <div>
-<!--                  {% set uniq_id = s.uniq_id %}{% set id = s.id %} -->
-                  <a href="/source/{{s.iid}}" {% if s.ref_cnt == 0 %} class="dimmed" 
-                     title="{{ _('See details of source \'%(iid)s\' (%(id)s)', id=iid, id=id)) {{ _('unused') }}">{% else %}
-                     title="{{ _('See details of source \'%(iid)s\' (%(id)s)', id=iid, id=id) }}">{% endif %}
+                 {% set id = s.id %}
+                  <a href="/source/{{s.iid}}"
+                {%- if s.ref_cnt == 0 %}
+                     class="dimmed" 
+                     title="{{ _('Source %(gid)s \'%(id)s\' (in material %(root)s)',
+                            gid=s.id, id=s.iid, root=s.root.batch_id) }} {{ _('unused') }}">
+                {% else %}
+                     title="{{ _('Source %(gid)s \'%(id)s\' (in material %(root)s)',
+                            gid=s.id, id=s.iid, root=s.root.batch_id) }}">
+                {% endif %}
                      {{s.stitle}}</a>
                 </div>
 

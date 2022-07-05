@@ -94,15 +94,15 @@ ORDER BY n.order"""
     get_person_list = """
 MATCH (root) -[:OBJ_PERSON]-> (p:Person)
     WHERE p.sortname >= $start_name
-WITH p ORDER BY p.sortname LIMIT $limit
+WITH root, p ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
     OPTIONAL MATCH (p) <-[:PARENT]- (f:Family) -[rf:EVENT]-> (fe:Event)
-WITH p, n, re.role as role, e, f.rel_type as rel, fe
+WITH root, p, n, re.role as role, e, f.rel_type as rel, fe
 ORDER BY p.sortname, n.order
     OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
     OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
-RETURN p as person,
+RETURN root, p as person,
     COLLECT(DISTINCT n) as names, 
     COLLECT(DISTINCT [e, pl.pname, role]) + COLLECT(DISTINCT [fe, fpl.pname, rel]) AS events
 ORDER BY person.sortname"""

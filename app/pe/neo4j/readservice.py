@@ -1160,6 +1160,7 @@ class Neo4jReadService(ConcreteService):
                 # >
                 node = record["source"]
                 s = SourceBl_from_node(node)
+                s.root = dict_root_node(record["root"])
                 notes = record["notes"]
                 for node in notes:
                     n = Note_from_node(node)

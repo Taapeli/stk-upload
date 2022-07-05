@@ -256,10 +256,11 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                 <tbody>
     {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
-                        <td class="ColumnEvent" title="{{e.id}} {{e.iid}} nr:{{e.uniq_id}}">
+                        <td class="ColumnEvent">
                             <div class="magnifier" alt="{{e.uniq_id}}">
-                                <a href="/event/{{e.iid}}" class="inlink">
-                                   {{e.type|transl('evt')}}</a>
+                                <a href="/event/{{e.iid}}" class="inlink"
+                                   title="{{ _('Event %(gid)s \'%(id)s\'', gid=e.id, id=e.iid) }}">
+                                    {{e.type|transl('evt')}}</a>
         {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>
         {% endif -%}
@@ -273,7 +274,8 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
     	{% for pref in e.place_ref %}{% set pl = obj[pref] %}
     	    {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
                             <a href="/place/{{pl.iid}}" class="inlink"
-                             title="{{ _('of type') }} {{pl.type}}; {{ _('See details of place \'%(id)s\'', id=pl.iid) }}">
+                             title="{{pl.type|transl('lt')|title}}; {{ _('Place %(gid)s \'%(id)s\'',
+                                    gid=e.id, id=pl.iid) }}">
                               {{macro.place_names_lang(pl)}}</a
                             >{{macro.note_link(pl.note_ref, obj)}}{% if pl.uppers %},
                             <small>{{macro.place_names_lang(pl.uppers[0])}}</small>{% endif %}
@@ -292,9 +294,9 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
         {% endif %}
 	    {% if e.note_ref %}
         	{% for ref in e.note_ref %}{% set note = obj[ref] %}
-	                            	<div><span class="typedesc">{{ note.type|transl('notet') }}</span>
-				                      {{macro.citation_link(note.citation_ref, obj)}}
-	                            	  {{ macro.notelink(note) }}</div>
+	                            <div><span class="typedesc">{{ note.type|transl('notet') }}</span>
+				                     {{macro.citation_link(note.citation_ref, obj)}}
+	                            	 {{ macro.notelink(note) }}</div>
 	        {% endfor %}
         {% endif %}
                             </div>

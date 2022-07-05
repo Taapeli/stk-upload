@@ -3278,7 +3278,7 @@ msgstr "Viittauksia"
 #: bp/scene/templates/scene/person.html:276
 #, python-format
 msgid "See details of place '%(id)s'"
-msgstr "Katso henkilön '%(id)s' tiedot"
+msgstr "Katso paikan '%(id)s' tiedot"
 
 #: bp/scene/templates/scene/media.html:110
 #, python-format
@@ -3815,8 +3815,8 @@ msgstr "ei käytetä"
 
 #: bp/scene/templates/scene/sources.html:72
 #, python-format
-msgid "See details of source '%(uniq_id)s' (%(id)s)"
-msgstr "Katso lähteen '%(uniq_id)s' (%(id)s) tiedot"
+msgid "See details of source '%(id)s' (%(root)s)"
+msgstr "Katso lähteen '%(id)s' (%(root)s) tiedot"
 
 #: bp/scene/templates/scene/sources.html:82
 #: bp/scene/templates/scene/sources.html:87

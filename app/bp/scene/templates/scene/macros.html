@@ -185,7 +185,8 @@
             <span class="typedesc">{{pn.type|transl('nt')}}</span>
          {% endif %}
          <a href="/person/{{person.iid}}" class="inlink"
-            title="{{ _('See details of person \'%(id)s\'', id=person.iid) }}">{{ person_name_long(pn) }}</a>
+            title="{{ _('Person %(gid)s \'%(id)s\'', gid=person.id, id=person.iid) }}">
+                {{ person_name_long(pn) }}</a>
      {% else %}
       <small><br> – 
          {% if pn.type != "Birth Name" %}
@@ -227,8 +228,13 @@
     {% if p.iid == iid %}
     <span class="myself">({{ _('self') }})</span>
     {% else %}
-    <a href="/person/{{p.iid}}" class="inlink" 
-        title="{{ _('See details of person \'%(id)s\'', id=p.iid) }}">
+    <a href="/person/{{p.iid}}" class="inlink"
+        {% if p.root %}
+            title="{{ _('Person %(gid)s \'%(id)s\' (in material %(root)s)',
+                      gid=p.id, id=p.iid, root=p.root.batch_id) }}">
+        {% else %}
+            title="{{ _('Person %(gid)s \'%(id)s\'',gid=p.id, id=p.iid) }}">
+        {% endif %}
         {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
 	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
 	    {% else %}{{ _('Anonymous') }}</a>
