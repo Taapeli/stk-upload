@@ -27,14 +27,31 @@ div#upload_xml {
 div#upload_xml div {display: inline;}
 form div {margin:.25em;}
 
-td.progress-td { padding: 0; }
-.progress {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	z-index: -1;
+/* .myProgress { */
+/*   width: 400px; */
+/*   height: 30px; */
+/*   background-color: #ddd; */
+/* } */
+.myBar {
+  position: absolute;
+  width: 1%;
+  height: 4px;
+  background-color: #04AA6D;
+  text-align: end;
 }
+
+/* td.progress-td { padding: 0; } */
+/* .progress { */
+/* 	position: absolute; */
+/* 	top: 0; */
+/* 	bottom: 0; */
+/* 	left: 0; */
+/* 	z-index: -1; */
+/* } */
+/* @keyframes animate_0_max { */
+/*   from {width: 0;} */
+/*   to {width: default;} */
+/* } */
 .visible { display: inline; }
 .hidden { display:none; }
 
@@ -83,26 +100,61 @@ var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
 function update_progress(batch_id) {
 	// see http://jsfiddle.net/kedctfmj/3/
 	$.get("get_progress/" + encodeURIComponent(batch_id), (rsp) => {
-		var progress_div = $("td div.progress[data-name='"+batch_id+"']");
-		var batch_id_column = progress_div.parent();
-		batch_id_column.css("background","oldlace");
-        batch_id_column.css("border-color", "#00800070")
-        batch_id_column.css("border-width", "3pt")
+   		var myBar = $("td div.progress[data-name='"+batch_id+"']").children().first("div");
+// 		var batch_id_column = progress_div.parent();
+// 		batch_id_column.css("background","oldlace");
+//         batch_id_column.css("border-color", "#00800070")
+//         batch_id_column.css("border-width", "3pt")
 
-        progress_div.css("position", "relative");
-        progress_div.css("top", "calc(100% - .5em)");
-        progress_div.css("height", ".5em");
-		progress_div.css("background","Green");
-		progress_div.css("opacity","0.5");
-		progress_div.css("z-index","1");
+//         progress_div.css("position", "relative");
+//         progress_div.css("top", "calc(100% - .5em)");
+//         progress_div.css("height", ".5em");
+//         //progress_div.css("animation-name", "animate_0_max");
+//         //progress_div.css("animation-duration", "1s");
+//         //progress_div.css("animation-fill-mode", "forwards");
+// 		progress_div.css("background-color","Green");
+// 		progress_div.css("opacity","0.5");
+// 		progress_div.css("z-index","1");
 		if (rsp.progress == 0) rsp.progress = 1;
-		progress_div.get(0).style.width = rsp.progress + "%";
+		show_progress(rsp.progress, myBar);
+// 		for (let i = 0; i < rsp.progress; i++) {
+// 			progress_div.get(0).style.width = i + "%";
+// 		};
+// 		progress_div.get(0).innerHMTL = rsp.progress + "%";
+// 		//progress_div.get(0).style.width = rsp.progress + "%";
         if (rsp.status == "Loading") 
             setTimeout(function() {update_progress(batch_id)}, PROGRESS_INTERVAL);
 		else 
 			location.reload();
 	});
 }
+
+var doing = 0;
+
+function show_progress(pct, elem) {
+	// See https://www.w3schools.com/howto/howto_js_progressbar.asp
+	// For each update, we animate the bar from 0 to pct.
+    if (doing == 0) {
+        doing = 1;
+        if (pct == 0) pct = 1;
+        if (pct > 100) pct = 100;
+        var id = setInterval(frame, 10);
+    
+        var width = 1;
+        function frame() {
+            if (width >= pct) {
+                clearInterval(id);
+                doing = 0;
+            } else {
+                width+= 4;
+                if (width > pct) width=pct;
+                elem.style.width = width + "%";
+                elem.title =  pct + "%";
+            }
+        }
+    }
+}
+
 
 function confirm_delete(subj, name) {
 	if (subj == 'xml') {
@@ -181,13 +233,19 @@ function filenm_changed(input) {
                     </form>
                 </div>
 
-                <div class="progress" data-name='{{upload.batch_id}}'></div>
-    {% if upload.state == 'Loading' %}
-                     <script>
-                         update_progress('{{upload.batch_id}}');
-                     </script>
-    {% endif -%}
+                <div class="myProgress" data-name='{{upload.batch_id}}'>
+     {% if upload.state == 'Loading' %}
+                    <div class="myBar"></div>
+                    <script> update_progress('{{upload.batch_id}}'); </script>
+     {% endif -%}
+                </div>
             </td>
+
+<!--                 <div class="progress" data-name='{{upload.batch_id}}'></div> -->
+<!--     {% if upload.state == 'Loading' %} -->
+<!--                      <script> update_progress('{{upload.batch_id}}'); </script> -->
+<!--     {% endif -%} -->
+<!--             </td> -->
 
             <td>{{upload.xmlname}}
 
