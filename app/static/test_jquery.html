@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My JQuery</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<style>
+div.ground { 
+    background-color: antiquewhite;
+    padding: 2pt;
+    width: 50%;
+}
+div { height: 20px; width: 1%; overflow: clip;}
+</style>
+<script>
+var w = 2;
+$(function(){
+
+	$("button").click(function() {
+	    var wp = w+"%";
+        $(".bar").width(wp)
+            .css('width','0px')
+            .animate({width:wp},100)
+            .attr('title',wp);
+	    w += Math.floor(Math.random() * 15);
+	})
+
+})
+
+//   $(function show_progress(w){
+//     var wp = w+"%";
+// //    $("button").click(function(){
+//         $(".bar").width(wp);
+// //         $(".bar").css('width','0px')
+// //                 .animate({width:wp})
+// //                 .attr('title',wp);
+//     }) )
+</script>
+</head>
+<body>
+
+<h2>This is a heading</h2>
+
+<div class="ground">
+    <div class="bar" style="background-color:#ff0000">This is a "bar" division.</div>
+</div>
+
+<p>This is a paragraph.</p>
+
+<button>Set width of bar</button>
+
+</body>
+</html>
+

@@ -809,6 +809,7 @@ class DOM_handler:
                     # TODO: val="1700-luvulla" muunnettava Noteksi
                 except:
                     placename.dates = None
+            ##print(f"\t# Place {pl.id} {pl.names[0]} +{len(pl.names)-1}")
 
             for placeobj_coord in placeobj.getElementsByTagName("coord"):
                 if placeobj_coord.hasAttribute("lat") and placeobj_coord.hasAttribute(
@@ -870,7 +871,6 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            print(f"\t# Place {pl.id} {pl.names[0]} +{len(pl.names)-1}")
             self.dataservice.ds_save_place(tx, pl, self.batch.id, iids, place_keys=self.place_keys)
             # The place_keys has been updated
 

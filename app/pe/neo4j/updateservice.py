@@ -683,7 +683,9 @@ class Neo4jUpdateService(ConcreteService):
                 order=name.order,
                 n_attr=n_attr,
             )
-            name.uniq_id = result.single()[0]
+            record = result.single()
+            if record:
+                name.uniq_id = record[0]
             # print(f"# ({place.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
 
         # Select default names for default languages

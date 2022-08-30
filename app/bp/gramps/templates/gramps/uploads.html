@@ -30,7 +30,7 @@ form div {margin:.25em;}
 .myBar {
   position: absolute;
   width: 1%;
-  height: 5px;
+  height: 6px;
   background-color: #04AA6D;
   text-align: end;
 }
@@ -86,34 +86,26 @@ var myBar = null;
 function update_progress(batch_id) {
 	// see http://jsfiddle.net/kedctfmj/3/
 	$.get("get_progress/" + encodeURIComponent(batch_id), (rsp) => {
-		var progress_div = $("td div.progress[data-name='"+batch_id+"']");
-        console.log("progress_div html "+ progress_div.html());
-		var myBar = $("td div.progress[data-name='"+batch_id+"'] :first-child");
-        console.log("myBar html "+ myBar.html());
-
+		var progress_div = $("td div.myProgress[data-name='"+batch_id+"']");
 		var batch_id_column = progress_div.parent();
 		batch_id_column.css("background","oldlace");
         batch_id_column.css("border-color", "#00800070")
         batch_id_column.css("border-width", "3pt")
 
-        //var myBar = progress_div.first();
-        console.log("myBar position "+ myBar.position());
+        var myBar = $("td div.myProgress[data-name='"+batch_id+"'] :first-child");
 		if (rsp.progress == 0) rsp.progress = 1;
-		//show_progress(rsp.progress);
         var wp = rsp.progress+"%";
-        myBar.width(wp).attr({'title': wp});
-        console.log("New width "+ wp);
+        myBar.width(wp)
+            .css('width','0px')
+            .animate({width:wp},100)
+            .attr('title',wp);
+        //console.log("New width "+ wp);
         if (rsp.status == "Loading") 
             setTimeout(function() {update_progress(batch_id)}, PROGRESS_INTERVAL);
 		else 
 			location.reload();
 	});
 };
-
-// function show_progress(pct) {
-//     var wp = pct+"%";
-//     myBar.width(wp).attr({'title': wp});
-//};
 
 function confirm_delete(subj, name) {
 	if (subj == 'xml') {
