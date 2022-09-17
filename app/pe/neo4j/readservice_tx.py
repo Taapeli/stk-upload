@@ -132,8 +132,6 @@ class Neo4jReadServiceTx(ConcreteService):
 
         # Select cypher clause by arguments
 
-        #if not username: username = ""
-
         cypher_prefix = ""
         if restart:
             # Show search form only
@@ -180,6 +178,14 @@ class Neo4jReadServiceTx(ConcreteService):
         # result: person, names, events
         for record in result:
             #  <Record 
+            #     root=<Node element_id='1102718' labels=frozenset({'Root'})
+            #        properties={'metaname': 'uploads/juha/2022-08-30.004/Mäkeläinen 2021 T530.gpkg.meta',
+            #            'file': 'uploads/juha/2022-08-30.004/Mäkeläinen 2021 T530.gpkg', 
+            #            'xmlname': 'Mäkeläinen 2021 T530.gpkg', 'material': 'Family Tree', 
+            #            'logname': 'uploads/juha/2022-08-30.004/Mäkeläinen 2021 T530.gpkg.log', 
+            #            'mediapath': '/home/jm/gramps-media/Mäkeläiset 2021.media', 'description': '', 
+            #            'state': 'Candidate', 'id': '2022-08-30.004', 'user': 'juha', 
+            #            'db_schema': '2022.1.7', 'timestamp': 1661851005965}>
             #     person=<Node id=163281 labels={'Person'} 
             #       properties={'sortname': 'Ahonius##Knut Hjalmar',  
             #         'sex': '1', 'confidence': '', 'change': 1540719036, 
@@ -200,7 +206,7 @@ class Neo4jReadServiceTx(ConcreteService):
             prec.person_node = record.get('person')
             prec.names = record.get('names')           # list(name_nodes)
             prec.events_w_role = record.get('events')  # list of tuples (event_node, place_name, role)
-            prec.owners = record.get('owners')
+            #prec.owners = record.get('owners')
 
         # got {'items': [PersonRecord], 'status': Status.OK}
         #    - PersonRecord = object with fields person_node, names, events_w_role, owners

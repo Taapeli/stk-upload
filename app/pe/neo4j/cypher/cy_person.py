@@ -113,7 +113,7 @@ ORDER BY person.sortname"""
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
  //OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
-RETURN user, person, 
+RETURN root, person, // user,
     COLLECT(DISTINCT name) AS names,
     //COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
@@ -138,11 +138,11 @@ LIMIT $limit
     read_persons_w_events_by_refname = """
 MATCH path = ( (search:Refname) -[:BASENAME*0..3]- (:Refname))
     WHERE search.name STARTS WITH $name
-WITH nodes(path) AS x, root UNWIND x AS rn 
-    MATCH (rn) -[:REFNAME {use:$use}]-> (person:Person) 
-          <-[:OBJ_PERSON]- (root)
+WITH nodes(path) AS x, root
+UNWIND x AS rn 
+    MATCH (rn) -[:REFNAME {use:$use}]-> (person:Person) <-[:OBJ_PERSON]- (root)
     MATCH (person) -[:NAME]-> (name:Name {order:0})
-WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
+WITH root, person, name""" + _get_events_tail + _get_events_surname
 
     read_persons_w_events_by_years = """
 MATCH (root)
