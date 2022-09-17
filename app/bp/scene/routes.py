@@ -47,6 +47,8 @@ import shareds
 from . import bp
 #from bl import material
 
+from bp.api import apikey
+
 from bl.base import Status, StkEncoder
 from bl.comment import CommentReader, CommentsUpdater #, Comment
 from bl.event import EventReader, EventWriter
@@ -1238,6 +1240,33 @@ def show_source_page(iid:str):
         citations=res["citations"],
         user_context=u_context,
     )
+
+@bp.route("/source/search")
+def source_search():
+    """ Free text search by source title
+    """
+    #print("data:", request.data)
+    data = json.loads(request.data)
+    searchtext = data.get("searchtext")
+    key = data.get("apikey")
+    if not apikey.is_validkey(key): 
+        return jsonify(dict(
+            status="Error",
+            statusText="Wrong API Key",
+        ))
+    
+    u_context = UserContext()
+    u_context.count = request.args.get("c", 100, type=int)
+    displaylist = []
+    try:
+        with SourceReader("read", u_context) as service:
+            res = service.reference_source_search(searchtext)
+            #print(res)
+            return jsonify(res)
+    except Exception as e:
+        traceback.print_exc()
+        stk_logger(u_context, f"-> bp.scene.routes.source_search FAILED")
+        return jsonify({"status": Status.ERROR})
 
 
 # ------------------------------ Menu 6: Media --------------------------------

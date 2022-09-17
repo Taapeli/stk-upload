@@ -1306,6 +1306,37 @@ class Neo4jReadService(ConcreteService):
         # Result dictionaries using key = Citation uniq_id
         return citations, notes, targets
 
+    def dr_source_search(self, args):
+        material = args.get('material')
+        username = args.get('use_user')
+        searchtext = args.get('searchtext')
+        limit = args.get('limit', 100)
+        #print(args)
+
+        cypher = """
+            CALL db.index.fulltext.queryNodes("sourcetitle",$searchtext) 
+                YIELD node as source, score
+            WITH source,score
+            ORDER by score desc
+
+            MATCH (root:Root {state:"Accepted"}) --> (source)
+            RETURN DISTINCT source, score
+            LIMIT $limit
+            """
+        with self.driver.session(default_access_mode="READ") as session:
+            result = session.run( cypher, 
+                                  searchtext=searchtext,
+                                  limit=limit)
+            rsp = []
+            for record in result:
+                source = record.get('source')
+                score = record.get('score')
+                d = dict(
+                    source=dict(source),
+                    score=score)
+                rsp.append(d) 
+            return {'items': rsp, 'status': Status.OK}
+
     # ------ Media -----
 
     def dr_get_media_list(self, user, material, fw_from, limit):
