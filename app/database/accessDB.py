@@ -48,7 +48,7 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 # ====== Database schema ======
 # Change (increment) this, if schema must be updated
 # The value is also stored in each Root node
-DB_SCHEMA_VERSION = '2022.1.7'
+DB_SCHEMA_VERSION = '2022.1.8'
 # =============================
 
 
@@ -104,7 +104,8 @@ def initialize_db():
 
         create_freetext_index()
         create_freetext_index_for_notes()
-        
+        create_freetext_index_for_sources()
+                
         # Fix changed schema
         do_schema_fixes()
 
@@ -467,4 +468,16 @@ def create_freetext_index_for_notes():
     except Exception as e:
         traceback.print_exc()
         logger.error(f'database.accessDB.create_freetext_index_for_notes: {e.__class__.__name__} {e}' )
+        raise
+
+def create_freetext_index_for_sources():
+    try:
+        _result = shareds.driver.session().run(Cypher_adm.create_freetext_index_for_sources)
+    except ClientError as e:
+        msgs = e.message.split(',')
+        print(f'Create_freetext_index for sources, ok: {msgs[0]}')
+        return
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f'database.accessDB.create_freetext_index_for_sources: {e.__class__.__name__} {e}' )
         raise
