@@ -141,8 +141,8 @@ class Neo4jReadServiceTx(ConcreteService):
             cypher = CypherPerson.get_person_list
             print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
         elif rule == 'freetext':
-            cypher_prefix = CypherPerson.read_persons_w_events_by_name1
-            cypher = CypherPerson.read_persons_w_events_by_name2
+            cypher_prefix = CypherPerson.read_persons_w_events_freetext_pre
+            cypher = CypherPerson.read_persons_w_events_freetext
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
             cypher = CypherPerson.read_persons_w_events_by_refname
@@ -193,14 +193,15 @@ class Neo4jReadServiceTx(ConcreteService):
             #         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
             #     names=[<Node id=163282 labels={'Name'} 
             #       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
-            #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
+            #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>]
             #     events=[
-            #        <Node id=18571 labels=frozenset({'Event'})
-            #           properties={'datetype': 0, 'change': 1585409703, 'description': '', 
-            #             'id': 'E5393', 'date2': 1839427, 'date1': 1839427, 'type': 'Birth',
-            #             'iid': 'E-247'}>, 
-            #        'Voipala',
-            #        'Primary']
+            #        [<Node element_id='1107067' labels=frozenset({'Event'}) 
+            #            properties={''iid': 'E-evpc', 'id': 'E0807', 'type': 'Birth',...}>, 
+            #         'Helsinki',
+            #         'Primary'],
+            #        [<Node element_id='1107068' labels=frozenset({'Event'}) ...]
+            #     ]
+            #     initial='A'
             #  >
             prec = PersonRecord()
             prec.person_node = record.get('person')
@@ -208,16 +209,12 @@ class Neo4jReadServiceTx(ConcreteService):
             prec.events_w_role = record.get('events')  # list of tuples (event_node, place_name, role)
             #prec.owners = record.get('owners')
 
-        # got {'items': [PersonRecord], 'status': Status.OK}
-        #    - PersonRecord = object with fields person_node, names, events_w_role, owners
-        #    -    events_w_role = list of tuples (event_node, place_name, role)
-
             # print(p_record)
             node = prec.person_node
             person = PersonBl_from_node(node)
             person.root = dict_root_node(record["root"])
 
-            # if take_refnames and record['refnames']:
+            # Todo if take_refnames and record['refnames']:
             #     refnlist = sorted(record['refnames'])
             #     p.refnames = ", ".join(refnlist)
 

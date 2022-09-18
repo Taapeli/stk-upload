@@ -302,7 +302,7 @@ def _do_get_persons(u_context, args):
 
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
-        # for i in res.get("items"): print(f"_do_get_persons: @{i.user} {i.sortname}")
+        # for i in res.get("items"): print(f"_do_get_persons: @{i.root.user} {i.sortname}")
 
     # res["u_context"] = u_context
     return res

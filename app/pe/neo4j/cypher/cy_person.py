@@ -113,7 +113,7 @@ ORDER BY person.sortname"""
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
  //OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
-RETURN root, person, // user,
+RETURN root, person, //user,
     COLLECT(DISTINCT name) AS names,
     //COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
@@ -122,14 +122,14 @@ RETURN root, person, // user,
     ORDER BY TOUPPER(names[0].surname), names[0].firstname"""
 
     # With rule=names, free text search
-    read_persons_w_events_by_name1 = """
+    read_persons_w_events_freetext_pre = """
 CALL db.index.fulltext.queryNodes("searchattr",$name)
     YIELD node as person, score
 WITH person,score ORDER BY score DESC, person.sortname
 """
-    read_persons_w_events_by_name2 = """
+    read_persons_w_events_freetext = """
 MATCH (root) -[:OBJ_PERSON]-> (person) -[:NAME]-> (name:Name {order:0})
-WITH score, person, name, root.user as user""" + _get_events_tail + """ 
+WITH root, score, person, name""" + _get_events_tail + """ 
 , TOUPPER(LEFT(name.surname,1)) as initial
 LIMIT $limit
 """
@@ -149,7 +149,7 @@ MATCH (root)
         -[:OBJ_PERSON]-> (person:Person)
     WHERE person.death_high >= $years[0] AND person.birth_low <= $years[1]
 OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
-WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
+WITH root, person, name""" + _get_events_tail + _get_events_surname
 
 # ---- Person with Gramps handle -----
 

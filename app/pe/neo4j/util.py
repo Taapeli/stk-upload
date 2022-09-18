@@ -117,7 +117,7 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
         print(f":param material_type => {material.m_type!r};")
         print(f":param state => {material.state!r};")
         for key, value in kwargs.items():
-            print (f":param {key} => {value!r};")
+            print (f":param   {key} => {value!r};")
         print("// 2. Copy to cypher console to run command:")
         print(full_cypher)
         print("-----------")
