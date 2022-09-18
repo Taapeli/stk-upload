@@ -200,16 +200,13 @@ class SourceReader(DataService):
 
         return res
 
-    def reference_source_search(self, searchtext):
+    def reference_source_search(self, searchtext, limit):
         context = self.user_context
         #use_user = context.batch_user()
         args = {}
         args["use_user"] = "" # self.use_user
-        args["fw"] = context.first  # From here forward
-        args["limit"] = context.count
-        args["batch_id"] = context.material.batch_id
-        args["material"] = context.material
-        args["state"] = context.material.state
+        if limit: 
+            args["limit"] = limit
         args["searchtext"] = searchtext
         res = self.dataservice.dr_source_search(args)
         #print(res)

@@ -1245,10 +1245,13 @@ def show_source_page(iid:str):
 def source_search():
     """ Free text search by source title
     """
-    #print("data:", request.data)
-    data = json.loads(request.data)
-    searchtext = data.get("searchtext")
-    key = data.get("apikey")
+    args = dict(request.args)
+
+    key = args.get("apikey")
+    searchtext = args.get("searchtext")
+    limit = args.get("limit")
+    if limit.isdigit():
+        limit = int(limit)
     if not apikey.is_validkey(key): 
         return jsonify(dict(
             status="Error",
@@ -1260,7 +1263,7 @@ def source_search():
     displaylist = []
     try:
         with SourceReader("read", u_context) as service:
-            res = service.reference_source_search(searchtext)
+            res = service.reference_source_search(searchtext, limit)
             #print(res)
             return jsonify(res)
     except Exception as e:
