@@ -16,7 +16,7 @@ from bl.place import PlaceBl, PlaceName
 from ui.place import place_names_local_from_nodes
 
 from pe.dataservice import ConcreteService
-from pe.neo4j.util import run_cypher
+from pe.neo4j.util import run_cypher, dict_root_node
 from pe.neo4j.util import run_cypher_batch
 from pe.neo4j.util import dict_root_node
 
@@ -634,11 +634,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 pl = PlaceBl_from_node(node)
                 node_ids.append(pl.uniq_id)
                 # Original owner
-                root_node = record["root"]
-                pl.root = {'material': root_node["material"], 
-                           'root_state': root_node["state"], 
-                           'root_user': root_node["user"], 
-                           'batch_id': root_node["id"]}
+                pl.root = dict_root_node(record["root"])
                 # Default language name
                 node = record["name"]
                 if node:
