@@ -1359,19 +1359,24 @@ class Neo4jReadService(ConcreteService):
 
             media = []
             for record in result:
-                # <Record o=<Node id=393949 labels={'Media'}
-                #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
-                #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
-                #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
-                #            'id': 'O0001', 'iid': 'M-6850'}>
-                #    credit='juha'
-                #    batch_id='2020-01-02.001'
-                #    count=1>
-                node = record["o"]
-                m = MediaBl_from_node(node)
+                # <Record
+                #    root=<Node element_id='911199' labels=frozenset({'Root'}) 
+                #        properties={'metaname': 'uploads/valta/2022-04-16.004/Rääkkylä paikat.isotammi.gpkg.meta',
+                #            'file': 'uploads/valta/2022-04-16.004/Rääkkylä paikat.isotammi.gpkg', 'xmlname': 'Rääkkylä paikat.isotammi.gpkg', 
+                #            'material': 'Place Data', 'logname': 'uploads/valta/2022-04-16.004/Rääkkylä paikat.isotammi.gpkg.log', 
+                #            'mediapath': '/home/kari/Rosenkvist20211231.gpkg.media', 
+                #            'description': 'Rääkkylän paikkatiedot-kanta Isotammen "place data" XML-versiona', 'state': 'Accepted', 'id': '2022-04-16.004', 
+                #            'user': 'valta', 'db_schema': '2022.1.8', 'timestamp': 1650124333093}> 
+                #    o=<Node element_id='1144116' labels=frozenset({'Media'}) 
+                #        properties={'iid': 'M-1xy', 'batch_id': '2022-04-16.004', 
+                #            'src': 'SSS/ErillisetPitajankartat/PitajankarttaRaakkyla.jpg', 
+                #            'mime': 'image/jpeg', 'change': 1639149676, 'name': '', 
+                #            'description': 'Erilliset pitäjänkartat Rääkkylä', 'id': 'O0073'}>
+                #    count=1
+                # >
+                m = MediaBl_from_node(record["o"])
+                m.root = dict_root_node(record["root"])
                 m.conn = record.get("count", 0)
-                m.credit = record.get("credit")
-                m.batch = record.get("batch_id")
                 media.append(m)
             if media:
                 return {"media": media, "status": Status.OK}

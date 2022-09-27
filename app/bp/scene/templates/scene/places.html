@@ -77,6 +77,7 @@
 	{% if places %}
 	    {% for p in places %}
 	    	{% set ini = p.pname[0]|list|first %}
+	    	{% set pl_title = macro.obj_title(p) %}
             <tr><td class="ColumnAlpha">
 	            {% if loop.changed(ini) %}
 	               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
@@ -87,27 +88,27 @@
                       <a href="/place/{{p.iid}}"
                     {% if not p.ref_cnt %}
                         class="dimmed" 
-                        title="{{ _('No references to place %(gid)s \'%(id)s\' (in material %(root)s)',
-                                    gid=p.id, id=p.iid, root=p.root.batch_id) }}">
+                        title="{{ _('No references to place %(title)s', title=pl_title) }}">
                     {% else %}
                         class="inlink"
-                        title="{{ _('Place %(gid)s \'%(id)s\' (in material %(root)s)',
-                                    gid=p.id, id=p.iid, root=p.root.batch_id) }}">
+                   		title="{{ _('Place') }} {{ pl_title }}">
                     {%- endif %}
                         <b>{{ macro.place_names(p) }}</b></a>
                       <span class="typedesc">{{p.type|transl('lt')}}</span>
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
+	    				{% set e_title = macro.obj_title(e) %}
 						<span class="typedesc">{{e.type|transl('lt_in')}}</span>
 						<a href="/place/{{e.iid}}" class="inlink"
-                           title="{{ _('Place %(gid)s \'%(id)s\'', gid=e.id, id=e.iid) }}">
+                   		   title="{{ _('Place')}} {{ e_title }}">
                             {{ macro.place_names(e) }}</a> 
 		        {% endif %}
                    </div>
             {% if p.lowers %}
 		           <ul style="margin:0 0 .2em 1em;">
-		        {% for e in p.lowers|sort(attribute='pname') %}    <li>
+		        {% for e in p.lowers|sort(attribute='pname') %}
+		           	  <li>{% set e_title = macro.obj_title(e) %}
 	                    <a href="/place/{{e.iid}}"
-                           title="{{ _('Place %(gid)s \'%(id)s\'', gid=e.id, id=e.iid) }}">
+                   		   title="{{ _('Place')}} {{ e_title }}">
                             {{ macro.place_names(e) }}</a>
 	                       &nbsp;<span class="typedesc">{{e.type|transl('lt')}}</span>
                       </li>

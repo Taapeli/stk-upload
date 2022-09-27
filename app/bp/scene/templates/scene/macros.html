@@ -159,7 +159,7 @@
 
 
 #  Formats object keys and root for display.
-{% macro obj_title(obj) -%}{% if obj.root.batch_id %}
+{% macro obj_title(obj) -%}{% if obj.root %}
     	{{obj.id}} '{{obj.iid}}'{{ _( ', origin from material batch %(root)s', root=obj.root.batch_id ) }}
     {% else %}{{obj.id}} '{{obj.iid}}'
     {% endif -%}
@@ -238,8 +238,7 @@
     {% else %}
     <a href="/person/{{p.iid}}" class="inlink"
         {% if p.root %}
-            title="{{ _('Person %(gid)s \'%(id)s\' from material batch %(root)s',
-                      gid=p.id, id=p.iid, root=p.root.batch_id) }}">
+            title="{{ _('Person') }}{{ obj_title(p) }}">
         {% else %}
             title="{{ _('Person %(gid)s \'%(id)s\'',gid=p.id, id=p.iid) }}">
         {% endif %}

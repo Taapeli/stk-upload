@@ -74,9 +74,9 @@ tr > td > img {
                                  {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
                                  {%else%}{{media.description}}
                                  {%endif%}
-                                 &rtrif; <a href="/scene/media/{{media.name}}?id={{media.iid}}"
-                                            style="text-decoration:underline;">
-                                        {{ _('Show fullscreen') }}</a>
+                                 &rtrif;&nbsp;<a href="/scene/media/{{media.name}}?id={{media.iid}}"
+                                            style="text-decoration:underline;"
+                                            >{{ _('Show fullscreen') }}</a>
                                  </p>
                             </div>
                         </div>
