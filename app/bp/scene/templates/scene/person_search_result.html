@@ -32,7 +32,7 @@
 	            <td class="ColumnPerson">
                     <div>
 	                    <a href="/person/{{p.iid}}"
-                           title="{{ _('Person %(gid)s \'%(id)s\'', gid=p.id, id=p.iid) }}">
+                           title="{{ _('Person')}} {{ macro.obj_title(p) }}">
                             {{p.names[0].firstname}} 
             {% if p.names[0].prefix %} {{p.names[0].prefix}}{% endif %}
             {% if p.names[0].surname %}
