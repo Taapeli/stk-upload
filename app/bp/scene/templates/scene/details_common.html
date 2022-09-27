@@ -41,7 +41,7 @@
         <div>
             <table class="IndividualList">
                 <tr>
-                    <th>{{ _('User') }}</th>
+                    <th>{{ _('Researcher') }}</th>
                     <th>{{ _('Batch')}}</th>
                     <th>{{ _('File') }}, {{ _('Description')|lower }}</i></th>
                     <th>{{ _('State') }}</th>
@@ -62,7 +62,7 @@
                                     class="Auditor">{{ root.id }}</button>
                         </form>
             {% else %}
-                        {{root.id}}<br>
+                        <b>{{root.id}}</b><br>
             {% endif -%}
                         <!-- span id="changetime">{{ _(root.timestamp_str()) }}</span -->
                     </td>

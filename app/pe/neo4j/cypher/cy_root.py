@@ -192,13 +192,10 @@ return b as batch,
 #-bl.batch.root.Root.get_my_batches
     get_materials_accepted = """
 match (root:Root) <-[:HAS_ACCESS]- (user_a:UserProfile)
-    where root.state='Accepted' and root.material = "Family Tree"
+    where root.state='Accepted' and root.material = $m_type //"Family Tree"
 optional match (root) <-[:HAS_LOADED]- (user_l:UserProfile)
 return root, user_l as loaded, collect(user_a.username) as usernames
-    order by root.id"""
-#     match (root:Root) <-[:HAS_ACCESS]- (user:UserProfile)
-# where root.state='Accepted' and root.material = $m_type
-# return user, root order by root.id"""
+    order by root.id desc"""
 
     count_materials_accepted = """
 match (root:Root) 
