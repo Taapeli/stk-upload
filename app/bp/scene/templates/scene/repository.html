@@ -1,0 +1,95 @@
+{# _myapp/templates/repository.html_ #}
+{% extends "/scene/sc_layout.html" %}
+{% block title %}{{ _('Repository and Sources') }}{% endblock %}
+{% import '/scene/macros.html' as macro with context %}
+{% block body %}
+{{ super() }}
+<style>
+div#summaryarea ul li p { margin: 0 0 0.3em 0; }
+td.Citation {padding:.3em;}
+td.Citation > div {display: inline }
+td.Citation div ol {padding-top:.3em;}
+</style>
+
+
+<div id="startdiv">
+    <h1>{{ _('Repository Details') }}</h1>
+    <div>{{ macro.show_use_case(no_change=true) }}</div>
+</div>
+
+{{ macro.menu(5) }}
+    <div class="content" id="IndividualDetail">
+	    <h2 style="position:sticky; top:0;" title="{{ _('Repository') }}">{{repo.rtitle}}</h2>
+	    <div id="summaryarea">
+
+            <table><tbody>
+                <tr><td class="ColumnAttribute">
+                    </td>
+                    <td class="Value"><b>
+                    	<a href="/repository/{{repo.iid}}" class="inlink"
+                           title="{{ _('Repository') }} {{ macro.obj_title(repo) }}">{{repo.rname}}</a>
+                    </b></td>
+                    <td></td>
+                </tr>
+
+                <tr><td>&nbsp;</td><td> </td></tr>
+                <tr>
+                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="Value TwoRows">{{macro.all_obj_ids(repo)}}</td>
+                    <td></td>
+                </tr>
+                <tr><td></td></tr>
+{#
+	{% if source.sauthor or source.spubinfo or source.sabbreviation %}
+                <tr><td class="ColumnAttribute">{{ _("Author") }}</td>
+                    <td class="Value">{{source.sauthor}}</td>
+                    <td></td>
+                </tr>
+                <tr><td class="ColumnAttribute">{{ _("Publishing info") }}</td>
+                    <td class="Value">{{source.spubinfo}}</td>
+                    <td></td>
+                </tr>
+                <tr><td class="ColumnAttribute">{{ _("Abbreviation") }}</td>
+                    <td class="Value">{{source.sabbrev}}</td>
+                    <td></td>
+                </tr>
+	{% endif %}
+	{% if source.notes %}
+	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
+                    <td class="Value"><ul>
+    	{% for note in source.notes %}
+	                   <li>{{ macro.notelink(note) }}</li>
+		{% endfor -%}
+                    </ul>
+	{% endif %}
+#}
+            </tbody></table>
+	    </div>
+
+        <form>
+			<input type="hidden" name="uniq_id" value="{{ repo.uniq_id }}">
+        </form>
+    	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
+
+	        <div class="subsection" id="source">
+	            <h3>{{ _('Sources') }}</h3>
+	            <table class="infolist eventlist" width="100%">
+	                <tbody>
+
+	{% for source in repo.sources %}
+	        		<tr>
+		{% if source.medium %}
+                      <td><span class="typedesc">{{source.medium|transl('medium')}}</span></td>
+        {% else %}
+                      <td>{{ _('Archieved') }}</td>
+        {% endif -%}
+	        		  <td>{{source.stitle}}
+	        		  </td>
+
+	         		</tr>
+	{% endfor %}
+                </tbody></table>
+	        </div>
+	    </div>
+{% endblock %}
+
