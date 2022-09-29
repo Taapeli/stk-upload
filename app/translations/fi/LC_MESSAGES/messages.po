@@ -4766,9 +4766,13 @@ msgstr "Talleta valittujen sarakkeiden tiedot<br/>referenssiniminä"
 msgid "Accept"
 msgstr "   Hyväksy   "
 
-#: templates/repo_sources.html:3
+#: templates/repository.html:3
 msgid "Repository Details"
-msgstr "Repositoryn tiedot"
+msgstr "Arkiston tiedot"
+
+#: templates/repository.html:3
+msgid "Media type"
+msgstr "Väline"
 
 #: templates/repo_sources.html:24
 msgid "URL href"
