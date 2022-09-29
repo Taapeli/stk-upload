@@ -29,26 +29,12 @@ logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
 from bl.base import Status
-#from bl.place import PlaceBl, PlaceName
 from bl.material import Material
-
-# from bl.dates import DateRange
-# from bl.person_name import Name
-# from bl.source import SourceBl
-# from bl.family import FamilyBl
-# from bl.event import EventBl
-# from bl.person import PersonBl
-# from bl.media import MediaBl
-# from bl.event import Event
-# from bl.note import Note
-# from bl.citation import Citation
-# from bl.repository import Repository
-# from models.dbtree import DbTree
-
 from ui.place import place_names_local_from_nodes
 
 #from .cypher.cy_place import CypherPlace, CypherPlaceStats
 from .cypher.cy_source import CypherSource
+from .cypher.cy_repository import CypherRepository
 from .cypher.cy_family import CypherFamily
 from .cypher.cy_event import CypherEvent
 from .cypher.cy_person import CypherPerson
@@ -1336,6 +1322,55 @@ class Neo4jReadService(ConcreteService):
                     score=score)
                 rsp.append(d) 
             return {'items': rsp, 'status': Status.OK}
+
+
+    def dr_get_repository(self, user: str, material: Material, iid: str):
+        """Returns the Repository with Sources included."""
+        repo = None
+        sources = []
+        with self.driver.session(default_access_mode="READ") as session:
+            result = run_cypher(session, 
+                CypherRepository.get_repository_sources_iid, 
+                user, material, iid=iid
+            )
+            for record in result:
+                # <Record 
+                #    root=<Node element_id='155335' labels=frozenset({'Root'}) 
+                #        properties={'material': 'Family Tree', 'state': 'Accepted', 'id': '2021-08-29.003', 'user': 'juha', ...}> 
+                #    repo=<Node element_id='160455' labels=frozenset({'Repository'}) 
+                #        properties={'rname': 'Haminan seurakunnan arkisto', 'iid': 'R-22s', 
+                #        'change': 1585409708, 'id': 'R0260', 'type': 'Archive'}> 
+                #    sources=[
+                #        [<Node element_id='165962' labels=frozenset({'Source'}) 
+                #            properties={'stitle': 'Haminan srk - pää- ja rippikirja 1732-1742 (I Aa:1, ruotsinkieliset)', 
+                #            'iid': 'S-amc', 'spubinfo': '', 'sauthor': '', 'change': 1585409706, 'id': 'S1705'}>, 
+                #         'Book'], 
+                #        [<Node element_id='165487', ...], 
+                #    ]>
+                # >
+                node = record["repo"]
+                repo = Repository_from_node(node)
+                repo.root = dict_root_node(record["root"])
+                source_list = record['sources']
+                if source_list:
+                    for node, medium, cita_cnt in source_list:
+                        if node:
+                            s = SourceBl_from_node(node)
+                            s.medium = medium
+                            s.citation_cnt = cita_cnt
+                            repo.sources.append(s)
+                # notes = record["notes"]
+                # for note_node in notes:
+                #     n = Note_from_node(note_node)
+                #     repo.notes.append(n)
+
+            if repo:
+                return {"item": repo, "status": Status.OK}
+            return {
+                "status": Status.NOT_FOUND,
+                "statustext": f"repo iid={iid} not found",
+            }
+
 
     # ------ Media -----
 

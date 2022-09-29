@@ -60,6 +60,7 @@ from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.place import PlaceReaderTx
 from bl.source import SourceReader
+from bl.repository import RepositoryReader
 
 from bp.graph.models.fanchart import FanChart
 from models import mediafile
@@ -1150,7 +1151,7 @@ def show_place(iid):
     )
 
 
-# ------------------------------ Menu 5: Sources --------------------------------
+# ------------------------------ Menu 5: Sources and repositories ---------------
 
 
 @bp.route("/scene/sources")
@@ -1203,9 +1204,6 @@ def show_sources(series=None):
 @roles_accepted("guest", "research", "audit", "admin")
 def show_source_page(iid:str):
     """Home page for a Source with referring Event and Person data"""
-    # if not iid:
-    #     flash(_("Invalid source id"), "error")
-    #     return redirect(url_for("scene.show_sources"))
     u_context = UserContext()
     try:
         with SourceReader("read", u_context) as service:
@@ -1260,7 +1258,6 @@ def source_search():
     
     u_context = UserContext()
     u_context.count = request.args.get("c", 100, type=int)
-    displaylist = []
     try:
         with SourceReader("read", u_context) as service:
             res = service.reference_source_search(searchtext, limit)
@@ -1270,6 +1267,51 @@ def source_search():
         traceback.print_exc()
         stk_logger(u_context, f"-> bp.scene.routes.source_search FAILED")
         return jsonify({"status": Status.ERROR})
+
+
+#@bp.route("/scene/source", methods=["GET"])
+@bp.route("/repository/<iid>")
+@login_required
+@roles_accepted("guest", "research", "audit", "admin")
+def show_repository(iid:str):
+    """Repository page with referring Sources"""
+    u_context = UserContext()
+    t0 = time.time()
+    try:
+        with RepositoryReader("read", u_context) as service:
+            res = service.get_repository_sources(iid, u_context)
+
+        if res["status"] == Status.NOT_FOUND:
+            msg = res.get("statustext", _("No objects found"))
+            flash(msg, "error")
+        if res["status"] != Status.OK:
+            flash(f'{res.get("statustext", _("error"))}', "error")
+
+        repo = res['item']
+        stk_logger(
+            u_context, f"-> bp.scene.routes.show_repository n={len(repo.sources)}"
+        )
+
+    except KeyError as e:
+        traceback.print_exc()
+        msg = f"bp.scene.routes.show_repository: {e.__class__.__name__} {e}"
+        flash(f'{ _("Program error")}', "error")
+        logger.error(msg)
+
+    # for s in res['sources']:
+    #     # for i in c.citators:
+    #     #     if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
+    #     #     else:               print(f'{c} – person {i} {i.sortname}')
+    #     if hasattr(s, "notes"):
+    #         for n in s.notes:
+    #             print(f'     {s.id} note {n.url} "{n.text}"')
+    return render_template(
+        "/scene/repository.html",
+        repo=repo,
+        sources=repo.sources,
+        user_context=u_context,
+        elapsed=time.time() - t0
+    )
 
 
 # ------------------------------ Menu 6: Media --------------------------------
