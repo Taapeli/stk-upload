@@ -1276,6 +1276,7 @@ def source_search():
 def show_repository(iid:str):
     """Repository page with referring Sources"""
     u_context = UserContext()
+    t0 = time.time()
     try:
         with RepositoryReader("read", u_context) as service:
             res = service.get_repository_sources(iid, u_context)
@@ -1309,6 +1310,7 @@ def show_repository(iid:str):
         repo=repo,
         sources=repo.sources,
         user_context=u_context,
+        elapsed=time.time() - t0
     )
 
 

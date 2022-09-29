@@ -19,32 +19,22 @@ td.Citation div ol {padding-top:.3em;}
 
 {{ macro.menu(5) }}
     <div class="content" id="IndividualDetail">
-	    <h2 style="position:sticky; top:0;" title="{{ _('Repository') }}">{{repo.rtitle}}</h2>
+	    <h2 style="position:sticky; top:0;" 
+	        title="{{ _('Repository') }} {{ macro.obj_title(repo) }}">{{repo.rname}}</h2>
+
 	    <div id="summaryarea">
-
             <table><tbody>
-                <tr><td class="ColumnAttribute">
-                    </td>
-                    <td class="Value"><b>
-                    	<a href="/repository/{{repo.iid}}" class="inlink"
-                           title="{{ _('Repository') }} {{ macro.obj_title(repo) }}">{{repo.rname}}</a>
-                    </b></td>
-                    <td></td>
-                </tr>
-
-                <tr><td>&nbsp;</td><td> </td></tr>
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="Value TwoRows">{{macro.all_obj_ids(repo)}}</td>
                     <td></td>
                 </tr>
-                <tr><td></td></tr>
-{#
-	{% if source.sauthor or source.spubinfo or source.sabbreviation %}
-                <tr><td class="ColumnAttribute">{{ _("Author") }}</td>
-                    <td class="Value">{{source.sauthor}}</td>
+                <tr><td class="ColumnAttribute">{{ _("Type") }}</td>
+                    <td class="Value">{{repo.type|transl('rept')}}</td>
                     <td></td>
                 </tr>
+{#
+	{% if source.sauthor or source.spubinfo or source.sabbreviation %}
                 <tr><td class="ColumnAttribute">{{ _("Publishing info") }}</td>
                     <td class="Value">{{source.spubinfo}}</td>
                     <td></td>
@@ -71,11 +61,15 @@ td.Citation div ol {padding-top:.3em;}
         </form>
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
 
-	        <div class="subsection" id="source">
-	            <h3>{{ _('Sources') }}</h3>
-	            <table class="infolist eventlist" width="100%">
-	                <tbody>
-
+	    <div class="subsection" id="source" style="padding-bottom:1em;">
+	        <h3>{{ _('Sources') }}</h3>
+	        <table class="infolist eventlist" width="100%">
+	            <tbody>
+					<tr>
+						<th>{{ _('Media type') }}</th>
+						<th>{{ _('Source') }}</th>
+						<th>{{ _('Citations') }}</th>
+					</tr>
 	{% for source in repo.sources %}
 	        		<tr>
 		{% if source.medium %}
@@ -83,8 +77,11 @@ td.Citation div ol {padding-top:.3em;}
         {% else %}
                       <td>{{ _('Archieved') }}</td>
         {% endif -%}
-	        		  <td>{{source.stitle}}
+	        		  <td><a href="/source/{{source.iid}}" class="inlink"
+                   	 	     title="{{ _('Source')}} {{ macro.obj_title(source) }}">
+                   	 	  {{source.stitle}}</a>
 	        		  </td>
+                      <td class="numbers">{{ source.citation_cnt }}</td>
 
 	         		</tr>
 	{% endfor %}

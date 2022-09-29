@@ -1353,10 +1353,11 @@ class Neo4jReadService(ConcreteService):
                 repo.root = dict_root_node(record["root"])
                 source_list = record['sources']
                 if source_list:
-                    for node, medium in source_list:
+                    for node, medium, cita_cnt in source_list:
                         if node:
                             s = SourceBl_from_node(node)
                             s.medium = medium
+                            s.citation_cnt = cita_cnt
                             repo.sources.append(s)
                 # notes = record["notes"]
                 # for note_node in notes:
