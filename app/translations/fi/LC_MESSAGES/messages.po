@@ -4770,7 +4770,11 @@ msgstr "   Hyväksy   "
 msgid "Repository Details"
 msgstr "Arkiston tiedot"
 
-#: templates/repository.html:3
+#: templates/repository.html:65
+msgid "Sources in this Repository"
+msgstr "Lähteet tässä arkistossa"
+
+#: templates/repository.html:67
 msgid "Media type"
 msgstr "Väline"
 
