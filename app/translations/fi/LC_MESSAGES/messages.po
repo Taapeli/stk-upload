@@ -1645,6 +1645,9 @@ msgstr "Lapset"
 msgid "of type"
 msgstr "Tyyppi"
 
+msgid "places"
+msgstr "paikkaa"
+
 #: bp/dupsearch/templates/compare.html:139
 #: bp/dupsearch/templates/compare2.html:139
 #: bp/scene/templates/scene/family.html:65

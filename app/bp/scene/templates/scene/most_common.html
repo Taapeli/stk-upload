@@ -13,7 +13,7 @@
                         }
                     </script>
                      {% for stat in surnamestats %}
-                        <span style='font-size:{{ stat.fontsize}}px'>
+                        <span style='font-size:{{ stat.fontsize}}pt'>
                             <a href=# onclick="submit_search('{{ stat.surname }}')"
                                title="{{ stat.count }} {{ _('persons') }}">{{ stat.surname }}</a>
                         </span>
@@ -32,9 +32,9 @@
                     <input name="rule" type="hidden" value="placename">
                     <input name="key" type="hidden">
                      {% for stat in placenamestats %}
-                        <span style='font-size:{{ stat.fontsize }}px'>
+                        <span style='font-size:{{ stat.fontsize }}pt'>
                             <a href="/place/{{stat.iid}}"
-                               title="{{ stat.count }} {{ _('references') }}">{{ stat.placename }}</a>
+                               title="{{ stat.count }} {{ pl_calc }}">{{ stat.placename }}</a>
                         </span>
                      {% endfor %}
                  </form>

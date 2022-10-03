@@ -538,6 +538,31 @@ class Neo4jReadServiceTx(ConcreteService):
                 )
         return result_list
 
+    def tx_get_citated_placename_list(self, username, material, count=50):
+        """List most citated Places by name. 
+        
+        If username is defined, filter by user. 
+        """
+        result_list = []
+        with self.driver.session(default_access_mode="READ") as session:
+            # Select Batches by user, if defined
+            if material.m_type == "Place Data":
+                cypher = CypherPlaceStats.get_citated_places_for_place_data
+            else:
+                cypher = CypherPlaceStats.get_place_list
+            # logger.debug(f"#  Neo4jReadService.tx_get_placename_list: cypher \n{cypher}\n")
+            result = run_cypher_batch(session, cypher, username, material, count=count)
+            for record in result:
+                iid = record["p.iid"]
+                p2name = record["p2.pname"]
+                pname = record["p.pname"]
+                placename = p2name+" ("+pname+")" if p2name else pname
+                count = record["count"]
+                result_list.append(
+                    {"placename": placename, "count": count, "iid": iid}
+                )
+        return result_list
+
     def tx_get_place_list_fw(self, user, fw_from, limit, lang, material):
         """Read place list from given start point"""
         ret = []
