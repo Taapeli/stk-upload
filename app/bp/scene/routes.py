@@ -366,10 +366,12 @@ def _fontsize_by_stat_order(statdata: dict):
             cloudlevels += 1
         stat["order"] = order
 
-    for stat in statdata:
-        p = stat["order"] / cloudlevels
-        stat["fontsize"] = round(maxfont - p*(maxfont-minfont),2)
-        #print(f"{stat['order']}. cnt={stat['count']}, {round(100.-100*p)}%, {stat['fontsize']}pt")
+    if cloudlevels > 1:
+        # Define font size for each level; for single level a default is used
+        for stat in statdata:
+            p = stat["order"] / cloudlevels
+            stat["fontsize"] = round(maxfont - p*(maxfont-minfont),2)
+            #print(f"{stat['order']}. cnt={stat['count']}, {round(100.-100*p)}%, {stat['fontsize']}pt")
 
     return statdata
 

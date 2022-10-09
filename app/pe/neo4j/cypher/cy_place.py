@@ -192,8 +192,9 @@ MATCH (m:Media  {handle: $m_handle})
 
 class CypherPlaceStats:
     get_place_list = """
-match (root) -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
-return p as place, count(p) as count
+match (root) -[:OBJ_PLACE]-> (p:Place)
+optional match (p) <-[:IS_INSIDE*]- (p2:Place)
+return p as place, count(p2) as count
     order by count desc
     limit $count"""
 

@@ -160,7 +160,9 @@
 
 #  Formats object keys and root for display.
 {% macro obj_title(obj) -%}{% if obj.root %}
-    	{{obj.id}} '{{obj.iid}}'{{ _( ', origin from material batch %(root)s', root=obj.root.batch_id ) }}
+    	{{obj.id}} '{{obj.iid}}'{% if user_context.is_common()
+    	%}{{ _( ', origin from material batch %(root)s', root=obj.root.batch_id ) }}
+    	{% endif %}
     {% else %}{{obj.id}} '{{obj.iid}}'
     {% endif -%}
 {%- endmacro %}
