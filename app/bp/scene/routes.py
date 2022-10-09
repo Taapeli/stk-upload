@@ -450,6 +450,8 @@ def show_person_search():  # (set_scope=None, batch_id=None):
 
         surnamestats = []
         placenamestats = []
+        by_cites = False # Select experimental commonness calculation rule
+        pl_calc=_("references") if by_cites else _("places")
         if rule == "init":
             # Start material search page:
             #    - show name clouds and
@@ -463,8 +465,6 @@ def show_person_search():  # (set_scope=None, batch_id=None):
                     surnamestats.sort(key=itemgetter("surname"))
 
             # Most common place names cloud
-            by_cites = False # Select eExperimental commonness calculation
-            pl_calc=_("references") if by_cites else _("places")
             with PlaceReaderTx("read_tx", u_context) as service:
                 placenamestats = service.get_placename_list(40, by_cites)
                 # {name, count, iid}

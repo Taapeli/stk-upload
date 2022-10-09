@@ -252,7 +252,7 @@ class PersonReaderTx(DataService):
         #      see -> Neo4jReadServiceTx.tx_get_person_by_iid
 
         person = res['person']
-        root_dict = res.get("root")  # {material, root_user, batch_id}
+        #root_dict = person.root  # {material, root_user, batch_id}
         self._catalog(person)
         for name in person.names:
             self._catalog(name)
@@ -462,7 +462,7 @@ class PersonReaderTx(DataService):
             "person": person,
             "objs": self.obj_catalog,
             "jscode": jscode,
-            "root": root_dict,
+            "root": person.root,
             "status": Status.OK,
         }
 

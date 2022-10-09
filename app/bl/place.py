@@ -446,7 +446,7 @@ class PlaceReaderTx(DataService):
         else calculate all inner places.
         """
         ds = self.dataservice
-        if by_cites:
+        if by_cites: # experimental rule
             placenames = ds.tx_get_citated_placename_list(self.use_user, 
                                               self.user_context.material,
                                               count=count)

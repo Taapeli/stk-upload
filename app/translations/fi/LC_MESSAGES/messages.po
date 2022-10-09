@@ -4082,6 +4082,9 @@ msgstr "Ota yhteys tukeen"
 msgid "Your Materials"
 msgstr "Aineistosi"
 
+msgid ", material"
+msgstr ", aineisto"
+
 #: bp/start/templates/start/my_settings.html:133
 msgid "See all your materials"
 msgstr "Aineistoluettelo"

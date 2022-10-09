@@ -148,7 +148,7 @@
         >{{ _("edited") }} {{obj.change_str()}}
         {%- if user_context.material %} – <span>
             {% if user_context.is_common() %}
-                {{ _('origin from') }}: {{obj.root.root_user}} ({{obj.root.batch_id}})
+                {{ _('origin from') }}: {{obj.root.root_user}}{{ _(', material')}} {{obj.root.batch_id}}
             {% else %}{{ _('User data')|lower }}
             {% endif %}
         </span>
