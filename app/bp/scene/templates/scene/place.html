@@ -114,7 +114,8 @@ div#events div.scrollbox {
             {% for ref in cita.source_refs %}
                     <li class="sourceDesc">
                         <a href="/source/{{ref.source_obj.iid}}"
-                           class="inlink" title="Lähteen S1207 tiedot">
+                           class="inlink"
+                           title="{{ _('Source')}} {{ macro.obj_title(ref.source_obj) }}">
                            {{ ref.source_obj.stitle }}
                         </a>
                 {% if ref.repository %}
