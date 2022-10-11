@@ -60,8 +60,7 @@ form div {margin:.25em;}
 </style>
 
 <script>
-//TODO: Translation for message
-var TOOLARGE =  "The file is too large (max 60 MB)";
+var TOOLARGE =  '{{ _("The file is too large (max 60 MB)") }}';
 
 function checkFileSize() {
 	try {
@@ -74,6 +73,8 @@ function checkFileSize() {
 	}
 	catch {
 	}
+	var uploadform = document.getElementById('uploadform');
+ 	uploadform.submit();
 	return true;
 }
 
@@ -123,7 +124,7 @@ function confirm_delete(subj, name) {
 }
 
 function filenm_changed(input) {
-    document.forms[0].submit.disabled = !input.value;    
+    document.forms[0].submitbutton.disabled = !input.value;    
 }
 </script>
 
@@ -140,15 +141,15 @@ function filenm_changed(input) {
 
 {% if current_user.is_authenticated and current_user.has_role('research') %}
         <div id="upload_xml">
-            <form action="/gramps/upload" method="post" enctype="multipart/form-data">
+            <form action="/gramps/upload" id="uploadform" method="post" enctype="multipart/form-data">
                 <div><b>{{ _("Send a new Gramps file") }}</b>
                 </div>
                 <div>
                     <input type="hidden" name="material" value="xml_file">
-                    <input type="file" name="filenm" accept=".gramps,.gpkg" onchange="filenm_changed(this)"/>
+                    <input type="file" id="filenm" name="filenm" accept=".gramps,.gpkg" onchange="filenm_changed(this)"/>
                 </div>
                 <div class="submit"> 
-                    <input type="submit" name="submit" value="{{ _('Send to database') }}" onclick="checkFileSize()" disabled/>
+                    <input type="button" name="submitbutton" value="{{ _('Send to database') }}" onclick="checkFileSize()" disabled/>
                 </div>
                 <div style="display:block; padding:.3em 0;">
                     {{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.
