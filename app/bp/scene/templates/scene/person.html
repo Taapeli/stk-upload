@@ -114,7 +114,8 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
             {{macro.citation_link(person.citation_ref, obj)}}
         </h2>
 
-        <div id="summaryarea">
+    {% set myid = person.uniq_id %}{# for famtree #}
+            <div id="summaryarea">
             <table>
                 <tr>
                     <td class="ColumnAttr" style="padding-bottom: .5em;">{{ _("Identifiers") }}</td>

@@ -187,27 +187,10 @@
     {{name.firstname}} <i>{{name.suffix}}</i> {{name.prefix}} <b>{{name.surname}}</b>
 {%- endmacro %}
 
+{# Now included in person_names_anon
 {% macro person_names(person, names) -%}
-    {#  Formats a Person name with link. Shows altername names also. #}
-    {% for pn in names|sort(attribute='order') %}
-     {% if loop.first %}
-         {% if pn.type != "Birth Name" %}
-            <span class="typedesc">{{pn.type|transl('nt')}}</span>
-         {% endif %}
-         <a href="/person/{{person.iid}}" class="inlink"
-            title="{{ _('Person') }} {{ obj_title(person) }}">
-{#            title="{{ _('Person %(gid)s \'%(id)s\'', gid=person.id, id=person.iid) }}">
-#}
-                {{ person_name_long(pn) }}</a>
-     {% else %}
-      <small><br> – 
-         {% if pn.type != "Birth Name" %}
-            <span class="typedesc">{{pn.type|transl('nt')}}</span>
-         {% endif %}
-        {{ person_name_long(pn) }}</small>
-     {% endif %}
-    {% endfor %}
 {%- endmacro %}
+#}
 
 {% macro person_names_anon(person, names) -%}
     {#  Formats a Person name with link. Shows altername names also. #}
@@ -215,7 +198,23 @@
     {% if person.too_new %}
         N N
     {% else %}
-        {{ person_names(person, names) }}
+        {# person_names(person, names) #}
+	    {% for pn in names|sort(attribute='order') %}
+	      {% if loop.first %}
+	         {% if pn.type != "Birth Name" %}
+	            <span class="typedesc">{{pn.type|transl('nt')}}</span>
+	         {% endif %}
+	         <a href="/person/{{person.iid}}" class="inlink"
+	            title="{{ _('Person') }} {{ obj_title(person) }}">
+	                {{ person_name_long(pn) }}</a>
+	      {% else %}
+	      <small><br> – 
+	         {% if pn.type != "Birth Name" %}
+	            <span class="typedesc">{{pn.type|transl('nt')}}</span>
+	         {% endif %}
+	        {{ person_name_long(pn) }}</small>
+	      {% endif %}
+	    {% endfor %}
      {% endif %}
 {%- endmacro %}
 
@@ -242,12 +241,6 @@
     {% else %}
     <a href="/person/{{p.iid}}" class="inlink"
        title="{{ _('Person') }} {{ obj_title(p) }}">
-{#      {% if p.root %}
-            title="{{ _('Person') }}{{ obj_title(p) }}">
-        {% else %}
-            title="{{ _('Person %(gid)s \'%(id)s\'',gid=p.id, id=p.iid) }}">
-        {% endif %}
-#}
         {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
 	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
 	    {% else %}{{ _('Anonymous') }}</a>
@@ -283,7 +276,7 @@
     {#  Formats a Family name with link. #}
          {# <span class="typedesc">{{family.rel_type|transl('marr')}}</span> #}
          <a href="/family/{{family.iid}}" class="inlink"
-            title="{{ _('See Family Details') }}">
+            title="{{ _('Family') }} {{ obj_title(family) }}">
             {% for name in [family.father_sortname, family.mother_sortname] %}
                 {% set a = name.split('#') %}
                 {{a[1]}} <i>{{a[2]}}</i> <b>{{a[0]}}</b>
@@ -310,14 +303,15 @@
     {% endif %}
 {%- endmacro %}
 
-{% macro notelink_2col(note) -%}
-    {#  Displays a Note link and Note text in 2 columns #}
+{# NOT USED {% macro notelink_2col(note) -%}
+    {x  Displays a Note link and Note text in 2 columns x}
     <td>{% if note.url %}
     <a href="{{note.url}}" class="outlink" 
        target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}</td>
     {% set list1 = note.text.split('\n') %}
     <td>{% for l in list1 %}{{ l }} {% endfor %}</td>
 {%- endmacro %}
+#}
 
 {% macro note_link(note_list, obj) -%}{#
        Creates template <sup>note link</sup> for each citation.
