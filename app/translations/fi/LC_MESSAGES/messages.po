@@ -2756,8 +2756,8 @@ msgid "references"
 msgstr "viittausta"
 
 #: bp/scene/routes.py:456
-msgid "places"
-msgstr "paikkaa"
+msgid "inner places"
+msgstr "sisempää paikkaa"
 
 #: bp/scene/routes.py:668
 msgid "type changed"

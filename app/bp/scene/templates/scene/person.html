@@ -114,7 +114,6 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
             {{macro.citation_link(person.citation_ref, obj)}}
         </h2>
 
-    {% set myid = person.uniq_id %}  
         <div id="summaryarea">
             <table>
                 <tr>
@@ -259,7 +258,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                         <td class="ColumnEvent">
                             <div class="magnifier" alt="{{e.uniq_id}}">
                                 <a href="/event/{{e.iid}}" class="inlink"
-                                   title="{{ _('Event %(gid)s \'%(id)s\'', gid=e.id, id=e.iid) }}">
+                                   title="{{ _('Event') }} {{ macro.obj_title(e) }}">
                                     {{e.type|transl('evt')}}</a>
         {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>
@@ -274,8 +273,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
     	{% for pref in e.place_ref %}{% set pl = obj[pref] %}
     	    {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
                             <a href="/place/{{pl.iid}}" class="inlink"
-                             title="{{pl.type|transl('lt')|title}}; {{ _('Place %(gid)s \'%(id)s\'',
-                                    gid=e.id, id=pl.iid) }}">
+                               title="{{pl.type|transl('lt')|title}} {{ macro.obj_title(pl) }}">
                               {{macro.place_names_lang(pl)}}</a
                             >{{macro.note_link(pl.note_ref, obj)}}{% if pl.uppers %},
                             <small>{{macro.place_names_lang(pl.uppers[0])}}</small>{% endif %}

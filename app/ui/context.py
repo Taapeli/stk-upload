@@ -52,6 +52,8 @@ class UserContext:
     NEXT_START = "<"  # from first name of data
     NEXT_END = ">"  # end reached: there is nothing forwards
 
+    SHOW_DISCUSSION = False    # Show Comments block in object pages and scene tabs
+
     # Modev to Material:
     # COMMON = "common"  # Multi-batch data like Approved data
     # BATCH = "batch"  # Selected candidate or approved batch

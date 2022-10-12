@@ -453,7 +453,7 @@ def show_person_search():  # (set_scope=None, batch_id=None):
         surnamestats = []
         placenamestats = []
         by_cites = False # Select experimental commonness calculation rule
-        pl_calc=_("references") if by_cites else _("places")
+        pl_calc=_("references") if by_cites else _("inner places")
         if rule == "init":
             # Start material search page:
             #    - show name clouds and
@@ -1153,10 +1153,10 @@ def show_place(iid):
         traceback.print_exc()
         return redirect(url_for("virhesivu", code=1, text=str(e)))
 
-    for c in citations:
-        for ref in c.source_refs:
-            notes = ",".join([n.id for n in c.notes])
-            print(f"# Citation {ref} {notes}")
+    # for c in citations:
+    #     for ref in c.source_refs:
+    #         notes = ",".join([n.id for n in c.notes]) if c.notes else ""
+    #         print(f"# Citation {ref} {notes}")
 
     stk_logger(u_context, f"-> bp.scene.routes.show_place n={cnt}")
     return render_template(
