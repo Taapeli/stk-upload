@@ -277,7 +277,7 @@ def translate(term, var_name, show_table=False):
             "Kortteli": _("in the block"), #"kortteli"
             "Kuntakeskus": _("Kuntakeskuksessa"), #"kuntakeskuksessa"
             "Kuvernementti": _("in the governorate"), # kuvernementti
-            "Laitos": _("in the nstitute"), # laitos
+            "Laitos": _("in the institute"), # laitos
             "Linnoitus": _("in the fortress"), #"linnoituksessa"
             "Locality": _("at locality of"), #"kulmakuntannassa"
             "Luonnonpaikka": _("in a natural place of"),
@@ -291,13 +291,15 @@ def translate(term, var_name, show_table=False):
             "Sairaala": _("at the hospital"),
             "srk": _("in the parish of"), #"seurakunnassa"
             "State": _("in the state"), #"valtiossa"
+            "Street": _("on the street of"),
             "Säteri": _("in seat farm"), 
             "Talo": _("in the farm"), # tilalla
-            "Tontti": _("Tontilla"), #"tontilla"
+            "Tila": _("in the farm"), # tilalla
+            "Tontti": _("tontilla"), #"tontilla"
             "Town": _("in the town"), #"kaupunki"
             "Village": _("in the village of"), #"kylässä"
             "Yritys": _("at the company"), # yritys
-            "Unknown": _("in a place of unkown type") #"tuntematon"
+            "Unknown": _("in a place of unknown type") #"tuntematon"
         }
         try:
             if term:
