@@ -240,7 +240,9 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 			<input type="hidden" name="uniq_id" value="{{ person.uniq_id }}">
         </form>
 
+	{% if user_context.SHOW_DISCUSSION %}
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
+    {% endif %}
     	
         <div class="subsection" id="events">
             <h3>{{ _("Events") }}</h3>

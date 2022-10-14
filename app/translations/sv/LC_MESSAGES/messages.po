@@ -1064,6 +1064,9 @@ msgstr "Typ / beskrivining"
 #: bp/scene/templates/scene/details_batch.html:104
 #: bp/scene/templates/scene/details_common.html:47
 #: bp/start/templates/start/my_settings.html:122 ui/jinja_filters.py:246
+msgid "State "
+msgstr "Skede"
+
 msgid "State"
 msgstr "Delstat"
 

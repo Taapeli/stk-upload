@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-10-13 18:58+0300\n"
+"POT-Creation-Date: 2022-10-14 21:30+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -1067,13 +1067,11 @@ msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:34
 #: bp/audit/templates/audit/batches.html:36
-#: bp/audit/templates/audit/pick_auditing.html:57
 #: bp/gramps/templates/gramps/details.html:71
 #: bp/gramps/templates/gramps/uploads.html:167
 #: bp/scene/templates/scene/details_batch.html:104
-#: bp/scene/templates/scene/details_common.html:47
-#: bp/start/templates/start/my_settings.html:122 ui/jinja_filters.py:246
-msgid "State"
+#: bp/start/templates/start/my_settings.html:122
+msgid "State "
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:35
@@ -1349,6 +1347,11 @@ msgstr ""
 
 #: bp/audit/templates/audit/pick_auditing.html:43
 msgid "Auditing Researcher's Material"
+msgstr ""
+
+#: bp/audit/templates/audit/pick_auditing.html:57
+#: bp/scene/templates/scene/details_common.html:47 ui/jinja_filters.py:246
+msgid "State"
 msgstr ""
 
 #: bp/audit/templates/audit/pick_auditing.html:70
@@ -3858,7 +3861,7 @@ msgstr ""
 msgid "Latest comments"
 msgstr ""
 
-#: bp/scene/templates/scene/hx-comment/comments_header.html:6
+#: bp/scene/templates/scene/hx-comment/comments_header.html:7
 msgid "Show discussion"
 msgstr ""
 

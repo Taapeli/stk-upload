@@ -145,7 +145,10 @@ div#events div.scrollbox {
 		<form>
 			<input type="hidden" name="uniq_id" value="{{ place.uniq_id }}">
 		</form>
+
+	{% if user_context.SHOW_DISCUSSION %}
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
+    {% endif %}
 
     {% if place.note_handles %}
         <div id="notes">

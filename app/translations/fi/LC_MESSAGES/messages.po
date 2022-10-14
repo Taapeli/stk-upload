@@ -1056,8 +1056,11 @@ msgstr "Tyyppi / kuvaus"
 #: bp/scene/templates/scene/details_batch.html:104
 #: bp/scene/templates/scene/details_common.html:47
 #: bp/start/templates/start/my_settings.html:122 ui/jinja_filters.py:246
-msgid "State"
+msgid "State "
 msgstr "Vaihe"
+
+msgid "State"
+msgstr "osavaltio"
 
 #: bp/admin/templates/admin/uploads.html:35 bp/audit/templates/audit/batches.html:38
 #: bp/audit/templates/audit/index.html:17
@@ -5438,7 +5441,7 @@ msgstr "seurakunnassa"
 
 #: ui/jinja_filters.py:293
 msgid "in the state"
-msgstr "maassa"
+msgstr "osavaltiossa"
 
 #: ui/jinja_filters.py:294
 msgid "on the street of"
