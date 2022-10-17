@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-10-13 18:58+0300\n"
+"POT-Creation-Date: 2022-10-17 10:50+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -294,15 +294,15 @@ msgstr ""
 msgid "Material type"
 msgstr ""
 
-#: bl/gramps/xml_dom_handler.py:228 bp/scene/templates/scene/repository.html:71
+#: bl/gramps/xml_dom_handler.py:228 bp/scene/templates/scene/repository.html:74
 msgid "Citations"
 msgstr ""
 
 #: bl/gramps/xml_dom_handler.py:232 bp/dupsearch/templates/compare.html:197
 #: bp/dupsearch/templates/compare2.html:196
-#: bp/scene/templates/scene/person.html:246
+#: bp/scene/templates/scene/person.html:248
 #: bp/scene/templates/scene/persons_list.html:77
-#: bp/scene/templates/scene/place.html:207
+#: bp/scene/templates/scene/place.html:210
 msgid "Events"
 msgstr ""
 
@@ -321,7 +321,7 @@ msgstr ""
 msgid "Media"
 msgstr ""
 
-#: bl/gramps/xml_dom_handler.py:244 bp/scene/templates/scene/family.html:121
+#: bl/gramps/xml_dom_handler.py:244 bp/scene/templates/scene/family.html:124
 #: bp/scene/templates/scene/place.html:95
 #: bp/scene/templates/scene/source_events.html:71
 msgid "Notes"
@@ -341,7 +341,7 @@ msgstr ""
 msgid "Repositories"
 msgstr ""
 
-#: bl/gramps/xml_dom_handler.py:262 bp/scene/templates/scene/family.html:76
+#: bl/gramps/xml_dom_handler.py:262 bp/scene/templates/scene/family.html:79
 #: bp/scene/templates/scene/macros.html:71
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:39
 #: templates/repo_sources.html:38
@@ -1007,7 +1007,7 @@ msgstr ""
 #: bp/gramps/templates/gramps/details.html:155
 #: bp/scene/templates/scene/details_batch.html:189
 #: bp/scene/templates/scene/details_batch.html:213
-#: bp/scene/templates/scene/place.html:157
+#: bp/scene/templates/scene/place.html:160
 #: bp/scene/templates/scene/repository.html:32 templates/cite_sour_repo.html:15
 #: templates/cite_sour_repo.html:59 templates/repo_sources.html:19
 msgid "Type"
@@ -1072,8 +1072,8 @@ msgstr ""
 #: bp/gramps/templates/gramps/uploads.html:167
 #: bp/scene/templates/scene/details_batch.html:104
 #: bp/scene/templates/scene/details_common.html:47
-#: bp/start/templates/start/my_settings.html:122 ui/jinja_filters.py:246
-msgid "State"
+#: bp/start/templates/start/my_settings.html:122
+msgid "State "
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:35
@@ -1375,8 +1375,8 @@ msgstr ""
 #: bp/scene/templates/scene/edit_event.html:4
 #: bp/scene/templates/scene/event_vue.html:61
 #: bp/scene/templates/scene/obsolete_event.html:45
-#: bp/scene/templates/scene/person.html:253
-#: bp/scene/templates/scene/place.html:216
+#: bp/scene/templates/scene/person.html:255
+#: bp/scene/templates/scene/place.html:219
 #: bp/start/templates/start/my_settings.html:145
 msgid "Description"
 msgstr ""
@@ -1613,7 +1613,7 @@ msgstr ""
 #: bp/scene/templates/scene/hx-person/famtree.html:58
 #: bp/scene/templates/scene/hx-person/famtree.html:60
 #: bp/scene/templates/scene/macros.html:279
-#: bp/scene/templates/scene/source_events.html:121 ui/jinja_filters.py:92
+#: bp/scene/templates/scene/source_events.html:124 ui/jinja_filters.py:92
 #: ui/jinja_filters.py:130
 msgid "Family"
 msgstr ""
@@ -1637,7 +1637,7 @@ msgstr ""
 #: bp/dupsearch/templates/compare.html:105
 #: bp/dupsearch/templates/compare2.html:105 bp/scene/routes.py:1048
 #: bp/scene/templates/scene/families.html:112
-#: bp/scene/templates/scene/family.html:98
+#: bp/scene/templates/scene/family.html:101
 #: bp/scene/templates/scene/hx-person/famtree.html:25
 #: bp/scene/templates/scene/hx-person/famtree.html:68
 msgid "Children"
@@ -1645,13 +1645,13 @@ msgstr ""
 
 #: bp/dupsearch/templates/compare.html:139
 #: bp/dupsearch/templates/compare2.html:139
-#: bp/scene/templates/scene/family.html:65
+#: bp/scene/templates/scene/family.html:68
 msgid "of type"
 msgstr ""
 
 #: bp/dupsearch/templates/compare.html:139
 #: bp/dupsearch/templates/compare2.html:139
-#: bp/scene/templates/scene/family.html:65
+#: bp/scene/templates/scene/family.html:68
 msgid "see details of place"
 msgstr ""
 
@@ -2056,7 +2056,7 @@ msgid "Number of multimedia objects"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:133
-#: bp/scene/templates/scene/details_batch.html:235
+#: bp/scene/templates/scene/details_batch.html:237
 msgid "Actions"
 msgstr ""
 
@@ -2672,15 +2672,15 @@ msgstr ""
 #: bp/scene/templates/scene/person_search_result.html:17
 #: bp/scene/templates/scene/person_search_result.html:35
 #: bp/scene/templates/scene/persons_list.html:76
-#: bp/scene/templates/scene/place.html:213
+#: bp/scene/templates/scene/place.html:216
 msgid "Person"
 msgstr ""
 
 #: bp/gramps/templates/gramps/scripting.html:33
-#: bp/scene/templates/scene/person.html:250
-#: bp/scene/templates/scene/person.html:262
-#: bp/scene/templates/scene/place.html:214
-#: bp/scene/templates/scene/source_events.html:125
+#: bp/scene/templates/scene/person.html:252
+#: bp/scene/templates/scene/person.html:264
+#: bp/scene/templates/scene/place.html:217
+#: bp/scene/templates/scene/source_events.html:128
 #: templates/cite_sour_repo.html:8
 msgid "Event"
 msgstr ""
@@ -2689,12 +2689,12 @@ msgstr ""
 #: bp/scene/templates/scene/edit_event.html:12
 #: bp/scene/templates/scene/event_vue.html:69
 #: bp/scene/templates/scene/obsolete_event.html:53
-#: bp/scene/templates/scene/person.html:252
+#: bp/scene/templates/scene/person.html:254
 #: bp/scene/templates/scene/places.html:41
 #: bp/scene/templates/scene/places.html:94
 #: bp/scene/templates/scene/places.html:102
 #: bp/scene/templates/scene/places.html:111
-#: bp/scene/templates/scene/source_events.html:129
+#: bp/scene/templates/scene/source_events.html:132
 #: templates/obsolete_select_refcols.html:37
 #: templates/obsolete_select_refcols.html:65
 msgid "Place"
@@ -2706,8 +2706,8 @@ msgstr ""
 
 #: bp/gramps/templates/gramps/scripting.html:36
 #: bp/scene/templates/scene/place.html:118
-#: bp/scene/templates/scene/repository.html:70
-#: bp/scene/templates/scene/repository.html:81
+#: bp/scene/templates/scene/repository.html:73
+#: bp/scene/templates/scene/repository.html:84
 #: bp/scene/templates/scene/source_events.html:22
 #: bp/scene/templates/scene/sources.html:73
 #: bp/scene/templates/scene/sources.html:75
@@ -2724,7 +2724,7 @@ msgstr ""
 
 #: bp/gramps/templates/gramps/scripting.html:39
 #: bp/scene/templates/scene/note_search_result.html:17
-#: bp/scene/templates/scene/place.html:152
+#: bp/scene/templates/scene/place.html:155
 msgid "Note"
 msgstr ""
 
@@ -2999,8 +2999,8 @@ msgstr ""
 #: bp/scene/templates/scene/edit_event.html:8
 #: bp/scene/templates/scene/event_vue.html:65
 #: bp/scene/templates/scene/obsolete_event.html:49
-#: bp/scene/templates/scene/person.html:251
-#: bp/scene/templates/scene/place.html:215
+#: bp/scene/templates/scene/person.html:253
+#: bp/scene/templates/scene/place.html:218
 #: bp/start/templates/start/my_settings.html:143
 #: templates/cite_sour_repo.html:19 templates/cite_sour_repo.html:29
 msgid "Date"
@@ -3125,7 +3125,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: bp/scene/templates/scene/families.html:145
-#: bp/scene/templates/scene/family.html:113
+#: bp/scene/templates/scene/family.html:116
 #, python-format
 msgid "one hidden"
 msgid_plural "%(num)d hidden"
@@ -3151,18 +3151,18 @@ msgstr ""
 msgid "Relation"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:57
+#: bp/scene/templates/scene/family.html:60
 msgid "Family Events"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:81
+#: bp/scene/templates/scene/family.html:84
 #: bp/scene/templates/scene/place.html:127
-#: bp/scene/templates/scene/source_events.html:98
+#: bp/scene/templates/scene/source_events.html:101
 #: templates/cite_sour_repo.html:29
 msgid "Page"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:85
+#: bp/scene/templates/scene/family.html:88
 #: bp/scene/templates/scene/source_events.html:34
 msgid "in the repository"
 msgstr ""
@@ -3284,7 +3284,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/media.html:66
 #: bp/scene/templates/scene/media.html:69
-#: bp/scene/templates/scene/media.html:133
+#: bp/scene/templates/scene/media.html:135
 msgid "Thumbnail"
 msgstr ""
 
@@ -3293,40 +3293,40 @@ msgid "Size"
 msgstr ""
 
 #: bp/scene/templates/scene/media.html:79
-#: bp/scene/templates/scene/person.html:345
+#: bp/scene/templates/scene/person.html:347
 msgid "Show fullscreen"
 msgstr ""
 
-#: bp/scene/templates/scene/media.html:94
+#: bp/scene/templates/scene/media.html:96
 #: bp/scene/templates/scene/medias.html:66
 #: bp/scene/templates/scene/places.html:72
 #: bp/scene/templates/scene/sources.html:55 templates/cite_sour_repo.html:25
 msgid "References"
 msgstr ""
 
-#: bp/scene/templates/scene/media.html:102
-#: bp/scene/templates/scene/media.html:116
+#: bp/scene/templates/scene/media.html:104
+#: bp/scene/templates/scene/media.html:118
 #, python-format
 msgid "Person %(gid)s '%(id)s'"
 msgstr ""
 
-#: bp/scene/templates/scene/media.html:106
+#: bp/scene/templates/scene/media.html:108
 #, python-format
 msgid "Place %(gid)s '%(id)s'"
 msgstr ""
 
-#: bp/scene/templates/scene/media.html:110
+#: bp/scene/templates/scene/media.html:112
 #, python-format
 msgid "Event %(gid)s '%(id)s'"
 msgstr ""
 
-#: bp/scene/templates/scene/media.html:120
+#: bp/scene/templates/scene/media.html:122
 #, python-format
 msgid "Family %(gid)s '%(id)s'"
 msgstr ""
 
-#: bp/scene/templates/scene/media.html:131
-#: bp/scene/templates/scene/media.html:135
+#: bp/scene/templates/scene/media.html:133
+#: bp/scene/templates/scene/media.html:137
 msgid "cropped"
 msgstr ""
 
@@ -3349,7 +3349,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/medias.html:42
 #: bp/scene/templates/scene/medias.html:64
-#: bp/scene/templates/scene/place.html:184
+#: bp/scene/templates/scene/place.html:187
 msgid "Title"
 msgstr ""
 
@@ -3359,16 +3359,16 @@ msgstr ""
 
 #: bp/scene/templates/scene/medias.html:82
 #: bp/scene/templates/scene/medias.html:85
-#: bp/scene/templates/scene/place.html:192
+#: bp/scene/templates/scene/place.html:195
 msgid "Go to media page"
 msgstr ""
 
 #: bp/scene/templates/scene/medias.html:83
 #: bp/scene/templates/scene/person.html:90
 #: bp/scene/templates/scene/person.html:93
-#: bp/scene/templates/scene/person.html:343
-#: bp/scene/templates/scene/place.html:185
-#: bp/scene/templates/scene/place.html:195 ui/jinja_filters.py:205
+#: bp/scene/templates/scene/person.html:345
+#: bp/scene/templates/scene/place.html:188
+#: bp/scene/templates/scene/place.html:198 ui/jinja_filters.py:205
 msgid "Photo"
 msgstr ""
 
@@ -3448,7 +3448,7 @@ msgid "Gender"
 msgstr ""
 
 #: bp/scene/templates/scene/person.html:179
-#: bp/scene/templates/scene/place.html:164
+#: bp/scene/templates/scene/place.html:167
 msgid "Private data"
 msgstr ""
 
@@ -3495,31 +3495,31 @@ msgstr ""
 msgid "See %(num)d person notes"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:307
+#: bp/scene/templates/scene/person.html:309
 msgid "Place Notes"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:327
+#: bp/scene/templates/scene/person.html:329
 msgid "Relations"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:337
+#: bp/scene/templates/scene/person.html:339
 msgid "Media files"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:348
+#: bp/scene/templates/scene/person.html:350
 msgid "Go to photo page"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:351
+#: bp/scene/templates/scene/person.html:353
 msgid "crop"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:362
+#: bp/scene/templates/scene/person.html:364
 msgid "Person Notes"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:374
+#: bp/scene/templates/scene/person.html:376
 #: bp/scene/templates/scene/place.html:109
 msgid "Source references"
 msgstr ""
@@ -3683,19 +3683,19 @@ msgstr ""
 msgid "Location"
 msgstr ""
 
-#: bp/scene/templates/scene/place.html:158
+#: bp/scene/templates/scene/place.html:161
 msgid "Additional Information"
 msgstr ""
 
-#: bp/scene/templates/scene/place.html:180
+#: bp/scene/templates/scene/place.html:183
 msgid "Medium "
 msgstr ""
 
-#: bp/scene/templates/scene/place.html:240
+#: bp/scene/templates/scene/place.html:243
 msgid "No events"
 msgstr ""
 
-#: bp/scene/templates/scene/place.html:245
+#: bp/scene/templates/scene/place.html:248
 msgid "The required place was not found."
 msgstr ""
 
@@ -3733,15 +3733,15 @@ msgstr ""
 msgid "Repository Details"
 msgstr ""
 
-#: bp/scene/templates/scene/repository.html:65
+#: bp/scene/templates/scene/repository.html:68
 msgid "Sources in this Repository"
 msgstr ""
 
-#: bp/scene/templates/scene/repository.html:69
+#: bp/scene/templates/scene/repository.html:72
 msgid "Media type"
 msgstr ""
 
-#: bp/scene/templates/scene/repository.html:78
+#: bp/scene/templates/scene/repository.html:81
 #: bp/scene/templates/scene/source_events.html:32
 msgid "Archieved"
 msgstr ""
@@ -3777,15 +3777,15 @@ msgstr ""
 msgid "Abbreviation"
 msgstr ""
 
-#: bp/scene/templates/scene/source_events.html:87
+#: bp/scene/templates/scene/source_events.html:90
 msgid "Source References"
 msgstr ""
 
-#: bp/scene/templates/scene/source_events.html:98
+#: bp/scene/templates/scene/source_events.html:101
 msgid "Copy citation to clipboard"
 msgstr ""
 
-#: bp/scene/templates/scene/source_events.html:100
+#: bp/scene/templates/scene/source_events.html:103
 msgid "confidence"
 msgstr ""
 
@@ -5346,6 +5346,10 @@ msgstr ""
 
 #: ui/jinja_filters.py:245
 msgid "Hospital"
+msgstr ""
+
+#: ui/jinja_filters.py:246
+msgid "State"
 msgstr ""
 
 #: ui/jinja_filters.py:247
