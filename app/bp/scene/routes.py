@@ -69,9 +69,6 @@ from ui import jinja_filters
 from ui.context import UserContext
 from ui.util import error_print, stk_logger
 
-calendars = [_("Julian"), _("Hebrew")]  # just for translations
-
-
 # ---------------------- Enter with material select ---------------------------
 
 

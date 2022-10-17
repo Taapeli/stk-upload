@@ -31,6 +31,12 @@ from flask_babelex import _
 from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKNOWN
 from models.util import format_ms_timestamp
 
+if False:  # just for babel translations
+    calendars = [_("Julian"), _("Hebrew")]
+    role_descriptions = [_("descr_admin"), _("descr_audit"), _("descr_gedcom"), _("descr_guest"),
+                         _("descr_master"), _("descr_member"), _("descr_research"), _("descr_to_be_approved")]
+
+
 def timestamp_ms(ts_ms, minutes=True):
     return format_ms_timestamp(ts_ms, minutes)
 

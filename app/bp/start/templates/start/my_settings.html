@@ -99,7 +99,7 @@ table.transparent tbody tr td {
 				{% for role in roles %}
 				<tr>
 					<td><b>{{role.name}}</b>:</td>
-					<td>{{role.description}}</td>
+					<td>{{ _("descr_"+role.name) }}</td>
 				</tr>
 				{% endfor %}
 			</table>
