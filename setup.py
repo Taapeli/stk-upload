@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+#
 #   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
