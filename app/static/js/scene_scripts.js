@@ -261,7 +261,7 @@ function refTable() {
 			var nodeSourceA = document.createElement("A");
 			nodeSourceA.href = '/source/' + sObj.iid;
 			nodeSourceA.setAttribute("class", "inlink");
-			nodeSourceA.setAttribute("title", "Lähteen " + sObj.id + " tiedot");
+			nodeSourceA.setAttribute("title", "Lähteen " + sObj.id + " / " + sObj.iid + " tiedot");
 			var textnode = document.createTextNode(sObj.stitle);
 			nodeSourceA.appendChild(textnode);
 			nodeSource.appendChild(nodeSourceA);

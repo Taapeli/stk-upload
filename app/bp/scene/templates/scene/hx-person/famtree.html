@@ -12,8 +12,8 @@
                 <p>{{ _("Parents' family") }}</p>
                     {% for fam in person.families_as_child %}
                     <div class="groupbox">
-                        <div class="familybox" title="{{ _('family') }} {{fam.id}}">
-                            <p><a href="/family/{{fam.iid}}" title="{{fam.id}}" class="inlink">
+                        <div class="familybox" title="{{ _('family') }} {{ macro.obj_title(fam) }}">
+                            <p><a href="/family/{{fam.iid}}" class="inlink">
                                     {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                                 {{fam.marriage_dates}}</p>
                             <ul>
@@ -55,8 +55,8 @@
                     <p>{{ _("As Parent in Family") }}</p>
                     <div class="groupbox">
                         {% for fam in person.families_as_parent %}
-                        <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-                            <p><a href="/family/{{fam.iid}}" title="{{fam.id}}" class="inlink">
+                        <div class="familybox" title="{{ _('Family') }} {{ macro.obj_title(fam) }}">
+                            <p><a href="/family/{{fam.iid}}" class="inlink">
                                     {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                                 {{fam.marriage_dates}}</p>
                             <ul>

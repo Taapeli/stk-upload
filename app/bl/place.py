@@ -438,12 +438,20 @@ class PlaceReaderTx(DataService):
                 c.source_refs = [refs[c.uniq_id]]
         return res
 
-    def get_placename_list(self, count=40):
+    def get_placename_list(self, count=40, by_cites=False):
         """
         Return placename stats so that the names can be displayed in a name cloud.
+        
+        If by_cites, the citations of the place are calculate; 
+        else calculate all inner places.
         """
         ds = self.dataservice
-        placenames = ds.tx_get_placename_list(self.use_user, 
+        if by_cites: # experimental rule
+            placenames = ds.tx_get_citated_placename_list(self.use_user, 
+                                              self.user_context.material,
+                                              count=count)
+        else:
+            placenames = ds.tx_get_placename_list(self.use_user, 
                                               self.user_context.material,
                                               count=count)
         # Returns [{placename, count, iid},...]

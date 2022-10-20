@@ -31,6 +31,12 @@ from flask_babelex import _
 from bl.person import SEX_FEMALE, SEX_MALE, SEX_UNKNOWN
 from models.util import format_ms_timestamp
 
+if False:  # just for babel translations
+    calendars = [_("Julian"), _("Hebrew")]
+    role_descriptions = [_("descr_admin"), _("descr_audit"), _("descr_gedcom"), _("descr_guest"),
+                         _("descr_master"), _("descr_member"), _("descr_research"), _("descr_to_be_approved")]
+
+
 def timestamp_ms(ts_ms, minutes=True):
     return format_ms_timestamp(ts_ms, minutes)
 
@@ -277,7 +283,7 @@ def translate(term, var_name, show_table=False):
             "Kortteli": _("in the block"), #"kortteli"
             "Kuntakeskus": _("Kuntakeskuksessa"), #"kuntakeskuksessa"
             "Kuvernementti": _("in the governorate"), # kuvernementti
-            "Laitos": _("in the nstitute"), # laitos
+            "Laitos": _("in the institute"), # laitos
             "Linnoitus": _("in the fortress"), #"linnoituksessa"
             "Locality": _("at locality of"), #"kulmakuntannassa"
             "Luonnonpaikka": _("in a natural place of"),
@@ -291,13 +297,15 @@ def translate(term, var_name, show_table=False):
             "Sairaala": _("at the hospital"),
             "srk": _("in the parish of"), #"seurakunnassa"
             "State": _("in the state"), #"valtiossa"
+            "Street": _("on the street of"),
             "Säteri": _("in seat farm"), 
             "Talo": _("in the farm"), # tilalla
-            "Tontti": _("Tontilla"), #"tontilla"
+            "Tila": _("in the farm"), # tilalla
+            "Tontti": _("tontilla"), #"tontilla"
             "Town": _("in the town"), #"kaupunki"
             "Village": _("in the village of"), #"kylässä"
             "Yritys": _("at the company"), # yritys
-            "Unknown": _("in a place of unkown type") #"tuntematon"
+            "Unknown": _("in a place of unknown type") #"tuntematon"
         }
         try:
             if term:

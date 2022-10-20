@@ -76,7 +76,7 @@ class DataService:
             self.username = user_context.user
             # The operative username
             if user_context.is_common():
-                self.use_user = None
+                self.use_user = ""
             else:
                 self.use_user = user_context.user
         else:

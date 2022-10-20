@@ -69,9 +69,6 @@ from ui import jinja_filters
 from ui.context import UserContext
 from ui.util import error_print, stk_logger
 
-calendars = [_("Julian"), _("Hebrew")]  # just for translations
-
-
 # ---------------------- Enter with material select ---------------------------
 
 
@@ -348,6 +345,32 @@ def show_persons():
         elapsed=elapsed,
     )
 
+def _fontsize_by_stat_order(statdata: dict):
+    """ Calculate name cloud font sizes.
+
+        Parameter 'statdata' is a dictionary {name, count, iid};
+        on return fields 'order' and 'fontsize' are added.
+    """
+    minfont = 8 # Unit: pt
+    maxfont = 20
+    order = 0
+    cloudlevels = 0
+    count = -1
+    for stat in statdata:
+        if stat["count"] != count:
+            count = stat["count"]
+            order += 1
+            cloudlevels += 1
+        stat["order"] = order
+
+    if cloudlevels > 1:
+        # Define font size for each level; for single level a default is used
+        for stat in statdata:
+            p = stat["order"] / cloudlevels
+            stat["fontsize"] = round(maxfont - p*(maxfont-minfont),2)
+            #print(f"{stat['order']}. cnt={stat['count']}, {round(100.-100*p)}%, {stat['fontsize']}pt")
+
+    return statdata
 
 @bp.route("/scene/persons/search", methods=["GET", "POST"])
 @login_required
@@ -358,12 +381,6 @@ def show_person_search():  # (set_scope=None, batch_id=None):
 
     Uses the material defined in SecureCookieSession session
     """
-    def name_cloud_size(stats, i):
-        """ Name cloud font size for name stats[i]. """
-        minfont = 6
-        maxfont = 20
-        return maxfont - i * (maxfont - minfont) / len(stats)
-
     t0 = time.time()
     try:
 
@@ -432,6 +449,8 @@ def show_person_search():  # (set_scope=None, batch_id=None):
 
         surnamestats = []
         placenamestats = []
+        by_cites = False # Select experimental commonness calculation rule
+        pl_calc=_("references") if by_cites else _("inner places")
         if rule == "init":
             # Start material search page:
             #    - show name clouds and
@@ -440,20 +459,17 @@ def show_person_search():  # (set_scope=None, batch_id=None):
             # Most common surnames cloud
             with PersonReader("read", u_context) as service:
                 surnamestats = service.get_surname_list(47)
-                # {name, count, iid}
-                for i, stat in enumerate(surnamestats):
-                    stat["order"] = i
-                    stat["fontsize"] = name_cloud_size(surnamestats, i)
-                surnamestats.sort(key=itemgetter("surname"))
+                if surnamestats:
+                    surnamestats = _fontsize_by_stat_order(surnamestats)
+                    surnamestats.sort(key=itemgetter("surname"))
 
             # Most common place names cloud
             with PlaceReaderTx("read_tx", u_context) as service:
-                placenamestats = service.get_placename_list(40)
+                placenamestats = service.get_placename_list(40, by_cites)
                 # {name, count, iid}
-                for i, stat in enumerate(placenamestats):
-                    stat["order"] = i
-                    stat["fontsize"] = name_cloud_size(placenamestats, i)
-                placenamestats.sort(key=itemgetter("placename"))
+                if placenamestats:
+                    placenamestats = _fontsize_by_stat_order(placenamestats)
+                    placenamestats.sort(key=itemgetter("placename"))
 
     except Exception as e:
         error_print("show_person_search", e)
@@ -477,6 +493,7 @@ def show_person_search():  # (set_scope=None, batch_id=None):
         status=status,
         surnamestats=surnamestats,
         placenamestats=placenamestats,
+        pl_calc=pl_calc,
         elapsed=time.time() - t0,
     )
 
@@ -1133,10 +1150,10 @@ def show_place(iid):
         traceback.print_exc()
         return redirect(url_for("virhesivu", code=1, text=str(e)))
 
-    for c in citations:
-        for ref in c.source_refs:
-            notes = ",".join([n.id for n in c.notes])
-            print(f"# Citation {ref} {notes}")
+    # for c in citations:
+    #     for ref in c.source_refs:
+    #         notes = ",".join([n.id for n in c.notes]) if c.notes else ""
+    #         print(f"# Citation {ref} {notes}")
 
     stk_logger(u_context, f"-> bp.scene.routes.show_place n={cnt}")
     return render_template(

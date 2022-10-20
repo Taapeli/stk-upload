@@ -51,7 +51,10 @@ td { padding-right:1em;}
 	<form>
 		<input type="hidden" name="uniq_id" value="{{ family.uniq_id }}">
 	</form>
-	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
+
+	{% if user_context.SHOW_DISCUSSION %}
+    	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
+    {% endif %}
 
     {% if family.events %} 
         <h3>{{ _("Family Events") }}</h3>

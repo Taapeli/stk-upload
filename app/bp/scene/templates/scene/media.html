@@ -89,7 +89,9 @@ tr > td > img {
 			<input type="hidden" name="uniq_id" value="{{ media.uniq_id }}">
         </form>
 
+	{% if user_context.SHOW_DISCUSSION %}
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
+    {% endif %}
 
 	    <h3>{{ _('References') }}</h3>
 		

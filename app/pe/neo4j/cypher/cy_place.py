@@ -192,16 +192,25 @@ MATCH (m:Media  {handle: $m_handle})
 
 class CypherPlaceStats:
     get_place_list = """
-match (root) -[:OBJ_OTHER]-> (e:Event) -[:PLACE]-> (p:Place) 
-return p as place, count(p) as count
-order by count desc
-limit $count"""
+match (root) -[:OBJ_PLACE]-> (p:Place)
+optional match (p) <-[:IS_INSIDE*]- (p2:Place)
+return p as place, count(p2) as count
+    order by count desc
+    limit $count"""
 
     get_place_list_for_place_data = """
-match (root) -[:OBJ_PLACE]-> (p:Place) <-[:IS_INSIDE*]- (p2:Place) 
-return p as place,count(p2) as count 
-order by count desc
-limit $count
+match (root) -[:OBJ_PLACE]-> (p:Place) <-[:IS_INSIDE*]- (p2:Place)
+return p as place, count(p2) as count 
+    order by count desc
+    limit $count
+"""
+    get_citated_places_for_place_data = """
+match (root) -[:OBJ_PLACE]-> (p:Place) 
+    optional match (p) -[rc:CITATION]-> (:Citation)
+    optional match (p) <-[:IS_INSIDE]- (p2:Place)
+return p.iid, p2.pname, p.pname, count(rc) as count 
+    order by count desc
+    limit $count
 """
 
 class CypherPlaceMerge:

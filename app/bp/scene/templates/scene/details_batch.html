@@ -101,7 +101,7 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
             <div> "{{ batch.xmlname }}"</div>
         </div>
         <div class="prelines">
-            <div><b>{{ _("State") }}:</b>
+            <div><b>{{ _("State ") }}:</b>
             </div>
             <div title='{{ _("Converting the Gramps file to the database") }}'
     {% if state_n > 10 %}class="states done">
@@ -229,8 +229,10 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
         <form>
             <input type="hidden" name="uniq_id" value="{{ batch.uniq_id }}">
         </form>
-        <div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
-            
+	{% if user_context.SHOW_DISCUSSION %}
+    	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
+    {% endif %}
+
         <div id="actions">
             <h3>{{ _("Actions") }}</h3>
             <div hx-trigger="load"
@@ -241,8 +243,6 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
 
 <!-- Startdiv ends -->
 </div>
-
-
 
 <!-- </div> {# content #} -->
 {% endblock %}

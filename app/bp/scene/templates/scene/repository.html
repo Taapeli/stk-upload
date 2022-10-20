@@ -59,10 +59,13 @@ td.Citation div ol {padding-top:.3em;}
         <form>
 			<input type="hidden" name="uniq_id" value="{{ repo.uniq_id }}">
         </form>
+
+	{% if user_context.SHOW_DISCUSSION %}
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
+    {% endif %}
 
 	    <div class="subsection" id="source" style="padding-bottom:1em;">
-	        <h3>{{ _('Sources') }}</h3>
+	        <h3>{{ _('Sources in this Repository') }}</h3>
 	        <table class="infolist eventlist" width="100%">
 	            <tbody>
 					<tr>

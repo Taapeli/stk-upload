@@ -12,12 +12,15 @@
                             document.forms.surnameform.submit();
                         }
                     </script>
-                     {% for stat in surnamestats %}
-                        <span style='font-size:{{ stat.fontsize}}px'>
+            {% for stat in surnamestats %}
+            	{% if stat.fontsize %}
+                        <span style='font-size:{{ stat.fontsize}}pt'>
+                {% else %}<span>
+                {% endif -%}
                             <a href=# onclick="submit_search('{{ stat.surname }}')"
                                title="{{ stat.count }} {{ _('persons') }}">{{ stat.surname }}</a>
                         </span>
-                     {% endfor %}
+            {% endfor %}
                  </form>
         {% else %}
                 <i>{{ _('No person names') }}</i>
@@ -31,12 +34,16 @@
                  <form name="placenameform" method="post" action="/scene/persons/search">
                     <input name="rule" type="hidden" value="placename">
                     <input name="key" type="hidden">
-                     {% for stat in placenamestats %}
-                        <span style='font-size:{{ stat.fontsize }}px'>
+        	{% for stat in placenamestats %}
+            	{% if stat.fontsize %}
+                        <span style='font-size:{{ stat.fontsize }}pt'>
+                {% else %}<span>
+                {% endif -%}
                             <a href="/place/{{stat.iid}}"
-                               title="{{ stat.count }} {{ _('references') }}">{{ stat.placename }}</a>
+                               title="{{ stat.count }} {{ pl_calc }}">
+                               {{ stat.placename }}</a>&nbsp;
                         </span>
-                     {% endfor %}
+            {% endfor %}
                  </form>
         {% else %}
                 <i>{{ _('No places') }}</i>

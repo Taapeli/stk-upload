@@ -81,7 +81,10 @@ td.Citation div ol {padding-top:.3em;}
         <form>
 			<input type="hidden" name="uniq_id" value="{{ source.uniq_id }}">
         </form>
+
+	{% if user_context.SHOW_DISCUSSION %}
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
+    {% endif %}
 
 	        <div class="subsection" id="citations">
 	            <h3>{{ _('Source References') }}</h3>

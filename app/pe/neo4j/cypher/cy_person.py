@@ -40,6 +40,10 @@ SET p.sortname=$key"""
     get_person = """
 MATCH (root) -[r:OBJ_PERSON]-> (p:Person {iid:$iid}) 
 RETURN p, root"""
+# //More accurate?
+#     get_person = """
+# MATCH (user:UserProfile) -[:HAS_LOADED]-> (root) -[:OBJ_PERSON]-> (p:Person {iid:$iid}) 
+# RETURN user.username as loader, root, p"""
 
     get_names_events = """
 MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
