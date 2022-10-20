@@ -467,8 +467,18 @@ def extract_media(pathname, batch_id):
     try:
         media_files_folder = mediafile.get_media_files_folder(batch_id)
         os.makedirs(media_files_folder, exist_ok=True)
-        TarFile(fileobj=gzip.GzipFile(pathname)).extractall(path=media_files_folder)
+        tarfile = TarFile(fileobj=gzip.GzipFile(pathname))
+
+        # protect from attacks via malformed tar files (see https://nvd.nist.gov/vuln/detail/CVE-2007-4559)
+        for tarinfo in tarfile:
+            if not (tarinfo.isreg() or tarinfo.isdir()): 
+                raise RuntimeError(f"Invalid entry in .gpkg file (only regular files and directories are accepted): {tarinfo.name}") 
+            if tarinfo.name.startswith("/") or ".." in tarinfo.name:
+                raise RuntimeError(f"Invalid entry in .gpkg file: {tarinfo.name}") 
+
+        tarfile.extractall(path=media_files_folder)
         xml_filename = os.path.join(media_files_folder, "data.gramps")
         os.remove(xml_filename)
     except:
         traceback.print_exc()
+        raise

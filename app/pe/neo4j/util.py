@@ -34,6 +34,10 @@ cypher_material_prefix = """
     MATCH (root:Root {state:"Accepted", material:$material_type})
 """
 
+cypher_common_batch_prefix = """
+    MATCH (root:Root{state:"Accepted", material:$material_type, id:$batch_id})
+"""
+
 cypher_user_batch_prefix = """
     MATCH (prof:UserProfile{username:$username})
         -[:HAS_ACCESS|:DOES_AUDIT]-> (root:Root{id:$batch_id})
@@ -93,23 +97,27 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
     """
     cypher_prefix = kwargs.get("cypher_prefix", "")
     if not username:
-        # By (state and) material_type
-        full_cypher = cypher_prefix + cypher_material_prefix + cypher
+        if material.batch_id:
+            # Single common material
+            full_cypher = cypher_prefix + cypher_common_batch_prefix + cypher
+        else:
+            # Materials by state and material_type
+            full_cypher = cypher_prefix + cypher_material_prefix + cypher
     else:
         # By username and batch_id
         full_cypher = cypher_prefix + cypher_user_batch_prefix + cypher
     if not isinstance(material, Material):
         raise IsotammiException("pe.neo4j.util.run_cypher_batch: invalid material")
 
-    if False:
+    if True:
         print("----------- pe.neo4j.util.run_cypher_batch -------------")
-        print("// 1. You may copy to cypher console to set parameters:")
+        print("// 1. You may copy this to cypher console to set parameters:")
         print(f":param username => {username!r};")
         print(f":param batch_id => {material.batch_id!r};")
         print(f":param material_type => {material.m_type!r};")
         print(f":param state => {material.state!r};")
         for key, value in kwargs.items():
-            print (f":param {key} => {value!r};")
+            print (f":param   {key} => {value!r};")
         print("// 2. Copy to cypher console to run command:")
         print(full_cypher)
         print("-----------")
@@ -118,6 +126,15 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
                        batch_id=material.batch_id, 
                        material_type=material.m_type,
                        **kwargs)
+
+def dict_root_node(root_node):
+    """ Create minimal root_dict from record["root"] """
+    
+    return {'material': root_node["material"], 
+            'root_state': root_node["state"], 
+            'root_user': root_node["user"], 
+            'batch_id': root_node["id"]}
+
 
 
 class IsotammiId:

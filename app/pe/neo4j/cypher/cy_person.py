@@ -94,15 +94,15 @@ ORDER BY n.order"""
     get_person_list = """
 MATCH (root) -[:OBJ_PERSON]-> (p:Person)
     WHERE p.sortname >= $start_name
-WITH p ORDER BY p.sortname LIMIT $limit
+WITH root, p ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
     OPTIONAL MATCH (p) <-[:PARENT]- (f:Family) -[rf:EVENT]-> (fe:Event)
-WITH p, n, re.role as role, e, f.rel_type as rel, fe
+WITH root, p, n, re.role as role, e, f.rel_type as rel, fe
 ORDER BY p.sortname, n.order
     OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
     OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
-RETURN p as person,
+RETURN root, p as person,
     COLLECT(DISTINCT n) as names, 
     COLLECT(DISTINCT [e, pl.pname, role]) + COLLECT(DISTINCT [fe, fpl.pname, rel]) AS events
 ORDER BY person.sortname"""
@@ -113,7 +113,7 @@ ORDER BY person.sortname"""
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
  //OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
-RETURN user, person, 
+RETURN root, person, //user,
     COLLECT(DISTINCT name) AS names,
     //COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [event, place.pname, r.role]) AS events"""
@@ -122,14 +122,14 @@ RETURN user, person,
     ORDER BY TOUPPER(names[0].surname), names[0].firstname"""
 
     # With rule=names, free text search
-    read_persons_w_events_by_name1 = """
+    read_persons_w_events_freetext_pre = """
 CALL db.index.fulltext.queryNodes("searchattr",$name)
     YIELD node as person, score
 WITH person,score ORDER BY score DESC, person.sortname
 """
-    read_persons_w_events_by_name2 = """
+    read_persons_w_events_freetext = """
 MATCH (root) -[:OBJ_PERSON]-> (person) -[:NAME]-> (name:Name {order:0})
-WITH score, person, name, root.user as user""" + _get_events_tail + """ 
+WITH root, score, person, name""" + _get_events_tail + """ 
 , TOUPPER(LEFT(name.surname,1)) as initial
 LIMIT $limit
 """
@@ -138,18 +138,18 @@ LIMIT $limit
     read_persons_w_events_by_refname = """
 MATCH path = ( (search:Refname) -[:BASENAME*0..3]- (:Refname))
     WHERE search.name STARTS WITH $name
-WITH nodes(path) AS x, root UNWIND x AS rn 
-    MATCH (rn) -[:REFNAME {use:$use}]-> (person:Person) 
-          <-[:OBJ_PERSON]- (root)
+WITH nodes(path) AS x, root
+UNWIND x AS rn 
+    MATCH (rn) -[:REFNAME {use:$use}]-> (person:Person) <-[:OBJ_PERSON]- (root)
     MATCH (person) -[:NAME]-> (name:Name {order:0})
-WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
+WITH root, person, name""" + _get_events_tail + _get_events_surname
 
     read_persons_w_events_by_years = """
 MATCH (root)
         -[:OBJ_PERSON]-> (person:Person)
     WHERE person.death_high >= $years[0] AND person.birth_low <= $years[1]
 OPTIONAL MATCH (person) -[:NAME]-> (name:Name {order:0})
-WITH person, name, root.user as user""" + _get_events_tail + _get_events_surname
+WITH root, person, name""" + _get_events_tail + _get_events_surname
 
 # ---- Person with Gramps handle -----
 

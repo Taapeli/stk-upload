@@ -31,10 +31,9 @@ class CypherPlace():
     _get_name_hierarchies_tail = """
     OPTIONAL MATCH (place) -[:NAME]-> (pn:Place_name)
         WHERE NOT pn = name
-//  WITH place, name, COLLECT(DISTINCT pn) AS names, COUNT(ref) AS uses
         OPTIONAL MATCH (place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
         OPTIONAL MATCH (place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
-        RETURN place, name, COUNT(DISTINCT ref) AS uses,
+        RETURN root, place, name, COUNT(DISTINCT ref) AS uses,
             COLLECT(DISTINCT pn) AS names,
             COLLECT(DISTINCT [ID(up), up.iid, up.type, upn.name, upn.lang]) AS upper,
             COLLECT(DISTINCT [ID(do), do.iid, do.type, don.name, don.lang]) AS lower
@@ -72,13 +71,13 @@ RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
     get_w_citas_names_notes = """
 MATCH  (root) -[:OBJ_PLACE]-> (place:Place{iid:$iid})
 OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
-WITH place, name
+WITH root, place, name
     OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 
         WHERE name is null or not n = name
     OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
     OPTIONAL MATCH (place) -[mr:MEDIA]-> (media:Media)
     OPTIONAL MATCH (place) -[cr:CITATION]-> (cita:Citation)
-RETURN place, name,
+RETURN root, place, name,
     COLLECT(DISTINCT n) AS names,
     COLLECT (DISTINCT note) AS notes,
     COLLECT (DISTINCT media) AS medias,
@@ -90,7 +89,7 @@ MATCH (root) -[:OBJ_OTHER]-> (cita) -[:NOTE]-> (note:Note)
 RETURN ID(cita) AS cid, note"""
 
     # Result indi is a Person or Family
-    get_person_family_events = """
+    get_place_events = """
 MATCH (e:Event) -[:PLACE]-> (l:Place)
     WHERE ID(l) = $locid
 WITH e,l

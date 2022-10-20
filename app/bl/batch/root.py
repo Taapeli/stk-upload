@@ -88,11 +88,29 @@ class State:
     ROOT_DELETED = "Deleted"
     ROOT_UNKNOWN = "Unknown"
     ROOT_DEFAULT_STATE = ROOT_ACCEPTED
+    ROOT_STATE_TO_ORDER_NUMBER = {
+        ROOT_UNKNOWN: 0,
+        FILE_LOADING: 5,
+        ROOT_STORING: 10,
+        ROOT_CANDIDATE: 20,
+        ROOT_AUDIT_REQUESTED: 30,
+        ROOT_AUDITING: 40,
+        # "Audit done": 50,
+        ROOT_ACCEPTED: 60,
+        ROOT_REJECTED: 61,
+        # "Merged": 70,
+        }
 
     OBJECT_CANDICATE = "Candidate"  # old BATCH_CANDIDATE  = "completed"
     OBJECT_ACCEPTED = "Accepted"
     OBJECT_MERGED = "Merged"
     OBJECT_REJECTED = "Rejected"
+
+    @staticmethod
+    def state_number(state):
+        """ Converts state value to ordinal number for comparison.
+        """
+        return State.ROOT_STATE_TO_ORDER_NUMBER.get(state, 0)
 
 
 class Root(NodeObject):
@@ -142,19 +160,7 @@ class Root(NodeObject):
     def state_number(self):
         """ Converts state value to ordinal number enabling comparison.
         """
-        conv = {
-            State.ROOT_UNKNOWN: 0,
-            State.FILE_LOADING: 5,
-            State.ROOT_STORING: 10,
-            State.ROOT_CANDIDATE: 20,
-            State.ROOT_AUDIT_REQUESTED: 30,
-            State.ROOT_AUDITING: 40,
-            # "Audit done": 50,
-            State.ROOT_ACCEPTED: 60,
-            State.ROOT_REJECTED: 61,
-            # "Merged": 70,
-            }
-        return conv.get(self.state, 0)
+        return State.state_number(self.state)
 
     def handle_suffix(self) -> str:
         """ Shortened batch id "2022-05-07.001" -> "2205071" for NodeObject.handle. """
@@ -175,7 +181,7 @@ class Root(NodeObject):
         Returns True, if allowed operation
         """
         if self.state == State.ROOT_AUDIT_REQUESTED:
-            ret = oper in ["browse", "start"]
+            ret = oper == "start"
         elif self.state == State.ROOT_AUDITING:
             if active_auditor:
                 # Withdraw/reject not used?
@@ -375,8 +381,9 @@ class Root(NodeObject):
                                  m_type=material_type)
             for rec in result:
                 root = Root.from_node(rec.get("root"))
-                user = rec.get("user")
-                root.user = dict(user.items())
+                user_node = rec.get("loaded")
+                root.user_dict = dict(user_node.items())
+                root.access = rec.get("usernames")
                 roots.append(root)
         print(f"#get_materials_accepted: {len(roots)} nodes of {material_type})")
         return roots

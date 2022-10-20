@@ -27,14 +27,14 @@ div#upload_xml {
 div#upload_xml div {display: inline;}
 form div {margin:.25em;}
 
-td.progress-td { padding: 0; }
-.progress {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	z-index: -1;
+.myBar {
+  position: absolute;
+  width: 1%;
+  height: 6px;
+  background-color: #04AA6D;
+  text-align: end;
 }
+
 .visible { display: inline; }
 .hidden { display:none; }
 
@@ -79,30 +79,33 @@ function checkFileSize() {
 
 // Progress bar
 var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
+//var w = 1;  // Initial bar width
+var myProgress = null;
+var myBar = null;
 
 function update_progress(batch_id) {
 	// see http://jsfiddle.net/kedctfmj/3/
 	$.get("get_progress/" + encodeURIComponent(batch_id), (rsp) => {
-		var progress_div = $("td div.progress[data-name='"+batch_id+"']");
+		var progress_div = $("td div.myProgress[data-name='"+batch_id+"']");
 		var batch_id_column = progress_div.parent();
 		batch_id_column.css("background","oldlace");
         batch_id_column.css("border-color", "#00800070")
         batch_id_column.css("border-width", "3pt")
 
-        progress_div.css("position", "relative");
-        progress_div.css("top", "calc(100% - .5em)");
-        progress_div.css("height", ".5em");
-		progress_div.css("background","Green");
-		progress_div.css("opacity","0.5");
-		progress_div.css("z-index","1");
+        var myBar = $("td div.myProgress[data-name='"+batch_id+"'] :first-child");
 		if (rsp.progress == 0) rsp.progress = 1;
-		progress_div.get(0).style.width = rsp.progress + "%";
+        var wp = rsp.progress+"%";
+        myBar.width(wp)
+            .css('width','0px')
+            .animate({width:wp},100)
+            .attr('title',wp);
+        //console.log("New width "+ wp);
         if (rsp.status == "Loading") 
             setTimeout(function() {update_progress(batch_id)}, PROGRESS_INTERVAL);
 		else 
 			location.reload();
 	});
-}
+};
 
 function confirm_delete(subj, name) {
 	if (subj == 'xml') {
@@ -181,13 +184,19 @@ function filenm_changed(input) {
                     </form>
                 </div>
 
-                <div class="progress" data-name='{{upload.batch_id}}'></div>
-    {% if upload.state == 'Loading' %}
-                     <script>
-                         update_progress('{{upload.batch_id}}');
-                     </script>
-    {% endif -%}
+                <div class="myProgress" data-name='{{upload.batch_id}}'>
+     {% if upload.state == 'Loading' %}
+                    <div class="myBar"></div>
+                    <script> update_progress('{{upload.batch_id}}'); </script>
+     {% endif -%}
+                </div>
             </td>
+
+<!--                 <div class="progress" data-name='{{upload.batch_id}}'></div> -->
+<!--     {% if upload.state == 'Loading' %} -->
+<!--                      <script> update_progress('{{upload.batch_id}}'); </script> -->
+<!--     {% endif -%} -->
+<!--             </td> -->
 
             <td>{{upload.xmlname}}
 

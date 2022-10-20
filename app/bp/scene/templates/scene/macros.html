@@ -144,18 +144,24 @@
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span>
     {% if obj.change %}
     <span id="changetime" title="{{ _('latest change time and contributor') }}"
-        {% if margin %}style='margin-right:{{margin}}'{% endif %}
+        {%- if margin %}style='margin-right:{{margin}}'{% endif %}
         >{{ _("edited") }} {{obj.change_str()}}
-        {%- if false %} {# Tilapäisesti poistettu: if user_context.material #}
-        – <span>
+        {%- if user_context.material %} – <span>
             {% if user_context.is_common() %}
-            {{ _('origin from') }}: {{user_context.user}}
-            {% else %}
-            {{ _('User data')|lower }}
+                {{ _('origin from') }}: {{obj.root.root_user}} ({{obj.root.batch_id}})
+            {% else %}{{ _('User data')|lower }}
             {% endif %}
         </span>
         {% endif %}
     </span>
+    {% endif -%}
+{%- endmacro %}
+
+
+#  Formats object keys and root for display.
+{% macro obj_title(obj) -%}{% if obj.root %}
+    	{{obj.id}} '{{obj.iid}}'{{ _( ', origin from material batch %(root)s', root=obj.root.batch_id ) }}
+    {% else %}{{obj.id}} '{{obj.iid}}'
     {% endif -%}
 {%- endmacro %}
 
@@ -187,7 +193,8 @@
             <span class="typedesc">{{pn.type|transl('nt')}}</span>
          {% endif %}
          <a href="/person/{{person.iid}}" class="inlink"
-            title="{{ _('see details of person %(id)s', id=person.iid) }}">{{ person_name_long(pn) }}</a>
+            title="{{ _('Person %(gid)s \'%(id)s\'', gid=person.id, id=person.iid) }}">
+                {{ person_name_long(pn) }}</a>
      {% else %}
       <small><br> – 
          {% if pn.type != "Birth Name" %}
@@ -229,8 +236,12 @@
     {% if p.iid == iid %}
     <span class="myself">({{ _('self') }})</span>
     {% else %}
-    <a href="/person/{{p.iid}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=p.iid) }}">
+    <a href="/person/{{p.iid}}" class="inlink"
+        {% if p.root %}
+            title="{{ _('Person') }}{{ obj_title(p) }}">
+        {% else %}
+            title="{{ _('Person %(gid)s \'%(id)s\'',gid=p.id, id=p.iid) }}">
+        {% endif %}
         {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
 	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
 	    {% else %}{{ _('Anonymous') }}</a>

@@ -33,7 +33,10 @@ td.Citation div ol {padding-top:.3em;}
             {% endif -%}
                         {{ _('in the repository') }}
                     </td>
-                    <td class="Value"><b>{{repo.rname}}</b></td>
+                    <td class="Value"><b>
+                    	<a href="/repository/{{repo.iid}}" class="inlink"
+                           title="{{ _('Repository') }} {{ macro.obj_title(repo) }}">{{repo.rname}}</a>
+                    </b></td>
                     <td></td>
                 </tr>
         {% endfor %}
@@ -115,15 +118,15 @@ td.Citation div ol {padding-top:.3em;}
                           {% endif -%}
                           {% if indi.id[0] == "F" %}
                                  <a href="/family/{{indi.iid}}" class="inlink"
-                                    title="{{ _('see details of family') }}"> 
+                                    title="{{ _('Family') }} {{ macro.obj_title(indi) }}">
                                     {{ indi.clearname | replace("#", " ") }}</a>
                           {% elif indi.id[0] == "E" %}{# _('Event') #}
                                  <a href="/event/{{indi.iid}}" class="inlink"
-                                    title="{{ _('see details of event') }}">
+                                    title="{{ _('Event') }} {{ macro.obj_title(indi) }}">
                                     {{ indi.clearname | title }}
                           {% elif indi.id[0] == "P" %}{# _('Place') #}
                                  <a href="/place/{{indi.iid}}" class="inlink"
-                                    title="{{ _('see details of place') }}">
+                                    title="{{ _('Place') }} {{ macro.obj_title(indi) }}">
                                     {{ indi.clearname }}
                           {% else %}
                                  {{ macro.person_name_by_sortname_anon(indi) }}

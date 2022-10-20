@@ -74,9 +74,9 @@ tr > td > img {
                                  {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
                                  {%else%}{{media.description}}
                                  {%endif%}
-                                 &rtrif; <a href="/scene/media/{{media.name}}?id={{media.iid}}"
-                                            style="text-decoration:underline;">
-                                        {{ _('Show fullscreen') }}</a>
+                                 &rtrif;&nbsp;<a href="/scene/media/{{media.name}}?id={{media.iid}}"
+                                            style="text-decoration:underline;"
+                                            >{{ _('Show fullscreen') }}</a>
                                  </p>
                             </div>
                         </div>
@@ -99,26 +99,26 @@ tr > td > img {
 		      <li>{{ _(ref.label) }}:
 		    	{% if ref.label == 'Person' %}
 		    		<a href="/person/{{ref.obj.iid}}" class="inlink"
-			               title="{{ _('see details of person %(id)s', id=ref.obj.iid) }} (nr={{ref.obj.uniq_id}})">
-			               {{ref.obj.sortname|replace("#", " ")}}</a>
+                       title="{{ _('Person %(gid)s \'%(id)s\'', gid=ref.obj.id, id=ref.obj.iid) }}">
+		               {{ref.obj.sortname|replace("#", " ")}}</a>
                 {% elif ref.label == 'Place' %}
                     <a href="/place/{{ref.obj.iid}}" class="inlink"
-                           title="{{ _('see details of place %(id)s', id=ref.obj.iid) }} (nr={{ref.obj.uniq_id}})">
-                           {{ref.obj.pname}}</a>
+                       title="{{ _('Place %(gid)s \'%(id)s\'', gid=ref.obj.id, id=ref.obj.iid) }}">
+                       {{ref.obj.pname}}</a>
                 {% elif ref.label == 'Event' %}
                     <a href="/event/{{ref.obj.iid}}" class="inlink"
-                           title="{{ _('see details of event %(id)s', id=ref.obj.iid) }} (nr={{ref.obj.uniq_id}})">
-                           {{ _(ref.obj.type) }}</a> {{ref.obj.description}}
+                       title="{{ _('Event %(gid)s \'%(id)s\'', gid=ref.obj.id, id=ref.obj.iid) }}">
+                       {{ _(ref.obj.type) }}</a> {{ref.obj.description}}
                     {% if ref.next_objs %}<ul>
                         {% for p in ref.next_objs %}<li>
                             {% if p.label == "Person" %}
                                 <a href="/person/{{p.iid}}" class="inlink"
-                                    title="{{ _('see details of person %(id)s', id=p.iid) }} (nr={{p.uniq_id}})">
-                                {{ macro.person_name_by_sortname(p) }}</a>
+                                   title="{{ _('Person %(gid)s \'%(id)s\'', gid=p.id, id=p.iid) }}">
+                                    {{ macro.person_name_by_sortname(p) }}</a>
                             {% elif p.label == "Family" %}
                                 <a href="/family/{{p.iid}}" class="inlink"
-                                    title="{{ _('see details of family %(id)s', id=p.iid) }} (nr={{p.uniq_id}})">
-                                {{ macro.family_name(p) }}</a>
+                                   title="{{ _('Family %(gid)s \'%(id)s\'', gid=p.id, id=p.iid) }}">
+                                    {{ macro.family_name(p) }}</a>
                             {% endif %}
                             </li>
                         {% endfor %}

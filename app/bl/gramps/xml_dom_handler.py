@@ -429,12 +429,12 @@ class DOM_handler:
             for ref in event.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
                     e.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
-                    ##print(f'# Event {e.id} has note {e.note_handles[-1]}')
+                    #(p)print(f'# Event {e.id} has note {e.note_handles[-1]}')
 
             for ref in event.getElementsByTagName("citationref"):
                 if ref.hasAttribute("hlink"):
                     e.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
-                    ##print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
+                    #(p)print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
 
             # Handle <objref> with citations and notes
             e.media_refs = self._extract_mediaref(event)
@@ -719,7 +719,7 @@ class DOM_handler:
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
                 if n.url:
-                    print(f"\t#handle_people_list: {p.id}: post process {n.url}")
+                    #(p)print(f"\t#handle_people_list: {p.id}: post process {n.url}")
                     url_notes.append(n)
 
             # Not used
@@ -809,6 +809,7 @@ class DOM_handler:
                     # TODO: val="1700-luvulla" muunnettava Noteksi
                 except:
                     placename.dates = None
+            ##print(f"\t# Place {pl.id} {pl.names[0]} +{len(pl.names)-1}")
 
             for placeobj_coord in placeobj.getElementsByTagName("coord"):
                 if placeobj_coord.hasAttribute("lat") and placeobj_coord.hasAttribute(
@@ -843,7 +844,7 @@ class DOM_handler:
                 n.type = placeobj_url.getAttribute("type")
                 n.text = placeobj_url.getAttribute("description")
                 if n.url:
-                    print(f"\t#handle_place_list: {pl.id}: post process {n.url}")
+                    #(p)print(f"\t#handle_place_list: {pl.id}: post process {n.url}")
                     url_notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName("placeref"):
@@ -870,7 +871,6 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has cite {pl.citation_handles[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            print(f"\t# Place {pl.id} {pl.names[0]} +{len(pl.names)-1}")
             self.dataservice.ds_save_place(tx, pl, self.batch.id, iids, place_keys=self.place_keys)
             # The place_keys has been updated
 
@@ -916,7 +916,7 @@ class DOM_handler:
                 n.type = repository_url.getAttribute("type")
                 n.text = repository_url.getAttribute("description")
                 if n.url:
-                    print(f"\t#handle_repositories_list: {r.id}: post process {n.url}")
+                    #(p)print(f"\t#handle_repositories_list: {r.id}: post process {n.url}")
                     url_notes.append(n)
 
             self.dataservice.ds_save_repository(tx, r, self.batch.id, iids)

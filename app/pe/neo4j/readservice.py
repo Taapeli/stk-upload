@@ -29,26 +29,12 @@ logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
 from bl.base import Status
-#from bl.place import PlaceBl, PlaceName
 from bl.material import Material
-
-# from bl.dates import DateRange
-# from bl.person_name import Name
-# from bl.source import SourceBl
-# from bl.family import FamilyBl
-# from bl.event import EventBl
-# from bl.person import PersonBl
-# from bl.media import MediaBl
-# from bl.event import Event
-# from bl.note import Note
-# from bl.citation import Citation
-# from bl.repository import Repository
-# from models.dbtree import DbTree
-
 from ui.place import place_names_local_from_nodes
 
 #from .cypher.cy_place import CypherPlace, CypherPlaceStats
 from .cypher.cy_source import CypherSource
+from .cypher.cy_repository import CypherRepository
 from .cypher.cy_family import CypherFamily
 from .cypher.cy_event import CypherEvent
 from .cypher.cy_person import CypherPerson
@@ -56,7 +42,7 @@ from .cypher.cy_media import CypherMedia
 from .cypher.cy_comment import CypherComment
 
 from pe.dataservice import ConcreteService
-from pe.neo4j.util import run_cypher, run_cypher_batch
+from pe.neo4j.util import run_cypher, run_cypher_batch, dict_root_node
 
 from pe.neo4j.nodereaders import Citation_from_node
 from pe.neo4j.nodereaders import Comment_from_node
@@ -372,6 +358,8 @@ class Neo4jReadService(ConcreteService):
                     # >
                     node = record["f"]
                     family = FamilyBl_from_node(node)
+                    family.root = dict_root_node(record["root"])
+
                 return {"item": family, "status": Status.OK}
         return {
             "item": None,
@@ -1158,6 +1146,7 @@ class Neo4jReadService(ConcreteService):
                 # >
                 node = record["source"]
                 s = SourceBl_from_node(node)
+                s.root = dict_root_node(record["root"])
                 notes = record["notes"]
                 for node in notes:
                     n = Note_from_node(node)
@@ -1179,7 +1168,7 @@ class Neo4jReadService(ConcreteService):
         source = None
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(
-                session, CypherSource.get_single_selection, user, material, iid=iid
+                session, CypherSource.get_source_iid, user, material, iid=iid
             )
             for record in result:
                 # <Record
@@ -1197,6 +1186,7 @@ class Neo4jReadService(ConcreteService):
                 # >
                 source_node = record["source"]
                 source = SourceBl_from_node(source_node)
+                source.root = dict_root_node(record["root"])
                 notes = record["notes"]
                 for note_node in notes:
                     n = Note_from_node(note_node)
@@ -1302,6 +1292,86 @@ class Neo4jReadService(ConcreteService):
         # Result dictionaries using key = Citation uniq_id
         return citations, notes, targets
 
+    def dr_source_search(self, args):
+        material = args.get('material')
+        username = args.get('use_user')
+        searchtext = args.get('searchtext')
+        limit = args.get('limit', 100)
+        #print(args)
+
+        cypher = """
+            CALL db.index.fulltext.queryNodes("sourcetitle",$searchtext) 
+                YIELD node as source, score
+            WITH source,score
+            ORDER by score desc
+
+            MATCH (root:Root {state:"Accepted"}) --> (source)
+            RETURN DISTINCT source, score
+            LIMIT $limit
+            """
+        with self.driver.session(default_access_mode="READ") as session:
+            result = session.run( cypher, 
+                                  searchtext=searchtext,
+                                  limit=limit)
+            rsp = []
+            for record in result:
+                source = record.get('source')
+                score = record.get('score')
+                d = dict(
+                    source=dict(source),
+                    score=score)
+                rsp.append(d) 
+            return {'items': rsp, 'status': Status.OK}
+
+
+    def dr_get_repository(self, user: str, material: Material, iid: str):
+        """Returns the Repository with Sources included."""
+        repo = None
+        sources = []
+        with self.driver.session(default_access_mode="READ") as session:
+            result = run_cypher(session, 
+                CypherRepository.get_repository_sources_iid, 
+                user, material, iid=iid
+            )
+            for record in result:
+                # <Record 
+                #    root=<Node element_id='155335' labels=frozenset({'Root'}) 
+                #        properties={'material': 'Family Tree', 'state': 'Accepted', 'id': '2021-08-29.003', 'user': 'juha', ...}> 
+                #    repo=<Node element_id='160455' labels=frozenset({'Repository'}) 
+                #        properties={'rname': 'Haminan seurakunnan arkisto', 'iid': 'R-22s', 
+                #        'change': 1585409708, 'id': 'R0260', 'type': 'Archive'}> 
+                #    sources=[
+                #        [<Node element_id='165962' labels=frozenset({'Source'}) 
+                #            properties={'stitle': 'Haminan srk - pää- ja rippikirja 1732-1742 (I Aa:1, ruotsinkieliset)', 
+                #            'iid': 'S-amc', 'spubinfo': '', 'sauthor': '', 'change': 1585409706, 'id': 'S1705'}>, 
+                #         'Book'], 
+                #        [<Node element_id='165487', ...], 
+                #    ]>
+                # >
+                node = record["repo"]
+                repo = Repository_from_node(node)
+                repo.root = dict_root_node(record["root"])
+                source_list = record['sources']
+                if source_list:
+                    for node, medium, cita_cnt in source_list:
+                        if node:
+                            s = SourceBl_from_node(node)
+                            s.medium = medium
+                            s.citation_cnt = cita_cnt
+                            repo.sources.append(s)
+                # notes = record["notes"]
+                # for note_node in notes:
+                #     n = Note_from_node(note_node)
+                #     repo.notes.append(n)
+
+            if repo:
+                return {"item": repo, "status": Status.OK}
+            return {
+                "status": Status.NOT_FOUND,
+                "statustext": f"repo iid={iid} not found",
+            }
+
+
     # ------ Media -----
 
     def dr_get_media_list(self, user, material, fw_from, limit):
@@ -1324,19 +1394,24 @@ class Neo4jReadService(ConcreteService):
 
             media = []
             for record in result:
-                # <Record o=<Node id=393949 labels={'Media'}
-                #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
-                #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
-                #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
-                #            'id': 'O0001', 'iid': 'M-6850'}>
-                #    credit='juha'
-                #    batch_id='2020-01-02.001'
-                #    count=1>
-                node = record["o"]
-                m = MediaBl_from_node(node)
+                # <Record
+                #    root=<Node element_id='911199' labels=frozenset({'Root'}) 
+                #        properties={'metaname': 'uploads/valta/2022-04-16.004/Rääkkylä paikat.isotammi.gpkg.meta',
+                #            'file': 'uploads/valta/2022-04-16.004/Rääkkylä paikat.isotammi.gpkg', 'xmlname': 'Rääkkylä paikat.isotammi.gpkg', 
+                #            'material': 'Place Data', 'logname': 'uploads/valta/2022-04-16.004/Rääkkylä paikat.isotammi.gpkg.log', 
+                #            'mediapath': '/home/kari/Rosenkvist20211231.gpkg.media', 
+                #            'description': 'Rääkkylän paikkatiedot-kanta Isotammen "place data" XML-versiona', 'state': 'Accepted', 'id': '2022-04-16.004', 
+                #            'user': 'valta', 'db_schema': '2022.1.8', 'timestamp': 1650124333093}> 
+                #    o=<Node element_id='1144116' labels=frozenset({'Media'}) 
+                #        properties={'iid': 'M-1xy', 'batch_id': '2022-04-16.004', 
+                #            'src': 'SSS/ErillisetPitajankartat/PitajankarttaRaakkyla.jpg', 
+                #            'mime': 'image/jpeg', 'change': 1639149676, 'name': '', 
+                #            'description': 'Erilliset pitäjänkartat Rääkkylä', 'id': 'O0073'}>
+                #    count=1
+                # >
+                m = MediaBl_from_node(record["o"])
+                m.root = dict_root_node(record["root"])
                 m.conn = record.get("count", 0)
-                m.credit = record.get("credit")
-                m.batch = record.get("batch_id")
                 media.append(m)
             if media:
                 return {"media": media, "status": Status.OK}
@@ -1382,7 +1457,7 @@ class Neo4jReadService(ConcreteService):
                     crop = record["prop"]
                     ref_node = record["ref"]
                     event_node = record["eref"]
-
+                    
                     # - Media node
                     # - cropping
                     # - referring Person, Family or Event
@@ -1391,6 +1466,8 @@ class Neo4jReadService(ConcreteService):
                     if not media:
                         media = MediaBl_from_node(media_node)
                         media.ref = []
+                        # Original owner
+                        media.root = dict_root_node(record["root"])
 
                     #   The referring object
 

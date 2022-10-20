@@ -16,8 +16,10 @@ from bl.place import PlaceBl, PlaceName
 from ui.place import place_names_local_from_nodes
 
 from pe.dataservice import ConcreteService
-from pe.neo4j.util import run_cypher
+from pe.neo4j.util import run_cypher, dict_root_node
 from pe.neo4j.util import run_cypher_batch
+from pe.neo4j.util import dict_root_node
+
 from pe.neo4j.nodereaders import Citation_from_node
 # from pe.neo4j.nodereaders import Comment_from_node
 # from pe.neo4j.nodereaders import DateRange_from_node
@@ -130,8 +132,6 @@ class Neo4jReadServiceTx(ConcreteService):
 
         # Select cypher clause by arguments
 
-        #if not username: username = ""
-
         cypher_prefix = ""
         if restart:
             # Show search form only
@@ -141,8 +141,8 @@ class Neo4jReadServiceTx(ConcreteService):
             cypher = CypherPerson.get_person_list
             print(f"tx_get_person_list: Show '{state}' '{material}' @{username} fw={fw_from}")
         elif rule == 'freetext':
-            cypher_prefix = CypherPerson.read_persons_w_events_by_name1
-            cypher = CypherPerson.read_persons_w_events_by_name2
+            cypher_prefix = CypherPerson.read_persons_w_events_freetext_pre
+            cypher = CypherPerson.read_persons_w_events_freetext
         elif rule in ['surname', 'firstname', 'patronyme']:
             # Search persons matching <rule> field to <key> value
             cypher = CypherPerson.read_persons_w_events_by_refname
@@ -178,6 +178,14 @@ class Neo4jReadServiceTx(ConcreteService):
         # result: person, names, events
         for record in result:
             #  <Record 
+            #     root=<Node element_id='1102718' labels=frozenset({'Root'})
+            #        properties={'metaname': 'uploads/juha/2022-08-30.004/Mäkeläinen 2021 T530.gpkg.meta',
+            #            'file': 'uploads/juha/2022-08-30.004/Mäkeläinen 2021 T530.gpkg', 
+            #            'xmlname': 'Mäkeläinen 2021 T530.gpkg', 'material': 'Family Tree', 
+            #            'logname': 'uploads/juha/2022-08-30.004/Mäkeläinen 2021 T530.gpkg.log', 
+            #            'mediapath': '/home/jm/gramps-media/Mäkeläiset 2021.media', 'description': '', 
+            #            'state': 'Candidate', 'id': '2022-08-30.004', 'user': 'juha', 
+            #            'db_schema': '2022.1.7', 'timestamp': 1661851005965}>
             #     person=<Node id=163281 labels={'Person'} 
             #       properties={'sortname': 'Ahonius##Knut Hjalmar',  
             #         'sex': '1', 'confidence': '', 'change': 1540719036, 
@@ -185,30 +193,28 @@ class Neo4jReadServiceTx(ConcreteService):
             #         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
             #     names=[<Node id=163282 labels={'Name'} 
             #       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
-            #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
+            #         'suffix': '', 'surname': 'Ahonius', 'order': 0}>]
             #     events=[
-            #        <Node id=18571 labels=frozenset({'Event'})
-            #           properties={'datetype': 0, 'change': 1585409703, 'description': '', 
-            #             'id': 'E5393', 'date2': 1839427, 'date1': 1839427, 'type': 'Birth',
-            #             'iid': 'E-247'}>, 
-            #        'Voipala',
-            #        'Primary']
+            #        [<Node element_id='1107067' labels=frozenset({'Event'}) 
+            #            properties={''iid': 'E-evpc', 'id': 'E0807', 'type': 'Birth',...}>, 
+            #         'Helsinki',
+            #         'Primary'],
+            #        [<Node element_id='1107068' labels=frozenset({'Event'}) ...]
+            #     ]
+            #     initial='A'
             #  >
             prec = PersonRecord()
             prec.person_node = record.get('person')
             prec.names = record.get('names')           # list(name_nodes)
             prec.events_w_role = record.get('events')  # list of tuples (event_node, place_name, role)
-            prec.owners = record.get('owners')
-
-        # got {'items': [PersonRecord], 'status': Status.OK}
-        #    - PersonRecord = object with fields person_node, names, events_w_role, owners
-        #    -    events_w_role = list of tuples (event_node, place_name, role)
+            #prec.owners = record.get('owners')
 
             # print(p_record)
             node = prec.person_node
             person = PersonBl_from_node(node)
+            person.root = dict_root_node(record["root"])
 
-            # if take_refnames and record['refnames']:
+            # Todo if take_refnames and record['refnames']:
             #     refnlist = sorted(record['refnames'])
             #     p.refnames = ", ".join(refnlist)
 
@@ -265,24 +271,15 @@ class Neo4jReadServiceTx(ConcreteService):
                 res.update({'status': Status.NOT_FOUND, 'statustext': 'The person does not exist'})
                 return res
 
-            # Store original researcher data 
-            #    root = dict {material_type, root_user, id}
-            #    - material_type root material type
-            #    - root_user    the (original) owner of this object
-            #    - bid          Batch id
-            root_node = record['root']
-            material_type = root_node.get('material', "")
-            root_state = root_node.get('state', "")
-            root_user = root_node.get('user', "")
-            bid = root_node.get('id', "")
-
             person_node = record['p']
             puid = person_node.id
-            #res['person_node'] = person_node
-            res['root'] = {'material':material_type, 
-                           'root_state':root_state, 
-                           'root_user': root_user, 
-                           'batch_id':bid}
+
+            # Store original researcher data 
+            #    - material_type root material type
+            #    - root_state   batch state
+            #    - root_user    the (original) owner of this object
+            #    - bid          Batch id
+            root = dict_root_node(record["root"])
 
 #                 # Add to list of all objects connected to this person
 #                 self.objs[person.uniq_id] = person
@@ -341,6 +338,7 @@ class Neo4jReadServiceTx(ConcreteService):
             return res
 
         person = PersonBl_from_node(person_node)
+        person.root = root
         person.families_as_parent = []
         person.families_as_child = []
         person.citation_ref = []
@@ -576,6 +574,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 node = record["place"]
                 p = PlaceBl_from_node(node)
                 p.ref_cnt = record["uses"]
+                p.root = dict_root_node(record["root"])
 
                 # Set place names and default display name pname
                 # 1. default name
@@ -634,6 +633,8 @@ class Neo4jReadServiceTx(ConcreteService):
                 node = record["place"]
                 pl = PlaceBl_from_node(node)
                 node_ids.append(pl.uniq_id)
+                # Original owner
+                pl.root = dict_root_node(record["root"])
                 # Default language name
                 node = record["name"]
                 if node:
@@ -770,7 +771,7 @@ class Neo4jReadServiceTx(ConcreteService):
             :param: privacy    True, if not showing live people
         """
         result = self.driver.session(default_access_mode="READ").run(
-            CypherPlace.get_person_family_events, locid=uniq_id
+            CypherPlace.get_place_events, locid=uniq_id
         )
         ret = []
         for record in result:

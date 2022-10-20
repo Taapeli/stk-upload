@@ -31,7 +31,7 @@ class CypherMedia():
     get_media_by_iid = """
 MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid}) <-[r:MEDIA]- (ref)
 OPTIONAL MATCH (ref) <-[:EVENT]- (eref)
-RETURN media, PROPERTIES(r) AS prop, ref, eref"""
+RETURN root, media, PROPERTIES(r) AS prop, ref, eref"""
 
     get_all = "MATCH (o:Media) RETURN o"
 
@@ -39,7 +39,7 @@ RETURN media, PROPERTIES(r) AS prop, ref, eref"""
     get_media_list = """
 MATCH (root) -[:OBJ_OTHER]-> (o:Media) <- [r:MEDIA] - ()
 WHERE o.description >= $start_name
-RETURN o, root.user as credit, root.id as batch_id, COUNT(r) AS count
+RETURN root, o, COUNT(r) AS count
     ORDER BY o.description LIMIT $limit"""
 
 

@@ -49,6 +49,7 @@ class Neo4jEngine():
             auth = (app.config['NEO4J_USERNAME'], 
                     app.config['NEO4J_PASSWORD']),
             connection_timeout = 15,
+            max_connection_lifetime = 3000,
             encrypted=False)
         self.version = app.config.get('NEO4J_VERSION','3.5')
         print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connecting (v>={self.version})')

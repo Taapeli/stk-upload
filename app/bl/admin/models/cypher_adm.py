@@ -158,6 +158,10 @@ CALL db.index.fulltext.createNodeIndex("searchattr",["Person"],["searchattr"])
 CALL db.index.fulltext.createNodeIndex("notetext",["Note"],["text"])     
     """
 
+    create_freetext_index_for_sources = """
+CALL db.index.fulltext.createNodeIndex("sourcetitle",["Source"],["stitle"])     
+    """
+
     build_indexes = """
 match (p:Person) --> (n:Name) 
 with p,collect(n.firstname + " " + n.suffix + " " + n.surname) as names

@@ -114,6 +114,7 @@ class PersonReaderTx(DataService):
         args["material"] = context.material
         args["state"] = context.material.state
         res = self.dataservice.tx_get_person_list(args)
+        # returns {'persons': persons, 'status': Status.OK}
 
         status = res.get("status")
         if status == Status.NOT_FOUND:

@@ -47,6 +47,8 @@ import shareds
 from . import bp
 #from bl import material
 
+from bp.api import apikey
+
 from bl.base import Status, StkEncoder
 from bl.comment import CommentReader, CommentsUpdater #, Comment
 from bl.event import EventReader, EventWriter
@@ -58,6 +60,7 @@ from bl.person import PersonReader, PersonWriter
 from bl.person_reader import PersonReaderTx
 from bl.place import PlaceReaderTx
 from bl.source import SourceReader
+from bl.repository import RepositoryReader
 
 from bp.graph.models.fanchart import FanChart
 from models import mediafile
@@ -300,7 +303,7 @@ def _do_get_persons(u_context, args):
 
     with PersonReaderTx("read_tx", u_context) as service:
         res = service.get_person_search(args)
-        # for i in res.get("items"): print(f"_do_get_persons: @{i.user} {i.sortname}")
+        # for i in res.get("items"): print(f"_do_get_persons: @{i.root.user} {i.sortname}")
 
     # res["u_context"] = u_context
     return res
@@ -917,7 +920,7 @@ def show_families():
 @bp.route("/family/<iid>", methods=["GET"])
 @login_required
 @roles_accepted("guest", "research", "audit", "admin")
-def show_family_iid(iid=None):
+def show_family(iid=None):
     """One Family."""
     if not iid:
         flash("Missing isotammi_id", "error")
@@ -929,7 +932,7 @@ def show_family_iid(iid=None):
         # reader = FamilyReader(readservice, u_context)
         res = service.get_family_data(iid)
 
-    stk_logger(u_context, "-> bp.scene.routes.show_family_page")
+    stk_logger(u_context, "-> bp.scene.routes.show_family")
     status = res.get("status")
     if status != Status.OK:
         if status == Status.ERROR:
@@ -1099,7 +1102,7 @@ def show_place(iid):
     u_context = UserContext()
     try:
         with PlaceReaderTx("read_tx", u_context) as service:
-            res = service.get_places_w_events(iid)
+            res = service.get_place_data(iid)
             # res {place: PlaceBl, status: 'OK', hierarchy: list(PlaceBl),
             #      citations: list(Citation), events: list(EventBl),
             #      uniq_ids: list(uniq_ids)}
@@ -1148,7 +1151,7 @@ def show_place(iid):
     )
 
 
-# ------------------------------ Menu 5: Sources --------------------------------
+# ------------------------------ Menu 5: Sources and repositories ---------------
 
 
 @bp.route("/scene/sources")
@@ -1201,9 +1204,6 @@ def show_sources(series=None):
 @roles_accepted("guest", "research", "audit", "admin")
 def show_source_page(iid:str):
     """Home page for a Source with referring Event and Person data"""
-    # if not iid:
-    #     flash(_("Invalid source id"), "error")
-    #     return redirect(url_for("scene.show_sources"))
     u_context = UserContext()
     try:
         with SourceReader("read", u_context) as service:
@@ -1237,6 +1237,80 @@ def show_source_page(iid:str):
         source=res["item"],
         citations=res["citations"],
         user_context=u_context,
+    )
+
+@bp.route("/source/search")
+def source_search():
+    """ Free text search by source title
+    """
+    args = dict(request.args)
+
+    key = args.get("apikey")
+    searchtext = args.get("searchtext")
+    limit = args.get("limit")
+    if limit.isdigit():
+        limit = int(limit)
+    if not apikey.is_validkey(key): 
+        return jsonify(dict(
+            status="Error",
+            statusText="Wrong API Key",
+        ))
+    
+    u_context = UserContext()
+    u_context.count = request.args.get("c", 100, type=int)
+    try:
+        with SourceReader("read", u_context) as service:
+            res = service.reference_source_search(searchtext, limit)
+            #print(res)
+            return jsonify(res)
+    except Exception as e:
+        traceback.print_exc()
+        stk_logger(u_context, f"-> bp.scene.routes.source_search FAILED")
+        return jsonify({"status": Status.ERROR})
+
+
+#@bp.route("/scene/source", methods=["GET"])
+@bp.route("/repository/<iid>")
+@login_required
+@roles_accepted("guest", "research", "audit", "admin")
+def show_repository(iid:str):
+    """Repository page with referring Sources"""
+    u_context = UserContext()
+    t0 = time.time()
+    try:
+        with RepositoryReader("read", u_context) as service:
+            res = service.get_repository_sources(iid, u_context)
+
+        if res["status"] == Status.NOT_FOUND:
+            msg = res.get("statustext", _("No objects found"))
+            flash(msg, "error")
+        if res["status"] != Status.OK:
+            flash(f'{res.get("statustext", _("error"))}', "error")
+
+        repo = res['item']
+        stk_logger(
+            u_context, f"-> bp.scene.routes.show_repository n={len(repo.sources)}"
+        )
+
+    except KeyError as e:
+        traceback.print_exc()
+        msg = f"bp.scene.routes.show_repository: {e.__class__.__name__} {e}"
+        flash(f'{ _("Program error")}', "error")
+        logger.error(msg)
+
+    # for s in res['sources']:
+    #     # for i in c.citators:
+    #     #     if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
+    #     #     else:               print(f'{c} – person {i} {i.sortname}')
+    #     if hasattr(s, "notes"):
+    #         for n in s.notes:
+    #             print(f'     {s.id} note {n.url} "{n.text}"')
+    return render_template(
+        "/scene/repository.html",
+        repo=repo,
+        sources=repo.sources,
+        user_context=u_context,
+        elapsed=time.time() - t0
     )
 
 
