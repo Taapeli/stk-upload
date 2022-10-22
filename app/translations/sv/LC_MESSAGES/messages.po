@@ -3812,11 +3812,11 @@ msgstr "Välj serie:"
 
 #: bp/scene/templates/scene/sources.html:28
 msgid "birth"
-msgstr "födelse"
+msgstr "födda"
 
 #: bp/scene/templates/scene/sources.html:29
 msgid "baptism"
-msgstr "dop"
+msgstr "döpta"
 
 #: bp/scene/templates/scene/sources.html:30
 msgid "wedding"

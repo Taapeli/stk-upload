@@ -56,9 +56,9 @@ class Material():
         self.state = session.get("state", "")
         if "state" in self.request_args:
             self.state = self.request_args.get("state")
-        self.batch_id = session.get("batch_id")
+        self.batch_id = session.get("batch_id", "") or ""
         if "batch_id" in self.request_args:
-            self.batch_id = self.request_args.get("batch_id")
+            self.batch_id = self.request_args.get("batch_id", "")
 
         # print(f"#Material(): {self.get_current()} REQUEST values={self.request_args}")
         return
@@ -78,7 +78,7 @@ class Material():
             if self.state is None:
                 return f"{ _(m) }: {self.batch_id}"
             elif self.state == State.ROOT_ACCEPTED:
-                batch = self.batch_id if self.batch_id else ""
+                batch = self.batch_id #if self.batch_id else ""
                 title = _('Approved Isotammi tree')
                 return f"{ _(m) } / {title} {batch}"
             else:
