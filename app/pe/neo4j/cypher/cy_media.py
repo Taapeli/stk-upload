@@ -38,9 +38,9 @@ RETURN root, media, PROPERTIES(r) AS prop, ref, eref"""
     # Media list by description with count limit
     get_media_list = """
 MATCH (root) -[:OBJ_OTHER]-> (o:Media) <- [r:MEDIA] - ()
-WHERE o.description >= $start_name
+    WHERE TOUPPER(o.description) >= $start_name
 RETURN root, o, COUNT(r) AS count
-    ORDER BY o.description LIMIT $limit"""
+    ORDER BY TOUPPER(o.description) LIMIT $limit"""
 
 
 # Write Media data
