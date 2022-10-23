@@ -119,12 +119,12 @@
 {% else %}
 	    <tr><td colspan="4">
 		  <div class="NotFound">
-    {% if next_fw %}
+    {% if user_context.at_start() %}
+              <p>{{ _('No medias found') }}.</p>
+    {% else %}
               <p>{{ _('The last item found') }}.</i>
 		      <p>&nbsp;&#9656; <a href="/scene/medias?fw=%20" 
 		          title="{{ _('first page') }}">{{ _("Go to the first media") }}</a></p>
-    {% else %}
-              <p>{{ _('No medias found') }}.</p>
     {% endif %}
 		  </div></td>
 	    </tr>

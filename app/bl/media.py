@@ -97,7 +97,7 @@ class MediaReader(DataService):
         limit = self.user_context.count
         ustr = "for user " + user if user else "approved "
         print(
-            f"MediaReader.read_my_media_list: Get max {limit} medias {ustr}starting {fw!r}"
+            f"MediaReader.read_my_media_list: Get max {limit} medias {ustr} starting {fw!r}"
         )
 
         res = self.dataservice.dr_get_media_list(self.use_user,
