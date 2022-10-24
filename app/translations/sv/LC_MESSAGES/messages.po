@@ -1589,11 +1589,11 @@ msgstr ""
 
 #: bp/dupsearch/routes.py:210 bp/dupsearch/routes.py:299 ui/jinja_filters.py:85
 msgid "Birth"
-msgstr "födda"
+msgstr "Födda"
 
 #: bp/dupsearch/routes.py:211 bp/dupsearch/routes.py:300 ui/jinja_filters.py:84
 msgid "Baptism"
-msgstr "döpta"
+msgstr "Döpta"
 
 #: bp/dupsearch/routes.py:212 bp/dupsearch/routes.py:301 ui/jinja_filters.py:91
 msgid "Death"
@@ -2816,7 +2816,7 @@ msgstr "antydningar"
 
 #: bp/scene/routes.py:453
 msgid "inner places"
-msgstr "Inga platser"
+msgstr "ingående platser"
 
 #: bp/scene/routes.py:665
 msgid "type changed"
@@ -3398,7 +3398,7 @@ msgstr "Inga platser"
 
 #: bp/scene/templates/scene/note_search_result.html:63
 msgid "No results"
-msgstr "inda resultat"
+msgstr "inga resultat"
 
 #: bp/scene/templates/scene/person.html:76
 msgid "Person's details"

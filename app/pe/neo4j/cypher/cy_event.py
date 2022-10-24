@@ -90,8 +90,8 @@ MERGE (n)-[r:PLACE]->(m)"""
 MATCH (n:Note)  WHERE n.handle IN $note_handles
 WITH n
     MATCH (e:Event)  WHERE e.handle=$handle
-    CREATE (e) -[r:NOTE]-> (n)
-RETURN count(r) AS cnt"""
+    CREATE (e) -[:NOTE]-> (n)
+RETURN COUNT(DISTINCT n) AS cnt"""
 
     link_citations = """
 match (c:Citation) where c.handle in $citation_handles

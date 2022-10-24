@@ -74,7 +74,7 @@ class StatsBuilder:
             return (cnt,0)
         cypher2 = """
             match (b:Root {id:$batch_id})
-            match (b) --> (x) --> (c:Citation)
+            match (b) --> (x) -[:CITATION]-> (c:Citation)
                 where $lb in labels(x)
             return count(distinct x) as cnt
         """
@@ -87,7 +87,7 @@ class StatsBuilder:
         """ Calculate number of label type objects and citations referred from Persons. """
         cypher = """
             match (b:Root {id:$batch_id})
-            match (b) --> (p:Person) --> (x)
+            match (b) -[:OBJ_PERSON]-> (p:Person) --> (x)
                 where $lb in labels(x)
             return count(x) as cnt
         """
@@ -98,7 +98,7 @@ class StatsBuilder:
             return (cnt,0)
         cypher2 = """
             match (b:Root {id:$batch_id})
-            match (b) --> (p:Person) --> (x) --> (c:Citation)
+            match (b) -[:OBJ_PERSON]-> (p:Person) --> (x) --> (c:Citation)
                 where $lb in labels(x)
             return count(distinct x) as cnt
         """
@@ -122,7 +122,7 @@ class StatsBuilder:
             event_stats.append(data_out)
 
         cypher = """
-            match (b:Root {id:"2021-08-29.003"})
+            match (b:Root {id:$batch_id})
                 match (b) --> (e)
                 optional match (e) -[:CITATION]-> (c)
             with e, count(c) > 0 as has_c
@@ -163,8 +163,8 @@ class StatsBuilder:
             #Todo: Limit results by event_types 
         """
         cypher = """
-            match (b:Root {id:$batch_id}) -[r]-> (e:Event)
-            optional match (e) -[cr:CITATION]-> (c)
+            match (b:Root {id:$batch_id}) -[:OBJ_OTHER]-> (e:Event)
+            optional match (e) -[:CITATION]-> (c)
             with e, head(collect(c)) as citations
             return e.type as type, 
                 count(distinct e) as cnt_events,

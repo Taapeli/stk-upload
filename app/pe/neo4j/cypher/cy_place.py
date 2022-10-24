@@ -206,9 +206,9 @@ return p as place, count(p2) as count
 """
     get_citated_places_for_place_data = """
 match (root) -[:OBJ_PLACE]-> (p:Place) 
-    optional match (p) -[rc:CITATION]-> (:Citation)
+    optional match (p) -[:CITATION]-> (c:Citation)
     optional match (p) <-[:IS_INSIDE]- (p2:Place)
-return p.iid, p2.pname, p.pname, count(rc) as count 
+return p.iid, p2.pname, p.pname, count(c) as count 
     order by count desc
     limit $count
 """

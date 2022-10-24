@@ -264,12 +264,12 @@ msgstr "Angiven giltig epost address finns redan"
 #: bl/batch/root.py:685
 #, python-format
 msgid "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted"
-msgstr "Godkänt batch-ID %(batch_id)s med %(deleted)d-noder har tagits bort"
+msgstr "Godkänt material-ID %(batch_id)s med %(deleted)d-noder har tagits bort"
 
 #: bl/batch/root.py:703
 #, python-format
 msgid "Superseded auditor '%(a)s' from batch %(b)s"
-msgstr "Granskaren '%(a)s' har ersätt %(b)s"
+msgstr "Granskaren '%(a)s' har ersätts i %(b)s"
 
 #: bl/gramps/gramps_loader.py:167
 msgid "Events with no references to"
@@ -626,7 +626,7 @@ msgstr "Användare"
 #: bp/scene/templates/scene/details_batch.html:145
 #: bp/scene/templates/scene/details_common.html:45
 msgid "Batch"
-msgstr "Batch"
+msgstr "Materialet"
 
 #: bp/admin/templates/admin/access_management.html:32
 msgid "Objects"
@@ -754,7 +754,7 @@ msgstr "Tomma batchar för användare"
 
 #: bp/admin/templates/admin/batch_clear.html:22
 msgid "Selected Batch"
-msgstr "Markerad batch"
+msgstr "Markerad material"
 
 #: bp/admin/templates/admin/batch_clear.html:39
 msgid "Number of empty batches"
@@ -1078,7 +1078,7 @@ msgstr "Typ / beskrivining"
 #: bp/scene/templates/scene/details_common.html:47
 #: bp/start/templates/start/my_settings.html:122
 msgid "State "
-msgstr "Skede"
+msgstr "Etapp "
 
 #: bp/admin/templates/admin/uploads.html:35
 #: bp/audit/templates/audit/batches.html:38
@@ -1132,7 +1132,7 @@ msgstr " lyckades"
 
 #: bp/audit/routes.py:166
 msgid "No such batch "
-msgstr "Ingen sådan sats "
+msgstr "Ingen sådan material "
 
 #: bp/audit/routes.py:267
 msgid "You are now an auditor for batch "
@@ -1183,7 +1183,7 @@ msgstr "Inpektions"
 #: bp/audit/templates/audit/approvals.html:46
 #: bp/gramps/templates/gramps/uploads.html:117
 msgid "Are you sure you want to delete this batch from database?"
-msgstr "Är du säker på att du vill avlägsna denna batch från databasen?"
+msgstr "Är du säker på att du vill avlägsna denna material från databasen?"
 
 #: bp/audit/templates/audit/approvals.html:55
 msgid "Approved batches"
@@ -1210,7 +1210,7 @@ msgstr "Forskare"
 #: bp/audit/templates/audit/approvals.html:75
 #: bp/audit/templates/audit/user_profile.html:114
 msgid "Batch id"
-msgstr "Batch id"
+msgstr "Material id"
 
 #: bp/audit/templates/audit/approvals.html:95
 msgid "Operations for"
@@ -1322,7 +1322,7 @@ msgstr "Lista godkända gemensamma satser"
 #: bp/audit/templates/audit/index.html:33
 #: bp/scene/templates/scene/sources.html:27
 msgid "all"
-msgstr "allt"
+msgstr "alla"
 
 #: bp/audit/templates/audit/index.html:34
 msgid "approved by me"
@@ -1461,7 +1461,7 @@ msgstr "Överge granskningen"
 
 #: bp/audit/templates/audit/pick_auditing.html:179
 msgid "Delete batch"
-msgstr "Markerad batch"
+msgstr "Radera materialet"
 
 #: bp/audit/templates/audit/pick_auditing.html:180
 msgid "The material and files are deleted permanetly"
@@ -1589,11 +1589,11 @@ msgstr ""
 
 #: bp/dupsearch/routes.py:210 bp/dupsearch/routes.py:299 ui/jinja_filters.py:85
 msgid "Birth"
-msgstr "Födelse"
+msgstr "Födda"
 
 #: bp/dupsearch/routes.py:211 bp/dupsearch/routes.py:300 ui/jinja_filters.py:84
 msgid "Baptism"
-msgstr "Dop"
+msgstr "Döpta"
 
 #: bp/dupsearch/routes.py:212 bp/dupsearch/routes.py:301 ui/jinja_filters.py:91
 msgid "Death"
@@ -2047,7 +2047,7 @@ msgstr "Antal noter"
 
 #: bp/gedcom/templates/gedcom_info.html:118
 msgid "Number of citations"
-msgstr "Antal citeringar"
+msgstr "Antal hänvisningar"
 
 #: bp/gedcom/templates/gedcom_info.html:120
 msgid "Number of sources"
@@ -2194,7 +2194,7 @@ msgstr "kontrollera alla"
 
 #: bp/gedcom/transforms/citationsinnotes.py:136
 msgid "Citations in notes"
-msgstr "Citeringar i noter"
+msgstr "Hänvisningar i noter"
 
 #: bp/gedcom/transforms/dates.py:34
 msgid "Correct some invalid date formats"
@@ -2485,7 +2485,7 @@ msgstr "Flytta en händelse anteckning till citeringssida"
 
 #: bp/gedcom/transforms/sukujutut.py:280
 msgid "Move a SOUR under NOTE to upper level"
-msgstr "Uppgradera SOUR under notering"
+msgstr "Uppgradera SOUR under upplysning"
 
 #: bp/gedcom/transforms/unmark.py:29
 msgid "Unmark"
@@ -2498,7 +2498,7 @@ msgstr "Återställ markerad tag's: <tag>-X -> <tag>"
 #: bp/gramps/routes.py:139
 #, python-format
 msgid "The batch %(id)s upload has started in background. "
-msgstr ""
+msgstr "Materialet %(id)s upload has started in background. "
 
 #: bp/gramps/routes.py:140
 msgid ""
@@ -2536,7 +2536,7 @@ msgstr "Det gick inte att ta bort material \"%(batch_id)s\""
 #: bp/gramps/routes.py:330
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
-msgstr "Batch %(batch_id)s har tagits bort, %(n)s noder"
+msgstr "Material %(batch_id)s har tagits bort, %(n)s noder"
 
 #: bp/gramps/routes.py:429
 msgid "Failed to retrieve commands"
@@ -2624,7 +2624,7 @@ msgstr "Antal citeringar"
 #: bp/gramps/templates/gramps/details.html:130
 #: bp/scene/templates/scene/details_batch.html:210
 msgid "Event Statistics"
-msgstr "Händelsestatistik"
+msgstr "Statistik över händerser"
 
 #: bp/gramps/templates/gramps/details.html:150
 msgid "Nonstandard types"
@@ -2644,7 +2644,7 @@ msgstr "Analys av Gramps filen"
 
 #: bp/gramps/templates/gramps/gramps_analyze.html:24 ui/batch_ops.py:37
 msgid "Gramps Verify Tool"
-msgstr "Verifiera verktyg i Gramps"
+msgstr "Verifiera med Gramps verktyg"
 
 #: bp/gramps/templates/gramps/gramps_analyze.html:46
 msgid "Download checked file"
@@ -2668,7 +2668,7 @@ msgstr "Tid / sek"
 
 #: bp/gramps/templates/gramps/scripting.html:27
 msgid "Batch ID"
-msgstr ""
+msgstr "Material id"
 
 #: bp/gramps/templates/gramps/scripting.html:29
 msgid "Scope"
@@ -2710,7 +2710,7 @@ msgstr "Plats"
 
 #: bp/gramps/templates/gramps/scripting.html:35 ui/jinja_filters.py:173
 msgid "Citation"
-msgstr "Citering"
+msgstr "Hänvisning"
 
 #: bp/gramps/templates/gramps/scripting.html:36
 #: bp/scene/templates/scene/place.html:118
@@ -2734,7 +2734,7 @@ msgstr "Arkiv"
 #: bp/scene/templates/scene/note_search_result.html:17
 #: bp/scene/templates/scene/place.html:155
 msgid "Note"
-msgstr "Notering"
+msgstr "Övrig upplysning"
 
 #: bp/gramps/templates/gramps/scripting.html:49
 msgid "Initial statements"
@@ -2816,7 +2816,7 @@ msgstr "antydningar"
 
 #: bp/scene/routes.py:453
 msgid "inner places"
-msgstr "Inga platser"
+msgstr "ingående platser"
 
 #: bp/scene/routes.py:665
 msgid "type changed"
@@ -2902,7 +2902,7 @@ msgstr "Okänd typ"
 #: bp/scene/templates/scene/medias.html:107
 #: bp/scene/templates/scene/persons_list.html:136
 msgid "The last item found"
-msgstr "Den sista föremålet"
+msgstr "Den sista rad"
 
 #: bp/scene/templates/scene/comments.html:98
 #, python-format
@@ -2928,7 +2928,7 @@ msgstr "Inga kommentarer hittades"
 #: bp/scene/templates/scene/details_batch.html:95
 #, python-format
 msgid "Statistics for Material %(id)s"
-msgstr "Statistik om materialet %(id)s"
+msgstr "Statistik över materialet %(id)s"
 
 #: bp/scene/templates/scene/details_batch.html:106
 #: bp/start/templates/start/s_macros.html:59
@@ -2938,7 +2938,7 @@ msgstr "Gramps-filen omvandlas till databasen"
 #: bp/scene/templates/scene/details_batch.html:111
 #: bp/start/templates/start/s_macros.html:59 ui/jinja_filters.py:345
 msgid "Storing"
-msgstr "Lagrar"
+msgstr "Laddas"
 
 #: bp/scene/templates/scene/details_batch.html:112
 #: bp/start/templates/start/s_macros.html:60
@@ -2968,7 +2968,7 @@ msgstr "granskningen igång"
 #: bp/scene/templates/scene/details_batch.html:126
 #: bp/start/templates/start/s_macros.html:62 ui/jinja_filters.py:348
 msgid "Auditing"
-msgstr "Granskning"
+msgstr "Granskas"
 
 #: bp/scene/templates/scene/details_batch.html:127
 #: bp/start/templates/start/s_macros.html:63
@@ -3062,7 +3062,7 @@ msgstr "från start"
 #: bp/scene/templates/scene/places.html:30
 #, python-format
 msgid "starting <tt>%(name)s</tt>"
-msgstr "från <tt>%(name)s</tt>"
+msgstr "altifrån <tt>%(name)s</tt>"
 
 #: bp/scene/templates/scene/families.html:51
 msgid "ordered by man's name"
@@ -3248,7 +3248,7 @@ msgstr "Anvädardata"
 #: bp/scene/templates/scene/macros.html:164
 #, python-format
 msgid ", origin from material batch %(root)s"
-msgstr ", från material %(root)s"
+msgstr ", från materialet %(root)s"
 
 #: bp/scene/templates/scene/macros.html:233
 msgid "See Person's Details"
@@ -3343,7 +3343,7 @@ msgstr "Lista över media"
 #: bp/scene/templates/scene/medias.html:28
 #, python-format
 msgid "Displaying %(num)s distinct medias"
-msgstr "Visning av %(num)s distinkta medier"
+msgstr "Visas av %(num)s medier"
 
 #: bp/scene/templates/scene/medias.html:41
 msgid "First letters of media"
@@ -3357,7 +3357,7 @@ msgstr "Titel"
 
 #: bp/scene/templates/scene/medias.html:68
 msgid "User Batch"
-msgstr "Batch från användare"
+msgstr "filen av forskare"
 
 #: bp/scene/templates/scene/medias.html:82
 #: bp/scene/templates/scene/medias.html:85
@@ -3398,7 +3398,7 @@ msgstr "Inga platser"
 
 #: bp/scene/templates/scene/note_search_result.html:63
 msgid "No results"
-msgstr "inda resultat"
+msgstr "inga resultat"
 
 #: bp/scene/templates/scene/person.html:76
 msgid "Person's details"
@@ -3553,7 +3553,7 @@ msgstr "Person lista"
 #: bp/scene/templates/scene/persons_list.html:25
 #, python-format
 msgid "Displaying %(num)s distinct persons"
-msgstr "Visar %(num)s distinkta personer"
+msgstr "Visar %(num)s personer"
 
 #: bp/scene/templates/scene/persons_list.html:32
 #: bp/scene/templates/scene/persons_search.html:64
@@ -3612,7 +3612,7 @@ msgstr "Sökfras"
 
 #: bp/scene/templates/scene/persons_search.html:90
 msgid "Any surname (beginning part)"
-msgstr "Valfritt efternamn (början del)"
+msgstr "Valfritt efternamn (inledande)"
 
 #: bp/scene/templates/scene/persons_search.html:93
 msgid "Any firstname (beginning part)"
@@ -3709,12 +3709,12 @@ msgstr "Platsen hittades inte."
 
 #: bp/scene/templates/scene/places.html:18
 msgid "Places List"
-msgstr "Plats lista"
+msgstr "Lista över platser"
 
 #: bp/scene/templates/scene/places.html:27
 #, python-format
 msgid "Displaying %(num)s distinct places"
-msgstr "Visning av %(num)s distinkta platser"
+msgstr "Visning av %(num)s platser i"
 
 #: bp/scene/templates/scene/places.html:40
 msgid "Starting letters of place"
@@ -3799,12 +3799,12 @@ msgstr "konfidens"
 
 #: bp/scene/templates/scene/sources.html:15
 msgid "List of Sources"
-msgstr "Lista av källor"
+msgstr "Lista över källor"
 
 #: bp/scene/templates/scene/sources.html:24
 #, python-format
 msgid "This page contains a directory of %(num)s sources."
-msgstr "Det här siidan visar %(num)s källor."
+msgstr "På sidan visasVälj serieVälj serie %(num)s källor."
 
 #: bp/scene/templates/scene/sources.html:26
 msgid "Select series:"
@@ -3812,27 +3812,27 @@ msgstr "Välj serie:"
 
 #: bp/scene/templates/scene/sources.html:28
 msgid "birth"
-msgstr "födelse"
+msgstr "födda"
 
 #: bp/scene/templates/scene/sources.html:29
 msgid "baptism"
-msgstr "dop"
+msgstr "döpta"
 
 #: bp/scene/templates/scene/sources.html:30
 msgid "wedding"
-msgstr "vigselse"
+msgstr "gifta"
 
 #: bp/scene/templates/scene/sources.html:31
 msgid "death"
-msgstr "död"
+msgstr "döda"
 
 #: bp/scene/templates/scene/sources.html:32
 msgid "move"
-msgstr "flytta"
+msgstr "flyttade"
 
 #: bp/scene/templates/scene/sources.html:52
 msgid "Source, notes"
-msgstr "Källa, anteckningar"
+msgstr "Källa, kompletterande uppgifter"
 
 #: bp/scene/templates/scene/sources.html:53
 msgid "Media in the repository"
@@ -4877,45 +4877,43 @@ msgstr "Ladda ner Gramps-filen"
 
 #: ui/jinja_filters.py:35
 msgid "Julian"
-msgstr "Julianska"
+msgstr "juliaaninen"
 
 #: ui/jinja_filters.py:35
 msgid "Hebrew"
-msgstr "Judiska"
+msgstr "juutalainen"
 
 #: ui/jinja_filters.py:36
 msgid "descr_admin"
-msgstr ""
+msgstr "Administrator with application management privileges"
 
 #: ui/jinja_filters.py:36
 msgid "descr_audit"
-msgstr ""
+msgstr "Auditor inspecting and approving researcher materials"
 
 #: ui/jinja_filters.py:36
 msgid "descr_gedcom"
-msgstr ""
+msgstr "A user who can use gedcom tools"
 
 #: ui/jinja_filters.py:36
 msgid "descr_guest"
-msgstr ""
+msgstr "Anonymous user, who can only browse demo pages"
 
 #: ui/jinja_filters.py:37
 msgid "descr_master"
-msgstr ""
+msgstr "Database main user with no application permissions"
 
 #: ui/jinja_filters.py:37
-#, fuzzy
 msgid "descr_member"
-msgstr "Kom ihåg mig"
+msgstr "Member of the Society"
 
 #: ui/jinja_filters.py:37
-#, fuzzy
 msgid "descr_research"
-msgstr "Forskare"
+msgstr "Researcher uploading materials ja passing them for inspection"
 
 #: ui/jinja_filters.py:37
 msgid "descr_to_be_approved"
-msgstr ""
+msgstr "Applicant user waiting for initiation"
 
 #: ui/jinja_filters.py:69 ui/jinja_filters.py:70
 msgid "Noble Name"
@@ -5203,11 +5201,11 @@ msgstr "Alternativa namn"
 
 #: ui/jinja_filters.py:174
 msgid "Event Note"
-msgstr "Händelse notering"
+msgstr "Händelse upplysning"
 
 #: ui/jinja_filters.py:175
 msgid "Family Note"
-msgstr "Familj notering"
+msgstr "Familj upplysning"
 
 #: ui/jinja_filters.py:177
 msgid "Html code"
@@ -5219,19 +5217,19 @@ msgstr "Se"
 
 #: ui/jinja_filters.py:179
 msgid "Media Note"
-msgstr "Media notering"
+msgstr "Media upplysning"
 
 #: ui/jinja_filters.py:180
 msgid "Media Reference Note"
-msgstr "Media referens notering"
+msgstr "Media referens upplysning"
 
 #: ui/jinja_filters.py:181
 msgid "Name Note"
-msgstr "Namn notering"
+msgstr "Namn upplysning"
 
 #: ui/jinja_filters.py:182
 msgid "Person Note"
-msgstr "Person notering"
+msgstr "Person upplysning"
 
 #: ui/jinja_filters.py:183
 msgid "Place Note"
@@ -5239,11 +5237,11 @@ msgstr "Plats noteting"
 
 #: ui/jinja_filters.py:184
 msgid "Repository Note"
-msgstr "Arkiv notering"
+msgstr "Arkiv upplysning"
 
 #: ui/jinja_filters.py:186
 msgid "Source Note"
-msgstr "Källa notering"
+msgstr "Källa upplysning"
 
 #: ui/jinja_filters.py:187
 msgid "To Do"
