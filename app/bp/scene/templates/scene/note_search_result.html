@@ -49,7 +49,8 @@ item:
 	    		{% for r in item.referrers %}
 	    			<br>
 	    			{% if r.url %}
-		    			<a href={{ r.url }} class="inlink">
+		    			<a href={{ r.url }} class="inlink"
+                           title="{{ macro.obj_title(r) }}">
 		    			<span class="gedcom_id">{{ r.id }}</span> {{ r.description }} {{ r.pname }}
 		    			</a>
 	    			{% else %}

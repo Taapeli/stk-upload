@@ -194,6 +194,7 @@ def translate(term, var_name, show_table=False):
         tabl = {
             "Album": _("Album"), #"albumi"
             "Archive": _("Archive"), #"arkisto"
+            "Church": _("Church"), #"kirkko"
             "Collection": _("Collection"), #"kokoelma"
             "Library": _("Library"), #"kirjasto"
             "Unknown": _("Unknown type"), #"tuntematon"

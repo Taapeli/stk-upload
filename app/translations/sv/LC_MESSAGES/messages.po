@@ -5275,6 +5275,9 @@ msgstr "Kollektion"
 msgid "Library"
 msgstr "Bibliotek"
 
+msgid "Church"
+msgstr "Kyrka"
+
 #: ui/jinja_filters.py:200
 msgid "Web site"
 msgstr "Webbplats"

@@ -99,9 +99,7 @@
                                     v-on:mouseover="showPopup(iid='{{p.iid}}',$event)"
                                     >👪</div>                            
 
-                             <br>&nbsp;&nbsp;&nbsp;&nbsp;
-                             <span class="gedcom_id" title="{{ _('Gedcom ID') }}">{{p.id}}</span> /
-                             <span class="isotammi_id" title="Isotammi-ID">{{p.iid}}</span>
+                             <br>&nbsp;&nbsp;&nbsp;&nbsp;{{ macro.obj_ids(p) }}
 	                    </div>
 	                </td>
 

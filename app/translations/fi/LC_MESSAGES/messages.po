@@ -5248,6 +5248,9 @@ msgstr "kokoelma"
 msgid "Library"
 msgstr "kirjasto"
 
+msgid "Church"
+msgstr "kirkko"
+
 #: ui/jinja_filters.py:200
 msgid "Web site"
 msgstr "nettisivu"
