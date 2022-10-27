@@ -2759,8 +2759,8 @@ msgid "Manage Materials"
 msgstr "Aineistojen hallinta"
 
 #: bp/gramps/templates/gramps/uploads.html:63
-msgid "The file is too large (max 60 MB)"
-msgstr "Tiedosto on liian iso (enintään 60 MB)"
+msgid "The file is too large (max %(max)s MB)"
+msgstr "Tiedosto on liian iso (enintään %(max)s MB)"
 
 #: bp/gramps/templates/gramps/uploads.html:114
 msgid "Are you sure you want to delete the XML file?"

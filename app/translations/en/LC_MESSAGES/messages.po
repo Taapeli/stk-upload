@@ -2759,7 +2759,7 @@ msgid "Manage Materials"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:63
-msgid "The file is too large (max 60 MB)"
+msgid "The file is too large (max %(max)s MB)"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:114

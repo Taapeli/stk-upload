@@ -11,6 +11,8 @@
 {{ super() }}
 
 {% from "start/s_macros.html" import hamburger_menu, state_info with context %}
+{% set TOOLARGE = _("The file is too large (max %(max)s MB)", max=( maxsize/(1024*1024) ) | round(1) ) %}
+<!-- Onkohan? {{TOOLARGE}} -->
 
 <style>
 h2 { margin-bottom: 0; }
@@ -60,7 +62,8 @@ form div {margin:.25em;}
 </style>
 
 <script>
-var TOOLARGE =  _("The file is too large (max %1 MB)", Math.round(maxsize/(1024*1024)) );
+const maxsize = {{ maxsize }};
+const TOOLARGE =  "{{ TOOLARGE }}";
 
 function checkFileSize() {
 	try {
@@ -80,7 +83,6 @@ function checkFileSize() {
 
 // Progress bar
 var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
-//var w = 1;  // Initial bar width
 var myProgress = null;
 var myBar = null;
 
