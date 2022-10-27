@@ -103,6 +103,7 @@ def list_uploads():
     return render_template(
         "/gramps/uploads.html",
         interval=inter,
+        maxsize=shareds.app.config.get("MAX_CONTENT_LENGTH"),
         uploads=upload_list,
         active_batch=active_batch,
         gramps_verify=gramps_verify,

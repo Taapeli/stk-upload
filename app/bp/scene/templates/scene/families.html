@@ -31,6 +31,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
 
 {% set cnt = families|count %}
 {% set name1 = user_context.first|replace("#", " ") %}
+{% set is_common = user_context.is_common() %}
 
 <div id="startdiv">
 	<h1>{{ _('List of Families') }}</h1>
@@ -159,7 +160,7 @@ th span.man-man, th span.wife-wife { color: #020299;}
         {% if f.dates %}
                 <span class="{{f.dates.calendar_css()}}">{{f.dates}}</span> 
         {% endif %}
-                <br>{{ macro.obj_ids(f) }}
+                <br>{{ macro.obj_ids(f, is_common) }}
             </td>
 
             <td class="Column30 ColumnSpouse">

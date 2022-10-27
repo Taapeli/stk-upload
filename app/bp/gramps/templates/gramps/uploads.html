@@ -60,13 +60,13 @@ form div {margin:.25em;}
 </style>
 
 <script>
-var TOOLARGE =  '{{ _("The file is too large (max 60 MB)") }}';
+var TOOLARGE =  _("The file is too large (max %1 MB)", Math.round(maxsize/(1024*1024)) );
 
 function checkFileSize() {
 	try {
 	 	var input = document.getElementById('filenm');
 	 	var file = input.files[0];
-	 	if (file.size > 60000000) {
+	 	if (file.size > maxsize) {
 			alert(TOOLARGE);
 			return false;
 	 	}
@@ -192,13 +192,6 @@ function filenm_changed(input) {
      {% endif -%}
                 </div>
             </td>
-
-<!--                 <div class="progress" data-name='{{upload.batch_id}}'></div> -->
-<!--     {% if upload.state == 'Loading' %} -->
-<!--                      <script> update_progress('{{upload.batch_id}}'); </script> -->
-<!--     {% endif -%} -->
-<!--             </td> -->
-
             <td>{{upload.xmlname}}
 
     {% if upload.material_type or upload.description %}

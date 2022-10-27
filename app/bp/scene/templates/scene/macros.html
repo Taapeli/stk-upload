@@ -136,9 +136,11 @@
 
 # 2. Data display
 
-{% macro obj_ids(obj) -%}
-    <span class="isotammi_id" title="Isotammi-ID">{{obj.iid}}</span> /
-    <span class="gedcom_id" title="Gramps ID">{{obj.id}}</span>
+{% macro obj_ids(obj, is_common=True) -%}
+	{# If is_common, do not show Gramps ID #}
+    <span class="isotammi_id" title="Isotammi-ID">{{obj.iid}}</span>
+    {% if not is_common %} / <span class="gedcom_id" title="Gramps ID">{{obj.id}}</span>
+    {% endif %}
 {%- endmacro %}
 
 {% macro all_obj_ids(obj, margin) -%}
