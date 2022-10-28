@@ -31,14 +31,14 @@ def get_sysname():
     sysname = shareds.app.config.get("STK_SYSNAME")
     return sysname
 
-def email(mail_from,mail_to,subject,body):
+def email(mail_from,mail_to,reply_to,subject,body):
     try:
         mail = Mail()
         sysname = get_sysname()
         msg = Message(f"{sysname.title()}: {subject}",
                       body=body,
                       sender=mail_from,
-                      reply_to=mail_from,
+                      reply_to=reply_to,
                       recipients=[mail_to])
         mail.send(msg)
         return True
@@ -48,21 +48,29 @@ def email(mail_from,mail_to,subject,body):
         traceback.print_exc()
     return False
 
-def email_admin(subject,body,sender=None):
-    if sender is None:
-        sender = shareds.app.config.get('ADMIN_EMAIL_FROM')
+def email_admin(subject,body,sender=None): # send email to admin
+    # must use isotammi.net domain for the sender (Sender Policy Framework)
+    admin = shareds.app.config.get('ADMIN_EMAIL_FROM')
+    
     mail_to = shareds.app.config.get('ADMIN_EMAIL_TO')
-    if sender and mail_to:
-        if email(sender,mail_to,subject,body):
-            syslog.log(type="sent email to admin", sender=sender,receiver=mail_to,subject=subject)
+    
+    # put the original sender in the 'reply to' address
+    if sender is None:
+        reply_to = mail_to
+    else:
+        reply_to = sender
+    if admin and mail_to and reply_to:
+        if email(admin,mail_to,reply_to,subject,body):
+            syslog.log(type="sent email to admin", sender=sender,receiver=mail_to,reply_to=reply_to,subject=subject)
             return True
         else:    
-            syslog.log(type="FAILED: email to admin", sender=sender,receiver=mail_to,subject=subject)
+            syslog.log(type="FAILED: email to admin", sender=sender,receiver=mail_to,reply_to=reply_to,subject=subject)
             return False
     return False
         
 def email_from_admin(subject,body,receiver):
     sender = shareds.app.config.get('ADMIN_EMAIL_FROM')
-    if sender:
-        syslog.log(type="sent email from admin",sender=sender,receiver=receiver,subject=subject)    
-        return email(sender,receiver,subject,body)    
+    reply_to = shareds.app.config.get('ADMIN_EMAIL_TO')
+    if sender and reply_to:
+        syslog.log(type="sent email from admin",sender=sender,receiver=receiver,reply_to=reply_to,subject=subject)    
+        return email(sender,receiver,reply_to,subject,body)    
