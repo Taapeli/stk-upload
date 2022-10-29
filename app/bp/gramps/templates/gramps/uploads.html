@@ -11,6 +11,8 @@
 {{ super() }}
 
 {% from "start/s_macros.html" import hamburger_menu, state_info with context %}
+{% set TOOLARGE = _("The file is too large (max %(max)s MB)", max=( maxsize/(1024*1024) ) | round(1) ) %}
+<!-- Onkohan? {{TOOLARGE}} -->
 
 <style>
 h2 { margin-bottom: 0; }
@@ -60,13 +62,14 @@ form div {margin:.25em;}
 </style>
 
 <script>
-var TOOLARGE =  '{{ _("The file is too large (max 60 MB)") }}';
+const maxsize = {{ maxsize }};
+const TOOLARGE =  "{{ TOOLARGE }}";
 
 function checkFileSize() {
 	try {
 	 	var input = document.getElementById('filenm');
 	 	var file = input.files[0];
-	 	if (file.size > 60000000) {
+	 	if (file.size > maxsize) {
 			alert(TOOLARGE);
 			return false;
 	 	}
@@ -80,7 +83,6 @@ function checkFileSize() {
 
 // Progress bar
 var PROGRESS_INTERVAL = {{interval}}; <!-- 10000; -->
-//var w = 1;  // Initial bar width
 var myProgress = null;
 var myBar = null;
 
@@ -192,13 +194,6 @@ function filenm_changed(input) {
      {% endif -%}
                 </div>
             </td>
-
-<!--                 <div class="progress" data-name='{{upload.batch_id}}'></div> -->
-<!--     {% if upload.state == 'Loading' %} -->
-<!--                      <script> update_progress('{{upload.batch_id}}'); </script> -->
-<!--     {% endif -%} -->
-<!--             </td> -->
-
             <td>{{upload.xmlname}}
 
     {% if upload.material_type or upload.description %}

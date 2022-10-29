@@ -1589,11 +1589,11 @@ msgstr ""
 
 #: bp/dupsearch/routes.py:210 bp/dupsearch/routes.py:299 ui/jinja_filters.py:85
 msgid "Birth"
-msgstr "födda"
+msgstr "Födda"
 
 #: bp/dupsearch/routes.py:211 bp/dupsearch/routes.py:300 ui/jinja_filters.py:84
 msgid "Baptism"
-msgstr "döpta"
+msgstr "Döpta"
 
 #: bp/dupsearch/routes.py:212 bp/dupsearch/routes.py:301 ui/jinja_filters.py:91
 msgid "Death"
@@ -2767,8 +2767,8 @@ msgid "Manage Materials"
 msgstr "Förvalta dina material"
 
 #: bp/gramps/templates/gramps/uploads.html:63
-msgid "The file is too large (max 60 MB)"
-msgstr "Filen är för stor (max 60 MB)"
+msgid "The file is too large (max %(max)s MB)"
+msgstr "Filen är för stor (max %(max)s MB)"
 
 #: bp/gramps/templates/gramps/uploads.html:114
 msgid "Are you sure you want to delete the XML file?"
@@ -2816,7 +2816,7 @@ msgstr "antydningar"
 
 #: bp/scene/routes.py:453
 msgid "inner places"
-msgstr "Inga platser"
+msgstr "ingående platser"
 
 #: bp/scene/routes.py:665
 msgid "type changed"
@@ -3398,7 +3398,7 @@ msgstr "Inga platser"
 
 #: bp/scene/templates/scene/note_search_result.html:63
 msgid "No results"
-msgstr "inda resultat"
+msgstr "inga resultat"
 
 #: bp/scene/templates/scene/person.html:76
 msgid "Person's details"
@@ -3812,11 +3812,11 @@ msgstr "Välj serie:"
 
 #: bp/scene/templates/scene/sources.html:28
 msgid "birth"
-msgstr "födelse"
+msgstr "födda"
 
 #: bp/scene/templates/scene/sources.html:29
 msgid "baptism"
-msgstr "dop"
+msgstr "döpta"
 
 #: bp/scene/templates/scene/sources.html:30
 msgid "wedding"
@@ -5274,6 +5274,9 @@ msgstr "Kollektion"
 #: ui/jinja_filters.py:198
 msgid "Library"
 msgstr "Bibliotek"
+
+msgid "Church"
+msgstr "Kyrka"
 
 #: ui/jinja_filters.py:200
 msgid "Web site"

@@ -1090,11 +1090,11 @@ class Neo4jReadService(ConcreteService):
 
         with self.driver.session(default_access_mode="READ") as session:
             if args.get("theme1"):
-                # Filter sources by searching keywords in fi and sv langiage
+                # Filter sources by searching keywords in fi and sv language
                 key1 = args.get("theme1")
                 key2 = args.get("theme2")
                 # Show my researcher data
-                print("dr_get_source_list_fw: my researcher data")
+                print(f"dr_get_source_list_fw: my researcher data {key1} {key2}")
                 result = run_cypher_batch(
                     session,
                     CypherSource.get_sources_with_selections,
@@ -1111,25 +1111,9 @@ class Neo4jReadService(ConcreteService):
 
             for record in result:
                 # <Record
-                #    owner_type='PASSED'
-                #    source=<Node id=333338 labels={'Source'}
-                #        properties={'id': 'S0029', 'stitle': 'Lapinjärvi vihityt 1788-1803 vol  es346',
-                #            'iid': 'S-b7c', 'spubinfo': '', 'sauthor': '',
-                #            'change': 1532807569}>
-                #    notes=[
-                #        <Node id=445002 labels={'Note'}
-                #            properties={'id': 'N2207', 'text': '', 'type': 'Source Note',
-                #                'iid': 'N-f35', 'url': 'http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=3788',
-                #                'change': 1532807569}>]
-                #    repositories=[
-                #        [   'Book',
-                #            <Node id=393661 labels={'Repository'}
-                #                properties={'id': 'R0003', 'rname': 'Lapinjärven seurakunnan arkisto',
-                #                    'type': 'Archive', 'iid': 'R-8f',
-                #                    'change': 1577815469}>]] cit_cnt=0 ref_cnt=0>
-
-                # <Record
-                # 0  uniq_id=242567
+                # 0  root=<Node element_id='155335' labels=frozenset({'Root'}) 
+                #        properties={'material': 'Family Tree', 'state': 'Accepted', 
+                #            'id': '2021-08-29.003', 'user': 'juha', ...}>
                 # 1  source=<Node id=242567 labels={'Source'}
                 #        properties={'handle': '_dcb5682a0f47b7de686b3251557', 'id': 'S0334',
                 #            'stitle': 'Åbo stifts herdaminne 1554-1640', 'change': '1516698633'}>

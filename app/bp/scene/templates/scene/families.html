@@ -24,12 +24,14 @@ div.man-wife, div.wife-man {
 div.wife-man a.inlink, div.man-wife a.inlink {
     color:darkgray;
 }
-th, td {width:30%;}
+th.Column30, td.Column30 { width:32%; }
+th.ColumnAlpha, td.ColumnAlpha { column-width: 2em; }
 th span.man-man, th span.wife-wife { color: #020299;}
 </style>
 
 {% set cnt = families|count %}
 {% set name1 = user_context.first|replace("#", " ") %}
+{% set is_common = user_context.is_common() %}
 
 <div id="startdiv">
 	<h1>{{ _('List of Families') }}</h1>
@@ -92,12 +94,38 @@ th span.man-man, th span.wife-wife { color: #020299;}
 	{% if user_context.order == "man" %}▶{% endif %}
 					{{ _("Father") }}</li>
 				{{ macro.buttons_bw(user_context, "/scene/families?o=father") }}
+
+    	{% for f in families %}
+	        {% if user_context.order == "man" %}
+	        	{% set ini = f.father.sortname|list|first|upper %}
+        		{% if loop.changed(ini) %}
+                <!-- li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li -->
+                <li><a href="javascript:jump('{{ini}}')"
+                       title="{{ _('Alphabetical Menu') }}: {{ini}}">
+                	{% if ini == "#" %}–{%else %}{{ini}}{% endif %}</a></li>
+        		{% endif %}
+        	{% endif %}
+    	{% endfor %}
+
 				{{ macro.buttons_fw(user_context, "/scene/families?o=father") }}
 
 				<li class="title">
 	{% if user_context.order == "wife" %}▶{% endif %}
 					{{ _("Mother") }}</li>
 				{{ macro.buttons_bw(user_context, "/scene/families?o=mother") }}
+
+    	{% for f in families %}
+	        {% if user_context.order == "wife" %}
+	        	{% set ini = f.mother.sortname|list|first|upper %}
+       			{% if loop.changed(ini) %}
+                <!-- li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li -->
+                <li><a href="javascript:jump('{{ini}}')"
+                       title="{{ _('Alphabetical Menu') }}: {{ini}}">
+                	{% if ini == "#" %}–{%else %}{{ini}}{% endif %}</a></li>
+        		{% endif %}
+        	{% endif %}
+    	{% endfor %}
+
 				{{ macro.buttons_fw(user_context, "/scene/families?o=mother") }}
 				<li class="title">&nbsp;</li>
             </ul>
@@ -105,7 +133,8 @@ th span.man-man, th span.wife-wife { color: #020299;}
 {% endif %}
 
     <table class="IndividualList">
-        <tr><th>{{ _("Family") }}</th>
+        <tr><th></th>
+        	<th>{{ _("Family") }}</th>
             <th><span class="man-{{user_context.order}}">{{ _("Man") }}</span> / 
                <span class="wife-{{user_context.order}}">{{ _("Wife") }}</span>
             </th>
@@ -113,19 +142,28 @@ th span.man-man, th span.wife-wife { color: #020299;}
         </tr>
 
     {% for f in families %}
-        <tr>
-            <td class="ColumnFamily">
+        <tr><td class="ColumnAlpha">
+        {% if user_context.order == "man" %}
+        	{% set ini = f.father.sortname|list|first|upper %}
+        {% else %}
+        	{% set ini = f.mother.sortname|list|first|upper %}
+        {% endif %}
+        {% if loop.changed(ini) %}
+	            <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">
+	               {% if ini == "#" %}–{%else %}{{ini}}{% endif %}</a>
+        {% endif %}
+        	</td>
+            <td class="Column30 ColumnFamily">
                 <a href="/family/{{f.iid}}" class="inlink"
                    title="{{ _('Go to family page') }}">&rarr; {{f.rel_type|transl('marr')}}</a>
         {% if f.marriage_place %} {{f.marriage_place}} {% endif -%}
         {% if f.dates %}
                 <span class="{{f.dates.calendar_css()}}">{{f.dates}}</span> 
         {% endif %}
-                <br><span class="isotammi_id" title="Isotammi-ID">{{f.iid}}</span>
-                <span class="gedcom_id" title="{{ _('Gedcom ID') }}">{{f.id}}</span> 
-                </td>
+                <br>{{ macro.obj_ids(f, is_common) }}
+            </td>
 
-            <td class="ColumnSpouse">
+            <td class="Column30 ColumnSpouse">
                 <div class="man-{{user_context.order}}">&#9794;
         {% if f.father.iid %}
 				{{ macro.person_names_anon(f.father, f.father.names[0:1]) }}

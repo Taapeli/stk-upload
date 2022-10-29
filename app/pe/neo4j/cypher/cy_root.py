@@ -125,7 +125,7 @@ MATCH (root:Root {id: $bid}) WHERE root.state = "Auditing"
 OPTIONAL MATCH (other:UserProfile) -[:DOES_AUDIT]-> (root)
     WHERE other.username <> $audi
 OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[r2:DOES_AUDIT]-> (root)
-WITH root, audi, other, r2, COUNT(other) AS oth_cnt,
+WITH root, audi, other, r2, COUNT(DISTINCT other) AS oth_cnt,
     r2.ts_from AS ts_from, 
     r2.ts_to AS ts_to
     SET (CASE WHEN oth_cnt = 0 THEN root END).state = $new_state

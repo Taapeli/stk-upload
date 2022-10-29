@@ -38,11 +38,11 @@ def nonstandard_types():
         etype = e.get_type()
         check(e, etype, "", EventType)
         check_attributes(e)
-        scan_media(obj)
+        scan_media(e)
     for p in db.iter_places():
         ptype = p.get_type()
         check(p, ptype, "", PlaceType)
-        scan_media(obj)
+        scan_media(p)
     for obj in db.iter_citations():
         scan_media(obj)
     for obj in db.iter_sources():

@@ -382,7 +382,7 @@ def show_upload_log(username, xmlfile, batch_id=None):
             break
         except FileNotFoundError:
             #print(f"bp.admin.routes.show_upload_log: no file {fname}")
-            pass
+            msg = _("File not found")
 
     logger.info(f"-> bp.admin.routes.show_upload_log f={fname}")
     return render_template("/admin/load_result.html", msg=msg)

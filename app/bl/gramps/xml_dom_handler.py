@@ -283,7 +283,7 @@ class DOM_handler:
             iid_generator.reserve(total_notes)
             # Split to chunks, chunk_max_size=self.TX_SIZE
             for nodes_chunk in self.get_chunk(self.noterefs_later, self.TX_SIZE):
-                print(f"DOM_handler.postprocess_notes: {len(nodes_chunk)} chunk")
+                #print(f"DOM_handler.postprocess_notes: {len(nodes_chunk)} chunk")
                 for parent in nodes_chunk:
                     session.write_transaction(self.handle_postprocessed_notes,
                                               parent, iid_generator)
@@ -299,7 +299,7 @@ class DOM_handler:
             return
 
         note_msg = [note.url for note in parent.notes]
-        print(f"handle_postprocessed_notes: {parent.id} --> {note_msg}")
+        #print(f"handle_postprocessed_notes: {parent.id} --> {note_msg}")
         self.dataservice.ds_save_note_list(tx, parent, self.batch.id, iids)
 
     def handle_citations_list(self, tx, nodes, iids):

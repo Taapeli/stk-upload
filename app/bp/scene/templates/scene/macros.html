@@ -136,12 +136,19 @@
 
 # 2. Data display
 
+{% macro obj_ids(obj, is_common=True) -%}
+	{# If is_common, do not show Gramps ID #}
+    <span class="isotammi_id" title="Isotammi-ID">{{obj.iid}}</span>
+    {% if not is_common %} / <span class="gedcom_id" title="Gramps ID">{{obj.id}}</span>
+    {% endif %}
+{%- endmacro %}
+
 {% macro all_obj_ids(obj, margin) -%}
     {#  Formats object keys and timestamp for display. Positioned at right margin.
         If 2nd arguments (like "350px") is present, leave the given right margin.
      #}
-    <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
-    <span class="isotammi_id" title="Isotammi-ID">{{obj.iid}}</span>
+    <span class="isotammi_id" title="Isotammi-ID">{{obj.iid}}</span> /
+    <span class="gedcom_id" title="Gramps ID">{{obj.id}}</span>
     {% if obj.change %}
     <span id="changetime" title="{{ _('latest change time and contributor') }}"
         {%- if margin %}style='margin-right:{{margin}}'{% endif %}
@@ -160,11 +167,10 @@
 
 #  Formats object keys and root for display.
 {% macro obj_title(obj) -%}{% if obj.root %}
-    	{{obj.id}} / {{obj.iid}}{% if user_context.is_common()
+    	{{obj.iid}} / {{obj.id}}{% if user_context.is_common()
     	%}{{ _( ', origin from material batch %(root)s', root=obj.root.batch_id ) }}
     	{% endif %}
-    {% else %}{{obj.id}} / {{obj.iid}}
-    {% endif -%}
+    {% else %}{{obj.iid}} / {{obj.id}}{% endif -%}
 {%- endmacro %}
 
 

@@ -117,7 +117,7 @@ class SourceReader(DataService):
         args = {"user": use_user, "fw": fw, "count": context.count}
         args['material'] = context.material
         if context.series:
-            # Filtering by series (Lähdesarja)
+            # Filtering search keywords by series prompt (Lähdesarja)
             THEMES = {
                 "birth": ("syntyneet", "födda"),
                 "baptism": ("kastetut", "döpta"),
@@ -125,9 +125,7 @@ class SourceReader(DataService):
                 "death": ("kuolleet", "döda"),
                 "move": ("muuttaneet", "flyttade"),
             }
-            theme_fi, theme_sv = THEMES[context.series]
-            args["theme1"] = theme_fi
-            args["theme2"] = theme_sv
+            args["theme1"], args["theme2"] = THEMES[context.series]
         try:
             sources = self.dataservice.dr_get_source_list_fw(args)
             # results = {'sources':sources,'status':Status.OK}

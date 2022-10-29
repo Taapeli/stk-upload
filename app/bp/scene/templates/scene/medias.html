@@ -9,12 +9,12 @@
 {% set cnt = medias|count %}
 {% set next_fw = user_context.next_name('fw') %}
 {% set next_bw = user_context.next_name('bw') %}
+{% set next_at_end = user_context.at_end() %}
+{% set is_common = user_context.is_common() %}
 
-{# set next_at_end = user_context.at_end()
-<p>next fb = "{{next_bw}}", fw = "{{next_fw}}"; 
-   at start = "{{user_context.at_start() }}", at end = "{{user_context.at_end() }}"</p>
-#}
-
+{#<p>next fb = "{{next_bw}}", fw = "{{next_fw}}"; 
+   at start = "{{user_context.at_start() }}",
+   at end = "{{user_context.at_end() }}"</p>#}
 <div id="startdiv">
 	<h1>{{ _('List of Medias') }}</h1>
     <div>{{ macro.show_use_case() }}</div>
@@ -54,6 +54,16 @@
     <div id="alphanav">{% set alpha = "¤" %}
         <ul>
             {{ macro.buttons_bw(user_context, "/scene/medias") }}
+
+    {% for m in medias %}
+        {% set ini = m.description[0]|list|first|upper %}
+        {% if loop.changed(ini) %}
+                <!-- li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li -->
+                <li><a href="javascript:jump('{{ini}}')"
+                       title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+        {% endif %}
+    {% endfor %}
+
             {{ macro.buttons_fw(user_context, "/scene/medias") }}
         </ul>
     </div>
@@ -61,7 +71,8 @@
 <section id="lista">
 
   <table id="medias">
-    <tr><th>{{ _("Title") }}</th>
+    <tr><th></th>
+        <th>{{ _("Title") }}</th>
         <th style="text-align: center;">{{ _("Picture") }}</th>
         <th>{{ _("References") }}</th>
     {% if user_context.is_auditor %}
@@ -70,11 +81,15 @@
     </tr>
 {% if cnt %}
     {% for m in medias %}
-        <tr>
+        {% set ini = m.description[0]|list|first|upper %}
+        <tr><td class="ColumnAlpha">
+	            {% if loop.changed(ini) %}
+	               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
+                {% endif %}
+                </td>
             <td><a href="/media/{{m.iid}}" class="inlink"
                    title="Media{{ macro.obj_title(m) }}">{{ m.description }}</a>
-                <br>&nbsp;&nbsp;<span class="isotammi_id" title="Isotammi ID">{{m.iid}}</span>
-                <span class="gedcom_id" title="{{ _('Gedcom ID') }}">{{m.id}}</span> 
+                <br>&nbsp;&nbsp;{{ macro.obj_ids(m, is_common) }}
             </td>
             <td style=" margin-left: auto; margin-right: auto;">
                 <div style="text-align: center;">
@@ -103,12 +118,12 @@
 {% else %}
 	    <tr><td colspan="4">
 		  <div class="NotFound">
-    {% if next_fw %}
+    {% if user_context.at_start() %}
+              <p>{{ _('No medias found') }}.</p>
+    {% else %}
               <p>{{ _('The last item found') }}.</i>
 		      <p>&nbsp;&#9656; <a href="/scene/medias?fw=%20" 
 		          title="{{ _('first page') }}">{{ _("Go to the first media") }}</a></p>
-    {% else %}
-              <p>{{ _('No medias found') }}.</p>
     {% endif %}
 		  </div></td>
 	    </tr>

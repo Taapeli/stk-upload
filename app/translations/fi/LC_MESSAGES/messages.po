@@ -2759,8 +2759,8 @@ msgid "Manage Materials"
 msgstr "Aineistojen hallinta"
 
 #: bp/gramps/templates/gramps/uploads.html:63
-msgid "The file is too large (max 60 MB)"
-msgstr "Tiedosto on liian iso (enintään 60 MB)"
+msgid "The file is too large (max %(max)s MB)"
+msgstr "Tiedosto on liian iso (enintään %(max)s MB)"
 
 #: bp/gramps/templates/gramps/uploads.html:114
 msgid "Are you sure you want to delete the XML file?"
@@ -3800,23 +3800,23 @@ msgstr "Valitse aihe:"
 
 #: bp/scene/templates/scene/sources.html:28
 msgid "birth"
-msgstr "syntymä"
+msgstr "syntyneet"
 
 #: bp/scene/templates/scene/sources.html:29
 msgid "baptism"
-msgstr "kaste"
+msgstr "kastetut"
 
 #: bp/scene/templates/scene/sources.html:30
 msgid "wedding"
-msgstr "vihkiminen"
+msgstr "vihityt"
 
 #: bp/scene/templates/scene/sources.html:31
 msgid "death"
-msgstr "kuolema"
+msgstr "kuolleet"
 
 #: bp/scene/templates/scene/sources.html:32
 msgid "move"
-msgstr "muutto"
+msgstr "muuttaneet"
 
 #: bp/scene/templates/scene/sources.html:52
 msgid "Source, notes"
@@ -5247,6 +5247,9 @@ msgstr "kokoelma"
 #: ui/jinja_filters.py:198
 msgid "Library"
 msgstr "kirjasto"
+
+msgid "Church"
+msgstr "kirkko"
 
 #: ui/jinja_filters.py:200
 msgid "Web site"

@@ -42,12 +42,12 @@ ORDER BY toUpper(s.stitle)"""
     get_sources_with_selections = """
 MATCH (root) -[:OBJ_SOURCE]-> (s:Source)
     WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
-WITH s ORDER BY toUpper(s.stitle)
+WITH root, s ORDER BY toUpper(s.stitle)
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
     OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN s as source, collect(DISTINCT note) as notes, 
+RETURN root, s as source, collect(DISTINCT note) as notes, 
        collect(DISTINCT [r.medium, rep]) as repositories,
        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
 ORDER BY toUpper(s.stitle)"""

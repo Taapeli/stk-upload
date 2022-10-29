@@ -9,6 +9,7 @@
 {% set next_fw = user_context.next_name('fw') %}
 {% set next_bw = user_context.next_name('bw') %}
 {% set next_at_end = user_context.at_end() %}
+{% set is_common = user_context.is_common() %}
 
 <div id="startdiv">
     <h1>{{ _('Persons') }}</h1>
@@ -99,9 +100,7 @@
                                     v-on:mouseover="showPopup(iid='{{p.iid}}',$event)"
                                     >👪</div>                            
 
-                             <br>&nbsp;&nbsp;&nbsp;&nbsp;
-                             <span class="isotammi_id" title="Isotammi-ID">{{p.iid}}</span>
-                             <span class="gedcom_id" title="{{ _('Gedcom ID') }}">{{p.id}}</span>
+                             <br>&nbsp;&nbsp;&nbsp;&nbsp;{{ macro.obj_ids(p, is_common) }}
 	                    </div>
 	                </td>
 

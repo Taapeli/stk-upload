@@ -56,9 +56,9 @@ class Material():
         self.state = session.get("state", "")
         if "state" in self.request_args:
             self.state = self.request_args.get("state")
-        self.batch_id = session.get("batch_id")
+        self.batch_id = session.get("batch_id", "") or ""
         if "batch_id" in self.request_args:
-            self.batch_id = self.request_args.get("batch_id")
+            self.batch_id = self.request_args.get("batch_id", "")
 
         # print(f"#Material(): {self.get_current()} REQUEST values={self.request_args}")
         return
@@ -71,14 +71,13 @@ class Material():
         """ Return current material and batch choice for display. """
         from bl.batch.root import State
         try:
-            m = self.m_type or "Unknown material"
-            # if m == "Place": m = "Places"
-            # print(f"#bl.material.Material.to_display: "
-            #       f'[{self.breed!r}, {self.state!r}, {m!r}, {self.batch_id!r}]')
-            if self.state is None:
-                return f"{ _(m) }: {self.batch_id}"
-            elif self.state == State.ROOT_ACCEPTED:
-                batch = self.batch_id if self.batch_id else ""
+            if not (self.m_type and self.state):
+                print(f"#Material.to_display: Missing Material Info! "
+                      f'[{self.breed!r}, {self.state!r}, {self.m_type!r}, {self.batch_id!r}]')
+                return _( 'GO TO START PAGE!' )
+            m = self.m_type
+            if self.state == State.ROOT_ACCEPTED:
+                batch = self.batch_id #if self.batch_id else ""
                 title = _('Approved Isotammi tree')
                 return f"{ _(m) } / {title} {batch}"
             else:

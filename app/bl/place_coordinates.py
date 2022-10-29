@@ -35,27 +35,29 @@ class Point:
 
     _point_coordinate_tr = str.maketrans(",°′″\\'\"NESWPIEL", ".              ")
 
-    def __init__(self, lon, lat=None):
+    def __init__(self, lat, lon=None):
         """Create a new Point instance.
         Arguments may be:
-        - lon(float), lat(float)    - real coordinates
-        - lon(str), lat(str)        - coordinates to be converted
-        - [lon, lat]                - ready coordinate vector (list or tuple)
+        - lat(float), lon(float)    - real coordinates
+        - lat(str), lon(str)        - coordinates to be converted
+        - [lat, lon]                - ready coordinate vector (list or tuple)
+        
+        Example lat, lon: [63.97, '024°16′56″E']
         """
         self.coord = None
         try:
-            if isinstance(lon, (list, tuple)):
-                # is (lon, lat) or [lon, lat]
+            if isinstance(lat, (list, tuple)):
+                # is (lat, lon) or [lat, lon]
                 if (
-                    len(lon) >= 2
-                    and isinstance(lon[0], float)
-                    and isinstance(lon[1], float)
+                    len(lat) >= 2
+                    and isinstance(lat[0], float)
+                    and isinstance(lat[1], float)
                 ):
-                    self.coord = list(lon)  # coord = [lat, lon]
+                    self.coord = list(lat)  # coord = [lat, lon]
                 else:
-                    raise (ValueError, "Point({}) are not two floats".format(lon))
+                    raise (ValueError, "Point({}) is not two floats".format(lat))
             else:
-                self.coord = [lon, lat]
+                self.coord = [lat, lon]
 
             # Now the arguments are in self.coord[0:1]
 
@@ -64,6 +66,7 @@ class Point:
                 (These letters stand for North, East, ... Pohjoinen, Itä ...)
             """
 
+            #print(f"#bl.place_coordinates.Point {self.coord}")
             for i in list(range(len(self.coord))):  # [0,1]
                 # If a coordinate is float, it's ok
                 x = self.coord[i]
@@ -90,6 +93,15 @@ class Point:
                                 self.coord[i] = degrees + minutes / 60.0
                         else:  # Only degrees
                             self.coord[i] = degrees
+                        # Negative directions given by trailing letter
+                        if i == 0: # latitude
+                            if x[-1] in "SE":  # south, etelä, syd
+                                self.coord[i] = self.coord[i] * -1                        
+                                print(f"#etelä {x[-1]} = {self.coord[i]}")
+                        else: # longitude
+                            if x[-1] in "WLV":  # West, länsi or vest
+                                self.coord[i] = self.coord[i] * -1
+                                print(f"#länsi {x[-1]} = {self.coord[i]}")
                     else:
                         raise ValueError("Point arg type is {}".format(self.coord[i]))
         except:

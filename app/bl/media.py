@@ -97,7 +97,7 @@ class MediaReader(DataService):
         limit = self.user_context.count
         ustr = "for user " + user if user else "approved "
         print(
-            f"MediaReader.read_my_media_list: Get max {limit} medias {ustr}starting {fw!r}"
+            f"MediaReader.read_my_media_list: Get max {limit} medias {ustr} starting {fw!r}"
         )
 
         res = self.dataservice.dr_get_media_list(self.use_user,
@@ -109,10 +109,14 @@ class MediaReader(DataService):
         medias = res.get("media", None)
 
         # Update the page scope according to items really found
+        if fw == " ":
+            first = self.user_context.NEXT_START
+        else:
+            first = medias[0].description
         if medias:
             self.user_context.update_session_scope(
                 "media_scope",
-                medias[0].description,
+                first,
                 medias[-1].description,
                 limit,
                 len(medias),
