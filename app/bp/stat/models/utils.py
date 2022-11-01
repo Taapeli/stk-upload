@@ -107,7 +107,7 @@ def build_general_stats():
             grep = f" | grep '{line_pattern}'"
         else:
             grep = ""
-        chunks = [ filenames[i:i+CHUNK_SIZE] for i in range(0, len(filenames), CHUNK_SIZE) ]
+        chunks = ( filenames[i:i+CHUNK_SIZE] for i in range(0, len(filenames), CHUNK_SIZE) )
         for f_names in chunks:
             s = ""
             for fn in f_names:

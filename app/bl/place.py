@@ -83,6 +83,26 @@ class Place(NodeObject):
     def __str__(self):
         return f"{self.uniq_id} {self.pname} ({self.type})"
 
+    def coord_letter(self, precision=2):
+        """ Show coordinates with principal compass point letters using user language. 
+
+            Examples:
+                59°49′25″N, 22°58′05″E -> 59.8236 N, 22.9680 E
+                12°5′35″S, 77°2′47″ W -> -12.093056, -77.046389 -> 12.0930 S, 77.0463 W
+        """
+        if self.coord and isinstance(self.coord, list):
+            east = self.coord[0]
+            north = self.coord[1]
+            if east >= 0 and north >= 0:
+                return f"{east:6.{precision}f} E, {north:6.{precision}f} N"
+            elif east >= 0 and north < 0:
+                return f"{east:6.{precision}f} E, {-north:6.{precision}f} S"
+            elif east < 0 and north < 0:
+                return f"{-east:6.{precision}f} W, {-north:6.{precision}f} S"
+            else: # east < 0 and north >= 0:
+                return f"{-east:6.{precision}f} W, {north:6.{precision}f} N"
+        else:
+            return ""
 
 class PlaceBl(Place):
     """Place / Paikka:

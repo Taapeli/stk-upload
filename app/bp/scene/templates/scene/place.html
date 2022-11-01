@@ -53,8 +53,7 @@ div#events div.scrollbox {
             - {{ _('OpenStreetMap on a larger scale') }}</a><br>
            <a target="map" href="https://www.google.fi/maps/@{{y}},{{x}},14z?hl=fi">
             - {{ _('on Google Map') }}</a>
-           <p>{{ _('Location') }}: N&nbsp;{{ '{0:0.4f}'.format(y) }}, 
-            E&nbsp;{{ '{0:0.4f}'.format(x) }}</p>
+           <p>{{ _('Location') }}: {{ place.coord_letter(4) }}</p>
         {% endif %}</div>
       {% endif %}
 

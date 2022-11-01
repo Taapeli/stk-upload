@@ -30,7 +30,11 @@ class Point:
 
     Properties:
         coord   coordinates of the point as list [lat, lon]
-                (north, east directions in degrees)
+                (north, east directions in floating degrees)
+
+    Note.
+        You may use Place.coord_letter(precision) method to display 
+        coordinates with N,E marks: "61.2037 E, 24.0606 N"
     """
 
     _point_coordinate_tr = str.maketrans(",°′″\\'\"NESWPIEL", ".              ")
@@ -38,7 +42,7 @@ class Point:
     def __init__(self, lat, lon=None):
         """Create a new Point instance.
         Arguments may be:
-        - lat(float), lon(float)    - real coordinates
+        - lat(float), lon(float)    - real coordinates (north, east)
         - lat(str), lon(str)        - coordinates to be converted
         - [lat, lon]                - ready coordinate vector (list or tuple)
         
