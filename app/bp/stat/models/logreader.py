@@ -385,6 +385,7 @@ Counters are kept in list of Counter objects.
         Read the file line by line, yield the values found from each line.
 
         """
+        maxerrors = 50  # Do not report others
 
         # Format of log messages (see app/__init__.py)
         # '%(asctime)s %(name)s %(levelname)s %(user)s %(message)s'
@@ -411,7 +412,12 @@ Counters are kept in list of Counter objects.
         for line in open(logfile, "r").read().splitlines():
             match = log_re.match(line)
             if not match:
-                flash(f"strange log line {line}") # this should not happen
+                maxerrors -= 1
+                if maxerrors > 0:
+                    print(f"strange log line {line}") # this should not happen
+                else:
+                    if maxerrors == 0:
+                        print("..... and others")
                 continue
             (date, level, user, message) = match.groups()
             if level != "INFO":
