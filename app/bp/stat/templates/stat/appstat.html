@@ -6,13 +6,15 @@
 
 <style>
 td {padding: 2pt;}
-.selections {width:unset;}
+.selections {
+	width:unset;
+	background: #f5f5f5;}
 .selections td {width:15em;}
 .selections label {
 	display: inline-block;
-	width:7em;
-}
+	width:7em;}
 .fit {width:fit-content !important;}
+.w800 { width:890px; }
 .num {text-align: right;}
 tt, input.tt {color:darkblue;}
 </style>
@@ -24,12 +26,11 @@ tt, input.tt {color:darkblue;}
 
   <div id="errors" class="errors"></div>
 
-  <div style="margin:1em;">Palaa <a href="/stat">alkusivulle</a></div>
+  <div style="padding:1em 1em 1em 6em;">Palaa <a href="/stat">tilastojen alkusivulle</a></div>
   <h2>Valintakriteerit</h2>
 
     <div class="fit">
       <form action="{{ caller }}">
-		<fieldset>
 		  <table class="selections">
 		    <tr>
 		      <td>{% set server = opts["server"] %}
@@ -98,18 +99,18 @@ tt, input.tt {color:darkblue;}
 		      </td>
 		    </tr>
 		  </table>
-		</fieldset>
       </form>
-      <p>Kohtaan {{ _("Methods:") }} kirjoitetaan säännöllinen lauseke, esim.
-      	 "<tt>*.routes.*</tt>" (kaikki toiminnot), "<tt>*.gramps.*</tt>" (lataukset ja aineistot),
-      	 "<tt>*.start*</tt>" jne.
-      	 
+      <p class="w800">
+      	Kohtaan {{ _("Methods:") }} kirjoitetaan säännöllinen lauseke, esim.
+      	"<tt>*.routes.*</tt>" (kaikki toiminnot), "<tt>*gramps*</tt>" (lataukset ja aineistot),
+      	"<tt>*.start*</tt>", "<tt>.gedcom*</tt>" jne.
+      </p> 
     </div>
 
     {% for filesection in res %}
     	{# filesection[0] is log file name #}
     	{# filesection[1] is contents from that log file #}
-	<div style="width:890px">
+	<div class="w800">
     	<h3>Lokitiedostot</h3>
     		<p><tt>{{ filesection[0] }}</tt></p>
 	</div>
