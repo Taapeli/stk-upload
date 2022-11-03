@@ -599,5 +599,6 @@ class StkUploadlog(Counter):
                     # one of those did match; do nothing with it
                     break
             else:               # none did match; print the unexpeted line
-                print(f"Unhandled line: {line}")
+                if not line[:5] in ["TITLE", "INFO ", "TOTAL"]:
+                    print(f"Unhandled line: {line}")
                 continue

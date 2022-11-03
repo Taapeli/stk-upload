@@ -4,17 +4,18 @@
 {% block body %}
 {{ super() }}
 
-{% macro make_table(rows) -%}
-<table>
-{% for row in rows %}  <tr>
-  {% for col in row
-  %}  <td{% if col != "" and col[0] in "0123456789"
-	   %} style="text-align: right"{% endif	%}> {{ col }} </td>
-  {% endfor%}</tr>
-{% endfor
-%}</table>
-{% endmacro -%}
-
+<style>
+td {padding: 2pt;}
+.selections {width:unset;}
+.selections td {width:15em;}
+.selections label {
+	display: inline-block;
+	width:7em;
+}
+.fit {width:fit-content !important;}
+.num {text-align: right;}
+tt, input.tt {color:darkblue;}
+</style>
 
 <div class="startdiv">
   <h1>{{ _(h1) }}</h1>
@@ -23,101 +24,122 @@
 
   <div id="errors" class="errors"></div>
 
-  Return to <a href="/stat">statistics start page.</a>
-  <p>
-    <b>Valintakriteereistä:</b>
-    <ul>
-      <li> Logs valinta poistui, kun tuli aikaan perustuva aggregointijakson valinta.
-      <li> N, n, e jne. ovat oikeammin sarakeotsikoita.  Lopullisempi
-	 toteutus on työn alla.  Toistaiseksi ne on tuolla riveillä, kun eri
-	 lokientryissä on eri määrät noita tietoja (helpompi ehkä nähdä,
-	 missä saatetaan haluta täydentää lokitusta...).
-    </ul>
-    <div>
-      Set options:
+  <div style="margin:1em;">Palaa <a href="/stat">alkusivulle</a></div>
+  <h2>Valintakriteerit</h2>
+
+    <div class="fit">
       <form action="{{ caller }}">
-	<fieldset>
-	  <table>
-	    <tr>
-	      <td>{% set server = opts["server"]
-		%}<label for="server">Server:</label>
-		<select id="server" name="server"> {%
-		  for ser in opts["servers"] %}
-		      <option value={{ ser }} {% if server==ser
-			  %}selected{% endif
-			  %}>{{ ser }}</option>{% endfor %}
-		    </select>
-	      </td>
-	      <td>{% set pkey = opts["pkey"]
-		%}<label for="pkey">Grouping:</label>
-		<select id="pkey" name="pkey"> {%
-		  for what in ["msg", "date", "user"] %}
-		      <option value={{ what }} {% if pkey==what
-			  %}selected{% endif
-			  %}>{{ what }}</option>{% endfor %}
-		</select>
-	      </td>
-	      <td>{% set period = opts["period"]
-		%}<label for="period">Aggregation:</label>
-		<select id="period" name="period"> {%
-		  for per in ["daily", "weekly", "monthly"] %}
-		      <option value={{ per }} {% if period==per
-			  %}selected{% endif
-			  %}>{{ per }}</option>{% endfor %}
-		    </select>
-	      </td>
-	      <td> </td>
-
-	      <td rowspan="2"> <input type="submit"
-				      value=" -- Go! --"
-				      style="height: 8ex">
-	      </td>
-	    </tr>
-
-	    <tr>
-	      <td>{% set msg = opts["msg"]
-		%} <label for="msg">{{ _("Methods:") }}</label>
-		    <input type="text" name="msg" size="6"
-	               title="{{ _("regexp(s) to match messages/methods") }}"
-	               value="{{ msg }}">
-	      </td>
-	      <td>{% set users = opts["users"]
-		%} <label for="users">{{ _("Users:") }}</label>
-		    <input type="text" name="users" size="6"
-	               title="{{ _("regexp(s) to match users") }}"
-			   value="{{ users }}">
-	      </td>
-	      <td>{% set topn = opts["topn"]
-		%} <label for="topn">{{ _("How many:") }}</label>
-	  	     <input type="text" name="topn" size="1"
-	               title="{{ _("How many at most?") }}"
-	               value="{{ topn }}">
-	      </td>
-	      <td> <label for="bycount">{{ _("Sort by count:") }}</label>
-		     <input type="checkbox" name="bycount" size="1"
-	               title="{{ _("Sort by count or by text?") }}"
-		       {% if opts["bycount"] %} checked {% endif %}
-		       id="bycount" value="x">
-	      </td>
-	    </tr>
-	  </table>
-	</fieldset>
+		<fieldset>
+		  <table class="selections">
+		    <tr>
+		      <td>{% set server = opts["server"] %}
+		      	<label for="server">Server</label>
+				<select id="server" name="server">
+			    {% for ser in opts["servers"] %}
+			      <option value={{ ser }} {% if server==ser%}selected{% endif %}>
+			      		  {{ ser }}</option>
+			    {% endfor -%}
+			    </select>
+		      </td>
+		      <td>{% set pkey = opts["pkey"] %}
+		      	<label for="pkey">Grouping</label>
+				<select id="pkey" name="pkey">
+					<option value="msg"{% if pkey=="msg" %} selected{% endif %}>
+						    {{ _("Methods:") }}</option>
+					<option value="date"{% if pkey=="date" %} selected{% endif %}>
+						    {{ _("date") }}</option>
+					<option value="user"{% if pkey=="username" %} selected{% endif %}>
+						    {{ _("Users:") }}</option>
+				</select>
+		      </td>
+		      <td>{% set period = opts["period"] %}
+		      	<label for="period">Aggregation</label>
+				<select id="period" name="period">
+					<option value="daily"{% if period=="daily" %} selected{% endif %}>
+						    {{ _("daily") }}</option>
+					<option value="weekly"{% if period=="weekly" %} selected{% endif %}>
+						    {{ _("weekly") }}</option>
+					<option value="monthly"{% if period=="monthly" %} selected{% endif %}>
+						    {{ _("monthly") }}</option>
+			    </select>
+		      </td>
+		      <td></td>
+	
+		      <td class="fit" rowspan="2">
+		      	<input type="submit" value=" -- Go! --" style="height: 8ex">
+		      </td>
+		    </tr>
+	
+		    <tr>
+		      <td>{% set msg = opts["msg"] %}
+		      	<label for="msg">{{ _("Methods:") }}</label>
+			    <input type="text" name="msg" size="18" class="tt"
+		               title="{{ _("regexp(s) to match messages/methods") }}"
+		               value={% if msg %}"{{msg}}"{% else %}"*.routes.*"{% endif %}>
+		      </td>
+		      <td>{% set users = opts["users"] %}
+		      	<label for="users">{{ _("Users:") }}</label>
+			    <input type="text" name="users" size="18" class="tt"
+		               title="{{ _("Users separated by commas") }}"
+				   value="{{ users }}">
+		      </td>
+		      <td>{% set topn = opts["topn"] %}
+		      	<label for="topn">{{ _("How many:") }}</label>
+		  	    <input type="text" name="topn" size="2"
+		               title="{{ _("How many at most?") }}"
+		               value="{{ topn }}">
+		      </td>
+		      <td>
+		      	<label for="bycount">{{ _("Sort by count:") }}</label>
+			    <input type="checkbox" name="bycount" size="1"
+		               title="{{ _("Sort by count or by text?") }}"
+			       {% if opts["bycount"] %} checked {% endif %}
+			       id="bycount" value="x">
+		      </td>
+		    </tr>
+		  </table>
+		</fieldset>
       </form>
+      <p>Kohtaan {{ _("Methods:") }} kirjoitetaan säännöllinen lauseke, esim.
+      	 "<tt>*.routes.*</tt>" (kaikki toiminnot), "<tt>*.gramps.*</tt>" (lataukset ja aineistot),
+      	 "<tt>*.start*</tt>" jne.
+      	 
     </div>
 
     {% for filesection in res %}
-    {# filesection[0] is log file name #}
-    {# filesection[1] is contents from that log file #}
-  <p>
-    <b>Logfile(s):</b> <tt>{{ filesection[0] }}</tt>
-  <p>
-    {% for subsection in filesection[1] %}
-    {# subsection[0] is 'By xxx' #}
-    {# subsection[1] is contents for that section #}
-    <i> {{ subsection[0] }} </i>
-    {{ make_table (subsection[1]) }}
-    <br>
-    {% endfor %} {# subsection #}
+    	{# filesection[0] is log file name #}
+    	{# filesection[1] is contents from that log file #}
+	<div style="width:890px">
+    	<h3>Lokitiedostot</h3>
+    		<p><tt>{{ filesection[0] }}</tt></p>
+	</div>
+
+	    {% for subsection in filesection[1] %}
+		    {# subsection[0] is 'By xxx' #}
+		    {# subsection[1] is contents for that section #}
+
+	<h3>Tulokset ryhmittelijänä {{ subsection[0] }} </h3>
+    <ul>
+    	<li>N = käyntien määrä
+    	<li>n = kohdeiden määrä
+    	<li>e = käytetty aika (yhteensä, keskim.)
+    </ul>
+
+
+	<table>
+	{% for row in subsection[1] %}
+	  {% if false %}<tr><td colspan="10" style="color:blue; font-size:8pt"> {{row}} </td></tr>{% endif -%}
+		<tr>
+	  {% for col in row %}
+	  		<td{% if col != "" and col[0] in "0123456789"%} class="num"{% endif -%}>
+	  			{{ col }}
+	  		</td>
+	  {% endfor%}
+	    </tr>
+	{% endfor %}
+	</table>
+
+	    {% endfor %} {# subsection #}
     {% endfor %} {# filesection #}
 
 </div>
