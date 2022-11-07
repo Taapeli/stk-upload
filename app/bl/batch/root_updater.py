@@ -148,6 +148,15 @@ class RootUpdater(DataService):
                                                        auditor_username)
         return res
 
+    def set_access(self, batch_id, auditor_username):
+        """ Create HAS_ACCESS permission, if the user has not any previous access.
+        
+            Previous access with any relation HAS_ACCESS, DOES_AUDIT,
+            DID_AUDIT, HAS_LOADED.
+        """
+        res = self.dataservice.ds_batch_set_access(batch_id, auditor_username)
+        return res
+    
     def set_audited(self, batch_id, user_audit, b_state):
         """ Set batch status and mark all auditions completed.
         """

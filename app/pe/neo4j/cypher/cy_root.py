@@ -91,6 +91,14 @@ WITH audi, r3
     DELETE r3
 RETURN audi.username AS user, r4 as relation_new"""
 
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_access
+    batch_set_access = """
+MATCH (root:Root {id: $bid})
+MATCH (audi:UserProfile {username: $audi})
+OPTIONAL MATCH (audi) -[r]-> (root)
+WITH root,audi,collect(r) AS rel WHERE size(rel) = 0
+    CREATE (audi) -[r:HAS_ACCESS]-> (root)
+RETURN ID(root) AS bid, ID(r) AS rel_id"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
     batch_set_auditor = """
@@ -101,6 +109,7 @@ MATCH (audi:UserProfile {username: $audi})
     SET r.ts_from = timestamp()
 RETURN ID(root) AS id"""
 
+# Not needed any more; there is never multiple auditors?
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_auditors
     batch_purge_auditors = """
 MATCH (me:UserProfile) -[r:DOES_AUDIT]-> (root:Root)
@@ -112,7 +121,6 @@ WITH me, COLLECT(ID(r)) AS my_rels,
         DELETE ra
 RETURN audi.username AS user, rel_id
     //root.id AS batch_id, me.username AS me, my_rels, rtype
-    
 """
 #Returned:
 # │"batch_id"      │"me"  │"my_rels"       │"user" │"rtype"     │"rel_id"│

@@ -142,6 +142,9 @@ table     { width: 750px; }
 
                 <div class="submit">
                    <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" /> 
+
+                   <span style="font-size:large; color:gray;"> | </span>
+
                    <input type="submit" value="{{ _('Upload log') }}" name="upload_log"
                        title="{{ _('Show upload log') }}"/>
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse"
@@ -156,7 +159,7 @@ table     { width: 750px; }
 {% if can_start %}
                    <input type="submit" name="start"
                        title="{{ _('Start as auditor (also the only way to delete the material)') }}"
-                    {% if other_auditor %}
+                    {% if auditing_by_other %}
                        value="{{ _('Supersede other auditor') }}"
                     {% elif root.state == "Accepted" or root.state == "Rejected" %}
                        value="{{ _('Start auditing again') }}"

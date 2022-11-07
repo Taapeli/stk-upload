@@ -185,6 +185,21 @@ class Neo4jUpdateService(ConcreteService):
         uniq_id = result.single()[0]
         return {"status": Status.OK, "identity": uniq_id}
 
+    def ds_batch_set_access(self, batch_id, auditor_user):
+        """Checks, if auditor has read access to this batch.
+           If not, creates a HAS_ACCESS relation from UserProfile to Root.
+        """
+        result = self.tx.run(
+            CypherRoot.batch_set_access, bid=batch_id, audi=auditor_user
+        )
+        for record in result:
+            uniq_id = record["bid"]
+            rel_id = record["rel_id"]
+            return {"status": Status.UPDATED, "identity": uniq_id, "rel_id": rel_id}
+        # The identity can be returned only using Cypher 4.1+
+        return {"status": Status.OK}
+
+
     def ds_batch_set_audited(self, batch_id, user, new_state):
         """Updates the auditing Batch node and auditor links.
            For existing auditor, DOES_AUDIT relation is replaced by DID_AUDIT

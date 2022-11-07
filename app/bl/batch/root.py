@@ -175,18 +175,16 @@ class Root(NodeObject):
     def state_transition(self, oper:str, active_auditor:bool=False) -> bool:
         """ Allowed auditor operations.
 
-        Some operations may require active auditor role (you are
-        registered as auditor for this batch).
+        Some operations may require active auditor role (you have DOES_AUDIT
+        permission for this batch).
 
         Returns True, if allowed operation
         """
         if self.state == State.ROOT_AUDIT_REQUESTED:
-            ret = oper == "start"
+            ret = oper in ["start", "browse", "download"]
         elif self.state == State.ROOT_AUDITING:
             if active_auditor:
-                # Withdraw/reject not used?
-                ret = oper in \
-                ["browse", "download", "accept", "withdraw", "reject"]
+                ret = oper in ["browse", "download", "accept", "withdraw", "reject"]
             else:
                 ret = oper == "start"
         elif self.state == State.ROOT_ACCEPTED:
@@ -690,9 +688,30 @@ class Root(NodeObject):
         return msg, deleted
 
     @staticmethod
-    def fix_purge_auditors(batch_id, username):
+    def TODO_purge_auditors(batch_id, username):
         """ Schema fix: If there is multiple auditors, purge others but current
-        """
+            (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
+       """
+        with RootUpdater("update") as serv:
+            res = serv.purge_other_auditors(batch_id, username)
+            # Got {status, removed_auditors}
+            removed_auditors = res.get("removed_auditors", [])
+            count = len(removed_auditors)
+            if count > 0:
+                auditors = ", ".join(removed_auditors)
+                msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
+                # Return removed auditors
+                return {"status":Status.UPDATED, 
+                        "removed_auditors":removed_auditors,
+                        "msg":msg}
+        # No removed auditors
+        return {"status":Status.OK}
+
+    @staticmethod
+    def obsolete_fix_purge_auditors(batch_id, username):
+        """ Schema fix: If there is multiple auditors, purge others but current
+            (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
+       """
         with RootUpdater("update") as serv:
             res = serv.purge_other_auditors(batch_id, username)
             # Got {status, removed_auditors}
