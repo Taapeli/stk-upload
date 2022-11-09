@@ -51,6 +51,7 @@ from bp.admin import uploads
 from models import syslog, loadfile
 from ui.context import UserContext
 from ui.util import error_print
+from ui.util import stk_logger
 
 logger = logging.getLogger("stkserver")
 
@@ -92,7 +93,7 @@ def audit_home():
 def audit_research_op(oper=None, batch_id=None):
     """ Select Researcher operation for Batch by oper.
         - "request": User moves Batch to Audit queue by setting state="Audit requested" or
-        ? "withdraw": Researcher withdraws audit request.
+        - "withdraw": User withdraws audit request.
     """
     try:
         user_id = current_user.username
@@ -109,7 +110,7 @@ def audit_research_op(oper=None, batch_id=None):
                 res = serv.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
             elif operation == "withdraw":
                 msg = _("Withdrawing audit request for ") + batch_id
-                res = serv.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
+                res = serv.change_state(batch_id, user_id, State.ROOT_CANDIDATE)
             # operation == "delete" -> delete_approved?
             else:
                 return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
@@ -213,6 +214,20 @@ def audit_pick(batch_id=None):
     )
 
 
+def _allow_batch_access(batch_id, user_audit):
+    """ If given auditor has no access permission,
+        create a HAS_ACCESS permission. """
+    with RootUpdater("update") as service: 
+        res = service.set_access(batch_id, user_audit)
+        status = res["status"]
+        if status == Status.UPDATED:
+            msg = _("You have given access permission for batch ") + batch_id
+            syslog.log(type="Material access given", batch=batch_id, op="allow_access", msg=msg)
+        elif status == Status.OK:
+            msg = _("Your access for batch %(bid)s is OK", bid=batch_id)
+        print(f"#bp.audit.routes._allow_batch_access: {msg}")
+    return status, msg
+
 @bp.route("/audit/selected", methods=["POST"])
 @login_required
 @roles_accepted("audit")
@@ -240,29 +255,21 @@ def auditor_ops():
 
         if request.form.get("browse"):
             # 0a. Go to scene views
-            with RootUpdater("update") as serv:
-                # (1) If the user has no DOES_AUDIT permission, create HAS_ACCESS permission
-                res = serv.set_access(batch_id, user_audit)
-                status = res["status"]
-                if status == Status.UPDATED:
-                    msg = _("You have now access for batch ") + batch_id
-                elif status == Status.OK:
-                    msg = _("Your access for batch checked")
-                print(f"#bp.audit.routes.auditor_ops {msg}")
+            status, msg = _allow_batch_access(batch_id, user_audit)
+            if status == Status.UPDATED:
+                flash(msg)
+                stk_logger(u_context, 
+                       f"-> bp.audit.routes.auditor_ops/allow b={batch_id}")
 
             args = {"batch_id": batch_id, "material_type": material_type, "state": state}
             return redirect("/scene/material/batch?" + urllib.parse.urlencode(args))
         elif request.form.get("download"):
             # 0b. Download Gramps file
-            with RootUpdater("update") as serv:
-                # (1) If the user has no DOES_AUDIT permission, create HAS_ACCESS permission
-                res = serv.set_access(batch_id, user_audit)
-                status = res["status"]
-                if status == Status.UPDATED:
-                    msg = _("You have now access for batch ") + batch_id
-                elif status == Status.OK:
-                    msg = _("Your access for batch checked")
-
+            status, msg = _allow_batch_access(batch_id, user_audit)
+            if status == Status.UPDATED:
+                flash(msg)
+                stk_logger(u_context, 
+                       f"-> bp.audit.routes.auditor_ops/allow b={batch_id}")
             return redirect(url_for("audit.audit_batch_download", 
                                     batch_id=batch_id, 
                                     username=current_user.username))

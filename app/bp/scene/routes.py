@@ -286,11 +286,7 @@ def _do_get_persons(u_context, args):
         # u_context.set_scope_from_request()
         if args.get("rule", "init") == "init" or args.get("key", "") == "":
             # Initializing this batch.
-            return {
-                "rule": "init",
-                "status": Status.NOT_STARTED,
-                # "u_context": u_context,
-            }
+            return { "rule": "init", "status": Status.NOT_STARTED }
     else:  # pg:'all'
         # u_context.set_scope_from_request("person_scope")
         args["rule"] = "all"

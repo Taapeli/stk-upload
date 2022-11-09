@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-10-17 14:15+0300\n"
+"POT-Creation-Date: 2022-11-09 12:31+0200\n"
 "PO-Revision-Date: 2022-10-13 20:01+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -176,28 +176,32 @@ msgstr "tuntematon suhde"
 msgid "This person has no families"
 msgstr "Ei perheitä"
 
-#: bl/material.py:82
+#: bl/material.py:77
+msgid "GO TO START PAGE!"
+msgstr "SIIRRY ALKUSIVULLE"
+
+#: bl/material.py:81
 msgid "Approved Isotammi tree"
 msgstr "Hyväksytty aineisto"
 
-#: bl/material.py:198
+#: bl/material.py:197
 msgid "Missing material_type or state"
 msgstr "Materiaalin tyyppi tai tila puuttuu"
 
-#: bl/material.py:204
+#: bl/material.py:203
 msgid "Undefined breed of materials"
 msgstr "Tuntematon materiaalin laatu"
 
 #: bl/person.py:122 bl/person.py:125 ui/jinja_filters.py:131
-#: ui/jinja_filters.py:328
+#: ui/jinja_filters.py:329
 msgid "Child"
 msgstr "lapsi"
 
-#: bl/person.py:123 ui/jinja_filters.py:327
+#: bl/person.py:123 ui/jinja_filters.py:328
 msgid "Son"
 msgstr "poika"
 
-#: bl/person.py:124 ui/jinja_filters.py:326
+#: bl/person.py:124 ui/jinja_filters.py:327
 msgid "Daughter"
 msgstr "tytär"
 
@@ -229,7 +233,7 @@ msgstr "Ketään ei löytynyt"
 msgid "Requested person not found"
 msgstr "Pyydettyä henkilöä ei ole"
 
-#: bl/batch/root_updater.py:179 bl/stats.py:278 bp/gramps/routes.py:515
+#: bl/batch/root_updater.py:188 bl/stats.py:278 bp/gramps/routes.py:516
 msgid "Failed to retrieve batch"
 msgstr "Aineiston avaaminen ei onnistunut"
 
@@ -259,12 +263,12 @@ msgstr "Poistettu %(cnt)d nodea"
 msgid "Given allowed email address already exists"
 msgstr "Annettu sähköpostiosoite jo käytössä"
 
-#: bl/batch/root.py:685
+#: bl/batch/root.py:683
 #, python-format
 msgid "Approved batch id %(batch_id)s with %(deleted)d nodes has been deleted"
 msgstr "Hyväksytty aineisto %(batch_id)s poistettu (%(deleted)d solmua)"
 
-#: bl/batch/root.py:703
+#: bl/batch/root.py:702 bl/batch/root.py:722
 #, python-format
 msgid "Superseded auditor '%(a)s' from batch %(b)s"
 msgstr "Tarkastaja '%(a)s' on syrjäytetty aineistosta %(b)s"
@@ -301,7 +305,7 @@ msgstr "Viittaukset"
 #: bl/gramps/xml_dom_handler.py:232 bp/dupsearch/templates/compare.html:197
 #: bp/dupsearch/templates/compare2.html:196
 #: bp/scene/templates/scene/person.html:248
-#: bp/scene/templates/scene/persons_list.html:77
+#: bp/scene/templates/scene/persons_list.html:78
 #: bp/scene/templates/scene/place.html:210
 msgid "Events"
 msgstr "Tapahtumat"
@@ -321,7 +325,7 @@ msgstr "Perheet"
 msgid "Media"
 msgstr "Mediat"
 
-#: bl/gramps/xml_dom_handler.py:244 bp/scene/templates/scene/family.html:124
+#: bl/gramps/xml_dom_handler.py:244 bp/scene/templates/scene/family.html:122
 #: bp/scene/templates/scene/place.html:95
 #: bp/scene/templates/scene/source_events.html:71
 msgid "Notes"
@@ -341,7 +345,7 @@ msgstr "Paikat"
 msgid "Repositories"
 msgstr "Arkistot"
 
-#: bl/gramps/xml_dom_handler.py:262 bp/scene/templates/scene/family.html:79
+#: bl/gramps/xml_dom_handler.py:262 bp/scene/templates/scene/family.html:77
 #: bp/scene/templates/scene/macros.html:71
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:39
 #: templates/repo_sources.html:38
@@ -575,6 +579,10 @@ msgstr "Käyttäjätiedot päivitetty"
 msgid "Data import from %(i)s to database has been started."
 msgstr "Tuonti tiedostosta %(i)s on alkanut."
 
+#: bp/admin/routes.py:385
+msgid "File not found"
+msgstr "Aineistoa ei ole"
+
 #: bp/admin/templates/admin/access_management.html:3
 #: bp/admin/templates/admin/access_management.html:11
 msgid "Management of access to batches"
@@ -619,8 +627,8 @@ msgstr "Käyttäjä"
 #: bp/dupsearch/templates/compare2.html:177
 #: bp/dupsearch/templates/dupsearch.html:30
 #: bp/gramps/templates/gramps/details.html:62
-#: bp/gramps/templates/gramps/uploads.html:116
-#: bp/gramps/templates/gramps/uploads.html:164
+#: bp/gramps/templates/gramps/uploads.html:118
+#: bp/gramps/templates/gramps/uploads.html:166
 #: bp/scene/templates/scene/details_batch.html:145
 #: bp/scene/templates/scene/details_common.html:45
 msgid "Batch"
@@ -1029,7 +1037,7 @@ msgstr "Uudemmat tapahtumat"
 #: bp/audit/templates/audit/pick_auditing.html:144
 #: bp/gramps/templates/gramps/details.html:178
 #: bp/gramps/templates/gramps/scripting.html:78
-#: bp/gramps/templates/gramps/uploads.html:242
+#: bp/gramps/templates/gramps/uploads.html:237
 msgid "Back"
 msgstr "Takaisin"
 
@@ -1069,7 +1077,7 @@ msgstr "Tyyppi / kuvaus"
 #: bp/audit/templates/audit/batches.html:36
 #: bp/audit/templates/audit/pick_auditing.html:57
 #: bp/gramps/templates/gramps/details.html:71
-#: bp/gramps/templates/gramps/uploads.html:167
+#: bp/gramps/templates/gramps/uploads.html:169
 #: bp/scene/templates/scene/details_batch.html:104
 #: bp/scene/templates/scene/details_common.html:47
 #: bp/start/templates/start/my_settings.html:122
@@ -1110,65 +1118,74 @@ msgstr "Näytä loki"
 msgid "Delete file"
 msgstr "Poista tiedosto"
 
-#: bp/audit/routes.py:107
+#: bp/audit/routes.py:109
 msgid "Audit request for "
 msgstr "Tarkastuspyyntö aineistolle "
 
-#: bp/audit/routes.py:110
+#: bp/audit/routes.py:112
 msgid "Withdrawing audit request for "
 msgstr "Takastuspyynnön peruminen aineistolle "
 
-#: bp/audit/routes.py:121
+#: bp/audit/routes.py:123
 msgid " failed"
 msgstr " epäonnistui"
 
-#: bp/audit/routes.py:123
+#: bp/audit/routes.py:125
 msgid " succeeded"
-msgstr " suoritettu"
+msgstr " tehty"
 
 #: bp/audit/routes.py:166
 msgid "No such batch "
 msgstr "Aineistoa ei ole"
 
-#: bp/audit/routes.py:267
+#: bp/audit/routes.py:224
+msgid "You have given access permission for batch "
+msgstr "Sinulle on annetty pääsy aineistoon "
+
+#: bp/audit/routes.py:227
+#, python-format
+msgid "Your access for batch %(bid)s is OK"
+msgstr "Pääsy aineistoon %(bid)s on OK"
+
+#: bp/audit/routes.py:297
 msgid "You are now an auditor for batch "
 msgstr "Olet nyt tarkastajana aineistolle "
 
-#: bp/audit/routes.py:286
+#: bp/audit/routes.py:317
 msgid "Audit batch accepted: "
 msgstr "Tarkastus läpäisty: "
 
-#: bp/audit/routes.py:290
+#: bp/audit/routes.py:322
 #, python-format
 msgid "You have rejected the audition of batch %(bid)s"
 msgstr "Hylkäsit aineiston %(bid)s tarkastuksessa"
 
-#: bp/audit/routes.py:298
+#: bp/audit/routes.py:331
 #, python-format
 msgid "You did audit the batch %(bid)s for %(d)s days"
 msgstr "Tarkastit aineistoa %(bid)s (%(d)s päivän ajan)"
 
-#: bp/audit/routes.py:342
+#: bp/audit/routes.py:376
 msgid "The file does not exist any more: "
 msgstr "Tiedostoa ei enää ole: "
 
-#: bp/audit/routes.py:345
+#: bp/audit/routes.py:379
 msgid "Not allowed to load this batch: "
 msgstr "Et voi ladata itsellesi aineistoa "
 
-#: bp/audit/routes.py:347 bp/gramps/routes.py:278
+#: bp/audit/routes.py:381 bp/gramps/routes.py:279
 msgid "Error in file loading"
 msgstr "Tiedoston lataaminen ei onnistunut"
 
-#: bp/audit/routes.py:498
+#: bp/audit/routes.py:532
 msgid "Done"
 msgstr "Tehty"
 
-#: bp/audit/routes.py:587
+#: bp/audit/routes.py:621
 msgid "Data type '{}' is not supported"
 msgstr "Tietotyyppiä '{}' ei tueta"
 
-#: bp/audit/routes.py:594
+#: bp/audit/routes.py:628
 msgid "Missing proper column title: "
 msgstr "Kelvollinen sarakeotsikko puuttuu:"
 
@@ -1177,7 +1194,7 @@ msgid "Auditions"
 msgstr "Hyväksytyt aineistot"
 
 #: bp/audit/templates/audit/approvals.html:46
-#: bp/gramps/templates/gramps/uploads.html:117
+#: bp/gramps/templates/gramps/uploads.html:119
 msgid "Are you sure you want to delete this batch from database?"
 msgstr "Haluatko varmasti poistaa tämän Tutkijan aineiston?"
 
@@ -1191,7 +1208,7 @@ msgid "Total <b>%(tot)s</b> objects"
 msgstr "Yhteensä <b>%(tot)s</b> kohdetta"
 
 #: bp/audit/templates/audit/approvals.html:71
-#: bp/gramps/templates/gramps/uploads.html:228
+#: bp/gramps/templates/gramps/uploads.html:223
 #: bp/refplace_editor/templates/refplace_editor.html:3
 msgid "Auditor"
 msgstr "Tarkastaja"
@@ -1236,7 +1253,7 @@ msgstr "Aineiston laatu"
 #: bp/audit/templates/audit/batches.html:37
 #: bp/audit/templates/audit/pick_auditing.html:98
 #: bp/gramps/templates/gramps/details.html:80
-#: bp/gramps/templates/gramps/uploads.html:165
+#: bp/gramps/templates/gramps/uploads.html:167
 #: bp/scene/templates/scene/details_batch.html:100
 msgid "Gramps file"
 msgstr "Gramps-tiedosto"
@@ -1257,7 +1274,7 @@ msgid "Auditing started"
 msgstr "Tarkastus alkanut"
 
 #: bp/audit/templates/audit/batches.html:107
-#: bp/audit/templates/audit/pick_auditing.html:146 ui/batch_ops.py:36
+#: bp/audit/templates/audit/pick_auditing.html:149 ui/batch_ops.py:36
 msgid "Show upload log"
 msgstr "Näytä latauksen loki"
 
@@ -1361,7 +1378,7 @@ msgid "Current auditors"
 msgstr "Tarkastajat"
 
 #: bp/audit/templates/audit/pick_auditing.html:90
-#: bp/gramps/templates/gramps/uploads.html:231
+#: bp/gramps/templates/gramps/uploads.html:226
 msgid "Duration of audition"
 msgstr "Tarkastuksen aikaväli"
 
@@ -1393,73 +1410,73 @@ msgstr "Kohteiden määrät"
 msgid "Total"
 msgstr "Yhteensä"
 
-#: bp/audit/templates/audit/pick_auditing.html:145
+#: bp/audit/templates/audit/pick_auditing.html:148
 msgid "Upload log"
 msgstr "Latausloki"
 
-#: bp/audit/templates/audit/pick_auditing.html:147
-#: bp/gramps/templates/gramps/uploads.html:180
+#: bp/audit/templates/audit/pick_auditing.html:150
+#: bp/gramps/templates/gramps/uploads.html:182
 #: bp/scene/templates/scene/details_common.html:61
 msgid "Browse this material"
 msgstr "Selaa aineistoa"
 
-#: bp/audit/templates/audit/pick_auditing.html:148
+#: bp/audit/templates/audit/pick_auditing.html:151
 msgid "You can browse, if you are currently auditing"
 msgstr "Voit selata, jos olet auditoimassa"
 
-#: bp/audit/templates/audit/pick_auditing.html:150
+#: bp/audit/templates/audit/pick_auditing.html:153
 msgid "Download file"
 msgstr "Lataa tiedosto"
 
-#: bp/audit/templates/audit/pick_auditing.html:151
+#: bp/audit/templates/audit/pick_auditing.html:154
 msgid "You can download, if you are currently auditing"
 msgstr "Voit ladata Gramps-tiedoston, jos olet auditoimassa"
 
-#: bp/audit/templates/audit/pick_auditing.html:158
+#: bp/audit/templates/audit/pick_auditing.html:161
 msgid "Start as auditor (also the only way to delete the material)"
 msgstr "Aloita tarkastaminen (tätä kautta pääset myös poistamaan aineiston)"
 
-#: bp/audit/templates/audit/pick_auditing.html:160
+#: bp/audit/templates/audit/pick_auditing.html:163
 msgid "Supersede other auditor"
 msgstr "Syrjäytä nykyinen tarkastaja"
 
-#: bp/audit/templates/audit/pick_auditing.html:162
+#: bp/audit/templates/audit/pick_auditing.html:165
 msgid "Start auditing again"
 msgstr "Aloita tarkastus uudestaan"
 
-#: bp/audit/templates/audit/pick_auditing.html:164
+#: bp/audit/templates/audit/pick_auditing.html:167
 msgid "Start auditing"
 msgstr "Aloita tarkastus"
 
-#: bp/audit/templates/audit/pick_auditing.html:168
+#: bp/audit/templates/audit/pick_auditing.html:171
 msgid "Accept auditing"
 msgstr "Hyväksy aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:169
+#: bp/audit/templates/audit/pick_auditing.html:172
 msgid "Include to accepted materials"
 msgstr "Liitä hyväksyttyihin aineistoihin"
 
-#: bp/audit/templates/audit/pick_auditing.html:171
+#: bp/audit/templates/audit/pick_auditing.html:174
 msgid "Withdraw"
 msgstr "Luovu"
 
-#: bp/audit/templates/audit/pick_auditing.html:172
+#: bp/audit/templates/audit/pick_auditing.html:175
 msgid "Give up for now"
 msgstr "Lopeta tarkastus (toistaiseksi)"
 
-#: bp/audit/templates/audit/pick_auditing.html:174
+#: bp/audit/templates/audit/pick_auditing.html:177
 msgid "Reject auditing"
 msgstr "Hylkää aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:175
+#: bp/audit/templates/audit/pick_auditing.html:178
 msgid "Dicard this material"
 msgstr "Aineisto hylätään"
 
-#: bp/audit/templates/audit/pick_auditing.html:179
+#: bp/audit/templates/audit/pick_auditing.html:182
 msgid "Delete batch"
 msgstr "Poista aineisto"
 
-#: bp/audit/templates/audit/pick_auditing.html:180
+#: bp/audit/templates/audit/pick_auditing.html:183
 msgid "The material and files are deleted permanetly"
 msgstr "Aineisto tiedostoineen poistetaan pysyvästi"
 
@@ -1606,13 +1623,13 @@ msgstr "Vertaa mahdollisia kaksoiskappaleita"
 
 #: bp/dupsearch/templates/compare.html:97
 #: bp/dupsearch/templates/compare2.html:97
-#: bp/gramps/templates/gramps/scripting.html:32 bp/scene/routes.py:1045
-#: bp/scene/templates/scene/families.html:108
+#: bp/gramps/templates/gramps/scripting.html:32 bp/scene/routes.py:1041
+#: bp/scene/templates/scene/families.html:137
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/hx-person/famtree.html:17
 #: bp/scene/templates/scene/hx-person/famtree.html:58
 #: bp/scene/templates/scene/hx-person/famtree.html:60
-#: bp/scene/templates/scene/macros.html:279
+#: bp/scene/templates/scene/macros.html:285
 #: bp/scene/templates/scene/source_events.html:124 ui/jinja_filters.py:98
 #: ui/jinja_filters.py:136
 msgid "Family"
@@ -1620,7 +1637,7 @@ msgstr "Perhe"
 
 #: bp/dupsearch/templates/compare.html:101
 #: bp/dupsearch/templates/compare2.html:101
-#: bp/scene/templates/scene/families.html:109
+#: bp/scene/templates/scene/families.html:138
 #: bp/scene/templates/scene/hx-person/famtree.html:21
 #: bp/scene/templates/scene/hx-person/famtree.html:64
 msgid "Man"
@@ -1628,16 +1645,16 @@ msgstr "Mies"
 
 #: bp/dupsearch/templates/compare.html:103
 #: bp/dupsearch/templates/compare2.html:103
-#: bp/scene/templates/scene/families.html:110
+#: bp/scene/templates/scene/families.html:139
 #: bp/scene/templates/scene/hx-person/famtree.html:23
 #: bp/scene/templates/scene/hx-person/famtree.html:66 ui/jinja_filters.py:156
 msgid "Wife"
 msgstr "Vaimo"
 
 #: bp/dupsearch/templates/compare.html:105
-#: bp/dupsearch/templates/compare2.html:105 bp/scene/routes.py:1045
-#: bp/scene/templates/scene/families.html:112
-#: bp/scene/templates/scene/family.html:101
+#: bp/dupsearch/templates/compare2.html:105 bp/scene/routes.py:1041
+#: bp/scene/templates/scene/families.html:141
+#: bp/scene/templates/scene/family.html:99
 #: bp/scene/templates/scene/hx-person/famtree.html:25
 #: bp/scene/templates/scene/hx-person/famtree.html:68
 msgid "Children"
@@ -1645,13 +1662,11 @@ msgstr "Lapset"
 
 #: bp/dupsearch/templates/compare.html:139
 #: bp/dupsearch/templates/compare2.html:139
-#: bp/scene/templates/scene/family.html:68
 msgid "of type"
 msgstr "Tyyppi"
 
 #: bp/dupsearch/templates/compare.html:139
 #: bp/dupsearch/templates/compare2.html:139
-#: bp/scene/templates/scene/family.html:68
 msgid "see details of place"
 msgstr "Katso paikan tiedot"
 
@@ -1692,11 +1707,11 @@ msgstr "Valitse"
 #: bp/gedcom/templates/gedcom_info.html:29
 #: bp/gramps/templates/gramps/analyze_xml.html:14
 #: bp/gramps/templates/gramps/gramps_analyze.html:25
-#: bp/gramps/templates/gramps/uploads.html:113
+#: bp/gramps/templates/gramps/uploads.html:115
 #: bp/scene/templates/scene/details_common.html:46
 #: bp/start/templates/start/my_settings.html:142
-#: bp/start/templates/start/s_macros.html:58 ui/jinja_filters.py:344
-#: ui/jinja_filters.py:353
+#: bp/start/templates/start/s_macros.html:58 ui/jinja_filters.py:345
+#: ui/jinja_filters.py:354
 msgid "File"
 msgstr "Tiedosto"
 
@@ -1937,9 +1952,11 @@ msgid "Unsupported type: "
 msgstr "Tyyppiä ei tueta: "
 
 #: bp/gedcom/templates/g_layout.html:25
+#: bp/scene/templates/scene/families.html:152
+#: bp/scene/templates/scene/medias.html:87
 #: bp/scene/templates/scene/person_search_result.html:28
-#: bp/scene/templates/scene/persons_list.html:88
-#: bp/scene/templates/scene/places.html:83
+#: bp/scene/templates/scene/persons_list.html:89
+#: bp/scene/templates/scene/places.html:89
 #: bp/scene/templates/scene/sources.html:64
 msgid "Back to Top"
 msgstr "Palaa alkuun"
@@ -2487,62 +2504,62 @@ msgstr "Poista tag-X-merkinnät"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Poistaa \"-X\"-merkityistä tunnisteista \"-X\" :n"
 
-#: bp/gramps/routes.py:139
+#: bp/gramps/routes.py:140
 #, python-format
 msgid "The batch %(id)s upload has started in background. "
 msgstr "Aineiston %(id)s talletus on käynnistynyt taustatyönä. "
 
-#: bp/gramps/routes.py:140
+#: bp/gramps/routes.py:141
 msgid ""
 "You can follow the process below, but you can also leave or do something "
 "else. "
 msgstr "Voit seurata toimintaa alla, mutta voit myös poistua tai tehdä muuta. "
 
-#: bp/gramps/routes.py:141
+#: bp/gramps/routes.py:142
 msgid "Come back later to see the results."
 msgstr "Palaa myöhemmin takaisin nähdäksesi tulokset."
 
-#: bp/gramps/routes.py:146
+#: bp/gramps/routes.py:147
 msgid "Failed to create a new batch - "
 msgstr "Uuden aineiston luonti ei onnistunut"
 
-#: bp/gramps/routes.py:234 bp/gramps/routes.py:259
+#: bp/gramps/routes.py:235 bp/gramps/routes.py:260
 #, python-format
 msgid "The file \"%(n)s\" does not exist"
 msgstr "Tiedostoa \"%(n)s\" ei ole"
 
-#: bp/gramps/routes.py:275
+#: bp/gramps/routes.py:276
 #, python-format
 msgid "The log file for \"%(n)s\" does not exist any more"
 msgstr "Lokitiedostoa aineistolle \"%(n)s\" ei enää ole"
 
-#: bp/gramps/routes.py:305
+#: bp/gramps/routes.py:306
 msgid "Batch not found"
 msgstr "Aineistoa ei ole"
 
-#: bp/gramps/routes.py:322
+#: bp/gramps/routes.py:323
 #, python-format
 msgid "Could not delete Batch id %(batch_id)s"
 msgstr "Aineiston %(batch_id)s poistaminen ei onnistunut"
 
-#: bp/gramps/routes.py:330
+#: bp/gramps/routes.py:331
 #, python-format
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr "Aineisto %(batch_id)s on poistettu (%(n)s kohdetta)"
 
-#: bp/gramps/routes.py:429
+#: bp/gramps/routes.py:430
 msgid "Failed to retrieve commands"
 msgstr "Komentoja ei saatu esiin"
 
-#: bp/gramps/routes.py:493 bp/scene/routes.py:1545
+#: bp/gramps/routes.py:494 bp/scene/routes.py:1541
 msgid "ERROR: Update did not succeed: "
 msgstr "VIRHE: Päivitys ei onnistunut: "
 
-#: bp/gramps/routes.py:495 bp/scene/routes.py:1547
+#: bp/gramps/routes.py:496 bp/scene/routes.py:1543
 msgid "Updated"
 msgstr "Päivitetty"
 
-#: bp/gramps/routes.py:509
+#: bp/gramps/routes.py:510
 msgid "Scripting tool is not enabled"
 msgstr "Scripting tool ei ole käytettävissä"
 
@@ -2667,11 +2684,11 @@ msgid "Scope"
 msgstr "Rajaus"
 
 #: bp/gramps/templates/gramps/scripting.html:31
-#: bp/scene/templates/scene/macros.html:208
-#: bp/scene/templates/scene/macros.html:243
+#: bp/scene/templates/scene/macros.html:214
+#: bp/scene/templates/scene/macros.html:249
 #: bp/scene/templates/scene/person_search_result.html:17
 #: bp/scene/templates/scene/person_search_result.html:35
-#: bp/scene/templates/scene/persons_list.html:76
+#: bp/scene/templates/scene/persons_list.html:77
 #: bp/scene/templates/scene/place.html:216
 msgid "Person"
 msgstr "Henkilö"
@@ -2690,10 +2707,10 @@ msgstr "Tapahtuma"
 #: bp/scene/templates/scene/event_vue.html:69
 #: bp/scene/templates/scene/obsolete_event.html:53
 #: bp/scene/templates/scene/person.html:254
-#: bp/scene/templates/scene/places.html:41
-#: bp/scene/templates/scene/places.html:94
-#: bp/scene/templates/scene/places.html:102
-#: bp/scene/templates/scene/places.html:111
+#: bp/scene/templates/scene/places.html:47
+#: bp/scene/templates/scene/places.html:100
+#: bp/scene/templates/scene/places.html:108
+#: bp/scene/templates/scene/places.html:117
 #: bp/scene/templates/scene/source_events.html:132
 #: templates/obsolete_select_refcols.html:37
 #: templates/obsolete_select_refcols.html:65
@@ -2753,38 +2770,39 @@ msgid "Execute"
 msgstr "Suorita"
 
 #: bp/gramps/templates/gramps/uploads.html:9
-#: bp/gramps/templates/gramps/uploads.html:138
+#: bp/gramps/templates/gramps/uploads.html:140
 #: bp/start/templates/start/index_logged.html:70
 msgid "Manage Materials"
 msgstr "Aineistojen hallinta"
 
-#: bp/gramps/templates/gramps/uploads.html:63
+#: bp/gramps/templates/gramps/uploads.html:14
+#, python-format
 msgid "The file is too large (max %(max)s MB)"
-msgstr "Tiedosto on liian iso (enintään %(max) MB)"
+msgstr "Tiedosto on liian iso (enintään %(max)s MB)"
 
-#: bp/gramps/templates/gramps/uploads.html:114
+#: bp/gramps/templates/gramps/uploads.html:116
 msgid "Are you sure you want to delete the XML file?"
 msgstr "Haluatko todella tuhota tämän Gramps-tiedoston?"
 
-#: bp/gramps/templates/gramps/uploads.html:145
+#: bp/gramps/templates/gramps/uploads.html:147
 msgid "Send a new Gramps file"
 msgstr "Tuo uusi Gramps-tiedosto"
 
-#: bp/gramps/templates/gramps/uploads.html:152
+#: bp/gramps/templates/gramps/uploads.html:154
 msgid "Send to database"
 msgstr "Vie tietokantaan"
 
-#: bp/gramps/templates/gramps/uploads.html:155
+#: bp/gramps/templates/gramps/uploads.html:157
 msgid ""
 "Select Gramps XML File (*.gramps etc) for converting to your candidate "
 "material"
 msgstr "Valitse Gramps-tiedosto (.gramps tai .gpkg) tutkijan aineistoksi"
 
-#: bp/gramps/templates/gramps/uploads.html:166
+#: bp/gramps/templates/gramps/uploads.html:168
 msgid "Person count"
 msgstr "Henkilöitä"
 
-#: bp/gramps/templates/gramps/uploads.html:184
+#: bp/gramps/templates/gramps/uploads.html:186
 msgid "Details and operations"
 msgstr "Lisätietoja ja toimintoja"
 
@@ -2796,44 +2814,44 @@ msgstr "Yhdistä lähteet"
 msgid "Merge Sources"
 msgstr "Yhdistä lähteet"
 
-#: bp/scene/routes.py:328
+#: bp/scene/routes.py:324
 msgid "Data read failed."
 msgstr "Tietojen lukeminen ei onnistunut"
 
-#: bp/scene/routes.py:453
+#: bp/scene/routes.py:449
 msgid "references"
 msgstr "viittausta"
 
-#: bp/scene/routes.py:453
+#: bp/scene/routes.py:449
 msgid "inner places"
 msgstr "sisempää paikkaa"
 
-#: bp/scene/routes.py:665
+#: bp/scene/routes.py:661
 msgid "type changed"
 msgstr "tyyppi muutettu"
 
-#: bp/scene/routes.py:667
+#: bp/scene/routes.py:663
 msgid "type change FAILED"
 msgstr "tyypin muutos EPÄONNISTUI"
 
-#: bp/scene/routes.py:794 bp/scene/routes.py:803
+#: bp/scene/routes.py:790 bp/scene/routes.py:799
 msgid "No event found"
 msgstr "Ei tapahtumia"
 
-#: bp/scene/routes.py:841 bp/scene/templates/scene/hx-person/famtree.html:42
+#: bp/scene/routes.py:837 bp/scene/templates/scene/hx-person/famtree.html:42
 #: bp/scene/templates/scene/obsolete_event.html:77
 msgid "Self"
 msgstr "Itse"
 
-#: bp/scene/routes.py:1035
+#: bp/scene/routes.py:1031
 msgid "No families"
 msgstr "Ei perheitä"
 
-#: bp/scene/routes.py:1230 bp/scene/routes.py:1302
+#: bp/scene/routes.py:1226 bp/scene/routes.py:1298
 msgid "No objects found"
 msgstr "Ei kohteita"
 
-#: bp/scene/routes.py:1633
+#: bp/scene/routes.py:1629
 msgid "No previous comments"
 msgstr "Ei aiempia kommentteja"
 
@@ -2867,7 +2885,7 @@ msgid "Replies"
 msgstr "Vastauksia"
 
 #: bp/scene/templates/scene/comments.html:41
-#: bp/scene/templates/scene/medias.html:68
+#: bp/scene/templates/scene/medias.html:79
 msgid "For auditor only"
 msgstr "Näytetään vain tarkastajalle"
 
@@ -2887,10 +2905,10 @@ msgid "Unknown object"
 msgstr "tuntematon tyyppi"
 
 #: bp/scene/templates/scene/comments.html:89
-#: bp/scene/templates/scene/families.html:165
-#: bp/scene/templates/scene/medias.html:98
-#: bp/scene/templates/scene/medias.html:107
-#: bp/scene/templates/scene/persons_list.html:136
+#: bp/scene/templates/scene/families.html:203
+#: bp/scene/templates/scene/medias.html:113
+#: bp/scene/templates/scene/medias.html:124
+#: bp/scene/templates/scene/persons_list.html:135
 msgid "The last item found"
 msgstr "Viimeinen rivi"
 
@@ -2900,10 +2918,10 @@ msgid "No comment found starting from \"%(name)s\""
 msgstr "Ei \"%(name)s\"-alkuisia kommentteja"
 
 #: bp/scene/templates/scene/comments.html:100
-#: bp/scene/templates/scene/families.html:160
+#: bp/scene/templates/scene/families.html:198
 #: bp/scene/templates/scene/macros.html:114
-#: bp/scene/templates/scene/medias.html:109
-#: bp/scene/templates/scene/persons_list.html:146
+#: bp/scene/templates/scene/medias.html:126
+#: bp/scene/templates/scene/persons_list.html:145
 msgid "first page"
 msgstr "Ensimmäiselle sivulle"
 
@@ -2926,7 +2944,7 @@ msgid "Converting the Gramps file to the database"
 msgstr "Gramps-tiedostoa viedään tietokantaan"
 
 #: bp/scene/templates/scene/details_batch.html:111
-#: bp/start/templates/start/s_macros.html:59 ui/jinja_filters.py:345
+#: bp/start/templates/start/s_macros.html:59 ui/jinja_filters.py:346
 msgid "Storing"
 msgstr "Tallentamassa"
 
@@ -2936,7 +2954,7 @@ msgid "The data is stored as candidate material"
 msgstr "Talletettu tutkijan aineistona"
 
 #: bp/scene/templates/scene/details_batch.html:116
-#: bp/start/templates/start/s_macros.html:60 ui/jinja_filters.py:346
+#: bp/start/templates/start/s_macros.html:60 ui/jinja_filters.py:347
 msgid "Candidate"
 msgstr "Tutkijan aineisto"
 
@@ -2946,7 +2964,7 @@ msgid "Waiting for audition"
 msgstr "Odottaa tarkastusta"
 
 #: bp/scene/templates/scene/details_batch.html:121
-#: bp/start/templates/start/s_macros.html:61 ui/jinja_filters.py:347
+#: bp/start/templates/start/s_macros.html:61 ui/jinja_filters.py:348
 msgid "Audit Requested"
 msgstr "Tarkastus pyydetty"
 
@@ -2956,7 +2974,7 @@ msgid "In audition"
 msgstr "Tarkastettavana"
 
 #: bp/scene/templates/scene/details_batch.html:126
-#: bp/start/templates/start/s_macros.html:62 ui/jinja_filters.py:348
+#: bp/start/templates/start/s_macros.html:62 ui/jinja_filters.py:349
 msgid "Auditing"
 msgstr "Tarkastus"
 
@@ -2966,7 +2984,7 @@ msgid "Audit done"
 msgstr "Tarkastus tehty"
 
 #: bp/scene/templates/scene/details_batch.html:131
-#: bp/start/templates/start/s_macros.html:63 ui/jinja_filters.py:349
+#: bp/start/templates/start/s_macros.html:63 ui/jinja_filters.py:350
 msgid "Accepted"
 msgstr "Hyväksytty"
 
@@ -2976,7 +2994,7 @@ msgid "Returned to researcher with comments"
 msgstr "Palautettu tutkijalle kommentein"
 
 #: bp/scene/templates/scene/details_batch.html:136
-#: bp/start/templates/start/s_macros.html:65 ui/jinja_filters.py:350
+#: bp/start/templates/start/s_macros.html:65 ui/jinja_filters.py:351
 msgid "Rejected"
 msgstr "Hylätty"
 
@@ -3030,107 +3048,115 @@ msgstr "Rooli"
 msgid "List of families"
 msgstr "Perheluettelo"
 
-#: bp/scene/templates/scene/families.html:35
+#: bp/scene/templates/scene/families.html:37
 msgid "List of Families"
 msgstr "Perheluettelo"
 
-#: bp/scene/templates/scene/families.html:45
+#: bp/scene/templates/scene/families.html:47
 #, python-format
 msgid "Displaying %(num)s distinct families"
 msgstr "Näytetään %(num)s perhettä"
 
-#: bp/scene/templates/scene/families.html:47
+#: bp/scene/templates/scene/families.html:49
 #: bp/scene/templates/scene/medias.html:30
-#: bp/scene/templates/scene/persons_list.html:28
-#: bp/scene/templates/scene/places.html:29
+#: bp/scene/templates/scene/persons_list.html:29
+#: bp/scene/templates/scene/places.html:35
 msgid "from begin"
 msgstr "alusta"
 
-#: bp/scene/templates/scene/families.html:48
+#: bp/scene/templates/scene/families.html:50
 #: bp/scene/templates/scene/medias.html:31
-#: bp/scene/templates/scene/persons_list.html:27
-#: bp/scene/templates/scene/places.html:30
+#: bp/scene/templates/scene/persons_list.html:28
+#: bp/scene/templates/scene/places.html:36
 #, python-format
 msgid "starting <tt>%(name)s</tt>"
 msgstr "alkaen <tt>%(name)s</tt>"
 
-#: bp/scene/templates/scene/families.html:51
+#: bp/scene/templates/scene/families.html:53
 msgid "ordered by man's name"
 msgstr "järjestettynä miehen nimen mukaan"
 
-#: bp/scene/templates/scene/families.html:52
+#: bp/scene/templates/scene/families.html:54
 msgid "ordered by wife's name"
 msgstr "järjestettynä vaimon nimen mukaan"
 
-#: bp/scene/templates/scene/families.html:61
-#: bp/scene/templates/scene/families.html:73
+#: bp/scene/templates/scene/families.html:63
+#: bp/scene/templates/scene/families.html:75
 #: bp/scene/templates/scene/medias.html:39
-#: bp/scene/templates/scene/persons_list.html:44
-#: bp/scene/templates/scene/places.html:38
+#: bp/scene/templates/scene/persons_list.html:45
+#: bp/scene/templates/scene/places.html:44
 msgid "Go to"
 msgstr "Siirry"
 
-#: bp/scene/templates/scene/families.html:61
-#: bp/scene/templates/scene/families.html:93 ui/jinja_filters.py:137
+#: bp/scene/templates/scene/families.html:63
+#: bp/scene/templates/scene/families.html:95 ui/jinja_filters.py:137
 msgid "Father"
 msgstr "Mies"
 
-#: bp/scene/templates/scene/families.html:63
-#: bp/scene/templates/scene/families.html:75
-#: bp/scene/templates/scene/persons_list.html:46
+#: bp/scene/templates/scene/families.html:65
+#: bp/scene/templates/scene/families.html:77
+#: bp/scene/templates/scene/persons_list.html:47
 msgid "Starting letters of surname"
 msgstr "Sukunimen alku"
 
-#: bp/scene/templates/scene/families.html:64
-#: bp/scene/templates/scene/families.html:76
-#: bp/scene/templates/scene/persons_list.html:47
+#: bp/scene/templates/scene/families.html:66
+#: bp/scene/templates/scene/families.html:78
+#: bp/scene/templates/scene/persons_list.html:48
 #: bp/scene/templates/scene/persons_search.html:91
 msgid "Surname"
 msgstr "Sukunimi"
 
-#: bp/scene/templates/scene/families.html:73
-#: bp/scene/templates/scene/families.html:99 ui/jinja_filters.py:143
+#: bp/scene/templates/scene/families.html:75
+#: bp/scene/templates/scene/families.html:114 ui/jinja_filters.py:143
 msgid "Mother"
 msgstr "Vaimo"
 
-#: bp/scene/templates/scene/families.html:90
-#: bp/scene/templates/scene/persons_list.html:61
+#: bp/scene/templates/scene/families.html:92
+#: bp/scene/templates/scene/persons_list.html:62
 msgid "Top of page"
 msgstr "Sivun yläreunaan"
 
-#: bp/scene/templates/scene/families.html:119
+#: bp/scene/templates/scene/families.html:102
+#: bp/scene/templates/scene/families.html:104
+#: bp/scene/templates/scene/families.html:121
+#: bp/scene/templates/scene/families.html:123
+#: bp/scene/templates/scene/medias.html:61
+#: bp/scene/templates/scene/medias.html:63
+#: bp/scene/templates/scene/person_search_result.html:7
+#: bp/scene/templates/scene/persons_list.html:67
+#: bp/scene/templates/scene/places.html:65
+#: bp/scene/templates/scene/places.html:66
+#: bp/scene/templates/scene/sources.html:44
+msgid "Alphabetical Menu"
+msgstr "Aakkosvalikko"
+
+#: bp/scene/templates/scene/families.html:158
 msgid "Go to family page"
 msgstr "Siirry perhesivulle"
 
-#: bp/scene/templates/scene/families.html:125
-#: bp/scene/templates/scene/medias.html:77
-#: bp/scene/templates/scene/persons_list.html:104
-msgid "Gedcom ID"
-msgstr "Alkuperäinen tunniste"
-
-#: bp/scene/templates/scene/families.html:144
-#: bp/scene/templates/scene/families.html:147
+#: bp/scene/templates/scene/families.html:182
+#: bp/scene/templates/scene/families.html:185
 #, python-format
 msgid "%(num)d child"
 msgid_plural "%(num)d children"
 msgstr[0] "lapsi"
 msgstr[1] "%(num)d lasta"
 
-#: bp/scene/templates/scene/families.html:145
-#: bp/scene/templates/scene/family.html:116
+#: bp/scene/templates/scene/families.html:183
+#: bp/scene/templates/scene/family.html:114
 #, python-format
 msgid "one hidden"
 msgid_plural "%(num)d hidden"
 msgstr[0] "yksi piilotettu"
 msgstr[1] "%(num)d piilotettua"
 
-#: bp/scene/templates/scene/families.html:158
+#: bp/scene/templates/scene/families.html:196
 #, python-format
 msgid "No family found with search keys starting \"%(name)s\""
 msgstr "Ei löytynyt perhettä \"%(name)s\"-alkusella hakusanalla"
 
-#: bp/scene/templates/scene/families.html:160
-#: bp/scene/templates/scene/persons_list.html:146
+#: bp/scene/templates/scene/families.html:198
+#: bp/scene/templates/scene/persons_list.html:145
 msgid "Go to the first person"
 msgstr "Siirry listan ensimmäiseen henkilöön"
 
@@ -3147,14 +3173,14 @@ msgstr "Parisuhde"
 msgid "Family Events"
 msgstr "Perheen tapahtumat"
 
-#: bp/scene/templates/scene/family.html:84
+#: bp/scene/templates/scene/family.html:82
 #: bp/scene/templates/scene/place.html:127
 #: bp/scene/templates/scene/source_events.html:101
 #: templates/cite_sour_repo.html:29
 msgid "Page"
 msgstr "Sivu"
 
-#: bp/scene/templates/scene/family.html:88
+#: bp/scene/templates/scene/family.html:86
 #: bp/scene/templates/scene/source_events.html:34
 msgid "in the repository"
 msgstr "arkistossa"
@@ -3166,6 +3192,7 @@ msgstr "Etsi henkilöitä"
 #: bp/scene/templates/scene/macros.html:48
 #: bp/scene/templates/scene/persons_search.html:3
 #: bp/scene/templates/scene/persons_search.html:35
+#: bp/scene/templates/scene/persons_search.html:123
 msgid "Search"
 msgstr "Haku"
 
@@ -3174,7 +3201,7 @@ msgid "Person list by default name"
 msgstr "Oletusnimen mukainen henkilöluettelo"
 
 #: bp/scene/templates/scene/macros.html:55
-#: bp/scene/templates/scene/persons_list.html:14
+#: bp/scene/templates/scene/persons_list.html:15
 msgid "Persons"
 msgstr "Henkilöt"
 
@@ -3214,54 +3241,54 @@ msgstr "ei seuraavaa sivua"
 msgid "next page starting"
 msgstr "seuraava sivu alkaen"
 
-#: bp/scene/templates/scene/macros.html:146
+#: bp/scene/templates/scene/macros.html:153
 msgid "latest change time and contributor"
 msgstr "viimeisin muutoshetki ja alkuperäisen tiedon antaja"
 
-#: bp/scene/templates/scene/macros.html:148
+#: bp/scene/templates/scene/macros.html:155
 msgid "edited"
 msgstr "muokattu"
 
-#: bp/scene/templates/scene/macros.html:151
+#: bp/scene/templates/scene/macros.html:158
 msgid "origin from"
 msgstr "alkuperä"
 
-#: bp/scene/templates/scene/macros.html:151
+#: bp/scene/templates/scene/macros.html:158
 msgid ", material"
 msgstr ", aineisto"
 
-#: bp/scene/templates/scene/macros.html:152
+#: bp/scene/templates/scene/macros.html:159
 #: bp/stat/templates/stat/layout.html:43
 msgid "User data"
 msgstr "Omia tietoja"
 
-#: bp/scene/templates/scene/macros.html:164
+#: bp/scene/templates/scene/macros.html:171
 #, python-format
 msgid ", origin from material batch %(root)s"
 msgstr ", alkuperäinen aineisto %(root)s"
 
-#: bp/scene/templates/scene/macros.html:233
+#: bp/scene/templates/scene/macros.html:239
 msgid "See Person's Details"
 msgstr "katso henkilön tiedot"
 
 #: bp/scene/templates/scene/hx-person/famtree.html:40
-#: bp/scene/templates/scene/macros.html:240
+#: bp/scene/templates/scene/macros.html:246
 msgid "self"
 msgstr "itse"
 
-#: bp/scene/templates/scene/macros.html:246
+#: bp/scene/templates/scene/macros.html:252
 msgid "Anonymous"
 msgstr "nimetön"
 
-#: bp/scene/templates/scene/macros.html:263
+#: bp/scene/templates/scene/macros.html:269
 msgid "born"
 msgstr "s."
 
-#: bp/scene/templates/scene/macros.html:265
+#: bp/scene/templates/scene/macros.html:271
 msgid "died"
 msgstr "k."
 
-#: bp/scene/templates/scene/macros.html:349
+#: bp/scene/templates/scene/macros.html:355
 msgid "Copy to clipboard"
 msgstr "Kopioi leikepöydälle"
 
@@ -3270,7 +3297,7 @@ msgid "Media data"
 msgstr "Median perustiedot"
 
 #: bp/scene/templates/scene/media.html:58
-#: bp/scene/templates/scene/medias.html:65
+#: bp/scene/templates/scene/medias.html:76
 msgid "Picture"
 msgstr "Kuva"
 
@@ -3290,8 +3317,8 @@ msgid "Show fullscreen"
 msgstr "Näytä suurena"
 
 #: bp/scene/templates/scene/media.html:96
-#: bp/scene/templates/scene/medias.html:66
-#: bp/scene/templates/scene/places.html:72
+#: bp/scene/templates/scene/medias.html:77
+#: bp/scene/templates/scene/places.html:78
 #: bp/scene/templates/scene/sources.html:55 templates/cite_sour_repo.html:25
 msgid "References"
 msgstr "Viittauksia"
@@ -3340,37 +3367,37 @@ msgid "First letters of media"
 msgstr "Median alkukirjaimet"
 
 #: bp/scene/templates/scene/medias.html:42
-#: bp/scene/templates/scene/medias.html:64
+#: bp/scene/templates/scene/medias.html:75
 #: bp/scene/templates/scene/place.html:187
 msgid "Title"
 msgstr "Otsikko"
 
-#: bp/scene/templates/scene/medias.html:68
+#: bp/scene/templates/scene/medias.html:79
 msgid "User Batch"
 msgstr "Tutkijan aineisto"
 
-#: bp/scene/templates/scene/medias.html:82
-#: bp/scene/templates/scene/medias.html:85
+#: bp/scene/templates/scene/medias.html:97
+#: bp/scene/templates/scene/medias.html:100
 #: bp/scene/templates/scene/place.html:195
 msgid "Go to media page"
 msgstr "Siirry mediasivulle"
 
-#: bp/scene/templates/scene/medias.html:83
+#: bp/scene/templates/scene/medias.html:98
 #: bp/scene/templates/scene/person.html:90
 #: bp/scene/templates/scene/person.html:93
 #: bp/scene/templates/scene/person.html:345
 #: bp/scene/templates/scene/place.html:188
-#: bp/scene/templates/scene/place.html:198 ui/jinja_filters.py:211
+#: bp/scene/templates/scene/place.html:198 ui/jinja_filters.py:212
 msgid "Photo"
 msgstr "kuva"
 
-#: bp/scene/templates/scene/medias.html:109
-msgid "Go to the first media"
-msgstr "Siirry ensimmäiseen mediaan"
-
-#: bp/scene/templates/scene/medias.html:111
+#: bp/scene/templates/scene/medias.html:122
 msgid "No medias found"
 msgstr "Ei medioita"
+
+#: bp/scene/templates/scene/medias.html:126
+msgid "Go to the first media"
+msgstr "Siirry ensimmäiseen mediaan"
 
 #: bp/scene/templates/scene/most_common.html:1
 #: bp/scene/templates/scene/persons_search.html:73
@@ -3386,7 +3413,7 @@ msgstr "Ei henkilönimiä"
 msgid "No places"
 msgstr "Ei paikkoja"
 
-#: bp/scene/templates/scene/note_search_result.html:63
+#: bp/scene/templates/scene/note_search_result.html:64
 msgid "No results"
 msgstr "Ei tuloksia"
 
@@ -3396,8 +3423,8 @@ msgstr "Henkilön tiedot"
 
 #: bp/scene/templates/scene/person.html:102
 #: bp/scene/templates/scene/person_search_result.html:3
-#: bp/scene/templates/scene/place.html:61
-#: bp/scene/templates/scene/places.html:53
+#: bp/scene/templates/scene/place.html:62
+#: bp/scene/templates/scene/places.html:59
 #: bp/scene/templates/scene/sources.html:40
 msgid "Top"
 msgstr "Ylös"
@@ -3516,14 +3543,6 @@ msgstr "Henkilön lisätietoja"
 msgid "Source references"
 msgstr "Lähdeviitteet"
 
-#: bp/scene/templates/scene/person_search_result.html:7
-#: bp/scene/templates/scene/persons_list.html:66
-#: bp/scene/templates/scene/places.html:59
-#: bp/scene/templates/scene/places.html:60
-#: bp/scene/templates/scene/sources.html:44
-msgid "Alphabetical Menu"
-msgstr "Aakkosvalikko"
-
 #: bp/scene/templates/scene/person_search_result.html:18
 msgid "Person's events"
 msgstr "Henkilön tapahtumat"
@@ -3540,12 +3559,12 @@ msgstr "Liian tuore näytettäväksi muille!"
 msgid "List of persons"
 msgstr "henkilöluettelo"
 
-#: bp/scene/templates/scene/persons_list.html:25
+#: bp/scene/templates/scene/persons_list.html:26
 #, python-format
 msgid "Displaying %(num)s distinct persons"
 msgstr "Näytetään %(num)s eri henkilöä"
 
-#: bp/scene/templates/scene/persons_list.html:32
+#: bp/scene/templates/scene/persons_list.html:33
 #: bp/scene/templates/scene/persons_search.html:64
 #, python-format
 msgid "%(num)s person hidden because of privacy protection"
@@ -3553,12 +3572,12 @@ msgid_plural "%(num)s people hidden because of privacy protection"
 msgstr[0] "%(num)s mahdollisesti elävä henkilö poistettu"
 msgstr[1] "%(num)s mahdollisesti elävää henkilöä poistettu"
 
-#: bp/scene/templates/scene/persons_list.html:144
+#: bp/scene/templates/scene/persons_list.html:143
 #, python-format
 msgid "No one found with search keys starting \"%(name)s\""
 msgstr "Ketään ei löytynyt nimestä \"%(name)s\" eteenpäin"
 
-#: bp/scene/templates/scene/persons_list.html:166
+#: bp/scene/templates/scene/persons_list.html:165
 msgid "See family"
 msgstr "Katso perhe"
 
@@ -3658,24 +3677,24 @@ msgstr "Ketään ei löytynyt hakutiedoilla"
 msgid "Place Details"
 msgstr "Paikan tiedot"
 
-#: bp/scene/templates/scene/place.html:41
+#: bp/scene/templates/scene/place.html:43
 msgid "Invalid coordinates"
 msgstr "Virheelliset koordinaatit"
 
-#: bp/scene/templates/scene/place.html:42
+#: bp/scene/templates/scene/place.html:43
 msgid "should be in decimal format"
 msgstr "pitäisi olla desimaalimuodossa"
 
-#: bp/scene/templates/scene/place.html:53
+#: bp/scene/templates/scene/place.html:54
 msgid "OpenStreetMap on a larger scale"
 msgstr "OpenstreetMap uudella sivulla"
 
-#: bp/scene/templates/scene/place.html:55
+#: bp/scene/templates/scene/place.html:56
 msgid "on Google Map"
 msgstr "Google-kartta uudella sivulla"
 
-#: bp/scene/templates/scene/place.html:56
-#: bp/scene/templates/scene/places.html:71
+#: bp/scene/templates/scene/place.html:57
+#: bp/scene/templates/scene/places.html:77
 msgid "Location"
 msgstr "Sijainti"
 
@@ -3695,29 +3714,29 @@ msgstr "Ei tapahtumia"
 msgid "The required place was not found."
 msgstr "Pyydettyä paikkaa ei löydy!"
 
-#: bp/scene/templates/scene/places.html:18
+#: bp/scene/templates/scene/places.html:24
 msgid "Places List"
 msgstr "Paikat"
 
-#: bp/scene/templates/scene/places.html:27
+#: bp/scene/templates/scene/places.html:33
 #, python-format
 msgid "Displaying %(num)s distinct places"
 msgstr "Näytetään %(num)s paikkaa"
 
-#: bp/scene/templates/scene/places.html:40
+#: bp/scene/templates/scene/places.html:46
 msgid "Starting letters of place"
 msgstr "Paikan alkukirjain"
 
-#: bp/scene/templates/scene/places.html:70
+#: bp/scene/templates/scene/places.html:76
 msgid "Location, related places"
 msgstr "Paikka, liittyvät paikat"
 
-#: bp/scene/templates/scene/places.html:91
+#: bp/scene/templates/scene/places.html:97
 #, python-format
 msgid "No references to place %(title)s"
 msgstr "Paikkaan ei ole viittauksia: %(title)s"
 
-#: bp/scene/templates/scene/places.html:125
+#: bp/scene/templates/scene/places.html:131
 msgid "No places found"
 msgstr "Ei paikkoja"
 
@@ -4193,37 +4212,56 @@ msgstr "Käsittelemme pyyntösi ja lähetämme pian lisäohjeita sähköpostilla
 msgid "Go to main page"
 msgstr "Etusivulle"
 
-#: bp/stat/templates/stat/appstat.html:79
+#: bp/stat/templates/stat/appstat.html:49
+#: bp/stat/templates/stat/appstat.html:76
+#: bp/stat/templates/stat/appstat.html:104
 msgid "Methods:"
 msgstr "Palvelut:"
 
-#: bp/stat/templates/stat/appstat.html:81
-msgid "regexp(s) to match messages/methods"
-msgstr "Python säännöllinen lauseke sanomien hakuun"
+#: bp/stat/templates/stat/appstat.html:51
+msgid "date"
+msgstr "ajalta"
 
-#: bp/stat/templates/stat/appstat.html:85
+#: bp/stat/templates/stat/appstat.html:53
+#: bp/stat/templates/stat/appstat.html:82
 msgid "Users:"
 msgstr "Käyttäjät:"
 
-#: bp/stat/templates/stat/appstat.html:87
-msgid "regexp(s) to match users"
-msgstr "käyttäjien rajaus (reg.expression)"
+#: bp/stat/templates/stat/appstat.html:60
+msgid "daily"
+msgstr "päivittäin"
 
-#: bp/stat/templates/stat/appstat.html:91
+#: bp/stat/templates/stat/appstat.html:62
+msgid "weekly"
+msgstr "viikoittain"
+
+#: bp/stat/templates/stat/appstat.html:64
+msgid "monthly"
+msgstr "kuukausittain"
+
+#: bp/stat/templates/stat/appstat.html:78
+msgid "regexp(s) to match messages/methods"
+msgstr "Python säännöllinen lauseke sanomien hakuun"
+
+#: bp/stat/templates/stat/appstat.html:84
+msgid "Users separated by commas"
+msgstr "Käyttäjätunnukset pilkuin erotettuina"
+
+#: bp/stat/templates/stat/appstat.html:88
 #: bp/stat/templates/stat/uploadstat.html:17
 msgid "How many:"
 msgstr "Lukumäärä:"
 
-#: bp/stat/templates/stat/appstat.html:93
+#: bp/stat/templates/stat/appstat.html:90
 #: bp/stat/templates/stat/uploadstat.html:19
 msgid "How many at most?"
 msgstr "Maksimimäärä"
 
-#: bp/stat/templates/stat/appstat.html:96
+#: bp/stat/templates/stat/appstat.html:94
 msgid "Sort by count:"
 msgstr "Osumamäärän mukaisessa järjestyksessä"
 
-#: bp/stat/templates/stat/appstat.html:98
+#: bp/stat/templates/stat/appstat.html:96
 #: bp/stat/templates/stat/uploadstat.html:39
 msgid "Sort by count or by text?"
 msgstr "Nimen tai määrän mukaan lajiteltuna?"
@@ -4431,7 +4469,7 @@ msgstr "Salasanasi on nollattu"
 msgid "You can confirm your email through the link below:"
 msgstr "Vahvista tunnuksesi klikkaamalla alla olevaa linkkiä:"
 
-#: pe/neo4j/updateservice.py:1562
+#: pe/neo4j/updateservice.py:1577
 msgid "Could not save a comment"
 msgstr "Kommentin tallettaminen ei onnistunut"
 
@@ -4882,7 +4920,9 @@ msgstr "Seuran jäsen"
 
 #: ui/jinja_filters.py:37
 msgid "descr_research"
-msgstr "Tutkija, joka voi käsitellä ja lähettää tarkastettavaksi omia aineistojaan sekä selata hyväksyttyjä"
+msgstr ""
+"Tutkija, joka voi käsitellä ja lähettää tarkastettavaksi omia "
+"aineistojaan sekä selata hyväksyttyjä"
 
 #: ui/jinja_filters.py:37
 msgid "descr_to_be_approved"
@@ -4920,7 +4960,7 @@ msgstr "taiteilijanimi"
 msgid "Changed Name"
 msgstr "muutettu nimi"
 
-#: ui/jinja_filters.py:78 ui/jinja_filters.py:199
+#: ui/jinja_filters.py:78 ui/jinja_filters.py:200
 msgid "Unknown type"
 msgstr "tuntematon tyyppi"
 
@@ -5144,7 +5184,7 @@ msgstr "vihkijä"
 msgid "Defendant"
 msgstr "vastaaja"
 
-#: ui/jinja_filters.py:157 ui/jinja_filters.py:213 ui/jinja_filters.py:261
+#: ui/jinja_filters.py:157 ui/jinja_filters.py:214 ui/jinja_filters.py:262
 msgid "Unknown"
 msgstr "tuntematon"
 
@@ -5240,395 +5280,395 @@ msgstr "albumi"
 msgid "Archive"
 msgstr "arkisto"
 
-#: ui/jinja_filters.py:197
-msgid "Collection"
-msgstr "kokoelma"
-
-#: ui/jinja_filters.py:198
-msgid "Library"
-msgstr "kirjasto"
-
-#: ui/jinja_filters.py:200
-msgid "Web site"
-msgstr "nettisivu"
-
-#: ui/jinja_filters.py:205
-msgid "Document"
-msgstr "asiakirja"
-
-#: ui/jinja_filters.py:206
-msgid "Book"
-msgstr "kirja"
-
-#: ui/jinja_filters.py:207
-msgid "Electronic"
-msgstr "sähköinen"
-
-#: ui/jinja_filters.py:208
-msgid "Magazine"
-msgstr "aikakauslehti"
-
-#: ui/jinja_filters.py:209
-msgid "Manuscript"
-msgstr "käsikirjoitus"
-
-#: ui/jinja_filters.py:210
-msgid "Newspaper"
-msgstr "lehti"
-
-#: ui/jinja_filters.py:212
-msgid "Tombstone"
-msgstr "hautakivi"
-
-#: ui/jinja_filters.py:218 ui/jinja_filters.py:249
-msgid "Region"
-msgstr "alue"
-
-#: ui/jinja_filters.py:219
-msgid "Vessel"
-msgstr "alus"
-
-#: ui/jinja_filters.py:220
-msgid "Borough"
-msgstr "kaupunginosa"
-
-#: ui/jinja_filters.py:221
-msgid "Building"
-msgstr "rakennus"
-
-#: ui/jinja_filters.py:222
+#: ui/jinja_filters.py:197 ui/jinja_filters.py:223
 msgid "Church"
 msgstr "kirkko"
 
-#: ui/jinja_filters.py:223
+#: ui/jinja_filters.py:198
+msgid "Collection"
+msgstr "kokoelma"
+
+#: ui/jinja_filters.py:199
+msgid "Library"
+msgstr "kirjasto"
+
+#: ui/jinja_filters.py:201
+msgid "Web site"
+msgstr "nettisivu"
+
+#: ui/jinja_filters.py:206
+msgid "Document"
+msgstr "asiakirja"
+
+#: ui/jinja_filters.py:207
+msgid "Book"
+msgstr "kirja"
+
+#: ui/jinja_filters.py:208
+msgid "Electronic"
+msgstr "sähköinen"
+
+#: ui/jinja_filters.py:209
+msgid "Magazine"
+msgstr "aikakauslehti"
+
+#: ui/jinja_filters.py:210
+msgid "Manuscript"
+msgstr "käsikirjoitus"
+
+#: ui/jinja_filters.py:211
+msgid "Newspaper"
+msgstr "lehti"
+
+#: ui/jinja_filters.py:213
+msgid "Tombstone"
+msgstr "hautakivi"
+
+#: ui/jinja_filters.py:219 ui/jinja_filters.py:250
+msgid "Region"
+msgstr "alue"
+
+#: ui/jinja_filters.py:220
+msgid "Vessel"
+msgstr "alus"
+
+#: ui/jinja_filters.py:221
+msgid "Borough"
+msgstr "kaupunginosa"
+
+#: ui/jinja_filters.py:222
+msgid "Building"
+msgstr "rakennus"
+
+#: ui/jinja_filters.py:224
 msgid "City"
 msgstr "paikkakunta"
 
-#: ui/jinja_filters.py:224
+#: ui/jinja_filters.py:225
 msgid "Country"
 msgstr "maa"
 
-#: ui/jinja_filters.py:225
+#: ui/jinja_filters.py:226
 msgid "Department"
 msgstr "osasto"
 
-#: ui/jinja_filters.py:226
+#: ui/jinja_filters.py:227
 msgid "District"
 msgstr "lääni"
 
-#: ui/jinja_filters.py:227 ui/jinja_filters.py:228 ui/jinja_filters.py:255
+#: ui/jinja_filters.py:228 ui/jinja_filters.py:229 ui/jinja_filters.py:256
 msgid "Farm"
 msgstr "maatila"
 
-#: ui/jinja_filters.py:229
+#: ui/jinja_filters.py:230
 msgid "Hamlet"
 msgstr "taloryhmä"
 
-#: ui/jinja_filters.py:230
+#: ui/jinja_filters.py:231
 msgid "Burial Site"
 msgstr "hautapaikka"
 
-#: ui/jinja_filters.py:231
+#: ui/jinja_filters.py:232
 msgid "Cemetery"
 msgstr "hautausmaa"
 
-#: ui/jinja_filters.py:232
+#: ui/jinja_filters.py:233
 msgid "Chapel Parish"
 msgstr "kappeliseurakunta"
 
-#: ui/jinja_filters.py:233
+#: ui/jinja_filters.py:234
 msgid "Mansion"
 msgstr "kartano"
 
-#: ui/jinja_filters.py:234
+#: ui/jinja_filters.py:235
 msgid "Denomination"
 msgstr "kirkkokunta"
 
-#: ui/jinja_filters.py:235
+#: ui/jinja_filters.py:236
 msgid "Street Address"
 msgstr "katuosoite"
 
-#: ui/jinja_filters.py:236
+#: ui/jinja_filters.py:237
 msgid "Block"
 msgstr "kortteli"
 
-#: ui/jinja_filters.py:237
+#: ui/jinja_filters.py:238
 msgid "Kuntakeskus"
 msgstr "kuntakeskus"
 
-#: ui/jinja_filters.py:238
+#: ui/jinja_filters.py:239
 msgid "Governorate"
 msgstr "kuvernementti"
 
-#: ui/jinja_filters.py:239
+#: ui/jinja_filters.py:240
 msgid "Institute"
 msgstr "laitos"
 
-#: ui/jinja_filters.py:240
+#: ui/jinja_filters.py:241
 msgid "Fortress"
 msgstr "linnoitus"
 
-#: ui/jinja_filters.py:241
+#: ui/jinja_filters.py:242
 msgid "Locality"
 msgstr "kulmakunta"
 
-#: ui/jinja_filters.py:242
+#: ui/jinja_filters.py:243
 msgid "Natural Place"
 msgstr "luonnonpaikka"
 
-#: ui/jinja_filters.py:243
+#: ui/jinja_filters.py:244
 msgid "Municipality"
 msgstr "kunta"
 
-#: ui/jinja_filters.py:244
+#: ui/jinja_filters.py:245
 msgid "Neighborhood"
 msgstr "kulmakunta"
 
-#: ui/jinja_filters.py:245
+#: ui/jinja_filters.py:246
 msgid "Learning Institution"
 msgstr "oppilaitos"
 
-#: ui/jinja_filters.py:246
+#: ui/jinja_filters.py:247
 msgid "Organization"
 msgstr "organisaatio"
 
-#: ui/jinja_filters.py:247 ui/jinja_filters.py:250
+#: ui/jinja_filters.py:248 ui/jinja_filters.py:251
 msgid "Parish"
 msgstr "seurakunta"
 
-#: ui/jinja_filters.py:248
+#: ui/jinja_filters.py:249
 msgid "Province"
 msgstr "provinssi"
 
-#: ui/jinja_filters.py:251
+#: ui/jinja_filters.py:252
 msgid "Hospital"
 msgstr "sairaala"
 
-#: ui/jinja_filters.py:252
+#: ui/jinja_filters.py:253
 msgid "State"
 msgstr "osavaltio"
 
-#: ui/jinja_filters.py:253
+#: ui/jinja_filters.py:254
 msgid "Street"
 msgstr "katu"
 
-#: ui/jinja_filters.py:254
+#: ui/jinja_filters.py:255
 msgid "Seat Farm"
 msgstr "säteri"
 
-#: ui/jinja_filters.py:256
+#: ui/jinja_filters.py:257
 msgid "Tontti"
 msgstr "tontti"
 
-#: ui/jinja_filters.py:257
+#: ui/jinja_filters.py:258
 msgid "Torppa"
 msgstr "torppa"
 
-#: ui/jinja_filters.py:258
+#: ui/jinja_filters.py:259
 msgid "Town"
 msgstr "kaupunki"
 
-#: ui/jinja_filters.py:259
+#: ui/jinja_filters.py:260
 msgid "Village"
 msgstr "kylä"
 
-#: ui/jinja_filters.py:260
+#: ui/jinja_filters.py:261
 msgid "Company"
 msgstr "yritys"
 
-#: ui/jinja_filters.py:266 ui/jinja_filters.py:296
+#: ui/jinja_filters.py:267 ui/jinja_filters.py:297
 msgid "in the region"
 msgstr "alueella"
 
-#: ui/jinja_filters.py:267
+#: ui/jinja_filters.py:268
 msgid "on vessel"
 msgstr "aluksella"
 
-#: ui/jinja_filters.py:268
+#: ui/jinja_filters.py:269
 msgid "in the borough of"
 msgstr "kaupunginosassa"
 
-#: ui/jinja_filters.py:269
+#: ui/jinja_filters.py:270
 msgid "in the building of"
 msgstr "rakennuksessa"
 
-#: ui/jinja_filters.py:270
+#: ui/jinja_filters.py:271
 msgid "in the church"
 msgstr "kirkossa"
 
-#: ui/jinja_filters.py:271
+#: ui/jinja_filters.py:272
 msgid "in the City"
 msgstr "paikkakunnalla"
 
-#: ui/jinja_filters.py:272
+#: ui/jinja_filters.py:273
 msgid "in the country of"
 msgstr "maassa"
 
-#: ui/jinja_filters.py:273
+#: ui/jinja_filters.py:274
 msgid "in the department of"
 msgstr "osastossa"
 
-#: ui/jinja_filters.py:274
+#: ui/jinja_filters.py:275
 msgid "in the district of"
 msgstr "läänissä"
 
-#: ui/jinja_filters.py:275
+#: ui/jinja_filters.py:276
 msgid "in the farm of"
 msgstr "maatilalla"
 
-#: ui/jinja_filters.py:276
+#: ui/jinja_filters.py:277
 msgid "in the hamlet of"
 msgstr "mökissä"
 
-#: ui/jinja_filters.py:277
+#: ui/jinja_filters.py:278
 msgid "in a burial site of"
 msgstr "hautapaikassa"
 
-#: ui/jinja_filters.py:278
+#: ui/jinja_filters.py:279
 msgid "in the cemetery"
 msgstr "hautausmaalla"
 
-#: ui/jinja_filters.py:279
+#: ui/jinja_filters.py:280
 msgid "in chapel parish"
 msgstr "kappeliseurakunnassa"
 
-#: ui/jinja_filters.py:280
+#: ui/jinja_filters.py:281
 msgid "in the mansion of"
 msgstr "kartanossa"
 
-#: ui/jinja_filters.py:281
+#: ui/jinja_filters.py:282
 msgid "in the denomination of"
 msgstr "kirkkokunnassa"
 
-#: ui/jinja_filters.py:282
+#: ui/jinja_filters.py:283
 msgid "at street address"
 msgstr "katuosoitteessa"
 
-#: ui/jinja_filters.py:283
+#: ui/jinja_filters.py:284
 msgid "in the block"
 msgstr "korttelissa"
 
-#: ui/jinja_filters.py:284
+#: ui/jinja_filters.py:285
 msgid "Kuntakeskuksessa"
 msgstr "kuntakeskuksessa"
 
-#: ui/jinja_filters.py:285
+#: ui/jinja_filters.py:286
 msgid "in the governorate"
 msgstr "kuvernementissä"
 
-#: ui/jinja_filters.py:286
+#: ui/jinja_filters.py:287
 msgid "in the institute"
 msgstr "laitoksessa"
 
-#: ui/jinja_filters.py:287
+#: ui/jinja_filters.py:288
 msgid "in the fortress"
 msgstr "linnoituksessa"
 
-#: ui/jinja_filters.py:288
+#: ui/jinja_filters.py:289
 msgid "at locality of"
 msgstr "kulmakunnalla"
 
-#: ui/jinja_filters.py:289
+#: ui/jinja_filters.py:290
 msgid "in a natural place of"
 msgstr "luonnonpaikassa"
 
-#: ui/jinja_filters.py:290
+#: ui/jinja_filters.py:291
 msgid "in the municipality of"
 msgstr "paikkakunnalla"
 
-#: ui/jinja_filters.py:291
+#: ui/jinja_filters.py:292
 msgid "in the neighborhood of"
 msgstr "kulmakunnalla"
 
-#: ui/jinja_filters.py:292
+#: ui/jinja_filters.py:293
 msgid "in the learning lnstitution"
 msgstr "oppilaitoksessa"
 
-#: ui/jinja_filters.py:293
+#: ui/jinja_filters.py:294
 msgid "in the organization of"
 msgstr "organisaatiossa"
 
-#: ui/jinja_filters.py:294
+#: ui/jinja_filters.py:295
 msgid "in the parish"
 msgstr "seurakunnassa"
 
-#: ui/jinja_filters.py:295
+#: ui/jinja_filters.py:296
 msgid "int the province of"
 msgstr "provinssissa"
 
-#: ui/jinja_filters.py:297
+#: ui/jinja_filters.py:298
 msgid "at the hospital"
 msgstr "sairaalassa"
 
-#: ui/jinja_filters.py:298
+#: ui/jinja_filters.py:299
 msgid "in the parish of"
 msgstr "seurakunnassa"
 
-#: ui/jinja_filters.py:299
+#: ui/jinja_filters.py:300
 msgid "in the state"
 msgstr "osavaltiossa"
 
-#: ui/jinja_filters.py:300
+#: ui/jinja_filters.py:301
 msgid "on the street of"
 msgstr "kadulla"
 
-#: ui/jinja_filters.py:301
+#: ui/jinja_filters.py:302
 msgid "in seat farm"
 msgstr "säterissä"
 
-#: ui/jinja_filters.py:302 ui/jinja_filters.py:303
+#: ui/jinja_filters.py:303 ui/jinja_filters.py:304
 msgid "in the farm"
 msgstr "maatilalla"
 
-#: ui/jinja_filters.py:304
+#: ui/jinja_filters.py:305
 msgid "tontilla"
 msgstr "tontilla"
 
-#: ui/jinja_filters.py:305
+#: ui/jinja_filters.py:306
 msgid "in the town"
 msgstr "kaupungissa"
 
-#: ui/jinja_filters.py:306
+#: ui/jinja_filters.py:307
 msgid "in the village of"
 msgstr "kylässä"
 
-#: ui/jinja_filters.py:307
+#: ui/jinja_filters.py:308
 msgid "at the company"
 msgstr "yrityksessä"
 
-#: ui/jinja_filters.py:308
+#: ui/jinja_filters.py:309
 msgid "in a place of unknown type"
 msgstr "nimeämättömässä paikassa"
 
-#: ui/jinja_filters.py:319
+#: ui/jinja_filters.py:320
 msgid "Married"
 msgstr "Avioliitossa"
 
-#: ui/jinja_filters.py:320
+#: ui/jinja_filters.py:321
 msgid "Unknown relation"
 msgstr "Tuntematon suhde"
 
-#: ui/jinja_filters.py:334
+#: ui/jinja_filters.py:335
 msgid "Family Tree"
 msgstr "Sukupuu"
 
-#: ui/jinja_filters.py:335
+#: ui/jinja_filters.py:336
 msgid "Place Data"
 msgstr "Paikat"
 
-#: ui/jinja_filters.py:336
+#: ui/jinja_filters.py:337
 msgid "Hiski Tree"
 msgstr "Hiskipuut"
 
-#: ui/jinja_filters.py:351
+#: ui/jinja_filters.py:352
 msgid "Loading"
 msgstr "Menossa tietokantaan"
 
-#: ui/jinja_filters.py:352
+#: ui/jinja_filters.py:353
 msgid "Load Failed"
 msgstr "Lataus epäonnistui"
 
-#: ui/jinja_filters.py:382
+#: ui/jinja_filters.py:383
 msgid "Root"
 msgstr "aineisto"
 

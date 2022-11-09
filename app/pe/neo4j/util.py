@@ -18,8 +18,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # blacked 15.11.2021/JMä
-from pprint import pprint
-import string
+#from pprint import pprint
+#import string
 import base32_lib as base32
 from bl.base import IsotammiException
 from bl.material import Material
@@ -31,11 +31,11 @@ cypher_user_prefix = """
 """
 
 cypher_material_prefix = """
-    MATCH (root:Root {state:"Accepted", material:$material_type})
+    MATCH (root:Root {material:$material_type})
 """
 
 cypher_common_batch_prefix = """
-    MATCH (root:Root{state:"Accepted", material:$material_type, id:$batch_id})
+    MATCH (root:Root{material:$material_type, id:$batch_id})
 """
 
 cypher_user_batch_prefix = """
@@ -54,7 +54,7 @@ def run_cypher(session, cypher:str, username:str, material:Material, **kwargs):
     """
     Runs the given Cypher query returning only the appropriate/allowed objects.
 
-    1) if username is not None or empty, then return objects from all 
+    1) if username is given, then return objects from all 
        different materials that the user has access to
     2) if username is None or empty, the return objects only from the 
        Accepted material of type kwargs["material_type"]
@@ -69,7 +69,7 @@ def run_cypher(session, cypher:str, username:str, material:Material, **kwargs):
         # By username
         full_cypher = cypher_user_prefix + cypher
     else:
-        # By (state and) material type
+        # By material type
         full_cypher = cypher_material_prefix + cypher
         if not isinstance(material, Material):
             raise IsotammiException("pe.neo4j.util.run_cypher: invalid material")
@@ -101,7 +101,7 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
             # Single common material
             full_cypher = cypher_prefix + cypher_common_batch_prefix + cypher
         else:
-            # Materials by state and material_type
+            # Materials by material_type
             full_cypher = cypher_prefix + cypher_material_prefix + cypher
     else:
         # By username and batch_id
