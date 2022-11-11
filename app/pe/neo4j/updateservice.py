@@ -250,6 +250,27 @@ class Neo4jUpdateService(ConcreteService):
         uniq_id = result.single()[0]
         return {"status": Status.OK, "identity": uniq_id}
 
+    def ds_batch_purge_access(self, batch_id, auditor_user):
+        """Removes other auditors, if there are multiple auditors.
+           (Used to revert multi-auditor operations.)
+        """
+        result = self.tx.run(CypherRoot.batch_purge_access, 
+                             bid=batch_id, me=auditor_user)
+        # Return example {
+        #    user:"valta",
+        #    rel_id:113743
+        # }
+        removed = []
+        for record in result:
+            # {batch_id,me,my_rels,user,rtype,rel_id}
+            username = record.get("user")
+            rel_uniq_id = record.get("rel_id")
+            print("#Neo4jUpdateService.ds_batch_purge_access: removed "
+                  f"id={rel_uniq_id} DOES_AUDIT from {username}")
+            removed.append(username)
+
+        return {"status": Status.OK, "removed_auditors": removed}
+
     def ds_batch_purge_auditors(self, batch_id, auditor_user):
         """Removes other auditors, if there are multiple auditors.
            (Used to revert multi-auditor operations.)
@@ -274,6 +295,7 @@ class Neo4jUpdateService(ConcreteService):
             removed.append(username)
 
         return {"status": Status.OK, "removed_auditors": removed}
+
 
     def ds_batch_remove_auditor(self, batch_id, auditor_user, new_state):
         """Updates Root node and relation from UserProfile.

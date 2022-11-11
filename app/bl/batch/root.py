@@ -688,6 +688,19 @@ class Root(NodeObject):
         return msg, deleted
 
     @staticmethod
+    def remove_old_access(batch_id, username):
+        """ Schema fix: If auditor has HAS_ACCESS permission (with DOES_AUDIT), remove it.
+       """
+        with RootUpdater("update") as serv:
+            res = serv.purge_old_access(batch_id, username)
+            if res:
+                # Permission removed
+                msg = _("Removed excessive access '%(a)s' from batch %(b)s", a=username, b=batch_id)
+                return {"status":Status.UPDATED, "msg":msg}
+        # No removed access
+        return {"status":Status.OK}
+
+    @staticmethod
     def TODO_purge_auditors(batch_id, username):
         """ Schema fix: If there is multiple auditors, purge others but current
             (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT

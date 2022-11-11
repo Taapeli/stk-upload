@@ -2747,23 +2747,23 @@ msgstr "Lisätiedot"
 
 #: bp/gramps/templates/gramps/scripting.html:49
 msgid "Initial statements"
-msgstr ""
+msgstr "Aloituskäskyt"
 
 #: bp/gramps/templates/gramps/scripting.html:52
 msgid "Where"
-msgstr ""
+msgstr "Missä"
 
 #: bp/gramps/templates/gramps/scripting.html:55
 msgid "Statements to execute for each object"
-msgstr ""
+msgstr "Kullekin kohteelle suoritettavat käskyt"
 
 #: bp/gramps/templates/gramps/scripting.html:58
 msgid "Filter"
-msgstr ""
+msgstr "Suodin"
 
 #: bp/gramps/templates/gramps/scripting.html:61
 msgid "Expressions to display"
-msgstr ""
+msgstr "Näyttökäskyt"
 
 #: bp/gramps/templates/gramps/scripting.html:68
 msgid "Execute"

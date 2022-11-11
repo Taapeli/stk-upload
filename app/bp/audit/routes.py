@@ -295,7 +295,7 @@ def auditor_ops():
                 #TODO (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
                 res = serv.select_auditor(batch_id, user_audit)
                 msg = _("You are now an auditor for batch ") + batch_id
-                res = Root.TODO_purge_auditors(batch_id, user_audit)
+                res = Root.remove_old_access(batch_id, user_audit)
                 status = res.get("status")
                 if status == Status.UPDATED:
                         msg1 = res.get("msg")

@@ -100,6 +100,14 @@ WITH root,audi,collect(r) AS rel WHERE size(rel) = 0
     CREATE (audi) -[r:HAS_ACCESS]-> (root)
 RETURN ID(root) AS bid, ID(r) AS rel_id"""
 
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_access
+    batch_purge_access = """
+MATCH (root:Root {id: $bid})
+MATCH (audi:UserProfile {username: $audi})
+MATCH (audi) -[r:HAS_ACCESS]-> (root)
+DELETE r 
+RETURN ID(root) AS id"""
+
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
     batch_set_auditor = """
 MATCH (root:Root {id: $bid}) WHERE root.state IN $states

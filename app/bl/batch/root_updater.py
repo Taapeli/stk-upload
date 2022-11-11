@@ -140,13 +140,18 @@ class RootUpdater(DataService):
                                                     allowed_states)
         return res
 
-    def purge_other_auditors(self, batch_id, auditor_username):
-        """ Removes other auditors, if there are multiple auditors. 
-            (Used to revert multi-auditor operations.)
+    def purge_old_access(self, batch_id, auditor_username):
+        """ Removes old HAS_ACCESS permission.
+        
+            Returns 
+                - ID(Root), if removed
+                - None if no HAS_ACCESS found
         """
-        res = self.dataservice.ds_batch_purge_auditors(batch_id, 
+        res = self.dataservice.ds_batch_purge_access(batch_id, 
                                                        auditor_username)
-        return res
+        for record in res:
+            return record["id"]
+        return None
 
     def set_access(self, batch_id, auditor_username):
         """ Create HAS_ACCESS permission, if the user has not any previous access.
