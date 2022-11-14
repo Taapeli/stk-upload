@@ -31,6 +31,7 @@ from bl.base import IsotammiException #, Status
 from bp.admin import uploads
 from models import loadfile #, util, syslog
 from pe.dataservice import DataService
+from pe.neo4j.nodereaders import Root_from_node
 
 class RootUpdater(DataService):
     """
@@ -109,12 +110,12 @@ class RootUpdater(DataService):
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id (in BatchUpdater). """
-        from .root import Root,  Status
+        from .root import Status # ,Root
         try:
             ret = self.dataservice.ds_get_batch(user, batch_id)
             # returns {"status":Status.OK, "node":record}
             node = ret['node']
-            batch = Root.from_node(node)
+            batch = Root_from_node(node)
             return {"status":Status.OK, "item":batch}
         except Exception as e:
             statustext = (

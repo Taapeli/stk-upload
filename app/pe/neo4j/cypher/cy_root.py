@@ -315,16 +315,19 @@ class CypherAudit():
     '''
 
     get_my_audits = '''
-match (b:Root {state:'Auditing', auditor: $oper})
+match (u:UserProfile{username: $oper}) -[:DOES_AUDIT]-> (b:Root) // {state:'Auditing'})
 optional match (b) --> (x)
-return b, labels(x)[0] as label, count(x) as cnt 
-    order by b.user, b.id, label'''
+return u.username as user, b as batch, 
+    labels(x)[0] as label, count(x) as cnt 
+    order by user, batch, label'''
 
     get_all_audits = '''
-match (b:Root{state:'Auditing'})
+match (u:UserProfile) -[:HAS_LOADED]-> (b:Root{state:'Auditing'})
+optional match (au:UserProfile) -[:DOES_AUDIT]-> (b)
 optional match (b) --> (x)
-return b, labels(x)[0] as label, count(x) as cnt 
-    order by b.user, b.id, label'''
+return u.username as user, b as batch, au.username as auditor,
+    labels(x)[0] as label, count(x) as cnt 
+    order by auditor, user, batch, label'''
 
 # # TODO Batch/Audit->Root
 #     xxmerge_check = """

@@ -521,6 +521,16 @@ def refnames():
     """ Operations for reference names """
     return render_template("/audit/reference.html")
 
+# @bp.route("/audit/list/refnames")
+# def read_refnames():
+#     """ Obsolete: Reads all Refname objects for table display
+#         (n:Refname)-[r]->(m)
+#
+#     NOTE. Refname to basename relations do net exist any more (after 24.4.2020 
+#     """
+#     recs = Refname.get_refnames()
+#     #return (recs)
+#     return render_template("/audit/refnames_list.html", names=recs)
 
 @bp.route("/audit/set/refnames")
 @login_required

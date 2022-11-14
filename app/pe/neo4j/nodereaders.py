@@ -39,6 +39,7 @@ from bl.source import SourceBl
 from bl.person_name import Name
 
 
+
 def init(cls:NodeObject, node:Node):
     """
     Returns bl.NodeObject instance from a Neo4j.graph.node.
@@ -276,4 +277,30 @@ def SourceBl_from_node(node):
     s.spubinfo = node["spubinfo"]
     s.sabbrev = node.get("sabbrev", "")
     return s
+
+def Root_from_node(node):
+    """
+    Transforms a db node to Root object
+    """
+    from bl.batch.root import Root, DEFAULT_MATERIAL
+    from models.util import format_ms_timestamp
+
+    obj = init(Root, node)
+    obj.uniq_id = node.id
+    obj.user = node.get("user", "")
+    obj.file = node.get("file", None)
+    obj.id = node.get("id", None)
+    obj.state = node.get("state", "")
+    obj.mediapath = node.get("mediapath")
+    obj.timestamp = node.get("timestamp", 0)
+    obj.upload = format_ms_timestamp(obj.timestamp)
+    #obj.auditor = node.get("auditor", None)
+    obj.material_type = node.get("material", DEFAULT_MATERIAL)
+    obj.description = node.get("description", "")
+    obj.xmlname = node.get("xmlname", "")
+    obj.metaname = node.get("metaname", "")
+    obj.logname = node.get("logname", "")
+    obj.db_schema = node.get("db_schema", "")
+    return obj
+
 

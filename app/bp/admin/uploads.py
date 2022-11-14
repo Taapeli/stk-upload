@@ -326,7 +326,9 @@ def list_uploads(username:str) -> List[Upload]:
         #    person_count=64
         #    auditors=[["juha",1630474129763,None]]
         # >
-        b: Root = Root.from_node(record["root"])
+        from pe.neo4j.nodereaders import Root_from_node
+
+        b: Root = Root_from_node(record["root"])
         u_name = record["u_name"]
 
         # meta = get_meta(b)

@@ -128,14 +128,22 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
                        material_type=material.m_type,
                        **kwargs)
 
-def dict_root_node(root_node):
-    """ Create minimal root_dict from record["root"] """
+def dict_root_node(root_node, select="min"):
+    """ Create minimal root_dict from record["root"] 
     
-    return {'material': root_node["material"], 
+        TODO: Is this obsolete?
+    """
+
+    dic = {'material': root_node["material"], 
             'root_state': root_node["state"], 
             'root_user': root_node["user"], 
             'batch_id': root_node["id"]}
-
+    if select == "more":
+        dic["description"] = root_node["description"]
+        dic["timestamp"] = root_node["timestamp"]
+        dic["xmlname"] = root_node["xmlname"]
+        dic["state"] = root_node["state"]
+        dic["file"] = root_node["file"]
 
 
 class IsotammiId:

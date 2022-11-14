@@ -39,11 +39,12 @@ import shareds
 from bl.admin.models.cypher_adm import Cypher_adm
 from bl.base import Status, NodeObject
 from bl.material import Material
-
 from .root_updater import RootUpdater
+
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_root import CypherRoot, CypherAudit
 from pe.neo4j.util import run_cypher
+from pe.neo4j.nodereaders import Root_from_node
 
 DEFAULT_MATERIAL = "Family Tree"
 
@@ -227,6 +228,8 @@ class Root(NodeObject):
     @classmethod
     def from_node(cls, node):
         """Convert a Neo4j Node to Root object.
+    
+        TODO: Should probably use pe.neo4j.nodereaders.Root_from_node
         """
         from models.util import format_ms_timestamp
         obj = cls()
@@ -557,6 +560,7 @@ class Root(NodeObject):
         titles = []
         labels = {}
         if auditor:
+            active_auditor = auditor
             result = shareds.driver.session().run(
                 CypherAudit.get_my_audits, oper=auditor
             )
@@ -571,12 +575,12 @@ class Root(NodeObject):
             #        'user': 'jpek', 'timestamp': 1578940247182}>
             #    label='Note'
             #    cnt=17>
-            b = Root.from_node(record["b"])
-            label = record["label"]
-            if not label:
-                label = ""
-            cnt = record["cnt"]
-            timestring = b.timestamp_str()
+            b = Root_from_node(record.get("batch"))
+            label = record.get("label","")
+            cnt = record.get("cnt",0)
+            if not auditor:
+                active_auditor = record.get("auditor")
+            time_string = b.timestamp_str()
             file = b.file.rsplit('/',1)[-1] if b.file else ""
 
             # Trick: Set Person as first in sort order!
@@ -585,7 +589,7 @@ class Root(NodeObject):
             if label and not label in titles:
                 titles.append(label)
 
-            key = f"{b.auditor}/{b.user}/{b.id}/{file} {timestring}"
+            key = f"{active_auditor}/{b.user}/{b.id}/{file} {time_string}"
             if not key in labels:
                 labels[key] = {}
             labels[key][label] = cnt

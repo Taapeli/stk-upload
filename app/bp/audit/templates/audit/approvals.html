@@ -5,6 +5,7 @@
     {{ super() }}
 <style>
 tr.mytitle > th { color:gray; font-size: 95%; }
+th.num {width:5em;}
 </style>
 
 <script>
@@ -73,7 +74,7 @@ function confirm_delete(name) {
                 <th></th>
                 <th>{{ _("Researcher") }}</th>
                 <th>{{ _("Batch id") }}</th>
-        {% for t in titles %}<th>{{ _(t) }}</th>{% endfor %}
+        {% for t in titles %}<th class="num">{{ _(t) | title }}</th>{% endfor %}
            </tr>
 	{% endif %}
            <tr>

@@ -1277,8 +1277,8 @@ class Neo4jReadService(ConcreteService):
         return citations, notes, targets
 
     def dr_source_search(self, args):
-        material = args.get('material')
-        username = args.get('use_user')
+        # material = args.get('material')
+        # username = args.get('use_user')
         searchtext = args.get('searchtext')
         limit = args.get('limit', 100)
         #print(args)
@@ -1513,7 +1513,7 @@ class Neo4jReadService(ConcreteService):
         :param: fw_from The timestamp from which the list is requested
         :param: limit   How many items per page
         """
-        from bl.batch.root import Root
+        from pe.neo4j.nodereaders import Root_from_node
 
         def record_to_topics(result):
             res = []
@@ -1551,7 +1551,7 @@ class Neo4jReadService(ConcreteService):
                 c.credit = record.get("commenter")
                 node = record["root"]
                 #Todo: Refactor to Root_from_node()
-                c.root = Root.from_node(node)
+                c.root = Root_from_node(node)
                 if c.obj_label == "Family":
                     c.object = FamilyBl_from_node(o_node)
                 elif c.obj_label == "Person":
