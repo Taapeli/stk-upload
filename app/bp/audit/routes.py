@@ -240,7 +240,7 @@ def auditor_ops():
         5. "start"     Audit request -> Auditing (2)
         6. "accept"    Auditing -> Accepted
         7. "reject"    Auditing -> Rejected
-        8. "withdraw"  Auditing -> Audit requested 'keskeytä'
+        8. "withdraw"  Auditing -> Audit requested 'luovu, keskeytä'
         9. "delete"    Rejected -> (does not exist)
         x. "cancel"
     (1) If the user has no DOES_AUDIT permission, create HAS_ACCESS permission
@@ -323,8 +323,7 @@ def auditor_ops():
                         bid=batch_id)
 
             elif operation == "withdraw":
-                # 8. Stop auditing this batch. New state is "Audit requested", 
-                #    if no one else is auditing.
+                # 8. Stop auditing this batch. New state is "Audit requested".
                 #    Auditor relation change from DOES_AUDIT to DID_AUDIT.
                 res = serv.remove_auditor(batch_id, user_audit)
                 d_days = int(round(res.get('d_days', 0.0)+0.5, 0))

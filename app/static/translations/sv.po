@@ -698,7 +698,7 @@ msgstr ""
 "säkert sätt"
 
 #: bp/admin/templates/admin/admin.html:73
-msgid "User and reference information management"
+msgid "User and Material Management"
 msgstr "Användare och referens informations underhåll"
 
 #: bp/admin/templates/admin/admin.html:75

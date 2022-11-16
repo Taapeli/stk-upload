@@ -701,7 +701,7 @@ msgid "Safely check and initiate important nodes, constraints and schema fixes"
 msgstr "Tärkeiden tietojen, rajoitusten ja rakennemuutosten turvallinen tarkastus"
 
 #: bp/admin/templates/admin/admin.html:73
-msgid "User and reference information management"
+msgid "User and Material Management"
 msgstr "Käyttäjien ja referenssitietojen hallinta"
 
 #: bp/admin/templates/admin/admin.html:75
