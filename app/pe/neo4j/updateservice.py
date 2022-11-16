@@ -879,6 +879,15 @@ class Neo4jUpdateService(ConcreteService):
         if repository.notes:
             self.ds_save_note_list(tx, parent=repository, batch_id=batch_id, iids=iids)
 
+        # Make relations to the Note nodes
+        if repository.note_handles:
+            result = tx.run(
+                CypherRepository.link_notes,
+                handle=repository.handle,
+                note_handles=repository.note_handles,
+                )
+            _cnt=result.single()["cnt"]
+            
         return
 
     # ----- Source -----
