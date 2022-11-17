@@ -102,10 +102,9 @@ RETURN ID(root) AS bid, ID(r) AS rel_id"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_access
     batch_purge_access = """
-MATCH (root:Root {id: $bid})
 MATCH (audi:UserProfile {username: $audi})
-MATCH (audi) -[r:HAS_ACCESS]-> (root)
-DELETE r 
+MATCH (audi) -[r:HAS_ACCESS]-> (root:Root {id: $bid})
+DETACH DELETE r 
 RETURN ID(root) AS id"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
@@ -176,7 +175,8 @@ RETURN b.logname as log, b.file as file, u.username as username"""
 
 #-bl.batch.root.Root.get_batch
     get_batch = """
-MATCH (u:UserProfile{username:$username}) -[r:HAS_ACCESS|DOES_AUDIT]-> (b:Root {id:$batch_id})
+MATCH (u:UserProfile{username:$username})
+MATCH (u) -[r:HAS_ACCESS|DOES_AUDIT|DID_AUDIT]-> (b:Root {id:$batch_id})
 RETURN b, type(r) AS rel_type"""
      
     list_all = """

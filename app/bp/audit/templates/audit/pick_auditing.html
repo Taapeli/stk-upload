@@ -4,6 +4,7 @@
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
+{% from "start/s_macros.html" import show_advance with context %}
 <style>
 .box {
   box-sizing: border-box;
@@ -34,6 +35,25 @@ table     { width: 750px; }
     margin-top: -6pt;
     text-align: right;
 }
+
+div.prelines {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 1em;
+}
+div.prelines div {margin-right: 4pt;}
+div.states {
+    border: solid gray 1pt;
+    padding: 2pt 6pt;
+    margin-right: 4pt;
+    color: gray;
+    background: cornsilk;
+    border-radius: 0 10pt 10pt 0;
+    box-shadow: 2px 2px 4px gray;
+}
+div.act { color: navy; font-weight: bold; }
+div.done {color: black;}
+
 </style>
 
 {{ hamburger_menu() }}
@@ -43,6 +63,10 @@ table     { width: 750px; }
         <h1>{{ _("Auditing Researcher's Material") }}</h1>
 
 {% include "flash_messages.html" %}
+
+        <div class="prelines">
+			{{ show_advance(root) }}
+		</div>
 
 {# Boxes #}
         <div class="clearfix">

@@ -700,7 +700,7 @@ class Root(NodeObject):
             if res:
                 # Permission removed
                 msg = _("Removed excessive access '%(a)s' from batch %(b)s", a=username, b=batch_id)
-                return {"status":Status.UPDATED, "msg":msg}
+                return {"status":res.get("status"), "msg":msg}
         # No removed access
         return {"status":Status.OK}
 

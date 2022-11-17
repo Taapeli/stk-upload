@@ -334,7 +334,7 @@ def auditor_ops():
                 return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
         if Status.has_failed(res):
-            msg = f"Audit request {operation} failed"
+            msg = f"Audit request '{operation}' failed"
             flash(_(msg), "error")
         else:
             flash(_(msg))

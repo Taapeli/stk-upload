@@ -255,21 +255,18 @@ class Neo4jUpdateService(ConcreteService):
            (Used to revert multi-auditor operations.)
         """
         result = self.tx.run(CypherRoot.batch_purge_access, 
-                             bid=batch_id, me=auditor_user)
-        # Return example {
-        #    user:"valta",
-        #    rel_id:113743
-        # }
+                             bid=batch_id, audi=auditor_user)
         removed = []
         for record in result:
-            # {batch_id,me,my_rels,user,rtype,rel_id}
-            username = record.get("user")
+            # <Record id=190386>
             rel_uniq_id = record.get("rel_id")
-            print("#Neo4jUpdateService.ds_batch_purge_access: removed "
-                  f"id={rel_uniq_id} DOES_AUDIT from {username}")
-            removed.append(username)
+            if rel_uniq_id:
+                print("#Neo4jUpdateService.ds_batch_purge_access: removed "
+                      f"id={rel_uniq_id} DOES_AUDIT from {auditor_user}")
+                removed.append(auditor_user)
+                return {"status": Status.UPDATED, "removed_auditors": removed}
 
-        return {"status": Status.OK, "removed_auditors": removed}
+        return  {"status": Status.NOT_FOUND, "removed_auditors": removed}
 
     def ds_batch_purge_auditors(self, batch_id, auditor_user):
         """Removes other auditors, if there are multiple auditors.

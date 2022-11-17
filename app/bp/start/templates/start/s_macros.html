@@ -68,3 +68,42 @@
 	</div>
 
 {%- endmacro %}
+
+{% macro show_advance(batch) -%}
+	{# Show a row of state badges with current emphasized. #}
+	{% set state_n = batch.state_number() %}
+            <div><b>{{ _("State ") }}:</b>
+            </div>
+            <div title='{{ _("Converting the Gramps file to the database") }}'
+    {% if state_n > 10 %}class="states done">
+    {% elif state_n == 10 %}class="states act">
+    {% else %}class="states">
+    {% endif -%}
+               {{ _("Storing") }}</div>
+            <div title='{{ _("The data is stored as candidate material") }}'
+    {% if state_n > 20 %}class="states done"
+    {% elif state_n == 20 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Candidate") }}</div>
+            <div title='{{ _("Waiting for audition") }}'
+    {% if state_n > 30 %}class="states done"
+    {% elif state_n == 30 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Audit Requested") }}</div>
+            <div title='{{ _("In audition") }}'
+    {% if state_n > 40 %}class="states done"
+    {% elif state_n == 40 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Auditing") }}</div>
+            <div title='{{ _("Audit done") }}'
+    {% if state_n > 60 %}class="states done"
+    {% elif state_n == 60 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Accepted") }}</div>
+            <div title='{{ _("Returned to researcher with comments") }}'
+    {% if state_n > 61 %}class="states done"
+    {% elif state_n == 61 %}class="states act"
+    {% else %}class="states"{% endif -%}>
+               {{ _("Rejected") }}</div>
+{%- endmacro %}
+
