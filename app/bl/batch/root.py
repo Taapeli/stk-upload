@@ -752,17 +752,6 @@ class BatchReader(DataService):
 
     def __init__(self, service_name: str):
         super().__init__(service_name)
-        self.idstr = f"{self.__class__.__name__}"
-        # logger.debug(f'#~~~{self.idstr} init')
-        # Find <class 'pe.neo4j.*service'> and initialize it
-        self.service_name = service_name
-        service_class = shareds.dataservices.get(self.service_name)
-        if not service_class:
-            raise KeyError(
-                f"BatchReader.__init__: name {self.service_name} not found"
-            )
-        # Initiate selected service object
-        self.dataservice = service_class(shareds.driver)
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id (in BatchReader). """
@@ -778,3 +767,16 @@ class BatchReader(DataService):
                 f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
             )
             return {"status": Status.ERROR, "statustext": statustext}
+
+    def get_auditors(self, batch_id):
+        """ Read data of the auditors. """
+        try:
+            ret = self.dataservice.dr_get_auditors(batch_id)
+            return ret
+        except Exception as e:
+            statustext = (
+                f"BatchUpdater.get_auditors failed: {e.__class__.__name__} {e}"
+            )
+            return {"status": Status.ERROR, "statustext": statustext}
+
+

@@ -11,7 +11,7 @@
 {{ super() }}
 
 {% from "start/s_macros.html" import hamburger_menu, state_info with context %}
-{% set TOOLARGE = _("The file is too large (max %(max)s MB)", max=( maxsize/(1024*1024) ) | round(1) ) %}
+{% set TOOLARGE = _("The file is too large (max %(m)s MB)", m=maxround ) %}
 <!-- Onkohan? {{TOOLARGE}} -->
 
 <style>

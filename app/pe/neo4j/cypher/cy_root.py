@@ -158,6 +158,12 @@ WITH audi, root
     SET r3.ts_from = $fromtime
 RETURN r3 AS newr"""
 
+    get_auditions = """
+MATCH (u:UserProfile) -[r]-> (root:Root {id: $bid})
+    WHERE type(r) =~ ".*_AUDIT"
+RETURN type(r) AS type, u.username AS user, r.ts_from AS from, r.ts_to AS to
+    ORDER BY r.ts_from"""
+
 #-bl.batch.root.Root.get_filename
     get_filename = """
 MATCH (u:UserProfile{username: $username}) -[:HAS_ACCESS]-> (b:Root {id: $batch_id})

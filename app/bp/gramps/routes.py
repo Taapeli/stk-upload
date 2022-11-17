@@ -100,10 +100,12 @@ def list_uploads():
 
     # for upl in upload_list:
     #     print(f"#bp.gramps.routes.list_uploads: {upl}")
+    maxsize = shareds.app.config.get("MAX_CONTENT_LENGTH")
     return render_template(
         "/gramps/uploads.html",
         interval=inter,
-        maxsize=shareds.app.config.get("MAX_CONTENT_LENGTH"),
+        maxsize=maxsize,
+        maxround=round(maxsize/(1024*1024),1),
         uploads=upload_list,
         active_batch=active_batch,
         gramps_verify=gramps_verify,

@@ -61,6 +61,7 @@ from bl.person_reader import PersonReaderTx
 from bl.place import PlaceReaderTx
 from bl.source import SourceReader
 from bl.repository import RepositoryReader
+from bl.batch.root import BatchReader
 
 from bp.graph.models.fanchart import FanChart
 from models import mediafile
@@ -1518,6 +1519,10 @@ def batch_details():
         elapsed = time.time() - t0
         stk_logger(user_context, 
                    f"-> bp.gramps.routes.batch_details e={elapsed:.3f}")
+        auditors = []
+        with BatchReader("read") as service:
+            auditors = service.get_auditors(batch_id)
+
         return render_template(
            "/scene/details_batch.html",
            batch=batch,
@@ -1525,6 +1530,7 @@ def batch_details():
            user_context=user_context,
            object_stats=res["objects"],
            event_stats=res["events"],
+           auditors=auditors.get("items",[]),
            elapsed=elapsed,
            msg=msg,
         )

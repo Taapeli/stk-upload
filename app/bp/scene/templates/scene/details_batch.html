@@ -72,6 +72,18 @@ div.states {
 }
 div.act { color: navy; font-weight: bold; }
 div.done {color: black;}
+
+p.aud {
+  margin: 0pt 10pt;
+}
+
+span.aud {
+  white-space: nowrap;
+  margin: 0 4px;
+  padding: 0 0 4px 2px;
+  font-size: 80%;
+  border-bottom: solid 1pt burlywood;
+}
 </style>
 
 <script>
@@ -232,6 +244,20 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
 	{% if user_context.SHOW_DISCUSSION %}
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
     {% endif %}
+
+	{% if auditors %}
+		<p class="aud">
+			<span>{{ _("Auditor activities:") }}</span>
+		{% for a in auditors %}
+			<span class="aud"><i>{{a.user}}</i>
+			{% if a.auditing %}{{ _("audits") }}
+			{% else %}{{ _("has audited") }}{%endif %}
+			{% if a.ts_to %}{{a.ts_from|format_ts_day}} – {{a.ts_to|format_ts_day}}
+            {% else %}{{a.ts_from|format_ts_day}} –{% endif -%}
+			</span>
+		{% endfor -%}
+		</p>
+	{% endif -%}
 
         <div id="actions">
             <h3>{{ _("Actions") }}</h3>
