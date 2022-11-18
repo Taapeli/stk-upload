@@ -67,7 +67,7 @@ class RepositoryReader(DataService):
 
         Returns a dictionary, where items = Source object.
         - item.repositories Repositories
-        # item.notes[]      Notes connected to Repository?
+        - item.notes        Notes connected to Repository
         - item.sources      Souorce objects
         """
         use_user = self.user_context.batch_user()

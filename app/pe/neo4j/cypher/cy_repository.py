@@ -25,7 +25,9 @@ RETURN COUNT(DISTINCT n) AS cnt"""
 MATCH (root:Root) -[:OBJ_SOURCE]-> (s:Source) -[r:REPOSITORY]-> (repo:Repository) 
     WHERE repo.iid = $iid
 OPTIONAL MATCH (c:Citation) -[cr:SOURCE]-> (s)
-WITH root, repo, r, s, COUNT(cr) AS citas 
+OPTIONAL MATCH (repo) -[:NOTE]-> (n)
+WITH root, repo, r, s, n, COUNT(cr) AS citas 
     ORDER BY repo.rname, s.stitle
-RETURN root, repo, 
-    COLLECT(DISTINCT [s, r.medium, citas]) AS sources"""
+RETURN root, repo,
+    COLLECT(DISTINCT [s, r.medium, citas]) AS sources,
+    COLLECT(DISTINCT (n)) AS notes"""

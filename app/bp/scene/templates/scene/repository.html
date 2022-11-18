@@ -33,6 +33,14 @@ td.Citation div ol {padding-top:.3em;}
                     <td class="Value">{{repo.type|transl('rept')}}</td>
                     <td></td>
                 </tr>
+    {% if repo.notes %}
+        <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
+            <td class="Value"><ul>
+    	{% for rnote in repo.notes %}
+    		<li>{{ macro.notelink(rnote) }}</li>
+        {% endfor -%}
+        </ul>
+    {% endif %}
 {#
 	{% if source.sauthor or source.spubinfo or source.sabbreviation %}
                 <tr><td class="ColumnAttribute">{{ _("Publishing info") }}</td>

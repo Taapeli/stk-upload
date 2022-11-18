@@ -1347,10 +1347,11 @@ class Neo4jReadService(ConcreteService):
                             s.medium = medium
                             s.citation_cnt = cita_cnt
                             repo.sources.append(s)
-                # notes = record["notes"]
-                # for note_node in notes:
-                #     n = Note_from_node(note_node)
-                #     repo.notes.append(n)
+                            
+                notes = record["notes"]
+                for note_node in notes:
+                    n = Note_from_node(note_node)
+                    repo.notes.append(n)
 
             if repo:
                 return {"item": repo, "status": Status.OK}
