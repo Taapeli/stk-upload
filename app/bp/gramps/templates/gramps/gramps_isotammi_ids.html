@@ -1,0 +1,101 @@
+{# _myapp/templates/gr_result.html_ #}
+{% extends "a_layout.html" %}
+{% block title %}{{ _("Isotammi IDs for Gramps") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+<style>
+div.content > p {
+    margin: 0.5em 1em;
+}
+td.number {
+	text-align: right;
+}
+
+td {
+	vertical-align: top;
+}
+
+</style>
+
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+
+<div id="app">
+	<h1>{{ _("Isotammi IDs for Gramps") }}</h1>
+	{{ _("File") }}: {{ file }}
+	<p>
+	<img v-show="!ready" src="/static/5.gif">
+
+	<div v-show="ready">
+		<b>{{ _("Object counts") }}</b>
+		<p>
+		<table>
+			<tr>
+				<th>{{ _("Object") }}
+				<th>{{ _("Count") }}
+		    <tr v-for="msg in msgs">
+				<td>${ msg.split(" ")[0] }
+				<td>${ msg.split(" ")[1] }
+				</td>
+	    	</tr>
+		</table>
+	
+	    <p>
+
+    	<a href="/gramps/download_updated_file/{{ batch_id }}">
+    		{{ _("Download updated file") }}
+		</a>
+    </div>
+    <p>
+    
+    &rtrif; <a href="/gramps/uploads">{{ _("Return") }}</a></p>
+
+</div>
+
+<script>
+var app = new Vue({
+    delimiters: ['${', '}'],
+    el: '#app',
+    created: function() {
+        this.init();    
+    },
+    filters: {
+        truncate: function(value, size) {
+            if (value.length > size) {
+                value = value.substring(0, size-3) + '...';
+            }
+            return value;
+        }
+    },
+    data: {
+    	ready: false,
+		batch_id: '{{ batch_id }}',
+//    	xmlfile: '{{ file }}',
+    	newfile: '{{ newfile }}',
+    	msgs: [],
+    	current: -1,
+    },
+    methods: {
+    	init: function() {
+    		axios.get('/gramps/gramps_isotammi_ids/' + this.batch_id + '/' + this.newfile)
+    		.then( function(rsp) {
+    			//app.msgs = Object.entries(rsp.data);
+    			app.msgs = rsp.data;
+    			console.log(this.msgs);
+    			app.ready = true;
+    		});
+    	},
+    	toggle: function(i) {
+    		console.log(i);
+    		if (app.current == i) 
+    			app.current = -1;
+			else
+				app.current = i;
+    	},
+    },
+});
+
+</script>
+
+{% endblock %}
+        
