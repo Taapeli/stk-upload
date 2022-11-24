@@ -18,7 +18,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-    Nimimuotojen normalisointi (Kehityksen alla!)
+    Nimimuotojen normalisointi
 
     Processes gedcom Items trying to fix problems of individual name tags
 
@@ -35,7 +35,10 @@ Created on 26.11.2016 – 2.6.2019
 
     Converted from bp.gedcom.transforms.names
 
-@author: JMä
+Update 2.11.2022
+    Version 0.1kku  (Kehityksen alla!) == version = "0.4.1"
+
+@author: JMä, kku
 '''
 #     Input example (originally no indent):
 #         0 @I0149@ INDI
@@ -65,9 +68,9 @@ from .. import transformer
 from ..transformer import Item 
 from flask_babelex import _
 
-version = "0.4kku"
+version = "0.4.1"
 doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Names-ohjelma"
-name = _("Personal names") + ' ' + version
+name = _("Personal names") #+ ' ' + version
 
 # Active Indi logical record GedcomRecord
 indi_record = None
