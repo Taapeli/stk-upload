@@ -32,6 +32,7 @@ class Tool(tool.Tool):
         self.db = self.dbstate.db
         tool.Tool.__init__(self, dbstate, options_class, name)
 
+        self.server = self.options.handler.options_dict["server"]
         self.batch_id = self.options.handler.options_dict["batch_id"]
         self.basedir = self.options.handler.options_dict["basedir"]
 
@@ -75,6 +76,7 @@ class Tool(tool.Tool):
         n.set_type("Isotammi metadata")
         data = {
             "date": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())),
+            "server": self.server,
             "batch_id": self.batch_id,
             "ids": self.values,
             "file": root["xmlname"]
@@ -126,10 +128,12 @@ class Options(tool.ToolOptions):
     def __init__(self, name, person_id=None):
         tool.ToolOptions.__init__(self, name, person_id)
         self.options_dict = {
+            "server": "",
             "batch_id": "",
             "basedir": "",
         }
         self.options_help = {
+            "server": ("=str", "Server host", "String"),
             "batch_id": ("=str", "Batch ID", "String"),
             "basedir": ("=str", "Current directory", "String"),
         }

@@ -237,7 +237,8 @@ def gramps_isotammi_ids_execute(batch_id, newfile):
     toolname = shareds.app.config.get("GRAMPS_ISOTAMMI_ID_TOOL")
     if not toolname:
         toolname = "isotammi-ids"
-        msgs = gramps_utils.gramps_run_for_batch(shareds.app, toolname, lang, current_user.username, batch_id, newfile)
+    msgs = gramps_utils.gramps_run_for_batch(shareds.app, toolname, lang, current_user.username, batch_id, newfile,
+                                              server=request.host)
     
     rsplines = []
     for line in  msgs:
