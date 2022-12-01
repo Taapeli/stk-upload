@@ -199,7 +199,11 @@ def gramps_analyze(batch_id):
 @roles_accepted("research", "admin", "audit")
 def gramps_analyze_json(batch_id, newfile):
     lang = session.get("lang","")
-    lines = gramps_utils.gramps_run_for_batch(shareds.app,  "verify", lang, current_user.username, batch_id, newfile)
+
+    toolname = shareds.app.config.get("GRAMPS_VERIFY_TOOL")
+    if not toolname:
+        toolname = "verify"
+    lines = gramps_utils.gramps_run_for_batch(shareds.app, toolname, lang, current_user.username, batch_id, newfile)
 
     rsp = defaultdict(list)
     for line in lines:
@@ -230,7 +234,6 @@ def gramps_isotammi_ids(batch_id):
 def gramps_isotammi_ids_execute(batch_id, newfile):
     lang = session.get("lang","")
     print("lang",lang)
-    
     msgs = gramps_utils.gramps_run_for_batch(shareds.app,  "isotammi-ids", lang, current_user.username, batch_id, newfile)
     
     rsplines = []
