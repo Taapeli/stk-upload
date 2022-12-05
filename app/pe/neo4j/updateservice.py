@@ -262,7 +262,7 @@ class Neo4jUpdateService(ConcreteService):
             uniq_id = record[0]
 #TODO: Kun auditoija on päättänyt auditoinnin,
 #      sitten muut mahdolliset(?) auditoinnit lopetetaan myös
-#      ajanhetkeen, joka on tätä aikaisempi.
+#      [ds_batch_set_audited] ajanhetkeen, joka on tätä aikaisempi.
 #        - talleta edeltä ts_to
 #        - välitä muille esim. ts_to - 1000
             return {"status": Status.OK, "identity": uniq_id}
