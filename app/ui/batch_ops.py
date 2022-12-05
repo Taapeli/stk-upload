@@ -35,20 +35,21 @@ RESEARCHER_FUNCTIONS = [ # (URL, title)
     ("/gramps/batch_download/{batch_id}",  _("Download the Gramps file")),
     ("/gramps/show_upload_log/{batch_id}", _("Show upload log")),
     ("/gramps/gramps_analyze/{batch_id}",  _("Gramps Verify Tool")),
+    ("/gramps/gramps_isotammi_ids/{batch_id}",  _("Add Isotammi IDs to Gramps XML file")),
     ("/gramps/batch_delete/{batch_id}",    _("Delete from database")),
     ]
 
 # A boolean vector, which RESEARCHER_FUNCTIONS are allowed for any Root.status
 
-RESEARCHER_OPERATIONS = { #    browse     request   withdraw  download log     verify  delete
-    State.ROOT_UNKNOWN:        (False,    False,    False,    False,   True,   False,   True),
-    State.FILE_LOADING:        (False,    False,    False,    False,   True,   False,   True),
-    State.FILE_LOAD_FAILED:    (True,     False,    False,    True,    True,   False,   True),                                                  
-    State.ROOT_STORING:        (False,    False,    False,    True,    True,   True,    True),
-    State.ROOT_CANDIDATE:      (True,     True,     False,    True,    True,   True,    True),
-    State.ROOT_REJECTED:       (True,     False,    False,    True,    True,   True,    True),
-    State.ROOT_AUDIT_REQUESTED:(True,     False,    True,     True,    True,   True,    True),
-    State.ROOT_AUDITING:       (True,     False,    True,     True,    True,   True,    True),
-    State.ROOT_ACCEPTED:       (True,     False,    False,    True,    True,   True,    False),
+RESEARCHER_OPERATIONS = { #    browse     request   withdraw  download log     verify  verify delete
+    State.ROOT_UNKNOWN:        (False,    False,    False,    False,   True,   False,  False, True),
+    State.FILE_LOADING:        (False,    False,    False,    False,   True,   False,  False, True),
+    State.FILE_LOAD_FAILED:    (True,     False,    False,    True,    True,   False,  False, True),                                                  
+    State.ROOT_STORING:        (False,    False,    False,    True,    True,   True,   True,  True),
+    State.ROOT_CANDIDATE:      (True,     True,     False,    True,    True,   True,   True,  True),
+    State.ROOT_REJECTED:       (True,     False,    False,    True,    True,   True,   True,  True),
+    State.ROOT_AUDIT_REQUESTED:(True,     False,    True,     True,    True,   True,   True,  True),
+    State.ROOT_AUDITING:       (True,     False,    True,     True,    True,   True,   True,  True),
+    State.ROOT_ACCEPTED:       (True,     False,    False,    True,    True,   True,   True,  False),
     }
 
