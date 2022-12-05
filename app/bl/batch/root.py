@@ -182,16 +182,16 @@ class Root(NodeObject):
         Returns True, if allowed operation
         """
         if self.state == State.ROOT_AUDIT_REQUESTED:
-            ret = oper in ["start", "browse", "download"]
+            ret = oper in ["browse", "download", "start"]
         elif self.state == State.ROOT_AUDITING:
             if active_auditor:
                 ret = oper in ["browse", "download", "accept", "withdraw", "reject"]
             else:
-                ret = oper == "start"
+                ret = oper in ["browse", "download", "start"]
         elif self.state == State.ROOT_ACCEPTED:
-            ret = oper in ["start", "browse", "download"]
+            ret = oper in ["browse", "download", "start"]
         elif self.state == State.ROOT_REJECTED:
-            ret = oper in ["browse", "start"] or \
+            ret = oper in ["browse", "download", "start"] or \
                 (oper == "delete" and active_auditor)
 
         # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
@@ -691,58 +691,55 @@ class Root(NodeObject):
         )
         return msg, deleted
 
-    @staticmethod
-    def remove_old_access(batch_id, username):
-        """ Schema fix: If auditor has HAS_ACCESS permission (with DOES_AUDIT), remove it.
-       """
-        with RootUpdater("update") as serv:
-            res = serv.purge_old_access(batch_id, username)
-            if res:
-                # Permission removed
-                msg = _("Removed excessive access '%(a)s' from batch %(b)s", a=username, b=batch_id)
-                return {"status":res.get("status"), "msg":msg}
-        # No removed access
-        return {"status":Status.OK}
+    # @staticmethod
+    # def remove_old_access(batch_id, username): use RootUpdater.purge_old_access
+    #     """ Schema fix: If auditor has HAS_ACCESS permission (with DOES_AUDIT), remove it."""
+    #     with RootUpdater("update") as serv:
+    #         res = serv.purge_old_access(batch_id, username)
+    #         if res: # Permission removed
+    #             msg = _("Removed excessive access '%(a)s' from batch %(b)s", a=username, b=batch_id)
+    #             return {"status":res.get("status"), "msg":msg}
+    #     return {"status":Status.OK}
 
-    @staticmethod
-    def TODO_purge_auditors(batch_id, username):
-        """ Schema fix: If there is multiple auditors, purge others but current
-            (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
-       """
-        with RootUpdater("update") as serv:
-            res = serv.purge_other_auditors(batch_id, username)
-            # Got {status, removed_auditors}
-            removed_auditors = res.get("removed_auditors", [])
-            count = len(removed_auditors)
-            if count > 0:
-                auditors = ", ".join(removed_auditors)
-                msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
-                # Return removed auditors
-                return {"status":Status.UPDATED, 
-                        "removed_auditors":removed_auditors,
-                        "msg":msg}
-        # No removed auditors
-        return {"status":Status.OK}
+    # @staticmethod
+    # def TODO_purge_auditors(batch_id, username):
+    #     """ Schema fix: If there is multiple auditors, purge others but current
+    #         (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
+    #    """
+    #     with RootUpdater("update") as serv:
+    #         res = serv.purge_other_auditors(batch_id, username)
+    #         # Got {status, removed_auditors}
+    #         removed_auditors = res.get("removed_auditors", [])
+    #         count = len(removed_auditors)
+    #         if count > 0:
+    #             auditors = ", ".join(removed_auditors)
+    #             msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
+    #             # Return removed auditors
+    #             return {"status":Status.UPDATED, 
+    #                     "removed_auditors":removed_auditors,
+    #                     "msg":msg}
+    #     # No removed auditors
+    #     return {"status":Status.OK}
 
-    @staticmethod
-    def obsolete_fix_purge_auditors(batch_id, username):
-        """ Schema fix: If there is multiple auditors, purge others but current
-            (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
-       """
-        with RootUpdater("update") as serv:
-            res = serv.purge_other_auditors(batch_id, username)
-            # Got {status, removed_auditors}
-            removed_auditors = res.get("removed_auditors", [])
-            count = len(removed_auditors)
-            if count > 0:
-                auditors = ", ".join(removed_auditors)
-                msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
-                # Return removed auditors
-                return {"status":Status.UPDATED, 
-                        "removed_auditors":removed_auditors,
-                        "msg":msg}
-        # No removed auditors
-        return {"status":Status.OK}
+    # @staticmethod
+    # def obsolete_fix_purge_auditors(batch_id, username):
+    #     """ Schema fix: If there is multiple auditors, purge others but current
+    #         (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
+    #    """
+    #     with RootUpdater("update") as serv:
+    #         res = serv.purge_other_auditors(batch_id, username)
+    #         # Got {status, removed_auditors}
+    #         removed_auditors = res.get("removed_auditors", [])
+    #         count = len(removed_auditors)
+    #         if count > 0:
+    #             auditors = ", ".join(removed_auditors)
+    #             msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
+    #             # Return removed auditors
+    #             return {"status":Status.UPDATED, 
+    #                     "removed_auditors":removed_auditors,
+    #                     "msg":msg}
+    #     # No removed auditors
+    #     return {"status":Status.OK}
 
 # class BatchUpdater(DataService): # -> bl.batch.root_updater.RootUpdater
 #     """ Root data store for write and update. 

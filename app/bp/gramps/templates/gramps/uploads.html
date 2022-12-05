@@ -96,6 +96,7 @@ function update_progress(batch_id) {
         batch_id_column.css("border-width", "3pt")
 
         var myBar = $("td div.myProgress[data-name='"+batch_id+"'] :first-child");
+        //? if (ssp.status == "error") return;
 		if (rsp.progress == 0) rsp.progress = 1;
         var wp = rsp.progress+"%";
         myBar.width(wp)

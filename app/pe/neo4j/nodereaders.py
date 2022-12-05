@@ -286,15 +286,13 @@ def Root_from_node(node):
     from models.util import format_ms_timestamp
 
     obj = init(Root, node)
-    obj.uniq_id = node.id
+    # uniq, id, auditor etc set
     obj.user = node.get("user", "")
     obj.file = node.get("file", None)
-    obj.id = node.get("id", None)
     obj.state = node.get("state", "")
     obj.mediapath = node.get("mediapath")
     obj.timestamp = node.get("timestamp", 0)
     obj.upload = format_ms_timestamp(obj.timestamp)
-    #obj.auditor = node.get("auditor", None)
     obj.material_type = node.get("material", DEFAULT_MATERIAL)
     obj.description = node.get("description", "")
     obj.xmlname = node.get("xmlname", "")

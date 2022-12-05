@@ -69,43 +69,18 @@ MATCH (u) -[r:HAS_LOADED]-> (b:Root {id: $bid})
     SET b.state=$state
 RETURN ID(b) AS id"""
 
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_audited
-    batch_set_i_audited = """
-MATCH (me:UserProfile) -[r1:DOES_AUDIT]-> (root:Root)
-    WHERE me.username = $audi AND root.id = $bid AND root.state = "Auditing"
-WITH root, me, r1, r1.ts_from AS fromtime1
-    CREATE (me) -[r2:DID_AUDIT]-> (root)
-        SET r2.ts_from=fromtime1
-        SET r2.ts_to=timestamp()
-        SET root.state=$state
-        //SET root.audited=$audi
-    DELETE r1
-RETURN root, r2 AS relation_new"""
-    batch_compelete_does_audits = """
-MATCH (audi:UserProfile) -[r3:DOES_AUDIT]-> (root)
-    WHERE id(root) = $uid
-WITH audi, r3
-    CREATE (audi) -[r4:DID_AUDIT]-> (root)
-        SET r4.ts_from=r3.ts_from
-        SET r4.ts_to=$ts
-    DELETE r3
-RETURN audi.username AS user, r4 as relation_new"""
-
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_access
+# pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_access
+    does_need_batch_access = """
+MATCH (root:Root{id:$bid})
+MATCH (u:UserProfile{username:$audi})
+    WHERE NOT EXISTS((u) -[:HAS_ACCESS|:DOES_AUDIT]-> (root))
+RETURN u.username"""
+# Returns batch id, if must create a HAS_ACCESS for browsing; else no match
     batch_set_access = """
 MATCH (root:Root {id: $bid})
 MATCH (audi:UserProfile {username: $audi})
-OPTIONAL MATCH (audi) -[r]-> (root)
-WITH root,audi,collect(r) AS rel WHERE size(rel) = 0
     CREATE (audi) -[r:HAS_ACCESS]-> (root)
 RETURN ID(root) AS bid, ID(r) AS rel_id"""
-
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_access
-    batch_purge_access = """
-MATCH (audi:UserProfile {username: $audi})
-MATCH (audi) -[r:HAS_ACCESS]-> (root:Root {id: $bid})
-DETACH DELETE r 
-RETURN ID(root) AS id"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
     batch_set_auditor = """
@@ -116,19 +91,35 @@ MATCH (audi:UserProfile {username: $audi})
     SET r.ts_from = timestamp()
 RETURN ID(root) AS id"""
 
-# Not needed any more; there is never multiple auditors?
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_auditors
-    batch_purge_auditors = """
-MATCH (me:UserProfile) -[r:DOES_AUDIT]-> (root:Root)
-    WHERE me.username = $me AND root.id = $bid
-MATCH (audi:UserProfile) -[ra:DOES_AUDIT]-> (root)
-    WHERE NOT audi.username = $me
-WITH me, COLLECT(ID(r)) AS my_rels,
-    audi, root, ra, ID(ra) as rel_id, type(ra) AS rtype
-        DELETE ra
-RETURN audi.username AS user, rel_id
-    //root.id AS batch_id, me.username AS me, my_rels, rtype
+    batch_end_audition = """
+MATCH (root:Root{id: $bid}) <-[r1:DOES_AUDIT]- (audi:UserProfile)
+        WHERE audi.username = $me
+    SET root.state = $state
+    CREATE (audi) -[r2:DID_AUDIT]-> (root)
+        SET r2.ts_from = r1.ts_from
+        SET r2.ts_to = timestamp()
+    DELETE r1
+RETURN r2 AS newr
 """
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_access
+# trying to set r2.ts_to lower than batch_end_audition time
+    batch_purge_access = """
+MATCH (audi:UserProfile {username: $audi})
+MATCH (audi) -[r:HAS_ACCESS]-> (root:Root {id: $bid})
+DETACH DELETE r 
+CREATE (audi) -[r2:DID_AUDIT]-> (root)
+    SET r2.ts_from = r1.ts_from
+    SET r2.ts_to = timestamp() - 1000
+RETURN ID(root) AS id"""
+
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_auditors
+# Remove all auditors but me
+    batch_purge_auditors = """
+MATCH (audi:UserProfile) -[ra:DOES_AUDIT]-> (root:Root{id:$bid})
+    WHERE NOT audi.username = $me
+DELETE ra
+
+RETURN audi.username AS user, ID(ra) as rel_id"""
 #Returned:
 # │"batch_id"      │"me"  │"my_rels"       │"user" │"rtype"     │"rel_id"│
 # │"2021-09-05.007"│"juha"│[268031,1487411]│"valta"│"DOES_AUDIT"│113743  │

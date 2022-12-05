@@ -53,7 +53,7 @@ div.states {
 }
 div.act { color: navy; font-weight: bold; }
 div.done {color: black;}
-
+.auops {font-weight: bold;}
 </style>
 
 {{ hamburger_menu() }}
@@ -165,23 +165,24 @@ div.done {color: black;}
                 <input type="hidden" value="{{user}}" name="user">
 
                 <div class="submit">
-                   <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" /> 
+                   <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" 
+                   		style="color:blue" /> 
 
                    <span style="font-size:large; color:gray;"> | </span>
 
                    <input type="submit" value="{{ _('Upload log') }}" name="upload_log"
                        title="{{ _('Show upload log') }}"/>
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse"
-                       title="{{ _('You can browse, if you are currently auditing') }}"
+                       title="{{ _('Open browsing view') }}"
                     {% if not can_browse %} disabled {% endif -%} />
                    <input type="submit" value="{{ _('Download file') }}" name="download"
-                       title="{{ _('You can download, if you are currently auditing') }}"
+                       title="{{ _('Get imported Gramps data') }}"
                     {% if not can_download %} disabled {% endif -%} />
 
                    <span style="font-size:large; color:gray;"> | </span>
 
 {% if can_start %}
-                   <input type="submit" name="start"
+                   <input type="submit" name="start" class="auops" 
                        title="{{ _('Start as auditor (also the only way to delete the material)') }}"
                     {% if auditing_by_other %}
                        value="{{ _('Supersede other auditor') }}"
@@ -193,18 +194,18 @@ div.done {color: black;}
 {% endif %}
 {% if i_am_auditor %}
                    <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
-                       title="{{ _('Include to accepted materials') }}"
+                       class="auops" title="{{ _('Include to accepted materials') }}"
 	                {% if not can_accept %} disabled {% endif -%} />
                    <input type="submit" value="{{ _('Withdraw') }}" name="withdraw"
-                       title="{{ _('Give up for now') }}"
+                       class="auops" title="{{ _('Give up for now') }}"
                     {% if not can_accept %} disabled {% endif -%} />
                    <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
-                       title="{{ _('Dicard this material') }}"
+                       class="auops" title="{{ _('Dicard this material') }}"
                     {% if not can_accept %} disabled {% endif -%} />
 {% endif -%}
 {% if can_delete %}
                    <input type="submit" value="{{ _('Delete batch') }}" name="delete"
-                       title="{{ _('The material and files are deleted permanetly') }}"/>
+                       class="auops" title="{{ _('The material and files are deleted permanetly') }}"/>
 {% endif -%}
                 </div>
             </form>

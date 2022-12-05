@@ -40,7 +40,7 @@ import urllib.parse
 from . import bp
 
 import shareds
-from bl.base import Status
+from bl.base import Status, IsotammiException
 from bl.batch.root import Root, State #, BatchUpdater
 from bl.batch.root_updater import RootUpdater
 from bl.person import Person, PersonWriter
@@ -90,7 +90,7 @@ def audit_home():
 @bp.route("/audit/user/<oper>/<batch_id>", methods=["GET"])
 @login_required
 @roles_accepted("research")
-def audit_research_op(oper=None, batch_id=None):
+def audit_researcher_ops(oper=None, batch_id=None):
     """ Select Researcher operation for Batch by oper.
         - "request": User moves Batch to Audit queue by setting state="Audit requested" or
         - "withdraw": User withdraws audit request.
@@ -106,17 +106,18 @@ def audit_research_op(oper=None, batch_id=None):
     
         with RootUpdater("update") as serv: 
             if operation == "request":
+                # Candidate -> Audit requested
                 msg = _("Audit request for ") + batch_id
                 res = serv.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
             elif operation == "withdraw":
+                # Auditing -> Audit requested 'luovu, keskeytä'
                 msg = _("Withdrawing audit request for ") + batch_id
                 res = serv.change_state(batch_id, user_id, State.ROOT_CANDIDATE)
-            # operation == "delete" -> delete_approved?
             else:
                 return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
     except Exception as e:
-        error_print("audit_research_op", e)
+        error_print("audit_researcher_ops", e)
         return redirect(url_for("gramps.list_uploads"))
 
     if not res or Status.has_failed(res):
@@ -124,7 +125,7 @@ def audit_research_op(oper=None, batch_id=None):
     else:
         flash(_(msg) + _(" succeeded"))
 
-    print(f"bp.audit.routes.audit_research_op/{operation}: {res.get('status')} for node {res.get('identity')}")
+    print(f"bp.audit.routes.audit_researcher_ops/{operation}: {res.get('status')} for node {res.get('identity')}")
     syslog.log(type=f"Audit {operation}", batch=batch_id, by=user_id, msg=msg)
     return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
@@ -166,32 +167,23 @@ def audit_pick(batch_id=None):
             flash(_("No such batch ") + str(batch_id), "error")
             return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
-        ## These don't exists any more: 
-        # res = Root.obsolete_fix_purge_auditors(batch_id, user_audit)
-        # # Got {status, removed_auditors, text}
-        # status = res.get("status")
-        # if status == Status.UPDATED:
-        #         msg = res.get("msg")
-        #         flash(msg)
-        #         print(f"bp.audit.routes.audit_pick: {msg}")
-        #         syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg)
-        #         # Get updated auditor list root.auditors
-        #         username, root, labels = Root.get_batch_stats(batch_id)
-
         total = 0
         for _label, cnt in labels:
             total += cnt
         auditor_names = [a[0] for a in root.auditors]
         i_am_auditor = (current_user.username in auditor_names)
-        print(f"#bp.audit.routes.audit_pick: {root}, auditors={auditor_names}, "
-              f"auditor={i_am_auditor}, user={current_user.username}")
+        prev_names = [a[0] for a in root.prev_audits]
+        i_was_auditor = (current_user.username in prev_names)
+        print(f"#bp.audit.routes.audit_pick: {root}, "
+              f"auditors={','.join(auditor_names)}/{','.join(prev_names)}, "
+              f"user={current_user.username}")
         auditing_by_other = len(auditor_names) > 0 and not i_am_auditor
-        can_browse = root.state_transition("browse", i_am_auditor)
-        can_download = root.state_transition("download", i_am_auditor)
+        can_browse = root.state_transition("browse", i_am_auditor or i_was_auditor)
+        can_download = root.state_transition("download", i_am_auditor or i_was_auditor)
         can_start = root.state_transition("start", i_am_auditor)
         can_accept = root.state_transition("accept", i_am_auditor)
         can_delete = root.state_transition("delete", i_am_auditor)
-        print(f"#bp.audit.routes.audit_pick: i_am_auditor={i_am_auditor} "
+        print(f"#bp.audit.routes.audit_pick: i_am/was auditor={i_am_auditor}/{i_was_auditor} "
               f"can browse={can_browse} download={can_download} start={can_start} "
               f"accept/withdraw/reject={can_accept} delete={can_delete}")
     except Exception as e:
@@ -207,7 +199,7 @@ def audit_pick(batch_id=None):
         can_browse=can_browse,
         can_download=can_download,
         can_start=can_start,
-        can_accept=can_accept, # + withdraw and reject
+        can_accept=can_accept, # & withdraw and reject
         label_nodes=labels,
         total=total,
         auditor_name=current_user.name,
@@ -217,8 +209,8 @@ def audit_pick(batch_id=None):
 def _allow_batch_access(batch_id, user_audit):
     """ If given auditor has no access permission,
         create a HAS_ACCESS permission. """
-    with RootUpdater("update") as service: 
-        res = service.set_access(batch_id, user_audit)
+    with RootUpdater("update") as serv: 
+        res = serv.set_access(batch_id, user_audit)
         status = res["status"]
         if status == Status.UPDATED:
             msg = _("You have given access permission for batch ") + batch_id
@@ -228,120 +220,143 @@ def _allow_batch_access(batch_id, user_audit):
         print(f"#bp.audit.routes._allow_batch_access: {msg}")
     return status, msg
 
+
 @bp.route("/audit/selected", methods=["POST"])
 @login_required
 @roles_accepted("audit")
 def auditor_ops():
     """ Select Auditor operation for Batch.
     Auditor operations:
-        0a "browse"    - no State change (1)
-        0b "download"  - no State change (1)
+        0a "browse"    - no State change (5)
+        0b "download"  - no State change (5)
         0c "upload_log"  no State change
-        5. "start"     Audit request -> Auditing (2)
-        6. "accept"    Auditing -> Accepted
-        7. "reject"    Auditing -> Rejected
-        8. "withdraw"  Auditing -> Audit requested 'luovu, keskeytä'
+        5. "start"     Audit request -> Auditing (1,2,3)
+        6. "accept"    Auditing -> Accepted (4)
+        7. "reject"    Auditing -> Rejected (4)
+        8. "withdraw"  Auditing -> Audit requested (4) 'luovu, keskeytä'
         9. "delete"    Rejected -> (does not exist)
         x. "cancel"
-    (1) If the user has no DOES_AUDIT permission, create HAS_ACCESS permission
-    (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
+   [a.(1) Remove my HAS_ACCESS, if exists, Todo?]
+    b.(2) For auditors (but me): change DOES_AUDIT --> DID_AUDIT, ts_to=now
+    c.(3) Add my DOES_AUDIT
+    ..(4) Change my DOES_AUDIT -> DID_AUDIT, ts_to=now
+    ..(5) Add my HAS_ACCESS, if I don't have HAS_ACCESS and no *_AUDIT exists
     """
+    #prev.1 If the user has no DOES_AUDIT permission, create HAS_ACCESS permission
+    #prev.2 If the user has HAS_ACCESS permission, replace it with DOES_AUDIT    
+
+    def find_request_op():
+        """ Pick the required operation from request. """
+        for op in ["browse", "download", "upload_log", "start",
+                   "accept", "reject", "withdraw"]:
+            if request.form.get(op):
+                return op
+        return "cancel"
+
+    here="bp.audit.routes.auditor_ops"
+    msg = ""
     try:
         u_context = UserContext()
         _breed, state, material_type, batch_id = u_context.material.get_current()
         user_owner = u_context.material.request_args.get("user")
         user_audit = current_user.username
-        operation = "cancel"
-
-        if request.form.get("browse"):
-            # 0a. Go to scene views
+        operation = find_request_op()
+        print(f"#auditor_ops: {user_audit} {operation} {batch_id}")
+        if operation in ["browse", "download"]:
             status, msg = _allow_batch_access(batch_id, user_audit)
             if status == Status.UPDATED:
                 flash(msg)
-                stk_logger(u_context, 
-                       f"-> bp.audit.routes.auditor_ops/allow b={batch_id}")
+                stk_logger(u_context, f"--> {here}/allow b={batch_id}")
+                syslog.log(type=f"Access granted", batch=batch_id, msg=msg)
 
+        if operation == "browse":
+            # 0a. Go to scene views
             args = {"batch_id": batch_id, "material_type": material_type, "state": state}
             return redirect("/scene/material/batch?" + urllib.parse.urlencode(args))
-        elif request.form.get("download"):
+        if operation == "download":
             # 0b. Download Gramps file
-            status, msg = _allow_batch_access(batch_id, user_audit)
-            if status == Status.UPDATED:
-                flash(msg)
-                stk_logger(u_context, 
-                       f"-> bp.audit.routes.auditor_ops/allow b={batch_id}")
             return redirect(url_for("audit.audit_batch_download", 
                                     batch_id=batch_id, 
                                     username=current_user.username))
-        elif request.form.get("upload_log"):
-            # 0c. Download Gramps file
+        if operation == "upload_log":
+            # 0c No State change
             return redirect(url_for("gramps.show_upload_log_from_batch_id", 
                                     batch_id=batch_id))
-        elif request.form.get("start"):
-            operation = "start"
-        elif request.form.get("accept"):
-            operation = "accept"
-        elif request.form.get("reject"):
-            operation = "reject"
-        elif request.form.get("withdraw"):
-            operation = "withdraw"
-        print(f"#auditor_ops: {user_audit} {batch_id} {operation}")
-        logger.info(f"--> bp.audit.routes.audit_selected u={user_owner} b={batch_id} {operation}")
-    
+
+        logger.info(f"--> {here} u={user_owner} b={batch_id} {operation}")
         with RootUpdater("update") as serv:
 
             if operation == "start":
-                # 5. Move from "Audit Requested" to "Auditing" state to "Accepted"
-                #TODO (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
+                # 5. "start"     Audit request -> Auditing (1,2,3)
+                # B - ds_batch_purge_auditors(self, batch_id, auditor_user):
+                #     Removes other auditor(s) but me
+                #     1. Purge other auditors but current
+                #     2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
+                #        replace it with DOES_AUDIT
+                #
+                # C - ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
+                #     Updates Batch node selected by Batch id and user.
+                #     We also check that the state is expected.
+                # (2) Complete current audition(s) [ds_batch_purge_auditors]
+                res1 = serv.purge_former_auditors(batch_id, user_audit)
+                if res1.get("status") == Status.UPDATED:
+                    msg = res1.get("msg")
+                    flash(msg)
+                    print(f"--> {here}(2): {msg}")
+                    syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg)
+                # (3) Add DOES_AUDIT
                 res = serv.select_auditor(batch_id, user_audit)
+                if Status.has_failed(res):
+                    raise(IsotammiException, here)
                 msg = _("You are now an auditor for batch ") + batch_id
-                res = Root.remove_old_access(batch_id, user_audit)
-                status = res.get("status")
-                if status == Status.UPDATED:
-                        msg1 = res.get("msg")
-                        flash(msg1)
-                        print(f"bp.audit.routes.audit_pick: {msg1}")
-                        syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg1)
+                # # - (3) Change auditor's DOES_AUDIT --> DID_AUDIT
+                if res.get("status") == Status.UPDATED:
+                    flash(msg)
+                    msg = res.get("msg")
+                    print(f"--> {here}(3): {msg}")
+                    syslog.log(type=f"Start auditing", batch=batch_id, msg=msg)
+                # # - (1) Remove HAS_ACCESS, if exists
+                # res = serv.purge_old_access(batch_id, user_audit)
 
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
                 res = serv.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
                 if Status.has_failed(res):
-                    msg = f"Audit request {operation} failed"
-                    flash(_(msg), "error")
+                    msg = _(f"Audit request {operation} failed")
+                    flash(msg, "error")
                     return redirect(url_for("audit.audit_pick", batch_id=batch_id))
                 else:
                     auditors_list = res.get("auditors")
                     print(f"auditor_ops: Batch {batch_id} accepted by {user_audit!r}, "
                           f"auditors: {auditors_list}")
                     msg = _("Audit batch accepted: ") + batch_id
+                    flash(msg)
 
             elif operation == "reject":
                 # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
                 res = serv.set_audited(batch_id, user_audit, State.ROOT_REJECTED)
                 msg = _("You have rejected the audition of batch %(bid)s",
                         bid=batch_id)
+                flash(msg)
 
             elif operation == "withdraw":
                 # 8. Stop auditing this batch. New state is "Audit requested".
-                #    Auditor relation change from DOES_AUDIT to DID_AUDIT.
+                # (4) Change DOES_AUDIT -> DID_AUDIT, ts_to=now
                 res = serv.remove_auditor(batch_id, user_audit)
                 d_days = int(round(res.get('d_days', 0.0)+0.5, 0))
                 msg = _("You did audit the batch %(bid)s for %(d)s days",
                         bid=batch_id, d=d_days)
+                flash(msg)
 
             else:
                 return redirect(url_for("audit.list_uploads", batch_id=batch_id))
 
-        if Status.has_failed(res):
-            msg = f"Audit request '{operation}' failed"
-            flash(_(msg), "error")
-        else:
-            flash(_(msg))
-
     except Exception as e:
+        if msg:
+            flash(msg)
         error_print("auditor_ops", e)
-        return redirect(url_for("audit.list_uploads"))
+        return redirect(url_for("audit.audit_pick", batch_id=batch_id))
+        #return redirect(url_for("audit.list_uploads"))
 
     syslog.log(type="Audit state change", batch=batch_id, op=operation, msg=msg)
     return redirect(url_for("audit.audit_pick", batch_id=batch_id))
