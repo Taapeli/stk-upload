@@ -615,7 +615,7 @@ def run_supertool(batch_id):
     if supertool_runner:
         lang = session.get("lang","")
         print("lang",lang)
-        _msgs = gramps_utils.run_supertool(supertool_runner, lang, current_user.username, batch_id, batch.xmlname, scriptfile, outputfile)
+        _msgs = gramps_utils.run_supertool(shareds.app, lang, current_user.username, batch_id, batch.xmlname, scriptfile, outputfile)
     else:
         _msgs = {}
     logger.info(f'bp.gramps.routes.run_supertool f="{os.path.basename(batch.xmlname)}"')

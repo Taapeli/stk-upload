@@ -110,16 +110,10 @@ def gramps_run(app, toolname, lang, username, inputfile, export_file=None, **arg
 
 
 
-def run_supertool(supertool_runner, lang, username, batch_id, xmlfile, scriptfile, outputfile):
-    upload_folder = get_upload_folder(username) 
-    pathname = os.path.join(upload_folder, batch_id)
-    supertool_runner = os.path.abspath(supertool_runner)
-    scriptfile_full = os.path.abspath(scriptfile)
-    cmd = f"{supertool_runner} '{lang}' '{xmlfile}' '{scriptfile_full}' '{outputfile}' '{os.getcwd()}'"
-    print("cmd:",cmd)
-    res = subprocess.run(cmd, shell=True, cwd=pathname, capture_output=True, encoding="utf-8")
-    print(res.stderr)
-    lines = res.stdout.splitlines()
+def run_supertool(app, lang, username, batch_id, xmlfile, scriptfile, outputfile):
+
+    lines = gramps_run_for_batch(app, "SuperTool", lang, 
+            username, batch_id, script=scriptfile, output=outputfile, args=os.getcwd())
     return lines
 
 
