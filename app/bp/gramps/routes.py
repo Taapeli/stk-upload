@@ -54,7 +54,7 @@ from flask_babelex import _
 
 import shareds
 from bl.base import Status
-from bl.batch.root import Root, BatchReader #, State, BatchUpdater
+from bl.batch.root import Root, BatchReader, State #, BatchUpdater
 from bl.batch.root_updater import RootUpdater
 from bl.gramps.gramps_utils import get_nonstandard_types
 from bl.gramps.gramps_loader import get_upload_folder

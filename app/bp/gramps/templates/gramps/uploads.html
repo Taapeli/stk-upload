@@ -12,8 +12,6 @@
 
 {% from "start/s_macros.html" import hamburger_menu, state_info with context %}
 {% set TOOLARGE = _("The file is too large (max %(m)s MB)", m=maxround ) %}
-<!-- Onkohan? {{TOOLARGE}} -->
-
 <style>
 h2 { margin-bottom: 0; }
 td { position: relative; }
@@ -219,7 +217,8 @@ function filenm_changed(input) {
 
             <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
             </td>
-            <td>{{upload.loc_state}}
+            <td class="state_{{upload.state|replace(" ", "")}}">
+            		{{ upload.state|transl('state') }}
     {% if upload.auditors %}
                     <br><i>{{ _("Auditor") }}:
         {% for auditor, ts_from, ts_to in upload.auditors %}

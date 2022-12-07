@@ -66,25 +66,15 @@
         {% endif %}
                 </td>
 
-	            <td class="msg_INFO">
-	            {{ upload.loc_state }}
+	            <td class="msg_INFO state_{{upload.state|replace(" ", "")}}">
+	            {{ upload.state|transl('state') }}
         {% if upload.batch_id %}
-{#          {% if upload.status == _("UPLOADED") %}
-                    <br>({{_( "deleted from database" ) }})
-            {% else %}
-#}
-                    <br><span style="color:gray">{{upload.count}} {{ _("persons") }}</span>
-{# endif #}
+                    <br><span style="color:gray; background:white;padding:1pt 2pt;">
+                    	{{upload.count}} {{ _("persons") }}</span>
         {% endif %}
                 </td>
 
 	            <td class="msg_INFO">
-{#
-        {% if upload.xmlname and upload.status != _("CANDIDATE") %}
-	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
-	           			{{ _("Store to database") }}</a> |
-        {% endif %}
-#}
         {% if upload.xmlname and upload.has_log %}
 	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}/{{upload.batch_id}}>
 	           			{{ _("Show log") }}</a> |
