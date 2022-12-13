@@ -297,7 +297,7 @@ def auditor_ops():
                 #     Updates Batch node selected by Batch id and user.
                 #     We also check that the state is expected.
                 # (2) Complete current audition(s) [ds_batch_purge_auditors]
-                res1 = serv.purge_former_auditors(batch_id, user_audit)
+                res1 = serv.end_auditions(batch_id, user_audit)
                 if res1.get("status") == Status.UPDATED:
                     msg = res1.get("msg")
                     flash(msg)

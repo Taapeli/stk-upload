@@ -128,12 +128,47 @@ class RootUpdater(DataService):
         res = self.dataservice.ds_batch_set_state(batch_id, username, b_state)
         return res
 
+    def purge_old_access(self, batch_id, auditor_username):
+        """ Removes old HAS_ACCESS permission. NOT USED
+        
+            Returns 
+                - ID(Root), if removed
+                - None if no HAS_ACCESS found
+        """
+        res = self.dataservice.ds_batch_purge_access(batch_id, auditor_username)
+        return res
+
+    #---- Auditor operations ----
+
+    def set_access(self, batch_id, auditor_username):
+        """ Create HAS_ACCESS permission, if the user has no previous accesses.
+        """
+        res = self.dataservice.ds_batch_set_access(batch_id, auditor_username)
+        return res
+    
+    def end_auditions(self, batch_id, auditor_username):
+        """ Make current auditors as former auditors.
+            1. If there is multiple auditors, purge others but current
+            2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
+               replace it with DOES_AUDIT
+        """
+        res = self.dataservice.ds_batch_end_auditors(batch_id, auditor_username)
+        # Got {status, removed_auditors}
+        removed_auditors = res.get("removed_auditors", [])
+        if len(removed_auditors) > 0:
+            auditors = ", ".join(removed_auditors)
+            msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
+            # Return removed auditors
+            #res["removed_auditors"] = removed_auditors
+            res["msg"] = msg
+        return res
+
     def select_auditor(self, batch_id, auditor_username):
         """ Mark auditor for this data batch and set status. 
 
             # - (3) Change auditor's DOES_AUDIT --> DID_AUDIT
             # If there is multiple auditors, purge others but current
-            res1 = serv.purge_former_auditors(batch_id, user_audit)
+            res1 = serv.end_auditions(batch_id, user_audit)
             # 5. "start"     Audit request -> Auditing (1,2,3)
             # - (2) Add DOES_AUDIT
             _res = serv.select_auditor(batch_id, user_audit)
@@ -149,39 +184,6 @@ class RootUpdater(DataService):
                                                     allowed_states)
         return res
 
-    def purge_old_access(self, batch_id, auditor_username):
-        """ Removes old HAS_ACCESS permission. NOT USED
-        
-            Returns 
-                - ID(Root), if removed
-                - None if no HAS_ACCESS found
-        """
-        res = self.dataservice.ds_batch_purge_access(batch_id, auditor_username)
-        return res
-
-    def purge_former_auditors(self, batch_id, auditor_username):
-        """ Make current auditors as former auditors.
-            1. If there is multiple auditors, purge others but current
-            2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
-               replace it with DOES_AUDIT
-        """
-        res = self.dataservice.ds_batch_purge_auditors(batch_id, auditor_username)
-        # Got {status, removed_auditors}
-        removed_auditors = res.get("removed_auditors", [])
-        if len(removed_auditors) > 0:
-            auditors = ", ".join(removed_auditors)
-            msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
-            # Return removed auditors
-            #res["removed_auditors"] = removed_auditors
-            res["msg"] = msg
-        return res
-
-    def set_access(self, batch_id, auditor_username):
-        """ Create HAS_ACCESS permission, if the user has no previous accesses.
-        """
-        res = self.dataservice.ds_batch_set_access(batch_id, auditor_username)
-        return res
-    
     def set_audited(self, batch_id, user_audit, b_state):
         """ Set batch status and mark all auditions completed.
             - called from bp.audit.routes.auditor_ops.find_request_op
@@ -206,6 +208,8 @@ class RootUpdater(DataService):
                                                        auditor_username, 
                                                        new_state)
         return res
+
+    #---- end auditor ops ----
 
     def batch_update_descr(self, batch_id, description, username):
         """ Update Root.description. """

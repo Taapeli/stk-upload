@@ -188,6 +188,7 @@ class Neo4jUpdateService(ConcreteService):
         uniq_id = result.single()[0]
         return {"status": Status.OK, "identity": uniq_id}
 
+    # ---- Auditor ops ----
 
     def ds_batch_set_access(self, batch_id, auditor_user):
         """Checks, if auditor has read access to this batch.
@@ -207,6 +208,40 @@ class Neo4jUpdateService(ConcreteService):
         # No match: no need create a HAS_ACCESS for browsing
         return {"status": Status.OK}
 
+    def ds_batch_end_auditors(self, batch_id, auditor_user):
+        """Removes other auditors but given user. 
+            1. Purge other auditors but current
+            2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
+               replace it with DOES_AUDIT
+        """
+        removed = []
+        st = Status.OK
+        result = self.tx.run(CypherRoot.batch_find_other_auditors, 
+                             bid=batch_id, me=auditor_user)
+        for record in result:
+            username = record.get("user")
+            rel_uniq_id = record.get("rel_id")
+            print("#Neo4jUpdateService.ds_batch_end_auditors: removed "
+                  f"rel={rel_uniq_id} DOES_AUDIT from {username}")
+            removed.append(username)
+            st = Status.UPDATED
+
+        return {"status": st, "removed_auditors": removed}
+
+    def ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
+        """Updates Batch node selected by Batch id and user.
+
+           - Check that the state is expected
+           - Updates Batch node selected by Batch id and user
+           - Create DOES_AUDIT link
+        """
+        result = self.tx.run(CypherRoot.batch_set_auditor, 
+                             bid=batch_id, audi=auditor_user, states=old_states
+        )
+        for record in result:
+            uniq_id = record[0]
+            return {"status": Status.OK, "identity": uniq_id}
+        return {"status": Status.NOT_FOUND}
 
     def ds_batch_set_audited(self, batch_id, user, new_state):
         """Updates the auditing Batch node and auditor links.
@@ -244,62 +279,6 @@ class Neo4jUpdateService(ConcreteService):
                   f"{type(r).__name__} {r.get('ts_from')}-{r.get('ts_to','')}")
 
         return {"status": Status.OK, "auditors": auditors}
-
-
-    def ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
-        """Updates Batch node selected by Batch id and user.
-
-           - Check that the state is expected
-           - Updates Batch node selected by Batch id and user
-           - Create DOES_AUDIT link
-        """
-        result = self.tx.run(CypherRoot.batch_set_auditor, 
-                             bid=batch_id, audi=auditor_user, states=old_states
-        )
-        for record in result:
-            uniq_id = record[0]
-            return {"status": Status.OK, "identity": uniq_id}
-        return {"status": Status.NOT_FOUND}
-
-
-    def ds_batch_purge_access(self, batch_id, auditor_user):
-        """Removes other auditors, if there are multiple auditors.
-           (Used to revert multi-auditor operations.)
-        """
-        result = self.tx.run(CypherRoot.batch_purge_access, 
-                             bid=batch_id, audi=auditor_user)
-        removed = []
-        for record in result:
-            # <Record id=190386>
-            rel_uniq_id = record.get("rel_id")
-            if rel_uniq_id:
-                print("#Neo4jUpdateService.ds_batch_purge_access: removed "
-                      f"id={rel_uniq_id} DOES_AUDIT from {auditor_user}")
-                removed.append(auditor_user)
-                return {"status": Status.UPDATED, "removed_auditors": removed}
-
-        return  {"status": Status.NOT_FOUND, "removed_auditors": removed}
-
-    def ds_batch_purge_auditors(self, batch_id, auditor_user):
-        """Removes other auditors but given user. 
-            1. Purge other auditors but current
-            2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
-               replace it with DOES_AUDIT
-        """
-        removed = []
-        st = Status.OK
-        result = self.tx.run(CypherRoot.batch_find_other_auditors, 
-                             bid=batch_id, me=auditor_user)
-        for record in result:
-            username = record.get("user")
-            rel_uniq_id = record.get("rel_id")
-            print("#Neo4jUpdateService.ds_batch_purge_auditors: removed "
-                  f"rel={rel_uniq_id} DOES_AUDIT from {username}")
-            removed.append(username)
-            st = Status.UPDATED
-
-        return {"status": st, "removed_auditors": removed}
-
 
     def ds_batch_remove_auditor(self, batch_id, auditor_user, new_state):
         """Updates Root node and the relation from UserProfile.
@@ -340,6 +319,27 @@ class Neo4jUpdateService(ConcreteService):
               f"({root_id}:Root({batch_id}))")
 
         return {"status": Status.OK, "identity": root_id, "d_days": d_days}
+
+    #- --- End auditor ops ----
+    
+    def ds_batch_purge_access(self, batch_id, auditor_user):
+        """Removes other auditors, if there are multiple auditors.
+           (Used to revert multi-auditor operations.)
+        """
+        result = self.tx.run(CypherRoot.batch_purge_access, 
+                             bid=batch_id, audi=auditor_user)
+        removed = []
+        for record in result:
+            # <Record id=190386>
+            rel_uniq_id = record.get("rel_id")
+            if rel_uniq_id:
+                print("#Neo4jUpdateService.ds_batch_purge_access: removed "
+                      f"id={rel_uniq_id} DOES_AUDIT from {auditor_user}")
+                removed.append(auditor_user)
+                return {"status": Status.UPDATED, "removed_auditors": removed}
+
+        return  {"status": Status.NOT_FOUND, "removed_auditors": removed}
+
 
     # ----- Common objects -----
 
