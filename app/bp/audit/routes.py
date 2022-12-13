@@ -104,15 +104,15 @@ def audit_researcher_ops(oper=None, batch_id=None):
             operation = session.get('oper')
             #request.form["oper"]
     
-        with RootUpdater("update") as serv: 
+        with RootUpdater("update") as service: 
             if operation == "request":
                 # Candidate -> Audit requested
                 msg = _("Audit request for ") + batch_id
-                res = serv.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
+                res = service.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
             elif operation == "withdraw":
                 # Auditing -> Audit requested 'luovu, keskeytä'
                 msg = _("Withdrawing audit request for ") + batch_id
-                res = serv.change_state(batch_id, user_id, State.ROOT_CANDIDATE)
+                res = service.change_state(batch_id, user_id, State.ROOT_CANDIDATE)
             else:
                 return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
@@ -222,7 +222,7 @@ def auditor_ops():
         9. "delete"    Rejected -> (does not exist)
         x. "cancel"
    [a.(1) Remove my HAS_ACCESS, if exists, Todo?]
-    b.(2) For auditors (but me): change DOES_AUDIT --> DID_AUDIT, ts_to=now
+    b.(2) For all auditors: change DOES_AUDIT --> DID_AUDIT, ts_to=now
     c.(3) Add my DOES_AUDIT
     ..(4) Change my DOES_AUDIT -> DID_AUDIT, ts_to=now
     ..(5) Add my HAS_ACCESS, if I don't have HAS_ACCESS and no *_AUDIT exists
@@ -241,14 +241,14 @@ def auditor_ops():
     def allow_batch_access(batch_id, user_audit):
         """ If given auditor has no access permission,
             create a HAS_ACCESS permission. """
-        with RootUpdater("update") as serv: 
-            res = serv.set_access(batch_id, user_audit)
+        with RootUpdater("update") as service: 
+            res = service.set_access(batch_id, user_audit)
             status = res["status"]
             if status == Status.UPDATED:
                 msg = _("You have given access permission for batch ") + batch_id
                 syslog.log(type="Material access given", batch=batch_id, op="allow_access", msg=msg)
             elif status == Status.OK:
-                msg = _("Your access for batch %(bid)s is OK", bid=batch_id)
+                msg = _("Batch %(bid)s access is OK", bid=batch_id)
             print(f"#bp.audit.routes.allow_batch_access: {msg}")
         return status, msg
 
@@ -268,58 +268,53 @@ def auditor_ops():
                 stk_logger(u_context, f"--> {here}/allow b={batch_id}")
                 syslog.log(type=f"Access granted", batch=batch_id, msg=msg)
 
-        if operation == "browse":
-            # 0a. Go to scene views
-            args = {"batch_id": batch_id, "material_type": material_type, "state": state}
-            return redirect("/scene/material/batch?" + urllib.parse.urlencode(args))
-        if operation == "download":
-            # 0b. Download Gramps file
-            return redirect(url_for("audit.audit_batch_download", 
-                                    batch_id=batch_id, 
-                                    username=current_user.username))
+            if operation == "browse":
+                # 0a. Go to scene views
+                args = {"batch_id": batch_id, "material_type": material_type, "state": state}
+                return redirect("/scene/material/batch?" + urllib.parse.urlencode(args))
+            else:   # operation == "download":
+                # 0b. Download Gramps file
+                return redirect(url_for("audit.audit_batch_download", 
+                                        batch_id=batch_id, 
+                                        username=current_user.username))
         if operation == "upload_log":
             # 0c No State change
             return redirect(url_for("gramps.show_upload_log_from_batch_id", 
                                     batch_id=batch_id))
 
-        logger.info(f"--> {here} u={user_owner} b={batch_id} {operation}")
-        with RootUpdater("update") as serv:
+        with RootUpdater("update") as service:
+            logger.info(f"--> {here} u={user_owner} b={batch_id} {operation}")
 
             if operation == "start":
                 # 5. "start"     Audit request -> Auditing (1,2,3)
-                # B - ds_batch_purge_auditors(self, batch_id, auditor_user):
-                #     Removes other auditor(s) but me
-                #     1. Purge other auditors but current
-                #     2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
-                #        replace it with DOES_AUDIT
                 #
-                # C - ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
-                #     Updates Batch node selected by Batch id and user.
-                #     We also check that the state is expected.
-                # (2) Complete current audition(s) [ds_batch_purge_auditors]
-                res1 = serv.end_auditions(batch_id, user_audit)
+                # B - ds_batch_end_audition(self, batch_id, auditor_user):
+                #     Changes each DOES_AUDIT link with DID_AUDIT
+                #     1. Create DID_AUDIT link with new end time
+                #     2. Remove DOES_AUDIT link
+                res1 = service.end_auditions(batch_id, user_audit)
                 if res1.get("status") == Status.UPDATED:
                     msg = res1.get("msg")
                     flash(msg)
-                    print(f"--> {here}(2): {msg}")
+                    print(f"--> {here}(B): {msg}")
                     syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg)
-                # (3) Add DOES_AUDIT
-                res = serv.select_auditor(batch_id, user_audit)
+                # C - ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
+                #     3. Updates Root.state
+                #     4. Create DOES_AUDIT link
+                res = service.select_auditor(batch_id, user_audit)
                 if Status.has_failed(res):
                     raise(IsotammiException, here)
-                msg = _("You are now an auditor for batch ") + batch_id
-                # # - (3) Change auditor's DOES_AUDIT --> DID_AUDIT
                 if res.get("status") == Status.UPDATED:
-                    flash(msg)
+                    flash( _("You are now an auditor for batch ") + batch_id )
                     msg = res.get("msg")
-                    print(f"--> {here}(3): {msg}")
+                    print(f"--> {here}(C): {msg}")
                     syslog.log(type=f"Start auditing", batch=batch_id, msg=msg)
                 # ? - (1) Remove HAS_ACCESS, if exists
-                # res = serv.purge_old_access(batch_id, user_audit)
+                # res = service.purge_old_access(batch_id, user_audit)
 
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
-                res = serv.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
+                res = service.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
                 if Status.has_failed(res):
                     msg = _(f"Audit request {operation} failed")
                     flash(msg, "error")
@@ -333,7 +328,7 @@ def auditor_ops():
 
             elif operation == "reject":
                 # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
-                res = serv.set_audited(batch_id, user_audit, State.ROOT_REJECTED)
+                res = service.set_audited(batch_id, user_audit, State.ROOT_REJECTED)
                 msg = _("You have rejected the audition of batch %(bid)s",
                         bid=batch_id)
                 flash(msg)
@@ -341,7 +336,7 @@ def auditor_ops():
             elif operation == "withdraw":
                 # 8. Stop auditing this batch. New state is "Audit requested".
                 # (4) Change DOES_AUDIT -> DID_AUDIT, ts_to=now
-                res = serv.remove_auditor(batch_id, user_audit)
+                res = service.remove_auditor(batch_id, user_audit)
                 d_days = int(round(res.get('d_days', 0.0)+0.5, 0))
                 msg = _("You did audit the batch %(bid)s for %(d)s days",
                         bid=batch_id, d=d_days)

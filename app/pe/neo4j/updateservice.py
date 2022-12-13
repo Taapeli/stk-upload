@@ -49,7 +49,7 @@ from .cypher.cy_person import CypherPerson
 from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_repository import CypherRepository
-from .cypher.cy_root import CypherRoot #, CypherAudit
+from .cypher.cy_root import CypherRoot, CypherAudit
 from .cypher.cy_source import CypherSourceByHandle
 
 from pe.neo4j.nodereaders import Comment_from_node
@@ -194,12 +194,12 @@ class Neo4jUpdateService(ConcreteService):
         """Checks, if auditor has read access to this batch.
            If not, creates a HAS_ACCESS relation from UserProfile to Root.
         """
-        result1 = self.tx.run(CypherRoot.does_need_batch_access, 
+        result1 = self.tx.run(CypherAudit.does_need_batch_access, 
                              bid=batch_id, audi=auditor_user)
         for record1 in result1:
             # Returned batch id => must create a HAS_ACCESS for browsing; else no match
             _user = record1[0]
-            result = self.tx.run(CypherRoot.batch_set_access, 
+            result = self.tx.run(CypherAudit.batch_set_access, 
                                  bid=batch_id, audi=auditor_user)
             for record in result:
                 uniq_id = record["bid"]
@@ -216,11 +216,11 @@ class Neo4jUpdateService(ConcreteService):
         """
         removed = []
         st = Status.OK
-        result = self.tx.run(CypherRoot.batch_find_other_auditors, 
+        result = self.tx.run(CypherAudit.batch_end_audition, 
                              bid=batch_id, me=auditor_user)
         for record in result:
             username = record.get("user")
-            rel_uniq_id = record.get("rel_id")
+            rel_uniq_id = record.get("relation_new").id
             print("#Neo4jUpdateService.ds_batch_end_auditors: removed "
                   f"rel={rel_uniq_id} DOES_AUDIT from {username}")
             removed.append(username)
@@ -235,7 +235,7 @@ class Neo4jUpdateService(ConcreteService):
            - Updates Batch node selected by Batch id and user
            - Create DOES_AUDIT link
         """
-        result = self.tx.run(CypherRoot.batch_set_auditor, 
+        result = self.tx.run(CypherAudit.batch_set_auditor, 
                              bid=batch_id, audi=auditor_user, states=old_states
         )
         for record in result:
@@ -251,7 +251,7 @@ class Neo4jUpdateService(ConcreteService):
         auditors=[]
         # 1. Change Root state and 
         #    replace my auditing [DOES_AUDIT] with completed [DID_AUDIT]
-        result = self.tx.run(CypherRoot.batch_end_audition, 
+        result = self.tx.run(CypherAudit.batch_end_audition, 
                              bid=batch_id, state=new_state)
         # _Record__keys (user, relation_new)
         for record in result:
@@ -267,7 +267,7 @@ class Neo4jUpdateService(ConcreteService):
             return {"status": Status.ERROR, "auditors": auditors}
         
         # 3. Update other auditors [DOES_AUDIT] with completed [DID_AUDIT]
-        result = self.tx.run(CypherRoot.batch_set_state_complete, 
+        result = self.tx.run(CypherAudit.batch_set_state_complete, 
                              user=audi, bid=root_id, state="")
         # _Record__keys <(user, relation_new)
         for record in result:
@@ -287,7 +287,7 @@ class Neo4jUpdateService(ConcreteService):
         # A. Locate root, my DOES_AUDIT link and number of other DOES_AUDIT links
         # B. Update root.ts_from, .ts_to and .state (if no other auditors ?todo?)
         # C? Delete my DOES_AUDIT link
-        record = self.tx.run(CypherRoot.batch_remove_auditor, 
+        record = self.tx.run(CypherAudit.batch_remove_auditor, 
                              bid=batch_id, audi=auditor_user, new_state=new_state
         ).single()
         # Returns: b: Root node, audi: UserProfile, oth_cnt: cnt of other auditors,
@@ -304,7 +304,7 @@ class Neo4jUpdateService(ConcreteService):
               f"-[r:DOES_AUDIT {ts_from},{ts_to}]-> ({root_id}:Root)")
 
         # D. Create DID_AUDIT link with time stamps
-        relation = self.tx.run(CypherRoot.link_did_audit, 
+        relation = self.tx.run(CypherAudit.link_did_audit, 
                                audi_id=audi_id, uid=root_id, fromtime = ts_from,
         ).single()[0] # Returns r: Relationship object
         ts_to = relation["ts_to"]
