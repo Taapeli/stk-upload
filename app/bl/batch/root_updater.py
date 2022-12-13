@@ -139,11 +139,11 @@ class RootUpdater(DataService):
             _res = serv.select_auditor(batch_id, user_audit)
         """
         from .root import State
-
         allowed_states = [State.ROOT_AUDIT_REQUESTED,
                           State.ROOT_AUDITING,
                           State.ROOT_ACCEPTED,
                           State.ROOT_REJECTED]
+        #TODO First remove active auditor(s)
         res = self.dataservice.ds_batch_set_auditor(batch_id,
                                                     auditor_username, 
                                                     allowed_states)

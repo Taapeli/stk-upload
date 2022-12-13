@@ -206,21 +206,6 @@ def audit_pick(batch_id=None):
     )
 
 
-def _allow_batch_access(batch_id, user_audit):
-    """ If given auditor has no access permission,
-        create a HAS_ACCESS permission. """
-    with RootUpdater("update") as serv: 
-        res = serv.set_access(batch_id, user_audit)
-        status = res["status"]
-        if status == Status.UPDATED:
-            msg = _("You have given access permission for batch ") + batch_id
-            syslog.log(type="Material access given", batch=batch_id, op="allow_access", msg=msg)
-        elif status == Status.OK:
-            msg = _("Your access for batch %(bid)s is OK", bid=batch_id)
-        print(f"#bp.audit.routes._allow_batch_access: {msg}")
-    return status, msg
-
-
 @bp.route("/audit/selected", methods=["POST"])
 @login_required
 @roles_accepted("audit")
@@ -253,6 +238,20 @@ def auditor_ops():
                 return op
         return "cancel"
 
+    def allow_batch_access(batch_id, user_audit):
+        """ If given auditor has no access permission,
+            create a HAS_ACCESS permission. """
+        with RootUpdater("update") as serv: 
+            res = serv.set_access(batch_id, user_audit)
+            status = res["status"]
+            if status == Status.UPDATED:
+                msg = _("You have given access permission for batch ") + batch_id
+                syslog.log(type="Material access given", batch=batch_id, op="allow_access", msg=msg)
+            elif status == Status.OK:
+                msg = _("Your access for batch %(bid)s is OK", bid=batch_id)
+            print(f"#bp.audit.routes.allow_batch_access: {msg}")
+        return status, msg
+
     here="bp.audit.routes.auditor_ops"
     msg = ""
     try:
@@ -263,7 +262,7 @@ def auditor_ops():
         operation = find_request_op()
         print(f"#auditor_ops: {user_audit} {operation} {batch_id}")
         if operation in ["browse", "download"]:
-            status, msg = _allow_batch_access(batch_id, user_audit)
+            status, msg = allow_batch_access(batch_id, user_audit)
             if status == Status.UPDATED:
                 flash(msg)
                 stk_logger(u_context, f"--> {here}/allow b={batch_id}")
@@ -315,7 +314,7 @@ def auditor_ops():
                     msg = res.get("msg")
                     print(f"--> {here}(3): {msg}")
                     syslog.log(type=f"Start auditing", batch=batch_id, msg=msg)
-                # # - (1) Remove HAS_ACCESS, if exists
+                # ? - (1) Remove HAS_ACCESS, if exists
                 # res = serv.purge_old_access(batch_id, user_audit)
 
             elif operation == "accept":

@@ -196,7 +196,7 @@ class Neo4jUpdateService(ConcreteService):
         result1 = self.tx.run(CypherRoot.does_need_batch_access, 
                              bid=batch_id, audi=auditor_user)
         for record1 in result1:
-            # Returned batch id: must create a HAS_ACCESS for browsing; else no match
+            # Returned batch id => must create a HAS_ACCESS for browsing; else no match
             _user = record1[0]
             result = self.tx.run(CypherRoot.batch_set_access, 
                                  bid=batch_id, audi=auditor_user)
@@ -217,24 +217,23 @@ class Neo4jUpdateService(ConcreteService):
         # 1. Change Root state and 
         #    replace my auditing [DOES_AUDIT] with completed [DID_AUDIT]
         result = self.tx.run(CypherRoot.batch_end_audition, 
-                             bid=batch_id, audi=user, state=new_state)
-        # _Record__keys (uniq_id, relation_new)
+                             bid=batch_id, state=new_state)
+        # _Record__keys (user, relation_new)
         for record in result:
             root_id = record["root"].id
-            #root_audited = record["root"]["audited"]
-            auditors = [user]
+            audi = record["user"]
+            auditors.append(audi)
             r = record["relation_new"]
             ts_from = r.get("ts_from")
             ts_to = r.get("ts_to","")
-            print(f"#ds_batch_set_audited: Auditor {user} "
+            print(f"#ds_batch_set_audited: Auditor {audi} "
                   f"{type(r).__name__} {ts_from}-{ts_to}")
         if not auditors:
-            auditors = [user]
             return {"status": Status.ERROR, "auditors": auditors}
         
         # 3. Update other auditors [DOES_AUDIT] with completed [DID_AUDIT]
-        result = self.tx.run(CypherRoot.batch_compelete_does_audits, 
-                             uid=root_id, ts=ts_to)
+        result = self.tx.run(CypherRoot.batch_set_state_complete, 
+                             user=audi, bid=root_id, state="")
         # _Record__keys <(user, relation_new)
         for record in result:
             auditor = record['user']
@@ -254,17 +253,11 @@ class Neo4jUpdateService(ConcreteService):
            - Updates Batch node selected by Batch id and user
            - Create DOES_AUDIT link
         """
-        result = self.tx.run(
-            CypherRoot.batch_set_auditor, 
-            bid=batch_id, audi=auditor_user, states=old_states
+        result = self.tx.run(CypherRoot.batch_set_auditor, 
+                             bid=batch_id, audi=auditor_user, states=old_states
         )
         for record in result:
             uniq_id = record[0]
-#TODO: Kun auditoija on päättänyt auditoinnin,
-#      sitten muut mahdolliset(?) auditoinnit lopetetaan myös
-#      [ds_batch_set_audited] ajanhetkeen, joka on tätä aikaisempi.
-#        - talleta edeltä ts_to
-#        - välitä muille esim. ts_to - 1000
             return {"status": Status.OK, "identity": uniq_id}
         return {"status": Status.NOT_FOUND}
 
@@ -288,12 +281,14 @@ class Neo4jUpdateService(ConcreteService):
         return  {"status": Status.NOT_FOUND, "removed_auditors": removed}
 
     def ds_batch_purge_auditors(self, batch_id, auditor_user):
-        """Removes other auditors, if there are multiple auditors.
-           (Used to revert multi-auditor operations.)
-            1. If there is multiple auditors, purge others but current
+        """Removes other auditors but given user. 
+            1. Purge other auditors but current
+            2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
+               replace it with DOES_AUDIT
         """
         removed = []
-        result = self.tx.run(CypherRoot.batch_purge_auditors, 
+        st = Status.OK
+        result = self.tx.run(CypherRoot.batch_find_other_auditors, 
                              bid=batch_id, me=auditor_user)
         for record in result:
             username = record.get("user")
@@ -301,9 +296,9 @@ class Neo4jUpdateService(ConcreteService):
             print("#Neo4jUpdateService.ds_batch_purge_auditors: removed "
                   f"rel={rel_uniq_id} DOES_AUDIT from {username}")
             removed.append(username)
-            return {"status": Status.UPDATED, "removed_auditors": removed}
+            st = Status.UPDATED
 
-        return {"status": Status.OK, "removed_auditors": removed}
+        return {"status": st, "removed_auditors": removed}
 
 
     def ds_batch_remove_auditor(self, batch_id, auditor_user, new_state):
@@ -312,33 +307,33 @@ class Neo4jUpdateService(ConcreteService):
         """
         # A. Locate root, my DOES_AUDIT link and number of other DOES_AUDIT links
         # B. Update root.ts_from, .ts_to and .state (if no other auditors ?todo?)
-        # C. Delete my DOES_AUDIT link
+        # C? Delete my DOES_AUDIT link
         record = self.tx.run(CypherRoot.batch_remove_auditor, 
-            bid=batch_id, audi=auditor_user, new_state=new_state
+                             bid=batch_id, audi=auditor_user, new_state=new_state
         ).single()
         # Returns: b: Root node, audi: UserProfile, oth_cnt: cnt of other auditors,
         #          ts_from: time from the removed DOES_AUDIT relation data
         #          ts_to:   creation time of (audi) -[r:DOES_AUDIT]-> (b)
         node_root = record["root"]
         node_audi = record["audi"]
-        root_id = node_root.id
-        audi_id = node_audi.id
         ts_from = record["ts_from"]
         ts_to = record["ts_to"] # probably None
+        root_id = node_root.id
+        audi_id = node_audi.id
         print("#ds_batch_remove_auditor: "
               f"Removed r ({audi_id}:{node_audi['username']}) "
               f"-[r:DOES_AUDIT {ts_from},{ts_to}]-> ({root_id}:Root)")
 
         # D. Create DID_AUDIT link with time stamps
         relation = self.tx.run(CypherRoot.link_did_audit, 
-            audi_id=audi_id, uid=root_id, fromtime = ts_from,
+                               audi_id=audi_id, uid=root_id, fromtime = ts_from,
         ).single()[0] # Returns r: Relationship object
         ts_to = relation["ts_to"]
         d_days = ""
         try:
             d_days = (ts_to - ts_from) / (1000*60*60*24)
         except Exception:
-            pass
+            d_days = "?"
         print("#ds_batch_remove_auditor: "
               f"Added r ({audi_id}:{node_audi['username']}) "
               f"-[r:DID_AUDIT time {ts_from}..{ts_to}]-> "
