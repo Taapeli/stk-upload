@@ -65,7 +65,7 @@ RETURN ID(b) AS id"""
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_state
     batch_set_state = """
 MATCH (u:UserProfile {username: $user})
-MATCH (u) -[r:HAS_LOADED]-> (b:Root {id: $bid})
+MATCH (u) -[r:HAS_LOADED|DOES_AUDIT]-> (b:Root {id: $bid})
     SET b.state=$state
 RETURN ID(b) AS id"""
 

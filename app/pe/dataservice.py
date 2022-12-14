@@ -103,7 +103,7 @@ class DataService:
 
     def __exit__(self, exc_type=None, exc_value=None, traceback=None):
         """Exit the runtime context related to this object.
-
+    
         The parameters describe the exception that caused the context to be
         exited. If the context was exited without an exception, all three
         arguments will be None.
@@ -113,7 +113,11 @@ class DataService:
             if exc_type:
                 logger.info(f"--{self.idstr} exit rollback {exc_type}")
                 if self.old_tx is None:
-                    self.dataservice.tx.rollback()
+                    # self.dataservice.tx.rollback()
+                    try:
+                        self.dataservice.tx.rollback()
+                    except Exception as e:
+                        logger.error(f'#~~~{self.idstr} rollback FAILED, {e.__class__.__name__} {e}')
             else:
                 if self.old_tx is None:
                     logger.debug(f'#~~~{self.idstr} exit commit tx={obj_addr(self.dataservice.tx)}')

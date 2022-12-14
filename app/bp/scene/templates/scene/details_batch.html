@@ -213,8 +213,12 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
 
         <div id="actions">
             <h3>{{ _("Actions") }}</h3>
+            {% if not batch.user == current_user.username %}
+            	{% set ret = "&ret="+"/scene/details/" %}
+            {% else %}{% set ret = "" %}
+            {% endif -%}<!-- auditor => {{auditor}} -->
             <div hx-trigger="load"
-                hx-get="/gramps/commands/{{batch.id}}?caller=scene"> 
+                hx-get="/gramps/commands/{{batch.id}}?caller=scene{{ret}}"> 
             </div>
         </div>
     </div>

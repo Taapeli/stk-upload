@@ -97,6 +97,8 @@ def audit_researcher_ops(oper=None, batch_id=None):
     """
     try:
         user_id = current_user.username
+        # Optional return page like "/scene/details/"
+        ret_page = request.args.get('ret', '')
         operation = oper
         if not batch_id:
             batch_id = session.get('batch_id')
@@ -114,11 +116,17 @@ def audit_researcher_ops(oper=None, batch_id=None):
                 msg = _("Withdrawing audit request for ") + batch_id
                 res = service.change_state(batch_id, user_id, State.ROOT_CANDIDATE)
             else:
-                return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
+                if ret_page:
+                    return redirect(ret_page)
+                else:
+                    return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
     except Exception as e:
         error_print("audit_researcher_ops", e)
-        return redirect(url_for("gramps.list_uploads"))
+        if ret_page:
+            return redirect(ret_page)
+        else:
+            return redirect(url_for("gramps.list_uploads"))
 
     if not res or Status.has_failed(res):
         flash(_(msg) + _(" failed"), "error")
@@ -127,7 +135,10 @@ def audit_researcher_ops(oper=None, batch_id=None):
 
     print(f"bp.audit.routes.audit_researcher_ops/{operation}: {res.get('status')} for node {res.get('identity')}")
     syslog.log(type=f"Audit {operation}", batch=batch_id, by=user_id, msg=msg)
-    return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
+    if ret_page:
+        return redirect(ret_page)
+    else:
+        return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
 
 @bp.route("/audit/list_uploads", methods=["GET"])
