@@ -147,12 +147,12 @@ class RootUpdater(DataService):
         return res
     
     def end_auditions(self, batch_id, auditor_username):
-        """ Make current auditors as former auditors.
+        """ Make current auditor(s) as former auditors.
             1. If there is multiple auditors, purge others but current
             2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
                replace it with DOES_AUDIT
         """
-        res = self.dataservice.ds_batch_end_auditors(batch_id, auditor_username)
+        res = self.dataservice.ds_batch_end_auditions(batch_id, auditor_username)
         # Got {status, removed_auditors}
         removed_auditors = res.get("removed_auditors", [])
         if len(removed_auditors) > 0:
@@ -166,13 +166,12 @@ class RootUpdater(DataService):
     def select_auditor(self, batch_id, auditor_username):
         """ Mark auditor for this data batch and set status. 
 
-            # - (3) Change auditor's DOES_AUDIT --> DID_AUDIT
-            # If there is multiple auditors, purge others but current
-            res1 = serv.end_auditions(batch_id, user_audit)
-            # 5. "start"     Audit request -> Auditing (1,2,3)
-            # - (2) Add DOES_AUDIT
-            _res = serv.select_auditor(batch_id, user_audit)
-        """
+            1. Root.state is ROOT_AUDIT_REQUEST
+            2. The auditors' link change DOES_AUDIT --> DID_AUDIT must be done
+               by calling self.set_audited()
+
+            Now set Root.state = ROOT_AUDITING and create new link DOES_AUDIT
+         """
         from .root import State
         allowed_states = [State.ROOT_AUDIT_REQUESTED,
                           State.ROOT_AUDITING,

@@ -68,79 +68,6 @@ def audit_home():
     return render_template("/audit/index.html")
 
 
-# ------------------- Change User Batch to Approved data ----------------------
-# Researcher steps:
-#    1.  /gramps/uploads
-#    2.  "Send for auditing" -> /audit/requested/<batch_id>
-#        - "request"   Candidate -> Audit request
-#    2.1  "revert"    Candidate <- Audit request
-#
-# Auditor steps:
-#    3.                           /audit/list_uploads
-#    4. "Pick audit operation" -> /audit/pick/<batch_id>   (pick_auditing.html)
-#    5. "Start auditing"       -> /audit/selected "start",batch_id  -> list_uploads
-#       - "start"   Audit request -> Auditing
-#    5.1 "Withdraw from audition" -> Audit requested
-#    6. "Accept auditing"      -> /audit/selected "accept",batch_id -> list_uploads
-#       - "accept"    Auditing -> Accepted
-#    7. "Reject auditing"      -> /audit/selected "reject",batch_id -> list_uploads
-#       - "reject"    Auditing -> Rejected
-# -----------------------------------------------------------------------------
-
-@bp.route("/audit/user/<oper>/<batch_id>", methods=["GET"])
-@login_required
-@roles_accepted("research")
-def audit_researcher_ops(oper=None, batch_id=None):
-    """ Select Researcher operation for Batch by oper.
-        - "request": User moves Batch to Audit queue by setting state="Audit requested" or
-        - "withdraw": User withdraws audit request.
-    """
-    try:
-        user_id = current_user.username
-        # Optional return page like "/scene/details/"
-        ret_page = request.args.get('ret', '')
-        operation = oper
-        if not batch_id:
-            batch_id = session.get('batch_id')
-        if not oper:
-            operation = session.get('oper')
-            #request.form["oper"]
-    
-        with RootUpdater("update") as service: 
-            if operation == "request":
-                # Candidate -> Audit requested
-                msg = _("Audit request for ") + batch_id
-                res = service.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
-            elif operation == "withdraw":
-                # Auditing -> Audit requested 'luovu, keskeytä'
-                msg = _("Withdrawing audit request for ") + batch_id
-                res = service.change_state(batch_id, user_id, State.ROOT_CANDIDATE)
-            else:
-                if ret_page:
-                    return redirect(ret_page)
-                else:
-                    return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
-
-    except Exception as e:
-        error_print("audit_researcher_ops", e)
-        if ret_page:
-            return redirect(ret_page)
-        else:
-            return redirect(url_for("gramps.list_uploads"))
-
-    if not res or Status.has_failed(res):
-        flash(_(msg) + _(" failed"), "error")
-    else:
-        flash(_(msg) + _(" succeeded"))
-
-    print(f"bp.audit.routes.audit_researcher_ops/{operation}: {res.get('status')} for node {res.get('identity')}")
-    syslog.log(type=f"Audit {operation}", batch=batch_id, by=user_id, msg=msg)
-    if ret_page:
-        return redirect(ret_page)
-    else:
-        return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
-
-
 @bp.route("/audit/list_uploads", methods=["GET"])
 @bp.route("/audit/list_uploads/<batch_id>", methods=["GET"])
 @login_required
@@ -215,6 +142,96 @@ def audit_pick(batch_id=None):
         total=total,
         auditor_name=current_user.name,
     )
+
+# ------------------- Change User Batch to Approved data ----------------------
+# Researcher steps:
+#    1.  /gramps/uploads
+#    2.  "Send for auditing" -> /audit/requested/<batch_id>
+#        - "request"   Candidate -> Audit request
+#    2.1  "revert"    Candidate <- Audit request
+#
+# Auditor steps:
+#    3.                           /audit/list_uploads
+#    4. "Pick audit operation" -> /audit/pick/<batch_id>   (pick_auditing.html)
+#    5. "Start auditing"       -> /audit/selected "start",batch_id  -> list_uploads
+#       - "start"   Audit request -> Auditing
+#    5.1 "Withdraw from audition" -> Audit requested
+#    6. "Accept auditing"      -> /audit/selected "accept",batch_id -> list_uploads
+#       - "accept"    Auditing -> Accepted
+#    7. "Reject auditing"      -> /audit/selected "reject",batch_id -> list_uploads
+#       - "reject"    Auditing -> Rejected
+# -----------------------------------------------------------------------------
+
+def _end_current_auditions(service, batch_id, user_audit):
+    """ Stop all auditions by changing each DOES_AUDIT link with DID_AUDIT.
+    """
+    # B - Changes each DOES_AUDIT link to DID_AUDIT
+    #     1. Creates DID_AUDIT link with new ts_end time
+    #     2. Removes DOES_AUDIT link
+    res1 = service.end_auditions(batch_id, user_audit)
+    if res1.get("status") == Status.UPDATED:
+        msg = res1.get("msg")
+        flash(msg)
+        syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg)
+        return msg
+    return ""
+
+@bp.route("/audit/user/<oper>/<batch_id>", methods=["GET"])
+@login_required
+@roles_accepted("research")
+def researcher_ops(oper=None, batch_id=None):
+    """ Select Researcher operation for Batch by oper.
+        - "request": User moves Batch to Audit queue by setting state="Audit requested" or
+        - "withdraw": User withdraws audit request.
+    """
+    here="bp.audit.routes.researcher_ops"
+    msg = ""
+    try:
+        user_id = current_user.username
+        # Optional return page like "/scene/details/"
+        ret_page = request.args.get('ret', '')
+        operation = oper
+        if not batch_id:
+            batch_id = session.get('batch_id')
+        if not oper:
+            operation = session.get('oper')
+            #request.form["oper"]
+    
+        with RootUpdater("update") as service: 
+            if operation == "request":
+                # Candidate -> Audit requested
+                msg = _("Audit request for ") + batch_id
+                res = service.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
+            elif operation == "withdraw":
+                # Auditing -> Audit requested 'luovu, keskeytä'
+                # 6. Move from "Auditing" to "Accepted" state
+                # Changes each DOES_AUDIT link to DID_AUDIT
+                msg1 = _end_current_auditions(service, batch_id, user_id)
+                if msg1: print(f"--> {here}-{operation}: {msg1}")
+            else:
+                if ret_page:
+                    return redirect(ret_page)
+                else:
+                    return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
+
+    except Exception as e:
+        error_print("researcher_ops", e)
+        if ret_page:
+            return redirect(ret_page)
+        else:
+            return redirect(url_for("gramps.list_uploads"))
+
+    if not res or Status.has_failed(res):
+        flash(_(msg) + _(" failed"), "error")
+    else:
+        flash(_(msg) + _(" succeeded"))
+
+    print(f"{here}/{operation}: {res.get('status')} for node {res.get('identity')}")
+    syslog.log(type=f"Audit {operation}", batch=batch_id, by=user_id, msg=msg)
+    if ret_page:
+        return redirect(ret_page)
+    else:
+        return redirect(url_for("gramps.list_uploads", batch_id=batch_id))
 
 
 @bp.route("/audit/selected", methods=["POST"])
@@ -298,17 +315,11 @@ def auditor_ops():
 
             if operation == "start":
                 # 5. "start"     Audit request -> Auditing (1,2,3)
-                #
-                # B - ds_batch_end_audition(self, batch_id, auditor_user):
-                #     Changes each DOES_AUDIT link with DID_AUDIT
-                #     1. Create DID_AUDIT link with new end time
-                #     2. Remove DOES_AUDIT link
-                res1 = service.end_auditions(batch_id, user_audit)
-                if res1.get("status") == Status.UPDATED:
-                    msg = res1.get("msg")
-                    flash(msg)
-                    print(f"--> {here}(B): {msg}")
-                    syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg)
+
+                # Changes each DOES_AUDIT link to DID_AUDIT
+                msg1 = _end_current_auditions(service, batch_id, user_audit)
+                if msg1: print(f"--> {here}-{operation}: {msg1}")
+
                 # C - ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
                 #     3. Updates Root.state
                 #     4. Create DOES_AUDIT link
@@ -325,6 +336,10 @@ def auditor_ops():
 
             elif operation == "accept":
                 # 6. Move from "Auditing" to "Accepted" state
+                # Changes each DOES_AUDIT link to DID_AUDIT
+                msg1 = _end_current_auditions(service, batch_id, user_audit)
+                if msg1: print(f"--> {here}-{operation}: {msg1}")
+
                 res = service.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
                 if Status.has_failed(res):
                     msg = _(f"Audit request {operation} failed")
@@ -339,6 +354,10 @@ def auditor_ops():
 
             elif operation == "reject":
                 # 7. Move from "Auditing" to "Rejected" state, if no other auditors exist
+                # Changes each DOES_AUDIT link to DID_AUDIT
+                msg1 = _end_current_auditions(service, batch_id, user_audit)
+                if msg1: print(f"--> {here}-{operation}: {msg1}")
+
                 res = service.set_audited(batch_id, user_audit, State.ROOT_REJECTED)
                 msg = _("You have rejected the audition of batch %(bid)s",
                         bid=batch_id)
@@ -346,6 +365,10 @@ def auditor_ops():
 
             elif operation == "withdraw":
                 # 8. Stop auditing this batch. New state is "Audit requested".
+                # Changes each DOES_AUDIT link to DID_AUDIT
+                msg1 = _end_current_auditions(service, batch_id, user_audit)
+                if msg1: print(f"--> {here}-{operation}: {msg1}")
+
                 # (4) Change DOES_AUDIT -> DID_AUDIT, ts_to=now
                 res = service.remove_auditor(batch_id, user_audit)
                 d_days = int(round(res.get('d_days', 0.0)+0.5, 0))

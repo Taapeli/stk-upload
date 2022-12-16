@@ -208,7 +208,7 @@ class Neo4jUpdateService(ConcreteService):
         # No match: no need create a HAS_ACCESS for browsing
         return {"status": Status.OK}
 
-    def ds_batch_end_auditors(self, batch_id, auditor_user):
+    def ds_batch_end_auditions(self, batch_id, auditor_user):
         """Removes other auditors but given user. 
             1. Purge other auditors but current
             2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
@@ -221,7 +221,7 @@ class Neo4jUpdateService(ConcreteService):
         for record in result:
             username = record.get("user")
             rel_uniq_id = record.get("relation_new").id
-            print("#Neo4jUpdateService.ds_batch_end_auditors: removed "
+            print("#Neo4jUpdateService.ds_batch_end_auditions: removed "
                   f"rel={rel_uniq_id} DOES_AUDIT from {username}")
             removed.append(username)
             st = Status.UPDATED
