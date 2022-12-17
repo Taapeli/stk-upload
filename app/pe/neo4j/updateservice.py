@@ -798,8 +798,8 @@ class Neo4jUpdateService(ConcreteService):
         for handle in place.citation_handles:
             # Link to existing Citation
             result = tx.run(
-                CypherObject.link_citation, 
-                handle=place.handle, c_handle=handle)
+                CypherObjectWHandle.link_citation, 
+                root_id=place.uniq_id, handle=handle)
 
         if place.media_refs:
             # Make relations to the Media nodes and their Note and Citation references
@@ -1117,13 +1117,13 @@ class Neo4jUpdateService(ConcreteService):
         # Make relations to the Note nodes
 
         for handle in person.note_handles:
-            tx.run(CypherPerson.link_note, p_handle=person.handle, n_handle=handle)
+            tx.run(CypherObjectWHandle.link_note, root_id=person.uniq_id, handle=handle)
 
         # Make relations to the Citation nodes
 
         for handle in person.citation_handles:
             tx.run(
-                CypherObject.link_citation, handle=person.handle, c_handle=handle
+                CypherObjectWHandle.link_citation, root_id=person.uniq_id, handle=handle
             )
         return
 
@@ -1583,7 +1583,7 @@ class Neo4jUpdateService(ConcreteService):
         # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
         for handle in f.citation_handles:
             tx.run(
-                CypherObject.link_citation, handle=f.handle, c_handle=handle
+                CypherObjectWHandle.link_citation, root_id=f.uniq_id, handle=handle
             )
 
 
