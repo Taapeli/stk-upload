@@ -329,7 +329,7 @@ MATCH (root:Root{id: $bid}) <-[r1:DOES_AUDIT]- (audi:UserProfile)
 RETURN audi.username AS user, r2 AS relation_new
 """
 
-    batch_set_auditor = """
+    batch_start_audition = """
 MATCH (root:Root {id: $bid}) WHERE root.state IN $states
 MATCH (audi:UserProfile {username: $audi})
     SET root.state = "Auditing"

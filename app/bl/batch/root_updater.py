@@ -163,12 +163,12 @@ class RootUpdater(DataService):
             res["msg"] = msg
         return res
 
-    def select_auditor(self, batch_id, auditor_username):
+    def start_audition(self, batch_id, auditor_username):
         """ Mark auditor for this data batch and set status. 
 
-            1. Root.state is ROOT_AUDIT_REQUEST
+            1. Check Root.state
             2. The auditors' link change DOES_AUDIT --> DID_AUDIT must be done
-               by calling self.set_audited()
+               before by calling self.end_auditions()
 
             Now set Root.state = ROOT_AUDITING and create new link DOES_AUDIT
          """
@@ -178,7 +178,7 @@ class RootUpdater(DataService):
                           State.ROOT_ACCEPTED,
                           State.ROOT_REJECTED]
         #TODO First remove active auditor(s)
-        res = self.dataservice.ds_batch_set_auditor(batch_id,
+        res = self.dataservice.ds_batch_start_audition(batch_id,
                                                     auditor_username, 
                                                     allowed_states)
         return res
@@ -187,7 +187,7 @@ class RootUpdater(DataService):
         """ Set batch status and mark all auditions completed.
             - called from bp.audit.routes.auditor_ops.find_request_op
               with State.ROOT_ACCEPTED, State.ROOT_REJECTED
-            - TODO: how about self.select_auditor?
+            - TODO: how about self.start_audition?
         """
         res = self.dataservice.ds_batch_set_audited(batch_id, user_audit, b_state)
         return res

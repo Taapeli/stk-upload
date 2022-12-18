@@ -320,18 +320,19 @@ def auditor_ops():
                 msg1 = _end_current_auditions(service, batch_id, user_audit)
                 if msg1: print(f"--> {here}-{operation}: {msg1}")
 
-                # C - ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
-                #     3. Updates Root.state
-                #     4. Create DOES_AUDIT link
-                res = service.select_auditor(batch_id, user_audit)
-                if Status.has_failed(res):
-                    raise(IsotammiException, here)
-                if res.get("status") == Status.UPDATED:
+                # C - Updates Root.state and creates DOES_AUDIT link
+                #   - If state does not match, returns NOT FOUND
+                res = service.start_audition(batch_id, user_audit)
+                if res.get("status") == Status.OK:
                     flash( _("You are now an auditor for batch ") + batch_id )
                     msg = res.get("msg")
                     print(f"--> {here}(C): {msg}")
                     syslog.log(type=f"Start auditing", batch=batch_id, msg=msg)
-                # ? - (1) Remove HAS_ACCESS, if exists
+                    raise(IsotammiException, here)
+                if Status.has_failed(res):
+                    logger.error(f"{here}(C): status={res.get('status','?')}")
+                    raise(IsotammiException, here)
+                # ? - Remove HAS_ACCESS, if exists
                 # res = service.purge_old_access(batch_id, user_audit)
 
             elif operation == "accept":

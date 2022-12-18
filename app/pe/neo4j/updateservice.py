@@ -216,11 +216,10 @@ class Neo4jUpdateService(ConcreteService):
         """
         removed = []
         st = Status.OK
-        result = self.tx.run(CypherAudit.batch_end_audition, 
-                             bid=batch_id, me=auditor_user)
+        result = self.tx.run(CypherAudit.batch_end_audition, bid=batch_id)
         for record in result:
             username = record.get("user")
-            rel_uniq_id = record.get("relation_new").id
+            rel_uniq_id = int(record.get("relation_new").element_id)
             print("#Neo4jUpdateService.ds_batch_end_auditions: removed "
                   f"rel={rel_uniq_id} DOES_AUDIT from {username}")
             removed.append(username)
@@ -228,14 +227,14 @@ class Neo4jUpdateService(ConcreteService):
 
         return {"status": st, "removed_auditors": removed}
 
-    def ds_batch_set_auditor(self, batch_id, auditor_user, old_states):
+    def ds_batch_start_audition(self, batch_id, auditor_user, old_states):
         """Updates Batch node selected by Batch id and user.
 
            - Check that the state is expected
            - Updates Batch node selected by Batch id and user
            - Create DOES_AUDIT link
         """
-        result = self.tx.run(CypherAudit.batch_set_auditor, 
+        result = self.tx.run(CypherAudit.batch_start_audition, 
                              bid=batch_id, audi=auditor_user, states=old_states
         )
         for record in result:
