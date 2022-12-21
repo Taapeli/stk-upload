@@ -185,28 +185,14 @@ class RootUpdater(DataService):
 
     def set_audited(self, batch_id, user_audit, b_state):
         """ Set batch status and mark all auditions completed.
-            - called from bp.audit.routes.auditor_ops.find_request_op
-              with State.ROOT_ACCEPTED, State.ROOT_REJECTED
-            - TODO: how about self.start_audition?
+
+            Returns {status, identity, d_days}, where identity = Root.id
+            and d_days duration of (last) audition in days.
         """
         res = self.dataservice.ds_batch_set_audited(batch_id, user_audit, b_state)
         return res
 
-    def remove_auditor(self, batch_id, auditor_username):
-        """ Mark auditor for this data batch and set status.
-
-            (4) Change all DOES_AUDIT -> DID_AUDIT, ts_to=now
-            If no other is auditing, the status is changed.
-        
-            Returns {status, identity, d_days}, where identity = Root.id
-            and d_days duration of (last) audition in days.
-        """
-        from .root import State
-        new_state = State.ROOT_AUDIT_REQUESTED
-        res = self.dataservice.ds_batch_remove_auditor(batch_id,
-                                                       auditor_username, 
-                                                       new_state)
-        return res
+    # def remove_auditor(self, batch_id, auditor_username): -> set_audited
 
     #---- end auditor ops ----
 

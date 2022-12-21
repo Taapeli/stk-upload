@@ -202,12 +202,20 @@ def researcher_ops(oper=None, batch_id=None):
                 # Candidate -> Audit requested
                 msg = _("Audit request for ") + batch_id
                 res = service.change_state(batch_id, user_id, State.ROOT_AUDIT_REQUESTED)
+
             elif operation == "withdraw":
                 # Auditing -> Audit requested 'luovu, keskeytä'
-                # 6. Move from "Auditing" to "Accepted" state
                 # Changes each DOES_AUDIT link to DID_AUDIT
                 msg1 = _end_current_auditions(service, batch_id, user_id)
                 if msg1: print(f"--> {here}-{operation}: {msg1}")
+
+                # Change state to Candidate
+                res = service.set_audited(batch_id, user_id, State.ROOT_CANDIDATE)
+                #res = service.remove_auditor(batch_id, user_audit)
+                d_days = int(round(res.get('d_days', 0.0)+0.5, 0))
+                msg = _("You did audit the batch %(bid)s for %(d)s days",
+                        bid=batch_id, d=d_days)
+                flash(msg)
             else:
                 if ret_page:
                     return redirect(ret_page)
@@ -341,7 +349,7 @@ def auditor_ops():
                 msg1 = _end_current_auditions(service, batch_id, user_audit)
                 if msg1: print(f"--> {here}-{operation}: {msg1}")
 
-                res = service.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
+                res = service.set_audited(batch_id, user_audit, State.ROOT_AUDIT_REQUESTED)
                 if Status.has_failed(res):
                     msg = _(f"Audit request {operation} failed")
                     flash(msg, "error")
@@ -370,8 +378,9 @@ def auditor_ops():
                 msg1 = _end_current_auditions(service, batch_id, user_audit)
                 if msg1: print(f"--> {here}-{operation}: {msg1}")
 
-                # (4) Change DOES_AUDIT -> DID_AUDIT, ts_to=now
-                res = service.remove_auditor(batch_id, user_audit)
+                # Change Root.state and return duration
+                res = service.set_audited(batch_id, user_audit, State.ROOT_CANDIDATE)
+                #res = service.remove_auditor(batch_id, user_audit)
                 d_days = int(round(res.get('d_days', 0.0)+0.5, 0))
                 msg = _("You did audit the batch %(bid)s for %(d)s days",
                         bid=batch_id, d=d_days)

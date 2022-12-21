@@ -243,81 +243,39 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.NOT_FOUND}
 
     def ds_batch_set_audited(self, batch_id, user, new_state):
-        """Updates the auditing Batch node and auditor links.
-           For existing auditor, DOES_AUDIT relation is replaced by DID_AUDIT
-           with ending timestamp added.
+        """Updates the auditing Batch node and return duration.
+        
+           The DOES_AUDIT link have been changed to DID_AUDIT
+           by ds_batch_end_auditions().
         """
         auditors=[]
-        # 1. Change Root state and 
-        #    replace my auditing [DOES_AUDIT] with completed [DID_AUDIT]
-        result = self.tx.run(CypherAudit.batch_end_audition, 
-                             bid=batch_id, state=new_state)
-        # _Record__keys (user, relation_new)
+        result = self.tx.run(CypherAudit.batch_set_state_complete, 
+                             audi=user, bid=batch_id, state=new_state)
+        # _Record__keys (root, audi, relation_new)
         for record in result:
-            root_id = record["root"].id
-            audi = record["user"]
-            auditors.append(audi)
+            node_root = record["root"]
+            node_audi = record["audi"]
             r = record["relation_new"]
             ts_from = r.get("ts_from")
-            ts_to = r.get("ts_to","")
-            print(f"#ds_batch_set_audited: Auditor {audi} "
-                  f"{type(r).__name__} {ts_from}-{ts_to}")
-        if not auditors:
-            return {"status": Status.ERROR, "auditors": auditors}
-        
-        # 3. Update other auditors [DOES_AUDIT] with completed [DID_AUDIT]
-        result = self.tx.run(CypherAudit.batch_set_state_complete, 
-                             user=audi, bid=root_id, state="")
-        # _Record__keys <(user, relation_new)
-        for record in result:
-            auditor = record['user']
+            ts_to = r.get("ts_to", 0)
+            root_id = node_root.id
+            audi_id = node_audi.id
+            auditor = node_audi.username
             auditors.append(auditor)
-            #myself = record['myself']
-            r = record["relation_new"]
-            print(f"#ds_batch_set_audited: others {auditor} "
-                  f"{type(r).__name__} {r.get('ts_from')}-{r.get('ts_to','')}")
+            try:
+                d_days = (ts_to - ts_from) / (1000*60*60*24)
+            except Exception:
+                d_days = "?"
+            print(f"#ds_batch_set_audited: ({audi_id}:({auditor}))"
+                  f" DID_AUDIT {ts_from}..{ts_to} ->"
+                  f" ({root_id}:Root({batch_id})), {d_days} days")
 
-        return {"status": Status.OK, "auditors": auditors}
-
-    def ds_batch_remove_auditor(self, batch_id, auditor_user, new_state):
-        """Updates Root node and the relation from UserProfile.
-           We also check that the state is expected.
-        """
-        # A. Locate root, my DOES_AUDIT link and number of other DOES_AUDIT links
-        # B. Update root.ts_from, .ts_to and .state (if no other auditors ?todo?)
-        # C? Delete my DOES_AUDIT link
-        record = self.tx.run(CypherAudit.batch_remove_auditor, 
-                             bid=batch_id, audi=auditor_user, new_state=new_state
-        ).single()
-        # Returns: b: Root node, audi: UserProfile, oth_cnt: cnt of other auditors,
-        #          ts_from: time from the removed DOES_AUDIT relation data
-        #          ts_to:   creation time of (audi) -[r:DOES_AUDIT]-> (b)
-        node_root = record["root"]
-        node_audi = record["audi"]
-        ts_from = record["ts_from"]
-        ts_to = record["ts_to"] # probably None
-        root_id = node_root.id
-        audi_id = node_audi.id
-        print("#ds_batch_remove_auditor: "
-              f"Removed r ({audi_id}:{node_audi['username']}) "
-              f"-[r:DOES_AUDIT {ts_from},{ts_to}]-> ({root_id}:Root)")
-
-        # D. Create DID_AUDIT link with time stamps
-        relation = self.tx.run(CypherAudit.link_did_audit, 
-                               audi_id=audi_id, uid=root_id, fromtime = ts_from,
-        ).single()[0] # Returns r: Relationship object
-        ts_to = relation["ts_to"]
-        d_days = ""
-        try:
-            d_days = (ts_to - ts_from) / (1000*60*60*24)
-        except Exception:
-            d_days = "?"
-        print("#ds_batch_remove_auditor: "
-              f"Added r ({audi_id}:{node_audi['username']}) "
-              f"-[r:DID_AUDIT time {ts_from}..{ts_to}]-> "
-              f"({root_id}:Root({batch_id}))")
-
+        if not auditors:
+            return {"status": Status.ERROR, "text": "No match", "d_days": 0}
         return {"status": Status.OK, "identity": root_id, "d_days": d_days}
+        #return {"status": Status.OK, "auditors": auditors}
+
+    # def ds_batch_remove_auditor(self, batch_id, auditor_user, new_state): -> ds_batch_set_audited
 
     #- --- End auditor ops ----
     

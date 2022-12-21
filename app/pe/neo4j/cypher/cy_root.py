@@ -338,28 +338,12 @@ MATCH (audi:UserProfile {username: $audi})
 RETURN ID(root) AS id"""
 
     batch_set_state_complete = """
-MATCH (u:UserProfile {username: $user}) -[r:DID_AUDIT]-> (b:Root {id: $bid})
+MATCH (u:UserProfile {username: $audi}) -[r:DID_AUDIT]-> (b:Root {id: $bid})
 WHERE b.state = "Auditing"
     SET b.state=$state
-RETURN ID(b) AS id"""
+RETURN b AS root, u AS audi, r AS relation_new"""
 
-    batch_remove_auditor = """
-MATCH (root:Root {id: $bid}) WHERE root.state = "Auditing"
-OPTIONAL MATCH (other:UserProfile) -[:DOES_AUDIT]-> (root)
-    WHERE other.username <> $audi
-OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[r2:DOES_AUDIT]-> (root)
-// audi = UserProfile $audi
-// other = other auditing UserProfiles, r2:DOEA_AUDIT
-// - set r2 ts_from,ts_to
-// - if others exists: set root,state, root.audited
-//TODO: Does not update r1
-WITH root, audi, other, r2, COUNT(DISTINCT other) AS oth_cnt,
-    r2.ts_from AS ts_from, 
-    r2.ts_to AS ts_to
-    SET (CASE WHEN oth_cnt = 0 THEN root END).state = $new_state
-    SET (CASE WHEN oth_cnt = 0 THEN root END).audited = null
-    DELETE r2
-RETURN root, audi, oth_cnt, ts_from, ts_to"""
+#     batch_remove_auditor -> batch_set_state_complete
 
     link_did_audit = """
 MATCH (root:Root) WHERE ID(root) = $uid
