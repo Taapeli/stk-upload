@@ -54,10 +54,10 @@ from flask_babelex import _
 
 import shareds
 from bl.base import Status
-from bl.batch.root import Root, BatchReader, State #, BatchUpdater
+from bl.batch.root import Root, BatchReader #, State #, BatchUpdater
 from bl.batch.root_updater import RootUpdater
 from bl.gramps.gramps_utils import get_nonstandard_types
-from bl.gramps.gramps_loader import get_upload_folder
+# from bl.gramps.gramps_loader import get_upload_folder
 
 from models import syslog, util #, loadfile
 
@@ -491,6 +491,7 @@ def get_commands(batch_id):
         If has argument '?caller=scene', don't show browse command
     """
     caller = request.args.get('caller', 'uploads')
+    ret_addr = request.args.get('ret', '')
 
     with BatchReader("update") as batch_service:
         res = batch_service.batch_get_one(current_user.username, batch_id)
@@ -515,6 +516,8 @@ def get_commands(batch_id):
                     if not (caller == "scene" and cmd.startswith("/scene/material/batch")):
                         # Add parameters
                         cmd = unquote_plus(cmd.format(state=batch.state, batch_id=batch.id))
+                        if ret_addr:
+                            cmd += "?ret=" + ret_addr
                         commands.append( (cmd, _(title), confirm) )
 
         return render_template("/gramps/commands.html", 
@@ -615,7 +618,7 @@ def run_supertool(batch_id):
     if supertool_runner:
         lang = session.get("lang","")
         print("lang",lang)
-        _msgs = gramps_utils.run_supertool(supertool_runner, lang, current_user.username, batch_id, batch.xmlname, scriptfile, outputfile)
+        _msgs = gramps_utils.run_supertool(shareds.app, lang, current_user.username, batch_id, batch.xmlname, scriptfile, outputfile)
     else:
         _msgs = {}
     logger.info(f'bp.gramps.routes.run_supertool f="{os.path.basename(batch.xmlname)}"')
