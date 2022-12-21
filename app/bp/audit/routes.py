@@ -143,7 +143,7 @@ def audit_pick(batch_id=None):
         auditor_name=current_user.name,
     )
 
-# ------------------- Change User Batch to Approved data ----------------------
+# ------------------- Change User Batch state ----------------------
 # Researcher steps:
 #    1.  /gramps/uploads
 #    2.  "Send for auditing" -> /audit/requested/<batch_id>
@@ -169,10 +169,11 @@ def _end_current_auditions(service, batch_id, user_audit):
     #     1. Creates DID_AUDIT link with new ts_end time
     #     2. Removes DOES_AUDIT link
     res1 = service.end_auditions(batch_id, user_audit)
+    messages = res1.get("messages", [])
     if res1.get("status") == Status.UPDATED:
-        msg = res1.get("msg")
-        flash(msg)
-        syslog.log(type=f"Auditors removed", batch=batch_id, msg=msg)
+        for msg in messages:
+            flash(msg)
+            syslog.log(type=f"Auditor removed", batch=batch_id, msg="; ".join(messages))
         return msg
     return ""
 
@@ -270,7 +271,7 @@ def auditor_ops():
         """ Pick the required operation from request. """
         for op in ["browse", "download", "upload_log", "start",
                    "accept", "reject", "withdraw"]:
-            if request.form.get(op):
+            if op in request.form:
                 return op
         return "cancel"
 
@@ -336,8 +337,7 @@ def auditor_ops():
                     msg = res.get("msg")
                     print(f"--> {here}(C): {msg}")
                     syslog.log(type=f"Start auditing", batch=batch_id, msg=msg)
-                    raise(IsotammiException, here)
-                if Status.has_failed(res):
+                else:
                     logger.error(f"{here}(C): status={res.get('status','?')}")
                     raise(IsotammiException, here)
                 # ? - Remove HAS_ACCESS, if exists
@@ -349,7 +349,7 @@ def auditor_ops():
                 msg1 = _end_current_auditions(service, batch_id, user_audit)
                 if msg1: print(f"--> {here}-{operation}: {msg1}")
 
-                res = service.set_audited(batch_id, user_audit, State.ROOT_AUDIT_REQUESTED)
+                res = service.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
                 if Status.has_failed(res):
                     msg = _(f"Audit request {operation} failed")
                     flash(msg, "error")

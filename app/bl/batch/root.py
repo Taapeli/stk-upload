@@ -37,7 +37,7 @@ logger = logging.getLogger('stkserver')
 
 import shareds
 from bl.admin.models.cypher_adm import Cypher_adm
-from bl.base import Status, NodeObject
+from bl.base import Status, NodeObject, IsotammiException
 from bl.material import Material
 from .root_updater import RootUpdater
 
@@ -193,8 +193,10 @@ class Root(NodeObject):
         elif self.state == State.ROOT_REJECTED:
             ret = oper in ["browse", "download", "start"] or \
                 (oper == "delete" and active_auditor)
-
-        # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
+        else:
+            # Candidate etc are not allowed for auditors
+            ret = False
+            print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
         return ret
         
 

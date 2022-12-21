@@ -155,12 +155,14 @@ class RootUpdater(DataService):
         res = self.dataservice.ds_batch_end_auditions(batch_id, auditor_username)
         # Got {status, removed_auditors}
         removed_auditors = res.get("removed_auditors", [])
-        if len(removed_auditors) > 0:
-            auditors = ", ".join(removed_auditors)
-            msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
-            # Return removed auditors
-            #res["removed_auditors"] = removed_auditors
-            res["msg"] = msg
+        messages = []
+        for audi in removed_auditors:
+            if audi == auditor_username:
+                msg = _("Auditor '%(a)s' has ended audition of %(b)s", a=audi, b=batch_id)
+            else:
+                msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=audi, b=batch_id)
+            messages.append(msg)
+            res["messages"] = messages
         return res
 
     def start_audition(self, batch_id, auditor_username):

@@ -209,7 +209,7 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK}
 
     def ds_batch_end_auditions(self, batch_id, auditor_user):
-        """Removes other auditors but given user. 
+        """Removes auditors but given user. 
             1. Purge other auditors but current
             2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
                replace it with DOES_AUDIT
@@ -260,7 +260,7 @@ class Neo4jUpdateService(ConcreteService):
             ts_to = r.get("ts_to", 0)
             root_id = node_root.id
             audi_id = node_audi.id
-            auditor = node_audi.username
+            auditor = node_audi["username"]
             auditors.append(auditor)
             try:
                 d_days = (ts_to - ts_from) / (1000*60*60*24)
