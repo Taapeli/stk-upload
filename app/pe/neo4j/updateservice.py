@@ -209,17 +209,14 @@ class Neo4jUpdateService(ConcreteService):
         return {"status": Status.OK}
 
     def ds_batch_end_auditions(self, batch_id, auditor_user):
-        """Removes auditors but given user. 
-            1. Purge other auditors but current
-            2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
-               replace it with DOES_AUDIT
+        """Removes active auditors by replacing DOES_AUDIT relations with DID_AUDIT.
         """
         removed = []
         st = Status.OK
         result = self.tx.run(CypherAudit.batch_end_audition, bid=batch_id)
         for record in result:
             username = record.get("user")
-            rel_uniq_id = int(record.get("relation_new").element_id)
+            rel_uniq_id = record.get("relation_new").id
             print("#Neo4jUpdateService.ds_batch_end_auditions: removed "
                   f"rel={rel_uniq_id} DOES_AUDIT from {username}")
             removed.append(username)
