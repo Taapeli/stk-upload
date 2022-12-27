@@ -113,3 +113,25 @@
   display: block;
   transform: none;
 }
+
+/* For macro show_advance(batch) in bp/start/templates/start/s_macros.html
+   Show a row of state badges with current emphasized. #}
+ */
+div.prelines {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 1em;
+}
+div.prelines div {margin-right: 4pt;}
+div.states {
+    border: solid gray 1pt;
+    padding: 2pt 6pt;
+    margin-right: 4pt;
+    color: gray;
+    background: cornsilk;
+    border-radius: 0 10pt 10pt 0;
+    box-shadow: 2px 2px 4px gray;
+}
+div.act { color: navy; font-weight: bold; }
+div.done {color: black;}
+

@@ -30,16 +30,17 @@ div#events div.scrollbox {
 </div>
 
 {{ macro.menu(4) }}
+
     <div class="content" id="Place">
 {% if place %}
     {% set current_p = place.iid %}
       {% if place.coord %}
-      <!-- See: https://wiki.openstreetmap.org/wiki/OpenLinkMap#Embed_map_in_another_website
+      {# See: https://wiki.openstreetmap.org/wiki/OpenLinkMap#Embed_map_in_another_website
            example: https://www.openstreetmap.org/#map=13/61.1823/23.8767 
-      -->
-        <div id="map">{% if '°' in place.coord %}
-        {{ _('Invalid coordinates') }}: {{place.coord}}
-        &mdash; {{ _('should be in decimal format') }}
+      #}
+        <div id="map">
+        {%- if '°' in place.coord %}
+        	{{ _('Invalid coordinates') }}: {{place.coord}} &mdash; {{ _('should be in decimal format') }}
         {% else %}<!-- level ({{level}} => 1:{{zoom}}) -->
             {% set r = (1 / zoom)  %}
             {% set y = place.coord[0] %}
@@ -53,17 +54,16 @@ div#events div.scrollbox {
             - {{ _('OpenStreetMap on a larger scale') }}</a><br>
            <a target="map" href="https://www.google.fi/maps/@{{y}},{{x}},14z?hl=fi">
             - {{ _('on Google Map') }}</a>
-           <p>{{ _('Location') }}: N&nbsp;{{ '{0:0.4f}'.format(y) }}, 
-            E&nbsp;{{ '{0:0.4f}'.format(x) }}</p>
-        {% endif %}</div>
+           <p>{{ _('Location') }}: {{ place.coord_letter(4) }}</p>
+        {% endif %}
+        </div>
       {% endif %}
 
     <h2 class="sticky" title="▲ {{ _('Top') }}"><a href="#">
         {{ place.names[0].name }} <span class="typedesc">{{ place.type|transl('lt') }}</span></a></h2>
+
         <div>
-
 {% include "flash_messages.html" %}
-
         </div>
 
         <div id="summaryarea">
@@ -125,13 +125,14 @@ div#events div.scrollbox {
                         <ul class="citaDesc">
                             <li>
                                 <span">{{ _("Page")}} {{cita.page}}</span>
-                {% for note in cita.notes %}
-                                <br>–► <i>{{note.text}}</i>
+                {% for note in cita.notes %}{% if note.show %}
+                                <br><span title="{{note.iid}} / {{note.id}}">–►</span>
+                                <i>{{note.text}}</i>
                         {% if note.url %}
                                 <a class="outlink" target="_blank" 
                                    href="{{note.url}}">{{note.url|transl('urldomain')}}</a>
                         {% endif %}
-                {% endfor %}
+                {% endif -%}{% endfor -%}
                             </li>
                         </ul>
                     </li>

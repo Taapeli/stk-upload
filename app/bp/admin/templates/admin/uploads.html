@@ -45,46 +45,36 @@
                     <td>{{upload.user}}<br><i>{{upload.u_name}}</i></td>
             {% endif %}
         {% endif%}
+				<td class="msg_INFO">
+    	           {{upload.xmlname}}<br>{{upload.batch_id}} 
+	            </td>
 
-	           <td class="msg_INFO">
-    	           {{upload.xmlname}}
-                   <br>{{upload.batch_id}} 
-	           </td>
-
-               <td class="msg_INFO">
-        {% set m_code = upload.m_type | lower | replace(" ","") -%}
-                    <span class="typedesc matr_{{m_code}}">{{upload.material_type|transl('material')}}</span>
+                <td class="msg_INFO">
+    	{% if upload.material_type or upload.description %}
+        	{% set m_code = upload.material_type | lower | replace(" ","") -%}
+                <span class="typedesc matr_{{m_code}}">{{upload.material_type|transl('material')}}</span>
+    	{% endif -%}
         {% if upload.description %} 
                     <br><i>{{ upload.description[0:19] }}
             {% if upload.description|length > 19  %}
                         ... 
-                        <div class="tooltip"> 
-                        &nbsp;&#8505;&nbsp;
-                          <div class="tooltiptext">
-                            {{ upload.description }} 
-                          </div>
-                        </div> 
+                        	<div class="tooltip"> &nbsp;&#8505;&nbsp;
+                          		<div class="tooltiptext">{{ upload.description }}</div>
+                        	</div> 
             {% endif %}
-                    </i>
+                    	</i>
         {% endif %}
-               </td>
+                </td>
 
-	           <td class="msg_INFO">{{upload.status}}
+	            <td class="msg_INFO state_{{upload.state|replace(" ", "")}}">
+	            {{ upload.state|transl('state') }}
         {% if upload.batch_id %}
-            {% if upload.status == _("UPLOADED") %}
-                    ({{_( "deleted from database" ) }})
-            {% else %}<br>
-                    {{upload.count}} {{ _("persons") }}
-            {% endif %}
+                    <br><span style="color:gray; background:white;padding:1pt 2pt;">
+                    	{{upload.count}} {{ _("persons") }}</span>
         {% endif %}
-               </td>
-	           <td class="msg_INFO">
-{#
-        {% if upload.xmlname and upload.status != _("CANDIDATE") %}
-	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
-	           			{{ _("Store to database") }}</a> |
-        {% endif %}
-#}
+                </td>
+
+	            <td class="msg_INFO">
         {% if upload.xmlname and upload.has_log %}
 	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}/{{upload.batch_id}}>
 	           			{{ _("Show log") }}</a> |
@@ -93,7 +83,7 @@
                     <a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
                         {{ _("Delete file") }}</a>
         {% endif %}
-	           	</td>
+	           	 </td>
 	       </tr>
     {% endfor %}
 

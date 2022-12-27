@@ -65,82 +65,34 @@ RETURN ID(b) AS id"""
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_state
     batch_set_state = """
 MATCH (u:UserProfile {username: $user})
-MATCH (u) -[r:HAS_LOADED]-> (b:Root {id: $bid})
+MATCH (u) -[r:HAS_LOADED|DOES_AUDIT]-> (b:Root {id: $bid})
     SET b.state=$state
 RETURN ID(b) AS id"""
 
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_audited
-    batch_set_i_audited = """
-MATCH (me:UserProfile) -[r1:DOES_AUDIT]-> (root:Root)
-    WHERE me.username = $audi AND root.id = $bid AND root.state = "Auditing"
-WITH root, me, r1, r1.ts_from AS fromtime1
-    CREATE (me) -[r2:DID_AUDIT]-> (root)
-        SET r2.ts_from=fromtime1
-        SET r2.ts_to=timestamp()
-        SET root.state=$state
-        //SET root.audited=$audi
-    DELETE r1
-RETURN root, r2 AS relation_new"""
-    batch_compelete_does_audits = """
-MATCH (audi:UserProfile) -[r3:DOES_AUDIT]-> (root)
-    WHERE id(root) = $uid
-WITH audi, r3
-    CREATE (audi) -[r4:DID_AUDIT]-> (root)
-        SET r4.ts_from=r3.ts_from
-        SET r4.ts_to=$ts
-    DELETE r3
-RETURN audi.username AS user, r4 as relation_new"""
 
-
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_auditor
-    batch_set_auditor = """
-MATCH (root:Root {id: $bid}) WHERE root.state IN $states
+#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_access
+    # trying to set r2.ts_to lower than batch_end_audition time
+    batch_purge_access = """
 MATCH (audi:UserProfile {username: $audi})
-    SET root.state = "Auditing"
-    CREATE (audi) -[r:DOES_AUDIT]-> (root)
-    SET r.ts_from = timestamp()
+MATCH (audi) -[r:HAS_ACCESS]-> (root:Root {id: $bid})
+DETACH DELETE r 
+CREATE (audi) -[r2:DID_AUDIT]-> (root)
+    SET r2.ts_from = r1.ts_from
+    SET r2.ts_to = timestamp() - 1000
 RETURN ID(root) AS id"""
 
-#-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_auditors
-    batch_purge_auditors = """
-MATCH (me:UserProfile) -[r:DOES_AUDIT]-> (root:Root)
-    WHERE me.username = $me AND root.id = $bid
-MATCH (audi:UserProfile) -[ra:DOES_AUDIT]-> (root)
-    WHERE NOT audi.username = $me
-WITH me, COLLECT(ID(r)) AS my_rels,
-    audi, root, ra, ID(ra) as rel_id, type(ra) AS rtype
-        DELETE ra
-RETURN audi.username AS user, rel_id
-    //root.id AS batch_id, me.username AS me, my_rels, rtype
-    
-"""
-#Returned:
-# │"batch_id"      │"me"  │"my_rels"       │"user" │"rtype"     │"rel_id"│
-# │"2021-09-05.007"│"juha"│[268031,1487411]│"valta"│"DOES_AUDIT"│113743  │
+# #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_auditors
+# # Remove all auditors but me
+#     batch_find_other_auditors = """
+# MATCH (audi:UserProfile) -[ra:DOES_AUDIT]-> (root:Root{id:$bid})
+#     WHERE NOT audi.username = $me
+# RETURN audi.username AS user, ID(ra) as rel_id"""
 
-#TODO: parameter new_state = "Audit Requested"
-#TODO: Create relation DID_AUDIT
-    batch_remove_auditor = """
-MATCH (root:Root {id: $bid}) WHERE root.state = "Auditing"
-OPTIONAL MATCH (other:UserProfile) -[:DOES_AUDIT]-> (root)
-    WHERE other.username <> $audi
-OPTIONAL MATCH (audi:UserProfile {username: $audi}) -[r2:DOES_AUDIT]-> (root)
-WITH root, audi, other, r2, COUNT(DISTINCT other) AS oth_cnt,
-    r2.ts_from AS ts_from, 
-    r2.ts_to AS ts_to
-    SET (CASE WHEN oth_cnt = 0 THEN root END).state = $new_state
-    SET (CASE WHEN oth_cnt = 0 THEN root END).audited = null
-    DELETE r2
-RETURN root, audi, oth_cnt, ts_from, ts_to"""
-    link_did_audit = """
-MATCH (root:Root) WHERE ID(root) = $uid
-MATCH (role:Role) <-[:HAS_ROLE]- (u:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
-    WHERE role.name = "audit" AND id(audi) = $audi_id
-WITH audi, root
-    CREATE (audi) -[r3:DID_AUDIT]-> (root)
-    SET r3.ts_to = timestamp()
-    SET r3.ts_from = $fromtime
-RETURN r3 AS newr"""
+    get_auditions = """
+MATCH (u:UserProfile) -[r]-> (root:Root {id: $bid})
+    WHERE type(r) =~ ".*_AUDIT"
+RETURN type(r) AS type, u.username AS user, r.ts_from AS from, r.ts_to AS to
+    ORDER BY r.ts_from"""
 
 #-bl.batch.root.Root.get_filename
     get_filename = """
@@ -154,7 +106,8 @@ RETURN b.logname as log, b.file as file, u.username as username"""
 
 #-bl.batch.root.Root.get_batch
     get_batch = """
-MATCH (u:UserProfile{username:$username}) -[r:HAS_ACCESS|DOES_AUDIT]-> (b:Root {id:$batch_id})
+MATCH (u:UserProfile{username:$username})
+MATCH (u) -[r:HAS_ACCESS|DOES_AUDIT|DID_AUDIT]-> (b:Root {id:$batch_id})
 RETURN b, type(r) AS rel_type"""
      
     list_all = """
@@ -299,16 +252,19 @@ class CypherAudit():
     '''
 
     get_my_audits = '''
-match (b:Root {state:'Auditing', auditor: $oper})
+match (u:UserProfile{username: $oper}) -[:DOES_AUDIT]-> (b:Root) // {state:'Auditing'})
 optional match (b) --> (x)
-return b, labels(x)[0] as label, count(x) as cnt 
-    order by b.user, b.id, label'''
+return u.username as user, b as batch, 
+    labels(x)[0] as label, count(x) as cnt 
+    order by user, batch, label'''
 
     get_all_audits = '''
-match (b:Root{state:'Auditing'})
+match (u:UserProfile) -[:HAS_LOADED]-> (b:Root{state:'Auditing'})
+optional match (au:UserProfile) -[:DOES_AUDIT]-> (b)
 optional match (b) --> (x)
-return b, labels(x)[0] as label, count(x) as cnt 
-    order by b.user, b.id, label'''
+return u.username as user, b as batch, au.username as auditor,
+    labels(x)[0] as label, count(x) as cnt 
+    order by auditor, user, batch, label'''
 
 # # TODO Batch/Audit->Root
 #     xxmerge_check = """
@@ -348,3 +304,55 @@ RETURN count(x)
 MATCH (a:Root {id: $batch})
 DETACH DELETE a
 '''
+
+    # ---- Auditor state operations ----
+
+    # Returns username, if must create a HAS_ACCESS for browsing; else no match
+    does_need_batch_access = """
+MATCH (root:Root{id:$bid})
+MATCH (u:UserProfile{username:$audi})
+    WHERE NOT EXISTS((u) -[:HAS_ACCESS|:DOES_AUDIT]-> (root))
+RETURN u.username"""
+
+    batch_set_access = """
+MATCH (root:Root {id: $bid})
+MATCH (audi:UserProfile {username: $audi})
+    CREATE (audi) -[r:HAS_ACCESS]-> (root)
+RETURN ID(root) AS bid, ID(r) AS rel_id"""
+
+    batch_end_audition = """
+MATCH (root:Root{id: $bid}) <-[r1:DOES_AUDIT]- (audi:UserProfile)
+    CREATE (audi) -[r2:DID_AUDIT]-> (root)
+        SET r2.ts_from = r1.ts_from
+        SET r2.ts_to = timestamp()
+    DELETE r1
+RETURN audi.username AS user, r2 AS relation_new
+"""
+
+    batch_start_audition = """
+MATCH (root:Root {id: $bid}) WHERE root.state IN $states
+MATCH (audi:UserProfile {username: $audi})
+    SET root.state = "Auditing"
+    CREATE (audi) -[r:DOES_AUDIT]-> (root)
+    SET r.ts_from = timestamp()
+RETURN ID(root) AS id"""
+
+    batch_set_state_complete = """
+MATCH (u:UserProfile {username: $audi}) -[r:DID_AUDIT]-> (b:Root {id: $bid})
+WHERE b.state = "Auditing"
+    SET b.state=$state
+RETURN b AS root, u AS audi, r AS relation_new"""
+
+#     batch_remove_auditor -> batch_set_state_complete
+
+    link_did_audit = """
+MATCH (root:Root) WHERE ID(root) = $uid
+MATCH (role:Role) <-[:HAS_ROLE]- (u:User) -[:SUPPLEMENTED]-> (audi:UserProfile)
+    WHERE role.name = "audit" AND id(audi) = $audi_id
+WITH audi, root
+    CREATE (audi) -[r3:DID_AUDIT]-> (root)
+    SET r3.ts_to = timestamp()
+    SET r3.ts_from = $fromtime
+RETURN r3 AS newr"""
+
+    # ---- End auditor state ops ----

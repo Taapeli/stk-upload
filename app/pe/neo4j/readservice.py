@@ -32,7 +32,8 @@ from bl.base import Status
 from bl.material import Material
 from ui.place import place_names_local_from_nodes
 
-#from .cypher.cy_place import CypherPlace, CypherPlaceStats
+from pe.dataservice import ConcreteService
+# from pe.neo4j
 from .cypher.cy_source import CypherSource
 from .cypher.cy_repository import CypherRepository
 from .cypher.cy_family import CypherFamily
@@ -40,25 +41,22 @@ from .cypher.cy_event import CypherEvent
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_media import CypherMedia
 from .cypher.cy_comment import CypherComment
+from .cypher.cy_root import CypherRoot
 
-from pe.dataservice import ConcreteService
-from pe.neo4j.util import run_cypher, run_cypher_batch, dict_root_node
-
-from pe.neo4j.nodereaders import Citation_from_node
-from pe.neo4j.nodereaders import Comment_from_node
-from pe.neo4j.nodereaders import DateRange_from_node
-from pe.neo4j.nodereaders import EventBl_from_node
-from pe.neo4j.nodereaders import FamilyBl_from_node
-from pe.neo4j.nodereaders import MediaBl_from_node
-from pe.neo4j.nodereaders import Note_from_node
-from pe.neo4j.nodereaders import Name_from_node
-from pe.neo4j.nodereaders import PersonBl_from_node
-from pe.neo4j.nodereaders import PlaceBl_from_node
-from pe.neo4j.nodereaders import PlaceName_from_node
-from pe.neo4j.nodereaders import Repository_from_node
-from pe.neo4j.nodereaders import SourceBl_from_node
-
-#from models.dbtree import DbTree
+from .util import run_cypher, run_cypher_batch, dict_root_node
+from .nodereaders import Citation_from_node
+from .nodereaders import Comment_from_node
+from .nodereaders import DateRange_from_node
+from .nodereaders import EventBl_from_node
+from .nodereaders import FamilyBl_from_node
+from .nodereaders import MediaBl_from_node
+from .nodereaders import Note_from_node
+from .nodereaders import Name_from_node
+from .nodereaders import PersonBl_from_node
+from .nodereaders import PlaceBl_from_node
+from .nodereaders import PlaceName_from_node
+from .nodereaders import Repository_from_node
+from .nodereaders import SourceBl_from_node
 
 
 class Neo4jReadService(ConcreteService):
@@ -108,6 +106,8 @@ class Neo4jReadService(ConcreteService):
         obj.role = role if role != "Primary" else None
         return obj
 
+    # ----- Batch (Root)  -----
+
     def dr_get_material_batches(self, user: str, iid: str):
         """
         Get list of my different materials and accepted all different materials.
@@ -142,21 +142,26 @@ class Neo4jReadService(ConcreteService):
             "statustext": "No Event found",
         }
 
+    def dr_get_auditors(self, batch_id):
+        """ Read list of the auditors and auditing parameters. """
+        class AuditionData: pass
+        auditions = []
+        with self.driver.session(default_access_mode="READ") as session:
+            result = session.run(CypherRoot.get_auditions, bid=batch_id)
+            for record in result:
+                a = AuditionData()
+                a.type = record.get("type")
+                a.user = record.get("user")
+                a.ts_from = record.get("from", "")
+                a.ts_to = record.get("to", "")
+                a.auditing = (a.type == "DOES_AUDIT")
+                auditions.append(a)
+
+        return {"status": Status.OK, "items": auditions}
+
     # ------ Persons -----
 
-    # def obsolete_dr_get_person_list(self, _args):
-    #     """Read Person data from given fw_from.
-    #
-    #     NOT USED --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_list
-    #
-    #     args = dict {use_user, fw, limit, rule, key, years}
-    #     """
-    #     persons = []
-    #     return {
-    #         "items": persons,
-    #         "status": Status.ERROR,
-    #         "statustext": "obsolete dr_get_person_list",
-    #     }
+    # def obsolete_dr_get_person_list(self, _args): --> pe.neo4j.readservice_tx.Neo4jReadServiceTx.tx_get_person_list
 
     def dr_inlay_person_lifedata(self, person):
         """Reads person's def. name, birth and death event into Person obj."""
@@ -1277,8 +1282,8 @@ class Neo4jReadService(ConcreteService):
         return citations, notes, targets
 
     def dr_source_search(self, args):
-        material = args.get('material')
-        username = args.get('use_user')
+        # material = args.get('material')
+        # username = args.get('use_user')
         searchtext = args.get('searchtext')
         limit = args.get('limit', 100)
         #print(args)
@@ -1311,7 +1316,6 @@ class Neo4jReadService(ConcreteService):
     def dr_get_repository(self, user: str, material: Material, iid: str):
         """Returns the Repository with Sources included."""
         repo = None
-        sources = []
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(session, 
                 CypherRepository.get_repository_sources_iid, 
@@ -1343,10 +1347,11 @@ class Neo4jReadService(ConcreteService):
                             s.medium = medium
                             s.citation_cnt = cita_cnt
                             repo.sources.append(s)
-                # notes = record["notes"]
-                # for note_node in notes:
-                #     n = Note_from_node(note_node)
-                #     repo.notes.append(n)
+                            
+                notes = record["notes"]
+                for note_node in notes:
+                    n = Note_from_node(note_node)
+                    repo.notes.append(n)
 
             if repo:
                 return {"item": repo, "status": Status.OK}
@@ -1513,7 +1518,7 @@ class Neo4jReadService(ConcreteService):
         :param: fw_from The timestamp from which the list is requested
         :param: limit   How many items per page
         """
-        from bl.batch.root import Root
+        from pe.neo4j.nodereaders import Root_from_node
 
         def record_to_topics(result):
             res = []
@@ -1551,7 +1556,7 @@ class Neo4jReadService(ConcreteService):
                 c.credit = record.get("commenter")
                 node = record["root"]
                 #Todo: Refactor to Root_from_node()
-                c.root = Root.from_node(node)
+                c.root = Root_from_node(node)
                 if c.obj_label == "Family":
                     c.object = FamilyBl_from_node(o_node)
                 elif c.obj_label == "Person":

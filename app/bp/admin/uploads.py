@@ -273,7 +273,7 @@ class Upload:
     batch_id: str
     xmlname: str
     state: str
-    loc_state: str
+    #loc_state: str        # Use: {{ upload.state|transl('state') }}
     material_type: str
     description: str
     user: str
@@ -326,7 +326,9 @@ def list_uploads(username:str) -> List[Upload]:
         #    person_count=64
         #    auditors=[["juha",1630474129763,None]]
         # >
-        b: Root = Root.from_node(record["root"])
+        from pe.neo4j.nodereaders import Root_from_node
+
+        b: Root = Root_from_node(record["root"])
         u_name = record["u_name"]
 
         # meta = get_meta(b)
@@ -348,7 +350,7 @@ def list_uploads(username:str) -> List[Upload]:
             u_name=u_name,
             auditors=auditors,
             state=b.state,
-            loc_state=_(b.state),
+            #loc_state=_(b.state),
             is_candidate=1 if (b.state == State.ROOT_CANDIDATE) else 0,
             for_auditor=1 if b.for_auditor() else 0,
             material_type=b.material_type,

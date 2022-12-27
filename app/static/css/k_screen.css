@@ -221,6 +221,12 @@ td.ColumnEvent ul li i {
 .matr_placedata  { color: indianred; }
 .matr_hiskitree  { color: slateblue; }
 
+.state_Accepted { background: #91c46c; }
+.state_Auditing { background: #CFF09E; }
+.state_Audit_Requested { background: #f1fbe2; }
+.state_Load_Failed { background: #F34A53; }
+.state_Rejected { background: #fb9499; }
+
 .langcode {
     font-variant: small-caps;
     text-transform: uppercase;

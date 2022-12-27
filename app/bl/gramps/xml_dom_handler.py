@@ -918,6 +918,10 @@ class DOM_handler:
                 if n.url:
                     #(p)print(f"\t#handle_repositories_list: {r.id}: post process {n.url}")
                     url_notes.append(n)
+            
+            for ref in repository.getElementsByTagName("noteref"):
+                if ref.hasAttribute("hlink"):
+                    r.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
 
             self.dataservice.ds_save_repository(tx, r, self.batch.id, iids)
             self.complete(r, url_notes)

@@ -4,6 +4,7 @@
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
+{% from "start/s_macros.html" import show_advance with context %}
 <style>
 .box {
   box-sizing: border-box;
@@ -34,6 +35,25 @@ table     { width: 750px; }
     margin-top: -6pt;
     text-align: right;
 }
+
+div.prelines {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 1em;
+}
+div.prelines div {margin-right: 4pt;}
+div.states {
+    border: solid gray 1pt;
+    padding: 2pt 6pt;
+    margin-right: 4pt;
+    color: gray;
+    background: cornsilk;
+    border-radius: 0 10pt 10pt 0;
+    box-shadow: 2px 2px 4px gray;
+}
+div.act { color: navy; font-weight: bold; }
+div.done {color: black;}
+.auops {font-weight: bold;}
 </style>
 
 {{ hamburger_menu() }}
@@ -43,6 +63,10 @@ table     { width: 750px; }
         <h1>{{ _("Auditing Researcher's Material") }}</h1>
 
 {% include "flash_messages.html" %}
+
+        <div class="prelines">
+			{{ show_advance(root) }}
+		</div>
 
 {# Boxes #}
         <div class="clearfix">
@@ -55,7 +79,8 @@ table     { width: 750px; }
           </div>
           <div class="box">
             <div>{{ _('State ') }}</div>
-            <p><b>{{ _(root.state) }}</b>
+            <p><b class="state_{{root.state|replace(" ", "")}}"
+                  style="padding: 2pt 4pt;">{{ _(root.state) }}</b>
                <br><small>{{root.timestamp_str()}}</small>
             </p>
           </div>
@@ -141,22 +166,26 @@ table     { width: 750px; }
                 <input type="hidden" value="{{user}}" name="user">
 
                 <div class="submit">
-                   <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" /> 
+                   <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" 
+                   		style="color:blue" /> 
+
+                   <span style="font-size:large; color:gray;"> | </span>
+
                    <input type="submit" value="{{ _('Upload log') }}" name="upload_log"
                        title="{{ _('Show upload log') }}"/>
                    <input type="submit" value="{{ _('Browse this material') }}" name="browse"
-                       title="{{ _('You can browse, if you are currently auditing') }}"
+                       title="{{ _('Open browsing view') }}"
                     {% if not can_browse %} disabled {% endif -%} />
                    <input type="submit" value="{{ _('Download file') }}" name="download"
-                       title="{{ _('You can download, if you are currently auditing') }}"
+                       title="{{ _('Get imported Gramps data') }}"
                     {% if not can_download %} disabled {% endif -%} />
 
                    <span style="font-size:large; color:gray;"> | </span>
 
 {% if can_start %}
-                   <input type="submit" name="start"
+                   <input type="submit" name="start" class="auops" 
                        title="{{ _('Start as auditor (also the only way to delete the material)') }}"
-                    {% if other_auditor %}
+                    {% if auditing_by_other %}
                        value="{{ _('Supersede other auditor') }}"
                     {% elif root.state == "Accepted" or root.state == "Rejected" %}
                        value="{{ _('Start auditing again') }}"
@@ -166,18 +195,18 @@ table     { width: 750px; }
 {% endif %}
 {% if i_am_auditor %}
                    <input type="submit" value="{{ _('Accept auditing') }}" name="accept"
-                       title="{{ _('Include to accepted materials') }}"
+                       class="auops" title="{{ _('Include to accepted materials') }}"
 	                {% if not can_accept %} disabled {% endif -%} />
                    <input type="submit" value="{{ _('Withdraw') }}" name="withdraw"
-                       title="{{ _('Give up for now') }}"
+                       class="auops" title="{{ _('Give up for now') }}"
                     {% if not can_accept %} disabled {% endif -%} />
                    <input type="submit" value="{{ _('Reject auditing') }}" name="reject"
-                       title="{{ _('Dicard this material') }}"
+                       class="auops" title="{{ _('Dicard this material') }}"
                     {% if not can_accept %} disabled {% endif -%} />
 {% endif -%}
 {% if can_delete %}
                    <input type="submit" value="{{ _('Delete batch') }}" name="delete"
-                       title="{{ _('The material and files are deleted permanetly') }}"/>
+                       class="auops" title="{{ _('The material and files are deleted permanetly') }}"/>
 {% endif -%}
                 </div>
             </form>

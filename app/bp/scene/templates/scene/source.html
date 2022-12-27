@@ -106,9 +106,9 @@ td.Citation div ol {padding-top:.3em;}
 	   					  {{ macro.stars(c.confidence|float) }}
 
                           {% if c.notes %}
-                            {% for note in c.notes %}
-                                <br>–► {{ macro.notelink(note) }}
-                            {% endfor %}
+                            {% for note in c.notes %}{% if note.show %}
+                                <br><span title="{{note.iid}} / {{note.id}}">–► </span>{{ macro.notelink(note) }}
+                            {% endif %}{% endfor %}
                           {% endif %}
 
 	               		  <ol type="a">

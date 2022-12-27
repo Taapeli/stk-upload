@@ -14,11 +14,20 @@ CREATE (u) -[:OBJ_OTHER]-> (a:Repository)
     SET a = $r_attr
 RETURN ID(a) as uniq_id"""
 
+    link_notes = """
+MATCH (n:Note) WHERE n.handle IN $note_handles
+WITH n
+  MATCH (r:Repository) WHERE r.handle=$handle
+  CREATE (r) -[:NOTE]-> (n)
+RETURN COUNT(DISTINCT n) AS cnt"""
+
     get_repository_sources_iid = """
 MATCH (root:Root) -[:OBJ_SOURCE]-> (s:Source) -[r:REPOSITORY]-> (repo:Repository) 
     WHERE repo.iid = $iid
 OPTIONAL MATCH (c:Citation) -[cr:SOURCE]-> (s)
-WITH root, repo, r, s, COUNT(cr) AS citas 
+OPTIONAL MATCH (repo) -[:NOTE]-> (n)
+WITH root, repo, r, s, n, COUNT(cr) AS citas 
     ORDER BY repo.rname, s.stitle
-RETURN root, repo, 
-    COLLECT(DISTINCT [s, r.medium, citas]) AS sources"""
+RETURN root, repo,
+    COLLECT(DISTINCT [s, r.medium, citas]) AS sources,
+    COLLECT(DISTINCT (n)) AS notes"""

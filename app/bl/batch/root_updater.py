@@ -24,13 +24,15 @@ Created on 7.12.2021
 '''
 import os
 import time
+from flask_babelex import _
 
 import shareds
+from models import loadfile
 from database.accessDB import DB_SCHEMA_VERSION
 from bl.base import IsotammiException #, Status
 from bp.admin import uploads
-from models import loadfile #, util, syslog
 from pe.dataservice import DataService
+from pe.neo4j.nodereaders import Root_from_node
 
 class RootUpdater(DataService):
     """
@@ -42,7 +44,6 @@ class RootUpdater(DataService):
         Initiate data store for update in given transaction or without transaction.
         """
         super().__init__(service_name, tx=tx)
-        self.batch = None
 
     # @staticmethod
     # def root_save(tx, attr):
@@ -109,12 +110,12 @@ class RootUpdater(DataService):
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id (in BatchUpdater). """
-        from .root import Root,  Status
+        from .root import Status # ,Root
         try:
             ret = self.dataservice.ds_get_batch(user, batch_id)
             # returns {"status":Status.OK, "node":record}
             node = ret['node']
-            batch = Root.from_node(node)
+            batch = Root_from_node(node)
             return {"status":Status.OK, "item":batch}
         except Exception as e:
             statustext = (
@@ -127,48 +128,75 @@ class RootUpdater(DataService):
         res = self.dataservice.ds_batch_set_state(batch_id, username, b_state)
         return res
 
-    def select_auditor(self, batch_id, auditor_username):
-        """ Mark auditor for this data batch and set status. """
-        from .root import State
+    def purge_old_access(self, batch_id, auditor_username):
+        """ Removes old HAS_ACCESS permission. NOT USED
+        
+            Returns 
+                - ID(Root), if removed
+                - None if no HAS_ACCESS found
+        """
+        res = self.dataservice.ds_batch_purge_access(batch_id, auditor_username)
+        return res
 
+    #---- Auditor operations ----
+
+    def set_access(self, batch_id, auditor_username):
+        """ Create HAS_ACCESS permission, if the user has no previous accesses.
+        """
+        res = self.dataservice.ds_batch_set_access(batch_id, auditor_username)
+        return res
+    
+    def end_auditions(self, batch_id, auditor_username):
+        """ Make current auditor(s) as former auditors.
+            1. If there is multiple auditors, purge others but current
+            2. If the auditor has HAS_ACCESS permission but not HAS_LOADED,
+               replace it with DOES_AUDIT
+        """
+        res = self.dataservice.ds_batch_end_auditions(batch_id, auditor_username)
+        # Got {status, removed_auditors}
+        removed_auditors = res.get("removed_auditors", [])
+        messages = []
+        for audi in removed_auditors:
+            if audi == auditor_username:
+                msg = _("Auditor '%(a)s' has ended audition of %(b)s", a=audi, b=batch_id)
+            else:
+                msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=audi, b=batch_id)
+            messages.append(msg)
+            res["messages"] = messages
+        return res
+
+    def start_audition(self, batch_id, auditor_username):
+        """ Mark auditor for this data batch and set status. 
+
+            1. Check Root.state
+            2. The auditors' link change DOES_AUDIT --> DID_AUDIT must be done
+               before by calling self.end_auditions()
+
+            Now set Root.state = ROOT_AUDITING and create new link DOES_AUDIT
+         """
+        from .root import State
         allowed_states = [State.ROOT_AUDIT_REQUESTED,
                           State.ROOT_AUDITING,
                           State.ROOT_ACCEPTED,
                           State.ROOT_REJECTED]
-        res = self.dataservice.ds_batch_set_auditor(batch_id,
+        #TODO First remove active auditor(s)
+        res = self.dataservice.ds_batch_start_audition(batch_id,
                                                     auditor_username, 
                                                     allowed_states)
         return res
 
-    def purge_other_auditors(self, batch_id, auditor_username):
-        """ Removes other auditors, if there are multiple auditors. 
-            (Used to revert multi-auditor operations.)
-        """
-        res = self.dataservice.ds_batch_purge_auditors(batch_id, 
-                                                       auditor_username)
-        return res
-
     def set_audited(self, batch_id, user_audit, b_state):
         """ Set batch status and mark all auditions completed.
+
+            Returns {status, identity, d_days}, where identity = Root.id
+            and d_days duration of (last) audition in days.
         """
         res = self.dataservice.ds_batch_set_audited(batch_id, user_audit, b_state)
         return res
 
-    def remove_auditor(self, batch_id, auditor_username):
-        """ Mark auditor for this data batch and set status.
-        
-            If no other is auditing, the status is changed.
-        
-            Returns {status, identity, d_days}, where identity = Root.id
-            and d_days duration of (last) audition in days.
-        """
-        from .root import State
+    # def remove_auditor(self, batch_id, auditor_username): -> set_audited
 
-        new_state = State.ROOT_AUDIT_REQUESTED
-        res = self.dataservice.ds_batch_remove_auditor(batch_id,
-                                                       auditor_username, 
-                                                       new_state)
-        return res
+    #---- end auditor ops ----
 
     def batch_update_descr(self, batch_id, description, username):
         """ Update Root.description. """
@@ -183,17 +211,14 @@ class RootUpdater(DataService):
         return res
 
     def commit(self):
-        """ Commit transaction. """
         self.dataservice.ds_commit()
-
     def rollback(self):
-        """ Commit transaction. """
         self.dataservice.ds_rollback()
 
-    def media_create_and_link_by_handles(self, uniq_id, media_refs):
-        """Save media object and it's Note and Citation references
-        using their Gramps handles.
-        """
-        if media_refs:
-            self.dataservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
+    # def media_create_and_link_by_handles(self, uniq_id, media_refs):
+    #     """NOT IN USE: Save media object and it's Note and Citation references
+    #     using their Gramps handles.
+    #     """
+    #     if media_refs:
+    #         self.dataservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
 

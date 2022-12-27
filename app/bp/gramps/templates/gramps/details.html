@@ -4,7 +4,7 @@
 {% block body %}
 {{ super() }}
 
-{% from "start/s_macros.html" import hamburger_menu, state_info with context %}
+{% from "start/s_macros.html" import hamburger_menu, state_info, show_advance with context %}
 
 <style>
 startbox h2 {margin-bottom: 0;}
@@ -55,6 +55,10 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
 
 {% include "flash_messages.html" %}
 
+	<div class="prelines">
+		{{ show_advance(batch) }}
+	</div>
+
     <div class="startbox" style="width: min-content">
     	<h2 class="center">{{ _("General")|title() }}</h2>
     	<table>
@@ -67,11 +71,8 @@ function doconfirm( command, title, caller, message ) { // used in commands.html
                 {% set m_code = batch.material_type | lower | replace(" ","") -%}
                 <td class="typedesc matr_{{m_code}}" style="font-size:110%">{{ _(batch.material_type) }}</td>
             </tr>
-            <tr>
-                <th>{{ _("State ") }}</th>
-                <td><b>{{ _(batch.state) }}</b>
-                </td>
-            </tr>
+{#          <tr><th>{{ _("State ") }}</th><td><b>{{ _(batch.state) }}</b></td></tr>
+#}
             <tr>
                 <th>{{ _("Changed") }} </th>
                 <td>{{ _(batch.timestamp_str()) }}</td>

@@ -11,9 +11,7 @@
 {{ super() }}
 
 {% from "start/s_macros.html" import hamburger_menu, state_info with context %}
-{% set TOOLARGE = _("The file is too large (max %(max)s MB)", max=( maxsize/(1024*1024) ) | round(1) ) %}
-<!-- Onkohan? {{TOOLARGE}} -->
-
+{% set TOOLARGE = _("The file is too large (max %(m)s MB)", m=maxround ) %}
 <style>
 h2 { margin-bottom: 0; }
 td { position: relative; }
@@ -96,6 +94,7 @@ function update_progress(batch_id) {
         batch_id_column.css("border-width", "3pt")
 
         var myBar = $("td div.myProgress[data-name='"+batch_id+"'] :first-child");
+        //? if (ssp.status == "error") return;
 		if (rsp.progress == 0) rsp.progress = 1;
         var wp = rsp.progress+"%";
         myBar.width(wp)
@@ -218,7 +217,8 @@ function filenm_changed(input) {
 
             <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
             </td>
-            <td>{{upload.loc_state}}
+            <td class="state_{{upload.state|replace(" ", "")}}">
+            		{{ upload.state|transl('state') }}
     {% if upload.auditors %}
                     <br><i>{{ _("Auditor") }}:
         {% for auditor, ts_from, ts_to in upload.auditors %}

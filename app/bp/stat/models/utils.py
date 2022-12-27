@@ -59,8 +59,8 @@ def glob2regexp(glob):
     try:
         return re.compile(val), want_if_match
     except Exception as e:
-        flash(f"Bad regexp for {what} '{self._opts[what]}': {e}",
-              category='warning')
+        flash(f"bp.stat.models.utils.glob2regexp: Bad regexp {e}", category='warning')
+        #flash(f"Bad regexp for {what} '{self._opts[what]}': {e}", category='warning')
     return None, True
 
 
@@ -92,19 +92,33 @@ def build_general_stats():
     def count_files_lines(fpat, line_pattern=None):
         """Count files matching file pattern FPAT, and lines in them.
 
-        Files to work with are searced under application root (see below).
+        Files to work with are searched under application root (see below).
         If optional line pattern LINE_PATTERN given, count only matching lines.
         WARNING: This may be os specific (read: not tested in windows)
         """
         # This is the root directory where the files are searched under:
-        code_root = shareds.app.config['APP_ROOT']
+        code_root = shareds.app.config['APP_ROOT'] + "/app"
+        # Process files by chunks to avoid too long lines
+        CHUNK_SIZE = 25    
+        total = 0
 
-        grep = ""
-        if line_pattern is not None:
-            grep = f" | grep '{line_pattern}'"
         filenames = run_cmd(f"find {code_root} -name '{fpat}'")
-        linecount = run_cmd(f"cat {' '.join(filenames)}{grep} | wc -l")
-        return (len(filenames), int(linecount[0]))
+        if line_pattern:
+            grep = f" | grep '{line_pattern}'"
+        else:
+            grep = ""
+        chunks = ( filenames[i:i+CHUNK_SIZE] for i in range(0, len(filenames), CHUNK_SIZE) )
+        for f_names in chunks:
+            s = ""
+            for fn in f_names:
+                if fn:
+                    s += " '" + fn + "'"
+            res = run_cmd(f"cat {s}{grep} | wc -l")
+            # wc returns something like "1437\n", where run_cmd returns ['471', '']
+            #print("count_files_lines:",len(f_names),"names",len(s),"chars",res,"cnt")
+            if len(res) > 0 and len(res[0]) > 0:
+                total += int(res[0])
+        return (len(filenames), total)
 
     (code_files, code_lines) = count_files_lines("*.py")
     (html_files, html_lines) = count_files_lines("*.html")
@@ -239,7 +253,7 @@ def build_options(logname_template, lookup_table):
             return None         # this will fail in caller
 
     if logname_template.startswith("*"):
-        logdir = "uploads/*"
+        logdir = "uploads/*/*"
     else:
         stk_logdir = shareds.app.config['STK_LOGDIR']
         logdir = stk_logdir[:stk_logdir.rindex("/")+1] + server

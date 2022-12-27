@@ -217,7 +217,7 @@ class NodeObject:
         """
         return self.__dict__
 
-class IsotammiException(Exception):
+class IsotammiException(BaseException):
     def __init__(self, msg, **kwargs):
         Exception.__init__(self, msg)
         self.kwargs = kwargs

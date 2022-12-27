@@ -61,6 +61,7 @@ from bl.person_reader import PersonReaderTx
 from bl.place import PlaceReaderTx
 from bl.source import SourceReader
 from bl.repository import RepositoryReader
+from bl.batch.root import BatchReader
 
 from bp.graph.models.fanchart import FanChart
 from models import mediafile
@@ -286,11 +287,7 @@ def _do_get_persons(u_context, args):
         # u_context.set_scope_from_request()
         if args.get("rule", "init") == "init" or args.get("key", "") == "":
             # Initializing this batch.
-            return {
-                "rule": "init",
-                "status": Status.NOT_STARTED,
-                # "u_context": u_context,
-            }
+            return { "rule": "init", "status": Status.NOT_STARTED }
     else:  # pg:'all'
         # u_context.set_scope_from_request("person_scope")
         args["rule"] = "all"
@@ -1150,10 +1147,21 @@ def show_place(iid):
         traceback.print_exc()
         return redirect(url_for("virhesivu", code=1, text=str(e)))
 
-    # for c in citations:
-    #     for ref in c.source_refs:
-    #         notes = ",".join([n.id for n in c.notes]) if c.notes else ""
-    #         print(f"# Citation {ref} {notes}")
+    for c in citations:
+        if c.notes:
+            # Check that only distinct Notes are shown
+            for i in range(len(c.notes)):
+                n = c.notes[i]
+                n.show = True   # Show only non-duplicate notes
+                for j in range(i):
+                    m = c.notes[j]  # Is there a matching instance m?
+                    if n.url == m.url and n.text == m.text and n.type == m.type:
+                        # Duplicate Note, update keys
+                        m.id += " + "+n.id
+                        m.iid += " + "+n.iid
+                        n.show = False
+                show = "+" if n.show else "-"
+                print(f'{show}     {c.id} > {n.id} {n.url} "{n.text}"')
 
     stk_logger(u_context, f"-> bp.scene.routes.show_place n={cnt}")
     return render_template(
@@ -1243,14 +1251,23 @@ def show_source_page(iid:str):
         logger.error(msg)
 
     for c in res['citations']:
-        # for i in c.citators:
-        #     if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
-        #     else:               print(f'{c} – person {i} {i.sortname}')
         if hasattr(c, "notes"):
-            for n in c.notes:
-                print(f'     {c.id} note {n.url} "{n.text}"')
+            # Check that only distinct Notes are shown
+            for i in range(len(c.notes)):
+                n = c.notes[i]
+                n.show = True   # Show only non-duplicate notes
+                for j in range(i):
+                    m = c.notes[j]  # Is there a matching instance m?
+                    if n.url == m.url and n.text == m.text and n.type == m.type:
+                        # Duplicate Note, update keys
+                        m.id += " + "+n.id
+                        m.iid += " + "+n.iid
+                        n.show = False
+                show = "+" if n.show else "-"
+                print(f'{show}     {c.id} > {n.id} {n.url} "{n.text}"')
+
     return render_template(
-        "/scene/source_events.html",
+        "/scene/source.html",
         source=res["item"],
         citations=res["citations"],
         user_context=u_context,
@@ -1502,6 +1519,10 @@ def batch_details():
         elapsed = time.time() - t0
         stk_logger(user_context, 
                    f"-> bp.gramps.routes.batch_details e={elapsed:.3f}")
+        auditors = []
+        with BatchReader("read") as service:
+            auditors = service.get_auditors(batch_id)
+
         return render_template(
            "/scene/details_batch.html",
            batch=batch,
@@ -1509,6 +1530,7 @@ def batch_details():
            user_context=user_context,
            object_stats=res["objects"],
            event_stats=res["events"],
+           auditors=auditors.get("items",[]),
            elapsed=elapsed,
            msg=msg,
         )

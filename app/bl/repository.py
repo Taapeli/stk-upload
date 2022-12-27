@@ -24,6 +24,9 @@ class Repository(NodeObject):
         type            str    arkiston tyyppi
         medium          str    from Source --> Repository relation.medium
         notes           Note[]
+        
+        For gramps_loader:
+            note_handles[]   str lisätiedon handle
     """
 
     def __init__(self):
@@ -33,6 +36,7 @@ class Repository(NodeObject):
         self.rname = ""
         self.medium = ""
         self.notes = []  # contains Note instances or Note.uniq_id values
+        self.note_handles = [] # contains noterefs of Note instances
 
         self.sources = []  # For creating display sets (Not used??)
 
@@ -63,7 +67,7 @@ class RepositoryReader(DataService):
 
         Returns a dictionary, where items = Source object.
         - item.repositories Repositories
-        # item.notes[]      Notes connected to Repository?
+        - item.notes        Notes connected to Repository
         - item.sources      Souorce objects
         """
         use_user = self.user_context.batch_user()

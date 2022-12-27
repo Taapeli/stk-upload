@@ -37,13 +37,14 @@ logger = logging.getLogger('stkserver')
 
 import shareds
 from bl.admin.models.cypher_adm import Cypher_adm
-from bl.base import Status, NodeObject
+from bl.base import Status, NodeObject, IsotammiException
 from bl.material import Material
-
 from .root_updater import RootUpdater
+
 from pe.dataservice import DataService
 from pe.neo4j.cypher.cy_root import CypherRoot, CypherAudit
 from pe.neo4j.util import run_cypher
+from pe.neo4j.nodereaders import Root_from_node
 
 DEFAULT_MATERIAL = "Family Tree"
 
@@ -175,27 +176,27 @@ class Root(NodeObject):
     def state_transition(self, oper:str, active_auditor:bool=False) -> bool:
         """ Allowed auditor operations.
 
-        Some operations may require active auditor role (you are
-        registered as auditor for this batch).
+        Some operations may require active auditor role (you have DOES_AUDIT
+        permission for this batch).
 
         Returns True, if allowed operation
         """
         if self.state == State.ROOT_AUDIT_REQUESTED:
-            ret = oper == "start"
+            ret = oper in ["browse", "download", "start"]
         elif self.state == State.ROOT_AUDITING:
             if active_auditor:
-                # Withdraw/reject not used?
-                ret = oper in \
-                ["browse", "download", "accept", "withdraw", "reject"]
+                ret = oper in ["browse", "download", "accept", "withdraw", "reject"]
             else:
-                ret = oper == "start"
+                ret = oper in ["browse", "download", "start"]
         elif self.state == State.ROOT_ACCEPTED:
-            ret = oper in ["start", "browse", "download"]
+            ret = oper in ["browse", "download", "start"]
         elif self.state == State.ROOT_REJECTED:
-            ret = oper in ["browse", "start"] or \
+            ret = oper in ["browse", "download", "start"] or \
                 (oper == "delete" and active_auditor)
-
-        # print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
+        else:
+            # Candidate etc are not allowed for auditors
+            ret = False
+            print(f"#bl.batch.root.Root.state_transition: {self.state} {oper} -> {ret}")
         return ret
         
 
@@ -229,6 +230,8 @@ class Root(NodeObject):
     @classmethod
     def from_node(cls, node):
         """Convert a Neo4j Node to Root object.
+    
+        TODO: Should probably use pe.neo4j.nodereaders.Root_from_node
         """
         from models.util import format_ms_timestamp
         obj = cls()
@@ -559,6 +562,7 @@ class Root(NodeObject):
         titles = []
         labels = {}
         if auditor:
+            active_auditor = auditor
             result = shareds.driver.session().run(
                 CypherAudit.get_my_audits, oper=auditor
             )
@@ -573,12 +577,12 @@ class Root(NodeObject):
             #        'user': 'jpek', 'timestamp': 1578940247182}>
             #    label='Note'
             #    cnt=17>
-            b = Root.from_node(record["b"])
-            label = record["label"]
-            if not label:
-                label = ""
-            cnt = record["cnt"]
-            timestring = b.timestamp_str()
+            b = Root_from_node(record.get("batch"))
+            label = record.get("label","")
+            cnt = record.get("cnt",0)
+            if not auditor:
+                active_auditor = record.get("auditor")
+            time_string = b.timestamp_str()
             file = b.file.rsplit('/',1)[-1] if b.file else ""
 
             # Trick: Set Person as first in sort order!
@@ -587,7 +591,7 @@ class Root(NodeObject):
             if label and not label in titles:
                 titles.append(label)
 
-            key = f"{b.auditor}/{b.user}/{b.id}/{file} {timestring}"
+            key = f"{active_auditor}/{b.user}/{b.id}/{file} {time_string}"
             if not key in labels:
                 labels[key] = {}
             labels[key][label] = cnt
@@ -689,24 +693,55 @@ class Root(NodeObject):
         )
         return msg, deleted
 
-    @staticmethod
-    def fix_purge_auditors(batch_id, username):
-        """ Schema fix: If there is multiple auditors, purge others but current
-        """
-        with RootUpdater("update") as serv:
-            res = serv.purge_other_auditors(batch_id, username)
-            # Got {status, removed_auditors}
-            removed_auditors = res.get("removed_auditors", [])
-            count = len(removed_auditors)
-            if count > 0:
-                auditors = ", ".join(removed_auditors)
-                msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
-                # Return removed auditors
-                return {"status":Status.UPDATED, 
-                        "removed_auditors":removed_auditors,
-                        "msg":msg}
-        # No removed auditors
-        return {"status":Status.OK}
+    # @staticmethod
+    # def remove_old_access(batch_id, username): use RootUpdater.purge_old_access
+    #     """ Schema fix: If auditor has HAS_ACCESS permission (with DOES_AUDIT), remove it."""
+    #     with RootUpdater("update") as serv:
+    #         res = serv.purge_old_access(batch_id, username)
+    #         if res: # Permission removed
+    #             msg = _("Removed excessive access '%(a)s' from batch %(b)s", a=username, b=batch_id)
+    #             return {"status":res.get("status"), "msg":msg}
+    #     return {"status":Status.OK}
+
+    # @staticmethod
+    # def TODO_purge_auditors(batch_id, username):
+    #     """ Schema fix: If there is multiple auditors, purge others but current
+    #         (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
+    #    """
+    #     with RootUpdater("update") as serv:
+    #         res = serv.purge_other_auditors(batch_id, username)
+    #         # Got {status, removed_auditors}
+    #         removed_auditors = res.get("removed_auditors", [])
+    #         count = len(removed_auditors)
+    #         if count > 0:
+    #             auditors = ", ".join(removed_auditors)
+    #             msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
+    #             # Return removed auditors
+    #             return {"status":Status.UPDATED, 
+    #                     "removed_auditors":removed_auditors,
+    #                     "msg":msg}
+    #     # No removed auditors
+    #     return {"status":Status.OK}
+
+    # @staticmethod
+    # def obsolete_fix_purge_auditors(batch_id, username):
+    #     """ Schema fix: If there is multiple auditors, purge others but current
+    #         (2) If the user has HAS_ACCESS permission, replace it with DOES_AUDIT
+    #    """
+    #     with RootUpdater("update") as serv:
+    #         res = serv.purge_other_auditors(batch_id, username)
+    #         # Got {status, removed_auditors}
+    #         removed_auditors = res.get("removed_auditors", [])
+    #         count = len(removed_auditors)
+    #         if count > 0:
+    #             auditors = ", ".join(removed_auditors)
+    #             msg = _("Superseded auditor '%(a)s' from batch %(b)s", a=auditors, b=batch_id)
+    #             # Return removed auditors
+    #             return {"status":Status.UPDATED, 
+    #                     "removed_auditors":removed_auditors,
+    #                     "msg":msg}
+    #     # No removed auditors
+    #     return {"status":Status.OK}
 
 # class BatchUpdater(DataService): # -> bl.batch.root_updater.RootUpdater
 #     """ Root data store for write and update. 
@@ -716,17 +751,6 @@ class BatchReader(DataService):
 
     def __init__(self, service_name: str):
         super().__init__(service_name)
-        self.idstr = f"{self.__class__.__name__}"
-        # logger.debug(f'#~~~{self.idstr} init')
-        # Find <class 'pe.neo4j.*service'> and initialize it
-        self.service_name = service_name
-        service_class = shareds.dataservices.get(self.service_name)
-        if not service_class:
-            raise KeyError(
-                f"BatchReader.__init__: name {self.service_name} not found"
-            )
-        # Initiate selected service object
-        self.dataservice = service_class(shareds.driver)
 
     def batch_get_one(self, user, batch_id):
         """Get Root object by username and batch id (in BatchReader). """
@@ -742,3 +766,16 @@ class BatchReader(DataService):
                 f"BatchUpdater.batch_get_one failed: {e.__class__.__name__} {e}"
             )
             return {"status": Status.ERROR, "statustext": statustext}
+
+    def get_auditors(self, batch_id):
+        """ Read data of the auditors. """
+        try:
+            ret = self.dataservice.dr_get_auditors(batch_id)
+            return ret
+        except Exception as e:
+            statustext = (
+                f"BatchUpdater.get_auditors failed: {e.__class__.__name__} {e}"
+            )
+            return {"status": Status.ERROR, "statustext": statustext}
+
+
