@@ -421,10 +421,11 @@ class DOM_handler:
                     }
                 )
 
-            e.attr = dict()
-            for attr in event.getElementsByTagName("attribute"):
-                if attr.hasAttribute("type"):
-                    e.attr[attr.getAttribute("type")] = attr.getAttribute("value")
+            self._extract_attr(event, e)
+#            e.attr = dict()
+#            for attr in event.getElementsByTagName("attribute"):
+#                if attr.hasAttribute("type"):
+#                    e.attr[attr.getAttribute("type")] = attr.getAttribute("value")
 
             for ref in event.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
@@ -1247,6 +1248,18 @@ class DOM_handler:
             node.change = int(dom.getAttribute("change"))
         if dom.hasAttribute("id"):
             node.id = dom.getAttribute("id")
+    
+    
+    def _extract_attr(self, dom, node):
+        """Extract attr values from DOM object to NodeObject fields.
+        
+        node.attr = [[self.type, self.value],[self.type, self.value],...]
+        """
+        node.attr = dict()
+        for attr in dom.getElementsByTagName("attribute"):
+            if attr.hasAttribute("type"):
+                node.attr[attr.getAttribute("type")] = attr.getAttribute("value")
+        
 
     def _extract_mediaref(self, dom_object):
         """Check if dom_object has media reference and extract it to p.media_refs.

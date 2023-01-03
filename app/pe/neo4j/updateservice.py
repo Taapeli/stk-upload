@@ -944,6 +944,7 @@ class Neo4jUpdateService(ConcreteService):
             for key, value in event.attr.items():
                 a = a + [key, value]
                 e_attr.update({"attr": a})
+            
         if event.dates:
             e_attr.update(event.dates.for_db())
 
