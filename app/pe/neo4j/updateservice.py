@@ -1021,6 +1021,13 @@ class Neo4jUpdateService(ConcreteService):
         if person.dates:
             p_attr.update(person.dates.for_db())
 
+        if person.attr:
+        # Convert 'attr' dict to list for db
+            a = []
+            for key, value in person.attr.items():
+                a = a + [key, value]
+                p_attr.update({"attr": a})
+
         result = tx.run(CypherPerson.create_to_batch, 
                         batch_id=batch_id, p_attr=p_attr)
         ids = []
@@ -1476,6 +1483,14 @@ class Neo4jUpdateService(ConcreteService):
             "id": f.id,
             "rel_type": f.rel_type,
         }
+
+        if f.attr:
+        # Convert 'attr' dict to list for db
+            a = []
+            for key, value in f.attr.items():
+                a = a + [key, value]
+                f_attr.update({"attr": a})
+
         result = tx.run(
             CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
         )

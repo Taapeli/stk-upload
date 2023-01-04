@@ -421,6 +421,7 @@ class DOM_handler:
                     }
                 )
 
+            # Handle <attribute>
             self._extract_attr(event, e)
 #            e.attr = dict()
 #            for attr in event.getElementsByTagName("attribute"):
@@ -510,6 +511,9 @@ class DOM_handler:
                 if ref.hasAttribute("hlink"):
                     f.child_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has child {f.child_handles[-1]}')
+                    
+            # Handle <attribute>
+            self._extract_attr(family, f)
 
             for ref in family.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
@@ -729,6 +733,9 @@ class DOM_handler:
             #        p.parentin_handles.append(person_parentin.getAttribute("hlink") + self.handle_suffix)
             #        ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
 
+            # Handle <attribute>
+            self._extract_attr(person, p)
+            
             for person_noteref in person.getElementsByTagName("noteref"):
                 if person_noteref.hasAttribute("hlink"):
                     p.note_handles.append(person_noteref.getAttribute("hlink") + self.handle_suffix)
