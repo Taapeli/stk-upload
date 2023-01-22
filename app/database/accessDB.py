@@ -88,15 +88,15 @@ def initialize_db():
 
         constr_list = {
             "Root":{"id"},
-            "Citation":{"iid"},
-            "Event":{"iid"},
-            "Family":{"iid"},
-            "Media":{"iid"},
-            "Note":{"iid"},
-            "Person":{"iid"},
-            "Place":{"iid"},
-            "Repository":{"iid"},
-            "Source":{"iid"},
+            "Citation":{"iid", "handle"},
+            "Event":{"iid", "handle"},
+            "Family":{"iid", "handle"},
+            "Media":{"iid", "handle"},
+            "Note":{"iid", "handle"},
+            "Person":{"iid", "handle"},
+            "Place":{"iid", "handle"},
+            "Repository":{"iid", "handle"},
+            "Source":{"iid", "handle"},
             "Role":{"name"},
             "User":{"email", "username"}
         }
