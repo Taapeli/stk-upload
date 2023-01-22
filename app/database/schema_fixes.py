@@ -122,6 +122,7 @@ def uuid_to_iid():
 
         # 2. For each batch
 
+        n_removed = 0
         for batch_id in batches:
 
             # 2.1 Find objects without a.iid
@@ -153,7 +154,6 @@ def uuid_to_iid():
             # 2.3 Remove a.uuid parameters, where still exists
 
             done = False
-            n_removed = 0
             while not done:
                 done = True
     
