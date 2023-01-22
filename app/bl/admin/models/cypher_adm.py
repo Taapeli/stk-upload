@@ -151,15 +151,15 @@ RETURN COUNT(a) AS cnt'''
 
 # ------------------ free text search ----------------
     create_freetext_index = """
-CALL db.index.fulltext.createNodeIndex("searchattr",["Person"],["searchattr"])
+CREATE FULLTEXT INDEX searchattr IF NOT EXISTS FOR (n:Person) ON EACH [n.searchattr]
     """
     
     create_freetext_index_for_notes = """
-CALL db.index.fulltext.createNodeIndex("notetext",["Note"],["text"])     
+CREATE FULLTEXT INDEX notetext IF NOT EXISTS FOR (n:Note) ON EACH [n.text]
     """
 
     create_freetext_index_for_sources = """
-CALL db.index.fulltext.createNodeIndex("sourcetitle",["Source"],["stitle"])     
+CREATE FULLTEXT INDEX sourcetitle IF NOT EXISTS FOR (n:Source) ON EACH [n.stitle] 
     """
 
     build_indexes = """

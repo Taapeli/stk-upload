@@ -391,14 +391,14 @@ def try_fixing_duplicate_roots():
 def create_unique_constraint(label, prop):
     ' Create given constraint for given label and property.'
     with shareds.driver.session() as session:
-        query = f"create constraint on (n:{label}) assert n.{prop} is unique"
+        query = f"create constraint if not exists for (n:{label}) require n.{prop} is unique"
         try:
             session.run(query)
             print(f'Unique constraint for {label}.{prop} created')
-        except ClientError as e:
-            msgs = e.message.split(',')
-            print(f'Unique constraint for {label}.{prop} ok: {msgs[0]}')
-            return
+#         except ClientError as e:
+#             msgs = e.message.split(',')
+#             print(f'Unique constraint for {label}.{prop} ok: {msgs[0]}')
+#             return
         except Exception as e:
             logger.error(f'database.accessDB.create_unique_constraint: {e.__class__.__name__} {e}' )
             raise

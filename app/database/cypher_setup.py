@@ -59,8 +59,8 @@ class SetupCypher():
     MATCH (a:Role) RETURN a.name
     """
     set_role_constraint = """
-    CREATE CONSTRAINT ON (role:Role) 
-        ASSERT role.name IS UNIQUE
+    CREATE CONSTRAINT FOR (role:Role) 
+        REQUIRE role.name IS UNIQUE
     """
     role_check_existence = """
     MATCH  (role:Role) WHERE role.name = $rolename RETURN COUNT(role)
@@ -80,16 +80,16 @@ class SetupCypher():
     """
 
     set_user_constraint1 = """
-    CREATE CONSTRAINT ON (user:User) 
-        ASSERT (user.email) IS UNIQUE;
+    CREATE CONSTRAINT FOR (user:User) 
+        REQUIRE user.email IS UNIQUE
     """
     set_user_constraint2 = """
-    CREATE CONSTRAINT ON (user:User) 
-        ASSERT (user.username) IS UNIQUE;
+    CREATE CONSTRAINT FOR (user:User) 
+        REQUIRE user.username IS UNIQUE
     """
 
-    index_year_birth_low = "CREATE INDEX ON :Person(birth_low)"
-    index_year_death_high = "CREATE INDEX ON :Person(death_high)"
+    index_year_birth_low = "CREATE INDEX FOR (n:Person) ON (n.birth_low)"
+    index_year_death_high = "CREATE INDEX FOR (n:Person) ON (n.death_high)"
 
     master_create = """
     MATCH  (role:Role) WHERE role.name = 'master'

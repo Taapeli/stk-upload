@@ -69,5 +69,5 @@ ORDER BY n.name"""
 
     delete_all = "MATCH (n:Refname) DETACH DELETE n"
 
-    set_constraint = "CREATE CONSTRAINT ON (r:Refname) ASSERT r.name IS UNIQUE"
+    set_constraint = "CREATE CONSTRAINT FOR (r:Refname) REQUIRE r.name IS UNIQUE"
 
