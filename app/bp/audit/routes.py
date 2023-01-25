@@ -351,7 +351,7 @@ def auditor_ops():
 
                 res = service.set_audited(batch_id, user_audit, State.ROOT_ACCEPTED)
                 if Status.has_failed(res):
-                    msg = _(f"Audit request {operation} failed")
+                    msg = _("Audit request {} failed").format(operation)
                     flash(msg, "error")
                     return redirect(url_for("audit.audit_pick", batch_id=batch_id))
                 else:

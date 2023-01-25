@@ -81,6 +81,7 @@ class Person(NodeObject):
        birth_high            int
        death_high            int
        change                int 1536324580
+       attr[]                dict lisätiedot {attr_type: attr_value}
       }
     """
 
@@ -97,6 +98,7 @@ class Person(NodeObject):
         self.death_low = None
         self.birth_high = None
         self.death_high = None
+        self.attr = dict()
 
     def __str__(self):
         dates = self.dates if self.dates else ""

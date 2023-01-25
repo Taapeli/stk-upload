@@ -421,10 +421,12 @@ class DOM_handler:
                     }
                 )
 
-            e.attr = dict()
-            for attr in event.getElementsByTagName("attribute"):
-                if attr.hasAttribute("type"):
-                    e.attr[attr.getAttribute("type")] = attr.getAttribute("value")
+            # Handle <attribute>
+            self._extract_attr(event, e)
+#            e.attr = dict()
+#            for attr in event.getElementsByTagName("attribute"):
+#                if attr.hasAttribute("type"):
+#                    e.attr[attr.getAttribute("type")] = attr.getAttribute("value")
 
             for ref in event.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
@@ -509,6 +511,9 @@ class DOM_handler:
                 if ref.hasAttribute("hlink"):
                     f.child_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has child {f.child_handles[-1]}')
+                    
+            # Handle <attribute>
+            self._extract_attr(family, f)
 
             for ref in family.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
@@ -728,6 +733,9 @@ class DOM_handler:
             #        p.parentin_handles.append(person_parentin.getAttribute("hlink") + self.handle_suffix)
             #        ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
 
+            # Handle <attribute>
+            self._extract_attr(person, p)
+            
             for person_noteref in person.getElementsByTagName("noteref"):
                 if person_noteref.hasAttribute("hlink"):
                     p.note_handles.append(person_noteref.getAttribute("hlink") + self.handle_suffix)
@@ -1247,6 +1255,18 @@ class DOM_handler:
             node.change = int(dom.getAttribute("change"))
         if dom.hasAttribute("id"):
             node.id = dom.getAttribute("id")
+    
+    
+    def _extract_attr(self, dom, node):
+        """Extract attr values from DOM object to NodeObject fields.
+        
+        node.attr = [[self.type, self.value],[self.type, self.value],...]
+        """
+        node.attr = dict()
+        for attr in dom.getElementsByTagName("attribute"):
+            if attr.hasAttribute("type"):
+                node.attr[attr.getAttribute("type")] = attr.getAttribute("value")
+        
 
     def _extract_mediaref(self, dom_object):
         """Check if dom_object has media reference and extract it to p.media_refs.

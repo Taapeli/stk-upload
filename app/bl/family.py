@@ -49,6 +49,7 @@ class Family(NodeObject):
             priv            str private if exists
             father_sortname str search key
             mother_sortname str search key
+            attr[]          dict lisätiedot {attr_type: attr_value}
     """
 
     def __init__(self, uniq_id=None):
@@ -60,6 +61,7 @@ class Family(NodeObject):
         # Sorting name of family's father and mother
         self.father_sortname = ""
         self.mother_sortname = ""
+        self.attr = dict()
 
     def __str__(self):
         if self.rel_type:
