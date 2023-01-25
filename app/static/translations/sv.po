@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-10 10:51+0200\n"
+"POT-Creation-Date: 2023-01-25 13:16+0200\n"
 "PO-Revision-Date: 2022-11-11 13:23+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -87,7 +87,7 @@ msgid "Terms of use"
 msgstr "Användarvillkoren"
 
 #: bp/stk_security/templates/security/_menu.html:5 setups.py:199
-#: templates/index_demo.html:100 templates/index_demo.html:104
+#: templates/index_demo.html:102 templates/index_demo.html:106
 msgid "Register"
 msgstr "Registrera"
 
@@ -170,11 +170,11 @@ msgstr "Läsfel av platser "
 msgid "Notes read error "
 msgstr "Läsfel för anteckningar "
 
-#: bl/family.py:68
+#: bl/family.py:70
 msgid "undefined relation"
 msgstr "odefinerad relation"
 
-#: bl/family.py:342
+#: bl/family.py:344
 msgid "This person has no families"
 msgstr "Denna person har inga familjer"
 
@@ -194,32 +194,32 @@ msgstr "Odefinerad material typ eller status"
 msgid "Undefined breed of materials"
 msgstr "Odefinerad material type"
 
-#: bl/person.py:122 bl/person.py:125 ui/jinja_filters.py:131
+#: bl/person.py:124 bl/person.py:127 ui/jinja_filters.py:131
 #: ui/jinja_filters.py:329
 msgid "Child"
 msgstr "Barn"
 
-#: bl/person.py:123 ui/jinja_filters.py:328
+#: bl/person.py:125 ui/jinja_filters.py:328
 msgid "Son"
 msgstr "Son"
 
-#: bl/person.py:124 ui/jinja_filters.py:327
+#: bl/person.py:126 ui/jinja_filters.py:327
 msgid "Daughter"
 msgstr "Dotter"
 
-#: bl/person.py:134
+#: bl/person.py:136
 msgid "sex not known"
 msgstr "kön inte känt"
 
-#: bl/person.py:135
+#: bl/person.py:137
 msgid "male"
 msgstr "man"
 
-#: bl/person.py:136
+#: bl/person.py:138
 msgid "female"
 msgstr "kvinna"
 
-#: bl/person.py:137
+#: bl/person.py:139
 msgid "sex not applicable"
 msgstr "kön inte tillämpligt"
 
@@ -360,19 +360,19 @@ msgstr "Arkiv"
 msgid "Sources"
 msgstr "Källor"
 
-#: bl/gramps/xml_dom_handler.py:1051 bp/gedcom/transforms/dates.py:33
+#: bl/gramps/xml_dom_handler.py:1058 bp/gedcom/transforms/dates.py:33
 msgid "Dates"
 msgstr "Datum"
 
-#: bl/gramps/xml_dom_handler.py:1053
+#: bl/gramps/xml_dom_handler.py:1060
 msgid "Family sorting names"
 msgstr "Familj sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1084
+#: bl/gramps/xml_dom_handler.py:1091
 msgid "Person sorting names"
 msgstr "Person sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1102
+#: bl/gramps/xml_dom_handler.py:1109
 msgid "Estimated lifetimes"
 msgstr "Beräknad livstider"
 
@@ -3378,7 +3378,7 @@ msgstr "Gå till det första mediet"
 
 #: bp/scene/templates/scene/most_common.html:1
 #: bp/scene/templates/scene/persons_search.html:73
-#: templates/index_demo.html:112
+#: templates/index_demo.html:114
 msgid "Most common names"
 msgstr "Vanligaste namnen"
 
@@ -4155,8 +4155,8 @@ msgstr "Min hemsida"
 msgid "Log in to this application"
 msgstr "Logga in denna applikation"
 
-#: bp/start/templates/start/s_macros.html:41 templates/index_demo.html:90
-#: templates/index_demo.html:96
+#: bp/start/templates/start/s_macros.html:41 templates/index_demo.html:92
+#: templates/index_demo.html:98
 msgid "Log in"
 msgstr "Logga in"
 
@@ -4526,7 +4526,7 @@ msgstr ""
 msgid "Isotammi-IDs"
 msgstr ""
 
-#: pe/neo4j/updateservice.py:1565
+#: pe/neo4j/updateservice.py:1580
 msgid "Could not save a comment"
 msgstr "Commentarens sparningen misslyckats"
 
@@ -4658,11 +4658,15 @@ msgstr "Se processen för din data"
 msgid "Gedcom data healing services"
 msgstr "Service för att förbättra Gedcom-data"
 
-#: templates/index_demo.html:71
+#: templates/index_demo.html:68
+msgid "Starting with Isotammi"
+msgstr ""
+
+#: templates/index_demo.html:73
 msgid "Look at the demo data"
 msgstr "Titta på demodata"
 
-#: templates/index_demo.html:72
+#: templates/index_demo.html:74
 msgid ""
 "In this demo we have a genealogical tree which follows our quality rules "
 "and \n"
@@ -4673,11 +4677,11 @@ msgstr ""
 " och det innehåller släktingarna till den finska nationalskompositör Jean"
 " Sibelius."
 
-#: templates/index_demo.html:82
+#: templates/index_demo.html:84
 msgid "Explore demo"
 msgstr "Utforska demo"
 
-#: templates/index_demo.html:91
+#: templates/index_demo.html:93
 msgid ""
 "If you have already registered, you can log in and refine the structure "
 "of your own data."
@@ -4685,7 +4689,7 @@ msgstr ""
 "Om du redan har registrerat dig kan du logga in och förfina strukturen på"
 " dina egna data."
 
-#: templates/index_demo.html:92
+#: templates/index_demo.html:94
 msgid ""
 "As a member of <i>Genealogical Society of Finland</i> you will get more "
 "services."
@@ -4693,7 +4697,7 @@ msgstr ""
 "Som medlem i <i>Genealogiska Sällskapet i Finland</i> får du fler "
 "tjänster."
 
-#: templates/index_demo.html:101
+#: templates/index_demo.html:103
 msgid "To see the full data, you can fill the registration form here"
 msgstr "För att se hela data kan du fylla i anmälningsblanketten här"
 

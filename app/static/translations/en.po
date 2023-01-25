@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-10 10:51+0200\n"
+"POT-Creation-Date: 2023-01-25 13:16+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -85,7 +85,7 @@ msgid "Terms of use"
 msgstr ""
 
 #: bp/stk_security/templates/security/_menu.html:5 setups.py:199
-#: templates/index_demo.html:100 templates/index_demo.html:104
+#: templates/index_demo.html:102 templates/index_demo.html:106
 msgid "Register"
 msgstr ""
 
@@ -168,11 +168,11 @@ msgstr ""
 msgid "Notes read error "
 msgstr ""
 
-#: bl/family.py:68
+#: bl/family.py:70
 msgid "undefined relation"
 msgstr ""
 
-#: bl/family.py:342
+#: bl/family.py:344
 msgid "This person has no families"
 msgstr ""
 
@@ -192,32 +192,32 @@ msgstr ""
 msgid "Undefined breed of materials"
 msgstr ""
 
-#: bl/person.py:122 bl/person.py:125 ui/jinja_filters.py:131
+#: bl/person.py:124 bl/person.py:127 ui/jinja_filters.py:131
 #: ui/jinja_filters.py:329
 msgid "Child"
 msgstr ""
 
-#: bl/person.py:123 ui/jinja_filters.py:328
+#: bl/person.py:125 ui/jinja_filters.py:328
 msgid "Son"
 msgstr ""
 
-#: bl/person.py:124 ui/jinja_filters.py:327
+#: bl/person.py:126 ui/jinja_filters.py:327
 msgid "Daughter"
 msgstr ""
 
-#: bl/person.py:134
+#: bl/person.py:136
 msgid "sex not known"
 msgstr ""
 
-#: bl/person.py:135
+#: bl/person.py:137
 msgid "male"
 msgstr ""
 
-#: bl/person.py:136
+#: bl/person.py:138
 msgid "female"
 msgstr ""
 
-#: bl/person.py:137
+#: bl/person.py:139
 msgid "sex not applicable"
 msgstr ""
 
@@ -358,19 +358,19 @@ msgstr ""
 msgid "Sources"
 msgstr ""
 
-#: bl/gramps/xml_dom_handler.py:1051 bp/gedcom/transforms/dates.py:33
+#: bl/gramps/xml_dom_handler.py:1058 bp/gedcom/transforms/dates.py:33
 msgid "Dates"
 msgstr ""
 
-#: bl/gramps/xml_dom_handler.py:1053
+#: bl/gramps/xml_dom_handler.py:1060
 msgid "Family sorting names"
 msgstr ""
 
-#: bl/gramps/xml_dom_handler.py:1084
+#: bl/gramps/xml_dom_handler.py:1091
 msgid "Person sorting names"
 msgstr ""
 
-#: bl/gramps/xml_dom_handler.py:1102
+#: bl/gramps/xml_dom_handler.py:1109
 msgid "Estimated lifetimes"
 msgstr ""
 
@@ -3368,7 +3368,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/most_common.html:1
 #: bp/scene/templates/scene/persons_search.html:73
-#: templates/index_demo.html:112
+#: templates/index_demo.html:114
 msgid "Most common names"
 msgstr ""
 
@@ -4125,8 +4125,8 @@ msgstr ""
 msgid "Log in to this application"
 msgstr ""
 
-#: bp/start/templates/start/s_macros.html:41 templates/index_demo.html:90
-#: templates/index_demo.html:96
+#: bp/start/templates/start/s_macros.html:41 templates/index_demo.html:92
+#: templates/index_demo.html:98
 msgid "Log in"
 msgstr ""
 
@@ -4488,7 +4488,7 @@ msgstr ""
 msgid "Isotammi-IDs"
 msgstr ""
 
-#: pe/neo4j/updateservice.py:1565
+#: pe/neo4j/updateservice.py:1580
 msgid "Could not save a comment"
 msgstr ""
 
@@ -4618,11 +4618,15 @@ msgstr ""
 msgid "Gedcom data healing services"
 msgstr ""
 
-#: templates/index_demo.html:71
+#: templates/index_demo.html:68
+msgid "Starting with Isotammi"
+msgstr ""
+
+#: templates/index_demo.html:73
 msgid "Look at the demo data"
 msgstr ""
 
-#: templates/index_demo.html:72
+#: templates/index_demo.html:74
 msgid ""
 "In this demo we have a genealogical tree which follows our quality rules "
 "and \n"
@@ -4630,23 +4634,23 @@ msgid ""
 " Sibelius."
 msgstr ""
 
-#: templates/index_demo.html:82
+#: templates/index_demo.html:84
 msgid "Explore demo"
 msgstr ""
 
-#: templates/index_demo.html:91
+#: templates/index_demo.html:93
 msgid ""
 "If you have already registered, you can log in and refine the structure "
 "of your own data."
 msgstr ""
 
-#: templates/index_demo.html:92
+#: templates/index_demo.html:94
 msgid ""
 "As a member of <i>Genealogical Society of Finland</i> you will get more "
 "services."
 msgstr ""
 
-#: templates/index_demo.html:101
+#: templates/index_demo.html:103
 msgid "To see the full data, you can fill the registration form here"
 msgstr ""
 
