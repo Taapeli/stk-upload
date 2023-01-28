@@ -41,7 +41,7 @@ def uuid_to_iid():
             - remove a.uuid
             - finally update b.db_schema
     """
-    from database.accessDB import DB_SCHEMA_VERSION, remove_prop_constraints
+    from database.accessDB import DB_SCHEMA_VERSION #, remove_prop_constraints
 
 
     # def remove_uuid_contraints():
@@ -82,7 +82,7 @@ def uuid_to_iid():
 
     # =========== uuid_to_iid starts here ==============
 
-    #Todo:  NOT Cypher 1.1 compliant!
+    #Note:  NOT Cypher 1.1 compliant
     #remove_uuid_contraints()
 
     q_get_batches = """
@@ -122,6 +122,7 @@ def uuid_to_iid():
 
         # 2. For each batch
 
+        n_removed = 0
         for batch_id in batches:
 
             # 2.1 Find objects without a.iid

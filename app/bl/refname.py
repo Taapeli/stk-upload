@@ -52,7 +52,11 @@ logger = logging.getLogger("stkserver")
 
 import shareds
 from bl.base import NodeObject  # , Status
-from pe.neo4j.cypher.cy_refname import CypherRefname
+if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
+    from pe.neo4j.cypher.cy_refname import CypherRefname
+else:
+    # Cypher clauses using syntax before Neo4j version 5.0
+    from pe.neo4j.cypher.cy_refname_v3_4 import CypherRefname
 from .person import Person, SEX_UNKNOWN 
 
 # Global allowed reference types in Refname.reftype field or use attribute in db

@@ -30,9 +30,15 @@ from neo4j.exceptions import ClientError, ConstraintError #,CypherSyntaxError
 from flask_security import utils as sec_utils
 
 import shareds
-from .cypher_setup import SetupCypher
+if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
+    from .cypher_setup import SetupCypher
+    from bl.admin.models.cypher_adm import Cypher_adm
+else:
+    # Cypher clauses using syntax before Neo4j version 5.0
+    from .cypher_setup_v3_4 import SetupCypher
+    from bl.admin.models.cypher_adm_v3_4 import Cypher_adm
+
 from .schema_fixes import do_schema_fixes
-from bl.admin.models.cypher_adm import Cypher_adm
 
 # All User roles here:
 ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön käyttäjä, näkee esittelysukupuun'},
@@ -88,15 +94,15 @@ def initialize_db():
 
         constr_list = {
             "Root":{"id"},
-            "Citation":{"iid"},
-            "Event":{"iid"},
-            "Family":{"iid"},
-            "Media":{"iid"},
-            "Note":{"iid"},
-            "Person":{"iid"},
-            "Place":{"iid"},
-            "Repository":{"iid"},
-            "Source":{"iid"},
+            "Citation":{"iid", "handle"},
+            "Event":{"iid", "handle"},
+            "Family":{"iid", "handle"},
+            "Media":{"iid", "handle"},
+            "Note":{"iid", "handle"},
+            "Person":{"iid", "handle"},
+            "Place":{"iid", "handle"},
+            "Repository":{"iid", "handle"},
+            "Source":{"iid", "handle"},
             "Role":{"name"},
             "User":{"email", "username"}
         }
@@ -391,17 +397,27 @@ def try_fixing_duplicate_roots():
 def create_unique_constraint(label, prop):
     ' Create given constraint for given label and property.'
     with shareds.driver.session() as session:
-        query = f"create constraint on (n:{label}) assert n.{prop} is unique"
-        try:
-            session.run(query)
-            print(f'Unique constraint for {label}.{prop} created')
-        except ClientError as e:
-            msgs = e.message.split(',')
-            print(f'Unique constraint for {label}.{prop} ok: {msgs[0]}')
-            return
-        except Exception as e:
-            logger.error(f'database.accessDB.create_unique_constraint: {e.__class__.__name__} {e}' )
-            raise
+        # Check Neo4j version by instance.NEO4J_VERSION
+        if shareds.db.version >= "5.0":
+            query = f"create constraint if not exists for (n:{label}) require n.{prop} is unique"
+            try:
+                session.run(query)
+                print(f'Unique constraint for {label}.{prop} created')
+            except Exception as e:
+                logger.error(f'database.accessDB.create_unique_constraint: {e.__class__.__name__} {e}' )
+                raise
+        else: # Neo4j versions 3.2 - 4.2
+            query = f"create constraint on (n:{label}) assert n.{prop} is unique"
+            try:
+                session.run(query)
+                print(f'Unique constraint for {label}.{prop} created')
+            except ClientError as e:
+                msgs = e.message.split(',')
+                print(f'Unique constraint for {label}.{prop} ok: {msgs[0]}')
+                return
+            except Exception as e:
+                logger.error(f'database.accessDB.create_unique_constraint: {e.__class__.__name__} {e}' )
+                raise
     return
 
 def create_constraint(label, prop):

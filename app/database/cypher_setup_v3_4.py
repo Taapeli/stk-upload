@@ -18,13 +18,14 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-Moved on 14.5.2019 from database.accessDB
+Copied from database.cypher_setup 28.1.2023
 
 @author: jm
 '''
 
 class SetupCypher():
-    """ Cypher clauses for setup """
+    """ Cypher clauses for setup.
+        Containing old cypher clauses for Neo4j versions < 5.0 . """
 
     # erase database 
     delete_database = """
@@ -59,8 +60,8 @@ class SetupCypher():
     MATCH (a:Role) RETURN a.name
     """
     set_role_constraint = """
-    CREATE CONSTRAINT FOR (role:Role) 
-        REQUIRE role.name IS UNIQUE
+    CREATE CONSTRAINT ON (role:Role) 
+        ASSERT role.name IS UNIQUE
     """
     role_check_existence = """
     MATCH  (role:Role) WHERE role.name = $rolename RETURN COUNT(role)
@@ -80,12 +81,12 @@ class SetupCypher():
     """
 
     set_user_constraint1 = """
-    CREATE CONSTRAINT FOR (user:User) 
-        REQUIRE user.email IS UNIQUE
+    CREATE CONSTRAINT ON (user:User) 
+        ASSERT (user.email) IS UNIQUE;
     """
     set_user_constraint2 = """
-    CREATE CONSTRAINT FOR (user:User) 
-        REQUIRE user.username IS UNIQUE
+    CREATE CONSTRAINT ON (user:User) 
+        ASSERT (user.username) IS UNIQUE;
     """
 
     index_year_birth_low = "CREATE INDEX ON :Person(birth_low)"
