@@ -242,7 +242,7 @@ class PersonReaderTx(DataService):
             if res.get("status") == Status.NOT_FOUND:
                 return {
                     "status": Status.NOT_FOUND,
-                    "statustext": _("Requested person not found"),
+                    "statustext": _("Requested person not available"),
                 }
             return res
 

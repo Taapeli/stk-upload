@@ -230,8 +230,8 @@ msgid "No persons found"
 msgstr "Ketään ei löytynyt"
 
 #: bl/person_reader.py:245
-msgid "Requested person not found"
-msgstr "Pyydettyä henkilöä ei ole"
+msgid "Requested person not available"
+msgstr "Et voi katsoa pyydettyä henkilöä"
 
 #: bl/batch/root_updater.py:207 bl/stats.py:278 bp/gramps/routes.py:587
 msgid "Failed to retrieve batch"
