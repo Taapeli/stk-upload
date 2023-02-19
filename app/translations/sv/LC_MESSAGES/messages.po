@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-25 13:16+0200\n"
+"POT-Creation-Date: 2023-02-19 15:28+0200\n"
 "PO-Revision-Date: 2022-11-11 13:23+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
 "Language-Team: sv <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.6.0\n"
+"Generated-By: Babel 2.10.3\n"
 
 #: chkdate.py:13
 msgid "Undefined"
@@ -360,19 +360,19 @@ msgstr "Arkiv"
 msgid "Sources"
 msgstr "Källor"
 
-#: bl/gramps/xml_dom_handler.py:1058 bp/gedcom/transforms/dates.py:33
+#: bl/gramps/xml_dom_handler.py:1041 bp/gedcom/transforms/dates.py:33
 msgid "Dates"
 msgstr "Datum"
 
-#: bl/gramps/xml_dom_handler.py:1060
+#: bl/gramps/xml_dom_handler.py:1043
 msgid "Family sorting names"
 msgstr "Familj sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1091
+#: bl/gramps/xml_dom_handler.py:1074
 msgid "Person sorting names"
 msgstr "Person sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1109
+#: bl/gramps/xml_dom_handler.py:1092
 msgid "Estimated lifetimes"
 msgstr "Beräknad livstider"
 
@@ -1627,7 +1627,7 @@ msgstr "Jämför potentiella dupliceringar"
 
 #: bp/dupsearch/templates/compare.html:97
 #: bp/dupsearch/templates/compare2.html:97
-#: bp/gramps/templates/gramps/scripting.html:32 bp/scene/routes.py:1042
+#: bp/gramps/templates/gramps/scripting.html:32 bp/scene/routes.py:1045
 #: bp/scene/templates/scene/families.html:137
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/hx-person/famtree.html:17
@@ -1656,7 +1656,7 @@ msgid "Wife"
 msgstr "Hustru"
 
 #: bp/dupsearch/templates/compare.html:105
-#: bp/dupsearch/templates/compare2.html:105 bp/scene/routes.py:1042
+#: bp/dupsearch/templates/compare2.html:105 bp/scene/routes.py:1045
 #: bp/scene/templates/scene/families.html:141
 #: bp/scene/templates/scene/family.html:99
 #: bp/scene/templates/scene/hx-person/famtree.html:25
@@ -2181,7 +2181,7 @@ msgstr "Välj din fil för bearbetning"
 msgid "Upload a new GEDCOM file"
 msgstr "Ladda upp ny Gedcom fil"
 
-#: bp/gedcom/templates/gedcom_list.html:54
+#: bp/gedcom/templates/gedcom_list.html:54 bp/scene/routes.py:382
 msgid "Return main page"
 msgstr "Tillbaka till huvud sidan"
 
@@ -2559,11 +2559,11 @@ msgstr "Material %(batch_id)s har tagits bort, %(n)s noder"
 msgid "Failed to retrieve commands"
 msgstr "Det gick inte att hämta kommandon"
 
-#: bp/gramps/routes.py:565 bp/scene/routes.py:1567
+#: bp/gramps/routes.py:565 bp/scene/routes.py:1570
 msgid "ERROR: Update did not succeed: "
 msgstr "FEL: Uppdateringen fungerade inte: "
 
-#: bp/gramps/routes.py:567 bp/scene/routes.py:1569
+#: bp/gramps/routes.py:567 bp/scene/routes.py:1572
 msgid "Updated"
 msgstr "Uppdaterad"
 
@@ -2844,40 +2844,44 @@ msgstr "Fusionera källor"
 msgid "Data read failed."
 msgstr "Dataläsningen misslyckades."
 
-#: bp/scene/routes.py:450
+#: bp/scene/routes.py:382
+msgid "No Material is selected."
+msgstr "Ingen material har utvalts."
+
+#: bp/scene/routes.py:453
 msgid "references"
 msgstr "antydningar"
 
-#: bp/scene/routes.py:450
+#: bp/scene/routes.py:453
 msgid "inner places"
 msgstr "ingående platser"
 
-#: bp/scene/routes.py:662
+#: bp/scene/routes.py:665
 msgid "type changed"
 msgstr "typen has förendrats"
 
-#: bp/scene/routes.py:664
+#: bp/scene/routes.py:667
 msgid "type change FAILED"
 msgstr "typ förendring MISSLYCKATS"
 
-#: bp/scene/routes.py:791 bp/scene/routes.py:800
+#: bp/scene/routes.py:794 bp/scene/routes.py:803
 msgid "No event found"
 msgstr "Inga händelser hittades"
 
-#: bp/scene/routes.py:838 bp/scene/templates/scene/hx-person/famtree.html:42
+#: bp/scene/routes.py:841 bp/scene/templates/scene/hx-person/famtree.html:42
 #: bp/scene/templates/scene/obsolete_event.html:77
 msgid "Self"
 msgstr "Själv"
 
-#: bp/scene/routes.py:1032
+#: bp/scene/routes.py:1035
 msgid "No families"
 msgstr "Inga familjer"
 
-#: bp/scene/routes.py:1238 bp/scene/routes.py:1319
+#: bp/scene/routes.py:1241 bp/scene/routes.py:1322
 msgid "No objects found"
 msgstr "Ingenting funnits"
 
-#: bp/scene/routes.py:1655
+#: bp/scene/routes.py:1658
 msgid "No previous comments"
 msgstr "Inga kommentarer"
 
