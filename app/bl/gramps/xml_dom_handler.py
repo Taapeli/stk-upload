@@ -579,10 +579,87 @@ class DOM_handler:
             self.dataservice.ds_save_media(tx, o, self.batch.id, iids)
             self.complete(o)
 
+
     def handle_people_list(self, tx, nodes, iids):
+        """ Handle list of Persons. """
+
+        def extract_person_name(person_name, name_order):
+            """ Create a Name object. """
+            pname = Name()
+            pname.order = name_order
+            pname.citation_handles = []
+            if person_name.hasAttribute("alt"):
+                pname.alt = person_name.getAttribute("alt")
+            if person_name.hasAttribute("type"):
+                pname.type = person_name.getAttribute("type")
+            for person_first in person_name.getElementsByTagName("first"):
+                if pname.firstname:
+                    self.blog.log_event(
+                        {
+                            "title":"Discarded repetitive first name in a person", 
+                            "level":"WARNING", 
+                            "count":p.id})
+                #break
+                if len(person_first.childNodes) > 0:
+                    pname.firstname = person_first.childNodes[0].data
+                elif len(person_first.childNodes) > 1:
+                    self.blog.log_event({
+                            "title":"Discarded repetitive child node in a first name of a person", 
+                            "level":"WARNING", 
+                            "count":p.id})
+            
+            if len(person_name.getElementsByTagName("surname")) == 1:
+                person_surname = person_name.getElementsByTagName("surname")[0]
+                if person_surname.hasAttribute("prefix"):
+                    pname.prefix = person_surname.getAttribute("prefix")
+                if len(person_surname.childNodes) == 1:
+                    pname.surname = person_surname.childNodes[0].data
+                elif len(person_surname.childNodes) > 1:
+                    self.blog.log_event({
+                            "title":"Discarded repetitive child node in a surname of a person", 
+                            "level":"WARNING", 
+                            "count":p.id})
+            elif len(person_name.getElementsByTagName("surname")) > 1:
+                self.blog.log_event({
+                        "title":"Discarded repetitive surname in a person", 
+                        "level":"WARNING", 
+                        "count":p.id})
+            if len(person_name.getElementsByTagName("suffix")) == 1:
+                person_suffix = person_name.getElementsByTagName("suffix")[0]
+                pname.suffix = person_suffix.childNodes[0].data
+            elif len(person_name.getElementsByTagName("suffix")) > 1:
+                self.blog.log_event({
+                        "title":"Discarded repetitive suffix in a person", 
+                        "level":"WARNING", 
+                        "count":p.id})
+            try:
+                pname.dates = self._extract_daterange(person_name) # Return Gramps_DateRange or None
+                # TODO: val="1700-luvulla" muutettava Noteksi
+            except:
+                pname.dates = None
+            if len(person_name.getElementsByTagName("title")) == 1:
+                person_title = person_name.getElementsByTagName("title")[0]
+                pname.title = person_title.childNodes[0].data
+            elif len(person_name.getElementsByTagName("title")) > 1:
+                self.blog.log_event({
+                        "title":"Discarded repetitive title in a person", 
+                        "level":"WARNING", 
+                        "count":p.id})
+            if len(person_name.getElementsByTagName("citationref")) >= 1:
+                for i in range(
+                    len(person_name.getElementsByTagName("citationref"))):
+                    person_name_citationref = person_name.getElementsByTagName("citationref")[i]
+                    if person_name_citationref.hasAttribute("hlink"):
+                        pname.citation_handles.append(
+                            person_name_citationref.getAttribute("hlink") + self.handle_suffix)
+            
+                        ##print(f'# Person name for {p.id} has cite {pname.citation_handles[-1]}')
+            return pname
+
+        # Starts handling the list of Persons
+
         for person in nodes:
             url_notes = []
-            name_order = 0
 
             p = PersonBl()
             # Extract handle, change and id
@@ -603,106 +680,12 @@ class DOM_handler:
                     break
                 p.sex = p.sex_from_str(person_gender.childNodes[0].data)
 
+            name_order = 0
             for person_name in person.getElementsByTagName("name"):
-                pname = Name()
-                pname.order = name_order
-                pname.citation_handles = []
+                pname = extract_person_name(person_name, name_order)
                 name_order += 1
-
-                if person_name.hasAttribute("alt"):
-                    pname.alt = person_name.getAttribute("alt")
-                if person_name.hasAttribute("type"):
-                    pname.type = person_name.getAttribute("type")
-
-                for person_first in person_name.getElementsByTagName("first"):
-                    if pname.firstname:
-                        self.blog.log_event(
-                            {
-                                "title": "More than one first name in a person",
-                                "level": "WARNING",
-                                "count": p.id,
-                            }
-                        )
-                        break
-                    if len(person_first.childNodes) == 1:
-                        pname.firstname = person_first.childNodes[0].data
-                    elif len(person_first.childNodes) > 1:
-                        self.blog.log_event(
-                            {
-                                "title": "More than one child node in a first name of a person",
-                                "level": "WARNING",
-                                "count": p.id,
-                            }
-                        )
-
-                if len(person_name.getElementsByTagName("surname")) == 1:
-                    person_surname = person_name.getElementsByTagName("surname")[0]
-                    if person_surname.hasAttribute("prefix"):
-                        pname.prefix = person_surname.getAttribute("prefix")
-                    if len(person_surname.childNodes) == 1:
-                        pname.surname = person_surname.childNodes[0].data
-                    elif len(person_surname.childNodes) > 1:
-                        self.blog.log_event(
-                            {
-                                "title": "More than one child node in a surname of a person",
-                                "level": "WARNING",
-                                "count": p.id,
-                            }
-                        )
-                elif len(person_name.getElementsByTagName("surname")) > 1:
-                    self.blog.log_event(
-                        {
-                            "title": "More than one surname in a person",
-                            "level": "WARNING",
-                            "count": p.id,
-                        }
-                    )
-
-                if len(person_name.getElementsByTagName("suffix")) == 1:
-                    person_suffix = person_name.getElementsByTagName("suffix")[0]
-                    pname.suffix = person_suffix.childNodes[0].data
-                elif len(person_name.getElementsByTagName("suffix")) > 1:
-                    self.blog.log_event(
-                        {
-                            "title": "More than one suffix in a person",
-                            "level": "WARNING",
-                            "count": p.id,
-                        }
-                    )
-                    
-                try:
-                    # Return Gramps_DateRange or None
-                    pname.dates = self._extract_daterange(person_name)
-                    # TODO: val="1700-luvulla" muutettava Noteksi
-                except:
-                    pname.dates = None
-
-                if len(person_name.getElementsByTagName("title")) == 1:
-                    person_title = person_name.getElementsByTagName("title")[0]
-                    pname.title = person_title.childNodes[0].data
-                elif len(person_name.getElementsByTagName("title")) > 1:
-                    self.blog.log_event(
-                        {
-                            "title": "More than one title in a person",
-                            "level": "WARNING",
-                            "count": p.id,
-                        }
-                    )
-
-                if len(person_name.getElementsByTagName("citationref")) >= 1:
-                    for i in range(
-                        len(person_name.getElementsByTagName("citationref"))
-                    ):
-                        person_name_citationref = person_name.getElementsByTagName(
-                            "citationref"
-                        )[i]
-                        if person_name_citationref.hasAttribute("hlink"):
-                            pname.citation_handles.append(
-                                person_name_citationref.getAttribute("hlink") + self.handle_suffix
-                            )
-                            ##print(f'# Person name for {p.id} has cite {pname.citation_handles[-1]}')
-
-                p.names.append(pname)
+                if pname:
+                    p.names.append(pname)
 
             for ref in person.getElementsByTagName("eventref"):
                 # Create a tuple (event_handle, role)

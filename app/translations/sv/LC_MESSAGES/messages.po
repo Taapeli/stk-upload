@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-10 10:51+0200\n"
+"POT-Creation-Date: 2023-02-19 15:28+0200\n"
 "PO-Revision-Date: 2022-11-11 13:23+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
 "Language-Team: sv <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.6.0\n"
+"Generated-By: Babel 2.10.3\n"
 
 #: chkdate.py:13
 msgid "Undefined"
@@ -87,7 +87,7 @@ msgid "Terms of use"
 msgstr "Användarvillkoren"
 
 #: bp/stk_security/templates/security/_menu.html:5 setups.py:199
-#: templates/index_demo.html:100 templates/index_demo.html:104
+#: templates/index_demo.html:102 templates/index_demo.html:106
 msgid "Register"
 msgstr "Registrera"
 
@@ -170,11 +170,11 @@ msgstr "Läsfel av platser "
 msgid "Notes read error "
 msgstr "Läsfel för anteckningar "
 
-#: bl/family.py:68
+#: bl/family.py:70
 msgid "undefined relation"
 msgstr "odefinerad relation"
 
-#: bl/family.py:342
+#: bl/family.py:344
 msgid "This person has no families"
 msgstr "Denna person har inga familjer"
 
@@ -194,32 +194,32 @@ msgstr "Odefinerad material typ eller status"
 msgid "Undefined breed of materials"
 msgstr "Odefinerad material type"
 
-#: bl/person.py:122 bl/person.py:125 ui/jinja_filters.py:131
+#: bl/person.py:124 bl/person.py:127 ui/jinja_filters.py:131
 #: ui/jinja_filters.py:329
 msgid "Child"
 msgstr "Barn"
 
-#: bl/person.py:123 ui/jinja_filters.py:328
+#: bl/person.py:125 ui/jinja_filters.py:328
 msgid "Son"
 msgstr "Son"
 
-#: bl/person.py:124 ui/jinja_filters.py:327
+#: bl/person.py:126 ui/jinja_filters.py:327
 msgid "Daughter"
 msgstr "Dotter"
 
-#: bl/person.py:134
+#: bl/person.py:136
 msgid "sex not known"
 msgstr "kön inte känt"
 
-#: bl/person.py:135
+#: bl/person.py:137
 msgid "male"
 msgstr "man"
 
-#: bl/person.py:136
+#: bl/person.py:138
 msgid "female"
 msgstr "kvinna"
 
-#: bl/person.py:137
+#: bl/person.py:139
 msgid "sex not applicable"
 msgstr "kön inte tillämpligt"
 
@@ -360,19 +360,19 @@ msgstr "Arkiv"
 msgid "Sources"
 msgstr "Källor"
 
-#: bl/gramps/xml_dom_handler.py:1051 bp/gedcom/transforms/dates.py:33
+#: bl/gramps/xml_dom_handler.py:1041 bp/gedcom/transforms/dates.py:33
 msgid "Dates"
 msgstr "Datum"
 
-#: bl/gramps/xml_dom_handler.py:1053
+#: bl/gramps/xml_dom_handler.py:1043
 msgid "Family sorting names"
 msgstr "Familj sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1084
+#: bl/gramps/xml_dom_handler.py:1074
 msgid "Person sorting names"
 msgstr "Person sorteringsnamn"
 
-#: bl/gramps/xml_dom_handler.py:1102
+#: bl/gramps/xml_dom_handler.py:1092
 msgid "Estimated lifetimes"
 msgstr "Beräknad livstider"
 
@@ -1627,7 +1627,7 @@ msgstr "Jämför potentiella dupliceringar"
 
 #: bp/dupsearch/templates/compare.html:97
 #: bp/dupsearch/templates/compare2.html:97
-#: bp/gramps/templates/gramps/scripting.html:32 bp/scene/routes.py:1042
+#: bp/gramps/templates/gramps/scripting.html:32 bp/scene/routes.py:1045
 #: bp/scene/templates/scene/families.html:137
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/hx-person/famtree.html:17
@@ -1656,7 +1656,7 @@ msgid "Wife"
 msgstr "Hustru"
 
 #: bp/dupsearch/templates/compare.html:105
-#: bp/dupsearch/templates/compare2.html:105 bp/scene/routes.py:1042
+#: bp/dupsearch/templates/compare2.html:105 bp/scene/routes.py:1045
 #: bp/scene/templates/scene/families.html:141
 #: bp/scene/templates/scene/family.html:99
 #: bp/scene/templates/scene/hx-person/famtree.html:25
@@ -2181,7 +2181,7 @@ msgstr "Välj din fil för bearbetning"
 msgid "Upload a new GEDCOM file"
 msgstr "Ladda upp ny Gedcom fil"
 
-#: bp/gedcom/templates/gedcom_list.html:54
+#: bp/gedcom/templates/gedcom_list.html:54 bp/scene/routes.py:382
 msgid "Return main page"
 msgstr "Tillbaka till huvud sidan"
 
@@ -2559,11 +2559,11 @@ msgstr "Material %(batch_id)s har tagits bort, %(n)s noder"
 msgid "Failed to retrieve commands"
 msgstr "Det gick inte att hämta kommandon"
 
-#: bp/gramps/routes.py:565 bp/scene/routes.py:1567
+#: bp/gramps/routes.py:565 bp/scene/routes.py:1570
 msgid "ERROR: Update did not succeed: "
 msgstr "FEL: Uppdateringen fungerade inte: "
 
-#: bp/gramps/routes.py:567 bp/scene/routes.py:1569
+#: bp/gramps/routes.py:567 bp/scene/routes.py:1572
 msgid "Updated"
 msgstr "Uppdaterad"
 
@@ -2844,40 +2844,44 @@ msgstr "Fusionera källor"
 msgid "Data read failed."
 msgstr "Dataläsningen misslyckades."
 
-#: bp/scene/routes.py:450
+#: bp/scene/routes.py:382
+msgid "No Material is selected."
+msgstr "Ingen material har utvalts."
+
+#: bp/scene/routes.py:453
 msgid "references"
 msgstr "antydningar"
 
-#: bp/scene/routes.py:450
+#: bp/scene/routes.py:453
 msgid "inner places"
 msgstr "ingående platser"
 
-#: bp/scene/routes.py:662
+#: bp/scene/routes.py:665
 msgid "type changed"
 msgstr "typen has förendrats"
 
-#: bp/scene/routes.py:664
+#: bp/scene/routes.py:667
 msgid "type change FAILED"
 msgstr "typ förendring MISSLYCKATS"
 
-#: bp/scene/routes.py:791 bp/scene/routes.py:800
+#: bp/scene/routes.py:794 bp/scene/routes.py:803
 msgid "No event found"
 msgstr "Inga händelser hittades"
 
-#: bp/scene/routes.py:838 bp/scene/templates/scene/hx-person/famtree.html:42
+#: bp/scene/routes.py:841 bp/scene/templates/scene/hx-person/famtree.html:42
 #: bp/scene/templates/scene/obsolete_event.html:77
 msgid "Self"
 msgstr "Själv"
 
-#: bp/scene/routes.py:1032
+#: bp/scene/routes.py:1035
 msgid "No families"
 msgstr "Inga familjer"
 
-#: bp/scene/routes.py:1238 bp/scene/routes.py:1319
+#: bp/scene/routes.py:1241 bp/scene/routes.py:1322
 msgid "No objects found"
 msgstr "Ingenting funnits"
 
-#: bp/scene/routes.py:1655
+#: bp/scene/routes.py:1658
 msgid "No previous comments"
 msgstr "Inga kommentarer"
 
@@ -3378,7 +3382,7 @@ msgstr "Gå till det första mediet"
 
 #: bp/scene/templates/scene/most_common.html:1
 #: bp/scene/templates/scene/persons_search.html:73
-#: templates/index_demo.html:112
+#: templates/index_demo.html:114
 msgid "Most common names"
 msgstr "Vanligaste namnen"
 
@@ -4155,8 +4159,8 @@ msgstr "Min hemsida"
 msgid "Log in to this application"
 msgstr "Logga in denna applikation"
 
-#: bp/start/templates/start/s_macros.html:41 templates/index_demo.html:90
-#: templates/index_demo.html:96
+#: bp/start/templates/start/s_macros.html:41 templates/index_demo.html:92
+#: templates/index_demo.html:98
 msgid "Log in"
 msgstr "Logga in"
 
@@ -4526,7 +4530,7 @@ msgstr ""
 msgid "Isotammi-IDs"
 msgstr ""
 
-#: pe/neo4j/updateservice.py:1565
+#: pe/neo4j/updateservice.py:1580
 msgid "Could not save a comment"
 msgstr "Commentarens sparningen misslyckats"
 
@@ -4658,11 +4662,15 @@ msgstr "Se processen för din data"
 msgid "Gedcom data healing services"
 msgstr "Service för att förbättra Gedcom-data"
 
-#: templates/index_demo.html:71
+#: templates/index_demo.html:68
+msgid "Starting with Isotammi"
+msgstr ""
+
+#: templates/index_demo.html:73
 msgid "Look at the demo data"
 msgstr "Titta på demodata"
 
-#: templates/index_demo.html:72
+#: templates/index_demo.html:74
 msgid ""
 "In this demo we have a genealogical tree which follows our quality rules "
 "and \n"
@@ -4673,11 +4681,11 @@ msgstr ""
 " och det innehåller släktingarna till den finska nationalskompositör Jean"
 " Sibelius."
 
-#: templates/index_demo.html:82
+#: templates/index_demo.html:84
 msgid "Explore demo"
 msgstr "Utforska demo"
 
-#: templates/index_demo.html:91
+#: templates/index_demo.html:93
 msgid ""
 "If you have already registered, you can log in and refine the structure "
 "of your own data."
@@ -4685,7 +4693,7 @@ msgstr ""
 "Om du redan har registrerat dig kan du logga in och förfina strukturen på"
 " dina egna data."
 
-#: templates/index_demo.html:92
+#: templates/index_demo.html:94
 msgid ""
 "As a member of <i>Genealogical Society of Finland</i> you will get more "
 "services."
@@ -4693,7 +4701,7 @@ msgstr ""
 "Som medlem i <i>Genealogiska Sällskapet i Finland</i> får du fler "
 "tjänster."
 
-#: templates/index_demo.html:101
+#: templates/index_demo.html:103
 msgid "To see the full data, you can fill the registration form here"
 msgstr "För att se hela data kan du fylla i anmälningsblanketten här"
 

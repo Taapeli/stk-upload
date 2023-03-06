@@ -378,7 +378,10 @@ def show_person_search():  # (set_scope=None, batch_id=None):
 
     Uses the material defined in SecureCookieSession session
     """
+    if not "state" in session:
+        return "<b>" + _("No Material is selected.") + "</b> <a href='/'>" + _("Return main page") + "</a>."
     t0 = time.time()
+    pl_calc = ""
     try:
 
         # 1. User and data context from session and current_user
@@ -409,7 +412,7 @@ def show_person_search():  # (set_scope=None, batch_id=None):
             f"{request.method} {u_context.material.get_request_args(session, request)} => "
             f'({session.get("current_context")!r}, {session["state"]!r}, '
             f'{session["material_type"]!r}, {session.get("batch_id")!r})'
-        )
+            )
 
         # ------ Free text search by Note texts
         if rule == "notetext":

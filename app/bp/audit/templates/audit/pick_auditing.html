@@ -79,7 +79,7 @@ div.done {color: black;}
           </div>
           <div class="box">
             <div>{{ _('State ') }}</div>
-            <p><b class="state_{{root.state|replace(" ", "")}}"
+            <p><b class="state_{{root.state|replace(' ', '')}}"
                   style="padding: 2pt 4pt;">{{ _(root.state) }}</b>
                <br><small>{{root.timestamp_str()}}</small>
             </p>

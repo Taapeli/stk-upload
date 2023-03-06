@@ -101,11 +101,11 @@ class Point:
                         if i == 0: # latitude
                             if x[-1] in "SE":  # south, etelä, syd
                                 self.coord[i] = self.coord[i] * -1                        
-                                print(f"#etelä {x[-1]} = {self.coord[i]}")
+                                #print(f"#south {x[-1]} = {self.coord[i]}")
                         else: # longitude
-                            if x[-1] in "WLV":  # West, länsi or vest
+                            if x[-1] in "WLV":  #bl.place_coordinates.Point:West, länsi or vest
                                 self.coord[i] = self.coord[i] * -1
-                                print(f"#länsi {x[-1]} = {self.coord[i]}")
+                                #print(f"#bl.place_coordinates.Point:west {x[-1]} = {self.coord[i]}")
                     else:
                         raise ValueError("Point arg type is {}".format(self.coord[i]))
         except:

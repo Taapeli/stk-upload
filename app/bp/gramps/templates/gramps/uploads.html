@@ -217,7 +217,7 @@ function filenm_changed(input) {
 
             <td class="center">{% if upload.count %}{{upload.count}}{% endif %}
             </td>
-            <td class="state_{{upload.state|replace(" ", "")}}">
+            <td class="state_{{upload.state|replace(' ', '')}}">
             		{{ upload.state|transl('state') }}
     {% if upload.auditors %}
                     <br><i>{{ _("Auditor") }}:
