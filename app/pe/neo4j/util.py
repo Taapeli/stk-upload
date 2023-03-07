@@ -31,7 +31,7 @@ cypher_user_prefix = """
 """
 
 cypher_material_prefix = """
-    MATCH (root:Root {material:$material_type})
+    MATCH (root:Root {material:$material_type, state:$state})
 """
 
 cypher_common_batch_prefix = """
@@ -76,6 +76,7 @@ def run_cypher(session, cypher:str, username:str, material:Material, **kwargs):
 
     return session.run(full_cypher, username=username, 
                        material_type=material.m_type,
+                       state=material.state,
                        **kwargs)
 
 
@@ -126,12 +127,13 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
                        username=username, 
                        batch_id=material.batch_id, 
                        material_type=material.m_type,
+                       state=material.state,
                        **kwargs)
 
 def dict_root_node(root_node, select="min"):
-    """ Create minimal root_dict from record["root"] 
-    
-        TODO: Is this obsolete?
+    """ Create minimal root_dict from record["root"]
+
+        Used in macro.all_obj_ids
     """
 
     dic = {'material': root_node["material"], 
@@ -144,6 +146,7 @@ def dict_root_node(root_node, select="min"):
         dic["xmlname"] = root_node["xmlname"]
         dic["state"] = root_node["state"]
         dic["file"] = root_node["file"]
+    return dic
 
 
 class IsotammiId:
