@@ -144,7 +144,7 @@ def dict_root_node(root_node, select="min"):
         dic["description"] = root_node["description"]
         dic["timestamp"] = root_node["timestamp"]
         dic["xmlname"] = root_node["xmlname"]
-        dic["state"] = root_node["state"]
+        #ic["state"] = root_node["state"]
         dic["file"] = root_node["file"]
     return dic
 
