@@ -301,7 +301,7 @@ class PersonWriter(DataService):
             "status": Status.OK,
         }
 
-    def set_estimated_lifetimes(self, uids=[]):
+    def set_people_lifetime_estimates(self, uids=[]):
         """Sets estimated lifetimes to Person.dates for given person.uniq_ids.
 
         Stores dates as Person properties: datetype, date1, and date2

@@ -261,6 +261,8 @@ def xml_to_stkbase(batch):  # :Root):
     """
     from bl.batch.root_updater import RootUpdater
     from bl.batch.root import State, DEFAULT_MATERIAL
+    from bl.person import PersonWriter
+    from bl.family import FamilyWriter
 
     t0 = time.time()
 
@@ -318,45 +320,37 @@ def xml_to_stkbase(batch):  # :Root):
     handler.handle_families()
     handler.postprocess_notes() # Separately allocate Isotammi ID batch for URL notes.
 
-    #       for k in handler.handle_to_node.keys():
-    #             print (f'\t{k} –> {handler.handle_to_node[k]}')
+    # Complete Person object properties and search indexes
+    for ids_chunk in handler.get_chunk(handler.person_ids, int(handler.TX_SIZE/4)):
+        #with RootUpdater("update") as batch_service:
+        #with PersonWriter("update", tx=self.dataservice.tx) as person_service:
+        with PersonWriter("update") as person_service:
+            handler.person_service = person_service
 
-    # if 0:
-    #     res = handler.set_person_calculated_attributes()
-    #     res = handler.set_person_estimated_dates()
-    #
-    #     # Copy date and name information from Person and Event nodes to Family nodes
-    #     res = handler.set_family_calculated_attributes()
-    #
-    #     # print("build_free_text_search_indexes")
-    #     t1 = time.time()
-    #     res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
-    #     handler.blog.log_event(
-    #         {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
-    #     )
-    #     # print("build_free_text_search_indexes done")
-            
+            handler.set_person_confidence_values(ids_chunk)
+            handler.set_person_calculated_attributes(ids_chunk)
+            handler.set_person_estimated_dates(ids_chunk)
+
+            # print("build_free_text_search_indexes")
+            t1 = time.time()
+            tx = handler.person_service.dataservice.tx
+            for ids in ids_chunk:
+                _res = DataAdmin.build_free_text_search_indexes(tx, ids)
+            handler.blog.log_event(
+                {"title": _("Free text search indexes"), 
+                 "count": len(ids_chunk), "elapsed": time.time() - t1}
+            )
+
+    # Complete Family object properties
+    for ids_chunk in handler.get_chunk(handler.family_ids, handler.TX_SIZE):
+        with FamilyWriter('update') as family_service:
+            handler.family_service = family_service
+            # Copy date and name information from Person and Event nodes to Family nodes
+            handler.set_family_calculated_attributes(ids_chunk)
+
     with RootUpdater("update") as batch_service:
-        handler.dataservice = batch_service.dataservice
-        handler.set_all_person_confidence_values()
-        handler.set_person_calculated_attributes()
-        handler.set_person_estimated_dates()
-    
-        # Copy date and name information from Person and Event nodes to Family nodes
-        handler.set_family_calculated_attributes()
-    
-        # print("build_free_text_search_indexes")
-        t1 = time.time()
-        _res = DataAdmin.build_free_text_search_indexes(batch_service.dataservice.tx, batch.id)
-        handler.blog.log_event(
-            {"title": _("Free text search indexes"), "elapsed": time.time() - t1}
-        )
-
-        # The gramps handles are not removed any more / 15.5.2022/JMä
-        # handler.unused_remove_handles()
         batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
-
-    logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
+        logger.info(f'-> bp.gramps.gramps_loader.xml_to_stkbase/ok f="{handler.file}"')
 
     handler.blog.log_event(
         {"title": "Total time", "level": "TITLE", "elapsed": time.time() - t0}

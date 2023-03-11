@@ -118,8 +118,8 @@ class DataAdmin():
         if not tx:
             tx = shareds.driver.session()
         if batch_id:
-            result = tx.run(Cypher_adm.build_indexes_for_batch, batch_id=batch_id)
+            _result = tx.run(Cypher_adm.build_indexes_for_batch, batch_id=batch_id)
         else:
-            result = tx.run(Cypher_adm.build_indexes)
+            _result = tx.run(Cypher_adm.build_indexes)
     
         
