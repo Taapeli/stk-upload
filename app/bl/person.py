@@ -313,7 +313,7 @@ class PersonWriter(DataService):
         """
         res = self.dataservice.ds_set_people_lifetime_estimates(uids)
 
-        print(f"Estimated lifetime for {res['count']} persons")
+        #print(f"Estimated lifetime for {res['count']} persons")
         return res
 
     def update_person_confidences(self, person_ids: list):

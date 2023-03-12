@@ -41,7 +41,6 @@ import shareds
 from bl.base import NodeObject, Status
 from bl.person import PersonBl #, PersonWriter
 from bl.person_name import Name
-from bl.family import FamilyBl, FamilyWriter
 from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaBl, MediaReferenceByHandles
@@ -265,7 +264,7 @@ class DOM_handler:
     def postprocess_notes(self):
         """ Process url notes using self.noterefs_later parent object list. 
         """
-        title="Notes(url)"
+        title="Notes / links"
         message = f"{title}: {len(self.noterefs_later)} kpl"
         print(f"***** {message} *****")
         t0 = time.time()
@@ -445,8 +444,9 @@ class DOM_handler:
             self.complete(e)
 
     def handle_family_list(self, tx, nodes, iids):
-        for family in nodes:
+        from bl.family import FamilyBl
 
+        for family in nodes:
             f = FamilyBl()
             f.child_handles = []
             f.event_handle_roles = []
@@ -1014,8 +1014,8 @@ class DOM_handler:
 
         # status = Status.OK
         message = f"{len(family_ids)} Family sortnames & dates"
-        print(f"***** {message} *****")
-        t0 = time.time()
+        #print(f"***** {message} *****")
+        #t0 = time.time()
         res = {}
         counter = 0
         if len(family_ids) == 0:
@@ -1028,18 +1028,18 @@ class DOM_handler:
                 counter += res.get("counter", 0)
 
         # Two data groups, one elapsed time!
-        self.blog.log_event(
-            {"title": _("Family dates and names"), "count": counter, "elapsed": time.time() - t0}
-        )
+        # self.blog.log_event(
+        #     {"title": _("Family dates and names"), "count": counter, "elapsed": time.time() - t0}
+        # )
         return res
 
     def set_person_calculated_attributes(self, person_ids):
         """Add links from each Person to Refnames and set Person.sortname"""
         status = Status.OK
         message = f"{len(self.person_ids)} Person refnames & sortnames"
-        print(f"***** {message} *****")
+        #print(f"***** {message} *****")
 
-        t0 = time.time()
+        #t0 = time.time()
         refname_count = 0
         sortname_count = 0
         if len(person_ids) == 0:
@@ -1056,12 +1056,12 @@ class DOM_handler:
                 refname_count += res.get("refnames")
                 sortname_count += res.get("sortnames")
 
-        self.blog.log_event({"title": "Refname references",
-                             "count": refname_count,
-                             "elapsed": time.time() - t0})
-        self.blog.log_event({"title": _("Person sorting names"), 
-                             "count": sortname_count, 
-                             "elapsed": time.time() - t0})
+        # self.blog.log_event({"title": "Refname references",
+        #                      "count": refname_count,
+        #                      "elapsed": time.time() - t0})
+        # self.blog.log_event({"title": _("Person sorting names"), 
+        #                      "count": sortname_count, 
+        #                      "elapsed": time.time() - t0})
         return {"status": status, "message": message}
 
     def set_person_estimated_dates(self, person_ids):
@@ -1072,15 +1072,15 @@ class DOM_handler:
         """
         status = Status.OK
         message = f"{len(self.person_ids)} Estimated lifetimes"
-        print(f"***** {message} *****")
-        t0 = time.time()
+        #print(f"***** {message} *****")
+        #t0 = time.time()
         res = self.person_service.set_people_lifetime_estimates(person_ids)
 
         count = res.get("count")
         message = _("Estimated lifetimes")
-        self.blog.log_event(
-            {"title": message, "count": count, "elapsed": time.time() - t0}
-        )
+        # self.blog.log_event(
+        #     {"title": message, "count": count, "elapsed": time.time() - t0}
+        # )
         return {"status": status, "message": f"{message}, {count} changed"}
 
     def set_person_confidence_values(self, person_ids):
@@ -1089,20 +1089,20 @@ class DOM_handler:
         Person.confidence is mean of all Citations used for Person's Events
         """
         message = f"{len(person_ids)} Person confidence values"
-        print(f"***** {message} *****")
+        #print(f"***** {message} *****")
         t0 = time.time()
 
         res = self.person_service.update_person_confidences(person_ids)
         status = res.get("status")
         count = res.get("count", 0)
         if status == Status.OK or status == Status.UPDATED:
-            self.blog.log_event(
-                {
-                    "title": "Confidences set",
-                    "count": count,
-                    "elapsed": time.time() - t0,
-                }
-            )
+            # self.blog.log_event(
+            #     {
+            #         "title": "Confidences set",
+            #         "count": count,
+            #         "elapsed": time.time() - t0,
+            #     }
+            # )
             return {"status": status, "message": f"{message}, {count} changed"}
         else:
             msg = res.get("statustext")

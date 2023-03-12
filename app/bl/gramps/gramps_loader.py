@@ -39,7 +39,7 @@ import shareds
 from models import mediafile
 
 from .xml_dom_handler import DOM_handler
-from .batchlogger import BatchLog, LogItem
+from .batchlogger import BatchLog, LogItem, LogTimer
 
 from bl.base import Status
 from bl.admin.models.data_admin import DataAdmin
@@ -77,7 +77,7 @@ def analyze_xml(username, batch_id, filename):
     e_family = 4
     e_object = 6
     e_note = 3
-    e_person = 16
+    e_person = 10
     e_place = 6
     e_repository = 2
     e_source = 3
@@ -279,7 +279,8 @@ def xml_to_stkbase(batch):  # :Root):
     
         # Initialize Run report
         handler.blog = BatchLog(batch.user)
-        handler.blog.log_event({"title": "Statistic of Gramps data storing", "level": "TITLE"})
+        handler.blog.log_event({"title": "Statistic of Gramps file import",
+                                "level": "TITLE"})
         handler.blog.log_event({"title": f"Loaded file '{file_displ}'", 
                                 "count": 1, 
                                 "elapsed": shareds.tdiff}
@@ -302,7 +303,6 @@ def xml_to_stkbase(batch):  # :Root):
         # Shortened batch id "2022-05-07.001" -> "2205071"
         handler.handle_suffix = batch.handle_suffix()
 
-        # batch.save(batch_service.dataservice.tx)
         with shareds.driver.session() as session:
             session.write_transaction(batch.save) 
 
@@ -321,32 +321,48 @@ def xml_to_stkbase(batch):  # :Root):
     handler.postprocess_notes() # Separately allocate Isotammi ID batch for URL notes.
 
     # Complete Person object properties and search indexes
-    for ids_chunk in handler.get_chunk(handler.person_ids, int(handler.TX_SIZE/4)):
+    print(f"***** {len(handler.person_ids)} Person calculated atributes *****")
+    print(f"***** {len(handler.family_ids)} Family sortnames & dates *****")
+    p_log = LogTimer("Person calculated attributes")
+    f_log = LogTimer("Family calculated attributes")
+    i_log = LogTimer("Free text search indexes")
+    chunk_size = int(handler.TX_SIZE/2)
+    for ids_chunk in handler.get_chunk(handler.person_ids, chunk_size):
+        print(f"#xml_to_stkbase: complete properties for {len(ids_chunk)} person nodes")
         #with RootUpdater("update") as batch_service:
         #with PersonWriter("update", tx=self.dataservice.tx) as person_service:
         with PersonWriter("update") as person_service:
             handler.person_service = person_service
 
+            t0 = time.time()
             handler.set_person_confidence_values(ids_chunk)
             handler.set_person_calculated_attributes(ids_chunk)
             handler.set_person_estimated_dates(ids_chunk)
+            p_log.add(len(ids_chunk), time.time() - t0)
 
             # print("build_free_text_search_indexes")
             t1 = time.time()
             tx = handler.person_service.dataservice.tx
             for ids in ids_chunk:
                 _res = DataAdmin.build_free_text_search_indexes(tx, ids)
-            handler.blog.log_event(
-                {"title": _("Free text search indexes"), 
-                 "count": len(ids_chunk), "elapsed": time.time() - t1}
-            )
+            i_log.add(len(ids_chunk), time.time() - t1)
+            # handler.blog.log_event(
+            #     {"title": _("Free text search indexes"), 
+            #      "count": len(ids_chunk), "elapsed": time.time() - t1})
+    handler.blog.log(p_log.get_item())
+    handler.blog.log(i_log.get_item())
 
     # Complete Family object properties
-    for ids_chunk in handler.get_chunk(handler.family_ids, handler.TX_SIZE):
+    for ids_chunk in handler.get_chunk(handler.family_ids, chunk_size):
+        print(f"#xml_to_stkbase: complete properties for {len(ids_chunk)} family nodes")
         with FamilyWriter('update') as family_service:
             handler.family_service = family_service
+
             # Copy date and name information from Person and Event nodes to Family nodes
+            t1 = time.time()
             handler.set_family_calculated_attributes(ids_chunk)
+            f_log.add(len(ids_chunk), time.time() - t1)
+    handler.blog.log(f_log.get_item())
 
     with RootUpdater("update") as batch_service:
         batch_service.change_state(batch.id, batch.user, State.ROOT_CANDIDATE)
