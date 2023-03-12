@@ -334,11 +334,11 @@ def xml_to_stkbase(batch):  # :Root):
         with PersonWriter("update") as person_service:
             handler.person_service = person_service
 
-            t0 = time.time()
+            t1 = time.time()
             handler.set_person_confidence_values(ids_chunk)
             handler.set_person_calculated_attributes(ids_chunk)
             handler.set_person_estimated_dates(ids_chunk)
-            p_log.add(len(ids_chunk), time.time() - t0)
+            p_log.add(len(ids_chunk), time.time() - t1)
 
             # print("build_free_text_search_indexes")
             t1 = time.time()
