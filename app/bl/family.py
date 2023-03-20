@@ -110,12 +110,23 @@ class FamilyBl(Family):
 
 class FamilyWriter(DataService):
     """
-    Family datastore for update with optional trasaction.
+    Family data store for update with optional transaction.
     """
 
     def __init__(self, service_name: str, u_context=None, tx=None):
         super().__init__(service_name, u_context, tx=tx)
         pass  # print(f"#FamilyWriter: {dir(self)}")
+
+    def set_family_calculated_attributes(self, uniq_id: int):
+        """ Set Family sort names and estimated marriage DateRange.
+        """
+        res = self.dataservice.ds_set_family_calculated_attributes(uniq_id)
+        stat = res.get("status")
+        counter = res.get("dates")
+        if Status.has_failed(res):
+            return {"status": stat, "statustext": res.get("statustext")}
+
+        return {"status": Status.OK, "count": counter}
 
 
 class FamilyReader(DataService):

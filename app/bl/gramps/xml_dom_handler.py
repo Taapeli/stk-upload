@@ -39,9 +39,8 @@ from flask_babelex import _
 
 import shareds
 from bl.base import NodeObject, Status
-from bl.person import PersonBl, PersonWriter
+from bl.person import PersonBl #, PersonWriter
 from bl.person_name import Name
-from bl.family import FamilyBl, FamilyWriter
 from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaBl, MediaReferenceByHandles
@@ -265,7 +264,7 @@ class DOM_handler:
     def postprocess_notes(self):
         """ Process url notes using self.noterefs_later parent object list. 
         """
-        title="Notes(url)"
+        title="Notes / links"
         message = f"{title}: {len(self.noterefs_later)} kpl"
         print(f"***** {message} *****")
         t0 = time.time()
@@ -445,8 +444,9 @@ class DOM_handler:
             self.complete(e)
 
     def handle_family_list(self, tx, nodes, iids):
-        for family in nodes:
+        from bl.family import FamilyBl
 
+        for family in nodes:
             f = FamilyBl()
             f.child_handles = []
             f.event_handle_roles = []
@@ -1004,7 +1004,7 @@ class DOM_handler:
 
     # -------------------------- Finishing process steps -------------------------------
 
-    def set_family_calculated_attributes(self):
+    def set_family_calculated_attributes(self, family_ids):
         """Set sortnames and lifetime dates for each Family in the list self.family_ids.
 
         For each Family
@@ -1013,70 +1013,58 @@ class DOM_handler:
         """
 
         # status = Status.OK
-        message = f"{len(self.family_ids)} Family sortnames & dates"
-        print(f"***** {message} *****")
-
-        t0 = time.time()
-        dates_count = 0
-        sortname_count = 0
-        if len(self.family_ids) == 0:
-            return {
-                "status": Status.OK,
-                "dates": dates_count,
-                "sortnames": sortname_count,
-            }
-
+        message = f"{len(family_ids)} Family sortnames & dates"
+        #print(f"***** {message} *****")
+        #t0 = time.time()
         res = {}
-        with FamilyWriter('update', tx=self.dataservice.tx) as service:
-            for uniq_id in self.family_ids:
-                if uniq_id is not None:
-                    ds = service.dataservice    # <Neo4jUpdateService>
-                    res = ds.ds_set_family_calculated_attributes(uniq_id)
-                    # returns {refnames, sortnames, status}
-                    dates_count += res.get("dates")
-                    sortname_count += res.get("sortnames")
+        counter = 0
+        if len(family_ids) == 0:
+            return {"status": Status.OK, "counter": counter}
+        service = self.family_service    # <Neo4jUpdateService>
+        for uniq_id in self.family_ids:
+            if uniq_id is not None:
+                res = service.set_family_calculated_attributes(uniq_id)
+                # returns {counter, status}
+                counter += res.get("counter", 0)
 
         # Two data groups, one elapsed time!
-        self.blog.log_event(
-            {"title": _("Dates"), "count": dates_count, "elapsed": time.time() - t0}
-        )
-        self.blog.log_event({"title": _("Family sorting names"), "count": sortname_count})
+        # self.blog.log_event(
+        #     {"title": _("Family dates and names"), "count": counter, "elapsed": time.time() - t0}
+        # )
         return res
 
-    def set_person_calculated_attributes(self):
+    def set_person_calculated_attributes(self, person_ids):
         """Add links from each Person to Refnames and set Person.sortname"""
         status = Status.OK
         message = f"{len(self.person_ids)} Person refnames & sortnames"
-        print(f"***** {message} *****")
+        #print(f"***** {message} *****")
 
-        t0 = time.time()
+        #t0 = time.time()
         refname_count = 0
         sortname_count = 0
-        if len(self.person_ids) == 0:
+        if len(person_ids) == 0:
             return {
                 "refnames": refname_count,
                 "sortnames": sortname_count,
                 "status": Status.NOT_FOUND,
             }
 
-        with PersonWriter('update', tx=self.dataservice.tx) as service:
-            for p_id in self.person_ids:
-                self.update_progress("refnames")
-                if p_id is not None:
-                    res = service.set_person_name_properties(uniq_id=p_id)
-                    # returns {refnames, sortnames, status}
-                    refname_count += res.get("refnames")
-                    sortname_count += res.get("sortnames")
+        for p_id in person_ids:
+            self.update_progress("refnames")
+            if p_id is not None:
+                res = self.person_service.set_person_name_properties(uniq_id=p_id)
+                refname_count += res.get("refnames")
+                sortname_count += res.get("sortnames")
 
-        self.blog.log_event({"title": "Refname references",
-                             "count": refname_count,
-                             "elapsed": time.time() - t0})
-        self.blog.log_event({"title": _("Person sorting names"), 
-                             "count": sortname_count, 
-                             "elapsed": time.time() - t0})
+        # self.blog.log_event({"title": "Refname references",
+        #                      "count": refname_count,
+        #                      "elapsed": time.time() - t0})
+        # self.blog.log_event({"title": _("Person sorting names"), 
+        #                      "count": sortname_count, 
+        #                      "elapsed": time.time() - t0})
         return {"status": status, "message": message}
 
-    def set_person_estimated_dates(self):
+    def set_person_estimated_dates(self, person_ids):
         """Sets estimated dates for each Person processed in handle_people
         in transaction
 
@@ -1084,52 +1072,50 @@ class DOM_handler:
         """
         status = Status.OK
         message = f"{len(self.person_ids)} Estimated lifetimes"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        res = self.dataservice.ds_set_people_lifetime_estimates(self.person_ids)
+        #print(f"***** {message} *****")
+        #t0 = time.time()
+        res = self.person_service.set_people_lifetime_estimates(person_ids)
 
         count = res.get("count")
         message = _("Estimated lifetimes")
-        self.blog.log_event(
-            {"title": message, "count": count, "elapsed": time.time() - t0}
-        )
+        # self.blog.log_event(
+        #     {"title": message, "count": count, "elapsed": time.time() - t0}
+        # )
         return {"status": status, "message": f"{message}, {count} changed"}
 
-    def set_all_person_confidence_values(self):
+    def set_person_confidence_values(self, person_ids):
         """Sets a quality ratings for collected list of Persons.
 
         Person.confidence is mean of all Citations used for Person's Events
         """
-        message = f"{len(self.person_ids)} Person confidence values"
-        print(f"***** {message} *****")
+        message = f"{len(person_ids)} Person confidence values"
+        #print(f"***** {message} *****")
         t0 = time.time()
 
-        with PersonWriter("update", tx=self.dataservice.tx) as service:
-            res = service.update_person_confidences(self.person_ids)
-            # returns {status, count, statustext}
-            status = res.get("status")
-            count = res.get("count", 0)
-            if status == Status.OK or status == Status.UPDATED:
-                self.blog.log_event(
-                    {
-                        "title": "Confidences set",
-                        "count": count,
-                        "elapsed": time.time() - t0,
-                    }
-                )
-                return {"status": status, "message": f"{message}, {count} changed"}
-            else:
-                msg = res.get("statustext")
-                self.blog.log_event(
-                    {
-                        "title": "Confidences not set",
-                        "count": count,
-                        "elapsed": time.time() - t0,
-                        "level": "ERROR",
-                    }
-                )
-                print(f"DOM_handler.set_all_person_confidence_values: FAILED: {msg}")
-                return {"status": status, "statustext": msg}
+        res = self.person_service.update_person_confidences(person_ids)
+        status = res.get("status")
+        count = res.get("count", 0)
+        if status == Status.OK or status == Status.UPDATED:
+            # self.blog.log_event(
+            #     {
+            #         "title": "Confidences set",
+            #         "count": count,
+            #         "elapsed": time.time() - t0,
+            #     }
+            # )
+            return {"status": status, "message": f"{message}, {count} changed"}
+        else:
+            msg = res.get("statustext")
+            self.blog.log_event(
+                {
+                    "title": "Confidences not set",
+                    "count": count,
+                    "elapsed": time.time() - t0,
+                    "level": "ERROR",
+                }
+            )
+            print(f"DOM_handler.set_person_confidence_values: FAILED: {msg}")
+            return {"status": status, "statustext": msg}
 
     # --------------------------- DOM subtree procesors ----------------------------
 

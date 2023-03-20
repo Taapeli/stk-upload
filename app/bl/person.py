@@ -301,7 +301,7 @@ class PersonWriter(DataService):
             "status": Status.OK,
         }
 
-    def set_estimated_lifetimes(self, uids=[]):
+    def set_people_lifetime_estimates(self, uids=[]):
         """Sets estimated lifetimes to Person.dates for given person.uniq_ids.
 
         Stores dates as Person properties: datetype, date1, and date2
@@ -313,7 +313,7 @@ class PersonWriter(DataService):
         """
         res = self.dataservice.ds_set_people_lifetime_estimates(uids)
 
-        print(f"Estimated lifetime for {res['count']} persons")
+        #print(f"Estimated lifetime for {res['count']} persons")
         return res
 
     def update_person_confidences(self, person_ids: list):

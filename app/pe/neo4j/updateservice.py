@@ -44,7 +44,7 @@ from .cypher.cy_family import CypherFamily
 from .cypher.cy_gramps import CypherObjectWHandle
 from .cypher.cy_media import CypherMedia
 from .cypher.cy_note import CypherNote
-from .cypher.cy_object import CypherObject
+#from .cypher.cy_object import CypherObject
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_refname import CypherRefname
@@ -1407,15 +1407,11 @@ class Neo4jUpdateService(ConcreteService):
         Set Family.date1 using the data in marriage Event
         Set Family.datetype and Family.date2 using the data in divorce or death Events
         """
-        #from bl.dates import DateRange, DR
-
         dates_count = 0
         sortname_count = 0
         status = Status.OK
         # print(f"### ds_set_family_calculated_attributes: self.tx = {self.tx}")
-        # Process the family
-        #### Todo Move and refactor to bl.FamilyBl
-        # result = Family_combo.get_dates_parents(my_tx, uniq_id)
+
         result = self.tx.run(CypherFamily.get_dates_parents, id=uniq_id)
         for record in result:
             # RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
