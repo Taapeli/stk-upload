@@ -1099,7 +1099,7 @@ class Neo4jReadService(ConcreteService):
                 key1 = args.get("theme1")
                 key2 = args.get("theme2")
                 # Show my researcher data
-                print(f"dr_get_source_list_fw: my researcher data {key1} {key2}")
+                print(f"dr_get_source_list_fw: my researcher data: {key1!r} {key2!r}")
                 result = run_cypher_batch(
                     session,
                     CypherSource.get_sources_with_selections,

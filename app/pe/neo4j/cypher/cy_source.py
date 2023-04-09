@@ -41,7 +41,7 @@ ORDER BY toUpper(s.stitle)"""
 
     get_sources_with_selections = """
 MATCH (root) -[:OBJ_SOURCE]-> (s:Source)
-    WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
+    WHERE tolower(s.stitle) CONTAINS $key1 OR s.stitle CONTAINS $key2 
 WITH root, s ORDER BY toUpper(s.stitle)
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)

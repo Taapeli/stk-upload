@@ -18,8 +18,12 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # blacked 15.11.2021/JMä
-#from pprint import pprint
-#import string
+import shareds
+LOG_CYPHER = False
+#TODO Fix how to import instance.config variable?
+if "LOG_CYPHER" in vars(shareds.app.config):
+    LOG_CYPHER = shareds.app.config.LOG_CYPHER
+
 import base32_lib as base32
 from bl.base import IsotammiException
 from bl.material import Material
@@ -110,7 +114,7 @@ def run_cypher_batch(session, cypher, username, material, **kwargs):
     if not isinstance(material, Material):
         raise IsotammiException("pe.neo4j.util.run_cypher_batch: invalid material")
 
-    if False:
+    if LOG_CYPHER:
         print("----------- pe.neo4j.util.run_cypher_batch -------------")
         print("// 1. You may copy this to cypher console to set parameters:")
         if username:
