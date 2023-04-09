@@ -45,7 +45,7 @@ from ui.context import UserContext
 from bl.base import Status
 from bl.person import PersonWriter
 
-from setups import User
+#from setups import User
 from bp.admin.forms import UpdateUserProfileForm, UpdateUserForm
 from bl.admin.models.data_admin import DataAdmin
 from bl.admin.models.user_admin import UserAdmin
@@ -214,9 +214,7 @@ def list_users():
 def update_user(username):
     """ A User is created or approved or ...
     """
-    # d = Domain("translations/sv/LC_MESSAGES")
-    # s = d.gettext("Return")
-    # print("s:",s)
+    from setups import User
 
     form = UpdateUserForm()
     if form.validate_on_submit():
