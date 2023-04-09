@@ -120,7 +120,7 @@ class SourceReader(DataService):
             # Filtering search keywords by series prompt (Lähdesarja)
             THEMES = {
                 "birth": ("syntyn", "födda"),
-                "baptism": ("kastet", "döpta"),
+                "baptism": ("kaste", "döpta"),
                 "wedding": ("vih", "vigda"),
                 "death": ("kuol", "döda"),
                 "move": ("muutt", "flyttade"),

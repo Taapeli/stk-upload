@@ -457,7 +457,7 @@ def remove_prop_constraints(prop):
             print(f'Removed {len(names)} Unique constraints for {prop}')
             
         except Exception as e:
-            logger.error(f'database.accessDB.remove_all_uuid_constraints: {e.__class__.__name__} {e}' )
+            logger.error(f'database.accessDB.remove_prop_constraints: {e.__class__.__name__} {e}' )
             raise
     return
 

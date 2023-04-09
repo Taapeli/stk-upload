@@ -1408,7 +1408,7 @@ class Neo4jReadService(ConcreteService):
                 return {"media": media, "status": Status.NOT_FOUND}
 
     def dr_get_media_single(self, user, material, iid):
-        """Read a Media object, selected by UUID or uniq_id.
+        """Read a Media object, selected by iid.
 
         :param: user    username, who has access
         :parma: iid     Media node iid

@@ -385,7 +385,6 @@ class Neo4jUpdateService(ConcreteService):
 
     def ds_save_citation(self, tx, citation, batch_id, iids):
         """Saves this Citation and connects it to it's Notes and Sources."""
-        citation.uuid = NodeObject.newUuid()
         citation.iid = iids.get_one()
 
         c_attr = {
@@ -461,7 +460,6 @@ class Neo4jUpdateService(ConcreteService):
             batch_id        str         Batch id, alternative object to link:
                                         (:Batch{id:batch_id}) --> (Note)
         """
-        note.uuid = NodeObject.newUuid()
         note.iid = iids.get_one()
         if not "batch_id":
             raise RuntimeError(f"Note.save needs batch_id for {note.id}")
@@ -507,7 +505,6 @@ class Neo4jUpdateService(ConcreteService):
         #TODO: Process also Notes for media?
         #TODO: Use MediaWriteService
         """
-        media.uuid = NodeObject.newUuid()
         media.iid = iids.get_one()
         m_attr = {
             "iid": media.iid,
@@ -620,7 +617,6 @@ class Neo4jUpdateService(ConcreteService):
 
         # Create or update this Place
 
-        # No uuid: place.iid = place.newUuid()
         place.iid = iids.get_one()
         pl_attr = {
             "iid": place.iid,
@@ -814,7 +810,6 @@ class Neo4jUpdateService(ConcreteService):
     def ds_save_repository(self, tx, repository, batch_id, iids):
         """Saves this Repository to db under given batch."""
 
-        repository.uuid = NodeObject.newUuid()
         repository.iid = iids.get_one()
         r_attr = {
             "iid": repository.iid,
@@ -854,7 +849,6 @@ class Neo4jUpdateService(ConcreteService):
             :param: batch_id      batch id where this source is linked
 
         """
-        source.uuid = NodeObject.newUuid()
         source.iid = iids.get_one()
         s_attr = {}
         try:
@@ -927,11 +921,10 @@ class Neo4jUpdateService(ConcreteService):
         - Does not link it from UserProfile or Person
         """
 
-        event.uuid = NodeObject.newUuid()
         event.iid = iids.get_one()
         e_attr = {
             "iid": event.iid,
-            "uuid": event.uuid,
+            # "uuid": event.uuid,
             "handle": event.handle,
             "change": event.change,
             "id": event.id,
@@ -1002,8 +995,6 @@ class Neo4jUpdateService(ConcreteService):
         @todo: Remove those referenced person names, which are not among
                new names (:Person) --> (:Name)
         """
-
-        person.uuid = NodeObject.newUuid()
         person.iid = iids.get_one()
 
         # Save the Person node under UserProfile; all attributes are replaced
@@ -1470,7 +1461,6 @@ class Neo4jUpdateService(ConcreteService):
 
         Connects the family to parent, child, citation and note nodes.
         """
-        # No uuid: f.uuid = NodeObject.newUuid()
         f.iid = iids.get_one()
         f_attr = {
             "iid": f.iid,

@@ -96,7 +96,7 @@ class Proxy:
         if objtype == "note": 
             haslink = False
         if haslink:
-            return  f"""<a href="/scene/{objtype}{sep}uuid={self.uuid}" target="_blank">{self.id}</a>""" 
+            return  f"""<a href="/{objtype}/{self.iid}" target="_blank">{self.id}</a>""" 
         elif hasattr(self, 'id'):
             return self.id
         else:
@@ -940,8 +940,7 @@ def get_attrs(scope):
             'sortname',
             'spouses',
             'surname',
-            'uid',
-            'uuid']
+            'iid']
     if scope == "Family":
         return [
              'batch_id',
@@ -954,8 +953,7 @@ def get_attrs(scope):
              'mother',
             'notes',
              'rel_type',
-             'uid',
-             'uuid']        
+             'iid']        
     if scope == 'Event':
         return [ 
             'batch_id',
@@ -971,8 +969,7 @@ def get_attrs(scope):
             'place',
             'scope',
             'type',
-            'uid',
-            'uuid']
+            'iid']
     if scope == 'Place':
         return [
             'altnames',
@@ -988,8 +985,7 @@ def get_attrs(scope):
             'pname',
             'scope',
             'type',
-            'uid',
-            'uuid']
+            'iid']
     if scope == 'Citation':
         return [
             'batch_id',
@@ -1001,8 +997,7 @@ def get_attrs(scope):
             'page',
             'scope',
             'source',
-            'uid',
-            'uuid']         
+            'iid']         
  
     if scope == 'Source':
         return [
@@ -1015,13 +1010,12 @@ def get_attrs(scope):
             'scope',
             'spubinfo',
             'stitle',
-            'uid',
-            'uuid']         
+            'iid']         
     if scope == 'Repository':
         return [
             'batch_id', 'change', 'id', 
             'notes',
-            'rname', 'scope', 'type', 'uid', 'uuid'] 
+            'rname', 'scope', 'type', 'iid'] 
     if scope == 'Media':
         return [
             'batch_id',
@@ -1033,10 +1027,9 @@ def get_attrs(scope):
             'notes',
             'scope',
             'src',
-            'uid',
-            'uuid']
+            'iid']
     if scope == "Note":
-        return ['batch_id', 'id', 'scope', 'text', 'type', 'uid', 'url']            
+        return ['batch_id', 'id', 'scope', 'text', 'type', 'iid', 'url']            
 
     return ["Unknown"]
 
