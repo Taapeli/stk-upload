@@ -60,14 +60,14 @@ form div {margin:.25em;}
 </style>
 
 <script>
-const maxsize = {{ maxsize }};
+const max_size = {{ maxsize }};
 const TOOLARGE =  "{{ TOOLARGE }}";
 
 function checkFileSize() {
 	try {
 	 	var input = document.getElementById('filenm');
 	 	var file = input.files[0];
-	 	if (file.size > maxsize) {
+	 	if (file.size > max_size) {
 			alert(TOOLARGE);
 			return false;
 	 	}

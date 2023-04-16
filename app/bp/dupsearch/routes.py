@@ -156,10 +156,11 @@ def _get_person(service, iid):
 @roles_required('audit')
 def compare():
     """ Compare by something? """
+    material_type = "Family Tree"
     iid1 = request.args.get("iid1")
     u_context1 = UserContext()
     u_context1.material.batch_id =  request.args.get("batch_id1")
-    u_context1.material.m_type = None
+    u_context1.material.m_type = material_type
     u_context1.state = request.args.get("state1")
     if u_context1.state == State.ROOT_ACCEPTED: # "Accepted":        
         u_context1.user = None
@@ -167,7 +168,7 @@ def compare():
     iid2 = request.args.get("iid2")
     u_context2 = UserContext()
     u_context2.material.batch_id =  request.args.get("batch_id2")
-    u_context2.material.m_type = None
+    u_context2.material.m_type = material_type
     u_context2.state = request.args.get("state2")
     if u_context2.state == State.ROOT_ACCEPTED: #"Accepted":        
         u_context2.user = None
