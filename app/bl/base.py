@@ -129,7 +129,7 @@ class NodeObject:
         """ My timestamp to display format. """
         if hasattr(self, "timestamp") and self.timestamp:
             t = float(self.timestamp) / 1000.0
-            return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+            return datetime.fromtimestamp(t).strftime("%d.%m.%Y %H:%M")
         else:
             return ""
 
