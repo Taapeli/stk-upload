@@ -142,7 +142,7 @@ def get_meta(root):
         status = meta.get("status")
         if status == State.FILE_LOADING or root.state ==  State.FILE_LOADING:
             stat = os.stat(metaname)
-            MAX_SEC = 2*60
+            MAX_SEC = 5*60
             if (stat.st_mtime < time.time() - MAX_SEC): 
                 # not updated within last two minutes -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED

@@ -112,9 +112,13 @@ class LogItem():
             c = self.count
         if self.elapsed:
             m,s = divmod(self.elapsed,60)
-            e = f"{int(m)} min {s:5.3f} sec" if m else f"{s:5.3f} sec"
-            return f"{self.level:5} {self.title+':':30} {c:4} / {e}"
-        return f"{self.level:5} {self.title+':':30} {c:4}"
+            if m > 60:
+                h,m = divmod(m,60)
+                e = f"{int(h)} h {int(m)} min {s:5.3f} sec"
+            else:
+                e = f"{int(m)} min {s:5.3f} sec" if m else f"{s:5.3f} sec"
+            return f"{self.level:5} {self.title+':':42}{c:4} / {e}"
+        return f"{self.level:5} {self.title+':':42}{c:4}"
 
 
 class LogTimer():
