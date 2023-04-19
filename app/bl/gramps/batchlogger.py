@@ -117,8 +117,8 @@ class LogItem():
                 e = f"{int(h)} h {int(m)} min {s:5.3f} sec"
             else:
                 e = f"{int(m)} min {s:5.3f} sec" if m else f"{s:5.3f} sec"
-            return f"{self.level:5} {self.title+':':42}{c:4} / {e}"
-        return f"{self.level:5} {self.title+':':42}{c:4}"
+            return f"{self.level:5} {self.title+':':42}{c:5} / {e}"
+        return f"{self.level:5} {self.title+':':42}{c:5}"
 
 
 class LogTimer():
