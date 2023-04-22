@@ -12,25 +12,16 @@ td ul li p { margin: 0 0 0.3em 0; }
 </style>
 
 <div id="startdiv">
-    <h1>{{ _('List of Sources') }}{% if user_context.series %} ({{ _(user_context.series) }}){% endif %}</h1>
+    <h1>{{ _('List of Repositories') }}</h1>
     <div>{{ macro.show_use_case() }}</div>
 </div>
 
-{{ macro.menu(5) }}
+{{ macro.menu(51) }}
     <div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
 	            <div style="width:100%">
-		            <p>{{ _('This page contains a directory of %(num)s sources.',num=sources|count) }}
-                    <span class="SearchBox"><br>
-                      {{ _("Select series:") }}
-			          <a href="/scene/sources" class="inlink">{{ _('all') }}</a> |
-			          <a href="/scene/sources/birth" class="inlink">{{ _('birth') }}</a> |
-			          <a href="/scene/sources/baptism" class="inlink">{{ _('baptism') }}</a> |
-			          <a href="/scene/sources/wedding" class="inlink">{{ _('wedding') }}</a> |
-			          <a href="/scene/sources/death" class="inlink">{{ _('death') }}</a> |
-			          <a href="/scene/sources/move" class="inlink">{{ _('move') }}</a>
-                    </span>
+		            <p>{{ _('This page contains a directory of %(num)s repositories.',num=sources|count) }}
 					</p>
 				</div>
             </div>
@@ -38,7 +29,7 @@ td ul li p { margin: 0 0 0.3em 0; }
 
 		<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-        {% for s in sources %}
+        {% for s in repos %}
         	{% set ini = s.stitle|list|first|upper %}
             {% if loop.changed(ini) %}
                 <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
@@ -49,20 +40,23 @@ td ul li p { margin: 0 0 0.3em 0; }
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-                    <th>{{ _('Source, notes') }}</th>
-                    <th>{{ _('Media and Repository') }}</th>
+                    <th>{{ _('Repository, notes') }}</th>
+                    <th>{{ _('Media in the repository') }}</th>
+{#                  <th title="{{ _('Citations') }}">{{ _('citated') }}</th> #}
                     <th title="{{ _('events, persons, etc., referred from') }}">{{ _('References') }}</th>
 				</tr>
 			</thead>
 			<tbody>
-	{% if sources %}
-	    {% for s in sources %}
+	{% if repos %}
+	    {% for s in repos %}
 	    	{% set ini = s.stitle|list|first|upper %}
 	    	<tr><td class="ColumnAlpha">
 	            {% if loop.changed(ini) %}
 	               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
                 {% endif %}
                 </td>
+            <td>To do</td>
+{# TODO
             <td class="ColumnSource">
                <div>
                  {% set id = s.id %}
@@ -95,10 +89,11 @@ td ul li p { margin: 0 0 0.3em 0; }
             {% endif %}</td>
             <td class="numbers">{% if s.ref_cnt %}{{s.ref_cnt}}{% endif %}</td>
             </tr>
+END TODO #}
 	    {% endfor %}
     {% else %}
             <tr><td colspan="4" id="lastitem_badge">
-                    <i>{{ _('No sources found') }}</i>
+                    <i>{{ _('No repositories found') }}</i>
                 </td>
             </tr>
 	{% endif %}

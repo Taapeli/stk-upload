@@ -1272,6 +1272,39 @@ def source_search():
         stk_logger(u_context, f"-> bp.scene.routes.source_search FAILED")
         return jsonify({"status": Status.ERROR})
 
+@bp.route("/scene/repositories")
+@login_required
+@roles_accepted("guest", "research", "audit", "admin")
+def show_repositories():
+    """List of repositories (archives) menu(51)
+    """
+    # print(f"--- {request}")
+    # print(f"--- {session}")
+    t0 = time.time()
+    # Set context by owner and the data selections
+    u_context = UserContext()
+    # Which range of data is shown
+    u_context.set_scope_from_request("repo_scope")
+    u_context.count = int(u_context.get("c", 100))
+
+    res = {"status":Status.OK, "items":[]}
+    # with SourceReader("read", u_context) as service:
+    #     # if series: u_context.series = series
+    #     res = service.get_source_list()
+    #     if res["status"] == Status.NOT_FOUND:
+    #         print("bp.scene.routes.show_sources: No sources found")
+    #     elif res["status"] != Status.OK:
+    #         print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
+
+    stk_logger(
+        u_context, f"-> bp.scene.routes.show_repositories n={len(res['items'])}"
+    )
+    return render_template(
+        "/scene/repositories.html",
+        repos=res["items"],
+        user_context=u_context,
+        elapsed=time.time() - t0,
+    )
 
 #@bp.route("/scene/source", methods=["GET"])
 @bp.route("/repository/<iid>")
