@@ -48,7 +48,7 @@ import pprint
 cypher_search0 = """
     match (p:Place {pname:$pname}) 
     optional match (p)-[r:IS_INSIDE]->(u:Place)
-    return p, p.uuid as id, COLLECT(u.pname) as uppers
+    return p, p.iid as id, COLLECT(u.pname) as uppers
 """
 
 cypher_search1 = """
@@ -135,7 +135,7 @@ def search(lookedfor):
         p = rec['p']
         uppers = __process_larger_places(rec['largerPlaces'])
         r = dict(
-            uuid=p['uuid'],
+            iid=p['iid'],
             pname=p['pname'],
             id=p['id'],
             type=p['type'],    

@@ -75,7 +75,7 @@ class DOM_handler:
         # self.mediapath = None                 # Directory for media files
         self.file = os.path.basename(pathname)  # for messages
         self.progress = defaultdict(int)
-        self.obj_counter = 0
+        # self.obj_counter = 0
         self.noterefs_later = []    # NodeObjects with obj.notes to be saved later
         # self.notes_to_postprocess = NodeObject(uniq_id = 0)
         # self.notes_to_postprocess.notes = []
@@ -89,13 +89,13 @@ class DOM_handler:
             yield objs[i:i+i_amount]
             i += i_amount
 
-    def unused_remove_handles(self):
+    def obsolete_unused_remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
         res = self.dataservice.ds_obj_remove_gramps_handles(self.batch.id)
         print(f'# --- removed handles from {res.get("count")} nodes')
         return res
 
-    def add_missing_links(self):
+    def obsolete_add_missing_links(self):
         """Link the Nodes without OWNS link to Batch"""
         from pe.neo4j.cypher.cy_root import CypherRoot
 
@@ -116,23 +116,19 @@ class DOM_handler:
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
         obj.save(self.dataservice.tx, **kwargs)
-        # self.obj_counter += 1 
-        # if self.obj_counter % 1000 == 0:
-        #     print(self.obj_counter, "Transaction restart")
-        #     self.dataservice.tx.commit()
-        #     self.dataservice.tx = shareds.driver.session().begin_transaction()
+        # removed: ... print(self.obj_counter, "Transaction restart")
 
         self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
-    def obsolete_save_and_link_handle2(self, tx, obj, **kwargs):
-        """Save object and store its identifiers in the dictionary by handle.
-
-        Some objects may accept arguments like batch_id="2019-08-26.004" and others
-        """
-        obj.save(tx, **kwargs)
-        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
-        self.update_progress(obj.__class__.__name__)
+    # def obsolete_save_and_link_handle2(self, tx, obj, **kwargs):
+    #     """Save object and store its identifiers in the dictionary by handle.
+    #
+    #     Some objects may accept arguments like batch_id="2019-08-26.004" and others
+    #     """
+    #     obj.save(tx, **kwargs)
+    #     self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
+    #     self.update_progress(obj.__class__.__name__)
 
     def complete(self, obj:NodeObject, url_notes = None):
         """ Complete object saving. """
@@ -297,7 +293,7 @@ class DOM_handler:
         if not parent.notes:
             return
 
-        note_msg = [note.url for note in parent.notes]
+        #note_msg = [note.url for note in parent.notes]
         #print(f"handle_postprocessed_notes: {parent.id} --> {note_msg}")
         self.dataservice.ds_save_note_list(tx, parent, self.batch.id, iids)
 
@@ -1013,7 +1009,7 @@ class DOM_handler:
         """
 
         # status = Status.OK
-        message = f"{len(family_ids)} Family sortnames & dates"
+        #message = f"{len(family_ids)} Family sortnames & dates"
         #print(f"***** {message} *****")
         #t0 = time.time()
         res = {}
@@ -1026,11 +1022,6 @@ class DOM_handler:
                 res = service.set_family_calculated_attributes(uniq_id)
                 # returns {counter, status}
                 counter += res.get("counter", 0)
-
-        # Two data groups, one elapsed time!
-        # self.blog.log_event(
-        #     {"title": _("Family dates and names"), "count": counter, "elapsed": time.time() - t0}
-        # )
         return res
 
     def set_person_calculated_attributes(self, person_ids):
@@ -1056,12 +1047,6 @@ class DOM_handler:
                 refname_count += res.get("refnames")
                 sortname_count += res.get("sortnames")
 
-        # self.blog.log_event({"title": "Refname references",
-        #                      "count": refname_count,
-        #                      "elapsed": time.time() - t0})
-        # self.blog.log_event({"title": _("Person sorting names"), 
-        #                      "count": sortname_count, 
-        #                      "elapsed": time.time() - t0})
         return {"status": status, "message": message}
 
     def set_person_estimated_dates(self, person_ids):
@@ -1071,7 +1056,7 @@ class DOM_handler:
         Called from bp.gramps.gramps_loader.xml_to_neo4j
         """
         status = Status.OK
-        message = f"{len(self.person_ids)} Estimated lifetimes"
+        #message = f"{len(self.person_ids)} Estimated lifetimes"
         #print(f"***** {message} *****")
         #t0 = time.time()
         res = self.person_service.set_people_lifetime_estimates(person_ids)

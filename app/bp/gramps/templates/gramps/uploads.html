@@ -60,10 +60,10 @@ form div {margin:.25em;}
 </style>
 
 <script>
-const maxsize = {{ maxsize }};
+/*const maxsize = {{ maxsize }}; Moved to parameter */
 const TOOLARGE =  "{{ TOOLARGE }}";
 
-function checkFileSize() {
+function checkFileSize(maxsize) {
 	try {
 	 	var input = document.getElementById('filenm');
 	 	var file = input.files[0];
@@ -150,7 +150,8 @@ function filenm_changed(input) {
                     <input type="file" id="filenm" name="filenm" accept=".gramps,.gpkg" onchange="filenm_changed(this)"/>
                 </div>
                 <div class="submit"> 
-                    <input type="button" name="submitbutton" value="{{ _('Send to database') }}" onclick="checkFileSize()" disabled/>
+                    <input type="button" name="submitbutton" value="{{ _('Send to database') }}"
+                     onclick="checkFileSize({{maxsize}})" disabled/>
                 </div>
                 <div style="display:block; padding:.3em 0;">
                     {{ _('Select Gramps XML File (*.gramps etc) for converting to your candidate material') }}.

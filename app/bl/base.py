@@ -23,11 +23,11 @@ Created on 22.8.2019
 @author: jm
 """
 #blacked 2021-05-01 JMä
-import uuid
+#import uuid
 import json
 import traceback
 from datetime import datetime
-import base32_lib as base32
+#import base32_lib as base32
 
 # Privacy rule: how many years after death
 PRIVACY_LIMIT = 0
@@ -100,7 +100,7 @@ class NodeObject:
 
         Optional uniq_id may be database key (int).
         """
-        self.uuid = None 
+        #self.uuid = None 
         self.uniq_id = uniq_id  # Neo4j object id
         self.change = 0  # Object change time
         self.id = ""  # Gedcom object id like "I1234"
@@ -129,7 +129,7 @@ class NodeObject:
         """ My timestamp to display format. """
         if hasattr(self, "timestamp") and self.timestamp:
             t = float(self.timestamp) / 1000.0
-            return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+            return datetime.fromtimestamp(t).strftime("%d.%m.%Y %H:%M")
         else:
             return ""
 
@@ -181,26 +181,25 @@ class NodeObject:
 
         return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
 
-    @staticmethod
-    def newUuid():
-        """Generates a new uuid key. DON'T!
-
-        See. https://docs.python.org/3/library/uuid.html
-        """
-        return None
-        #return uuid.uuid4().hex
-
-    def uuid_short(self):
-        """ Display uuid (or iid) in short form. 
-        
-            Real uuid shortened, iid need is not too long
-        """
-        if self.uuid:
-            if len(self.uuid) > 20:
-                return self.uuid[:6]
-            return self.uuid
-        else:
-            return ""
+    # @staticmethod
+    # def newUuid(): # Removed 9.4.2023 / JMä
+    #     """Generates a new uuid key. DON'T!
+    #
+    #     See. https://docs.python.org/3/library/uuid.html
+    #     """
+    #     return None
+    #     #return uuid.uuid4().hex
+    # def uuid_short(self):
+    #     """ Display uuid (or iid) in short form. 
+    #
+    #         Real uuid shortened, iid need is not too long
+    #     """
+    #     if self.uuid:
+    #         if len(self.uuid) > 20:
+    #             return self.uuid[:6]
+    #         return self.uuid
+    #     else:
+    #         return ""
 
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """

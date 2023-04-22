@@ -47,7 +47,7 @@ def init(cls:NodeObject, node:Node):
     n = cls()
     n.uniq_id = node.id
     n.id = node["id"]
-    n.uuid = node.get("uuid","")
+    #n.uuid = node.get("uuid","")
     n.iid = node.get("iid","")
     if node["handle"]:
         n.handle = node["handle"]

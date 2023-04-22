@@ -119,11 +119,11 @@ class SourceReader(DataService):
         if context.series:
             # Filtering search keywords by series prompt (Lähdesarja)
             THEMES = {
-                "birth": ("syntyneet", "födda"),
-                "baptism": ("kastetut", "döpta"),
-                "wedding": ("vihityt", "vigda"),
-                "death": ("kuolleet", "döda"),
-                "move": ("muuttaneet", "flyttade"),
+                "birth": ("syntyn", "födda"),
+                "baptism": ("kaste", "döpta"),
+                "wedding": ("vih", "vigda"),
+                "death": ("kuol", "döda"),
+                "move": ("muutt", "flyttade"),
             }
             args["theme1"], args["theme2"] = THEMES[context.series]
         try:

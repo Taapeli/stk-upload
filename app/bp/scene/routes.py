@@ -509,7 +509,7 @@ def show_person(iid=None, fanchart=False):
     """One Person with all connected nodes - NEW version 3.
 
     Arguments:
-    - iid=     persons iid or uuid
+    - iid=     persons iid
     - fanchart= by default family details shown, fanchart navigation uses this
     """
     from datetime import date
@@ -964,39 +964,6 @@ def show_family(iid=None):
         user_context=u_context,
         elapsed=time.time() - t0,
     )
-
-@bp.route("/scene/family", methods=["GET"])
-@login_required
-@roles_accepted("guest", "research", "audit", "admin")
-def obsolete_show_family_page(iid=None):
-    """One Family, only for by /scene/json/event from person.html
-    """
-    return "bp.scene.routes.obsolete_show_family_page: REMOVED"
-    # iid = request.args.get("uuid", iid)
-    # if not iid:
-    #     return redirect(url_for("virhesivu", code=1, text="Missing Family key"))
-    # t0 = time.time()
-    # u_context = UserContext()
-    #
-    # with FamilyReader("read", u_context) as service:
-    #     # reader = FamilyReader(readservice, u_context)
-    #     res = service.get_family_data(iid)
-    #
-    # stk_logger(u_context, "-> bp.scene.routes.show_family_page")
-    # status = res.get("status")
-    # if status != Status.OK:
-    #     if status == Status.ERROR:
-    #         flash(f'{res.get("statustext")}', "error")
-    #     else:
-    #         flash(f'{ _("This item is not available") }', "warning")
-    #
-    # return render_template(
-    #     "/scene/family.html",
-    #     menuno=3,
-    #     family=res["item"],
-    #     user_context=u_context,
-    #     elapsed=time.time() - t0,
-    # )
 
 
 @bp.route("/scene/json/families", methods=["POST", "GET"])

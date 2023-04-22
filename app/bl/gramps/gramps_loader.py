@@ -437,7 +437,7 @@ def file_clean(pathname):
                 encoding="utf-8",
             ) as file_in:
                 counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned apostrophes from .gpkg input file"  
+            msg = "Cleaned characters from .gpkg input file"  
             event = LogItem(
                 {"title": msg, "count": counter, "elapsed": time.time() - t0}
             )
@@ -451,7 +451,7 @@ def file_clean(pathname):
             ) as file_in:
                 # print("A gzipped file")
                 counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned apostrophes from packed input lines"
+            msg = "Cleaned characters from packed input lines"
             event = LogItem(
                 {"title": msg, "count": counter, "elapsed": time.time() - t0}
             )
@@ -463,7 +463,7 @@ def file_clean(pathname):
             with open(pathname, mode="rt", encoding="utf-8") as file_in:
                 print("Not a gzipped file")
                 counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned apostrophes from input lines"
+            msg = "Cleaned characters from input lines"
             event = LogItem(
                 {"title": msg, "count": counter, "elapsed": time.time() - t0}
             )

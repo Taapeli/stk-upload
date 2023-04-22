@@ -467,10 +467,10 @@ def get_progress(batch_id):
         done += progress.get("EventBl", 0)
         done += progress.get("FamilyBl", 0) * 2
         done += progress.get("Note", 0)
-        done += progress.get("PersonBl", 0) * 3
+        done += progress.get("PersonBl", 0) * 2 # without refnames 3
         done += progress.get("PlaceBl", 0) * 2
         done += progress.get("MediaBl", 0)
-        done += progress.get("Source_gramps", 0)
+        done += progress.get("SourceBl", 0)
         done += progress.get("Repository", 0)
         done += progress.get("refnames", 0)
         # Why total may be 0? The default is set to 50% progress!
@@ -479,7 +479,8 @@ def get_progress(batch_id):
             "progress": 99 * done // total if total else 50,
             "batch_id": batch_id,
         }
-        print(f"#bp.gramps.routes.get_progress: {done}/{total}, {rsp}")
+        print(f"#bp.gramps.routes.get_progress: {done}/{total} {done-total} to go, {rsp}")
+        #print(f"# {progress}")
         return jsonify(rsp)
 
 @bp.route("/gramps/commands/<batch_id>")

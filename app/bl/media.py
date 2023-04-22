@@ -125,7 +125,7 @@ class MediaReader(DataService):
         return {"status": Status.NOT_FOUND}
 
     def get_one(self, oid):
-        """Read a Media object, selected by UUID or uniq_id."""
+        """Read a Media object, selected by iid or uniq_id."""
 
 
         # Example database items:
