@@ -142,11 +142,16 @@ def get_meta(root):
         status = meta.get("status")
         if status == State.FILE_LOADING or root.state ==  State.FILE_LOADING:
             stat = os.stat(metaname)
-            MAX_SEC = 5*60
-            if (stat.st_mtime < time.time() - MAX_SEC): 
+
+            # Timeout 2 min, if analyze has ended; else 10 min
+            c = meta.get("counts","")
+            max_sec = 2*60 if c else 10*60
+            #print(f"bp.admin.uploads.get_meta: max_sec={max_sec}")
+
+            if (stat.st_mtime < time.time() - max_sec): 
                 # not updated within last two minutes -> assume failure
                 meta["status"] = State.FILE_LOAD_FAILED
-                msg1= f"{_('Load failed, no progress in %(n)s seconds', n=MAX_SEC)}"
+                msg1= f"{_('Load failed, no progress in %(n)s seconds', n=max_sec)}"
                 msg = f"{util.format_timestamp()}: {msg1}"
                 with open(root.logname,"a") as f:
                     print("", file=f)

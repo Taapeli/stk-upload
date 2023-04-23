@@ -155,7 +155,10 @@ def analyze_xml(username, batch_id, filename):
 
 
 def analyze(username, filename):
-    """Returns a list of Analyze_row objects carrying number of items and references."""
+    """Returns a list of Analyze_row objects carrying number of
+       items and references.
+    """
+    t0 = time.time()
     values = analyze_xml(username, filename)
 
     references = []
@@ -252,6 +255,7 @@ def analyze(username, filename):
 
     references.append(row)
 
+    print(f"#bl.gramps.gramps_loader.analyze: {time.time() - t0} seconds")
     return references
 
 
