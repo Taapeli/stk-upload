@@ -1287,14 +1287,13 @@ def show_repositories():
     u_context.set_scope_from_request("repo_scope")
     u_context.count = int(u_context.get("c", 100))
 
-    res = {"status":Status.OK, "items":[]}
-    # with SourceReader("read", u_context) as service:
-    #     # if series: u_context.series = series
-    #     res = service.get_source_list()
-    #     if res["status"] == Status.NOT_FOUND:
-    #         print("bp.scene.routes.show_sources: No sources found")
-    #     elif res["status"] != Status.OK:
-    #         print(f'bp.scene.routes.show_sources: Error {res.get("statustext")}')
+    with RepositoryReader("read", u_context) as service:
+        # if series: u_context.series = series
+        res = service.get_repo_list()
+        if res["status"] == Status.NOT_FOUND:
+            print("bp.scene.routes.show_repositories: No sources found")
+        elif res["status"] != Status.OK:
+            print(f'bp.scene.routes.show_repositories: Error {res.get("statustext")}')
 
     stk_logger(
         u_context, f"-> bp.scene.routes.show_repositories n={len(res['items'])}"

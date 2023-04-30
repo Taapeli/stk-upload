@@ -49,8 +49,7 @@ def init(cls:NodeObject, node:Node):
     n.id = node["id"]
     #n.uuid = node.get("uuid","")
     n.iid = node.get("iid","")
-    if node["handle"]:
-        n.handle = node["handle"]
+    n.handle = node["handle"] or None
     n.change = node.get("change")
     return n
 
@@ -254,8 +253,6 @@ def Repository_from_node(node):
             'type': 'Archive', 'change': '1522861211'}>
     """
     n = init(Repository, node)
-    n.uniq_id = node.id
-    n.id = node["id"] or ""
     n.handle = node["handle"] or None
     n.change = node["change"] or 0
     n.rname = node["rname"] or ""

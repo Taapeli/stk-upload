@@ -1313,6 +1313,42 @@ class Neo4jReadService(ConcreteService):
             return {'items': rsp, 'status': Status.OK}
 
 
+    # ------ Repositories (Archives) -----
+
+    def dr_get_repo_list_fw(self, args):
+        """Read all repositories with notes and number of sources.
+
+        used keyword arguments:
+        - user        Username to select data
+        - fw          Read repositories starting from this keyword
+        - count       How many repositories to read
+
+        Todo: tuloksen sivuttaminen esim. 100 kpl / sivu
+        """
+        repos = []
+        user = args.get("user")
+        material = args.get("material")
+
+        with self.driver.session(default_access_mode="READ") as session:
+            result = run_cypher_batch(
+                session, CypherRepository.get_repositories, user, material
+            )
+
+            for record in result:
+                # Record root, repository, notes[], mediums[], source_cnt 
+                node = record["repository"]
+                rep = Repository_from_node(node)
+                # Got <id>, Change, id, iid, rname, type
+                rep.root = dict_root_node(record["root"])
+                for node in record["notes"]:
+                    n = Note_from_node(node)
+                    rep.notes.append(n)
+                rep.mediums = record["mediums"] or []
+                rep.source_cnt = record["source_cnt"]
+                repos.append(rep)
+
+        return repos
+
     def dr_get_repository(self, user: str, material: Material, iid: str):
         """Returns the Repository with Sources included."""
         repo = None

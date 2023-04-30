@@ -21,6 +21,16 @@ WITH n
   CREATE (r) -[:NOTE]-> (n)
 RETURN COUNT(DISTINCT n) AS cnt"""
 
+    get_repositories = """
+MATCH (root) -[:OBJ_OTHER]-> (rep:Repository)
+    OPTIONAL MATCH (rep) -[:NOTE]-> (note)
+    OPTIONAL MATCH (rep) <-[r:REPOSITORY]- (s:Source)
+RETURN root, rep as repository, collect(DISTINCT note) as notes, 
+       collect(DISTINCT r.medium) as mediums,
+       //collect(DISTINCT s) as sources,
+       COUNT(s) AS source_cnt 
+ORDER BY toUpper(rep.rname)"""
+
     get_repository_sources_iid = """
 MATCH (root:Root) -[:OBJ_SOURCE]-> (s:Source) -[r:REPOSITORY]-> (repo:Repository) 
     WHERE repo.iid = $iid
