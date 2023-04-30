@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-02-19 15:28+0200\n"
+"POT-Creation-Date: 2023-04-30 12:09+0300\n"
 "PO-Revision-Date: 2023-01-25 13:17+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -172,7 +172,7 @@ msgstr "Huomautuksen lukuvirhe"
 msgid "undefined relation"
 msgstr "tuntematon suhde"
 
-#: bl/family.py:344
+#: bl/family.py:355
 msgid "This person has no families"
 msgstr "Ei perheitä"
 
@@ -233,7 +233,7 @@ msgstr "Ketään ei löytynyt"
 msgid "Requested person not available"
 msgstr "Et voi katsoa pyydettyä henkilöä"
 
-#: bl/batch/root_updater.py:207 bl/stats.py:278 bp/gramps/routes.py:587
+#: bl/batch/root_updater.py:207 bl/stats.py:278 bp/gramps/routes.py:588
 msgid "Failed to retrieve batch"
 msgstr "Aineiston avaaminen ei onnistunut"
 
@@ -278,36 +278,32 @@ msgstr ""
 msgid "Superseded auditor '%(a)s' from batch %(b)s"
 msgstr "Tarkastaja '%(a)s' on syrjäytetty aineistosta %(b)s"
 
-#: bl/gramps/gramps_loader.py:167
+#: bl/gramps/gramps_loader.py:170
 msgid "Events with no references to"
 msgstr "Tapahtumaa ilman viitettä"
 
-#: bl/gramps/gramps_loader.py:247
+#: bl/gramps/gramps_loader.py:250
 msgid "Estimated time"
 msgstr "Arvioitu aika"
 
-#: bl/gramps/gramps_loader.py:250
+#: bl/gramps/gramps_loader.py:253
 msgid "sec"
 msgstr "sek"
 
-#: bl/gramps/gramps_loader.py:352
-msgid "Free text search indexes"
-msgstr "Luotu vapaahaun indeksi"
-
-#: bl/gramps/gramps_loader.py:462
+#: bl/gramps/gramps_loader.py:476
 msgid "Unable to open Gramps file"
 msgstr "Gramps-tiedoston avaaminen ei onnistu"
 
-#: bl/gramps/xml_dom_handler.py:171 bp/gramps/templates/gramps/details.html:70
+#: bl/gramps/xml_dom_handler.py:166 bp/gramps/templates/gramps/details.html:70
 #: bp/scene/templates/scene/details_batch.html:121
 msgid "Material type"
 msgstr "Aineiston laatu"
 
-#: bl/gramps/xml_dom_handler.py:228 bp/scene/templates/scene/repository.html:82
+#: bl/gramps/xml_dom_handler.py:223 bp/scene/templates/scene/repository.html:82
 msgid "Citations"
 msgstr "Viittaukset"
 
-#: bl/gramps/xml_dom_handler.py:232 bp/dupsearch/templates/compare.html:197
+#: bl/gramps/xml_dom_handler.py:227 bp/dupsearch/templates/compare.html:201
 #: bp/dupsearch/templates/compare2.html:196
 #: bp/scene/templates/scene/person.html:248
 #: bp/scene/templates/scene/persons_list.html:78
@@ -315,7 +311,7 @@ msgstr "Viittaukset"
 msgid "Events"
 msgstr "Tapahtumat"
 
-#: bl/gramps/xml_dom_handler.py:236 bp/dupsearch/templates/compare.html:192
+#: bl/gramps/xml_dom_handler.py:231 bp/dupsearch/templates/compare.html:196
 #: bp/dupsearch/templates/compare2.html:191
 #: bp/scene/templates/scene/hx-person/famtree.html:4
 #: bp/scene/templates/scene/hx-person/famtree.html:11
@@ -324,53 +320,43 @@ msgstr "Tapahtumat"
 msgid "Families"
 msgstr "Perheet"
 
-#: bl/gramps/xml_dom_handler.py:240
+#: bl/gramps/xml_dom_handler.py:235
 #: bp/gramps/templates/gramps/scripting.html:38
 #: bp/scene/templates/scene/event_vue.html:82
 msgid "Media"
 msgstr "Mediat"
 
-#: bl/gramps/xml_dom_handler.py:244 bp/scene/templates/scene/family.html:122
+#: bl/gramps/xml_dom_handler.py:239 bp/scene/templates/scene/family.html:122
 #: bp/scene/templates/scene/place.html:95
 #: bp/scene/templates/scene/repository.html:37
 #: bp/scene/templates/scene/source.html:71
 msgid "Notes"
 msgstr "Lisätiedot"
 
-#: bl/gramps/xml_dom_handler.py:248
+#: bl/gramps/xml_dom_handler.py:243
 msgid "People"
 msgstr "Henkilöitä"
 
-#: bl/gramps/xml_dom_handler.py:254 bp/gedcom/transforms/places.py:30
+#: bl/gramps/xml_dom_handler.py:249 bp/gedcom/transforms/places.py:30
 #: bp/scene/templates/scene/macros.html:67
 #: bp/scene/templates/scene/places.html:3
 msgid "Places"
 msgstr "Paikat"
 
-#: bl/gramps/xml_dom_handler.py:258 templates/cite_sour_repo.html:55
+#: bl/gramps/xml_dom_handler.py:253 bp/scene/templates/scene/macros.html:71
+#: templates/cite_sour_repo.html:55
 msgid "Repositories"
 msgstr "Arkistot"
 
-#: bl/gramps/xml_dom_handler.py:262 bp/scene/templates/scene/family.html:77
-#: bp/scene/templates/scene/macros.html:71
+#: bl/gramps/xml_dom_handler.py:257 bp/scene/templates/scene/family.html:77
+#: bp/scene/templates/scene/macros.html:75
+#: bp/scene/templates/scene/repositories.html:3
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:39
 #: templates/repo_sources.html:38
 msgid "Sources"
 msgstr "Lähteet"
 
-#: bl/gramps/xml_dom_handler.py:1041 bp/gedcom/transforms/dates.py:33
-msgid "Dates"
-msgstr "Päivämäärät"
-
-#: bl/gramps/xml_dom_handler.py:1043
-msgid "Family sorting names"
-msgstr "Perheiden lajitteluavaimet"
-
-#: bl/gramps/xml_dom_handler.py:1074
-msgid "Person sorting names"
-msgstr "Henkilöiden lajitteluavaimet"
-
-#: bl/gramps/xml_dom_handler.py:1092
+#: bl/gramps/xml_dom_handler.py:1066
 msgid "Estimated lifetimes"
 msgstr "Elinaika-arviot"
 
@@ -568,24 +554,24 @@ msgstr "Ei poistettavia tyhjiä eriä"
 msgid "Estimated {} person lifetimes"
 msgstr "Arvioitu elinaika {} henkilölle"
 
-#: bp/admin/routes.py:252
+#: bp/admin/routes.py:250
 msgid "Isotammi user approved"
 msgstr "Isotammen käyttäjätunnus hyväksytty"
 
-#: bp/admin/routes.py:253
+#: bp/admin/routes.py:251
 msgid "You are now approved to use Isotammi at {server} with user name {user}."
 msgstr "Käyttäjätunnuksesi {user} on nyt hyväksytty {server}-palveluun."
 
-#: bp/admin/routes.py:259
+#: bp/admin/routes.py:257
 msgid "User updated"
 msgstr "Käyttäjätiedot päivitetty"
 
-#: bp/admin/routes.py:343
+#: bp/admin/routes.py:341
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr "Tuonti tiedostosta %(i)s on alkanut."
 
-#: bp/admin/routes.py:385
+#: bp/admin/routes.py:383
 msgid "File not found"
 msgstr "Aineistoa ei ole"
 
@@ -634,7 +620,7 @@ msgstr "Käyttäjä"
 #: bp/dupsearch/templates/dupsearch.html:30
 #: bp/gramps/templates/gramps/details.html:66
 #: bp/gramps/templates/gramps/uploads.html:117
-#: bp/gramps/templates/gramps/uploads.html:165
+#: bp/gramps/templates/gramps/uploads.html:166
 #: bp/scene/templates/scene/details_batch.html:109
 #: bp/scene/templates/scene/details_common.html:45
 msgid "Batch"
@@ -1023,6 +1009,7 @@ msgstr "Aika"
 #: bp/scene/templates/scene/details_batch.html:153
 #: bp/scene/templates/scene/details_batch.html:177
 #: bp/scene/templates/scene/place.html:161
+#: bp/scene/templates/scene/repositories.html:48
 #: bp/scene/templates/scene/repository.html:32 templates/cite_sour_repo.html:15
 #: templates/cite_sour_repo.html:59 templates/repo_sources.html:19
 msgid "Type"
@@ -1044,7 +1031,7 @@ msgstr "Uudemmat tapahtumat"
 #: bp/audit/templates/audit/pick_auditing.html:169
 #: bp/gramps/templates/gramps/details.html:179
 #: bp/gramps/templates/gramps/scripting.html:78
-#: bp/gramps/templates/gramps/uploads.html:237
+#: bp/gramps/templates/gramps/uploads.html:238
 msgid "Back"
 msgstr "Takaisin"
 
@@ -1083,7 +1070,7 @@ msgstr "Tyyppi / kuvaus"
 #: bp/admin/templates/admin/uploads.html:34
 #: bp/audit/templates/audit/batches.html:36
 #: bp/audit/templates/audit/pick_auditing.html:81
-#: bp/gramps/templates/gramps/uploads.html:168
+#: bp/gramps/templates/gramps/uploads.html:169
 #: bp/scene/templates/scene/details_common.html:47
 #: bp/start/templates/start/my_settings.html:122
 #: bp/start/templates/start/s_macros.html:75
@@ -1206,7 +1193,7 @@ msgid "Total <b>%(tot)s</b> objects"
 msgstr "Yhteensä <b>%(tot)s</b> kohdetta"
 
 #: bp/audit/templates/audit/approvals.html:72
-#: bp/gramps/templates/gramps/uploads.html:223
+#: bp/gramps/templates/gramps/uploads.html:224
 #: bp/refplace_editor/templates/refplace_editor.html:3
 msgid "Auditor"
 msgstr "Tarkastaja"
@@ -1251,7 +1238,7 @@ msgstr "Aineiston laatu"
 #: bp/audit/templates/audit/batches.html:37
 #: bp/audit/templates/audit/pick_auditing.html:123
 #: bp/gramps/templates/gramps/details.html:81
-#: bp/gramps/templates/gramps/uploads.html:166
+#: bp/gramps/templates/gramps/uploads.html:167
 #: bp/scene/templates/scene/details_batch.html:95
 msgid "Gramps file"
 msgstr "Gramps-tiedosto"
@@ -1376,7 +1363,7 @@ msgid "Current auditors"
 msgstr "Tarkastajat"
 
 #: bp/audit/templates/audit/pick_auditing.html:115
-#: bp/gramps/templates/gramps/uploads.html:226
+#: bp/gramps/templates/gramps/uploads.html:227
 msgid "Duration of audition"
 msgstr "Tarkastuksen aikaväli"
 
@@ -1413,7 +1400,7 @@ msgid "Upload log"
 msgstr "Latausloki"
 
 #: bp/audit/templates/audit/pick_auditing.html:176
-#: bp/gramps/templates/gramps/uploads.html:181
+#: bp/gramps/templates/gramps/uploads.html:182
 #: bp/scene/templates/scene/details_common.html:61
 msgid "Browse this material"
 msgstr "Selaa aineistoa"
@@ -1596,19 +1583,19 @@ msgstr "Talleta aineistojasi tästä"
 msgid "Set white list"
 msgstr "Aseta sallitut koodit"
 
-#: bp/dupsearch/routes.py:210 bp/dupsearch/routes.py:299 ui/jinja_filters.py:85
+#: bp/dupsearch/routes.py:213 bp/dupsearch/routes.py:302 ui/jinja_filters.py:85
 msgid "Birth"
 msgstr "syntymä"
 
-#: bp/dupsearch/routes.py:211 bp/dupsearch/routes.py:300 ui/jinja_filters.py:84
+#: bp/dupsearch/routes.py:214 bp/dupsearch/routes.py:303 ui/jinja_filters.py:84
 msgid "Baptism"
 msgstr "kaste"
 
-#: bp/dupsearch/routes.py:212 bp/dupsearch/routes.py:301 ui/jinja_filters.py:91
+#: bp/dupsearch/routes.py:215 bp/dupsearch/routes.py:304 ui/jinja_filters.py:91
 msgid "Death"
 msgstr "kuolema"
 
-#: bp/dupsearch/routes.py:213 bp/dupsearch/routes.py:302 ui/jinja_filters.py:86
+#: bp/dupsearch/routes.py:216 bp/dupsearch/routes.py:305 ui/jinja_filters.py:86
 msgid "Burial"
 msgstr "hautaus"
 
@@ -1621,13 +1608,13 @@ msgstr "Vertaa mahdollisia kaksoiskappaleita"
 
 #: bp/dupsearch/templates/compare.html:97
 #: bp/dupsearch/templates/compare2.html:97
-#: bp/gramps/templates/gramps/scripting.html:32 bp/scene/routes.py:1045
+#: bp/gramps/templates/gramps/scripting.html:32 bp/scene/routes.py:1012
 #: bp/scene/templates/scene/families.html:137
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/hx-person/famtree.html:17
 #: bp/scene/templates/scene/hx-person/famtree.html:58
 #: bp/scene/templates/scene/hx-person/famtree.html:60
-#: bp/scene/templates/scene/macros.html:285
+#: bp/scene/templates/scene/macros.html:289
 #: bp/scene/templates/scene/source.html:124 ui/jinja_filters.py:98
 #: ui/jinja_filters.py:136
 msgid "Family"
@@ -1650,7 +1637,7 @@ msgid "Wife"
 msgstr "Vaimo"
 
 #: bp/dupsearch/templates/compare.html:105
-#: bp/dupsearch/templates/compare2.html:105 bp/scene/routes.py:1045
+#: bp/dupsearch/templates/compare2.html:105 bp/scene/routes.py:1012
 #: bp/scene/templates/scene/families.html:141
 #: bp/scene/templates/scene/family.html:99
 #: bp/scene/templates/scene/hx-person/famtree.html:25
@@ -1678,13 +1665,13 @@ msgstr "tunnus"
 msgid "iid"
 msgstr "isotammi-id"
 
-#: bp/dupsearch/templates/compare.html:183
+#: bp/dupsearch/templates/compare.html:185
 #: bp/dupsearch/templates/compare2.html:183
 #: bp/scene/templates/scene/person.html:128
 msgid "Names"
 msgstr "Nimet"
 
-#: bp/dupsearch/templates/compare.html:187
+#: bp/dupsearch/templates/compare.html:191
 #: bp/dupsearch/templates/compare2.html:186
 msgid "Parents"
 msgstr "Vanhemmat"
@@ -1957,7 +1944,8 @@ msgstr "Tyyppiä ei tueta: "
 #: bp/scene/templates/scene/person_search_result.html:28
 #: bp/scene/templates/scene/persons_list.html:89
 #: bp/scene/templates/scene/places.html:89
-#: bp/scene/templates/scene/sources.html:64
+#: bp/scene/templates/scene/repositories.html:60
+#: bp/scene/templates/scene/sources.html:63
 msgid "Back to Top"
 msgstr "Palaa alkuun"
 
@@ -2206,6 +2194,10 @@ msgstr "Valitse kaikki"
 #: bp/gedcom/transforms/citationsinnotes.py:136
 msgid "Citations in notes"
 msgstr "Lähdeviitteet lisätiedoissa"
+
+#: bp/gedcom/transforms/dates.py:33
+msgid "Dates"
+msgstr "Päivämäärät"
 
 #: bp/gedcom/transforms/dates.py:34
 msgid "Correct some invalid date formats"
@@ -2547,19 +2539,19 @@ msgstr "Aineiston %(batch_id)s poistaminen ei onnistunut"
 msgid "Batch %(batch_id)s has been deleted, %(n)s nodes"
 msgstr "Aineisto %(batch_id)s on poistettu (%(n)s kohdetta)"
 
-#: bp/gramps/routes.py:499
+#: bp/gramps/routes.py:500
 msgid "Failed to retrieve commands"
 msgstr "Komentoja ei saatu esiin"
 
-#: bp/gramps/routes.py:565 bp/scene/routes.py:1570
+#: bp/gramps/routes.py:566 bp/scene/routes.py:1569
 msgid "ERROR: Update did not succeed: "
 msgstr "VIRHE: Päivitys ei onnistunut: "
 
-#: bp/gramps/routes.py:567 bp/scene/routes.py:1572
+#: bp/gramps/routes.py:568 bp/scene/routes.py:1571
 msgid "Updated"
 msgstr "Päivitetty"
 
-#: bp/gramps/routes.py:581
+#: bp/gramps/routes.py:582
 msgid "Scripting tool is not enabled"
 msgstr "Scripting tool ei ole käytettävissä"
 
@@ -2701,8 +2693,8 @@ msgid "Scope"
 msgstr "Rajaus"
 
 #: bp/gramps/templates/gramps/scripting.html:31
-#: bp/scene/templates/scene/macros.html:214
-#: bp/scene/templates/scene/macros.html:249
+#: bp/scene/templates/scene/macros.html:218
+#: bp/scene/templates/scene/macros.html:253
 #: bp/scene/templates/scene/person_search_result.html:17
 #: bp/scene/templates/scene/person_search_result.html:35
 #: bp/scene/templates/scene/persons_list.html:77
@@ -2742,16 +2734,17 @@ msgstr "viite"
 #: bp/scene/templates/scene/repository.html:81
 #: bp/scene/templates/scene/repository.html:92
 #: bp/scene/templates/scene/source.html:22
-#: bp/scene/templates/scene/sources.html:73
-#: bp/scene/templates/scene/sources.html:75
+#: bp/scene/templates/scene/sources.html:72
+#: bp/scene/templates/scene/sources.html:74
 msgid "Source"
 msgstr "Lähde"
 
 #: bp/gramps/templates/gramps/scripting.html:37
+#: bp/scene/templates/scene/repositories.html:69
 #: bp/scene/templates/scene/repository.html:23
 #: bp/scene/templates/scene/source.html:38
-#: bp/scene/templates/scene/sources.html:88
-#: bp/scene/templates/scene/sources.html:94 templates/repo_sources.html:8
+#: bp/scene/templates/scene/sources.html:87
+#: bp/scene/templates/scene/sources.html:93 templates/repo_sources.html:8
 msgid "Repository"
 msgstr "Arkisto"
 
@@ -2808,17 +2801,17 @@ msgstr "Tuo uusi Gramps-tiedosto"
 msgid "Send to database"
 msgstr "Vie tietokantaan"
 
-#: bp/gramps/templates/gramps/uploads.html:156
+#: bp/gramps/templates/gramps/uploads.html:157
 msgid ""
 "Select Gramps XML File (*.gramps etc) for converting to your candidate "
 "material"
 msgstr "Valitse Gramps-tiedosto (.gramps tai .gpkg) tutkijan aineistoksi"
 
-#: bp/gramps/templates/gramps/uploads.html:167
+#: bp/gramps/templates/gramps/uploads.html:168
 msgid "Person count"
 msgstr "Henkilöitä"
 
-#: bp/gramps/templates/gramps/uploads.html:185
+#: bp/gramps/templates/gramps/uploads.html:186
 msgid "Details and operations"
 msgstr "Lisätietoja ja toimintoja"
 
@@ -2863,15 +2856,15 @@ msgstr "Ei tapahtumia"
 msgid "Self"
 msgstr "Itse"
 
-#: bp/scene/routes.py:1035
+#: bp/scene/routes.py:1002
 msgid "No families"
 msgstr "Ei perheitä"
 
-#: bp/scene/routes.py:1241 bp/scene/routes.py:1322
+#: bp/scene/routes.py:1208 bp/scene/routes.py:1321
 msgid "No objects found"
 msgstr "Ei kohteita"
 
-#: bp/scene/routes.py:1658
+#: bp/scene/routes.py:1657
 msgid "No previous comments"
 msgstr "Ei aiempia kommentteja"
 
@@ -2882,7 +2875,7 @@ msgstr "Keskusteluaiheet"
 
 #: bp/scene/templates/scene/comments.html:19
 #: bp/scene/templates/scene/comments.html:34
-#: bp/scene/templates/scene/macros.html:86
+#: bp/scene/templates/scene/macros.html:90
 msgid "Discussions"
 msgstr "Keskustelut"
 
@@ -2939,7 +2932,7 @@ msgstr "Ei \"%(name)s\"-alkuisia kommentteja"
 
 #: bp/scene/templates/scene/comments.html:100
 #: bp/scene/templates/scene/families.html:198
-#: bp/scene/templates/scene/macros.html:114
+#: bp/scene/templates/scene/macros.html:118
 #: bp/scene/templates/scene/medias.html:126
 #: bp/scene/templates/scene/persons_list.html:145
 msgid "first page"
@@ -3098,6 +3091,7 @@ msgstr "Sivun yläreunaan"
 #: bp/scene/templates/scene/persons_list.html:67
 #: bp/scene/templates/scene/places.html:65
 #: bp/scene/templates/scene/places.html:66
+#: bp/scene/templates/scene/repositories.html:34
 #: bp/scene/templates/scene/sources.html:44
 msgid "Alphabetical Menu"
 msgstr "Aakkosvalikko"
@@ -3176,90 +3170,90 @@ msgstr "Oletusnimen mukainen henkilöluettelo"
 msgid "Persons"
 msgstr "Henkilöt"
 
-#: bp/scene/templates/scene/macros.html:75
+#: bp/scene/templates/scene/macros.html:79
 msgid "Thumbnails"
 msgstr "Pienoiskuvat"
 
-#: bp/scene/templates/scene/macros.html:75
+#: bp/scene/templates/scene/macros.html:79
 msgid "Pictures"
 msgstr "Kuvat ja mediat"
 
-#: bp/scene/templates/scene/macros.html:80
+#: bp/scene/templates/scene/macros.html:84
 msgid "Material details and actions"
 msgstr "Aineiston tiedot ja toiminnot"
 
-#: bp/scene/templates/scene/macros.html:80
+#: bp/scene/templates/scene/macros.html:84
 msgid "Material details"
 msgstr "Aineiston tiedot"
 
-#: bp/scene/templates/scene/macros.html:91
+#: bp/scene/templates/scene/macros.html:95
 msgid "Get more info"
 msgstr "Katso lisätietoja"
 
-#: bp/scene/templates/scene/macros.html:91
+#: bp/scene/templates/scene/macros.html:95
 msgid "Log in to Isotammi"
 msgstr "Kirjaudu sisään"
 
-#: bp/scene/templates/scene/macros.html:118
+#: bp/scene/templates/scene/macros.html:122
 msgid "previous page"
 msgstr "edellinen sivu"
 
-#: bp/scene/templates/scene/macros.html:126
+#: bp/scene/templates/scene/macros.html:130
 msgid "no next page"
 msgstr "ei seuraavaa sivua"
 
-#: bp/scene/templates/scene/macros.html:132
+#: bp/scene/templates/scene/macros.html:136
 msgid "next page starting"
 msgstr "seuraava sivu alkaen"
 
-#: bp/scene/templates/scene/macros.html:153
+#: bp/scene/templates/scene/macros.html:157
 msgid "latest change time and contributor"
 msgstr "viimeisin muutoshetki ja alkuperäisen tiedon antaja"
 
-#: bp/scene/templates/scene/macros.html:155
+#: bp/scene/templates/scene/macros.html:159
 msgid "edited"
 msgstr "muokattu"
 
-#: bp/scene/templates/scene/macros.html:158
+#: bp/scene/templates/scene/macros.html:162
 msgid "origin from"
 msgstr "alkuperä"
 
-#: bp/scene/templates/scene/macros.html:158
+#: bp/scene/templates/scene/macros.html:162
 msgid ", material"
 msgstr ", aineisto"
 
-#: bp/scene/templates/scene/macros.html:159
+#: bp/scene/templates/scene/macros.html:163
 #: bp/stat/templates/stat/layout.html:43
 msgid "User data"
 msgstr "Omia tietoja"
 
-#: bp/scene/templates/scene/macros.html:171
+#: bp/scene/templates/scene/macros.html:175
 #, python-format
 msgid ", origin from material batch %(root)s"
 msgstr ", alkuperäinen aineisto %(root)s"
 
-#: bp/scene/templates/scene/macros.html:239
+#: bp/scene/templates/scene/macros.html:243
 msgid "See Person's Details"
 msgstr "katso henkilön tiedot"
 
 #: bp/scene/templates/scene/hx-person/famtree.html:40
-#: bp/scene/templates/scene/macros.html:246
+#: bp/scene/templates/scene/macros.html:250
 msgid "self"
 msgstr "itse"
 
-#: bp/scene/templates/scene/macros.html:252
+#: bp/scene/templates/scene/macros.html:256
 msgid "Anonymous"
 msgstr "nimetön"
 
-#: bp/scene/templates/scene/macros.html:269
+#: bp/scene/templates/scene/macros.html:273
 msgid "born"
 msgstr "s."
 
-#: bp/scene/templates/scene/macros.html:271
+#: bp/scene/templates/scene/macros.html:275
 msgid "died"
 msgstr "k."
 
-#: bp/scene/templates/scene/macros.html:355
+#: bp/scene/templates/scene/macros.html:359
 msgid "Copy to clipboard"
 msgstr "Kopioi leikepöydälle"
 
@@ -3290,7 +3284,7 @@ msgstr "Näytä suurena"
 #: bp/scene/templates/scene/media.html:96
 #: bp/scene/templates/scene/medias.html:77
 #: bp/scene/templates/scene/places.html:78
-#: bp/scene/templates/scene/sources.html:55 templates/cite_sour_repo.html:25
+#: bp/scene/templates/scene/sources.html:54 templates/cite_sour_repo.html:25
 msgid "References"
 msgstr "Viittauksia"
 
@@ -3396,6 +3390,7 @@ msgstr "Henkilön tiedot"
 #: bp/scene/templates/scene/person_search_result.html:3
 #: bp/scene/templates/scene/place.html:62
 #: bp/scene/templates/scene/places.html:59
+#: bp/scene/templates/scene/repositories.html:30
 #: bp/scene/templates/scene/sources.html:40
 msgid "Top"
 msgstr "Ylös"
@@ -3711,6 +3706,36 @@ msgstr "Paikkaan ei ole viittauksia: %(title)s"
 msgid "No places found"
 msgstr "Ei paikkoja"
 
+#: bp/scene/templates/scene/repositories.html:14
+#: templates/obsolete_ng_table_repositories.html:10
+msgid "List of Repositories"
+msgstr "Arkistot"
+
+#: bp/scene/templates/scene/repositories.html:23
+, python-format
+msgid "This page contains a directory of %(num)s repositories."
+msgstr "Tällä sivulla näytetään %(num)s arkistoa."
+
+#: bp/scene/templates/scene/repositories.html:49
+msgid "Repository, notes"
+msgstr "Arkisto, lisätiedot"
+
+#: bp/scene/templates/scene/repositories.html:50
+msgid "Mediums"
+msgstr "Aineistomuodot"
+
+#: bp/scene/templates/scene/repositories.html:51
+msgid "Sources in this repository"
+msgstr "Lähteet tässä arkistossa"
+
+#: bp/scene/templates/scene/repositories.html:51
+msgid "Number of Sources"
+msgstr "Lähteitä"
+
+#: bp/scene/templates/scene/repositories.html:85
+msgid "No repositories found"
+msgstr "Ei arkistoja"
+
 #: bp/scene/templates/scene/repository.html:3
 msgid "Repository and Sources"
 msgstr "Arkisto ja lähteet"
@@ -3812,18 +3837,18 @@ msgid "Source, notes"
 msgstr "Lähde, lisätiedot"
 
 #: bp/scene/templates/scene/sources.html:53
-msgid "Media in the repository"
-msgstr "Muoto arkistossa"
+msgid "Media and Repository"
+msgstr "Arkisto ja sen tyyppi"
 
-#: bp/scene/templates/scene/sources.html:55
+#: bp/scene/templates/scene/sources.html:54
 msgid "events, persons, etc., referred from"
 msgstr "viittauksia tapahtumista, henkilöistä jne."
 
-#: bp/scene/templates/scene/sources.html:73
+#: bp/scene/templates/scene/sources.html:72
 msgid "unused"
 msgstr "ei käytetä"
 
-#: bp/scene/templates/scene/sources.html:102
+#: bp/scene/templates/scene/sources.html:101
 msgid "No sources found"
 msgstr "Ei lähteitä"
 
@@ -4508,7 +4533,7 @@ msgstr ""
 msgid "Isotammi-IDs"
 msgstr ""
 
-#: pe/neo4j/updateservice.py:1580
+#: pe/neo4j/updateservice.py:1566
 msgid "Could not save a comment"
 msgstr "Kommentin tallettaminen ei onnistunut"
 
@@ -4723,10 +4748,6 @@ msgstr "Luettu tiedosto"
 #: templates/ladattu2.html:8
 msgid "Would display  statistics"
 msgstr "Näytettäisiin tilastoa"
-
-#: templates/obsolete_ng_table_repositories.html:10
-msgid "List of Repositories"
-msgstr "Arkistot"
 
 #: templates/obsolete_ng_table_repositories.html:11
 msgid "Showing repositories"
