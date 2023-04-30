@@ -1030,7 +1030,7 @@ class DOM_handler:
         message = f"{len(self.person_ids)} Person refnames & sortnames"
         #print(f"***** {message} *****")
 
-        #t0 = time.time()
+        t9 = time.time()
         refname_count = 0
         sortname_count = 0
         if len(person_ids) == 0:
@@ -1047,6 +1047,7 @@ class DOM_handler:
                 refname_count += res.get("refnames")
                 sortname_count += res.get("sortnames")
 
+        print(f"#bl.gramps.xml_dom_handler.DOM_handler.set_person_calculated_attributes: {time.time()-t9:.3f} seconds")
         return {"status": status, "message": message}
 
     def set_person_estimated_dates(self, person_ids):
@@ -1058,14 +1059,12 @@ class DOM_handler:
         status = Status.OK
         #message = f"{len(self.person_ids)} Estimated lifetimes"
         #print(f"***** {message} *****")
-        #t0 = time.time()
+        t9 = time.time()
         res = self.person_service.set_people_lifetime_estimates(person_ids)
 
         count = res.get("count")
         message = _("Estimated lifetimes")
-        # self.blog.log_event(
-        #     {"title": message, "count": count, "elapsed": time.time() - t0}
-        # )
+        print(f"#bl.gramps.xml_dom_handler.DOM_handler.set_person_estimated_dates: {time.time()-t9:.3f} seconds")
         return {"status": status, "message": f"{message}, {count} changed"}
 
     def set_person_confidence_values(self, person_ids):
@@ -1075,19 +1074,13 @@ class DOM_handler:
         """
         message = f"{len(person_ids)} Person confidence values"
         #print(f"***** {message} *****")
-        t0 = time.time()
+        t9 = time.time()
 
         res = self.person_service.update_person_confidences(person_ids)
         status = res.get("status")
         count = res.get("count", 0)
         if status == Status.OK or status == Status.UPDATED:
-            # self.blog.log_event(
-            #     {
-            #         "title": "Confidences set",
-            #         "count": count,
-            #         "elapsed": time.time() - t0,
-            #     }
-            # )
+            print(f"#bl.gramps.xml_dom_handler.DOM_handler.set_person_confidence_values: {time.time()-t9:.3f} seconds")
             return {"status": status, "message": f"{message}, {count} changed"}
         else:
             msg = res.get("statustext")
@@ -1095,7 +1088,7 @@ class DOM_handler:
                 {
                     "title": "Confidences not set",
                     "count": count,
-                    "elapsed": time.time() - t0,
+                    "elapsed": time.time() - t9,
                     "level": "ERROR",
                 }
             )

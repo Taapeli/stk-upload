@@ -54,7 +54,7 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 # ====== Database schema ======
 # Change (increment) this, if schema must be updated
 # The value is also stored in each Root node
-DB_SCHEMA_VERSION = '2022.1.8'
+DB_SCHEMA_VERSION = '2022.1.9'
 # =============================
 
 
@@ -104,7 +104,8 @@ def initialize_db():
             "Repository":{"iid", "handle"},
             "Source":{"iid", "handle"},
             "Role":{"name"},
-            "User":{"email", "username"}
+            "User":{"email", "username"},
+            "Refname":{"name"},
         }
         check_constraints(constr_list)
 
