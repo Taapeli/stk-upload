@@ -28,7 +28,7 @@ from neo4j.exceptions import ClientError
 logger = logging.getLogger("stkserver")
 from datetime import date  # , datetime
 
-from bl.base import Status, IsotammiException, NodeObject
+from bl.base import Status, IsotammiException #, NodeObject
 from bl.dates import DateRange, DR
 from bl.person_name import Name
 from bl.place import PlaceBl

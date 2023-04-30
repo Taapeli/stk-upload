@@ -62,6 +62,34 @@ class RepositoryReader(DataService):
             else:
                 self.use_user = u_context.user
 
+    def get_repo_list(self):
+        """Get junk of Repository objects for Repositories list."""
+        context = self.user_context
+        fw = context.first  # From here forward
+        use_user = context.batch_user()
+        args = {"user": use_user, "fw": fw, "count": context.count}
+        args['material'] = context.material
+        try:
+            repos = self.dataservice.dr_get_repo_list_fw(args)
+            # results = {'sources':sources,'status':Status.OK}
+
+            # Update the page scope according to items really found
+            if repos:
+                context.update_session_scope(
+                    "source_scope",
+                    repos[0].rname,
+                    repos[-1].rname,
+                    context.count,
+                    len(repos),
+                )
+            else:
+                return {"items": [], "status": Status.NOT_FOUND}
+
+            results = {"items": repos, "status": Status.OK}
+        except Exception as e:
+            results = {"status": Status.ERROR, "statustext": f"Repository list: {e}"}
+        return results
+
     def get_repository_sources(self, iid, u_context):
         """Read the repository and referencing sources.
 
