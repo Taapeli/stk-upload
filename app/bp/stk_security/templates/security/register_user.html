@@ -3,8 +3,33 @@
 {% from "security/_macros.html" import render_field_with_errors, render_field %}  
 {% block title %}{{ _('Registration') }}{% endblock %} 
 {% block body %} 
-{{ super() }}  
+{{ super() }}
   
+ <style>
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 540px;
+  background-color: black;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+</style> 
 	 
 <div style="margin-left:50px; padding-bottom: 2em;"> 
   <div> 
@@ -25,7 +50,7 @@
                 {% include "security/_menu.html" %} 
        </div>
 
-       <div class="startbox"> 
+       <div class="startbox2"> 
           <h2>{{ _('My User Properties') }}</h2> 
 		     <form action="{{ url_for_security('register') }}" 
 		           method="POST" name="register_user_form"> 
@@ -33,10 +58,17 @@
 				  {{ register_user_form.hidden_tag() }} 
 				  {{ render_field_with_errors(register_user_form.email) }} 
                   {{ render_field_with_errors(register_user_form.name) }} 
-                  <p>{{ _('Define a username and password for you') }}:</p>
+                  <p>{{ _('Define a username and password for you') }}:
+                    <span class="tooltip"><font size=4>&#x1F6C8;</font> 
+                      <span class="tooltiptext">{{ _("Userid of length 6 to 20 characters can include upper an lower case alphabets. "
+                        "numbers, characters '-' and '_'. It must start with an alphabet."
+                        "&#x0a;Password length must be between 8 and 20 characters.") }}</span>
+                    </span>
+                  </p> 	                  
                   {{ render_field_with_errors(register_user_form.username) }} 
-                  {{ render_field_with_errors(register_user_form.password) }} 
-				 
+                  {{ render_field_with_errors(register_user_form.password) }}
+                   
+			 
 				  {% if register_user_form.password_confirm %} 
 				    {{ render_field_with_errors(register_user_form.password_confirm) }} 
 				  {% endif %} 
