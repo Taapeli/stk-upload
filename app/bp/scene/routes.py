@@ -1233,8 +1233,14 @@ def show_source_page(iid:str):
                         m.id += " + "+n.id
                         m.iid += " + "+n.iid
                         n.show = False
-                show = "+" if n.show else "-"
-                print(f'{show}     {c.id} > {n.id} {n.url} "{n.text}"')
+                show = "# citation" if n.show else "# hide"
+                print(f'{show} {c.id} > {n.id} {n.url} "{n.text}"')
+        else:
+            if c.page.startswith("http"):
+                # Add new field c.url, if no c.notes exists
+                c.url = c.page
+                c.page = ""
+                print (f"# citation (no note.url) {c.id} url={c.url}")
 
     return render_template(
         "/scene/source.html",
