@@ -375,7 +375,7 @@
             {% endif %}
         {% endfor %}
     {% else %}
-    	{% if cita.url.startswith("http") %}{# Url extracted from cita.page #}
+    	{% if cita.url and cita.url.startswith("http") %}{# Url extracted from cita.page #}
     		{% set ns.url = "; URL: " + cita.url %}
     		{% if "hiski.genealogia.fi" in cita.url %}
 	    		{% set p = cita.url.split("+t") %}
