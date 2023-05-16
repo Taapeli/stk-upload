@@ -11,13 +11,13 @@
 .tooltip {
   position: relative;
   display: inline-block;
-  background-color: DarkGray;
+  background-color: #1cb31c; /* A lighter green */
   color: white;
   padding: 0 2pt;
   border-radius: 7pt;
 }
-input#agree { position:relative; left:5em; }
-
+input#agree { position: relative; left: 7em; }
+form > ul > li {color: red; }
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 35em;
@@ -76,15 +76,15 @@ input#agree { position:relative; left:5em; }
                   {{ render_field_with_errors(register_user_form.password) }}
                    
 			 
-			{% if register_user_form.password_confirm %}
-                  <p>{{ _("Read the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>") }}:</p>
-				  	{{ _("I agree to the terms_of_use") }}"
-				    {{ render_field_with_errors(register_user_form.password_confirm) }} 
-				  </p>
-                  {{ render_field_with_errors(register_user_form.agree) }}
-			{% endif %} 
-
+				  {% if register_user_form.password_confirm %}
+				  <div id="agree-block">
+				    {{ render_field_with_errors(register_user_form.password_confirm) }}
+				  </div>
+				  {% endif %} 
 				  <input type=hidden name=language value={{ session.lang }}>
+				  {# render_field(register_user_form.terms) #} 
+ 
+                  {{ render_field_with_errors(register_user_form.agree) }} 
                   <div class="right-button">
 				    {{ render_field(register_user_form.submit) }}
 				  </div>

@@ -152,7 +152,7 @@ msgstr "Salasana on väärän pituinen. Katso 'i' info."
 
 #: setups.py:246
 msgid "Please indicate that you have read and agree to the Terms of Use"
-msgstr "Olen lukenut ja hyväksynyt käyttöehdot"
+msgstr "Ole hyvä rastita, että olet lukenut ja hyväksynyt käyttöehdot"
 
 #: bp/admin/forms.py:59 bp/start/templates/start/join.html:55 setups.py:295
 msgid "User name"
