@@ -44,6 +44,7 @@ import email_validator
 #from email_validator import EmailSyntaxError
 
 from ui import jinja_filters
+from flask import Markup
 from wtforms import SelectField, SubmitField, BooleanField
 
 from pe.neo4j.neo4jengine import Neo4jEngine
@@ -202,11 +203,12 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
     email = StringField(_l('Email address'), validators=[Required(_('Email required'))])
     password = PasswordField(_l('Password'),
                              validators=[Required(_('Password required'))])
-    agree = BooleanField( LazyFormat(_("I have read and agree to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"),
+    
+    agree = BooleanField( Markup(LazyFormat(_("I have read and agree to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"),
                                   terms_of_use_url=_("http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"),
                                   terms_of_use=_("Terms of use"), 
                                   validators=[Required(_('Agreement required'))]
-                        ))
+                        )))
     submit = SubmitField(_l('Register'))
     
 
@@ -222,7 +224,14 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
         email = shareds.user_datastore.get_user(email)
         if email:
             raise ValidationError(_l('Email has been reserved already'))
-        
+
+    def validate_name(self, field):
+        name = field.data
+#        print(f"Name to validate '{name}'")
+        if len(name) not in range(6, 21):
+            raise ValidationError(_l('Name length not acceptable, see Info'))
+        if not re.match(r"^[A-Za-zÀ-ÖØ-öø-ÿ-]+(?:\s[A-Za-zÀ-ÖØ-öø-ÿ-]+)*$", name):
+            raise ValidationError(_l('Name has unacceptable characters'))
 
     def validate_username(self, field):
         userid = field.data
@@ -243,7 +252,7 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     def validate_agree(self, field):
         if not field.data:
-            raise ValidationError(_l('Please indicate that you have read and agree to the Terms of Use'), 'error') 
+            raise ValidationError(_('Please indicate that you have read and agree to the Terms of Use'), 'error') 
         
 #============================== Start here ====================================
 
