@@ -1220,6 +1220,7 @@ def show_source_page(iid:str):
         flash(f'{ _("Program error")}', "error")
         logger.error(msg)
 
+    # print(f'Source {res["item"].iid}, {len(res["citations"])} citations')
     for c in res['citations']:
         if hasattr(c, "notes"):
             # Check that only distinct Notes are shown
@@ -1233,14 +1234,16 @@ def show_source_page(iid:str):
                         m.id += " + "+n.id
                         m.iid += " + "+n.iid
                         n.show = False
-                show = "# citation" if n.show else "# hide"
-                print(f'{show} {c.id} > {n.id} {n.url} "{n.text}"')
+                show = "citation" if n.show else "hide"
+                print(f'##{show} {c.id} > {n.id} {n.url} "{n.text}"')
         else:
             if c.page.startswith("http"):
                 # Add new field c.url, if no c.notes exists
                 c.url = c.page
                 c.page = ""
-                print (f"# citation (no note.url) {c.id} url={c.url}")
+                print (f"##citation (no note.url) {c.id} url={c.url}")
+            else:
+                print (f"##citation (no note.url) {c.id} page='{c.page}'")
 
     return render_template(
         "/scene/source.html",
