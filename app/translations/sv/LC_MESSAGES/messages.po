@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-05-16 13:45+0300\n"
+"POT-Creation-Date: 2023-05-19 19:24+0300\n"
 "PO-Revision-Date: 2022-11-11 13:23+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -41,60 +41,57 @@ msgstr "Svenska"
 msgid "English"
 msgstr "Engelska"
 
-#: setups.py:187
+#: setups.py:188
 msgid "Email or Username"
 msgstr "Epost eller användarnamn"
 
-#: setups.py:188 setups.py:203
+#: setups.py:189 setups.py:204
 msgid "Password"
 msgstr "Lösenord"
 
-#: setups.py:190
+#: setups.py:191
 msgid "Remember Me"
 msgstr "Kom ihåg mig"
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:191
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:192
 msgid "Login"
 msgstr "Logga in"
 
-#: setups.py:197 templates/del_table_users.html:32
+#: setups.py:198 templates/del_table_users.html:32
 msgid "Username"
 msgstr "Användarnamn"
 
-#: setups.py:197
-#, fuzzy
+#: setups.py:198
 msgid "Username required"
-msgstr "Språk som krävs"
+msgstr "Användarnamn som krävs"
 
 #: bp/admin/templates/admin/list_users.html:83
 #: bp/admin/templates/admin/list_users.html:85
 #: bp/gramps/templates/gramps/scripting.html:46
-#: bp/start/templates/start/join.html:54 setups.py:198 setups.py:295
+#: bp/start/templates/start/join.html:54 setups.py:199 setups.py:304
 #: templates/del_table_users.html:33 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Namn"
 
-#: setups.py:198
-#, fuzzy
+#: setups.py:199
 msgid "Name required"
-msgstr "Språk som krävs"
+msgstr "Namn som krävs"
 
 #: bp/admin/forms.py:57 bp/admin/templates/admin/list_users.html:90
 #: bp/admin/templates/admin/list_users.html:92
-#: bp/start/templates/start/join.html:56 setups.py:202
+#: bp/start/templates/start/join.html:56 setups.py:203
 msgid "Email address"
 msgstr "Epost address"
 
-#: setups.py:202
-#, fuzzy
+#: setups.py:203
 msgid "Email required"
-msgstr "Språk som krävs"
-
-#: setups.py:204
-msgid "Password required"
-msgstr ""
+msgstr "Epost som krävs"
 
 #: setups.py:205
+msgid "Password required"
+msgstr "Lösenord som krävs"
+
+#: setups.py:207
 msgid ""
 "I have read and agree to the <a href='{terms_of_use_url}' "
 "target='esite'>{terms_of_use}</a>"
@@ -105,7 +102,7 @@ msgstr ""
 #: bp/audit/templates/audit/user_profile.html:77
 #: bp/audit/templates/audit/user_profile.html:84
 #: bp/start/templates/start/my_settings.html:78
-#: bp/start/templates/start/my_settings.html:85 setups.py:206
+#: bp/start/templates/start/my_settings.html:85 setups.py:208
 msgid "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
 msgstr "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
 
@@ -113,61 +110,67 @@ msgstr "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
 #: bp/audit/templates/audit/user_profile.html:85
 #: bp/start/templates/start/my_settings.html:75
 #: bp/start/templates/start/my_settings.html:79
-#: bp/start/templates/start/my_settings.html:86 setups.py:207
+#: bp/start/templates/start/my_settings.html:86 setups.py:209
 msgid "Terms of use"
 msgstr "Användarvillkoren"
 
-#: setups.py:208
-#, fuzzy
+#: setups.py:210
 msgid "Agreement required"
-msgstr "Språk som krävs"
+msgstr "Användarvillkoren som krävs"
 
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:210
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:212
 #: templates/index_demo.html:102 templates/index_demo.html:106
 msgid "Register"
 msgstr "Registrera"
 
-#: setups.py:219
-msgid "Email syntax is not valid"
-msgstr ""
-
 #: setups.py:221
-msgid "Email is not valid"
-msgstr ""
+msgid "Email syntax is not valid"
+msgstr "E-post har felaktig format"
 
-#: setups.py:224
+#: setups.py:223
+msgid "Email is not valid"
+msgstr "E-post måst fixas"
+
+#: setups.py:226
 msgid "Email has been reserved already"
 msgstr "Denna e-post redan reserverat"
 
-#: setups.py:231
+#: setups.py:232
+msgid "Name length not acceptable, see Info"
+msgstr ""
+
+#: setups.py:234
+msgid "Name has unacceptable characters"
+msgstr ""
+
+#: setups.py:240
 msgid "Username length not acceptable, see Info"
 msgstr ""
 
-#: setups.py:233
+#: setups.py:242
 msgid "Username has unacceptable characters or structure"
 msgstr ""
 
-#: setups.py:236
+#: setups.py:245
 msgid "Username has been reserved already"
 msgstr "Användarnamnet redan reserverat"
 
-#: setups.py:241
+#: setups.py:250
 msgid "Password length not acceptable, see Info"
 msgstr ""
 
-#: setups.py:246
-#, fuzzy
+#: setups.py:255
 msgid "Please indicate that you have read and agree to the Terms of Use"
 msgstr "Indikera att du har läst och godkänner användar vilkoren"
 
-#: bp/admin/forms.py:59 bp/start/templates/start/join.html:55 setups.py:295
+#: bp/admin/forms.py:59 bp/start/templates/start/join.html:55 setups.py:304
 msgid "User name"
 msgstr "Användar namn"
 
 #: bp/admin/forms.py:62 bp/admin/forms.py:65
 #: bp/admin/templates/admin/list_users.html:95
 #: bp/audit/templates/audit/user_profile.html:52 bp/start/forms.py:39
-#: bp/start/forms.py:43 setups.py:295
+#: bp/start/forms.py:43 setups.py:304
 msgid "Language"
 msgstr "Språk"
 
@@ -273,7 +276,6 @@ msgid "No persons found"
 msgstr "Inga personer hittades"
 
 #: bl/person_reader.py:245
-#, fuzzy
 msgid "Requested person not available"
 msgstr "Personen finns inte"
 
@@ -2593,11 +2595,11 @@ msgstr "Material %(batch_id)s har tagits bort, %(n)s noder"
 msgid "Failed to retrieve commands"
 msgstr "Det gick inte att hämta kommandon"
 
-#: bp/gramps/routes.py:566 bp/scene/routes.py:1575
+#: bp/gramps/routes.py:566 bp/scene/routes.py:1578
 msgid "ERROR: Update did not succeed: "
 msgstr "FEL: Uppdateringen fungerade inte: "
 
-#: bp/gramps/routes.py:568 bp/scene/routes.py:1577
+#: bp/gramps/routes.py:568 bp/scene/routes.py:1580
 msgid "Updated"
 msgstr "Uppdaterad"
 
@@ -2912,11 +2914,11 @@ msgstr "Själv"
 msgid "No families"
 msgstr "Inga familjer"
 
-#: bp/scene/routes.py:1208 bp/scene/routes.py:1327
+#: bp/scene/routes.py:1208 bp/scene/routes.py:1330
 msgid "No objects found"
 msgstr "Ingenting funnits"
 
-#: bp/scene/routes.py:1663
+#: bp/scene/routes.py:1666
 msgid "No previous comments"
 msgstr "Inga kommentarer"
 
@@ -3766,34 +3768,29 @@ msgid "List of Repositories"
 msgstr "Arkiv lista"
 
 #: bp/scene/templates/scene/repositories.html:23
-#, fuzzy, python-format
+#, python-format
 msgid "This page contains a directory of %(num)s repositories."
-msgstr "På sidan visasVälj serieVälj serie %(num)s källor."
+msgstr "På sidan visas %(num)s källor."
 
 #: bp/scene/templates/scene/repositories.html:44
-#, fuzzy
 msgid "Repository, notes"
-msgstr "Arkiv upplysning"
+msgstr "Arkiv, upplysning"
 
 #: bp/scene/templates/scene/repositories.html:45
-#, fuzzy
 msgid "Mediums"
-msgstr "Medium"
+msgstr "Medias"
 
 #: bp/scene/templates/scene/repositories.html:46
-#, fuzzy
 msgid "Sources in this repository"
 msgstr "Källor i det här arkivet"
 
 #: bp/scene/templates/scene/repositories.html:46
-#, fuzzy
 msgid "Number of Sources"
 msgstr "Antal källor"
 
 #: bp/scene/templates/scene/repositories.html:80
-#, fuzzy
 msgid "No repositories found"
-msgstr "Inga källor hittades"
+msgstr "Inga arkiv hittades"
 
 #: bp/scene/templates/scene/repository.html:3
 msgid "Repository and Sources"
@@ -3830,7 +3827,7 @@ msgid "Source Details"
 msgstr "Käll detaljer"
 
 #: bp/scene/templates/scene/source.html:45
-#: bp/stk_security/templates/security/register_user.html:49
+#: bp/stk_security/templates/security/register_user.html:52
 msgid "Note!"
 msgstr "Märk!"
 
@@ -3896,7 +3893,6 @@ msgid "Source, notes"
 msgstr "Källa, kompletterande uppgifter"
 
 #: bp/scene/templates/scene/sources.html:53
-#, fuzzy
 msgid "Media and Repository"
 msgstr "Medlet i arkivet"
 
@@ -4498,15 +4494,15 @@ msgstr "Kan du inte logga in?"
 msgid "Registration"
 msgstr "Registrering"
 
-#: bp/stk_security/templates/security/register_user.html:40
+#: bp/stk_security/templates/security/register_user.html:43
 msgid "Fill in the User Information Form of Isotammi database Service"
 msgstr "Fyll i användar information form av Isotammi Databasen Service"
 
-#: bp/stk_security/templates/security/register_user.html:48
+#: bp/stk_security/templates/security/register_user.html:51
 msgid "Register as an user of Isotammi Service"
 msgstr "Registrera dig som användare av Isotammi Service"
 
-#: bp/stk_security/templates/security/register_user.html:50
+#: bp/stk_security/templates/security/register_user.html:53
 #, python-format
 msgid ""
 "When you have sent this form, you must wait for mail from us and click "
@@ -4515,19 +4511,23 @@ msgstr ""
 "När du har skickat detta formulär måste du vänta på e-post från oss och "
 "klicka på länken \"%(link)s\" i meddelandet du fick. Då kan du logga in!"
 
-#: bp/stk_security/templates/security/register_user.html:53
+#: bp/stk_security/templates/security/register_user.html:56
 msgid "Other Operations"
 msgstr "Andra operationer"
 
-#: bp/stk_security/templates/security/register_user.html:58
+#: bp/stk_security/templates/security/register_user.html:61
 msgid "My User Properties"
 msgstr "Mina användaregenskaper"
 
-#: bp/stk_security/templates/security/register_user.html:65
+#: bp/stk_security/templates/security/register_user.html:68
 msgid "Define a username and password for you"
 msgstr "Definiera ett användarnamn och lösenord för dig"
 
-#: bp/stk_security/templates/security/register_user.html:67
+#: bp/stk_security/templates/security/register_user.html:69
+msgid "help"
+msgstr "hjälp"
+
+#: bp/stk_security/templates/security/register_user.html:70
 msgid ""
 "<b>Userid</b> of length 6 to 20 characters can include upper an lower "
 "case alphabets. numbers, characters '-' and '_'. It must start with an "
