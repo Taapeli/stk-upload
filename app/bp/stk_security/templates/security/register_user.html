@@ -66,7 +66,7 @@ form > ul > li {color: red; }
 				  {{ render_field_with_errors(register_user_form.email) }} 
                   {{ render_field_with_errors(register_user_form.name) }} 
                   <p>{{ _('Define a username and password for you') }}:
-                    <span class="tooltip"> &nbsp;ℹ&nbsp;
+                    <span class="tooltip"> &nbsp;{{ _("help") }}&nbsp;
                       <span class="tooltiptext">{{ _("<b>Userid</b> of length 6 to 20 characters can include upper an lower case alphabets. "
                         "numbers, characters '-' and '_'. It must start with an alphabet."
                         "<br><b>Password</b> length must be between 8 and 20 characters.") }}</span>

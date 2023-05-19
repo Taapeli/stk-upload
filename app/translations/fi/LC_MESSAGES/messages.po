@@ -136,11 +136,11 @@ msgstr "Sähköpostiosoite on jo käytössä"
 
 #: setups.py:231
 msgid "Username length not acceptable, see Info"
-msgstr "Käyttäjätunnus on väärän pituinen. Katso 'i' info."
+msgstr "Käyttäjätunnus on väärän pituinen"
 
 #: setups.py:233
 msgid "Username has unacceptable characters or structure"
-msgstr "Käyttäjätunnus ei ole kelvollinen. Katso 'i' info."
+msgstr "Käyttäjätunnus ei ole kelvollinen"
 
 #: setups.py:236
 msgid "Username has been reserved already"
@@ -148,7 +148,7 @@ msgstr "Tämä käyttäjätunnus on jo varattu"
 
 #: setups.py:241
 msgid "Password length not acceptable, see Info"
-msgstr "Salasana on väärän pituinen. Katso 'i' info."
+msgstr "Salasana on väärän pituinen"
 
 #: setups.py:246
 msgid "Please indicate that you have read and agree to the Terms of Use"
@@ -4472,6 +4472,10 @@ msgstr "Täytä käyttäjätietolomake Isotammeen"
 #: bp/stk_security/templates/security/register_user.html:48
 msgid "Register as an user of Isotammi Service"
 msgstr "Rekisteröidy Isotammen käyttäjäksi"
+
+#: bp/stk_security/templates/security/register_user.html:69
+msgid "help"
+msgstr "ohje"
 
 #: bp/stk_security/templates/security/register_user.html:50
 #, python-format

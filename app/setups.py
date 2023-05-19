@@ -252,7 +252,7 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     def validate_agree(self, field):
         if not field.data:
-            raise ValidationError(_('Please indicate that you have read and agree to the Terms of Use'), 'error') 
+            raise ValidationError(_l('Please indicate that you have read and agree to the Terms of Use'), 'error') 
         
 #============================== Start here ====================================
 
