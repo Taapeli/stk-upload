@@ -129,7 +129,7 @@ msgstr "E-post har felaktig format"
 
 #: setups.py:223
 msgid "Email is not valid"
-msgstr "E-post måst fixas"
+msgstr "E-post moste fixas"
 
 #: setups.py:226
 msgid "Email has been reserved already"
