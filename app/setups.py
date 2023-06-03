@@ -204,11 +204,17 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
     password = PasswordField(_l('Password'),
                              validators=[Required(_('Password required'))])
     
-    agree = BooleanField( Markup(LazyFormat(_("I have read and agree to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"),
-                                  terms_of_use_url=_("http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"),
-                                  terms_of_use=_("Terms of use"), 
-                                  validators=[Required(_('Agreement required'))]
-                        )))
+    # agree = BooleanField( Markup(LazyFormat(_("I have read and agree to the <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>"),
+    #                               terms_of_use_url=_("http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"),
+    #                               terms_of_use=_("Terms of use"), 
+    #                               validators=[Required(_('Agreement required'))]
+    #                     )))
+    
+    agree = BooleanField(LazyFormat(_("I have read and agree to the ") + Markup("<a href='_{terms_of_use_url}' target='esite'>{terms_of_use}</a>"),
+                                 terms_of_use_url=_("http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"),
+                                 terms_of_use=_("Terms of use"), 
+                                 validators=[Required(_('Agreement required'))]
+                       ))
     submit = SubmitField(_l('Register'))
     
 
@@ -230,7 +236,7 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 #        print(f"Name to validate '{name}'")
         if len(name) not in range(6, 21):
             raise ValidationError(_l('Name length not acceptable, see Info'))
-        if not re.match(r"^[A-Za-zÀ-ÖØ-öø-ÿ-]+(?:\s[A-Za-zÀ-ÖØ-öø-ÿ-]+)*$", name):
+        if not re.match(r"^[A-Za-zÀ-ÖØ-öø-ÿ-'š]+(?:\s[A-Za-zÀ-ÖØ-öø-ÿ-'š]+)*$", name):
             raise ValidationError(_l('Name has unacceptable characters'))
 
     def validate_username(self, field):
