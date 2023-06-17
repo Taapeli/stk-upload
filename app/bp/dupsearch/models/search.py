@@ -26,13 +26,13 @@ from bl.event import Event
 from bl.refname import Refname
 import shareds
 
-from neo4j import GraphDatabase
+# from neo4j import GraphDatabase
 from werkzeug.utils import secure_filename
 import subprocess
 from operator import itemgetter
 import functools
 import time
-from pprint import pprint
+# from pprint import pprint
 from pe.neo4j.nodereaders import EventBl_from_node
 
 # https://neo4j.com/developer/kb/fulltext-search-in-neo4j/
@@ -41,20 +41,20 @@ from pe.neo4j.nodereaders import EventBl_from_node
 #
 # Requires Neo4j 3.5 or later
 
-neo4j_uri = shareds.app.config.get("NEO4J_URI")
-neo4j_username = shareds.app.config.get("NEO4J_USERNAME")
-neo4j_password = shareds.app.config.get("NEO4J_PASSWORD")
+# neo4j_uri = shareds.app.config.get("NEO4J_URI")
+# neo4j_username = shareds.app.config.get("NEO4J_USERNAME")
+# neo4j_password = shareds.app.config.get("NEO4J_PASSWORD")
 libsvm_folder = shareds.app.config.get("LIBSVM_FOLDER")
-
-neo4j_driver = GraphDatabase.driver(
-        neo4j_uri, 
-        auth = (neo4j_username,neo4j_password), 
-        connection_timeout = 15)
+#
+# neo4j_driver = GraphDatabase.driver(
+#         neo4j_uri, 
+#         auth = (neo4j_username,neo4j_password), 
+#         connection_timeout = 15)
 
 def run(cypher,callback=None,**kwargs):
     #print("run",cypher)
     try:
-        res = neo4j_driver.session().run(cypher, kwargs)
+        res = shareds.driver.session().run(cypher, kwargs)
         n = 0
         reslist = list(res)
         count = len(reslist)

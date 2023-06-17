@@ -44,7 +44,7 @@ import email_validator
 #from email_validator import EmailSyntaxError
 
 from ui import jinja_filters
-from flask import Markup
+from markupsafe import Markup
 from wtforms import SelectField, SubmitField, BooleanField
 
 from pe.neo4j.neo4jengine import Neo4jEngine
@@ -127,6 +127,7 @@ class User(UserMixin):
     current_login_ip = ''
     login_count = 0
     agree = False
+    fs_uniquifier = ''
     # View filtering option. Stored here for logging in scene pages
     current_context = "common"  # = ui.context.MATERIAL_COMMON
 
@@ -146,7 +147,8 @@ class User(UserMixin):
         self.current_login_at = kwargs.get('current_login_at')
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
-        self.agree = kwargs.get('agree')        
+        self.agree = kwargs.get('agree')
+        self.fs_uniquifier =  kwargs.get('fs_uniquifier')        
 
     def __str__(self):
         if self.roles:

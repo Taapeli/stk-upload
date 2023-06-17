@@ -34,21 +34,21 @@ https://isotammi.net/api/v0/search?lookfor=Pekka
 import pprint
 
 cypher_search_refname = """
-MATCH (p:Refname {name: $lookfor}) --> (b:Refname)
+MATCH (p:Refname {name: $lookfor}) --> (b:Refname {use:$use})
 RETURN b.name as refname
 """
 
 cypher_fetch_namefamily = """
 MATCH (n:Refname {name:$lookfor})
-OPTIONAL MATCH (n) --> (m:Refname)
+OPTIONAL MATCH (n) - [:BASENAME {use:$use}] -> (m:Refname)
 WITH COALESCE(m, n) AS base
 OPTIONAL MATCH (base) <-- (o:Refname)
 RETURN [base.name] + COLLECT(o.name) AS namefamily
 """
 
 
-def search_refname(rname):
-#    print(f"Looking for basename of name {rname}")
+def search_refname(rname, use):
+    print(f"Looking for basename of {use} {rname}")
     result = shareds.driver.session().run(cypher_search_refname, lookfor=rname).single()
     if not result: 
         return dict(status="Not found",statusText="Not found",resultCount=0)
@@ -65,15 +65,16 @@ def search_refname(rname):
     }
 
 
-def fetch_namefamily(rname):
-#    print(f"Getting name family of {rname}")
-    result = shareds.driver.session().run(cypher_fetch_namefamily, lookfor=rname)
+def fetch_namefamily(rname, use):
+    print(f"Getting name family of {use} {rname}")
+    result = shareds.driver.session().run(cypher_fetch_namefamily, lookfor=rname, use=use)
     if not result:
 #        print(f"namefamily for {rname}  not found") 
         return dict(status="Not found",statusText="Not found",resultCount=0)
+    print(result)
     for rec in result:
         namefamily = rec['namefamily']
-#        print(namefamily)
+        print(f"{rname} -> {namefamily}")
         return {"status":"OK",
             "statusText":"OK",
             "resultCount": 1,

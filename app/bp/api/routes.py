@@ -155,6 +155,7 @@ def refnameapi_v0_basename():
 
 @bp.route('/refnameapi/fetch_namefamily', methods=['POST'])
 def refnameapi_v0_namefamily():
+    print(request.form)
     key = request.form.get("apikey")
     if not apikey.is_validkey(key): return jsonify(dict(
             status="Error",
@@ -162,12 +163,13 @@ def refnameapi_v0_namefamily():
         ))
     
     lookfor = request.form.get("lookfor")
+    use = request.form.get("use")
 #    print(lookfor)
     if not lookfor: return jsonify(dict(
             status="Error",
             statusText="Missing argument 'lookfor'",
         ))
-    rsp = refnameapi.fetch_namefamily(lookfor) 
+    rsp = refnameapi.fetch_namefamily(lookfor, use) 
     response = jsonify(rsp)
     print(response)
     response.headers['Access-Control-Allow-Origin'] = '*'
