@@ -41,8 +41,9 @@ class Neo4jEngine():
             NEO4J_PASSWORD = 'passwd'
             NEO4J_VERSION = '4.0'         # Default: 3.5
     '''
-    
     def __init__(self, app):
+#        print(os.getenv('PATH'))
+#        print(app.config['NEO4J_USERNAME'] + ' connect')
         self.driver = GraphDatabase.driver(
             app.config['NEO4J_URI'], 
             auth = (app.config['NEO4J_USERNAME'], 
@@ -51,37 +52,22 @@ class Neo4jEngine():
             max_connection_lifetime = 3000,
             encrypted=False)
         self.version = app.config.get('NEO4J_VERSION','3.5')
-        self.name, self.version, self.edition =self.get_version()
-
         print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connecting (v>={self.version})')
    
     def close(self):
         self.driver.close()
-   
 
     def execute(self, cypher, **kwargs):
         ''' Execute a Cypher write phrase returning a single value.
         '''
         with self.driver.session() as session:
-            session.write_transaction(self._execute, cypher, **kwargs)
+            session.write_transaction(self._execute, cypher, kwargs)
         
     @staticmethod
     def _execute(tx, cypher, **kwargs):
         result = tx.run(cypher, kwargs)
         return result.single()[0]
 
-    def get_version(self):
-        version_cypher = '''
-            call dbms.components() yield name, versions, edition 
-                unwind versions as version 
-                return name, version, edition;
-            '''
-        with self.driver.session() as session:
-#            self.name, self.version, self.edition = session.run(version_cypher)
-            result= session.run(version_cypher)
-            values = result.single()
-        return values[0], values[1], values[2]
-    
     def consume_counters(self, result):
         ''' Get counters from Neo4j.result object (both 3.5 & 4.1 versions).
         

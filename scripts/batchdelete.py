@@ -53,7 +53,6 @@ from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
-# print(f"<<<<<<<<<<< Batchdelete referred to driver {shareds.driver}")
 shareds.dataservices = {
     "read":    Neo4jReadService,
     "read_tx": Neo4jReadServiceTx,
@@ -64,4 +63,5 @@ shareds.dataservices = {
 
 ret = Root.delete_batch(args.username, args.batch_id)
 print(ret)
+ 
  

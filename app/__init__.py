@@ -146,11 +146,6 @@ def get_locale():
             if current_user.is_authenticated: 
                 reqlang = current_user.language
                 session['lang'] = reqlang
-    if not reqlang:
-        header = request.headers.get('Accept-Language')
-        if header and len(header) > 1:
-            reqlang = header[:2]
-            session['lang'] = reqlang               
     return reqlang
 
 from flask_login import user_logged_in, user_logged_out

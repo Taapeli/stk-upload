@@ -52,7 +52,6 @@ from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
-# print(f"<<<<<<<<<< Xmlload sets shareds.driver to shareds.db.driver {shareds.driver}")
 shareds.dataservices = {
     "read":    Neo4jReadService,
     "read_tx": Neo4jReadServiceTx,
