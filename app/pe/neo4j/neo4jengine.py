@@ -41,6 +41,22 @@ class Neo4jEngine():
             NEO4J_PASSWORD = 'passwd'
             NEO4J_VERSION = '4.0'         # Default: 3.5
     '''
+    
+    def get_db_version(self, tx):
+        version_cypher = '''
+            call dbms.components() yield name, versions, edition
+              unwind versions as version 
+              return name, version, edition;
+        ''' 
+        try:
+            result = dict()
+            result = tx.run(version_cypher)
+           
+            return (result.values())
+        except Exception as e:
+            print("Pieleen meni", e)
+            return None
+    
     def __init__(self, app):
 #        print(os.getenv('PATH'))
 #        print(app.config['NEO4J_USERNAME'] + ' connect')
@@ -51,8 +67,18 @@ class Neo4jEngine():
             connection_timeout = 15,
             max_connection_lifetime = 3000,
             encrypted=False)
-        self.version = app.config.get('NEO4J_VERSION','3.5')
-        print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connecting (v>={self.version})')
+        
+        with self.driver.session() as session:
+            values = session.read_transaction(self.get_db_version)
+            self.name    = values[0][0]
+            self.version = values[0][1]
+            self.edition = values[0][2]
+        print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connected to ({self.name} {self.version} {self.edition})')    
+             
+        # self.version = app.config.get('NEO4J_VERSION','3.5')
+        # print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connecting (v>={self.version})')
+        
+
    
     def close(self):
         self.driver.close()
