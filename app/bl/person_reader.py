@@ -81,6 +81,7 @@ class PersonReaderTx(DataService):
             rule=firstname, key=name  by start of the first of first names
             rule=patronyme, key=name  by start of patronyme name
             rule=refname, key=name    by exact refname
+            rule=freetext, key=patt   by Lucerne fulltext key
             rule=years, key=str       by possible living years:
                 str='-y2'   untill year
                 str='y1'    single year

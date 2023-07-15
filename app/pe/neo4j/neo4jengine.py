@@ -69,7 +69,7 @@ class Neo4jEngine():
         
         with self.driver.session() as session:
             values = session.read_transaction(self.get_db_version)
-            if values:
+            if values: # example [['Neo4j Kernel', '5.9.0', 'community']]
                 self.name    = values[0][0]
                 self.version = values[0][1]
                 self.edition = values[0][2]
