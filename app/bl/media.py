@@ -125,7 +125,7 @@ class MediaReader(DataService):
         return {"status": Status.NOT_FOUND}
 
     def get_one(self, oid):
-        """Read a Media object, selected by iid or uniq_id."""
+        """Read a Media object with referrer and referenced objects."""
 
 
         # Example database items:
@@ -143,6 +143,8 @@ class MediaReader(DataService):
             return res
 
         media = res.get("media")
+        media.citations = res.get("citations")
+        media.notes = res.get("notes")
 
         return {"item": media, "status": Status.OK}
 
