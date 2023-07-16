@@ -11,6 +11,10 @@ p {margin-left:15px;}
 #flex {display: flex; /*height:75vh;*/
     flex-wrap: wrap;
 }
+#notes, #citations {
+    margin:.5em; padding: 1em;
+}
+
 #flex > div {
     margin:.5em; padding: 1em;
     width: 43%; 
@@ -155,6 +159,34 @@ tr > td > img {
         </div>
 	</div>
  {% endif %}
+  </div> {# end flex #}
+  <div>
+	{% if media.notes %}
+	<div id="notes">
+
+	    <h3>{{ _('Notes') }}</h3>
+
+			<ul>
+		    {% for ref in media.ref %}
+				<li> tähän note
+				</li>
+		    {% endfor %}
+			</ul>
+	</div>
+	{% endif %}
+	{% if media.citations %}
+	<div id="citations">
+
+	    <h3>{{ _('Citations') }}</h3>
+
+			<ul>
+		    {% for ref in media.ref %}
+				<li> tähän citation
+				</li>
+		    {% endfor %}
+			</ul>
+	</div>
+	{% endif %}
   </div>
   <div class="fullclear"></div>
 {% endif %}

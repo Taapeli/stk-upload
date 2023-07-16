@@ -1482,6 +1482,7 @@ class Neo4jReadService(ConcreteService):
                     crop = record["prop"]
                     ref_node = record["ref"]
                     event_node = record["eref"]
+                    out_nodes = record["out_refs"]
                     
                     # - Media node
                     # - cropping
@@ -1535,6 +1536,18 @@ class Neo4jReadService(ConcreteService):
 
                         mref.next_objs.append(obj2)
 
+                    notes = []
+                    citations = []
+                    for node in out_nodes:
+                        lbl = list(node.labels)[0]
+                        print (f" -> ({lbl}: {node._properties})")
+                        if "Note" in node.labels:
+                            obj = Note_from_node(node)
+                            notes.append(obj)
+                        if "Citation" in node.labels:
+                            obj = Citation_from_node(node)
+                            citations.append(obj)
+
             except Exception as e:
                 return {
                     "status": Status.ERROR,
@@ -1542,7 +1555,8 @@ class Neo4jReadService(ConcreteService):
                 }
 
         status = Status.OK if media else Status.NOT_FOUND
-        return {"status": status, "media": media}
+        return {"status": status, "media": media,
+                "notes":notes, "citations":citations}
 
     # ------ Comment -----
 
