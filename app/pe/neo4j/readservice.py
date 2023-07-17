@@ -1473,16 +1473,19 @@ class Neo4jReadService(ConcreteService):
         event_refs = {}  # The Person or Family nodes behind referencing Event
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher_batch(
-                    session, CypherMedia.get_media_by_iid, user, material, iid=iid
-                )
-                # RETURN media, r, ref, ref2
+                result = run_cypher_batch(session, CypherMedia.get_media_data_by_iid,
+                                          user, material, iid=iid)
+                # RETURN media, PROPERTIES(r) AS prop, referrer, referrer_e,
+                # COLLECT (DISTINCT note) AS notes,
+                # COLLECT (DISTINCT [citation, source, note_list]) as citas
+    
                 for record in result:
                     media_node = record["media"]
                     crop = record["prop"]
-                    ref_node = record["ref"]
-                    event_node = record["eref"]
-                    out_nodes = record["out_refs"]
+                    ref_node = record["referrer"]
+                    event_node = record["referrer_e"]
+                    note_nodes = record["notes"]
+                    cita_nodes = record["citas"]
                     
                     # - Media node
                     # - cropping
@@ -1537,16 +1540,19 @@ class Neo4jReadService(ConcreteService):
                         mref.next_objs.append(obj2)
 
                     notes = []
+                    for note_node in note_nodes:
+                        lbl = list(note_node.labels)[0]
+                        print (f" -> ({lbl}: {note_node._properties})")
+                        obj = Note_from_node(note_node)
+                        notes.append(obj)
                     citations = []
-                    for node in out_nodes:
-                        lbl = list(node.labels)[0]
-                        print (f" -> ({lbl}: {node._properties})")
-                        if "Note" in node.labels:
-                            obj = Note_from_node(node)
-                            notes.append(obj)
-                        if "Citation" in node.labels:
-                            obj = Citation_from_node(node)
-                            citations.append(obj)
+                    for cita_node, source_node, s_notes in cita_nodes:
+                        if cita_node:
+                            cita = Citation_from_node(cita_node)
+                            cita.sour = SourceBl_from_node(source_node)
+                            for note_node in s_notes:
+                                cita.sour.notes.append(Note_from_node(note_node))
+                            citations.append(cita)
 
             except Exception as e:
                 return {
