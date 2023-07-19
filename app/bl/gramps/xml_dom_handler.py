@@ -190,7 +190,7 @@ class DOM_handler:
     def handle_dom_nodes(self, tag, title, transaction_function, chunk_max_size):
         """ Get all the notes in the xml_tree. """
 
-        """ DOM-objektit pätkitään chunk_max_size-kokoisiin joukkoihin ja tarjotaan handlerille
+        """ DOM-objects are split to chunk_max_size chunks and given to handler
         """
 
         """ 
@@ -343,6 +343,7 @@ class DOM_handler:
                 citation_sourceref = citation.getElementsByTagName("sourceref")[0]
                 if citation_sourceref.hasAttribute("hlink"):
                     c.source_handle = citation_sourceref.getAttribute("hlink") + self.handle_suffix
+
                     ##print(f'# Citation {c.id} points source {c.source_handle}')
             elif len(citation.getElementsByTagName("sourceref")) > 1:
                 self.blog.log_event(
@@ -571,7 +572,18 @@ class DOM_handler:
                 if obj_file.hasAttribute("description"):
                     o.description = obj_file.getAttribute("description")
 
-            # TODO: Varmista, ettei mediassa voi olla Note
+            o.note_handles = []
+            for ref in obj.getElementsByTagName("noteref"):
+                if ref.hasAttribute("hlink"):
+                    o.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
+                    ##print(f'# Media {o.id} has note {o.note_handles[-1]}')
+
+            o.citation_handles = []
+            for ref in obj.getElementsByTagName("citationref"):
+                if ref.hasAttribute("hlink"):
+                    o.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
+                    ##print(f'# Media {o.id} has cite {o.citation_handles[-1]}')
+
             self.dataservice.ds_save_media(tx, o, self.batch.id, iids)
             self.complete(o)
 
