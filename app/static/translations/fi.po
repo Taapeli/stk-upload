@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-04-30 12:09+0300\n"
+"POT-Creation-Date: 2023-05-19 19:24+0300\n"
 "PO-Revision-Date: 2023-01-25 13:17+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -41,29 +41,58 @@ msgstr "ruotsi"
 msgid "English"
 msgstr "englanti"
 
-#: setups.py:182
+#: setups.py:188
 msgid "Email or Username"
 msgstr "Sähköposti tai käyttäjätunnus"
 
-#: setups.py:183 setups.py:197
+#: setups.py:189 setups.py:204
 msgid "Password"
 msgstr "Salasana"
 
-#: setups.py:185
+#: setups.py:191
 msgid "Remember Me"
 msgstr "Muista minut"
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:186
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:192
 msgid "Login"
 msgstr "Kirjautuminen"
 
+#: setups.py:198 templates/del_table_users.html:32
+msgid "Username"
+msgstr "Käyttäjätunnus"
+
+#: setups.py:198
+#, fuzzy
+msgid "Username required"
+msgstr "Kieli on pakollinen"
+
+#: bp/admin/templates/admin/list_users.html:83
+#: bp/admin/templates/admin/list_users.html:85
+#: bp/gramps/templates/gramps/scripting.html:46
+#: bp/start/templates/start/join.html:54 setups.py:199 setups.py:304
+#: templates/del_table_users.html:33 templates/repo_sources.html:15
+msgid "Name"
+msgstr "Nimi"
+
+#: setups.py:199
+msgid "Name required"
+msgstr "Kieli on pakollinen"
+
 #: bp/admin/forms.py:57 bp/admin/templates/admin/list_users.html:90
 #: bp/admin/templates/admin/list_users.html:92
-#: bp/start/templates/start/join.html:56 setups.py:192
+#: bp/start/templates/start/join.html:56 setups.py:203
 msgid "Email address"
 msgstr "Sähköposti"
 
-#: setups.py:193
+#: setups.py:203
+msgid "Email required"
+msgstr "Sähköposti on pakollinen"
+
+#: setups.py:205
+msgid "Password required"
+msgstr ""
+
+#: setups.py:207
 msgid ""
 "I have read and agree to the <a href='{terms_of_use_url}' "
 "target='esite'>{terms_of_use}</a>"
@@ -72,7 +101,7 @@ msgstr "Hyväksyn <a href='{terms_of_use_url}' target='esite'>{terms_of_use}</a>
 #: bp/audit/templates/audit/user_profile.html:77
 #: bp/audit/templates/audit/user_profile.html:84
 #: bp/start/templates/start/my_settings.html:78
-#: bp/start/templates/start/my_settings.html:85 setups.py:194
+#: bp/start/templates/start/my_settings.html:85 setups.py:208
 msgid "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
 msgstr ""
 
@@ -80,53 +109,71 @@ msgstr ""
 #: bp/audit/templates/audit/user_profile.html:85
 #: bp/start/templates/start/my_settings.html:75
 #: bp/start/templates/start/my_settings.html:79
-#: bp/start/templates/start/my_settings.html:86 setups.py:195
+#: bp/start/templates/start/my_settings.html:86 setups.py:209
 msgid "Terms of use"
 msgstr "Käyttöehdot"
 
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:199
+#: setups.py:210
+msgid "Agreement required"
+msgstr "Sinun on hyvksyttävä käyttöehdot"
+
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:212
 #: templates/index_demo.html:102 templates/index_demo.html:106
 msgid "Register"
 msgstr "Rekisteröidy"
 
-#: setups.py:203
-msgid "Please indicate that you have read and agree to the Terms and Conditions"
-msgstr "Olen lukenut ja hyväksynyt käyttöehdot"
+#: setups.py:221
+msgid "Email syntax is not valid"
+msgstr "Sähköpostiosoite ei näytä oikealta"
 
-#: setups.py:210
+#: setups.py:223
+msgid "Email is not valid"
+msgstr "Sähköpostiosiste ei ole oikein"
+
+#: setups.py:226
 msgid "Email has been reserved already"
 msgstr "Sähköpostiosoite on jo käytössä"
 
-#: setups.py:215
+#: setups.py:232
+#, fuzzy
+msgid "Name length not acceptable, see Info"
+msgstr "Käyttäjätunnus on väärän pituinen"
+
+#: setups.py:234
+#, fuzzy
+msgid "Name has unacceptable characters"
+msgstr "Käyttäjätunnus ei ole kelvollinen"
+
+#: setups.py:240
+msgid "Username length not acceptable, see Info"
+msgstr "Käyttäjätunnus on väärän pituinen"
+
+#: setups.py:242
+msgid "Username has unacceptable characters or structure"
+msgstr "Käyttäjätunnus ei ole kelvollinen"
+
+#: setups.py:245
 msgid "Username has been reserved already"
 msgstr "Tämä käyttäjätunnus on jo varattu"
 
-#: setups.py:217 templates/del_table_users.html:32
-msgid "Username"
-msgstr "Käyttäjätunnus"
+#: setups.py:250
+msgid "Password length not acceptable, see Info"
+msgstr "Salasana on väärän pituinen"
 
-#: bp/admin/templates/admin/list_users.html:83
-#: bp/admin/templates/admin/list_users.html:85
-#: bp/gramps/templates/gramps/scripting.html:46
-#: bp/start/templates/start/join.html:54 setups.py:218 setups.py:270
-#: templates/del_table_users.html:33 templates/repo_sources.html:15
-msgid "Name"
-msgstr "Nimi"
+#: setups.py:255
+msgid "Please indicate that you have read and agree to the Terms of Use"
+msgstr "Ole hyvä rastita, että olet lukenut ja hyväksynyt käyttöehdot"
+
+#: bp/admin/forms.py:59 bp/start/templates/start/join.html:55 setups.py:304
+msgid "User name"
+msgstr "Käyttäjätunnus"
 
 #: bp/admin/forms.py:62 bp/admin/forms.py:65
 #: bp/admin/templates/admin/list_users.html:95
 #: bp/audit/templates/audit/user_profile.html:52 bp/start/forms.py:39
-#: bp/start/forms.py:43 setups.py:219 setups.py:270
+#: bp/start/forms.py:43 setups.py:304
 msgid "Language"
 msgstr "Kieli"
-
-#: setups.py:221
-msgid "Language required"
-msgstr "Kieli on pakollinen"
-
-#: bp/admin/forms.py:59 bp/start/templates/start/join.html:55 setups.py:270
-msgid "User name"
-msgstr "Käyttäjätunnus"
 
 #: bl/dates.py:253
 msgid "calculated "
@@ -1009,7 +1056,7 @@ msgstr "Aika"
 #: bp/scene/templates/scene/details_batch.html:153
 #: bp/scene/templates/scene/details_batch.html:177
 #: bp/scene/templates/scene/place.html:161
-#: bp/scene/templates/scene/repositories.html:48
+#: bp/scene/templates/scene/repositories.html:43
 #: bp/scene/templates/scene/repository.html:32 templates/cite_sour_repo.html:15
 #: templates/cite_sour_repo.html:59 templates/repo_sources.html:19
 msgid "Type"
@@ -1615,7 +1662,7 @@ msgstr "Vertaa mahdollisia kaksoiskappaleita"
 #: bp/scene/templates/scene/hx-person/famtree.html:58
 #: bp/scene/templates/scene/hx-person/famtree.html:60
 #: bp/scene/templates/scene/macros.html:289
-#: bp/scene/templates/scene/source.html:124 ui/jinja_filters.py:98
+#: bp/scene/templates/scene/source.html:128 ui/jinja_filters.py:98
 #: ui/jinja_filters.py:136
 msgid "Family"
 msgstr "Perhe"
@@ -1944,7 +1991,7 @@ msgstr "Tyyppiä ei tueta: "
 #: bp/scene/templates/scene/person_search_result.html:28
 #: bp/scene/templates/scene/persons_list.html:89
 #: bp/scene/templates/scene/places.html:89
-#: bp/scene/templates/scene/repositories.html:60
+#: bp/scene/templates/scene/repositories.html:55
 #: bp/scene/templates/scene/sources.html:63
 msgid "Back to Top"
 msgstr "Palaa alkuun"
@@ -2543,11 +2590,11 @@ msgstr "Aineisto %(batch_id)s on poistettu (%(n)s kohdetta)"
 msgid "Failed to retrieve commands"
 msgstr "Komentoja ei saatu esiin"
 
-#: bp/gramps/routes.py:566 bp/scene/routes.py:1569
+#: bp/gramps/routes.py:566 bp/scene/routes.py:1578
 msgid "ERROR: Update did not succeed: "
 msgstr "VIRHE: Päivitys ei onnistunut: "
 
-#: bp/gramps/routes.py:568 bp/scene/routes.py:1571
+#: bp/gramps/routes.py:568 bp/scene/routes.py:1580
 msgid "Updated"
 msgstr "Päivitetty"
 
@@ -2706,7 +2753,7 @@ msgstr "Henkilö"
 #: bp/scene/templates/scene/person.html:252
 #: bp/scene/templates/scene/person.html:264
 #: bp/scene/templates/scene/place.html:218
-#: bp/scene/templates/scene/source.html:128 templates/cite_sour_repo.html:8
+#: bp/scene/templates/scene/source.html:132 templates/cite_sour_repo.html:8
 msgid "Event"
 msgstr "Tapahtuma"
 
@@ -2719,7 +2766,7 @@ msgstr "Tapahtuma"
 #: bp/scene/templates/scene/places.html:100
 #: bp/scene/templates/scene/places.html:108
 #: bp/scene/templates/scene/places.html:117
-#: bp/scene/templates/scene/source.html:132
+#: bp/scene/templates/scene/source.html:136
 #: templates/obsolete_select_refcols.html:37
 #: templates/obsolete_select_refcols.html:65
 msgid "Place"
@@ -2740,7 +2787,7 @@ msgid "Source"
 msgstr "Lähde"
 
 #: bp/gramps/templates/gramps/scripting.html:37
-#: bp/scene/templates/scene/repositories.html:69
+#: bp/scene/templates/scene/repositories.html:64
 #: bp/scene/templates/scene/repository.html:23
 #: bp/scene/templates/scene/source.html:38
 #: bp/scene/templates/scene/sources.html:87
@@ -2860,11 +2907,11 @@ msgstr "Itse"
 msgid "No families"
 msgstr "Ei perheitä"
 
-#: bp/scene/routes.py:1208 bp/scene/routes.py:1321
+#: bp/scene/routes.py:1208 bp/scene/routes.py:1330
 msgid "No objects found"
 msgstr "Ei kohteita"
 
-#: bp/scene/routes.py:1657
+#: bp/scene/routes.py:1666
 msgid "No previous comments"
 msgstr "Ei aiempia kommentteja"
 
@@ -3712,34 +3759,29 @@ msgid "List of Repositories"
 msgstr "Arkistot"
 
 #: bp/scene/templates/scene/repositories.html:23
-#, fuzzy, python-format
+#, python-format
 msgid "This page contains a directory of %(num)s repositories."
-msgstr "Tällä sivulla näytetään %(num)s lähdettä."
+msgstr "Tällä sivulla näytetään %(num)s arkistoa."
 
-#: bp/scene/templates/scene/repositories.html:49
-#, fuzzy
+#: bp/scene/templates/scene/repositories.html:44
 msgid "Repository, notes"
-msgstr "arkisto"
+msgstr "Arkisto, lisätiedot"
 
-#: bp/scene/templates/scene/repositories.html:50
-#, fuzzy
+#: bp/scene/templates/scene/repositories.html:45
 msgid "Mediums"
-msgstr "Keskiarvo"
+msgstr "Aineistomuodot"
 
-#: bp/scene/templates/scene/repositories.html:51
-#, fuzzy
+#: bp/scene/templates/scene/repositories.html:46
 msgid "Sources in this repository"
 msgstr "Lähteet tässä arkistossa"
 
-#: bp/scene/templates/scene/repositories.html:51
-#, fuzzy
+#: bp/scene/templates/scene/repositories.html:46
 msgid "Number of Sources"
 msgstr "Lähteitä"
 
-#: bp/scene/templates/scene/repositories.html:85
-#, fuzzy
+#: bp/scene/templates/scene/repositories.html:80
 msgid "No repositories found"
-msgstr "Ei lähteitä"
+msgstr "Ei arkistoja"
 
 #: bp/scene/templates/scene/repository.html:3
 msgid "Repository and Sources"
@@ -3776,7 +3818,7 @@ msgid "Source Details"
 msgstr "Lähteen tiedot"
 
 #: bp/scene/templates/scene/source.html:45
-#: bp/stk_security/templates/security/register_user.html:20
+#: bp/stk_security/templates/security/register_user.html:52
 msgid "Note!"
 msgstr "Huomaa!"
 
@@ -3842,9 +3884,8 @@ msgid "Source, notes"
 msgstr "Lähde, lisätiedot"
 
 #: bp/scene/templates/scene/sources.html:53
-#, fuzzy
 msgid "Media and Repository"
-msgstr "Muoto arkistossa"
+msgstr "Arkisto ja sen tyyppi"
 
 #: bp/scene/templates/scene/sources.html:54
 msgid "events, persons, etc., referred from"
@@ -4434,15 +4475,15 @@ msgstr "Eikö kirjautuminen onnistu?"
 msgid "Registration"
 msgstr "Rekisteröityminen"
 
-#: bp/stk_security/templates/security/register_user.html:11
+#: bp/stk_security/templates/security/register_user.html:43
 msgid "Fill in the User Information Form of Isotammi database Service"
 msgstr "Täytä käyttäjätietolomake Isotammeen"
 
-#: bp/stk_security/templates/security/register_user.html:19
+#: bp/stk_security/templates/security/register_user.html:51
 msgid "Register as an user of Isotammi Service"
 msgstr "Rekisteröidy Isotammen käyttäjäksi"
 
-#: bp/stk_security/templates/security/register_user.html:21
+#: bp/stk_security/templates/security/register_user.html:53
 #, python-format
 msgid ""
 "When you have sent this form, you must wait for mail from us and click "
@@ -4451,17 +4492,32 @@ msgstr ""
 "Kun olet lähettänyt tämän lomakkeen, odota sähköpostia meiltä. Klikkaa "
 "siinä olevaa linkkiä \"%(link)s\". Näin pääset aloittamaan Isotammessa!"
 
-#: bp/stk_security/templates/security/register_user.html:24
+#: bp/stk_security/templates/security/register_user.html:56
 msgid "Other Operations"
 msgstr "Muita toimintoja"
 
-#: bp/stk_security/templates/security/register_user.html:29
+#: bp/stk_security/templates/security/register_user.html:61
 msgid "My User Properties"
 msgstr "Käyttäjätietoni"
 
-#: bp/stk_security/templates/security/register_user.html:36
+#: bp/stk_security/templates/security/register_user.html:68
 msgid "Define a username and password for you"
 msgstr "Valitse itsellesi käyttäjätunnus ja salasana"
+
+#: bp/stk_security/templates/security/register_user.html:69
+msgid "help"
+msgstr "ohje"
+
+#: bp/stk_security/templates/security/register_user.html:70
+msgid ""
+"<b>Userid</b> of length 6 to 20 characters can include upper an lower "
+"case alphabets. numbers, characters '-' and '_'. It must start with an "
+"alphabet.<br><b>Password</b> length must be between 8 and 20 characters."
+msgstr ""
+"<b>Käyttäjätunnuksen</b> on oltava 6–20 merkkiä pitkä. Sen pitää alkaa "
+"kirjaimella ja siinä saa olla pikkukirjaimia, numeroita ja "
+"välimerkkeikejä '-' ja '_'. <br><b>Salasanan</b> pitää olla 6–20 merkkiä "
+"pitkä."
 
 #: bp/stk_security/templates/security/send_confirmation.html:4
 msgid "Verifying registration"

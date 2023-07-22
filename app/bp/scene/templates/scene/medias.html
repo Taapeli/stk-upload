@@ -28,7 +28,7 @@
                 <p>{{ _('Displaying %(num)s distinct medias', num=cnt) }}
 {% if user_context.at_start() %}
          		  {{ _('from begin') }}.
-{% else %}		  {{ _('starting <tt>%(name)s</tt>', name=next_bw) }}.
+{% else %}		  {{ _('starting <tt>%(name)s</tt>', name='"'+next_bw+'"') }}.
 {% endif %}
                 </p>
             </div>

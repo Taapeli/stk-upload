@@ -158,25 +158,23 @@ class PersonReader(DataService):
     - Returns a Result object.
     """
 
-    def get_person_list(self):
-        """List person data including all data needed to Persons page.
-        
-        NOT USED --> bl.person_reader.PersonReaderTx.get_person_search
-
-        In version v2021.1.2 called:
-            # --> Neo4jDriver.dr_get_person_list(user, fw_from, limit)
-            #     --> Neo4jReadServiceTx.tx_get_person_list()
-            #         --> CypherPerson.read_approved_persons_w_events_fw_name
-            #         --> CypherPerson.read_my_persons_w_events_fw_name
-            #         --> CypherPerson.get_common_events_by_refname_use
-            #         --> CypherPerson.get_my_events_by_refname_use
-            #         --> CypherPerson.get_common_events_by_years
-            #         --> CypherPerson.get_my_events_by_years
-            #        #--> Cypher_person.get_events_by_refname
-            #        #--> Cypher_person.get_events_by_refname
-        """
-        print("bl.person.PersonReader.get_person_list: ERROR obsolete")
-        return {"items": [], "status": Status.ERROR, "statustext":"obsolete get_person_list"}
+    # def get_person_list(self):  # --> bl.person_reader.PersonReaderTx.get_person_search
+    #     """List person data including all data needed to Persons page.
+    #
+    #     In version v2021.1.2 called:
+    #         # --> Neo4jDriver.dr_get_person_list(user, fw_from, limit)
+    #         #     --> Neo4jReadServiceTx.tx_get_person_list()
+    #         #         --> CypherPerson.read_approved_persons_w_events_fw_name
+    #         #         --> CypherPerson.read_my_persons_w_events_fw_name
+    #         #         --> CypherPerson.get_common_events_by_refname_use
+    #         #         --> CypherPerson.get_my_events_by_refname_use
+    #         #         --> CypherPerson.get_common_events_by_years
+    #         #         --> CypherPerson.get_my_events_by_years
+    #         #        #--> Cypher_person.get_events_by_refname
+    #         #        #--> Cypher_person.get_events_by_refname
+    #     """
+    #     print("bl.person.PersonReader.get_person_list: ERROR obsolete")
+    #     return {"items": [], "status": Status.ERROR, "statustext":"obsolete get_person_list"}
 
     def get_surname_list(self, count=40):
         """

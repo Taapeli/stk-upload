@@ -6,23 +6,30 @@
 {{ super() }}
   
  <style>
+ p > label { display: inline-block; width:14em; }
+ p > input { display: inline-block; }
 .tooltip {
   position: relative;
   display: inline-block;
-  border-bottom: 1px dotted black;
+  background-color: #1cb31c; /* A lighter green */
+  color: white;
+  padding: 0 2pt;
+  border-radius: 7pt;
 }
-
+input#agree { position: relative; left: 7em; }
+form > ul > li {color: red; }
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 540px;
+  width: 35em;
   background-color: black;
   color: #fff;
   text-align: left;
   border-radius: 6px;
-  padding: 5px 0;
-
+  padding: 5px;
   /* Position the tooltip */
   position: absolute;
+  right: -20em;
+  top: -6em;
   z-index: 1;
 }
 
@@ -59,18 +66,20 @@
 				  {{ render_field_with_errors(register_user_form.email) }} 
                   {{ render_field_with_errors(register_user_form.name) }} 
                   <p>{{ _('Define a username and password for you') }}:
-                    <span class="tooltip"><font size=4>&#x1F6C8;</font> 
-                      <span class="tooltiptext">{{ _("Userid of length 6 to 20 characters can include upper an lower case alphabets. "
+                    <span class="tooltip"> &nbsp;{{ _("help") }}&nbsp;
+                      <span class="tooltiptext">{{ _("<b>Userid</b> of length 6 to 20 characters can include upper an lower case alphabets. "
                         "numbers, characters '-' and '_'. It must start with an alphabet."
-                        "&#x0a;Password length must be between 8 and 20 characters.") }}</span>
+                        "<br><b>Password</b> length must be between 8 and 20 characters.") }}</span>
                     </span>
                   </p> 	                  
                   {{ render_field_with_errors(register_user_form.username) }} 
                   {{ render_field_with_errors(register_user_form.password) }}
                    
 			 
-				  {% if register_user_form.password_confirm %} 
-				    {{ render_field_with_errors(register_user_form.password_confirm) }} 
+				  {% if register_user_form.password_confirm %}
+				  <div id="agree-block">
+				    {{ render_field_with_errors(register_user_form.password_confirm) }}
+				  </div>
 				  {% endif %} 
 				  <input type=hidden name=language value={{ session.lang }}>
 				  {# render_field(register_user_form.terms) #} 

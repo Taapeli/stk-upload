@@ -11,8 +11,12 @@ p {margin-left:15px;}
 #flex {display: flex; /*height:75vh;*/
     flex-wrap: wrap;
 }
+.subsection {
+    margin:.5em; padding: 0 1em;
+}
+
 #flex > div {
-    margin:.5em; padding: 1em;
+    margin:.5em; padding: 0 1em;
     width: 43%; 
 }
 .pic_container {
@@ -70,7 +74,7 @@ tr > td > img {
                                 src="/scene/thumbnail?id={{media.iid}}" 
                                 title="key = {{media.iid}}"/></div>
                             <div>
-                                 <p style="nowrap;">
+                                 <p style="nowrap">
                                  {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
                                  {%else%}{{media.description}}
                                  {%endif%}
@@ -155,6 +159,52 @@ tr > td > img {
         </div>
 	</div>
  {% endif %}
+  </div> {# end flex #}
+
+  <div>
+	{% if media.notes %}
+	<div class="subsection" id="notes">
+	    <h3>{{ _('Media notes') }}</h3>
+        {% for note in media.notes %}
+            <div class="grampsstylednote">
+                 <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
+                    {{macro.citation_link(note.citation_ref, obj)}}
+                    {{ macro.notelink(note) }}</p>
+            </div>
+        {% endfor %}
+	</div>
+	{% endif %}
+
+	{% if source_citations %}
+	<div class="subsection" id="citations">
+    	<h3>{{ _('Source citations') }}</h3>
+        <div id="sourcerefContent">
+		{# Python code:
+		 for s_key in source_citations:
+		    for cita in source_citations[s_key]:
+		        print(f"media source_citation[{s_key}]: {cita.sour} > {cita}")
+		#}
+    	{% for s_key in source_citations %}
+        	{% set s = source_citations[s_key][0].sour %}
+        	<div class="sourceDesc">
+        		<a href="/source/{{ s.iid }}" class="inlink"
+        		   title="Lähteen {{ s.id }} / {{ s.iid }} tiedot">{{ s.stitle }}</a>
+        		 – <span class="typedesc">{{ s.spubinfo }}</span>
+        	{% for cita in source_citations[s_key] %}
+        		<div class="citaDesc"><!-- confidence={{cita.confidence}}  -->
+        			<span title="{{cita.id}} {{cita.confidence|transl('conf')}}" +
+        				"{{ macro.stars(cita.confidence|int) }}">{{cita.page}}</span>
+        		{% for sn in s.notes %}
+        			<div> –► <i>{{sn.type}}</i>
+        				<a class="outlink" target="_blank" href="{{sn.url}}">{{sn.url|transl('urldomain')}}</a>
+        			</div>
+        		</div>
+         		{% endfor %}
+        	{% endfor %}
+        	</div>
+ 		{% endfor %}
+	</div> {# a Source #}
+	{% endif %}
   </div>
   <div class="fullclear"></div>
 {% endif %}

@@ -28,12 +28,18 @@ class CypherMedia():
 
 # Read Media data
 
-    get_media_by_iid = """
+    get_media_data_by_iid = """
 MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid}) <-[r:MEDIA]- (ref)
-OPTIONAL MATCH (ref) <-[:EVENT]- (eref)
-RETURN root, media, PROPERTIES(r) AS prop, ref, eref"""
-
-    get_all = "MATCH (o:Media) RETURN o"
+OPTIONAL MATCH (media) <-[r:MEDIA]- (referrer)
+OPTIONAL MATCH (referrer) <-[:EVENT]- (referrer_e)
+OPTIONAL MATCH (media) -[:NOTE]-> (note:Note)
+OPTIONAL MATCH (media) -[:CITATION]-> (cita:Citation) -[:SOURCE]-> (s:Source)
+OPTIONAL MATCH (s) -[:NOTE]-> (sn:Note)
+WITH root, media, r, referrer, referrer_e, note, cita, s,
+    COLLECT(DISTINCT sn) AS s_notes
+RETURN root, media, PROPERTIES(r) AS prop, referrer, referrer_e,
+    COLLECT (DISTINCT note) AS notes,
+    COLLECT (DISTINCT [cita, s, s_notes]) as citas"""
 
     # Media list by description with count limit
     get_media_list = """
@@ -51,4 +57,17 @@ MATCH (u:Root {id:$bid})
 MERGE (u) -[:OBJ_OTHER]-> (a:Media {iid:$iid})
     SET a += $m_attr
 RETURN ID(a) as uniq_id"""
+
+    link_notes = """
+MATCH (n:Note) WHERE n.handle IN $note_handles
+WITH n
+  MATCH (m:Media) WHERE m.handle=$handle
+  CREATE (m) -[:NOTE]-> (n)
+RETURN COUNT(DISTINCT n) AS cnt"""
+
+    link_citations = """
+match (c:Citation) where c.handle in $citation_handles
+with c
+    match (m:Media)  where m.handle=$handle
+    merge (m) -[:CITATION]-> (c)"""
 

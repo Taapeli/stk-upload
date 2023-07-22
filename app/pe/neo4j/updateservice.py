@@ -525,6 +525,23 @@ class Neo4jUpdateService(ConcreteService):
         )
         media.uniq_id = result.single()[0]
 
+        # Make relations to the Citation nodes
+        if media.citation_handles:  #  citation_handles != '':
+            tx.run(
+                CypherMedia.link_citations,
+                handle=media.handle,
+                citation_handles=media.citation_handles,
+            )
+
+        # Make relations to the Note nodes
+        if media.note_handles:
+            result = tx.run(
+                CypherMedia.link_notes,
+                handle=media.handle,
+                note_handles=media.note_handles,
+                )
+            _cnt=result.single()["cnt"]
+
 
     def ds_create_link_medias_w_handles(self, tx, uniq_id: int, media_refs: list):
         """Save media object and it's Note and Citation references

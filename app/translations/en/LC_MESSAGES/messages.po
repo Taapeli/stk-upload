@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-04-30 12:09+0300\n"
+"POT-Creation-Date: 2023-05-19 19:24+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -41,29 +41,57 @@ msgstr ""
 msgid "English"
 msgstr ""
 
-#: setups.py:182
+#: setups.py:188
 msgid "Email or Username"
 msgstr ""
 
-#: setups.py:183 setups.py:197
+#: setups.py:189 setups.py:204
 msgid "Password"
 msgstr ""
 
-#: setups.py:185
+#: setups.py:191
 msgid "Remember Me"
 msgstr ""
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:186
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:192
 msgid "Login"
+msgstr ""
+
+#: setups.py:198 templates/del_table_users.html:32
+msgid "Username"
+msgstr ""
+
+#: setups.py:198
+msgid "Username required"
+msgstr ""
+
+#: bp/admin/templates/admin/list_users.html:83
+#: bp/admin/templates/admin/list_users.html:85
+#: bp/gramps/templates/gramps/scripting.html:46
+#: bp/start/templates/start/join.html:54 setups.py:199 setups.py:304
+#: templates/del_table_users.html:33 templates/repo_sources.html:15
+msgid "Name"
+msgstr ""
+
+#: setups.py:199
+msgid "Name required"
 msgstr ""
 
 #: bp/admin/forms.py:57 bp/admin/templates/admin/list_users.html:90
 #: bp/admin/templates/admin/list_users.html:92
-#: bp/start/templates/start/join.html:56 setups.py:192
+#: bp/start/templates/start/join.html:56 setups.py:203
 msgid "Email address"
 msgstr ""
 
-#: setups.py:193
+#: setups.py:203
+msgid "Email required"
+msgstr ""
+
+#: setups.py:205
+msgid "Password required"
+msgstr ""
+
+#: setups.py:207
 msgid ""
 "I have read and agree to the <a href='{terms_of_use_url}' "
 "target='esite'>{terms_of_use}</a>"
@@ -72,7 +100,7 @@ msgstr ""
 #: bp/audit/templates/audit/user_profile.html:77
 #: bp/audit/templates/audit/user_profile.html:84
 #: bp/start/templates/start/my_settings.html:78
-#: bp/start/templates/start/my_settings.html:85 setups.py:194
+#: bp/start/templates/start/my_settings.html:85 setups.py:208
 msgid "http://wiki.isotammi.net/wiki/Isotammi_käyttöehdot"
 msgstr ""
 
@@ -80,52 +108,68 @@ msgstr ""
 #: bp/audit/templates/audit/user_profile.html:85
 #: bp/start/templates/start/my_settings.html:75
 #: bp/start/templates/start/my_settings.html:79
-#: bp/start/templates/start/my_settings.html:86 setups.py:195
+#: bp/start/templates/start/my_settings.html:86 setups.py:209
 msgid "Terms of use"
 msgstr ""
 
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:199
+#: setups.py:210
+msgid "Agreement required"
+msgstr ""
+
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:212
 #: templates/index_demo.html:102 templates/index_demo.html:106
 msgid "Register"
 msgstr ""
 
-#: setups.py:203
-msgid "Please indicate that you have read and agree to the Terms and Conditions"
+#: setups.py:221
+msgid "Email syntax is not valid"
 msgstr ""
 
-#: setups.py:210
+#: setups.py:223
+msgid "Email is not valid"
+msgstr ""
+
+#: setups.py:226
 msgid "Email has been reserved already"
 msgstr ""
 
-#: setups.py:215
+#: setups.py:232
+msgid "Name length not acceptable, see Info"
+msgstr ""
+
+#: setups.py:234
+msgid "Name has unacceptable characters"
+msgstr ""
+
+#: setups.py:240
+msgid "Username length not acceptable, see Info"
+msgstr ""
+
+#: setups.py:242
+msgid "Username has unacceptable characters or structure"
+msgstr ""
+
+#: setups.py:245
 msgid "Username has been reserved already"
 msgstr ""
 
-#: setups.py:217 templates/del_table_users.html:32
-msgid "Username"
+#: setups.py:250
+msgid "Password length not acceptable, see Info"
 msgstr ""
 
-#: bp/admin/templates/admin/list_users.html:83
-#: bp/admin/templates/admin/list_users.html:85
-#: bp/gramps/templates/gramps/scripting.html:46
-#: bp/start/templates/start/join.html:54 setups.py:218 setups.py:270
-#: templates/del_table_users.html:33 templates/repo_sources.html:15
-msgid "Name"
+#: setups.py:255
+msgid "Please indicate that you have read and agree to the Terms of Use"
+msgstr ""
+
+#: bp/admin/forms.py:59 bp/start/templates/start/join.html:55 setups.py:304
+msgid "User name"
 msgstr ""
 
 #: bp/admin/forms.py:62 bp/admin/forms.py:65
 #: bp/admin/templates/admin/list_users.html:95
 #: bp/audit/templates/audit/user_profile.html:52 bp/start/forms.py:39
-#: bp/start/forms.py:43 setups.py:219 setups.py:270
+#: bp/start/forms.py:43 setups.py:304
 msgid "Language"
-msgstr ""
-
-#: setups.py:221
-msgid "Language required"
-msgstr ""
-
-#: bp/admin/forms.py:59 bp/start/templates/start/join.html:55 setups.py:270
-msgid "User name"
 msgstr ""
 
 #: bl/dates.py:253
@@ -1009,7 +1053,7 @@ msgstr ""
 #: bp/scene/templates/scene/details_batch.html:153
 #: bp/scene/templates/scene/details_batch.html:177
 #: bp/scene/templates/scene/place.html:161
-#: bp/scene/templates/scene/repositories.html:48
+#: bp/scene/templates/scene/repositories.html:43
 #: bp/scene/templates/scene/repository.html:32 templates/cite_sour_repo.html:15
 #: templates/cite_sour_repo.html:59 templates/repo_sources.html:19
 msgid "Type"
@@ -1615,7 +1659,7 @@ msgstr ""
 #: bp/scene/templates/scene/hx-person/famtree.html:58
 #: bp/scene/templates/scene/hx-person/famtree.html:60
 #: bp/scene/templates/scene/macros.html:289
-#: bp/scene/templates/scene/source.html:124 ui/jinja_filters.py:98
+#: bp/scene/templates/scene/source.html:128 ui/jinja_filters.py:98
 #: ui/jinja_filters.py:136
 msgid "Family"
 msgstr ""
@@ -1944,7 +1988,7 @@ msgstr ""
 #: bp/scene/templates/scene/person_search_result.html:28
 #: bp/scene/templates/scene/persons_list.html:89
 #: bp/scene/templates/scene/places.html:89
-#: bp/scene/templates/scene/repositories.html:60
+#: bp/scene/templates/scene/repositories.html:55
 #: bp/scene/templates/scene/sources.html:63
 msgid "Back to Top"
 msgstr ""
@@ -2543,11 +2587,11 @@ msgstr ""
 msgid "Failed to retrieve commands"
 msgstr ""
 
-#: bp/gramps/routes.py:566 bp/scene/routes.py:1569
+#: bp/gramps/routes.py:566 bp/scene/routes.py:1578
 msgid "ERROR: Update did not succeed: "
 msgstr ""
 
-#: bp/gramps/routes.py:568 bp/scene/routes.py:1571
+#: bp/gramps/routes.py:568 bp/scene/routes.py:1580
 msgid "Updated"
 msgstr ""
 
@@ -2706,7 +2750,7 @@ msgstr ""
 #: bp/scene/templates/scene/person.html:252
 #: bp/scene/templates/scene/person.html:264
 #: bp/scene/templates/scene/place.html:218
-#: bp/scene/templates/scene/source.html:128 templates/cite_sour_repo.html:8
+#: bp/scene/templates/scene/source.html:132 templates/cite_sour_repo.html:8
 msgid "Event"
 msgstr ""
 
@@ -2719,7 +2763,7 @@ msgstr ""
 #: bp/scene/templates/scene/places.html:100
 #: bp/scene/templates/scene/places.html:108
 #: bp/scene/templates/scene/places.html:117
-#: bp/scene/templates/scene/source.html:132
+#: bp/scene/templates/scene/source.html:136
 #: templates/obsolete_select_refcols.html:37
 #: templates/obsolete_select_refcols.html:65
 msgid "Place"
@@ -2740,7 +2784,7 @@ msgid "Source"
 msgstr ""
 
 #: bp/gramps/templates/gramps/scripting.html:37
-#: bp/scene/templates/scene/repositories.html:69
+#: bp/scene/templates/scene/repositories.html:64
 #: bp/scene/templates/scene/repository.html:23
 #: bp/scene/templates/scene/source.html:38
 #: bp/scene/templates/scene/sources.html:87
@@ -2860,11 +2904,11 @@ msgstr ""
 msgid "No families"
 msgstr ""
 
-#: bp/scene/routes.py:1208 bp/scene/routes.py:1321
+#: bp/scene/routes.py:1208 bp/scene/routes.py:1330
 msgid "No objects found"
 msgstr ""
 
-#: bp/scene/routes.py:1657
+#: bp/scene/routes.py:1666
 msgid "No previous comments"
 msgstr ""
 
@@ -3712,23 +3756,23 @@ msgstr ""
 msgid "This page contains a directory of %(num)s repositories."
 msgstr ""
 
-#: bp/scene/templates/scene/repositories.html:49
+#: bp/scene/templates/scene/repositories.html:44
 msgid "Repository, notes"
 msgstr ""
 
-#: bp/scene/templates/scene/repositories.html:50
+#: bp/scene/templates/scene/repositories.html:45
 msgid "Mediums"
 msgstr ""
 
-#: bp/scene/templates/scene/repositories.html:51
+#: bp/scene/templates/scene/repositories.html:46
 msgid "Sources in this repository"
 msgstr ""
 
-#: bp/scene/templates/scene/repositories.html:51
+#: bp/scene/templates/scene/repositories.html:46
 msgid "Number of Sources"
 msgstr ""
 
-#: bp/scene/templates/scene/repositories.html:85
+#: bp/scene/templates/scene/repositories.html:80
 msgid "No repositories found"
 msgstr ""
 
@@ -3767,7 +3811,7 @@ msgid "Source Details"
 msgstr ""
 
 #: bp/scene/templates/scene/source.html:45
-#: bp/stk_security/templates/security/register_user.html:20
+#: bp/stk_security/templates/security/register_user.html:52
 msgid "Note!"
 msgstr ""
 
@@ -4416,31 +4460,42 @@ msgstr ""
 msgid "Registration"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:11
+#: bp/stk_security/templates/security/register_user.html:43
 msgid "Fill in the User Information Form of Isotammi database Service"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:19
+#: bp/stk_security/templates/security/register_user.html:51
 msgid "Register as an user of Isotammi Service"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:21
+#: bp/stk_security/templates/security/register_user.html:53
 #, python-format
 msgid ""
 "When you have sent this form, you must wait for mail from us and click "
 "the link \"%(link)s\" in the message you got. Then you can log in!"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:24
+#: bp/stk_security/templates/security/register_user.html:56
 msgid "Other Operations"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:29
+#: bp/stk_security/templates/security/register_user.html:61
 msgid "My User Properties"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:36
+#: bp/stk_security/templates/security/register_user.html:68
 msgid "Define a username and password for you"
+msgstr ""
+
+#: bp/stk_security/templates/security/register_user.html:69
+msgid "help"
+msgstr ""
+
+#: bp/stk_security/templates/security/register_user.html:70
+msgid ""
+"<b>Userid</b> of length 6 to 20 characters can include upper an lower "
+"case alphabets. numbers, characters '-' and '_'. It must start with an "
+"alphabet.<br><b>Password</b> length must be between 8 and 20 characters."
 msgstr ""
 
 #: bp/stk_security/templates/security/send_confirmation.html:4

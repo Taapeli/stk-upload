@@ -1220,6 +1220,7 @@ def show_source_page(iid:str):
         flash(f'{ _("Program error")}', "error")
         logger.error(msg)
 
+    # print(f'Source {res["item"].iid}, {len(res["citations"])} citations')
     for c in res['citations']:
         if hasattr(c, "notes"):
             # Check that only distinct Notes are shown
@@ -1233,8 +1234,16 @@ def show_source_page(iid:str):
                         m.id += " + "+n.id
                         m.iid += " + "+n.iid
                         n.show = False
-                show = "+" if n.show else "-"
-                print(f'{show}     {c.id} > {n.id} {n.url} "{n.text}"')
+                show = "citation" if n.show else "hide"
+                print(f'##{show} {c.id} > {n.id} {n.url} "{n.text}"')
+        else:
+            if c.page.startswith("http"):
+                # Add new field c.url, if no c.notes exists
+                c.url = c.page
+                c.page = ""
+                print (f"##citation (no note.url) {c.id} url={c.url}")
+            else:
+                print (f"##citation (no note.url) {c.id} page='{c.page}'")
 
     return render_template(
         "/scene/source.html",
@@ -1415,8 +1424,23 @@ def show_media(iid):
     else:
         size = mediafile.get_image_size(fullname)
 
-    return render_template(
-        "/scene/media.html", media=medium, size=size, user_context=u_context, menuno=6
+    # Display citations grouped by sources
+    source_citations = {}
+    for cita in medium.citations:
+        s_iid = cita.sour.iid
+        if s_iid in source_citations.keys():
+            source_citations[s_iid].append(cita)
+        else:
+            source_citations[s_iid] = [cita]
+
+    for s_key in source_citations:
+        for cita in source_citations[s_key]:
+            print(f"media source_citation[{s_key}]: {cita.sour} > {cita}")
+
+    return render_template("/scene/media.html", 
+                           media=medium, size=size,
+                           source_citations=source_citations,
+                           user_context=u_context, menuno=6
     )
 
 

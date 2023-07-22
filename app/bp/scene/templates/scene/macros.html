@@ -374,6 +374,16 @@
                 {% endif -%}
             {% endif %}
         {% endfor %}
+    {% else %}
+    	{% if cita.url and cita.url.startswith("http") %}
+    		{# There is an url extracted from cita.page #}
+    		{% set ns.url = "; URL: " + cita.url %}
+    		{% if "hiski.genealogia.fi" in cita.url %}
+	    		{% set p = cita.url.split("+t") %}
+	    		{% if p %}{% set ns.page = ", sivu " + p[-1] %}{% endif %}
+	    	{% else %}{% set ns.page = ", sivu " + cita.url %}
+	    	{% endif %}
+    	{% endif %}
     {% endif -%}
     {% if cita.page %}
         {% if 'sivu' in cita.page %}{% set ns.page = ", " + cita.page %}
@@ -383,7 +393,7 @@
     {% set txt = repo_name + " - " + source.stitle + ns.page + ns.url -%}
         <input id="clp_id{{clip_index}}" type="text" style="display:None" value="{{txt}}">
         <div class="copy-fld" onclick="toClipboard('clp_id{{clip_index}}')"
-              title="{{ title }}"> ⚓{{anchor_text}} </div>
+              title="{{ title }}"> ⚓{{anchor_text}} </div>&nbsp;
 {%- endmacro %}
 
 

@@ -51,10 +51,10 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
          {'level':'-1', 'name':'to_be_approved','description':'Käyttäjä joka odottaa hyväksymistä'}
 )
 
-# ====== Database schema ======
+# ====== Stk database schema ======
 # Change (increment) this, if schema must be updated
 # The value is also stored in each Root node
-DB_SCHEMA_VERSION = '2022.1.9'
+DB_SCHEMA_VERSION = '2022.1.10'
 # =============================
 
 

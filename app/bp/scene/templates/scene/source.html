@@ -102,7 +102,11 @@ td.Citation div ol {padding-top:.3em;}
 
 	        		    <div title="{{c.confidence|transl('conf')}} {{ _('confidence') }}"
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
-	   					  <b>{{c.page}}</b> 
+	   					  <b>{% if c.url %}
+	   					  		<a href="{{c.url}}" class="outlink" 
+           						   target="_blank">{{c.url|transl('urldomain')}}</a>
+	   					     {% else %}{{c.page}}
+	   					     {% endif -%}</b> 
 	   					  {{ macro.stars(c.confidence|float) }}
 
                           {% if c.notes %}
