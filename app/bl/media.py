@@ -124,7 +124,7 @@ class MediaReader(DataService):
             return {"status": Status.OK, "items": medias}
         return {"status": Status.NOT_FOUND}
 
-    def get_one(self, oid):
+    def get_one(self, iid):
         """Read a Media object with referrer and referenced objects."""
 
 
@@ -137,8 +137,9 @@ class MediaReader(DataService):
         # (media) <-[crop()]-   (Event  'E9999' id=99999) <-- (Person 'I9999' id=999)
 
         user = self.user_context.batch_user()
-        res = self.dataservice.dr_get_media_single(user, self.user_context.material, oid)
-        # returns {status, items}
+        serv = self.dataservice
+        res = serv.dr_get_media_single(user, self.user_context.material, iid)
+        # returns {status, media, notes}
         if Status.has_failed(res):
             return res
 
@@ -146,6 +147,9 @@ class MediaReader(DataService):
         media.citations = res.get("citations")
         media.notes = res.get("notes")
 
+        res2 = serv.dr_get_sources_for_obj(user, self.user_context.material, iid)
+        if Status.has_failed(res2):
+            return res2
         return {"item": media, "status": Status.OK}
 
 

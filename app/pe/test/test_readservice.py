@@ -350,7 +350,7 @@ def test_dr_get_event_notes_medias1(svc):
 
     def dr_get_topic_list(self, user, batch_id, fw_from, limit):
 
-    def dr_get_source_citations(self, sourceid: int):
+    def dr_get_source_citators(self, sourceid: int):
     def dr_inlay_person_lifedata(self, person):
     def dr_get_surname_list(self, username, batch_id, count):
     def dr_get_placename_list(self, username, batch_id, count=50): 

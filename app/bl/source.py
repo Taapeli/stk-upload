@@ -167,7 +167,7 @@ class SourceReader(DataService):
             res.statustext = f"no Source with iid={iid!r}"
             return res
 
-        citations, notes, targets = self.dataservice.dr_get_source_citations(
+        citations, notes, targets = self.dataservice.dr_get_source_citators(
             source.uniq_id
         )
 
