@@ -18,15 +18,11 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # blacked 15.11.2021/JMä
-import shareds
-LOG_CYPHER = False
-#TODO Fix how to import instance.config variable?
-if "LOG_CYPHER" in vars(shareds.app.config):
-    LOG_CYPHER = shareds.app.config.LOG_CYPHER
-
 import base32_lib as base32
 from bl.base import IsotammiException
 from bl.material import Material
+import shareds
+LOG_CYPHER = shareds.app.config.get("LOG_CYPHER", False)
 
 cypher_user_prefix = """
     MATCH (prof:UserProfile{username:$username}) 

@@ -390,7 +390,11 @@
         {% else %}{% set ns.page = ", sivu " + cita.page %}
         {% endif -%}
     {% endif -%}
-    {% set txt = repo_name + " - " + source.stitle + ns.page + ns.url -%}
+    {% if repo_name %}
+    	{% set txt = repo_name + " - " + source.stitle + ns.page + ns.url -%}
+    {% else %}
+    	{% set txt = "? - " + source.stitle + ns.page + ns.url -%}
+    {% endif %}
         <input id="clp_id{{clip_index}}" type="text" style="display:None" value="{{txt}}">
         <div class="copy-fld" onclick="toClipboard('clp_id{{clip_index}}')"
               title="{{ title }}"> ⚓{{anchor_text}} </div>&nbsp;

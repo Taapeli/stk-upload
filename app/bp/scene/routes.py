@@ -1276,7 +1276,7 @@ def source_search():
             res = service.reference_source_search(searchtext, limit)
             #print(res)
             return jsonify(res)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         stk_logger(u_context, f"-> bp.scene.routes.source_search FAILED")
         return jsonify({"status": Status.ERROR})
@@ -1424,6 +1424,7 @@ def show_media(iid):
     else:
         size = mediafile.get_image_size(fullname)
 
+    medium.citations = []
     # Display citations grouped by sources
     source_citations = {}
     for cita in medium.citations:

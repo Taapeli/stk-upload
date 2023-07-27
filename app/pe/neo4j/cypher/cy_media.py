@@ -28,18 +28,38 @@ class CypherMedia():
 
 # Read Media data
 
-    get_media_data_by_iid = """
-MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid}) <-[r:MEDIA]- (ref)
-OPTIONAL MATCH (media) <-[r:MEDIA]- (referrer)
+#     get_media_by_iid = """
+# MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid}) <-[r:MEDIA]- (ref)
+# OPTIONAL MATCH (media) <-[r:MEDIA]- (referrer)
+# OPTIONAL MATCH (referrer) <-[:EVENT]- (referrer_e)
+# OPTIONAL MATCH (media) -[:NOTE]-> (note:Note)
+# OPTIONAL MATCH (media) -[:CITATION]-> (cita:Citation) -[:SOURCE]-> (sour:Source)
+# OPTIONAL MATCH (cita) -[:NOTE]-> (cn:Note)
+# WITH root, media, r, referrer, referrer_e, note, cita, sour,
+#     COLLECT(DISTINCT cn) AS c_notes
+# RETURN root, media, PROPERTIES(r) AS prop, referrer, referrer_e,
+#     COLLECT (DISTINCT note) AS notes,
+#     COLLECT (DISTINCT [cita, sour, c_notes]) as citas
+# """
+    get_media_by_iid = """
+MATCH (root) -[:OBJ_OTHER]-> (a:Media {iid:$iid})
+OPTIONAL MATCH (a) <-[r:MEDIA]- (referrer)
 OPTIONAL MATCH (referrer) <-[:EVENT]- (referrer_e)
-OPTIONAL MATCH (media) -[:NOTE]-> (note:Note)
-OPTIONAL MATCH (media) -[:CITATION]-> (cita:Citation) -[:SOURCE]-> (s:Source)
-OPTIONAL MATCH (s) -[:NOTE]-> (sn:Note)
-WITH root, media, r, referrer, referrer_e, note, cita, s,
-    COLLECT(DISTINCT sn) AS s_notes
-RETURN root, media, PROPERTIES(r) AS prop, referrer, referrer_e,
-    COLLECT (DISTINCT note) AS notes,
-    COLLECT (DISTINCT [cita, s, s_notes]) as citas"""
+OPTIONAL MATCH (a) -[:NOTE]-> (note:Note)
+RETURN root, a, PROPERTIES(r) AS prop, referrer, referrer_e,
+    COLLECT(DISTINCT note) AS notes"""
+
+    get_media_sources_notes = """
+MATCH (root) --> (a:Media {iid:$iid})
+MATCH (a) -[:CITATION]-> (cita:Citation) -[:SOURCE]-> (sour:Source)
+OPTIONAL MATCH (sour) -[:REPOSITORY]-> (repo:Repository)
+OPTIONAL MATCH (cita) -[:NOTE]-> (c_note:Note)
+OPTIONAL MATCH (sour) -[:NOTE]-> (s_note:Note)
+RETURN //root,
+    a, cita, sour, repo,
+    COLLECT(DISTINCT s_note) AS source_notes,
+    COLLECT(DISTINCT c_note) AS citation_notes
+"""
 
     # Media list by description with count limit
     get_media_list = """
