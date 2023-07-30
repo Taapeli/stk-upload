@@ -1255,12 +1255,14 @@ def show_source_page(iid:str):
 @bp.route("/source/search")
 def source_search():
     """ Free text search by source title
+    
+        For testing? Not in use!
     """
     args = dict(request.args)
 
     key = args.get("apikey")
     searchtext = args.get("searchtext")
-    limit = args.get("limit")
+    limit = args.get("limit",10)
     if limit.isdigit():
         limit = int(limit)
     if not apikey.is_validkey(key): 
@@ -1276,7 +1278,7 @@ def source_search():
             res = service.reference_source_search(searchtext, limit)
             #print(res)
             return jsonify(res)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         stk_logger(u_context, f"-> bp.scene.routes.source_search FAILED")
         return jsonify({"status": Status.ERROR})
@@ -1423,23 +1425,13 @@ def show_media(iid):
         size = 0
     else:
         size = mediafile.get_image_size(fullname)
-
-    # Display citations grouped by sources
-    source_citations = {}
-    for cita in medium.citations:
-        s_iid = cita.sour.iid
-        if s_iid in source_citations.keys():
-            source_citations[s_iid].append(cita)
-        else:
-            source_citations[s_iid] = [cita]
-
-    for s_key in source_citations:
-        for cita in source_citations[s_key]:
-            print(f"media source_citation[{s_key}]: {cita.sour} > {cita}")
+    cites = res.get("cites", [])
+    for c in cites:
+        print(f"cite: {c}")
 
     return render_template("/scene/media.html", 
                            media=medium, size=size,
-                           source_citations=source_citations,
+                           source_citations=cites,
                            user_context=u_context, menuno=6
     )
 

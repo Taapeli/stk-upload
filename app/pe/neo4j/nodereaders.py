@@ -261,7 +261,7 @@ def Repository_from_node(node):
 
 def SourceBl_from_node(node):
     """
-    Transforms a db node to an object of type Source.
+    Transforms a db node to an object of type SourceBl.
     """
     # <Node id=355993 labels={'Source'}
     #     properties={'id': 'S0296', 'stitle': 'Hämeenlinnan lyseo 1873-1972',

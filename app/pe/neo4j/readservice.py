@@ -28,7 +28,7 @@ import logging
 logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
-from bl.base import Status
+from bl.base import Status, IsotammiException
 from bl.material import Material
 from ui.place import place_names_local_from_nodes
 
@@ -167,7 +167,7 @@ class Neo4jReadService(ConcreteService):
         """Reads person's def. name, birth and death event into Person obj."""
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(CypherSource.get_person_lifedata, pid=person.uniq_id)
+            result = session.run(CypherPerson.get_person_lifedata, pid=person.uniq_id)
             for record in result:
                 # <Record
                 #    name=<Node id=379934 labels={'Name'}
@@ -1153,7 +1153,7 @@ class Neo4jReadService(ConcreteService):
         return sources
 
     def dr_get_source_w_repository(self, user: str, material: Material, iid: str):
-        """Returns the PlaceBl with Notes and PlaceNames included."""
+        """Returns the Source with Repositories and Notes."""
         source = None
         with self.driver.session(default_access_mode="READ") as session:
             result = run_cypher(
@@ -1194,7 +1194,90 @@ class Neo4jReadService(ConcreteService):
                 "statustext": f"source iid={iid} not found",
             }
 
-    def dr_get_source_citations(self, sourceid: int):
+
+    def dr_get_sources_for_obj(self, user, material, iid):
+        """Read Citations, Sources and Repositories referred from given object.
+
+        :param: user        username, who has access
+        :param: material    the material concerned
+        :param: iid         Current object node iid
+
+         Returns Citation (w Notes) - Source (w Notes) - Repository data 
+                 as list of SourceCitation objects.
+        
+        TODO: Not processing Citation properties and connected Media
+       """
+
+        class SourceCitation:
+            """ Carrier for a Source and Repository reference. """
+            def __init__(self):
+                # Referencing Citation (w Notes), Source (w Notes) and Repository
+                self.citation = None
+                self.source = None
+                self.repository = None
+            def __str__(self):
+                c = self.citation.iid if self.citation else "?"
+                s = self.source.iid if self.source else "?"
+                r = self.repository.iid if self.repository else "?"
+                return (f"{c} -> {s} -> {r}")
+
+
+        citations = []
+    
+        if iid[0] == "M":
+            select_obj = CypherSource.media_prefix
+        else:
+            raise IsotammiException("Neo4jReadService.dr_get_sources_for_obj: Unknown object type")
+
+        with self.driver.session(default_access_mode="READ") as session:
+            try:
+                result = run_cypher_batch(session, CypherSource.get_obj_source_notes, user, material,
+                                          cypher_prefix=select_obj, iid=iid)
+                # RETURN a, cita, sour, repo,
+                #    COLLECT(DISTINCT s_note) AS source_notes,
+                #    COLLECT(DISTINCT c_note) AS citation_notes
+    
+                for record in result:
+                    cita_node = record["cita"]
+                    sour_node = record["sour"]
+                    repo_node = record["repo"]
+                    source_notes = record["source_notes"]
+                    citation_notes = record["citation_notes"]
+ 
+                    if cita_node:
+                        cita = Citation_from_node(cita_node)
+                        cita.notes = []
+                        for node in citation_notes:
+                            cita.notes.append(Note_from_node(node))
+                    # else:
+                    #     return {"status": Status.NOT_FOUND}
+
+                    sour = None
+                    if sour_node:
+                        sour = SourceBl_from_node(sour_node)
+                        for node in source_notes:
+                            sour.notes.append(Note_from_node(node))
+
+                    repo = None
+                    if repo_node:
+                        repo = Repository_from_node(repo_node)
+
+                    cita_tuple = SourceCitation()
+                    cita_tuple.citation = cita
+                    cita_tuple.source = sour
+                    cita_tuple.repository = repo
+                    citations.append(cita_tuple)
+
+            except Exception as e:
+                return {
+                    "status": Status.ERROR,
+                    "statustext": f"Neo4jReadService.dr_get_sources_for_obj: {e.__class__.__name__} {e}",
+                }
+
+        return {"status": Status.OK, "citations": citations}
+
+
+    def dr_get_source_citators(self, sourceid: int):
         """Read Events and Person, Family and Media citating this Source.
 
         Returns
@@ -1275,32 +1358,27 @@ class Neo4jReadService(ConcreteService):
                     targets[uniq_id] = targetlist
                 else:
                     print(
-                        f'dr_get_source_citations: Event {near_node.id} {near_node.get("id")} without Person or Family?'
+                        f'dr_get_source_citators: Event {near_node.id} {near_node.get("id")} without Person or Family?'
                     )
 
         # Result dictionaries using key = Citation uniq_id
         return citations, notes, targets
 
     def dr_source_search(self, args):
+        """
+        For testing? Not in use!
+        """
         # material = args.get('material')
         # username = args.get('use_user')
         searchtext = args.get('searchtext')
+        state = args.get('state', 'Accepted')
         limit = args.get('limit', 100)
         #print(args)
 
-        cypher = """
-            CALL db.index.fulltext.queryNodes("sourcetitle",$searchtext) 
-                YIELD node as source, score
-            WITH source,score
-            ORDER by score desc
-
-            MATCH (root:Root {state:"Accepted"}) --> (source)
-            RETURN DISTINCT source, score
-            LIMIT $limit
-            """
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run( cypher, 
+            result = session.run( CypherSource.source_fulltext_search, 
                                   searchtext=searchtext,
+                                  state=state,
                                   limit=limit)
             rsp = []
             for record in result:
@@ -1444,10 +1522,11 @@ class Neo4jReadService(ConcreteService):
                 return {"media": media, "status": Status.NOT_FOUND}
 
     def dr_get_media_single(self, user, material, iid):
-        """Read a Media object, selected by iid.
+        """Read a Media object with Referrers and Notes.
 
-        :param: user    username, who has access
-        :parma: iid     Media node iid
+        :param: user        username, who has access
+        :param: material    the material concerned
+        :parma: iid         Media node iid
         """
 
         class MediaReferrer:
@@ -1473,20 +1552,18 @@ class Neo4jReadService(ConcreteService):
         event_refs = {}  # The Person or Family nodes behind referencing Event
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher_batch(session, CypherMedia.get_media_data_by_iid,
+                result = run_cypher_batch(session, CypherMedia.get_media_by_iid,
                                           user, material, iid=iid)
-                # RETURN media, PROPERTIES(r) AS prop, referrer, referrer_e,
-                # COLLECT (DISTINCT note) AS notes,
-                # COLLECT (DISTINCT [citation, source, note_list]) as citas
-    
+                # RETURN root, a, PROPERTIES(r) AS prop, referrer, referrer_e,
+                #   COLLECT(DISTINCT note) AS notes
+
                 for record in result:
-                    media_node = record["media"]
+                    media_node = record["a"]
                     crop = record["prop"]
                     ref_node = record["referrer"]
                     event_node = record["referrer_e"]
                     note_nodes = record["notes"]
-                    cita_nodes = record["citas"]
-                    
+
                     # - Media node
                     # - cropping
                     # - referring Person, Family or Event
@@ -1541,18 +1618,9 @@ class Neo4jReadService(ConcreteService):
 
                     notes = []
                     for note_node in note_nodes:
-                        lbl = list(note_node.labels)[0]
-                        print (f" -> ({lbl}: {note_node._properties})")
+                        print (f" {media_node['id']} -> (Note: {note_node._properties})")
                         obj = Note_from_node(note_node)
                         notes.append(obj)
-                    citations = []
-                    for cita_node, source_node, s_notes in cita_nodes:
-                        if cita_node:
-                            cita = Citation_from_node(cita_node)
-                            cita.sour = SourceBl_from_node(source_node)
-                            for note_node in s_notes:
-                                cita.sour.notes.append(Note_from_node(note_node))
-                            citations.append(cita)
 
             except Exception as e:
                 return {
@@ -1561,8 +1629,8 @@ class Neo4jReadService(ConcreteService):
                 }
 
         status = Status.OK if media else Status.NOT_FOUND
-        return {"status": status, "media": media,
-                "notes":notes, "citations":citations}
+        return {"status": status, "media": media, "notes":notes}
+
 
     # ------ Comment -----
 
