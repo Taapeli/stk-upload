@@ -130,7 +130,7 @@ class MediaReader(DataService):
 
         # Example database items:
         #    MATCH (media:Media) <-[r:MEDIA]- (ref) <-[:EVENT]- (ref2)
-        #  media     r (crop)             ref                           ref2
+        #  media     r                    ref                           ref2
         # (media) <-[crop()]-            (Person 'I0026' id=21532) <-- (None)
         # (media) <-[crop(47,67,21,91)]- (Person 'I0026' id=21532) <-- (None)
         # (media) <-[crop(20,47,22,53)]- (Person 'I0029' id=21535) <-- (None)
@@ -140,17 +140,19 @@ class MediaReader(DataService):
         serv = self.dataservice
         res = serv.dr_get_media_single(user, self.user_context.material, iid)
         # returns {status, media, notes}
+        #    where media.ref = list of referrer objects
         if Status.has_failed(res):
             return res
 
         media = res.get("media")
-        media.citations = res.get("citations")
         media.notes = res.get("notes")
 
         res2 = serv.dr_get_sources_for_obj(user, self.user_context.material, iid)
         if Status.has_failed(res2):
             return res2
-        return {"item": media, "status": Status.OK}
+        cites = res2.get("citations", [])
+
+        return {"status": Status.OK, "item": media, "cites": cites}
 
 
 # class MediaWriter(DataService):
