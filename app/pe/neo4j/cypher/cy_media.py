@@ -49,18 +49,6 @@ OPTIONAL MATCH (a) -[:NOTE]-> (note:Note)
 RETURN root, a, PROPERTIES(r) AS prop, referrer, referrer_e,
     COLLECT(DISTINCT note) AS notes"""
 
-    media_prefix = "MATCH (a:Media {iid:$iid}) "
-    get_obj_source_notes = """
-MATCH (a) -[:CITATION]-> (cita:Citation) -[:SOURCE]-> (sour:Source)
-OPTIONAL MATCH (sour) -[:REPOSITORY]-> (repo:Repository)
-OPTIONAL MATCH (cita) -[:NOTE]-> (c_note:Note)
-OPTIONAL MATCH (sour) -[:NOTE]-> (s_note:Note)
-RETURN //root, a,
-    cita, sour, repo,
-    COLLECT(DISTINCT s_note) AS source_notes,
-    COLLECT(DISTINCT c_note) AS citation_notes
-"""
-
     # Media list by description with count limit
     get_media_list = """
 MATCH (root) -[:OBJ_OTHER]-> (o:Media) <- [:MEDIA] - (r)

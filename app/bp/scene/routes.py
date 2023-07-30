@@ -1255,12 +1255,14 @@ def show_source_page(iid:str):
 @bp.route("/source/search")
 def source_search():
     """ Free text search by source title
+    
+        For testing? Not in use!
     """
     args = dict(request.args)
 
     key = args.get("apikey")
     searchtext = args.get("searchtext")
-    limit = args.get("limit")
+    limit = args.get("limit",10)
     if limit.isdigit():
         limit = int(limit)
     if not apikey.is_validkey(key): 

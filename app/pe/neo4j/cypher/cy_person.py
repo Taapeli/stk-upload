@@ -74,13 +74,6 @@ MATCH (src) -[r:CITATION|NOTE|MEDIA]-> (target)
     WHERE ID(src) IN $uid_list
 RETURN src, properties(r) AS r, target"""
 
-#     # Older version:
-#     get_objs_citation_note_media = """
-# MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-#     WHERE ID(x) IN $uid_list
-# RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
-
-
     get_names = """
 MATCH (n) <-[r:NAME]- (p:Person)
     where id(p) = $pid
@@ -91,6 +84,13 @@ ORDER BY name.order"""
 MATCH (n)<-[r:NAME]-(p:Person)
 RETURN ID(p) AS pid, n as name
 ORDER BY n.order"""
+
+    get_person_lifedata = """
+match (p:Person) -[:NAME]-> (n:Name {order:0})
+    where id(p) = $pid
+optional match (p) -[re:EVENT]-> (e:Event)
+    where e.type = "Birth" or e.type = "Death"
+return n as name, collect(distinct e) as events"""
 
 
 # ----- Persons listing ----
