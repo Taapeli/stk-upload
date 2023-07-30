@@ -28,7 +28,7 @@ import logging
 logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
-from bl.base import Status
+from bl.base import Status, IsotammiException
 from bl.material import Material
 from ui.place import place_names_local_from_nodes
 
@@ -1194,54 +1194,88 @@ class Neo4jReadService(ConcreteService):
                 "statustext": f"source iid={iid} not found",
             }
 
-    # ------- Ehdotus alkaa ?????
 
     def dr_get_sources_for_obj(self, user, material, iid):
         """Read Citations, Sources and Repositories referred from given object.
 
         :param: user        username, who has access
         :param: material    the material concerned
-        :parma: iid     Current node iid
-        """
-        cita_tuples = {}  # [citation, source, [cita_note]]
+        :param: iid         Current object node iid
+
+         Returns Citation (w Notes) - Source (w Notes) - Repository data 
+                 as list of SourceCitation objects.
+        
+        TODO: Not processing Citation properties and connected Media
+       """
+
+        class SourceCitation:
+            """ Carrier for a Source and Repository reference. """
+            def __init__(self):
+                # Referencing Citation (w Notes), Source (w Notes) and Repository
+                self.citation = None
+                self.source = None
+                self.repository = None
+            def __str__(self):
+                c = self.citation.iid if self.citation else "?"
+                s = self.source.iid if self.source else "?"
+                r = self.repository.iid if self.repository else "?"
+                return (f"{c} -> {s} -> {r}")
+
+
+        citations = []
     
+        if iid[0] == "M":
+            select_obj = CypherMedia.media_prefix
+        else:
+            raise IsotammiException("Neo4jReadService.dr_get_sources_for_obj: Unknown object type")
+
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher_batch(session, CypherMedia.get_media_sources_notes,
-                                          user, material, iid=iid)
+                result = run_cypher_batch(session, CypherMedia.get_obj_source_notes, user, material,
+                                          cypher_prefix=select_obj, iid=iid)
                 # RETURN a, cita, sour, repo,
                 #    COLLECT(DISTINCT s_note) AS source_notes,
                 #    COLLECT(DISTINCT c_note) AS citation_notes
     
                 for record in result:
-                    media_node = record["a"]
-                    #ref_node = record["referrer"]
-                    #event_node = record["referrer_e"]
+                    cita_node = record["cita"]
+                    sour_node = record["sour"]
                     repo_node = record["repo"]
-                    cita_node = record["cita"]   # 
                     source_notes = record["source_notes"]
                     citation_notes = record["citation_notes"]
  
-                    citations = []
-                    for cita_node, source_node, c_notes in cita_tuples:
-                        if cita_node:
-                            cita = Citation_from_node(cita_node)
-                            cita.sour = SourceBl_from_node(source_node)
-                            for note_node in c_notes:
-                                cita.sour.notes.append(Note_from_node(note_node))
-                                print (f" {cita_node['id']} -> (Note: {note_node._properties})")
-                            citations.append(cita)
+                    if cita_node:
+                        cita = Citation_from_node(cita_node)
+                        cita.notes = []
+                        for node in citation_notes:
+                            cita.notes.append(Note_from_node(node))
+                    # else:
+                    #     return {"status": Status.NOT_FOUND}
+
+                    sour = None
+                    if sour_node:
+                        sour = SourceBl_from_node(sour_node)
+                        for node in source_notes:
+                            sour.notes.append(Note_from_node(node))
+
+                    repo = None
+                    if repo_node:
+                        repo = Repository_from_node(repo_node)
+
+                    cita_tuple = SourceCitation()
+                    cita_tuple.citation = cita
+                    cita_tuple.source = sour
+                    cita_tuple.repository = repo
+                    citations.append(cita_tuple)
 
             except Exception as e:
                 return {
                     "status": Status.ERROR,
-                    "statustext": f"Neo4jReadService.dr_get_media_single: {e.__class__.__name__} {e}",
+                    "statustext": f"Neo4jReadService.dr_get_sources_for_obj: {e.__class__.__name__} {e}",
                 }
 
-        status = Status.OK if media else Status.NOT_FOUND
-        return {"status": status, "referrers": referrers,
-                "notes":notes, "citations":citations}
-# Ehdotus päättyy
+        return {"status": Status.OK, "citations": citations}
+
 
     def dr_get_source_citators(self, sourceid: int):
         """Read Events and Person, Family and Media citating this Source.

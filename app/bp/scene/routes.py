@@ -1423,24 +1423,13 @@ def show_media(iid):
         size = 0
     else:
         size = mediafile.get_image_size(fullname)
-
-    medium.citations = []
-    # Display citations grouped by sources
-    source_citations = {}
-    for cita in medium.citations:
-        s_iid = cita.sour.iid
-        if s_iid in source_citations.keys():
-            source_citations[s_iid].append(cita)
-        else:
-            source_citations[s_iid] = [cita]
-
-    for s_key in source_citations:
-        for cita in source_citations[s_key]:
-            print(f"media source_citation[{s_key}]: {cita.sour} > {cita}")
+    cites = res.get("cites", [])
+    for c in cites:
+        print(f"cite: {c}")
 
     return render_template("/scene/media.html", 
                            media=medium, size=size,
-                           source_citations=source_citations,
+                           source_citations=cites,
                            user_context=u_context, menuno=6
     )
 

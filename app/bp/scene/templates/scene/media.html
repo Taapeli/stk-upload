@@ -177,79 +177,49 @@ tr > td > img {
 
 	{% if source_citations %}
 
-		{% if kokeilu_metodi %}
 <style>
    td.Citation {padding:.3em;}
    td.Citation > div {display: inline }
    td.Citation div ol {padding-top:.3em;}
 </style>
 	        <div class="subsection" id="citations">
-	            <h3>{{ _('Source References') }} (X)</h3>
+	            <h3>{{ _('Source References') }}</h3>
 	            <table class="infolist eventlist" width="100%">
 	                <tbody>
 
-			        {% for c in media.citations %} <!-- |sort(attribute='page') %} -->
+		{% for cite in source_citations %} <!-- |sort(attribute='page') %} -->
+			{% set c = cite.citation %}
+			{% set s = cite.source %}
+			{% set r = cite.repository %}
 	        		<tr>
 	        		  <td class="Citation" style="text-align: center;">
 	        		     <span title="sitaatti {{c.iid}} ({{c.id}})">{{loop.index}}.</span> 
 	        		  </td>
 	        		  <td class="Citation">
-			<!--        {{loop.index}}, {{c}}, {{c.sour}},                   {{repo_name}}, {{ _( "Page" ) }} -->
-            {{ macro.source_clip(loop.index, c, c.sour, repo_name, c.sour.stitle, _("Copy citation to clipboard")) }}
+			<!--        {{loop.index}}, {{c}}, {{s}},                   {{r.rname}}, {{ _( "Page" ) }} -->
+            {{ macro.source_clip(loop.index, c, s, r.rname, s.stitle, _("Copy citation to clipboard")) }}
 
 	        		    <div title="{{c.confidence|transl('conf')}} {{ _('confidence') }}"
-                          {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
+            {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
 	   					  	<span><b>{% if c.url %}
 	   					  		<a href="{{c.url}}" class="outlink" 
            						   target="_blank">{{c.url|transl('urldomain')}}</a>
-	   					     {% else %}{{c.page}}
-	   					     {% endif -%}</b></span>
+	   		{% else %}{{c.page}}
+	   		{% endif -%}</b></span>
 	   					  {{ macro.stars(c.confidence|float) }}
                		    	<ol type="a">
-	               		{% for note in c.sour.notes %}
+	               		{% for note in s.notes %}
                             <li><span title="{{note.iid}} / {{note.id}}">–► </span>{{ macro.notelink(note) }}
 	                    {% endfor %}
 	                      	</ol>
 	                    </div>
 	         		  </td>
 	         		</tr>
-                    {% endfor %}
+		{% endfor %}
                 </tbody></table>
 	        </div>
 	{% endif %}
 
-	<div class="subsection" id="citations">
-    	<h3>{{ _('Source References') }}</h3>
-        <div id="sourcerefContent">
-	{# <!-- Python code:
-	 for s_key in source_citations:
-	    for cita in source_citations[s_key]:
-	        print(f"media source_citation[{s_key}]: {cita.sour} > {cita}") -->
-	#}
-		{% set abc = "abcdefghijklmnopqrstuv" %}
-    	{% for s_key in source_citations %}
-        	{% set s = source_citations[s_key][0].sour %}
-        	<div class="sourceDesc">
-        		<a href="/source/{{ s.iid }}" class="inlink"
-        		   title="Lähteen {{ s.id }} / {{ s.iid }} tiedot">{{ s.stitle }}</a>
-        		 – <span class="typedesc">{{ s.medium }}</span>
-        	{% for cita in source_citations[s_key] %}
-        		{% for sn in s.notes %}
-        		<div class="citaDesc">
-        			{{ abc[loop.index0] }}.
-        			<span title="{{cita.id}} {{cita.confidence|transl('conf')}} {{ _('confidence') }}">
-        				{{cita.page}} {{ macro.stars(cita.confidence|int) }}
-        			</span>
-        			–► <i>{{sn.type}}</i>
-        				<a class="outlink" target="_blank" href="{{sn.url}}">{{sn.url|transl('urldomain')}}</a>
-        		</div>
-         		{% endfor %}
-        	{% endfor %}
-        	</div>
- 		{% endfor %}
-	</div> {# a Source #}
-	{% endif %}
-  </div>
   <div class="fullclear"></div>
 {% endif %}
 </div>
