@@ -167,7 +167,7 @@ class Neo4jReadService(ConcreteService):
         """Reads person's def. name, birth and death event into Person obj."""
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(CypherSource.get_person_lifedata, pid=person.uniq_id)
+            result = session.run(CypherPerson.get_person_lifedata, pid=person.uniq_id)
             for record in result:
                 # <Record
                 #    name=<Node id=379934 labels={'Name'}
@@ -1225,13 +1225,13 @@ class Neo4jReadService(ConcreteService):
         citations = []
     
         if iid[0] == "M":
-            select_obj = CypherMedia.media_prefix
+            select_obj = CypherSource.media_prefix
         else:
             raise IsotammiException("Neo4jReadService.dr_get_sources_for_obj: Unknown object type")
 
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher_batch(session, CypherMedia.get_obj_source_notes, user, material,
+                result = run_cypher_batch(session, CypherSource.get_obj_source_notes, user, material,
                                           cypher_prefix=select_obj, iid=iid)
                 # RETURN a, cita, sour, repo,
                 #    COLLECT(DISTINCT s_note) AS source_notes,
@@ -1365,25 +1365,20 @@ class Neo4jReadService(ConcreteService):
         return citations, notes, targets
 
     def dr_source_search(self, args):
+        """
+        For testing? Not in use!
+        """
         # material = args.get('material')
         # username = args.get('use_user')
         searchtext = args.get('searchtext')
+        state = args.get('state', 'Accepted')
         limit = args.get('limit', 100)
         #print(args)
 
-        cypher = """
-            CALL db.index.fulltext.queryNodes("sourcetitle",$searchtext) 
-                YIELD node as source, score
-            WITH source,score
-            ORDER by score desc
-
-            MATCH (root:Root {state:"Accepted"}) --> (source)
-            RETURN DISTINCT source, score
-            LIMIT $limit
-            """
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run( cypher, 
+            result = session.run( CypherSource.source_fulltext_search, 
                                   searchtext=searchtext,
+                                  state=state,
                                   limit=limit)
             rsp = []
             for record in result:
