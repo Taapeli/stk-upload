@@ -169,8 +169,8 @@
 {%- endmacro %}
 
 
-#  Formats object keys and root for display.
 {% macro obj_title(obj) -%}{% if obj.root %}
+		{#  Formats object keys and root for display. #}
     	{{obj.iid}} / {{obj.id}}{% if user_context.is_common()
     	%}{{ _( ', origin from material batch %(root)s', root=obj.root.batch_id ) }}
     	{% endif %}
@@ -400,6 +400,54 @@
               title="{{ title }}"> ⚓{{anchor_text}} </div>&nbsp;
 {%- endmacro %}
 
+{% macro source_citations(source_citations) %}
+	{# Shows a div for Citations of Sources and Repositories
+	   using data from Neo4jReadService.dr_get_sources_for_obj().
+	   Calls macros source_clip, stars, notelink
+	#}
+	<style>
+	   td.Citation {padding:.3em;}
+	   td.Citation > div {display: inline }
+	   td.Citation div ol {padding-top:.3em;}
+	</style>
+ 
+    <div class="subsection" id="citations">
+        <h3>{{ _('Source References') }}</h3>
+        <table class="infolist eventlist" width="100%">
+            <tbody>
+		{% for cite in source_citations %}
+			{% set c = cite.citation %}
+			{% set s = cite.source %}
+			{% set r = cite.repository %}
+	       		<tr>
+	       		  <td class="Citation" style="text-align: center;">
+	       		     <span title="sitaatti {{c.iid}} ({{c.id}})">{{loop.index}}.</span> 
+	       		  </td>
+	       		  <td class="Citation">
+            {{ source_clip(loop.index, c, s, r.rname, s.stitle, _("Copy citation to clipboard")) }}
+
+	        		<div title="{{c.confidence|transl('conf')}} {{ _('confidence') }}"
+            			{% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
+	   					<span><b>
+	   			{% if c.url %}
+	   						<a href="{{c.url}}" class="outlink" 
+           					   target="_blank">{{c.url|transl('urldomain')}}</a>
+	   			{% else %}  <a href="/source/{{s.iid}}" class="inlink"
+	   						   title="{{ _('Source') }} {{s.id}} '{{s.iid}}'">{{c.page}}</a>
+	   			{% endif -%}
+	   					</b></span> {{ stars(c.confidence|float) }}
+               		    	<ol type="a">
+	               		{% for note in s.notes %}
+                            	<li><span title="{{note.iid}} / {{note.id}}">–► </span>{{ notelink(note) }}
+	                    {% endfor %}
+	                      	</ol>
+	                    </div>
+	         		  </td>
+	         		</tr>
+		{% endfor %}
+                </tbody></table>
+	        </div>
+{% endmacro %}
 
 # 2.4 Place
 
