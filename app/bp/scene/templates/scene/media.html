@@ -176,48 +176,7 @@ tr > td > img {
 	{% endif %}
 
 	{% if source_citations %}
-
-<style>
-   td.Citation {padding:.3em;}
-   td.Citation > div {display: inline }
-   td.Citation div ol {padding-top:.3em;}
-</style>
-	        <div class="subsection" id="citations">
-	            <h3>{{ _('Source References') }}</h3>
-	            <table class="infolist eventlist" width="100%">
-	                <tbody>
-
-		{% for cite in source_citations %} <!-- |sort(attribute='page') %} -->
-			{% set c = cite.citation %}
-			{% set s = cite.source %}
-			{% set r = cite.repository %}
-	        		<tr>
-	        		  <td class="Citation" style="text-align: center;">
-	        		     <span title="sitaatti {{c.iid}} ({{c.id}})">{{loop.index}}.</span> 
-	        		  </td>
-	        		  <td class="Citation">
-			<!--        {{loop.index}}, {{c}}, {{s}},                   {{r.rname}}, {{ _( "Page" ) }} -->
-            {{ macro.source_clip(loop.index, c, s, r.rname, s.stitle, _("Copy citation to clipboard")) }}
-
-	        		    <div title="{{c.confidence|transl('conf')}} {{ _('confidence') }}"
-            {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
-	   					  	<span><b>{% if c.url %}
-	   					  		<a href="{{c.url}}" class="outlink" 
-           						   target="_blank">{{c.url|transl('urldomain')}}</a>
-	   		{% else %}{{c.page}}
-	   		{% endif -%}</b></span>
-	   					  {{ macro.stars(c.confidence|float) }}
-               		    	<ol type="a">
-	               		{% for note in s.notes %}
-                            <li><span title="{{note.iid}} / {{note.id}}">–► </span>{{ macro.notelink(note) }}
-	                    {% endfor %}
-	                      	</ol>
-	                    </div>
-	         		  </td>
-	         		</tr>
-		{% endfor %}
-                </tbody></table>
-	        </div>
+		{{ macro.source_citations(source_citations) }}
 	{% endif %}
 
   <div class="fullclear"></div>
