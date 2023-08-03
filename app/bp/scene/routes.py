@@ -1427,7 +1427,7 @@ def show_media(iid):
         size = mediafile.get_image_size(fullname)
     cites = res.get("cites", [])
     for c in cites:
-        print(f"cite: {c}")
+        print(f"#cite: {c}")
 
     return render_template("/scene/media.html", 
                            media=medium, size=size,

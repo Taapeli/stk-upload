@@ -109,6 +109,7 @@ class Neo4jUpdateService(ConcreteService):
             #                                  format(msg)), 'level':"ERROR"})
             return {"status": Status.ERROR, "statustext": f"Rollback failed: {msg}"}
 
+
     # ----- Batch Audit -----
 
     @staticmethod
@@ -397,6 +398,7 @@ class Neo4jUpdateService(ConcreteService):
         }
         if citation.dates:
             c_attr.update(citation.dates.for_db())
+        c_attr.update(citation.src_attrs())
 
         result = tx.run(
             CypherCitation.create_to_batch,
@@ -472,6 +474,7 @@ class Neo4jUpdateService(ConcreteService):
             "text": note.text,
             "url": note.url,
         }
+        n_attr.update(note.src_attrs())
         if note.handle:
             n_attr["handle"] = note.handle
         if not parent_id is None:
@@ -517,6 +520,8 @@ class Neo4jUpdateService(ConcreteService):
             "description": media.description,
         }
         m_attr["batch_id"] = batch_id
+        m_attr.update(media.src_attrs())
+
         result = tx.run(
             CypherMedia.create_in_batch,
             bid=batch_id,
@@ -643,6 +648,7 @@ class Neo4jUpdateService(ConcreteService):
             "type": place.type,
             "pname": place.pname,
         }
+        pl_attr.update(place.src_attrs())
         if place.coord:
             # If no coordinates, don't set coord attribute
             pl_attr["coord"] = place.coord.get_coordinates()
@@ -836,6 +842,7 @@ class Neo4jUpdateService(ConcreteService):
             "rname": repository.rname,
             "type": repository.type,
         }
+        r_attr.update(repository.src_attrs())
         result = tx.run(
             CypherRepository.create_in_batch,
             bid=batch_id,
@@ -878,6 +885,7 @@ class Neo4jUpdateService(ConcreteService):
                 "sauthor": source.sauthor,
                 "spubinfo": source.spubinfo,
             }
+            s_attr.update(source.src_attrs())
 
             result = tx.run(CypherSourceByHandle.create_to_batch,
                             batch_id=batch_id, s_attr=s_attr)
@@ -948,13 +956,7 @@ class Neo4jUpdateService(ConcreteService):
             "type": event.type,
             "description": event.description,
         }
-        if event.attr:
-            # Convert 'attr' dict to list for db
-            a = []
-            for key, value in event.attr.items():
-                a = a + [key, value]
-                e_attr.update({"attr": a})
-            
+        e_attr.update(event.src_attrs())
         if event.dates:
             e_attr.update(event.dates.for_db())
 
@@ -1026,15 +1028,16 @@ class Neo4jUpdateService(ConcreteService):
             "confidence": person.confidence,
             "sortname": person.sortname,
         }
+        p_attr.update(person.src_attrs())
         if person.dates:
             p_attr.update(person.dates.for_db())
 
-        if person.attr:
-        # Convert 'attr' dict to list for db
-            a = []
-            for key, value in person.attr.items():
-                a = a + [key, value]
-                p_attr.update({"attr": a})
+        ##p_attr = self._convert_attr(person)
+        # From dict {'Id Code': 'malli'} create parameter attr_id_code: "malli"
+        for key, value in person.attr.items():
+            i = "attr_"+"".join([ c if c.isalnum() else "_" for c in key ]).lower()
+            p_attr[i] = value
+            print(p_attr)
 
         result = tx.run(CypherPerson.create_to_batch, 
                         batch_id=batch_id, p_attr=p_attr)
@@ -1109,7 +1112,7 @@ class Neo4jUpdateService(ConcreteService):
             "title": name.title,
             # no Isotammi ID for names
         }
-        
+        n_attr.update(name.src_attrs())
         if name.dates:
             n_attr.update(name.dates.for_db())
             
