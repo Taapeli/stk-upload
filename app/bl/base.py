@@ -181,26 +181,6 @@ class NodeObject:
 
         return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
 
-    # @staticmethod
-    # def newUuid(): # Removed 9.4.2023 / JMä
-    #     """Generates a new uuid key. DON'T!
-    #
-    #     See. https://docs.python.org/3/library/uuid.html
-    #     """
-    #     return None
-    #     #return uuid.uuid4().hex
-    # def uuid_short(self):
-    #     """ Display uuid (or iid) in short form. 
-    #
-    #         Real uuid shortened, iid need is not too long
-    #     """
-    #     if self.uuid:
-    #         if len(self.uuid) > 20:
-    #             return self.uuid[:6]
-    #         return self.uuid
-    #     else:
-    #         return ""
-
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """
         try:
@@ -215,6 +195,27 @@ class NodeObject:
         Called by `json.dumps(my_stk_object, cls=StkEncoder)`
         """
         return self.__dict__
+
+    def src_attrs(self):
+        """Get a dictionary of attribute pairs as list of separate parameters
+           to be used as cypher parameter map.
+
+           Input:  obj.attr__dict a pre-defined dictionary
+                                  created by xml_dom_handler.DOM_handler._extract_base 
+           Output: obj.attr_<key> = <value> for each dictionary items
+
+           Example: 
+            - from  obj.attr__dict = {'Id Code': 'malli',"Copyright":"me"} 
+            - to    {"attr_id_code": "malli", "attr_copyright": "me"}
+        """
+        ret_dict = {}
+        if hasattr(self, "attr__dict") and isinstance(self.attr__dict, dict):
+            for key, value in self.attr__dict.items():
+                keyvar = "attr_" + "".join([c if c.isalnum() else "_" for c in key]).lower()
+                ret_dict[keyvar] = value
+                print(f"# Attribute {type(self).__name__}.{keyvar} = {value!r}")
+        return ret_dict
+
 
 class IsotammiException(BaseException):
     def __init__(self, msg, **kwargs):
