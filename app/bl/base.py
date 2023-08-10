@@ -93,6 +93,7 @@ class NodeObject:
     """
     Class representing Neo4j Node type objects.
     """
+    STR_DELIM = "⁋" # Used for storing a string array to a staring
 
     def __init__(self, uniq_id:int=None):
         """
@@ -174,12 +175,12 @@ class NodeObject:
             return self.dates != other.dates
         return False
 
-    @staticmethod
-    def split_with_hyphen(id_str):
-        """Inserts a hyphen into the id string."""
-        """Examples: H-1, H-1234, H1-2345, H1234-5678."""
-
-        return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
+    # @staticmethod
+    # def split_with_hyphen(id_str): # -> pe.neo4j.util.IsotammiId.get_one.format_iid
+    #     """Inserts a hyphen into the id string."""
+    #     """Examples: H-1, H-1234, H1-2345, H1234-5678."""
+    #
+    #     return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
 
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """
@@ -196,25 +197,38 @@ class NodeObject:
         """
         return self.__dict__
 
-    def src_attrs(self):
-        """Get a dictionary of attribute pairs as list of separate parameters
-           to be used as cypher parameter map.
+    def extra_attrs(self):
+        """ Return Gramps object attributes from xml as a list of parameters
+            to be saved to db.
 
-           Input:  obj.attr__dict a pre-defined dictionary
+            Input:  obj.attr__dict a pre-defined dictionary
                                   created by xml_dom_handler.DOM_handler._extract_base 
-           Output: obj.attr_<key> = <value> for each dictionary items
+            Output: obj.attr_<key> = <values_string> for each dictionary items
 
-           Example: 
-            - from  obj.attr__dict = {'Id Code': 'malli',"Copyright":"me"} 
-            - to    {"attr_id_code": "malli", "attr_copyright": "me"}
+            The values are joined using STR_DELIM symbol as separator. String also
+            starts with 
+
+            Example: 
+            - from  obj.attr__dict = {'Id Code': 'malli',
+                                      "Copyright":"Helmet"
+                                      "Copyright":"Kaupunginkirjasto"} 
+            - to    {"attr_id_code": ["malli"],
+                     "attr_copyright": ["Helmet", "Kaupunginkirjasto"]}
         """
-        ret_dict = {}
+        dl = {}
+        ret = {}
         if hasattr(self, "attr__dict") and isinstance(self.attr__dict, dict):
             for key, value in self.attr__dict.items():
                 keyvar = "attr_" + "".join([c if c.isalnum() else "_" for c in key]).lower()
-                ret_dict[keyvar] = value
-                print(f"# Attribute {type(self).__name__}.{keyvar} = {value!r}")
-        return ret_dict
+                if keyvar in dl.keys():
+                    dl[keyvar].append(value)
+                else:
+                    dl[keyvar] = [value]
+            for keyvar in dl.keys():
+                values = dl[keyvar]
+                ret[keyvar] = self.STR_DELIM + self.STR_DELIM.join(values) + self.STR_DELIM
+                print(f"# Attribute {type(self).__name__}({self.id}).{keyvar} = {ret[keyvar]}")
+        return ret
 
 
 class IsotammiException(BaseException):
