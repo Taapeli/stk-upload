@@ -1203,15 +1203,17 @@ class DOM_handler:
         if dom.hasAttribute("id"):
             node.id = dom.getAttribute("id")
 
-        # - Extract all source "attribute" (in <person>, <object>) and
-        #   "srcattribute" (in <citation>, <source>) values from DOM object
-        # - to a single NodeObject dict field: node.attr__dict = {type: value, type:value,...}
+        # - Extract all following source values from DOM object
+        #   1. "attribute" (in <person>, <object>) and
+        #   2. "srcattribute" (in <citation>, <source>)
+        # - to a single NodeObject dict field
+        #   - node.attr__dict = {type: value, type:value,...}
         node.attr__dict = dict()
         for attr in dom.getElementsByTagName("attribute") + dom.getElementsByTagName("srcattribute"):
             if attr.hasAttribute("type"):
                 node.attr__dict[attr.getAttribute("type")] = attr.getAttribute("value")
-        if node.attr__dict:
-            print(f"## Got {node.id} attributes {node.attr__dict}")
+        # if node.attr__dict:
+        #     print(f"## Got {node.id} attributes {node.attr__dict}")
 
     def _extract_mediaref(self, dom_object):
         """Check if dom_object has media reference and extract it to p.media_refs.
