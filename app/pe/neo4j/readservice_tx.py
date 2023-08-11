@@ -16,7 +16,7 @@ from bl.place import PlaceBl, PlaceName
 from ui.place import place_names_local_from_nodes
 
 from pe.dataservice import ConcreteService
-from pe.neo4j.util import run_cypher, dict_root_node
+from pe.neo4j.util import run_cypher
 from pe.neo4j.util import run_cypher_batch
 from pe.neo4j.util import dict_root_node
 
@@ -840,6 +840,7 @@ class Neo4jReadServiceTx(ConcreteService):
         return {"items": ret, "status": Status.OK}
 
     # ------ Other -----
+
 
     def tx_get_object_places(self, base_objs:dict):
         ''' Read Place hierarchies for given Event objects.

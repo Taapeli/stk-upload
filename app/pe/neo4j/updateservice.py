@@ -44,7 +44,6 @@ from .cypher.cy_family import CypherFamily
 from .cypher.cy_gramps import CypherObjectWHandle
 from .cypher.cy_media import CypherMedia
 from .cypher.cy_note import CypherNote
-#from .cypher.cy_object import CypherObject
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_refname import CypherRefname
