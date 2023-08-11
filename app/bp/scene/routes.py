@@ -45,10 +45,8 @@ from flask_babelex import _
 
 import shareds
 from . import bp
-#from bl import material
 
 from bp.api import apikey
-
 from bl.base import Status, StkEncoder
 from bl.comment import CommentReader, CommentsUpdater #, Comment
 from bl.event import EventReader, EventWriter
@@ -1417,6 +1415,7 @@ def show_media(iid):
     if medium:
         fullname, mimetype = mediafile.get_fullname(medium.iid)
         stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
+        print(f"#attrs: {medium.attrs}")
     else:
         flash(f'{res.get("statustext","error")}', "error")
         fullname = None
@@ -1427,7 +1426,7 @@ def show_media(iid):
         size = mediafile.get_image_size(fullname)
     cites = res.get("cites", [])
     for c in cites:
-        print(f"cite: {c}")
+        print(f"#cite: {c}")
 
     return render_template("/scene/media.html", 
                            media=medium, size=size,

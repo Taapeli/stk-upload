@@ -197,12 +197,6 @@ MATCH (m:Media  {handle: $m_handle})
 
 # use models.gen.cypher.Cypher_name (there is no handle)
 
-#     link_citation = # --> CypherObject.link_citation
-# """
-# MATCH (p:Person   {handle: $p_handle})
-# MATCH (c:Citation {handle: $c_handle})
-# MERGE (p)-[r:CITATION]->(c)"""
-
     link_note = """
 MATCH (n {handle:$p_handle})
 MATCH (m:Note {handle:$n_handle})

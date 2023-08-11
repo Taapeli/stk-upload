@@ -60,6 +60,7 @@ class Name(NodeObject):
         self.suffix = suff
         self.dates = dates
         self.title = titl
+        self.attrs = ""
         # # Set in bp.gramps.xml_dom_handler.DOM_handler.handle_people
         # self.citation_handles = []
         # # For person page

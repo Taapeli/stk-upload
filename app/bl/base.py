@@ -93,7 +93,6 @@ class NodeObject:
     """
     Class representing Neo4j Node type objects.
     """
-
     def __init__(self, uniq_id:int=None):
         """
         Constructor.
@@ -102,24 +101,19 @@ class NodeObject:
         """
         #self.uuid = None 
         self.uniq_id = uniq_id  # Neo4j object id
-        self.change = 0  # Object change time
-        self.id = ""  # Gedcom object id like "I1234"
-        self.handle = ""  # Gramps handle (?)
+        self.change = 0     # Object change time
+        self.id = ""        # Gedcom object id like "I1234"
+        self.handle = ""    # Gramps handle (?)
+        self.attrs = ""     # dict containing Gramps object attributes and srcattributes
 
-        self.state = None  # Object state in process path
+        self.state = None   # Object state in process path
         # TODO Define constants for values:
         #     candicate, audit_requested, auditing, accepted,
         #     mergeing, common, rejected
-        self.iid = None  # Containing
+        self.iid = None     # Containing
         # - object type id ("H" = Human person etc.)
         # - running number in Crockford Base 32 format
         # - ISO 7064 checksum (2 digits)
-
-        # if uniq_id:
-        #     if isinstance(uniq_id, int):
-        #         self.uniq_id = uniq_id
-        #     else:
-        #         self.uuid = uniq_id
 
     def __str__(self):
         #uuid = self.uuid if self.uuid else "-"
@@ -174,32 +168,12 @@ class NodeObject:
             return self.dates != other.dates
         return False
 
-    @staticmethod
-    def split_with_hyphen(id_str):
-        """Inserts a hyphen into the id string."""
-        """Examples: H-1, H-1234, H1-2345, H1234-5678."""
-
-        return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
-
     # @staticmethod
-    # def newUuid(): # Removed 9.4.2023 / JMä
-    #     """Generates a new uuid key. DON'T!
+    # def split_with_hyphen(id_str): # -> pe.neo4j.util.IsotammiId.get_one.format_iid
+    #     """Inserts a hyphen into the id string."""
+    #     """Examples: H-1, H-1234, H1-2345, H1234-5678."""
     #
-    #     See. https://docs.python.org/3/library/uuid.html
-    #     """
-    #     return None
-    #     #return uuid.uuid4().hex
-    # def uuid_short(self):
-    #     """ Display uuid (or iid) in short form. 
-    #
-    #         Real uuid shortened, iid need is not too long
-    #     """
-    #     if self.uuid:
-    #         if len(self.uuid) > 20:
-    #             return self.uuid[:6]
-    #         return self.uuid
-    #     else:
-    #         return ""
+    #     return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
 
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """
@@ -215,6 +189,7 @@ class NodeObject:
         Called by `json.dumps(my_stk_object, cls=StkEncoder)`
         """
         return self.__dict__
+
 
 class IsotammiException(BaseException):
     def __init__(self, msg, **kwargs):

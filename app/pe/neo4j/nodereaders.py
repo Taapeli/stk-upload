@@ -18,6 +18,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 from datetime import datetime
+import json
 
 try:
     from neo4j.graph import Node            # Neo4j 4.x
@@ -51,6 +52,8 @@ def init(cls:NodeObject, node:Node):
     n.iid = node.get("iid","")
     n.handle = node["handle"] or None
     n.change = node.get("change")
+    jats = node.get("attrs")
+    n.attrs = json.loads(jats) if jats else {}
     return n
 
 def Citation_from_node(node):

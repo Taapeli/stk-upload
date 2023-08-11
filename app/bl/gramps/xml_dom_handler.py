@@ -34,6 +34,7 @@ import re
 import time
 import os
 import xml.dom.minidom
+import json
 import threading
 from flask_babelex import _
 
@@ -301,7 +302,7 @@ class DOM_handler:
         for citation in nodes:
 
             c = Citation()
-            # Extract handle, change and id
+            # Extract handle, change, id and attr
             self._extract_base(citation, c)
 
             try:
@@ -361,7 +362,7 @@ class DOM_handler:
         for event in nodes:
             # Create an event with Gramps attributes
             e = EventBl()
-            # Extract handle, change and id
+            # Extract handle, change, id and attr
             self._extract_base(event, e)
             e.place_handles = []
             e.note_handles = []
@@ -417,13 +418,6 @@ class DOM_handler:
                     }
                 )
 
-            # Handle <attribute>
-            self._extract_attr(event, e)
-#            e.attr = dict()
-#            for attr in event.getElementsByTagName("attribute"):
-#                if attr.hasAttribute("type"):
-#                    e.attr[attr.getAttribute("type")] = attr.getAttribute("value")
-
             for ref in event.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
                     e.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
@@ -450,7 +444,7 @@ class DOM_handler:
             f.note_handles = []
             f.citation_handles = []
 
-            # Extract handle, change and id
+            # Extract handle, change, id and attr
             self._extract_base(family, f)
 
             if len(family.getElementsByTagName("rel")) == 1:
@@ -508,9 +502,6 @@ class DOM_handler:
                 if ref.hasAttribute("hlink"):
                     f.child_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has child {f.child_handles[-1]}')
-                    
-            # Handle <attribute>
-            self._extract_attr(family, f)
 
             for ref in family.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
@@ -533,10 +524,11 @@ class DOM_handler:
 
         for note in nodes:
             n = Note()
-            # Extract handle, change and id
+            # Extract handle, change, id and attr
             self._extract_base(note, n)
 
             n.priv = self._get_priv(note)
+
             if note.hasAttribute("type"):
                 n.type = note.getAttribute("type")
 
@@ -552,7 +544,7 @@ class DOM_handler:
     def handle_media_list(self, tx, nodes, iids):
         for obj in nodes:
             o = MediaBl()
-            # Extract handle, change and id
+            # Extract handle, change, id and attr
             self._extract_base(obj, o)
 
             for obj_file in obj.getElementsByTagName("file"):
@@ -670,7 +662,7 @@ class DOM_handler:
             url_notes = []
 
             p = PersonBl()
-            # Extract handle, change and id
+            # Extract handle, change, id and attr
             self._extract_base(person, p)
             p.event_handle_roles = []
             p.note_handles = []
@@ -724,9 +716,6 @@ class DOM_handler:
             #        p.parentin_handles.append(person_parentin.getAttribute("hlink") + self.handle_suffix)
             #        ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
 
-            # Handle <attribute>
-            self._extract_attr(person, p)
-            
             for person_noteref in person.getElementsByTagName("noteref"):
                 if person_noteref.hasAttribute("hlink"):
                     p.note_handles.append(person_noteref.getAttribute("hlink") + self.handle_suffix)
@@ -758,7 +747,7 @@ class DOM_handler:
             pl.note_handles = []
             pl.citation_handles = []
 
-            # Extract handle, change and id
+            # Extract handle, change, id and attr
             self._extract_base(placeobj, pl)
             pl.type = placeobj.getAttribute("type")
 
@@ -882,7 +871,7 @@ class DOM_handler:
             url_notes = []
 
             r = Repository()
-            # Extract handle, change and id
+            # Extract handle, change, id and attr
             self._extract_base(repository, r)
 
             if len(repository.getElementsByTagName("rname")) == 1:
@@ -936,7 +925,6 @@ class DOM_handler:
             s.repositories = []  # list of Repository objects, containing 
                                 # prev. repository_id, reporef_hlink and reporef_medium
 
-            # Extract handle, change and id
             self._extract_base(source, s)
 
             if len(source.getElementsByTagName("stitle")) == 1:
@@ -1204,9 +1192,10 @@ class DOM_handler:
     def _extract_base(self, dom, node):
         """Extract common variables from DOM object to NodeObject fields.
 
-        node.id = self.id = ''            str Gedcom object id like "I1234"
-        node.change = self.change         int Gramps object change timestamp
-        node.handle = self.handle = ''    str Gramps handle
+        node.id = self.id = ''          str Gedcom object id like "I1234"
+        node.change = self.change       int Gramps object change timestamp
+        node.handle = self.handle = ''  str Gramps handle
+        node.attr__dict = {}            dict Gramps attributes and srcattributes
         """
         if dom.hasAttribute("handle"):
             node.handle = dom.getAttribute("handle") + self.handle_suffix
@@ -1214,18 +1203,26 @@ class DOM_handler:
             node.change = int(dom.getAttribute("change"))
         if dom.hasAttribute("id"):
             node.id = dom.getAttribute("id")
-    
-    
-    def _extract_attr(self, dom, node):
-        """Extract attr values from DOM object to NodeObject fields.
-        
-        node.attr = [[self.type, self.value],[self.type, self.value],...]
-        """
-        node.attr = dict()
-        for attr in dom.getElementsByTagName("attribute"):
+
+        # - Extract all following source values from DOM object
+        #   1. "attribute" (in <person>, <object>) and
+        #   2. "srcattribute" (in <citation>, <source>)
+        # - to a single NodeObject json field
+        #   - node.attrs = {type: [value], type: [value,...] ... }
+        my_attrs = {}
+        for attr in dom.getElementsByTagName("attribute") + dom.getElementsByTagName("srcattribute"):
             if attr.hasAttribute("type"):
-                node.attr[attr.getAttribute("type")] = attr.getAttribute("value")
-        
+                key = attr.getAttribute("type")
+                value = attr.getAttribute("value")
+                if key in my_attrs.keys():
+                    new_val = my_attrs[key] + [value]
+                else: # New key
+                    new_val = [value]
+                my_attrs[key] = new_val
+        if my_attrs:
+            node.attrs = json.dumps(my_attrs, ensure_ascii=False)
+            print(f"## Got {node.id} attributes {node.attrs}")
+        return
 
     def _extract_mediaref(self, dom_object):
         """Check if dom_object has media reference and extract it to p.media_refs.
