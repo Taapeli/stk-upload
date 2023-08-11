@@ -76,6 +76,7 @@ class MediaBl(Media):
         """
         Constructor
         """
+        Media.__init__(self)
         self.description = ""
         self.src = None
         self.mime = None

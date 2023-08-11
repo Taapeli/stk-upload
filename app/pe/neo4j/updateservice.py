@@ -394,10 +394,10 @@ class Neo4jUpdateService(ConcreteService):
             "id": citation.id,
             "page": citation.page,
             "confidence": citation.confidence,
+            "attrs": citation.attrs,
         }
         if citation.dates:
             c_attr.update(citation.dates.for_db())
-        c_attr.update(citation.extra_attrs())
 
         result = tx.run(
             CypherCitation.create_to_batch,
@@ -472,8 +472,8 @@ class Neo4jUpdateService(ConcreteService):
             "type": note.type,
             "text": note.text,
             "url": note.url,
+            "attrs": note.attrs,
         }
-        n_attr.update(note.extra_attrs())
         if note.handle:
             n_attr["handle"] = note.handle
         if not parent_id is None:
@@ -517,9 +517,10 @@ class Neo4jUpdateService(ConcreteService):
             "mime": media.mime,
             "name": media.name,
             "description": media.description,
+            "attrs": media.attrs,
+            "batch_id": batch_id,
         }
-        m_attr["batch_id"] = batch_id
-        m_attr.update(media.extra_attrs())
+        #m_attr["batch_id"] = batch_id
 
         result = tx.run(
             CypherMedia.create_in_batch,
@@ -646,8 +647,8 @@ class Neo4jUpdateService(ConcreteService):
             "id": place.id,
             "type": place.type,
             "pname": place.pname,
+            "attrs": place.attrs,
         }
-        pl_attr.update(place.extra_attrs())
         if place.coord:
             # If no coordinates, don't set coord attribute
             pl_attr["coord"] = place.coord.get_coordinates()
@@ -840,8 +841,8 @@ class Neo4jUpdateService(ConcreteService):
             "id": repository.id,
             "rname": repository.rname,
             "type": repository.type,
+            "attrs": repository.attrs,
         }
-        r_attr.update(repository.extra_attrs())
         result = tx.run(
             CypherRepository.create_in_batch,
             bid=batch_id,
@@ -883,8 +884,8 @@ class Neo4jUpdateService(ConcreteService):
                 "stitle": source.stitle,
                 "sauthor": source.sauthor,
                 "spubinfo": source.spubinfo,
+                "attrs": source.attrs,
             }
-            s_attr.update(source.extra_attrs())
 
             result = tx.run(CypherSourceByHandle.create_to_batch,
                             batch_id=batch_id, s_attr=s_attr)
@@ -954,8 +955,8 @@ class Neo4jUpdateService(ConcreteService):
             "id": event.id,
             "type": event.type,
             "description": event.description,
+            "attrs": event.attrs,
         }
-        e_attr.update(event.extra_attrs())
         if event.dates:
             e_attr.update(event.dates.for_db())
 
@@ -1026,8 +1027,8 @@ class Neo4jUpdateService(ConcreteService):
             "sex": person.sex,
             "confidence": person.confidence,
             "sortname": person.sortname,
+            "attrs": person.attrs,
         }
-        p_attr.update(person.extra_attrs())
         if person.dates:
             p_attr.update(person.dates.for_db())
 
@@ -1109,9 +1110,9 @@ class Neo4jUpdateService(ConcreteService):
             "prefix": name.prefix,
             "suffix": name.suffix,
             "title": name.title,
+            "attrs": name.attrs,
             # no Isotammi ID for names
         }
-        n_attr.update(name.extra_attrs())
         if name.dates:
             n_attr.update(name.dates.for_db())
             

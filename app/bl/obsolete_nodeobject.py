@@ -36,7 +36,7 @@ class NodeReader(DataService):
         user = self.user_context.batch_user()
         material = self.user_context.material
         lbl = label.title()
-        res = self.dataservice.dr_get_object_attrs(user,  material,
+        res = self.dataservice.dr_get_object_attrs(user, material,
                                                    lbl, iid)
         if Status.has_failed(res):
             return res

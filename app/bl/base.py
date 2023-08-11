@@ -93,8 +93,6 @@ class NodeObject:
     """
     Class representing Neo4j Node type objects.
     """
-    STR_DELIM = "⁋" # Used for storing a string array to a staring
-
     def __init__(self, uniq_id:int=None):
         """
         Constructor.
@@ -103,24 +101,19 @@ class NodeObject:
         """
         #self.uuid = None 
         self.uniq_id = uniq_id  # Neo4j object id
-        self.change = 0  # Object change time
-        self.id = ""  # Gedcom object id like "I1234"
-        self.handle = ""  # Gramps handle (?)
+        self.change = 0     # Object change time
+        self.id = ""        # Gedcom object id like "I1234"
+        self.handle = ""    # Gramps handle (?)
+        self.attrs = ""     # dict containing Gramps object attributes and srcattributes
 
-        self.state = None  # Object state in process path
+        self.state = None   # Object state in process path
         # TODO Define constants for values:
         #     candicate, audit_requested, auditing, accepted,
         #     mergeing, common, rejected
-        self.iid = None  # Containing
+        self.iid = None     # Containing
         # - object type id ("H" = Human person etc.)
         # - running number in Crockford Base 32 format
         # - ISO 7064 checksum (2 digits)
-
-        # if uniq_id:
-        #     if isinstance(uniq_id, int):
-        #         self.uniq_id = uniq_id
-        #     else:
-        #         self.uuid = uniq_id
 
     def __str__(self):
         #uuid = self.uuid if self.uuid else "-"
@@ -196,39 +189,6 @@ class NodeObject:
         Called by `json.dumps(my_stk_object, cls=StkEncoder)`
         """
         return self.__dict__
-
-    def extra_attrs(self):
-        """ Return Gramps object attributes from xml as a list of parameters
-            to be saved to db.
-
-            Input:  obj.attr__dict a pre-defined dictionary
-                                  created by xml_dom_handler.DOM_handler._extract_base 
-            Output: obj.attr_<key> = <values_string> for each dictionary items
-
-            The values are joined using STR_DELIM symbol as separator. String also
-            starts with 
-
-            Example: 
-            - from  obj.attr__dict = {'Id Code': 'malli',
-                                      "Copyright":"Helmet"
-                                      "Copyright":"Kaupunginkirjasto"} 
-            - to    {"attr_id_code": ["malli"],
-                     "attr_copyright": ["Helmet", "Kaupunginkirjasto"]}
-        """
-        dl = {}
-        ret = {}
-        if hasattr(self, "attr__dict") and isinstance(self.attr__dict, dict):
-            for key, value in self.attr__dict.items():
-                keyvar = "attr_" + "".join([c if c.isalnum() else "_" for c in key]).lower()
-                if keyvar in dl.keys():
-                    dl[keyvar].append(value)
-                else:
-                    dl[keyvar] = [value]
-            for keyvar in dl.keys():
-                values = dl[keyvar]
-                ret[keyvar] = self.STR_DELIM + self.STR_DELIM.join(values) + self.STR_DELIM
-                print(f"# Attribute {type(self).__name__}({self.id}).{keyvar} = {ret[keyvar]}")
-        return ret
 
 
 class IsotammiException(BaseException):
