@@ -34,6 +34,7 @@ import re
 import time
 import os
 import xml.dom.minidom
+import json
 import threading
 from flask_babelex import _
 
@@ -1206,14 +1207,22 @@ class DOM_handler:
         # - Extract all following source values from DOM object
         #   1. "attribute" (in <person>, <object>) and
         #   2. "srcattribute" (in <citation>, <source>)
-        # - to a single NodeObject dict field
-        #   - node.attr__dict = {type: value, type:value,...}
-        node.attr__dict = dict()
+        # - to a single NodeObject json field
+        #   - node.attrs = {type: [value], type: [value,...] ... }
+        my_attrs = {}
         for attr in dom.getElementsByTagName("attribute") + dom.getElementsByTagName("srcattribute"):
             if attr.hasAttribute("type"):
-                node.attr__dict[attr.getAttribute("type")] = attr.getAttribute("value")
-        # if node.attr__dict:
-        #     print(f"## Got {node.id} attributes {node.attr__dict}")
+                key = attr.getAttribute("type")
+                value = attr.getAttribute("value")
+                if key in my_attrs.keys():
+                    new_val = my_attrs[key] + [value]
+                else: # New key
+                    new_val = [value]
+                my_attrs[key] = new_val
+        if my_attrs:
+            node.attrs = json.dumps(my_attrs, ensure_ascii=False)
+            print(f"## Got {node.id} attributes {node.attrs}")
+        return
 
     def _extract_mediaref(self, dom_object):
         """Check if dom_object has media reference and extract it to p.media_refs.

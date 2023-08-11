@@ -60,7 +60,6 @@ from bl.place import PlaceReaderTx
 from bl.source import SourceReader
 from bl.repository import RepositoryReader
 from bl.batch.root import BatchReader
-from bl.nodeobject import NodeReader
 
 from bp.graph.models.fanchart import FanChart
 from models import mediafile
@@ -1416,6 +1415,7 @@ def show_media(iid):
     if medium:
         fullname, mimetype = mediafile.get_fullname(medium.iid)
         stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
+        print(f"#attrs: {medium.attrs}")
     else:
         flash(f'{res.get("statustext","error")}', "error")
         fullname = None
@@ -1510,19 +1510,6 @@ def fetch_thumbnail():
 
     return ret
 
-@bp.route("/scene/attributes/<label>/<iid>")
-@login_required
-@roles_accepted("guest", "research", "audit", "admin")
-def get_gramps_attributes(label, iid):
-    """Fetch gramps attribute for any object"""
-    u_context = UserContext()
-    with NodeReader("read", u_context) as service:
-        res = service.get_object_attrs(label, iid)
-        if Status.has_failed(res):
-            return f"Epäonnistui {res['status']}"
-        val = res.get("vars")
-        print(f"#get_gramps_attributes: {val}")
-    return f"Tulos: {val}"
 
 # ------------------------------ Menu 7: Details --------------------------------
 
