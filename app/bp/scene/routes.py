@@ -45,10 +45,8 @@ from flask_babelex import _
 
 import shareds
 from . import bp
-#from bl import material
 
 from bp.api import apikey
-
 from bl.base import Status, StkEncoder
 from bl.comment import CommentReader, CommentsUpdater #, Comment
 from bl.event import EventReader, EventWriter
@@ -62,6 +60,7 @@ from bl.place import PlaceReaderTx
 from bl.source import SourceReader
 from bl.repository import RepositoryReader
 from bl.batch.root import BatchReader
+from bl.nodeobject import NodeReader
 
 from bp.graph.models.fanchart import FanChart
 from models import mediafile
@@ -1511,6 +1510,19 @@ def fetch_thumbnail():
 
     return ret
 
+@bp.route("/scene/attributes/<label>/<iid>")
+@login_required
+@roles_accepted("guest", "research", "audit", "admin")
+def get_gramps_attributes(label, iid):
+    """Fetch gramps attribute for any object"""
+    u_context = UserContext()
+    with NodeReader("read", u_context) as service:
+        res = service.get_object_attrs(label, iid)
+        if Status.has_failed(res):
+            return f"Epäonnistui {res['status']}"
+        val = res.get("vars")
+        print(f"#get_gramps_attributes: {val}")
+    return f"Tulos: {val}"
 
 # ------------------------------ Menu 7: Details --------------------------------
 

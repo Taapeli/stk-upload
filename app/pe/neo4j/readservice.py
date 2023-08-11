@@ -42,6 +42,7 @@ from .cypher.cy_person import CypherPerson
 from .cypher.cy_media import CypherMedia
 from .cypher.cy_comment import CypherComment
 from .cypher.cy_root import CypherRoot
+from .cypher.cy_nodeobject import CypherNodeObject
 
 from .util import run_cypher, run_cypher_batch, dict_root_node
 from .nodereaders import Citation_from_node
@@ -1733,6 +1734,47 @@ class Neo4jReadService(ConcreteService):
                 return {"topics": topics, "status": Status.OK}
             else:
                 return {"topics": [], "status": Status.NOT_FOUND}
+
+
+
+    # ------ Comment -----
+
+    def dr_get_object_attrs(self, user, material, label:str, iid:str):
+        """ Read Gramps attributes for given object.
+        
+            :param:    label    object label
+            :param:    iid      Isotammi_id
+        """
+
+        res = {}
+        with self.driver.session(default_access_mode="READ") as session:
+            # Comment topics for batch objects
+            result = run_cypher_batch(
+                session,
+                CypherNodeObject.get_gramps_attributes, 
+                user,
+                material,
+                label=label,
+                iid=iid,
+            )
+            for record in result:
+                # Returns vars
+                # like [["attr_description", "⁋val1⁋"], ["attr_copyright", "⁋val2⁋"]]
+
+                res_dict = record['vars']
+                print(f"#tx_get_object_attrs: {res_dict}")
+                if len(res_dict) > 0:
+                    for key, value in res_dict:
+                        tkey = key[5:]      # without "attr_"
+                        text = value[1:-1]  # without delimiters
+                        if tkey in res.keys():
+                            res[tkey] += [text]
+                        else:
+                            res[tkey] = [text]
+                        print(f"## {tkey} : {text!r}")
+
+        return {'status': Status.OK, 'vars': res}
+
 
     # ------ Start page statistics -----
 

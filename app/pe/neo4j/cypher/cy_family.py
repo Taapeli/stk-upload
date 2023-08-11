@@ -143,12 +143,6 @@ MATCH (n:Family {handle:$f_handle})
 MATCH (m:Note {handle:$n_handle})
 CREATE (n)-[r:NOTE]->(m)"""
 
-#     link_citation = # --> CypherObject.link_citation
-# """
-# MATCH (n:Family) WHERE n.handle=$f_handle
-# MATCH (m:Citation) WHERE m.handle=$c_handle
-# CREATE (n)-[r:CITATION]->(m)"""
-
     set_dates_sortname = """
 MATCH (family:Family) WHERE ID(family) = $id
 SET family += $f_attr"""
