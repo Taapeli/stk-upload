@@ -216,22 +216,29 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                 </tr>
         {% endif %}
     {% endif %}
+
+	{% if person.attrs %}
+		{{ macro.attr_rows(person) }}
+	{% endif %}
+
     {% if person.confidence > '' %}<tr>
                     <td class="ColumnAttr">{{ _("Confidence of data") }}</td>
                     <td class="Value">{{ macro.stars(person.confidence|float) }}</td>
                 </tr>
     {% endif %}
-    {% if person.note_ref %}
-                <tr><td></td>
-                   <td>–► <a href="#notes" class="inlink">
-    	{% if person.note_ref|count == 1 %}
-                       {{ _('See person note') }}
-    	{% else %}
-                       {{ _('See %(num)d person notes', num=person.note_ref|count) }}
-    	{% endif -%}</a></td>
-                </tr>
-    {% endif %}
 
+    {% if person.note_ref %}
+	            <tr class="attrs">
+	            	<td class="ColumnAttribute">{{ _("Person Notes") }}</td>
+		            <td class="Value">
+		    			<ul style="margin:0">
+        {% for ref in person.note_ref %}{% set note = obj[ref] %}
+		            		<li> <span class="typedesc">{{ note.type|transl('notet') }}</span>
+	                    {{macro.citation_link(note.citation_ref, obj)}}
+	                    {{ macro.notelink(note) }}</li>
+	    {% endfor %}</ul></td>
+	    		</tr>
+    {% endif %}
 		
             </table>
         </div>
@@ -243,10 +250,6 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	{% if user_context.SHOW_DISCUSSION %}
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
     {% endif %}
-    
-	{% if person.attrs %}
-		{{ macro.obj_attrs(person) }}
-	{% endif %}
     	
         <div class="subsection" id="events">
             <h3>{{ _("Events") }}</h3>
@@ -363,18 +366,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
         </div>
     {% endif %}
 
-    {% if person.note_ref %}
-        <div class="subsection" id="notes">
-            <h3>{{ _("Person Notes") }}</h3>
-        {% for ref in person.note_ref %}{% set note = obj[ref] %}
-            <div class="grampsstylednote">
-                 <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
-                    {{macro.citation_link(note.citation_ref, obj)}}
-                    {{ macro.notelink(note) }}</p>
-            </div>
-        {% endfor %}
-        </div>
-    {% endif %}
+    {#removed 2013-08-22 if person.note_ref ... endif #}
 
         <div class="subsection" id="sourcerefs">
             <h3>{{ _("Source references") }}</h3>

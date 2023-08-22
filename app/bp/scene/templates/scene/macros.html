@@ -177,26 +177,19 @@
     {% else %}{{obj.iid}} / {{obj.id}}{% endif -%}
 {%- endmacro %}
 
-{% macro obj_attrs(obj) %}
-	{# Shows all Gramps attribute data for this object #} 
+{% macro attr_rows(obj) %}
+	{# Shows all Gramps attribute data for this object as table rows #} 
 	{% if obj.attrs %}
-		<style>
-		div#attrs td {padding-bottom: .5em;}
-		div#attrs ul {margin:0}
-		</style>
-		<div class="subsection" id="attrs">
-		    <h3>{{ _('Attributes') }}</h3>
-		    <table>
-	        {% for key, values in obj.attrs.items() %}
-	            <tr><td><b title="{{key}}">{{ _(key) }}</b></td>
-		            <td><ul>{% for value in values %}
-		            	<li>{{ value }}</li>
-		            	{% endfor %}</ul>
-		            </td>
-	            </tr>
-	        {% endfor %}
-		    </table>
-		</div>
+        {% for key, values in obj.attrs.items() %}
+            <tr class="attrs">
+            	<td class="ColumnAttribute" title="{{ _('Attribute') }} {{key}}">{{ _(key) }}</td>
+	            <td class="Value">
+	            	<ul style="margin:0">{% for value in values %}
+	            		<li>&nbsp;{{ value }}</li>
+	            	{% endfor %}</ul>
+	            </td>
+            </tr>
+        {% endfor %}
 	{% endif %}
 {%- endmacro %}
 

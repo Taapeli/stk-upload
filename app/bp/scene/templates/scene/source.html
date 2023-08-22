@@ -53,7 +53,7 @@ td.Citation div ol {padding-top:.3em;}
                     <td></td>
                 </tr>
                 <tr><td></td></tr>
-{% if source.sauthor or source.spubinfo or source.sabbreviation %}
+	{% if source.sauthor or source.spubinfo or source.sabbreviation %}
                 <tr><td class="ColumnAttribute">{{ _("Author") }}</td>
                     <td class="Value">{{source.sauthor}}</td>
                     <td></td>
@@ -66,15 +66,18 @@ td.Citation div ol {padding-top:.3em;}
                     <td class="Value">{{source.sabbrev}}</td>
                     <td></td>
                 </tr>
-{% endif %}
-{% if source.notes %}
+	{% endif %}
+	{% if source.attrs %}
+				{{ macro.attr_rows(source) }}
+	{% endif %}
+	{% if source.notes %}
 	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
                     <td class="Value"><ul>
-    {% for note in source.notes %}
+    	{% for note in source.notes %}
 	                   <li>{{ macro.notelink(note) }}</li>
-	{% endfor -%}
+		{% endfor -%}
                     </ul>
-{% endif %}
+	{% endif %}
             </tbody></table>
 	    </div>
 
