@@ -175,6 +175,10 @@ tr > td > img {
 	</div>
 	{% endif %}
 
+	{% if media.attrs %}
+		{{ macro.obj_attrs(media) }}
+	{% endif %}
+
 	{% if source_citations %}
 		{{ macro.source_citations(source_citations) }}
 	{% endif %}

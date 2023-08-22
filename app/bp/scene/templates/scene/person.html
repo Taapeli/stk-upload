@@ -243,6 +243,10 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	{% if user_context.SHOW_DISCUSSION %}
     	<div id="comments_div" hx-get="/scene/hx-comment/comments_header" hx-trigger="load"></div> 
     {% endif %}
+    
+	{% if person.attrs %}
+		{{ macro.obj_attrs(person) }}
+	{% endif %}
     	
         <div class="subsection" id="events">
             <h3>{{ _("Events") }}</h3>
