@@ -86,6 +86,10 @@ tr > td > img {
                         </div>
                     </td>
                </tr>
+	{% if media.attrs %}
+				{{ macro.attr_rows(media) }}
+	{% endif %}
+
 	        </table>
 		</div>
 
@@ -173,10 +177,6 @@ tr > td > img {
             </div>
         {% endfor %}
 	</div>
-	{% endif %}
-
-	{% if media.attrs %}
-		{{ macro.obj_attrs(media) }}
 	{% endif %}
 
 	{% if source_citations %}
