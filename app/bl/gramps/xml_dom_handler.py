@@ -302,7 +302,7 @@ class DOM_handler:
         for citation in nodes:
 
             c = Citation()
-            # Extract handle, change, id and attr
+            # Extract handle, change, id and attrs
             self._extract_base(citation, c)
 
             try:
@@ -362,7 +362,7 @@ class DOM_handler:
         for event in nodes:
             # Create an event with Gramps attributes
             e = EventBl()
-            # Extract handle, change, id and attr
+            # Extract handle, change, id and attrs
             self._extract_base(event, e)
             e.place_handles = []
             e.note_handles = []
@@ -444,7 +444,7 @@ class DOM_handler:
             f.note_handles = []
             f.citation_handles = []
 
-            # Extract handle, change, id and attr
+            # Extract handle, change, id and attrs
             self._extract_base(family, f)
 
             if len(family.getElementsByTagName("rel")) == 1:
@@ -524,7 +524,7 @@ class DOM_handler:
 
         for note in nodes:
             n = Note()
-            # Extract handle, change, id and attr
+            # Extract handle, change, id and attrs
             self._extract_base(note, n)
 
             n.priv = self._get_priv(note)
@@ -544,7 +544,7 @@ class DOM_handler:
     def handle_media_list(self, tx, nodes, iids):
         for obj in nodes:
             o = MediaBl()
-            # Extract handle, change, id and attr
+            # Extract handle, change, id and attrs
             self._extract_base(obj, o)
 
             for obj_file in obj.getElementsByTagName("file"):
@@ -662,7 +662,7 @@ class DOM_handler:
             url_notes = []
 
             p = PersonBl()
-            # Extract handle, change, id and attr
+            # Extract handle, change, id and attrs
             self._extract_base(person, p)
             p.event_handle_roles = []
             p.note_handles = []
@@ -747,7 +747,7 @@ class DOM_handler:
             pl.note_handles = []
             pl.citation_handles = []
 
-            # Extract handle, change, id and attr
+            # Extract handle, change, id and attrs
             self._extract_base(placeobj, pl)
             pl.type = placeobj.getAttribute("type")
 
@@ -871,7 +871,7 @@ class DOM_handler:
             url_notes = []
 
             r = Repository()
-            # Extract handle, change, id and attr
+            # Extract handle, change, id and attrs
             self._extract_base(repository, r)
 
             if len(repository.getElementsByTagName("rname")) == 1:

@@ -61,7 +61,7 @@ class Family(NodeObject):
         # Sorting name of family's father and mother
         self.father_sortname = ""
         self.mother_sortname = ""
-        self.attr = dict()
+        self.attrs =  ""
 
     def __str__(self):
         if self.rel_type:

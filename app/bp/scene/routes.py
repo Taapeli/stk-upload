@@ -827,7 +827,7 @@ def json_get_event():
         # Medias
         medias = res.get("medias", [])
         for m in medias:
-            m.href = "/scene/media/" + m.iid
+            m.href = "/scene/media/" + m.name + "?id=" +m.iid
 
         res_dict = {
             "event": event,
@@ -1445,7 +1445,7 @@ def fetch_media(fname):
     """Fetch media file to display full screen.
 
     Example:
-    http://127.0.0.1:5000/scene/media/kuva2?id=63995268bd2348aeb6c70b5259f6743f&crop=0,21,100,91&full=1
+    http://127.0.0.1:5000/scene/media/kuva2?id=M-66z&crop=0,21,100,91&full=1
 
     Arguments:
         id    iid of Media
@@ -1456,8 +1456,8 @@ def fetch_media(fname):
     crop = request.args.get("crop")
     # show_thumb for cropped image only
     show_thumb = request.args.get("full", "0") == "0"
-    fullname, mimetype = mediafile.get_fullname(iid)
     try:
+        fullname, mimetype = mediafile.get_fullname(iid)
         if crop:
             # crop dimensions are diescribed as % of width and height
             image = mediafile.get_cropped_image(fullname, crop, show_thumb)
@@ -1474,6 +1474,10 @@ def fetch_media(fname):
         ret = send_file(os.path.join("static", "image/noone.jpg"), mimetype=mimetype)
         logger.debug(f"-> bp.scene.routes.fetch_media none")
         return ret
+    except Exception as e:
+        # Show default image
+        logger.error(f"-> bp.scene.routes.fetch_media {e.__class__.__name__}, {e}")
+        return "Image read error iid={iid!r}"
 
 
 @bp.route("/scene/thumbnail")
