@@ -87,7 +87,7 @@ class Event(NodeObject):
         self.type = ""
         self.description = ""
         self.dates = None
-        self.attr = dict()  # prev. attr_type, attr_value
+        self.attrs =  ""
 
     def __str__(self):
         return f"{self.uniq_id} {self.type} {self.description}"

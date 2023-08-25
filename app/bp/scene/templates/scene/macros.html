@@ -177,13 +177,13 @@
     {% else %}{{obj.iid}} / {{obj.id}}{% endif -%}
 {%- endmacro %}
 
-{% macro attr_rows(obj) %}
+{% macro attr_rows(obj, colspan="1") %}
 	{# Shows all Gramps attribute data for this object as table rows #} 
 	{% if obj.attrs %}
         {% for key, values in obj.attrs.items() %}
-            <tr class="attrs">
-            	<td class="ColumnAttribute" title="{{ _('Attribute') }} {{key}}">{{ _(key) }}</td>
-	            <td class="Value">
+            <tr class="attrs" title="{{ _('Attribute') }}: '{{key}}'">
+            	<td class="ColumnAttribute">&raquo;{{ _(key) }}</td>
+	            <td class="Value" colspan="{{colspan}}">
 	            	<ul style="margin:0">{% for value in values %}
 	            		<li>&nbsp;{{ value }}</li>
 	            	{% endfor %}</ul>

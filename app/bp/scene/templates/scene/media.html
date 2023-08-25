@@ -89,6 +89,14 @@ tr > td > img {
 	{% if media.attrs %}
 				{{ macro.attr_rows(media) }}
 	{% endif %}
+	{% if media.notes %}
+	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
+                    <td class="Value"><ul>
+    	{% for note in media.notes %}
+	                   <li>{{ macro.notelink(note) }}</li>
+		{% endfor -%}
+                    </ul>
+	{% endif %}
 
 	        </table>
 		</div>
@@ -166,19 +174,6 @@ tr > td > img {
   </div> {# end flex #}
 
   <div>
-	{% if media.notes %}
-	<div class="subsection" id="notes">
-	    <h3>{{ _('Notes') }}</h3>
-        {% for note in media.notes %}
-            <div class="grampsstylednote">
-                 <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
-                    {{macro.citation_link(note.citation_ref, obj)}}
-                    {{ macro.notelink(note) }}</p>
-            </div>
-        {% endfor %}
-	</div>
-	{% endif %}
-
 	{% if source_citations %}
 		{{ macro.source_citations(source_citations) }}
 	{% endif %}
