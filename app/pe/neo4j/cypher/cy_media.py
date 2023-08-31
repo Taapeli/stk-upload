@@ -42,11 +42,11 @@ class CypherMedia():
 #     COLLECT (DISTINCT [cita, sour, c_notes]) as citas
 # """
     get_media_by_iid = """
-MATCH (root) -[:OBJ_OTHER]-> (a:Media {iid:$iid})
-OPTIONAL MATCH (a) <-[r:MEDIA]- (referrer)
-OPTIONAL MATCH (referrer) <-[:EVENT]- (referrer_e)
-OPTIONAL MATCH (a) -[:NOTE]-> (note:Note)
-RETURN root, a, PROPERTIES(r) AS prop, referrer, referrer_e,
+MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid})
+OPTIONAL MATCH (media) <-[r:MEDIA]- (referrer)
+OPTIONAL MATCH (referrer) <-[:EVENT]- (referrer_source)
+OPTIONAL MATCH (media) -[:NOTE]-> (note:Note)
+RETURN root, media, PROPERTIES(r) AS prop, referrer, referrer_source,
     COLLECT(DISTINCT note) AS notes"""
 
     # Media list by description with count limit

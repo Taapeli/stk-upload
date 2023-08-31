@@ -1551,18 +1551,19 @@ class Neo4jReadService(ConcreteService):
 
         media = None
         event_refs = {}  # The Person or Family nodes behind referencing Event
+        notes = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
                 result = run_cypher_batch(session, CypherMedia.get_media_by_iid,
                                           user, material, iid=iid)
-                # RETURN root, a, PROPERTIES(r) AS prop, referrer, referrer_e,
+                # RETURN root, media, PROPERTIES(r) AS prop, referrer, referrer_source,
                 #   COLLECT(DISTINCT note) AS notes
 
                 for record in result:
-                    media_node = record["a"]
+                    media_node = record["media"]
                     crop = record["prop"]
                     ref_node = record["referrer"]
-                    event_node = record["referrer_e"]
+                    src_node = record["referrer_source"]
                     note_nodes = record["notes"]
 
                     # - Media node
@@ -1599,25 +1600,24 @@ class Neo4jReadService(ConcreteService):
 
                     #    The next object behind the Event
 
-                    if event_node:
-                        if event_node.id in event_refs:
-                            obj2 = event_refs[event_node.id]
+                    if src_node:
+                        if src_node.id in event_refs:
+                            obj2 = event_refs[src_node.id]
                         else:
-                            if "Person" in event_node.labels:
-                                obj2 = PersonBl_from_node(event_node)
+                            if "Person" in src_node.labels:
+                                obj2 = PersonBl_from_node(src_node)
                                 obj2.label = "Person"
-                            elif "Family" in event_node.labels:
-                                obj2 = FamilyBl_from_node(event_node)
+                            elif "Family" in src_node.labels:
+                                obj2 = FamilyBl_from_node(src_node)
                                 obj2.label = "Family"
                             else:
                                 raise TypeError(
-                                    f"MediaReader.get_one: unknown type {list(event_node.labels)}"
+                                    f"MediaReader.get_one: unknown type {list(src_node.labels)}"
                                 )
                             event_refs[obj2.uniq_id] = obj2
 
                         mref.next_objs.append(obj2)
 
-                    notes = []
                     for note_node in note_nodes:
                         print (f" {media_node['id']} -> (Note: {note_node._properties})")
                         obj = Note_from_node(note_node)

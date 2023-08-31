@@ -78,12 +78,19 @@
                         </span>
                     </td>
                 </tr>
+                <tr v-for="n in notes">
+                    <td class="ColumnAttribute">{{ _("Notes") }}</td>
+                    <td class="Value">
+                        <!-- span class="typedesc">${n.type_lang}</span -->
+                        <i title="type_lang">${n.text}</i>
+                    </td>
+                </tr>
                 <tr v-for="m in medias">
                     <td class="ColumnAttribute">{{ _("Media") }}</td>
                     <td class="Value">
+                        <span class="typedesc">${m.mime}</span>
                         <a v-bind:href="m.href" :iid="m.iid" class="inlink">
                             ${m.description}</a>
-                        <span class="typedesc">${m.mime}</span>
                     </td>
                 </tr>
             </table>
