@@ -23,14 +23,7 @@ Created on 24.3.2020
 @author: jm
 """
 # blacked 2021-05-01 JMä
-import os
-
-import shareds
 from .base import NodeObject, Status
-from bl.person import PersonBl
-from bl.family import FamilyBl
-from bl.place import PlaceBl
-from bl.event import EventBl
 
 from pe.dataservice import DataService
 

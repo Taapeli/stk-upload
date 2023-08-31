@@ -818,16 +818,19 @@ def json_get_event():
         places = res.get("places", [])
         for pl in places:
             pl.href = "/place/" + pl.iid
-            pl.type_lang = jinja_filters.translate(pl.type, "lt").title()
+            pl.type_lang = jinja_filters.translate(pl.type, "lt")
             for up in pl.uppers:
                 up.href = "/place/" + up.iid
-                up.type_lang = jinja_filters.translate(up.type, "lt_in").title()
+                up.type_lang = jinja_filters.translate(up.type, "lt_in")
         # Event notes
         notes = res.get("notes", [])
+        for n in notes:
+            n.type_lang = jinja_filters.translate(n.type, "notet")
         # Medias
         medias = res.get("medias", [])
         for m in medias:
-            m.href = "/scene/media/" + m.name + "?id=" +m.iid
+            m.image = "/scene/media/" + m.name + "?id=" +m.iid # display
+            m.href = "/media/" + m.iid # object page link
 
         res_dict = {
             "event": event,

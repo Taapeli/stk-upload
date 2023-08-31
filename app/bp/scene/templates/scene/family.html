@@ -83,7 +83,10 @@ div#summaryarea table td:last-child{
         <div id="summaryarea">
             <table><tbody>
         {% for e in family.events|sort(attribute='dates') %}
-                <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
+                <tr><td class="ColumnAttribute">
+                		<a title="{{ _('Event') }} {{e.iid}} / {{e.id}}"
+                		   class="inlink" href="/event/{{e.iid}}">{{e.type|transl('evt')|capitalize}}</a>
+                	</td>
                     <td class="ColumnDate {{e.dates.calendar_css()}}">{{e.dates}}</td>
                     <td class="ColumnPlace">
                     <a href="/place/{{e.place.iid}}" class="inlink"

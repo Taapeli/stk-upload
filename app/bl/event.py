@@ -41,15 +41,12 @@ Todo:
 """
 # blacked 2021-05-01 JMä
 import logging
-
 logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
 from bl.base import NodeObject, Status
 from bl.material import Material
 from pe.dataservice import DataService
-
-from bl.dates import DateRange
 
 
 class Event(NodeObject):
@@ -108,6 +105,7 @@ class EventReader(DataService):
         - 'iid': 'H-ad3'
         - 'referees': True
         - 'notes': True
+        - 'places': True
         """
         statustext = ""
         res_dict = {}
