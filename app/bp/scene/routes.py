@@ -828,9 +828,16 @@ def json_get_event():
             n.type_lang = jinja_filters.translate(n.type, "notet")
         # Medias
         medias = res.get("medias", [])
-        for m in medias:
-            m.image = "/scene/media/" + m.name + "?id=" +m.iid # display
-            m.href = "/media/" + m.iid # object page link
+        if medias:
+            for m in medias:
+                m.media_page = "/scene/media/" + m.name + "?id=" +m.iid # display
+                m.href = "/media/" + m.iid # object page link
+            # The image shown on page
+            fullname, _mimetype, size = mediafile.get_fullname(medias[0].iid)
+            if medias[0].mime == "application/pdf":
+                medias[0].size = 0
+            else:
+                medias[0].size = size   # mediafile.get_image_size(fullname)
 
         res_dict = {
             "event": event,
@@ -1416,7 +1423,7 @@ def show_media(iid):
 
     medium = res.get("item", None)
     if medium:
-        fullname, mimetype = mediafile.get_fullname(medium.iid)
+        fullname, mimetype, size = mediafile.get_fullname(medium.iid)
         stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
         print(f"#attrs: {medium.attrs}")
     else:
@@ -1425,8 +1432,8 @@ def show_media(iid):
         mimetype = None
     if mimetype == "application/pdf":
         size = 0
-    else:
-        size = mediafile.get_image_size(fullname)
+    # else:
+    #     size = mediafile.get_image_size(fullname)
     cites = res.get("cites", [])
     for c in cites:
         print(f"#cite: {c}")
@@ -1460,12 +1467,12 @@ def fetch_media(fname):
     # show_thumb for cropped image only
     show_thumb = request.args.get("full", "0") == "0"
     try:
-        fullname, mimetype = mediafile.get_fullname(iid)
+        fullname, mimetype, _size = mediafile.get_fullname(iid)
         if crop:
-            # crop dimensions are diescribed as % of width and height
+            # crop dimensions are described as % of width and height
             image = mediafile.get_cropped_image(fullname, crop, show_thumb)
             logger.debug("-> bp.scene.routes.fetch_media cropped png")
-            # Create a png image in memery and display it
+            # Create a png image in memory and display it
             buffer = io.BytesIO()
             image.save(buffer, format="PNG")
             return Response(buffer.getvalue(), mimetype="image/png")
