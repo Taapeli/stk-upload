@@ -42,6 +42,9 @@ def get_media_thumbnails_folder(batch_id):
     return os.path.abspath(media_thumbnails_folder)
 
 def get_fullname(iid):
+    """ Finds image file and return file fullname, image mime type and 
+        image size tuple (width, height).
+    """
     with shareds.driver.session(default_access_mode='READ') as session:
         rec = session.run(cypher_get_medium, iid=iid).single()
         if rec:
@@ -51,7 +54,8 @@ def get_fullname(iid):
             mimetype = m['mime']
             media_files_folder = get_media_files_folder(batch_id)
             fullname = os.path.join(media_files_folder,src)
-            return fullname,mimetype
+            image = Image.open(fullname)
+            return fullname, mimetype, image.size
     raise IsotammiException(f"models.mediafile.get_fullname can not read {iid!r}")
 
 def get_thumbname(iid, crop=None):

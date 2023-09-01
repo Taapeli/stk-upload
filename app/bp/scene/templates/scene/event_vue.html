@@ -9,7 +9,21 @@
 #summaryarea {display: flex; /*height:75vh;*/
     flex-wrap: wrap;
 }
+.pic_container {
+  /*width: 100%; */
+  /*padding-top: 100%; /* 1:1 Aspect Ratio */
+  position: relative;
+  min-height: 250px;
+}
+.pic {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
 </style>
+
 <div id="startdiv">
     <h1>{{ _("Event details") }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
@@ -33,6 +47,15 @@
         </h2>
 
         <div id="summaryarea">
+
+			<div class="pic_container" v-if="!medias || !medias.length">
+		        <div class="pic">
+	            	<img :alt="picture ".concat(${medias[0].description})
+	            		 :src="/scene/media/".concat(${medias[0].name}).concat("?id=".concat(${medias[0].iid})
+	                 	 :title="key = ".concat(${medias[0].iid}) />
+		        </div>
+			</div>
+
             <div v-if="allow_edit" style="background:khaki; padding:.5em;">
                 <img v-if="!edit_mode" src="/static/image/edit-property-26.png" 
                 	@click="edit"
@@ -128,6 +151,7 @@
             </table>
 
         </div><!-- div#persons -->
+        </div><!-- MIKSI? -->
     </div><!-- div.content -->
 </div><!-- div.vue_app -->
 
