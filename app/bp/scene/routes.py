@@ -832,12 +832,14 @@ def json_get_event():
             for m in medias:
                 m.media_page = "/scene/media/" + m.name + "?id=" +m.iid # display
                 m.href = "/media/" + m.iid # object page link
-            # The image shown on page
-            fullname, _mimetype, size = mediafile.get_fullname(medias[0].iid)
-            if medias[0].mime == "application/pdf":
-                medias[0].size = 0
-            else:
-                medias[0].size = size   # mediafile.get_image_size(fullname)
+                # The image shown on page
+                _fullname, _mimetype, m.size = mediafile.get_fullname(m.iid)
+                # {'uniq_id': 3101145, 'change': 1693326068, 'id': 'O0004', 
+                #  'handle': '_f6694f284126c6141d068ea27c@2308291', 'attrs': {}, 
+                #  'state': None, 'iid': 'M-6ap', 'description': 'hääpari', 
+                #  'src': 'hääpari.png', 'mime': 'image/png', 'name': 'hääpari.png', 
+                #  'media_page': '/scene/media/hääpari.png?id=M-6ap', 
+                #  'href': '/media/M-6ap', 'size': (239, 243)}
 
         res_dict = {
             "event": event,
