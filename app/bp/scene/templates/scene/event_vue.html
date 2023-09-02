@@ -9,6 +9,13 @@
 #summaryarea {display: flex; /*height:75vh;*/
     flex-wrap: wrap;
 }
+#flex {display: flex; /*height:75vh;*/
+    flex-wrap: wrap;
+}
+#flex > div {
+    margin:.5em; padding: 0 1em;
+    width: 43%; 
+}
 .pic_container {
   /*width: 100%; */
   /*padding-top: 100%; /* 1:1 Aspect Ratio */
@@ -17,11 +24,17 @@
 }
 .pic {
   position: absolute;
-  top: 0;
+  top: -2.7em;
   left: 0;
   bottom: 0;
   right: 0;
 }
+.pic > img {
+  max-width: 100%;
+  max-height: 100%;
+  border: solid 1pt gray;
+}
+.pic > div {font-style: italic;}
 </style>
 
 <div id="startdiv">
@@ -38,24 +51,14 @@
          <li v-show="error_message != ''" class='flash_error'>${ error_message }</li>
     </ul>
  -->
-    <div class="content" id="IndividualDetail" v-if="event">
-
-        <h2 style="position:sticky; top:0;">
+  <div class="content" id="IndividualDetail" v-if="event">
+       <h2 style="position:sticky; top:0;">
             <span v-if="event.description">${event.type_lang}: 
                 <i>${event.description}</i></span>
             <span v-else>${event.type_lang} </span>
         </h2>
 
-        <div id="summaryarea">
-
-			<div class="pic_container" v-if="!medias || !medias.length">
-		        <div class="pic">
-	            	<img :alt="picture ".concat(${medias[0].description})
-	            		 :src="/scene/media/".concat(${medias[0].name}).concat("?id=".concat(${medias[0].iid})
-	                 	 :title="key = ".concat(${medias[0].iid}) />
-		        </div>
-			</div>
-
+		<div id="flex">
             <div v-if="allow_edit" style="background:khaki; padding:.5em;">
                 <img v-if="!edit_mode" src="/static/image/edit-property-26.png" 
                 	@click="edit"
@@ -118,9 +121,16 @@
                 </tr>
             </table>
             </div>
-        </div><!-- div#summaryarea -->
 
-        <div class="subsection" id="persons">
+			<div class="pic_container" v-for="m in medias">
+		        <div class="pic">
+	            	<img :alt="m.description" :src="m.media_page" />
+	            	<div>${m.description}</div>
+		        </div>
+			</div>
+ 		</div> <!-- div#flex -->
+
+        <div class="subsection fullclear" id="persons">
             <h3>{{ _("Participants") }}</h3>
             <table class="infolist eventlist" v-if="referees">
                 <thead>
@@ -152,7 +162,8 @@
 
         </div><!-- div#persons -->
         </div><!-- MIKSI? -->
-    </div><!-- div.content -->
+	  </div>
+  </div><!-- div.content -->
 </div><!-- div.vue_app -->
 
 <script>
