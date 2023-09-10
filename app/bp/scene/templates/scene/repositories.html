@@ -61,8 +61,8 @@ td ul li p { margin: 0 0 0.3em 0; }
             </td>
             <td class="ColumnRepo">
                <div>
-                  <a href="/repository/{{repo.iid}}" title="{{ _('Repository')}} {{ macro.obj_title(repo) }}">
-                     {{repo.rname}}</a>
+                  <a href="/repository/{{repo.iid}}" title="{{ _('Repository')}} {{ macro.obj_title(repo) }}"
+                     class="inlink">{{repo.rname}}</a>
                 </div>
 
 	        {% if repo.notes %}<ul>{% for note in repo.notes %}

@@ -256,7 +256,7 @@
         N N
     {% else %}
         <a href="/person/{{p.iid}}" class="inlink"
-            title="{{ _('See Person\'s Details') }}">{{ person_name_by_sortname(p) }}</a>
+           title="{{ _('Person') }} {{ obj_title(p) }}">{{ person_name_by_sortname(p) }}</a>
      {% endif %}
 {%- endmacro %}
 
