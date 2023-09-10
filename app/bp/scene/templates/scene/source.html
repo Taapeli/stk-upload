@@ -91,7 +91,7 @@ td.Citation div ol {padding-top:.3em;}
 			        {% for c in citations|sort(attribute='page') %}
 	        		<tr>
 	        		  <td class="Citation" style="text-align: center;">
-	        		     <span title="sitaatti {{c.id}} #{{c.uniq_id}}">{{ loop.index }}.</span> 
+	        		     <span title="{{ _("Citation") }} {{ macro.obj_title(c) }}">{{ loop.index }}.</span> 
 	        		  </td>
 	        		  <td class="Citation">
 

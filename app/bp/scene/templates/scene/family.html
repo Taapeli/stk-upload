@@ -102,13 +102,16 @@ div#summaryarea table td:last-child{
                 <tr><td class="ColumnAttribute"><b>{{ _('Sources') }}</b></td>
                     <td class="Value" colspan="2"><ul>
             {% for s in family.sources %}
-                        <li><a href="/source/{{s.iid}}" class="inlink">{{s.stitle}}</a>, 
+                        <li><a href="/source/{{s.iid}}" class="inlink"
+                               title="{{ _('Source') }} {{ macro.obj_title(s) }}">{{s.stitle}}</a>, 
                 {% for c in s.citations %}
                             {{ _("Page") }}: {{c.page}}
                 {% endfor -%}
                 {% for repo in s.repositories %}
                             <br>&nbsp;&nbsp; – {% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
-                            {{ _('in the repository') }} <b>{{repo.rname}}</b>
+                            {{ _('in the repository') }}
+                            <a class="inlink" href="/repository/{{repo.iid}}"
+                               title="{{ _('Repository') }} {{ macro.obj_title(repo) }}"><b>{{repo.rname}}</b></a>
                 {% endfor -%}
                         </li>
             {% endfor -%}
