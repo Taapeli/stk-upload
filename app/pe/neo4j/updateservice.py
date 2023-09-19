@@ -23,10 +23,12 @@ Created on 23.3.2020
 """
 import logging
 import traceback
+from collections import defaultdict
+from datetime import date  # , datetime
+
 from neo4j.exceptions import ClientError
 
 logger = logging.getLogger("stkserver")
-from datetime import date  # , datetime
 
 from bl.base import Status, IsotammiException #, NodeObject
 from bl.dates import DateRange, DR
@@ -309,6 +311,7 @@ class Neo4jUpdateService(ConcreteService):
             def __str__(self):
                 return f"{self.uniq_id}:{self.label} {self.str}"
 
+        return {"status": Status.OK}  # TODO
         objs = {}
         try:
             print("pe.neo4j.updateservice.Neo4jUpdateService.ds_merge_check: TODO fix merge_check")
@@ -811,14 +814,57 @@ class Neo4jUpdateService(ConcreteService):
 
     def ds_places_merge(self, id1, id2):
         """Merges given two Place objects using apoc library."""
+
+        def merge_name_nodes(name_nodes):
+            """
+            Merge Place_name nodes if the names are identical.
+            
+            For each unique name this will generate Cypher code like:
+            
+                match (n1:Place_name) where id(n1) = $id1
+                match (n2:Place_name) where id(n2) = $id2
+                call apoc.refactor.mergeNodes([n1,n2],
+                    {properties:'discard',mergeRels:true})
+                yield node
+                return node
+                
+            The idmap variable contains the node ids:
+            
+                idmap = {'id1': 149595, 'id2': 149614}
+            
+            """
+            nodemap = defaultdict(list)
+            for node in name_nodes:
+                nodemap[node["name"]].append(node)
+            new_nodes = []
+            for name, nodes in nodemap.items():
+                if len(nodes) > 1:
+                    cypher = ""
+                    namelist = []
+                    idmap = {}
+                    for i, node in enumerate(nodes, start=1):
+                        cypher += f"\nmatch (n{i}:Place_name) where id(n{i}) = $id{i}"
+                        namelist.append(f"n{i}")
+                        idmap[f"id{i}"] =  node.id
+                    cypher += f"\ncall apoc.refactor.mergeNodes([{','.join(namelist)}],"
+                    cypher += f"\n    {{properties:'discard',mergeRels:true}})"
+                    cypher += f"\nyield node"
+                    cypher += f"\nreturn node"
+                    rec = self.tx.run(cypher, **idmap).single()
+                    node = rec["node"]
+                else:
+                    node = nodes[0]                    
+                new_nodes.append(node)
+            return new_nodes
+        
         try:
-            self.tx.run(CypherPlaceMerge.delete_namelinks, id=id1)
             record = self.tx.run(
                 CypherPlaceMerge.merge_places, id1=id1, id2=id2
             ).single()
             node = record["node"]
             place = PlaceBl_from_node(node)
             name_nodes = record["names"]
+            name_nodes = merge_name_nodes (name_nodes) 
             place.names = [PlaceName_from_node(n) for n in name_nodes]
         except ClientError as e:
             # traceback.print_exc()
