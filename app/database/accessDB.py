@@ -439,14 +439,21 @@ def create_constraint(label, prop):
 
 def remove_prop_constraints(prop):
     """ Remove unique constraints for given property.
-        NOTE. Uses Cypher 4.4 "Show" clause!
     """
     with shareds.driver.session() as session:
-        try:
+        if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
+            list_indexes = """
+                SHOW UNIQUENESS CONSTRAINTS
+                YIELD name, labelsOrTypes, properties
+                    WHERE $prop IN properties
+            LIMIT 5"""
+        else:
             list_indexes = """
                 SHOW UNIQUE CONSTRAINTS 
                 YIELD name, labelsOrTypes, properties
-                    WHERE $prop IN properties"""
+                    WHERE $prop IN properties
+            LIMIT 5"""
+        try:
             names = []
             result = session.run(list_indexes, prop=prop)
             for name, labels, props in result:
@@ -464,6 +471,9 @@ def remove_prop_constraints(prop):
 
 
 def create_freetext_index():
+    #Note: Should not need ClientError with Neo4j 5.1 IF NOT EXISTS
+    #TODO: Use create_person_search_index, create_note_text_index and create_source_text_index
+    #      cypher clauses for text-2.0 indexes
     try:
         _result = shareds.driver.session().run(Cypher_adm.create_freetext_index)
     except ClientError as e:

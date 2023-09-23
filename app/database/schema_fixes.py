@@ -185,10 +185,11 @@ def do_schema_fixes():
 
         @See: https://neo4j.com/docs/api/python-driver/current/api.html#neo4j.SummaryCounters
     """
+    print(f" --- Start database.schema_fixes.do_schema_fixes")
 
     # --- For DB_SCHEMA_VERSION = '2022.1.3'...'2022.1.8', 9.6.2022/HRo & JMä
     # # For all batches b:
-    # #    - if found objects with missing a.iid: generate a.iid and remove a.uiid
+    # #    - if found objects with missing a.iid: generate a.iid and remove a.uuid
     # #    - else remove a.uuid
     # #    - set b.db_schema version
     # uuid_to_iid()
@@ -197,39 +198,39 @@ def do_schema_fixes():
 
     #  --- For DB_SCHEMA_VERSION = '2022.1.1', 1.4.2022/JMä
 
-    STATS_link_to_from = """
-        MATCH (b:Root) -[:STATS]-> (x:Stats)
-        DETACH DELETE x"""
-    with shareds.driver.session() as session: 
-        result = session.run(STATS_link_to_from)
-        counters = shareds.db.consume_counters(result)
-        stats_removed = counters.nodes_deleted
-        if stats_removed:
-            print(f" -- removed {stats_removed} old stats with forwards link (:Root) -[:STATS]-> (:Stats)")
-            # New stats are created with backwards link (:Root) <-[:STATS]- (:Stats)")
-
-    DOES_AUDIT_ts = """
-        MATCH () -[r:DOES_AUDIT]-> () WHERE NOT r.timestamp IS null
-            SET r.ts_from = r.timestamp
-            SET r.timestamp = null        
-        """
-    with shareds.driver.session() as session: 
-        result = session.run(DOES_AUDIT_ts)
-        counters = shareds.db.consume_counters(result)
-        rel_changed = int(counters.properties_set / 2)
-        if rel_changed:
-            print(f" -- updated properties in {rel_changed} DOES_AUDIT relations")
-
-    clear_root_audited = """
-        MATCH (r:Root) WHERE NOT r.audited IS null
-            SET r.audited = null        
-        """
-    with shareds.driver.session() as session: 
-        result = session.run(clear_root_audited)
-        counters = shareds.db.consume_counters(result)
-        removed = int(counters.properties_set)
-        if removed:
-            print(f" -- updated properties in {removed} Root objects")
+    # STATS_link_to_from = """
+    #     MATCH (b:Root) -[:STATS]-> (x:Stats)
+    #     DETACH DELETE x"""
+    # with shareds.driver.session() as session: 
+    #     result = session.run(STATS_link_to_from)
+    #     counters = shareds.db.consume_counters(result)
+    #     stats_removed = counters.nodes_deleted
+    #     if stats_removed:
+    #         print(f" -- removed {stats_removed} old stats with forwards link (:Root) -[:STATS]-> (:Stats)")
+    #         # New stats are created with backwards link (:Root) <-[:STATS]- (:Stats)")
+    #
+    # DOES_AUDIT_ts = """
+    #     MATCH () -[r:DOES_AUDIT]-> () WHERE NOT r.timestamp IS null
+    #         SET r.ts_from = r.timestamp
+    #         SET r.timestamp = null        
+    #     """
+    # with shareds.driver.session() as session: 
+    #     result = session.run(DOES_AUDIT_ts)
+    #     counters = shareds.db.consume_counters(result)
+    #     rel_changed = int(counters.properties_set / 2)
+    #     if rel_changed:
+    #         print(f" -- updated properties in {rel_changed} DOES_AUDIT relations")
+    #
+    # clear_root_audited = """
+    #     MATCH (r:Root) WHERE NOT r.audited IS null
+    #         SET r.audited = null        
+    #     """
+    # with shareds.driver.session() as session: 
+    #     result = session.run(clear_root_audited)
+    #     counters = shareds.db.consume_counters(result)
+    #     removed = int(counters.properties_set)
+    #     if removed:
+    #         print(f" -- updated properties in {removed} Root objects")
 
     return
 
