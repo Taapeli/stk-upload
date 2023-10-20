@@ -38,7 +38,8 @@ div.box1 {
 }
 
 div.box2 {
-	max-height: 300px;
+    min-height: 500px;
+	max-height: 800px;
 	overflow-y: auto;
 }
 
@@ -48,7 +49,7 @@ div.box3 {
     margin: 0 1em 1em 0;
     padding: 1em; 
     width: 300px;
-    min-height: 200px;
+    min-height: 500px;
     border-radius: 15px;
     background-color: #D5F5E3;
 }
@@ -149,25 +150,33 @@ input {
 	        <p>
 	    </form>
 	</div>
+	
+{#
 
     <input type="button" value="Create test data" @click="test_create">
     <input type="button" value="Delete test data" @click="test_delete">
+#}
 
 	<div class="box1" v-show="to_be_merged.length > 0">	    
 	<template v-for="p in to_be_merged">
 		<div class="box3">
 		        <h2>${ p.pname } (${ p.uniq_id })</h2>
+
+{#			
                 <p v-if="p.batch">${ p.batch }</p>
                 <p v-else><i>No batch!</i></p>
+#}
 		        <div class="box2">
+
 		        <h2>Ominaisuudet</h2>
 		        <table border>
-		            <tr><td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		            <tr><td class=checkbox><input type="radio" v-model="placetype" :value="p.uniq_id">
 		                <td>Tyyppi<td>${ p.type }
-		            <tr><td class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
+		            <tr><td class=checkbox><input type="radio" v-model="placecoord" :value="p.uniq_id">
 		                <td>Coord<td>${ p.coord }
 		            </tr>
 		        </table>
+
 		        <h2>Nimet</h2>
 		        <table>
 		        	<tr><th class=checkbox><input type="checkbox" xv-model="selected2" :value="name">
@@ -178,16 +187,25 @@ input {
 		        		<td>${ pname.lang }
 		        		<td>${ pname.order }
 		        </table>
+
+		        <h2>Ympärillä</h2>
+		        <ul>
+		        	<li v-for="subplace in p.uppers">
+		        	${ subplace.name } (${ subplace.type })
+		        </ul>
+
 		        <h2>Sisältää</h2>
 		        <ul>
 		        	<li v-for="subplace in p.surrounds">
 		        	${ subplace.name } (${ subplace.type })
 		        </ul>
+
 				</div>
 		</div>
 	</template>
 	<br>
-	<input type=button value="Yhdistä" @click="mergeplaces()" v-bind:disabled="!same_batch">
+	<div>${ msg }</div>
+	<input type=button value="Yhdistä" @click="mergeplaces()" v-bind:disabled="to_be_merged.length != 2">
 	<input type=button value="Sulje" @click="to_be_merged = []">
 	</div>
 		
@@ -199,8 +217,8 @@ input {
 </body>
 
 <script>
-function log(msg) {
-    console.log(msg);
+function log(...msg) {
+    console.log(...msg);
 }
 
 function removeFromArray(arr, value) { 
@@ -232,6 +250,9 @@ var app = new Vue({
         places: [], // {id:1234,name:"Suomi",type:"Valtio",batch:"Audit 2020-12-26.001"}
         path: [],
         parentname: "",
+        msg:"",
+        placecoord: "",
+        placetype: "",
     }, // data
 //        ,lat:60,long:24,surrounds:["Helsinki","Tampere"]},
 
@@ -277,11 +298,21 @@ var app = new Vue({
         merge: function() {
         	var prev_batch = null;
         	app.to_be_merged = [];
+        	app.msg = "";
+        	this.placetype = this.selected[0].uniq_id;
+        	if (!this.selected[0].coord && this.selected[1].coord) {
+	        	this.placecoord = this.selected[1].uniq_id;
+        	} else {
+	        	this.placecoord = this.selected[0].uniq_id;
+        	}
+        	var temp = [];
         	this.selected.forEach( function(p) {
+	        	// app.to_be_merged.push(p);
 	            axios.get('/refplaces/api/getplace?id=' + p.uniq_id ).
 	                then(function(rsp, status) {
 	                	var p = rsp.data.place;
-			        	app.to_be_merged.push(p);
+			        	temp.push(p);
+			        	// app.to_be_merged.push(p);
 			        	// p.batch="Batch 2020-11-26.001" -> "Batch"
 			        	var batch_type = p.batch.split(" ")[0];
 			        	console.log('Batch type = '+ batch_type);
@@ -289,23 +320,55 @@ var app = new Vue({
 			        		app.same_batch = false;
 			        	}
 			        	prev_batch = batch_type;
+			        	log("tempxy:", temp.length);
+		        		if (temp.length == 2) {
+		        			log("to_be_merged1", app.to_be_merged);
+				        	if (temp[0].uniq_id == app.selected[0].uniq_id) {
+				        		log(1);
+					        	//app.to_be_merged = temp;
+					        	app.to_be_merged.push(temp[0]);
+					        	app.to_be_merged.push(temp[1]);
+				        	} else {  // reverse order
+				        		log(2);
+					        	app.to_be_merged.push(temp[1]);
+					        	app.to_be_merged.push(temp[0]);
+				        	}
+		        			log("to_be_merged2", app.to_be_merged);
+			        	}
 	                });
         	});
+        	
     	},
         mergeplaces: function() {
         	var id1 = this.selected[0].uniq_id;
         	var id2 = this.selected[1].uniq_id;
             axios.get('/refplaces/api/mergeplaces?id1=' + id1 + "&id2=" +id2 ).
                 then(function(rsp, status) {
-		        	app.to_be_merged = [];
-		        	var p = app.selected[0];
-		            axios.get('/refplaces/api/getplace?id=' + p.uniq_id ).
-		                then(function(rsp, status) {
-		                	var p = rsp.data.place;
-				        	app.to_be_merged.push(p);
-		                });
+                console.log("tsp", rsp);
+                	if (rsp.data.status == 'OK') {
+			        	app.to_be_merged = [];
+			        	var p = app.selected[0];
+			            axios.get('/refplaces/api/getplace?id=' + p.uniq_id ).
+			                then(function(rsp, status) {
+			                	var p = rsp.data.place;
+					        	app.to_be_merged.push(p);
+			                });
+		                // remove second place from the main list:
+		                const index = app.find_place_by_id(app.selected[1].uniq_id);
+		                if (index) {
+			                app.places.splice(index, 1);
+		                }
+		                app.selected.splice(1, 1);
+	                } else {
+	                	app.msg = rsp.data.statustext;
+	                }
                 });
     	},
+        find_place_by_id: function(uniq_id) {
+        	for (const [index, place] of app.places.entries()) {
+        		if (place.uniq_id == uniq_id) return index;
+    		}
+        },
     	clear_selected: function() {
     		this.selected = [];
     	},
