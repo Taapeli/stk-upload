@@ -751,7 +751,7 @@ class Neo4jReadServiceTx(ConcreteService):
         ret = []
         for tnode in t.tree.expand_tree(mode=t.tree.DEPTH):
             logger.debug(
-                f"{t.tree.depth(t.tree[tnode])} {t.tree[tnode]} {t.tree[tnode].bpointer}"
+                f"{t.tree.depth(t.tree[tnode])} {t.tree[tnode]} {t.tree[tnode].predecessor}"
             )
             if tnode != 0:
                 n = t.tree[tnode]
@@ -785,7 +785,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
                 p.pname = p.names[0].name
                 # logger.info("# {}".format(p))
-                p.parent = n.bpointer
+                p.parent = n.predecessor
                 ret.append(p)
         return ret
 

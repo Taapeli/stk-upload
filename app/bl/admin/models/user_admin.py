@@ -181,7 +181,7 @@ class UserAdmin():
     def get_user_profiles(cls):
         try:
             with shareds.driver.session() as session:
-                profileRecords = session.read_transaction(cls._getProfileRecords)
+                profileRecords = session.execute_read(cls._getProfileRecords)
                 result = []
                 for record in profileRecords:
                     node = record['profile']
