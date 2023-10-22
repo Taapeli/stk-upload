@@ -90,7 +90,8 @@ class Name(NodeObject):
                 ID(p2), p2.est_birth, p2.est_death,
                 n2.firstname, n2.suffix, n2.title, n2.surname]) AS ids
             """.format()
-        return shareds.driver.session().run(query)
+        with shareds.driver.session() as session:
+            return session.run(query)
 
     @staticmethod
     def get_clearname(uniq_id=None):  # Not used!

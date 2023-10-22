@@ -512,6 +512,7 @@ class PlaceUpdater(DataService):
             # Update default language name links
             def_names = ret.get("ids")
             self.dataservice.ds_place_set_default_names(
+                self.dataservice.tx,
                 place.uniq_id, def_names["fi"], def_names["sv"]
             )
 
