@@ -21,3 +21,4 @@ neo4j==5.8.0
 passlib==1.7.4
 Pillow==9.5.0
 treelib==1.6.4
+packaging==21.3

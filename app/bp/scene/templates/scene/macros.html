@@ -181,8 +181,8 @@
 	{# Shows all Gramps attribute data for this object as table rows #} 
 	{% if obj.attrs %}
         {% for key, values in obj.attrs.items() %}
-            <tr class="attrs" title="{{ _('Attribute') }}: '{{key}}'">
-            	<td class="ColumnAttribute">&raquo;{{ _(key) }}</td>
+            <tr class="attrs" title="{{ _('Extra Attribute') }}: '{{key}}'">
+            	<td class="ColumnAttribute"><span class="ExtraAttribute">{{ _(key) }}</span></td>
 	            <td class="Value" colspan="{{colspan}}">
 	            	<ul style="margin:0">{% for value in values %}
 	            		<li>&nbsp;{{ value }}</li>
