@@ -173,7 +173,7 @@ RETURN ID(p) as uniq_id"""
     create_name_as_leaf = """
 CREATE (n:Name) SET n = $n_attr
 WITH n
-MATCH (p:Person)    WHERE ID(p) = $parent_id
+MATCH (p:Person {iid: $parent_id})
 MERGE (p)-[r:NAME]->(n)
 WITH n
 match (c:Citation) where c.handle in $citation_handles
@@ -206,7 +206,7 @@ CREATE (n) -[r:NOTE]-> (m)"""
 
     fetch_selected_for_lifetime_estimates = """
 MATCH (p:Person) 
-    WHERE id(p) IN $idlist
+    WHERE p.iid IN $idlist
 OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
 OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
 OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
@@ -238,8 +238,7 @@ RETURN p, id(p) as pid,
 """
 
     update_lifetime_estimate = """
-MATCH (p:Person) 
-    WHERE id(p) = $id
+MATCH (p:Person {iid: $id})
 SET p.birth_low = $birth_low,
     p.death_low = $death_low,
     p.birth_high = $birth_high,
@@ -247,14 +246,14 @@ SET p.birth_low = $birth_low,
 """
 
     get_confidences = """
-MATCH (person:Person) WHERE ID(person)=$id
+MATCH (person:Person {iid: $id})
 OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c1:Citation)
 OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
 RETURN person.confidence AS confidence, 
     COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
     set_confidence = """
-MATCH (person:Person) WHERE ID(person)=$id
+MATCH (person:Person {iid: $id})
 SET person.confidence=$confidence"""
 
 #-pe.neo4j.readservice.Neo4jReadService.dr_get_surname_list
@@ -266,19 +265,19 @@ order by count desc
 limit $count"""
 
     set_primary_name = """
-match (p:Person{iid:$iid})  
+match (p:Person {iid:$iid})  
 match (p) -[:NAME]-> (n1:Name{order:0})
 match (p) -[:NAME]-> (n2:Name{order:$old_order})
 set n1.order = $old_order, n2.order = 0
     """
 
     set_name_order = """
-match (n:Name) where id(n) = $uid  
+match (n:Name {iid: $uid}) 
 set n.order = $order
     """
 
     set_name_type = """
-match (n:Name) where id(n) = $uid  
+match (n:Name  {iid: $id}) 
 set n.type = $nametype
 return n
     """

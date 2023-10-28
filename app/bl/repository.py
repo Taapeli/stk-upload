@@ -29,9 +29,9 @@ class Repository(NodeObject):
             note_handles[]   str lisätiedon handle
     """
 
-    def __init__(self):
+    def __init__(self, iid=None):
         """ Luo uuden repository-instanssin """
-        NodeObject.__init__(self)
+        NodeObject.__init__(self, iid)
         self.type = ""
         self.rname = ""
         self.medium = ""

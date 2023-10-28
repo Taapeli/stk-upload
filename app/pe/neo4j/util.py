@@ -163,6 +163,7 @@ class IsotammiId:
         Create an object with a reservation of 'id_count' ID values from the
         database counter for the type of 'obj_name'.
         """
+        # iid for Name objects start with "D" but are formed from corresponding Person iid
         self.iid_type = "H" if obj_name.startswith("Pe") else obj_name[:1]
         self.session = session
         self.n_iid = 0

@@ -30,19 +30,19 @@ Created on 23.3.2020
 class CypherObjectWHandle():
 
     link_media = """
-MATCH (e) WHERE ID(e) = $root_id
+MATCH (e {iid: $root_id}) WHERE $lbl in LABELS(e)
 MATCH (m:Media  {handle: $handle})
   CREATE (e) -[r:MEDIA]-> (m)
-    SET r = $r_attr
-RETURN ID(m) AS uniq_id"""
+    SET r = $r_attr"""
+#!RETURN ID(m) AS uniq_id"""
 
-    link_note = """
-MATCH (e) WHERE ID(e) = $root_id
+    link_note_iid = """
+MATCH (e {iid: $root_id}) WHERE $lbl in LABELS(e)
 MATCH (m:Note  {handle: $handle})
   CREATE (e) -[r:NOTE]-> (m)"""
 
     link_citation = """
-MATCH (e) WHERE ID(e) = $root_id
+MATCH (e {iid: $root_id}) WHERE $lbl in LABELS(e)
 MATCH (m:Citation  {handle: $handle})
   CREATE (e) -[r:CITATION]-> (m)"""
 

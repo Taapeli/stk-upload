@@ -27,9 +27,9 @@ class Note(NodeObject):
             url             str web link
     """
 
-    def __init__(self):
+    def __init__(self, iid=None):
         """Creates a Note instance in memory"""
-        NodeObject.__init__(self)
+        NodeObject.__init__(self, iid)
         self.type = ""
         self.priv = None
         self.text = ""

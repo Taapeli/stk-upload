@@ -44,7 +44,7 @@ class Family(NodeObject):
     Properties:
             change
             id              esim. "F0001"
-            uniq_id         int database key
+            iid             str object unique key
             rel_type        str suhteen tyyppi
             priv            str private if exists
             father_sortname str search key
@@ -52,9 +52,9 @@ class Family(NodeObject):
             attr[]          dict lisätiedot {attr_type: attr_value}
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """Creates a new Family instance representing a database Family node."""
-        NodeObject.__init__(self, uniq_id)
+        NodeObject.__init__(self, iid)
         self.priv = None
         self.rel_type = ""
         self.dates = None  # TODO DateRange marriage .. divorce
@@ -77,15 +77,15 @@ class FamilyBl(Family):
     Properties from Family:
             change
             id              esim. "F0001"
-            uniq_id         int database key
+            iid             str object unique key
             rel_type        str "marriage" etc.
             father_sortname str search key
             mother_sortname str search key
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """Creates a Family instance for carrying whole family information."""
-        Family.__init__(self, uniq_id)
+        Family.__init__(self, iid)
 
         self.father = None
         self.mother = None
@@ -117,10 +117,10 @@ class FamilyWriter(DataService):
         super().__init__(service_name, u_context, tx=tx)
         pass  # print(f"#FamilyWriter: {dir(self)}")
 
-    def set_family_calculated_attributes(self, uniq_id: int):
+    def set_family_calculated_attributes(self, iid: str):
         """ Set Family sort names and estimated marriage DateRange.
         """
-        res = self.dataservice.ds_set_family_calculated_attributes(uniq_id)
+        res = self.dataservice.ds_set_family_calculated_attributes(iid)
         stat = res.get("status")
         counter = res.get("dates")
         if Status.has_failed(res):
@@ -268,14 +268,14 @@ class FamilyReader(DataService):
 
         family = ret_results.get("item")
         # The Nodes for search of Sources and Notes (Family and Events)
-        src_list = [family.uniq_id]
+        src_list = [family.iid]
         """
             2. Get Parent nodes [optionally] with default Name
                res is dict {items, status, statustext}
         """
         if select_parents:
             res = self.dataservice.dr_get_family_parents(
-                family.uniq_id, with_name=select_names
+                family.iid, with_name=select_names
             )
             for p in res.get("items"):
                 # For User's own data, no hiding for too new persons
@@ -291,7 +291,7 @@ class FamilyReader(DataService):
         """
         if select_children:
             res = self.dataservice.dr_get_family_children(
-                family.uniq_id, with_events=select_events, with_names=select_names
+                family.iid, with_events=select_events, with_names=select_names
             )
             # res {'items': [<bl.person.PersonBl>], 'status': Status}
             family.num_hidden_children = 0
@@ -308,11 +308,11 @@ class FamilyReader(DataService):
         """
         if select_events:
             res = self.dataservice.dr_get_family_events(
-                family.uniq_id, with_places=select_places
+                family.iid, with_places=select_places
             )
             for e in res.get("items"):
                 family.events.append(e)
-                src_list.append(e.uniq_id)
+                src_list.append(e.iid)
         """
             5 Get family and event Sources Citations and Repositories
               optionally with Notes

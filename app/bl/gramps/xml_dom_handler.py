@@ -69,7 +69,7 @@ class DOM_handler:
         self.username = current_user  # current username
         self.dataservice = dataservice
         
-        self.handle_to_node = {}  # {handle:(iid, uniq_id)}
+        #!self.handle_to_node = {}  # {handle:(iid, uniq_id)}
         self.person_ids = []  # List of processed Person node unique id's
         self.family_ids = []  # List of processed Family node unique id's
         # self.batch = None                     # Batch node to be created
@@ -119,26 +119,17 @@ class DOM_handler:
         obj.save(self.dataservice.tx, **kwargs)
         # removed: ... print(self.obj_counter, "Transaction restart")
 
-        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
+        #!self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
-
-    # def obsolete_save_and_link_handle2(self, tx, obj, **kwargs):
-    #     """Save object and store its identifiers in the dictionary by handle.
-    #
-    #     Some objects may accept arguments like batch_id="2019-08-26.004" and others
-    #     """
-    #     obj.save(tx, **kwargs)
-    #     self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
-    #     self.update_progress(obj.__class__.__name__)
 
     def complete(self, obj:NodeObject, url_notes = None):
         """ Complete object saving. """
         # 1. Store handle to iid, uniq_id conversion
-        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
+        #!self.handle_to_node[obj.handle] = obj.iid   #!, obj.uniq_id)
         # 2. Note references from url field must be processed later
         if url_notes:
             # Create referencing object stub with important parameters
-            parent = NodeObject(obj.uniq_id)
+            parent = NodeObject(obj.iid)
             parent.id = obj.id
             parent.notes = url_notes # List of Notes objects
             self.noterefs_later.append(parent)
@@ -429,7 +420,7 @@ class DOM_handler:
                     #(p)print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
 
             # Handle <objref> with citations and notes
-            e.media_refs = self._extract_mediaref(event)
+            e.media_refs = self._extract_mediaref(e, event)
 
             self.dataservice.ds_save_event(tx, e, self.batch.id, iids)
             self.complete(e)
@@ -517,7 +508,7 @@ class DOM_handler:
             self.complete(f)
 
             # The sortnames and dates will be set for these families
-            self.family_ids.append(f.uniq_id)
+            self.family_ids.append(f.iid)
 
     
     def handle_note_list(self, tx, nodes, iids):
@@ -698,7 +689,7 @@ class DOM_handler:
                     p.event_handle_roles.append((e_handle, e_role))
 
             # Handle <objref>
-            p.media_refs = self._extract_mediaref(person)
+            p.media_refs = self._extract_mediaref(p, person)
 
             for person_url in person.getElementsByTagName("url"):
                 n = Note()
@@ -730,14 +721,15 @@ class DOM_handler:
             self.complete(p, url_notes)
 
             # The refnames will be set for these persons
-            self.person_ids.append(p.uniq_id)
+            self.person_ids.append(p.iid)
 
 
     def handle_place_list(self, tx, nodes, iids:IsotammiId):
         """Get all the places in the xml_tree.
+        
 
         To create place hierarchy links, there must be a dictionary of
-        Place handles and uniq_ids created so far. The link may use
+        Place handles and iids created so far. The link may use
         previous node or create a new one.
         """
         for placeobj in nodes:
@@ -850,7 +842,7 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has note {pl.note_handles[-1]}')
 
             # Handle <objref>
-            pl.media_refs = self._extract_mediaref(placeobj)
+            pl.media_refs = self._extract_mediaref(pl, placeobj)
             # if pl.media_refs: print(f'#> saving Place {pl.id} with {len(pl.media_refs)} media_refs')
 
             for ref in placeobj.getElementsByTagName("citationref"):
@@ -1017,9 +1009,9 @@ class DOM_handler:
         if len(family_ids) == 0:
             return {"status": Status.OK, "counter": counter}
         service = self.family_service    # <Neo4jUpdateService>
-        for uniq_id in self.family_ids:
-            if uniq_id is not None:
-                res = service.set_family_calculated_attributes(uniq_id)
+        for iid in self.family_ids:
+            if iid is not None:
+                res = service.set_family_calculated_attributes(iid)
                 # returns {counter, status}
                 counter += res.get("counter", 0)
         return res
@@ -1043,7 +1035,7 @@ class DOM_handler:
         for p_id in person_ids:
             self.update_progress("refnames")
             if p_id is not None:
-                res = self.person_service.set_person_name_properties(uniq_id=p_id)
+                res = self.person_service.set_person_name_properties(iid=p_id)
                 refname_count += res.get("refnames")
                 sortname_count += res.get("sortnames")
 
@@ -1224,7 +1216,7 @@ class DOM_handler:
             print(f"## Got {node.id} attributes {node.attrs}")
         return
 
-    def _extract_mediaref(self, dom_object):
+    def _extract_mediaref(self, obj:NodeObject, dom_object):
         """Check if dom_object has media reference and extract it to p.media_refs.
 
         Example:
@@ -1243,7 +1235,7 @@ class DOM_handler:
         media_nr = -1
         for objref in dom_object.getElementsByTagName("objref"):
             if objref.hasAttribute("hlink"):
-                resu = MediaReferenceByHandles()
+                resu = MediaReferenceByHandles(obj)
                 resu.media_handle = objref.getAttribute("hlink") + self.handle_suffix
                 media_nr += 1
                 resu.media_order = media_nr

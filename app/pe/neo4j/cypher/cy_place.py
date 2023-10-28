@@ -35,9 +35,9 @@ class CypherPlace():
         OPTIONAL MATCH (place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
         RETURN root, place, name, COUNT(DISTINCT ref) AS uses,
             COLLECT(DISTINCT pn) AS names,
-            COLLECT(DISTINCT [ID(up), up.iid, up.type, upn.name, upn.lang]) AS upper,
-            COLLECT(DISTINCT [ID(do), do.iid, do.type, don.name, don.lang]) AS lower
-    ORDER BY name.name"""
+            COLLECT(DISTINCT [-1, up.iid, up.type, upn.name, upn.lang]) AS upper,
+            COLLECT(DISTINCT [-2, do.iid, do.type, don.name, don.lang]) AS lower
+    ORDER BY name.name""" #TODO Remove -1, -2
 
     get_name_hierarchies = """
 MATCH (root) -[:OBJ_PLACE]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
@@ -50,26 +50,26 @@ WITH root, place, name ORDER BY name.name LIMIT $limit
     link_name_lang = """
 MATCH (fi:Place_name) <-[:NAME]- (place:Place),
     (place) -[:NAME]-> (sv:Place_name)  
-    WHERE ID(place) = $place_id AND ID(fi) = $fi_id AND ID(sv) = $sv_id
+    WHERE place.iid = $place_id AND fi.iid = $fi_id AND sv.iid = $sv_id
 OPTIONAL MATCH (place) -[r:NAME_LANG]-> ()
     DELETE r
 MERGE (place) -[:NAME_LANG {lang:'fi'}]-> (fi)
 MERGE (place) -[:NAME_LANG {lang:'sv'}]-> (sv)
-RETURN DISTINCT ID(place) AS pl, ID(fi) AS fi, ID(sv) AS sv"""
+RETURN DISTINCT place.iid AS pl, fi.iid AS fi, sv.iid AS sv"""
 
 # Default language names update with $place_id, $fi_id; sv_id is the same
     link_name_lang_single = """
 MATCH (n:Place_name) <-[:NAME]- (place:Place)  
-    WHERE ID(place) = $place_id AND ID(n) = $fi_id
+    WHERE place.iid = $place_id AND n.iid = $fi_id
 OPTIONAL MATCH (place) -[r:NAME_LANG]-> ()
     DELETE r
 MERGE (place) -[:NAME_LANG {lang:'fi'}]-> (n)
 MERGE (place) -[:NAME_LANG {lang:'sv'}]-> (n)
-RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
+RETURN DISTINCT place.iid AS pl, n.iid AS fi, n.iid AS sv"""
 
 # For place page
     get_w_citas_names_notes = """
-MATCH  (root) -[:OBJ_PLACE]-> (place:Place{iid:$iid})
+MATCH  (root) -[:OBJ_PLACE]-> (place:Place {iid:$iid})
 OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
 WITH root, place, name
     OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 
@@ -85,21 +85,19 @@ RETURN root, place, name,
 
     get_notes_for_citas = """
 MATCH (root) -[:OBJ_OTHER]-> (cita) -[:NOTE]-> (note:Note)
-    WHERE ID(cita) in $citas
-RETURN ID(cita) AS cid, note"""
+    WHERE cita.iid in $citas
+RETURN cita.iid AS cid, note"""
 
     # Result indi is a Person or Family
     get_place_events = """
-MATCH (e:Event) -[:PLACE]-> (l:Place)
-    WHERE ID(l) = $locid
+MATCH (e:Event) -[:PLACE]-> (l:Place {iid: $locid})
 WITH e,l
     MATCH (indi) -[r]-> (e)
     OPTIONAL MATCH (indi) -[:NAME]-> (n)
 RETURN indi, r.role AS role, COLLECT(DISTINCT n) AS names, e AS event
 ORDER BY e.date1"""
     get_person_events = """
-MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
-    WHERE ID(l) = $locid
+MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place {iid: $locid})
     MATCH (p) --> (n:Name)
     OPTIONAL MATCH (p) -[:F
 WITH p, r, e, l, n ORDER BY n.order
@@ -109,22 +107,22 @@ ORDER BY e.date1"""
 
     # Queries for Place page hierarchy
     read_pl_hierarchy = """
-MATCH x= (p:Place)<-[:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place {iid: $locid})<-[:IS_INSIDE*]-(i:Place)
     WITH NODES(x) AS nodes, relationships(x) AS r
     RETURN nodes, SIZE(r) AS lv, r
     UNION
-MATCH x= (p:Place)-[:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place {iid: $locid})-[:IS_INSIDE*]->(i:Place)
     WITH NODES(x) AS nodes, relationships(x) AS r
     RETURN nodes, SIZE(r)*-1 AS lv, r
 """
     # Query for single Place without hierarchy
     root_query = """
-MATCH (p:Place) WHERE ID(p) = $locid
+MATCH (p:Place {iid: $locid}}
 RETURN p.type AS type, p.iid AS iid, p.pname AS name
 """
     # Query to get names for a Place with $locid, $lang
     read_pl_names="""
-MATCH (place:Place) WHERE ID(place) = $locid
+MATCH (place:Place {iid: $locid}}
 OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
 WITH place, name
     OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 
@@ -139,48 +137,55 @@ RETURN name, COLLECT(n) AS names LIMIT 15
 MATCH (u:Root {id:$batch_id})
 CREATE (new_pl:Place)
     SET new_pl = $p_attr
-CREATE (u) -[:OBJ_PLACE]-> (new_pl) 
-RETURN ID(new_pl) AS uniq_id"""
+CREATE (u) -[:OBJ_PLACE]-> (new_pl)"""
+#! RETURN ID(new_pl) AS uniq_id"""
 
     # Set properties for an existing Place and connect it to Batch
-    complete = """
+    # Set properties for an Place matching handle and connect it to Batch
+    complete_handle = """
 MATCH (u:Root {id:$batch_id})
-MATCH (pl:Place) WHERE ID(pl) = $plid
+MATCH (pl:Place {handle: $p_handle})
     SET pl += $p_attr
 CREATE (u) -[:OBJ_PLACE]-> (pl)"""
 
     add_name = """
-MATCH (pl:Place) WHERE ID(pl) = $pid
+MATCH (pl:Place {iid: $pid})
 CREATE (pl) -[r:NAME {order:$order}]-> (n:Place_name)
-    SET n = $n_attr
-RETURN ID(n) AS uniq_id"""
+    SET n = $n_attr"""
+#! RETURN ID(n) AS uniq_id"""
 
     # Link to a known upper Place
-    link_hier = """
-MATCH (pl:Place) WHERE ID(pl) = $plid
-MATCH (up:Place) WHERE ID(up) = $up_id
+#     link_hier_iid = """
+# MATCH (pl:Place {iid: $plid})
+# MATCH (up:Place {iid: $up_id})
+# MERGE (pl) -[r:IS_INSIDE]-> (up)
+#     SET r = $r_attr"""
+    link_hier_handle = """
+MATCH (pl:Place {handle: $p_handle})
+MATCH (up:Place {handle: $up_handle})
 MERGE (pl) -[r:IS_INSIDE]-> (up)
-    SET r = $r_attr"""
+    SET r = $r_attr
+RETURN up.iid AS iid"""
 
     # Link to a new dummy upper Place
-    link_create_hier = """
-MATCH (pl:Place) WHERE ID(pl) = $plid
+    link_create_hier_handle = """
+MATCH (pl:Place {handle: $p_handle})
 CREATE (new_pl:Place)
     SET new_pl.handle = $up_handle
 CREATE (pl) -[r:IS_INSIDE]-> (new_pl)
     SET r = $r_attr
-RETURN ID(new_pl) AS uniq_id"""
+RETURN new_pl.iid AS iid"""
 
     add_urls = """
 MATCH (u:Root {id:$batch_id})
 CREATE (u) -[:OBJ_OTHER]-> (n:Note) 
     SET n = $n_attr
 WITH n
-    MATCH (pl:Place) WHERE ID(pl) = $pid
+    MATCH (pl:Place {iid: $pid})
     MERGE (pl) -[r:NOTE]-> (n)"""
 
-    link_note = """
-MATCH (pl:Place) WHERE ID(pl) = $pid
+    link_note_iid = """
+MATCH (pl:Place {iid: $pid})
 MATCH (n:Note)  WHERE n.handle=$hlink
 CREATE (pl) -[r:NOTE]-> (n)"""
 
@@ -219,10 +224,11 @@ class CypherPlaceMerge:
 MATCH (node) -[r:NAME_LANG]-> (pn)
 WHERE ID(node) = $id
 DELETE r"""
+#TODO: Obsolete key ID()
 
     merge_places = """
-MATCH (p1:Place)        WHERE ID(p1) = $id1 
-MATCH (p2:Place)        WHERE ID(p2) = $id2
+MATCH (p1:Place {iid: $id1})
+MATCH (p2:Place {iid: $id2})
 CALL apoc.refactor.mergeNodes([p1,p2],
     {properties:'discard',mergeRels:true})
 YIELD node

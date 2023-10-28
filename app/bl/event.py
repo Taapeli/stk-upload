@@ -77,10 +77,10 @@ class Event(NodeObject):
                     names = []         Names attached
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """Creates a new Event instance."""
         """ Luo uuden event-instanssin """
-        NodeObject.__init__(self, uniq_id)
+        NodeObject.__init__(self, iid)
         self.type = ""
         self.description = ""
         self.dates = None

@@ -54,8 +54,8 @@ class Neo4jWriteDriver(object):
             return err
 
 
-    def media_save_w_handles(self, uniq_id:int, media_refs:list):
-        ''' Save media object and it's Note and Citation references
+    def media_save_w_handles(self, iid:str, media_refs:list):
+        ''' NOT USED! Save media object and it's Note and Citation references
             using their Gramps handles.
             
             media_handle:
@@ -74,20 +74,24 @@ class Neo4jWriteDriver(object):
                     r_attr['upper'] = resu.crop[1]
                     r_attr['right'] = resu.crop[2]
                     r_attr['lower'] = resu.crop[3]
-                doing = f"(src:{uniq_id}) -[{r_attr}]-> Media {resu.media_handle}"
+                doing = f"(src:{iid}) -[{r_attr}]-> Media {resu.media_handle}"
 #                 print(doing)
-                result = self.tx.run(CypherObjectWHandle.link_media, 
-                                     root_id=uniq_id, handle=resu.media_handle, 
-                                     r_attr=r_attr)
-                media_uid = result.single()[0]    # for media object
+                self.tx.run(CypherObjectWHandle.link_media,
+                            lbl=resu.obj_name,
+                            root_id=iid,
+                            handle=resu.media_handle, 
+                            r_attr=r_attr)
+                media_uid = iid    # for media object
 
                 for handle in resu.note_handles:
                     doing = f"{media_uid}->Note {handle}"
 #                     result = self.tx.run('MATCH (s), (t) WHERE ID(s)=$root_id and t.handle=$handle RETURN s,t', 
 #                         root_id=media_uid, handle=handle)
 #                     for s,t in result: print(f"\nMedia {s}\nNote {t}")
-                    self.tx.run(CypherObjectWHandle.link_note, 
-                                root_id=media_uid, handle=handle)
+                    self.tx.run(CypherObjectWHandle.link_note_iid, 
+                                lbl=resu.obj_name,
+                                root_id=media_uid,
+                                handle=handle)
 
                 for handle in resu.citation_handles:
                     doing = f"{media_uid}->Citation {handle}"
@@ -95,7 +99,9 @@ class Neo4jWriteDriver(object):
 #                         root_id=media_uid, handle=handle)
 #                     for s,t in result: print(f"\nMedia {s}\nCite {t}")
                     self.tx.run(CypherObjectWHandle.link_citation, 
-                                root_id=media_uid, handle=handle)
+                                lbl=resu.obj_name,
+                                root_id=media_uid,
+                                handle=handle)
 
         except Exception as err:
             logger.error(f"Neo4jWriteDriver.media_save_w_handles {doing}: {err}")

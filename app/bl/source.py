@@ -53,9 +53,9 @@ class Source(NodeObject):
             stitle          str lähteen otsikko
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """ Luo uuden source-instanssin """
-        NodeObject.__init__(self, uniq_id=uniq_id)
+        NodeObject.__init__(self, iid)
         self.stitle = ""
         self.sauthor = ""
         self.spubinfo = ""
@@ -73,12 +73,12 @@ class SourceBl(Source):
     Array note_ref may contain database keys (uniq_ids)
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """Creates a new PlaceBl instance.
 
         You may also give for printout eventual hierarchy level
         """
-        Source.__init__(self, uniq_id)
+        Source.__init__(self, iid)
 
         # For display combo
         # Todo: onko repositories, citations käytössä?

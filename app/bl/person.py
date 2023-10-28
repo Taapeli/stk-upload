@@ -85,9 +85,9 @@ class Person(NodeObject):
       }
     """
 
-    def __init__(self):
+    def __init__(self, iid=None):
         """ Creates a new Person instance. """
-        NodeObject.__init__(self)
+        NodeObject.__init__(self, iid)
         self.priv = None
         self.sex = SEX_UNKNOWN
         self.confidence = ""

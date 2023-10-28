@@ -706,7 +706,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
         return {"place": pl, "uniq_ids": node_ids, "citas": citations}
 
-    def tx_get_place_tree(self, locid, lang="fi"):
+    def tx_get_place_tree(self, locid:str, lang="fi"):
         """Read upper and lower places around this place.
 
         Haetaan koko paikkojen ketju paikan locid ympärillä
@@ -719,11 +719,11 @@ class Neo4jReadServiceTx(ConcreteService):
         ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
         │"lv"│"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"  │
         ╞════╪═══════╪═════════╪══════════╪═══════╪═════════╪═════════╡
-        │"2" │"21774"│"Region" │"Tuutari" │"21747"│"Country"│"Venäjä" │
+        │"2" │"P-774"│"Region" │"Tuutari" │"P-747"│"Country"│"Venäjä" │
         ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-        │"1" │"21774"│"Region" │"Tuutari" │"21773"│"State"  │"Inkeri" │
+        │"1" │"P-774"│"Region" │"Tuutari" │"P-773"│"State"  │"Inkeri" │
         ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-        │"-1"│"21775"│"Village"│"Nurkkala"│"21774"│"Region" │"Tuutari"│
+        │"-1"│"P-775"│"Village"│"Nurkkala"│"P-774"│"Region" │"Tuutari"│
         └────┴───────┴─────────┴──────────┴───────┴─────────┴─────────┘
         Metodi palauttaa siitä listan
             Place(result[0].id2) # Artjärvi City
@@ -740,7 +740,7 @@ class Neo4jReadServiceTx(ConcreteService):
             # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
             # Hae oman paikan tiedot ilman yhteyksiä
             with self.driver.session(default_access_mode="READ") as session:
-                result = session.run(CypherPlace.root_query, locid=int(locid))
+                result = session.run(CypherPlace.root_query, locid=locid)
                 record = result.single()
                 t.tree.create_node(
                     record["name"],
@@ -753,7 +753,7 @@ class Neo4jReadServiceTx(ConcreteService):
             logger.debug(
                 f"{t.tree.depth(t.tree[tnode])} {t.tree[tnode]} {t.tree[tnode].predecessor}"
             )
-            if tnode != 0:
+            if tnode:   #!  != 0:
                 n = t.tree[tnode]
 
                 # Get all names: default lang: 'name' and others: 'names'
@@ -771,7 +771,7 @@ class Neo4jReadServiceTx(ConcreteService):
                     #    ]
                     # >
                 lv = t.tree.depth(n)
-                p = PlaceBl(uniq_id=tnode, ptype=n.data["type"], level=lv)
+                p = PlaceBl(iid=tnode, ptype=n.data["type"], level=lv)
                 p.iid = n.data["iid"]
                 node = record["name"]
                 if node:
@@ -789,14 +789,14 @@ class Neo4jReadServiceTx(ConcreteService):
                 ret.append(p)
         return ret
 
-    def tx_get_place_events(self, uniq_id, privacy):
+    def tx_get_place_events(self, iid, privacy):
         """Find events and persons associated to given Place.
 
             :param: uniq_id    current place uniq_id
             :param: privacy    True, if not showing live people
         """
         result = self.driver.session(default_access_mode="READ").run(
-            CypherPlace.get_place_events, locid=uniq_id
+            CypherPlace.get_place_events, locid=iid
         )
         ret = []
         for record in result:

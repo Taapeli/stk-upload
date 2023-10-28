@@ -93,14 +93,17 @@ class NodeObject:
     """
     Class representing Neo4j Node type objects.
     """
-    def __init__(self, uniq_id:int=None):
+    def __init__(self, iid=None):
         """
         Constructor.
 
-        Optional uniq_id may be database key (int).
+        Optional iid should be unique key (str).
+        Obsolete: iid may also be Neo4j version 3 database key (int),
+                  which is saved as self.uniq_id
         """
-        #self.uuid = None 
-        self.uniq_id = uniq_id  # Neo4j object id
+        self.uniq_id = None  # Neo4j object id
+        if isinstance(iid, int):
+            self.uniq_id = iid
         self.change = 0     # Object change time
         self.id = ""        # Gedcom object id like "I1234"
         self.handle = ""    # Gramps handle (?)
@@ -110,14 +113,18 @@ class NodeObject:
         # TODO Define constants for values:
         #     candicate, audit_requested, auditing, accepted,
         #     mergeing, common, rejected
-        self.iid = None     # Containing
+        if isinstance(iid, str):
+            self.iid = iid
+        else:
+            self.iid = None     # Containing
         # - object type id ("H" = Human person etc.)
         # - running number in Crockford Base 32 format
         # - ISO 7064 checksum (2 digits)
 
     def __str__(self):
-        #uuid = self.uuid if self.uuid else "-"
-        return f'(NodeObject {self.iid}/{self.uniq_id}/{self.id} date {self.dates})"'
+        # Supports also obsolete Neo4j id() as uniq_id
+        iid = self.uniq_id if self.uniq_id else self.iid
+        return f'(NodeObject {self.iid}/{self.iid}/{self.id} date {self.dates})"'
 
     def timestamp_str(self):
         """ My timestamp to display format. """

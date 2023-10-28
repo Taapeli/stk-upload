@@ -120,7 +120,8 @@ RETURN f, p.pname AS marriage_place,
 MATCH (b:Root {id: $batch_id})
 MERGE (b) -[r:OBJ_FAMILY]-> (f:Family {handle: $f_attr.handle}) 
     SET f = $f_attr
-RETURN ID(f) as uniq_id"""
+RETURN f.iid as iid"""
+#!RETURN ID(f) as uniq_id"""
 
     link_parent = """
 MATCH (n:Family {handle:$f_handle})

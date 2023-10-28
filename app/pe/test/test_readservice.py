@@ -339,7 +339,7 @@ def test_dr_get_event_notes_medias1(svc):
 
     def tx_get_place_list_fw(self, user, fw_from, limit, lang="fi", batch_id=None):
     def tx_get_place_w_names_citations_notes_medias(self, user, uuid, lang="fi"):
-    def dr_get_place_tree(self, locid, lang="fi"):
+    def dr_get_place_tree(self, locid:str, lang="fi"):
     def dr_get_place_events(self, uniq_id, privacy):
 
     def dr_get_source_list_fw(self, args):

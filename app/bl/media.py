@@ -42,9 +42,9 @@ class Media(NodeObject):
             description     str description
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """ Luo uuden media-instanssin """
-        NodeObject.__init__(self, uniq_id)
+        NodeObject.__init__(self, iid)
         self.description = ""
         self.src = None
         self.mime = None
@@ -161,7 +161,13 @@ class MediaReferenceByHandles:
     Used in bp.gramps.xml_dom_handler.DOM_handler
     """
 
-    def __init__(self):
+    def __init__(self, source_object: NodeObject):
+        """ Create a reference object having referrer object label and 
+            references with different reference properties.
+        """
+        lbl = source_object.__class__.__name__
+        self.obj_name = lbl[:-2] if lbl.endswith("Bl") else lbl
+            
         self.media_handle = None
         self.media_order = 0  # Media reference order nr
         self.crop = []  # Four coordinates
@@ -169,7 +175,7 @@ class MediaReferenceByHandles:
         self.citation_handles = []  # list of citation handles
 
     def __str__(self):
-        s = f"{self.media_handle} [{self.media_order}]"
+        s = f"{self.obj_name} -> {self.media_handle} [{self.media_order}]"
         if self.crop:
             s += f" crop({self.crop})"
         if self.note_handles:

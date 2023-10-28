@@ -71,10 +71,10 @@ class Place(NodeObject):
             note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """Creates a new Place instance."""
-        NodeObject.__init__(self)
-        self.uniq_id = uniq_id
+        NodeObject.__init__(self, iid)
+        #! self.uniq_id = uniq_id
         self.type = ""
         self.names = []
         self.pname = ""
@@ -120,12 +120,12 @@ class PlaceBl(Place):
             note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
     """
 
-    def __init__(self, uniq_id=None, ptype="", level=None):
+    def __init__(self, iid=None, ptype="", level=None):
         """Creates a new PlaceBl instance.
 
         You may also give for printout eventual hierarchy level
         """
-        Place.__init__(self, uniq_id)
+        Place.__init__(self, iid)
 
         if ptype:
             self.type = ptype
@@ -170,7 +170,7 @@ class PlaceBl(Place):
                     if name.lang == lang and not lang in selection.keys():
                         # A matching language
                         # print(f'# select {lang}: {name.name} {name.uniq_id}')
-                        selection[lang] = name.uniq_id
+                        selection[lang] = name.iid
             # 2. find replacing languages, if not matching
             for lang in use_langs:
                 if not lang in selection.keys():
@@ -178,13 +178,13 @@ class PlaceBl(Place):
                     for name in names:
                         if name.lang == "" and not lang in selection.keys():
                             # print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
-                            selection[lang] = name.uniq_id
+                            selection[lang] = name.iid
                 if not lang in selection.keys():
                     # No missing language, select any
                     for name in names:
                         if not lang in selection.keys():
                             # print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
-                            selection[lang] = name.uniq_id
+                            selection[lang] = name.iid
 
             ret = {}
             for lang in use_langs:
@@ -419,19 +419,19 @@ class PlaceReaderTx(DataService):
 
         try:
             results["hierarchy"] = self.dataservice.tx_get_place_tree(
-                place.uniq_id, lang=lang
+                place.iid, lang=lang
             )
 
         except AttributeError as e:
             traceback.print_exc()
             return {
                 "status": Status.ERROR,
-                "statustext": f"Place tree attr for {place.uniq_id}: {e}",
+                "statustext": f"Place tree attr for {place.iid}: {e}",
             }
         except ValueError as e:
             return {
                 "status": Status.ERROR,
-                "statustext": f"Place tree value for {place.uniq_id}: {e}",
+                "statustext": f"Place tree value for {place.uiid}: {e}",
             }
 
         results["uniq_ids"]= res.get("uniq_ids",[])
@@ -439,7 +439,7 @@ class PlaceReaderTx(DataService):
         if citations:
             results["citations"] = citations
 
-        res = self.dataservice.tx_get_place_events(place.uniq_id, privacy)
+        res = self.dataservice.tx_get_place_events(place.iid, privacy)
         results["events"] = res["items"]
         return results
 

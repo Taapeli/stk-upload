@@ -31,11 +31,12 @@ from neo4j.exceptions import ClientError
 logger = logging.getLogger("stkserver")
 
 from bl.base import Status, IsotammiException #, NodeObject
-from bl.dates import DateRange, DR
+from bl.person import Person
 from bl.person_name import Name
 from bl.place import PlaceBl
 from bl.family import FamilyBl
 from bl.note import Note
+from bl.dates import DateRange, DR
 
 from pe.dataservice import ConcreteService
 
@@ -57,6 +58,7 @@ from pe.neo4j.nodereaders import Comment_from_node
 from pe.neo4j.nodereaders import PlaceBl_from_node
 from pe.neo4j.nodereaders import PlaceName_from_node
 from pe.neo4j.nodereaders import SourceBl_from_node
+from pe.neo4j.util import IsotammiId
 
 
 
@@ -502,6 +504,7 @@ class Neo4jUpdateService(ConcreteService):
         # print(f"Note.save: summary={result.summary().counters}")
         note.uniq_id = record[0]
 
+
     # ----- Media -----
 
     def ds_save_media(self, tx, media, batch_id, iids):
@@ -551,11 +554,12 @@ class Neo4jUpdateService(ConcreteService):
             _cnt=result.single()["cnt"]
 
 
-    def ds_create_link_medias_w_handles(self, tx, uniq_id: int, media_refs: list):
+    def ds_create_link_medias_w_handles(self, tx, iid: str, media_refs: list):
         """Save media object and it's Note and Citation references
         using their Gramps handles.
 
         media_refs:
+            obj_name          # Label of referee object
             media_handle      # Media object handle
             media_order       # Media reference order nr
             crop              # Four coordinates
@@ -571,39 +575,41 @@ class Neo4jUpdateService(ConcreteService):
                     r_attr["upper"] = resu.crop[1]
                     r_attr["right"] = resu.crop[2]
                     r_attr["lower"] = resu.crop[3]
-                doing = f"(src:{uniq_id}) -[{r_attr}]-> Media {resu.media_handle}"
+                doing = f"(src:{iid}) -[{r_attr}]-> Media {resu.media_handle}"
                 # print(doing)
-                result = tx.run(
-                    CypherObjectWHandle.link_media,
-                    root_id=uniq_id,
+                tx.run(CypherObjectWHandle.link_media,
+                    lbl=resu.obj_name,
+                    root_id=iid,
                     handle=resu.media_handle,
                     r_attr=r_attr,
                 )
                 # media_uid = result.single()[0]    # for media object
-                media_uid = None
-                for record in result:
-                    if media_uid:
-                        print(doing)
-                        print(
-                            f"ds_create_link_medias_w_handles: double link_media, "
-                            f"replacing media_uid={media_uid} with uid={record[0]}. "
-                            f"handle={resu.media_handle}"
-                        )
-                    else:
-                        media_uid = record[0]
+                #! media_uid = None
+                # for record in result:
+                #     if media_uid:
+                print(doing)
+                    #! print(
+                    #     f"ds_create_link_medias_w_handles: double link_media, "
+                    #     f"replacing media_uid={media_uid} with uid={record[0]}. "
+                    #     f"handle={resu.media_handle}"
+                    # )
+                    # else:
+                    #     media_uid = record[0]
 
                 for handle in resu.note_handles:
-                    doing = f"{media_uid}->Note {handle}"
-                    tx.run(
-                        CypherObjectWHandle.link_note, root_id=media_uid, handle=handle
+                    doing = f"{iid}->Note {handle}"
+                    tx.run(CypherObjectWHandle.link_note_iid,
+                           lbl=resu.obj_name,
+                           root_id=iid,
+                           handle=handle
                     )
 
                 for handle in resu.citation_handles:
-                    doing = f"{media_uid}->Citation {handle}"
-                    tx.run(
-                        CypherObjectWHandle.link_citation,
-                        root_id=media_uid,
-                        handle=handle,
+                    doing = f"{iid}->Citation {handle}"
+                    tx.run(CypherObjectWHandle.link_citation,
+                           lbl=resu.obj_name,
+                           root_id=iid,
+                           handle=handle,
                     )
 
         except Exception as err:
@@ -614,13 +620,13 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Place -----
 
-    def ds_save_place(self, tx, place, batch_id, iids, place_keys=None):
+    def ds_save_place(self, tx, place, batch_id, iids:IsotammiId, place_keys=None):
         """Save Place, Place_names, Notes and connect to hierarchy.
 
-        :param: place_keys    dict {handle: uniq_id}
+        :param: place_keys    dict {handle: iid}
         :param: batch_id      batch id where this place is linked
 
-        The 'uniq_id's of already created nodes can be found in 'place_keys'
+        The 'iid's of already created nodes can be found in 'place_keys'
         dictionary by 'handle'.
 
         Create node for Place self:
@@ -637,10 +643,10 @@ class Neo4jUpdateService(ConcreteService):
         - Notes are linked to self using 'note_handles's (the Notes have been
           saved before)
 
-        NOT Raises an error, if write fails.
+        Does NOT raise an error, if write fails.
         """
 
-        # Create or update this Place
+        # A. Create or update this Place
 
         place.iid = iids.get_one()
         pl_attr = {
@@ -656,63 +662,58 @@ class Neo4jUpdateService(ConcreteService):
             # If no coordinates, don't set coord attribute
             pl_attr["coord"] = place.coord.get_coordinates()
 
-        # Create Place place
+        #    Create Place place
 
-        if place_keys:
-            # Check if this Place node is already created
-            plid = place_keys.get(place.handle)
-        else:
-            plid = None
-
-        if plid:
+        # Check if this Place node is already created
+        if place_keys and place.handle in place_keys.keys():
             # 1) node has been created but not connected to Batch.
             #    update known Place node parameters and link from Batch
-            place.uniq_id = plid
             if place.type:
-                # print(f">Pl_save-1 Complete Place ({place.id} #{plid}) {place.handle} {place.pname}")
-                result = tx.run(
-                    CypherPlace.complete,  # TODO
-                    batch_id=batch_id,
-                    plid=plid,
-                    p_attr=pl_attr,
+                # print(f">Pl_save-1 Complete Place ({place.id} #{pl_iid}) {place.handle} {place.pname}")
+                result = tx.run(CypherPlace.complete_handle,
+                                batch_id=batch_id,
+                                p_handle=place.handle,
+                                p_attr=pl_attr,
                 )
+                #iid = result.single[0]
+                place_keys[place.handle] = place.iid
+                
             else:
-                # print(f">Pl_save-1 NO UPDATE Place ({place.id} #{plid}) attr={pl_attr}")
+                # print(f">Pl_save-1 NO UPDATE Place ({place.id} #{pl_iid}) attr={pl_attr}")
                 pass
         else:
             # 2) new node: create and link from Batch
-            # print(f">Pl_save-2 Create a new Place ({place.id} #{place.uniq_id} {place.pname}) {place.handle}")
-            result = tx.run(CypherPlace.create, batch_id=batch_id, p_attr=pl_attr)
-            place.uniq_id = result.single()[0]
-            place_keys[place.handle] = place.uniq_id
+            print(f"#!>Pl_save-2 Create a new Place ({place.id} #{place.iid} {place.pname}) {place.handle}")
+            tx.run(CypherPlace.create,
+                   batch_id=batch_id, p_attr=pl_attr)
+            #! place.uniq_id = result.single()[0]
+            place_keys[place.handle] = place.iid
 
-        # Create Place_names
+        #    Create Place_names
+        #    New iid = "D<place_iid>.i"
 
+        for i in range(len(place.names)):
+            place.names[i].iid = f"D{place.iid}.{i+1}"
         for name in place.names:
-            n_attr = {"name": name.name, "lang": name.lang}
+            n_attr = {"name": name.name, "lang": name.lang, "iid":name.iid}
             if name.dates:
                 n_attr.update(name.dates.for_db())
-            result = tx.run(
-                CypherPlace.add_name,
-                pid=place.uniq_id,
-                order=name.order,
-                n_attr=n_attr,
+            tx.run(CypherPlace.add_name,
+                   pid=place.iid,
+                   order=name.order,
+                   n_attr=n_attr,
             )
-            record = result.single()
-            if record:
-                name.uniq_id = record[0]
-            # print(f"# ({place.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
+            print(f"#! ({place.iid}:Place)-[:NAME]->({name.iid}:{name})")
 
         # Select default names for default languages
         ret = PlaceBl.find_default_names(place.names, ["fi", "sv"])
         if ret.get("status") == Status.OK:
             # Update default language name links
-
             # def_names: dict {lang, uid} uniq_id's of PlaceName objects
             def_names = ret.get("ids")
-            self.ds_place_set_default_names(tx, place.uniq_id, def_names["fi"], def_names["sv"])
+            self.ds_place_set_default_names(tx, place.iid, def_names["fi"], def_names["sv"])
 
-        # Make hierarchy relations to upper Place nodes
+        # B. Make hierarchy relations to upper Place nodes
 
         for ref in place.surround_ref:
             up_handle = ref["hlink"]
@@ -726,51 +727,52 @@ class Neo4jUpdateService(ConcreteService):
 
             # Link to upper node
 
-            uid = place_keys.get(up_handle) if place_keys else None
-            if uid:
+            if place_keys and up_handle in place_keys.keys():
                 # 3) Link to a known upper Place
                 #    The upper node is already created: create a link to that
                 #    upper Place node
-                # print(f"Pl_save-3 Link ({place.id} #{place.uniq_id}) {_r} (#{uid})")
-                result = tx.run(
-                    CypherPlace.link_hier,
-                    plid=place.uniq_id,
-                    up_id=uid,
-                    r_attr=rel_attr,
+                # print(f"Pl_save-3 Link ({place.id} #{place.uniq_id}) {_r} (#{up_iid})")
+                result = tx.run(CypherPlace.link_hier_handle,
+                                p_handle=place.handle, up_handle=up_handle,
+                                r_attr=rel_attr,
                 )
+                place_keys[up_handle] = result.single()[0]
             else:
                 # 4) Link to unknown place
                 #    A new upper node: create a Place with only handle
                 #    parameter and link hierarchy to Place place
                 # print(f"Pl_save-4 Link to empty upper Place ({place.id} #{place.uniq_id}) {_r} {up_handle}")
-                result = tx.run(
-                    CypherPlace.link_create_hier,
-                    plid=place.uniq_id,
-                    r_attr=rel_attr,
-                    up_handle=up_handle,
+                result = tx.run(CypherPlace.link_create_hier_handle,
+                                p_handle=place.handle, up_handle=up_handle,
+                                r_attr=rel_attr,
                 )
                 place_keys[up_handle] = result.single()[0]
 
 
+        for i in range(len(place.notes)):
+            place.notes[i].iid = f"{place.iid}.U{i+1}"
         for note in place.notes:
-            n_attr = {"url": note.url, "type": note.type, "text": note.text}
-            result = tx.run(
-                CypherPlace.add_urls,
-                batch_id=batch_id, pid=place.uniq_id, n_attr=n_attr)
+            n_attr = {
+                "url": note.url, 
+                "type": note.type, 
+                "text": note.text,
+                "iid": place.iid
+                }
+            result = tx.run(CypherPlace.add_urls,
+                            batch_id=batch_id, pid=place.iid, n_attr=n_attr
+            )
 
         # Make the place note relations; the Notes have been stored before
         # TODO: There may be several Notes for the same handle! You shold use uniq_id!
 
         for n_handle in place.note_handles:
-            result = tx.run(
-                CypherPlace.link_note,
-                pid=place.uniq_id, hlink=n_handle)
+            tx.run(CypherPlace.link_note_iid, pid=place.iid, hlink=n_handle)
 
         for handle in place.citation_handles:
             # Link to existing Citation
-            result = tx.run(
-                CypherObjectWHandle.link_citation, 
-                root_id=place.uniq_id, handle=handle)
+            result = tx.run(CypherObjectWHandle.link_citation,
+                            lbl="Place",
+                            root_id=place.iid, handle=handle)
 
         if place.media_refs:
             # Make relations to the Media nodes and their Note and Citation references
@@ -809,7 +811,7 @@ class Neo4jUpdateService(ConcreteService):
                 )
 
         except Exception as err:
-            logger.error(f"Neo4jUpdateService.place_set_default_names: {err}")
+            logger.error(f"Neo4jUpdateService.ds_place_set_default_names: {err}")
             return err
 
     def ds_places_merge(self, id1, id2):
@@ -837,7 +839,7 @@ class Neo4jUpdateService(ConcreteService):
             for node in name_nodes:
                 nodemap[node["name"]].append(node)
             new_nodes = []
-            for name, nodes in nodemap.items():
+            for _name, nodes in nodemap.items():
                 if len(nodes) > 1:
                     cypher = ""
                     namelist = []
@@ -1052,7 +1054,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Person -----
 
-    def ds_save_person(self, tx, person, batch_id, iids):
+    def ds_save_person(self, tx, person:Person, batch_id, iids):
         """Saves the Person object and possibly the Names, Events ja Citations.
 
         On return, the self.uniq_id is set
@@ -1061,6 +1063,7 @@ class Neo4jUpdateService(ConcreteService):
                new names (:Person) --> (:Name)
         """
         person.iid = iids.get_one()
+        lbl = "Person" 
 
         # Save the Person node under UserProfile; all attributes are replaced
 
@@ -1095,8 +1098,11 @@ class Neo4jUpdateService(ConcreteService):
             print("iWarning got no uniq_id for Person {}".format(p_attr))
 
         # Save Name nodes under the Person node
+        niid = 0
         for name in person.names:
-            self.ds_save_name(tx, name, parent_id=person.uniq_id)   # no Isotammi ID for names
+            niid += 1
+            name.iid = f"D{person.iid}.{niid}"
+            self.ds_save_name(tx, name, parent_id=person.iid)
 
         # Save web urls as Note nodes connected under the Person
         if person.notes:
@@ -1115,7 +1121,7 @@ class Neo4jUpdateService(ConcreteService):
         # Make relations to the Media nodes and it's Note and Citation references
         if person.media_refs:
             self.ds_create_link_medias_w_handles(
-                tx, person.uniq_id, person.media_refs
+                tx, person.iid, person.media_refs
             )
 
         # The relations to the Family node will be created in Family.save(),
@@ -1124,13 +1130,14 @@ class Neo4jUpdateService(ConcreteService):
         # Make relations to the Note nodes
 
         for handle in person.note_handles:
-            tx.run(CypherObjectWHandle.link_note, root_id=person.uniq_id, handle=handle)
+            tx.run(CypherObjectWHandle.link_note_iid, 
+                   lbl=lbl, root_id=person.iid, handle=handle)
 
         # Make relations to the Citation nodes
 
         for handle in person.citation_handles:
-            tx.run(
-                CypherObjectWHandle.link_citation, root_id=person.uniq_id, handle=handle
+            tx.run(CypherObjectWHandle.link_citation, 
+                   lbl=lbl, root_id=person.iid, handle=handle
             )
         return
 
@@ -1446,10 +1453,10 @@ class Neo4jUpdateService(ConcreteService):
         cnt = counters.properties_set
         return {"status": Status.OK, "count": cnt}
 
-    def ds_set_family_calculated_attributes(self, uniq_id=None):
+    def ds_set_family_calculated_attributes(self, iid=None):
         """Set Family sortnames and estimated marriage DateRange.
 
-        :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+        :param: uids  list of iids of Person nodes; empty = all lifetimes
 
         Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes
 
@@ -1462,7 +1469,7 @@ class Neo4jUpdateService(ConcreteService):
         status = Status.OK
         # print(f"### ds_set_family_calculated_attributes: self.tx = {self.tx}")
 
-        result = self.tx.run(CypherFamily.get_dates_parents, id=uniq_id)
+        result = self.tx.run(CypherFamily.get_dates_parents, id=iid)
         for record in result:
             # RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
             #        mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
@@ -1498,13 +1505,13 @@ class Neo4jUpdateService(ConcreteService):
 
             # Save the dates from Event node and sortnames from Person nodes
             ret = self.ds_set_family_dates_sortnames(
-                uniq_id,
+                iid,
                 dates_dict,
                 record.get("father_sortname"),
                 record.get("mother_sortname"),
             )
             # print('Neo4jUpdateService.ds_set_family_calculated_attributes: '
-            #      f'id={uniq_id} properties_set={ret.get("count","none")}')
+            #      f'id={iid} properties_set={ret.get("count","none")}')
             dates_count += 1
             sortname_count += 1
 
@@ -1530,17 +1537,15 @@ class Neo4jUpdateService(ConcreteService):
             "attrs": f.attrs,
         }
 
-        result = tx.run(
-            CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
-        )
-        ids = []
-        for record in result:
-            f.uniq_id = record[0]
-            ids.append(f.uniq_id)
-            if len(ids) > 1:
-                logger.warning(
-                    f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}"
-                )
+        tx.run(CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr)
+        #! ids = []
+        # for record in result:
+        #     #!f.uniq_id = record[0]
+        #     ids.append(f.iid)
+        #     if len(ids) > 1:
+        #         logger.warning(
+        #             f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}"
+        #         )
 
         # Make father and mother relations to Person nodes
 
@@ -1586,8 +1591,10 @@ class Neo4jUpdateService(ConcreteService):
 
         # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
         for handle in f.citation_handles:
-            tx.run(
-                CypherObjectWHandle.link_citation, root_id=f.uniq_id, handle=handle
+            tx.run(CypherObjectWHandle.link_citation,
+                   lbl=f.__class__.__name__,
+                   root_id=f.iid,
+                   handle=handle
             )
 
 
