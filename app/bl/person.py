@@ -257,8 +257,8 @@ class PersonWriter(DataService):
     def set_name_type(self, uniq_id, nametype):
         self.dataservice.dr_set_name_type(uniq_id, nametype)
 
-    def set_person_name_properties(self, uniq_id=None, ops=["refname", "sortname"]):
-        """Set Refnames to all Persons or one Person with given uniq_id;
+    def set_person_name_properties(self, iid:str = None, ops=["refname", "sortname"]):
+        """Set Refnames to all Persons or one Person with given iid;
         also sets Person.sortname using the default name
 
         Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
@@ -271,7 +271,7 @@ class PersonWriter(DataService):
         names = []
 
         # Get each Name object (with person_uid)
-        for pid, name_node in self.dataservice.ds_get_personnames(uniq_id):
+        for pid, name_node in self.dataservice.ds_get_personnames(iid):
             from pe.neo4j.nodereaders import Name_from_node # import here to avoid import cycle
             name = Name_from_node(name_node)
             name.person_uid = pid
@@ -299,7 +299,7 @@ class PersonWriter(DataService):
             "status": Status.OK,
         }
 
-    def set_people_lifetime_estimates(self, uids=[]):
+    def set_people_lifetime_estimates(self, iids=[]):
         """Sets estimated lifetimes to Person.dates for given person.uniq_ids.
 
         Stores dates as Person properties: datetype, date1, and date2
@@ -309,7 +309,7 @@ class PersonWriter(DataService):
         Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
         and models.dataupdater.set_estimated_dates
         """
-        res = self.dataservice.ds_set_people_lifetime_estimates(uids)
+        res = self.dataservice.ds_set_people_lifetime_estimates(iids)
 
         #print(f"Estimated lifetime for {res['count']} persons")
         return res

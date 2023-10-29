@@ -51,7 +51,7 @@ from bl.dates import Gramps_DateRange
 from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
-from pe.neo4j.util import IsotammiId
+from pe.neo4j.util import IsotammiIds
 from bl.gramps.batchlogger import LogItem
 
 
@@ -195,7 +195,7 @@ class DOM_handler:
         counter = 0
     
         with shareds.driver.session() as session:
-            iid_generator = IsotammiId(session, obj_name=title)
+            iid_generator = IsotammiIds(session, obj_name=title)
             for nodes_chunk in self.get_chunk(dom_nodes, chunk_max_size):
                 chunk_size = len(nodes_chunk)
                 iid_generator.reserve(chunk_size)
@@ -266,7 +266,7 @@ class DOM_handler:
             print(f"DOM_handler.postprocess_notes: {total_notes} "\
                   f"Notes for {len(self.noterefs_later)} objects")
 
-            iid_generator = IsotammiId(session, obj_name="Notes")
+            iid_generator = IsotammiIds(session, obj_name="Notes")
             iid_generator.reserve(total_notes)
             # Split to chunks, chunk_max_size=self.TX_SIZE
             for nodes_chunk in self.get_chunk(self.noterefs_later, self.TX_SIZE):
@@ -724,7 +724,7 @@ class DOM_handler:
             self.person_ids.append(p.iid)
 
 
-    def handle_place_list(self, tx, nodes, iids:IsotammiId):
+    def handle_place_list(self, tx, nodes, iids:IsotammiIds):
         """Get all the places in the xml_tree.
         
 
@@ -999,11 +999,6 @@ class DOM_handler:
         - set Family.father_sortname, Family.mother_sortname,
         - set Family.datetype, Family.date1 and Family.date2
         """
-
-        # status = Status.OK
-        #message = f"{len(family_ids)} Family sortnames & dates"
-        #print(f"***** {message} *****")
-        #t0 = time.time()
         res = {}
         counter = 0
         if len(family_ids) == 0:

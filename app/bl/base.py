@@ -175,13 +175,6 @@ class NodeObject:
             return self.dates != other.dates
         return False
 
-    # @staticmethod
-    # def split_with_hyphen(id_str): # -> pe.neo4j.util.IsotammiId.get_one.format_iid
-    #     """Inserts a hyphen into the id string."""
-    #     """Examples: H-1, H-1234, H1-2345, H1234-5678."""
-    #
-    #     return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
-
     def change_str(self):
         """ Display change time like '28.03.2020 17:34:58'. """
         try:

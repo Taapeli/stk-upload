@@ -149,12 +149,12 @@ def dict_root_node(root_node, select="min"):
     return dic
 
 
-class IsotammiId:
+class IsotammiIds:
     """
     Serves a sequences of unique ID keys by object type from the database.
 
     Usage:
-    - a = IsotammiId(tx, "People") Create an ID generator using given transaction
+    - a = IsotammiIds(tx, "People") Create an ID generator using given transaction
     - a.reserve(100)             Allocates given number of keys
     - key = a.get_one()            Get next key
     """

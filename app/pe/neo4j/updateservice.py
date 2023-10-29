@@ -58,7 +58,7 @@ from pe.neo4j.nodereaders import Comment_from_node
 from pe.neo4j.nodereaders import PlaceBl_from_node
 from pe.neo4j.nodereaders import PlaceName_from_node
 from pe.neo4j.nodereaders import SourceBl_from_node
-from pe.neo4j.util import IsotammiId
+from pe.neo4j.util import IsotammiIds
 
 
 
@@ -620,7 +620,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Place -----
 
-    def ds_save_place(self, tx, place, batch_id, iids:IsotammiId, place_keys=None):
+    def ds_save_place(self, tx, place, batch_id, iids:IsotammiIds, place_keys=None):
         """Save Place, Place_names, Notes and connect to hierarchy.
 
         :param: place_keys    dict {handle: iid}
@@ -1054,7 +1054,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Person -----
 
-    def ds_save_person(self, tx, person:Person, batch_id, iids):
+    def ds_save_person(self, tx, person:Person, batch_id, iids:IsotammiIds):
         """Saves the Person object and possibly the Names, Events ja Citations.
 
         On return, the self.uniq_id is set
