@@ -189,8 +189,8 @@ class Neo4jUpdateService(ConcreteService):
         result = self.tx.run(
             CypherRoot.batch_set_state, bid=batch_id, user=user, state=state
         )
-        uniq_id = result.single()[0]
-        return {"status": Status.OK, "identity": uniq_id}
+        bid = result.single()[0]
+        return {"status": Status.OK, "identity": bid}
 
     # ---- Auditor ops ----
 
@@ -288,7 +288,7 @@ class Neo4jUpdateService(ConcreteService):
                              bid=batch_id, audi=auditor_user)
         removed = []
         for record in result:
-            # <Record id=190386>
+            # <Record id=190386, rel_id="...">
             rel_uniq_id = record.get("rel_id")
             if rel_uniq_id:
                 print("#Neo4jUpdateService.ds_batch_purge_access: removed "
@@ -771,7 +771,7 @@ class Neo4jUpdateService(ConcreteService):
         for handle in place.citation_handles:
             # Link to existing Citation
             result = tx.run(CypherObjectWHandle.link_citation,
-                            lbl="Place",
+                            lbl=place.label(),
                             root_id=place.iid, handle=handle)
 
         if place.media_refs:
@@ -1430,9 +1430,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Family -----
 
-    def ds_set_family_dates_sortnames(
-        self, uniq_id, dates, father_sortname, mother_sortname
-    ):
+    def ds_set_family_dates_sortnames(self, iid:str, dates, f_sortname, m_sortname):
         """Update Family dates and parents' sortnames.
 
         :param:    uniq_id      family identity
@@ -1442,13 +1440,13 @@ class Neo4jUpdateService(ConcreteService):
         Called from self.ds_set_family_calculated_attributes only
         """
         f_attr = {
-            "father_sortname": father_sortname,
-            "mother_sortname": mother_sortname,
+            "father_sortname": f_sortname,
+            "mother_sortname": m_sortname,
         }
         if dates:
             f_attr.update(dates)
 
-        result = self.tx.run(CypherFamily.set_dates_sortname, id=uniq_id, f_attr=f_attr)
+        result = self.tx.run(CypherFamily.set_dates_sortname, id=iid, f_attr=f_attr)
         counters = result.consume().counters
         cnt = counters.properties_set
         return {"status": Status.OK, "count": cnt}
@@ -1522,7 +1520,7 @@ class Neo4jUpdateService(ConcreteService):
             "statustext": ret.get("statustext", ""),
         }
 
-    def ds_save_family(self, tx, f:FamilyBl, batch_id, iids):
+    def ds_save_family(self, tx, f:FamilyBl, batch_id, iids:IsotammiIds):
         """Saves the family node to db with its relations.
 
         Connects the family to parent, child, citation and note nodes.
@@ -1592,7 +1590,7 @@ class Neo4jUpdateService(ConcreteService):
         # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
         for handle in f.citation_handles:
             tx.run(CypherObjectWHandle.link_citation,
-                   lbl=f.__class__.__name__,
+                   lbl=f.label(),
                    root_id=f.iid,
                    handle=handle
             )

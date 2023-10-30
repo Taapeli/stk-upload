@@ -81,7 +81,7 @@ class Place(NodeObject):
         self.coord = None
 
     def __str__(self):
-        return f"{self.uniq_id} {self.pname} ({self.type})"
+        return f"{self.iid} {self.pname} ({self.type})"
 
     def coord_letter(self, precision=2):
         """ Show coordinates with principal compass point letters using user language. 

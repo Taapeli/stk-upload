@@ -124,7 +124,15 @@ class NodeObject:
     def __str__(self):
         # Supports also obsolete Neo4j id() as uniq_id
         iid = self.uniq_id if self.uniq_id else self.iid
-        return f'(NodeObject {self.iid}/{self.iid}/{self.id} date {self.dates})"'
+        return f'(NodeObject {iid}/{self.iid}/{self.id} date {self.dates})"'
+
+    def label(self):
+        """ Returns Neo4j label for this object. """
+        name = self.__class__.__name__
+        if name.endswith("Bl"):
+            name = name[:-2]
+        print(f"#! Object label = {name!r}")
+        return name
 
     def timestamp_str(self):
         """ My timestamp to display format. """

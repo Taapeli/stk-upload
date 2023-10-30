@@ -786,7 +786,6 @@ class DOM_handler:
                 try:
                     # Returns Gramps_DateRange or None
                     placename.dates = self._extract_daterange(placeobj_pname)
-                    # TODO: val="1700-luvulla" muunnettava Noteksi
                 except:
                     placename.dates = None
             ##print(f"\t# Place {pl.id} {pl.names[0]} +{len(pl.names)-1}")

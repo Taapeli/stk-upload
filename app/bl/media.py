@@ -165,9 +165,7 @@ class MediaReferenceByHandles:
         """ Create a reference object having referrer object label and 
             references with different reference properties.
         """
-        lbl = source_object.__class__.__name__
-        self.obj_name = lbl[:-2] if lbl.endswith("Bl") else lbl
-            
+        self.obj_name = source_object.label() # Source node label
         self.media_handle = None
         self.media_order = 0  # Media reference order nr
         self.crop = []  # Four coordinates

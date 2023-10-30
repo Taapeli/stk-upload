@@ -78,7 +78,7 @@ MATCH (f) -[:NOTE]- (note:Note) WHERE ID(f) in $id_list
 RETURN ID(f) AS src_id, note"""
 
     get_dates_parents = """
-MATCH (family:Family) WHERE ID(family)=$id
+MATCH (family:Family {iid: $id})
 OPTIONAL MATCH (family)-[:PARENT {role:"father"}]-(father:Person)
 OPTIONAL MATCH (father)-[:EVENT]-(father_death:Event {type:"Death"})
 OPTIONAL MATCH (family)-[:PARENT {role:"mother"}]-(mother:Person)
@@ -119,8 +119,8 @@ RETURN f, p.pname AS marriage_place,
     create_to_batch = """
 MATCH (b:Root {id: $batch_id})
 MERGE (b) -[r:OBJ_FAMILY]-> (f:Family {handle: $f_attr.handle}) 
-    SET f = $f_attr
-RETURN f.iid as iid"""
+    SET f = $f_attr"""
+#!RETURN f.iid as iid"""
 #!RETURN ID(f) as uniq_id"""
 
     link_parent = """
@@ -145,6 +145,6 @@ MATCH (m:Note {handle:$n_handle})
 CREATE (n)-[r:NOTE]->(m)"""
 
     set_dates_sortname = """
-MATCH (family:Family) WHERE ID(family) = $id
+MATCH (family:Family {iid: $id})
 SET family += $f_attr"""
 
