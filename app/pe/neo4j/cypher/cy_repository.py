@@ -14,10 +14,10 @@ CREATE (u) -[:OBJ_OTHER]-> (a:Repository)
     SET a = $r_attr
 RETURN ID(a) as uniq_id"""
 
-    link_notes = """
-MATCH (n:Note) WHERE n.handle IN $note_handles
+    r_link_notes = """
+MATCH (n:Note {handle: $hlinks})
 WITH n
-  MATCH (r:Repository) WHERE r.handle=$handle
+  MATCH (r:Repository {handle: $handle})
   CREATE (r) -[:NOTE]-> (n)
 RETURN COUNT(DISTINCT n) AS cnt"""
 

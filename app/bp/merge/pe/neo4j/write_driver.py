@@ -88,7 +88,7 @@ class Neo4jWriteDriver(object):
 #                     result = self.tx.run('MATCH (s), (t) WHERE ID(s)=$root_id and t.handle=$handle RETURN s,t', 
 #                         root_id=media_uid, handle=handle)
 #                     for s,t in result: print(f"\nMedia {s}\nNote {t}")
-                    self.tx.run(CypherObjectWHandle.link_note_iid, 
+                    self.tx.run(CypherObjectWHandle.link_note, 
                                 lbl=resu.obj_name,
                                 root_id=media_uid,
                                 handle=handle)

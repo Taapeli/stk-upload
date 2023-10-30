@@ -38,7 +38,9 @@ MATCH (m:Source   {handle: $hlink})
 MERGE (n) -[r:SOURCE]-> (m)"""
 
     # Create Note node and link (Citation) --> (Note)
-    link_note = """
+    c_link_note = """
 MATCH (n:Citation {handle: $handle})
 MATCH (m:Note     {handle: $hlink})
 CREATE (n) -[r:NOTE]-> (m)"""
+
+

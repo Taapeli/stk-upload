@@ -197,9 +197,9 @@ MATCH (m:Media  {handle: $m_handle})
 
 # use models.gen.cypher.Cypher_name (there is no handle)
 
-    link_note = """
-MATCH (n {handle:$p_handle})
-MATCH (m:Note {handle:$n_handle})
+    p_link_note = """
+MATCH (n:Person {handle:$handle})
+MATCH (m:Note {handle:$hlink})
 CREATE (n) -[r:NOTE]-> (m)"""
 
 # ----- Other -----

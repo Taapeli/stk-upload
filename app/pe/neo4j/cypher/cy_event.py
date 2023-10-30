@@ -86,10 +86,10 @@ MATCH (n:Event) WHERE n.handle=$handle
 MATCH (m:Place) WHERE m.handle=$place_handle
 MERGE (n)-[r:PLACE]->(m)"""
 
-    link_notes = """
-MATCH (n:Note)  WHERE n.handle IN $note_handles
+    e_link_notes = """
+MATCH (n:Note)  WHERE n.handle IN $hlinks
 WITH n
-    MATCH (e:Event)  WHERE e.handle=$handle
+    MATCH (e:Event {handle: $handle})
     CREATE (e) -[:NOTE]-> (n)
 RETURN COUNT(DISTINCT n) AS cnt"""
 

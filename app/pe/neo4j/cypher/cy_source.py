@@ -90,20 +90,6 @@ RETURN //root, a,
 
     # ------------------------ Cypher clauses ------------------------
 
-    # Default name, birth and death
-#     get_person_lifedata = """ # -> cy_person/CypherPerson
-# match (p:Person) -[:NAME]-> (n:Name {order:0})
-#     where id(p) = $pid
-# optional match (p) -[re:EVENT]-> (e:Event)
-#     where e.type = "Birth" or e.type = "Death"
-# return n as name, collect(distinct e) as events"""
-
-#     get_citation_sources_repositories = """
-# MATCH (c:Citation) -[:SOURCE]-> (s:Source)
-#     WHERE ID(c) IN $uid_list
-#     OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
-# RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
-
     get_citation_sources_repositories = """
 MATCH (cita:Citation) -[:SOURCE]-> (source:Source)
     WHERE ID(cita) IN $uid_list
@@ -120,8 +106,7 @@ MATCH (root:Root {state:$state}) -[:OBJ_SOURCE]-> (source)
 RETURN DISTINCT source, score"""
 
 
-class CypherSourceByHandle():
-    """ For Source class """
+    # --- Cypher by handle ----
 
     create_to_batch = """
 MATCH (b:Root {id: $batch_id})
@@ -129,10 +114,13 @@ MERGE (b) -[r:OBJ_SOURCE]-> (s:Source {handle: $s_attr.handle})
     SET s = $s_attr
 RETURN ID(s) as uniq_id"""
 
-    link_note = """
+    s_link_note = """
 MATCH (n:Source {handle:$handle})
 MATCH (m:Note {handle:$hlink})
 CREATE (n) -[r:NOTE]-> (m)"""
+# MATCH (n:Source {handle:$handle})
+# MATCH (m:Note {handle:$hlink})
+# CREATE (n) -[r:NOTE]-> (m)"""
 
     link_repository = """
 MATCH (n:Source) WHERE n.handle=$handle

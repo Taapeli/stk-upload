@@ -184,10 +184,13 @@ WITH n
     MATCH (pl:Place {iid: $pid})
     MERGE (pl) -[r:NOTE]-> (n)"""
 
-    link_note_iid = """
-MATCH (pl:Place {iid: $pid})
-MATCH (n:Note)  WHERE n.handle=$hlink
-CREATE (pl) -[r:NOTE]-> (n)"""
+    pl_link_note = """
+MATCH (n:Place {handle:$handle})
+MATCH (m:Note {handle:$hlink})
+CREATE (n) -[r:NOTE]-> (m)"""
+# MATCH (pl:Place {iid: $pid})
+# MATCH (n:Note)  WHERE n.handle=$hlink
+# CREATE (pl) -[r:NOTE]-> (n)"""
 
     link_media = """
 MATCH (p:Place {handle: $p_handle})

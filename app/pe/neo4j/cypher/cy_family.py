@@ -139,9 +139,9 @@ MATCH (n:Family {handle:$f_handle})
 MATCH (m:Person {handle:$p_handle})
 MERGE (n)-[r:CHILD]->(m)"""
 
-    link_note = """
-MATCH (n:Family {handle:$f_handle})
-MATCH (m:Note {handle:$n_handle})
+    f_link_note = """
+MATCH (n:Family {handle:$handle})
+MATCH (m:Note {handle:$hlink})
 CREATE (n)-[r:NOTE]->(m)"""
 
     set_dates_sortname = """
