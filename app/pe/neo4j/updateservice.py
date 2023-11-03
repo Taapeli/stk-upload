@@ -404,35 +404,31 @@ class Neo4jUpdateService(ConcreteService):
         if citation.dates:
             c_attr.update(citation.dates.for_db())
 
-        result = tx.run(
-            CypherCitation.create_to_batch,
-            batch_id=batch_id,
-            c_attr=c_attr,
-        )
-        ids = []
-        for record in result:
-            citation.uniq_id = record[0]
-            ids.append(citation.uniq_id)
-            if len(ids) > 1:
-                print(
-                    "iError updated multiple Citations {} - {}, attr={}".format(
-                        citation.id, ids, c_attr
-                    )
-                )
+        tx.run(CypherCitation.create_to_batch, batch_id=batch_id, c_attr=c_attr)
+        #!ids = []
+        # for record in result:
+        #     citation.uniq_id = record[0]
+        #     ids.append(citation.uniq_id)
+        #     if len(ids) > 1:
+        #         print(
+        #             "iError updated multiple Citations {} - {}, attr={}".format(
+        #                 citation.id, ids, c_attr
+        #             )
+        #         )
 
         # Make relations to the Note nodes
-        for handle in citation.note_handles:
-            tx.run(
-                CypherCitation.c_link_note, handle=citation.handle, hlink=handle
-            )
+        if citation.note_handles:
+            query = CypherObjectWHandle.link_item("Citation", "Note")
+            for hlink in citation.note_handles:
+                tx.run(query, src=citation.handle, dst=hlink)
+        #!for handle in citation.note_handles:
+        #     tx.run(CypherCitation.c_link_note, handle=citation.handle, hlink=handle)
 
         # Make relation to the Source node
-        if citation.source_handle != "":
-            tx.run(
-                CypherCitation.link_source,
-                handle=citation.handle,
-                hlink=citation.source_handle,
-            )
+        if citation.source_handle:
+            query = CypherObjectWHandle.link_item("Citation", "Source")
+            tx.run(query, src=citation.handle, dst=citation.source_handle)
+            #! tx.run(CypherCitation.link_source, handle=citation.handle, hlink=citation.source_handle)
 
 
     # ----- Note -----
@@ -462,7 +458,7 @@ class Neo4jUpdateService(ConcreteService):
         """Creates this Note object as a Note node
 
         Arguments:
-            parent_uid      uniq_id     Object to link: (parent) --> (Note)
+            parent_id       str         Object to link: (parent) --> (Note)
             batch_id        str         Batch id, alternative object to link:
                                         (:Batch{id:batch_id}) --> (Note)
         """
@@ -528,33 +524,37 @@ class Neo4jUpdateService(ConcreteService):
         }
         #m_attr["batch_id"] = batch_id
 
-        result = tx.run(
-            CypherMedia.create_in_batch,
-            bid=batch_id,
-            iid=media.iid,
-            m_attr=m_attr,
-        )
+        result = tx.run(CypherMedia.create_in_batch,
+            bid=batch_id, iid=media.iid, m_attr=m_attr)
         media.uniq_id = result.single()[0]
 
-        # Make relations to the Citation nodes
-        if media.citation_handles:  #  citation_handles != '':
-            tx.run(
-                CypherMedia.m_link_citations,
-                handle=media.handle,
-                hlinks=media.citation_handles,
-            )
+        # Make relation(s) to the Note and Citation nodes
 
-        # Make relations to the Note nodes
         if media.note_handles:
-            result = tx.run(
-                CypherMedia.m_link_notes,
-                handle=media.handle,
-                hlinks=media.note_handles,
-                )
-            _cnt=result.single()["cnt"]
+            query = CypherObjectWHandle.link_item("Media", "Note")
+            for hlink in media.note_handles:
+                tx.run(query, src=media.handle, dst=hlink)
+        #! if media.note_handles:
+        #     result = tx.run(
+        #         CypherMedia.m_link_notes,
+        #         handle=media.handle,
+        #         hlinks=media.note_handles,
+        #         )
+        #     _cnt=result.single()["cnt"]
+
+        if media.citation_handles:
+            query = CypherObjectWHandle.link_item("Media", "Citation")
+            for hlink in media.citation_handles:
+                tx.run(query, src=media.iid, dst=hlink)
+        #! if media.citation_handles:  #  citation_handles != '':
+        #     tx.run(
+        #         CypherMedia.m_link_citations,
+        #         handle=media.handle,
+        #         hlinks=media.citation_handles,
+        #     )
 
 
-    def ds_create_link_medias_w_handles(self, tx, iid: str, media_refs: list):
+    def ds_create_link_medias_w_handles(self, tx, src_handle, media_refs: list):
         """Save media object and it's Note and Citation references
         using their Gramps handles.
 
@@ -568,62 +568,63 @@ class Neo4jUpdateService(ConcreteService):
         """
         doing = "?"
         try:
-            for resu in media_refs:
-                r_attr = {"order": resu.media_order}
-                if resu.crop:
-                    r_attr["left"] = resu.crop[0]
-                    r_attr["upper"] = resu.crop[1]
-                    r_attr["right"] = resu.crop[2]
-                    r_attr["lower"] = resu.crop[3]
-                doing = f"(src:{iid}) -[{r_attr}]-> Media {resu.media_handle}"
+            for m_ref in media_refs:
+                r_attr = {"order": m_ref.media_order}
+                if m_ref.crop:
+                    r_attr["left"] = m_ref.crop[0]
+                    r_attr["upper"] = m_ref.crop[1]
+                    r_attr["right"] = m_ref.crop[2]
+                    r_attr["lower"] = m_ref.crop[3]
+                doing = f"(src:{src_handle}) -[{r_attr}]-> Media {m_ref.media_handle}"
                 # print(doing)
-                query = CypherObjectWHandle.link_item(src_label=resu.obj_name,
-                                                      dst_label="Media",
-                                                      set_r_attr=True)
-                print("#! "+query)
-                tx.run(query, src_iid=iid, handle=resu.media_handle, r_attr=r_attr)
+
+                # Save media node
+                
+                query = CypherObjectWHandle.link_item(m_ref.obj_name, "Media", True)
+                tx.run(query, src=src_handle, dst=m_ref.media_handle, r_attr=r_attr)
                 #! tx.run(CypherObjectWHandle.link_media,
-                #     lbl=resu.obj_name,
+                #     lbl=m_ref.obj_name,
                 #     src_iid=iid,
-                #     handle=resu.media_handle,
+                #     handle=m_ref.media_handle,
                 #     r_attr=r_attr,)
-                # media_uid = result.single()[0]    # for media object
+                # media_uid = m_reflt.single()[0]    # for media object
                 #! media_uid = None
-                # for record in result:
+                # for record in m_reflt:
                 #     if media_uid:
                 print(doing)
                     #! print(
                     #     f"ds_create_link_medias_w_handles: double link_media, "
                     #     f"replacing media_uid={media_uid} with uid={record[0]}. "
-                    #     f"handle={resu.media_handle}"
+                    #     f"handle={m_ref.media_handle}"
                     # )
                     # else:
                     #     media_uid = record[0]
 
-                query = CypherObjectWHandle.link_item(src_label=resu.obj_name,
-                                                      dst_label="Note",
-                                                      set_r_attr=True)
-                print("#! "+query)
-                for handle in resu.note_handles:
-                    doing = f" {resu.obj_name} {iid}->Note {handle}"
-                    tx.run(query, src_iid=iid, handle=resu.media_handle, r_attr=r_attr)
-                    # tx.run(CypherObjectWHandle.link_note,
-                    #        lbl=resu.obj_name,
-                    #        src_iid=iid,
-                    #        handle=handle)
-                    print(doing)
 
-                query = CypherObjectWHandle.link_item(src_label=resu.obj_name,
-                                                      dst_label="Citation",
-                                                      set_r_attr=True)
-                print("#! "+query)
-                for handle in resu.citation_handles:
-                    doing = f" {resu.obj_name} {iid}->Citation {handle}"
-                    tx.run(query, src_iid=iid, handle=resu.media_handle, r_attr=r_attr)
-                    # tx.run(CypherObjectWHandle.link_citation,
-                    #        lbl=resu.obj_name,
-                    #        src_iid=iid,
-                    #        handle=handle)
+                # Save listed notes and citations for this media
+                
+                if m_ref.note_handles:
+                    query = CypherObjectWHandle.link_item(m_ref.obj_name, "Note", True)
+                    print("#! "+query)
+                    for hlink in m_ref.note_handles:
+                        doing = f" {m_ref.obj_name} {src_handle}-> Note {hlink}"
+                        tx.run(query, src=src_handle, dst=hlink, r_attr=r_attr)
+                        # tx.run(CypherObjectWHandle.link_note,
+                        #        lbl=m_ref.obj_name,
+                        #        src_iid=iid,
+                        #        handle=hlink)
+                        print(doing)
+
+                if m_ref.citation_handles:
+                    query = CypherObjectWHandle.link_item(m_ref.obj_name, "Citation", True)
+                    print("#! "+query)
+                    for hlink in m_ref.citation_handles:
+                        doing = f" {m_ref.obj_name} {src_handle}-> Citation {hlink}"
+                        tx.run(query, src=src_handle, dst=hlink, r_attr=r_attr)
+                        # tx.run(CypherObjectWHandle.link_citation,
+                        #        lbl=m_ref.obj_name,
+                        #        src_iid=iid,
+                        #        handle=hlink)
 
         except Exception as err:
             traceback.print_exc()
@@ -779,28 +780,25 @@ class Neo4jUpdateService(ConcreteService):
         # TODO: There may be several Notes for the same handle! You shold use uniq_id!
 
         if place.note_handles:
-            query = CypherObjectWHandle.link_item(src_label="Place", dst_label="Note")
-            print("#! "+query)
-            for handle in place.note_handles:
-                tx.run(query, src_iid=place.iid, handle=handle)
+            query = CypherObjectWHandle.link_item("Place", "Note")
+            for hlink in place.note_handles:
+                tx.run(query, src=place.handle, dst=hlink)
                 # tx.run(CypherPlace.pl_link_note,
                 #        p_handle=place.handle, hlinks=n_handle)
                 # # .run(CypherPlace.link_note, pid=place.iid, hlink=n_handle)
 
         if place.citation_handles:
-            query = CypherObjectWHandle.link_item(src_label="Place", dst_label="Citation")
-            print("#! "+query)
-            for handle in place.citation_handles:
+            query = CypherObjectWHandle.link_item("Place", "Citation")
+            for hlink in place.citation_handles:
                 # Link to existing Citation
-                tx.run(query, src_iid=place.iid, handle=handle)
+                tx.run(query, src=place.handle, dst=hlink)
                 # result = tx.run(CypherObjectWHandle.link_citation,
-                #                 lbl=place.label(), src_iid=place.iid, handle=handle)
+                #                 lbl=place.label(), src_iid=place.iid, handle=hlink)
 
         if place.media_handles:
-            query = CypherObjectWHandle.link_item(src_label="Place", dst_label="Media")
-            print("#! "+query)
-            for handle in place.media_handles:
-                tx.run(query, src_iid=place.iid, handle=handle)
+            query = CypherObjectWHandle.link_item("Place", "Media")
+            for hlink in place.media_handles:
+                tx.run(query, src=place.handle, dst=hlink)
         # if place.media_refs:
         #     # Make relations to the Media nodes and their Note and Citation references
         #     result = self.ds_create_link_medias_w_handles(
@@ -808,7 +806,7 @@ class Neo4jUpdateService(ConcreteService):
 
 
     def ds_place_set_default_names(self, tx, place_id, fi_id, sv_id):
-        """Creates default links from Place to fi and sv PlaceNames.
+        """Creates default links from Place to fi and sv PlaceNames identified by iid.
 
         - place_id      Place object id
         - fi_id         PlaceName object id for fi
@@ -816,15 +814,12 @@ class Neo4jUpdateService(ConcreteService):
         """
         try:
             if fi_id == sv_id:
-                result = tx.run(
-                    CypherPlace.link_name_lang_single, place_id=place_id, fi_id=fi_id
+                result = tx.run(CypherPlace.link_name_lang_single,
+                                place_id=place_id, fi_id=fi_id
                 )
             else:
-                result = tx.run(
-                    CypherPlace.link_name_lang,
-                    place_id=place_id,
-                    fi_id=fi_id,
-                    sv_id=sv_id,
+                result = tx.run(CypherPlace.link_name_lang,
+                                place_id=place_id, fi_id=fi_id, sv_id=sv_id,
                 )
             x = None
             for x, _fi, _sv in result:
@@ -850,8 +845,10 @@ class Neo4jUpdateService(ConcreteService):
             
             For each unique name this will generate Cypher code like:
             
-                match (n1:Place_name) where id(n1) = $id1
-                match (n2:Place_name) where id(n2) = $id2
+                #!match (n1:Place_name) where id(n1) = $id1
+                #!match (n2:Place_name) where id(n2) = $id2
+                match (n1:Place_name) where n1.iid = $id1
+                match (n2:Place_name) where n2.iid = $id2
                 call apoc.refactor.mergeNodes([n1,n2],
                     {properties:'discard',mergeRels:true})
                 yield node
@@ -859,7 +856,7 @@ class Neo4jUpdateService(ConcreteService):
                 
             The idmap variable contains the node ids:
             
-                idmap = {'id1': 149595, 'id2': 149614}
+                idmap = {'id1': 'DP-32ge.1, 'id2': 'DP-32ge.2'}
             
             """
             nodemap = defaultdict(list)
@@ -872,9 +869,9 @@ class Neo4jUpdateService(ConcreteService):
                     namelist = []
                     idmap = {}
                     for i, node in enumerate(nodes, start=1):
-                        cypher += f"\nmatch (n{i}:Place_name) where id(n{i}) = $id{i}"
+                        cypher += f"\nmatch (n{i}:Place_name) where n{i}.iid = $id{i}"
                         namelist.append(f"n{i}")
-                        idmap[f"id{i}"] =  node.id
+                        idmap[f"id{i}"] =  node.iid
                     cypher += f"\ncall apoc.refactor.mergeNodes([{','.join(namelist)}],"
                     cypher += f"\n    {{properties:'discard',mergeRels:true}})"
                     cypher += f"\nyield node"
@@ -942,7 +939,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Source -----
 
-    def ds_save_source(self, tx, source, batch_id, iids):   
+    def ds_save_source(self, tx, source, batch_id, iids:IsotammiIds):   
         """ Saves this Source and connect it to Notes and Repositories.
 
             :param: batch_id      batch id where this source is linked
@@ -962,27 +959,26 @@ class Neo4jUpdateService(ConcreteService):
                 "attrs": source.attrs,
             }
 
-            result = tx.run(CypherSource.create_to_batch,
-                            batch_id=batch_id, s_attr=s_attr)
-            ids = []
-            for record in result:
-                source.uniq_id = record[0]
-                ids.append(source.uniq_id)
-                if len(ids) > 1:
-                    print("iError updated multiple Sources {} - {}, attr={}".format(source.id, ids, s_attr))
+            tx.run(CypherSource.create_to_batch, batch_id=batch_id, s_attr=s_attr)
+            #!ids = []
+            # for record in result:
+            #     source.uniq_id = record[0]
+            #     ids.append(source.uniq_id)
+            #     if len(ids) > 1:
+            #         print("iError updated multiple Sources {} - {}, attr={}".format(source.id, ids, s_attr))
 
         except Exception as err:
-            print("iError source_save: {0} attr={1}".format(err, s_attr))
+            print("Neo4jUpdateService.ds_save_source: {0} attr={1}".format(err, s_attr))
             raise RuntimeError("Could not save Source {}".format(source.id))
 
         # Make relation to the Note nodes
-        for note_handle in source.note_handles:
-            try:
-                tx.run(CypherSource.s_link_note, 
-                       handle=source.handle, hlink=note_handle)
-            except Exception as err:
-                logger.error(f"Source_gramps.save: {err} in linking Notes {source.handle} -> {source.note_handles}")
-                #print("iError Source.save note: {0}".format(err), file=stderr)
+        for hlink in source.note_handles:
+            #!tx.run(CypherSource.s_link_note, 
+            query = CypherObjectWHandle.link_item("Source", "Note")
+            tx.run(query, src=source.handle, dst=hlink)
+            #!except Exception as err:
+            #     logger.error(f"Source_gramps.save: {err} in linking Notes {source.handle} -> {source.note_handles}")
+            #     #print("iError Source.save note: {0}".format(err), file=stderr)
 
         # Make relation to the Repository nodes
         for repo in source.repositories:
@@ -995,16 +991,19 @@ class Neo4jUpdateService(ConcreteService):
                 print("iError Source.save Repository: {0}".format(err))
                 
 
-    def mergesources(self, id1, id2):
+    def mergesources(self, id1:str, id2:str):
+        
+            # match (p1:Source)        where id(p1) = $id1 
+            # match (p2:Source)        where id(p2) = $id2
         cypher_mergesources = """
-            match (p1:Source)        where id(p1) = $id1 
-            match (p2:Source)        where id(p2) = $id2
+            match (p1:Source)        where p1.iid = $id1 
+            match (p2:Source)        where p2.iid = $id2
             call apoc.refactor.mergeNodes([p1,p2],
                 {properties:'discard',mergeRels:true})
             yield node
             return node
         """
-        rec = self.tx.run(cypher_mergesources,id1=id1,id2=id2).single()
+        rec = self.tx.run(cypher_mergesources, id1=id1, id2=id2).single()
         if rec is None: return None
         node = rec['node']
         source = SourceBl_from_node(node)
@@ -1015,7 +1014,7 @@ class Neo4jUpdateService(ConcreteService):
     def ds_save_event(self, tx, event, batch_id, iids):
         """Saves event to database:
         - Creates a new db node for this Event
-        - Sets self.uniq_id
+        - #Not: Sets self.uniq_id
 
         - links to existing Place, Note, Citation, Media objects
         - Does not link it from UserProfile or Person
@@ -1035,49 +1034,47 @@ class Neo4jUpdateService(ConcreteService):
         if event.dates:
             e_attr.update(event.dates.for_db())
 
-        result = tx.run(
-            CypherEvent.create_to_batch, batch_id=batch_id, e_attr=e_attr
-        )
-        ids = []
-        for record in result:
-            event.uniq_id = record[0]
-            ids.append(event.uniq_id)
-            if len(ids) > 1:
-                print(
-                    "iError updated multiple Events {} - {}, attr={}".format(
-                        event.id, ids, e_attr
-                    )
-                )
+        tx.run(CypherEvent.create_to_batch, batch_id=batch_id, e_attr=e_attr)
+        #!ids = []
+        # for record in result:
+        #     event.uniq_id = record[0]
+        #     ids.append(event.uniq_id)
+        #     if len(ids) > 1:
+        #         print(
+        #             "iError updated multiple Events {} - {}, attr={}".format(
+        #                 event.id, ids, e_attr
+        #             )
+        #         )
 
         # Make relation to the Place node
-        for pl_handle in event.place_handles:
-            tx.run(
-                CypherEvent.link_place, handle=event.handle, place_handle=pl_handle
-            )
+        if event.place_handles:
+            query = CypherObjectWHandle.link_item("Event", "Place")
+            for hlink in event.place_handles:
+                tx.run(query, src=event.handle, dst=hlink)
+            #!for pl_handle in event.place_handles:
+            #     tx.run(CypherEvent.link_place, handle=event.handle, place_handle=pl_handle)
 
         # Make relations to the Note nodes
         if event.note_handles:
-            result = tx.run(
-                CypherEvent.e_link_notes,
-                handle=event.handle,
-                hlinks=event.note_handles,
-            )
-            _cnt = result.single()["cnt"]
+            #!result = tx.run(CypherEvent.e_link_notes,...)
+            query = CypherObjectWHandle.link_item("Event", "Note")
+            for hlink in event.note_handles:
+                tx.run(query, src=event.handle, dst=hlink)
+            #!_cnt = result.single()["cnt"]
             # print(f"##Luotiin {cnt} Note-yhteyttä: {event.id}->{event.note_handles}")
 
-        # Make relations to the Citation nodes
+        # Make relations to multiple Citation nodes
         if event.citation_handles:  #  citation_handles != '':
-            tx.run(
-                CypherEvent.link_citations,
-                handle=event.handle,
-                citation_handles=event.citation_handles,
-            )
+            query = CypherObjectWHandle.link_item("Event", "Citation")
+            for hlink in event.note_handles:
+                tx.run(query, src=event.handle, dst=hlink)
+            #  tx.run(CypherEvent.link_citations,
+            #     handle=event.handle,
+            #     citation_handles=event.citation_handles, )
 
         # Make relations to the Media nodes and their Note and Citation references
         if event.media_refs:
-            self.ds_create_link_medias_w_handles(
-                tx, event.uniq_id, event.media_refs
-            )
+            self.ds_create_link_medias_w_handles(tx, event.handle, event.media_refs)
 
     # ----- Person -----
 
@@ -1090,9 +1087,8 @@ class Neo4jUpdateService(ConcreteService):
                new names (:Person) --> (:Name)
         """
         person.iid = iids.get_one()
-        lbl = "Person" 
 
-        # Save the Person node under UserProfile; all attributes are replaced
+        # Save the Person node under Root; all attributes are replaced
 
         p_attr = {
             "iid": person.iid,
@@ -1108,21 +1104,19 @@ class Neo4jUpdateService(ConcreteService):
         if person.dates:
             p_attr.update(person.dates.for_db())
 
-        result = tx.run(CypherPerson.create_to_batch, 
-                        batch_id=batch_id, p_attr=p_attr)
-        ids = []
-        for record in result:
-            person.uniq_id = record[0]
-            ids.append(person.uniq_id)
-            if len(ids) > 1:
-                print(
-                    "iError updated multiple Persons {} - {}, attr={}".format(
-                        person.id, ids, p_attr
-                    )
-                )
-            # print("Person {} ".format(person.uniq_id))
-        if person.uniq_id == None:
-            print("iWarning got no uniq_id for Person {}".format(p_attr))
+        tx.run(CypherPerson.create_to_batch, batch_id=batch_id, p_attr=p_attr)
+        #!for record in result:
+        #     #!person.uniq_id = record[0]
+        #     ids.append(person.uniq_id)
+        #     if len(ids) > 1:
+        #         print(
+        #             "iError updated multiple Persons {} - {}, attr={}".format(
+        #                 person.id, ids, p_attr
+        #             )
+        #         )
+        #     # print("Person {} ".format(person.uniq_id))
+        # if person.uniq_id == None:
+        #     print("iWarning got no uniq_id for Person {}".format(p_attr))
 
         # Save Name nodes under the Person node
         niid = 0
@@ -1136,14 +1130,14 @@ class Neo4jUpdateService(ConcreteService):
             self.ds_save_note_list(tx, parent=person, batch_id=batch_id, iids=iids)
 
         """ Connect to each Event loaded from Gramps """
+
         # for i in range(len(person.eventref_hlink)):
-        for event_handle, role in person.event_handle_roles:
-            tx.run(
-                CypherPerson.link_event,
-                p_handle=person.handle,
-                e_handle=event_handle,
-                role=role,
-            )
+        if person.event_handle_roles:
+            query = CypherObjectWHandle.link_item("Person", "Event")
+            for href, role in person.event_handle_roles:
+                r_attr = {"role": role}
+                tx.run(query, src=person.handle, hlink=href, r_attr=r_attr)
+                #!tx.run(CypherPerson.link_event, p_handle=person.handle, e_handle=event_handle, role=role,)
 
         # Make relations to the Media nodes and it's Note and Citation references
         if person.media_refs:
@@ -1158,10 +1152,9 @@ class Neo4jUpdateService(ConcreteService):
 
         if person.note_handles:
             # Link to existing Notes
-            query = CypherObjectWHandle.link_item(src_label="Person", dst_label="Note")
-            print("#! "+query)
-            for handle in person.note_handles:
-                tx.run(query, src_iid=person.iid, handle=handle)
+            query = CypherObjectWHandle.link_item("Person", "Note")
+            for href in person.note_handles:
+                tx.run(query, src=person.handle, dst=href)
         # for handle in person.note_handles:
         #     tx.run(CypherPerson.p_link_note, 
         #            lbl=lbl, src_iid=person.iid, handle=handle)
@@ -1170,10 +1163,9 @@ class Neo4jUpdateService(ConcreteService):
 
         if person.citation_handles:
             # Link to existing Citations
-            query = CypherObjectWHandle.link_item(src_label="Person", dst_label="Citation")
-            print("#! "+query)
-            for handle in person.citation_handles:
-                tx.run(query, src_iid=person.iid, handle=handle)
+            query = CypherObjectWHandle.link_item("Person", "Citation")
+            for href in person.citation_handles:
+                tx.run(query, src=person.handle, dst=href)
         # for handle in person.citation_handles:
         #     tx.run(CypherObjectWHandle.link_citation, 
         #            lbl=lbl, src_iid=person.iid, handle=handle)
@@ -1617,21 +1609,22 @@ class Neo4jUpdateService(ConcreteService):
         for handle in f.child_handles:
             tx.run(CypherFamily.link_child, f_handle=f.handle, p_handle=handle)
 
-        # Make relation(s) to the Note node
+        # Make relation(s) to the Note and Citation nodes
 
-        # print(f"Family_gramps.save: linking Notes {self.handle} -> {self.note_handles}")
-        for handle in f.note_handles:
-            tx.run(CypherFamily.f_link_note, handle=f.handle, hlink=handle)
+        if f.note_handles:
+            query = CypherObjectWHandle.link_item("Family", "Note")
+            for href in f.note_handles:
+                tx.run(query, src=f.handle, dst=href)
+        #!for handle in f.note_handles:
+        #     tx.run(CypherFamily.f_link_note, handle=f.handle, hlink=handle)
 
-        # Make relation(s) to the Citation node
-
-        # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
-        for handle in f.citation_handles:
-            tx.run(CypherObjectWHandle.link_citation,
-                   lbl=f.label(),
-                   src_iid=f.iid,
-                   handle=handle
-            )
+        if f.citation_handles:
+            query = CypherObjectWHandle.link_item("Family", "Citation")
+            for href in f.citation_handles:
+                tx.run(query, src=f.handle, dst=href)
+        #!for handle in f.citation_handles:
+        #     tx.run(CypherObjectWHandle.link_citation,
+        #            lbl=f.label(), src_iid=f.iid, handle=handle)
 
 
     # ----- Discussions -----

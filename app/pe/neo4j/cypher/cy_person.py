@@ -61,7 +61,7 @@ RETURN type(rel) AS rel_type, rel.role as role,
 
     get_event_places = """
 MATCH (event:Event) -[:PLACE]-> (pl:Place)
-    WHERE ID(event) IN $uid_list
+    WHERE event.iid IN $iid_list
 OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
 OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
@@ -159,10 +159,9 @@ WITH root, person, name""" + _get_events_tail + _get_events_surname
 
     create_to_batch = """
 MATCH (root:Root {id: $batch_id})
-MERGE (p:Person {handle: $p_attr.handle})
-MERGE (root) -[r:OBJ_PERSON]-> (p)
-    SET p = $p_attr
-RETURN ID(p) as uniq_id"""
+MERGE (b) -[r:OBJ_PERSON]-> (p:Person {handle: $p_attr.handle})
+    SET p = $p_attr"""
+#!RETURN ID(p) as uniq_id"""
 
 #     link_name = """
 # CREATE (n:Name) SET n = $n_attr

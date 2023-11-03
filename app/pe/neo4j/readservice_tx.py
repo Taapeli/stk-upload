@@ -855,7 +855,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
         try:
             uids = list(base_objs.keys())
-            results = self.tx.run(CypherPerson.get_event_places, uid_list=uids)
+            results = self.tx.run(CypherPerson.get_event_places, iid_list=uids)
             for record in results:
                 # Returns 
                 #    - label    'Event'

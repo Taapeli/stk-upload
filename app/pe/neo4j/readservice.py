@@ -288,7 +288,7 @@ class Neo4jReadService(ConcreteService):
         places = []
         try:
             with self.driver.session(default_access_mode="READ") as session:
-                result = session.run(CypherEvent.get_event_place, uid=uid, lang="fi")
+                result = session.run(CypherEvent.get_event_place, iid=uid, lang="fi")
                 for record in result:
                     # Returns place, name, COLLECT(DISTINCT [properties(r), upper,uname]) as upper_n
                     pl = PlaceBl_from_node(record["place"])

@@ -36,11 +36,15 @@ class CypherObjectWHandle():
             In Cypher, you can not give Labels as parameters, so this function
             creates different Cypher clauses for each combination of src, dst.
             
-            Example:
-                tx.run(CypherObjectWHandle.link_item("Event", "Note", set_r_attr=False),
+            Examples:
+                tx.run(CypherObjectWHandle.link_item("Event", "Note"),
                        pid=place.iid, hlink=n_handle)
+                tx.run(CypherObjectWHandle.link_item(src_label=resu.obj_name,
+                                                     dst_label="Citation",
+                                                     set_r_attr=True),
+                       src=place.handle, dst=media_handle, r_attr=r_attr)
 
-            (src:<lbl> {iid}) -[r:REL_LBL]-> (dst:<lbl> {handle:<handle>})
+            (src:<src_lbl>{handle: $src}) -[r:<link_type>]-> (dst:<dst_lbl>{handle:$dst})
         """
         type_by_label = {
             "Citation": "CITATION",
@@ -58,11 +62,12 @@ class CypherObjectWHandle():
             "Source": "SOURCE",
             }
         link_type = type_by_label.get(dst_label)
-        query = f"""MATCH (e:{src_label} {{iid: $src_iid}})
-                    MATCH (m:{dst_label}  {{handle: $handle}})
-                        CREATE (e) -[r:{link_type}]-> (m)"""
+        query = f"""MATCH (s:{src_label} {{handle: $src}})
+                    MATCH (d:{dst_label}  {{handle: $dst}})
+                        CREATE (s) -[r:{link_type}]-> (d)"""
         if set_r_attr:
-            query += "SET r = $r_attr"
+            query += "\n    SET r = $r_attr"
+        print("#! link_item: \n"+query)
         return query
 
 #     link_media = """

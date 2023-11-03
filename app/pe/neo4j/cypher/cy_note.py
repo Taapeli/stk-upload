@@ -18,7 +18,7 @@ RETURN ID(n)"""
 
     # Find a known parent node with uniq_id and connect a new Note to it
     create_in_batch_as_leaf = """
-MATCH (a) WHERE ID(a) = $parent_id
+MATCH (a) WHERE a.iid = $parent_id
 MATCH (u:Root {id:$bid})
     CREATE (u) -[:OBJ_OTHER]-> (n:Note) 
     CREATE (a) -[:NOTE]-> (n)

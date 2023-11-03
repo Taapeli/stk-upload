@@ -48,7 +48,7 @@ WITH root, place, name ORDER BY name.name LIMIT $limit
 
 # Default language names update with $place_id, $fi_id, $sv_id
     link_name_lang = """
-MATCH (fi:Place_name) <-[:NAME]- (place:Place),
+MATCH (place:Place) -[:NAME]-> (fi:Place_name),
     (place) -[:NAME]-> (sv:Place_name)  
     WHERE place.iid = $place_id AND fi.iid = $fi_id AND sv.iid = $sv_id
 OPTIONAL MATCH (place) -[r:NAME_LANG]-> ()

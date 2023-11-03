@@ -111,8 +111,8 @@ RETURN DISTINCT source, score"""
     create_to_batch = """
 MATCH (b:Root {id: $batch_id})
 MERGE (b) -[r:OBJ_SOURCE]-> (s:Source {handle: $s_attr.handle}) 
-    SET s = $s_attr
-RETURN ID(s) as uniq_id"""
+    SET s = $s_attr"""
+# RETURN ID(s) as uniq_id"""
 
     s_link_note = """
 MATCH (n:Source {handle:$handle})

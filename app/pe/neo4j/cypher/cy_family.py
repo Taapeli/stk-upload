@@ -139,10 +139,12 @@ MATCH (n:Family {handle:$f_handle})
 MATCH (m:Person {handle:$p_handle})
 MERGE (n)-[r:CHILD]->(m)"""
 
-    f_link_note = """
-MATCH (n:Family {handle:$handle})
-MATCH (m:Note {handle:$hlink})
-CREATE (n)-[r:NOTE]->(m)"""
+#! For each Note, Citation --> USE CypherObjectWHandle.link_item("Family", "Note")
+#
+#     f_link_note = """
+# MATCH (n:Family {handle:$handle})
+# MATCH (m:Note {handle:$hlink})
+# CREATE (n)-[r:NOTE]->(m)"""
 
     set_dates_sortname = """
 MATCH (family:Family {iid: $id})
