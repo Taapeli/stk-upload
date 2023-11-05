@@ -343,7 +343,7 @@ class Neo4jReadServiceTx(ConcreteService):
         person.families_as_child = []
         person.citation_ref = []
         person.note_ref = []
-        person.media_ref = []
+        person.media_ref = []   # bl.media.MediaReferenceByHandles objects?
         #self._catalog(person)
 
         # Info about linked Root node
@@ -627,7 +627,7 @@ class Neo4jReadServiceTx(ConcreteService):
         pl = None
         citations = [] # Citation objects referenced from this Place
         cita_dict = {}
-        node_ids = []  # List of uniq_is for place, name, note and media nodes
+        node_iids = []  # List of uniq_is for place, name, note and media nodes
         with self.driver.session(default_access_mode="READ") as session:
 
             # 1. Get names, notes, medias and citations
@@ -657,9 +657,10 @@ class Neo4jReadServiceTx(ConcreteService):
 
                 node = record["place"]
                 pl = PlaceBl_from_node(node)
-                node_ids.append(pl.uniq_id)
+                node_iids.append(pl.iid)
                 # Original owner
                 pl.root = dict_root_node(record["root"])
+                pl.medias = []
                 # Default language name
                 node = record["name"]
                 if node:
@@ -667,25 +668,25 @@ class Neo4jReadServiceTx(ConcreteService):
                 # Other name versions
                 for node in record["names"]:
                     pl.names.append(PlaceName_from_node(node))
-                    node_ids.append(pl.names[-1].uniq_id)
+                    node_iids.append(pl.names[-1].iid)
 
                 for node in record["notes"]:
                     n = Note_from_node(node)
                     pl.notes.append(n)
-                    node_ids.append(n.uniq_id)
+                    node_iids.append(n.iid)
 
                 for node in record["medias"]:
                     m = MediaBl_from_node(node)
-                    # Todo: should replace pl.media_ref[] <-- pl.medias[]
-                    pl.media_ref.append(m)
-                    node_ids.append(m.uniq_id)
+                    pl.medias.append(m)
+                    #!pl.media_refs.append(m)
+                    node_iids.append(m.iid)
 
                 for node in record["citas"]:
                     c = Citation_from_node(node)
                     c.notes = [] # To be set below
                     citations.append(c)
-                    cita_dict[c.uniq_id] = c
-                    node_ids.append(c.uniq_id)
+                    cita_dict[c.iid] = c
+                    node_iids.append(c.iid)
 
             # 2. Get Notes for Citations
 
@@ -704,7 +705,7 @@ class Neo4jReadServiceTx(ConcreteService):
                     note_obj = Note_from_node(record["note"])
                     cita_obj.notes.append(note_obj)
 
-        return {"place": pl, "uniq_ids": node_ids, "citas": citations}
+        return {"place": pl, "iids": node_iids, "citas": citations}
 
     def tx_get_place_tree(self, locid:str, lang="fi"):
         """Read upper and lower places around this place.
@@ -753,35 +754,35 @@ class Neo4jReadServiceTx(ConcreteService):
             logger.debug(
                 f"{t.tree.depth(t.tree[tnode])} {t.tree[tnode]} {t.tree[tnode].predecessor}"
             )
-            if tnode:   #!  != 0:
+            if tnode:   # Not root node
                 n = t.tree[tnode]
-
+                lv = t.tree.depth(n)
+                p = PlaceBl(iid=tnode, ptype=n.data["type"], level=lv)
+                p.iid = n.data["iid"]
+ 
                 # Get all names: default lang: 'name' and others: 'names'
                 with self.driver.session(default_access_mode="READ") as session:
                     result = session.run(
                         CypherPlace.read_pl_names, locid=tnode, lang=lang
                     )
-                    record = result.single()
-                    # <Record
-                    #    name=<Node id=514413 labels={'Place_name'}
-                    #        properties={'name': 'Suomi', 'lang': ''}>
-                    #    names=[<Node id=514415 labels={'Place_name'}
-                    #            properties={'name': 'Finnland', 'lang': 'de'}>,
-                    #        <Node id=514414 labels={'Place_name'} ...}>
-                    #    ]
-                    # >
-                lv = t.tree.depth(n)
-                p = PlaceBl(iid=tnode, ptype=n.data["type"], level=lv)
-                p.iid = n.data["iid"]
-                node = record["name"]
-                if node:
-                    p.names.append(PlaceName_from_node(node))
-                oth_names = []
-                for node in record["names"]:
-                    oth_names.append(PlaceName_from_node(node))
-                # Arrage names by local language first
-                lst = PlaceName.arrange_names(oth_names)
-                p.names += lst
+                    for record in result:
+                        #!record = result.single()
+                        # <Record
+                        #    name=<Node id=514413 labels={'Place_name'}
+                        #        properties={'name': 'Suomi', 'lang': ''}>
+                        #    names=[<Node id=514415 labels={'Place_name'}
+                        #            properties={'name': 'Finnland', 'lang': 'de'}>,
+                        #        <Node id=514414 labels={'Place_name'} ...}>
+                        #    ] >
+                        node = record["name"]
+                        if node:
+                            p.names.append(PlaceName_from_node(node))
+                        oth_names = []
+                        for node in record["names"]:
+                            oth_names.append(PlaceName_from_node(node))
+                        # Arrage names by local language first
+                        lst = PlaceName.arrange_names(oth_names)
+                        p.names += lst
 
                 p.pname = p.names[0].name
                 # logger.info("# {}".format(p))
@@ -1027,7 +1028,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 #            'iid': 'R-1d6', 'change': 1563727817}>
                 # >
                 # 1. Current Citation
-                uniq_id = record['uniq_id']
+                iid = record['iid']
                 ref = SourceReference()
 
                 # 2. The Source node
@@ -1039,7 +1040,7 @@ class Neo4jReadServiceTx(ConcreteService):
                     ref.medium = record['rel'].get('medium', "")
                 else:
                     ref.repository_obj = None
-                references[uniq_id] = ref
+                references[iid] = ref
 
         return {'status': Status.OK, 'sources': references}
 

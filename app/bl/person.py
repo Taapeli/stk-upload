@@ -336,7 +336,7 @@ class PersonWriter(DataService):
 class PersonBl(Person):
     def __init__(self):
         """
-        Constructor creates a new PersonBl intance.
+        Constructor creates a new PersonBl instance.
         """
         Person.__init__(self)
         self.names = []

@@ -23,7 +23,7 @@ import json
 try:
     from neo4j.graph import Node            # Neo4j 4.x
 except:
-    from neo4j.types.graph import Node      # Neo4j 3.x
+    from neo4j.types.graph import Node      #! Neo4j 3.x
 
 from bl.base import NodeObject, PRIVACY_LIMIT
 from bl.citation import Citation
@@ -46,7 +46,7 @@ def init(cls:NodeObject, node:Node):
     Returns bl.NodeObject instance from a Neo4j.graph.node.
     """
     n = cls()
-    n.uniq_id = node.id
+    n.uniq_id = node.id     #!TODO: Remove this
     n.id = node["id"]
     #n.uuid = node.get("uuid","")
     n.iid = node.get("iid","")
@@ -75,6 +75,7 @@ def Comment_from_node(node):
     <Node id=164 labels={'Comment'}
         properties={'text': 'Amanda syntyi Porvoossa'}>
     """
+    # TODO: missing iid field?
     n = init(Comment, node)
     n.title = node.get("title","")
     n.text = node["text"]
@@ -164,7 +165,7 @@ def Name_from_node(node):
             'surname': 'Klick', '': 'Birth Name'}>
     """
     n = Name()
-    n.uniq_id = node.id
+    #!n.uniq_id = node.id
     # n.id = node.id    # Name has no id "N0000"
     n.type = node["type"]
     n.firstname = node.get("firstname", "")
@@ -219,7 +220,7 @@ def PersonBl_from_node(node, obj=None):
     return obj
 
 
-def PlaceBl_from_node( node):
+def PlaceBl_from_node(node):
     """Creates a node object of type Place from a Neo4j node.
 
     Example node:
@@ -239,12 +240,11 @@ def PlaceName_from_node(node):
     <Node id=78278 labels={'Place_name'}
         properties={'lang': '', 'name': 'Kangasalan srk'}>
     """
-    pn = PlaceName() 
-    pn.uniq_id = node.id
-    pn.name = node.get("name", "?")
-    pn.lang = node.get("lang", "")
-    pn.dates = node.get("dates")
-    return pn
+    p = init(PlaceName, node)
+    p.name = node.get("name", "?")
+    p.lang = node.get("lang", "")
+    p.dates = node.get("dates")
+    return p
 
 def Repository_from_node(node):
     """

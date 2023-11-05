@@ -168,7 +168,7 @@ class Neo4jReadService(ConcreteService):
         """Reads person's def. name, birth and death event into Person obj."""
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(CypherPerson.get_person_lifedata, pid=person.uniq_id)
+            result = session.run(CypherPerson.get_person_lifedata, pid=person.iid)
             for record in result:
                 # <Record
                 #    name=<Node id=379934 labels={'Name'}
@@ -425,7 +425,7 @@ class Neo4jReadService(ConcreteService):
                     family = FamilyBl_from_node(f_node)
                     family.marriage_place = record["marriage_place"]
 
-                    uniq_id = -1
+                    iid = ""
                     for role, parent_node, name_node in record["parent"]:
                         if parent_node:
                             # <Node id=214500 labels={'Person'}
@@ -433,7 +433,7 @@ class Neo4jReadService(ConcreteService):
                             #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496,
                             #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008',
                             #    'date2': 1997946, 'date1': 1929380}>
-                            if uniq_id != parent_node.id:
+                            if iid != parent_node.iid:
                                 # Skip person with double default name
                                 pp = PersonBl_from_node(parent_node)
                                 if role == "father":
@@ -467,7 +467,7 @@ class Neo4jReadService(ConcreteService):
             status = Status.OK if families else Status.NOT_FOUND
             return {"families": families, "status": status}
 
-    def dr_get_family_parents(self, uniq_id: int, with_name=True):
+    def dr_get_family_parents(self, iid: str, with_name=True):
         """
         Get Parent nodes, optionally with default Name
 
@@ -476,7 +476,7 @@ class Neo4jReadService(ConcreteService):
         parents = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = session.run(CypherFamily.get_family_parents, fuid=uniq_id)
+                result = session.run(CypherFamily.get_family_parents, fuid=iid)
                 for record in result:
                     # <Record
                     #    role='father'
@@ -498,7 +498,7 @@ class Neo4jReadService(ConcreteService):
                     role = record["role"]
                     person_node = record["person"]
                     if person_node:
-                        if uniq_id != person_node.id:
+                        if iid != person_node.iid:
                             # Skip person with double default name
                             p = PersonBl_from_node(person_node)
                             p.role = role
@@ -520,7 +520,7 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": parents, "status": Status.OK, "statustext": ""}
 
-    def dr_get_family_children(self, uniq_id, with_events=True, with_names=True):
+    def dr_get_family_children(self, iid: str, with_events=True, with_names=True):
         """
         Get Child nodes, optionally with Birth and Death nodes
 
@@ -529,7 +529,7 @@ class Neo4jReadService(ConcreteService):
         children = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = session.run(CypherFamily.get_family_children, fuid=uniq_id)
+                result = session.run(CypherFamily.get_family_children, fuid=iid)
                 for record in result:
                     # <Record
                     #    person=<Node id=550538 labels={'Person'}
@@ -560,7 +560,7 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": children, "status": Status.OK}
 
-    def dr_get_family_events(self, uniq_id, with_places=True):
+    def dr_get_family_events(self, iid :str, with_places=True):
         """
         4. Get family Events node with Places
 
@@ -569,7 +569,7 @@ class Neo4jReadService(ConcreteService):
         events = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = session.run(CypherFamily.get_events_w_places, fuid=uniq_id)
+                result = session.run(CypherFamily.get_events_w_places, fuid=iid)
                 # RETURN event, place, names,
                 #        COLLECT(DISTINCT [place_in, rel_in, COLLECT in_names]) AS inside
                 for record in result:
@@ -635,7 +635,7 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": events, "status": Status.OK}
 
-    def dr_get_family_sources(self, id_list, with_notes=True):
+    def dr_get_family_sources(self, id_list :list[str], with_notes=True):
         """
         Get Sources Citations and Repositories for given families and events.
 
@@ -680,7 +680,7 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": sources, "status": Status.OK}
 
-    def dr_get_family_notes(self, id_list: list):
+    def dr_get_family_notes(self, id_list: list[str]):
         """
         Get Notes for family and events
         The id_list should include the uniq_ids for Family and events Events
@@ -724,7 +724,7 @@ class Neo4jReadService(ConcreteService):
         Get the minimal data required for creating graphs with person labels.
         The target depends on which = ('person', 'parents', 'children').
         For which='person', the oid should contain an iid.
-        For 'parents' and 'children' the oid should contain a database uniq_id.
+        For 'parents' and 'children' the oid should contain iid values.
         The 'death_high' value is always returned for privacy checks.
         """
         switcher = {
@@ -738,7 +738,7 @@ class Neo4jReadService(ConcreteService):
             for record in result:
                 result_list.append(
                     {
-                        "uniq_id": record["uniq_id"],
+                        #! "uniq_id": record["uniq_id"],
                         "iid": record["iid"],
                         "sortname": record["sortname"],
                         "gender": record["gender"],
@@ -1031,7 +1031,7 @@ class Neo4jReadService(ConcreteService):
         return {"status": Status.OK, "citations": citations}
 
 
-    def dr_get_source_citators(self, sourceid: int):
+    def dr_get_source_citators(self, sourceid: str):
         """Read Events and Person, Family and Media citating this Source.
 
         Returns
@@ -1042,13 +1042,13 @@ class Neo4jReadService(ConcreteService):
                         (from near or behind near)
         """
 
-        citations = {}  # {uniq_id:citation_object}
-        notes = {}  # {uniq_id:[note_object]}
-        # near = {}           # {uniq_id:object}
-        targets = {}  # {uniq_id:[object]} Person or Family
+        citations = {}  # {iid:citation_object}
+        notes = {}      # {iid:[note_object]}
+        # near = {}     # {iid:object}
+        targets = {}    # {iid:[object]} Person or Family
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(CypherSource.get_citators_of_source, uniq_id=sourceid)
+            result = session.run(CypherSource.get_citators_of_source, iid=sourceid)
             for record in result:
                 # <Record        # (1) A Person or Family
                 #                #     referencing directly Citation
@@ -1086,15 +1086,15 @@ class Neo4jReadService(ConcreteService):
                 far_nodes = record["far"]
                 note_nodes = record["notes"]
 
-                uniq_id = citation_node.id
+                iid = citation_node.record["iid"]
                 citation = Citation_from_node(citation_node)
-                citations[uniq_id] = citation
+                citations[iid] = citation
 
                 notelist = []
                 for node in note_nodes:
                     notelist.append(Note_from_node(node))
                 if notelist:
-                    notes[uniq_id] = notelist
+                    notes[iid] = notelist
 
                 targetlist = []  # Persons or Families referring this source
                 for node, role in far_nodes:
@@ -1109,13 +1109,13 @@ class Neo4jReadService(ConcreteService):
                     if obj:
                         targetlist.append(obj)
                 if targetlist:
-                    targets[uniq_id] = targetlist
+                    targets[iid] = targetlist
                 else:
                     print(
                         f'dr_get_source_citators: Event {near_node.id} {near_node.get("id")} without Person or Family?'
                     )
 
-        # Result dictionaries using key = Citation uniq_id
+        # Result dictionaries using key = Citation iid
         return citations, notes, targets
 
     def dr_source_search(self, args):
@@ -1367,7 +1367,7 @@ class Neo4jReadService(ConcreteService):
                                 raise TypeError(
                                     f"MediaReader.get_one: unknown type {list(src_node.labels)}"
                                 )
-                            event_refs[obj2.uniq_id] = obj2
+                            event_refs[obj2.iid] = obj2
 
                         mref.next_objs.append(obj2)
 

@@ -122,7 +122,7 @@ RETURN p.type AS type, p.iid AS iid, p.pname AS name
 """
     # Query to get names for a Place with $locid, $lang
     read_pl_names="""
-MATCH (place:Place {iid: $locid}}
+MATCH (place:Place {iid: $locid})
 OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
 WITH place, name
     OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) 

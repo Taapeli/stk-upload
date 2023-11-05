@@ -16,6 +16,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from bl.base import IsotammiException
 
 '''
 Database write clauses using Gramps handle.
@@ -28,10 +29,12 @@ Created on 23.3.2020
 '''
 
 class CypherObjectWHandle():
-    
-    def link_item(self, src_label, dst_label, set_r_attr=False):
+
+
+    @staticmethod
+    def link_item(src_label, dst_label, set_rel=False):
         """ Create connection between src note to dst node item.
-            Optionally set relation parameters.
+            Set relation parameters, if requested.
             
             In Cypher, you can not give Labels as parameters, so this function
             creates different Cypher clauses for each combination of src, dst.
@@ -41,8 +44,8 @@ class CypherObjectWHandle():
                        pid=place.iid, hlink=n_handle)
                 tx.run(CypherObjectWHandle.link_item(src_label=resu.obj_name,
                                                      dst_label="Citation",
-                                                     set_r_attr=True),
-                       src=place.handle, dst=media_handle, r_attr=r_attr)
+                                                     set_rel=True),
+                       src=place.handle, dst=m_ref.handle, r_attr=r_attr)
 
             (src:<src_lbl>{handle: $src}) -[r:<link_type>]-> (dst:<dst_lbl>{handle:$dst})
         """
@@ -62,12 +65,17 @@ class CypherObjectWHandle():
             "Source": "SOURCE",
             }
         link_type = type_by_label.get(dst_label)
-        query = f"""MATCH (s:{src_label} {{handle: $src}})
-                    MATCH (d:{dst_label}  {{handle: $dst}})
-                        CREATE (s) -[r:{link_type}]-> (d)"""
-        if set_r_attr:
+        if link_type is None:
+            print (f"// Not maching relation type for {dst_label}")
+            return None
+            #raise(IsotammiException, f"Not maching relation type for {dst_label}")
+        query = f"""
+MATCH (s:{src_label} {{handle: $src}})
+MATCH (d:{dst_label} {{handle: $dst}})
+CREATE (s) -[r:{link_type}]-> (d)"""
+        if set_rel:
             query += "\n    SET r = $r_attr"
-        print("#! link_item: \n"+query)
+        print("#! link_item:"+query.replace("\n","  "))
         return query
 
 #     link_media = """

@@ -289,10 +289,10 @@ class Neo4jUpdateService(ConcreteService):
         removed = []
         for record in result:
             # <Record id=190386, rel_id="...">
-            rel_uniq_id = record.get("rel_id")
-            if rel_uniq_id:
+            rel_long_uniq_id = record.get("rel_id")
+            if rel_long_uniq_id:
                 print("#Neo4jUpdateService.ds_batch_purge_access: removed "
-                      f"id={rel_uniq_id} DOES_AUDIT from {auditor_user}")
+                      f"id={rel_long_uniq_id} DOES_AUDIT from {auditor_user}")
                 removed.append(auditor_user)
                 return {"status": Status.UPDATED, "removed_auditors": removed}
 
@@ -560,7 +560,7 @@ class Neo4jUpdateService(ConcreteService):
 
         media_refs:
             obj_name          # Label of referee object
-            media_handle      # Media object handle
+            handle            # Media object handle
             media_order       # Media reference order nr
             crop              # Four coordinates
             note_handles      # list of Note object handles
@@ -575,17 +575,17 @@ class Neo4jUpdateService(ConcreteService):
                     r_attr["upper"] = m_ref.crop[1]
                     r_attr["right"] = m_ref.crop[2]
                     r_attr["lower"] = m_ref.crop[3]
-                doing = f"(src:{src_handle}) -[{r_attr}]-> Media {m_ref.media_handle}"
+                doing = f"(src:{src_handle}) -[{r_attr}]-> Media {m_ref.handle}"
                 # print(doing)
 
                 # Save media node
                 
                 query = CypherObjectWHandle.link_item(m_ref.obj_name, "Media", True)
-                tx.run(query, src=src_handle, dst=m_ref.media_handle, r_attr=r_attr)
+                tx.run(query, src=src_handle, dst=m_ref.handle, r_attr=r_attr)
                 #! tx.run(CypherObjectWHandle.link_media,
                 #     lbl=m_ref.obj_name,
                 #     src_iid=iid,
-                #     handle=m_ref.media_handle,
+                #     handle=m_ref.handle,
                 #     r_attr=r_attr,)
                 # media_uid = m_reflt.single()[0]    # for media object
                 #! media_uid = None
@@ -595,7 +595,7 @@ class Neo4jUpdateService(ConcreteService):
                     #! print(
                     #     f"ds_create_link_medias_w_handles: double link_media, "
                     #     f"replacing media_uid={media_uid} with uid={record[0]}. "
-                    #     f"handle={m_ref.media_handle}"
+                    #     f"handle={m_ref.handle}"
                     # )
                     # else:
                     #     media_uid = record[0]
@@ -698,9 +698,9 @@ class Neo4jUpdateService(ConcreteService):
         else:
             # 2) new node: create and link from Batch
             print(f"#!>Pl_save-2 Create a new Place ({place.id} #{place.iid} {place.pname}) {place.handle}")
-            tx.run(CypherPlace.create,
-                   batch_id=batch_id, p_attr=pl_attr)
+            tx.run(CypherPlace.create, batch_id=batch_id, p_attr=pl_attr)
             #! place.uniq_id = result.single()[0]
+
             place_keys[place.handle] = place.iid
 
         #    Create Place_names
@@ -795,10 +795,10 @@ class Neo4jUpdateService(ConcreteService):
                 # result = tx.run(CypherObjectWHandle.link_citation,
                 #                 lbl=place.label(), src_iid=place.iid, handle=hlink)
 
-        if place.media_handles:
+        if place.media_refs:
             query = CypherObjectWHandle.link_item("Place", "Media")
-            for hlink in place.media_handles:
-                tx.run(query, src=place.handle, dst=hlink)
+            for m_ref in place.media_refs:
+                tx.run(query, src=place.handle, dst=m_ref.handle)
         # if place.media_refs:
         #     # Make relations to the Media nodes and their Note and Citation references
         #     result = self.ds_create_link_medias_w_handles(
@@ -1136,7 +1136,7 @@ class Neo4jUpdateService(ConcreteService):
             query = CypherObjectWHandle.link_item("Person", "Event")
             for href, role in person.event_handle_roles:
                 r_attr = {"role": role}
-                tx.run(query, src=person.handle, hlink=href, r_attr=r_attr)
+                tx.run(query, src=person.handle, dst=href, r_attr=r_attr)
                 #!tx.run(CypherPerson.link_event, p_handle=person.handle, e_handle=event_handle, role=role,)
 
         # Make relations to the Media nodes and it's Note and Citation references

@@ -214,5 +214,3 @@ class RootUpdater(DataService):
         self.dataservice.ds_commit()
     def rollback(self):
         self.dataservice.ds_rollback()
-
-    # def media_create_and_link_by_handles(self, uniq_id, media_refs):

@@ -1108,12 +1108,12 @@ def show_place(iid):
                 )
             cnt = len(res.get("events")) if res.get("events", False) else 0
             pl = res.get("place")
-            pl_hierarchy=res.get("hierarchy")
+            pl_hierarchy=res.get("hierarchy", [])
             events=res.get("events")
             citations = res.get("citations", [])
             # Map scaling
             level = 1
-            for p in res.get("hierarchy"):
+            for p in pl_hierarchy:  #!res.get("hierarchy"):
                 if p.iid == pl.iid:
                     level = p.level
                     break

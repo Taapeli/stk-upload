@@ -58,8 +58,8 @@ class Neo4jWriteDriver(object):
         ''' NOT USED! Save media object and it's Note and Citation references
             using their Gramps handles.
             
-            media_handle:
-                media_handle      # Media object handle
+            handle:
+                handle      # Media object handle
                 media_order       # Media reference order nr
                 crop              # Four coordinates
                 note_handles      # list of Note object handles
@@ -74,12 +74,12 @@ class Neo4jWriteDriver(object):
                     r_attr['upper'] = resu.crop[1]
                     r_attr['right'] = resu.crop[2]
                     r_attr['lower'] = resu.crop[3]
-                doing = f"(src:{iid}) -[{r_attr}]-> Media {resu.media_handle}"
+                doing = f"(src:{iid}) -[{r_attr}]-> Media {resu.handle}"
 #                 print(doing)
                 self.tx.run(CypherObjectWHandle.link_media,
                             lbl=resu.obj_name,
                             root_id=iid,
-                            handle=resu.media_handle, 
+                            handle=resu.handle, 
                             r_attr=r_attr)
                 media_uid = iid    # for media object
 

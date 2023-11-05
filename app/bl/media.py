@@ -155,25 +155,27 @@ class MediaReader(DataService):
 
 
 class MediaReferenceByHandles:
-    """Gramps media reference result object.
+    """Gramps media reference data object.
 
     Includes Note and Citation references and crop data.
     Used in bp.gramps.xml_dom_handler.DOM_handler
     """
 
-    def __init__(self, source_object: NodeObject):
+    def __init__(self, node_object: NodeObject):
         """ Create a reference object having referrer object label and 
             references with different reference properties.
+            
+            Object might contain multiple references of each type.
         """
-        self.obj_name = source_object.label() # Source node label
-        self.media_handle = None
+        self.obj_name = node_object.label() # Source node label
+        self.handle = None
         self.media_order = 0  # Media reference order nr
         self.crop = []  # Four coordinates
-        self.note_handles = []  # list of note handles
-        self.citation_handles = []  # list of citation handles
+        self.note_handles = []  # list of media -> note handles
+        self.citation_handles = []  # list of media -> citation handles
 
     def __str__(self):
-        s = f"{self.obj_name} -> {self.media_handle} [{self.media_order}]"
+        s = f"{self.obj_name} -> {self.handle} [{self.media_order}]"
         if self.crop:
             s += f" crop({self.crop})"
         if self.note_handles:

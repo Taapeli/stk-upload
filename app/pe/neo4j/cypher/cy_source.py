@@ -63,7 +63,7 @@ RETURN root, s AS source,
     ORDER BY source.stitle"""
 
     get_citators_of_source = """
-match (s) <-[:SOURCE]- (c:Citation) where id(s)=$uniq_id
+match (s {iid:$iid}) <-[:SOURCE]- (c:Citation)
 match (c) <-[:CITATION]- (x)
 with c,x
     optional match (c) -[:NOTE]-> (n:Note)
@@ -94,7 +94,7 @@ RETURN //root, a,
 MATCH (cita:Citation) -[:SOURCE]-> (source:Source)
     WHERE ID(cita) IN $uid_list
 OPTIONAL MATCH (source) -[rel:REPOSITORY]-> (repo:Repository)
-RETURN ID(cita) AS uniq_id, source, properties(rel) as rel, repo"""
+RETURN cita.iid AS iid, source, properties(rel) as rel, repo"""
 
     source_fulltext_search = """
 CALL db.index.fulltext.queryNodes("sourcetitle",$searchtext) 

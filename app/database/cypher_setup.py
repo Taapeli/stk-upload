@@ -47,10 +47,10 @@ class SetupCypher():
     MATCH (b:Root) WHERE b.file IS NULL
     OPTIONAL MATCH (b) --> (x)
     WITH b, COLLECT(DISTINCT LABELS(x)[0]) AS lbls, COUNT(x) AS ch WHERE ch < 2
-        RETURN ID(b) AS uniq_id, b.id AS id
+        RETURN elementId(b) AS uniq_id, b.id AS id
     """
     remove_empty_roots = """
-    MATCH (b:Root) WHERE id(b) in $uniq_ids
+    MATCH (b:Root) WHERE elementId(b) in $uniq_ids
     OPTIONAL MATCH (b) --> (x)
         DETACH DELETE b, x
     """

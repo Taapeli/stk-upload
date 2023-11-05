@@ -23,11 +23,9 @@ Created on 22.8.2019
 @author: jm
 """
 #blacked 2021-05-01 JMä
-#import uuid
 import json
 import traceback
 from datetime import datetime
-#import base32_lib as base32
 
 # Privacy rule: how many years after death
 PRIVACY_LIMIT = 0
@@ -98,28 +96,35 @@ class NodeObject:
         Constructor.
 
         Optional iid should be unique key (str).
-        Obsolete: iid may also be Neo4j version 3 database key (int),
-                  which is saved as self.uniq_id
+        Obsolete 2023: iid may also be Neo4j version 3 database key (int),
+                       which is saved as self.uniq_id
+
+        Possible other fields in xml_dom_handler
+        - citation_refs[]  ?
+        - media_refs[]     ?
+        - note_refs[]    ?
         """
+        #TODO Remove uniq_id when not in use after 2023
         self.uniq_id = None  # Neo4j object id
         if isinstance(iid, int):
             self.uniq_id = iid
         self.change = 0     # Object change time
         self.id = ""        # Gedcom object id like "I1234"
-        self.handle = ""    # Gramps handle (?)
-        self.attrs = ""     # dict containing Gramps object attributes and srcattributes
-
-        self.state = None   # Object state in process path
-        # TODO Define constants for values:
-        #     candicate, audit_requested, auditing, accepted,
-        #     mergeing, common, rejected
+        self.handle = ""    # Gramps handle
         if isinstance(iid, str):
             self.iid = iid
         else:
-            self.iid = None     # Containing
+            self.iid = None
+        # iid contains
         # - object type id ("H" = Human person etc.)
         # - running number in Crockford Base 32 format
-        # - ISO 7064 checksum (2 digits)
+        self.attrs = ""     # dict containing Gramps object attributes and srcattributes
+
+        # Proposed Object state in process path
+        self.state = None   
+        # TODO Define constants for values:
+        #     candidate, audit_requested, auditing, accepted,
+        #     mergeing, common, rejected
 
     def __str__(self):
         # Supports also obsolete Neo4j id() as uniq_id
@@ -127,7 +132,7 @@ class NodeObject:
         return f'(NodeObject {iid}/{self.iid}/{self.id} date {self.dates})"'
 
     def label(self):
-        """ Returns Neo4j label for this object. """
+        """ Returns Neo4j node label for this object. """
         name = self.__class__.__name__
         if name.endswith("Bl"):
             name = name[:-2]

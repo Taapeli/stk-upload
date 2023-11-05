@@ -83,11 +83,11 @@ class Name(NodeObject):
 
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name)
-            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2)
+            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE p1.iid<p2.iid
                 AND n2.surname = n1.surname AND n2.firstname = n1.firstname
-                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death,
+                RETURN COLLECT ([p1.iid, p1.est_birth, p1.est_death,
                 n1.firstname, n1.suffix, n1.title, n1.surname,
-                ID(p2), p2.est_birth, p2.est_death,
+                p2.iid, p2.est_birth, p2.est_death,
                 n2.firstname, n2.suffix, n2.title, n2.surname]) AS ids
             """.format()
         with shareds.driver.session() as session:

@@ -625,7 +625,6 @@ class DOM_handler:
                         "count":p.id})
             try:
                 pname.dates = self._extract_daterange(person_name) # Return Gramps_DateRange or None
-                # TODO: val="1700-luvulla" muutettava Noteksi
             except:
                 pname.dates = None
             if len(person_name.getElementsByTagName("title")) == 1:
@@ -688,7 +687,7 @@ class DOM_handler:
                         e_role = None
                     p.event_handle_roles.append((e_handle, e_role))
 
-            # Handle <objref>
+            # Handle <objref>, returns a list of m_ref's
             p.media_refs = self._extract_mediaref(p, person)
 
             for person_url in person.getElementsByTagName("url"):
@@ -1211,7 +1210,7 @@ class DOM_handler:
         return
 
     def _extract_mediaref(self, obj:NodeObject, dom_object):
-        """Check if dom_object has media reference and extract it to p.media_refs.
+        """Check if dom_object has media reference and extract it for p.media_refs.
 
         Example:
             <objref hlink="_d485d4484ef70ec50c6">
@@ -1227,34 +1226,37 @@ class DOM_handler:
         """
         result_list = []
         media_nr = -1
-        for objref in dom_object.getElementsByTagName("objref"):
-            if objref.hasAttribute("hlink"):
-                resu = MediaReferenceByHandles(obj)
-                resu.media_handle = objref.getAttribute("hlink") + self.handle_suffix
+        for dom_media in dom_object.getElementsByTagName("objref"):
+            if dom_media.hasAttribute("hlink"):
+                m_ref = MediaReferenceByHandles(obj)
+                # Contains media handle, crop, media_order and
+                #    referrer object_name and
+                #    possible lists of note handles nad citation handles
+                m_ref.handle = dom_media.getAttribute("hlink") + self.handle_suffix
                 media_nr += 1
-                resu.media_order = media_nr
+                m_ref.media_order = media_nr
 
-                for region in objref.getElementsByTagName("region"):
+                for region in dom_media.getElementsByTagName("region"):
                     if region.hasAttribute("corner1_x"):
                         left = region.getAttribute("corner1_x")
                         upper = region.getAttribute("corner1_y")
                         right = region.getAttribute("corner2_x")
                         lower = region.getAttribute("corner2_y")
-                        resu.crop = int(left), int(upper), int(right), int(lower)
-                        # print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle} crop={resu.crop}')
-                # if not resu.crop: print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle}')
+                        m_ref.crop = int(left), int(upper), int(right), int(lower)
+                        # print(f'#_extract_mediaref: Pic {m_ref.media_order} handle={m_ref.handle} crop={m_ref.crop}')
+                # if not m_ref.crop: print(f'#_extract_mediaref: Pic {m_ref.media_order} handle={m_ref.handle}')
 
                 # Add note and citation references
-                for ref in objref.getElementsByTagName("noteref"):
-                    if ref.hasAttribute("hlink"):
-                        resu.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
-                        # print(f'#_extract_mediaref: Note {resu.note_handles[-1]}')
+                for dom_note in dom_media.getElementsByTagName("noteref"):
+                    if dom_note.hasAttribute("hlink"):
+                        m_ref.note_handles.append(dom_note.getAttribute("hlink") + self.handle_suffix)
+                        # print(f'#_extract_mediaref: Note {m_ref.note_handles[-1]}')
 
-                for ref in objref.getElementsByTagName("citationref"):
-                    if ref.hasAttribute("hlink"):
-                        resu.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
-                        # print(f'#_extract_mediaref: Cite {resu.citation_handles[-1]}')
+                for dom_cite in dom_media.getElementsByTagName("citationref"):
+                    if dom_cite.hasAttribute("hlink"):
+                        m_ref.citation_handles.append(dom_cite.getAttribute("hlink") + self.handle_suffix)
+                        # print(f'#_extract_mediaref: Cite {m_ref.citation_handles[-1]}')
 
-                result_list.append(resu)
+                result_list.append(m_ref)
 
         return result_list

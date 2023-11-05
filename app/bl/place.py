@@ -112,7 +112,7 @@ class PlaceBl(Place):
             coord               str paikan koordinaatit (leveys- ja pituuspiiri)
             surrounding[]       int uniq_ids of upper
             note_ref[]          int uniq_ids of Notes
-            media_ref[]         int uniq_ids of Medias
+            media_refs[]        int uniq_ids of Medias
         May be defined in Place_gramps:
             surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
             citation_ref[]      int uniq_ids of Citations
@@ -135,8 +135,8 @@ class PlaceBl(Place):
 
         self.uppers = []  # Upper place objects for hierarchy display
         self.notes = []  # Notes connected to this place
-        self.note_ref = []  # uniq_ids of Notes
-        self.media_ref = []  # uniq_id of models.gen.media.Media
+        self.note_ref = []  # iids? of Notes
+        self.media_refs = []  # bl.media.MediaReferenceByHandles OR? iids of models.gen.media.Media
         self.ref_cnt = None  # for display: count of referencing objects
 
     def set_default_names(self, tx, def_names: dict, dataservice):
@@ -146,9 +146,9 @@ class PlaceBl(Place):
 
         - place         Place object
         - - .names      PlaceName objects
-        - def_names     dict {lang, uid} uniq_id's of PlaceName objects
+        - def_names     dict {lang, uid} iid's of PlaceName objects
         """
-        dataservice.ds_place_set_default_names(tx, self.uniq_id, def_names["fi"], def_names["sv"])
+        dataservice.ds_place_set_default_names(tx, self.iid, def_names["fi"], def_names["sv"])
 
     @staticmethod
     def find_default_names(names: list, use_langs: list):
@@ -169,7 +169,7 @@ class PlaceBl(Place):
                 for name in names:
                     if name.lang == lang and not lang in selection.keys():
                         # A matching language
-                        # print(f'# select {lang}: {name.name} {name.uniq_id}')
+                        # print(f'# select {lang}: {name.name} {name.iid}')
                         selection[lang] = name.iid
             # 2. find replacing languages, if not matching
             for lang in use_langs:
@@ -177,13 +177,13 @@ class PlaceBl(Place):
                     # Maybe a missing language is found?
                     for name in names:
                         if name.lang == "" and not lang in selection.keys():
-                            # print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
+                            # print(f'# select {lang}>{name.lang}: {name.name} {name.iid}')
                             selection[lang] = name.iid
                 if not lang in selection.keys():
                     # No missing language, select any
                     for name in names:
                         if not lang in selection.keys():
-                            # print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
+                            # print(f'# select {lang}>{name.lang}: {name.name} {name.iid}')
                             selection[lang] = name.iid
 
             ret = {}
@@ -235,6 +235,7 @@ class PlaceName(NodeObject):
     """Paikan nimi
 
     Properties:
+            iid              str IsotammiId
             name             str nimi
             lang             str kielikoodi
             dates            DateRange aikajakso
@@ -243,6 +244,7 @@ class PlaceName(NodeObject):
 
     def __init__(self, name="", lang=""):
         """ Luo uuden name-instanssin """
+        self.iid = None
         self.name = name
         self.lang = lang
         self.dates = None
@@ -342,8 +344,8 @@ class PlaceReaderTx(DataService):
     # def __init__(self, service_name: str, u_context=None):
     #     # print(f'#~~{self.__class__.__name__} init')
     #     super().__init__(service_name, u_context)
-    #     # obj_catalog maps object uniq_id to connected objects
-    #     self.obj_catalog = {}  # dict {uniq_id: Connected_object: NodeObject}
+    #     # obj_catalog maps object iid to connected objects
+    #     self.obj_catalog = {}  # dict {iid: Connected_object: NodeObject}
 
 
     def get_place_list(self):
@@ -431,7 +433,7 @@ class PlaceReaderTx(DataService):
         except ValueError as e:
             return {
                 "status": Status.ERROR,
-                "statustext": f"Place tree value for {place.uiid}: {e}",
+                "statustext": f"Place tree value for {place.iid}: {e}",
             }
 
         results["uniq_ids"]= res.get("uniq_ids",[])
@@ -453,9 +455,9 @@ class PlaceReaderTx(DataService):
         refs = res.get("sources", [])
         for c in citations:
             if hasattr(c, 'source_refs'):
-                c.source_refs.append(refs[c.uniq_id])
+                c.source_refs.append(refs[c.iid])
             else:
-                c.source_refs = [refs[c.uniq_id]]
+                c.source_refs = [refs[c.iid]]
         return res
 
     def get_placename_list(self, count=40, by_cites=False):
@@ -513,7 +515,7 @@ class PlaceUpdater(DataService):
             def_names = ret.get("ids")
             self.dataservice.ds_place_set_default_names(
                 self.dataservice.tx,
-                place.uniq_id, def_names["fi"], def_names["sv"]
+                place.iid, def_names["fi"], def_names["sv"]
             )
 
             ret = self.dataservice.ds_commit()

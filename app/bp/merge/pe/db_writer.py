@@ -39,7 +39,7 @@ class DBwriter(object):
             using their Gramps handles.
         '''
         if media_refs:
-            self.dbdriver.media_save_w_handles(iid:str, media_refs)
+            self.dbdriver.media_save_w_handles(iid, media_refs)
 
     def mergeplaces(self, id1, id2):
         with shareds.driver.session() as session:
