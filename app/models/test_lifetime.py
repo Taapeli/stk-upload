@@ -8,7 +8,7 @@
 # pylint: disable=too-many-branches
 # pylint: disable=no-member
 
-import datetime
+#!import datetime
 from lifetime import Event
 from lifetime import calculate_estimates
 import lifetime

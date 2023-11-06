@@ -30,9 +30,9 @@ class CypherPerson():
 
 # ----- Person node -----
 
-    get_person_by_uid = "MATCH (p:Person) WHERE ID(p) = $uid"
+    get_person_by_uid = "MATCH (p:Person {iid: $uid})"
     set_sortname = """
-MATCH (p:Person) WHERE ID(p) = $uid
+MATCH (p:Person {iid: $uid})
 SET p.sortname=$key"""
 
 # ----- Person page -----
@@ -46,11 +46,11 @@ RETURN p, root"""
 # RETURN user.username as loader, root, p"""
 
     get_names_events = """
-MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
+MATCH (p:Person {iid: $uid}) -[rel:NAME|EVENT]-> (x)
 RETURN type(rel) AS rel_type, x AS node, rel.role AS role ORDER BY x.order"""
 
     get_families = """
-MATCH (p:Person) <-[rel:CHILD|PARENT]- (f:Family) WHERE ID(p) = $uid
+MATCH (p:Person {iid: $uid}) <-[rel:CHILD|PARENT]- (f:Family)
 OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event)
 OPTIONAL MATCH (f) -[mr:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
 OPTIONAL MATCH (m) -[:EVENT]-> (me:Event {type:"Birth"})
@@ -71,23 +71,22 @@ RETURN LABELS(event)[0] AS label, ID(event) AS uniq_id,
 
     get_objs_citations_notes_medias = """
 MATCH (src) -[r:CITATION|NOTE|MEDIA]-> (target)
-    WHERE ID(src) IN $uid_list
+    WHERE src.iid IN $uid_list
 RETURN src, properties(r) AS r, target"""
 
     get_names = """
-MATCH (n) <-[r:NAME]- (p:Person)
-    where id(p) = $pid
-RETURN id(p) as pid, n as name
+MATCH (n) <-[r:NAME]- (p:Person {iid:$pid})
+RETURN p.iid as pid, n as name
 ORDER BY name.order"""
 
     get_all_persons_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
-RETURN ID(p) AS pid, n as name
+RETURN p.iid AS pid, n as name
 ORDER BY n.order"""
 
     get_person_lifedata = """
 match (p:Person) -[:NAME]-> (n:Name {order:0})
-    where id(p) = $pid
+    where p.iid = $pid
 optional match (p) -[re:EVENT]-> (e:Event)
     where e.type = "Birth" or e.type = "Death"
 return n as name, collect(distinct e) as events"""
@@ -159,7 +158,7 @@ WITH root, person, name""" + _get_events_tail + _get_events_surname
 
     create_to_batch = """
 MATCH (root:Root {id: $batch_id})
-MERGE (b) -[r:OBJ_PERSON]-> (p:Person {handle: $p_attr.handle})
+MERGE (root) -[r:OBJ_PERSON]-> (p:Person {handle: $p_attr.handle})
     SET p = $p_attr"""
 #!RETURN ID(p) as uniq_id"""
 
@@ -212,12 +211,12 @@ OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
 OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
 OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
 OPTIONAL MATCH (spouse) <-[:PARENT]- (fam1:Family) where id(spouse) <> id(p)
-RETURN p, id(p) as pid, 
+RETURN p, //#! p.iid as pid, 
     COLLECT(DISTINCT [e,r.role]) AS events,
     COLLECT(DISTINCT [fam_event,r2.role]) AS fam_events,
-    COLLECT(DISTINCT [c,id(c)]) as children,
-    COLLECT(DISTINCT [parent,id(parent)]) as parents,
-    collect(distinct [spouse,id(spouse)]) as spouses
+    COLLECT(DISTINCT [c,c.iid]) as children,
+    COLLECT(DISTINCT [parent,parent.iid]) as parents,
+    collect(distinct [spouse,spouse.iid]) as spouses
 """
 
     fetch_all_for_lifetime_estimates = """
@@ -228,7 +227,7 @@ OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
 OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
 OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
 OPTIONAL MATCH (spouse) <-[:PARENT]- (fam1:Family) where id(spouse) <> id(p)
-RETURN p, id(p) as pid, 
+RETURN p, //#! id(p) as pid, 
     collect(distinct [e,r.role]) AS events,
     collect(distinct [fam_event,r2.role]) AS fam_events,
     collect(distinct [c,id(c)]) as children,

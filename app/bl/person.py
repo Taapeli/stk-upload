@@ -24,7 +24,7 @@
 
     class bl.Person(): 
         Person-noden parametrit 
-         - uniq_id
+         #!- uniq_id removed
          - properties { handle:"_dd2c613026e7528c1a21f78da8a",
                         id:"I0000",
                         priv:None,
@@ -67,7 +67,7 @@ from bl.base import PRIVACY_LIMIT
 class Person(NodeObject):
     """Person object
 
-    - uniq_id                int database key
+    #! Removed: - uniq_id                int database key
     - Node properties: {
        handle                str "_dd2c613026e7528c1a21f78da8a"
        id                    str "I0000"
@@ -210,13 +210,13 @@ class PersonReader(DataService):
         else:
             return nodes
 
-    def get_parents(self, uniq_id, privacy):
+    def get_parents(self, iid, privacy):
         """
-        Get all parents of the person with given db uniq_id.
+        Get all parents of the person with given iid.
         Returns a list as number of parents in database is not always 0..2.
         """
         last_year_allowed = datetime.now().year - PRIVACY_LIMIT
-        nodes = self.dataservice.dr_get_family_members_by_id(uniq_id, which="parents")
+        nodes = self.dataservice.dr_get_family_members_by_id(iid, which="parents")
         for n in nodes:
             n["too_new"] = n["death_high"] > last_year_allowed
         if privacy:
@@ -224,13 +224,13 @@ class PersonReader(DataService):
         else:
             return nodes
 
-    def get_children(self, uniq_id, privacy):
+    def get_children(self, iid, privacy):
         """
-        Get all children of the person with given db uniq_id.
+        Get all children of the person with given iid.
         Returns a list.
         """
         last_year_allowed = datetime.now().year - PRIVACY_LIMIT
-        nodes = self.dataservice.dr_get_family_members_by_id(uniq_id, which="children")
+        nodes = self.dataservice.dr_get_family_members_by_id(iid, which="children")
         for n in nodes:
             n["too_new"] = n["death_high"] > last_year_allowed
         if privacy:
@@ -254,8 +254,8 @@ class PersonWriter(DataService):
     def set_name_orders(self, uid_list):
         self.dataservice.dr_set_name_orders(uid_list)
 
-    def set_name_type(self, uniq_id, nametype):
-        self.dataservice.dr_set_name_type(uniq_id, nametype)
+    def set_name_type(self, iid, nametype):
+        self.dataservice.dr_set_name_type(iid, nametype)
 
     def set_person_name_properties(self, iid:str = None, ops=["refname", "sortname"]):
         """Set Refnames to all Persons or one Person with given iid;
@@ -314,15 +314,15 @@ class PersonWriter(DataService):
         #print(f"Estimated lifetime for {res['count']} persons")
         return res
 
-    def update_person_confidences(self, person_ids: list):
+    def update_person_confidences(self, person_ids: list[str]):
         """Sets a quality rating for given list of Person.uniq_ids.
 
         Person.confidence is calculated as a mean of confidences in
         all Citations used for Person's Events.
         """
         counter = 0
-        for uniq_id in person_ids:
-            res = self.dataservice.ds_update_person_confidences(uniq_id)
+        for iid in person_ids:
+            res = self.dataservice.ds_update_person_confidences(iid)
             # returns {confidence, status, statustext}
             stat = res.get("status")
             if stat == Status.UPDATED:

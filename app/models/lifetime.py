@@ -78,6 +78,7 @@ BAPTISM = "Baptism"
 MAX_ITERATIONS = 10 
 
 class Person:
+    """ Person data for life time calculation """
     def __init__(self):
         self.pid = None
         self.gramps_id = None
@@ -90,7 +91,7 @@ class Person:
         # pare = [f"{x.gramps_id}({x.pid})" for x in self.parents]
         # chdr = [f"{x.gramps_id}({x.pid})" for x in self.children]
         return (
-            f"{self.gramps_id}({self.pid}): {len(self.events)} events, "
+            f"lifetime.Person {self.gramps_id}({self.pid}): {len(self.events)} events, "
             f"parents={self.parent_pids}, children={self.child_pids}"
         )
 
@@ -139,6 +140,7 @@ CURRENT_YEAR = Year("normal", current_year)
 
 @dataclass
 class Event:
+    """ Event data for life time calculation """
     eventtype: str
     datetype: str
     year: int

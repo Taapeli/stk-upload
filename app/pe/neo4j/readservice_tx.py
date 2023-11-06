@@ -272,7 +272,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 return res
 
             person_node = record['p']
-            puid = person_node.id
+            #!puid = person_node.id
 
             # Store original researcher data 
             #    - material_type root material type
@@ -303,7 +303,7 @@ class Neo4jReadServiceTx(ConcreteService):
         event_node_roles = []
         cause_of_death = None
         try:
-            results = self.tx.run(CypherPerson.get_names_events, uid=puid)
+            results = self.tx.run(CypherPerson.get_names_events, uid=iid)
             for record in results:
                 # <Record
                 #    rel_type='NAME'
@@ -332,7 +332,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 res['cause_of_death'] = cause_of_death
 
         except Exception as e:
-            msg = f'person={puid} {e.__class__.__name__} {e}'
+            msg = f'person={iid} {e.__class__.__name__} {e}'
             print(f'dx_get_person_names_events: {msg}')
             res.update({'status': Status.ERROR, 'statustext': f"Could not read names and events: {msg}"})
             return res

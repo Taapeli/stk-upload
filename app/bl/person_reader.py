@@ -54,16 +54,16 @@ class PersonReaderTx(DataService):
     def __init__(self, service_name: str, u_context=None):
         # print(f'#~~{self.__class__.__name__} init')
         super().__init__(service_name, u_context)
-        self.obj_catalog = {}  # dict {uniq_id: Connected_object: NodeObject}
+        self.obj_catalog = {}  # dict {iid: Connected_object: NodeObject}
 
     def _catalog(self, obj: NodeObject):
         """ Add the object to collection of referenced objects. """
         if obj is None:
             return
-        if not obj.uniq_id in self.obj_catalog:
-            self.obj_catalog[obj.uniq_id] = obj
+        if not obj.iid in self.obj_catalog:
+            self.obj_catalog[obj.iid] = obj
         else:
-            c = self.obj_catalog[obj.uniq_id]
+            c = self.obj_catalog[obj.iid]
             if c is obj:
                 print(
                     f"bl.person_reader.PersonReaderTx._catalog: WARNING same object twice: {obj}"
@@ -263,7 +263,7 @@ class PersonReaderTx(DataService):
          
         # 3. Person's families as child or parent
 
-        res = self.dataservice.tx_get_person_families(person.uniq_id)
+        res = self.dataservice.tx_get_person_families(person.iid)
         if Status.has_failed(res):
             logger.error(
                 "#bl.person_reader.PersonReaderTx.get_person_data - Can not read families:"
@@ -314,14 +314,14 @@ class PersonReaderTx(DataService):
             self._catalog(place)
 
         for e in person.events:
-            if e.uniq_id in place_references.keys():
+            if e.iid in place_references.keys():
 
-                place = _extract_place_w_names(place_references[e.uniq_id])
+                place = _extract_place_w_names(place_references[e.iid])
                 if place:
-                    e.place_ref = [place.uniq_id]
+                    e.place_ref = [place.iid]
                     # Add Upper Place, if not set and exists
-                    if place.uppers == [] and place.uniq_id in place_references:
-                        refs = place_references[place.uniq_id]
+                    if place.uppers == [] and place.iid in place_references:
+                        refs = place_references[place.iid]
                         if refs:
                             up_place = _extract_place_w_names(refs)
                             if up_place:
@@ -366,30 +366,30 @@ class PersonReaderTx(DataService):
                             # If id is in the dictionary, return its value.
                             # If not, insert id with a value of 2nd argument.
                             target_obj = citations.setdefault(
-                                current.obj.uniq_id, current.obj
+                                current.obj.iid, current.obj
                             )
                             if hasattr(src, "citation_ref"):
-                                src.citation_ref.append(current.obj.uniq_id)
+                                src.citation_ref.append(current.obj.iid)
                             else:
-                                src.citation_ref = [current.obj.uniq_id]
+                                src.citation_ref = [current.obj.iid]
                         elif label == "Note":
-                            target_obj = notes.setdefault(current.obj.uniq_id, current.obj)
+                            target_obj = notes.setdefault(current.obj.iid, current.obj)
                             if hasattr(src, "note_ref"):
-                                src.note_ref.append(current.obj.uniq_id)
+                                src.note_ref.append(current.obj.iid)
                             else:
-                                src.note_ref = [current.obj.uniq_id]
+                                src.note_ref = [current.obj.iid]
                             target_obj.citation_ref = []
                         elif label == "Media":
                             target_obj = medias.setdefault(
-                                current.obj.uniq_id, current.obj
+                                current.obj.iid, current.obj
                             )
                             if hasattr(src, "media_ref"):
-                                src.media_ref.append((current.obj.uniq_id, crop, order))
+                                src.media_ref.append((current.obj.iid, crop, order))
                             else:
-                                src.media_ref = [(current.obj.uniq_id, crop, order)]
+                                src.media_ref = [(current.obj.iid, crop, order)]
                             target_obj.citation_ref = []
                             # Sort the Media references by order
-                            # print(f'#\tMedia ref {target_obj.uniq_id} order={order}, crop={crop}')
+                            # print(f'#\tMedia ref {target_obj.iid} order={order}, crop={crop}')
                             if (
                                 len(src.media_ref) > 1
                                 and src.media_ref[-2][2] > src.media_ref[-1][2]
@@ -403,8 +403,8 @@ class PersonReaderTx(DataService):
 
             # print(f'#+ - found {len(citations)} Citations, {len(notes)} Notes,"\
             #       f" {len(medias)} Medias from {len(new_ids)} nodes')
-            # for uniq_id, note in notes.items():
-            #     print(f'#+ - {uniq_id}: {note}')
+            # for iid, note in notes.items():
+            #     print(f'#+ - {iid}: {note}')
             all_citations.update(citations)
             self.obj_catalog.update(citations)
             self.obj_catalog.update(notes)
@@ -432,9 +432,9 @@ class PersonReaderTx(DataService):
 
         source_refs = res.get("sources")
         if source_refs:
-            for uniq_id, ref in source_refs.items():
+            for iid, ref in source_refs.items():
                 # 1. The Citation node
-                cita = self.obj_catalog[uniq_id]
+                cita = self.obj_catalog[iid]
 
                 # 2. The Source node
                 source = ref.source_obj
@@ -446,12 +446,12 @@ class PersonReaderTx(DataService):
                     repo.medium = ref.medium
                     self._catalog(repo)
                     # This source is in this repository
-                    if not repo.uniq_id in source.repositories:
-                        source.repositories.append(repo.uniq_id)
+                    if not repo.iid in source.repositories:
+                        source.repositories.append(repo.iid)
 
                 # Referencing a (Source, medium, Repository) tuple
-                cita.source_id = source.uniq_id
-                # print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
+                cita.source_id = source.iid
+                # print(f"# ({iid}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
 
         #         # Create Javascript code to create source/citation list
         #         jscode = get_citations_js(self.dataservice.objs)
@@ -485,7 +485,7 @@ class PersonReaderTx(DataService):
         for o in self.obj_catalog.values():
             if isinstance(o, Citation):
                 page = unquote(o.page)
-                js += f"citations[{o.uniq_id}] = {{ "
+                js += f"citations[{o.iid}] = {{ "
                 js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
                 js += f'id:"{o.id}", note_ref:{o.note_ref}, '
                 js += f'page:"{page}", source_id:{o.source_id}, iid:"{o.iid}" '
@@ -496,7 +496,7 @@ class PersonReaderTx(DataService):
                 sauthor = unquote(o.sauthor)
                 spubinfo = unquote(o.spubinfo)
                 stitle = unquote(o.stitle)
-                js += f"sources[{o.uniq_id}] = {{ "
+                js += f"sources[{o.iid}] = {{ "
                 js += f'id:"{o.id}", note_ref:{o.note_ref}, '
                 js += f'repositories:{o.repositories}, sauthor:"{sauthor}", '
                 js += f'spubinfo:"{spubinfo}", stitle:"{stitle}", '
@@ -507,7 +507,7 @@ class PersonReaderTx(DataService):
             elif isinstance(o, Repository):
                 medium = translate(o.medium, "medium")
                 atype = translate(o.type, "rept")
-                js += f"repositories[{o.uniq_id}] = {{ "
+                js += f"repositories[{o.iid}] = {{ "
                 js += (
                     f'iid:"{o.iid}", id:"{o.id}", type:"{atype}", rname:"{o.rname}", '
                 )
@@ -520,11 +520,11 @@ class PersonReaderTx(DataService):
                 continue
 
         # Find referenced Notes; conversion to set removes duplicates
-        for uniq_id in set(notes):
-            o = self.obj_catalog[uniq_id]
+        for iid in set(notes):
+            o = self.obj_catalog[iid]
             text = unquote(o.text)
             url = unquote(o.url)
-            js += f"notes[{o.uniq_id}] = {{ "
+            js += f"notes[{o.iid}] = {{ "
             js += f'iid:"{o.iid}", id:"{o.id}", type:"{o.type}", '
             js += f'priv:"{o.priv}", text:"{text}", url:"{url}" '
             js += "};\n"

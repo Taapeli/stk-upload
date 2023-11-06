@@ -58,7 +58,7 @@ from pe.neo4j.nodereaders import Comment_from_node
 from pe.neo4j.nodereaders import PlaceBl_from_node
 from pe.neo4j.nodereaders import PlaceName_from_node
 from pe.neo4j.nodereaders import SourceBl_from_node
-from pe.neo4j.util import IsotammiIds
+from pe.neo4j.util import IidGenerator
 
 
 
@@ -177,7 +177,7 @@ class Neo4jUpdateService(ConcreteService):
                             cypher=CypherRoot.batch_merge,
                             b_attr=attr,
                             )
-        return record["id"] #{"status": Status.OK, "identity": uniq_id}
+        return record["id"] #{"status": Status.OK, "identity": iid}
 
 
     def ds_batch_set_state(self, batch_id, user, state):
@@ -206,9 +206,9 @@ class Neo4jUpdateService(ConcreteService):
             result = self.tx.run(CypherAudit.batch_set_access, 
                                  bid=batch_id, audi=auditor_user)
             for record in result:
-                uniq_id = record["bid"]
+                root_id = record["bid"]
                 rel_id = record["rel_id"]
-                return {"status": Status.UPDATED, "identity": uniq_id, "rel_id": rel_id}
+                return {"status": Status.UPDATED, "identity": root_id, "rel_id": rel_id}
         # No match: no need create a HAS_ACCESS for browsing
         return {"status": Status.OK}
 
@@ -220,9 +220,9 @@ class Neo4jUpdateService(ConcreteService):
         result = self.tx.run(CypherAudit.batch_end_audition, bid=batch_id)
         for record in result:
             username = record.get("user")
-            rel_uniq_id = record.get("relation_new").id
+            rel_id = record.get("relation_new").id
             print("#Neo4jUpdateService.ds_batch_end_auditions: removed "
-                  f"rel={rel_uniq_id} DOES_AUDIT from {username}")
+                  f"rel={rel_id} DOES_AUDIT from {username}")
             removed.append(username)
             st = Status.UPDATED
 
@@ -239,8 +239,8 @@ class Neo4jUpdateService(ConcreteService):
                              bid=batch_id, audi=auditor_user, states=old_states
         )
         for record in result:
-            uniq_id = record[0]
-            return {"status": Status.OK, "identity": uniq_id}
+            root_id = record[0]
+            return {"status": Status.OK, "identity": root_id}
         return {"status": Status.NOT_FOUND}
 
     def ds_batch_set_audited(self, batch_id, user, new_state):
@@ -259,17 +259,17 @@ class Neo4jUpdateService(ConcreteService):
             r = record["relation_new"]
             ts_from = r.get("ts_from")
             ts_to = r.get("ts_to", 0)
-            root_id = node_root.id
-            audi_id = node_audi.id
+            root_id = node_root.id # Batch id
+            #!audi_id = node_audi.id
             auditor = node_audi["username"]
             auditors.append(auditor)
             try:
                 d_days = (ts_to - ts_from) / (1000*60*60*24)
             except Exception:
                 d_days = "?"
-            print(f"#ds_batch_set_audited: ({audi_id}:({auditor}))"
+            print(f"#ds_batch_set_audited: (:UserProfile({auditor}))"
                   f" DID_AUDIT {ts_from}..{ts_to} ->"
-                  f" ({root_id}:Root({batch_id})), {d_days} days")
+                  f" (:Root({batch_id})), {d_days} days")
 
         if not auditors:
             return {"status": Status.ERROR, "text": "No match", "d_days": 0}
@@ -289,10 +289,10 @@ class Neo4jUpdateService(ConcreteService):
         removed = []
         for record in result:
             # <Record id=190386, rel_id="...">
-            rel_long_uniq_id = record.get("rel_id")
-            if rel_long_uniq_id:
+            rel_id = record.get("rel_id")
+            if rel_id:
                 print("#Neo4jUpdateService.ds_batch_purge_access: removed "
-                      f"id={rel_long_uniq_id} DOES_AUDIT from {auditor_user}")
+                      f"id={rel_id} DOES_AUDIT from {auditor_user}")
                 removed.append(auditor_user)
                 return {"status": Status.UPDATED, "removed_auditors": removed}
 
@@ -311,7 +311,7 @@ class Neo4jUpdateService(ConcreteService):
 
         class RefObj:
             def __str__(self):
-                return f"{self.uniq_id}:{self.label} {self.str}"
+                return f"{self.iid}:{self.label} {self.str}"
 
         return {"status": Status.OK}  # TODO
         objs = {}
@@ -321,7 +321,7 @@ class Neo4jUpdateService(ConcreteService):
             # # for root_id, root_str, rel, obj_id, obj_label, obj_str in result:
             # for record in result:
             #     ro = RefObj()
-            #     ro.uniq_id = record["obj_id"]
+            #     ro.iid = record["obj_id"]
             #     ro.label = record["obj_label"]
             #     ro.str = record["obj_str"]
             #     ro.root = (
@@ -330,14 +330,14 @@ class Neo4jUpdateService(ConcreteService):
             #         record.get("root_str"),
             #     )
             #     # rint(f'#ds_merge_check {root_id}:{root_str} -[{rel}]-> {obj_id}:{obj_label} {obj_str}')
-            #     print(f"#ds_merge_check {ro.uniq_id}:{ro.label} {ro.str} in {ro.root}")
-            #     if ro.uniq_id in objs.keys():
-            #         # Error if current uniq_id exists twice
-            #         msg = f"Object {ro} has two roots {objs[ro.uniq_id].root} and {ro.root}"
+            #     print(f"#ds_merge_check {ro.iid}:{ro.label} {ro.str} in {ro.root}")
+            #     if ro.iid in objs.keys():
+            #         # Error if current iid exists twice
+            #         msg = f"Object {ro} has two roots {objs[ro.iid].root} and {ro.root}"
             #         return {"status": Status.ERROR, "statustext": msg}
             #     for i, obj2 in objs.items():
             #         print(f"#ds_merge_check {obj2} <> {ro}")
-            #         if i == ro.uniq_id:
+            #         if i == ro.iid:
             #             continue
             #         # Error if different labels or has different root node
             #         if obj2.label != ro.label:
@@ -348,7 +348,7 @@ class Neo4jUpdateService(ConcreteService):
             #                 f"Object {ro} has different roots {obj2.root} and {ro.root}"
             #             )
             #             return {"status": Status.ERROR, "statustext": msg}
-            #     objs[ro.uniq_id] = ro
+            #     objs[ro.iid] = ro
 
             if len(objs) == 2:
                 print(f"ds_merge_check ok {objs}")
@@ -365,7 +365,7 @@ class Neo4jUpdateService(ConcreteService):
                 f"{id1}<-{id2} failed: {e.__class__.__name__} {e}",
             }
 
-    # def ds_obj_remove_gramps_handles(self, batch_id):
+    # def obolete_ds_obj_remove_gramps_handles(self, batch_id):
     #     """Remove all Gramps handles."""
     #     status = Status.OK
     #     total = 0
@@ -407,8 +407,8 @@ class Neo4jUpdateService(ConcreteService):
         tx.run(CypherCitation.create_to_batch, batch_id=batch_id, c_attr=c_attr)
         #!ids = []
         # for record in result:
-        #     citation.uniq_id = record[0]
-        #     ids.append(citation.uniq_id)
+        #     citation.iid = record[0]
+        #     ids.append(citation.iid)
         #     if len(ids) > 1:
         #         print(
         #             "iError updated multiple Citations {} - {}, attr={}".format(
@@ -450,7 +450,7 @@ class Neo4jUpdateService(ConcreteService):
                 if not note.id:
                     n_cnt += 1
                     note.id = f"N{n_cnt}.{parent.id}"
-                self.ds_save_note(tx, note, batch_id, iids, parent.uniq_id)
+                self.ds_save_note(tx, note, batch_id, iids, parent.iid)
             else:
                 raise AttributeError("note.save_note_list: Argument not a Note")
 
@@ -498,7 +498,7 @@ class Neo4jUpdateService(ConcreteService):
             )
         record = result.single()
         # print(f"Note.save: summary={result.summary().counters}")
-        note.uniq_id = record[0]
+        note.iid = record[0]
 
 
     # ----- Media -----
@@ -526,7 +526,7 @@ class Neo4jUpdateService(ConcreteService):
 
         result = tx.run(CypherMedia.create_in_batch,
             bid=batch_id, iid=media.iid, m_attr=m_attr)
-        media.uniq_id = result.single()[0]
+        media.iid = result.single()[0]
 
         # Make relation(s) to the Note and Citation nodes
 
@@ -634,7 +634,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Place -----
 
-    def ds_save_place(self, tx, place, batch_id, iids:IsotammiIds, place_keys=None):
+    def ds_save_place(self, tx, place, batch_id, iids:IidGenerator, place_keys=None):
         """Save Place, Place_names, Notes and connect to hierarchy.
 
         :param: place_keys    dict {handle: iid}
@@ -699,8 +699,6 @@ class Neo4jUpdateService(ConcreteService):
             # 2) new node: create and link from Batch
             print(f"#!>Pl_save-2 Create a new Place ({place.id} #{place.iid} {place.pname}) {place.handle}")
             tx.run(CypherPlace.create, batch_id=batch_id, p_attr=pl_attr)
-            #! place.uniq_id = result.single()[0]
-
             place_keys[place.handle] = place.iid
 
         #    Create Place_names
@@ -723,7 +721,7 @@ class Neo4jUpdateService(ConcreteService):
         ret = PlaceBl.find_default_names(place.names, ["fi", "sv"])
         if ret.get("status") == Status.OK:
             # Update default language name links
-            # def_names: dict {lang, uid} uniq_id's of PlaceName objects
+            # def_names: dict {lang, uid} iid's of PlaceName objects
             def_names = ret.get("ids")
             self.ds_place_set_default_names(tx, place.iid, def_names["fi"], def_names["sv"])
 
@@ -745,7 +743,7 @@ class Neo4jUpdateService(ConcreteService):
                 # 3) Link to a known upper Place
                 #    The upper node is already created: create a link to that
                 #    upper Place node
-                # print(f"Pl_save-3 Link ({place.id} #{place.uniq_id}) {_r} (#{up_iid})")
+                # print(f"Pl_save-3 Link ({place.id} #{place.iid}) {_r} (#{up_iid})")
                 result = tx.run(CypherPlace.link_hier_handle,
                                 p_handle=place.handle, up_handle=up_handle,
                                 r_attr=rel_attr,
@@ -755,7 +753,7 @@ class Neo4jUpdateService(ConcreteService):
                 # 4) Link to unknown place
                 #    A new upper node: create a Place with only handle
                 #    parameter and link hierarchy to Place place
-                # print(f"Pl_save-4 Link to empty upper Place ({place.id} #{place.uniq_id}) {_r} {up_handle}")
+                # print(f"Pl_save-4 Link to empty upper Place ({place.id} #{place.iid}) {_r} {up_handle}")
                 result = tx.run(CypherPlace.link_create_hier_handle,
                                 p_handle=place.handle, up_handle=up_handle,
                                 r_attr=rel_attr,
@@ -764,7 +762,7 @@ class Neo4jUpdateService(ConcreteService):
 
 
         for i in range(len(place.notes)):
-            place.notes[i].iid = f"{place.iid}.U{i+1}"
+            place.notes[i].iid = f"D{place.iid}.{i+1}"
         for note in place.notes:
             n_attr = {
                 "url": note.url, 
@@ -777,7 +775,7 @@ class Neo4jUpdateService(ConcreteService):
             )
 
         # Make the place note relations; the Notes have been stored before
-        # TODO: There may be several Notes for the same handle! You shold use uniq_id!
+        # TODO: There may be several Notes for the same handle! You shold use iid!
 
         if place.note_handles:
             query = CypherObjectWHandle.link_item("Place", "Note")
@@ -802,7 +800,7 @@ class Neo4jUpdateService(ConcreteService):
         # if place.media_refs:
         #     # Make relations to the Media nodes and their Note and Citation references
         #     result = self.ds_create_link_medias_w_handles(
-        #         tx, place.uniq_id, place.media_refs)
+        #         tx, place.iid, place.media_refs)
 
 
     def ds_place_set_default_names(self, tx, place_id, fi_id, sv_id):
@@ -920,7 +918,7 @@ class Neo4jUpdateService(ConcreteService):
             bid=batch_id,
             r_attr=r_attr
         )
-        repository.uniq_id = result.single()[0]
+        repository.iid = result.single()[0]
 
         # Save the notes attached to repository
         if repository.notes:
@@ -939,7 +937,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Source -----
 
-    def ds_save_source(self, tx, source, batch_id, iids:IsotammiIds):   
+    def ds_save_source(self, tx, source, batch_id, iids:IidGenerator):   
         """ Saves this Source and connect it to Notes and Repositories.
 
             :param: batch_id      batch id where this source is linked
@@ -962,8 +960,8 @@ class Neo4jUpdateService(ConcreteService):
             tx.run(CypherSource.create_to_batch, batch_id=batch_id, s_attr=s_attr)
             #!ids = []
             # for record in result:
-            #     source.uniq_id = record[0]
-            #     ids.append(source.uniq_id)
+            #     source.iid = record[0]
+            #     ids.append(source.iid)
             #     if len(ids) > 1:
             #         print("iError updated multiple Sources {} - {}, attr={}".format(source.id, ids, s_attr))
 
@@ -1014,7 +1012,6 @@ class Neo4jUpdateService(ConcreteService):
     def ds_save_event(self, tx, event, batch_id, iids):
         """Saves event to database:
         - Creates a new db node for this Event
-        - #Not: Sets self.uniq_id
 
         - links to existing Place, Note, Citation, Media objects
         - Does not link it from UserProfile or Person
@@ -1037,8 +1034,8 @@ class Neo4jUpdateService(ConcreteService):
         tx.run(CypherEvent.create_to_batch, batch_id=batch_id, e_attr=e_attr)
         #!ids = []
         # for record in result:
-        #     event.uniq_id = record[0]
-        #     ids.append(event.uniq_id)
+        #     event.iid = record[0]
+        #     ids.append(event.iid)
         #     if len(ids) > 1:
         #         print(
         #             "iError updated multiple Events {} - {}, attr={}".format(
@@ -1078,10 +1075,8 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Person -----
 
-    def ds_save_person(self, tx, person:Person, batch_id, iids:IsotammiIds):
+    def ds_save_person(self, tx, person:Person, batch_id, iids:IidGenerator):
         """Saves the Person object and possibly the Names, Events ja Citations.
-
-        On return, the self.uniq_id is set
 
         @todo: Remove those referenced person names, which are not among
                new names (:Person) --> (:Name)
@@ -1106,17 +1101,17 @@ class Neo4jUpdateService(ConcreteService):
 
         tx.run(CypherPerson.create_to_batch, batch_id=batch_id, p_attr=p_attr)
         #!for record in result:
-        #     #!person.uniq_id = record[0]
-        #     ids.append(person.uniq_id)
+        #     #!person.iid = record[0]
+        #     ids.append(person.iid)
         #     if len(ids) > 1:
         #         print(
         #             "iError updated multiple Persons {} - {}, attr={}".format(
         #                 person.id, ids, p_attr
         #             )
         #         )
-        #     # print("Person {} ".format(person.uniq_id))
-        # if person.uniq_id == None:
-        #     print("iWarning got no uniq_id for Person {}".format(p_attr))
+        #     # print("Person {} ".format(person.iid))
+        # if person.iid == None:
+        #     print("iWarning got no iid for Person {}".format(p_attr))
 
         # Save Name nodes under the Person node
         niid = 0
@@ -1133,9 +1128,10 @@ class Neo4jUpdateService(ConcreteService):
 
         # for i in range(len(person.eventref_hlink)):
         if person.event_handle_roles:
-            query = CypherObjectWHandle.link_item("Person", "Event")
+            query = CypherObjectWHandle.link_item("Person", "Event", True)
             for href, role in person.event_handle_roles:
                 r_attr = {"role": role}
+                print(f"#!! {person.id}/{person.iid} -> Event {href} {r_attr}")
                 tx.run(query, src=person.handle, dst=href, r_attr=r_attr)
                 #!tx.run(CypherPerson.link_event, p_handle=person.handle, e_handle=event_handle, role=role,)
 
@@ -1154,6 +1150,7 @@ class Neo4jUpdateService(ConcreteService):
             # Link to existing Notes
             query = CypherObjectWHandle.link_item("Person", "Note")
             for href in person.note_handles:
+                print(f"#!! {person.id}/{person.iid} -> Note {href}")
                 tx.run(query, src=person.handle, dst=href)
         # for handle in person.note_handles:
         #     tx.run(CypherPerson.p_link_note, 
@@ -1165,6 +1162,7 @@ class Neo4jUpdateService(ConcreteService):
             # Link to existing Citations
             query = CypherObjectWHandle.link_item("Person", "Citation")
             for href in person.citation_handles:
+                print(f"#!! {person.id}/{person.iid} -> Citation {href}")
                 tx.run(query, src=person.handle, dst=href)
         # for handle in person.citation_handles:
         #     tx.run(CypherObjectWHandle.link_citation, 
@@ -1179,6 +1177,7 @@ class Neo4jUpdateService(ConcreteService):
         """
 
         n_attr = {
+            "iid": name.iid,
             "order": name.order,
             "type": name.type,
             "firstname": name.firstname,
@@ -1192,20 +1191,19 @@ class Neo4jUpdateService(ConcreteService):
         if name.dates:
             n_attr.update(name.dates.for_db())
             
-        tx.run(
-            CypherPerson.create_name_as_leaf,
+        tx.run(CypherPerson.create_name_as_leaf,
             n_attr=n_attr,
             parent_id=parent_id,
             citation_handles=name.citation_handles,
         )
 
-    def ds_get_personnames(self, uniq_id=None):
+    def ds_get_personnames(self, iid=None):
         """Picks all Name versions of this Person or all persons.
 
         Use optionally refnames or sortname for person selection
         """
-        if uniq_id:
-            result = self.tx.run(CypherPerson.get_names, pid=uniq_id)
+        if iid:
+            result = self.tx.run(CypherPerson.get_names, pid=iid)
         else:
             result = self.tx.run(CypherPerson.get_all_persons_names)
         # <Record
@@ -1216,23 +1214,33 @@ class Neo4jUpdateService(ConcreteService):
 
         return [(record["pid"], record["name"]) for record in result]
 
+
     def ds_set_people_lifetime_estimates(self, uids):
         """Get estimated lifetimes to Person.dates for given person.uniq_ids.
 
-        :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+        :param: uids  list of iids of Person nodes; empty = all lifetimes
         """
         from models import lifetime
         from models.lifetime import BIRTH, DEATH, BAPTISM, BURIAL #, MARRIAGE
-        #from bl.dates import DR
-        
-        def sortkey(event): # sorts events so that BIRTH, DEATH, BAPTISM, BURIAL come first
+
+        def key_birth_1st(event):
+            " sorts events so that BIRTH, DEATH, BAPTISM, BURIAL come first "
             if event.eventtype in (BIRTH, DEATH):
                 return 0
             elif event.eventtype in (BAPTISM, BURIAL):
                 return 1
             else:
                 return 2
-            
+
+        def list_object_keys(node_list):
+            " Usage: pids = list_object_keys(record['parents'']) "
+            objects = []
+            for node, iid in node_list:
+                if node:
+                    objects.append(iid)
+            return objects
+
+
         personlist = []
         personmap = {}
         res = {"status": Status.OK}
@@ -1240,11 +1248,12 @@ class Neo4jUpdateService(ConcreteService):
 
         if uids is not None:
             result = self.tx.run(
-                CypherPerson.fetch_selected_for_lifetime_estimates, idlist=uids
+                CypherPerson.fetch_selected_for_lifetime_estimates, 
+                idlist=uids
             )
         else: # for whole database, this is not actually used?
             result = self.tx.run(CypherPerson.fetch_all_for_lifetime_estimates)
-        # RETURN p, id(p) as pid,
+        # RETURN p, #! id(p) as pid,
         #     COLLECT(DISTINCT [e,r.role]) AS events,
         #     COLLECT(DISTINCT [fam_event,r2.role]) AS fam_events,
         #     COLLECT(DISTINCT [c,id(c)]) as children,
@@ -1252,7 +1261,8 @@ class Neo4jUpdateService(ConcreteService):
         for record in result:
             # Person
             p = lifetime.Person()
-            p.pid = record["pid"]
+            #! p.pid = record["pid"]
+            p.iid = record["p"]["iid"]
             p.gramps_id = record["p"]["id"]
 
             # Person and family event dates
@@ -1303,28 +1313,21 @@ class Neo4jUpdateService(ConcreteService):
                     #year2 = date2 // 1024
                     ev = lifetime.Event(eventtype, datetype2, year2, role)
                     p.events.append(ev)
-                p.events.sort(key=sortkey)
+                p.events.sort(key=key_birth_1st)
                     
 
             # List Parent, Child and Spouse identities
-            p.parent_pids = []
-            for _parent, pid in record["parents"]:
-                if pid:
-                    p.parent_pids.append(pid)
 
-            p.child_pids = []
-            for _parent, pid in record["children"]:
-                if pid:
-                    p.child_pids.append(pid)
-
-            p.spouse_pids = []
-            for _spouse, pid in record["spouses"]:
-                if pid:
-                    p.spouse_pids.append(pid)
+            #!for _parent, pid in record["parents"]:
+            #     if pid:
+            #         p.parent_pids.append(pid)
+            p.parent_pids = list_object_keys(record["parents"])
+            p.child_pids = list_object_keys(record["children"])
+            p.spouse_pids = list_object_keys(record["spouses"])
 
             # print(f"#> lifetime.Person {p}")
             personlist.append(p)
-            personmap[p.pid] = p
+            personmap[p.iid] = p
 
         # Add parents and children to lifetime.Person objects
         for p in personlist:
@@ -1345,7 +1348,7 @@ class Neo4jUpdateService(ConcreteService):
         for p in personlist:
             result = self.tx.run(
                 CypherPerson.update_lifetime_estimate,
-                id=p.pid,
+                id=p.iid,
                 birth_low=p.birth_low.getvalue(),
                 death_low=p.death_low.getvalue(),
                 birth_high=p.birth_high.getvalue(),
@@ -1358,15 +1361,15 @@ class Neo4jUpdateService(ConcreteService):
 
 
     def ds_build_refnames(self, person_uid: int, name: Name):
-        """Set Refnames to the Person with given uniq_id."""
+        """Set Refnames to the Person with given iid."""
 
-        def link_to_refname(person_uid, nm, use):
+        def link_to_refname(person_iid, nm, use):
             result = self.tx.run(
-                CypherRefname.link_person_to, pid=person_uid, name=nm, use=use
+                CypherRefname.link_person_to, pid=person_iid, name=nm, use=use
             )
             rid = result.single()[0]
             if rid is None:
-                raise RuntimeError(f"Error for ({person_uid})-->({nm})")
+                raise RuntimeError(f"Error for ({person_iid})-->({nm})")
             return rid
 
         count = 0
@@ -1387,16 +1390,16 @@ class Neo4jUpdateService(ConcreteService):
         #xxx
         return {"status": Status.OK, "count": count}
 
-    def ds_update_person_confidences(self, uniq_id: int):
+    def ds_update_person_confidences(self, iid: str):
         """Collect Person confidence from Person and Event nodes and store result in Person.
 
         Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
         sumc = 0
         confs = []
-        result = self.tx.run(CypherPerson.get_confidences, id=uniq_id)
+        result = self.tx.run(CypherPerson.get_confidences, id=iid)
         for record in result:
-            # Returns person.uniq_id, COLLECT(confidence) AS list
+            # Returns person.iid, COLLECT(confidence) AS list
             orig_conf = record["confidence"]
             confs = record["list"]
             for conf in confs:
@@ -1409,9 +1412,7 @@ class Neo4jUpdateService(ConcreteService):
             new_conf = ""
         if orig_conf != new_conf:
             # Update confidence needed
-            self.tx.run(
-                CypherPerson.set_confidence, id=uniq_id, confidence=new_conf
-            )
+            self.tx.run(CypherPerson.set_confidence, id=iid, confidence=new_conf)
             return {"confidence": new_conf, "status": Status.UPDATED}
         return {"confidence": new_conf, "status": Status.OK}
 
@@ -1428,9 +1429,7 @@ class Neo4jUpdateService(ConcreteService):
             return
 
         try:
-            _result = self.tx.run(
-                CypherRefname.link_person_to, pid=pid, name=name, use=reftype
-            )
+            self.tx.run(CypherRefname.link_person_to, pid=pid, name=name, use=reftype)
             return {"status": Status.OK}
 
         except Exception as e:
@@ -1440,22 +1439,22 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Refname -----
 
-    def ds_get_person_by_uid(self, uniq_id: int):
-        """Set Person object by uniq_id.
+    def ds_get_person_by_uid(self, iid: str):
+        """Set Person object by iid.
 
         NOT USED!
         """
         try:
-            self.tx.run(CypherPerson.get_person_by_uid, uid=uniq_id)
+            self.tx.run(CypherPerson.get_person_by_uid, uid=iid)
             return {"status": Status.OK}
         except Exception as e:
-            msg = f"Neo4jUpdateService.ds_get_person_by_uid: person={uniq_id}, {e.__class__.__name__}, {e}"
+            msg = f"Neo4jUpdateService.ds_get_person_by_uid: person={iid}, {e.__class__.__name__}, {e}"
             print(msg)
             return {"status": Status.ERROR, "statustext": msg}
 
-    def ds_set_person_sortname(self, uniq_id: int, sortname):
-        """ Set sortname property to Person object by uniq_id."""
-        self.tx.run(CypherPerson.set_sortname, uid=uniq_id, key=sortname)
+    def ds_set_person_sortname(self, iid: str, sortname):
+        """ Set sortname property to Person object by iid."""
+        self.tx.run(CypherPerson.set_sortname, uid=iid, key=sortname)
         return {"status": Status.OK}
 
     # ----- Family -----
@@ -1463,7 +1462,7 @@ class Neo4jUpdateService(ConcreteService):
     def ds_set_family_dates_sortnames(self, iid:str, dates, f_sortname, m_sortname):
         """Update Family dates and parents' sortnames.
 
-        :param:    uniq_id      family identity
+        :param:    iid      family identity
         :dates:    dict         representing DateRange for family
                                 (marriage ... death or divorce
 
@@ -1481,10 +1480,10 @@ class Neo4jUpdateService(ConcreteService):
         cnt = counters.properties_set
         return {"status": Status.OK, "count": cnt}
 
-    def ds_set_family_calculated_attributes(self, iid=None):
+    def ds_set_family_calculated_attributes(self, iid):
         """Set Family sortnames and estimated marriage DateRange.
 
-        :param: uids  list of iids of Person nodes; empty = all lifetimes
+        :param: uids  list of iids of Person nodes
 
         Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes
 
@@ -1550,7 +1549,7 @@ class Neo4jUpdateService(ConcreteService):
             "statustext": ret.get("statustext", ""),
         }
 
-    def ds_save_family(self, tx, f:FamilyBl, batch_id, iids:IsotammiIds):
+    def ds_save_family(self, tx, f:FamilyBl, batch_id, iids:IidGenerator):
         """Saves the family node to db with its relations.
 
         Connects the family to parent, child, citation and note nodes.
@@ -1568,7 +1567,7 @@ class Neo4jUpdateService(ConcreteService):
         tx.run(CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr)
         #! ids = []
         # for record in result:
-        #     #!f.uniq_id = record[0]
+        #     #!f.iid = record[0]
         #     ids.append(f.iid)
         #     if len(ids) > 1:
         #         logger.warning(
@@ -1639,6 +1638,7 @@ class Neo4jUpdateService(ConcreteService):
         Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
         """
         is_reply = attr.get("reply")
+        #NOTE. Uses ID() key for all kind of objects
         if is_reply:
             cypher = CypherComment.create_comment
         else: # default

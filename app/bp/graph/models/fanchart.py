@@ -82,13 +82,13 @@ class FanChart:
             "too_new": person_attributes["too_new"]
         }
 
-    def build_parents(self, u_context, uniq_id, size, privacy, level=1):
+    def build_parents(self, u_context, iid :str, size, privacy, level=1):
         """
         Recurse to ancestors, building a data structure for fanchart.
         """
 
         with PersonReader("read", u_context) as service:
-            result = service.get_parents(uniq_id, privacy)
+            result = service.get_parents(iid, privacy)
 
         par_count = max(
             len(result), 2
@@ -101,7 +101,7 @@ class FanChart:
                 node["size"] = size / par_count  # leaf node, others must have no size
             else:
                 ancest = self.build_parents(
-                    u_context, par["uniq_id"], size / par_count, privacy, level + 1
+                    u_context, par["iid"], size / par_count, privacy, level + 1
                 )
                 if len(ancest) == 0:
                     node["size"] = (
@@ -116,7 +116,7 @@ class FanChart:
             parents.append(node)
         return parents
 
-    def build_children(self, u_context, uniq_id, size, privacy, level=1):
+    def build_children(self, u_context, iid :str, size, privacy, level=1):
         """
         Recurse to descendants, building a data structure for fanchart.
         """
@@ -134,7 +134,7 @@ class FanChart:
             )
 
         with PersonReader("read", u_context) as service:
-            result = service.get_children(uniq_id, privacy)
+            result = service.get_children(iid, privacy)
 
         chi_count = len(result)
         children = []
@@ -145,7 +145,7 @@ class FanChart:
                 node["size"] = size / chi_count  # leaf node, others should have no size
             else:
                 descend = self.build_children(
-                    u_context, chi["uniq_id"], size / chi_count, privacy, level + 1
+                    u_context, chi["iid"], size / chi_count, privacy, level + 1
                 )
                 if len(descend) == 0:
                     node["size"] = (
@@ -175,13 +175,13 @@ class FanChart:
 
         for person in result:
             fanchart = self.fanchart_data(person, descendant=True)
-            uniq_id = person["uniq_id"]
+            iid = person["iid"]
 
         # Gather all required data in two directions from the central person. Data structure used in both is a
         # recursive dictionary with unlimited children, for the Javascript sunburst chart by Vasco Asturiano
         # (https://vasturiano.github.io/sunburst-chart/)
-        ancestors = self.build_parents(u_context, uniq_id, 1, privacy)
-        descendants = self.build_children(u_context, uniq_id, 1, privacy)
+        ancestors = self.build_parents(u_context, iid, 1, privacy)
+        descendants = self.build_children(u_context, iid, 1, privacy)
 
         # Merge the two sunburst chart data trees to form a single two-way fan chart.
         # This step involves handling several special cases related to the fact that the data structure (inherited

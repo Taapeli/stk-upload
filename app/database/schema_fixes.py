@@ -33,7 +33,7 @@ import shareds
 #---- (change uuid_to_iid) Replace uuid keys by iid and set b.cd_schema ----
 # --- For DB_SCHEMA_VERSION = '2022.1.3'...'2022.1.8' 9.6.2022/HRo & JMä
 
-#from pe.neo4j.util import IsotammiIds
+#from pe.neo4j.util import IidGenerator
 
 # def uuid_to_iid():
 #     """ 1. For each batch b browse objects a:
@@ -42,7 +42,7 @@ import shareds
 #             - finally update b.db_schema
 #     """
 #     from database.accessDB import DB_SCHEMA_VERSION #, remove_prop_constraints
-#     from pe.neo4j.util import IsotammiIds
+#     from pe.neo4j.util import IidGenerator
 #
 #     # def remove_uuid_contraints():
 #     #     """ Remove all uuid contraints. """
@@ -62,7 +62,7 @@ import shareds
 #         for label, uids in uniq_ids:
 #             chunck_size = len(uids)
 #             n_objects += chunck_size
-#             iid_generator = IsotammiIds(session, obj_name=label)
+#             iid_generator = IidGenerator(session, obj_name=label)
 #             iid_generator.reserve(chunck_size)
 #             #properties_set = 0
 #             for n in range(chunck_size):

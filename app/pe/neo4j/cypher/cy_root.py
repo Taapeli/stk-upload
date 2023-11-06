@@ -333,7 +333,7 @@ MATCH (audi:UserProfile {username: $audi})
     SET root.state = "Auditing"
     CREATE (audi) -[r:DOES_AUDIT]-> (root)
     SET r.ts_from = timestamp()
-RETURN ID(root) AS id"""
+RETURN root.id AS id"""
 
     batch_set_state_complete = """
 MATCH (u:UserProfile {username: $audi}) -[r:DID_AUDIT]-> (b:Root {id: $bid})

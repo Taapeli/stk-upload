@@ -51,7 +51,7 @@ from bl.dates import Gramps_DateRange
 from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
-from pe.neo4j.util import IsotammiIds
+from pe.neo4j.util import IidGenerator
 from bl.gramps.batchlogger import LogItem
 
 
@@ -180,14 +180,13 @@ class DOM_handler:
         return (material_type, description)
 
     def handle_dom_nodes(self, tag, title, transaction_function, chunk_max_size):
-        """ Get all the notes in the xml_tree. """
+        """ Get all the nodes in the xml_tree.
 
-        """ DOM-objects are split to chunk_max_size chunks and given to handler
+            DOM-objects are split to chunk_max_size chunks and given to handler
         """
 
-        """ 
-        ---- Process DOM nodes inside transaction 
-        """
+        # ---- Process DOM nodes inside transaction ---
+
         dom_nodes = self.xml_tree.getElementsByTagName(tag)
         message = f"{tag}: {len(dom_nodes)} kpl"
         print(f"***** {message} *****")
@@ -195,7 +194,7 @@ class DOM_handler:
         counter = 0
     
         with shareds.driver.session() as session:
-            iid_generator = IsotammiIds(session, obj_name=title)
+            iid_generator = IidGenerator(session, obj_name=title)
             for nodes_chunk in self.get_chunk(dom_nodes, chunk_max_size):
                 chunk_size = len(nodes_chunk)
                 iid_generator.reserve(chunk_size)
@@ -266,7 +265,7 @@ class DOM_handler:
             print(f"DOM_handler.postprocess_notes: {total_notes} "\
                   f"Notes for {len(self.noterefs_later)} objects")
 
-            iid_generator = IsotammiIds(session, obj_name="Notes")
+            iid_generator = IidGenerator(session, obj_name="Notes")
             iid_generator.reserve(total_notes)
             # Split to chunks, chunk_max_size=self.TX_SIZE
             for nodes_chunk in self.get_chunk(self.noterefs_later, self.TX_SIZE):
@@ -702,9 +701,6 @@ class DOM_handler:
 
             # Not used
             # for person_parentin in person.getElementsByTagName('parentin'):
-            #    if person_parentin.hasAttribute("hlink"):
-            #        p.parentin_handles.append(person_parentin.getAttribute("hlink") + self.handle_suffix)
-            #        ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
 
             for person_noteref in person.getElementsByTagName("noteref"):
                 if person_noteref.hasAttribute("hlink"):
@@ -723,7 +719,7 @@ class DOM_handler:
             self.person_ids.append(p.iid)
 
 
-    def handle_place_list(self, tx, nodes, iids:IsotammiIds):
+    def handle_place_list(self, tx, nodes, iids:IidGenerator):
         """Get all the places in the xml_tree.
         
 

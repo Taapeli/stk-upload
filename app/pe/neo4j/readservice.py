@@ -433,7 +433,7 @@ class Neo4jReadService(ConcreteService):
                             #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496,
                             #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008',
                             #    'date2': 1997946, 'date1': 1929380}>
-                            if iid != parent_node.iid:
+                            if iid != parent_node["iid"]:
                                 # Skip person with double default name
                                 pp = PersonBl_from_node(parent_node)
                                 if role == "father":
@@ -498,7 +498,7 @@ class Neo4jReadService(ConcreteService):
                     role = record["role"]
                     person_node = record["person"]
                     if person_node:
-                        if iid != person_node.iid:
+                        if iid != person_node["iid"]:
                             # Skip person with double default name
                             p = PersonBl_from_node(person_node)
                             p.role = role
@@ -1086,7 +1086,7 @@ class Neo4jReadService(ConcreteService):
                 far_nodes = record["far"]
                 note_nodes = record["notes"]
 
-                iid = citation_node.record["iid"]
+                iid = citation_node["iid"]
                 citation = Citation_from_node(citation_node)
                 citations[iid] = citation
 

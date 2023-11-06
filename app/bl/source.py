@@ -167,9 +167,8 @@ class SourceReader(DataService):
             res.statustext = f"no Source with iid={iid!r}"
             return res
 
-        citations, notes, targets = self.dataservice.dr_get_source_citators(
-            source.uniq_id
-        )
+        citations, notes, targets = \
+            self.dataservice.dr_get_source_citators(source.iid)
 
         #        if len(targets) == 0:
         #            # Only Citations connected to Person Event or Family Event can be

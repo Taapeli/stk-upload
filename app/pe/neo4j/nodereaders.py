@@ -46,7 +46,7 @@ def init(cls:NodeObject, node:Node):
     Returns bl.NodeObject instance from a Neo4j.graph.node.
     """
     n = cls()
-    n.uniq_id = node.id     #!TODO: Remove this
+    #!n.uniq_id = node.id     #!TODO: Remove this
     n.id = node["id"]
     #n.uuid = node.get("uuid","")
     n.iid = node.get("iid","")
@@ -164,7 +164,7 @@ def Name_from_node(node):
         properties={'title': 'Sir', 'firstname': 'Brita Helena', 'suffix': '', 'order': 0,
             'surname': 'Klick', '': 'Birth Name'}>
     """
-    n = Name()
+    n = init(Name, node)
     #!n.uniq_id = node.id
     # n.id = node.id    # Name has no id "N0000"
     n.type = node["type"]

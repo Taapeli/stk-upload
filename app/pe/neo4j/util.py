@@ -149,14 +149,28 @@ def dict_root_node(root_node, select="min"):
     return dic
 
 
-class IsotammiIds:
+class IidGenerator:
     """
-    Serves a sequences of unique ID keys by object type from the database.
+    Serves a sequences of unique IsotammiId keys by object type from the database.
 
     Usage:
-    - a = IsotammiIds(tx, "People") Create an ID generator using given transaction
+    - a = IidGenerator(tx, "People") Create an ID generator using given transaction
     - a.reserve(100)             Allocates given number of keys
     - key = a.get_one()            Get next key
+    
+    #TODO: Convert this to a real generator class:
+    # https://stackoverflow.com/questions/42983569/how-to-write-a-generator-class
+    #
+    # class Fib:
+    #     def __init__(self):
+    #         self.a, self.b = 0, 1        
+    #     def __next__(self):
+    #         return_value = self.a
+    #         self.a, self.b = self.b, self.a+self.b
+    #         return return_value
+    #     def __iter__(self):
+    #         return self
+
     """
     def __init__(self, session, obj_name: str):
         """
