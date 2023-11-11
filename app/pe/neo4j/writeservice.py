@@ -78,8 +78,8 @@ class Neo4jWriteService(ConcreteService):
     def dr_set_name_orders(self, uid_order_list):
         with self.driver.session(default_access_mode='WRITE') as session:
             for order, uid in enumerate(uid_order_list): 
-                session.run(CypherPerson.set_name_order, uid=uid, order=order).single()
+                session.run(CypherPerson.set_name_order, iid=uid, order=order).single()
 
     def dr_set_name_type(self, uid, nametype):
         with self.driver.session(default_access_mode='WRITE') as session:
-            session.run(CypherPerson.set_name_type, uid=uid, nametype=nametype).single()
+            session.run(CypherPerson.set_name_type, iid=uid, nametype=nametype).single()

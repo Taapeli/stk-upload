@@ -16,7 +16,7 @@ class Repository(NodeObject):
     """Repository / Arkisto.
 
     Properties:
-        uniq_id         int    db native key or None
+        iid         int    db native key or None
         handle          str    Gramps handle
         change          int    timestamp
         id              str    esim. "R0001"
@@ -35,7 +35,7 @@ class Repository(NodeObject):
         self.type = ""
         self.rname = ""
         self.medium = ""
-        self.notes = []  # contains Note instances or Note.uniq_id values
+        self.notes = []  # contains Note instances or Note.iid values
         self.note_handles = [] # contains noterefs of Note instances
 
         self.sources = []  # For creating display sets (Not used??)

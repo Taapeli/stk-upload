@@ -201,43 +201,57 @@ class Neo4jReadService(ConcreteService):
         Returns dict {item, status, statustext}
         """
         event = None
+        causes = []    # Death cause event
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher(
-                    session, CypherEvent.get_an_event, user, material, iid=iid
-                )
-                for record in result:
-                    if record["e"]:
-                        # Record: <Record
-                        #    e=<Node id=16580 labels=frozenset({'Event'})
-                        #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
-                        #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
-                        #            'type': 'Baptism', 'iid': 'E-6007'}>
-                        #    root=<Node id=31100 labels=frozenset({'Audit'})
-                        #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
-                        # >
-                        node = record["e"]
-                        event = EventBl_from_node(node)
-                if event:
-                    return {"item": event, "status": Status.OK}
+                result = run_cypher(session, CypherEvent.get_an_event, 
+                                    user, material, iid=iid)
+                record = result.single()
+                if record["e"]:
+                    # Record: <Record
+                    #    e=<Node id=16580 labels=frozenset({'Event'})
+                    #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
+                    #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
+                    #            'type': 'Baptism', 'iid': 'E-6007'}>
+                    #    root=<Node id=31100 labels=frozenset({'Audit'})
+                    #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
+                    # >
+                    node = record["e"]
+                    event = EventBl_from_node(node)
+                if event and event.type == "Death":
+                    # Read also event with type: Cause Of Death"
+                    result = session.run(CypherEvent.get_cause_event, iid=iid)
+                    for record in result:
+                        if record:
+                            # Record: <Record
+                            #    cause=<Node element_id='...' labels=frozenset({'Event'})
+                            #        properties={'description': 'Rautatieonnettomuus Pöljän seisakkeella',
+                            #            'handle': '_e0787c4feac1d97afbaf9d89f9a@23110625', 'id': 'E0009',
+                            #            'type': 'Cause Of Death', 'attrs': '' ...}
+                            # >  >
+                            node = record[0]
+                            causes.append(EventBl_from_node(node))
+
+                return {"item": event, "causes": causes, "status": Status.OK}
 
             except Exception as e:
-                return {"item": None, "status": Status.ERROR, "statustext": str(e)}
+                return {"item": event, "causes": causes, 
+                        "status": Status.ERROR, "statustext": str(e)}
 
         return {
-            "item": event,
+            "item": event, "causes": causes,
             "status": Status.NOT_FOUND,
             "statustext": "No Event found",
         }
 
-    def dr_get_event_participants(self, uid):
+    def dr_get_event_participants(self, uid: str):
         """Get people and families connected to this event.
 
         Returns dict {items, status, statustext}
         """
         try:
             with self.driver.session(default_access_mode="READ") as session:
-                result = session.run(CypherEvent.get_event_participants, uid=uid)
+                result = session.run(CypherEvent.get_event_participants, iid=uid)
                 parts = []
                 for record in result:
                     # <Record
@@ -317,7 +331,7 @@ class Neo4jReadService(ConcreteService):
         medias = []
         try:
             with self.driver.session(default_access_mode="READ") as session:
-                result = session.run(CypherEvent.get_event_notes_medias, uid=uid)
+                result = session.run(CypherEvent.get_event_notes_medias, iid=uid)
                 for record in result:
                     # Return COLLECT(DISTINCT [properties(rel_n), note]) AS notes,
                     #        COLLECT(DISTINCT [properties(rel_m), media]) AS medias
@@ -639,7 +653,7 @@ class Neo4jReadService(ConcreteService):
         """
         Get Sources Citations and Repositories for given families and events.
 
-        The id_list should include the uniq_ids for Family and events Events
+        The id_list should include the iids for Family and events Events
 
         returns dict {items, status, statustext}
         """
@@ -683,7 +697,7 @@ class Neo4jReadService(ConcreteService):
     def dr_get_family_notes(self, id_list: list[str]):
         """
         Get Notes for family and events
-        The id_list should include the uniq_ids for Family and events Events
+        The id_list should include the iids for Family and events Events
 
         returns dict {items, status, statustext}
         """
@@ -693,7 +707,7 @@ class Neo4jReadService(ConcreteService):
                 result = session.run(CypherFamily.get_family_notes, id_list=id_list)
                 for record in result:
                     # <Record
-                    #    src_id=543995
+                    #    src_id='E1-efcr'
                     #    repository=<Node id=529693 labels={'Repository'}
                     #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'iid': 'R-45', 'change': 1585409708}>
                     #    source=<Node id=534511 labels={'Source'}

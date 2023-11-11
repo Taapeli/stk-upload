@@ -300,11 +300,11 @@ class PersonWriter(DataService):
         }
 
     def set_people_lifetime_estimates(self, iids=[]):
-        """Sets estimated lifetimes to Person.dates for given person.uniq_ids.
+        """Sets estimated lifetimes to Person.dates for given person.iids.
 
         Stores dates as Person properties: datetype, date1, and date2
 
-        :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+        :param: uids  list of iids of Person nodes; empty = all lifetimes
 
         Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
         and models.dataupdater.set_estimated_dates
@@ -315,7 +315,7 @@ class PersonWriter(DataService):
         return res
 
     def update_person_confidences(self, person_ids: list[str]):
-        """Sets a quality rating for given list of Person.uniq_ids.
+        """Sets a quality rating for given list of Person.iids.
 
         Person.confidence is calculated as a mean of confidences in
         all Citations used for Person's Events.

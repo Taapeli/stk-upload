@@ -28,7 +28,7 @@ class Citation(NodeObject):
             confidence       str confidence 0.0 - 5.0 (?)
             note_ref         int huomautuksen osoite (ent. note_handles str)
             source_handle    str handle of source   _or_
-            source_id        int uniq_id of a Source object
+            source_id        int iid of a Source object
             citators         NodeRef nodes referring this citation
     """
 

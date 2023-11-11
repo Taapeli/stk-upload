@@ -226,7 +226,7 @@ class PersonReaderTx(DataService):
             """
             place_node, placenames = pl_reference
             if place_node:
-                place = self.obj_catalog[place_node.id]
+                place = self.obj_catalog[place_node.get("iid",None)]
                 place.names = place_names_local_from_placenames(placenames)
                 return place
             return None

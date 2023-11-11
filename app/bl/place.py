@@ -46,6 +46,7 @@ import logging
 logger = logging.getLogger("stkserver")
 
 from .base import NodeObject, Status
+from .citation import Citation
 from pe.dataservice import DataService
 
 
@@ -61,12 +62,12 @@ class Place(NodeObject):
         May be defined in PlaceBl:
             names[]             PlaceName
             coord               str paikan koordinaatit (leveys- ja pituuspiiri)
-            surrounding[]       int uniq_ids of upper
-            note_ref[]          int uniq_ids of Notes
-            media_ref[]         int uniq_ids of Medias
+            surrounding[]       int iids of upper
+            note_ref[]          int iids of Notes
+            media_ref[]         int iids of Medias
         May be defined in Place_gramps:
             surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
-            citation_ref[]      int uniq_ids of Citations
+            citation_ref[]      int iids of Citations
             placeref_hlink      str paikan osoite
             note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
     """
@@ -110,12 +111,12 @@ class PlaceBl(Place):
     Properties, might be defined in here:
             names[]             PlaceName default name first
             coord               str paikan koordinaatit (leveys- ja pituuspiiri)
-            surrounding[]       int uniq_ids of upper
-            note_ref[]          int uniq_ids of Notes
-            media_refs[]        int uniq_ids of Medias
+            surrounding[]       int iids of upper
+            note_ref[]          int iids of Notes
+            media_refs[]        int iids of Medias
         May be defined in Place_gramps:
             surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
-            citation_ref[]      int uniq_ids of Citations
+            citation_ref[]      int iids of Citations
             placeref_hlink      str paikan osoite
             note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
     """
@@ -151,7 +152,7 @@ class PlaceBl(Place):
         dataservice.ds_place_set_default_names(tx, self.iid, def_names["fi"], def_names["sv"])
 
     @staticmethod
-    def find_default_names(names: list, use_langs: list):
+    def find_default_names(names: list, use_langs: [str]):
         """Select default names for listed use_langs list.
 
         Rules for name selection
@@ -197,7 +198,7 @@ class PlaceBl(Place):
 
 
     @staticmethod
-    def combine_places(pn_tuples, lang):
+    def combine_places(pn_tuples, lang) -> list(Place):
         """Creates a list of Places with names combined from given names.
 
         The pl_tuple has Places data as a tuple 
@@ -294,8 +295,8 @@ class PlaceName(NodeObject):
                 n_other.append(nm)
         return n_default + n_local + n_unknown + n_other
 
-    def _lang_key(self, obj):
-        """ Name comparison key by 1) language, 2) name """
+    def _lang_key(self, obj) -> str:
+        """ PlaceName comparison key by 1) language, 2) name """
         lang_order = {
             "fi": "0",
             "sv": "1",
@@ -348,7 +349,7 @@ class PlaceReaderTx(DataService):
     #     self.obj_catalog = {}  # dict {iid: Connected_object: NodeObject}
 
 
-    def get_place_list(self):
+    def get_place_list(self) -> dict:
         """Get a list on PlaceBl objects with nearest hierarchy neighbors.
 
         Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
@@ -393,7 +394,7 @@ class PlaceReaderTx(DataService):
             }
         return {"items": places, "status": Status.OK}
 
-    def get_place_data(self, iid):
+    def get_place_data(self, iid:str) -> dict:
         """Read the place hierarchy and events connected to this place.
 
         Luetaan annettuun paikkaan liittyvä hierarkia ja tapahtumat
@@ -407,17 +408,13 @@ class PlaceReaderTx(DataService):
         material = self.user_context.material
         res = self.dataservice.tx_get_place_w_names_citations_notes_medias(
                     use_user, iid, lang, material)
-        # res {place:Place, uniq_ids:list(uniq_ids), "citas": list(Citations)}
-        # The uniq_ids includes all references to names, notes, medias and citations
+        # res {place:Place, iids:list(iids), "citas": list(Citations)}
+        # The iids includes all references to names, notes, medias and citations
         place = res.get("place")
         results = {"place": place, "status": Status.OK}
 
         if not place:
-            res = {
-                "status": Status.ERROR,
-                "statustext": f"No Place '{iid}'",
-            }
-            return res
+            return {"status": Status.ERROR, "statustext": f"No Place '{iid}'"}
 
         try:
             results["hierarchy"] = self.dataservice.tx_get_place_tree(
@@ -436,7 +433,7 @@ class PlaceReaderTx(DataService):
                 "statustext": f"Place tree value for {place.iid}: {e}",
             }
 
-        results["uniq_ids"]= res.get("uniq_ids",[])
+        results["iids"]= res.get("iids",[])
         citations = res.get("citas", [])
         if citations:
             results["citations"] = citations
@@ -445,7 +442,7 @@ class PlaceReaderTx(DataService):
         results["events"] = res["items"]
         return results
 
-    def get_citation_sources_repositories(self, citations):
+    def get_citation_sources_repositories(self, citations:list[Citation]):
         """ Get source citations for given Place. """
         if not citations:
             return []
@@ -456,8 +453,10 @@ class PlaceReaderTx(DataService):
         for c in citations:
             if hasattr(c, 'source_refs'):
                 c.source_refs.append(refs[c.iid])
-            else:
+            elif refs:
                 c.source_refs = [refs[c.iid]]
+            else:
+                c.source_refs = []
         return res
 
     def get_placename_list(self, count=40, by_cites=False):

@@ -860,27 +860,26 @@ class Neo4jReadServiceTx(ConcreteService):
             for record in results:
                 # Returns 
                 #    - label    'Event'
-                #    - uniq_id  db id of current Event
                 #    - pl       Place node
                 #    - [pn]     its Place_name objects
                 #    - pi       surrounding Place node
                 #    - [pi]     its Place_name objects
 
-                event_uniq_id = record['uniq_id']
+                event_iid = record['iid']
 
                 # Place node and names linked to this event
                 place_node = record['pl']
-                place_uniq_id = place_node.id
+                place_iid = place_node["iid"]
                 pn_nodes = record['pnames']
                 placenames = [PlaceName_from_node(node) for node in pn_nodes]
-                references[event_uniq_id] = (place_node, placenames)
+                references[event_iid] = (place_node, placenames)
 
                 # Upper Place node and names linked to this Place
                 upper_place_node = record['pi']
                 if upper_place_node:
                     pn_nodes = record['pinames']
                     placenames = [PlaceName_from_node(node) for node in pn_nodes]
-                    references[place_uniq_id] = (upper_place_node, placenames)
+                    references[place_iid] = (upper_place_node, placenames)
                 pass
 
             # Convert nodes and store them as PlaceBl objects with PlaceNames included
@@ -1012,7 +1011,7 @@ class Neo4jReadServiceTx(ConcreteService):
             return {'status':Status.NOT_FOUND}
         references = {} # {Citation.unid_id: SourceReference}
 
-        citation_uids = [cita.uniq_id for cita in citations]
+        citation_uids = [cita.iid for cita in citations]
         with self.driver.session(default_access_mode='READ') as session:
             results = session.run(CypherSource.get_citation_sources_repositories, 
                                   uid_list=citation_uids)

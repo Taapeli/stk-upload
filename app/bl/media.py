@@ -36,7 +36,7 @@ class Media(NodeObject):
             handle
             change
             id              esim. "O0001"
-            uniq_id         int database key
+            iid         int database key
             src             str file path
             mime            str mime type
             description     str description

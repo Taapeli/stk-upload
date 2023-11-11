@@ -70,7 +70,7 @@ class SourceBl(Source):
     """Source with optional referenced data.
 
     Arrays repositories, citations, notes may contain business objects
-    Array note_ref may contain database keys (uniq_ids)
+    Array note_ref may contain database keys (iids)
     """
 
     def __init__(self, iid=None):

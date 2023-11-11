@@ -92,7 +92,7 @@ RETURN //root, a,
 
     get_citation_sources_repositories = """
 MATCH (cita:Citation) -[:SOURCE]-> (source:Source)
-    WHERE ID(cita) IN $uid_list
+    WHERE cita.iid IN $uid_list
 OPTIONAL MATCH (source) -[rel:REPOSITORY]-> (repo:Repository)
 RETURN cita.iid AS iid, source, properties(rel) as rel, repo"""
 

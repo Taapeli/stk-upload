@@ -47,7 +47,7 @@ RETURN type(owner) as owner_type, s AS source,
     ORDER BY source.stitle"""
 
     get_citators_of_source = """
-match (s) <-[:SOURCE]- (c:Citation) where id(s)=$uniq_id
+match (s) <-[:SOURCE]- (c:Citation) where s.iid=$iid
 match (c) <-[:CITATION]- (x)
 with c,x
     optional match (c) -[:NOTE]-> (n:Note)

@@ -63,8 +63,8 @@ RETURN root, o, COUNT(DISTINCT r) AS count
     create_in_batch = """
 MATCH (u:Root {id:$bid})
 MERGE (u) -[:OBJ_OTHER]-> (a:Media {iid:$iid})
-    SET a += $m_attr
-RETURN ID(a) as uniq_id"""
+    SET a += $m_attr"""
+#!RETURN ID(a) as uniq_id"""
 
 #! For each Note, Citation --> USE CypherObjectWHandle.link_item("Media", "Note")
 #

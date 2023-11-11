@@ -117,7 +117,7 @@ MATCH x= (p:Place {iid: $locid})-[:IS_INSIDE*]->(i:Place)
 """
     # Query for single Place without hierarchy
     root_query = """
-MATCH (p:Place {iid: $locid}}
+MATCH (p:Place {iid: $locid})
 RETURN p.type AS type, p.iid AS iid, p.pname AS name
 """
     # Query to get names for a Place with $locid, $lang

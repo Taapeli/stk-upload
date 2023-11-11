@@ -805,6 +805,9 @@ def json_get_event():
         # Event
         event = res.get("event", None)
         event.type_lang = jinja_filters.translate(event.type, "evt").title()
+        causes = res.get("causes", None)
+        if causes:
+            print(f"bp.scene.routes.json_get_event: causes: {causes}")
         # Event members
         members = res.get("members", [])
         for m in members:
@@ -843,6 +846,7 @@ def json_get_event():
 
         res_dict = {
             "event": event,
+            "causes": causes,
             "members": members,
             "notes": notes,
             "places": places,

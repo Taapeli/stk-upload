@@ -32,6 +32,10 @@ class CypherEvent(object):
     get_an_event = '''
 MATCH (root) -[r:OBJ_OTHER]-> (e:Event {iid:$iid}) 
 RETURN e, type(r) AS root_type, root'''
+    get_cause_event = """
+MATCH (e:Event {iid:$iid}) <-[:EVENT]- (src)
+    -[:EVENT]-> (cause:Event {type: "Cause Of Death"}) 
+RETURN cause"""
 
     get_event_place = """
 MATCH (e:Event {iid: $iid}) -[rp:PLACE]-> (place)

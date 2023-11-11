@@ -526,7 +526,7 @@ class Neo4jUpdateService(ConcreteService):
 
         result = tx.run(CypherMedia.create_in_batch,
             bid=batch_id, iid=media.iid, m_attr=m_attr)
-        media.iid = result.single()[0]
+        #!media.iid = result.single()[0]
 
         # Make relation(s) to the Note and Citation nodes
 
@@ -1216,7 +1216,7 @@ class Neo4jUpdateService(ConcreteService):
 
 
     def ds_set_people_lifetime_estimates(self, uids):
-        """Get estimated lifetimes to Person.dates for given person.uniq_ids.
+        """Get estimated lifetimes to Person.dates for given person.iids.
 
         :param: uids  list of iids of Person nodes; empty = all lifetimes
         """

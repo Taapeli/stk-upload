@@ -47,7 +47,7 @@ class Name(NodeObject):
             dates               DateRange date expression
             title               str titteli, esim. Sir, Dr.
             # citation_handles[]  str gramps handles for citations
-            # citation_ref[]      int uniq_ids of citation nodes
+            # citation_ref[]      int iids of citation nodes
     """
 
     def __init__(self, givn="", surn="", pref="", suff="", dates="", titl=""):
@@ -94,9 +94,9 @@ class Name(NodeObject):
             return session.run(query)
 
     @staticmethod
-    def get_clearname(uniq_id=None):  # Not used!
+    def get_clearname(iid=None):  # Not used!
         """Lists all Name versions of this Person as single cleartext"""
-        result = Name.get_personnames(None, uniq_id)
+        result = Name.get_personnames(None, iid)
         names = []
         for record in result:
             # <Node id=210189 labels={'Name'}

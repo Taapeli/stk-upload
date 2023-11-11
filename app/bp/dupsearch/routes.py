@@ -140,7 +140,7 @@ def upload():
 def _get_person(service, iid):
     result = service.get_person_data(iid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")} – {iid}', "error")
         return None, []

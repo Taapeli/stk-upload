@@ -65,7 +65,7 @@ MATCH (event:Event) -[:PLACE]-> (pl:Place)
 OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
 OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
-RETURN LABELS(event)[0] AS label, ID(event) AS uniq_id, 
+RETURN LABELS(event)[0] AS label, event.iid AS iid, 
     pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
 

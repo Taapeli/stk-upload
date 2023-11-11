@@ -1,7 +1,7 @@
 #   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
-#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
+#   Copyright (C) 2016-2023  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
 #                            Timo Nallikari, Pekka Valta
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,10 @@ Created on 22.8.2019
 import json
 import traceback
 from datetime import datetime
+
+#See https://docs.python.org/3/library/typing.html
+from typing import NewType
+IsotammiId = NewType('IsotammiId', str)
 
 # Privacy rule: how many years after death
 PRIVACY_LIMIT = 0
@@ -106,8 +110,8 @@ class NodeObject:
         """
         #TODO Remove uniq_id when not in use after 2023
         self.uniq_id = None  # Neo4j object id
-        if isinstance(iid, int):
-            self.uniq_id = iid
+        #! if isinstance(uniq_id, int):
+        #     self.uniq_id = uniq_id
         self.change = 0     # Object change time
         self.id = ""        # Gedcom object id like "I1234"
         self.handle = ""    # Gramps handle

@@ -13,11 +13,11 @@ values = get_test_values(shareds.driver)
 # user = "kku"
 # batch_id = "2021-12-20.014"
 # family_uuid = "b4a142f60d87478ebacf7bc435414bcc"
-# family_uniq_id = 103383
+# family_iid = 103383
 # 
 # 
 # place_uuid = '465734f43901480aaf55f5bba456321d'
-# place_uniq_id = 93021
+# place_iid = 93021
     
 @pytest.fixture
 def svc():

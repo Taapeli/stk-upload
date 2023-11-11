@@ -27,10 +27,10 @@ class DBwriter(object):
 
             - place         Place object
             - - .names      PlaceName objects
-            - def_names     dict {lang, uid} uniq_id's of PlaceName objects
+            - def_names     dict {lang, uid} iid's of PlaceName objects
         '''
 
-        self.dbdriver.place_set_default_names(place.uniq_id, 
+        self.dbdriver.place_set_default_names(place.iid, 
                                               def_names['fi'], def_names['sv'])
 
 
