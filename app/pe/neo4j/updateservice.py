@@ -705,7 +705,7 @@ class Neo4jUpdateService(ConcreteService):
         #    New iid = "D<place_iid>.i"
 
         for i in range(len(place.names)):
-            place.names[i].iid = f"D{place.iid}.{i+1}"
+            place.names[i].iid = f"A{place.iid}.{i+1}"
         for name in place.names:
             n_attr = {"name": name.name, "lang": name.lang, "iid":name.iid}
             if name.dates:
@@ -918,7 +918,7 @@ class Neo4jUpdateService(ConcreteService):
             bid=batch_id,
             r_attr=r_attr
         )
-        repository.iid = result.single()[0]
+        #!repository.iid = result.single()[0]
 
         # Save the notes attached to repository
         if repository.notes:
@@ -1117,7 +1117,7 @@ class Neo4jUpdateService(ConcreteService):
         niid = 0
         for name in person.names:
             niid += 1
-            name.iid = f"D{person.iid}.{niid}"
+            name.iid = f"A{person.iid}.{niid}"
             self.ds_save_name(tx, name, parent_id=person.iid)
 
         # Save web urls as Note nodes connected under the Person

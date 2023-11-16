@@ -198,7 +198,7 @@ class PlaceBl(Place):
 
 
     @staticmethod
-    def combine_places(pn_tuples, lang) -> list(Place):
+    def combine_places(pn_tuples, lang) -> list[Place]:
         """Creates a list of Places with names combined from given names.
 
         The pl_tuple has Places data as a tuple 
