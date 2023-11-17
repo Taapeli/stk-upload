@@ -140,7 +140,7 @@ class NodeObject:
         name = self.__class__.__name__
         if name.endswith("Bl"):
             name = name[:-2]
-        print(f"#! Object label = {name!r}")
+        #print(f"#! Object label = {name!r}")
         return name
 
     def timestamp_str(self):
@@ -208,7 +208,7 @@ class NodeObject:
         return self.__dict__
 
 
-class IsotammiException(BaseException):
+class IsotammiException(Exception):
     def __init__(self, msg, **kwargs):
         Exception.__init__(self, msg)
         self.kwargs = kwargs

@@ -16,8 +16,8 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from bl.base import IsotammiException
 
+from ..util import relation_type_by_label
 '''
 Database write clauses using Gramps handle.
 
@@ -28,69 +28,33 @@ Created on 23.3.2020
 @author: jm
 '''
 
-class CypherObjectWHandle():
-
+class CypherLink():
 
     @staticmethod
-    def link_item(src_label, dst_label, set_rel=False):
-        """ Create connection between src note to dst node item.
-            Set relation parameters, if requested.
-            
+    def link_handle(src_label, dst_label, set_rel=False) -> str:
+        """ Creates query for connecting src note to dst node item.
+            Set relation parameters, if requested by set_rel.
+
             In Cypher, you can not give Labels as parameters, so this function
             creates different Cypher clauses for each combination of src, dst.
-            
+
             Examples:
-                tx.run(CypherObjectWHandle.link_item("Event", "Note"),
+                tx.run(CypherLink.link_handle("Event", "Note"),
                        pid=place.iid, hlink=n_handle)
-                tx.run(CypherObjectWHandle.link_item(src_label=resu.obj_name,
-                                                     dst_label="Citation",
-                                                     set_rel=True),
+                tx.run(CypherLink.link_handle(src_label=resu.obj_name,
+                                              dst_label="Citation",
+                                              set_rel=True),
                        src=place.handle, dst=m_ref.handle, r_attr=r_attr)
 
             (src:<src_lbl>{handle: $src}) -[r:<link_type>]-> (dst:<dst_lbl>{handle:$dst})
         """
-        type_by_label = {
-            "Citation": "CITATION",
-            "Event": "EVENT",
-            "Media": "MEDIA",
-            "Name": "NAME",
-            "Note": "NOTE",
-            # "Person": "CHILD",
-            # "Person": "PARENT",
-            # "Place": "IS_INSIDE",
-            "Place": "PLACE",
-            "Place_name": "NAME",
-            # "Place_name": "NAME_LANG",
-            "Repository": "REPOSITORY",
-            "Source": "SOURCE",
-            }
-        link_type = type_by_label.get(dst_label)
-        if link_type is None:
-            print (f"// Not maching relation type for {dst_label}")
-            return None
-            #raise(IsotammiException, f"Not maching relation type for {dst_label}")
+        link_type = relation_type_by_label(dst_label)
         query = f"""
 MATCH (s:{src_label} {{handle: $src}})
 MATCH (d:{dst_label} {{handle: $dst}})
 CREATE (s) -[r:{link_type}]-> (d)"""
         if set_rel:
             query += "\n    SET r = $r_attr"
-        print("#! link_item:"+query.replace("\n","  "))
+        #print("#! link_handle:"+query.replace("\n","  "))
         return query
-
-#     link_media = """
-# MATCH (e {iid: $src_iid}) WHERE $lbl in LABELS(e)
-# MATCH (m:Media  {handle: $handle})
-#   CREATE (e) -[r:MEDIA]-> (m)
-#     SET r = $r_attr"""
-#!RETURN ID(m) AS uniq_id"""
-
-#     link_note_x = """MATCH (e: {iid: $src_iid}) WHERE $lbl in LABELS(e)
-# MATCH (m:Note  {handle: $handle})
-#   CREATE (e) -[r:NOTE]-> (m)"""
-
-#     link_citation = """
-# MATCH (e {iid: $src_iid}) WHERE $lbl in LABELS(e)
-# MATCH (m:Citation  {handle: $handle})
-#   CREATE (e) -[r:CITATION]-> (m)"""
 

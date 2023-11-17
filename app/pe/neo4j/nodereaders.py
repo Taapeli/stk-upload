@@ -242,7 +242,7 @@ def PlaceName_from_node(node):
     """
     p = init(PlaceName, node)
     p.name = node.get("name", "?")
-    p.lang = node.get("lang", "")
+    #!p.lang = node.get("lang", "")
     p.dates = node.get("dates")
     return p
 

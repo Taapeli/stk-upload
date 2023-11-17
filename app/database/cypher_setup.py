@@ -46,11 +46,11 @@ class SetupCypher():
     find_empty_roots = """
     MATCH (b:Root) WHERE b.file IS NULL
     OPTIONAL MATCH (b) --> (x)
-    WITH b, COLLECT(DISTINCT LABELS(x)[0]) AS lbls, COUNT(x) AS ch WHERE ch < 2
-        RETURN elementId(b) AS uniq_id, b.id AS id
+        WITH b, LABELS(x)[0] AS lbl ORDER BY b.id, lbl
+    RETURN b.id, elementId(b) AS uid, COLLECT(DISTINCT lbl) as lbls
     """
     remove_empty_roots = """
-    MATCH (b:Root) WHERE elementId(b) in $uniq_ids
+    MATCH (b:Root) WHERE elementId(b) in $elem_ids
     OPTIONAL MATCH (b) --> (x)
         DETACH DELETE b, x
     """

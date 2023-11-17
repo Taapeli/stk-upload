@@ -54,7 +54,7 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 # ====== Stk database schema ======
 # Change (increment) this, if schema must be updated
 # The value is also stored in each Root node
-DB_SCHEMA_VERSION = '2022.1.10'
+DB_SCHEMA_VERSION = "2022.1.10"
 # =============================
 
 
@@ -86,7 +86,7 @@ def initialize_db():
             create_single_profile('_Stk_')
 
         # Fix possible Root.id uniqueness
-        try_fixing_duplicate_roots()
+        fix_empty_roots()
 
         create_lock_w_constraint()
 
@@ -100,7 +100,9 @@ def initialize_db():
             "Media":{"iid", "handle"},
             "Note":{"iid", "handle"},
             "Person":{"iid", "handle"},
+            "Name":{"iid"},
             "Place":{"iid", "handle"},
+            "Place_name":{"iid"},
             "Repository":{"iid", "handle"},
             "Source":{"iid", "handle"},
             "Role":{"name"},
@@ -350,12 +352,11 @@ def create_year_indexes():
 
 
 def check_constraints(needed:dict):
-    ''' Create missing UNIQUE constraints from given nodes and parameters.
+    ''' Create missing UNIQUE constraints for given nodes and parameters.
     '''
-    for label,props in needed.items():
+    for label, props in needed.items():
         for prop in props:
-            create_unique_constraint(label, prop)
-#     print(f'checked {n_ok} constraints ok')
+            create_unique_constraint(label, prop, f"{label}_{prop}")
     return
 
 def create_lock_w_constraint():
@@ -367,7 +368,7 @@ def create_lock_w_constraint():
                     db_schema=DB_SCHEMA_VERSION, 
                     locked=False)
         print(f'Initial Lock (version {DB_SCHEMA_VERSION}) created')
-        create_unique_constraint('Lock', 'id')
+        create_unique_constraint('Lock', 'id', 'lock_id')
         return
 
 def re_initiate_nodes_constraints_fixes():
@@ -378,64 +379,57 @@ def re_initiate_nodes_constraints_fixes():
         print('Initial Lock removed')
         return
 
-def try_fixing_duplicate_roots():
+def fix_empty_roots():
     """ Remove possible empty (duplicate?) root nodes, to fix Root.id uniqueness.
     
-        Reason was missing unique constraint.
+        Reason was missing unique constraint. Also removes unused Root nodes.
     """
-    uniq_ids = []
+    elem_ids = []
+    node_sum = 0
     with shareds.driver.session() as session:
         result = session.run(SetupCypher.find_empty_roots)
-        for uniq_id, _id in result:
-            uniq_ids.append(uniq_id)
-            logger.info(f'database.accessDB.try_fixing_duplicate_roots: empty Root: {uniq_id}:{id}')
-        if uniq_ids:
-            session.run(SetupCypher.remove_empty_roots, uniq_ids=uniq_ids).single()
-            logger.info(f'database.accessDB.try_fixing_duplicate_roots: deleted {len(uniq_ids)} empty Root nodes')
-        print(f'Deleted {len(uniq_ids)} empty Root nodes')
+        # b.id, elementId(b) AS uid, COLLECT(DISTINCT lbl) as lbls
+        for _root_id, elem_id, lbls in result:
+            elem_ids.append(elem_id)
+            logger.info("database.accessDB.fix_empty_roots:"
+                        f"empty Root: {elem_id} with links {lbls}")
+        elem_cnt = len(elem_ids)
+        if elem_cnt:
+            result = session.run(SetupCypher.remove_empty_roots, elem_ids=elem_ids)
+            summary = result.consume().summary
+            node_cnt = summary.counters.nodes_deleted
+            node_sum += node_cnt
+            rela_cnt = summary.counters.relationships_deleted
+            logger.info(f"database.accessDB.fix_empty_roots: deleted "
+                        f"{elem_cnt} empty Root nodes with {rela_cnt} near node types "
+                        f"and {node_cnt} nodes")
+        print(f"Deleted {elem_cnt} empty Root nodes and {node_sum-elem_cnt} other nodes")
         return
 
-def create_unique_constraint(label, prop):
-    ' Create given constraint for given label and property.'
+def create_unique_constraint(label, property_name, constraint_name):
+    """ "Create an unique constraint for given label and property.
+    """
     with shareds.driver.session() as session:
-        # Check Neo4j version by instance.NEO4J_VERSION
-        if shareds.db.version >= "5.0":
-            query = f"create constraint if not exists for (n:{label}) require n.{prop} is unique"
-            try:
-                session.run(query)
-                print(f'Unique constraint for {label}.{prop} created')
-            except Exception as e:
-                logger.error(f'database.accessDB.create_unique_constraint: {e.__class__.__name__} {e}' )
-                raise
-        else: # Neo4j versions 3.2 - 4.2
-            query = f"create constraint on (n:{label}) assert n.{prop} is unique"
-            try:
-                session.run(query)
-                print(f'Unique constraint for {label}.{prop} created')
-            except ClientError as e:
-                msgs = e.message.split(',')
-                print(f'Unique constraint for {label}.{prop} ok: {msgs[0]}')
-                return
-            except Exception as e:
-                logger.error(f'database.accessDB.create_unique_constraint: {e.__class__.__name__} {e}' )
-                raise
-    return
+        query=f"CREATE CONSTRAINT {constraint_name} IF NOT EXISTS" + \
+            f"   FOR (n:{label}) REQUIRE n.{property_name} IS UNIQUE"
+        # query = f"create constraint on (n:{label})"
+        try:
+            result = session.run(query)
+            summary = result.consume().summary
+            cnt = summary.counters.relationships_created
+            if cnt:
+                print(f"Constraint {constraint_name} for {label}.{property_name} created")
+            else:
+                print(f"A constraint for {label}.{property_name} exist")
 
-def create_constraint(label, prop):
-    ' Create given constraint for given label and property.'
-    with shareds.driver.session() as session:
-        query = f"create constraint on (n:{label})"
-        try:  
-            session.run(query)
-            print(f'Constraint for {label}.{prop} created')
-        except ClientError as e:
-            msgs = e.message.split(',')
-            print(f'Constraint for {label}.{prop} ok: {msgs[0]}')
-            return
         except Exception as e:
-            logger.error(f'database.accessDB.create_constraint: {e.__class__.__name__} {e}' )
+            logger.error("database.accessDB.create_unique_constraint for "
+                f"{constraint_name}: {e.__class__.__name__} {e}" )
             raise
     return
+
+# def create_constraint(label, prop):
+#     ' Create given constraint for given label and property.'
 
 def remove_prop_constraints(prop):
     """ Remove unique constraints for given property.
@@ -458,14 +452,14 @@ def remove_prop_constraints(prop):
             result = session.run(list_indexes, prop=prop)
             for name, labels, props in result:
                 names.append(name)
-                print(f'Removing Unique constraints for {labels[0]}.{props[0]}')
+                print(f"Removing Unique constraints for {labels[0]}.{props[0]}")
 
             for name in names:
                 session.run("DROP CONSTRAINT "+name+" IF EXISTS")
-            print(f'Removed {len(names)} Unique constraints for {prop}')
+            print(f"Removed {len(names)} Unique constraints for {prop}")
             
         except Exception as e:
-            logger.error(f'database.accessDB.remove_prop_constraints: {e.__class__.__name__} {e}' )
+            logger.error(f"database.accessDB.remove_prop_constraints: {e.__class__.__name__} {e}" )
             raise
     return
 

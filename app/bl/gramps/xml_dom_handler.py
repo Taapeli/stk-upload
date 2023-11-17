@@ -251,7 +251,7 @@ class DOM_handler:
     def postprocess_notes(self):
         """ Process url notes using self.noterefs_later parent object list. 
         """
-        title="Notes / links"
+        title="More Notes"
         message = f"{title}: {len(self.noterefs_later)} kpl"
         print(f"***** {message} *****")
         t0 = time.time()
@@ -269,7 +269,7 @@ class DOM_handler:
             iid_generator.reserve(total_notes)
             # Split to chunks, chunk_max_size=self.TX_SIZE
             for nodes_chunk in self.get_chunk(self.noterefs_later, self.TX_SIZE):
-                #print(f"DOM_handler.postprocess_notes: {len(nodes_chunk)} chunk")
+                print(f"DOM_handler.postprocess_notes: {len(nodes_chunk)} chunk")
                 for parent in nodes_chunk:
                     session.write_transaction(self.handle_postprocessed_notes,
                                               parent, iid_generator)

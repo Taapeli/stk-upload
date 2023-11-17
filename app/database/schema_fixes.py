@@ -187,6 +187,33 @@ def do_schema_fixes():
     """
     print(f" --- Start database.schema_fixes.do_schema_fixes")
 
+    # --- For DB_SCHEMA_VERSION = '2022.1.8'...'2023.1.0', 12.11.2023/JMä
+    # For all batche b:
+    #    for all Name and PlaceName nodes in b:
+    #    - if found objects with missing a.iid: generate a.iid
+    #    - set b.db_schema version
+    def create_name_indexes():
+        query1 = """
+            CREATE RANGE INDEX Name_iid IF NOT EXISTS
+                FOR (n:Name) ON (n.iid)
+            """
+        query2 = """
+            CREATE RANGE INDEX PlaceName_iid IF NOT EXISTS
+                FOR (n:PlaceName) ON (n.iid)"""
+        pass
+
+    def set_iid_for_names():
+        query = """
+            MATCH (root:Root{id:"2023-11-06.025"}) -[OBJ_PLACE]-> 
+                (x:Place) -[:NAME]-> (pn:Place_name)
+            RETURN root,x,pn as name LIMIT 5
+                UNION
+            MATCH (root:Root{id:"2023-11-06.025"}) -[OBJ_PERSON]-> 
+                (x:Person) -[:NAME]-> (hn:Name)
+            RETURN root,x,hn as name LIMIT 5
+        """
+        pass
+
     # --- For DB_SCHEMA_VERSION = '2022.1.3'...'2022.1.8', 9.6.2022/HRo & JMä
     # # For all batches b:
     # #    - if found objects with missing a.iid: generate a.iid and remove a.uuid

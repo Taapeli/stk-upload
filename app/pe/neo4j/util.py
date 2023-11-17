@@ -149,6 +149,57 @@ def dict_root_node(root_node, select="min"):
     return dic
 
 
+def relation_type_by_label(label: str) -> str:
+    """ Find relation type by Node label.
+    """
+    types = {"Citation":"CITATION", 
+        "Event":"EVENT", 
+        "Media":"MEDIA", 
+        "Name":"NAME", 
+        "Note":"NOTE", 
+        # "Person": "CHILD",
+        # "Person": "PARENT",
+        # "Place": "IS_INSIDE",
+        "Place":"PLACE", 
+        "Place_name":"NAME", 
+        # "Place_name": "NAME_LANG",
+        "Repository":"REPOSITORY", 
+        "Source":"SOURCE"}
+    link_type = types.get(label)
+    if link_type is None:
+        #print (f"// No matching relation type for {label}")
+        raise (IsotammiException, f"No matching relation type for {label}")
+
+    return link_type
+
+def label_by_iid(iid: str) -> str:
+    """ Find Node label by IsotammiId.
+    """
+    labels = {
+        "C":"Citation", 
+        "E":"Event", 
+        "M":"Media", 
+        "AN":"Name", 
+        "N":"Note", 
+        "H": "Person",
+        "P":"Place", 
+        "AP":"Place_name", 
+        "R":"Repository", 
+        "S":"Source"}
+    if iid:
+        a = iid[0]
+        if a == "A":
+            a = iid[0:1]    #  "AP" (Place) or "AI" (Person)
+    else:
+        a ="*"
+    label = labels.get(a)
+    if label is None:
+        #print (f"// No matching relation type for {dst_label}")
+        raise IsotammiException("No matching label for " + iid)
+
+    return label
+
+
 class IidGenerator:
     """
     Serves a sequences of unique IsotammiId keys by object type from the database.
