@@ -30,13 +30,13 @@ from neo4j.exceptions import ClientError, ConstraintError #,CypherSyntaxError
 from flask_security import utils as sec_utils
 
 import shareds
-if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
-    from .cypher_setup import SetupCypher
-    from bl.admin.models.cypher_adm import Cypher_adm
-else:
-    # Cypher clauses using syntax before Neo4j version 5.0
-    from .cypher_setup_v3_4 import SetupCypher
-    from bl.admin.models.cypher_adm_v3_4 import Cypher_adm
+#!if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
+from .cypher_setup import SetupCypher
+from bl.admin.models.cypher_adm import Cypher_adm
+# else:
+#     # Cypher clauses using syntax before Neo4j version 5.0
+#     from .cypher_setup_v3_4 import SetupCypher
+#     from bl.admin.models.cypher_adm_v3_4 import Cypher_adm
 
 from .schema_fixes import do_schema_fixes
 
@@ -52,9 +52,9 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 )
 
 # ====== Stk database schema ======
-# Change (increment) this, if schema must be updated
+#TODO Always change (increment) this, if schema must be updated
 # The value is also stored in each Root node
-DB_SCHEMA_VERSION = "2022.1.10"
+DB_SCHEMA_VERSION = "2023.1."
 # =============================
 
 
@@ -396,7 +396,7 @@ def fix_empty_roots():
         elem_cnt = len(elem_ids)
         if elem_cnt:
             result = session.run(SetupCypher.remove_empty_roots, elem_ids=elem_ids)
-            summary = result.consume().summary
+            summary = result.consume()
             node_cnt = summary.counters.nodes_deleted
             node_sum += node_cnt
             rela_cnt = summary.counters.relationships_deleted
@@ -406,8 +406,8 @@ def fix_empty_roots():
         print(f"Deleted {elem_cnt} empty Root nodes and {node_sum-elem_cnt} other nodes")
         return
 
-def create_unique_constraint(label, property_name, constraint_name):
-    """ "Create an unique constraint for given label and property.
+def create_unique_constraint(label, property_name, constraint_name=""):
+    """ Create an unique constraint for given label and property.
     """
     with shareds.driver.session() as session:
         query=f"CREATE CONSTRAINT {constraint_name} IF NOT EXISTS" + \
@@ -415,9 +415,9 @@ def create_unique_constraint(label, property_name, constraint_name):
         # query = f"create constraint on (n:{label})"
         try:
             result = session.run(query)
-            summary = result.consume().summary
-            cnt = summary.counters.relationships_created
-            if cnt:
+            summary = result.consume()
+            #cnt = summary.counters.relationships_created
+            if summary and summary.counters.relationships_created:
                 print(f"Constraint {constraint_name} for {label}.{property_name} created")
             else:
                 print(f"A constraint for {label}.{property_name} exist")
@@ -435,18 +435,17 @@ def remove_prop_constraints(prop):
     """ Remove unique constraints for given property.
     """
     with shareds.driver.session() as session:
-        if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
-            list_indexes = """
-                SHOW UNIQUENESS CONSTRAINTS
+        #!if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
+        #     list_indexes = """
+        #         SHOW UNIQUENESS CONSTRAINTS
+        #         YIELD name, labelsOrTypes, properties
+        #             WHERE $prop IN properties
+        #     LIMIT 5"""
+        # else:
+        list_indexes = """
+            SHOW UNIQUE CONSTRAINTS
                 YIELD name, labelsOrTypes, properties
-                    WHERE $prop IN properties
-            LIMIT 5"""
-        else:
-            list_indexes = """
-                SHOW UNIQUE CONSTRAINTS 
-                YIELD name, labelsOrTypes, properties
-                    WHERE $prop IN properties
-            LIMIT 5"""
+                WHERE $prop IN properties  LIMIT 5"""
         try:
             names = []
             result = session.run(list_indexes, prop=prop)

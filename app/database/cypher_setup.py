@@ -88,8 +88,16 @@ class SetupCypher():
         REQUIRE user.username IS UNIQUE
     """
 
-    index_year_birth_low = "CREATE INDEX ON :Person(birth_low)"
-    index_year_death_high = "CREATE INDEX ON :Person(death_high)"
+    #!index_year_birth_low = "CREATE INDEX ON :Person(birth_low)"
+    # index_year_death_high = "CREATE INDEX ON :Person(death_high)"
+    index_year_birth_low = """
+    CREATE CONSTRAINT person_birth_low IF NOT EXISTS
+        FOR :Person(birth_low)
+        REQUIRE Person.birth_low IS UNIQUE"""
+    index_year_death_high = """
+    CREATE CONSTRAINT person_death_high IF NOT EXISTS
+        FOR :Person(death_high)
+        REQUIRE Person.death_high IS UNIQUE"""
 
     master_create = """
     MATCH  (role:Role) WHERE role.name = 'master'

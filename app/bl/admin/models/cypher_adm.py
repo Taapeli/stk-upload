@@ -151,15 +151,18 @@ RETURN COUNT(a) AS cnt'''
 
 # ------------------ free text search ----------------
     create_freetext_index = """
-CREATE FULLTEXT INDEX searchattr IF NOT EXISTS FOR (n:Person) ON EACH [n.searchattr]
+CREATE FULLTEXT INDEX searchattr IF NOT EXISTS
+FOR (n:Person) ON EACH [n.searchattr]
     """
 
     create_freetext_index_for_notes = """
-CREATE FULLTEXT INDEX notetext IF NOT EXISTS FOR (n:Note) ON EACH [n.text]
+CREATE FULLTEXT INDEX notetext IF NOT EXISTS
+FOR (n:Note) ON EACH [n.text]
     """
 
     create_freetext_index_for_sources = """
-CREATE FULLTEXT INDEX sourcetitle IF NOT EXISTS FOR (n:Source) ON EACH [n.stitle] 
+CREATE FULLTEXT INDEX sourcetitle IF NOT EXISTS
+FOR (n:Source) ON EACH [n.stitle] 
     """
 
 # #Todo: Create Neo4j 5.1 new syntax indexes?

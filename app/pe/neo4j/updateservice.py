@@ -1451,8 +1451,8 @@ class Neo4jUpdateService(ConcreteService):
             f_attr.update(dates)
 
         result = self.tx.run(CypherFamily.set_dates_sortname, id=iid, f_attr=f_attr)
-        counters = result.consume().counters
-        cnt = counters.properties_set
+        summary = result.consume()
+        cnt = summary.counters.properties_set
         return {"status": Status.OK, "count": cnt}
 
     def ds_set_family_calculated_attributes(self, iid):
