@@ -44,12 +44,20 @@ from bl.person_name import Name
 def init(cls:NodeObject, node:Node):
     """
     Returns bl.NodeObject instance from a Neo4j.graph.node.
+    
+    TODO: Remove temporary fix:
+    For old data, missing iid is replaced by element_id preceded by '-'
+    That value should not be saved to database!
     """
     n = cls()
     #!n.uniq_id = node.id     #!TODO: Remove this
     n.id = node["id"]
     #n.uuid = node.get("uuid","")
-    n.iid = node.get("iid","")
+    n.iid = node.get("iid", "")
+    if n.iid == "":
+        n.iid = "-" + node.element_id
+        label, = node.labels
+        print(f"pe.neo4j.nodereaders.init: WARNING: Missign iid for {label} node ")
     n.handle = node["handle"] or None
     n.change = node.get("change")
     jats = node.get("attrs")

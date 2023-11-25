@@ -1152,7 +1152,7 @@ class Neo4jUpdateService(ConcreteService):
         """
 
         n_attr = {
-            "iid": name.iid,
+            #!"iid": name.iid,
             "order": name.order,
             "type": name.type,
             "firstname": name.firstname,
@@ -1161,8 +1161,11 @@ class Neo4jUpdateService(ConcreteService):
             "suffix": name.suffix,
             "title": name.title,
             "attrs": name.attrs,
-            # no Isotammi ID for names
         }
+        #TODO Remove temporary fix '-' for missing iid values
+        if name.iid and not name.iid.startswith("-"):
+            # Do not save temporary iid starting with hyphen
+            n_attr["iid"] = name.iid
         if name.dates:
             n_attr.update(name.dates.for_db())
             

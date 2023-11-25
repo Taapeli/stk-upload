@@ -453,8 +453,8 @@ class Neo4jReadServiceTx(ConcreteService):
                     family_members.append(member_set)
 
                 # 3.4. The Family node
-
-                family = {'family_rel': family_rel, 
+                #TODO Oli 'family'. Miksi?
+                _family = {'family_rel': family_rel,
                           'family_role': family_role,
                           'family_node': family_node,
                           'family_events': family_events,
