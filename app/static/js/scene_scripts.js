@@ -77,7 +77,7 @@ function refTable() {
 
 	this.addC = function(s_id, c_id) {
 		// Adds a citation to source.
-		// The lines of this.cTbl are arrays [source_id, [citation_id, ...]]
+		// The lines of this.cTbl are arrays [source_iid, [citation_iid, ...]]
 	    //this.mark = (s_id + 1) + "abcderfghijklmopqrstuvwxyzåäö"[c_id];
 		var line;
 		var l = this.cTbl.length;
@@ -196,8 +196,8 @@ function refTable() {
 					} else {
 					    // Store source and citation ids
 						// <sup><a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
-					    var arr = node.id.split('-');
-					    mark = this.addC(Number(arr[0]), Number(arr[1]));
+					    var arr = node.id.split('/');
+					    mark = this.addC(arr[0], arr[1]);
 					    node.href = "#sref" + mark;
 					    node.innerText = mark;
 					    ret += mark + ">" + node.id + '<br>';

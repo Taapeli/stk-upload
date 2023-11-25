@@ -47,7 +47,7 @@ class Name(NodeObject):
             dates               DateRange date expression
             title               str titteli, esim. Sir, Dr.
             # citation_handles[]  str gramps handles for citations
-            # citation_ref[]      int iids of citation nodes
+            # citation_ref[]    str iids of citation nodes
     """
 
     def __init__(self, givn="", surn="", pref="", suff="", dates="", titl=""):

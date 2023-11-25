@@ -53,15 +53,16 @@ def init(cls:NodeObject, node:Node):
     #!n.uniq_id = node.id     #!TODO: Remove this
     n.id = node["id"]
     #n.uuid = node.get("uuid","")
-    n.iid = node.get("iid", "")
-    if n.iid == "":
-        n.iid = "-" + node.element_id
-        label, = node.labels
-        print(f"pe.neo4j.nodereaders.init: WARNING: Missign iid for {label} node ")
-    n.handle = node["handle"] or None
-    n.change = node.get("change")
-    jats = node.get("attrs")
-    n.attrs = json.loads(jats) if jats else {}
+    label, = node.labels
+    if label != "Root":
+        n.iid = node.get("iid", "")
+        if n.iid == "":
+            n.iid = "-" + node.element_id
+            print(f"pe.neo4j.nodereaders.init: WARNING: Missign iid for {label} node ")
+        n.handle = node["handle"] or None
+        n.change = node.get("change")
+        jats = node.get("attrs")
+        n.attrs = json.loads(jats) if jats else {}
     return n
 
 def Citation_from_node(node):

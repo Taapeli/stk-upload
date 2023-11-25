@@ -69,6 +69,7 @@ RETURN LABELS(event)[0] AS label, event.iid AS iid,
     pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
 
+#TODO: You should define the label of src! Very slow!
     get_objs_citations_notes_medias = """
 MATCH (src) -[r:CITATION|NOTE|MEDIA]-> (target)
     WHERE src.iid IN $uid_list

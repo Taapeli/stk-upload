@@ -509,6 +509,9 @@ def show_person(iid=None, fanchart=False):
     Arguments:
     - iid=     persons iid
     - fanchart= by default family details shown, fanchart navigation uses this
+    
+    NOTE: Test js for References table: Add "?debug=1" to url address to run 
+          the process step by step
     """
     from datetime import date
     t0 = time.time()
@@ -521,7 +524,7 @@ def show_person(iid=None, fanchart=False):
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(iid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
         person = None
@@ -569,7 +572,7 @@ def show_person_family_tree_hx(iid):
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(iid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")
@@ -608,7 +611,7 @@ def show_person_fanchart_hx(iid):
     with PersonReaderTx("read_tx", u_context) as service:
         result = service.get_person_data(iid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")
@@ -624,14 +627,14 @@ def show_person_fanchart_hx(iid):
     )
 
 
-@bp.route("/scene/nametypes/<uniq_id>/<typename>", methods=["GET"])
+@bp.route("/scene/nametypes/<iid>/<typename>", methods=["GET"])
 @roles_accepted("audit")
-def get_person_nametypes(uniq_id, typename):
+def get_person_nametypes(iid, typename):
     s = f"""
         <select name='nametype' 
-            id='name_{uniq_id}'
-            hx-put='changetype/{uniq_id}' 
-            hx-target='#msg_{uniq_id}' 
+            id='name_{iid}'
+            hx-put='changetype/{iid}' 
+            hx-target='#msg_{iid}' 
             hx-swap='innerHTML settle:1s'>
     """
     found = False
@@ -644,22 +647,23 @@ def get_person_nametypes(uniq_id, typename):
     if not found:
         s += f"\n    <option value='{typename}' selected>" + _(typename)
     s += "\n</select>"
-    s += f"<span class='msg' id='msg_{uniq_id}'></span>"
+    s += f"<span class='msg' id='msg_{iid}'></span>"
+    print(f"bp.scene.routes.get_person_nametypes:\n{s}")
     return s
 
 
-@bp.route("/scene/changetype/<uniq_id>", methods=["PUT"])
+@bp.route("/scene/changetype/<iid>", methods=["PUT"])
 @roles_accepted("audit")
-def person_name_changetype(uniq_id):
+def person_name_changetype(iid):
     try:
         nametype_list = request.form.getlist("nametype")
         uid_list = request.form.getlist("order")
-        index = uid_list.index(uniq_id)
+        index = uid_list.index(iid)
         nametype = nametype_list[index]
         u_context = UserContext()
 
         with PersonWriter("simple", u_context) as service:
-            service.set_name_type(int(uniq_id), nametype)
+            service.set_name_type(iid, nametype)
         return _("type changed")  # will be displayed in <span class='msg' ...>
     except:
         return _("type change FAILED")  # will be displayed in <span class='msg' ...>
@@ -837,7 +841,7 @@ def json_get_event():
                 m.href = "/media/" + m.iid # object page link
                 # The image shown on page
                 _fullname, _mimetype, m.size = mediafile.get_fullname(m.iid)
-                # {'uniq_id': 3101145, 'change': 1693326068, 'id': 'O0004', 
+                # {'iid': '...', 'change': 1693326068, 'id': 'O0004', 
                 #  'handle': '_f6694f284126c6141d068ea27c@2308291', 'attrs': {}, 
                 #  'state': None, 'iid': 'M-6ap', 'description': 'hääpari', 
                 #  'src': 'hääpari.png', 'mime': 'image/png', 'name': 'hääpari.png', 
@@ -1668,7 +1672,7 @@ def fetch_comments():
     from pe.neo4j.nodereaders import Comment_from_node
 
     u_context = UserContext()
-    uniq_id = int(request.args.get("uniq_id"))
+    iid = request.args.get("iid")
     # uuid = request.args.get("uuid")
     if request.args.get("start"):
         start = float(request.args.get("start"))
@@ -1678,7 +1682,7 @@ def fetch_comments():
 
     try:
         result = shareds.driver.session().run(
-            CypherComment.fetch_obj_comments, uniq_id=uniq_id, start=start
+            CypherComment.fetch_obj_comments, iid=iid, start=start
         )
         comments = []
         last_timestamp = None
@@ -1713,7 +1717,7 @@ def add_comment():
 
     u_context = UserContext()
     # uuid = request.form.get("uuid")
-    uniq_id = int(request.form.get("uniq_id", 0))
+    iid = request.form.get("iid")
     comment_text = request.form.get("comment_text")
     if comment_text.strip() == "":
         return ""
@@ -1721,7 +1725,7 @@ def add_comment():
     comment = None
     try:
         with CommentsUpdater("update") as comment_service:
-            res = comment_service.add_comment(user, uniq_id, comment_text)
+            res = comment_service.add_comment(user, iid, comment_text)
             if res:
                 if Status.has_failed(res, strict=True):
                     flash(f'{res.get("statustext","error")}', "error")

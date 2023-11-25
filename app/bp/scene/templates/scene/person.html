@@ -114,7 +114,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
             {{macro.citation_link(person.citation_ref, obj)}}
         </h2>
 
-    {% set myid = person.uniq_id %}{# for famtree #}
+    {% set myid = person.iid %}{# for famtree #}
             <div id="summaryarea">
             <table>
                 <tr>
@@ -146,7 +146,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	                        <tr{% if edit_names %} class="movable"{% endif %}>
 	                            <td class="ColumnAttribute">
 	                            	{% if may_edit %}
-			                            <select hx-trigger="load" hx-get="/scene/nametypes/{{p_name.uniq_id}}/{{ p_name.type }}" hx-swap="outerHTML"></select>
+			                            <select hx-trigger="load" hx-get="/scene/nametypes/{{p_name.iid}}/{{ p_name.type }}" hx-swap="outerHTML"></select>
 		                            {% else %}
 	                            		{{p_name.type|transl('nt')}}
                             		{% endif %}
@@ -163,7 +163,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	                                {% endif %}
 	        
 	        	                    {{macro.citation_link(p_name.citation_ref, obj)}}
-	        	                    <input type="hidden" name="order" value="{{p_name.uniq_id}}">
+	        	                    <input type="hidden" name="order" value="{{p_name.iid}}">
 	                            </td>
 	                        </tr>{% endfor %}
 	               	    </tbody></table>
@@ -244,7 +244,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
         </div>
 
         <form>
-			<input type="hidden" name="uniq_id" value="{{ person.uniq_id }}">
+			<input type="hidden" name="iid" value="{{ person.iid }}">
         </form>
 
 	{% if user_context.SHOW_DISCUSSION %}
@@ -266,7 +266,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
     {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
                         <td class="ColumnEvent">
-                            <div class="magnifier" alt="{{e.uniq_id}}">
+                            <div class="magnifier" alt="{{e.iid}}">
                                 <a href="/event/{{e.iid}}" class="inlink"
                                    title="{{ _('Event') }} {{ macro.obj_title(e) }}">
                                     {{e.type|transl('evt')}}</a>
@@ -327,8 +327,8 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                     <button type="button" onclick="tbl.noteReferences('noteContent','citTbl')">Lisää paikkojen huomautukset</button><br>
                     <button type="button" onclick="tbl.sourceReferences('sourcerefContent','citTbl')">Lisää lähdeluettelo</button></div>
                <div id="dbug"><p>Löydetyt viitteet</p></div>
-               <div><table id="citTbl"><body><tr><td>Viitteet lähteittäin</td></tr></body></table></div>
-               <div><table id="notTbl"><body><tr><td>Viitteet huomautuksiin</td></tr></body></table></div>
+               <div><table id="citTbl"><tr><td>Viitteet lähteittäin</td></tr></table></div>
+               <div><table id="notTbl"><tr><td>Viitteet huomautuksiin</td></tr></table></div>
             </div>
         </div>
     {% endif %}

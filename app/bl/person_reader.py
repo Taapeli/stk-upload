@@ -329,7 +329,7 @@ class PersonReaderTx(DataService):
 
         # 5. Citations, Notes, Medias
 
-        new_ids = [-1]
+        new_ids = [""]
         all_citations = {}
         while len(new_ids) > 0:
             # New objects
@@ -398,13 +398,14 @@ class PersonReaderTx(DataService):
                                 # print("#\tMedia sort done")
                         else:
                             raise NotImplementedError(
-                                "Citation, Note or Media excepted, got {label}"
+                                f"Citation, Note or Media excepted, got {label}"
                             )
-
-            # print(f'#+ - found {len(citations)} Citations, {len(notes)} Notes,"\
-            #       f" {len(medias)} Medias from {len(new_ids)} nodes')
-            # for iid, note in notes.items():
-            #     print(f'#+ - {iid}: {note}')
+                else: # No references from this object
+                    pass
+            print(f"#+ - found {len(citations)} Citations, {len(notes)} Notes,"
+                  f" {len(medias)} Medias from {len(new_ids)} nodes")
+            for iid, note in notes.items():
+                print(f'#+ - {iid}: {note}')
             all_citations.update(citations)
             self.obj_catalog.update(citations)
             self.obj_catalog.update(notes)
@@ -485,10 +486,10 @@ class PersonReaderTx(DataService):
         for o in self.obj_catalog.values():
             if isinstance(o, Citation):
                 page = unquote(o.page)
-                js += f"citations[{o.iid}] = {{ "
+                js += f'citations["{o.iid}"] = {{ '
                 js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
-                js += f'id:"{o.id}", note_ref:{o.note_ref}, '
-                js += f'page:"{page}", source_id:{o.source_id}, iid:"{o.iid}" '
+                js += f'id:"{o.id}", note_ref:"{o.note_ref}", '
+                js += f'page:"{page}", source_id:"{o.source_id}", iid:"{o.iid}" '
                 js += "};\n"
                 notes.extend(o.note_ref)
 
@@ -496,8 +497,8 @@ class PersonReaderTx(DataService):
                 sauthor = unquote(o.sauthor)
                 spubinfo = unquote(o.spubinfo)
                 stitle = unquote(o.stitle)
-                js += f"sources[{o.iid}] = {{ "
-                js += f'id:"{o.id}", note_ref:{o.note_ref}, '
+                js += f'sources["{o.iid}"] = {{ '
+                js += f'id:"{o.id}", note_ref:"{o.note_ref}", '
                 js += f'repositories:{o.repositories}, sauthor:"{sauthor}", '
                 js += f'spubinfo:"{spubinfo}", stitle:"{stitle}", '
                 js += f'iid:"{o.iid}" '
@@ -507,7 +508,7 @@ class PersonReaderTx(DataService):
             elif isinstance(o, Repository):
                 medium = translate(o.medium, "medium")
                 atype = translate(o.type, "rept")
-                js += f"repositories[{o.iid}] = {{ "
+                js += f'repositories["{o.iid}"] = {{ '
                 js += (
                     f'iid:"{o.iid}", id:"{o.id}", type:"{atype}", rname:"{o.rname}", '
                 )
@@ -524,7 +525,7 @@ class PersonReaderTx(DataService):
             o = self.obj_catalog[iid]
             text = unquote(o.text)
             url = unquote(o.url)
-            js += f"notes[{o.iid}] = {{ "
+            js += f'notes["{o.iid}"] = {{ '
             js += f'iid:"{o.iid}", id:"{o.id}", type:"{o.type}", '
             js += f'priv:"{o.priv}", text:"{text}", url:"{url}" '
             js += "};\n"

@@ -67,7 +67,7 @@ class Place(NodeObject):
             media_ref[]         int iids of Medias
         May be defined in Place_gramps:
             surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
-            citation_ref[]      int iids of Citations
+            citation_ref[]      str iids of Citations
             placeref_hlink      str paikan osoite
             note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
     """
@@ -116,7 +116,7 @@ class PlaceBl(Place):
             media_refs[]        int iids of Medias
         May be defined in Place_gramps:
             surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
-            citation_ref[]      int iids of Citations
+            citation_ref[]      str iids of Citations
             placeref_hlink      str paikan osoite
             note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
     """
