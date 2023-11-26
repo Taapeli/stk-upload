@@ -20,10 +20,10 @@ import os
 from datetime import datetime
 import json
 
-try:
-    from neo4j.graph import Node            # Neo4j 4.x
-except:
-    from neo4j.types.graph import Node      #! Neo4j 3.x
+#!try:
+from neo4j.graph import Node            # Neo4j 4.x
+#!except:
+#     from neo4j.types.graph import Node      #! Neo4j 3.x
 
 from bl.base import NodeObject, PRIVACY_LIMIT
 from bl.citation import Citation
@@ -65,7 +65,7 @@ def init(cls:NodeObject, node:Node):
         n.attrs = json.loads(jats) if jats else {}
     return n
 
-def Citation_from_node(node):
+def Citation_from_node(node:Node) -> Citation:
     """
     Transforms a db node to an object of type Citation.
     """
@@ -77,7 +77,7 @@ def Citation_from_node(node):
     return n
 
 
-def Comment_from_node(node):
+def Comment_from_node(node:Node) -> Comment:
     """
     Transforms a db node to an object of type Comment.
 
@@ -94,7 +94,7 @@ def Comment_from_node(node):
     return n
 
 
-def DateRange_from_node(node):
+def DateRange_from_node(node:Node) -> DateRange:
     """
     Extracts a DateRange value from any db node, if present.
     """
@@ -103,7 +103,7 @@ def DateRange_from_node(node):
 
     return DateRange()
 
-def EventBl_from_node(node):
+def EventBl_from_node(node:Node) -> EventBl:
     """
     Transforms a db node to an object of type Event or EventBl.
 
@@ -121,10 +121,10 @@ def EventBl_from_node(node):
         n.dates = DateRange()
     n.dates.calendar = node["calendar"]
     n.description = node["description"] or ""
-    n.attr = node.get("attr", dict())
+    #!n.attr = json.loads(node.get("attr", ""))
     return n
 
-def FamilyBl_from_node(node):
+def FamilyBl_from_node(node:Node) -> FamilyBl:
     """
     Transforms a db node to an object of type Family.
 
@@ -146,7 +146,7 @@ def FamilyBl_from_node(node):
     return n
 
 
-def MediaBl_from_node(node):
+def MediaBl_from_node(node:Node) -> Media:
     """
     Transforms a db node to an object of type Media.
 
@@ -165,7 +165,7 @@ def MediaBl_from_node(node):
         n.name = ""
     return n
 
-def Name_from_node(node):
+def Name_from_node(node:Node) -> Name:
     """
     Transforms a db node to an object of type Name
 
@@ -190,7 +190,7 @@ def Name_from_node(node):
     return n
 
 
-def Note_from_node(node):
+def Note_from_node(node:Node) -> Note:
     """
     Transforms a db node to an object of type Note.
     """
@@ -202,7 +202,7 @@ def Note_from_node(node):
     n.url = node.get("url", "")
     return n
 
-def PersonBl_from_node(node, obj=None):
+def PersonBl_from_node(node:Node) -> PersonBl:
     """
     Transforms a db node to an object of type Person.
 
@@ -229,7 +229,7 @@ def PersonBl_from_node(node, obj=None):
     return obj
 
 
-def PlaceBl_from_node(node):
+def PlaceBl_from_node(node:Node) -> PlaceBl:
     """Creates a node object of type Place from a Neo4j node.
 
     Example node:
@@ -243,7 +243,7 @@ def PlaceBl_from_node(node):
     p.coord = node.get("coord", None)
     return p
 
-def PlaceName_from_node(node):
+def PlaceName_from_node(node:Node) -> PlaceName:
     """Transforms a db node to an object of type Place_name.
 
     <Node id=78278 labels={'Place_name'}
@@ -255,7 +255,7 @@ def PlaceName_from_node(node):
     p.dates = node.get("dates")
     return p
 
-def Repository_from_node(node):
+def Repository_from_node(node:Node) -> Repository:
     """
     Transforms a db node to Repository object
 
@@ -271,7 +271,7 @@ def Repository_from_node(node):
     n.type = node["type"] or ""
     return n
 
-def SourceBl_from_node(node):
+def SourceBl_from_node(node:Node) -> SourceBl:
     """
     Transforms a db node to an object of type SourceBl.
     """
@@ -287,7 +287,7 @@ def SourceBl_from_node(node):
     s.sabbrev = node.get("sabbrev", "")
     return s
 
-def Root_from_node(node):
+def Root_from_node(node:Node): # -> Root:
     """
     Transforms a db node to Root object
     """

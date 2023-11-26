@@ -109,23 +109,27 @@ class NodeObject:
         - note_refs[]    ?
         """
         #TODO Remove uniq_id when not in use after 2023
-        self.uniq_id = None  # Neo4j object id
+        self.uniq_id = None  # obsolete Neo4j object id
         #! if isinstance(uniq_id, int):
         #     self.uniq_id = uniq_id
-        self.change = 0     # Object change time
-        self.id = ""        # Gedcom object id like "I1234"
-        self.handle = ""    # Gramps handle
+        self.change:int = 0     # Object change time
+        self.id:str = ""        # Gedcom object id like "I1234"
+        self.handle:str = ""    # Gramps handle
+        # iid contains
+        # - object type id ("H" = Human person etc.)
+        # - running number in Crockford Base 32 format
         if isinstance(iid, str):
             self.iid = iid
         else:
             self.iid = None
-        # iid contains
-        # - object type id ("H" = Human person etc.)
-        # - running number in Crockford Base 32 format
-        self.attrs = ""     # dict containing Gramps object attributes and srcattributes
+
+        # attrs is json a dict of Gramps object attributes and srcattributes
+        #    to str    self.attrs = json.dumps(attrs_dict, ensure_ascii=False)
+        #    to dict   attrs_for_db = json.loads(self.attrs)
+        self.attrs:str = ""     
 
         # Proposed Object state in process path
-        self.state = None   
+        self.state:str = None   
         # TODO Define constants for values:
         #     candidate, audit_requested, auditing, accepted,
         #     mergeing, common, rejected
@@ -135,15 +139,36 @@ class NodeObject:
         iid = self.uniq_id if self.uniq_id else self.iid
         return f'(NodeObject {iid}/{self.iid}/{self.id} date {self.dates})"'
 
-    def label(self):
-        """ Returns Neo4j node label for this object. """
+    def label(self) -> str:
+        """ Returns Neo4j node label for this object.
+
+                iid   class &     optional
+                mark  label       class
+                ----  -----      ----------
+                C    "Citation"
+                     "Comment"
+                E    "Event"     (EventBl)
+                F    "Family"    (FamilyBl)
+                M    "Media"     (MediaBl)
+                AN ! "Name"
+                N    "Note"
+                H !  "Person"    (PersonBl)
+                AP ! "Place_name"
+                P    "Place"     (PlaceBl)
+                     "Refname"
+                R    "Repository"
+                S    "Source"    (SourceBl)
+                     "Stats"
+
+        @See: pe.neo4j.util.label_by_iid, bl.base.NodeObject.label
+        """
         name = self.__class__.__name__
         if name.endswith("Bl"):
             name = name[:-2]
         #print(f"#! Object label = {name!r}")
         return name
 
-    def timestamp_str(self):
+    def timestamp_str(self) -> str:
         """ My timestamp to display format. """
         if hasattr(self, "timestamp") and self.timestamp:
             t = float(self.timestamp) / 1000.0
@@ -151,6 +176,15 @@ class NodeObject:
         else:
             return ""
 
+    def attrs_for_db(self) -> str: 
+        """ Get self.attrs:dict as string. 
+        
+            attrs_for_db = obj.attrs_for_db()
+        """
+        if self.attrs:
+            return json.dumps(self.attrs, ensure_ascii=False)
+        else:
+            return ""
 
     """
         Compare 
@@ -192,7 +226,7 @@ class NodeObject:
             return self.dates != other.dates
         return False
 
-    def change_str(self):
+    def change_str(self) -> str:
         """ Display change time like '28.03.2020 17:34:58'. """
         try:
             return datetime.fromtimestamp(self.change).strftime("%d.%m.%Y %H:%M:%S")

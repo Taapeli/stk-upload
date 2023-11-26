@@ -52,6 +52,7 @@ class Name(NodeObject):
 
     def __init__(self, givn="", surn="", pref="", suff="", dates="", titl=""):
         """ Luo uuden name-instanssin """
+        NodeObject.__init__(self)
         self.type = ""
         self.order = None
         self.firstname = givn
@@ -60,7 +61,7 @@ class Name(NodeObject):
         self.suffix = suff
         self.dates = dates
         self.title = titl
-        self.attrs = ""
+        #!self.attrs = ""
         # # Set in bp.gramps.xml_dom_handler.DOM_handler.handle_people
         # self.citation_handles = []
         # # For person page

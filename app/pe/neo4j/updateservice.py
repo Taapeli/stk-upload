@@ -25,7 +25,6 @@ import logging
 import traceback
 from collections import defaultdict
 from datetime import date  # , datetime
-
 from neo4j.exceptions import ClientError
 
 logger = logging.getLogger("stkserver")
@@ -399,7 +398,7 @@ class Neo4jUpdateService(ConcreteService):
             "id": citation.id,
             "page": citation.page,
             "confidence": citation.confidence,
-            "attrs": citation.attrs,
+            "attrs": citation.attrs_for_db(),
         }
         if citation.dates:
             c_attr.update(citation.dates.for_db())
@@ -476,7 +475,7 @@ class Neo4jUpdateService(ConcreteService):
             "type": note.type,
             "text": note.text,
             "url": note.url,
-            "attrs": note.attrs,
+            "attrs": note.attrs_for_db(),
         }
         if note.handle:
             n_attr["handle"] = note.handle
@@ -487,6 +486,7 @@ class Neo4jUpdateService(ConcreteService):
                    n_attr=n_attr,
             )
         elif not batch_id is None:
+            # print(f"#Neo4jUpdateService.ds_save_note: {batch_id=}, {n_attr=}")
             tx.run(CypherNote.create_in_batch, 
                    bid=batch_id,
                    n_attr=n_attr,
@@ -516,12 +516,12 @@ class Neo4jUpdateService(ConcreteService):
             "mime": media.mime,
             "name": media.name,
             "description": media.description,
-            "attrs": media.attrs,
+            "attrs": media.attrs_for_db(),
             "batch_id": batch_id,
         }
         #m_attr["batch_id"] = batch_id
 
-        result = tx.run(CypherMedia.create_in_batch,
+        _result = tx.run(CypherMedia.create_in_batch,
             bid=batch_id, iid=media.iid, m_attr=m_attr)
         #!media.iid = result.single()[0]
 
@@ -644,7 +644,7 @@ class Neo4jUpdateService(ConcreteService):
             "id": place.id,
             "type": place.type,
             "pname": place.pname,
-            "attrs": place.attrs,
+            "attrs": place.attrs_for_db(),
         }
         if place.coord:
             # If no coordinates, don't set coord attribute
@@ -676,7 +676,6 @@ class Neo4jUpdateService(ConcreteService):
             place_keys[place.handle] = place.iid
 
         #    Create Place_names
-        #    New iid = "D<place_iid>.i"
 
         for i in range(len(place.names)):
             place.names[i].iid = f"A{place.iid}.{i+1}"
@@ -886,7 +885,7 @@ class Neo4jUpdateService(ConcreteService):
             "id": repository.id,
             "rname": repository.rname,
             "type": repository.type,
-            "attrs": repository.attrs,
+            "attrs": repository.attrs_for_db(),
         }
         result = tx.run(
             CypherRepository.create_in_batch,
@@ -929,7 +928,7 @@ class Neo4jUpdateService(ConcreteService):
                 "stitle": source.stitle,
                 "sauthor": source.sauthor,
                 "spubinfo": source.spubinfo,
-                "attrs": source.attrs,
+                "attrs": source.attrs_for_db(),
             }
 
             tx.run(CypherSource.create_to_batch, batch_id=batch_id, s_attr=s_attr)
@@ -1001,7 +1000,7 @@ class Neo4jUpdateService(ConcreteService):
             "id": event.id,
             "type": event.type,
             "description": event.description,
-            "attrs": event.attrs,
+            "attrs": event.attrs_for_db(),
         }
         if event.dates:
             e_attr.update(event.dates.for_db())
@@ -1069,7 +1068,7 @@ class Neo4jUpdateService(ConcreteService):
             "sex": person.sex,
             "confidence": person.confidence,
             "sortname": person.sortname,
-            "attrs": person.attrs,
+            "attrs": person.attrs_for_db(),
         }
         if person.dates:
             p_attr.update(person.dates.for_db())
@@ -1160,7 +1159,7 @@ class Neo4jUpdateService(ConcreteService):
             "prefix": name.prefix,
             "suffix": name.suffix,
             "title": name.title,
-            "attrs": name.attrs,
+            "attrs": name.attrs_for_db(),
         }
         #TODO Remove temporary fix '-' for missing iid values
         if name.iid and not name.iid.startswith("-"):
@@ -1539,18 +1538,10 @@ class Neo4jUpdateService(ConcreteService):
             "change": f.change,
             "id": f.id,
             "rel_type": f.rel_type,
-            "attrs": f.attrs,
+            "attrs": f.attrs_for_db(),
         }
 
         tx.run(CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr)
-        #! ids = []
-        # for record in result:
-        #     #!f.iid = record[0]
-        #     ids.append(f.iid)
-        #     if len(ids) > 1:
-        #         logger.warning(
-        #             f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}"
-        #         )
 
         # Make father and mother relations to Person nodes
 

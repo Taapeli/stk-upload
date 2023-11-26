@@ -404,8 +404,8 @@ class PersonReaderTx(DataService):
                     pass
             print(f"#+ - found {len(citations)} Citations, {len(notes)} Notes,"
                   f" {len(medias)} Medias from {len(new_ids)} nodes")
-            for iid, note in notes.items():
-                print(f'#+ - {iid}: {note}')
+            # for iid, note in notes.items():
+            #     print(f'#+ - {iid}: {note}')
             all_citations.update(citations)
             self.obj_catalog.update(citations)
             self.obj_catalog.update(notes)

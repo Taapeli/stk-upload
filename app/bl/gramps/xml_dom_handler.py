@@ -1201,8 +1201,10 @@ class DOM_handler:
                     new_val = [value]
                 my_attrs[key] = new_val
         if my_attrs:
-            node.attrs = json.dumps(my_attrs, ensure_ascii=False)
-            print(f"## Got {node.id} attributes {node.attrs}")
+            node.attrs:dict = my_attrs
+            # Converted to db string format in bl.base.NodeObject.attrs_for_db()
+            # called from pe.neo4j.updateservice.Neo4jUpdateService methods
+            print(f"#DOM_handler._extract_base: Got {node.id=} {node.attrs=}")
         return
 
     def _extract_mediaref(self, obj:NodeObject, dom_object):

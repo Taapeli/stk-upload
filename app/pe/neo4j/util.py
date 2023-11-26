@@ -44,7 +44,7 @@ cypher_user_batch_prefix = """
 """
 
 cypher_block_of_iids = """
-MERGE (a:iid {id:$iid_type})
+MERGE (a:iid {id:$iid_mark})
     ON CREATE SET a.counter = $iid_count
     ON MATCH SET a.counter = a.counter + $iid_count
 RETURN a.counter - $iid_count AS new_iid"""
@@ -176,16 +176,16 @@ def label_by_iid(iid: str) -> str:
     """ Find Node label by IsotammiId.
     """
     labels = {
-        "C":"Citation", 
-        "E":"Event", 
-        "M":"Media", 
+        "C": "Citation", 
+        "E": "Event", 
+        "M": "Media", 
         "AN":"Name", 
-        "N":"Note", 
+        "N": "Note", 
         "H": "Person",
-        "P":"Place", 
+        "P": "Place", 
         "AP":"Place_name", 
-        "R":"Repository", 
-        "S":"Source"}
+        "R": "Repository", 
+        "S": "Source"}
     if iid:
         a = iid[0]
         if a == "A":
@@ -206,13 +206,13 @@ class IidGenerator:
 
     Usage:
     - a = IidGenerator(tx, "People") Create an ID generator using given transaction
-    - a.reserve(100)             Allocates given number of keys
-    - key = a.get_one()            Get next key
+    - a.reserve(100)                 Allocates given number of keys
+    - key = a.get_one()              Get next key
     
     #TODO: Convert this to a real generator class:
     # https://stackoverflow.com/questions/42983569/how-to-write-a-generator-class
     #
-    # class Fib:
+    # class Fib: #example
     #     def __init__(self):
     #         self.a, self.b = 0, 1        
     #     def __next__(self):
@@ -227,9 +227,13 @@ class IidGenerator:
         """
         Create an object with a reservation of 'id_count' ID values from the
         database counter for the type of 'obj_name'.
+        
+        Isotammi_id or iid consist of object type mark (1-2 letters) and
+        running index grouped by hyphens.
+        
+        @See: pe.neo4j.util.label_by_iid, bl.base.NodeObject.label
         """
-        # iid for Name objects start with "D" but are formed from corresponding Person iid
-        self.iid_type = "H" if obj_name.startswith("Pe") else obj_name[:1]
+        self.iid_mark = "H" if obj_name.startswith("Pe") else obj_name[:1]
         self.session = session
         self.n_iid = 0
         self.max_iid = 0
@@ -237,9 +241,11 @@ class IidGenerator:
     def reserve(self, iid_count: int):
         """
         Create an object with a reservation of 'id_count' ID values from the
-        database counter fot the type of 'obj_name'.
+        database counter for the type of 'obj_name'.
         """
-        result = self.session.run(cypher_block_of_iids, iid_type=self.iid_type, iid_count = iid_count)
+        result = self.session.run(cypher_block_of_iids, 
+                                  iid_mark=self.iid_mark, 
+                                  iid_count = iid_count)
         self.n_iid = result.single()[0]
         self.max_iid = self.n_iid + iid_count - 1
 
@@ -258,7 +264,7 @@ class IidGenerator:
             raise IsotammiException("Whole chunk of allocated Isotammi IDs already used."
                                     f" {self.n_iid} > {self.max_iid}")
 
-        iid = format_iid(self.iid_type + base32.encode(self.n_iid, checksum=False))
+        iid = format_iid(self.iid_mark + base32.encode(self.n_iid, checksum=False))
         self.n_iid += 1
 
 ##        print(f"new_isotammi_id: {self.n_iid} -> {iid}")

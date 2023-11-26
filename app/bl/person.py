@@ -98,7 +98,7 @@ class Person(NodeObject):
         self.death_low = None
         self.birth_high = None
         self.death_high = None
-        self.attrs =  ""
+        #!self.attrs =  ""
 
     def __str__(self):
         dates = self.dates if self.dates else ""

@@ -89,7 +89,7 @@ class Event(NodeObject):
         self.type = ""
         self.description = ""
         self.dates = None
-        self.attrs =  ""
+        #!self.attrs =  ""
 
     def __str__(self):
         return f"{self.iid} {self.type} {self.description}"
