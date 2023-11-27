@@ -29,7 +29,7 @@ from neo4j.exceptions import ClientError
 
 logger = logging.getLogger("stkserver")
 
-from bl.base import Status, IsotammiException #, NodeObject
+from bl.base import Status, IsotammiException, NodeObject #, NodeObject
 from bl.person import Person
 from bl.person_name import Name
 from bl.place import PlaceBl
@@ -432,7 +432,7 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Note -----
 
-    def ds_save_note_list(self, tx, parent, batch_id, iids):
+    def ds_save_note_list(self, tx, parent:NodeObject, batch_id, iids:IidGenerator):
         """Save the parent.notes[] objects as a descendant of the parent node.
 
         Arguments:
@@ -479,6 +479,7 @@ class Neo4jUpdateService(ConcreteService):
         }
         if note.handle:
             n_attr["handle"] = note.handle
+        # if note.url: print(f"#ds_save_note: {note.iid} {note.url!r}")
         if not parent_id is None:
             tx.run(CypherNote.create_in_batch_as_leaf(parent_id),
                    bid=batch_id,

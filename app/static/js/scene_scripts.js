@@ -273,7 +273,7 @@ function refTable() {
 				rObj = repositories[sObj.repositories[k]];
 				textnode = document.createTextNode(" – ");
 				nodeSource.appendChild(textnode);
-				
+
 				// Medium:– <span class="typedesc">kirja</span>
 				var nodeMedium = document.createElement("SPAN");
 				nodeMedium.setAttribute("class", "typedesc");
@@ -357,29 +357,31 @@ function refTable() {
 		// Url link is named by the url's domain name
 		var k, l, note, text;
 		for (k = 0; k < note_ref.length; k++) {
-			note = notes[note_ref[k]]
-			if (note.url || note.text) {
-				var lines = note.text.split("¤");
-				htmlObject.appendChild(document.createTextNode(" –► "));
-				var nodeI = document.createElement("I");
-				nodeI.appendChild(document.createTextNode(lines[0] + " "));
-				for (l=1; l < lines.length; l++) {
-					if (lines[l].length > 0) {
-						nodeI.appendChild(document.createElement("BR"));
-						nodeI.appendChild(document.createTextNode(lines[l]));
+			note = notes[note_ref[k]];
+			if (note) {
+				if (note.url || note.text) {
+					var lines = note.text.split("¤");
+					htmlObject.appendChild(document.createTextNode(" –► "));
+					var nodeI = document.createElement("I");
+					nodeI.appendChild(document.createTextNode(lines[0] + " "));
+					for (l=1; l < lines.length; l++) {
+						if (lines[l].length > 0) {
+							nodeI.appendChild(document.createElement("BR"));
+							nodeI.appendChild(document.createTextNode(lines[l]));
+						}
 					}
+					nodeI.appendChild(document.createTextNode(' '));
+					htmlObject.appendChild(nodeI);
 				}
-				nodeI.appendChild(document.createTextNode(' '));
-				htmlObject.appendChild(nodeI);
-			}
-			if (note.url) {
-				var nodeNoteA = document.createElement("A");
-				nodeNoteA.setAttribute("class", "outlink");
-				nodeNoteA.setAttribute("target", "_blank");
-				nodeNoteA.setAttribute("href", note.url);
-				text = nodeNoteA.hostname;
-				nodeNoteA.appendChild(document.createTextNode(text));
-				htmlObject.appendChild(nodeNoteA);
+				if (note.url) {
+					var nodeNoteA = document.createElement("A");
+					nodeNoteA.setAttribute("class", "outlink");
+					nodeNoteA.setAttribute("target", "_blank");
+					nodeNoteA.setAttribute("href", note.url);
+					text = nodeNoteA.hostname;
+					nodeNoteA.appendChild(document.createTextNode(text));
+					htmlObject.appendChild(nodeNoteA);
+				}
 			}
 		}
 	}

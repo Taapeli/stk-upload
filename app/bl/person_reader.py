@@ -25,7 +25,7 @@ Created on 30.1.2021
 #import shareds
 from pe.dataservice import DataService
 from bl.base import Status, NodeObject
-
+from bl.dates import ITimer
 from bl.source import SourceBl
 from bl.citation import Citation
 from bl.repository import Repository
@@ -149,7 +149,7 @@ class PersonReaderTx(DataService):
             num_hidden = 0
         return {"items": persons2, "num_hidden": num_hidden, "status": status}
 
-    def get_person_data(self, iid: str):
+    def get_person_data(self, iid: str, fullData=True):
         """
         Get a Person with all connected nodes for display in Person page as object tree.
         """
@@ -162,11 +162,11 @@ class PersonReaderTx(DataService):
            for f
                 (f) --> (fp:Person) -[*1]-> (fpn:Name)
                 (f) --> (fe:Event)
-        3. for z in p, x, fe, z, s, r
-               (y) --> (z:Citation|Note|Media)
         4. for pl in z:Place, ph
                (pl) --> (pn:Place_name)
                (pl) --> (ph:Place)
+        3. for z in p, x, fe, z, s, r
+               (y) --> (z:Citation|Note|Media)
         5. for c in z:Citation
                (c) --> (s:Source) --> (r:Repository)
         
@@ -233,6 +233,12 @@ class PersonReaderTx(DataService):
 
         # ---/
 
+        # Select which data to read
+        do_places = fullData
+        do_sources = fullData
+        do_note_media = fullData
+        jscode = ""
+
         res = self.dataservice.tx_get_person_by_iid(
             iid, 
             self.user_context.material,
@@ -293,68 +299,74 @@ class PersonReaderTx(DataService):
         #    Sort all Person and family Events by date
         person.events.sort()
 
-        # 4. Places for person and each event
+        if do_places:
 
-        res = self.dataservice.tx_get_object_places(self.obj_catalog)
-        # returns {status, place_references}
-        if Status.has_failed(res):
-            logger.error(
-                "#bl.person_reader.PersonReaderTx.get_person_data - Can not read places:"
-                f' {res.get("statustext")}'
-            )
-            return res
+            # 4. Places for person and each event
 
-        place_references = res.get("place_references", {})
-        # Got dictionary {object_id:  (place_node, (name_nodes))
-
-        # KKu: Converting nodes to PlaceBl objects with PlaceNames included
-        #      see -> Neo4jReadServiceTx.tx_get_person_by_iid
-
-        for place in res['places']:
-            self._catalog(place)
-
-        for e in person.events:
-            if e.iid in place_references.keys():
-
-                place = _extract_place_w_names(place_references[e.iid])
-                if place:
-                    e.place_ref = [place.iid]
-                    # Add Upper Place, if not set and exists
-                    if place.uppers == [] and place.iid in place_references:
-                        refs = place_references[place.iid]
-                        if refs:
-                            up_place = _extract_place_w_names(refs)
-                            if up_place:
-                                place.uppers = [up_place]
-
-        # 5. Citations, Notes, Medias
-
-        new_ids = [""]
-        all_citations = {}
-        while len(new_ids) > 0:
-            # New objects
-            citations = {}
-            notes = {}
-            medias = {}
-
-            res = self.dataservice.tx_get_object_citation_note_media(
-                self.obj_catalog, new_ids
-            )
-            # returns {status, new_objects, references}
-            # - new_objects    the objects, for which a new search should be done
-            # - references     {source id: [ReferenceObj(node, order, crop)]}
+            res = self.dataservice.tx_get_object_places(self.obj_catalog)
+            # returns {status, place_references}
             if Status.has_failed(res):
                 logger.error(
-                    "#bl.person_reader.PersonReaderTx.get_person_data - Can not read citations etc.:"
+                    "#bl.person_reader.PersonReaderTx.get_person_data - Can not read places:"
                     f' {res.get("statustext")}'
                 )
                 return res
-            new_ids = res.get("new_objects", [])
-            references = res.get("references")
+    
+            place_references = res.get("place_references", {})
+            # Got dictionary {object_id:  (place_node, (name_nodes))
+    
+            # KKu: Converting nodes to PlaceBl objects with PlaceNames included
+            #      see -> Neo4jReadServiceTx.tx_get_person_by_iid
+    
+            for place in res['places']:
+                self._catalog(place)
 
-            for src_id, src in self.obj_catalog.items():
-                refs = references.get(src_id)
-                if refs:
+            for e in person.events:
+                if e.iid in place_references.keys():
+    
+                    place = _extract_place_w_names(place_references[e.iid])
+                    if place:
+                        e.place_ref = [place.iid]
+                        # Add Upper Place, if not set and exists
+                        if place.uppers == [] and place.iid in place_references:
+                            refs = place_references[place.iid]
+                            if refs:
+                                up_place = _extract_place_w_names(refs)
+                                if up_place:
+                                    place.uppers = [up_place]
+
+        # 5. Citations, Notes, Medias
+
+        if do_sources or do_note_media:
+
+            new_ids = [""]
+            all_citations = {}
+            while len(new_ids) > 0:
+                # New objects
+                citations = {}
+                notes = {}
+                medias = {}
+
+                res = self.dataservice.tx_get_object_citation_note_media(
+                    self.obj_catalog, new_ids
+                )
+                # returns {status, new_objects, references}
+                # - new_objects    the objects, for which a new search should be done
+                # - references     {source id: [ReferenceObj(node, order, crop)]}
+                if Status.has_failed(res):
+                    logger.error(
+                        "#bl.person_reader.PersonReaderTx.get_person_data - Can not read citations etc.:"
+                        f' {res.get("statustext")}'
+                    )
+                    return res
+                new_ids = res.get("new_objects", [])
+                references = res.get("references")
+    
+                for src_id, src in self.obj_catalog.items():
+                    refs = references.get(src_id)
+                    if refs is None:
+                        continue
+                    
                     for current in refs:
                         order = current.order
                         crop = current.crop
@@ -400,63 +412,67 @@ class PersonReaderTx(DataService):
                             raise NotImplementedError(
                                 f"Citation, Note or Media excepted, got {label}"
                             )
-                else: # No references from this object
-                    pass
-            print(f"#+ - found {len(citations)} Citations, {len(notes)} Notes,"
-                  f" {len(medias)} Medias from {len(new_ids)} nodes")
-            # for iid, note in notes.items():
-            #     print(f'#+ - {iid}: {note}')
-            all_citations.update(citations)
-            self.obj_catalog.update(citations)
-            self.obj_catalog.update(notes)
-            self.obj_catalog.update(medias)
+                if len(citations) + len(notes) + len(medias) + len(new_ids) > 0:
+                    print(f"#+ - found {len(citations)} Citations, {len(notes)} Notes,"
+                          f" {len(medias)} Medias from {len(new_ids)} nodes")
+                # for iid, note in notes.items():
+                #     print(f'#+ - {iid}: {note}')
+                all_citations.update(citations)
+                self.obj_catalog.update(citations)
+                self.obj_catalog.update(notes)
+                self.obj_catalog.update(medias)
 
-        # The average confidence of the sources (person.confidence) has been calculated
-        # when creating (or updating) Person
+            # The average confidence of the sources (person.confidence) has been calculated
+            # when creating (or updating) Person
 
-        # 6. Read Sources s and Repositories r for all Citations
-        #    for c in z:Citation
-        #        (c) --> (s:Source) --> (r:Repository)
+            if do_sources:
 
-        res = self.dataservice.tx_get_citation_sources_repositories(
-            list(all_citations.values())
-        )
-        if Status.has_failed(res, strict=False):
-            logger.error(
-                "#bl.person_reader.PersonReaderTx.get_person_data - Can not read repositories:"
-                f' {res.get("statustext")}'
-            )
-            return res
-        # res = {'status': Status.OK, 'sources': references}
-        #    - references    {Citation.unid_id: SourceReference}
-        #        - SourceReference    object with source_node, repository_node, medium
+                # 6. Read Sources s and Repositories r for all Citations
+                #    for c in z:Citation
+                #        (c) --> (s:Source) --> (r:Repository)
 
-        source_refs = res.get("sources")
-        if source_refs:
-            for iid, ref in source_refs.items():
-                # 1. The Citation node
-                cita = self.obj_catalog[iid]
+                res = self.dataservice.tx_get_citation_sources_repositories(
+                    list(all_citations.values())
+                )
+                if Status.has_failed(res, strict=False):
+                    logger.error(
+                        "#bl.person_reader.PersonReaderTx.get_person_data - Can not read repositories:"
+                        f' {res.get("statustext")}'
+                    )
+                    return res
+                # res = {'status': Status.OK, 'sources': references}
+                #    - references    {Citation.unid_id: SourceReference}
+                #    - Source_refs   objects with source_node, repository_node, medium
+        
+                source_refs = res.get("sources")
+                if source_refs:
+                    for iid, ref in source_refs.items():
+                        # 1. The Citation node
+                        cita = self.obj_catalog[iid]
+        
+                        # 2. The Source node
+                        source = ref.source_obj
+                        self._catalog(source)
+        
+                        # 3.-4. The Repository node and medium from REPOSITORY relation
+                        repo = ref.repository_obj
+                        if repo:
+                            repo.medium = ref.medium
+                            self._catalog(repo)
+                            # This source is in this repository
+                            if not repo.iid in source.repositories:
+                                source.repositories.append(repo.iid)
+        
+                        # Referencing a (Source, medium, Repository) tuple
+                        cita.source_id = source.iid
+                        # print(f"# ({iid}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
+        
+                #         # Create Javascript code to create source/citation list
+                #         jscode = get_citations_js(self.dataservice.objs)
+                jscode = self.get_citations_js()
 
-                # 2. The Source node
-                source = ref.source_obj
-                self._catalog(source)
-
-                # 3.-4. The Repository node and medium from REPOSITORY relation
-                repo = ref.repository_obj
-                if repo:
-                    repo.medium = ref.medium
-                    self._catalog(repo)
-                    # This source is in this repository
-                    if not repo.iid in source.repositories:
-                        source.repositories.append(repo.iid)
-
-                # Referencing a (Source, medium, Repository) tuple
-                cita.source_id = source.iid
-                # print(f"# ({iid}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
-
-        #         # Create Javascript code to create source/citation list
-        #         jscode = get_citations_js(self.dataservice.objs)
-        jscode = self.get_citations_js()
+        # print("#PersonReaderTx.get_person_data: "
+        #       f"{person.id}/{person.iid} with {len(self.obj_catalog)} objects {elapsed}")
 
         # Return Person with included objects,  and javascript code to create
         # Citations, Sources and Repositories with their Notes

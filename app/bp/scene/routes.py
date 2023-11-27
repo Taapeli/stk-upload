@@ -47,7 +47,8 @@ import shareds
 from . import bp
 
 from bp.api import apikey
-from bl.base import Status, StkEncoder
+from bl.base import Status, StkEncoder #, IsotammiException
+from bl.dates import ITimer
 from bl.comment import CommentReader, CommentsUpdater #, Comment
 from bl.event import EventReader, EventWriter
 from bl.family import FamilyReader
@@ -522,6 +523,7 @@ def show_person(iid=None, fanchart=False):
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
+        elapsed = ITimer()
         result = service.get_person_data(iid)
 
     # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
@@ -534,16 +536,18 @@ def show_person(iid=None, fanchart=False):
     else:
         person = result.get("person")
         objs = result.get("objs", [])
-        print(f"# Person with {len(objs)} objects")
+        print(f"#show_person: Person with {len(objs)} objects {elapsed}")
         jscode = result.get("jscode", "")
         # Batch or Audit node data like {'material', 'root_user', 'id'}
         person.root = result.get("root")
 
+    #print("show_person:\n" + jscode)
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     may_edit = current_user.has_role("audit")  # or current_user.has_role('admin')
     # may_edit = 0
+
     return render_template(
         "/scene/person.html",
         person=person,
@@ -567,35 +571,24 @@ def show_person_family_tree_hx(iid):
     """
     Htmx-component for displaying selected relatives tab: the families details.
     """
+    elapsed = ITimer()
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
-        result = service.get_person_data(iid)
+        result = service.get_person_data(iid, fullData=False)
 
     # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")
     objs = result.get("objs", [])
-    print(f"# Person with {len(objs)} objects")
-    jscode = result.get("jscode", "")
-    root = result.get("root")
+    print(f"#show_person_family_tree_hx: Person with {len(objs)} objects {elapsed}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_person_family_tree_hx n={len(objs)}")
 
-    stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
-
-    last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
-    may_edit = current_user.has_role("audit")  # or current_user.has_role('admin')
     return render_template(
         "/scene/hx-person/famtree.html",
         person=person,
-        obj=objs,
-        jscode=jscode,
-        menuno=12,
-        root=root,
-        last_year_allowed=last_year_allowed,
-        user_context=u_context,
-        may_edit=may_edit,
-    )
+     )
 
 
 @bp.route("/scene/hx-person/fanchart/<iid>", methods=["GET"])
@@ -605,11 +598,11 @@ def show_person_fanchart_hx(iid):
     """
     Htmx-component for displaying selected relatives tab: fanchart.
     """
-    t0 = time.time()
+    elapsed = ITimer()
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
-        result = service.get_person_data(iid)
+        result = service.get_person_data(iid, fullData=False)
 
     # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
@@ -618,8 +611,9 @@ def show_person_fanchart_hx(iid):
 
     fanchart = FanChart().get(iid)
     n = len(fanchart.get("children", []))
-    t1 = time.time() - t0
-    stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
+    print(f"#show_person_fanchart_hx: Person with {n} children {elapsed}")
+    #!t1 = time.time() - t0
+    #!stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
     return render_template(
         "/scene/hx-person/fanchart.html",
         person=person,
@@ -648,7 +642,7 @@ def get_person_nametypes(iid, typename):
         s += f"\n    <option value='{typename}' selected>" + _(typename)
     s += "\n</select>"
     s += f"<span class='msg' id='msg_{iid}'></span>"
-    print(f"bp.scene.routes.get_person_nametypes:\n{s}")
+    #print(f"bp.scene.routes.get_person_nametypes:\n{s}")
     return s
 
 
@@ -672,11 +666,12 @@ def person_name_changetype(iid):
 @bp.route("/scene/get_person_names/<iid>", methods=["PUT"])
 @roles_accepted("guest", "research", "audit", "admin")
 def get_person_names(iid):
+    # For names list editing
     u_context = UserContext()
 
-    args = {}
+    #!args = {}
     with PersonReader("read", u_context) as service:
-        result = service.get_person_data(iid, args)
+        result = service.get_person_data(iid, fullData=False)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
@@ -1433,20 +1428,20 @@ def show_media(iid):
 
     medium = res.get("item", None)
     if medium:
-        fullname, mimetype, size = mediafile.get_fullname(medium.iid)
+        _fullname, mimetype, size = mediafile.get_fullname(medium.iid)
         stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
         print(f"#attrs: {medium.attrs}")
     else:
         flash(f'{res.get("statustext","error")}', "error")
-        fullname = None
+        _fullname = None
         mimetype = None
     if mimetype == "application/pdf":
         size = 0
     # else:
-    #     size = mediafile.get_image_size(fullname)
+    #     size = mediafile.get_image_size(_fullname)
     cites = res.get("cites", [])
     for c in cites:
-        print(f"#cite: {c}")
+        print(f"#show_media: cite {c}")
 
     return render_template("/scene/media.html", 
                            media=medium, size=size,

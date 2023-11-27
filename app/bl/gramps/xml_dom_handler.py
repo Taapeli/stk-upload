@@ -34,7 +34,7 @@ import re
 import time
 import os
 import xml.dom.minidom
-import json
+#import json
 import threading
 from flask_babelex import _
 
@@ -122,7 +122,7 @@ class DOM_handler:
         #!self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
-    def complete(self, obj:NodeObject, url_notes = None):
+    def complete(self, obj:NodeObject, url_notes:list[NodeObject] = None):
         """ Complete object saving. """
         # 1. Store handle to iid, uniq_id conversion
         #!self.handle_to_node[obj.handle] = obj.iid   #!, obj.uniq_id)
@@ -198,7 +198,7 @@ class DOM_handler:
             for nodes_chunk in self.get_chunk(dom_nodes, chunk_max_size):
                 chunk_size = len(nodes_chunk)
                 iid_generator.reserve(chunk_size)
-                print(f"#handle_dom_nodes: new tx for {chunk_size} {iid_generator.iid_type} nodes")
+                # print(f"#handle_dom_nodes: new tx for {chunk_size} {iid_generator.iid_mark} nodes")
                 session.write_transaction(transaction_function, 
                                           nodes=nodes_chunk,
                                           iids=iid_generator)
