@@ -647,6 +647,7 @@ class DOM_handler:
 
         # Starts handling the list of Persons
 
+        href_fixes = 0 
         for person in nodes:
             url_notes = []
 
@@ -688,11 +689,14 @@ class DOM_handler:
 
             # Handle <objref>, returns a list of m_ref's
             p.media_refs = self._extract_mediaref(p, person)
-
+            
             for person_url in person.getElementsByTagName("url"):
                 n = Note()
                 n.priv = self._get_priv(person_url)
-                n.url = person_url.getAttribute("href")
+                href = person_url.getAttribute("href")
+                _text, n.url = self._pick_url_from_text(href)
+                if _text:
+                    href_fixes += 1
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
                 if n.url:
@@ -717,6 +721,8 @@ class DOM_handler:
 
             # The refnames will be set for these persons
             self.person_ids.append(p.iid)
+        if href_fixes > 0:
+            print(f"DOM_handler.handle_people_list: fixed {href_fixes} person urls") 
 
 
     def handle_place_list(self, tx, nodes, iids:IidGenerator):
@@ -1086,7 +1092,7 @@ class DOM_handler:
                 return priv
         return None
 
-    def _pick_url_from_text(self, src):
+    def _pick_url_from_text(self, src:str) -> list[str]:
         """Extract an url from the text src, if any
     
         Returns (text, url), where the url is removed from text
