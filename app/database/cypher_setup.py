@@ -43,6 +43,15 @@ class SetupCypher():
     remove_lock_initiated = """
     MATCH (lock:Lock {id:'initiated'}) DELETE lock
     """
+    find_roots_db_schema = """
+    MATCH (root:Root)  WHERE root.db_schema < $db_schema
+    RETURN root.id AS batch_id
+    """
+    set_root_db_schema = """
+    MATCH (root:Root {id:$id}) 
+        SET root.db_schema = $db_schema
+        SET root.neo4jImportId = null
+    """
     find_empty_roots = """
     MATCH (b:Root) WHERE b.file IS NULL
     OPTIONAL MATCH (b) --> (x)

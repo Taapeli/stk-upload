@@ -22,6 +22,7 @@
 #from datetime import datetime
 import logging
 import traceback
+from bl.base import IsotammiException
 
 logger = logging.getLogger('stkserver')
 
@@ -54,6 +55,7 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
 # ====== Stk database schema ======
 #TODO Always change (increment) this, if schema must be updated
 # The value is also stored in each Root node
+# Syntax: <year>.<running number>.<fix number>
 DB_SCHEMA_VERSION = "2023.1.0"
 # =============================
 
@@ -371,6 +373,29 @@ def create_lock_w_constraint():
         create_unique_constraint('Lock', 'id', 'lock_id')
         return
 
+def find_roots_to_update() -> int:
+    """ Find batches not following current db_schema """
+    batches = []
+    with shareds.driver.session() as session:
+        result = session.run(SetupCypher.find_roots_db_schema, 
+                             db_schema=DB_SCHEMA_VERSION)
+        for record in result:
+            batches.append(record[0])
+    return batches
+
+def update_root_schema(batch_id:str):
+    """ Mark this batch is following current db_schema """
+    if (not batch_id) or (not DB_SCHEMA_VERSION):
+        IsotammiException("database.accessDB.update_root_schema FAILED")
+    with shareds.driver.session() as session:
+        # Also remove neo4jImportId, if exists
+        result = session.run(SetupCypher.set_root_db_schema, 
+                             id=batch_id, db_schema=DB_SCHEMA_VERSION)
+        summary = result.consume()
+        if summary.counters.properties_set == 1:
+            print(f"update_root_schema: Batch {batch_id} updated to version {DB_SCHEMA_VERSION})")
+    return
+
 def re_initiate_nodes_constraints_fixes():
     # Remove initial lock for re-creating nodes, constraints and schema fixes
     with shareds.driver.session() as session:
@@ -428,39 +453,40 @@ def create_unique_constraint(label, property_name, constraint_name=""):
             raise
     return
 
-# def create_constraint(label, prop):
-#     ' Create given constraint for given label and property.'
+def drop_prop_constraints(prop: str):
+    """ Drop all indexes for given property.
 
-def remove_prop_constraints(prop):
-    """ Remove unique constraints for given property.
+        Database copy from older version to new database created temporary
+        neo4jImportId fields and their indexes. Here we drop their unique indexes,
     """
-    with shareds.driver.session() as session:
-        #!if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
-        #     list_indexes = """
-        #         SHOW UNIQUENESS CONSTRAINTS
-        #         YIELD name, labelsOrTypes, properties
-        #             WHERE $prop IN properties
-        #     LIMIT 5"""
-        # else:
-        list_indexes = """
-            SHOW UNIQUE CONSTRAINTS
-                YIELD name, labelsOrTypes, properties
-                WHERE $prop IN properties  LIMIT 5"""
-        try:
-            names = []
-            result = session.run(list_indexes, prop=prop)
-            for name, labels, props in result:
-                names.append(name)
-                print(f"Removing Unique constraints for {labels[0]}.{props[0]}")
+    cy_list_constraints = """
+        SHOW ALL CONSTRAINTS 
+        YIELD name, labelsOrTypes, properties WHERE $prop in properties"""
+    # ╒═════════════════════╤═════════════════╤═════════════════╕
+    # │name                 │labelsOrTypes    │properties       │
+    # ╞═════════════════════╪═════════════════╪═════════════════╡
+    # │"constraint_2026f827"│["Note"]         │["neo4jImportId"]│
+    # ├─────────────────────┼─────────────────┼─────────────────┤
 
-            for name in names:
-                session.run("DROP CONSTRAINT "+name+" IF EXISTS")
-            print(f"Removed {len(names)} Unique constraints for {prop}")
-            
-        except Exception as e:
-            logger.error(f"database.accessDB.remove_prop_constraints: {e.__class__.__name__} {e}" )
-            raise
-    return
+    drops_done = 0
+    drops_todo = []
+    with shareds.driver.session() as session: 
+        result = session.run(cy_list_constraints, prop=prop)
+        for record in result:
+            constraint_name = record[0]
+            label = record[1][0]
+            drops_todo.append((constraint_name,label))
+        for name, label in drops_todo:
+            result = session.run(f"DROP CONSTRAINT {name} IF EXISTS")
+            summary = result.consume()
+            count = summary.counters.constraints_removed
+            drops_done += count
+            print(f"drop_prop_constraints: {name} for {label}.{prop} "
+                  f"{['not existed','removed'][count]}")
+                
+        if drops_done:
+            print(f"drop_prop_constraints: {drops_done} indexes removed")
+    return drops_done
 
 
 def create_freetext_index():

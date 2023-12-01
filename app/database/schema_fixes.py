@@ -193,7 +193,7 @@ def do_schema_fixes():
     #    - if found objects with missing a.iid: generate a.iid
     #    - set b.db_schema version
 
-    def set_iid_remove_neo4jImportId(bid:str) -> int:
+    def update_obj_keys(bid:str) -> int:
         """ For all nodes in given batch add missing iid and 
             remove obsolete neo4jImportId.
 
@@ -204,37 +204,28 @@ def do_schema_fixes():
             5) Return number on nodes changed
         """
         cy_person_names = """
-            MATCH (root:Root{id:$bid) WITH root LIMIT 1
-            MATCH (root) -[OBJ_PERSON]-> (src:Person) -[r:NAME]-> (nm:Name)
-            WITH src, nm, nm.iid AS old_iid
-                SET nm.iid = "A"+src.iid+"."+(nm.order + 1)
-                SET nm.neo4jImportId = null
-                SET src.neo4jImportId = null
-            RETURN count(nm) AS cnt, 
-                CASE WHEN old_iid IS null THEN 1 ELSE 0 END AS new_iid
-            //RETURN src, nm as name, "A"+src.iid+"."+nm.order AS name_iid LIMIT 100
-        """
+MATCH (root:Root{id:$bid}) WITH root
+MATCH (root) -[OBJ_PERSON]-> (src:Person) -[r:NAME]-> (nm:Name)
+WITH src, nm, nm.iid AS old_iid
+    SET nm.iid = "A"+src.iid+"."+(nm.order + 1)
+    SET nm.neo4jImportId = null
+    SET src.neo4jImportId = null
+RETURN count(nm) AS name_cnt"""
         cy_place_names = """
-            MATCH (root:Root{id:$bid}) -[OBJ_PLACE]-> 
-                (src:Place) -[r:NAME]-> (nm:Place_name)
-            WITH src, r, nm, nm.iid AS old_iid
-                SET nm.iid = "A"+src.iid+"."+(r.order + 1)
-                SET nm.neo4jImportId = null
-                SET src.neo4jImportId = null
-            RETURN count(nm) AS cnt, 
-                CASE WHEN old_iid IS null THEN 1 ELSE 0 END AS new_iid
-            //RETURN src, nm as name, "A"+src.iid+"."+r.order AS name_iid LIMIT 100
-        """
+MATCH (root:Root{id:$bid}) -[OBJ_PLACE]-> 
+    (src:Place) -[r:NAME]-> (nm:Place_name)
+WITH src, r, nm, nm.iid AS old_iid
+    SET nm.iid = "A"+src.iid+"."+(r.order + 1)
+    SET nm.neo4jImportId = null
+    SET src.neo4jImportId = null
+RETURN count(nm) AS name_cnt"""
         # // Other (but Name, Place_name) nodes to remove neo4jImportId
-        # MATCH (a:Root{id:$bid}) -[r WHERE NOT TYPE(r) STARTS WITH 'OBJ_P']-> (b)
-        # WHERE NOT b.neo4jImportId IS null
-        # RETURN a.id, LABELS(b)[0] AS lbl, COLLECT(b.iid) AS todo
         cy_no_names = """
-            MATCH (a:Root{id:$bid}) -[r WHERE NOT TYPE(r) STARTS WITH 'OBJ_P']-> (b)
-            WHERE NOT b.neo4jImportId IS null
-                SET b.neo4jImportId = null
-            WITH labels(b)[0] AS lbl, count(b) AS cnt
-            RETURN {label: lbl, count: cnt} ORDER BY lbl"""
+MATCH (a:Root{id:$bid}) -[r WHERE NOT TYPE(r) STARTS WITH 'OBJ_P']-> (b)
+WHERE NOT b.neo4jImportId IS null
+    SET b.neo4jImportId = null
+WITH labels(b)[0] AS lbl, count(b) AS cnt
+RETURN {label: lbl, count: cnt} AS stat ORDER BY lbl"""
         # ╒═══════════════════════════════╕
         # │stat                           │
         # ╞═══════════════════════════════╡
@@ -246,182 +237,76 @@ def do_schema_fixes():
         # │{count: 2, label: "Repository"}│
         # │{count: 4, label: "Source"}    │
         # └───────────────────────────────┘
-        # NOTE! Refnamet jäävät käsittelemättä
+        # NOTE! The Refnames are not processed
 
         names_total = 0
         prop_total = 0
-        name_key_removals = 0
         other_key_removals = 0
         # Person names
         with shareds.driver.session() as session:
             result = session.run(cy_person_names, bid=bid)
-            for name_cnt, new_iid in result:
-                iids_added = 1 if new_iid else 0
+            for record in result:
+                name_cnt = record[0]
                 names_total += name_cnt
-                summary = result.consume() 
-                prop_cnt = summary.counters.properties_set
-                name_removals = prop_cnt - iids_added
-                prop_total += name_removals
+                #print(f"#update_obj_keys: {bid} {name_cnt} persons")
+            summary = result.consume() 
+            prop_cnt = summary.counters.properties_set
+            prop_total += prop_cnt
         # Place names
         with shareds.driver.session() as session:
             result = session.run(cy_place_names, bid=bid)
-            for name_cnt, new_iid in result:
-                iids_added = 1 if new_iid else 0
+            for record in result:
+                name_cnt = record[0]
                 names_total += name_cnt
-                summary = result.consume() 
                 prop_cnt = summary.counters.properties_set
-                name_removals = prop_cnt - iids_added
-                prop_total += name_removals
+                #print(f"#update_obj_keys: {bid} {name_cnt} places")
+            summary = result.consume() 
+            prop_cnt = summary.counters.properties_set
+            prop_total += prop_cnt
         # Other than names
         with shareds.driver.session() as session:
             result = session.run(cy_no_names, bid=bid)
-            for stat in result:
+            for record in result:
+                stat = record[0]
                 prop_cnt = stat["count"]
                 other_key_removals += prop_cnt
-                print(f"#set_iid_remove_neo4jImportId: {bid} {stat['label']}")
+                #print(f"#update_obj_keys: {bid} {stat['label']}={prop_cnt}")
                 prop_total += other_key_removals
-        logger.info(f"do_schema_fixes.set_iid_remove_neo4jImportId: {bid} set "
-                    f"{names_total} iids for names and removed "
-                    f"{other_key_removals} temp keys")
+
+        logger.info(f"do_schema_fixes.update_obj_keys: {bid} set "
+                    f"{names_total} iids for names, removed "
+                    f"{prop_total-names_total} keys")
 
         # Return number of propertis changed; 0 if all is done
         return prop_total 
-        
-        
 
-    def obsolete_remove_importId(chunk_size: int, schema_version: str):
-        """ For unprocessed batches, clean nodes containing a 'importId' property
-            and generate an iids for Name and PlaceName objects.
-
-            Very large batches are cleaned only partially to avoid too heavy 
-            transactions, but calling this routine repeatedly work continues.
-
-
-            1) remove 'importId' from first 'chunck_size' nodes
-            2) set iid for those node needed
-            3) if all nodes was cleared, mark batch processed 
-               by setting root.db_schema to current DB_SCHEMA_VERSION
-            For Batches which are not totally done, the cleaning continues
-            in the next call of this routine
-        """
-        pick_chunks_1 = """
-MATCH (b:Root) WHERE b.db_schema < $schema_version
-    WITH b LIMIT 20
-OPTIONAL MATCH (b) --> (x) WHERE b.neo4jImportId IS NOT NULL
-WITH b.id AS batch, b.db_schema AS schema, b.xmlname AS batch_f, COUNT(x) AS cnt
-RETURN batch, schema, batch_f, cnt,
-    CASE
-        WHEN cnt < $chunk_size THEN 0
-        ELSE (cnt - $chunk_size)
-    END AS left
-        """
-        # │batch           │schema    │batch_f                               │cnt   │left  │
-        # ╞════════════════╪══════════╪══════════════════════════════════════╪══════╪══════╡
-        # │"2022-02-28.001"│"2022.1.8"│"bromarf paikkatiedot.isotammi.gpkg"  │545   │0     │
-        # │"2022-01-25.003"│"2022.1.8"│"Paikat Viljakkala 20211021.gramps"   │21787 │11787 │
-        # └────────────────┴──────────┴──────────────────────────────────────┴──────┴──────┘
-        _bid="TODO"
-        pick_chunks_2 = """
-MATCH (b:Root{id:$bid}) --> (h:Person) -[:NAME]-> (x)
-    WHERE x.neo4jImportId IS NOT NULL
-  RETURN b.id AS batch, h.iid AS src,
-        COLLECT(DISTINCT [ID(x),x.firstname+" "+x.surname]) AS dst
-UNION
-MATCH (b:Root{id:$bid}) --> (h:Place) -[:NAME]-> (x)
-    WHERE x.neo4jImportId IS NOT NULL
-  RETURN b.id AS batch, h.iid AS src,
-        COLLECT(DISTINCT [ID(x),x.name]) AS dst"""
-        # │batch           │src     │dst                                                   │
-        # ╞════════════════╪════════╪══════════════════════════════════════════════════════╡
-        # │"2021-08-31.001"│"H-1n64"│[[190072, "Liisa Maija Puuhaara"], [190071, "Liisa "]]│
-        #                           # Set iids "H-1n64"+".1", "H-1n64"+".2"
-        # │"2021-08-31.001"│"P-sbq" │[[190035, "Helsingfors"], [190034, "Helsinki"]]       │
-        #                           # Set iids "P-sbq"+".1", "P-sbq"+".2"
-        # └────────────────┴────────┴──────────────────────────────────────────────────────┘
-
-        
-        do_next = 0
-        did_now = 0
-        with shareds.driver.session() as session:
-
-            # 1. Clean some chunks of 1st degree nodes (directly pointed from Root)
-            #TODO clean, not pick
-            result1 = session.run(pick_chunks_1, 
-                                 chunk_size=chunk_size, schema_version=schema_version)
-            for batch, schema, batch_f, cnt, left in result1:
-                if batch:
-                    did_now = did_now + cnt
-                    do_next = do_next + left
-                    summary = result1.consume()
-                    changes = summary.counters.properties_set
-
-                    # 2. Set iid to 2nd degree nodes (Names, Place_names)
-                    #TODO clean, not pick
-                    result2 = session.run(pick_chunks_2, bid=batch)
-                    n = 0
-                    for batch, src, dst in result2:
-                        n = n + 1
-                        for d in dst:
-                            print(f" setting node ID({dst[0]}).iid = {src}.{n} # {dst[1]}")
-                
-                    print(f"#remove_importId: {cnt} properties removed from {batch}, {left} to do")
-                    
-            if changes:
-                print(f" -- removed {changes} indexes removed")
-        
-    def drop_indexes(prop: str):
-        """ Database copy from older version to new database created temporary
-            neo4jImportId fields and their indexes. 
-            First we drop their unique indexes,
-        """
-        list_constraints = """
-            SHOW ALL CONSTRAINTS 
-            YIELD name, labelsOrTypes, properties WHERE $prop in properties"""
-        drop_constraints = """
-            DROP CONSTRAINT {constraint_name} [IF EXISTS"""
-
-        drop_count_max = 3
-        drops_done = 0
-        with shareds.driver.session() as session: 
-            result = session.run(list_constraints,prop=prop)
-            for record in result:
-                drop_count_max = drop_count_max - 1
-                if drop_count_max >= 0:
-                    constraint_name = record[0]
-                    label = record[1][0]
-                    drops_done = drops_done + 1
-                    print(f"#drop_indexes: {constraint_name!r} for {label}:{prop} removing")
-                    
-            if drops_done:
-                print(f"drop_indexes: {drops_done} indexes removed")
-        return drops_done
 
 
     # --------------- START -----------------
+
+    from database.accessDB import update_root_schema, find_roots_to_update, drop_prop_constraints
     
     # --- For DB_SCHEMA_VERSION = '2022.1.3'...'2022.1.8', 9.6.2022/HRo & JMä
     #
-    # A. drop_indexes("neo4jImportId")
-    # B. For all batches b:
-    #    1. if found objects with missing a.iid: 
-    #       - generate a.iid and remove a.neo4jImportId
-    #    2. find objects (root) --> (x)
-    #       - remove a.neo4jImportId
-    #    3. set b.db_schema version to current DB_SCHEMA_VERSION
-    #
-    # for bid in "MATCH (root:Root) WHERE root.db_schema < $schema_version
-    #             RETURN root.id"
-    #     ##remove_importId(chunk_size: int, schema_version: str)
-    #     set_iid_remove_neo4jImportId(bid:str):
+    # A. drop obsolete indexes
+    drop_prop_constraints("neo4jImportId")
 
-    drop_indexes("neo4jImportId")
+    # B. Find all batches b not in current schema:
+    batches = find_roots_to_update()
+    print(f"do_schema_fixes: found {len(batches)} batches to update")
+    for bid in batches:
+    #    1a if found objects with missing a.iid: 
+    #       - generate a.iid and remove a.neo4jImportId
+    #    1b find other objects (root) --> (x)
+    #       - remove a.neo4jImportId
+        update_obj_keys(bid)
+    #    2. set b.db_schema version to current DB_SCHEMA_VERSION
+        update_root_schema(bid)
+
+    print("database.schema_fixes.do_schema_fixes.update_obj_keys: done for "
+          f"len(batches) batches")
+
     
-    for bid in ["2022-10-31.002", "2022-10-22.005"]:
-        count = set_iid_remove_neo4jImportId(bid)
-        _todo = """
-        """
-        if count == 0:
-            print("iid_for_names done; update Root!")
 
 #---- (change uuid_to_iid) ----
 
