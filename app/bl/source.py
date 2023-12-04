@@ -53,9 +53,9 @@ class Source(NodeObject):
             stitle          str lähteen otsikko
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """ Luo uuden source-instanssin """
-        NodeObject.__init__(self, uniq_id=uniq_id)
+        NodeObject.__init__(self, iid)
         self.stitle = ""
         self.sauthor = ""
         self.spubinfo = ""
@@ -70,15 +70,15 @@ class SourceBl(Source):
     """Source with optional referenced data.
 
     Arrays repositories, citations, notes may contain business objects
-    Array note_ref may contain database keys (uniq_ids)
+    Array note_ref may contain database keys (iids)
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """Creates a new PlaceBl instance.
 
         You may also give for printout eventual hierarchy level
         """
-        Source.__init__(self, uniq_id)
+        Source.__init__(self, iid)
 
         # For display combo
         # Todo: onko repositories, citations käytössä?
@@ -167,9 +167,8 @@ class SourceReader(DataService):
             res.statustext = f"no Source with iid={iid!r}"
             return res
 
-        citations, notes, targets = self.dataservice.dr_get_source_citators(
-            source.uniq_id
-        )
+        citations, notes, targets = \
+            self.dataservice.dr_get_source_citators(source.iid)
 
         #        if len(targets) == 0:
         #            # Only Citations connected to Person Event or Family Event can be

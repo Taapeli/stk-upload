@@ -30,9 +30,9 @@ class CypherPerson():
 
 # ----- Person node -----
 
-    get_person_by_uid = "MATCH (p:Person) WHERE ID(p) = $uid"
+    get_person_by_uid = "MATCH (p:Person {iid: $uid})"
     set_sortname = """
-MATCH (p:Person) WHERE ID(p) = $uid
+MATCH (p:Person {iid: $uid})
 SET p.sortname=$key"""
 
 # ----- Person page -----
@@ -46,11 +46,11 @@ RETURN p, root"""
 # RETURN user.username as loader, root, p"""
 
     get_names_events = """
-MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
+MATCH (p:Person {iid: $uid}) -[rel:NAME|EVENT]-> (x)
 RETURN type(rel) AS rel_type, x AS node, rel.role AS role ORDER BY x.order"""
 
     get_families = """
-MATCH (p:Person) <-[rel:CHILD|PARENT]- (f:Family) WHERE ID(p) = $uid
+MATCH (p:Person {iid: $uid}) <-[rel:CHILD|PARENT]- (f:Family)
 OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event)
 OPTIONAL MATCH (f) -[mr:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
 OPTIONAL MATCH (m) -[:EVENT]-> (me:Event {type:"Birth"})
@@ -61,33 +61,33 @@ RETURN type(rel) AS rel_type, rel.role as role,
 
     get_event_places = """
 MATCH (event:Event) -[:PLACE]-> (pl:Place)
-    WHERE ID(event) IN $uid_list
+    WHERE event.iid IN $iid_list
 OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
 OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
-RETURN LABELS(event)[0] AS label, ID(event) AS uniq_id, 
+RETURN LABELS(event)[0] AS label, event.iid AS iid, 
     pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
 
+#TODO: You should define the label of src! Very slow!
     get_objs_citations_notes_medias = """
 MATCH (src) -[r:CITATION|NOTE|MEDIA]-> (target)
-    WHERE ID(src) IN $uid_list
+    WHERE src.iid IN $uid_list
 RETURN src, properties(r) AS r, target"""
 
     get_names = """
-MATCH (n) <-[r:NAME]- (p:Person)
-    where id(p) = $pid
-RETURN id(p) as pid, n as name
+MATCH (n) <-[r:NAME]- (p:Person {iid:$pid})
+RETURN p.iid as pid, n as name
 ORDER BY name.order"""
 
     get_all_persons_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
-RETURN ID(p) AS pid, n as name
+RETURN p.iid AS pid, n as name
 ORDER BY n.order"""
 
     get_person_lifedata = """
 match (p:Person) -[:NAME]-> (n:Name {order:0})
-    where id(p) = $pid
+    where p.iid = $pid
 optional match (p) -[re:EVENT]-> (e:Event)
     where e.type = "Birth" or e.type = "Death"
 return n as name, collect(distinct e) as events"""
@@ -159,10 +159,9 @@ WITH root, person, name""" + _get_events_tail + _get_events_surname
 
     create_to_batch = """
 MATCH (root:Root {id: $batch_id})
-MERGE (p:Person {handle: $p_attr.handle})
-MERGE (root) -[r:OBJ_PERSON]-> (p)
-    SET p = $p_attr
-RETURN ID(p) as uniq_id"""
+MERGE (root) -[r:OBJ_PERSON]-> (p:Person {handle: $p_attr.handle})
+    SET p = $p_attr"""
+#!RETURN ID(p) as uniq_id"""
 
 #     link_name = """
 # CREATE (n:Name) SET n = $n_attr
@@ -173,7 +172,7 @@ RETURN ID(p) as uniq_id"""
     create_name_as_leaf = """
 CREATE (n:Name) SET n = $n_attr
 WITH n
-MATCH (p:Person)    WHERE ID(p) = $parent_id
+MATCH (p:Person {iid: $parent_id})
 MERGE (p)-[r:NAME]->(n)
 WITH n
 match (c:Citation) where c.handle in $citation_handles
@@ -197,28 +196,28 @@ MATCH (m:Media  {handle: $m_handle})
 
 # use models.gen.cypher.Cypher_name (there is no handle)
 
-    link_note = """
-MATCH (n {handle:$p_handle})
-MATCH (m:Note {handle:$n_handle})
+    p_link_note = """
+MATCH (n:Person {handle:$handle})
+MATCH (m:Note {handle:$hlink})
 CREATE (n) -[r:NOTE]-> (m)"""
 
 # ----- Other -----
 
     fetch_selected_for_lifetime_estimates = """
 MATCH (p:Person) 
-    WHERE id(p) IN $idlist
+    WHERE p.iid IN $idlist
 OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
 OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
 OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
 OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
 OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
 OPTIONAL MATCH (spouse) <-[:PARENT]- (fam1:Family) where id(spouse) <> id(p)
-RETURN p, id(p) as pid, 
+RETURN p, //#! p.iid as pid, 
     COLLECT(DISTINCT [e,r.role]) AS events,
     COLLECT(DISTINCT [fam_event,r2.role]) AS fam_events,
-    COLLECT(DISTINCT [c,id(c)]) as children,
-    COLLECT(DISTINCT [parent,id(parent)]) as parents,
-    collect(distinct [spouse,id(spouse)]) as spouses
+    COLLECT(DISTINCT [c,c.iid]) as children,
+    COLLECT(DISTINCT [parent,parent.iid]) as parents,
+    collect(distinct [spouse,spouse.iid]) as spouses
 """
 
     fetch_all_for_lifetime_estimates = """
@@ -229,7 +228,7 @@ OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
 OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
 OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
 OPTIONAL MATCH (spouse) <-[:PARENT]- (fam1:Family) where id(spouse) <> id(p)
-RETURN p, id(p) as pid, 
+RETURN p, //#! id(p) as pid, 
     collect(distinct [e,r.role]) AS events,
     collect(distinct [fam_event,r2.role]) AS fam_events,
     collect(distinct [c,id(c)]) as children,
@@ -238,8 +237,7 @@ RETURN p, id(p) as pid,
 """
 
     update_lifetime_estimate = """
-MATCH (p:Person) 
-    WHERE id(p) = $id
+MATCH (p:Person {iid: $id})
 SET p.birth_low = $birth_low,
     p.death_low = $death_low,
     p.birth_high = $birth_high,
@@ -247,14 +245,14 @@ SET p.birth_low = $birth_low,
 """
 
     get_confidences = """
-MATCH (person:Person) WHERE ID(person)=$id
+MATCH (person:Person {iid: $id})
 OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c1:Citation)
 OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
 RETURN person.confidence AS confidence, 
     COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
     set_confidence = """
-MATCH (person:Person) WHERE ID(person)=$id
+MATCH (person:Person {iid: $id})
 SET person.confidence=$confidence"""
 
 #-pe.neo4j.readservice.Neo4jReadService.dr_get_surname_list
@@ -266,43 +264,45 @@ order by count desc
 limit $count"""
 
     set_primary_name = """
-match (p:Person{iid:$iid})  
+match (p:Person {iid:$iid})  
 match (p) -[:NAME]-> (n1:Name{order:0})
 match (p) -[:NAME]-> (n2:Name{order:$old_order})
 set n1.order = $old_order, n2.order = 0
     """
 
     set_name_order = """
-match (n:Name) where id(n) = $uid  
+match (n:Name {iid: $uid}) 
 set n.order = $order
     """
 
     set_name_type = """
-match (n:Name) where id(n) = $uid  
+match (n:Name  {iid: $id}) 
 set n.type = $nametype
 return n
     """
 
     get_person_for_graph = """
-MATCH (n:Person)
-	WHERE n.iid in $ids 
+MATCH (n:Person) WHERE n.iid in $ids 
 OPTIONAL MATCH (n) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
-RETURN ID(n) AS uniq_id, n.iid AS iid, n.sortname AS sortname, 
+RETURN //#! ID(n) AS uniq_id, 
+       n.iid AS iid, n.sortname AS sortname, 
        n.sex as gender, COLLECT([e.type, e.date1/1024]) AS events,
        n.death_high AS death_high"""
 
     get_persons_parents = """
 MATCH (n:Person) <-[:CHILD]- (f:Family) -[:PARENT]-> (p:Person)
-	WHERE ID(n) in $ids 
+	WHERE n.iid in $ids 
 OPTIONAL MATCH (p) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
-RETURN ID(p) AS uniq_id, p.iid AS iid, p.sortname AS sortname, 
+RETURN //#! ID(p) AS uniq_id, 
+       p.iid AS iid, p.sortname AS sortname, 
        p.sex as gender, COLLECT([e.type, e.date1/1024]) AS events,
        p.death_high AS death_high"""
 
     get_persons_children = """
 MATCH (n:Person) <-[:PARENT]- (f:Family) -[:CHILD]-> (c:Person)
-	WHERE ID(n) in $ids 
+	WHERE n.iid in $ids 
 OPTIONAL MATCH (c) --> (e:Event) WHERE e.type in ["Birth", "Death"] 
-RETURN ID(c) AS uniq_id, c.iid AS iid, c.sortname AS sortname, 
+RETURN //#! ID(c) AS uniq_id,
+       c.iid AS iid, c.sortname AS sortname, 
        c.sex as gender, COLLECT([e.type, e.date1/1024]) AS events,
        c.death_high AS death_high"""

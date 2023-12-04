@@ -168,7 +168,7 @@ class Neo4jReadService(ConcreteService):
         """Reads person's def. name, birth and death event into Person obj."""
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(CypherPerson.get_person_lifedata, pid=person.uniq_id)
+            result = session.run(CypherPerson.get_person_lifedata, pid=person.iid)
             for record in result:
                 # <Record
                 #    name=<Node id=379934 labels={'Name'}
@@ -201,43 +201,57 @@ class Neo4jReadService(ConcreteService):
         Returns dict {item, status, statustext}
         """
         event = None
+        causes = []    # Death cause event
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = run_cypher(
-                    session, CypherEvent.get_an_event, user, material, iid=iid
-                )
-                for record in result:
-                    if record["e"]:
-                        # Record: <Record
-                        #    e=<Node id=16580 labels=frozenset({'Event'})
-                        #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
-                        #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
-                        #            'type': 'Baptism', 'iid': 'E-6007'}>
-                        #    root=<Node id=31100 labels=frozenset({'Audit'})
-                        #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
-                        # >
-                        node = record["e"]
-                        event = EventBl_from_node(node)
-                if event:
-                    return {"item": event, "status": Status.OK}
+                result = run_cypher(session, CypherEvent.get_an_event, 
+                                    user, material, iid=iid)
+                record = result.single()
+                if record["e"]:
+                    # Record: <Record
+                    #    e=<Node id=16580 labels=frozenset({'Event'})
+                    #        properties={'datetype': 0, 'change': 1585409701, 'description': '',
+                    #            'id': 'E1742', 'date2': 1815589, 'date1': 1815589,
+                    #            'type': 'Baptism', 'iid': 'E-6007'}>
+                    #    root=<Node id=31100 labels=frozenset({'Audit'})
+                    #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
+                    # >
+                    node = record["e"]
+                    event = EventBl_from_node(node)
+                if event and event.type == "Death":
+                    # Read also event with type: Cause Of Death"
+                    result = session.run(CypherEvent.get_cause_event, iid=iid)
+                    for record in result:
+                        if record:
+                            # Record: <Record
+                            #    cause=<Node element_id='...' labels=frozenset({'Event'})
+                            #        properties={'description': 'Rautatieonnettomuus Pöljän seisakkeella',
+                            #            'handle': '_e0787c4feac1d97afbaf9d89f9a@23110625', 'id': 'E0009',
+                            #            'type': 'Cause Of Death', 'attrs': '' ...}
+                            # >  >
+                            node = record[0]
+                            causes.append(EventBl_from_node(node))
+
+                return {"item": event, "causes": causes, "status": Status.OK}
 
             except Exception as e:
-                return {"item": None, "status": Status.ERROR, "statustext": str(e)}
+                return {"item": event, "causes": causes, 
+                        "status": Status.ERROR, "statustext": str(e)}
 
         return {
-            "item": event,
+            "item": event, "causes": causes,
             "status": Status.NOT_FOUND,
             "statustext": "No Event found",
         }
 
-    def dr_get_event_participants(self, uid):
+    def dr_get_event_participants(self, uid: str):
         """Get people and families connected to this event.
 
         Returns dict {items, status, statustext}
         """
         try:
             with self.driver.session(default_access_mode="READ") as session:
-                result = session.run(CypherEvent.get_event_participants, uid=uid)
+                result = session.run(CypherEvent.get_event_participants, iid=uid)
                 parts = []
                 for record in result:
                     # <Record
@@ -288,7 +302,7 @@ class Neo4jReadService(ConcreteService):
         places = []
         try:
             with self.driver.session(default_access_mode="READ") as session:
-                result = session.run(CypherEvent.get_event_place, uid=uid, lang="fi")
+                result = session.run(CypherEvent.get_event_place, iid=uid, lang="fi")
                 for record in result:
                     # Returns place, name, COLLECT(DISTINCT [properties(r), upper,uname]) as upper_n
                     pl = PlaceBl_from_node(record["place"])
@@ -317,7 +331,7 @@ class Neo4jReadService(ConcreteService):
         medias = []
         try:
             with self.driver.session(default_access_mode="READ") as session:
-                result = session.run(CypherEvent.get_event_notes_medias, uid=uid)
+                result = session.run(CypherEvent.get_event_notes_medias, iid=uid)
                 for record in result:
                     # Return COLLECT(DISTINCT [properties(rel_n), note]) AS notes,
                     #        COLLECT(DISTINCT [properties(rel_m), media]) AS medias
@@ -425,7 +439,7 @@ class Neo4jReadService(ConcreteService):
                     family = FamilyBl_from_node(f_node)
                     family.marriage_place = record["marriage_place"]
 
-                    uniq_id = -1
+                    iid = ""
                     for role, parent_node, name_node in record["parent"]:
                         if parent_node:
                             # <Node id=214500 labels={'Person'}
@@ -433,7 +447,7 @@ class Neo4jReadService(ConcreteService):
                             #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496,
                             #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008',
                             #    'date2': 1997946, 'date1': 1929380}>
-                            if uniq_id != parent_node.id:
+                            if iid != parent_node["iid"]:
                                 # Skip person with double default name
                                 pp = PersonBl_from_node(parent_node)
                                 if role == "father":
@@ -467,7 +481,7 @@ class Neo4jReadService(ConcreteService):
             status = Status.OK if families else Status.NOT_FOUND
             return {"families": families, "status": status}
 
-    def dr_get_family_parents(self, uniq_id: int, with_name=True):
+    def dr_get_family_parents(self, iid: str, with_name=True):
         """
         Get Parent nodes, optionally with default Name
 
@@ -476,7 +490,7 @@ class Neo4jReadService(ConcreteService):
         parents = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = session.run(CypherFamily.get_family_parents, fuid=uniq_id)
+                result = session.run(CypherFamily.get_family_parents, fuid=iid)
                 for record in result:
                     # <Record
                     #    role='father'
@@ -498,7 +512,7 @@ class Neo4jReadService(ConcreteService):
                     role = record["role"]
                     person_node = record["person"]
                     if person_node:
-                        if uniq_id != person_node.id:
+                        if iid != person_node["iid"]:
                             # Skip person with double default name
                             p = PersonBl_from_node(person_node)
                             p.role = role
@@ -520,7 +534,7 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": parents, "status": Status.OK, "statustext": ""}
 
-    def dr_get_family_children(self, uniq_id, with_events=True, with_names=True):
+    def dr_get_family_children(self, iid: str, with_events=True, with_names=True):
         """
         Get Child nodes, optionally with Birth and Death nodes
 
@@ -529,7 +543,7 @@ class Neo4jReadService(ConcreteService):
         children = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = session.run(CypherFamily.get_family_children, fuid=uniq_id)
+                result = session.run(CypherFamily.get_family_children, fuid=iid)
                 for record in result:
                     # <Record
                     #    person=<Node id=550538 labels={'Person'}
@@ -560,7 +574,7 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": children, "status": Status.OK}
 
-    def dr_get_family_events(self, uniq_id, with_places=True):
+    def dr_get_family_events(self, iid :str, with_places=True):
         """
         4. Get family Events node with Places
 
@@ -569,7 +583,7 @@ class Neo4jReadService(ConcreteService):
         events = []
         with self.driver.session(default_access_mode="READ") as session:
             try:
-                result = session.run(CypherFamily.get_events_w_places, fuid=uniq_id)
+                result = session.run(CypherFamily.get_events_w_places, fuid=iid)
                 # RETURN event, place, names,
                 #        COLLECT(DISTINCT [place_in, rel_in, COLLECT in_names]) AS inside
                 for record in result:
@@ -635,11 +649,11 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": events, "status": Status.OK}
 
-    def dr_get_family_sources(self, id_list, with_notes=True):
+    def dr_get_family_sources(self, id_list :list[str], with_notes=True):
         """
         Get Sources Citations and Repositories for given families and events.
 
-        The id_list should include the uniq_ids for Family and events Events
+        The id_list should include the iids for Family and events Events
 
         returns dict {items, status, statustext}
         """
@@ -680,10 +694,10 @@ class Neo4jReadService(ConcreteService):
 
         return {"items": sources, "status": Status.OK}
 
-    def dr_get_family_notes(self, id_list: list):
+    def dr_get_family_notes(self, id_list: list[str]):
         """
         Get Notes for family and events
-        The id_list should include the uniq_ids for Family and events Events
+        The id_list should include the iids for Family and events Events
 
         returns dict {items, status, statustext}
         """
@@ -693,7 +707,7 @@ class Neo4jReadService(ConcreteService):
                 result = session.run(CypherFamily.get_family_notes, id_list=id_list)
                 for record in result:
                     # <Record
-                    #    src_id=543995
+                    #    src_id='E1-efcr'
                     #    repository=<Node id=529693 labels={'Repository'}
                     #        properties={'id': 'R0179', 'rname': 'Loviisan seurakunnan arkisto', 'type': 'Archive', 'iid': 'R-45', 'change': 1585409708}>
                     #    source=<Node id=534511 labels={'Source'}
@@ -724,7 +738,7 @@ class Neo4jReadService(ConcreteService):
         Get the minimal data required for creating graphs with person labels.
         The target depends on which = ('person', 'parents', 'children').
         For which='person', the oid should contain an iid.
-        For 'parents' and 'children' the oid should contain a database uniq_id.
+        For 'parents' and 'children' the oid should contain iid values.
         The 'death_high' value is always returned for privacy checks.
         """
         switcher = {
@@ -738,7 +752,7 @@ class Neo4jReadService(ConcreteService):
             for record in result:
                 result_list.append(
                     {
-                        "uniq_id": record["uniq_id"],
+                        #! "uniq_id": record["uniq_id"],
                         "iid": record["iid"],
                         "sortname": record["sortname"],
                         "gender": record["gender"],
@@ -826,254 +840,7 @@ class Neo4jReadService(ConcreteService):
         return {"items": list(families.values()), "status": Status.OK}
 
     # # ------ Places ----- # Moved to --> pe.neo4j.readservice_tx.Neo4jReadServiceTx
-    #
-    # def dr_get_place_list_fw(self, user, fw_from, limit, lang, material):
-    #     """Read place list from given start point"""
-    #     ret = []
-    #     if lang not in ["fi", "sv"]:
-    #         lang = "fi"
-    #     with self.driver.session(default_access_mode="READ") as session:
-    #         print("Neo4jReadService.dr_get_place_list_fw")
-    #         result = run_cypher_batch(
-    #             session,
-    #             CypherPlace.get_name_hierarchies,
-    #             user,
-    #             material,
-    #             fw=fw_from,
-    #             limit=limit,
-    #             lang=lang,
-    #         )
-    #         for record in result:
-    #             # <Record
-    #             #    place=<Node id=514341 labels={'Place'}
-    #             #        properties={'coord': [61.49, 23.76],
-    #             #            'id': 'P0300', 'type': 'City', 'iid': 'P-484',
-    #             #            'pname': 'Tampere', 'change': 1585409704}>
-    #             #    name=<Node id=514342 labels={'Place_name'}
-    #             #        properties={'name': 'Tampere', 'lang': ''}>
-    #             #    names=[<Node id=514344 labels={'Place_name'}
-    #             #            properties={'name': 'Tampereen kaupunki', 'lang': ''}>,
-    #             #        <Node id=514343 ...>]
-    #             #    uses=4
-    #             #    upper=[[514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finnland', 'de'],
-    #             #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finland', 'sv'],
-    #             #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Suomi', '']
-    #             #    ]
-    #             #    lower=[[None, None, None, None, None]]>
-    #             node = record["place"]
-    #             p = PlaceBl_from_node(node)
-    #             p.ref_cnt = record["uses"]
-    #
-    #             # Set place names and default display name pname
-    #             node = record["name"]
-    #             p.names.append(PlaceName_from_node(node))
-    #             oth_names = []
-    #             for node in record["names"]:
-    #                 oth_names.append(PlaceName_from_node(node))
-    #             # Arrage names by local language first
-    #             lst = PlaceName.arrange_names(oth_names)
-    #
-    #             p.names += lst
-    #             p.pname = p.names[0].name
-    #             p.uppers = PlaceBl.combine_places(record["upper"], lang)
-    #             p.lowers = PlaceBl.combine_places(record["lower"], lang)
-    #             ret.append(p)
-    #
-    #     # Return sorted by first name in the list p.names -> p.pname
-    #     return sorted(ret, key=lambda x: x.pname)
-    #
-    # def dr_get_place_w_names_notes_medias(self, user, iid, lang, material):
-    #     """Returns the PlaceBl with PlaceNames, Notes and Medias included."""
-    #     pl = None
-    #     node_ids = []  # List of uniq_is for place, name, note and media nodes
-    #     with self.driver.session(default_access_mode="READ") as session:
-    #         result = run_cypher(
-    #             session,
-    #             CypherPlace.get_w_names_notes,
-    #             user,
-    #             material,
-    #             iid=iid,
-    #             lang=lang,
-    #         )
-    #         for record in result:
-    #             # <Record
-    #             #    place=<Node id=514286 labels={'Place'}
-    #             #        properties={'coord': [60.45138888888889, 22.266666666666666],
-    #             #            'id': 'P0007', 'type': 'City', 'iid': 'P-e21a',
-    #             #            'pname': 'Turku', 'change': 1585409704}>
-    #             #    name=<Node id=514288 labels={'Place_name'}
-    #             #        properties={'name': 'Åbo', 'lang': 'sv'}>
-    #             #    names=[<Node id=514287 labels={'Place_name'}
-    #             #                properties={'name': 'Turku', 'lang': ''}>]
-    #             #    notes=[<Node id=582777 labels=frozenset({'Note'}) properties=...>]
-    #             #    medias=[]
-    #             # >
-    #
-    #             node = record["place"]
-    #             pl = PlaceBl_from_node(node)
-    #             node_ids.append(pl.uniq_id)
-    #             # Default lang name
-    #             name_node = record["name"]
-    #             if name_node:
-    #                 pl.names.append(PlaceName_from_node(name_node))
-    #             # Other name versions
-    #             for name_node in record["names"]:
-    #                 pl.names.append(PlaceName_from_node(name_node))
-    #                 node_ids.append(pl.names[-1].uniq_id)
-    #
-    #             for notes_node in record["notes"]:
-    #                 n = Note_from_node(notes_node)
-    #                 pl.notes.append(n)
-    #                 node_ids.append(pl.notes[-1].uniq_id)
-    #
-    #             for medias_node in record["medias"]:
-    #                 m = MediaBl_from_node(medias_node)
-    #                 # Todo: should replace pl.media_ref[] <-- pl.medias[]
-    #                 pl.media_ref.append(m)
-    #                 node_ids.append(pl.media_ref[-1].uniq_id)
-    #
-    #     return {"place": pl, "uniq_ids": node_ids}
-    #
-    # def dr_get_place_tree(self, locid, lang="fi"):
-    #     """Read upper and lower places around this place.
-    #
-    #     Haetaan koko paikkojen ketju paikan locid ympärillä
-    #     Palauttaa listan paikka-olioita ylimmästä alimpaan.
-    #     Jos hierarkiaa ei ole, listalla on vain oma Place_combo.
-    #
-    #     Esim. Tuutarin hierarkia
-    #           2 Venäjä -> 1 Inkeri -> 0 Tuutari -> -1 Nurkkala
-    #           tulee tietokannasta näin:
-    #     ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
-    #     │"lv"│"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"  │
-    #     ╞════╪═══════╪═════════╪══════════╪═══════╪═════════╪═════════╡
-    #     │"2" │"21774"│"Region" │"Tuutari" │"21747"│"Country"│"Venäjä" │
-    #     ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-    #     │"1" │"21774"│"Region" │"Tuutari" │"21773"│"State"  │"Inkeri" │
-    #     ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-    #     │"-1"│"21775"│"Village"│"Nurkkala"│"21774"│"Region" │"Tuutari"│
-    #     └────┴───────┴─────────┴──────────┴───────┴─────────┴─────────┘
-    #     Metodi palauttaa siitä listan
-    #         Place(result[0].id2) # Artjärvi City
-    #         Place(result[0].id1) # Männistö Village
-    #         Place(result[1].id1) # Pekkala Farm
-    #     Muuttuja lv on taso:
-    #         >0 = ylemmät,
-    #          0 = tämä,
-    #         <0 = alemmat
-    #     """
-    #     t = DbTree(self.driver, CypherPlace.read_pl_hierarchy, "pname", "type")
-    #     t.load_to_tree_struct(locid)
-    #     if t.tree.depth() == 0:
-    #         # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
-    #         # Hae oman paikan tiedot ilman yhteyksiä
-    #         with self.driver.session(default_access_mode="READ") as session:
-    #             result = session.run(CypherPlace.root_query, locid=int(locid))
-    #             record = result.single()
-    #             t.tree.create_node(
-    #                 record["name"],
-    #                 locid,
-    #                 parent=0,
-    #                 data={"type": record["type"], "iid": record["iid"]},
-    #             )
-    #     ret = []
-    #     for tnode in t.tree.expand_tree(mode=t.tree.DEPTH):
-    #         logger.debug(
-    #             f"{t.tree.depth(t.tree[tnode])} {t.tree[tnode]} {t.tree[tnode].bpointer}"
-    #         )
-    #         if tnode != 0:
-    #             n = t.tree[tnode]
-    #
-    #             # Get all names: default lang: 'name' and others: 'names'
-    #             with self.driver.session(default_access_mode="READ") as session:
-    #                 result = session.run(
-    #                     CypherPlace.read_pl_names, locid=tnode, lang=lang
-    #                 )
-    #                 record = result.single()
-    #                 # <Record
-    #                 #    name=<Node id=514413 labels={'Place_name'}
-    #                 #        properties={'name': 'Suomi', 'lang': ''}>
-    #                 #    names=[<Node id=514415 labels={'Place_name'}
-    #                 #            properties={'name': 'Finnland', 'lang': 'de'}>,
-    #                 #        <Node id=514414 labels={'Place_name'} ...}>
-    #                 #    ]
-    #                 # >
-    #             lv = t.tree.depth(n)
-    #             p = PlaceBl(uniq_id=tnode, ptype=n.data["type"], level=lv)
-    #             p.iid = n.data["iid"]
-    #             node = record["name"]
-    #             if node:
-    #                 p.names.append(PlaceName_from_node(node))
-    #             oth_names = []
-    #             for node in record["names"]:
-    #                 oth_names.append(PlaceName_from_node(node))
-    #             # Arrage names by local language first
-    #             lst = PlaceName.arrange_names(oth_names)
-    #             p.names += lst
-    #
-    #             p.pname = p.names[0].name
-    #             # logger.info("# {}".format(p))
-    #             p.parent = n.bpointer
-    #             ret.append(p)
-    #     return ret
-    #
-    # def dr_get_place_events(self, uniq_id, privacy):
-    #     """Find events and persons associated to given Place.
-    #
-    #         :param: uniq_id    current place uniq_id
-    #         :param: privacy    True, if not showing live people
-    #     """
-    #     result = self.driver.session(default_access_mode="READ").run(
-    #         CypherPlace.get_person_family_events, locid=uniq_id
-    #     )
-    #     ret = []
-    #     for record in result:
-    #         # <Record
-    #         #    indi=<Node id=523974 labels={'Person'}
-    #         #        properties={'sortname': 'Borg#Maria Charlotta#', 'death_high': 1897,
-    #         #            'confidence': '', 'sex': 2, 'change': 1585409709, 'birth_low': 1841,
-    #         #            'birth_high': 1841, 'id': 'I0029', 'iid': 'H-9cd',
-    #         #            'death_low': 1897}>
-    #         #    role='Primary'
-    #         #    names=[<Node id=523975 labels={'Name'}
-    #         #            properties={'firstname': 'Maria Charlotta', 'type': 'Birth Name',
-    #         #                'suffix': '', 'surname': 'Borg', 'prefix': '', 'order': 0}>,
-    #         #        <Node id=523976 labels={'Name'} properties={...}>]
-    #         #    event=<Node id=523891 labels={'Event'}
-    #         #            properties={'datetype': 0, 'change': 1585409700, 'description': '',
-    #         #                'id': 'E0080', 'date2': 1885458, 'type': 'Birth', 'date1': 1885458,
-    #         #                'iid': 'E-5f9'}>
-    #         # >
-    #         e = EventBl_from_node(record["event"])
-    #         # Fields uid (person uniq_id) and names are on standard in EventBl
-    #         e.role = record["role"]
-    #         indi_label = list(record["indi"].labels)[0]
-    #         # if indi_label in ["Audit", "Batch"]:
-    #         #     continue
-    #         if "Person" == indi_label:
-    #             e.indi_label = "Person"
-    #             e.indi = PersonBl_from_node(record["indi"])
-    #             # Reading confidental person data which is available to this user?
-    #             if not privacy:
-    #                 e.indi.too_new = False
-    #             elif e.indi.too_new:  # Check privacy
-    #                 continue
-    #             for node in record["names"]:
-    #                 e.indi.names.append(Name_from_node(node))
-    #             ##ret.append({'event':e, 'indi':e.indi, 'label':'Person'})
-    #             ret.append(e)
-    #         elif "Family" == indi_label:
-    #             e.indi_label = "Family"
-    #             e.indi = FamilyBl_from_node(record["indi"])
-    #             ##ret.append({'event':e, 'indi':e.indi, 'label':'Family'})
-    #             ret.append(e)
-    #         else:  # Root
-    #             pass
-    #             # print(
-    #             #     f"dr_get_place_events: No Person or Family:"
-    #             #     f" {e.id} {list(record['indi'].labels)[0]} {record['indi'].get('id')}"
-    #             # )
-    #     return {"items": ret, "status": Status.OK}
+
 
     # ------ Sources -----
 
@@ -1278,7 +1045,7 @@ class Neo4jReadService(ConcreteService):
         return {"status": Status.OK, "citations": citations}
 
 
-    def dr_get_source_citators(self, sourceid: int):
+    def dr_get_source_citators(self, sourceid: str):
         """Read Events and Person, Family and Media citating this Source.
 
         Returns
@@ -1289,13 +1056,13 @@ class Neo4jReadService(ConcreteService):
                         (from near or behind near)
         """
 
-        citations = {}  # {uniq_id:citation_object}
-        notes = {}  # {uniq_id:[note_object]}
-        # near = {}           # {uniq_id:object}
-        targets = {}  # {uniq_id:[object]} Person or Family
+        citations = {}  # {iid:citation_object}
+        notes = {}      # {iid:[note_object]}
+        # near = {}     # {iid:object}
+        targets = {}    # {iid:[object]} Person or Family
 
         with self.driver.session(default_access_mode="READ") as session:
-            result = session.run(CypherSource.get_citators_of_source, uniq_id=sourceid)
+            result = session.run(CypherSource.get_citators_of_source, iid=sourceid)
             for record in result:
                 # <Record        # (1) A Person or Family
                 #                #     referencing directly Citation
@@ -1333,15 +1100,15 @@ class Neo4jReadService(ConcreteService):
                 far_nodes = record["far"]
                 note_nodes = record["notes"]
 
-                uniq_id = citation_node.id
+                iid = citation_node["iid"]
                 citation = Citation_from_node(citation_node)
-                citations[uniq_id] = citation
+                citations[iid] = citation
 
                 notelist = []
                 for node in note_nodes:
                     notelist.append(Note_from_node(node))
                 if notelist:
-                    notes[uniq_id] = notelist
+                    notes[iid] = notelist
 
                 targetlist = []  # Persons or Families referring this source
                 for node, role in far_nodes:
@@ -1356,13 +1123,13 @@ class Neo4jReadService(ConcreteService):
                     if obj:
                         targetlist.append(obj)
                 if targetlist:
-                    targets[uniq_id] = targetlist
+                    targets[iid] = targetlist
                 else:
                     print(
                         f'dr_get_source_citators: Event {near_node.id} {near_node.get("id")} without Person or Family?'
                     )
 
-        # Result dictionaries using key = Citation uniq_id
+        # Result dictionaries using key = Citation iid
         return citations, notes, targets
 
     def dr_source_search(self, args):
@@ -1614,7 +1381,7 @@ class Neo4jReadService(ConcreteService):
                                 raise TypeError(
                                     f"MediaReader.get_one: unknown type {list(src_node.labels)}"
                                 )
-                            event_refs[obj2.uniq_id] = obj2
+                            event_refs[obj2.iid] = obj2
 
                         mref.next_objs.append(obj2)
 

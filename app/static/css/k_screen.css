@@ -594,6 +594,12 @@ table.infolist tr td ol {
 	font-style: italic; 
 	font-family: Times;
 }
+.ExtraAttribute {
+	background-color: aliceblue;
+	border: solid steelblue 1pt;
+	color: steelblue;
+	padding: 0 2pt;	
+}
 
 #summaryarea table.infolist td.ColumnAttribute,
 #parents table.infolist td.ColumnAttribute,

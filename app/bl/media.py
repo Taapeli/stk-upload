@@ -36,15 +36,15 @@ class Media(NodeObject):
             handle
             change
             id              esim. "O0001"
-            uniq_id         int database key
+            iid         int database key
             src             str file path
             mime            str mime type
             description     str description
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """ Luo uuden media-instanssin """
-        NodeObject.__init__(self, uniq_id)
+        NodeObject.__init__(self, iid)
         self.description = ""
         self.src = None
         self.mime = None
@@ -155,21 +155,27 @@ class MediaReader(DataService):
 
 
 class MediaReferenceByHandles:
-    """Gramps media reference result object.
+    """Gramps media reference data object.
 
     Includes Note and Citation references and crop data.
     Used in bp.gramps.xml_dom_handler.DOM_handler
     """
 
-    def __init__(self):
-        self.media_handle = None
+    def __init__(self, node_object: NodeObject):
+        """ Create a reference object having referrer object label and 
+            references with different reference properties.
+            
+            Object might contain multiple references of each type.
+        """
+        self.obj_name = node_object.label() # Source node label
+        self.handle = None
         self.media_order = 0  # Media reference order nr
         self.crop = []  # Four coordinates
-        self.note_handles = []  # list of note handles
-        self.citation_handles = []  # list of citation handles
+        self.note_handles = []  # list of media -> note handles
+        self.citation_handles = []  # list of media -> citation handles
 
     def __str__(self):
-        s = f"{self.media_handle} [{self.media_order}]"
+        s = f"{self.obj_name} -> {self.handle} [{self.media_order}]"
         if self.crop:
             s += f" crop({self.crop})"
         if self.note_handles:

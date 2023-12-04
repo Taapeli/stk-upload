@@ -179,7 +179,7 @@ div#events div.scrollbox {
         </div>
     {% endif %}
 
-    {% if place.media_ref %}
+    {% if place.medias %}
         <div id="medias">
             <h3>{{ _('Medium ') }}</h3>
             <table class="infolist medialist">
@@ -190,7 +190,7 @@ div#events div.scrollbox {
                     </tr>
                 </thead>
                 <tbody>
-        {% for m in place.media_ref %}
+        {% for m in place.medias %}
                     <tr>
                         <td class="ColumnDescription"><a href="/media/{{m.iid}}" class="inlink"
                    title="{{ _('Go to media page') }}">{{m.description}}</a></td>

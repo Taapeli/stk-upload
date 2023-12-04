@@ -47,11 +47,12 @@ class Name(NodeObject):
             dates               DateRange date expression
             title               str titteli, esim. Sir, Dr.
             # citation_handles[]  str gramps handles for citations
-            # citation_ref[]      int uniq_ids of citation nodes
+            # citation_ref[]    str iids of citation nodes
     """
 
     def __init__(self, givn="", surn="", pref="", suff="", dates="", titl=""):
         """ Luo uuden name-instanssin """
+        NodeObject.__init__(self)
         self.type = ""
         self.order = None
         self.firstname = givn
@@ -60,7 +61,7 @@ class Name(NodeObject):
         self.suffix = suff
         self.dates = dates
         self.title = titl
-        self.attrs = ""
+        #!self.attrs = ""
         # # Set in bp.gramps.xml_dom_handler.DOM_handler.handle_people
         # self.citation_handles = []
         # # For person page
@@ -83,20 +84,20 @@ class Name(NodeObject):
 
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name)
-            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2)
+            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE p1.iid<p2.iid
                 AND n2.surname = n1.surname AND n2.firstname = n1.firstname
-                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death,
+                RETURN COLLECT ([p1.iid, p1.est_birth, p1.est_death,
                 n1.firstname, n1.suffix, n1.title, n1.surname,
-                ID(p2), p2.est_birth, p2.est_death,
+                p2.iid, p2.est_birth, p2.est_death,
                 n2.firstname, n2.suffix, n2.title, n2.surname]) AS ids
             """.format()
         with shareds.driver.session() as session:
             return session.run(query)
 
     @staticmethod
-    def get_clearname(uniq_id=None):  # Not used!
+    def get_clearname(iid=None):  # Not used!
         """Lists all Name versions of this Person as single cleartext"""
-        result = Name.get_personnames(None, uniq_id)
+        result = Name.get_personnames(None, iid)
         names = []
         for record in result:
             # <Node id=210189 labels={'Name'}

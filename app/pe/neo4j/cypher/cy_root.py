@@ -33,8 +33,7 @@ class CypherRoot():
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_aqcuire_lock
     acquire_lock = """MERGE (lock:Lock {id:$lock_id})
 SET lock.locked = true
-RETURN lock
-"""
+RETURN lock"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_find_last_used_batch_seq
     batch_find_last_id = """
@@ -60,14 +59,14 @@ MATCH (u:UserProfile {username: $b_attr.user})
     MERGE (u) -[:HAS_ACCESS]-> (b)
     SET b = $b_attr
     SET b.timestamp = timestamp()
-RETURN ID(b) AS id"""
+RETURN b.id AS id"""
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_set_state
     batch_set_state = """
 MATCH (u:UserProfile {username: $user})
 MATCH (u) -[r:HAS_LOADED|DOES_AUDIT]-> (b:Root {id: $bid})
     SET b.state=$state
-RETURN ID(b) AS id"""
+RETURN b.id AS id"""
 
 
 #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_access
@@ -79,7 +78,8 @@ DETACH DELETE r
 CREATE (audi) -[r2:DID_AUDIT]-> (root)
     SET r2.ts_from = r1.ts_from
     SET r2.ts_to = timestamp() - 1000
-RETURN ID(root) AS id"""
+RETURN b.id AS id, elementId(r) as rel_id
+"""
 
 # #-pe.neo4j.updateservice.Neo4jUpdateService.ds_batch_purge_auditors
 # # Remove all auditors but me
@@ -110,9 +110,7 @@ MATCH (u:UserProfile{username:$username})
 MATCH (u) -[r:HAS_ACCESS|DOES_AUDIT|DID_AUDIT]-> (b:Root {id:$batch_id})
 RETURN b, type(r) AS rel_type"""
      
-    list_all = """
-MATCH (b:Root) 
-RETURN b """
+    list_all = "MATCH (b:Root)  RETURN b"
 
     # List 1) my batches and 2) accepted material collections
     get_root_pallette = """
@@ -335,7 +333,7 @@ MATCH (audi:UserProfile {username: $audi})
     SET root.state = "Auditing"
     CREATE (audi) -[r:DOES_AUDIT]-> (root)
     SET r.ts_from = timestamp()
-RETURN ID(root) AS id"""
+RETURN root.id AS id"""
 
     batch_set_state_complete = """
 MATCH (u:UserProfile {username: $audi}) -[r:DID_AUDIT]-> (b:Root {id: $bid})

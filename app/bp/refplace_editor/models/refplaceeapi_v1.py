@@ -52,7 +52,7 @@ cypher_test_show = """
     MATCH (n:Place{pname:'zSuomi'})-[r]-(x) RETURN * LIMIT 25
 """
 cypher_search = """
-    match (p:Place {pname:$pname}) return p,id(p) as id
+    match (p:Place {pname:$pname}) return p    #! ,id(p) as id
 """
 
 cypher_list_subordinate_places = """
@@ -98,9 +98,9 @@ def search(lookfor):
     records = []
     for rec in  result:
         p = rec['p']
-        oid = rec['id']
+        #!oid = rec['id']
         r = dict(
-            id=oid,
+            id=p["iid"],
             name=p['pname'],
             type=p['type'],
         )

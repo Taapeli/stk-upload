@@ -181,8 +181,8 @@
 	{# Shows all Gramps attribute data for this object as table rows #} 
 	{% if obj.attrs %}
         {% for key, values in obj.attrs.items() %}
-            <tr class="attrs" title="{{ _('Attribute') }}: '{{key}}'">
-            	<td class="ColumnAttribute">&raquo;{{ _(key) }}</td>
+            <tr class="attrs" title="{{ _('Extra Attribute') }}: '{{key}}'">
+            	<td class="ColumnAttribute"><span class="ExtraAttribute">{{ _(key) }}</span></td>
 	            <td class="Value" colspan="{{colspan}}">
 	            	<ul style="margin:0">{% for value in values %}
 	            		<li>&nbsp;{{ value }}</li>
@@ -341,11 +341,11 @@
 
 {% macro note_link(note_list, obj) -%}{#
        Creates template <sup>note link</sup> for each citation.
-       - note_list  list of note uniq_ids
-       - obj        dict of objects: obj[uniq_id] = Note object
+       - note_list  list of note iids
+       - obj        dict of objects: obj[iid] = Note object
 
 #}{% if note_list %}<sup>{% for cr in note_list %}{%set note = obj[cr] %}
-       <a id="N{{note.uniq_id}}"><b>{{note.type|transl('notet')}}</b> {{note.url}}
+       <a id="N{{note.iid}}"><b>{{note.type|transl('notet')}}</b> {{note.url}}
          <i>{{note.text}}</i></a>{% endfor %}</sup>{% endif 
 %}{%- endmacro %}
 
@@ -354,11 +354,11 @@
 
 {% macro citation_link(cit_list, obj) -%}
     {# Creates template <sup>citation link</sup> for each citation.
-       - cit_list   list of citation uniq_ids
-       - obj        dict of objects: obj[uniq_id] = Citation object
+       - cit_list   list of citation iids
+       - obj        dict of objects: obj[iid] = Citation object
      #}
     {% if cit_list %}<sup>{% for cr in cit_list %}
-                    <a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
+                    <a id="{{obj[cr].source_id}}/{{obj[cr].iid}}">*</a>
     {% endfor %}</sup>{% endif %}
 {%- endmacro %}
 

@@ -58,7 +58,7 @@ class PersonRecord:
         return f'({id_str}) {len(self.names)} names,{len(self.events_w_role)} events'
 
 class MediaReference:
-    ''' Object to return media reference data. '''
+    ''' Object to return media etc. reference data. '''
     def __init__(self):
         self.node = None
         self.order = None
@@ -86,12 +86,12 @@ class SourceReference:
     def __str__(self):
         if self.source_obj:
             label = self.source_obj.__class__.__name__
-            source_str = f'{label} {self.source_obj.uniq_id}:{self.source_obj.id}'
+            source_str = f'{label} {self.source_obj["iid"]}:{self.source_obj.id}'
         else:
             source_str = ""
         if self.repository_obj:
             label = self.repository_obj.__class__.__name__
-            repo_str = f'{label} {self.repository_obj.uniq_id}:{self.repository_obj.id}'
+            repo_str = f'{label} {self.repository_obj["iid"]}:{self.repository_obj.id}'
         else:
             repo_str = ""
         return f'({source_str}) -[{self.medium}]-> ({repo_str})'
@@ -243,7 +243,7 @@ class Neo4jReadServiceTx(ConcreteService):
     def tx_get_person_by_iid(self, iid:str, material:Material, active_user:str):
         ''' Read a person from common data or user's own Batch.
 
-        :param: iid        str
+        :param: iid         str
         :param: active_user str         if "": read from approved data
                                         else:  read user's candidate data
         :param: material    Material    defines the material 
@@ -258,12 +258,12 @@ class Neo4jReadServiceTx(ConcreteService):
             record = run_cypher_batch(self.tx, CypherPerson.get_person,
                                       active_user, material, iid=iid).single()
             # <Record 
-            #    p=<Node id=25651 labels=frozenset({'Person'})
+            #    p=<Node element_id='...' labels=frozenset({'Person'})
             #        properties={'sortname': 'Zakrevski#Arseni#Andreevits', 'death_high': 1865,
             #            'sex': 1, 'confidence': '', 'change': 1585409698, 'birth_low': 1783,
             #            'birth_high': 1783, 'id': 'I1135', 'iid': 'H-f2b',
             #            'death_low': 1865}>
-            #    root=<Node id=31100 labels=frozenset({'Audit'})
+            #    root=<Node element_id='...' labels=frozenset({'Audit'})
             #        properties={'id': '2020-07-28.001', ... 'timestamp': 1596463360673}>
             # >
             if record is None:
@@ -272,7 +272,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 return res
 
             person_node = record['p']
-            puid = person_node.id
+            #!puid = person_node.id
 
             # Store original researcher data 
             #    - material_type root material type
@@ -280,9 +280,6 @@ class Neo4jReadServiceTx(ConcreteService):
             #    - root_user    the (original) owner of this object
             #    - bid          Batch id
             root = dict_root_node(record["root"])
-
-#                 # Add to list of all objects connected to this person
-#                 self.objs[person.uniq_id] = person
 
         except Exception as e:
             raise
@@ -303,11 +300,11 @@ class Neo4jReadServiceTx(ConcreteService):
         event_node_roles = []
         cause_of_death = None
         try:
-            results = self.tx.run(CypherPerson.get_names_events, uid=puid)
+            results = self.tx.run(CypherPerson.get_names_events, uid=iid)
             for record in results:
                 # <Record
                 #    rel_type='NAME'
-                #    node=<Node id=21610 labels=frozenset({'Name'})
+                #    node=<Node element_id='...' labels=frozenset({'Name'})
                 #        properties={'firstname': 'Eva', 'surname': 'Sibelius', 'prefix': '', 
                 #            'type': 'Birth Name', 'suffix': '', 'title': '', 'order': 0}>
                 #    role=None
@@ -319,10 +316,8 @@ class Neo4jReadServiceTx(ConcreteService):
                 label, = node.labels
                 if label == 'Name':
                     name_nodes.append(node)
-                    #self.objs[x.uniq_id] = x
                 elif label == 'Event':
                     event_node_roles.append([node,role])
-                    #self.objs[x.uniq_id] = x 
                     if node.get("type") == "Cause Of Death":
                         cause_of_death = node
                 #print(f"#+ 2  ({puid}) -[:{person_rel} {role}]-> ({node.id}:{label})")
@@ -332,7 +327,7 @@ class Neo4jReadServiceTx(ConcreteService):
                 res['cause_of_death'] = cause_of_death
 
         except Exception as e:
-            msg = f'person={puid} {e.__class__.__name__} {e}'
+            msg = f'person={iid} {e.__class__.__name__} {e}'
             print(f'dx_get_person_names_events: {msg}')
             res.update({'status': Status.ERROR, 'statustext': f"Could not read names and events: {msg}"})
             return res
@@ -343,7 +338,7 @@ class Neo4jReadServiceTx(ConcreteService):
         person.families_as_child = []
         person.citation_ref = []
         person.note_ref = []
-        person.media_ref = []
+        person.media_ref = []   # bl.media.MediaReferenceByHandles objects?
         #self._catalog(person)
 
         # Info about linked Root node
@@ -453,8 +448,8 @@ class Neo4jReadServiceTx(ConcreteService):
                     family_members.append(member_set)
 
                 # 3.4. The Family node
-
-                family = {'family_rel': family_rel, 
+                #TODO Oli 'family'. Miksi?
+                _family = {'family_rel': family_rel,
                           'family_role': family_role,
                           'family_node': family_node,
                           'family_events': family_events,
@@ -581,13 +576,13 @@ class Neo4jReadServiceTx(ConcreteService):
             )
             for record in result:
                 # <Record
-                #    place=<Node id=514341 labels={'Place'}
+                #    place=<Node element_id='...' labels={'Place'}
                 #        properties={'coord': [61.49, 23.76],
                 #            'id': 'P0300', 'type': 'City', 'iid': 'P-5484',
                 #            'pname': 'Tampere', 'change': 1585409704}>
                 #    name=<Node id=514342 labels={'Place_name'}
                 #        properties={'name': 'Tampere', 'lang': ''}>
-                #    names=[<Node id=514344 labels={'Place_name'}
+                #    names=[<Node element_id='...' labels={'Place_name'}
                 #            properties={'name': 'Tampereen kaupunki', 'lang': ''}>,
                 #        <Node id=514343 ...>]
                 #    uses=4
@@ -627,7 +622,7 @@ class Neo4jReadServiceTx(ConcreteService):
         pl = None
         citations = [] # Citation objects referenced from this Place
         cita_dict = {}
-        node_ids = []  # List of uniq_is for place, name, note and media nodes
+        node_iids = []  # List of uniq_is for place, name, note and media nodes
         with self.driver.session(default_access_mode="READ") as session:
 
             # 1. Get names, notes, medias and citations
@@ -642,13 +637,13 @@ class Neo4jReadServiceTx(ConcreteService):
             )
             for record in result:
                 # <Record
-                #    place=<Node id=514286 labels={'Place'}
+                #    place=<Node element_id='...' labels={'Place'}
                 #        properties={'coord': [60.45138888888889, 22.266666666666666],
                 #            'id': 'P0007', 'type': 'City', 'iid': 'P-21a',
                 #            'pname': 'Turku', 'change': 1585409704}>
-                #    name=<Node id=514288 labels={'Place_name'}
+                #    name=<Node element_id='...' labels={'Place_name'}
                 #        properties={'name': 'Åbo', 'lang': 'sv'}>
-                #    names=[<Node id=514287 labels={'Place_name'}
+                #    names=[<Node element_id='...' labels={'Place_name'}
                 #                properties={'name': 'Turku', 'lang': ''}>]
                 #    notes=[<Node id=582777 labels=frozenset({'Note'}) properties=...>]
                 #    medias=[]
@@ -657,9 +652,10 @@ class Neo4jReadServiceTx(ConcreteService):
 
                 node = record["place"]
                 pl = PlaceBl_from_node(node)
-                node_ids.append(pl.uniq_id)
+                node_iids.append(pl.iid)
                 # Original owner
                 pl.root = dict_root_node(record["root"])
+                pl.medias = []
                 # Default language name
                 node = record["name"]
                 if node:
@@ -667,25 +663,25 @@ class Neo4jReadServiceTx(ConcreteService):
                 # Other name versions
                 for node in record["names"]:
                     pl.names.append(PlaceName_from_node(node))
-                    node_ids.append(pl.names[-1].uniq_id)
+                    node_iids.append(pl.names[-1].iid)
 
                 for node in record["notes"]:
                     n = Note_from_node(node)
                     pl.notes.append(n)
-                    node_ids.append(n.uniq_id)
+                    node_iids.append(n.iid)
 
                 for node in record["medias"]:
                     m = MediaBl_from_node(node)
-                    # Todo: should replace pl.media_ref[] <-- pl.medias[]
-                    pl.media_ref.append(m)
-                    node_ids.append(m.uniq_id)
+                    pl.medias.append(m)
+                    #!pl.media_refs.append(m)
+                    node_iids.append(m.iid)
 
                 for node in record["citas"]:
                     c = Citation_from_node(node)
                     c.notes = [] # To be set below
                     citations.append(c)
-                    cita_dict[c.uniq_id] = c
-                    node_ids.append(c.uniq_id)
+                    cita_dict[c.iid] = c
+                    node_iids.append(c.iid)
 
             # 2. Get Notes for Citations
 
@@ -704,9 +700,9 @@ class Neo4jReadServiceTx(ConcreteService):
                     note_obj = Note_from_node(record["note"])
                     cita_obj.notes.append(note_obj)
 
-        return {"place": pl, "uniq_ids": node_ids, "citas": citations}
+        return {"place": pl, "iids": node_iids, "citas": citations}
 
-    def tx_get_place_tree(self, locid, lang="fi"):
+    def tx_get_place_tree(self, locid:str, lang="fi"):
         """Read upper and lower places around this place.
 
         Haetaan koko paikkojen ketju paikan locid ympärillä
@@ -719,11 +715,11 @@ class Neo4jReadServiceTx(ConcreteService):
         ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
         │"lv"│"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"  │
         ╞════╪═══════╪═════════╪══════════╪═══════╪═════════╪═════════╡
-        │"2" │"21774"│"Region" │"Tuutari" │"21747"│"Country"│"Venäjä" │
+        │"2" │"P-774"│"Region" │"Tuutari" │"P-747"│"Country"│"Venäjä" │
         ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-        │"1" │"21774"│"Region" │"Tuutari" │"21773"│"State"  │"Inkeri" │
+        │"1" │"P-774"│"Region" │"Tuutari" │"P-773"│"State"  │"Inkeri" │
         ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-        │"-1"│"21775"│"Village"│"Nurkkala"│"21774"│"Region" │"Tuutari"│
+        │"-1"│"P-775"│"Village"│"Nurkkala"│"P-774"│"Region" │"Tuutari"│
         └────┴───────┴─────────┴──────────┴───────┴─────────┴─────────┘
         Metodi palauttaa siitä listan
             Place(result[0].id2) # Artjärvi City
@@ -740,7 +736,7 @@ class Neo4jReadServiceTx(ConcreteService):
             # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
             # Hae oman paikan tiedot ilman yhteyksiä
             with self.driver.session(default_access_mode="READ") as session:
-                result = session.run(CypherPlace.root_query, locid=int(locid))
+                result = session.run(CypherPlace.root_query, locid=locid)
                 record = result.single()
                 t.tree.create_node(
                     record["name"],
@@ -753,35 +749,35 @@ class Neo4jReadServiceTx(ConcreteService):
             logger.debug(
                 f"{t.tree.depth(t.tree[tnode])} {t.tree[tnode]} {t.tree[tnode].predecessor}"
             )
-            if tnode != 0:
+            if tnode:   # Not root node
                 n = t.tree[tnode]
-
+                lv = t.tree.depth(n)
+                p = PlaceBl(iid=tnode, ptype=n.data["type"], level=lv)
+                p.iid = n.data["iid"]
+ 
                 # Get all names: default lang: 'name' and others: 'names'
                 with self.driver.session(default_access_mode="READ") as session:
                     result = session.run(
                         CypherPlace.read_pl_names, locid=tnode, lang=lang
                     )
-                    record = result.single()
-                    # <Record
-                    #    name=<Node id=514413 labels={'Place_name'}
-                    #        properties={'name': 'Suomi', 'lang': ''}>
-                    #    names=[<Node id=514415 labels={'Place_name'}
-                    #            properties={'name': 'Finnland', 'lang': 'de'}>,
-                    #        <Node id=514414 labels={'Place_name'} ...}>
-                    #    ]
-                    # >
-                lv = t.tree.depth(n)
-                p = PlaceBl(uniq_id=tnode, ptype=n.data["type"], level=lv)
-                p.iid = n.data["iid"]
-                node = record["name"]
-                if node:
-                    p.names.append(PlaceName_from_node(node))
-                oth_names = []
-                for node in record["names"]:
-                    oth_names.append(PlaceName_from_node(node))
-                # Arrage names by local language first
-                lst = PlaceName.arrange_names(oth_names)
-                p.names += lst
+                    for record in result:
+                        #!record = result.single()
+                        # <Record
+                        #    name=<Node id=514413 labels={'Place_name'}
+                        #        properties={'name': 'Suomi', 'lang': ''}>
+                        #    names=[<Node id=514415 labels={'Place_name'}
+                        #            properties={'name': 'Finnland', 'lang': 'de'}>,
+                        #        <Node id=514414 labels={'Place_name'} ...}>
+                        #    ] >
+                        node = record["name"]
+                        if node:
+                            p.names.append(PlaceName_from_node(node))
+                        oth_names = []
+                        for node in record["names"]:
+                            oth_names.append(PlaceName_from_node(node))
+                        # Arrage names by local language first
+                        lst = PlaceName.arrange_names(oth_names)
+                        p.names += lst
 
                 p.pname = p.names[0].name
                 # logger.info("# {}".format(p))
@@ -789,19 +785,19 @@ class Neo4jReadServiceTx(ConcreteService):
                 ret.append(p)
         return ret
 
-    def tx_get_place_events(self, uniq_id, privacy):
+    def tx_get_place_events(self, iid, privacy):
         """Find events and persons associated to given Place.
 
-            :param: uniq_id    current place uniq_id
+            :param: iid        current place iid
             :param: privacy    True, if not showing live people
         """
         result = self.driver.session(default_access_mode="READ").run(
-            CypherPlace.get_place_events, locid=uniq_id
+            CypherPlace.get_place_events, locid=iid
         )
         ret = []
         for record in result:
             # <Record
-            #    indi=<Node id=523974 labels={'Person'}
+            #    indi=<Node element_id='...' labels={'Person'}
             #        properties={'sortname': 'Borg#Maria Charlotta#', 'death_high': 1897,
             #            'confidence': '', 'sex': 2, 'change': 1585409709, 'birth_low': 1841,
             #            'birth_high': 1841, 'id': 'I0029', 'iid': 'P-9cd',
@@ -811,13 +807,13 @@ class Neo4jReadServiceTx(ConcreteService):
             #            properties={'firstname': 'Maria Charlotta', 'type': 'Birth Name',
             #                'suffix': '', 'surname': 'Borg', 'prefix': '', 'order': 0}>,
             #        <Node id=523976 labels={'Name'} properties={...}>]
-            #    event=<Node id=523891 labels={'Event'}
+            #    event=<Node element_id='...' labels={'Event'}
             #            properties={'datetype': 0, 'change': 1585409700, 'description': '',
             #                'id': 'E0080', 'date2': 1885458, 'type': 'Birth', 'date1': 1885458,
             #                'iid': 'E-a5f9'}>
             # >
             e = EventBl_from_node(record["event"])
-            # Fields uid (person uniq_id) and names are on standard in EventBl
+            # Fields uid (person iid) and names are on standard in EventBl
             e.role = record["role"]
             indi_label = list(record["indi"].labels)[0]
             if "Person" == indi_label:
@@ -845,41 +841,40 @@ class Neo4jReadServiceTx(ConcreteService):
     def tx_get_object_places(self, base_objs:dict):
         ''' Read Place hierarchies for given Event objects.
         
-        :param:    base_objs    {uniq_id: bl.base.NodeObject}, updated!
+        :param:    base_objs    {iid: bl.base.NodeObject}, updated!
         '''
         # Place references: {src: (place_node, [name_node, ...])}
-        # - src                 Event (or Place) uniq_id
+        # - src                 Event (or Place) iid
         # - place_node          connected place node
         # - [name_node, ...]    name nodes for this place
         references = {}
 
         try:
             uids = list(base_objs.keys())
-            results = self.tx.run(CypherPerson.get_event_places, uid_list=uids)
+            results = self.tx.run(CypherPerson.get_event_places, iid_list=uids)
             for record in results:
                 # Returns 
                 #    - label    'Event'
-                #    - uniq_id  db id of current Event
                 #    - pl       Place node
                 #    - [pn]     its Place_name objects
                 #    - pi       surrounding Place node
                 #    - [pi]     its Place_name objects
 
-                event_uniq_id = record['uniq_id']
+                event_iid = record['iid']
 
                 # Place node and names linked to this event
                 place_node = record['pl']
-                place_uniq_id = place_node.id
+                place_iid = place_node["iid"]
                 pn_nodes = record['pnames']
                 placenames = [PlaceName_from_node(node) for node in pn_nodes]
-                references[event_uniq_id] = (place_node, placenames)
+                references[event_iid] = (place_node, placenames)
 
                 # Upper Place node and names linked to this Place
                 upper_place_node = record['pi']
                 if upper_place_node:
                     pn_nodes = record['pinames']
                     placenames = [PlaceName_from_node(node) for node in pn_nodes]
-                    references[place_uniq_id] = (upper_place_node, placenames)
+                    references[place_iid] = (upper_place_node, placenames)
                 pass
 
             # Convert nodes and store them as PlaceBl objects with PlaceNames included
@@ -902,8 +897,8 @@ class Neo4jReadServiceTx(ConcreteService):
         ''' 
         Read Citations, Notes, Medias for list of active objects.
  
-        :param:    obj_catalog    {uniq_id: NodeObject}, by uniq_id, updated!
-        :param:    active_objs    The src uniq_ids to check for targets
+        :param:    obj_catalog    {iid: NodeObject}, by iid, updated!
+        :param:    active_objs    The src iids to check for targets
 
                 (src) -[r:CITATION|NOTE|MEDIA]-> (target)
  
@@ -913,17 +908,17 @@ class Neo4jReadServiceTx(ConcreteService):
         Returns {status, new_objects, references}
         - references    Object by source with target_label, target_node, order
                         and crop fields
-        - new_objects   list of created all new uniq_ids, where this search
+        - new_objects   list of created all new iids, where this search
                         should be repeated
         '''
         
-        # Collections {src_id: [target_nodes]) - the object referred from each src node
+        # Collections {src_iid: [target_nodes]) - the object referred from each src node
         coll = {}
         # These new objects may have more Citations, Notes or Medias 
         new_obj_ids = []
 
         try:
-            if active_objs and active_objs[0] > 0:
+            if active_objs and active_objs[0] != "":
                 # Search next level destinations (src) -[r:CITATION|NOTE|MEDIA]-> (target)
                 uids = active_objs
             else:
@@ -944,22 +939,20 @@ class Neo4jReadServiceTx(ConcreteService):
 
                 # The existing object src
                 src_node = record['src']
-                src_uniq_id = src_node.id
-                #src_label, = src_node.labels
-                #src = obj_catalog[record['uniq_id']]
+                src_iid = src_node["iid"]
 
                 rel = record['r']
                 ref.order = rel.get('order')
                 # Target is a Citation, Note or Media
                 target_node = record['target']
-                target_uniq_id = target_node.id
+                target_iid = target_node["iid"]
                 target_label, = target_node.labels
                 #ref.node = target_node
                 if target_label == 'Citation':
                     ref.obj = Citation_from_node(target_node)
-                if target_label == 'Note':
+                elif target_label == 'Note':
                     ref.obj = Note_from_node(target_node)
-                if target_label == 'Media':
+                elif target_label == 'Media':
                     ref.obj = MediaBl_from_node(target_node)
                     # Media crop attributes used in this relation
                     left = rel.get('left')
@@ -970,21 +963,21 @@ class Neo4jReadServiceTx(ConcreteService):
                         ref.crop = (left, upper, right, lower)
                 ref.label = target_label
                 # Relation r between (src_node) --> (target)
-                #print(f'# Cita/Note/Media: ({src_uniq_id}:{src_label} {src_node["id"]}) {ref}')
+                #print(f'# Cita/Note/Media: ({src_iid}:{src_label} {src_node["id"]}) {ref}')
 
                 # Add current target reference to objects referred 
                 # from this src object 
-                ref_list = coll.get(src_uniq_id, None)
+                ref_list = coll.get(src_iid, None)
                 if ref_list:
                     # There are already targets referred from src_node
                     if not ref in ref_list:
-                        coll[src_uniq_id].append(ref)
+                        coll[src_iid].append(ref)
                 else:
-                    coll[src_uniq_id] = [ref]
+                    coll[src_iid] = [ref]
 
-                if not ( target_uniq_id in new_obj_ids or \
-                         target_uniq_id in active_objs):
-                    new_obj_ids.append(target_uniq_id)
+                if not ( target_iid in new_obj_ids or \
+                         target_iid in active_objs ):
+                    new_obj_ids.append(target_iid)
 
         except Exception as e:
             traceback.print_exc()
@@ -1005,29 +998,29 @@ class Neo4jReadServiceTx(ConcreteService):
             - citations[]   list Citation   list of Citation objects
             
             On return res['sources'] gives references as a dict 
-            {uniq_id: SourceReference}
+            {iid: SourceReference}
         '''
         if len(citations) == 0:
             return {'status':Status.NOT_FOUND}
         references = {} # {Citation.unid_id: SourceReference}
 
-        citation_uids = [cita.uniq_id for cita in citations]
+        citation_uids = [cita.iid for cita in citations]
         with self.driver.session(default_access_mode='READ') as session:
             results = session.run(CypherSource.get_citation_sources_repositories, 
                                   uid_list=citation_uids)
             for record in results:
                 # <Record 
-                #    uniq_id=392761 
+                #    element_id='4:18f484ec-c98a-4e88-9acb-165fdd5a3216:1093022' 
                 #    source=<Node id=397146 labels={'Source'} 
                 #        properties={'id': 'S1723', 'stitle': 'Hauhon seurakunnan rippikirja 1757-1764', 
                 #            'iid': 'S-a294', 'spubinfo': '', 'sauthor': '', 'change': 1563727817}>
                 #    rel={'medium': 'Book'}
-                #    repo=<Node id=316903 labels={'Repository'}
+                #    repo=<Node element_id='...' labels={'Repository'}
                 #        properties={'id': 'R0157', 'rname': 'Hauhon seurakunnan arkisto', 'type': 'Archive', 
                 #            'iid': 'R-1d6', 'change': 1563727817}>
                 # >
                 # 1. Current Citation
-                uniq_id = record['uniq_id']
+                iid = record['iid']
                 ref = SourceReference()
 
                 # 2. The Source node
@@ -1039,7 +1032,7 @@ class Neo4jReadServiceTx(ConcreteService):
                     ref.medium = record['rel'].get('medium', "")
                 else:
                     ref.repository_obj = None
-                references[uniq_id] = ref
+                references[iid] = ref
 
         return {'status': Status.OK, 'sources': references}
 

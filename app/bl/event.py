@@ -44,9 +44,14 @@ import logging
 logger = logging.getLogger("stkserver")
 from flask_babelex import _
 
-from bl.base import NodeObject, Status
+from bl.base import NodeObject, Status, IsotammiId
 from bl.material import Material
 from pe.dataservice import DataService
+
+# For typing:
+# IsotammiId: TypeAlias = str
+from bl.place import Place
+from bl.person import Person
 
 
 class Event(NodeObject):
@@ -77,17 +82,17 @@ class Event(NodeObject):
                     names = []         Names attached
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid:IsotammiId=None):
         """Creates a new Event instance."""
         """ Luo uuden event-instanssin """
-        NodeObject.__init__(self, uniq_id)
+        NodeObject.__init__(self, iid)
         self.type = ""
         self.description = ""
         self.dates = None
-        self.attrs =  ""
+        #!self.attrs =  ""
 
     def __str__(self):
-        return f"{self.uniq_id} {self.type} {self.description}"
+        return f"{self.iid} {self.type} {self.description}"
 
 
 class EventReader(DataService):
@@ -97,7 +102,7 @@ class EventReader(DataService):
     - Returns a Result object.
     """
 
-    def get_event_data(self, iid, material:Material, args):
+    def get_event_data(self, iid:IsotammiId, material:Material, args) -> dict:
         """
         Get event data and participants: Persons and Families.
 
@@ -117,12 +122,14 @@ class EventReader(DataService):
                 "statustext": _("The event is not accessible"),
             }
         event = res["item"]
+        causes = res["causes"]
         event.note_ref = []
         res_dict["event"] = event
+        res_dict["causes"] = causes
 
         members = []
         if args.get("referees"):
-            res = self.dataservice.dr_get_event_participants(event.uniq_id)
+            res = self.dataservice.dr_get_event_participants(event.iid)
             if Status.has_failed(res):
                 statustext += _("Participants read error ") + res["statustext"] + " "
                 print(f"bl.event.EventReader.get_event_data: {statustext}")
@@ -131,7 +138,7 @@ class EventReader(DataService):
                 res_dict["members"] = members
         places = []
         if args.get("places"):
-            res = self.dataservice.dr_get_event_place(event.uniq_id)
+            res = self.dataservice.dr_get_event_place(event.iid)
             if Status.has_failed(res):
                 statustext += _("Place read error ") + res["statustext"] + " "
             else:
@@ -141,7 +148,7 @@ class EventReader(DataService):
         notes = []
         medias = []
         if args.get("notes"):
-            res = self.dataservice.dr_get_event_notes_medias(event.uniq_id)
+            res = self.dataservice.dr_get_event_notes_medias(event.iid)
             if Status.has_failed(res):
                 statustext += _("Notes read error ") + res["statustext"] + " "
             else:
@@ -161,12 +168,12 @@ class EventBl(Event):
     Properties, might be defined in here:
             names[]             PlaceName default name first
             coord               str paikan koordinaatit (leveys- ja pituuspiiri)
-            surrounding[]       int uniq_ids of upper
-            note_ref[]          int uniq_ids of Notes
-            media_ref[]         int uniq_ids of Medias
+            surrounding[]       int iids of upper
+            note_ref[]          int iids of Notes
+            media_ref[]         int iids of Medias
         May be defined in Place_gramps:
             surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
-            citation_ref[]      int uniq_ids of Citations
+            citation_ref[]      int iids of Citations
             placeref_hlink      str paikan osoite
             note_handles       str huomautuksen osoite (tulostuksessa Note-olioita)
     """
@@ -177,17 +184,17 @@ class EventBl(Event):
         """
         Event.__init__(self)
         self.role = ""  # role of event from EVENT relation, if available
-        # Lists of uniq_ids:
-        self.note_handles = []
-        self.citation_ref = []
-        self.place_ref = []
-        self.media_ref = []
-        self.note_ref = []
+        # Lists of iids:
+        self.note_handles: list[str] = []
+        self.citation_ref: list[str] = []
+        self.place_ref: list[str] = []
+        self.media_ref: list[str] = []
+        self.note_ref: list[str] = []
 
-        self.citations = []  # For creating display sets
+        self.citations: list[str] = []  # For creating display sets
         #       self.notes = []         # TODO: Note objects <- note_handles[]
-        self.place = None  # Place node, if included
-        self.person = None  # Persons names connected; for creating display
+        self.place: Place = None        # Place node, if included
+        self.person: Person = None      # Person connected; for creating display
 
 
 class EventWriter:
@@ -195,6 +202,6 @@ class EventWriter:
         self.writeservice = writeservice
         self.u_context = u_context
 
-    def update_event(self, iid, args):
+    def update_event(self, iid:IsotammiId, args) -> dict:
         rec = self.writeservice.dr_update_event(iid, args)
         return rec

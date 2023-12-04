@@ -77,7 +77,7 @@ function refTable() {
 
 	this.addC = function(s_id, c_id) {
 		// Adds a citation to source.
-		// The lines of this.cTbl are arrays [source_id, [citation_id, ...]]
+		// The lines of this.cTbl are arrays [source_iid, [citation_iid, ...]]
 	    //this.mark = (s_id + 1) + "abcderfghijklmopqrstuvwxyzåäö"[c_id];
 		var line;
 		var l = this.cTbl.length;
@@ -196,8 +196,8 @@ function refTable() {
 					} else {
 					    // Store source and citation ids
 						// <sup><a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
-					    var arr = node.id.split('-');
-					    mark = this.addC(Number(arr[0]), Number(arr[1]));
+					    var arr = node.id.split('/');
+					    mark = this.addC(arr[0], arr[1]);
 					    node.href = "#sref" + mark;
 					    node.innerText = mark;
 					    ret += mark + ">" + node.id + '<br>';
@@ -273,7 +273,7 @@ function refTable() {
 				rObj = repositories[sObj.repositories[k]];
 				textnode = document.createTextNode(" – ");
 				nodeSource.appendChild(textnode);
-				
+
 				// Medium:– <span class="typedesc">kirja</span>
 				var nodeMedium = document.createElement("SPAN");
 				nodeMedium.setAttribute("class", "typedesc");
@@ -357,29 +357,31 @@ function refTable() {
 		// Url link is named by the url's domain name
 		var k, l, note, text;
 		for (k = 0; k < note_ref.length; k++) {
-			note = notes[note_ref[k]]
-			if (note.url || note.text) {
-				var lines = note.text.split("¤");
-				htmlObject.appendChild(document.createTextNode(" –► "));
-				var nodeI = document.createElement("I");
-				nodeI.appendChild(document.createTextNode(lines[0] + " "));
-				for (l=1; l < lines.length; l++) {
-					if (lines[l].length > 0) {
-						nodeI.appendChild(document.createElement("BR"));
-						nodeI.appendChild(document.createTextNode(lines[l]));
+			note = notes[note_ref[k]];
+			if (note) {
+				if (note.url || note.text) {
+					var lines = note.text.split("¤");
+					htmlObject.appendChild(document.createTextNode(" –► "));
+					var nodeI = document.createElement("I");
+					nodeI.appendChild(document.createTextNode(lines[0] + " "));
+					for (l=1; l < lines.length; l++) {
+						if (lines[l].length > 0) {
+							nodeI.appendChild(document.createElement("BR"));
+							nodeI.appendChild(document.createTextNode(lines[l]));
+						}
 					}
+					nodeI.appendChild(document.createTextNode(' '));
+					htmlObject.appendChild(nodeI);
 				}
-				nodeI.appendChild(document.createTextNode(' '));
-				htmlObject.appendChild(nodeI);
-			}
-			if (note.url) {
-				var nodeNoteA = document.createElement("A");
-				nodeNoteA.setAttribute("class", "outlink");
-				nodeNoteA.setAttribute("target", "_blank");
-				nodeNoteA.setAttribute("href", note.url);
-				text = nodeNoteA.hostname;
-				nodeNoteA.appendChild(document.createTextNode(text));
-				htmlObject.appendChild(nodeNoteA);
+				if (note.url) {
+					var nodeNoteA = document.createElement("A");
+					nodeNoteA.setAttribute("class", "outlink");
+					nodeNoteA.setAttribute("target", "_blank");
+					nodeNoteA.setAttribute("href", note.url);
+					text = nodeNoteA.hostname;
+					nodeNoteA.appendChild(document.createTextNode(text));
+					htmlObject.appendChild(nodeNoteA);
+				}
 			}
 		}
 	}

@@ -37,7 +37,7 @@ logger = logging.getLogger('stkserver')
 
 import shareds
 from bl.admin.models.cypher_adm import Cypher_adm
-from bl.base import Status, NodeObject, IsotammiException
+from bl.base import Status, NodeObject #, IsotammiException
 from bl.material import Material
 from .root_updater import RootUpdater
 

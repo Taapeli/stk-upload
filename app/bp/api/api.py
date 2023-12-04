@@ -49,27 +49,28 @@ import pprint
 import uuid
 
 cypher_search = """
-    match (p:Place {pname:$pname}) return p,id(p) as id
+    match (p:Place {pname:$pname}) return p  //#! use p.iid, not id(p) as id
 """
 
 cypher_record = """
-    match (p:Place)
-        where id(p) = $id 
+    match (p:Place {iid: p.iid}) //#! where id(p) = $id 
     optional match (smallerPlace:Place)-[h2:IS_INSIDE]->(p) 
     optional match (p)-[h1:IS_INSIDE]->(largerPlace:Place) 
     return p,
-        collect (distinct [h1,largerPlace,id(largerPlace)]) as largerPlaces,
-        collect (distinct [h2,smallerPlace,id(smallerPlace)]) as smallerPlaces
+        collect (distinct [h1,largerPlace]) as largerPlaces,
+        collect (distinct [h2,smallerPlace]) as smallerPlaces
 """
+#!      collect (distinct [h1,largerPlace,id(largerPlace)]) as largerPlaces,
+#!      collect (distinct [h2,smallerPlace,id(smallerPlace)]) as smallerPlaces
 
 def search(lookfor):
     result = shareds.driver.session().run(cypher_search,pname=lookfor)
     records = []
     for rec in  result:
         p = rec['p']
-        oid = rec['id']
+        #!oid = rec['id']
         r = dict(
-            id=oid,
+            id=p["iid"],
             name=p['pname'],
             type=p['type'],
         )

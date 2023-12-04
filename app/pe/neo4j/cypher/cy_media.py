@@ -63,19 +63,25 @@ RETURN root, o, COUNT(DISTINCT r) AS count
     create_in_batch = """
 MATCH (u:Root {id:$bid})
 MERGE (u) -[:OBJ_OTHER]-> (a:Media {iid:$iid})
-    SET a += $m_attr
-RETURN ID(a) as uniq_id"""
+    SET a += $m_attr"""
+#!RETURN ID(a) as uniq_id"""
 
-    link_notes = """
-MATCH (n:Note) WHERE n.handle IN $note_handles
-WITH n
-  MATCH (m:Media) WHERE m.handle=$handle
-  CREATE (m) -[:NOTE]-> (n)
-RETURN COUNT(DISTINCT n) AS cnt"""
-
-    link_citations = """
-match (c:Citation) where c.handle in $citation_handles
-with c
-    match (m:Media)  where m.handle=$handle
-    merge (m) -[:CITATION]-> (c)"""
+#! For each Note, Citation --> USE CypherObjectWHandle.link_item("Media", "Note")
+#
+#!   m_link_notes = """
+# MATCH (n:Note) WHERE n.handle IN $hlinks
+# WITH n
+#   MATCH (m:Media {handle: $handle})
+#   CREATE (m) -[:NOTE]-> (n)
+# RETURN COUNT(DISTINCT n) AS cnt"""
+#
+#     m_link_citations = """
+# MATCH (m:Media {handle: $handle})
+# MATCH (n:Citation) WHERE n.handle IN $hlinks
+#   CREATE (m) -[:CITATION]-> (n)
+# RETURN COUNT(DISTINCT n) AS cnt"""
+# match (c:Citation) where c.handle in $citation_handles
+# with c
+#     match (m:Media)  where m.handle=$handle
+#     merge (m) -[:CITATION]-> (c)"""
 

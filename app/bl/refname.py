@@ -68,17 +68,18 @@ class Refname(NodeObject):
     ( Refname {uniq_id, nimi} ) -[reftype]-> (Refname)
                reftype = (etunimi, sukunimi, patronyymi)
     Properties:                                             input source
-        uniq_id     ID() ...                                    (created in save())
+        uniq_id elementId() ...                             str (created in save())
         name    1st letter capitalized                      (Nimi)
         refname * the std name referenced, if exists        (RefNimi)
         reftype * which kind of reference refname points to ('firstname')
         sex  '2', '1' or '0'                                (Sukupuoli)
         source  points to Source                            (Lähde)
-
+    
+    * Note: Refname objects has not other key but Neoj elementId
     * Note: refnamea ja reftypeä ei talleteta tekstinä, vaan kannassa tehdään
             viittaus tyyppiä reftype ko Refname-olioon
     """
-
+    
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
 
     label = "Refname"
@@ -167,8 +168,8 @@ class Refname(NodeObject):
             (A:{name:name}) -[:PARENTNAME]-> (B:{name:refname})
         This object must have:
         - name (Name)
-        The identifier is an ID(Refname)
-        - uniq_id (int)
+        The identifier is an elementId(Refname)
+        - uniq_id (str)
         Optional arguments:
         - gender ('M'/'F'/'')
         - source (str)

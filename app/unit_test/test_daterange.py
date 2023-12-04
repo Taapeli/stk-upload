@@ -221,7 +221,7 @@ class Test(unittest.TestCase):
         nodesorted = sorted(nodevector)
         expected_uids = [3, 4, 1, 2, 5]
         for i in range(len(nodesorted)):
-            self.assertEqual(nodesorted[i].uniq_id, expected_uids[i], f"Invalid sort order, pos {i}")
+            self.assertEqual(nodesorted[i].iid, expected_uids[i], f"Invalid sort order, pos {i}")
 
 #         print (f"Sorted nodes:")
 #         for node in nodesorted:

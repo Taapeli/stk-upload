@@ -29,16 +29,19 @@ class CypherCitation():
     create_to_batch = """
 MATCH (b:Root {id: $batch_id})
 MERGE (b) -[r:OBJ_OTHER]-> (c:Citation {handle: $c_attr.handle}) 
-    SET c = $c_attr
-RETURN ID(c) as uniq_id"""
+    SET c = $c_attr"""
+#! RETURN ID(c) as uniq_id"""
 
-    link_source = """
-MATCH (n:Citation {handle: $handle})
-MATCH (m:Source   {handle: $hlink})
-MERGE (n) -[r:SOURCE]-> (m)"""
+#! For each Note, Citation --> USE CypherObjectWHandle.link_item("Citation", "Note")
+#
+#!    link_source = """
+# MATCH (n:Citation {handle: $handle})
+# MATCH (m:Source   {handle: $hlink})
+# MERGE (n) -[r:SOURCE]-> (m)"""
+#     # Create Note node and link (Citation) --> (Note)
+#     c_link_note = """
+# MATCH (n:Citation {handle: $handle})
+# MATCH (m:Note     {handle: $hlink})
+# CREATE (n) -[r:NOTE]-> (m)"""
 
-    # Create Note node and link (Citation) --> (Note)
-    link_note = """
-MATCH (n:Citation {handle: $handle})
-MATCH (m:Note     {handle: $hlink})
-CREATE (n) -[r:NOTE]-> (m)"""
+

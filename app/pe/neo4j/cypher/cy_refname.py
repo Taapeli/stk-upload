@@ -47,7 +47,7 @@ MERGE (a:Refname {name: $a_name}) SET a = $a_attr
 RETURN ID(a) AS aid, a.name AS aname"""
 
     link_person_to = """
-MATCH (p:Person) WHERE ID(p) = $pid
+MATCH (p:Person {iid: $pid})
 MERGE (a:Refname {name:$name})
 MERGE (a) -[:REFNAME {use:$use}]-> (p)
 RETURN ID(a) as rid"""
