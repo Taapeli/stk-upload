@@ -202,26 +202,14 @@ def label_by_iid(iid: str) -> str:
 
 class IidGenerator:
     """
-    Serves a sequences of unique IsotammiId keys by object type from the database.
+    Generating a sequences of unique IsotammiId keys by object type from the database.
+    
+    @see: https://stackoverflow.com/questions/42983569/how-to-write-a-generator-class
 
     Usage:
     - a = IidGenerator(tx, "People") Create an ID generator using given transaction
     - a.reserve(100)                 Allocates given number of keys
     - key = a.get_one()              Get next key
-    
-    #TODO: Convert this to a real generator class:
-    # https://stackoverflow.com/questions/42983569/how-to-write-a-generator-class
-    #
-    # class Fib: #example
-    #     def __init__(self):
-    #         self.a, self.b = 0, 1        
-    #     def __next__(self):
-    #         return_value = self.a
-    #         self.a, self.b = self.b, self.a+self.b
-    #         return return_value
-    #     def __iter__(self):
-    #         return self
-
     """
     def __init__(self, session, obj_name: str):
         """
@@ -230,6 +218,9 @@ class IidGenerator:
         
         Isotammi_id or iid consist of object type mark (1-2 letters) and
         running index grouped by hyphens.
+        
+        The keys are reserved in greater bunches not to lock database
+        every time a new key is needed.
         
         @See: pe.neo4j.util.label_by_iid, bl.base.NodeObject.label
         """
@@ -240,8 +231,8 @@ class IidGenerator:
 
     def reserve(self, iid_count: int):
         """
-        Create an object with a reservation of 'id_count' ID values from the
-        database counter for the type of 'obj_name'.
+        Create or update an object with a reservation of 'id_count' ID values
+        from the database counter for the type of 'obj_name'.
         """
         result = self.session.run(cypher_block_of_iids, 
                                   iid_mark=self.iid_mark, 
@@ -253,19 +244,43 @@ class IidGenerator:
         """
         Yield the next Isotammi ID properly formatted.
         """
-        def format_iid(id_str: str) -> str:
-            """
-            Inserts a hyphen into the id string.
-            Examples: H-1, H-1234, H1-2345, H1234-5678
-            """
-            return f'{id_str[: max(1, len(id_str) - 4)]}-{id_str[max(1, len(id_str) - 4) :]}'
 
         if self.n_iid > self.max_iid:
             raise IsotammiException("Whole chunk of allocated Isotammi IDs already used."
                                     f" {self.n_iid} > {self.max_iid}")
 
-        iid = format_iid(self.iid_mark + base32.encode(self.n_iid, checksum=False))
+        iid = self._format_iid(self.iid_mark, self.n_iid)
         self.n_iid += 1
 
 ##        print(f"new_isotammi_id: {self.n_iid} -> {iid}")
         return iid
+
+    def _format_iid(self, mark:str, n_val: str) -> str:
+        """
+        Inserts a hyphen into the id string.
+        Examples: H-1, H-1234, H1-2345, H1234-5678
+        """
+        val = base32.encode(n_val, checksum=False)
+        l_val = len(val)
+        if l_val == 0:
+            #print(f"0) {mark}-{val}")
+            return "FAIL"
+        x = ""
+        while len(val) > 4:
+            x = x + "-" + val[-4:]
+            val = val[:-4]
+            #print(f"2) {mark}{val}{x} | {val=},{x=}")
+        #print(f"1) {mark}-{val}{x}")
+        if l_val <= 4:
+            return mark + "-" + val
+        return mark + val + x
+
+
+if __name__ == "__main__":
+    print("Testing Iid value formatting")
+    my = IidGenerator(0, "Person")
+    for n in range(10):
+        val = 40**n
+        print(f'\t{val!r} = tulos {my._format_iid("H", val)!r}')
+    print("done")
+
