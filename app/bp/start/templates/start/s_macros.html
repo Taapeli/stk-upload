@@ -79,6 +79,13 @@
     {% else %}class="states">
     {% endif -%}
                {{ _("Storing") }}</div>
+
+    {% if state_n == 6 %}
+            <div title='{{ _("Error in data upload") }}'
+    			 class="states fail">
+               {{ _("Load Failed") }}</div>
+    {% endif %}
+
             <div title='{{ _("The data is stored as candidate material") }}'
     {% if state_n > 20 %}class="states done"
     {% elif state_n == 20 %}class="states act"

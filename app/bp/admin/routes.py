@@ -370,6 +370,7 @@ def list_threads():
 @login_required
 @roles_accepted("member", "admin", "audit")
 def show_upload_log(username, xmlfile, batch_id=None):
+    success = False
     upload_folder = uploads.get_upload_folder(username)
     for fname in [
             os.path.join(upload_folder, batch_id, xmlfile + ".log"),
@@ -377,13 +378,20 @@ def show_upload_log(username, xmlfile, batch_id=None):
         ]:
         try:
             msg = open(fname, encoding="utf-8").read()
+            success = True
             break
         except FileNotFoundError:
-            #print(f"bp.admin.routes.show_upload_log: no file {fname}")
-            msg = _("File not found")
+            print(f"bp.admin.routes.show_upload_log: no file {fname}")
+            msg = "" #"_("Log file has been removed")
 
-    logger.info(f"-> bp.admin.routes.show_upload_log f={fname}")
-    return render_template("/admin/load_result.html", msg=msg)
+    if success:
+        logger.info(f"-> bp.admin.routes.show_upload_log f={fname}")
+    else:
+        flash(_("The log file for %(n)s has been removed", n=batch_id), "error")
+        logger.warn(f"-> bp.admin.routes.show_upload_log not found f={fname}")
+
+    return render_template("/admin/load_result.html", msg=msg,
+                           not_found=(not success), batch_id=batch_id)
 
 
 @bp.route("/admin/xml_delete/<username>/<xmlfile>")

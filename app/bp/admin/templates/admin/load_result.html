@@ -1,4 +1,4 @@
-{# _myapp/templates/gr_result.html_ #}
+{# _admin/templates/load_result.html_ #}
 {% extends "a_layout.html" %}
 {% block title %}{{ _("Gramps to Neo4j log") }}{% endblock %}
 {% block body %}
@@ -10,7 +10,13 @@
 <pre style="white-space: pre-wrap;">
 {{ msg }}
 </pre>
-
+{% if not_found %}
+<p> {{ _( "The log file of the material has been removed. If you want, you may" ) }}
+   <a href="/audit/pick/{{ batch_id}}">
+   	{{ _( "revise of remove the whole batch ") }} <tt>{{ batch_id }}</tt>".
+   </a>
+</p>
+{% endif %}
 <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
 {% endblock %}
 </body>

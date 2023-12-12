@@ -133,5 +133,6 @@ div.states {
     box-shadow: 2px 2px 4px gray;
 }
 div.act { color: navy; font-weight: bold; }
+div.fail { color: red; font-weight: bold; }
 div.done {color: black;}
 
