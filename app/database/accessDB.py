@@ -22,6 +22,7 @@
 #from datetime import datetime
 import logging
 import traceback
+from bl.base import IsotammiException
 
 logger = logging.getLogger('stkserver')
 
@@ -30,13 +31,13 @@ from neo4j.exceptions import ClientError, ConstraintError #,CypherSyntaxError
 from flask_security import utils as sec_utils
 
 import shareds
-if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
-    from .cypher_setup import SetupCypher
-    from bl.admin.models.cypher_adm import Cypher_adm
-else:
-    # Cypher clauses using syntax before Neo4j version 5.0
-    from .cypher_setup_v3_4 import SetupCypher
-    from bl.admin.models.cypher_adm_v3_4 import Cypher_adm
+#!if shareds.app.config.get("NEO4J_VERSION", "0") >= "5.0":
+from .cypher_setup import SetupCypher
+from bl.admin.models.cypher_adm import Cypher_adm
+# else:
+#     # Cypher clauses using syntax before Neo4j version 5.0
+#     from .cypher_setup_v3_4 import SetupCypher
+#     from bl.admin.models.cypher_adm_v3_4 import Cypher_adm
 
 from .schema_fixes import do_schema_fixes
 
@@ -51,10 +52,11 @@ ROLES = ({'level':'0',  'name':'guest',    'description':'Rekisteröitymätön k
          {'level':'-1', 'name':'to_be_approved','description':'Käyttäjä joka odottaa hyväksymistä'}
 )
 
-# ====== Database schema ======
-# Change (increment) this, if schema must be updated
+# ====== Stk database schema ======
+#TODO Always change (increment) this, if schema must be updated
 # The value is also stored in each Root node
-DB_SCHEMA_VERSION = '2022.1.9'
+# Syntax: <year>.<running number>.<fix number>
+DB_SCHEMA_VERSION = "2023.1.0"
 # =============================
 
 
@@ -86,7 +88,7 @@ def initialize_db():
             create_single_profile('_Stk_')
 
         # Fix possible Root.id uniqueness
-        try_fixing_duplicate_roots()
+        fix_empty_roots()
 
         create_lock_w_constraint()
 
@@ -100,7 +102,9 @@ def initialize_db():
             "Media":{"iid", "handle"},
             "Note":{"iid", "handle"},
             "Person":{"iid", "handle"},
+            "Name":{"iid"},
             "Place":{"iid", "handle"},
+            "Place_name":{"iid"},
             "Repository":{"iid", "handle"},
             "Source":{"iid", "handle"},
             "Role":{"name"},
@@ -350,12 +354,11 @@ def create_year_indexes():
 
 
 def check_constraints(needed:dict):
-    ''' Create missing UNIQUE constraints from given nodes and parameters.
+    ''' Create missing UNIQUE constraints for given nodes and parameters.
     '''
-    for label,props in needed.items():
+    for label, props in needed.items():
         for prop in props:
-            create_unique_constraint(label, prop)
-#     print(f'checked {n_ok} constraints ok')
+            create_unique_constraint(label, prop, f"{label}_{prop}")
     return
 
 def create_lock_w_constraint():
@@ -367,8 +370,31 @@ def create_lock_w_constraint():
                     db_schema=DB_SCHEMA_VERSION, 
                     locked=False)
         print(f'Initial Lock (version {DB_SCHEMA_VERSION}) created')
-        create_unique_constraint('Lock', 'id')
+        create_unique_constraint('Lock', 'id', 'lock_id')
         return
+
+def find_roots_to_update() -> int:
+    """ Find batches not following current db_schema """
+    batches = []
+    with shareds.driver.session() as session:
+        result = session.run(SetupCypher.find_roots_db_schema, 
+                             db_schema=DB_SCHEMA_VERSION)
+        for record in result:
+            batches.append(record[0])
+    return batches
+
+def update_root_schema(batch_id:str):
+    """ Mark this batch is following current db_schema """
+    if (not batch_id) or (not DB_SCHEMA_VERSION):
+        IsotammiException("database.accessDB.update_root_schema FAILED")
+    with shareds.driver.session() as session:
+        # Also remove neo4jImportId, if exists
+        result = session.run(SetupCypher.set_root_db_schema, 
+                             id=batch_id, db_schema=DB_SCHEMA_VERSION)
+        summary = result.consume()
+        if summary.counters.properties_set == 1:
+            print(f"update_root_schema: Batch {batch_id} updated to version {DB_SCHEMA_VERSION})")
+    return
 
 def re_initiate_nodes_constraints_fixes():
     # Remove initial lock for re-creating nodes, constraints and schema fixes
@@ -378,92 +404,95 @@ def re_initiate_nodes_constraints_fixes():
         print('Initial Lock removed')
         return
 
-def try_fixing_duplicate_roots():
+def fix_empty_roots():
     """ Remove possible empty (duplicate?) root nodes, to fix Root.id uniqueness.
     
-        Reason was missing unique constraint.
+        Reason was missing unique constraint. Also removes unused Root nodes.
     """
-    uniq_ids = []
+    elem_ids = []
+    node_sum = 0
     with shareds.driver.session() as session:
         result = session.run(SetupCypher.find_empty_roots)
-        for uniq_id, _id in result:
-            uniq_ids.append(uniq_id)
-            logger.info(f'database.accessDB.try_fixing_duplicate_roots: empty Root: {uniq_id}:{id}')
-        if uniq_ids:
-            session.run(SetupCypher.remove_empty_roots, uniq_ids=uniq_ids).single()
-            logger.info(f'database.accessDB.try_fixing_duplicate_roots: deleted {len(uniq_ids)} empty Root nodes')
-        print(f'Deleted {len(uniq_ids)} empty Root nodes')
+        # b.id, elementId(b) AS uid, COLLECT(DISTINCT lbl) as lbls
+        for _root_id, elem_id, lbls in result:
+            elem_ids.append(elem_id)
+            logger.info("database.accessDB.fix_empty_roots:"
+                        f"empty Root: {elem_id} with links {lbls}")
+        elem_cnt = len(elem_ids)
+        if elem_cnt:
+            result = session.run(SetupCypher.remove_empty_roots, elem_ids=elem_ids)
+            summary = result.consume()
+            node_cnt = summary.counters.nodes_deleted
+            node_sum += node_cnt
+            rela_cnt = summary.counters.relationships_deleted
+            logger.info(f"database.accessDB.fix_empty_roots: deleted "
+                        f"{elem_cnt} empty Root nodes with {rela_cnt} near node types "
+                        f"and {node_cnt} nodes")
+        print(f"Deleted {elem_cnt} empty Root nodes and {node_sum-elem_cnt} other nodes")
         return
 
-def create_unique_constraint(label, prop):
-    ' Create given constraint for given label and property.'
-    with shareds.driver.session() as session:
-        # Check Neo4j version by instance.NEO4J_VERSION
-        if shareds.db.version >= "5.0":
-            query = f"create constraint if not exists for (n:{label}) require n.{prop} is unique"
-            try:
-                session.run(query)
-                print(f'Unique constraint for {label}.{prop} created')
-            except Exception as e:
-                logger.error(f'database.accessDB.create_unique_constraint: {e.__class__.__name__} {e}' )
-                raise
-        else: # Neo4j versions 3.2 - 4.2
-            query = f"create constraint on (n:{label}) assert n.{prop} is unique"
-            try:
-                session.run(query)
-                print(f'Unique constraint for {label}.{prop} created')
-            except ClientError as e:
-                msgs = e.message.split(',')
-                print(f'Unique constraint for {label}.{prop} ok: {msgs[0]}')
-                return
-            except Exception as e:
-                logger.error(f'database.accessDB.create_unique_constraint: {e.__class__.__name__} {e}' )
-                raise
-    return
-
-def create_constraint(label, prop):
-    ' Create given constraint for given label and property.'
-    with shareds.driver.session() as session:
-        query = f"create constraint on (n:{label})"
-        try:  
-            session.run(query)
-            print(f'Constraint for {label}.{prop} created')
-        except ClientError as e:
-            msgs = e.message.split(',')
-            print(f'Constraint for {label}.{prop} ok: {msgs[0]}')
-            return
-        except Exception as e:
-            logger.error(f'database.accessDB.create_constraint: {e.__class__.__name__} {e}' )
-            raise
-    return
-
-def remove_prop_constraints(prop):
-    """ Remove unique constraints for given property.
-        NOTE. Uses Cypher 4.4 "Show" clause!
+def create_unique_constraint(label, property_name, constraint_name=""):
+    """ Create an unique constraint for given label and property.
     """
     with shareds.driver.session() as session:
+        query=f"CREATE CONSTRAINT {constraint_name} IF NOT EXISTS" + \
+            f"   FOR (n:{label}) REQUIRE n.{property_name} IS UNIQUE"
+        # query = f"create constraint on (n:{label})"
         try:
-            list_indexes = """
-                SHOW UNIQUE CONSTRAINTS 
-                YIELD name, labelsOrTypes, properties
-                    WHERE $prop IN properties"""
-            names = []
-            result = session.run(list_indexes, prop=prop)
-            for name, labels, props in result:
-                names.append(name)
-                print(f'Removing Unique constraints for {labels[0]}.{props[0]}')
+            result = session.run(query)
+            summary = result.consume()
+            #cnt = summary.counters.relationships_created
+            if summary and summary.counters.relationships_created:
+                print(f"Constraint {constraint_name} for {label}.{property_name} created")
+            else:
+                print(f"A constraint for {label}.{property_name} exist")
 
-            for name in names:
-                session.run("DROP CONSTRAINT "+name+" IF EXISTS")
-            print(f'Removed {len(names)} Unique constraints for {prop}')
-            
         except Exception as e:
-            logger.error(f'database.accessDB.remove_prop_constraints: {e.__class__.__name__} {e}' )
+            logger.error("database.accessDB.create_unique_constraint for "
+                f"{constraint_name}: {e.__class__.__name__} {e}" )
             raise
     return
+
+def drop_prop_constraints(prop: str):
+    """ Drop all indexes for given property.
+
+        Database copy from older version to new database created temporary
+        neo4jImportId fields and their indexes. Here we drop their unique indexes,
+    """
+    cy_list_constraints = """
+        SHOW ALL CONSTRAINTS 
+        YIELD name, labelsOrTypes, properties WHERE $prop in properties"""
+    # ╒═════════════════════╤═════════════════╤═════════════════╕
+    # │name                 │labelsOrTypes    │properties       │
+    # ╞═════════════════════╪═════════════════╪═════════════════╡
+    # │"constraint_2026f827"│["Note"]         │["neo4jImportId"]│
+    # ├─────────────────────┼─────────────────┼─────────────────┤
+
+    drops_done = 0
+    drops_todo = []
+    with shareds.driver.session() as session: 
+        result = session.run(cy_list_constraints, prop=prop)
+        for record in result:
+            constraint_name = record[0]
+            label = record[1][0]
+            drops_todo.append((constraint_name,label))
+        for name, label in drops_todo:
+            result = session.run(f"DROP CONSTRAINT {name} IF EXISTS")
+            summary = result.consume()
+            count = summary.counters.constraints_removed
+            drops_done += count
+            print(f"drop_prop_constraints: {name} for {label}.{prop} "
+                  f"{['not existed','removed'][count]}")
+                
+        if drops_done:
+            print(f"drop_prop_constraints: {drops_done} indexes removed")
+    return drops_done
 
 
 def create_freetext_index():
+    #Note: Should not need ClientError with Neo4j 5.1 IF NOT EXISTS
+    #TODO: Use create_person_search_index, create_note_text_index and create_source_text_index
+    #      cypher clauses for text-2.0 indexes
     try:
         _result = shareds.driver.session().run(Cypher_adm.create_freetext_index)
     except ClientError as e:

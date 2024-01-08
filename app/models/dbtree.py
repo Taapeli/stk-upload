@@ -96,7 +96,7 @@ class DbTree():
         """
         self.node_id = node_id
         with self.driver.session(default_access_mode='READ') as session:
-            result = session.run(self.query, locid=int(node_id))
+            result = session.run(self.query, locid=node_id)
             return [(record["nodes"], record["lv"], record["r"]) 
                     for record in result]
 
@@ -121,17 +121,26 @@ class DbTree():
         # first create all nodes (under initial parent)
         for nodes, _level, relations in hierarchy_result:
             for node in nodes:
-                if not self.tree.contains(node.id):
+                # Example: <Node element_id='4:18f484ec-c98a-4e88-9acb-165fdd5a3216:1110156' 
+                #    labels=frozenset({'Place'})
+                #    properties={'coord': [61.203655, 24.06065], 'iid': 'P-32n6',
+                #        'pname': 'Voipaalan kartano', 'change': 1693326647, 
+                #        'handle': '_ef04df92a173342c2fdd249d390@2311052', 
+                #        'id': 'P0009', 'type': 'Farm', 'attrs': ''}>
+                iid = node.get('iid')
+                if not self.tree.contains(iid):
                     self.tree.create_node(node.get(self.name_field_name), 
-                                          node.id, 
+                                          iid, 
                                           parent=0, 
                                           data={self.type_field_name:node.get(self.type_field_name),
-                                                'iid':node.get('iid')})
+                                                'iid':iid})
     
         # then move all nodes under correct parent
         for nodes, _level, relations in hierarchy_result:
             for rel in relations:
-                self.tree.move_node(rel.start_node.id, rel.end_node.id)
+                start = rel.start_node.get("iid")
+                end = rel.end_node.get("iid")
+                self.tree.move_node(start, end)
         return self.tree
 
 
@@ -147,22 +156,25 @@ class DbTree():
         nodes = [self.tree[node] for node in self.tree.expand_tree(mode=self.tree.DEPTH)]
         for node in nodes:
             if node.bpointer != None:
+                #TODO: Call to deprecated function "bpointer"; use "node.predecessor" instead.
+                # With treelib 1.6.4
+                # ueing node.predecessor("a431f142-7bfd-11ee-8d6f-2bf86e8618f5")does not help!
                 if node.bpointer in nl:
                     lv = nl[node.bpointer] + 1
                 else:
                     lv = lv + 1
                     nl[node.identifier] = lv
                 fill = ''.join([ "       " for _n in range(lv-1)])
-                print("({}){} {:5d}<-{:5d} {} ".format(lv, fill, 
+                print("({}){} {}<-{} {} ".format(lv, fill, 
                       node.bpointer, node.identifier, node.tag))
 
 
 if __name__ == '__main__':
     # Valinnainen argumentti: id of a place
     if len(sys.argv) <= 1:
-        locid = 21773
+        locid = "P-32n6"
     else:
-        locid = int(sys.argv[1])
+        locid = sys.argv[1]
     print ("paikka {}".format(locid))
 
     # Connect db
@@ -172,10 +184,10 @@ if __name__ == '__main__':
     # Suoritetaan haku tietokannasta: paikkaan locid liittyvät
     # solmut ja relaatiot
     query = """
-MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE p.iid = $locid
     RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
     UNION
-MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE p.iid = $locid
     RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
     t_test = DbTree(driver, query, 'pname', 'type')
@@ -185,7 +197,7 @@ MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
         # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa. 
         # Hae oman paikan tiedot ilman yhteyksiä
         query = """
-MATCH (p:Place) WHERE ID(p) = $locid
+MATCH (p:Place) WHERE p.iid = $locid
 RETURN p.type AS type, p.pname AS name
 """
         with driver.session() as session:

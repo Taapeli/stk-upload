@@ -128,7 +128,7 @@ def print_tree(t):
 
 if __name__ == '__main__':
     """ Run 'python unit_test/place_tree.py 103338'
-        where the argument is uniq_id of a place
+        where the argument is iid of a place
     """
     if len(sys.argv) <= 1:
         locid = 21773

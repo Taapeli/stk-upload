@@ -40,7 +40,7 @@ WHERE b.user = $user AND name.name >= $fw
 WITH name ORDER BY name.name LIMIT $limit
     SET name.prefix = $pre"""
         result = session.run(update_query, user='juha', fw='', limit=2, lang='fi', pre="von")
-        counters = result.consume().counters
+        counters = result.consume()
         print(f'done {counters}')
 
 if __name__ == '__main__':

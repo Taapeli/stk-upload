@@ -11,8 +11,12 @@ p {margin-left:15px;}
 #flex {display: flex; /*height:75vh;*/
     flex-wrap: wrap;
 }
+.subsection {
+    margin:.5em; padding: 0 1em;
+}
+
 #flex > div {
-    margin:.5em; padding: 1em;
+    margin:.5em; padding: 0 1em;
     width: 43%; 
 }
 .pic_container {
@@ -70,7 +74,7 @@ tr > td > img {
                                 src="/scene/thumbnail?id={{media.iid}}" 
                                 title="key = {{media.iid}}"/></div>
                             <div>
-                                 <p style="nowrap;">
+                                 <p style="nowrap">
                                  {% if size %}{{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>
                                  {%else%}{{media.description}}
                                  {%endif%}
@@ -82,6 +86,18 @@ tr > td > img {
                         </div>
                     </td>
                </tr>
+	{% if media.attrs %}
+				{{ macro.attr_rows(media) }}
+	{% endif %}
+	{% if media.notes %}
+	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
+                    <td class="Value"><ul>
+    	{% for note in media.notes %}
+	                   <li>{{ macro.notelink(note) }}</li>
+		{% endfor -%}
+                    </ul>
+	{% endif %}
+
 	        </table>
 		</div>
 
@@ -155,7 +171,13 @@ tr > td > img {
         </div>
 	</div>
  {% endif %}
-  </div>
+  </div> {# end flex #}
+
+  <div>
+	{% if source_citations %}
+		{{ macro.source_citations(source_citations) }}
+	{% endif %}
+
   <div class="fullclear"></div>
 {% endif %}
 </div>

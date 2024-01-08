@@ -43,8 +43,8 @@ def test_get_families(svc):
         'change', 'change_str', 'children', 'dates', 'events', 'father', 'father_sortname', 
         'handle', 'id', 'iid', 'marriage_dates', 'marriage_place', 'mother', 'mother_sortname', 
         'no_of_children', 'note_ref', 'notes', 'num_hidden_children', 'priv', 
-        'rel_type', 'remove_privacy_limits', 'sources', 'split_with_hyphen', 'state', 'timestamp_str', 'uniq_id',
-        #'uuid', 'uuid_short'
+        'rel_type', 'remove_privacy_limits', 'sources', 'state', 'timestamp_str', 'iid',
+        #'uuid', 'uuid_short', 'split_with_hyphen'
         ]
     for attr in attrs:
         assert attr in dir(f)
@@ -76,7 +76,7 @@ def test_get_family_by_uuid1(svc):
              'iid', 'marriage_dates', 'mother', 'mother_sortname', 
              'note_ref', 'notes', 'priv', 
              'rel_type', 'remove_privacy_limits', 'sources', 
-             'state', 'timestamp_str', 'uniq_id',
+             'state', 'timestamp_str', 'iid',
              # 'uuid', 'uuid_short'
              ]
     for attr in attrs:
@@ -85,7 +85,7 @@ def test_get_family_by_uuid1(svc):
 
 def test_get_family_parents0(svc):    
     # invalid unid_iq
-    rsp = svc.dr_get_family_parents(uniq_id=INVALID_UNIQ_ID, with_name=True)
+    rsp = svc.dr_get_family_parents(iid=INVALID_UNIQ_ID, with_name=True)
     print(rsp)    
     assert rsp is not None
     assert rsp['status'] == 'OK'
@@ -95,7 +95,7 @@ def test_get_family_parents0(svc):
 
 def test_get_family_parents1(svc):    
     # valid unid_iq, with names
-    rsp = svc.dr_get_family_parents(uniq_id=values.family_uniq_id, with_name=True)
+    rsp = svc.dr_get_family_parents(iid=values.family_iid, with_name=True)
     print(rsp)    
     assert rsp is not None
     assert rsp['status'] == 'OK'
@@ -109,7 +109,7 @@ def test_get_family_parents1(svc):
 
 def test_get_family_parents2(svc):    
     # valid unid_iq, without names (the result is the same as with names)
-    rsp = svc.dr_get_family_parents(uniq_id=values.family_uniq_id, with_name=False)
+    rsp = svc.dr_get_family_parents(iid=values.family_iid, with_name=False)
     print(rsp)    
     assert rsp is not None
     assert rsp['status'] == 'OK'
@@ -122,7 +122,7 @@ def test_get_family_parents2(svc):
 
 def test_get_family_children0(svc):    
     # invalid uniq id
-    rsp = svc.dr_get_family_children(uniq_id=INVALID_UNIQ_ID, with_events=True, with_names=True)
+    rsp = svc.dr_get_family_children(iid=INVALID_UNIQ_ID, with_events=True, with_names=True)
     print(rsp)    
     assert rsp is not None
     assert rsp['status'] == 'OK'
@@ -132,7 +132,7 @@ def test_get_family_children0(svc):
 
 def test_get_family_children1(svc):    
     # valid uniq id
-    rsp = svc.dr_get_family_children(uniq_id=values.family_uniq_id, with_events=True, with_names=True)
+    rsp = svc.dr_get_family_children(iid=values.family_iid, with_events=True, with_names=True)
     print(rsp)    
     assert rsp is not None
     assert rsp['status'] == 'OK'
@@ -160,11 +160,11 @@ def test_get_place_w_names_notes_medias0a(svc):
     rsp = svc.tx_get_place_w_names_citations_notes_medias(INVALID_USER, uuid="x", lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
-    assert set(rsp.keys()) == {'place', 'uniq_ids'}
+    assert set(rsp.keys()) == {'place', 'iids'}
     place = rsp['place'] 
-    uniq_ids = rsp['uniq_ids'] 
+    iids = rsp['iids'] 
     assert rsp['place'] is None
-    assert rsp['uniq_ids'] == []
+    assert rsp['iids'] == []
 
 def test_get_place_w_names_notes_medias0b(svc):    
     # valid user, invalid uuid
@@ -173,11 +173,11 @@ def test_get_place_w_names_notes_medias0b(svc):
     rsp = svc.tx_get_place_w_names_citations_notes_medias(values.user, uuid=INVALID_UUID, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
-    assert set(rsp.keys()) == {'place', 'uniq_ids'}
+    assert set(rsp.keys()) == {'place', 'iids'}
     place = rsp['place'] 
-    uniq_ids = rsp['uniq_ids'] 
+    iids = rsp['iids'] 
     assert rsp['place'] is None
-    assert rsp['uniq_ids'] == []
+    assert rsp['iids'] == []
 
 def test_get_place_w_names_notes_medias0c(svc):    
     # invalid user, valid uuid
@@ -186,11 +186,11 @@ def test_get_place_w_names_notes_medias0c(svc):
     rsp = svc.tx_get_place_w_names_citations_notes_medias(user=INVALID_USER, uuid=values.place_uuid, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
-    assert set(rsp.keys()) == {'place', 'uniq_ids'}
+    assert set(rsp.keys()) == {'place', 'iids'}
     place = rsp['place'] 
-    uniq_ids = rsp['uniq_ids'] 
+    iids = rsp['iids'] 
     assert rsp['place'] is None
-    assert rsp['uniq_ids'] == []
+    assert rsp['iids'] == []
 
 def test_get_place_w_names_notes_medias1(svc):    
     # valid user, valid uuid
@@ -199,12 +199,12 @@ def test_get_place_w_names_notes_medias1(svc):
     rsp = svc.tx_get_place_w_names_citations_notes_medias(values.user, uuid=values.place_uuid, lang="fi", material=material)
     print(rsp)    
     assert isinstance(rsp, dict)
-    assert set(rsp.keys()) == {'place', 'uniq_ids'}
+    assert set(rsp.keys()) == {'place', 'iids'}
     place = rsp['place'] 
-    uniq_ids = rsp['uniq_ids'] 
+    iids = rsp['iids'] 
     assert isinstance(place, PlaceBl)
-    assert isinstance(uniq_ids, list)
-    assert len(uniq_ids) == 1
+    assert isinstance(iids, list)
+    assert len(iids) == 1
 
 def test_get_event_by_uuid0(svc):    
     # valid user, invalid uuid
@@ -250,7 +250,7 @@ def test_get_event_participants1(svc):
     # def dr_get_event_participants(self, uid):
     material = Material(session=None, request=None)
     material.batch_id = values.batch_id 
-    rsp = svc.dr_get_event_participants(values.event_uniq_id)
+    rsp = svc.dr_get_event_participants(values.event_iid)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'items', 'status'}
@@ -279,7 +279,7 @@ def test_get_event_place1(svc):
     # def dr_get_event_place(self, uid):
     material = Material(session=None, request=None)
     material.batch_id = values.batch_id 
-    rsp = svc.dr_get_event_place(values.event_uniq_id)
+    rsp = svc.dr_get_event_place(values.event_iid)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'items', 'status'}
@@ -308,7 +308,7 @@ def test_dr_get_event_notes_medias1(svc):
     # def dr_get_event_notes_medias(self, uid):
     material = Material(session=None, request=None)
     material.batch_id = values.batch_id 
-    rsp = svc.dr_get_event_notes_medias(values.event_uniq_id)
+    rsp = svc.dr_get_event_notes_medias(values.event_iid)
     print(rsp)    
     assert isinstance(rsp, dict)
     assert set(rsp.keys()) == {'medias', 'notes', 'status'}
@@ -328,9 +328,9 @@ def test_dr_get_event_notes_medias1(svc):
     def dr_get_event_place(self, uid):
     def dr_get_event_notes_medias(self, uid):
 
-    def dr_get_family_parents(self, uniq_id: int, with_name=True):
-    def dr_get_family_children(self, uniq_id, with_events=True, with_names=True):
-    def dr_get_family_events(self, uniq_id, with_places=True):
+    def dr_get_family_parents(self, iid: int, with_name=True):
+    def dr_get_family_children(self, iid, with_events=True, with_names=True):
+    def dr_get_family_events(self, iid, with_places=True):
     def dr_get_family_sources(self, id_list, with_notes=True):
     def dr_get_family_notes(self, id_list: list):
     def dr_get_family_members_by_id(self, oid, which):
@@ -339,8 +339,8 @@ def test_dr_get_event_notes_medias1(svc):
 
     def tx_get_place_list_fw(self, user, fw_from, limit, lang="fi", batch_id=None):
     def tx_get_place_w_names_citations_notes_medias(self, user, uuid, lang="fi"):
-    def dr_get_place_tree(self, locid, lang="fi"):
-    def dr_get_place_events(self, uniq_id, privacy):
+    def dr_get_place_tree(self, locid:str, lang="fi"):
+    def dr_get_place_events(self, iid, privacy):
 
     def dr_get_source_list_fw(self, args):
     def dr_get_source_w_repository(self, user, uuid):
@@ -350,7 +350,7 @@ def test_dr_get_event_notes_medias1(svc):
 
     def dr_get_topic_list(self, user, batch_id, fw_from, limit):
 
-    def dr_get_source_citations(self, sourceid: int):
+    def dr_get_source_citators(self, sourceid: int):
     def dr_inlay_person_lifedata(self, person):
     def dr_get_surname_list(self, username, batch_id, count):
     def dr_get_placename_list(self, username, batch_id, count=50): 

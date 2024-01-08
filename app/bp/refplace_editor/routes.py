@@ -71,14 +71,16 @@ def mergeplaces():
     # datastore = PlaceUpdater(dataservice)
     #print(f'#> bp.refplace_editor.routes.mergeplaces: datastore = {datastore}')
 
-    with PlaceUpdater("update") as service:
-        ret = service.merge2places(int(id1),int(id2))
-
-    if Status.has_failed(ret):
-        print(f"mergeplaces: {ret.get('statustext')}")
-        return StkEncoder.jsonify(ret)
-    #TODO: Should use original ret dictionary as is
-    return StkEncoder.jsonify(ret.get('place'))
+    try:
+        with PlaceUpdater("update") as service:
+            ret = service.merge2places(int(id1),int(id2))
+    except Exception as e:
+        ret = {
+            "status": "Error",
+            "statustext": str(e)
+        }
+    print(f"mergeplaces: {ret.get('statustext')}")
+    return StkEncoder.jsonify(ret)
 
 @bp.route('/refplaces/api/test_create', methods=['GET'])
 @roles_accepted('audit')

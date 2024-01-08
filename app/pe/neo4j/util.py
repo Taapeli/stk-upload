@@ -18,15 +18,11 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # blacked 15.11.2021/JMä
-import shareds
-LOG_CYPHER = False
-#TODO Fix how to import instance.config variable?
-if "LOG_CYPHER" in vars(shareds.app.config):
-    LOG_CYPHER = shareds.app.config.LOG_CYPHER
-
 import base32_lib as base32
 from bl.base import IsotammiException
 from bl.material import Material
+import shareds
+LOG_CYPHER = shareds.app.config.get("LOG_CYPHER", False) if shareds.app else False
 
 cypher_user_prefix = """
     MATCH (prof:UserProfile{username:$username}) 
@@ -48,7 +44,7 @@ cypher_user_batch_prefix = """
 """
 
 cypher_block_of_iids = """
-MERGE (a:iid {id:$iid_type})
+MERGE (a:iid {id:$iid_mark})
     ON CREATE SET a.counter = $iid_count
     ON MATCH SET a.counter = a.counter + $iid_count
 RETURN a.counter - $iid_count AS new_iid"""
@@ -153,31 +149,94 @@ def dict_root_node(root_node, select="min"):
     return dic
 
 
-class IsotammiId:
+def relation_type_by_label(label: str) -> str:
+    """ Find relation type by Node label.
     """
-    Serves a sequences of unique ID keys by object type from the database.
+    types = {"Citation":"CITATION", 
+        "Event":"EVENT", 
+        "Media":"MEDIA", 
+        "Name":"NAME", 
+        "Note":"NOTE", 
+        # "Person": "CHILD",
+        # "Person": "PARENT",
+        # "Place": "IS_INSIDE",
+        "Place":"PLACE", 
+        "Place_name":"NAME", 
+        # "Place_name": "NAME_LANG",
+        "Repository":"REPOSITORY", 
+        "Source":"SOURCE"}
+    link_type = types.get(label)
+    if link_type is None:
+        #print (f"// No matching relation type for {label}")
+        raise (IsotammiException, f"No matching relation type for {label}")
+
+    return link_type
+
+def label_by_iid(iid: str) -> str:
+    """ Find Node label by IsotammiId.
+    """
+    labels = {
+        "C": "Citation", 
+        "E": "Event", 
+        "M": "Media", 
+        "AN":"Name", 
+        "N": "Note", 
+        "H": "Person",
+        "P": "Place", 
+        "AP":"Place_name", 
+        "R": "Repository", 
+        "S": "Source"}
+    if iid:
+        a = iid[0]
+        if a == "A":
+            a = iid[0:1]    #  "AP" (Place) or "AI" (Person)
+    else:
+        a ="*"
+    label = labels.get(a)
+    if label is None:
+        #print (f"// No matching relation type for {dst_label}")
+        raise IsotammiException("No matching label for " + iid)
+
+    return label
+
+
+class IidGenerator:
+    """
+    Generating a sequences of unique IsotammiId keys by object type from the database.
+    
+    @see: https://stackoverflow.com/questions/42983569/how-to-write-a-generator-class
 
     Usage:
-    - a = IsotammiId(tx, "People") Create an ID generator using given transaction
-    - a.reserve(100)             Allocates given number of keys
-    - key = a.get_one()            Get next key
+    - a = IidGenerator(tx, "People") Create an ID generator using given transaction
+    - a.reserve(100)                 Allocates given number of keys
+    - key = a.get_one()              Get next key
     """
     def __init__(self, session, obj_name: str):
         """
         Create an object with a reservation of 'id_count' ID values from the
         database counter for the type of 'obj_name'.
+        
+        Isotammi_id or iid consist of object type mark (1-2 letters) and
+        running index grouped by hyphens.
+        
+        The keys are reserved in greater bunches not to lock database
+        every time a new key is needed.
+        
+        @See: pe.neo4j.util.label_by_iid, bl.base.NodeObject.label
         """
-        self.iid_type = "H" if obj_name.startswith("Pe") else obj_name[:1]
+        self.iid_mark = "H" if obj_name.startswith("Pe") else obj_name[:1]
         self.session = session
         self.n_iid = 0
         self.max_iid = 0
 
     def reserve(self, iid_count: int):
         """
-        Create an object with a reservation of 'id_count' ID values from the
-        database counter fot the type of 'obj_name'.
+        Create or update an object with a reservation of 'id_count' ID values
+        from the database counter for the type of 'obj_name'.
         """
-        result = self.session.run(cypher_block_of_iids, iid_type=self.iid_type, iid_count = iid_count)
+        result = self.session.run(cypher_block_of_iids, 
+                                  iid_mark=self.iid_mark, 
+                                  iid_count = iid_count)
         self.n_iid = result.single()[0]
         self.max_iid = self.n_iid + iid_count - 1
 
@@ -185,19 +244,43 @@ class IsotammiId:
         """
         Yield the next Isotammi ID properly formatted.
         """
-        def format_iid(id_str: str) -> str:
-            """
-            Inserts a hyphen into the id string.
-            Examples: H-1, H-1234, H1-2345, H1234-5678
-            """
-            return f'{id_str[: max(1, len(id_str) - 4)]}-{id_str[max(1, len(id_str) - 4) :]}'
 
         if self.n_iid > self.max_iid:
             raise IsotammiException("Whole chunk of allocated Isotammi IDs already used."
                                     f" {self.n_iid} > {self.max_iid}")
 
-        iid = format_iid(self.iid_type + base32.encode(self.n_iid, checksum=False))
+        iid = self._format_iid(self.iid_mark, self.n_iid)
         self.n_iid += 1
 
 ##        print(f"new_isotammi_id: {self.n_iid} -> {iid}")
         return iid
+
+    def _format_iid(self, mark:str, n_val: str) -> str:
+        """
+        Inserts a hyphen into the id string.
+        Examples: H-1, H-1234, H1-2345, H1234-5678
+        """
+        val = base32.encode(n_val, checksum=False)
+        l_val = len(val)
+        if l_val == 0:
+            #print(f"0) {mark}-{val}")
+            return "FAIL"
+        x = ""
+        while len(val) > 4:
+            x = x + "-" + val[-4:]
+            val = val[:-4]
+            #print(f"2) {mark}{val}{x} | {val=},{x=}")
+        #print(f"1) {mark}-{val}{x}")
+        if l_val <= 4:
+            return mark + "-" + val
+        return mark + val + x
+
+
+if __name__ == "__main__":
+    print("Testing Iid value formatting")
+    my = IidGenerator(0, "Person")
+    for n in range(10):
+        val = 40**n
+        print(f'\t{val!r} = tulos {my._format_iid("H", val)!r}')
+    print("done")
+

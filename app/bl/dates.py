@@ -56,6 +56,7 @@ Created on 16.10.2017
 """
 # blacked 2021-05-01 JMä
 from datetime import date
+import time
 
 DR = {
     "MISSING": -1,  # no date
@@ -78,6 +79,26 @@ DR = {
     "EST_BETWEEN": 20,
     "EST_ABOUT": 21,
 }
+
+class ITimer():
+    """ Calculate time difference.
+        Usage:
+            >>> elapsed = ITimer()
+            # process ...
+            >>> print(f"{elapsed}")
+            0.032s
+    """
+
+    def __init__(self):
+        self.t0 = time.time()
+    
+    def __str__(self):
+        e = self.elapsed()
+        return "{:.3}s".format(e)
+
+    def elapsed(self) -> float:
+        return time.time() - self.t0
+
 
 # class DateTolerance():
 #     '''

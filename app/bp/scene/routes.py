@@ -45,11 +45,10 @@ from flask_babelex import _
 
 import shareds
 from . import bp
-#from bl import material
 
 from bp.api import apikey
-
-from bl.base import Status, StkEncoder
+from bl.base import Status, StkEncoder #, IsotammiException
+from bl.dates import ITimer
 from bl.comment import CommentReader, CommentsUpdater #, Comment
 from bl.event import EventReader, EventWriter
 from bl.family import FamilyReader
@@ -511,6 +510,9 @@ def show_person(iid=None, fanchart=False):
     Arguments:
     - iid=     persons iid
     - fanchart= by default family details shown, fanchart navigation uses this
+    
+    NOTE: Test js for References table: Add "?debug=1" to url address to run 
+          the process step by step
     """
     from datetime import date
     t0 = time.time()
@@ -521,9 +523,10 @@ def show_person(iid=None, fanchart=False):
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
+        elapsed = ITimer()
         result = service.get_person_data(iid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
         person = None
@@ -533,16 +536,18 @@ def show_person(iid=None, fanchart=False):
     else:
         person = result.get("person")
         objs = result.get("objs", [])
-        print(f"# Person with {len(objs)} objects")
+        print(f"#show_person: Person with {len(objs)} objects {elapsed}")
         jscode = result.get("jscode", "")
         # Batch or Audit node data like {'material', 'root_user', 'id'}
         person.root = result.get("root")
 
+    #print("show_person:\n" + jscode)
     stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
 
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     may_edit = current_user.has_role("audit")  # or current_user.has_role('admin')
     # may_edit = 0
+
     return render_template(
         "/scene/person.html",
         person=person,
@@ -566,35 +571,24 @@ def show_person_family_tree_hx(iid):
     """
     Htmx-component for displaying selected relatives tab: the families details.
     """
+    elapsed = ITimer()
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
-        result = service.get_person_data(iid)
+        result = service.get_person_data(iid, fullData=False)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")
     objs = result.get("objs", [])
-    print(f"# Person with {len(objs)} objects")
-    jscode = result.get("jscode", "")
-    root = result.get("root")
+    print(f"#show_person_family_tree_hx: Person with {len(objs)} objects {elapsed}")
+    stk_logger(u_context, f"-> bp.scene.routes.show_person_family_tree_hx n={len(objs)}")
 
-    stk_logger(u_context, f"-> bp.scene.routes.show_person n={len(objs)}")
-
-    last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
-    may_edit = current_user.has_role("audit")  # or current_user.has_role('admin')
     return render_template(
         "/scene/hx-person/famtree.html",
         person=person,
-        obj=objs,
-        jscode=jscode,
-        menuno=12,
-        root=root,
-        last_year_allowed=last_year_allowed,
-        user_context=u_context,
-        may_edit=may_edit,
-    )
+     )
 
 
 @bp.route("/scene/hx-person/fanchart/<iid>", methods=["GET"])
@@ -604,21 +598,22 @@ def show_person_fanchart_hx(iid):
     """
     Htmx-component for displaying selected relatives tab: fanchart.
     """
-    t0 = time.time()
+    elapsed = ITimer()
     u_context = UserContext()
 
     with PersonReaderTx("read_tx", u_context) as service:
-        result = service.get_person_data(iid)
+        result = service.get_person_data(iid, fullData=False)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{material,root_user,batch_id}}
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
     person = result.get("person")
 
     fanchart = FanChart().get(iid)
     n = len(fanchart.get("children", []))
-    t1 = time.time() - t0
-    stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
+    print(f"#show_person_fanchart_hx: Person with {n} children {elapsed}")
+    #!t1 = time.time() - t0
+    #!stk_logger(u_context, f"-> show_person_fanchart_hx n={n} e={t1:.3f}")
     return render_template(
         "/scene/hx-person/fanchart.html",
         person=person,
@@ -626,14 +621,14 @@ def show_person_fanchart_hx(iid):
     )
 
 
-@bp.route("/scene/nametypes/<uniq_id>/<typename>", methods=["GET"])
+@bp.route("/scene/nametypes/<iid>/<typename>", methods=["GET"])
 @roles_accepted("audit")
-def get_person_nametypes(uniq_id, typename):
+def get_person_nametypes(iid, typename):
     s = f"""
         <select name='nametype' 
-            id='name_{uniq_id}'
-            hx-put='changetype/{uniq_id}' 
-            hx-target='#msg_{uniq_id}' 
+            id='name_{iid}'
+            hx-put='changetype/{iid}' 
+            hx-target='#msg_{iid}' 
             hx-swap='innerHTML settle:1s'>
     """
     found = False
@@ -646,22 +641,23 @@ def get_person_nametypes(uniq_id, typename):
     if not found:
         s += f"\n    <option value='{typename}' selected>" + _(typename)
     s += "\n</select>"
-    s += f"<span class='msg' id='msg_{uniq_id}'></span>"
+    s += f"<span class='msg' id='msg_{iid}'></span>"
+    #print(f"bp.scene.routes.get_person_nametypes:\n{s}")
     return s
 
 
-@bp.route("/scene/changetype/<uniq_id>", methods=["PUT"])
+@bp.route("/scene/changetype/<iid>", methods=["PUT"])
 @roles_accepted("audit")
-def person_name_changetype(uniq_id):
+def person_name_changetype(iid):
     try:
         nametype_list = request.form.getlist("nametype")
         uid_list = request.form.getlist("order")
-        index = uid_list.index(uniq_id)
+        index = uid_list.index(iid)
         nametype = nametype_list[index]
         u_context = UserContext()
 
         with PersonWriter("simple", u_context) as service:
-            service.set_name_type(int(uniq_id), nametype)
+            service.set_name_type(iid, nametype)
         return _("type changed")  # will be displayed in <span class='msg' ...>
     except:
         return _("type change FAILED")  # will be displayed in <span class='msg' ...>
@@ -670,11 +666,12 @@ def person_name_changetype(uniq_id):
 @bp.route("/scene/get_person_names/<iid>", methods=["PUT"])
 @roles_accepted("guest", "research", "audit", "admin")
 def get_person_names(iid):
+    # For names list editing
     u_context = UserContext()
 
-    args = {}
+    #!args = {}
     with PersonReader("read", u_context) as service:
-        result = service.get_person_data(iid, args)
+        result = service.get_person_data(iid, fullData=False)
 
     if Status.has_failed(result):
         flash(f'{result.get("statustext","error")}', "error")
@@ -807,6 +804,9 @@ def json_get_event():
         # Event
         event = res.get("event", None)
         event.type_lang = jinja_filters.translate(event.type, "evt").title()
+        causes = res.get("causes", None)
+        if causes:
+            print(f"bp.scene.routes.json_get_event: causes: {causes}")
         # Event members
         members = res.get("members", [])
         for m in members:
@@ -820,19 +820,32 @@ def json_get_event():
         places = res.get("places", [])
         for pl in places:
             pl.href = "/place/" + pl.iid
-            pl.type_lang = jinja_filters.translate(pl.type, "lt").title()
+            pl.type_lang = jinja_filters.translate(pl.type, "lt")
             for up in pl.uppers:
                 up.href = "/place/" + up.iid
-                up.type_lang = jinja_filters.translate(up.type, "lt_in").title()
+                up.type_lang = jinja_filters.translate(up.type, "lt_in")
         # Event notes
         notes = res.get("notes", [])
+        for n in notes:
+            n.type_lang = jinja_filters.translate(n.type, "notet")
         # Medias
         medias = res.get("medias", [])
-        for m in medias:
-            m.href = "/scene/media/" + m.iid
+        if medias:
+            for m in medias:
+                m.media_page = "/scene/media/" + m.name + "?id=" +m.iid # display
+                m.href = "/media/" + m.iid # object page link
+                # The image shown on page
+                _fullname, _mimetype, m.size = mediafile.get_fullname(m.iid)
+                # {'iid': '...', 'change': 1693326068, 'id': 'O0004', 
+                #  'handle': '_f6694f284126c6141d068ea27c@2308291', 'attrs': {}, 
+                #  'state': None, 'iid': 'M-6ap', 'description': 'hääpari', 
+                #  'src': 'hääpari.png', 'mime': 'image/png', 'name': 'hääpari.png', 
+                #  'media_page': '/scene/media/hääpari.png?id=M-6ap', 
+                #  'href': '/media/M-6ap', 'size': (239, 243)}
 
         res_dict = {
             "event": event,
+            "causes": causes,
             "members": members,
             "notes": notes,
             "places": places,
@@ -1098,12 +1111,12 @@ def show_place(iid):
                 )
             cnt = len(res.get("events")) if res.get("events", False) else 0
             pl = res.get("place")
-            pl_hierarchy=res.get("hierarchy")
+            pl_hierarchy=res.get("hierarchy", [])
             events=res.get("events")
             citations = res.get("citations", [])
             # Map scaling
             level = 1
-            for p in res.get("hierarchy"):
+            for p in pl_hierarchy:  #!res.get("hierarchy"):
                 if p.iid == pl.iid:
                     level = p.level
                     break
@@ -1255,12 +1268,14 @@ def show_source_page(iid:str):
 @bp.route("/source/search")
 def source_search():
     """ Free text search by source title
+    
+        For testing? Not in use!
     """
     args = dict(request.args)
 
     key = args.get("apikey")
     searchtext = args.get("searchtext")
-    limit = args.get("limit")
+    limit = args.get("limit",10)
     if limit.isdigit():
         limit = int(limit)
     if not apikey.is_validkey(key): 
@@ -1276,7 +1291,7 @@ def source_search():
             res = service.reference_source_search(searchtext, limit)
             #print(res)
             return jsonify(res)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         stk_logger(u_context, f"-> bp.scene.routes.source_search FAILED")
         return jsonify({"status": Status.ERROR})
@@ -1413,19 +1428,25 @@ def show_media(iid):
 
     medium = res.get("item", None)
     if medium:
-        fullname, mimetype = mediafile.get_fullname(medium.iid)
+        _fullname, mimetype, size = mediafile.get_fullname(medium.iid)
         stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
+        print(f"#attrs: {medium.attrs}")
     else:
         flash(f'{res.get("statustext","error")}', "error")
-        fullname = None
+        _fullname = None
         mimetype = None
     if mimetype == "application/pdf":
         size = 0
-    else:
-        size = mediafile.get_image_size(fullname)
+    # else:
+    #     size = mediafile.get_image_size(_fullname)
+    cites = res.get("cites", [])
+    for c in cites:
+        print(f"#show_media: cite {c}")
 
-    return render_template(
-        "/scene/media.html", media=medium, size=size, user_context=u_context, menuno=6
+    return render_template("/scene/media.html", 
+                           media=medium, size=size,
+                           source_citations=cites,
+                           user_context=u_context, menuno=6
     )
 
 
@@ -1439,7 +1460,7 @@ def fetch_media(fname):
     """Fetch media file to display full screen.
 
     Example:
-    http://127.0.0.1:5000/scene/media/kuva2?id=63995268bd2348aeb6c70b5259f6743f&crop=0,21,100,91&full=1
+    http://127.0.0.1:5000/scene/media/kuva2?id=M-66z&crop=0,21,100,91&full=1
 
     Arguments:
         id    iid of Media
@@ -1450,13 +1471,13 @@ def fetch_media(fname):
     crop = request.args.get("crop")
     # show_thumb for cropped image only
     show_thumb = request.args.get("full", "0") == "0"
-    fullname, mimetype = mediafile.get_fullname(iid)
     try:
+        fullname, mimetype, _size = mediafile.get_fullname(iid)
         if crop:
-            # crop dimensions are diescribed as % of width and height
+            # crop dimensions are described as % of width and height
             image = mediafile.get_cropped_image(fullname, crop, show_thumb)
             logger.debug("-> bp.scene.routes.fetch_media cropped png")
-            # Create a png image in memery and display it
+            # Create a png image in memory and display it
             buffer = io.BytesIO()
             image.save(buffer, format="PNG")
             return Response(buffer.getvalue(), mimetype="image/png")
@@ -1468,6 +1489,10 @@ def fetch_media(fname):
         ret = send_file(os.path.join("static", "image/noone.jpg"), mimetype=mimetype)
         logger.debug(f"-> bp.scene.routes.fetch_media none")
         return ret
+    except Exception as e:
+        # Show default image
+        logger.error(f"-> bp.scene.routes.fetch_media {e.__class__.__name__}, {e}")
+        return "Image read error iid={iid!r}"
 
 
 @bp.route("/scene/thumbnail")
@@ -1642,7 +1667,7 @@ def fetch_comments():
     from pe.neo4j.nodereaders import Comment_from_node
 
     u_context = UserContext()
-    uniq_id = int(request.args.get("uniq_id"))
+    iid = request.args.get("iid")
     # uuid = request.args.get("uuid")
     if request.args.get("start"):
         start = float(request.args.get("start"))
@@ -1652,7 +1677,7 @@ def fetch_comments():
 
     try:
         result = shareds.driver.session().run(
-            CypherComment.fetch_obj_comments, uniq_id=uniq_id, start=start
+            CypherComment.fetch_obj_comments, iid=iid, start=start
         )
         comments = []
         last_timestamp = None
@@ -1687,7 +1712,7 @@ def add_comment():
 
     u_context = UserContext()
     # uuid = request.form.get("uuid")
-    uniq_id = int(request.form.get("uniq_id", 0))
+    iid = request.form.get("iid")
     comment_text = request.form.get("comment_text")
     if comment_text.strip() == "":
         return ""
@@ -1695,7 +1720,7 @@ def add_comment():
     comment = None
     try:
         with CommentsUpdater("update") as comment_service:
-            res = comment_service.add_comment(user, uniq_id, comment_text)
+            res = comment_service.add_comment(user, iid, comment_text)
             if res:
                 if Status.has_failed(res, strict=True):
                     flash(f'{res.get("statustext","error")}', "error")

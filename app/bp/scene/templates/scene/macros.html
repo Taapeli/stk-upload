@@ -169,12 +169,28 @@
 {%- endmacro %}
 
 
-#  Formats object keys and root for display.
 {% macro obj_title(obj) -%}{% if obj.root %}
+		{#  Formats object keys and root for display. #}
     	{{obj.iid}} / {{obj.id}}{% if user_context.is_common()
     	%}{{ _( ', origin from material batch %(root)s', root=obj.root.batch_id ) }}
     	{% endif %}
     {% else %}{{obj.iid}} / {{obj.id}}{% endif -%}
+{%- endmacro %}
+
+{% macro attr_rows(obj, colspan="1") %}
+	{# Shows all Gramps attribute data for this object as table rows #} 
+	{% if obj.attrs %}
+        {% for key, values in obj.attrs.items() %}
+            <tr class="attrs" title="{{ _('Extra Attribute') }}: '{{key}}'">
+            	<td class="ColumnAttribute"><span class="ExtraAttribute">{{ _(key) }}</span></td>
+	            <td class="Value" colspan="{{colspan}}">
+	            	<ul style="margin:0">{% for value in values %}
+	            		<li>&nbsp;{{ value }}</li>
+	            	{% endfor %}</ul>
+	            </td>
+            </tr>
+        {% endfor %}
+	{% endif %}
 {%- endmacro %}
 
 
@@ -240,7 +256,7 @@
         N N
     {% else %}
         <a href="/person/{{p.iid}}" class="inlink"
-            title="{{ _('See Person\'s Details') }}">{{ person_name_by_sortname(p) }}</a>
+           title="{{ _('Person') }} {{ obj_title(p) }}">{{ person_name_by_sortname(p) }}</a>
      {% endif %}
 {%- endmacro %}
 
@@ -325,11 +341,11 @@
 
 {% macro note_link(note_list, obj) -%}{#
        Creates template <sup>note link</sup> for each citation.
-       - note_list  list of note uniq_ids
-       - obj        dict of objects: obj[uniq_id] = Note object
+       - note_list  list of note iids
+       - obj        dict of objects: obj[iid] = Note object
 
 #}{% if note_list %}<sup>{% for cr in note_list %}{%set note = obj[cr] %}
-       <a id="N{{note.uniq_id}}"><b>{{note.type|transl('notet')}}</b> {{note.url}}
+       <a id="N{{note.iid}}"><b>{{note.type|transl('notet')}}</b> {{note.url}}
          <i>{{note.text}}</i></a>{% endfor %}</sup>{% endif 
 %}{%- endmacro %}
 
@@ -338,11 +354,11 @@
 
 {% macro citation_link(cit_list, obj) -%}
     {# Creates template <sup>citation link</sup> for each citation.
-       - cit_list   list of citation uniq_ids
-       - obj        dict of objects: obj[uniq_id] = Citation object
+       - cit_list   list of citation iids
+       - obj        dict of objects: obj[iid] = Citation object
      #}
     {% if cit_list %}<sup>{% for cr in cit_list %}
-                    <a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
+                    <a id="{{obj[cr].source_id}}/{{obj[cr].iid}}">*</a>
     {% endfor %}</sup>{% endif %}
 {%- endmacro %}
 
@@ -390,12 +406,64 @@
         {% else %}{% set ns.page = ", sivu " + cita.page %}
         {% endif -%}
     {% endif -%}
-    {% set txt = repo_name + " - " + source.stitle + ns.page + ns.url -%}
+    {% if repo_name %}
+    	{% set txt = repo_name + " - " + source.stitle + ns.page + ns.url -%}
+    {% else %}
+    	{% set txt = "? - " + source.stitle + ns.page + ns.url -%}
+    {% endif %}
         <input id="clp_id{{clip_index}}" type="text" style="display:None" value="{{txt}}">
         <div class="copy-fld" onclick="toClipboard('clp_id{{clip_index}}')"
               title="{{ title }}"> ⚓{{anchor_text}} </div>&nbsp;
 {%- endmacro %}
 
+{% macro source_citations(source_citations) %}
+	{# Shows a div for Citations of Sources and Repositories
+	   using data from Neo4jReadService.dr_get_sources_for_obj().
+	   Calls macros source_clip, stars, notelink
+	#}
+	<style>
+	   td.Citation {padding:.3em;}
+	   td.Citation > div {display: inline }
+	   td.Citation div ol {padding-top:.3em;}
+	</style>
+ 
+    <div class="subsection" id="citations">
+        <h3>{{ _('Source References') }}</h3>
+        <table class="infolist eventlist" width="100%">
+            <tbody>
+		{% for cite in source_citations %}
+			{% set c = cite.citation %}
+			{% set s = cite.source %}
+			{% set r = cite.repository %}
+	       		<tr>
+	       		  <td class="Citation" style="text-align: center;">
+	       		     <span title="sitaatti {{c.iid}} ({{c.id}})">{{loop.index}}.</span> 
+	       		  </td>
+	       		  <td class="Citation">
+            {{ source_clip(loop.index, c, s, r.rname, s.stitle, _("Copy citation to clipboard")) }}
+
+	        		<div title="{{c.confidence|transl('conf')}} {{ _('confidence') }}"
+            			{% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
+	   					<span><b>
+	   			{% if c.url %}
+	   						<a href="{{c.url}}" class="outlink" 
+           					   target="_blank">{{c.url|transl('urldomain')}}</a>
+	   			{% else %}  <a href="/source/{{s.iid}}" class="inlink"
+	   						   title="{{ _('Source') }} {{s.id}} '{{s.iid}}'">{{c.page}}</a>
+	   			{% endif -%}
+	   					</b></span> {{ stars(c.confidence|float) }}
+               		    	<ol type="a">
+	               		{% for note in s.notes %}
+                            	<li><span title="{{note.iid}} / {{note.id}}">–► </span>{{ notelink(note) }}
+	                    {% endfor %}
+	                      	</ol>
+	                    </div>
+	         		  </td>
+	         		</tr>
+		{% endfor %}
+                </tbody></table>
+	        </div>
+{% endmacro %}
 
 # 2.4 Place
 

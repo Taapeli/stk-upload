@@ -50,7 +50,7 @@ RETURN c AS comment, labels(obj)[0] AS obj_type"""
 
     fetch_obj_comments = """
 MATCH (p) -[:COMMENT] -> (c) <-[:COMMENTED]- (u:UserProfile)
-    WHERE id(p) = $uniq_id AND c.timestamp <= $start
+    WHERE id(p) = $iid AND c.timestamp <= $start
 RETURN c AS comment, u.username AS commenter 
     ORDER BY c.timestamp DESC LIMIT 5"""
 

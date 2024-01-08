@@ -68,17 +68,18 @@ class Refname(NodeObject):
     ( Refname {uniq_id, nimi} ) -[reftype]-> (Refname)
                reftype = (etunimi, sukunimi, patronyymi)
     Properties:                                             input source
-        uniq_id     ID() ...                                    (created in save())
+        uniq_id elementId() ...                             str (created in save())
         name    1st letter capitalized                      (Nimi)
         refname * the std name referenced, if exists        (RefNimi)
         reftype * which kind of reference refname points to ('firstname')
         sex  '2', '1' or '0'                                (Sukupuoli)
         source  points to Source                            (Lähde)
-
+    
+    * Note: Refname objects has not other key but Neoj elementId
     * Note: refnamea ja reftypeä ei talleteta tekstinä, vaan kannassa tehdään
             viittaus tyyppiä reftype ko Refname-olioon
     """
-
+    
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
 
     label = "Refname"
@@ -167,8 +168,8 @@ class Refname(NodeObject):
             (A:{name:name}) -[:PARENTNAME]-> (B:{name:refname})
         This object must have:
         - name (Name)
-        The identifier is an ID(Refname)
-        - uniq_id (int)
+        The identifier is an elementId(Refname)
+        - uniq_id (str)
         Optional arguments:
         - gender ('M'/'F'/'')
         - source (str)
@@ -327,25 +328,26 @@ class Refname(NodeObject):
         """
         try:
             ret = []
-            results = shareds.driver.session().run(CypherRefname.get_all)
-            for result in results:
-                node = result["n"]
+            with shareds.driver.session() as session:
+                result = session.run(CypherRefname.get_all)
+            for record in result:
+                node = record["n"]
                 rn = Refname.from_node(node)
                 reftypes = []
                 refnames = []
-                for typ, role, r_node in result["r_ref"]:
+                for typ, role, r_node in record["r_ref"]:
                     # Referenced name exists
                     if typ:
                         # in ('REFNAME', 'BASENAME', 'PARENTNAME'):
-                        # print(f'# {rn} -> {role} {r_node["name"]} -> {result["l_uses"]}')
+                        # print(f'# {rn} -> {role} {r_node["name"]} -> {record["l_uses"]}')
                         if role:
                             reftypes.append(role)
                         if r_node:
                             refnames.append(r_node["name"])
-                rn.usecount = result["uses"]
+                rn.usecount = record["uses"]
                 if rn.usecount > 0:
                     # References from a Person exists
-                    for l in result["l_uses"]:
+                    for l in record["l_uses"]:
                         if not l in reftypes:
                             reftypes.append(l)
                     reftypes.reverse()

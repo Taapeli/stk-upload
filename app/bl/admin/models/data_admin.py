@@ -67,19 +67,19 @@ class DataAdmin():
         cnt_all = 0
         cnt_nodes = -1
         while cnt_nodes:
-            if user:
-                result = shareds.driver.session().run(cypher_clause, limit=LIMIT,
-                                                      user=user)
-            else:
-                result = shareds.driver.session().run(cypher_clause, limit=LIMIT)
-            counters = shareds.db.consume_counters(result)
-            if counters:
-                cnt_nodes = counters.nodes_deleted
-                cnt_relations = counters.relationships_deleted
-                cnt_all += cnt_nodes
-                print(f"Deleted {cnt_nodes} nodes, {cnt_relations} relations")
-            else:
-                print("That's All, Folks!")
+            with shareds.driver.session() as session:
+                if user:
+                    result = session.run(cypher_clause, limit=LIMIT, user=user)
+                else:
+                    result = session.run(cypher_clause, limit=LIMIT)
+                counters = shareds.db.consume_counters(result)
+                if counters:
+                    cnt_nodes = counters.nodes_deleted
+                    cnt_relations = counters.relationships_deleted
+                    cnt_all += cnt_nodes
+                    print(f"Deleted {cnt_nodes} nodes, {cnt_relations} relations")
+                else:
+                    print("That's All, Folks!")
         
         return cnt_all
 
