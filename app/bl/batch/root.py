@@ -92,6 +92,7 @@ class State:
     ROOT_STATE_TO_ORDER_NUMBER = {
         ROOT_UNKNOWN: 0,
         FILE_LOADING: 5,
+        FILE_LOAD_FAILED: 6,
         ROOT_STORING: 10,
         ROOT_CANDIDATE: 20,
         ROOT_AUDIT_REQUESTED: 30,

@@ -239,6 +239,7 @@ class PersonReaderTx(DataService):
         do_note_media = fullData
         jscode = ""
 
+        elapsed_iid = ITimer()
         res = self.dataservice.tx_get_person_by_iid(
             iid, 
             self.user_context.material,
@@ -266,7 +267,7 @@ class PersonReaderTx(DataService):
         for event in person.events:
             self._catalog(event)
         self._catalog(person.cause_of_death)
-         
+
         # 3. Person's families as child or parent
 
         res = self.dataservice.tx_get_person_families(person.iid)
@@ -298,8 +299,11 @@ class PersonReaderTx(DataService):
 
         #    Sort all Person and family Events by date
         person.events.sort()
+        print(f"#get_person_data: 1 Person {len(person.names)} Names "
+              f"{len(person.events)} Events {elapsed_iid}")
 
         if do_places:
+            elapsed_pla = ITimer()
 
             # 4. Places for person and each event
 
@@ -314,6 +318,7 @@ class PersonReaderTx(DataService):
     
             place_references = res.get("place_references", {})
             # Got dictionary {object_id:  (place_node, (name_nodes))
+            place_cnt = len(place_references)
     
             # KKu: Converting nodes to PlaceBl objects with PlaceNames included
             #      see -> Neo4jReadServiceTx.tx_get_person_by_iid
@@ -327,6 +332,7 @@ class PersonReaderTx(DataService):
                     place = _extract_place_w_names(place_references[e.iid])
                     if place:
                         e.place_ref = [place.iid]
+                        place_cnt += 1
                         # Add Upper Place, if not set and exists
                         if place.uppers == [] and place.iid in place_references:
                             refs = place_references[place.iid]
@@ -334,10 +340,14 @@ class PersonReaderTx(DataService):
                                 up_place = _extract_place_w_names(refs)
                                 if up_place:
                                     place.uppers = [up_place]
+                                    place_cnt += 1
+            if place_cnt:
+                print(f"#get_person_data: {place_cnt} Places {elapsed_pla}")
 
         # 5. Citations, Notes, Medias
 
         if do_sources or do_note_media:
+            elapsed_snm = ITimer()
 
             new_ids = [""]
             all_citations = {}
@@ -412,9 +422,9 @@ class PersonReaderTx(DataService):
                             raise NotImplementedError(
                                 f"Citation, Note or Media excepted, got {label}"
                             )
-                if len(citations) + len(notes) + len(medias) + len(new_ids) > 0:
-                    print(f"#+ - found {len(citations)} Citations, {len(notes)} Notes,"
-                          f" {len(medias)} Medias from {len(new_ids)} nodes")
+                if len(references) + len(notes) + len(medias) + len(new_ids) > 0:
+                    print(f"#get_person_data: {len(references)} Citations, {len(notes)} Notes,"
+                          f" {len(medias)} Medias from {len(new_ids)} nodes {elapsed_snm}")
                 # for iid, note in notes.items():
                 #     print(f'#+ - {iid}: {note}')
                 all_citations.update(citations)
@@ -426,6 +436,7 @@ class PersonReaderTx(DataService):
             # when creating (or updating) Person
 
             if do_sources:
+                elapsed_csr = ITimer()
 
                 # 6. Read Sources s and Repositories r for all Citations
                 #    for c in z:Citation
@@ -470,6 +481,8 @@ class PersonReaderTx(DataService):
                 #         # Create Javascript code to create source/citation list
                 #         jscode = get_citations_js(self.dataservice.objs)
                 jscode = self.get_citations_js()
+                if source_refs:
+                    print(f"#get_person_data: {len(source_refs)} Sources {elapsed_csr}")
 
         # print("#PersonReaderTx.get_person_data: "
         #       f"{person.id}/{person.iid} with {len(self.obj_catalog)} objects {elapsed}")
