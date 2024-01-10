@@ -29,3 +29,5 @@ build/
 dist/
 logs/
 instance/whitelists
+
+.project

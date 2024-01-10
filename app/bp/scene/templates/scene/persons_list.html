@@ -23,20 +23,21 @@
         <div id="summaryarea">
             <div class="flex-container">
 	           <div id="description_box">
-                   <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
-	{% if next_fw > ' ' %}
-					   {{ _('starting <tt>%(name)s</tt>', name=user_context.first) }}.
-	{% else %}         {{ _('from begin') }}.
+	{% set f = user_context.first %}
+					<p style="color:pink;">first='{{f}}' [suku#etu#isä]</p> 
+					<p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
+	{% if not user_context.at_start() %}
+					   {{ _('starting <tt>%(name)s</tt>', name=f.replace("#", " ")) }}
 	{% endif %}
     {% if num_hidden %}
-                       		<br>-
-						    {{ ngettext(
-						    	'%(num)s person hidden because of privacy protection', 
-						    	'%(num)s people hidden because of privacy protection', 
-						    	num_hidden ) 
-						    }}
+                       	<br>-
+					    {{ ngettext(
+					    	'%(num)s person hidden because of privacy protection', 
+					    	'%(num)s people hidden because of privacy protection', 
+					    	num_hidden ) 
+					    }}
     {% endif %}
-                       </p>
+					</p>
 	           </div>
 	           <div class="SearchBox">
 	               <form action="/scene/persons/all">
@@ -140,10 +141,15 @@
         </table>
 	{% else %}
         <div class="NotFound">
+        {% if next_fw.startswith("<") or next_fw.startswith(">") %}
+            <p>{{ _('No one found with search keys') }}.</p>
+        {% else %}
             <p>{{ _('No one found with search keys starting "%(name)s"', name=next_fw) }}.</p>
-            {% if next_fw %}<p>&nbsp;&#9656; <a href="/scene/persons/all?fw=%20" 
+        {% endif %}
+        {% if next_fw %}
+            <p>&nbsp;&#9656; <a href="/scene/persons/all?fw=%20" 
                 title="{{ _('first page') }}">{{ _("Go to the first person") }}</a></p>
-            {% endif %}
+        {% endif %}
         </div>
         <p>&nbsp;</p>
 	{% endif %}
