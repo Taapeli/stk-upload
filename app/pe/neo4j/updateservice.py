@@ -461,8 +461,8 @@ class Neo4jUpdateService(ConcreteService):
             batch_id        str         Batch id, alternative object to link:
                                         (:Batch{id:batch_id}) --> (Note)
         """
-        from bl.dates import ITimer
-        elapsed = ITimer()  # Start timer
+        #from bl.dates import ITimer
+        #elapsed = ITimer()  # Start timer
 
         note.iid = iids.get_one()
         if not batch_id:
