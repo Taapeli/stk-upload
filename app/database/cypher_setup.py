@@ -43,14 +43,23 @@ class SetupCypher():
     remove_lock_initiated = """
     MATCH (lock:Lock {id:'initiated'}) DELETE lock
     """
+    find_roots_db_schema = """
+    MATCH (root:Root)  WHERE root.db_schema < $db_schema
+    RETURN root.id AS batch_id
+    """
+    set_root_db_schema = """
+    MATCH (root:Root {id:$id}) 
+        SET root.db_schema = $db_schema
+        SET root.neo4jImportId = null
+    """
     find_empty_roots = """
     MATCH (b:Root) WHERE b.file IS NULL
     OPTIONAL MATCH (b) --> (x)
-    WITH b, COLLECT(DISTINCT LABELS(x)[0]) AS lbls, COUNT(x) AS ch WHERE ch < 2
-        RETURN ID(b) AS uniq_id, b.id AS id
+        WITH b, LABELS(x)[0] AS lbl ORDER BY b.id, lbl
+    RETURN b.id, elementId(b) AS uid, COLLECT(DISTINCT lbl) as lbls
     """
     remove_empty_roots = """
-    MATCH (b:Root) WHERE id(b) in $uniq_ids
+    MATCH (b:Root) WHERE elementId(b) in $elem_ids
     OPTIONAL MATCH (b) --> (x)
         DETACH DELETE b, x
     """
@@ -88,8 +97,16 @@ class SetupCypher():
         REQUIRE user.username IS UNIQUE
     """
 
-    index_year_birth_low = "CREATE INDEX ON :Person(birth_low)"
-    index_year_death_high = "CREATE INDEX ON :Person(death_high)"
+    #!index_year_birth_low = "CREATE INDEX ON :Person(birth_low)"
+    # index_year_death_high = "CREATE INDEX ON :Person(death_high)"
+    index_year_birth_low = """
+    CREATE CONSTRAINT person_birth_low IF NOT EXISTS
+        FOR :Person(birth_low)
+        REQUIRE Person.birth_low IS UNIQUE"""
+    index_year_death_high = """
+    CREATE CONSTRAINT person_death_high IF NOT EXISTS
+        FOR :Person(death_high)
+        REQUIRE Person.death_high IS UNIQUE"""
 
     master_create = """
     MATCH  (role:Role) WHERE role.name = 'master'

@@ -39,7 +39,7 @@ class Neo4jEngine():
             NEO4J_URI = "bolt://localhost:7687"
             NEO4J_USERNAME = 'neo4j'
             NEO4J_PASSWORD = 'passwd'
-            NEO4J_VERSION = '4.0'         # Default: 3.5
+            NEO4J_VERSION = result of get_db_version()
     '''
     
     def get_db_version(self, tx):
@@ -51,10 +51,9 @@ class Neo4jEngine():
         try:
             result = dict()
             result = tx.run(version_cypher)
-           
             return (result.values())
         except Exception as e:
-            print("Pieleen meni", e)
+            print("Something went wrong with getting neo4j version: ", e)
             return None
     
     def __init__(self, app):
@@ -69,16 +68,17 @@ class Neo4jEngine():
             encrypted=False)
         
         with self.driver.session() as session:
-            values = session.read_transaction(self.get_db_version)
-            self.name    = values[0][0]
-            self.version = values[0][1]
-            self.edition = values[0][2]
-        print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connected to ({self.name} {self.version} {self.edition})')    
-             
+            values = session.execute_read(self.get_db_version)
+            if values: # example [['Neo4j Kernel', '5.9.0', 'community']]
+                self.name    = values[0][0]
+                self.version = values[0][1]
+                self.edition = values[0][2]
+                print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connected to ({self.name} {self.version} {self.edition})') 
+            
+            else:
+                print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} could not connect to database')         
         # self.version = app.config.get('NEO4J_VERSION','3.5')
         # print(f'Neo4jEngine: {app.config["NEO4J_USERNAME"]} connecting (v>={self.version})')
-        
-
    
     def close(self):
         self.driver.close()

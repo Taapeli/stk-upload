@@ -68,9 +68,10 @@ td ul li p { margin: 0 0 0.3em 0; }
                  {% set id = s.id %}
                   <a href="/source/{{s.iid}}"
                 {%- if s.ref_cnt == 0 %}
-                     class="dimmed" 
+                     class="inlink dimmed" 
                    	 title="{{ _('Source')}} {{ macro.obj_title(s) }} {{ _('unused') }}">
                 {% else %}
+                	 class="inlink" 
                    	 title="{{ _('Source')}} {{ macro.obj_title(s) }}">
                 {% endif %}
                      {{s.stitle}}</a>

@@ -20,16 +20,16 @@ class Note(NodeObject):
             handle          str stats with '_' if comes from Gramps
             change          int timestamp from Gramps
             id              esim. "N0001"
-            uniq_id         int database key
+            iid         int database key
             priv            int >0 non-public information
             type            str note type
             text            str note description
             url             str web link
     """
 
-    def __init__(self):
+    def __init__(self, iid=None):
         """Creates a Note instance in memory"""
-        NodeObject.__init__(self)
+        NodeObject.__init__(self, iid)
         self.type = ""
         self.priv = None
         self.text = ""
@@ -38,7 +38,7 @@ class Note(NodeObject):
     def __str__(self):
         desc = self.text if len(self.text) < 17 else self.text[:14] + "..."
         url = "" if self.url == None else self.url
-        return "{} {} {!r} {}".format(self.id, self.type, desc, url)
+        return f"{self.id} {self.type} {desc!r} {url}"
 
 
 class NoteReader(DataService):

@@ -45,7 +45,7 @@ import email_validator
 
 from ui import jinja_filters
 from flask import Markup
-from wtforms import SelectField, SubmitField, BooleanField
+from wtforms import SubmitField, BooleanField # SelectField, 
 
 from pe.neo4j.neo4jengine import Neo4jEngine
 #from pe.neo4j.readservice import Neo4jReadService
@@ -263,6 +263,7 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 #============================== Start here ====================================
 
 sysversion = Chkdate()  # Last application commit date or "Unknown"
+print(f'Configured for Neo4j {shareds.app.config.get("NEO4J_VERSION", "None")}')
 
 print('Isotammi server setups') 
 shareds.mail = Mail(shareds.app)
@@ -285,6 +286,7 @@ if True:
     from pe.neo4j.readservice_tx import Neo4jReadServiceTx
 
     shareds.db = Neo4jEngine(shareds.app)
+    # Now shareds.db.version has resolved as '5.9.0' (or other)
     shareds.driver  = shareds.db.driver
     shareds.dataservices = {
         "read":    Neo4jReadService,
@@ -299,7 +301,7 @@ if True:
                                 confirm_register_form=ExtendedConfirmRegisterForm,
                                 login_form=ExtendedLoginForm)
 
-print('Neo4j and security set up')
+print('Neo4j and security set up done')
 
 # Check and initiate important nodes and constraints and schema fixes.
 accessDB.initialize_db() 
@@ -416,3 +418,4 @@ def logcontent(row):
 
 # DO NOT REMOVE (ON käytössä vaikka varoitus "unused import")
 import routes
+a = routes.get_locale()

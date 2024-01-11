@@ -37,7 +37,7 @@ logger = logging.getLogger('stkserver')
 
 import shareds
 from bl.admin.models.cypher_adm import Cypher_adm
-from bl.base import Status, NodeObject, IsotammiException
+from bl.base import Status, NodeObject #, IsotammiException
 from bl.material import Material
 from .root_updater import RootUpdater
 
@@ -347,9 +347,10 @@ class Root(NodeObject):
     @staticmethod
     def get_batches():
         """ Read all Root nodes. """
-        result = shareds.driver.session().run(CypherRoot.list_all)
-        for rec in result:
-            yield dict(rec.get("b"))
+        with shareds.driver.session() as session:
+            result = session.run(CypherRoot.list_all)
+            for rec in result:
+                yield dict(rec.get("b"))
 
     @staticmethod
     def count_my_batches(username:str):
@@ -413,50 +414,52 @@ class Root(NodeObject):
         """
         # Get your approved batches
         approved = {}
-        result = shareds.driver.session().run(CypherRoot.get_passed, user=user)
-        for node, count in result:
-            # <Record batch=<Node id=435790 labels={'Audit'}
-            #    properties={'auditor': 'juha', 'id': '2020-03-24.002',
-            #    'user': 'juha', 'timestamp': 1585070354153}>
-            #  cnt=200>
-            b = Root.from_node(node)
-            approved[b.id] = count
+        with shareds.driver.session() as session:
+            result = session.run(CypherRoot.get_passed, user=user)
+            for node, count in result:
+                # <Record batch=<Node id=435790 labels={'Audit'}
+                #    properties={'auditor': 'juha', 'id': '2020-03-24.002',
+                #    'user': 'juha', 'timestamp': 1585070354153}>
+                #  cnt=200>
+                b = Root.from_node(node)
+                approved[b.id] = count
 
         # Get current researcher batches
         titles = []
         user_data = {}
-        result = shareds.driver.session().run(
-            CypherRoot.get_batches, user=user, status=State.ROOT_CANDIDATE)
-        for record in result:
-            # <Record batch=<Node id=319388 labels={'Batch'}
-            #    properties={ // 'mediapath': '/home/jm/my_own.media',
-            #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps',
-            #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787,
-            #        'status': 'completed'}>
-            #  label='Note'
-            #  cnt=2>
-            b = Root.from_node(record["batch"])
-            label = record.get("label", "")
-            cnt = record["cnt"]
-
-            batch_id = b.id
-            tstring = b.timestamp_str()
-
-            # Trick: Set Person as first in sort order!
-            if label == "Person":
-                label = " Person"
-            if label and not label in titles:
-                titles.append(label)
-
-            key = f"{user}/{batch_id}/{tstring}"
-            if not key in user_data:
-                user_data[key] = {}
-            user_data[key][label] = cnt
-
-            audited = approved.get(batch_id)
-            if audited:
-                user_data[key]["Audit"] = audited
-            #print(f"bl.batch.Root.get_user_stats: user_data[{key}] {user_data[key]}")
+        with shareds.driver.session() as session:
+            result = session.run(CypherRoot.get_batches,
+                                 user=user, status=State.ROOT_CANDIDATE)
+            for record in result:
+                # <Record batch=<Node id=319388 labels={'Batch'}
+                #    properties={ // 'mediapath': '/home/jm/my_own.media',
+                #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps',
+                #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787,
+                #        'status': 'completed'}>
+                #  label='Note'
+                #  cnt=2>
+                b = Root.from_node(record["batch"])
+                label = record.get("label", "")
+                cnt = record["cnt"]
+    
+                batch_id = b.id
+                tstring = b.timestamp_str()
+    
+                # Trick: Set Person as first in sort order!
+                if label == "Person":
+                    label = " Person"
+                if label and not label in titles:
+                    titles.append(label)
+    
+                key = f"{user}/{batch_id}/{tstring}"
+                if not key in user_data:
+                    user_data[key] = {}
+                user_data[key][label] = cnt
+    
+                audited = approved.get(batch_id)
+                if audited:
+                    user_data[key]["Audit"] = audited
+                #print(f"bl.batch.Root.get_user_stats: user_data[{key}] {user_data[key]}")
 
         return sorted(titles), user_data
 
@@ -478,48 +481,47 @@ class Root(NodeObject):
         username = None
         root = None
         node = None
-        result = shareds.driver.session().run(
-            CypherRoot.get_single_batch, batch=batch_id
-        )
-        for record in result:
-            # <Record
-            #    profile=<Node id=21 labels=frozenset({'UserProfile'})
-            #        properties={...}>
-            #    root=<Node id=119472 labels=frozenset({'Root'})
-            #        properties={'file': 'uploads/juha/Untitled_1.isotammi.gpkg', 'material':'Family Tree',
-            #            'description': 'Pieni koeaineisto', 'id': '2021-05-27.002', 'state': 'Candidate', 
-            #            'user': 'aku', 'timestamp': 1622140130273}>
-            #    label='Person'
-            #    cnt=6
-            #    auditors=['juha',1620570475208,None]
-            #    prev_audits=['joku',1630402986262,1648739430163]
-            #    has_access=['jpek']
-            # >
-            if node is None or \
-               (node.id != record["root"].id and \
-               username != record['profile']['username']):
-                # Not same user and root
-
-                # profile is the researcher uploaded the material
-                username = record['profile']['username']
-                root = Root.from_node(record["root"])
-                # Users granted special access
-                root.has_access = record['has_access'] 
-                root.auditors = []
-                for au_user, ts_from, ts_to in record["auditors"]:
-                    # [username, timestamp_from, timestamp_to]
-                    if au_user:
-                        root.auditors.append([au_user, ts_from, ts_to])
-                root.prev_audits = []
-                for au_user, ts_from, ts_to in record["prev_audits"]:
-                    if au_user:
-                        root.prev_audits.append([au_user, ts_from, ts_to])
-            label = record.get("label", "-")
-            # Trick: Set Person to first in sort order!
-            if label == "Person":
-                label = " Person"
-            cnt = record["cnt"]
-            labels.append((label, cnt))
+        with shareds.driver.session() as session:
+            result = session.run(CypherRoot.get_single_batch, batch=batch_id)
+            for record in result:
+                # <Record
+                #    profile=<Node id=21 labels=frozenset({'UserProfile'})
+                #        properties={...}>
+                #    root=<Node id=119472 labels=frozenset({'Root'})
+                #        properties={'file': 'uploads/juha/Untitled_1.isotammi.gpkg', 'material':'Family Tree',
+                #            'description': 'Pieni koeaineisto', 'id': '2021-05-27.002', 'state': 'Candidate', 
+                #            'user': 'aku', 'timestamp': 1622140130273}>
+                #    label='Person'
+                #    cnt=6
+                #    auditors=['juha',1620570475208,None]
+                #    prev_audits=['joku',1630402986262,1648739430163]
+                #    has_access=['jpek']
+                # >
+                if node is None or \
+                   (node.id != record["root"].id and \
+                   username != record['profile']['username']):
+                    # Not same user and root
+    
+                    # profile is the researcher uploaded the material
+                    username = record['profile']['username']
+                    root = Root.from_node(record["root"])
+                    # Users granted special access
+                    root.has_access = record['has_access'] 
+                    root.auditors = []
+                    for au_user, ts_from, ts_to in record["auditors"]:
+                        # [username, timestamp_from, timestamp_to]
+                        if au_user:
+                            root.auditors.append([au_user, ts_from, ts_to])
+                    root.prev_audits = []
+                    for au_user, ts_from, ts_to in record["prev_audits"]:
+                        if au_user:
+                            root.prev_audits.append([au_user, ts_from, ts_to])
+                label = record.get("label", "-")
+                # Trick: Set Person to first in sort order!
+                if label == "Person":
+                    label = " Person"
+                cnt = record["cnt"]
+                labels.append((label, cnt))
 
         return username, root, sorted(labels)
 
@@ -561,41 +563,38 @@ class Root(NodeObject):
         """Get statistics of auditor's audition batch contents (for audit/approvals)."""
         titles = []
         labels = {}
-        if auditor:
-            active_auditor = auditor
-            result = shareds.driver.session().run(
-                CypherAudit.get_my_audits, oper=auditor
-            )
-        else:
-            result = shareds.driver.session().run(
-                CypherAudit.get_all_audits, oper=auditor
-            )
-        for record in result:
-            # <Record
-            #    b=<Node id=439060 labels={'Audit'}
-            #        properties={'auditor': 'juha', 'id': '2020-01-03.001',
-            #        'user': 'jpek', 'timestamp': 1578940247182}>
-            #    label='Note'
-            #    cnt=17>
-            b = Root_from_node(record.get("batch"))
-            label = record.get("label","")
-            cnt = record.get("cnt",0)
-            if not auditor:
-                active_auditor = record.get("auditor")
-            time_string = b.timestamp_str()
-            file = b.file.rsplit('/',1)[-1] if b.file else ""
-
-            # Trick: Set Person as first in sort order!
-            if label == "Person":
-                label = " Person"
-            if label and not label in titles:
-                titles.append(label)
-
-            key = f"{active_auditor}/{b.user}/{b.id}/{file} {time_string}"
-            if not key in labels:
-                labels[key] = {}
-            labels[key][label] = cnt
-            # print(f'labels[{key}] {labels[key]}')
+        with shareds.driver.session() as session:
+            if auditor:
+                active_auditor = auditor
+                result = session.run(CypherAudit.get_my_audits, oper=auditor)
+            else:
+                result = session.run(CypherAudit.get_all_audits, oper=auditor)
+            for record in result:
+                # <Record
+                #    b=<Node id=439060 labels={'Audit'}
+                #        properties={'auditor': 'juha', 'id': '2020-01-03.001',
+                #        'user': 'jpek', 'timestamp': 1578940247182}>
+                #    label='Note'
+                #    cnt=17>
+                b = Root_from_node(record.get("batch"))
+                label = record.get("label","")
+                cnt = record.get("cnt",0)
+                if not auditor:
+                    active_auditor = record.get("auditor")
+                time_string = b.timestamp_str()
+                file = b.file.rsplit('/',1)[-1] if b.file else ""
+    
+                # Trick: Set Person as first in sort order!
+                if label == "Person":
+                    label = " Person"
+                if label and not label in titles:
+                    titles.append(label)
+    
+                key = f"{active_auditor}/{b.user}/{b.id}/{file} {time_string}"
+                if not key in labels:
+                    labels[key] = {}
+                labels[key][label] = cnt
+                # print(f'labels[{key}] {labels[key]}')
 
         return sorted(titles), labels
 
@@ -605,35 +604,34 @@ class Root(NodeObject):
         #TODO Get DOES_AUDIT timestamp
         labels = []
         batch = None
-        result = shareds.driver.session().run(
-            CypherRoot.get_single_batch, batch=audit_id
-        )
-        for record in result:
-            # <Record batch=<Node id=319388 labels={'Batch'}
-            #    properties={ // 'mediapath': '/home/jm/my_own.media',
-            #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps',
-            #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787,
-            #        'status': 'completed'}>
-            #  label='Note'
-            #  cnt=2>
-
-            if not batch:
-                batch = record["batch"]
-                user = batch.get("user")
-                ts = batch.get("timestamp")
-                if ts:
-                    t = float(ts) / 1000.0
-                    tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
-                else:
-                    tstring = ""
-            label = record["label"]
-            if label == None:
-                label = "-"
-            # Trick: Set Person as first in sort order!
-            if label == "Person":
-                label = " Person"
-            cnt = record["cnt"]
-            labels.append((label, cnt))
+        with shareds.driver.session() as session:
+            result = session.run(CypherRoot.get_single_batch, batch=audit_id)
+            for record in result:
+                # <Record batch=<Node id=319388 labels={'Batch'}
+                #    properties={ // 'mediapath': '/home/jm/my_own.media',
+                #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps',
+                #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787,
+                #        'status': 'completed'}>
+                #  label='Note'
+                #  cnt=2>
+    
+                if not batch:
+                    batch = record["batch"]
+                    user = batch.get("user")
+                    ts = batch.get("timestamp")
+                    if ts:
+                        t = float(ts) / 1000.0
+                        tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+                    else:
+                        tstring = ""
+                label = record["label"]
+                if label == None:
+                    label = "-"
+                # Trick: Set Person as first in sort order!
+                if label == "Person":
+                    label = " Person"
+                cnt = record["cnt"]
+                labels.append((label, cnt))
 
         return user, audit_id, tstring, sorted(labels)
 

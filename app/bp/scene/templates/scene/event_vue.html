@@ -9,7 +9,34 @@
 #summaryarea {display: flex; /*height:75vh;*/
     flex-wrap: wrap;
 }
+#flex {display: flex; /*height:75vh;*/
+    flex-wrap: wrap;
+}
+#flex > div {
+    margin:.5em; padding: 0 1em;
+    width: 43%; 
+}
+.pic_container {
+  /*width: 100%; */
+  /*padding-top: 100%; /* 1:1 Aspect Ratio */
+  position: relative;
+  min-height: 250px;
+}
+.pic {
+  position: absolute;
+  top: -2.7em;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+.pic > img {
+  max-width: 100%;
+  max-height: 100%;
+  border: solid 1pt gray;
+}
+.pic > div {font-style: italic;}
 </style>
+
 <div id="startdiv">
     <h1>{{ _("Event details") }}</h1>
     <div>{{ macro.show_use_case(no_change=true) }}</div>
@@ -24,15 +51,14 @@
          <li v-show="error_message != ''" class='flash_error'>${ error_message }</li>
     </ul>
  -->
-    <div class="content" id="IndividualDetail" v-if="event">
-
-        <h2 style="position:sticky; top:0;">
+  <div class="content" id="IndividualDetail" v-if="event">
+       <h2 style="position:sticky; top:0;">
             <span v-if="event.description">${event.type_lang}: 
                 <i>${event.description}</i></span>
             <span v-else>${event.type_lang} </span>
         </h2>
 
-        <div id="summaryarea">
+		<div id="flex">
             <div v-if="allow_edit" style="background:khaki; padding:.5em;">
                 <img v-if="!edit_mode" src="/static/image/edit-property-26.png" 
                 	@click="edit"
@@ -78,19 +104,33 @@
                         </span>
                     </td>
                 </tr>
+                <tr v-for="n in notes">
+                    <td class="ColumnAttribute">{{ _("Notes") }}</td>
+                    <td class="Value">
+                        <!-- span class="typedesc">${n.type_lang}</span -->
+                        <i title="type_lang">${n.text}</i>
+                    </td>
+                </tr>
                 <tr v-for="m in medias">
                     <td class="ColumnAttribute">{{ _("Media") }}</td>
                     <td class="Value">
+                        <span class="typedesc">${m.mime}</span>
                         <a v-bind:href="m.href" :iid="m.iid" class="inlink">
                             ${m.description}</a>
-                        <span class="typedesc">${m.mime}</span>
                     </td>
                 </tr>
             </table>
             </div>
-        </div><!-- div#summaryarea -->
 
-        <div class="subsection" id="persons">
+			<div class="pic_container" v-for="m in medias">
+		        <div class="pic">
+	            	<img :alt="m.description" :src="m.media_page" />
+	            	<div>${m.description}</div>
+		        </div>
+			</div>
+ 		</div> <!-- div#flex -->
+
+        <div class="subsection fullclear" id="persons">
             <h3>{{ _("Participants") }}</h3>
             <table class="infolist eventlist" v-if="referees">
                 <thead>
@@ -121,7 +161,9 @@
             </table>
 
         </div><!-- div#persons -->
-    </div><!-- div.content -->
+        </div><!-- MIKSI? -->
+	  </div>
+  </div><!-- div.content -->
 </div><!-- div.vue_app -->
 
 <script>

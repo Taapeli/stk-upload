@@ -6,10 +6,21 @@
 {% import '/scene/macros.html' as macro with context %}
 <style>
 u { color: DarkKhaki; text-decoration: none; }
-table {margin-top:1em;}
-td { padding-right:1em;}
 .source-flex { display: flex; }
 .source-flex > div {padding: 0 0 0 1em; }
+
+div#summaryarea table {
+    table-layout: auto;
+    margin-top:1em;
+	width: 100%;
+}
+div#summaryarea td {
+	padding-right:1em;
+	white-space: nowrap;
+}
+div#summaryarea table td:last-child{
+    width:100%;
+}
 </style>
 
 <div id="startdiv">
@@ -28,11 +39,10 @@ td { padding-right:1em;}
             <table><tbody>
                 <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="Value TwoRows" colspan="2">{{macro.all_obj_ids(family)}}</td>
-                    <td></td>
                 </tr>
                 <tr><td class="ColumnAttribute">{{ _("Relation") }}</td>
                     <td class="Value"> {{ family.rel_type|transl('marr') }}</td>
-                    <td>{{ family.dates }}</td>
+                    <td class="Value">{{ family.dates }}</td>
                 </tr>
             {% for p in [family.father, family.mother] %}
                 {% if p %}
@@ -45,6 +55,18 @@ td { padding-right:1em;}
                 </tr>
                 {% endif -%}
             {% endfor %}
+	{% if family.attrs %}
+				{{ macro.attr_rows(family, colspan="2") }}
+	{% endif %}
+	{% if family.notes %}
+	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
+                    <td class="Value" colspan="2"><ul>
+    	{% for note in family.notes %}
+	                   <li>{{ macro.notelink(note) }}</li>
+		{% endfor -%}
+                    </ul>
+	{% endif %}
+
             </tbody></table>
         </div>
 
@@ -61,7 +83,10 @@ td { padding-right:1em;}
         <div id="summaryarea">
             <table><tbody>
         {% for e in family.events|sort(attribute='dates') %}
-                <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
+                <tr><td class="ColumnAttribute">
+                		<a title="{{ _('Event') }} {{e.iid}} / {{e.id}}"
+                		   class="inlink" href="/event/{{e.iid}}">{{e.type|transl('evt')|capitalize}}</a>
+                	</td>
                     <td class="ColumnDate {{e.dates.calendar_css()}}">{{e.dates}}</td>
                     <td class="ColumnPlace">
                     <a href="/place/{{e.place.iid}}" class="inlink"
@@ -77,13 +102,16 @@ td { padding-right:1em;}
                 <tr><td class="ColumnAttribute"><b>{{ _('Sources') }}</b></td>
                     <td class="Value" colspan="2"><ul>
             {% for s in family.sources %}
-                        <li><a href="/source/{{s.iid}}" class="inlink">{{s.stitle}}</a>, 
+                        <li><a href="/source/{{s.iid}}" class="inlink"
+                               title="{{ _('Source') }} {{ macro.obj_title(s) }}">{{s.stitle}}</a>, 
                 {% for c in s.citations %}
                             {{ _("Page") }}: {{c.page}}
                 {% endfor -%}
                 {% for repo in s.repositories %}
                             <br>&nbsp;&nbsp; – {% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
-                            {{ _('in the repository') }} <b>{{repo.rname}}</b>
+                            {{ _('in the repository') }}
+                            <a class="inlink" href="/repository/{{repo.iid}}"
+                               title="{{ _('Repository') }} {{ macro.obj_title(repo) }}"><b>{{repo.rname}}</b></a>
                 {% endfor -%}
                         </li>
             {% endfor -%}
@@ -118,17 +146,6 @@ td { padding-right:1em;}
  			</div>
     {% endif %}
  
-    {% if family.notes %}
-            <h2>{{ _("Notes") }}</h2>
-            <div id="summaryarea">
-                <table>
-            {% for n in family.notes %}
- 				   <tr>{% if n.text %}<td>{{ n.text }}</p></td>{% endif %}
- 				{% if n.url %}<td><a href="{{ n.url }}">{{ n.url }}</a></td>{% endif %}</tr>
-            {% endfor %}
-                </table>
-            </div>
-    {% endif %}
 {% endif %}
         <p>&nbsp;</p> <!-- family -->
     </div>

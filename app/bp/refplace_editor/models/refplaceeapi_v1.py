@@ -17,15 +17,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import shareds
-from _operator import itemgetter
-from bl.dates import DateRange
-#import pprint
-from bl.place import PlaceBl, PlaceName
-#from pe.neo4j.updateservice import Neo4jDataService
-#from pe.obsolete_db_writer import DbWriter
-#import json
 from operator import attrgetter
+from operator import itemgetter
+from pprint import pprint
+
+import shareds
+
+from bl.dates import DateRange
+from bl.place import PlaceBl, PlaceName
 from pe.neo4j.nodereaders import PlaceBl_from_node, PlaceName_from_node
 
 
@@ -53,7 +52,7 @@ cypher_test_show = """
     MATCH (n:Place{pname:'zSuomi'})-[r]-(x) RETURN * LIMIT 25
 """
 cypher_search = """
-    match (p:Place {pname:$pname}) return p,id(p) as id
+    match (p:Place {pname:$pname}) return p    #! ,id(p) as id
 """
 
 cypher_list_subordinate_places = """
@@ -64,7 +63,7 @@ cypher_list_subordinate_places = """
 """
 
 cypher_list_top_level_places = """
-    match (p:Place)
+    match (root:Root{state:'Accepted', material:'Family Tree'}) -[:OBJ_PLACE]-> (p:Place)
     match(p) -[r:NAME]-> (pn:Place_name)
     where not exists( (p)-[:IS_INSIDE]->(:Place) ) 
     return p, id(p) as id, collect([r,pn]) as names
@@ -83,7 +82,7 @@ cypher_record = """
 cypher_getplace = """
     match (p:Place)
         where id(p) = $id
-    optional match (p) <-[r_root:OWNS|PASSED]- (root) 
+    optional match (p) <-[r_root]- (root:Root) 
     optional match (p) -[r:NAME]-> (pn:Place_name)
     optional match (smallerPlace:Place)-[h2:IS_INSIDE]->(p) 
     optional match (p)-[h1:IS_INSIDE]->(largerPlace:Place) 
@@ -99,9 +98,9 @@ def search(lookfor):
     records = []
     for rec in  result:
         p = rec['p']
-        oid = rec['id']
+        #!oid = rec['id']
         r = dict(
-            id=oid,
+            id=p["iid"],
             name=p['pname'],
             type=p['type'],
         )
@@ -144,7 +143,8 @@ def list_subordinate_places(parent_id):
 def getplace(id1):
     print('id:',id1)
     result = shareds.driver.session().run(cypher_getplace,id=id1).single()
-    print('result:',result)
+    print('getplace result:')
+    pprint(dict(result))
     if not result: return dict(status="Error",resultCount=0)
     p = result.get('p')
     rlabel = result.get('root_label','')
@@ -201,6 +201,7 @@ def getplace(id1):
     if smallerPlaces == [[None,None,None]]: smallerPlaces = []
     place.surrounds = [PlaceName_from_node(p2) for (h2,p2,id2) in smallerPlaces]
     place.surrounds=sorted(places2,key=itemgetter('name'))
+    place.uppers = sorted(places1,key=itemgetter('name'))
     return {"status":"OK",
      "statusText":"OK",
      "resultCount": 1,

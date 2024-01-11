@@ -114,7 +114,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
             {{macro.citation_link(person.citation_ref, obj)}}
         </h2>
 
-    {% set myid = person.uniq_id %}{# for famtree #}
+    {% set myid = person.iid %}{# for famtree #}
             <div id="summaryarea">
             <table>
                 <tr>
@@ -146,7 +146,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	                        <tr{% if edit_names %} class="movable"{% endif %}>
 	                            <td class="ColumnAttribute">
 	                            	{% if may_edit %}
-			                            <select hx-trigger="load" hx-get="/scene/nametypes/{{p_name.uniq_id}}/{{ p_name.type }}" hx-swap="outerHTML"></select>
+			                            <select hx-trigger="load" hx-get="/scene/nametypes/{{p_name.iid}}/{{ p_name.type }}" hx-swap="outerHTML"></select>
 		                            {% else %}
 	                            		{{p_name.type|transl('nt')}}
                             		{% endif %}
@@ -163,7 +163,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
 	                                {% endif %}
 	        
 	        	                    {{macro.citation_link(p_name.citation_ref, obj)}}
-	        	                    <input type="hidden" name="order" value="{{p_name.uniq_id}}">
+	        	                    <input type="hidden" name="order" value="{{p_name.iid}}">
 	                            </td>
 	                        </tr>{% endfor %}
 	               	    </tbody></table>
@@ -216,28 +216,35 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                 </tr>
         {% endif %}
     {% endif %}
+
+	{% if person.attrs %}
+		{{ macro.attr_rows(person) }}
+	{% endif %}
+
     {% if person.confidence > '' %}<tr>
                     <td class="ColumnAttr">{{ _("Confidence of data") }}</td>
                     <td class="Value">{{ macro.stars(person.confidence|float) }}</td>
                 </tr>
     {% endif %}
-    {% if person.note_ref %}
-                <tr><td></td>
-                   <td>–► <a href="#notes" class="inlink">
-    	{% if person.note_ref|count == 1 %}
-                       {{ _('See person note') }}
-    	{% else %}
-                       {{ _('See %(num)d person notes', num=person.note_ref|count) }}
-    	{% endif -%}</a></td>
-                </tr>
-    {% endif %}
 
+    {% if person.note_ref %}
+	            <tr class="attrs">
+	            	<td class="ColumnAttribute">{{ _("Person Notes") }}</td>
+		            <td class="Value">
+		    			<ul style="margin:0">
+        {% for ref in person.note_ref %}{% set note = obj[ref] %}
+		            		<li> <span class="typedesc">{{ note.type|transl('notet') }}</span>
+	                    {{macro.citation_link(note.citation_ref, obj)}}
+	                    {{ macro.notelink(note) }}</li>
+	    {% endfor %}</ul></td>
+	    		</tr>
+    {% endif %}
 		
             </table>
         </div>
 
         <form>
-			<input type="hidden" name="uniq_id" value="{{ person.uniq_id }}">
+			<input type="hidden" name="iid" value="{{ person.iid }}">
         </form>
 
 	{% if user_context.SHOW_DISCUSSION %}
@@ -259,7 +266,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
     {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
                         <td class="ColumnEvent">
-                            <div class="magnifier" alt="{{e.uniq_id}}">
+                            <div class="magnifier" alt="{{e.iid}}">
                                 <a href="/event/{{e.iid}}" class="inlink"
                                    title="{{ _('Event') }} {{ macro.obj_title(e) }}">
                                     {{e.type|transl('evt')}}</a>
@@ -320,8 +327,8 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
                     <button type="button" onclick="tbl.noteReferences('noteContent','citTbl')">Lisää paikkojen huomautukset</button><br>
                     <button type="button" onclick="tbl.sourceReferences('sourcerefContent','citTbl')">Lisää lähdeluettelo</button></div>
                <div id="dbug"><p>Löydetyt viitteet</p></div>
-               <div><table id="citTbl"><body><tr><td>Viitteet lähteittäin</td></tr></body></table></div>
-               <div><table id="notTbl"><body><tr><td>Viitteet huomautuksiin</td></tr></body></table></div>
+               <div><table id="citTbl"><tr><td>Viitteet lähteittäin</td></tr></table></div>
+               <div><table id="notTbl"><tr><td>Viitteet huomautuksiin</td></tr></table></div>
             </div>
         </div>
     {% endif %}
@@ -359,18 +366,7 @@ tr.movable:hover {background-color:#FFE4C4; cursor: move;}
         </div>
     {% endif %}
 
-    {% if person.note_ref %}
-        <div class="subsection" id="notes">
-            <h3>{{ _("Person Notes") }}</h3>
-        {% for ref in person.note_ref %}{% set note = obj[ref] %}
-            <div class="grampsstylednote">
-                 <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
-                    {{macro.citation_link(note.citation_ref, obj)}}
-                    {{ macro.notelink(note) }}</p>
-            </div>
-        {% endfor %}
-        </div>
-    {% endif %}
+    {#removed 2013-08-22 if person.note_ref ... endif #}
 
         <div class="subsection" id="sourcerefs">
             <h3>{{ _("Source references") }}</h3>

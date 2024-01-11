@@ -1,7 +1,7 @@
 #   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
-#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu, 
+#   Copyright (C) 2016-2023  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
 #                            Timo Nallikari, Pekka Valta
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -16,32 +16,30 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
-Created on 25.5.2021
+"""
+Created on 11.8.2023
 
 @author: jm
-'''
+"""
+from bl.base import Status
+from pe.dataservice import DataService
 
-class CypherCitation():
-    """ For creating Citation object from Gramps data. """
+class NodeReader(DataService):
+    """
+    Data reading class for all kind of objects.
 
-    # Create Citation node and link (Batch) --> (Citation)
-    create_to_batch = """
-MATCH (b:Root {id: $batch_id})
-MERGE (b) -[r:OBJ_OTHER]-> (c:Citation {handle: $c_attr.handle}) 
-    SET c = $c_attr"""
-#! RETURN ID(c) as uniq_id"""
+    - Returns a Result object.
+    """
+    def get_object_attrs(self, label:str, iid:str): #label:str, iid:str):
+        """ Read Gramps attributes for given object.
+        """
+        user = self.user_context.batch_user()
+        material = self.user_context.material
+        lbl = label.title()
+        res = self.dataservice.dr_get_object_attrs(user, material,
+                                                   lbl, iid)
+        if Status.has_failed(res):
+            return res
+        return res
 
-#! For each Note, Citation --> USE CypherObjectWHandle.link_item("Citation", "Note")
-#
-#!    link_source = """
-# MATCH (n:Citation {handle: $handle})
-# MATCH (m:Source   {handle: $hlink})
-# MERGE (n) -[r:SOURCE]-> (m)"""
-#     # Create Note node and link (Citation) --> (Note)
-#     c_link_note = """
-# MATCH (n:Citation {handle: $handle})
-# MATCH (m:Note     {handle: $hlink})
-# CREATE (n) -[r:NOTE]-> (m)"""
-
-
+        

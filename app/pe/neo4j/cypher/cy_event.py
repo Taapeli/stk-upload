@@ -27,13 +27,18 @@ Created on 2.9.2020
 
 class CypherEvent(object):
 
+    #--- Read access ---
+
     get_an_event = '''
 MATCH (root) -[r:OBJ_OTHER]-> (e:Event {iid:$iid}) 
 RETURN e, type(r) AS root_type, root'''
+    get_cause_event = """
+MATCH (e:Event {iid:$iid}) <-[:EVENT]- (src)
+    -[:EVENT]-> (cause:Event {type: "Cause Of Death"}) 
+RETURN cause"""
 
     get_event_place = """
-MATCH (e:Event) -[rp:PLACE]-> (place)
-    WHERE ID(e) = $uid
+MATCH (e:Event {iid: $iid}) -[rp:PLACE]-> (place)
 OPTIONAL MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name)
 OPTIONAL MATCH (place) -[r:IS_INSIDE]-> (upper)
 OPTIONAL MATCH (upper) -[:NAME_LANG {lang:$lang}]-> (uname)
@@ -41,13 +46,11 @@ RETURN place, name,
     COLLECT(DISTINCT [properties(r), upper,uname]) as upper_n
 """
     get_event_source = """
-MATCH (e:Event) -[:CITATION]-> (cite) -[:SOURCE]-> (source)
-    WHERE ID(e) = $uid
+MATCH (e:Event {iid: $iid}) -[:CITATION]-> (cite) -[:SOURCE]-> (source)
 RETURN e, cite,source
 """
     get_event_notes_medias = """
-MATCH (e:Event)
-    WHERE ID(e) = $uid
+MATCH (e:Event {iid: $iid})
 OPTIONAL MATCH (e) -[rel_n:NOTE]-> (note)
 OPTIONAL MATCH (e) -[rel_m:MEDIA]-> (media)
 WITH e, note, rel_n, media, rel_m 
@@ -58,50 +61,41 @@ RETURN COLLECT(DISTINCT [properties(rel_n), note]) AS notes,
 
     # Get Event with referring Persons and Families
     get_event_participants = """
-MATCH (event:Event) <-[r:EVENT]- (p) 
-    WHERE ID(event) = $uid
+MATCH (event:Event {iid: $iid}) <-[r:EVENT]- (p) 
 OPTIONAL MATCH (p) -[:NAME]-> (n:Name {order:0})
 RETURN  r.role AS role, p, n AS name
     ORDER BY role"""
-#     get_event_notes = """
-# MATCH (e:Event) -[rn:NOTE]-> (note)
-#     WHERE ID(e) = $uid
-# RETURN note, properties(rn) AS rel"""
-#     get_event_medias = """
-# MATCH (e:Event) -[rn:NOTE]-> (note)
-#     WHERE ID(e) = $uid
-# RETURN note, properties(rn) AS rel"""
 
-
-# --- Save to Batch
+# --- Save to Batch ---
 
     create_to_batch = """
 MATCH (b:Root {id: $batch_id})
 MERGE (b) -[r:OBJ_OTHER]-> (e:Event {handle: $e_attr.handle})
-    SET e = $e_attr
-RETURN ID(e) as uniq_id"""
+    SET e = $e_attr"""
+#! RETURN e.iid as iid"""
 
     link_place = """
-MATCH (n:Event) WHERE n.handle=$handle
-MATCH (m:Place) WHERE m.handle=$place_handle
+MATCH (n:Event {handle: $handle})
+MATCH (m:Place) {handle: $hlink})
 MERGE (n)-[r:PLACE]->(m)"""
+#! $place_handle <= $hlink
 
-    link_notes = """
-MATCH (n:Note)  WHERE n.handle IN $note_handles
-WITH n
-    MATCH (e:Event)  WHERE e.handle=$handle
-    CREATE (e) -[:NOTE]-> (n)
-RETURN COUNT(DISTINCT n) AS cnt"""
-
-    link_citations = """
-match (c:Citation) where c.handle in $citation_handles
-with c
-    match (e:Event)  where e.handle=$handle
-    merge (e) -[r:CITATION]-> (c)"""
+#! For each Note, Citation --> USE CypherObjectWHandle.link_item("Event", "Note")
+#
+#!     e_link_notes = """
+# MATCH (n:Note)  WHERE n.handle IN $hlinks
+# WITH n
+#     MATCH (e:Event {handle: $handle})
+#     CREATE (e) -[:NOTE]-> (n)
+# RETURN COUNT(DISTINCT n) AS cnt"""
+#     link_citations = """
+# match (c:Citation) where c.handle in $citation_handles
+# with c
+#     match (e:Event)  where e.handle=$handle
+#     merge (e) -[r:CITATION]-> (c)"""
 
     update_event = """
 match (e:Event{iid:$iid})
 set e += $attrs
-return e
-    """
+return e"""
     

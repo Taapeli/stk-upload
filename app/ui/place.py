@@ -56,10 +56,10 @@ def place_names_local_from_placenames(placenames):
     for pn in placenames:
         if pn.lang == "":
             no_lang.append(pn)
-            ##print(f"# - no lang {len(place_bl.names)} (Place_name {pn.uniq_id} {pn})")
+            ##print(f"# - no lang {len(place_bl.names)} (Place_name {pn.iid} {pn})")
         elif pn.lang == current_user.language:
             own_lang.append(pn)
-            ##print(f"# - my lang (Place_name {pn.uniq_id} {pn})")
+            ##print(f"# - my lang (Place_name {pn.iid} {pn})")
         else:
             alien_lang.append(pn)
             ##print(f"# - alien lang (Place_name {pn})")

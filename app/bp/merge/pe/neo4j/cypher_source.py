@@ -47,7 +47,7 @@ RETURN type(owner) as owner_type, s AS source,
     ORDER BY source.stitle"""
 
     get_citators_of_source = """
-match (s) <-[:SOURCE]- (c:Citation) where id(s)=$uniq_id
+match (s) <-[:SOURCE]- (c:Citation) where s.iid=$iid
 match (c) <-[:CITATION]- (x)
 with c,x
     optional match (c) -[:NOTE]-> (n:Note)
@@ -68,11 +68,11 @@ order by c.id, x.id"""
     get_auditted_set_single_selection = _match_auditted + _single_set_selection
     get_own_set_single_selection = _match_own + _single_set_selection
 
-    # Default name, birth and death
-    get_person_lifedata = """
-match (p:Person) -[:NAME]-> (n:Name {order:0})
-    where id(p) = $pid
-optional match (p) -[re:EVENT]-> (e:Event)
-    where e.type = "Birth" or e.type = "Death"
-return n as name, collect(distinct e) as events"""
+#!    # Default name, birth and death
+#     get_person_lifedata = """
+# match (p:Person) -[:NAME]-> (n:Name {order:0})
+#     where id(p) = $pid
+# optional match (p) -[re:EVENT]-> (e:Event)
+#     where e.type = "Birth" or e.type = "Death"
+# return n as name, collect(distinct e) as events"""
     
