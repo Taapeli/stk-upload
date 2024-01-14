@@ -120,7 +120,7 @@ class PersonReaderTx(DataService):
         status = res.get("status")
         if status == Status.NOT_FOUND:
             msg = res.get("statustext")
-            logger.error(f"bl.person.PersonReader.get_person_search: {msg}")
+            logger.warning(f"bl.person.PersonReader.get_person_search: {msg}")
             print(f"bl.person.PersonReader.get_person_search: {msg}")
             return {
                 "items": [],

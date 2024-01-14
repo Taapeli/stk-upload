@@ -236,7 +236,7 @@ class Neo4jReadServiceTx(ConcreteService):
 
         if len(persons) == 0:
             return {'persons': [], 'status': Status.NOT_FOUND,
-                    'statustext': f'No persons found by "{args}"'}
+                    'statustext': f'No persons found'}
         return {'persons': persons, 'status': Status.OK}
 
 
