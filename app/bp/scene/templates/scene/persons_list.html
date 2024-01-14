@@ -23,11 +23,12 @@
         <div id="summaryarea">
             <div class="flex-container">
 	           <div id="description_box">
-	{% set f = user_context.first %}
                    <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
-	{% if next_fw > ' ' %}
-					   {{ _('starting <tt>%(name)s</tt>', name=f.replace("#", " ")) }}.
-	{% else %}         {{ _('from begin') }}.
+	{% set f = user_context.first %}
+	{% set name1 = f.replace("#", " ") %}
+	{% if user_context.at_start() %}
+	                   {{ _('from begin') }}
+	{% else %}         {{ _('starting <tt>%(name)s</tt>', name=name1) }}
 	{% endif %}
     {% if num_hidden %}
                        		<br>-
