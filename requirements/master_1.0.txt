@@ -1,9 +1,0 @@
-base32-lib>=1.0.0
-bcrypt==3.1.6
-email_validator
-Flask==2.3.2
-Flask-BabelEx==0.9.4
-Flask-Security==3.0.0
-neo4j==1.7.2
-pillow>=6.2.0
-treelib==1.5.5
