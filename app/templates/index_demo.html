@@ -103,7 +103,8 @@ div.CloudBox a:hover   { text-decoration: underline; }
                 <p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
                 <form method="get" action={{demo_site}}>
                     <div class="submit">
-                        <button type="submit" formaction="/register">{{ _('Register') }}</button>
+                    	<i style="color:darkred">Rekisteröityminen on tilapäisesti suljettu!</i>
+<!--                        <button type="submit" formaction="/register">{{ _('Register') }}</button>-->
                     </div>
                     <input type="hidden" name="lang" value="{{ lang }}">
                 </form>
