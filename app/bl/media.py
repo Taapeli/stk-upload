@@ -23,14 +23,7 @@ Created on 24.3.2020
 @author: jm
 """
 # blacked 2021-05-01 JMä
-import os
-
-import shareds
 from .base import NodeObject, Status
-from bl.person import PersonBl
-from bl.family import FamilyBl
-from bl.place import PlaceBl
-from bl.event import EventBl
 
 from pe.dataservice import DataService
 
@@ -43,15 +36,15 @@ class Media(NodeObject):
             handle
             change
             id              esim. "O0001"
-            uniq_id         int database key
+            iid         int database key
             src             str file path
             mime            str mime type
             description     str description
     """
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, iid=None):
         """ Luo uuden media-instanssin """
-        NodeObject.__init__(self, uniq_id)
+        NodeObject.__init__(self, iid)
         self.description = ""
         self.src = None
         self.mime = None
@@ -76,6 +69,7 @@ class MediaBl(Media):
         """
         Constructor
         """
+        Media.__init__(self)
         self.description = ""
         self.src = None
         self.mime = None
@@ -124,27 +118,35 @@ class MediaReader(DataService):
             return {"status": Status.OK, "items": medias}
         return {"status": Status.NOT_FOUND}
 
-    def get_one(self, oid):
-        """Read a Media object, selected by UUID or uniq_id."""
+    def get_one(self, iid):
+        """Read a Media object with referrer and referenced objects."""
 
 
         # Example database items:
         #    MATCH (media:Media) <-[r:MEDIA]- (ref) <-[:EVENT]- (ref2)
-        #  media     r (crop)             ref                           ref2
+        #  media     r                    ref                           ref2
         # (media) <-[crop()]-            (Person 'I0026' id=21532) <-- (None)
         # (media) <-[crop(47,67,21,91)]- (Person 'I0026' id=21532) <-- (None)
         # (media) <-[crop(20,47,22,53)]- (Person 'I0029' id=21535) <-- (None)
         # (media) <-[crop()]-   (Event  'E9999' id=99999) <-- (Person 'I9999' id=999)
 
         user = self.user_context.batch_user()
-        res = self.dataservice.dr_get_media_single(user, self.user_context.material, oid)
-        # returns {status, items}
+        serv = self.dataservice
+        res = serv.dr_get_media_single(user, self.user_context.material, iid)
+        # returns {status, media, notes}
+        #    where media.ref = list of referrer objects
         if Status.has_failed(res):
             return res
 
         media = res.get("media")
+        media.notes = res.get("notes")
 
-        return {"item": media, "status": Status.OK}
+        res2 = serv.dr_get_sources_for_obj(user, self.user_context.material, iid)
+        if Status.has_failed(res2):
+            return res2
+        cites = res2.get("citations", [])
+
+        return {"status": Status.OK, "item": media, "cites": cites}
 
 
 # class MediaWriter(DataService):
@@ -153,21 +155,27 @@ class MediaReader(DataService):
 
 
 class MediaReferenceByHandles:
-    """Gramps media reference result object.
+    """Gramps media reference data object.
 
     Includes Note and Citation references and crop data.
     Used in bp.gramps.xml_dom_handler.DOM_handler
     """
 
-    def __init__(self):
-        self.media_handle = None
+    def __init__(self, node_object: NodeObject):
+        """ Create a reference object having referrer object label and 
+            references with different reference properties.
+            
+            Object might contain multiple references of each type.
+        """
+        self.obj_name = node_object.label() # Source node label
+        self.handle = None
         self.media_order = 0  # Media reference order nr
         self.crop = []  # Four coordinates
-        self.note_handles = []  # list of note handles
-        self.citation_handles = []  # list of citation handles
+        self.note_handles = []  # list of media -> note handles
+        self.citation_handles = []  # list of media -> citation handles
 
     def __str__(self):
-        s = f"{self.media_handle} [{self.media_order}]"
+        s = f"{self.obj_name} -> {self.handle} [{self.media_order}]"
         if self.crop:
             s += f" crop({self.crop})"
         if self.note_handles:

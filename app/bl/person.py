@@ -24,7 +24,7 @@
 
     class bl.Person(): 
         Person-noden parametrit 
-         - uniq_id
+         #!- uniq_id removed
          - properties { handle:"_dd2c613026e7528c1a21f78da8a",
                         id:"I0000",
                         priv:None,
@@ -67,7 +67,7 @@ from bl.base import PRIVACY_LIMIT
 class Person(NodeObject):
     """Person object
 
-    - uniq_id                int database key
+    #! Removed: - uniq_id                int database key
     - Node properties: {
        handle                str "_dd2c613026e7528c1a21f78da8a"
        id                    str "I0000"
@@ -85,9 +85,9 @@ class Person(NodeObject):
       }
     """
 
-    def __init__(self):
+    def __init__(self, iid=None):
         """ Creates a new Person instance. """
-        NodeObject.__init__(self)
+        NodeObject.__init__(self, iid)
         self.priv = None
         self.sex = SEX_UNKNOWN
         self.confidence = ""
@@ -98,7 +98,7 @@ class Person(NodeObject):
         self.death_low = None
         self.birth_high = None
         self.death_high = None
-        self.attr = dict()
+        #!self.attrs =  ""
 
     def __str__(self):
         dates = self.dates if self.dates else ""
@@ -158,25 +158,23 @@ class PersonReader(DataService):
     - Returns a Result object.
     """
 
-    def get_person_list(self):
-        """List person data including all data needed to Persons page.
-        
-        NOT USED --> bl.person_reader.PersonReaderTx.get_person_search
-
-        In version v2021.1.2 called:
-            # --> Neo4jDriver.dr_get_person_list(user, fw_from, limit)
-            #     --> Neo4jReadServiceTx.tx_get_person_list()
-            #         --> CypherPerson.read_approved_persons_w_events_fw_name
-            #         --> CypherPerson.read_my_persons_w_events_fw_name
-            #         --> CypherPerson.get_common_events_by_refname_use
-            #         --> CypherPerson.get_my_events_by_refname_use
-            #         --> CypherPerson.get_common_events_by_years
-            #         --> CypherPerson.get_my_events_by_years
-            #        #--> Cypher_person.get_events_by_refname
-            #        #--> Cypher_person.get_events_by_refname
-        """
-        print("bl.person.PersonReader.get_person_list: ERROR obsolete")
-        return {"items": [], "status": Status.ERROR, "statustext":"obsolete get_person_list"}
+    # def get_person_list(self):  # --> bl.person_reader.PersonReaderTx.get_person_search
+    #     """List person data including all data needed to Persons page.
+    #
+    #     In version v2021.1.2 called:
+    #         # --> Neo4jDriver.dr_get_person_list(user, fw_from, limit)
+    #         #     --> Neo4jReadServiceTx.tx_get_person_list()
+    #         #         --> CypherPerson.read_approved_persons_w_events_fw_name
+    #         #         --> CypherPerson.read_my_persons_w_events_fw_name
+    #         #         --> CypherPerson.get_common_events_by_refname_use
+    #         #         --> CypherPerson.get_my_events_by_refname_use
+    #         #         --> CypherPerson.get_common_events_by_years
+    #         #         --> CypherPerson.get_my_events_by_years
+    #         #        #--> Cypher_person.get_events_by_refname
+    #         #        #--> Cypher_person.get_events_by_refname
+    #     """
+    #     print("bl.person.PersonReader.get_person_list: ERROR obsolete")
+    #     return {"items": [], "status": Status.ERROR, "statustext":"obsolete get_person_list"}
 
     def get_surname_list(self, count=40):
         """
@@ -212,13 +210,13 @@ class PersonReader(DataService):
         else:
             return nodes
 
-    def get_parents(self, uniq_id, privacy):
+    def get_parents(self, iid, privacy):
         """
-        Get all parents of the person with given db uniq_id.
+        Get all parents of the person with given iid.
         Returns a list as number of parents in database is not always 0..2.
         """
         last_year_allowed = datetime.now().year - PRIVACY_LIMIT
-        nodes = self.dataservice.dr_get_family_members_by_id(uniq_id, which="parents")
+        nodes = self.dataservice.dr_get_family_members_by_id(iid, which="parents")
         for n in nodes:
             n["too_new"] = n["death_high"] > last_year_allowed
         if privacy:
@@ -226,13 +224,13 @@ class PersonReader(DataService):
         else:
             return nodes
 
-    def get_children(self, uniq_id, privacy):
+    def get_children(self, iid, privacy):
         """
-        Get all children of the person with given db uniq_id.
+        Get all children of the person with given iid.
         Returns a list.
         """
         last_year_allowed = datetime.now().year - PRIVACY_LIMIT
-        nodes = self.dataservice.dr_get_family_members_by_id(uniq_id, which="children")
+        nodes = self.dataservice.dr_get_family_members_by_id(iid, which="children")
         for n in nodes:
             n["too_new"] = n["death_high"] > last_year_allowed
         if privacy:
@@ -256,11 +254,11 @@ class PersonWriter(DataService):
     def set_name_orders(self, uid_list):
         self.dataservice.dr_set_name_orders(uid_list)
 
-    def set_name_type(self, uniq_id, nametype):
-        self.dataservice.dr_set_name_type(uniq_id, nametype)
+    def set_name_type(self, iid, nametype):
+        self.dataservice.dr_set_name_type(iid, nametype)
 
-    def set_person_name_properties(self, uniq_id=None, ops=["refname", "sortname"]):
-        """Set Refnames to all Persons or one Person with given uniq_id;
+    def set_person_name_properties(self, iid:str = None, ops=["refname", "sortname"]):
+        """Set Refnames to all Persons or one Person with given iid;
         also sets Person.sortname using the default name
 
         Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes,
@@ -273,7 +271,7 @@ class PersonWriter(DataService):
         names = []
 
         # Get each Name object (with person_uid)
-        for pid, name_node in self.dataservice.ds_get_personnames(uniq_id):
+        for pid, name_node in self.dataservice.ds_get_personnames(iid):
             from pe.neo4j.nodereaders import Name_from_node # import here to avoid import cycle
             name = Name_from_node(name_node)
             name.person_uid = pid
@@ -301,30 +299,30 @@ class PersonWriter(DataService):
             "status": Status.OK,
         }
 
-    def set_estimated_lifetimes(self, uids=[]):
-        """Sets estimated lifetimes to Person.dates for given person.uniq_ids.
+    def set_people_lifetime_estimates(self, iids=[]):
+        """Sets estimated lifetimes to Person.dates for given person.iids.
 
         Stores dates as Person properties: datetype, date1, and date2
 
-        :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+        :param: uids  list of iids of Person nodes; empty = all lifetimes
 
         Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
         and models.dataupdater.set_estimated_dates
         """
-        res = self.dataservice.ds_set_people_lifetime_estimates(uids)
+        res = self.dataservice.ds_set_people_lifetime_estimates(iids)
 
-        print(f"Estimated lifetime for {res['count']} persons")
+        #print(f"Estimated lifetime for {res['count']} persons")
         return res
 
-    def update_person_confidences(self, person_ids: list):
-        """Sets a quality rating for given list of Person.uniq_ids.
+    def update_person_confidences(self, person_ids: list[str]):
+        """Sets a quality rating for given list of Person.iids.
 
         Person.confidence is calculated as a mean of confidences in
         all Citations used for Person's Events.
         """
         counter = 0
-        for uniq_id in person_ids:
-            res = self.dataservice.ds_update_person_confidences(uniq_id)
+        for iid in person_ids:
+            res = self.dataservice.ds_update_person_confidences(iid)
             # returns {confidence, status, statustext}
             stat = res.get("status")
             if stat == Status.UPDATED:
@@ -338,7 +336,7 @@ class PersonWriter(DataService):
 class PersonBl(Person):
     def __init__(self):
         """
-        Constructor creates a new PersonBl intance.
+        Constructor creates a new PersonBl instance.
         """
         Person.__init__(self)
         self.names = []

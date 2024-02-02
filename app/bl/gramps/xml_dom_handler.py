@@ -34,14 +34,14 @@ import re
 import time
 import os
 import xml.dom.minidom
+#import json
 import threading
 from flask_babelex import _
 
 import shareds
 from bl.base import NodeObject, Status
-from bl.person import PersonBl, PersonWriter
+from bl.person import PersonBl #, PersonWriter
 from bl.person_name import Name
-from bl.family import FamilyBl, FamilyWriter
 from bl.place import PlaceName, PlaceBl
 from bl.place_coordinates import Point
 from bl.media import MediaBl, MediaReferenceByHandles
@@ -51,7 +51,7 @@ from bl.dates import Gramps_DateRange
 from bl.citation import Citation
 from bl.repository import Repository
 from bl.source import SourceBl
-from pe.neo4j.util import IsotammiId
+from pe.neo4j.util import IidGenerator
 from bl.gramps.batchlogger import LogItem
 
 
@@ -69,14 +69,14 @@ class DOM_handler:
         self.username = current_user  # current username
         self.dataservice = dataservice
         
-        self.handle_to_node = {}  # {handle:(iid, uniq_id)}
+        #!self.handle_to_node = {}  # {handle:(iid, uniq_id)}
         self.person_ids = []  # List of processed Person node unique id's
         self.family_ids = []  # List of processed Family node unique id's
         # self.batch = None                     # Batch node to be created
         # self.mediapath = None                 # Directory for media files
         self.file = os.path.basename(pathname)  # for messages
         self.progress = defaultdict(int)
-        self.obj_counter = 0
+        # self.obj_counter = 0
         self.noterefs_later = []    # NodeObjects with obj.notes to be saved later
         # self.notes_to_postprocess = NodeObject(uniq_id = 0)
         # self.notes_to_postprocess.notes = []
@@ -90,13 +90,13 @@ class DOM_handler:
             yield objs[i:i+i_amount]
             i += i_amount
 
-    def unused_remove_handles(self):
+    def obsolete_unused_remove_handles(self):
         """Remove all Gramps handles, becouse they are not needed any more."""
         res = self.dataservice.ds_obj_remove_gramps_handles(self.batch.id)
         print(f'# --- removed handles from {res.get("count")} nodes')
         return res
 
-    def add_missing_links(self):
+    def obsolete_add_missing_links(self):
         """Link the Nodes without OWNS link to Batch"""
         from pe.neo4j.cypher.cy_root import CypherRoot
 
@@ -117,32 +117,19 @@ class DOM_handler:
         Some objects may accept arguments like batch_id="2019-08-26.004" and others
         """
         obj.save(self.dataservice.tx, **kwargs)
-        # self.obj_counter += 1 
-        # if self.obj_counter % 1000 == 0:
-        #     print(self.obj_counter, "Transaction restart")
-        #     self.dataservice.tx.commit()
-        #     self.dataservice.tx = shareds.driver.session().begin_transaction()
+        # removed: ... print(self.obj_counter, "Transaction restart")
 
-        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
+        #!self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
         self.update_progress(obj.__class__.__name__)
 
-    def obsolete_save_and_link_handle2(self, tx, obj, **kwargs):
-        """Save object and store its identifiers in the dictionary by handle.
-
-        Some objects may accept arguments like batch_id="2019-08-26.004" and others
-        """
-        obj.save(tx, **kwargs)
-        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
-        self.update_progress(obj.__class__.__name__)
-
-    def complete(self, obj:NodeObject, url_notes = None):
+    def complete(self, obj:NodeObject, url_notes:list[NodeObject] = None):
         """ Complete object saving. """
         # 1. Store handle to iid, uniq_id conversion
-        self.handle_to_node[obj.handle] = (obj.iid, obj.uniq_id)
+        #!self.handle_to_node[obj.handle] = obj.iid   #!, obj.uniq_id)
         # 2. Note references from url field must be processed later
         if url_notes:
             # Create referencing object stub with important parameters
-            parent = NodeObject(obj.uniq_id)
+            parent = NodeObject(obj.iid)
             parent.id = obj.id
             parent.notes = url_notes # List of Notes objects
             self.noterefs_later.append(parent)
@@ -193,14 +180,13 @@ class DOM_handler:
         return (material_type, description)
 
     def handle_dom_nodes(self, tag, title, transaction_function, chunk_max_size):
-        """ Get all the notes in the xml_tree. """
+        """ Get all the nodes in the xml_tree.
 
-        """ DOM-objektit pätkitään chunk_max_size-kokoisiin joukkoihin ja tarjotaan handlerille
+            DOM-objects are split to chunk_max_size chunks and given to handler
         """
 
-        """ 
-        ---- Process DOM nodes inside transaction 
-        """
+        # ---- Process DOM nodes inside transaction ---
+
         dom_nodes = self.xml_tree.getElementsByTagName(tag)
         message = f"{tag}: {len(dom_nodes)} kpl"
         print(f"***** {message} *****")
@@ -208,11 +194,11 @@ class DOM_handler:
         counter = 0
     
         with shareds.driver.session() as session:
-            iid_generator = IsotammiId(session, obj_name=title)
+            iid_generator = IidGenerator(session, obj_name=title)
             for nodes_chunk in self.get_chunk(dom_nodes, chunk_max_size):
                 chunk_size = len(nodes_chunk)
                 iid_generator.reserve(chunk_size)
-                print(f"#handle_dom_nodes: new tx for {chunk_size} {iid_generator.iid_type} nodes")
+                # print(f"#handle_dom_nodes: new tx for {chunk_size} {iid_generator.iid_mark} nodes")
                 session.write_transaction(transaction_function, 
                                           nodes=nodes_chunk,
                                           iids=iid_generator)
@@ -265,7 +251,7 @@ class DOM_handler:
     def postprocess_notes(self):
         """ Process url notes using self.noterefs_later parent object list. 
         """
-        title="Notes(url)"
+        title="More Notes"
         message = f"{title}: {len(self.noterefs_later)} kpl"
         print(f"***** {message} *****")
         t0 = time.time()
@@ -279,11 +265,11 @@ class DOM_handler:
             print(f"DOM_handler.postprocess_notes: {total_notes} "\
                   f"Notes for {len(self.noterefs_later)} objects")
 
-            iid_generator = IsotammiId(session, obj_name="Notes")
+            iid_generator = IidGenerator(session, obj_name="Notes")
             iid_generator.reserve(total_notes)
             # Split to chunks, chunk_max_size=self.TX_SIZE
             for nodes_chunk in self.get_chunk(self.noterefs_later, self.TX_SIZE):
-                #print(f"DOM_handler.postprocess_notes: {len(nodes_chunk)} chunk")
+                print(f"DOM_handler.postprocess_notes: {len(nodes_chunk)} chunk")
                 for parent in nodes_chunk:
                     session.write_transaction(self.handle_postprocessed_notes,
                                               parent, iid_generator)
@@ -298,7 +284,7 @@ class DOM_handler:
         if not parent.notes:
             return
 
-        note_msg = [note.url for note in parent.notes]
+        #note_msg = [note.url for note in parent.notes]
         #print(f"handle_postprocessed_notes: {parent.id} --> {note_msg}")
         self.dataservice.ds_save_note_list(tx, parent, self.batch.id, iids)
 
@@ -306,7 +292,7 @@ class DOM_handler:
         for citation in nodes:
 
             c = Citation()
-            # Extract handle, change and id
+            # Extract handle, change, id and attrs
             self._extract_base(citation, c)
 
             try:
@@ -348,6 +334,7 @@ class DOM_handler:
                 citation_sourceref = citation.getElementsByTagName("sourceref")[0]
                 if citation_sourceref.hasAttribute("hlink"):
                     c.source_handle = citation_sourceref.getAttribute("hlink") + self.handle_suffix
+
                     ##print(f'# Citation {c.id} points source {c.source_handle}')
             elif len(citation.getElementsByTagName("sourceref")) > 1:
                 self.blog.log_event(
@@ -365,7 +352,7 @@ class DOM_handler:
         for event in nodes:
             # Create an event with Gramps attributes
             e = EventBl()
-            # Extract handle, change and id
+            # Extract handle, change, id and attrs
             self._extract_base(event, e)
             e.place_handles = []
             e.note_handles = []
@@ -421,13 +408,6 @@ class DOM_handler:
                     }
                 )
 
-            # Handle <attribute>
-            self._extract_attr(event, e)
-#            e.attr = dict()
-#            for attr in event.getElementsByTagName("attribute"):
-#                if attr.hasAttribute("type"):
-#                    e.attr[attr.getAttribute("type")] = attr.getAttribute("value")
-
             for ref in event.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
                     e.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
@@ -439,21 +419,22 @@ class DOM_handler:
                     #(p)print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
 
             # Handle <objref> with citations and notes
-            e.media_refs = self._extract_mediaref(event)
+            e.media_refs = self._extract_mediaref(e, event)
 
             self.dataservice.ds_save_event(tx, e, self.batch.id, iids)
             self.complete(e)
 
     def handle_family_list(self, tx, nodes, iids):
-        for family in nodes:
+        from bl.family import FamilyBl
 
+        for family in nodes:
             f = FamilyBl()
             f.child_handles = []
             f.event_handle_roles = []
             f.note_handles = []
             f.citation_handles = []
 
-            # Extract handle, change and id
+            # Extract handle, change, id and attrs
             self._extract_base(family, f)
 
             if len(family.getElementsByTagName("rel")) == 1:
@@ -511,9 +492,6 @@ class DOM_handler:
                 if ref.hasAttribute("hlink"):
                     f.child_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
                     ##print(f'# Family {f.id} has child {f.child_handles[-1]}')
-                    
-            # Handle <attribute>
-            self._extract_attr(family, f)
 
             for ref in family.getElementsByTagName("noteref"):
                 if ref.hasAttribute("hlink"):
@@ -529,17 +507,18 @@ class DOM_handler:
             self.complete(f)
 
             # The sortnames and dates will be set for these families
-            self.family_ids.append(f.uniq_id)
+            self.family_ids.append(f.iid)
 
     
     def handle_note_list(self, tx, nodes, iids):
 
         for note in nodes:
             n = Note()
-            # Extract handle, change and id
+            # Extract handle, change, id and attrs
             self._extract_base(note, n)
 
             n.priv = self._get_priv(note)
+
             if note.hasAttribute("type"):
                 n.type = note.getAttribute("type")
 
@@ -555,7 +534,7 @@ class DOM_handler:
     def handle_media_list(self, tx, nodes, iids):
         for obj in nodes:
             o = MediaBl()
-            # Extract handle, change and id
+            # Extract handle, change, id and attrs
             self._extract_base(obj, o)
 
             for obj_file in obj.getElementsByTagName("file"):
@@ -575,17 +554,105 @@ class DOM_handler:
                 if obj_file.hasAttribute("description"):
                     o.description = obj_file.getAttribute("description")
 
-            # TODO: Varmista, ettei mediassa voi olla Note
+            o.note_handles = []
+            for ref in obj.getElementsByTagName("noteref"):
+                if ref.hasAttribute("hlink"):
+                    o.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
+                    ##print(f'# Media {o.id} has note {o.note_handles[-1]}')
+
+            o.citation_handles = []
+            for ref in obj.getElementsByTagName("citationref"):
+                if ref.hasAttribute("hlink"):
+                    o.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
+                    ##print(f'# Media {o.id} has cite {o.citation_handles[-1]}')
+
             self.dataservice.ds_save_media(tx, o, self.batch.id, iids)
             self.complete(o)
 
+
     def handle_people_list(self, tx, nodes, iids):
+        """ Handle list of Persons. """
+
+        def extract_person_name(person_name, name_order):
+            """ Create a Name object. """
+            pname = Name()
+            pname.order = name_order
+            pname.citation_handles = []
+            if person_name.hasAttribute("alt"):
+                pname.alt = person_name.getAttribute("alt")
+            if person_name.hasAttribute("type"):
+                pname.type = person_name.getAttribute("type")
+            for person_first in person_name.getElementsByTagName("first"):
+                if pname.firstname:
+                    self.blog.log_event(
+                        {
+                            "title":"Discarded repetitive first name in a person", 
+                            "level":"WARNING", 
+                            "count":p.id})
+                #break
+                if len(person_first.childNodes) > 0:
+                    pname.firstname = person_first.childNodes[0].data
+                elif len(person_first.childNodes) > 1:
+                    self.blog.log_event({
+                            "title":"Discarded repetitive child node in a first name of a person", 
+                            "level":"WARNING", 
+                            "count":p.id})
+            
+            if len(person_name.getElementsByTagName("surname")) == 1:
+                person_surname = person_name.getElementsByTagName("surname")[0]
+                if person_surname.hasAttribute("prefix"):
+                    pname.prefix = person_surname.getAttribute("prefix")
+                if len(person_surname.childNodes) == 1:
+                    pname.surname = person_surname.childNodes[0].data
+                elif len(person_surname.childNodes) > 1:
+                    self.blog.log_event({
+                            "title":"Discarded repetitive child node in a surname of a person", 
+                            "level":"WARNING", 
+                            "count":p.id})
+            elif len(person_name.getElementsByTagName("surname")) > 1:
+                self.blog.log_event({
+                        "title":"Discarded repetitive surname in a person", 
+                        "level":"WARNING", 
+                        "count":p.id})
+            if len(person_name.getElementsByTagName("suffix")) == 1:
+                person_suffix = person_name.getElementsByTagName("suffix")[0]
+                pname.suffix = person_suffix.childNodes[0].data
+            elif len(person_name.getElementsByTagName("suffix")) > 1:
+                self.blog.log_event({
+                        "title":"Discarded repetitive suffix in a person", 
+                        "level":"WARNING", 
+                        "count":p.id})
+            try:
+                pname.dates = self._extract_daterange(person_name) # Return Gramps_DateRange or None
+            except:
+                pname.dates = None
+            if len(person_name.getElementsByTagName("title")) == 1:
+                person_title = person_name.getElementsByTagName("title")[0]
+                pname.title = person_title.childNodes[0].data
+            elif len(person_name.getElementsByTagName("title")) > 1:
+                self.blog.log_event({
+                        "title":"Discarded repetitive title in a person", 
+                        "level":"WARNING", 
+                        "count":p.id})
+            if len(person_name.getElementsByTagName("citationref")) >= 1:
+                for i in range(
+                    len(person_name.getElementsByTagName("citationref"))):
+                    person_name_citationref = person_name.getElementsByTagName("citationref")[i]
+                    if person_name_citationref.hasAttribute("hlink"):
+                        pname.citation_handles.append(
+                            person_name_citationref.getAttribute("hlink") + self.handle_suffix)
+            
+                        ##print(f'# Person name for {p.id} has cite {pname.citation_handles[-1]}')
+            return pname
+
+        # Starts handling the list of Persons
+
+        href_fixes = 0 
         for person in nodes:
             url_notes = []
-            name_order = 0
 
             p = PersonBl()
-            # Extract handle, change and id
+            # Extract handle, change, id and attrs
             self._extract_base(person, p)
             p.event_handle_roles = []
             p.note_handles = []
@@ -603,106 +670,12 @@ class DOM_handler:
                     break
                 p.sex = p.sex_from_str(person_gender.childNodes[0].data)
 
+            name_order = 0
             for person_name in person.getElementsByTagName("name"):
-                pname = Name()
-                pname.order = name_order
-                pname.citation_handles = []
+                pname = extract_person_name(person_name, name_order)
                 name_order += 1
-
-                if person_name.hasAttribute("alt"):
-                    pname.alt = person_name.getAttribute("alt")
-                if person_name.hasAttribute("type"):
-                    pname.type = person_name.getAttribute("type")
-
-                for person_first in person_name.getElementsByTagName("first"):
-                    if pname.firstname:
-                        self.blog.log_event(
-                            {
-                                "title": "More than one first name in a person",
-                                "level": "WARNING",
-                                "count": p.id,
-                            }
-                        )
-                        break
-                    if len(person_first.childNodes) == 1:
-                        pname.firstname = person_first.childNodes[0].data
-                    elif len(person_first.childNodes) > 1:
-                        self.blog.log_event(
-                            {
-                                "title": "More than one child node in a first name of a person",
-                                "level": "WARNING",
-                                "count": p.id,
-                            }
-                        )
-
-                if len(person_name.getElementsByTagName("surname")) == 1:
-                    person_surname = person_name.getElementsByTagName("surname")[0]
-                    if person_surname.hasAttribute("prefix"):
-                        pname.prefix = person_surname.getAttribute("prefix")
-                    if len(person_surname.childNodes) == 1:
-                        pname.surname = person_surname.childNodes[0].data
-                    elif len(person_surname.childNodes) > 1:
-                        self.blog.log_event(
-                            {
-                                "title": "More than one child node in a surname of a person",
-                                "level": "WARNING",
-                                "count": p.id,
-                            }
-                        )
-                elif len(person_name.getElementsByTagName("surname")) > 1:
-                    self.blog.log_event(
-                        {
-                            "title": "More than one surname in a person",
-                            "level": "WARNING",
-                            "count": p.id,
-                        }
-                    )
-
-                if len(person_name.getElementsByTagName("suffix")) == 1:
-                    person_suffix = person_name.getElementsByTagName("suffix")[0]
-                    pname.suffix = person_suffix.childNodes[0].data
-                elif len(person_name.getElementsByTagName("suffix")) > 1:
-                    self.blog.log_event(
-                        {
-                            "title": "More than one suffix in a person",
-                            "level": "WARNING",
-                            "count": p.id,
-                        }
-                    )
-                    
-                try:
-                    # Return Gramps_DateRange or None
-                    pname.dates = self._extract_daterange(person_name)
-                    # TODO: val="1700-luvulla" muutettava Noteksi
-                except:
-                    pname.dates = None
-
-                if len(person_name.getElementsByTagName("title")) == 1:
-                    person_title = person_name.getElementsByTagName("title")[0]
-                    pname.title = person_title.childNodes[0].data
-                elif len(person_name.getElementsByTagName("title")) > 1:
-                    self.blog.log_event(
-                        {
-                            "title": "More than one title in a person",
-                            "level": "WARNING",
-                            "count": p.id,
-                        }
-                    )
-
-                if len(person_name.getElementsByTagName("citationref")) >= 1:
-                    for i in range(
-                        len(person_name.getElementsByTagName("citationref"))
-                    ):
-                        person_name_citationref = person_name.getElementsByTagName(
-                            "citationref"
-                        )[i]
-                        if person_name_citationref.hasAttribute("hlink"):
-                            pname.citation_handles.append(
-                                person_name_citationref.getAttribute("hlink") + self.handle_suffix
-                            )
-                            ##print(f'# Person name for {p.id} has cite {pname.citation_handles[-1]}')
-
-                p.names.append(pname)
+                if pname:
+                    p.names.append(pname)
 
             for ref in person.getElementsByTagName("eventref"):
                 # Create a tuple (event_handle, role)
@@ -714,13 +687,16 @@ class DOM_handler:
                         e_role = None
                     p.event_handle_roles.append((e_handle, e_role))
 
-            # Handle <objref>
-            p.media_refs = self._extract_mediaref(person)
-
+            # Handle <objref>, returns a list of m_ref's
+            p.media_refs = self._extract_mediaref(p, person)
+            
             for person_url in person.getElementsByTagName("url"):
                 n = Note()
                 n.priv = self._get_priv(person_url)
-                n.url = person_url.getAttribute("href")
+                href = person_url.getAttribute("href")
+                _text, n.url = self._pick_url_from_text(href)
+                if _text:
+                    href_fixes += 1
                 n.type = person_url.getAttribute("type")
                 n.text = person_url.getAttribute("description")
                 if n.url:
@@ -729,13 +705,7 @@ class DOM_handler:
 
             # Not used
             # for person_parentin in person.getElementsByTagName('parentin'):
-            #    if person_parentin.hasAttribute("hlink"):
-            #        p.parentin_handles.append(person_parentin.getAttribute("hlink") + self.handle_suffix)
-            #        ##print(f'# Person {p.id} is parent in family {p.parentin_handles[-1]}')
 
-            # Handle <attribute>
-            self._extract_attr(person, p)
-            
             for person_noteref in person.getElementsByTagName("noteref"):
                 if person_noteref.hasAttribute("hlink"):
                     p.note_handles.append(person_noteref.getAttribute("hlink") + self.handle_suffix)
@@ -750,14 +720,17 @@ class DOM_handler:
             self.complete(p, url_notes)
 
             # The refnames will be set for these persons
-            self.person_ids.append(p.uniq_id)
+            self.person_ids.append(p.iid)
+        if href_fixes > 0:
+            print(f"DOM_handler.handle_people_list: fixed {href_fixes} person urls") 
 
 
-    def handle_place_list(self, tx, nodes, iids:IsotammiId):
+    def handle_place_list(self, tx, nodes, iids:IidGenerator):
         """Get all the places in the xml_tree.
+        
 
         To create place hierarchy links, there must be a dictionary of
-        Place handles and uniq_ids created so far. The link may use
+        Place handles and iids created so far. The link may use
         previous node or create a new one.
         """
         for placeobj in nodes:
@@ -767,7 +740,7 @@ class DOM_handler:
             pl.note_handles = []
             pl.citation_handles = []
 
-            # Extract handle, change and id
+            # Extract handle, change, id and attrs
             self._extract_base(placeobj, pl)
             pl.type = placeobj.getAttribute("type")
 
@@ -814,7 +787,6 @@ class DOM_handler:
                 try:
                     # Returns Gramps_DateRange or None
                     placename.dates = self._extract_daterange(placeobj_pname)
-                    # TODO: val="1700-luvulla" muunnettava Noteksi
                 except:
                     placename.dates = None
             ##print(f"\t# Place {pl.id} {pl.names[0]} +{len(pl.names)-1}")
@@ -870,7 +842,7 @@ class DOM_handler:
                     ##print(f'# Place {pl.id} has note {pl.note_handles[-1]}')
 
             # Handle <objref>
-            pl.media_refs = self._extract_mediaref(placeobj)
+            pl.media_refs = self._extract_mediaref(pl, placeobj)
             # if pl.media_refs: print(f'#> saving Place {pl.id} with {len(pl.media_refs)} media_refs')
 
             for ref in placeobj.getElementsByTagName("citationref"):
@@ -891,7 +863,7 @@ class DOM_handler:
             url_notes = []
 
             r = Repository()
-            # Extract handle, change and id
+            # Extract handle, change, id and attrs
             self._extract_base(repository, r)
 
             if len(repository.getElementsByTagName("rname")) == 1:
@@ -945,7 +917,6 @@ class DOM_handler:
             s.repositories = []  # list of Repository objects, containing 
                                 # prev. repository_id, reporef_hlink and reporef_medium
 
-            # Extract handle, change and id
             self._extract_base(source, s)
 
             if len(source.getElementsByTagName("stitle")) == 1:
@@ -1021,132 +992,95 @@ class DOM_handler:
 
     # -------------------------- Finishing process steps -------------------------------
 
-    def set_family_calculated_attributes(self):
+    def set_family_calculated_attributes(self, family_ids):
         """Set sortnames and lifetime dates for each Family in the list self.family_ids.
 
         For each Family
         - set Family.father_sortname, Family.mother_sortname,
         - set Family.datetype, Family.date1 and Family.date2
         """
-
-        # status = Status.OK
-        message = f"{len(self.family_ids)} Family sortnames & dates"
-        print(f"***** {message} *****")
-
-        t0 = time.time()
-        dates_count = 0
-        sortname_count = 0
-        if len(self.family_ids) == 0:
-            return {
-                "status": Status.OK,
-                "dates": dates_count,
-                "sortnames": sortname_count,
-            }
-
         res = {}
-        with FamilyWriter('update', tx=self.dataservice.tx) as service:
-            for uniq_id in self.family_ids:
-                if uniq_id is not None:
-                    ds = service.dataservice    # <Neo4jUpdateService>
-                    res = ds.ds_set_family_calculated_attributes(uniq_id)
-                    # returns {refnames, sortnames, status}
-                    dates_count += res.get("dates")
-                    sortname_count += res.get("sortnames")
-
-        # Two data groups, one elapsed time!
-        self.blog.log_event(
-            {"title": _("Dates"), "count": dates_count, "elapsed": time.time() - t0}
-        )
-        self.blog.log_event({"title": _("Family sorting names"), "count": sortname_count})
+        counter = 0
+        if len(family_ids) == 0:
+            return {"status": Status.OK, "counter": counter}
+        service = self.family_service    # <Neo4jUpdateService>
+        for iid in self.family_ids:
+            if iid is not None:
+                res = service.set_family_calculated_attributes(iid)
+                # returns {counter, status}
+                counter += res.get("counter", 0)
         return res
 
-    def set_person_calculated_attributes(self):
+    def set_person_calculated_attributes(self, person_ids):
         """Add links from each Person to Refnames and set Person.sortname"""
         status = Status.OK
         message = f"{len(self.person_ids)} Person refnames & sortnames"
-        print(f"***** {message} *****")
+        #print(f"***** {message} *****")
 
-        t0 = time.time()
+        t9 = time.time()
         refname_count = 0
         sortname_count = 0
-        if len(self.person_ids) == 0:
+        if len(person_ids) == 0:
             return {
                 "refnames": refname_count,
                 "sortnames": sortname_count,
                 "status": Status.NOT_FOUND,
             }
 
-        with PersonWriter('update', tx=self.dataservice.tx) as service:
-            for p_id in self.person_ids:
-                self.update_progress("refnames")
-                if p_id is not None:
-                    res = service.set_person_name_properties(uniq_id=p_id)
-                    # returns {refnames, sortnames, status}
-                    refname_count += res.get("refnames")
-                    sortname_count += res.get("sortnames")
+        for p_id in person_ids:
+            self.update_progress("refnames")
+            if p_id is not None:
+                res = self.person_service.set_person_name_properties(iid=p_id)
+                refname_count += res.get("refnames")
+                sortname_count += res.get("sortnames")
 
-        self.blog.log_event({"title": "Refname references",
-                             "count": refname_count,
-                             "elapsed": time.time() - t0})
-        self.blog.log_event({"title": _("Person sorting names"), 
-                             "count": sortname_count, 
-                             "elapsed": time.time() - t0})
+        print(f"#bl.gramps.xml_dom_handler.DOM_handler.set_person_calculated_attributes: {time.time()-t9:.3f} seconds")
         return {"status": status, "message": message}
 
-    def set_person_estimated_dates(self):
+    def set_person_estimated_dates(self, person_ids):
         """Sets estimated dates for each Person processed in handle_people
         in transaction
 
         Called from bp.gramps.gramps_loader.xml_to_neo4j
         """
         status = Status.OK
-        message = f"{len(self.person_ids)} Estimated lifetimes"
-        print(f"***** {message} *****")
-        t0 = time.time()
-        res = self.dataservice.ds_set_people_lifetime_estimates(self.person_ids)
+        #message = f"{len(self.person_ids)} Estimated lifetimes"
+        #print(f"***** {message} *****")
+        t9 = time.time()
+        res = self.person_service.set_people_lifetime_estimates(person_ids)
 
         count = res.get("count")
         message = _("Estimated lifetimes")
-        self.blog.log_event(
-            {"title": message, "count": count, "elapsed": time.time() - t0}
-        )
+        print(f"#bl.gramps.xml_dom_handler.DOM_handler.set_person_estimated_dates: {time.time()-t9:.3f} seconds")
         return {"status": status, "message": f"{message}, {count} changed"}
 
-    def set_all_person_confidence_values(self):
+    def set_person_confidence_values(self, person_ids):
         """Sets a quality ratings for collected list of Persons.
 
         Person.confidence is mean of all Citations used for Person's Events
         """
-        message = f"{len(self.person_ids)} Person confidence values"
-        print(f"***** {message} *****")
-        t0 = time.time()
+        message = f"{len(person_ids)} Person confidence values"
+        #print(f"***** {message} *****")
+        t9 = time.time()
 
-        with PersonWriter("update", tx=self.dataservice.tx) as service:
-            res = service.update_person_confidences(self.person_ids)
-            # returns {status, count, statustext}
-            status = res.get("status")
-            count = res.get("count", 0)
-            if status == Status.OK or status == Status.UPDATED:
-                self.blog.log_event(
-                    {
-                        "title": "Confidences set",
-                        "count": count,
-                        "elapsed": time.time() - t0,
-                    }
-                )
-                return {"status": status, "message": f"{message}, {count} changed"}
-            else:
-                msg = res.get("statustext")
-                self.blog.log_event(
-                    {
-                        "title": "Confidences not set",
-                        "count": count,
-                        "elapsed": time.time() - t0,
-                        "level": "ERROR",
-                    }
-                )
-                print(f"DOM_handler.set_all_person_confidence_values: FAILED: {msg}")
-                return {"status": status, "statustext": msg}
+        res = self.person_service.update_person_confidences(person_ids)
+        status = res.get("status")
+        count = res.get("count", 0)
+        if status == Status.OK or status == Status.UPDATED:
+            print(f"#bl.gramps.xml_dom_handler.DOM_handler.set_person_confidence_values: {time.time()-t9:.3f} seconds")
+            return {"status": status, "message": f"{message}, {count} changed"}
+        else:
+            msg = res.get("statustext")
+            self.blog.log_event(
+                {
+                    "title": "Confidences not set",
+                    "count": count,
+                    "elapsed": time.time() - t9,
+                    "level": "ERROR",
+                }
+            )
+            print(f"DOM_handler.set_person_confidence_values: FAILED: {msg}")
+            return {"status": status, "statustext": msg}
 
     # --------------------------- DOM subtree procesors ----------------------------
 
@@ -1158,7 +1092,7 @@ class DOM_handler:
                 return priv
         return None
 
-    def _pick_url_from_text(self, src):
+    def _pick_url_from_text(self, src:str) -> list[str]:
         """Extract an url from the text src, if any
     
         Returns (text, url), where the url is removed from text
@@ -1245,9 +1179,10 @@ class DOM_handler:
     def _extract_base(self, dom, node):
         """Extract common variables from DOM object to NodeObject fields.
 
-        node.id = self.id = ''            str Gedcom object id like "I1234"
-        node.change = self.change         int Gramps object change timestamp
-        node.handle = self.handle = ''    str Gramps handle
+        node.id = self.id = ''          str Gedcom object id like "I1234"
+        node.change = self.change       int Gramps object change timestamp
+        node.handle = self.handle = ''  str Gramps handle
+        node.attr__dict = {}            dict Gramps attributes and srcattributes
         """
         if dom.hasAttribute("handle"):
             node.handle = dom.getAttribute("handle") + self.handle_suffix
@@ -1255,21 +1190,31 @@ class DOM_handler:
             node.change = int(dom.getAttribute("change"))
         if dom.hasAttribute("id"):
             node.id = dom.getAttribute("id")
-    
-    
-    def _extract_attr(self, dom, node):
-        """Extract attr values from DOM object to NodeObject fields.
-        
-        node.attr = [[self.type, self.value],[self.type, self.value],...]
-        """
-        node.attr = dict()
-        for attr in dom.getElementsByTagName("attribute"):
-            if attr.hasAttribute("type"):
-                node.attr[attr.getAttribute("type")] = attr.getAttribute("value")
-        
 
-    def _extract_mediaref(self, dom_object):
-        """Check if dom_object has media reference and extract it to p.media_refs.
+        # - Extract all following source values from DOM object
+        #   1. "attribute" (in <person>, <object>) and
+        #   2. "srcattribute" (in <citation>, <source>)
+        # - to a single NodeObject json field
+        #   - node.attrs = {type: [value], type: [value,...] ... }
+        my_attrs = {}
+        for attr in dom.getElementsByTagName("attribute") + dom.getElementsByTagName("srcattribute"):
+            if attr.hasAttribute("type"):
+                key = attr.getAttribute("type")
+                value = attr.getAttribute("value")
+                if key in my_attrs.keys():
+                    new_val = my_attrs[key] + [value]
+                else: # New key
+                    new_val = [value]
+                my_attrs[key] = new_val
+        if my_attrs:
+            node.attrs:dict = my_attrs
+            # Converted to db string format in bl.base.NodeObject.attrs_for_db()
+            # called from pe.neo4j.updateservice.Neo4jUpdateService methods
+            print(f"#DOM_handler._extract_base: Got {node.id=} {node.attrs=}")
+        return
+
+    def _extract_mediaref(self, obj:NodeObject, dom_object):
+        """Check if dom_object has media reference and extract it for p.media_refs.
 
         Example:
             <objref hlink="_d485d4484ef70ec50c6">
@@ -1285,34 +1230,37 @@ class DOM_handler:
         """
         result_list = []
         media_nr = -1
-        for objref in dom_object.getElementsByTagName("objref"):
-            if objref.hasAttribute("hlink"):
-                resu = MediaReferenceByHandles()
-                resu.media_handle = objref.getAttribute("hlink") + self.handle_suffix
+        for dom_media in dom_object.getElementsByTagName("objref"):
+            if dom_media.hasAttribute("hlink"):
+                m_ref = MediaReferenceByHandles(obj)
+                # Contains media handle, crop, media_order and
+                #    referrer object_name and
+                #    possible lists of note handles nad citation handles
+                m_ref.handle = dom_media.getAttribute("hlink") + self.handle_suffix
                 media_nr += 1
-                resu.media_order = media_nr
+                m_ref.media_order = media_nr
 
-                for region in objref.getElementsByTagName("region"):
+                for region in dom_media.getElementsByTagName("region"):
                     if region.hasAttribute("corner1_x"):
                         left = region.getAttribute("corner1_x")
                         upper = region.getAttribute("corner1_y")
                         right = region.getAttribute("corner2_x")
                         lower = region.getAttribute("corner2_y")
-                        resu.crop = int(left), int(upper), int(right), int(lower)
-                        # print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle} crop={resu.crop}')
-                # if not resu.crop: print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle}')
+                        m_ref.crop = int(left), int(upper), int(right), int(lower)
+                        # print(f'#_extract_mediaref: Pic {m_ref.media_order} handle={m_ref.handle} crop={m_ref.crop}')
+                # if not m_ref.crop: print(f'#_extract_mediaref: Pic {m_ref.media_order} handle={m_ref.handle}')
 
                 # Add note and citation references
-                for ref in objref.getElementsByTagName("noteref"):
-                    if ref.hasAttribute("hlink"):
-                        resu.note_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
-                        # print(f'#_extract_mediaref: Note {resu.note_handles[-1]}')
+                for dom_note in dom_media.getElementsByTagName("noteref"):
+                    if dom_note.hasAttribute("hlink"):
+                        m_ref.note_handles.append(dom_note.getAttribute("hlink") + self.handle_suffix)
+                        # print(f'#_extract_mediaref: Note {m_ref.note_handles[-1]}')
 
-                for ref in objref.getElementsByTagName("citationref"):
-                    if ref.hasAttribute("hlink"):
-                        resu.citation_handles.append(ref.getAttribute("hlink") + self.handle_suffix)
-                        # print(f'#_extract_mediaref: Cite {resu.citation_handles[-1]}')
+                for dom_cite in dom_media.getElementsByTagName("citationref"):
+                    if dom_cite.hasAttribute("hlink"):
+                        m_ref.citation_handles.append(dom_cite.getAttribute("hlink") + self.handle_suffix)
+                        # print(f'#_extract_mediaref: Cite {m_ref.citation_handles[-1]}')
 
-                result_list.append(resu)
+                result_list.append(m_ref)
 
         return result_list

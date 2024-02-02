@@ -41,7 +41,7 @@ ORDER BY toUpper(s.stitle)"""
 
     get_sources_with_selections = """
 MATCH (root) -[:OBJ_SOURCE]-> (s:Source)
-    WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
+    WHERE tolower(s.stitle) CONTAINS $key1 OR s.stitle CONTAINS $key2 
 WITH root, s ORDER BY toUpper(s.stitle)
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
@@ -63,7 +63,7 @@ RETURN root, s AS source,
     ORDER BY source.stitle"""
 
     get_citators_of_source = """
-match (s) <-[:SOURCE]- (c:Citation) where id(s)=$uniq_id
+match (s {iid:$iid}) <-[:SOURCE]- (c:Citation)
 match (c) <-[:CITATION]- (x)
 with c,x
     optional match (c) -[:NOTE]-> (n:Note)
@@ -72,42 +72,55 @@ return c as citation, collect(distinct n) as notes, x as near,
     collect(distinct [pe, re.role]) as far
 order by c.id, x.id"""
 
+    # ---------------- Citations for different object ------------------
+
+    # 1) cypher_prefix for different objects
+    media_prefix = "MATCH (a:Media {iid:$iid}) "
+    # 2) common read clauses
+    get_obj_source_notes = """
+MATCH (a) -[:CITATION]-> (cita:Citation) -[:SOURCE]-> (sour:Source)
+OPTIONAL MATCH (sour) -[:REPOSITORY]-> (repo:Repository)
+OPTIONAL MATCH (cita) -[:NOTE]-> (c_note:Note)
+OPTIONAL MATCH (sour) -[:NOTE]-> (s_note:Note)
+RETURN //root, a,
+    cita, sour, repo,
+    COLLECT(DISTINCT s_note) AS source_notes,
+    COLLECT(DISTINCT c_note) AS citation_notes
+"""
+
     # ------------------------ Cypher clauses ------------------------
-
-    # Default name, birth and death
-    get_person_lifedata = """
-match (p:Person) -[:NAME]-> (n:Name {order:0})
-    where id(p) = $pid
-optional match (p) -[re:EVENT]-> (e:Event)
-    where e.type = "Birth" or e.type = "Death"
-return n as name, collect(distinct e) as events"""
-
-#     get_citation_sources_repositories = """
-# MATCH (c:Citation) -[:SOURCE]-> (s:Source)
-#     WHERE ID(c) IN $uid_list
-#     OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
-# RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
 
     get_citation_sources_repositories = """
 MATCH (cita:Citation) -[:SOURCE]-> (source:Source)
-    WHERE ID(cita) IN $uid_list
+    WHERE cita.iid IN $uid_list
 OPTIONAL MATCH (source) -[rel:REPOSITORY]-> (repo:Repository)
-RETURN ID(cita) AS uniq_id, source, properties(rel) as rel, repo"""
+RETURN cita.iid AS iid, source, properties(rel) as rel, repo"""
+
+    source_fulltext_search = """
+CALL db.index.fulltext.queryNodes("sourcetitle",$searchtext) 
+    YIELD node as source, score
+WITH source,score
+    ORDER by score desc LIMIT $limit
+
+MATCH (root:Root {state:$state}) -[:OBJ_SOURCE]-> (source)
+RETURN DISTINCT source, score"""
 
 
-class CypherSourceByHandle():
-    """ For Source class """
+    # --- Cypher by handle ----
 
     create_to_batch = """
 MATCH (b:Root {id: $batch_id})
 MERGE (b) -[r:OBJ_SOURCE]-> (s:Source {handle: $s_attr.handle}) 
-    SET s = $s_attr
-RETURN ID(s) as uniq_id"""
+    SET s = $s_attr"""
+# RETURN ID(s) as uniq_id"""
 
-    link_note = """
+    s_link_note = """
 MATCH (n:Source {handle:$handle})
 MATCH (m:Note {handle:$hlink})
 CREATE (n) -[r:NOTE]-> (m)"""
+# MATCH (n:Source {handle:$handle})
+# MATCH (m:Note {handle:$hlink})
+# CREATE (n) -[r:NOTE]-> (m)"""
 
     link_repository = """
 MATCH (n:Source) WHERE n.handle=$handle

@@ -25,9 +25,15 @@ Created on 22.11.2020
 
 class CypherRefname():
     '''
-    Cypher clauses for creating and accessing Refnames
+    Cypher clases for creating and accessing Refnames.
+    Contains a alternative cypher clause for Neo4j versions < 5.0
     '''
 
+ 
+#     # With relation to base Refname
+#     def save_link(link_type):
+#         # link (a) -[:BASENAME|PARENTNAME]-> (b)
+#         # Calling Refname: (self) --> (self.refname)
     link_basename = """
 MERGE (a:Refname {name: $a_name}) SET a = $a_attr
 MERGE (b:Refname {name: $b_name})
@@ -47,7 +53,7 @@ MERGE (a:Refname {name: $a_name}) SET a = $a_attr
 RETURN ID(a) AS aid, a.name AS aname"""
 
     link_person_to = """
-MATCH (p:Person {iid: $pid})
+MATCH (p:Person) WHERE ID(p) = $pid
 MERGE (a:Refname {name:$name})
 MERGE (a) -[:REFNAME {use:$use}]-> (p)
 RETURN ID(a) as rid"""
@@ -65,5 +71,6 @@ ORDER BY n.name"""
 
     delete_all = "MATCH (n:Refname) DETACH DELETE n"
 
-    set_constraint = "CREATE CONSTRAINT FOR (r:Refname) REQUIRE r.name IS UNIQUE"
+    # cypher clause for Neo4j versions < 5.0
+    set_constraint = "CREATE CONSTRAINT ON (r:Refname) ASSERT r.name IS UNIQUE"
 

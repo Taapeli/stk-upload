@@ -1,7 +1,7 @@
 #   Isotammi Genealogical Service for combining multiple researchers' results.
 #   Created in co-operation with the Genealogical Society of Finland.
 #
-#   Copyright (C) 2016-2021  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
+#   Copyright (C) 2016-2023  Juha Mäkeläinen, Jorma Haapasalo, Kari Kujansuu,
 #                            Timo Nallikari, Pekka Valta
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -23,11 +23,13 @@ Created on 22.8.2019
 @author: jm
 """
 #blacked 2021-05-01 JMä
-import uuid
 import json
 import traceback
 from datetime import datetime
-import base32_lib as base32
+
+#See https://docs.python.org/3/library/typing.html
+from typing import NewType
+IsotammiId = NewType('IsotammiId', str)
 
 # Privacy rule: how many years after death
 PRIVACY_LIMIT = 0
@@ -93,46 +95,96 @@ class NodeObject:
     """
     Class representing Neo4j Node type objects.
     """
-
-    def __init__(self, uniq_id:int=None):
+    def __init__(self, iid=None):
         """
         Constructor.
 
-        Optional uniq_id may be database key (int).
-        """
-        self.uuid = None 
-        self.uniq_id = uniq_id  # Neo4j object id
-        self.change = 0  # Object change time
-        self.id = ""  # Gedcom object id like "I1234"
-        self.handle = ""  # Gramps handle (?)
+        Optional iid should be unique key (str).
+        Obsolete 2023: iid may also be Neo4j version 3 database key (int),
+                       which is saved as self.uniq_id
 
-        self.state = None  # Object state in process path
-        # TODO Define constants for values:
-        #     candicate, audit_requested, auditing, accepted,
-        #     mergeing, common, rejected
-        self.iid = None  # Containing
+        Possible other fields in xml_dom_handler
+        - citation_refs[]  ?
+        - media_refs[]     ?
+        - note_refs[]    ?
+        """
+        #TODO Remove uniq_id when not in use after 2023
+        self.uniq_id = None  # obsolete Neo4j object id
+        #! if isinstance(uniq_id, int):
+        #     self.uniq_id = uniq_id
+        self.change:int = 0     # Object change time
+        self.id:str = ""        # Gedcom object id like "I1234"
+        self.handle:str = ""    # Gramps handle
+        # iid contains
         # - object type id ("H" = Human person etc.)
         # - running number in Crockford Base 32 format
-        # - ISO 7064 checksum (2 digits)
+        if isinstance(iid, str):
+            self.iid = iid
+        else:
+            self.iid = None
 
-        # if uniq_id:
-        #     if isinstance(uniq_id, int):
-        #         self.uniq_id = uniq_id
-        #     else:
-        #         self.uuid = uniq_id
+        # attrs is json a dict of Gramps object attributes and srcattributes
+        #    to str    self.attrs = json.dumps(attrs_dict, ensure_ascii=False)
+        #    to dict   attrs_for_db = json.loads(self.attrs)
+        self.attrs:str = ""     
+
+        # Proposed Object state in process path
+        self.state:str = None   
+        # TODO Define constants for values:
+        #     candidate, audit_requested, auditing, accepted,
+        #     mergeing, common, rejected
 
     def __str__(self):
-        #uuid = self.uuid if self.uuid else "-"
-        return f'(NodeObject {self.iid}/{self.uniq_id}/{self.id} date {self.dates})"'
+        # Supports also obsolete Neo4j id() as uniq_id
+        iid = self.uniq_id if self.uniq_id else self.iid
+        return f'(NodeObject {iid}/{self.iid}/{self.id} date {self.dates})"'
 
-    def timestamp_str(self):
+    def label(self) -> str:
+        """ Returns Neo4j node label for this object.
+
+                iid   class &     optional
+                mark  label       class
+                ----  -----      ----------
+                C    "Citation"
+                     "Comment"
+                E    "Event"     (EventBl)
+                F    "Family"    (FamilyBl)
+                M    "Media"     (MediaBl)
+                AN ! "Name"
+                N    "Note"
+                H !  "Person"    (PersonBl)
+                AP ! "Place_name"
+                P    "Place"     (PlaceBl)
+                     "Refname"
+                R    "Repository"
+                S    "Source"    (SourceBl)
+                     "Stats"
+
+        @See: pe.neo4j.util.label_by_iid, bl.base.NodeObject.label
+        """
+        name = self.__class__.__name__
+        if name.endswith("Bl"):
+            name = name[:-2]
+        #print(f"#! Object label = {name!r}")
+        return name
+
+    def timestamp_str(self) -> str:
         """ My timestamp to display format. """
         if hasattr(self, "timestamp") and self.timestamp:
             t = float(self.timestamp) / 1000.0
-            return datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+            return datetime.fromtimestamp(t).strftime("%d.%m.%Y %H:%M")
         else:
             return ""
 
+    def attrs_for_db(self) -> str: 
+        """ Get self.attrs:dict as string. 
+        
+            attrs_for_db = obj.attrs_for_db()
+        """
+        if self.attrs:
+            return json.dumps(self.attrs, ensure_ascii=False)
+        else:
+            return ""
 
     """
         Compare 
@@ -174,35 +226,7 @@ class NodeObject:
             return self.dates != other.dates
         return False
 
-    @staticmethod
-    def split_with_hyphen(id_str):
-        """Inserts a hyphen into the id string."""
-        """Examples: H-1, H-1234, H1-2345, H1234-5678."""
-
-        return id_str[:max(1, len(id_str)-4)] + "-" + id_str[max(1, len(id_str)-4):]
-
-    @staticmethod
-    def newUuid():
-        """Generates a new uuid key. DON'T!
-
-        See. https://docs.python.org/3/library/uuid.html
-        """
-        return None
-        #return uuid.uuid4().hex
-
-    def uuid_short(self):
-        """ Display uuid (or iid) in short form. 
-        
-            Real uuid shortened, iid need is not too long
-        """
-        if self.uuid:
-            if len(self.uuid) > 20:
-                return self.uuid[:6]
-            return self.uuid
-        else:
-            return ""
-
-    def change_str(self):
+    def change_str(self) -> str:
         """ Display change time like '28.03.2020 17:34:58'. """
         try:
             return datetime.fromtimestamp(self.change).strftime("%d.%m.%Y %H:%M:%S")
@@ -217,7 +241,8 @@ class NodeObject:
         """
         return self.__dict__
 
-class IsotammiException(BaseException):
+
+class IsotammiException(Exception):
     def __init__(self, msg, **kwargs):
         Exception.__init__(self, msg)
         self.kwargs = kwargs

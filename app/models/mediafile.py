@@ -9,6 +9,7 @@ import os
 from PIL import Image 
 
 import shareds
+from bl.base import IsotammiException
 
 media_base_folder = "media"
 cypher_get_medium = "MATCH (m:Media{iid:$iid}) RETURN m"
@@ -41,15 +42,21 @@ def get_media_thumbnails_folder(batch_id):
     return os.path.abspath(media_thumbnails_folder)
 
 def get_fullname(iid):
-    rec = shareds.driver.session(default_access_mode='READ').run(cypher_get_medium,
-                                                                 iid=iid).single()
-    m = rec['m']
-    batch_id = m.get('batch_id','no-batch')
-    src = m['src']
-    mimetype = m['mime']
-    media_files_folder = get_media_files_folder(batch_id)
-    fullname = os.path.join(media_files_folder,src)
-    return fullname,mimetype
+    """ Finds image file and return file fullname, image mime type and 
+        image size tuple (width, height).
+    """
+    with shareds.driver.session(default_access_mode='READ') as session:
+        rec = session.run(cypher_get_medium, iid=iid).single()
+        if rec:
+            m = rec['m']
+            batch_id = m.get('batch_id','no-batch')
+            src = m['src']
+            mimetype = m['mime']
+            media_files_folder = get_media_files_folder(batch_id)
+            fullname = os.path.join(media_files_folder,src)
+            image = Image.open(fullname)
+            return fullname, mimetype, image.size
+    raise IsotammiException(f"models.mediafile.get_fullname can not read {iid!r}")
 
 def get_thumbname(iid, crop=None):
     ''' Find stored thumbnail file name; create a new file, if needed.

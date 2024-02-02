@@ -18,13 +18,14 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-Moved on 14.5.2019 from database.accessDB
+Copied from database.cypher_setup 28.1.2023
 
 @author: jm
 '''
 
 class SetupCypher():
-    """ Cypher clauses for setup """
+    """ Cypher clauses for setup.
+        Containing old cypher clauses for Neo4j versions < 5.0 . """
 
     # erase database 
     delete_database = """
@@ -43,23 +44,14 @@ class SetupCypher():
     remove_lock_initiated = """
     MATCH (lock:Lock {id:'initiated'}) DELETE lock
     """
-    find_roots_db_schema = """
-    MATCH (root:Root)  WHERE root.db_schema < $db_schema
-    RETURN root.id AS batch_id
-    """
-    set_root_db_schema = """
-    MATCH (root:Root {id:$id}) 
-        SET root.db_schema = $db_schema
-        SET root.neo4jImportId = null
-    """
     find_empty_roots = """
     MATCH (b:Root) WHERE b.file IS NULL
     OPTIONAL MATCH (b) --> (x)
-        WITH b, LABELS(x)[0] AS lbl ORDER BY b.id, lbl
-    RETURN b.id, elementId(b) AS uid, COLLECT(DISTINCT lbl) as lbls
+    WITH b, COLLECT(DISTINCT LABELS(x)[0]) AS lbls, COUNT(x) AS ch WHERE ch < 2
+        RETURN ID(b) AS uniq_id, b.id AS id
     """
     remove_empty_roots = """
-    MATCH (b:Root) WHERE elementId(b) in $elem_ids
+    MATCH (b:Root) WHERE id(b) in $uniq_ids
     OPTIONAL MATCH (b) --> (x)
         DETACH DELETE b, x
     """
@@ -68,8 +60,8 @@ class SetupCypher():
     MATCH (a:Role) RETURN a.name
     """
     set_role_constraint = """
-    CREATE CONSTRAINT FOR (role:Role) 
-        REQUIRE role.name IS UNIQUE
+    CREATE CONSTRAINT ON (role:Role) 
+        ASSERT role.name IS UNIQUE
     """
     role_check_existence = """
     MATCH  (role:Role) WHERE role.name = $rolename RETURN COUNT(role)
@@ -89,24 +81,16 @@ class SetupCypher():
     """
 
     set_user_constraint1 = """
-    CREATE CONSTRAINT FOR (user:User) 
-        REQUIRE user.email IS UNIQUE
+    CREATE CONSTRAINT ON (user:User) 
+        ASSERT (user.email) IS UNIQUE;
     """
     set_user_constraint2 = """
-    CREATE CONSTRAINT FOR (user:User) 
-        REQUIRE user.username IS UNIQUE
+    CREATE CONSTRAINT ON (user:User) 
+        ASSERT (user.username) IS UNIQUE;
     """
 
-    #!index_year_birth_low = "CREATE INDEX ON :Person(birth_low)"
-    # index_year_death_high = "CREATE INDEX ON :Person(death_high)"
-    index_year_birth_low = """
-    CREATE CONSTRAINT person_birth_low IF NOT EXISTS
-        FOR :Person(birth_low)
-        REQUIRE Person.birth_low IS UNIQUE"""
-    index_year_death_high = """
-    CREATE CONSTRAINT person_death_high IF NOT EXISTS
-        FOR :Person(death_high)
-        REQUIRE Person.death_high IS UNIQUE"""
+    index_year_birth_low = "CREATE INDEX ON :Person(birth_low)"
+    index_year_death_high = "CREATE INDEX ON :Person(death_high)"
 
     master_create = """
     MATCH  (role:Role) WHERE role.name = 'master'

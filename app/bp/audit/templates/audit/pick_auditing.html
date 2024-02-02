@@ -79,7 +79,7 @@ div.done {color: black;}
           </div>
           <div class="box">
             <div>{{ _('State ') }}</div>
-            <p><b class="state_{{root.state|replace(" ", "")}}"
+            <p><b class="state_{{root.state|replace(' ', '')}}"
                   style="padding: 2pt 4pt;">{{ _(root.state) }}</b>
                <br><small>{{root.timestamp_str()}}</small>
             </p>
@@ -166,7 +166,7 @@ div.done {color: black;}
                 <input type="hidden" value="{{user}}" name="user">
 
                 <div class="submit">
-                   <input type="submit" value="&lt; {{ _('Back') }}" name="cancel" 
+                   <input type="submit" value="&lt; {{ _('Batch list') }}" name="cancel" 
                    		style="color:blue" /> 
 
                    <span style="font-size:large; color:gray;"> | </span>

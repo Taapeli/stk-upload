@@ -214,11 +214,3 @@ class RootUpdater(DataService):
         self.dataservice.ds_commit()
     def rollback(self):
         self.dataservice.ds_rollback()
-
-    # def media_create_and_link_by_handles(self, uniq_id, media_refs):
-    #     """NOT IN USE: Save media object and it's Note and Citation references
-    #     using their Gramps handles.
-    #     """
-    #     if media_refs:
-    #         self.dataservice.ds_create_link_medias_w_handles(uniq_id, media_refs)
-

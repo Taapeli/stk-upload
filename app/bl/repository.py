@@ -16,7 +16,7 @@ class Repository(NodeObject):
     """Repository / Arkisto.
 
     Properties:
-        uniq_id         int    db native key or None
+        iid         int    db native key or None
         handle          str    Gramps handle
         change          int    timestamp
         id              str    esim. "R0001"
@@ -29,13 +29,13 @@ class Repository(NodeObject):
             note_handles[]   str lisätiedon handle
     """
 
-    def __init__(self):
+    def __init__(self, iid=None):
         """ Luo uuden repository-instanssin """
-        NodeObject.__init__(self)
+        NodeObject.__init__(self, iid)
         self.type = ""
         self.rname = ""
         self.medium = ""
-        self.notes = []  # contains Note instances or Note.uniq_id values
+        self.notes = []  # contains Note instances or Note.iid values
         self.note_handles = [] # contains noterefs of Note instances
 
         self.sources = []  # For creating display sets (Not used??)
@@ -61,6 +61,34 @@ class RepositoryReader(DataService):
                 self.use_user = None
             else:
                 self.use_user = u_context.user
+
+    def get_repo_list(self):
+        """Get junk of Repository objects for Repositories list."""
+        context = self.user_context
+        fw = context.first  # From here forward
+        use_user = context.batch_user()
+        args = {"user": use_user, "fw": fw, "count": context.count}
+        args['material'] = context.material
+        try:
+            repos = self.dataservice.dr_get_repo_list_fw(args)
+            # results = {'sources':sources,'status':Status.OK}
+
+            # Update the page scope according to items really found
+            if repos:
+                context.update_session_scope(
+                    "source_scope",
+                    repos[0].rname,
+                    repos[-1].rname,
+                    context.count,
+                    len(repos),
+                )
+            else:
+                return {"items": [], "status": Status.NOT_FOUND}
+
+            results = {"items": repos, "status": Status.OK}
+        except Exception as e:
+            results = {"status": Status.ERROR, "statustext": f"Repository list: {e}"}
+        return results
 
     def get_repository_sources(self, iid, u_context):
         """Read the repository and referencing sources.

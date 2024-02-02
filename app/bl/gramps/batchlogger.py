@@ -17,34 +17,27 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-'''
-Cumulates Batch steps and stores them as a LogItem node
-
-    After a series of logical run steps, Batch has a link to each data node with
-    label Person or Family.
-    The UserProfile has also relation CURRENT_LOAD to most current Batch.
-
-    (u:UserProfile) -[:CURRENT_LOAD]-> (b:Batch)
-    (u:UserProfile) -[:HAS_LOADED]-> (b:Batch)
-    (b:Batch) -[:BATCH_MEMBER]-> (:Person|Family)
+"""
+Accumulates Batch steps and stores them as a list of LogItem nodes.
 
 Created on 26.5.2018
 
 @author: jm
-'''
+"""
+import time
+
 
 class BatchLog():
-    '''
-    Creates a log of userid bach steps.
+    """
+    Creates a log of userid batch steps.
 
     append()  Adds a log event to log
-    list()    Gets the log contenst objects 
-    '''
-
+    list()    Gets the log contents objects 
+    """
     def __init__(self, userid):
-        '''
+        """
         Creates a Batch object
-        '''
+        """
         if userid == None:
             raise AttributeError("Batch.userid must be defined")
         self.bid = None
@@ -55,21 +48,21 @@ class BatchLog():
         # Runtime variables for batch steps
         self.steps = []
         self.totaltime = 0.0    # Sum of LogItem.elapsed
-        self.totalpercent = 0   # Sum of LogItem.percent
 
     def log_event(self, event_dict):
-        # Add a and event dictionary as a new LogItem to Batch log
+        """Add a and event dictionary as a new LogItem to Batch log.
+        """
         batch_event = LogItem(event_dict)
         self.log(batch_event)
 
     def log(self, batch_event):
-        # Add a bp.gramps.batchlogger.LogItem to Batch log
+        """Add a bp.gramps.batchlogger.LogItem to Batch log.
+        """
         self.append(batch_event)
 
     def append(self, obj):
-        '''
-        The argument object (a LogItem) is added to batch LogItem list
-        '''
+        """The argument object (a LogItem) is added to batch LogItem list
+        """
         if not isinstance(obj, LogItem):
             raise AttributeError("Batch.append need a LogItem instance")
 
@@ -81,11 +74,11 @@ class BatchLog():
         return None
 
     def list(self):
-        """ Gets the active LogItem steps as a list """
+        """ Gets the active LogItem steps as a list. """
         return self.steps
 
     def str_list(self):
-        """ Gets the active LogItem steps as a list of strings """
+        """ Gets the active LogItem steps as a list of strings. """
         li = []
         for e in self.steps:
             li.append(str(e))
@@ -99,18 +92,18 @@ class LogItem():
         title    str    logged text message
         count    int    count of processed things in this event
         elapsed  float  time elapsed in seconds
-        percent  int    process progress grade 1..100
     '''
 
-    def __init__(self, ev):
-        '''
-        Constructor
-        '''
+    def __init__(self, ev: dict):
+        """
+        Constructs anLogItem from a dictionary.
+        
+        Example: {"title": title, "count": counter, "elapsed": time.time() - t0}
+        """
         self.level = ev['level']        if 'level' in ev    else 'INFO'
         self.title = ev['title']        if 'title' in ev    else ''
         self.count = ev['count']        if 'count' in ev    else None
         self.elapsed = ev['elapsed']    if 'elapsed' in ev  else None
-        self.percent = ev['percent']    if 'percent' in ev  else None
 
     def __str__(self):
         if self.count == None:
@@ -119,6 +112,58 @@ class LogItem():
             c = self.count
         if self.elapsed:
             m,s = divmod(self.elapsed,60)
-            e = f"{int(m)} min {s:5.3f} sec" if m else f"{s:5.3f} sec"
-            return f"{self.level:5} {self.title+':':26} {c:4} / {e}"
-        return f"{self.level:5} {self.title+':':26} {c:4}"
+            if m > 60:
+                h,m = divmod(m,60)
+                e = f"{int(h)} h {int(m)} min {s:5.3f} sec"
+            else:
+                e = f"{int(m)} min {s:5.3f} sec" if m else f"{s:5.3f} sec"
+            return f"{self.level:5} {self.title+':':42}{c:5} / {e}"
+        return f"{self.level:5} {self.title+':':42}{c:5}"
+
+
+class LogTimer():
+    """
+    Tool for accumulating data for a single LogItem (count, time).
+
+    - You may give elapsed time in each add(count, elapsed) call.
+    - If you omit 2nd argument calling add(count), you get
+      automatic calculated time between LogTimer and get_item calls.
+
+        LogTimer("My title")    Creates an Info level LogTimer
+        add(count)              Accumulates count (without individual elapsed time)
+        add(count, elapsed)     Accumulates count and time
+        get_item()              Returns data as a LogItem object
+        
+    """
+    def __init__(self, title:str, level:str = "INFO"):
+        """ Creates a LogTimer object of level "INFO" with given title.
+        """
+        self.start_time = time.time()
+        self.level = level
+        self.title = title
+        self.count = 0
+        self.elapsed = 0.0
+
+    def add(self, count: int, elapsed:float = 0.0):
+        """ Accumulates count and elpased time """
+        self.count += count
+        self.elapsed += elapsed
+        # e = ev.get('elapsed', 0.0)
+        # if isinstance(c, float):
+        #     self.elapsed += e
+        # else:
+        #     raise AttributeError("LogTimer 'elapsed' must be float if present.")
+
+    def get_item(self):
+        """ Returns data as a LogItem object. """
+        if self.elapsed == 0.0:
+            self.elapsed = time.time() - self.start_time
+        item = LogItem({
+            "title": self.title, 
+            "count": self.count, 
+            "elapsed": self.elapsed
+            })
+        return item
+        
+        
+        

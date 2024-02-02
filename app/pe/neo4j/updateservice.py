@@ -23,17 +23,19 @@ Created on 23.3.2020
 """
 import logging
 import traceback
+from collections import defaultdict
+from datetime import date  # , datetime
 from neo4j.exceptions import ClientError
 
 logger = logging.getLogger("stkserver")
-from datetime import date  # , datetime
 
-from bl.base import Status, IsotammiException, NodeObject
-from bl.dates import DateRange, DR
+from bl.base import Status, IsotammiException, NodeObject #, NodeObject
+from bl.person import Person
 from bl.person_name import Name
 from bl.place import PlaceBl
 from bl.family import FamilyBl
 from bl.note import Note
+from bl.dates import DateRange, DR
 
 from pe.dataservice import ConcreteService
 
@@ -41,21 +43,21 @@ from .cypher.cy_citation import CypherCitation
 from .cypher.cy_comment import CypherComment
 from .cypher.cy_event import CypherEvent
 from .cypher.cy_family import CypherFamily
-from .cypher.cy_gramps import CypherObjectWHandle
+from .cypher.cy_gramps import CypherLink
 from .cypher.cy_media import CypherMedia
 from .cypher.cy_note import CypherNote
-from .cypher.cy_object import CypherObject
 from .cypher.cy_person import CypherPerson
 from .cypher.cy_place import CypherPlace, CypherPlaceMerge
 from .cypher.cy_refname import CypherRefname
 from .cypher.cy_repository import CypherRepository
 from .cypher.cy_root import CypherRoot, CypherAudit
-from .cypher.cy_source import CypherSourceByHandle
+from .cypher.cy_source import CypherSource
 
 from pe.neo4j.nodereaders import Comment_from_node
 from pe.neo4j.nodereaders import PlaceBl_from_node
 from pe.neo4j.nodereaders import PlaceName_from_node
 from pe.neo4j.nodereaders import SourceBl_from_node
+from pe.neo4j.util import IidGenerator
 
 
 
@@ -108,6 +110,7 @@ class Neo4jUpdateService(ConcreteService):
             #             self.blog.log_event({'title':_("Database save failed due to {}".\
             #                                  format(msg)), 'level':"ERROR"})
             return {"status": Status.ERROR, "statustext": f"Rollback failed: {msg}"}
+
 
     # ----- Batch Audit -----
 
@@ -173,7 +176,7 @@ class Neo4jUpdateService(ConcreteService):
                             cypher=CypherRoot.batch_merge,
                             b_attr=attr,
                             )
-        return record["id"] #{"status": Status.OK, "identity": uniq_id}
+        return record["id"] #{"status": Status.OK, "identity": iid}
 
 
     def ds_batch_set_state(self, batch_id, user, state):
@@ -185,8 +188,8 @@ class Neo4jUpdateService(ConcreteService):
         result = self.tx.run(
             CypherRoot.batch_set_state, bid=batch_id, user=user, state=state
         )
-        uniq_id = result.single()[0]
-        return {"status": Status.OK, "identity": uniq_id}
+        bid = result.single()[0]
+        return {"status": Status.OK, "identity": bid}
 
     # ---- Auditor ops ----
 
@@ -202,9 +205,9 @@ class Neo4jUpdateService(ConcreteService):
             result = self.tx.run(CypherAudit.batch_set_access, 
                                  bid=batch_id, audi=auditor_user)
             for record in result:
-                uniq_id = record["bid"]
+                root_id = record["bid"]
                 rel_id = record["rel_id"]
-                return {"status": Status.UPDATED, "identity": uniq_id, "rel_id": rel_id}
+                return {"status": Status.UPDATED, "identity": root_id, "rel_id": rel_id}
         # No match: no need create a HAS_ACCESS for browsing
         return {"status": Status.OK}
 
@@ -216,9 +219,9 @@ class Neo4jUpdateService(ConcreteService):
         result = self.tx.run(CypherAudit.batch_end_audition, bid=batch_id)
         for record in result:
             username = record.get("user")
-            rel_uniq_id = record.get("relation_new").id
+            rel_id = record.get("relation_new").id
             print("#Neo4jUpdateService.ds_batch_end_auditions: removed "
-                  f"rel={rel_uniq_id} DOES_AUDIT from {username}")
+                  f"rel={rel_id} DOES_AUDIT from {username}")
             removed.append(username)
             st = Status.UPDATED
 
@@ -235,8 +238,8 @@ class Neo4jUpdateService(ConcreteService):
                              bid=batch_id, audi=auditor_user, states=old_states
         )
         for record in result:
-            uniq_id = record[0]
-            return {"status": Status.OK, "identity": uniq_id}
+            root_id = record[0]
+            return {"status": Status.OK, "identity": root_id}
         return {"status": Status.NOT_FOUND}
 
     def ds_batch_set_audited(self, batch_id, user, new_state):
@@ -255,17 +258,17 @@ class Neo4jUpdateService(ConcreteService):
             r = record["relation_new"]
             ts_from = r.get("ts_from")
             ts_to = r.get("ts_to", 0)
-            root_id = node_root.id
-            audi_id = node_audi.id
+            root_id = node_root.id # Batch id
+            #!audi_id = node_audi.id
             auditor = node_audi["username"]
             auditors.append(auditor)
             try:
                 d_days = (ts_to - ts_from) / (1000*60*60*24)
             except Exception:
                 d_days = "?"
-            print(f"#ds_batch_set_audited: ({audi_id}:({auditor}))"
+            print(f"#ds_batch_set_audited: (:UserProfile({auditor}))"
                   f" DID_AUDIT {ts_from}..{ts_to} ->"
-                  f" ({root_id}:Root({batch_id})), {d_days} days")
+                  f" (:Root({batch_id})), {d_days} days")
 
         if not auditors:
             return {"status": Status.ERROR, "text": "No match", "d_days": 0}
@@ -284,11 +287,11 @@ class Neo4jUpdateService(ConcreteService):
                              bid=batch_id, audi=auditor_user)
         removed = []
         for record in result:
-            # <Record id=190386>
-            rel_uniq_id = record.get("rel_id")
-            if rel_uniq_id:
+            # <Record id=190386, rel_id="...">
+            rel_id = record.get("rel_id")
+            if rel_id:
                 print("#Neo4jUpdateService.ds_batch_purge_access: removed "
-                      f"id={rel_uniq_id} DOES_AUDIT from {auditor_user}")
+                      f"id={rel_id} DOES_AUDIT from {auditor_user}")
                 removed.append(auditor_user)
                 return {"status": Status.UPDATED, "removed_auditors": removed}
 
@@ -307,8 +310,9 @@ class Neo4jUpdateService(ConcreteService):
 
         class RefObj:
             def __str__(self):
-                return f"{self.uniq_id}:{self.label} {self.str}"
+                return f"{self.iid}:{self.label} {self.str}"
 
+        return {"status": Status.OK}  # TODO
         objs = {}
         try:
             print("pe.neo4j.updateservice.Neo4jUpdateService.ds_merge_check: TODO fix merge_check")
@@ -316,7 +320,7 @@ class Neo4jUpdateService(ConcreteService):
             # # for root_id, root_str, rel, obj_id, obj_label, obj_str in result:
             # for record in result:
             #     ro = RefObj()
-            #     ro.uniq_id = record["obj_id"]
+            #     ro.iid = record["obj_id"]
             #     ro.label = record["obj_label"]
             #     ro.str = record["obj_str"]
             #     ro.root = (
@@ -325,14 +329,14 @@ class Neo4jUpdateService(ConcreteService):
             #         record.get("root_str"),
             #     )
             #     # rint(f'#ds_merge_check {root_id}:{root_str} -[{rel}]-> {obj_id}:{obj_label} {obj_str}')
-            #     print(f"#ds_merge_check {ro.uniq_id}:{ro.label} {ro.str} in {ro.root}")
-            #     if ro.uniq_id in objs.keys():
-            #         # Error if current uniq_id exists twice
-            #         msg = f"Object {ro} has two roots {objs[ro.uniq_id].root} and {ro.root}"
+            #     print(f"#ds_merge_check {ro.iid}:{ro.label} {ro.str} in {ro.root}")
+            #     if ro.iid in objs.keys():
+            #         # Error if current iid exists twice
+            #         msg = f"Object {ro} has two roots {objs[ro.iid].root} and {ro.root}"
             #         return {"status": Status.ERROR, "statustext": msg}
             #     for i, obj2 in objs.items():
             #         print(f"#ds_merge_check {obj2} <> {ro}")
-            #         if i == ro.uniq_id:
+            #         if i == ro.iid:
             #             continue
             #         # Error if different labels or has different root node
             #         if obj2.label != ro.label:
@@ -343,7 +347,7 @@ class Neo4jUpdateService(ConcreteService):
             #                 f"Object {ro} has different roots {obj2.root} and {ro.root}"
             #             )
             #             return {"status": Status.ERROR, "statustext": msg}
-            #     objs[ro.uniq_id] = ro
+            #     objs[ro.iid] = ro
 
             if len(objs) == 2:
                 print(f"ds_merge_check ok {objs}")
@@ -360,7 +364,7 @@ class Neo4jUpdateService(ConcreteService):
                 f"{id1}<-{id2} failed: {e.__class__.__name__} {e}",
             }
 
-    # def ds_obj_remove_gramps_handles(self, batch_id):
+    # def obolete_ds_obj_remove_gramps_handles(self, batch_id):
     #     """Remove all Gramps handles."""
     #     status = Status.OK
     #     total = 0
@@ -385,7 +389,6 @@ class Neo4jUpdateService(ConcreteService):
 
     def ds_save_citation(self, tx, citation, batch_id, iids):
         """Saves this Citation and connects it to it's Notes and Sources."""
-        citation.uuid = NodeObject.newUuid()
         citation.iid = iids.get_one()
 
         c_attr = {
@@ -395,44 +398,41 @@ class Neo4jUpdateService(ConcreteService):
             "id": citation.id,
             "page": citation.page,
             "confidence": citation.confidence,
+            "attrs": citation.attrs_for_db(),
         }
         if citation.dates:
             c_attr.update(citation.dates.for_db())
 
-        result = tx.run(
-            CypherCitation.create_to_batch,
-            batch_id=batch_id,
-            c_attr=c_attr,
-        )
-        ids = []
-        for record in result:
-            citation.uniq_id = record[0]
-            ids.append(citation.uniq_id)
-            if len(ids) > 1:
-                print(
-                    "iError updated multiple Citations {} - {}, attr={}".format(
-                        citation.id, ids, c_attr
-                    )
-                )
+        tx.run(CypherCitation.create_to_batch, batch_id=batch_id, c_attr=c_attr)
+        #!ids = []
+        # for record in result:
+        #     citation.iid = record[0]
+        #     ids.append(citation.iid)
+        #     if len(ids) > 1:
+        #         print(
+        #             "iError updated multiple Citations {} - {}, attr={}".format(
+        #                 citation.id, ids, c_attr
+        #             )
+        #         )
 
         # Make relations to the Note nodes
-        for handle in citation.note_handles:
-            tx.run(
-                CypherCitation.link_note, handle=citation.handle, hlink=handle
-            )
+        if citation.note_handles:
+            query = CypherLink.link_handle("Citation", "Note")
+            for hlink in citation.note_handles:
+                tx.run(query, src=citation.handle, dst=hlink)
+        #!for handle in citation.note_handles:
+        #     tx.run(CypherCitation.c_link_note, handle=citation.handle, hlink=handle)
 
         # Make relation to the Source node
-        if citation.source_handle != "":
-            tx.run(
-                CypherCitation.link_source,
-                handle=citation.handle,
-                hlink=citation.source_handle,
-            )
+        if citation.source_handle:
+            query = CypherLink.link_handle("Citation", "Source")
+            tx.run(query, src=citation.handle, dst=citation.source_handle)
+            #! tx.run(CypherCitation.link_source, handle=citation.handle, hlink=citation.source_handle)
 
 
     # ----- Note -----
 
-    def ds_save_note_list(self, tx, parent, batch_id, iids):
+    def ds_save_note_list(self, tx, parent:NodeObject, batch_id, iids:IidGenerator):
         """Save the parent.notes[] objects as a descendant of the parent node.
 
         Arguments:
@@ -449,7 +449,7 @@ class Neo4jUpdateService(ConcreteService):
                 if not note.id:
                     n_cnt += 1
                     note.id = f"N{n_cnt}.{parent.id}"
-                self.ds_save_note(tx, note, batch_id, iids, parent.uniq_id)
+                self.ds_save_note(tx, note, batch_id, iids, parent.iid)
             else:
                 raise AttributeError("note.save_note_list: Argument not a Note")
 
@@ -457,13 +457,15 @@ class Neo4jUpdateService(ConcreteService):
         """Creates this Note object as a Note node
 
         Arguments:
-            parent_uid      uniq_id     Object to link: (parent) --> (Note)
+            parent_id       str         Object to link: (parent) --> (Note)
             batch_id        str         Batch id, alternative object to link:
                                         (:Batch{id:batch_id}) --> (Note)
         """
-        note.uuid = NodeObject.newUuid()
+        #from bl.dates import ITimer
+        #elapsed = ITimer()  # Start timer
+
         note.iid = iids.get_one()
-        if not "batch_id":
+        if not batch_id:
             raise RuntimeError(f"Note.save needs batch_id for {note.id}")
         n_attr = {
             "iid": note.iid,
@@ -473,31 +475,29 @@ class Neo4jUpdateService(ConcreteService):
             "type": note.type,
             "text": note.text,
             "url": note.url,
+            "attrs": note.attrs_for_db(),
         }
         if note.handle:
             n_attr["handle"] = note.handle
+        # if note.url: print(f"#ds_save_note: {note.iid} {note.url!r}")
         if not parent_id is None:
-            # print(f"Note.save: (Root {batch_id}) --> (Note {note.id}) <-- (parent {parent_id})")
-            result = tx.run(
-                CypherNote.create_in_batch_as_leaf,
-                bid=batch_id,
-                parent_id=parent_id,
-                n_attr=n_attr,
+            tx.run(CypherNote.create_in_batch_as_leaf(parent_id),
+                   bid=batch_id,
+                   parent_id=parent_id,
+                   n_attr=n_attr,
             )
         elif not batch_id is None:
-            # print(f"Note.save: (Root {batch_id}) --> (Note {note.id})")
-            result = tx.run(
-                CypherNote.create_in_batch, 
-                bid=batch_id, 
-                n_attr=n_attr
+            # print(f"#Neo4jUpdateService.ds_save_note: {batch_id=}, {n_attr=}")
+            tx.run(CypherNote.create_in_batch, 
+                   bid=batch_id,
+                   n_attr=n_attr,
             )
         else:
             raise RuntimeError(
                 f"Note.save needs batch_id or parent_id for {note.id}"
             )
-        record = result.single()
-        # print(f"Note.save: summary={result.summary().counters}")
-        note.uniq_id = record[0]
+        #print(f"Note.save: ({batch_id}) --> ({note.id}) <-- ({parent_id}) | {elapsed}")
+
 
     # ----- Media -----
 
@@ -507,7 +507,6 @@ class Neo4jUpdateService(ConcreteService):
         #TODO: Process also Notes for media?
         #TODO: Use MediaWriteService
         """
-        media.uuid = NodeObject.newUuid()
         media.iid = iids.get_one()
         m_attr = {
             "iid": media.iid,
@@ -518,23 +517,48 @@ class Neo4jUpdateService(ConcreteService):
             "mime": media.mime,
             "name": media.name,
             "description": media.description,
+            "attrs": media.attrs_for_db(),
+            "batch_id": batch_id,
         }
-        m_attr["batch_id"] = batch_id
-        result = tx.run(
-            CypherMedia.create_in_batch,
-            bid=batch_id,
-            iid=media.iid,
-            m_attr=m_attr,
-        )
-        media.uniq_id = result.single()[0]
+        #m_attr["batch_id"] = batch_id
+
+        _result = tx.run(CypherMedia.create_in_batch,
+            bid=batch_id, iid=media.iid, m_attr=m_attr)
+        #!media.iid = result.single()[0]
+
+        # Make relation(s) to the Note and Citation nodes
+
+        if media.note_handles:
+            query = CypherLink.link_handle("Media", "Note")
+            for hlink in media.note_handles:
+                tx.run(query, src=media.handle, dst=hlink)
+        #! if media.note_handles:
+        #     result = tx.run(
+        #         CypherMedia.m_link_notes,
+        #         handle=media.handle,
+        #         hlinks=media.note_handles,
+        #         )
+        #     _cnt=result.single()["cnt"]
+
+        if media.citation_handles:
+            query = CypherLink.link_handle("Media", "Citation")
+            for hlink in media.citation_handles:
+                tx.run(query, src=media.iid, dst=hlink)
+        #! if media.citation_handles:  #  citation_handles != '':
+        #     tx.run(
+        #         CypherMedia.m_link_citations,
+        #         handle=media.handle,
+        #         hlinks=media.citation_handles,
+        #     )
 
 
-    def ds_create_link_medias_w_handles(self, tx, uniq_id: int, media_refs: list):
+    def ds_create_link_medias_w_handles(self, tx, src_handle, media_refs: list):
         """Save media object and it's Note and Citation references
         using their Gramps handles.
 
         media_refs:
-            media_handle      # Media object handle
+            obj_name          # Label of referee object
+            handle            # Media object handle
             media_order       # Media reference order nr
             crop              # Four coordinates
             note_handles      # list of Note object handles
@@ -542,47 +566,40 @@ class Neo4jUpdateService(ConcreteService):
         """
         doing = "?"
         try:
-            for resu in media_refs:
-                r_attr = {"order": resu.media_order}
-                if resu.crop:
-                    r_attr["left"] = resu.crop[0]
-                    r_attr["upper"] = resu.crop[1]
-                    r_attr["right"] = resu.crop[2]
-                    r_attr["lower"] = resu.crop[3]
-                doing = f"(src:{uniq_id}) -[{r_attr}]-> Media {resu.media_handle}"
+            for m_ref in media_refs:
+                r_attr = {"order": m_ref.media_order}
+                if m_ref.crop:
+                    r_attr["left"] = m_ref.crop[0]
+                    r_attr["upper"] = m_ref.crop[1]
+                    r_attr["right"] = m_ref.crop[2]
+                    r_attr["lower"] = m_ref.crop[3]
+                doing = f"(src:{src_handle}) -[{r_attr}]-> Media {m_ref.handle}"
                 # print(doing)
-                result = tx.run(
-                    CypherObjectWHandle.link_media,
-                    root_id=uniq_id,
-                    handle=resu.media_handle,
-                    r_attr=r_attr,
-                )
-                # media_uid = result.single()[0]    # for media object
-                media_uid = None
-                for record in result:
-                    if media_uid:
-                        print(doing)
-                        print(
-                            f"ds_create_link_medias_w_handles: double link_media, "
-                            f"replacing media_uid={media_uid} with uid={record[0]}. "
-                            f"handle={resu.media_handle}"
-                        )
-                    else:
-                        media_uid = record[0]
 
-                for handle in resu.note_handles:
-                    doing = f"{media_uid}->Note {handle}"
-                    tx.run(
-                        CypherObjectWHandle.link_note, root_id=media_uid, handle=handle
-                    )
+                # Save media node
+                
+                query = CypherLink.link_handle(m_ref.obj_name, "Media", True)
+                tx.run(query, src=src_handle, dst=m_ref.handle, r_attr=r_attr)
 
-                for handle in resu.citation_handles:
-                    doing = f"{media_uid}->Citation {handle}"
-                    tx.run(
-                        CypherObjectWHandle.link_citation,
-                        root_id=media_uid,
-                        handle=handle,
-                    )
+                # Save listed notes and citations for this media
+                
+                if m_ref.note_handles:
+                    query = CypherLink.link_handle(m_ref.obj_name, "Note", True)
+                    #print("#! ds_create_link_medias_w_handles "+query)
+                    for hlink in m_ref.note_handles:
+                        doing = f" {m_ref.obj_name} {src_handle}-> Note {hlink}"
+                        tx.run(query, src=src_handle, dst=hlink, r_attr=r_attr)
+                        # tx.run(CypherLink.link_note,
+                        #        lbl=m_ref.obj_name, src_iid=iid, handle=hlink)
+
+                if m_ref.citation_handles:
+                    query = CypherLink.link_handle(m_ref.obj_name, "Citation", True)
+                    #print("#! ds_create_link_medias_w_handles "+query)
+                    for hlink in m_ref.citation_handles:
+                        doing = f" {m_ref.obj_name} {src_handle}-> Citation {hlink}"
+                        tx.run(query, src=src_handle, dst=hlink, r_attr=r_attr)
+                        # tx.run(CypherLink.link_citation,
+                        #        lbl=m_ref.obj_name, src_iid=iid, handle=hlink)
 
         except Exception as err:
             traceback.print_exc()
@@ -592,13 +609,13 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Place -----
 
-    def ds_save_place(self, tx, place, batch_id, iids, place_keys=None):
+    def ds_save_place(self, tx, place, batch_id, iids:IidGenerator, place_keys=None):
         """Save Place, Place_names, Notes and connect to hierarchy.
 
-        :param: place_keys    dict {handle: uniq_id}
+        :param: place_keys    dict {handle: iid}
         :param: batch_id      batch id where this place is linked
 
-        The 'uniq_id's of already created nodes can be found in 'place_keys'
+        The 'iid's of already created nodes can be found in 'place_keys'
         dictionary by 'handle'.
 
         Create node for Place self:
@@ -615,12 +632,11 @@ class Neo4jUpdateService(ConcreteService):
         - Notes are linked to self using 'note_handles's (the Notes have been
           saved before)
 
-        NOT Raises an error, if write fails.
+        Does NOT raise an error, if write fails.
         """
 
-        # Create or update this Place
+        # A. Create or update this Place
 
-        # No uuid: place.iid = place.newUuid()
         place.iid = iids.get_one()
         pl_attr = {
             "iid": place.iid,
@@ -629,68 +645,62 @@ class Neo4jUpdateService(ConcreteService):
             "id": place.id,
             "type": place.type,
             "pname": place.pname,
+            "attrs": place.attrs_for_db(),
         }
         if place.coord:
             # If no coordinates, don't set coord attribute
             pl_attr["coord"] = place.coord.get_coordinates()
 
-        # Create Place place
+        #    Create Place place
 
-        if place_keys:
-            # Check if this Place node is already created
-            plid = place_keys.get(place.handle)
-        else:
-            plid = None
-
-        if plid:
+        # Check if this Place node is already created
+        if place_keys and place.handle in place_keys.keys():
             # 1) node has been created but not connected to Batch.
             #    update known Place node parameters and link from Batch
-            place.uniq_id = plid
             if place.type:
-                # print(f">Pl_save-1 Complete Place ({place.id} #{plid}) {place.handle} {place.pname}")
-                result = tx.run(
-                    CypherPlace.complete,  # TODO
-                    batch_id=batch_id,
-                    plid=plid,
-                    p_attr=pl_attr,
+                # print(f">Pl_save-1 Complete Place ({place.id} #{pl_iid}) {place.handle} {place.pname}")
+                result = tx.run(CypherPlace.complete_handle,
+                                batch_id=batch_id,
+                                p_handle=place.handle,
+                                p_attr=pl_attr,
                 )
+                #iid = result.single[0]
+                place_keys[place.handle] = place.iid
+                
             else:
-                # print(f">Pl_save-1 NO UPDATE Place ({place.id} #{plid}) attr={pl_attr}")
+                # print(f">Pl_save-1 NO UPDATE Place ({place.id} #{pl_iid}) attr={pl_attr}")
                 pass
         else:
             # 2) new node: create and link from Batch
-            # print(f">Pl_save-2 Create a new Place ({place.id} #{place.uniq_id} {place.pname}) {place.handle}")
-            result = tx.run(CypherPlace.create, batch_id=batch_id, p_attr=pl_attr)
-            place.uniq_id = result.single()[0]
-            place_keys[place.handle] = place.uniq_id
+            #print(f"#!>Pl_save-2 Create a new Place ({place.id} #{place.iid} {place.pname}) {place.handle}")
+            tx.run(CypherPlace.create, batch_id=batch_id, p_attr=pl_attr)
+            place_keys[place.handle] = place.iid
 
-        # Create Place_names
+        #    Create Place_names
 
+        for i in range(len(place.names)):
+            place.names[i].iid = f"A{place.iid}.{i+1}"
         for name in place.names:
-            n_attr = {"name": name.name, "lang": name.lang}
+            # name.lang is set later to name links
+            n_attr = {"name": name.name, "iid":name.iid}
             if name.dates:
                 n_attr.update(name.dates.for_db())
-            result = tx.run(
-                CypherPlace.add_name,
-                pid=place.uniq_id,
-                order=name.order,
-                n_attr=n_attr,
+            tx.run(CypherPlace.add_name,
+                   pid=place.iid,
+                   order=name.order,
+                   n_attr=n_attr,
             )
-            record = result.single()
-            if record:
-                name.uniq_id = record[0]
-            # print(f"# ({place.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
+            #print(f"#! ({place.iid}:Place)-[:NAME]->({name.iid}:{name})")
 
-        # Select default names for default languages
+        # Select default names for the default languages
         ret = PlaceBl.find_default_names(place.names, ["fi", "sv"])
         if ret.get("status") == Status.OK:
             # Update default language name links
-
-            # def_names: dict {lang, uid} uniq_id's of PlaceName objects
+            # def_names: dict {lang, uid} iid's of PlaceName objects
             def_names = ret.get("ids")
-            self.ds_place_set_default_names(tx, place.uniq_id, def_names["fi"], def_names["sv"])
+            self.ds_place_set_default_names(tx, place.iid, def_names["fi"], def_names["sv"])
 
-        # Make hierarchy relations to upper Place nodes
+        # B. Make hierarchy relations to upper Place nodes
 
         for ref in place.surround_ref:
             up_handle = ref["hlink"]
@@ -704,60 +714,72 @@ class Neo4jUpdateService(ConcreteService):
 
             # Link to upper node
 
-            uid = place_keys.get(up_handle) if place_keys else None
-            if uid:
+            if place_keys and up_handle in place_keys.keys():
                 # 3) Link to a known upper Place
                 #    The upper node is already created: create a link to that
                 #    upper Place node
-                # print(f"Pl_save-3 Link ({place.id} #{place.uniq_id}) {_r} (#{uid})")
-                result = tx.run(
-                    CypherPlace.link_hier,
-                    plid=place.uniq_id,
-                    up_id=uid,
-                    r_attr=rel_attr,
+                # print(f"Pl_save-3 Link ({place.id} #{place.iid}) {_r} (#{up_iid})")
+                result = tx.run(CypherPlace.link_hier_handle,
+                                p_handle=place.handle, up_handle=up_handle,
+                                r_attr=rel_attr,
                 )
+                place_keys[up_handle] = result.single()[0]
             else:
                 # 4) Link to unknown place
                 #    A new upper node: create a Place with only handle
                 #    parameter and link hierarchy to Place place
-                # print(f"Pl_save-4 Link to empty upper Place ({place.id} #{place.uniq_id}) {_r} {up_handle}")
-                result = tx.run(
-                    CypherPlace.link_create_hier,
-                    plid=place.uniq_id,
-                    r_attr=rel_attr,
-                    up_handle=up_handle,
+                # print(f"Pl_save-4 Link to empty upper Place ({place.id} #{place.iid}) {_r} {up_handle}")
+                result = tx.run(CypherPlace.link_create_hier_handle,
+                                p_handle=place.handle, up_handle=up_handle,
+                                r_attr=rel_attr,
                 )
                 place_keys[up_handle] = result.single()[0]
 
 
+        for i in range(len(place.notes)):
+            place.notes[i].iid = f"D{place.iid}.{i+1}"
         for note in place.notes:
-            n_attr = {"url": note.url, "type": note.type, "text": note.text}
-            result = tx.run(
-                CypherPlace.add_urls,
-                batch_id=batch_id, pid=place.uniq_id, n_attr=n_attr)
+            n_attr = {
+                "url": note.url, 
+                "type": note.type, 
+                "text": note.text,
+                "iid": place.iid
+                }
+            result = tx.run(CypherPlace.add_urls,
+                            batch_id=batch_id, pid=place.iid, n_attr=n_attr
+            )
 
         # Make the place note relations; the Notes have been stored before
-        # TODO: There may be several Notes for the same handle! You shold use uniq_id!
+        # TODO: There may be several Notes for the same handle! You shold use iid!
 
-        for n_handle in place.note_handles:
-            result = tx.run(
-                CypherPlace.link_note,
-                pid=place.uniq_id, hlink=n_handle)
+        if place.note_handles:
+            query = CypherLink.link_handle("Place", "Note")
+            for hlink in place.note_handles:
+                tx.run(query, src=place.handle, dst=hlink)
+                # tx.run(CypherPlace.pl_link_note,
+                #        p_handle=place.handle, hlinks=n_handle)
+                # # .run(CypherPlace.link_note, pid=place.iid, hlink=n_handle)
 
-        for handle in place.citation_handles:
-            # Link to existing Citation
-            result = tx.run(
-                CypherObjectWHandle.link_citation, 
-                root_id=place.uniq_id, handle=handle)
+        if place.citation_handles:
+            query = CypherLink.link_handle("Place", "Citation")
+            for hlink in place.citation_handles:
+                # Link to existing Citation
+                tx.run(query, src=place.handle, dst=hlink)
+                # result = tx.run(CypherLink.link_citation,
+                #                 lbl=place.label(), src_iid=place.iid, handle=hlink)
 
         if place.media_refs:
-            # Make relations to the Media nodes and their Note and Citation references
-            result = self.ds_create_link_medias_w_handles(
-                tx, place.uniq_id, place.media_refs)
+            query = CypherLink.link_handle("Place", "Media")
+            for m_ref in place.media_refs:
+                tx.run(query, src=place.handle, dst=m_ref.handle)
+        # if place.media_refs:
+        #     # Make relations to the Media nodes and their Note and Citation references
+        #     result = self.ds_create_link_medias_w_handles(
+        #         tx, place.iid, place.media_refs)
 
 
     def ds_place_set_default_names(self, tx, place_id, fi_id, sv_id):
-        """Creates default links from Place to fi and sv PlaceNames.
+        """Creates default links from Place to fi and sv PlaceNames identified by iid.
 
         - place_id      Place object id
         - fi_id         PlaceName object id for fi
@@ -765,15 +787,12 @@ class Neo4jUpdateService(ConcreteService):
         """
         try:
             if fi_id == sv_id:
-                result = tx.run(
-                    CypherPlace.link_name_lang_single, place_id=place_id, fi_id=fi_id
+                result = tx.run(CypherPlace.link_name_lang_single,
+                                place_id=place_id, fi_id=fi_id
                 )
             else:
-                result = tx.run(
-                    CypherPlace.link_name_lang,
-                    place_id=place_id,
-                    fi_id=fi_id,
-                    sv_id=sv_id,
+                result = tx.run(CypherPlace.link_name_lang,
+                                place_id=place_id, fi_id=fi_id, sv_id=sv_id,
                 )
             x = None
             for x, _fi, _sv in result:
@@ -782,24 +801,69 @@ class Neo4jUpdateService(ConcreteService):
 
             if not x:
                 logger.warning(
-                    "eo4jWriteDriver.place_set_default_names: not created "
+                    "Neo4jUpdateService.ds_place_set_default_names: not created "
                     f"Place {place_id}, names fi:{fi_id}, sv:{sv_id}"
                 )
 
         except Exception as err:
-            logger.error(f"Neo4jUpdateService.place_set_default_names: {err}")
+            logger.error(f"Neo4jUpdateService.ds_place_set_default_names: {err}")
             return err
 
     def ds_places_merge(self, id1, id2):
         """Merges given two Place objects using apoc library."""
+
+        def merge_name_nodes(name_nodes):
+            """
+            Merge Place_name nodes if the names are identical.
+            
+            For each unique name this will generate Cypher code like:
+            
+                #!match (n1:Place_name) where id(n1) = $id1
+                #!match (n2:Place_name) where id(n2) = $id2
+                match (n1:Place_name) where n1.iid = $id1
+                match (n2:Place_name) where n2.iid = $id2
+                call apoc.refactor.mergeNodes([n1,n2],
+                    {properties:'discard',mergeRels:true})
+                yield node
+                return node
+                
+            The idmap variable contains the node ids:
+            
+                idmap = {'id1': 'DP-32ge.1, 'id2': 'DP-32ge.2'}
+            
+            """
+            nodemap = defaultdict(list)
+            for node in name_nodes:
+                nodemap[node["name"]].append(node)
+            new_nodes = []
+            for _name, nodes in nodemap.items():
+                if len(nodes) > 1:
+                    cypher = ""
+                    namelist = []
+                    idmap = {}
+                    for i, node in enumerate(nodes, start=1):
+                        cypher += f"\nmatch (n{i}:Place_name) where n{i}.iid = $id{i}"
+                        namelist.append(f"n{i}")
+                        idmap[f"id{i}"] =  node.iid
+                    cypher += f"\ncall apoc.refactor.mergeNodes([{','.join(namelist)}],"
+                    cypher += f"\n    {{properties:'discard',mergeRels:true}})"
+                    cypher += f"\nyield node"
+                    cypher += f"\nreturn node"
+                    rec = self.tx.run(cypher, **idmap).single()
+                    node = rec["node"]
+                else:
+                    node = nodes[0]                    
+                new_nodes.append(node)
+            return new_nodes
+        
         try:
-            self.tx.run(CypherPlaceMerge.delete_namelinks, id=id1)
             record = self.tx.run(
                 CypherPlaceMerge.merge_places, id1=id1, id2=id2
             ).single()
             node = record["node"]
             place = PlaceBl_from_node(node)
             name_nodes = record["names"]
+            name_nodes = merge_name_nodes (name_nodes) 
             place.names = [PlaceName_from_node(n) for n in name_nodes]
         except ClientError as e:
             # traceback.print_exc()
@@ -814,7 +878,6 @@ class Neo4jUpdateService(ConcreteService):
     def ds_save_repository(self, tx, repository, batch_id, iids):
         """Saves this Repository to db under given batch."""
 
-        repository.uuid = NodeObject.newUuid()
         repository.iid = iids.get_one()
         r_attr = {
             "iid": repository.iid,
@@ -823,13 +886,14 @@ class Neo4jUpdateService(ConcreteService):
             "id": repository.id,
             "rname": repository.rname,
             "type": repository.type,
+            "attrs": repository.attrs_for_db(),
         }
         result = tx.run(
             CypherRepository.create_in_batch,
             bid=batch_id,
             r_attr=r_attr
         )
-        repository.uniq_id = result.single()[0]
+        #!repository.iid = result.single()[0]
 
         # Save the notes attached to repository
         if repository.notes:
@@ -838,9 +902,9 @@ class Neo4jUpdateService(ConcreteService):
         # Make relations to the Note nodes
         if repository.note_handles:
             result = tx.run(
-                CypherRepository.link_notes,
+                CypherRepository.r_link_notes,
                 handle=repository.handle,
-                note_handles=repository.note_handles,
+                hlinks=repository.note_handles,
                 )
             _cnt=result.single()["cnt"]
             
@@ -848,13 +912,12 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Source -----
 
-    def ds_save_source(self, tx, source, batch_id, iids):   
+    def ds_save_source(self, tx, source, batch_id, iids:IidGenerator):   
         """ Saves this Source and connect it to Notes and Repositories.
 
             :param: batch_id      batch id where this source is linked
 
         """
-        source.uuid = NodeObject.newUuid()
         source.iid = iids.get_one()
         s_attr = {}
         try:
@@ -866,34 +929,34 @@ class Neo4jUpdateService(ConcreteService):
                 "stitle": source.stitle,
                 "sauthor": source.sauthor,
                 "spubinfo": source.spubinfo,
+                "attrs": source.attrs_for_db(),
             }
 
-            result = tx.run(CypherSourceByHandle.create_to_batch,
-                            batch_id=batch_id, s_attr=s_attr)
-            ids = []
-            for record in result:
-                source.uniq_id = record[0]
-                ids.append(source.uniq_id)
-                if len(ids) > 1:
-                    print("iError updated multiple Sources {} - {}, attr={}".format(source.id, ids, s_attr))
+            tx.run(CypherSource.create_to_batch, batch_id=batch_id, s_attr=s_attr)
+            #!ids = []
+            # for record in result:
+            #     source.iid = record[0]
+            #     ids.append(source.iid)
+            #     if len(ids) > 1:
+            #         print("iError updated multiple Sources {} - {}, attr={}".format(source.id, ids, s_attr))
 
         except Exception as err:
-            print("iError source_save: {0} attr={1}".format(err, s_attr))
+            print("Neo4jUpdateService.ds_save_source: {0} attr={1}".format(err, s_attr))
             raise RuntimeError("Could not save Source {}".format(source.id))
 
         # Make relation to the Note nodes
-        for note_handle in source.note_handles:
-            try:
-                tx.run(CypherSourceByHandle.link_note, 
-                       handle=source.handle, hlink=note_handle)
-            except Exception as err:
-                logger.error(f"Source_gramps.save: {err} in linking Notes {source.handle} -> {source.note_handles}")
-                #print("iError Source.save note: {0}".format(err), file=stderr)
+        for hlink in source.note_handles:
+            #!tx.run(CypherSource.s_link_note, 
+            query = CypherLink.link_handle("Source", "Note")
+            tx.run(query, src=source.handle, dst=hlink)
+            #!except Exception as err:
+            #     logger.error(f"Source_gramps.save: {err} in linking Notes {source.handle} -> {source.note_handles}")
+            #     #print("iError Source.save note: {0}".format(err), file=stderr)
 
         # Make relation to the Repository nodes
         for repo in source.repositories:
             try:
-                tx.run(CypherSourceByHandle.link_repository, 
+                tx.run(CypherSource.link_repository, 
                        handle=source.handle, 
                        hlink=repo.handle, 
                        medium=repo.medium)
@@ -901,16 +964,19 @@ class Neo4jUpdateService(ConcreteService):
                 print("iError Source.save Repository: {0}".format(err))
                 
 
-    def mergesources(self, id1, id2):
+    def mergesources(self, id1:str, id2:str):
+        
+            # match (p1:Source)        where id(p1) = $id1 
+            # match (p2:Source)        where id(p2) = $id2
         cypher_mergesources = """
-            match (p1:Source)        where id(p1) = $id1 
-            match (p2:Source)        where id(p2) = $id2
+            match (p1:Source)        where p1.iid = $id1 
+            match (p2:Source)        where p2.iid = $id2
             call apoc.refactor.mergeNodes([p1,p2],
                 {properties:'discard',mergeRels:true})
             yield node
             return node
         """
-        rec = self.tx.run(cypher_mergesources,id1=id1,id2=id2).single()
+        rec = self.tx.run(cypher_mergesources, id1=id1, id2=id2).single()
         if rec is None: return None
         node = rec['node']
         source = SourceBl_from_node(node)
@@ -921,92 +987,78 @@ class Neo4jUpdateService(ConcreteService):
     def ds_save_event(self, tx, event, batch_id, iids):
         """Saves event to database:
         - Creates a new db node for this Event
-        - Sets self.uniq_id
 
         - links to existing Place, Note, Citation, Media objects
         - Does not link it from UserProfile or Person
         """
 
-        event.uuid = NodeObject.newUuid()
         event.iid = iids.get_one()
         e_attr = {
             "iid": event.iid,
-            "uuid": event.uuid,
+            # "uuid": event.uuid,
             "handle": event.handle,
             "change": event.change,
             "id": event.id,
             "type": event.type,
             "description": event.description,
+            "attrs": event.attrs_for_db(),
         }
-        if event.attr:
-            # Convert 'attr' dict to list for db
-            a = []
-            for key, value in event.attr.items():
-                a = a + [key, value]
-                e_attr.update({"attr": a})
-            
         if event.dates:
             e_attr.update(event.dates.for_db())
 
-        result = tx.run(
-            CypherEvent.create_to_batch, batch_id=batch_id, e_attr=e_attr
-        )
-        ids = []
-        for record in result:
-            event.uniq_id = record[0]
-            ids.append(event.uniq_id)
-            if len(ids) > 1:
-                print(
-                    "iError updated multiple Events {} - {}, attr={}".format(
-                        event.id, ids, e_attr
-                    )
-                )
+        tx.run(CypherEvent.create_to_batch, batch_id=batch_id, e_attr=e_attr)
+        #!ids = []
+        # for record in result:
+        #     event.iid = record[0]
+        #     ids.append(event.iid)
+        #     if len(ids) > 1:
+        #         print(
+        #             "iError updated multiple Events {} - {}, attr={}".format(
+        #                 event.id, ids, e_attr
+        #             )
+        #         )
 
         # Make relation to the Place node
-        for pl_handle in event.place_handles:
-            tx.run(
-                CypherEvent.link_place, handle=event.handle, place_handle=pl_handle
-            )
+        if event.place_handles:
+            query = CypherLink.link_handle("Event", "Place")
+            for hlink in event.place_handles:
+                tx.run(query, src=event.handle, dst=hlink)
+            #!for pl_handle in event.place_handles:
+            #     tx.run(CypherEvent.link_place, handle=event.handle, place_handle=pl_handle)
 
         # Make relations to the Note nodes
         if event.note_handles:
-            result = tx.run(
-                CypherEvent.link_notes,
-                handle=event.handle,
-                note_handles=event.note_handles,
-            )
-            _cnt = result.single()["cnt"]
+            #!result = tx.run(CypherEvent.e_link_notes,...)
+            query = CypherLink.link_handle("Event", "Note")
+            for hlink in event.note_handles:
+                tx.run(query, src=event.handle, dst=hlink)
+            #!_cnt = result.single()["cnt"]
             # print(f"##Luotiin {cnt} Note-yhteyttä: {event.id}->{event.note_handles}")
 
-        # Make relations to the Citation nodes
+        # Make relations to multiple Citation nodes
         if event.citation_handles:  #  citation_handles != '':
-            tx.run(
-                CypherEvent.link_citations,
-                handle=event.handle,
-                citation_handles=event.citation_handles,
-            )
+            query = CypherLink.link_handle("Event", "Citation")
+            for hlink in event.note_handles:
+                tx.run(query, src=event.handle, dst=hlink)
+            #  tx.run(CypherEvent.link_citations,
+            #     handle=event.handle,
+            #     citation_handles=event.citation_handles, )
 
         # Make relations to the Media nodes and their Note and Citation references
         if event.media_refs:
-            self.ds_create_link_medias_w_handles(
-                tx, event.uniq_id, event.media_refs
-            )
+            self.ds_create_link_medias_w_handles(tx, event.handle, event.media_refs)
 
     # ----- Person -----
 
-    def ds_save_person(self, tx, person, batch_id, iids):
+    def ds_save_person(self, tx, person:Person, batch_id, iids:IidGenerator):
         """Saves the Person object and possibly the Names, Events ja Citations.
-
-        On return, the self.uniq_id is set
 
         @todo: Remove those referenced person names, which are not among
                new names (:Person) --> (:Name)
         """
-
-        person.uuid = NodeObject.newUuid()
         person.iid = iids.get_one()
 
-        # Save the Person node under UserProfile; all attributes are replaced
+        # Save the Person node under Root; all attributes are replaced
 
         p_attr = {
             "iid": person.iid,
@@ -1017,55 +1069,51 @@ class Neo4jUpdateService(ConcreteService):
             "sex": person.sex,
             "confidence": person.confidence,
             "sortname": person.sortname,
+            "attrs": person.attrs_for_db(),
         }
         if person.dates:
             p_attr.update(person.dates.for_db())
 
-        if person.attr:
-        # Convert 'attr' dict to list for db
-            a = []
-            for key, value in person.attr.items():
-                a = a + [key, value]
-                p_attr.update({"attr": a})
-
-        result = tx.run(CypherPerson.create_to_batch, 
-                        batch_id=batch_id, p_attr=p_attr)
-        ids = []
-        for record in result:
-            person.uniq_id = record[0]
-            ids.append(person.uniq_id)
-            if len(ids) > 1:
-                print(
-                    "iError updated multiple Persons {} - {}, attr={}".format(
-                        person.id, ids, p_attr
-                    )
-                )
-            # print("Person {} ".format(person.uniq_id))
-        if person.uniq_id == None:
-            print("iWarning got no uniq_id for Person {}".format(p_attr))
+        tx.run(CypherPerson.create_to_batch, batch_id=batch_id, p_attr=p_attr)
+        #!for record in result:
+        #     #!person.iid = record[0]
+        #     ids.append(person.iid)
+        #     if len(ids) > 1:
+        #         print(
+        #             "iError updated multiple Persons {} - {}, attr={}".format(
+        #                 person.id, ids, p_attr
+        #             )
+        #         )
+        #     # print("Person {} ".format(person.iid))
+        # if person.iid == None:
+        #     print("iWarning got no iid for Person {}".format(p_attr))
 
         # Save Name nodes under the Person node
+        niid = 0
         for name in person.names:
-            self.ds_save_name(tx, name, parent_id=person.uniq_id)   # no Isotammi ID for names
+            niid += 1
+            name.iid = f"A{person.iid}.{niid}"
+            self.ds_save_name(tx, name, parent_id=person.iid)
 
         # Save web urls as Note nodes connected under the Person
         if person.notes:
             self.ds_save_note_list(tx, parent=person, batch_id=batch_id, iids=iids)
 
         """ Connect to each Event loaded from Gramps """
+
         # for i in range(len(person.eventref_hlink)):
-        for event_handle, role in person.event_handle_roles:
-            tx.run(
-                CypherPerson.link_event,
-                p_handle=person.handle,
-                e_handle=event_handle,
-                role=role,
-            )
+        if person.event_handle_roles:
+            query = CypherLink.link_handle("Person", "Event", True)
+            for href, role in person.event_handle_roles:
+                r_attr = {"role": role}
+                #print(f"#!! {person.id}/{person.iid} -> Event {href} {r_attr}")
+                tx.run(query, src=person.handle, dst=href, r_attr=r_attr)
+                #!tx.run(CypherPerson.link_event, p_handle=person.handle, e_handle=event_handle, role=role,)
 
         # Make relations to the Media nodes and it's Note and Citation references
         if person.media_refs:
             self.ds_create_link_medias_w_handles(
-                tx, person.uniq_id, person.media_refs
+                tx, person.iid, person.media_refs
             )
 
         # The relations to the Family node will be created in Family.save(),
@@ -1073,15 +1121,27 @@ class Neo4jUpdateService(ConcreteService):
 
         # Make relations to the Note nodes
 
-        for handle in person.note_handles:
-            tx.run(CypherObjectWHandle.link_note, root_id=person.uniq_id, handle=handle)
+        if person.note_handles:
+            # Link to existing Notes
+            query = CypherLink.link_handle("Person", "Note")
+            for href in person.note_handles:
+                #print(f"#!! {person.id}/{person.iid} -> Note {href}")
+                tx.run(query, src=person.handle, dst=href)
+        # for handle in person.note_handles:
+        #     tx.run(CypherPerson.p_link_note, 
+        #            lbl=lbl, src_iid=person.iid, handle=handle)
 
         # Make relations to the Citation nodes
 
-        for handle in person.citation_handles:
-            tx.run(
-                CypherObjectWHandle.link_citation, root_id=person.uniq_id, handle=handle
-            )
+        if person.citation_handles:
+            # Link to existing Citations
+            query = CypherLink.link_handle("Person", "Citation")
+            for href in person.citation_handles:
+                #print(f"#!! {person.id}/{person.iid} -> Citation {href}")
+                tx.run(query, src=person.handle, dst=href)
+        # for handle in person.citation_handles:
+        #     tx.run(CypherLink.link_citation, 
+        #            lbl=lbl, src_iid=person.iid, handle=handle)
         return
 
     def ds_save_name(self, tx, name, parent_id):
@@ -1092,6 +1152,7 @@ class Neo4jUpdateService(ConcreteService):
         """
 
         n_attr = {
+            #!"iid": name.iid,
             "order": name.order,
             "type": name.type,
             "firstname": name.firstname,
@@ -1099,26 +1160,28 @@ class Neo4jUpdateService(ConcreteService):
             "prefix": name.prefix,
             "suffix": name.suffix,
             "title": name.title,
-            # no Isotammi ID for names
+            "attrs": name.attrs_for_db(),
         }
-        
+        #TODO Remove temporary fix '-' for missing iid values
+        if name.iid and not name.iid.startswith("-"):
+            # Do not save temporary iid starting with hyphen
+            n_attr["iid"] = name.iid
         if name.dates:
             n_attr.update(name.dates.for_db())
             
-        tx.run(
-            CypherPerson.create_name_as_leaf,
+        tx.run(CypherPerson.create_name_as_leaf,
             n_attr=n_attr,
             parent_id=parent_id,
             citation_handles=name.citation_handles,
         )
 
-    def ds_get_personnames(self, uniq_id=None):
+    def ds_get_personnames(self, iid=None):
         """Picks all Name versions of this Person or all persons.
 
         Use optionally refnames or sortname for person selection
         """
-        if uniq_id:
-            result = self.tx.run(CypherPerson.get_names, pid=uniq_id)
+        if iid:
+            result = self.tx.run(CypherPerson.get_names, pid=iid)
         else:
             result = self.tx.run(CypherPerson.get_all_persons_names)
         # <Record
@@ -1129,23 +1192,33 @@ class Neo4jUpdateService(ConcreteService):
 
         return [(record["pid"], record["name"]) for record in result]
 
-    def ds_set_people_lifetime_estimates(self, uids):
-        """Get estimated lifetimes to Person.dates for given person.uniq_ids.
 
-        :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+    def ds_set_people_lifetime_estimates(self, uids):
+        """Get estimated lifetimes to Person.dates for given person.iids.
+
+        :param: uids  list of iids of Person nodes; empty = all lifetimes
         """
         from models import lifetime
         from models.lifetime import BIRTH, DEATH, BAPTISM, BURIAL #, MARRIAGE
-        #from bl.dates import DR
-        
-        def sortkey(event): # sorts events so that BIRTH, DEATH, BAPTISM, BURIAL come first
+
+        def key_birth_1st(event):
+            " sorts events so that BIRTH, DEATH, BAPTISM, BURIAL come first "
             if event.eventtype in (BIRTH, DEATH):
                 return 0
             elif event.eventtype in (BAPTISM, BURIAL):
                 return 1
             else:
                 return 2
-            
+
+        def list_object_keys(node_list):
+            " Usage: pids = list_object_keys(record['parents'']) "
+            objects = []
+            for node, iid in node_list:
+                if node:
+                    objects.append(iid)
+            return objects
+
+
         personlist = []
         personmap = {}
         res = {"status": Status.OK}
@@ -1153,11 +1226,12 @@ class Neo4jUpdateService(ConcreteService):
 
         if uids is not None:
             result = self.tx.run(
-                CypherPerson.fetch_selected_for_lifetime_estimates, idlist=uids
+                CypherPerson.fetch_selected_for_lifetime_estimates, 
+                idlist=uids
             )
         else: # for whole database, this is not actually used?
             result = self.tx.run(CypherPerson.fetch_all_for_lifetime_estimates)
-        # RETURN p, id(p) as pid,
+        # RETURN p, #! id(p) as pid,
         #     COLLECT(DISTINCT [e,r.role]) AS events,
         #     COLLECT(DISTINCT [fam_event,r2.role]) AS fam_events,
         #     COLLECT(DISTINCT [c,id(c)]) as children,
@@ -1165,7 +1239,8 @@ class Neo4jUpdateService(ConcreteService):
         for record in result:
             # Person
             p = lifetime.Person()
-            p.pid = record["pid"]
+            #! p.pid = record["pid"]
+            p.iid = record["p"]["iid"]
             p.gramps_id = record["p"]["id"]
 
             # Person and family event dates
@@ -1216,28 +1291,21 @@ class Neo4jUpdateService(ConcreteService):
                     #year2 = date2 // 1024
                     ev = lifetime.Event(eventtype, datetype2, year2, role)
                     p.events.append(ev)
-                p.events.sort(key=sortkey)
+                p.events.sort(key=key_birth_1st)
                     
 
             # List Parent, Child and Spouse identities
-            p.parent_pids = []
-            for _parent, pid in record["parents"]:
-                if pid:
-                    p.parent_pids.append(pid)
 
-            p.child_pids = []
-            for _parent, pid in record["children"]:
-                if pid:
-                    p.child_pids.append(pid)
-
-            p.spouse_pids = []
-            for _spouse, pid in record["spouses"]:
-                if pid:
-                    p.spouse_pids.append(pid)
+            #!for _parent, pid in record["parents"]:
+            #     if pid:
+            #         p.parent_pids.append(pid)
+            p.parent_pids = list_object_keys(record["parents"])
+            p.child_pids = list_object_keys(record["children"])
+            p.spouse_pids = list_object_keys(record["spouses"])
 
             # print(f"#> lifetime.Person {p}")
             personlist.append(p)
-            personmap[p.pid] = p
+            personmap[p.iid] = p
 
         # Add parents and children to lifetime.Person objects
         for p in personlist:
@@ -1258,7 +1326,7 @@ class Neo4jUpdateService(ConcreteService):
         for p in personlist:
             result = self.tx.run(
                 CypherPerson.update_lifetime_estimate,
-                id=p.pid,
+                id=p.iid,
                 birth_low=p.birth_low.getvalue(),
                 death_low=p.death_low.getvalue(),
                 birth_high=p.birth_high.getvalue(),
@@ -1271,15 +1339,15 @@ class Neo4jUpdateService(ConcreteService):
 
 
     def ds_build_refnames(self, person_uid: int, name: Name):
-        """Set Refnames to the Person with given uniq_id."""
+        """Set Refnames to the Person with given iid."""
 
-        def link_to_refname(person_uid, nm, use):
+        def link_to_refname(person_iid, nm, use):
             result = self.tx.run(
-                CypherRefname.link_person_to, pid=person_uid, name=nm, use=use
+                CypherRefname.link_person_to, pid=person_iid, name=nm, use=use
             )
             rid = result.single()[0]
             if rid is None:
-                raise RuntimeError(f"Error for ({person_uid})-->({nm})")
+                raise RuntimeError(f"Error for ({person_iid})-->({nm})")
             return rid
 
         count = 0
@@ -1300,16 +1368,16 @@ class Neo4jUpdateService(ConcreteService):
         #xxx
         return {"status": Status.OK, "count": count}
 
-    def ds_update_person_confidences(self, uniq_id: int):
+    def ds_update_person_confidences(self, iid: str):
         """Collect Person confidence from Person and Event nodes and store result in Person.
 
         Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
         sumc = 0
         confs = []
-        result = self.tx.run(CypherPerson.get_confidences, id=uniq_id)
+        result = self.tx.run(CypherPerson.get_confidences, id=iid)
         for record in result:
-            # Returns person.uniq_id, COLLECT(confidence) AS list
+            # Returns person.iid, COLLECT(confidence) AS list
             orig_conf = record["confidence"]
             confs = record["list"]
             for conf in confs:
@@ -1322,9 +1390,7 @@ class Neo4jUpdateService(ConcreteService):
             new_conf = ""
         if orig_conf != new_conf:
             # Update confidence needed
-            self.tx.run(
-                CypherPerson.set_confidence, id=uniq_id, confidence=new_conf
-            )
+            self.tx.run(CypherPerson.set_confidence, id=iid, confidence=new_conf)
             return {"confidence": new_conf, "status": Status.UPDATED}
         return {"confidence": new_conf, "status": Status.OK}
 
@@ -1341,9 +1407,7 @@ class Neo4jUpdateService(ConcreteService):
             return
 
         try:
-            _result = self.tx.run(
-                CypherRefname.link_person_to, pid=pid, name=name, use=reftype
-            )
+            self.tx.run(CypherRefname.link_person_to, pid=pid, name=name, use=reftype)
             return {"status": Status.OK}
 
         except Exception as e:
@@ -1353,53 +1417,51 @@ class Neo4jUpdateService(ConcreteService):
 
     # ----- Refname -----
 
-    def ds_get_person_by_uid(self, uniq_id: int):
-        """Set Person object by uniq_id.
+    def ds_get_person_by_uid(self, iid: str):
+        """Set Person object by iid.
 
         NOT USED!
         """
         try:
-            self.tx.run(CypherPerson.get_person_by_uid, uid=uniq_id)
+            self.tx.run(CypherPerson.get_person_by_uid, uid=iid)
             return {"status": Status.OK}
         except Exception as e:
-            msg = f"Neo4jUpdateService.ds_get_person_by_uid: person={uniq_id}, {e.__class__.__name__}, {e}"
+            msg = f"Neo4jUpdateService.ds_get_person_by_uid: person={iid}, {e.__class__.__name__}, {e}"
             print(msg)
             return {"status": Status.ERROR, "statustext": msg}
 
-    def ds_set_person_sortname(self, uniq_id: int, sortname):
-        """ Set sortname property to Person object by uniq_id."""
-        self.tx.run(CypherPerson.set_sortname, uid=uniq_id, key=sortname)
+    def ds_set_person_sortname(self, iid: str, sortname):
+        """ Set sortname property to Person object by iid."""
+        self.tx.run(CypherPerson.set_sortname, uid=iid, key=sortname)
         return {"status": Status.OK}
 
     # ----- Family -----
 
-    def ds_set_family_dates_sortnames(
-        self, uniq_id, dates, father_sortname, mother_sortname
-    ):
+    def ds_set_family_dates_sortnames(self, iid:str, dates, f_sortname, m_sortname):
         """Update Family dates and parents' sortnames.
 
-        :param:    uniq_id      family identity
+        :param:    iid      family identity
         :dates:    dict         representing DateRange for family
                                 (marriage ... death or divorce
 
         Called from self.ds_set_family_calculated_attributes only
         """
         f_attr = {
-            "father_sortname": father_sortname,
-            "mother_sortname": mother_sortname,
+            "father_sortname": f_sortname,
+            "mother_sortname": m_sortname,
         }
         if dates:
             f_attr.update(dates)
 
-        result = self.tx.run(CypherFamily.set_dates_sortname, id=uniq_id, f_attr=f_attr)
-        counters = result.consume().counters
-        cnt = counters.properties_set
+        result = self.tx.run(CypherFamily.set_dates_sortname, id=iid, f_attr=f_attr)
+        summary = result.consume()
+        cnt = summary.counters.properties_set
         return {"status": Status.OK, "count": cnt}
 
-    def ds_set_family_calculated_attributes(self, uniq_id=None):
+    def ds_set_family_calculated_attributes(self, iid):
         """Set Family sortnames and estimated marriage DateRange.
 
-        :param: uids  list of uniq_ids of Person nodes; empty = all lifetimes
+        :param: uids  list of iids of Person nodes
 
         Called from bp.gramps.xml_dom_handler.DOM_handler.set_family_calculated_attributes
 
@@ -1407,16 +1469,12 @@ class Neo4jUpdateService(ConcreteService):
         Set Family.date1 using the data in marriage Event
         Set Family.datetype and Family.date2 using the data in divorce or death Events
         """
-        #from bl.dates import DateRange, DR
-
         dates_count = 0
         sortname_count = 0
         status = Status.OK
         # print(f"### ds_set_family_calculated_attributes: self.tx = {self.tx}")
-        # Process the family
-        #### Todo Move and refactor to bl.FamilyBl
-        # result = Family_combo.get_dates_parents(my_tx, uniq_id)
-        result = self.tx.run(CypherFamily.get_dates_parents, id=uniq_id)
+
+        result = self.tx.run(CypherFamily.get_dates_parents, id=iid)
         for record in result:
             # RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
             #        mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
@@ -1452,13 +1510,13 @@ class Neo4jUpdateService(ConcreteService):
 
             # Save the dates from Event node and sortnames from Person nodes
             ret = self.ds_set_family_dates_sortnames(
-                uniq_id,
+                iid,
                 dates_dict,
                 record.get("father_sortname"),
                 record.get("mother_sortname"),
             )
             # print('Neo4jUpdateService.ds_set_family_calculated_attributes: '
-            #      f'id={uniq_id} properties_set={ret.get("count","none")}')
+            #      f'id={iid} properties_set={ret.get("count","none")}')
             dates_count += 1
             sortname_count += 1
 
@@ -1469,12 +1527,11 @@ class Neo4jUpdateService(ConcreteService):
             "statustext": ret.get("statustext", ""),
         }
 
-    def ds_save_family(self, tx, f:FamilyBl, batch_id, iids):
+    def ds_save_family(self, tx, f:FamilyBl, batch_id, iids:IidGenerator):
         """Saves the family node to db with its relations.
 
         Connects the family to parent, child, citation and note nodes.
         """
-        # No uuid: f.uuid = NodeObject.newUuid()
         f.iid = iids.get_one()
         f_attr = {
             "iid": f.iid,
@@ -1482,26 +1539,10 @@ class Neo4jUpdateService(ConcreteService):
             "change": f.change,
             "id": f.id,
             "rel_type": f.rel_type,
+            "attrs": f.attrs_for_db(),
         }
 
-        if f.attr:
-        # Convert 'attr' dict to list for db
-            a = []
-            for key, value in f.attr.items():
-                a = a + [key, value]
-                f_attr.update({"attr": a})
-
-        result = tx.run(
-            CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr
-        )
-        ids = []
-        for record in result:
-            f.uniq_id = record[0]
-            ids.append(f.uniq_id)
-            if len(ids) > 1:
-                logger.warning(
-                    f"bl.family.FamilyBl.save updated multiple Families {self.id} - {ids}, attr={f_attr}"
-                )
+        tx.run(CypherFamily.create_to_batch, batch_id=batch_id, f_attr=f_attr)
 
         # Make father and mother relations to Person nodes
 
@@ -1537,19 +1578,22 @@ class Neo4jUpdateService(ConcreteService):
         for handle in f.child_handles:
             tx.run(CypherFamily.link_child, f_handle=f.handle, p_handle=handle)
 
-        # Make relation(s) to the Note node
+        # Make relation(s) to the Note and Citation nodes
 
-        # print(f"Family_gramps.save: linking Notes {self.handle} -> {self.note_handles}")
-        for handle in f.note_handles:
-            tx.run(CypherFamily.link_note, f_handle=f.handle, n_handle=handle)
+        if f.note_handles:
+            query = CypherLink.link_handle("Family", "Note")
+            for href in f.note_handles:
+                tx.run(query, src=f.handle, dst=href)
+        #!for handle in f.note_handles:
+        #     tx.run(CypherFamily.f_link_note, handle=f.handle, hlink=handle)
 
-        # Make relation(s) to the Citation node
-
-        # print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
-        for handle in f.citation_handles:
-            tx.run(
-                CypherObjectWHandle.link_citation, root_id=f.uniq_id, handle=handle
-            )
+        if f.citation_handles:
+            query = CypherLink.link_handle("Family", "Citation")
+            for href in f.citation_handles:
+                tx.run(query, src=f.handle, dst=href)
+        #!for handle in f.citation_handles:
+        #     tx.run(CypherLink.link_citation,
+        #            lbl=f.label(), src_iid=f.iid, handle=handle)
 
 
     # ----- Discussions -----
@@ -1564,6 +1608,7 @@ class Neo4jUpdateService(ConcreteService):
         Case object_id refers to a Comment or Topic, create a Comment; else create a Topic
         """
         is_reply = attr.get("reply")
+        #NOTE. Uses ID() key for all kind of objects
         if is_reply:
             cypher = CypherComment.create_comment
         else: # default

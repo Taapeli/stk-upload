@@ -5,6 +5,7 @@
 {% block body %}
 {{ super() }}
 <style>
+td.space-after {padding-bottom: .5em;}
 div#summaryarea ul li p { margin: 0 0 0.3em 0; }
 td.Citation {padding:.3em;}
 td.Citation > div {display: inline }
@@ -25,7 +26,7 @@ td.Citation div ol {padding-top:.3em;}
             <table><tbody>
     {% if source.repositories %}{% set repo_name = source.repositories[0].rname %}
         {% for repo in source.repositories %}
-                <tr><td class="ColumnAttribute">
+                <tr><td class="ColumnAttribute space-after">
             {% if repo.medium %}
                         <span class="typedesc">{{repo.medium|transl('medium')}}</span>
             {% else %}
@@ -37,7 +38,6 @@ td.Citation div ol {padding-top:.3em;}
                     	<a href="/repository/{{repo.iid}}" class="inlink"
                            title="{{ _('Repository') }} {{ macro.obj_title(repo) }}">{{repo.rname}}</a>
                     </b></td>
-                    <td></td>
                 </tr>
         {% endfor %}
     {% else %}{% set repo_name = "?" %}
@@ -46,35 +46,32 @@ td.Citation div ol {padding-top:.3em;}
                     </td>
                 </tr>
     {% endif %}
-                <tr><td>&nbsp;</td><td> </td></tr>
-                <tr>
-                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                <tr stype="margin-top: 1em;">
+                    <td class="ColumnAttribute space-after">{{ _("Identifiers") }}</td>
                     <td class="Value TwoRows">{{macro.all_obj_ids(source)}}</td>
-                    <td></td>
                 </tr>
-                <tr><td></td></tr>
-{% if source.sauthor or source.spubinfo or source.sabbreviation %}
+	{% if source.sauthor or source.spubinfo or source.sabbreviation %}
                 <tr><td class="ColumnAttribute">{{ _("Author") }}</td>
                     <td class="Value">{{source.sauthor}}</td>
-                    <td></td>
                 </tr>
                 <tr><td class="ColumnAttribute">{{ _("Publishing info") }}</td>
                     <td class="Value">{{source.spubinfo}}</td>
-                    <td></td>
                 </tr>
                 <tr><td class="ColumnAttribute">{{ _("Abbreviation") }}</td>
                     <td class="Value">{{source.sabbrev}}</td>
-                    <td></td>
                 </tr>
-{% endif %}
-{% if source.notes %}
+	{% endif %}
+	{% if source.attrs %}
+				{{ macro.attr_rows(source) }}
+	{% endif %}
+	{% if source.notes %}
 	            <tr><td class="ColumnAttribute">{{ _("Notes") }}</td>
                     <td class="Value"><ul>
-    {% for note in source.notes %}
+    	{% for note in source.notes %}
 	                   <li>{{ macro.notelink(note) }}</li>
-	{% endfor -%}
+		{% endfor -%}
                     </ul>
-{% endif %}
+	{% endif %}
             </tbody></table>
 	    </div>
 
@@ -94,7 +91,7 @@ td.Citation div ol {padding-top:.3em;}
 			        {% for c in citations|sort(attribute='page') %}
 	        		<tr>
 	        		  <td class="Citation" style="text-align: center;">
-	        		     <span title="sitaatti {{c.id}} #{{c.uniq_id}}">{{ loop.index }}.</span> 
+	        		     <span title="{{ _("Citation") }} {{ macro.obj_title(c) }}">{{ loop.index }}.</span> 
 	        		  </td>
 	        		  <td class="Citation">
 
@@ -102,7 +99,11 @@ td.Citation div ol {padding-top:.3em;}
 
 	        		    <div title="{{c.confidence|transl('conf')}} {{ _('confidence') }}"
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
-	   					  <b>{{c.page}}</b> 
+	   					  <b>{% if c.url %}
+	   					  		<a href="{{c.url}}" class="outlink" 
+           						   target="_blank">{{c.url|transl('urldomain')}}</a>
+	   					     {% else %}{{c.page}}
+	   					     {% endif -%}</b> 
 	   					  {{ macro.stars(c.confidence|float) }}
 
                           {% if c.notes %}

@@ -69,7 +69,7 @@ tr > td:nth-child(5) {
 	      {% endif %}
 	           </td>
 
-               <td class="state_{{upload.state|replace(" ", "")}}">
+               <td class="state_{{upload.state|replace(' ', '')}}">
 	      {% if upload.for_auditor %}
 	           	   <b>{{upload.state|transl('state')}}</b>
 	      {% else %}

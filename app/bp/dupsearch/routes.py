@@ -21,12 +21,12 @@ import json
 import time
 
 from collections import defaultdict
-from difflib import HtmlDiff, _mdiff
+from difflib import HtmlDiff as _mdiff
 from types import SimpleNamespace
 
-from flask import render_template, request, jsonify, flash,  session as user_session
+from flask import render_template, request, jsonify, flash #, session as user_session
 from flask_security import login_required, roles_required
-from flask_security import current_user
+#from flask_security import current_user
 from flask_babelex import _
 from . import bp
 
@@ -35,7 +35,8 @@ from bp.dupsearch.models import search
 from ui.context import UserContext
 from bl.person_reader import PersonReaderTx
 from bl.base import Status
-from bl.material import Material
+from dns.rdataclass import NONE
+#from bl.material import Material
 
 
 @bp.route('/dupsearch',  methods=['GET'])
@@ -69,8 +70,8 @@ def batches():
     for b in batch_list:
         #print(b)
         file = b.get('file')
-        status = b.get('state')
-        if file: # and status == State.ROOT_CANDIDATE:
+        _status = b.get('state')
+        if file: # and _status == State.ROOT_CANDIDATE:
             file = file.split("/")[-1].replace("_clean.gramps",".gramps")
             file = file.split("/")[-1].replace("_clean.gpkg",".gpkg")
             b['file'] = file 
@@ -139,11 +140,10 @@ def upload():
 def _get_person(service, iid):
     result = service.get_person_data(iid)
 
-    # result {'person':PersonBl, 'objs':{uniq_id:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
+    # result {'person':PersonBl, 'objs':{iid:obj}, 'jscode':str, 'root':{root_type,root_user,batch_id}}
     if Status.has_failed(result):
-        flash(f'{result.get("statustext","error")}', "error")
-        person = None
-        objs = []
+        flash(f'{result.get("statustext","error")} – {iid}', "error")
+        return None, []
     else:
         person = result.get("person")
         objs = result.get("objs", [])
@@ -156,9 +156,11 @@ def _get_person(service, iid):
 @roles_required('audit')
 def compare():
     """ Compare by something? """
+    material_type = "Family Tree"
     iid1 = request.args.get("iid1")
     u_context1 = UserContext()
     u_context1.material.batch_id =  request.args.get("batch_id1")
+    u_context1.material.m_type = material_type
     u_context1.state = request.args.get("state1")
     if u_context1.state == State.ROOT_ACCEPTED: # "Accepted":        
         u_context1.user = None
@@ -166,6 +168,7 @@ def compare():
     iid2 = request.args.get("iid2")
     u_context2 = UserContext()
     u_context2.material.batch_id =  request.args.get("batch_id2")
+    u_context2.material.m_type = material_type
     u_context2.state = request.args.get("state2")
     if u_context2.state == State.ROOT_ACCEPTED: #"Accepted":        
         u_context2.user = None
@@ -175,7 +178,7 @@ def compare():
 
     with PersonReaderTx("read_tx", u_context2) as service:
         person2,objs2 = _get_person(service, iid2)
-    
+
 #     return render_template('/compare.html',
 #                            batch_id1=batch_id1, 
 #                            person1=person1,

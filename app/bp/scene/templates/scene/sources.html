@@ -50,8 +50,7 @@ td ul li p { margin: 0 0 0.3em 0; }
 			<thead>
 				<tr><th></th>
                     <th>{{ _('Source, notes') }}</th>
-                    <th>{{ _('Media in the repository') }}</th>
-{#                  <th title="{{ _('Citations') }}">{{ _('citated') }}</th> #}
+                    <th>{{ _('Media and Repository') }}</th>
                     <th title="{{ _('events, persons, etc., referred from') }}">{{ _('References') }}</th>
 				</tr>
 			</thead>
@@ -69,9 +68,10 @@ td ul li p { margin: 0 0 0.3em 0; }
                  {% set id = s.id %}
                   <a href="/source/{{s.iid}}"
                 {%- if s.ref_cnt == 0 %}
-                     class="dimmed" 
+                     class="inlink dimmed" 
                    	 title="{{ _('Source')}} {{ macro.obj_title(s) }} {{ _('unused') }}">
                 {% else %}
+                	 class="inlink" 
                    	 title="{{ _('Source')}} {{ macro.obj_title(s) }}">
                 {% endif %}
                      {{s.stitle}}</a>

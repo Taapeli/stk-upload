@@ -1,0 +1,87 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "/scene/sc_layout.html" %}
+{% block title %}{{ _('Sources') }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+<style>
+.ColumnRepoType { text-align: center;}
+td.Archive ul { margin: 0; padding-left: 1em; padding-bottom: 0.5em; }
+td ul li p { margin: 0 0 0.3em 0; }
+</style>
+
+<div id="startdiv">
+    <h1>{{ _('List of Repositories') }}</h1>
+    <div>{{ macro.show_use_case() }}</div>
+</div>
+
+{{ macro.menu(51) }}
+    <div class="content" id="Individuals">
+        <div id="summaryarea">
+            <div class="flex-container">
+	            <div style="width:100%">
+		            <p>{{ _('This page contains a directory of %(num)s repositories.',num=repos|count) }}
+					</p>
+				</div>
+            </div>
+        </div>
+
+		<div id="alphanav">
+			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
+        {% for repo in repos %}
+        	{% set ini = repo.rname|list|first|upper %}
+            {% if loop.changed(ini) %}
+                <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+            {% endif %}
+        {% endfor %}
+			</ul>
+		</div>
+
+		<table class="IndividualList">
+			<thead>
+				<tr><th></th>
+                    <th class="ColumnRepoType">{{ _('Type') }}</th>
+                    <th>{{ _('Repository, notes') }}</th>
+                    <th>{{ _('Mediums') }}</th>
+                    <th title="{{ _('Sources in this repository') }}">{{ _('Number of Sources') }}</th>
+				</tr>
+			</thead>
+			<tbody>
+	{% if repos %}
+	    {% for repo in repos %}
+	    	{% set ini = repo.rname|list|first|upper %}
+	    	<tr><td class="ColumnAlpha">
+	            {% if loop.changed(ini) %}
+	               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
+                {% endif %}
+                </td>
+
+            <td class="ColumnRepoType">
+                     <span class="typedesc">{{repo.type|transl('rept')}}</span>
+            </td>
+            <td class="ColumnRepo">
+               <div>
+                  <a href="/repository/{{repo.iid}}" title="{{ _('Repository')}} {{ macro.obj_title(repo) }}"
+                     class="inlink">{{repo.rname}}</a>
+                </div>
+
+	        {% if repo.notes %}<ul>{% for note in repo.notes %}
+	            <li>{{ macro.notelink(note) }}</li>
+            {% endfor %}</ul>{% endif %}
+            </td>
+            <td class=Mediums">
+                {%- for m in repo.mediums %}{% if not loop.first %}, {% endif %}{{m|transl('medium')}}{% endfor %}
+            </td>
+            <td class="numbers">{% if repo.source_cnt %}{{repo.source_cnt}}{% endif %}</td>
+            </tr>
+	    {% endfor %}
+    {% else %}
+            <tr><td colspan="4" id="lastitem_badge">
+                    <i>{{ _('No repositories found') }}</i>
+                </td>
+            </tr>
+	{% endif %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

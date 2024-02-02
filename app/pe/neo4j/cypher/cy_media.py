@@ -28,12 +28,26 @@ class CypherMedia():
 
 # Read Media data
 
+#     get_media_by_iid = """
+# MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid}) <-[r:MEDIA]- (ref)
+# OPTIONAL MATCH (media) <-[r:MEDIA]- (referrer)
+# OPTIONAL MATCH (referrer) <-[:EVENT]- (referrer_e)
+# OPTIONAL MATCH (media) -[:NOTE]-> (note:Note)
+# OPTIONAL MATCH (media) -[:CITATION]-> (cita:Citation) -[:SOURCE]-> (sour:Source)
+# OPTIONAL MATCH (cita) -[:NOTE]-> (cn:Note)
+# WITH root, media, r, referrer, referrer_e, note, cita, sour,
+#     COLLECT(DISTINCT cn) AS c_notes
+# RETURN root, media, PROPERTIES(r) AS prop, referrer, referrer_e,
+#     COLLECT (DISTINCT note) AS notes,
+#     COLLECT (DISTINCT [cita, sour, c_notes]) as citas
+# """
     get_media_by_iid = """
-MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid}) <-[r:MEDIA]- (ref)
-OPTIONAL MATCH (ref) <-[:EVENT]- (eref)
-RETURN root, media, PROPERTIES(r) AS prop, ref, eref"""
-
-    get_all = "MATCH (o:Media) RETURN o"
+MATCH (root) -[:OBJ_OTHER]-> (media:Media {iid:$iid})
+OPTIONAL MATCH (media) <-[r:MEDIA]- (referrer)
+OPTIONAL MATCH (referrer) <-[:EVENT]- (referrer_source)
+OPTIONAL MATCH (media) -[:NOTE]-> (note:Note)
+RETURN root, media, PROPERTIES(r) AS prop, referrer, referrer_source,
+    COLLECT(DISTINCT note) AS notes"""
 
     # Media list by description with count limit
     get_media_list = """
@@ -49,6 +63,25 @@ RETURN root, o, COUNT(DISTINCT r) AS count
     create_in_batch = """
 MATCH (u:Root {id:$bid})
 MERGE (u) -[:OBJ_OTHER]-> (a:Media {iid:$iid})
-    SET a += $m_attr
-RETURN ID(a) as uniq_id"""
+    SET a += $m_attr"""
+#!RETURN ID(a) as uniq_id"""
+
+#! For each Note, Citation --> USE CypherObjectWHandle.link_item("Media", "Note")
+#
+#!   m_link_notes = """
+# MATCH (n:Note) WHERE n.handle IN $hlinks
+# WITH n
+#   MATCH (m:Media {handle: $handle})
+#   CREATE (m) -[:NOTE]-> (n)
+# RETURN COUNT(DISTINCT n) AS cnt"""
+#
+#     m_link_citations = """
+# MATCH (m:Media {handle: $handle})
+# MATCH (n:Citation) WHERE n.handle IN $hlinks
+#   CREATE (m) -[:CITATION]-> (n)
+# RETURN COUNT(DISTINCT n) AS cnt"""
+# match (c:Citation) where c.handle in $citation_handles
+# with c
+#     match (m:Media)  where m.handle=$handle
+#     merge (m) -[:CITATION]-> (c)"""
 

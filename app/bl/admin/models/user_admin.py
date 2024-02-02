@@ -181,7 +181,7 @@ class UserAdmin():
     def get_user_profiles(cls):
         try:
             with shareds.driver.session() as session:
-                profileRecords = session.read_transaction(cls._getProfileRecords)
+                profileRecords = session.execute_read(cls._getProfileRecords)
                 result = []
                 for record in profileRecords:
                     node = record['profile']
@@ -204,8 +204,10 @@ class UserAdmin():
     @classmethod 
     def update_user_language(cls, username, language):
         try:
-            result = shareds.driver.session().run(Cypher_adm.user_update_language,
-                         username=username,language=language).single()
+            with shareds.driver.session() as session:
+                result = session.run(Cypher_adm.user_update_language,
+                                     username=username,
+                                     language=language).single()
             return result
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -295,20 +297,21 @@ class UserAdmin():
     def get_accesses():
         try:
             rsp = []
-            for rec in shareds.driver.session().run(Cypher_adm.list_accesses):
-                user = dict(rec.get("user"))
-                batch = dict(rec.get("root"))
-                file = batch.get('file','–')
-                batch["file"] = file.split("/")[-1].\
-                    replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
-                #rel = dict(rec.get("r"))
-                rel_id = rec.get("rel_id")
-                cnt_own = rec.get("cnt")
-                access = dict(user=user, batch=batch, rel_id=rel_id, cnt=cnt_own)
-                print("access:", access)
-                rsp.append(access)
-            logger.info(f"-> bp.admin.models.user_admin.UserAdmin.get_accesses n={len(rsp)}")
-            return rsp
+            with shareds.driver.session() as session:
+                for rec in session.run(Cypher_adm.list_accesses):
+                    user = dict(rec.get("user"))
+                    batch = dict(rec.get("root"))
+                    file = batch.get('file','–')
+                    batch["file"] = file.split("/")[-1].\
+                        replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
+                    #rel = dict(rec.get("r"))
+                    rel_id = rec.get("rel_id")
+                    cnt_own = rec.get("cnt")
+                    access = dict(user=user, batch=batch, rel_id=rel_id, cnt=cnt_own)
+                    print("access:", access)
+                    rsp.append(access)
+                logger.info(f"-> bp.admin.models.user_admin.UserAdmin.get_accesses n={len(rsp)}")
+                return rsp
 
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -319,8 +322,9 @@ class UserAdmin():
     def add_access(username, batchid):
         try:
             logger.info(f"-> bp.admin.models.user_admin.UserAdmin.add_access u={username} b={batchid}")
-            rsp = shareds.driver.session().run(Cypher_adm.add_access,username=username,batchid=batchid).single()
-            return rsp
+            with shareds.driver.session() as session:
+                result = session.run(Cypher_adm.add_access,username=username,batchid=batchid).single()
+            return result
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
             return None                 
@@ -329,8 +333,9 @@ class UserAdmin():
     def delete_accesses(idlist):
         try:
             logger.info(f"-> bp.admin.models.user_admin.UserAdmin.delete_accesses i={idlist}")
-            rsp = shareds.driver.session().run(Cypher_adm.delete_accesses,idlist=idlist).single()
-            return rsp
+            with shareds.driver.session() as session:
+                result = session.run(Cypher_adm.delete_accesses, idlist=idlist).single()
+            return result
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
             return None                 

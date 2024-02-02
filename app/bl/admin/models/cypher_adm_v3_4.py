@@ -19,6 +19,7 @@
 
 '''
 Created on 8.3.2019
+    For old neo4j version < 5, to be used in database.accessDB
 
 @author: jm
 '''
@@ -149,32 +150,16 @@ MATCH (a:Root)
 DETACH DELETE a
 RETURN COUNT(a) AS cnt'''
 
-# ------------------ free text search ----------------
+# ------------------ free text search (Neo4j version < 5.0) ----------------
     create_freetext_index = """
-CREATE FULLTEXT INDEX searchattr IF NOT EXISTS
-FOR (n:Person) ON EACH [n.searchattr]
+CALL db.index.fulltext.createNodeIndex("searchattr",["Person"],["searchattr"])
     """
-
     create_freetext_index_for_notes = """
-CREATE FULLTEXT INDEX notetext IF NOT EXISTS
-FOR (n:Note) ON EACH [n.text]
+CALL db.index.fulltext.createNodeIndex("notetext",["Note"],["text"])     
     """
-
     create_freetext_index_for_sources = """
-CREATE FULLTEXT INDEX sourcetitle IF NOT EXISTS
-FOR (n:Source) ON EACH [n.stitle] 
+CALL db.index.fulltext.createNodeIndex("sourcetitle",["Source"],["stitle"])     
     """
-
-# #Todo: Create Neo4j 5.1 new syntax indexes?
-#     create_person_search_index = """
-# CREATE TEXT INDEX searchattr IF NOT EXISTS
-# FOR (n:Person) ON (n.searchattr)"""
-#     create_note_text_index = """
-# CREATE TEXT INDEX notetext IF NOT EXISTS
-# FOR (n:Note) ON (n.text)"""
-#     create_source_text_index = """
-# CREATE TEXT INDEX sourcetitle IF NOT EXISTS
-# FOR (n:Source) ON (n.stitle)"""
 
     build_indexes = """
 match (p:Person) --> (n:Name) 

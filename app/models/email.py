@@ -31,7 +31,7 @@ def get_sysname():
     sysname = shareds.app.config.get("STK_SYSNAME")
     return sysname
 
-def email(mail_from,mail_to,reply_to,subject,body):
+def xxxemail(mail_from,mail_to,reply_to,subject,body):
     try:
         mail = Mail()
         sysname = get_sysname()
@@ -47,6 +47,30 @@ def email(mail_from,mail_to,reply_to,subject,body):
         logging.error(str(e))
         traceback.print_exc()
     return False
+
+def email(mail_from, mail_to, reply_to, subject, body):
+    msg = f"""\
+From: {mail_from}
+Subject: {subject}
+To: {mail_to}
+Reply-to: {reply_to}
+
+{body}
+""" 
+    mail_server = shareds.app.config.get('MAIL_SERVER')
+    mail_user = shareds.app.config.get('MAIL_USERNAME')
+    mail_password = shareds.app.config.get('MAIL_PASSWORD')
+    conn = smtplib.SMTP_SSL(mail_server)
+    conn.set_debuglevel(True)
+    if mail_user:
+        conn.login(mail_user, mail_password)
+    msg = msg.replace("\n", "\r\n")
+    msg = msg.encode("utf-8",errors='ignore')
+    conn.sendmail(mail_user, [mail_to], msg)
+    conn.quit()
+    return True
+
+
 
 def email_admin(subject,body,sender=None): # send email to admin
     # must use isotammi.net domain for the sender (Sender Policy Framework)

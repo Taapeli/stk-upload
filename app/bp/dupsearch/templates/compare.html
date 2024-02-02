@@ -48,7 +48,7 @@ table {
 
 th, td {
   text-align: left;
-  #padding: 16px;
+  /* padding: 16px; */
 }
 
 tr:nth-child(even) {
@@ -178,11 +178,15 @@ tr:nth-child(even) {
     		<td style="width:45%" colspan="3">{{ batch_id1 }} 
     		<td style="width:45%" colspan="3">{{ batch_id2 }} 
     	<tr><th>{{ _("ID") }}, {{ _("iid") }}
-    		<td colspan="3">{{ person1.id }}, <tt>{{ person1.iid }}</tt>
-    		<td colspan="3">{{ person2.id }}, <tt>{{ person2.iid }}</tt>
+    		<td colspan="3">
+    			{% if person1 %}{{ person1.id }}, <tt>{{ person1.iid }}</tt>{% else %}–{% endif %}
+    		<td colspan="3">
+    			{% if person2 %}{{ person2.id }}, <tt>{{ person2.iid }}</tt>{% else %}–{% endif %}
     	<tr><th class="hdrcol">{{ _("Names") }}
-    		<td colspan="3" class="datacol">{{ macro.person_name(person1.names[0]) }}
-    		<td colspan="3" class="datacol">{{ macro.person_name(person2.names[0]) }}
+    		<td colspan="3" class="datacol">
+    			{% if person1 %}{{ macro.person_name(person1.names[0]) }}{% endif %}
+    		<td colspan="3" class="datacol">
+    			{% if person2 %}{{ macro.person_name(person2.names[0]) }}{% endif %}
 		</tr>
     	<tr><th>{{ _("Parents") }}
 			<td colspan="3">{{ parents(person1) }}
