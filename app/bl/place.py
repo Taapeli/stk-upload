@@ -212,7 +212,7 @@ class PlaceBl(Place):
         """
         placedict = {}
         for nid, iid, ntype, name, nlang in pn_tuples:
-            if nid:  # id of a lower place
+            if nid and name is not None:  # id of a lower place
                 pn = PlaceName(name=name, lang=nlang)
                 if nid in placedict:
                     # Append name to existing PlaceBl
