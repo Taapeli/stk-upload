@@ -1113,7 +1113,7 @@ class Neo4jUpdateService(ConcreteService):
         # Make relations to the Media nodes and it's Note and Citation references
         if person.media_refs:
             self.ds_create_link_medias_w_handles(
-                tx, person.iid, person.media_refs
+                tx, person.handle, person.media_refs
             )
 
         # The relations to the Family node will be created in Family.save(),
