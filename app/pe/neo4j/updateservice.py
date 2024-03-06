@@ -1038,7 +1038,7 @@ class Neo4jUpdateService(ConcreteService):
         # Make relations to multiple Citation nodes
         if event.citation_handles:  #  citation_handles != '':
             query = CypherLink.link_handle("Event", "Citation")
-            for hlink in event.note_handles:
+            for hlink in event.citation_handles:
                 tx.run(query, src=event.handle, dst=hlink)
             #  tx.run(CypherEvent.link_citations,
             #     handle=event.handle,
