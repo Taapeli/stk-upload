@@ -18,6 +18,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.12.1\n"
 
+#: templates/index_demo.html:109 stk_security/templates/security/_menu.html:10
+msgid "Currently no registration is available."
+msgstr "Registreringen är tillfälligt stängd!"
+
 #: chkdate.py:13
 msgid "Undefined"
 msgstr "Odefinerad"

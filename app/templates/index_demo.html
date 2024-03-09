@@ -100,14 +100,17 @@ div.CloudBox a:hover   { text-decoration: underline; }
                 </form>
 
                 <h2>{{ _('Register') }}</h2>
+     {% if False %} <!-- Allow new user registration -->
                 <p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
                 <form method="get" action={{demo_site}}>
                     <div class="submit">
-                    	<i style="color:darkred">Rekisteröityminen on tilapäisesti suljettu!</i>
-<!--                        <button type="submit" formaction="/register">{{ _('Register') }}</button>-->
+                       <button type="submit" formaction="/register">{{ _('Register') }}</button>
                     </div>
                     <input type="hidden" name="lang" value="{{ lang }}">
                 </form>
+  	 {% else %}
+                <p><i style="color:darkred">{{ _('Currently no registration is available.') }}</i></p>
+  	 {% endif %}
             </div>
 			{% endif %}
 
