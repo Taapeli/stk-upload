@@ -100,7 +100,7 @@ div.CloudBox a:hover   { text-decoration: underline; }
                 </form>
 
                 <h2>{{ _('Register') }}</h2>
-     {% if False %} <!-- Allow new user registration -->
+     {% if config['STK_REGISTERABLE'] %} <!-- Allow new user registration -->
                 <p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
                 <form method="get" action={{demo_site}}>
                     <div class="submit">

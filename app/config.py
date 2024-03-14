@@ -18,7 +18,7 @@ from flask_babelex import lazy_gettext as _l
 print('Reading application config.py')
 DEBUG = False
 
-SECURITY_REGISTERABLE = True
+SECURITY_REGISTERABLE = True 
 SECURITY_CONFIRMABLE = True
 SECURITY_RECOVERABLE = True
 SECURITY_TRACKABLE = True

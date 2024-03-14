@@ -46,6 +46,9 @@ form > ul > li {color: red; }
     {% include "flash_messages.html" %}
     </div>
 
+{% if security.registerable %}
+   {% if config['STK_REGISTERABLE'] %} <!-- Allow new user registration -->
+
     <div class="row"> 
        <div class="startbox"> 
           <h2>{{ _('Register as an user of Isotammi Service') }}</h2> 
@@ -91,6 +94,11 @@ form > ul > li {color: red; }
 		     </form> 
 	    </div> 
 	</div>
+  	{% else %}
+    <p><i style="color:darkred; font-size:large;">{{ _('Currently no registration is available.') }}</i></p>
+	{% endif %}
+{% endif %}
+
 </div> 
 </div>
 {% endblock %}
