@@ -28,8 +28,9 @@ def make_thumbnail(src_file, dst_file, crop=None):
             im = Image.open(src_file)
         im.thumbnail(size)
         im.convert('RGB').save(dst_file, "JPEG")
-    except FileNotFoundError as e:
-        print(f'models.mediafile.make_thumbnail: {e}')
+    except FileNotFoundError as _e:
+        #print(f'models.mediafile.make_thumbnail: {e.strerror}: {src_file}")
+        pass
 
 def get_media_files_folder(batch_id):
     media_folder = os.path.join(media_base_folder,batch_id)
@@ -53,9 +54,13 @@ def get_fullname(iid):
             src = m['src']
             mimetype = m['mime']
             media_files_folder = get_media_files_folder(batch_id)
-            fullname = os.path.join(media_files_folder,src)
-            image = Image.open(fullname)
-            return fullname, mimetype, image.size
+            try:
+                fullname = os.path.join(media_files_folder,src)
+                image = Image.open(fullname)
+                return fullname, mimetype, image.size
+            except FileNotFoundError as e:
+                print(f"models.mediafile.get_fullname: {e.strerror}: {src}")
+                return src, mimetype, -1
     raise IsotammiException(f"models.mediafile.get_fullname can not read {iid!r}")
 
 def get_thumbname(iid, crop=None):

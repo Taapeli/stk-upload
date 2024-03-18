@@ -2,13 +2,11 @@
 {# <h2>{{ _('Register or Log in') }}</h2>  #}
 <ul>
   {% if security.registerable %}
-     {% if config['STK_REGISTERABLE'] %} <!-- Allow new user registration -->
     <li><a href="{{ url_for_security('register') }}{%
 			if 'next' in request.args %}?next={{ request.args.next|urlencode }}{% endif 
 		%}">{{ _('Register') }}</a><br/></li>
-  	 {% else %}
+  {% else %}
     <li><i style="color:darkred">{{ _('Currently no registration is available.') }}</i></li>
-  	 {% endif %}
   {% endif %}
   {% if security.confirmable %}
     <li><a href="{{ url_for_security('send_confirmation') }}">{{ _('Confirm account') }}</a></li>

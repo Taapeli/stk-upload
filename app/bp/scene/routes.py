@@ -1429,7 +1429,8 @@ def show_media(iid):
     medium = res.get("item", None)
     if medium:
         _fullname, mimetype, size = mediafile.get_fullname(medium.iid)
-        stk_logger(u_context, f"-> bp.scene.routes.show_media n={len(medium.ref)}")
+        stk_logger(u_context, 
+                   f"-> bp.scene.routes.show_media n={len(medium.ref)} size={size}")
         print(f"#attrs: {medium.attrs}")
     else:
         flash(f'{res.get("statustext","error")}', "error")

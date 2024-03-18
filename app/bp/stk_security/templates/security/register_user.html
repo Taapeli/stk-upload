@@ -47,7 +47,7 @@ form > ul > li {color: red; }
     </div>
 
 {% if security.registerable %}
-   {% if config['STK_REGISTERABLE'] %} <!-- Allow new user registration -->
+   {# if config['SECURITY_REGISTERABLE'] #}
 
     <div class="row"> 
        <div class="startbox"> 
@@ -94,9 +94,9 @@ form > ul > li {color: red; }
 		     </form> 
 	    </div> 
 	</div>
-  	{% else %}
+{% else %}
     <p><i style="color:darkred; font-size:large;">{{ _('Currently no registration is available.') }}</i></p>
-	{% endif %}
+	{# endif -#}
 {% endif %}
 
 </div> 
