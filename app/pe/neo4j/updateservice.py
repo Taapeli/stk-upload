@@ -1038,7 +1038,7 @@ class Neo4jUpdateService(ConcreteService):
         # Make relations to multiple Citation nodes
         if event.citation_handles:  #  citation_handles != '':
             query = CypherLink.link_handle("Event", "Citation")
-            for hlink in event.note_handles:
+            for hlink in event.citation_handles:
                 tx.run(query, src=event.handle, dst=hlink)
             #  tx.run(CypherEvent.link_citations,
             #     handle=event.handle,
@@ -1113,7 +1113,7 @@ class Neo4jUpdateService(ConcreteService):
         # Make relations to the Media nodes and it's Note and Citation references
         if person.media_refs:
             self.ds_create_link_medias_w_handles(
-                tx, person.iid, person.media_refs
+                tx, person.handle, person.media_refs
             )
 
         # The relations to the Family node will be created in Family.save(),
