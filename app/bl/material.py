@@ -120,12 +120,14 @@ class Material():
         """
         from bl.batch.root import State, Root
         def reset_scope(session, params):
-            """ Check, if any of session [state, material_type, batch_id] is changed """
+            """ Check, if any of session [state, material_type, batch_id] is changed.
+            """
             if (
                 params[0] != session["state"] or \
                 params[1] != session["material_type"] or \
                 params[2] != session["batch_id"]
                 ):
+                # session has new "material_type", "state", "batch_id"
                 print ("#Material.set_session_material.reset_scope:")
                 print(f' - session     from {params}\n'
                       f' - session to batch {[session["state"], session["material_type"], session["batch_id"]]}')
@@ -143,9 +145,6 @@ class Material():
         session["breed"] = breed
         #session["set_scope"] = True  # Reset material and scope
         session["current_context"] = breed
-        # Remove obsolete var: #TODO Remove after next production version at 2022
-        if "material" in session:
-            print(f'Removed obsolete session.material={session.pop("material")!r}')
 
         if breed == MATERIAL_BATCH:
             # request args:  {'batch_id': '2021-10-09.001'}
@@ -158,13 +157,13 @@ class Material():
 
             # Missing material type or state?
             # - optional args: {'material_type': 'Family Tree', 'state': 'Candidate'}
-            if session["batch_id"] and (
-                not session.get("material_type") or not session.get("state")
-            ):
+            if session["batch_id"] and \
+                ( not session.get("material_type") or not session.get("state") ):
                 # Get from database
                 root = Root.get_batch(username, session["batch_id"])
                 session["material_type"] = root.material_type
                 session["state"] = root.state
+            # Use material type and state from session
             reset_scope(session, old_params)
 
             print(

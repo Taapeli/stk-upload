@@ -13,12 +13,6 @@ print('Application instance path: ' + shareds.app.instance_path)
 
 shareds.app.config.from_object('config')
 shareds.app.config.from_pyfile('config.py')
-# Can new users register?
-# (You can not change SECURITY_REGISTERABLE in instance.config,
-#  as it's value is already defined) 
-may_reg = app.config.get("STK_REGISTERABLE",True)
-print(f'New users may register: {may_reg}')
-app.config['STK_REGISTERABLE'] = may_reg
 
 class ContextFilter(logging.Filter):
     """
