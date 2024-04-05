@@ -56,7 +56,7 @@ RETURN pc AS person, nc AS name, cbe AS birth, cde AS death
 # RETURN fe as event, fep AS place"""
 
     get_events_w_places = """
-MATCH (x {iid:$fuid}) -[:EVENT]-> (e:Event)
+MATCH (x:Family {iid:$fuid}) -[:EVENT]-> (e:Event)
 OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
 OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
@@ -67,13 +67,13 @@ RETURN event, place, names,
     COLLECT(DISTINCT [pi, ri, in_names]) AS inside"""
 
     get_family_sources = """
-MATCH (f) -[:CITATION]-> (c:Citation)  WHERE f.iid in $id_list
+MATCH (f:Family) -[:CITATION]-> (c:Citation)  WHERE f.iid in $id_list
     OPTIONAL MATCH (c) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
 RETURN f.iid AS src_id,
     re AS repository, s AS source, c AS citation"""
 
     get_family_notes = """
-MATCH (f) -[:NOTE]- (note:Note) WHERE f.iid in $id_list
+MATCH (f:Family) -[:NOTE]- (note:Note) WHERE f.iid in $id_list
     OPTIONAL MATCH (f) 
 RETURN f.iid AS src_id, note"""
 
@@ -137,13 +137,6 @@ MERGE (n)-[r:EVENT]->(m)
 MATCH (n:Family {handle:$f_handle})
 MATCH (m:Person {handle:$p_handle})
 MERGE (n)-[r:CHILD]->(m)"""
-
-#! For each Note, Citation --> USE CypherObjectWHandle.link_item("Family", "Note")
-#
-#     f_link_note = """
-# MATCH (n:Family {handle:$handle})
-# MATCH (m:Note {handle:$hlink})
-# CREATE (n)-[r:NOTE]->(m)"""
 
     set_dates_sortname = """
 MATCH (family:Family {iid: $id})

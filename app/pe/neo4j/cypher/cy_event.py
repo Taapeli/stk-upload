@@ -61,7 +61,7 @@ RETURN COLLECT(DISTINCT [properties(rel_n), note]) AS notes,
 
     # Get Event with referring Persons and Families
     get_event_participants = """
-MATCH (event:Event {iid: $iid}) <-[r:EVENT]- (p) 
+MATCH (event:Event {iid: $iid}) <-[r:EVENT]- (p:Person|Family) 
 OPTIONAL MATCH (p) -[:NAME]-> (n:Name {order:0})
 RETURN  r.role AS role, p, n AS name
     ORDER BY role"""
@@ -72,27 +72,11 @@ RETURN  r.role AS role, p, n AS name
 MATCH (b:Root {id: $batch_id})
 MERGE (b) -[r:OBJ_OTHER]-> (e:Event {handle: $e_attr.handle})
     SET e = $e_attr"""
-#! RETURN e.iid as iid"""
 
-    link_place = """
-MATCH (n:Event {handle: $handle})
-MATCH (m:Place) {handle: $hlink})
-MERGE (n)-[r:PLACE]->(m)"""
-#! $place_handle <= $hlink
-
-#! For each Note, Citation --> USE CypherObjectWHandle.link_item("Event", "Note")
-#
-#!     e_link_notes = """
-# MATCH (n:Note)  WHERE n.handle IN $hlinks
-# WITH n
-#     MATCH (e:Event {handle: $handle})
-#     CREATE (e) -[:NOTE]-> (n)
-# RETURN COUNT(DISTINCT n) AS cnt"""
-#     link_citations = """
-# match (c:Citation) where c.handle in $citation_handles
-# with c
-#     match (e:Event)  where e.handle=$handle
-#     merge (e) -[r:CITATION]-> (c)"""
+#     link_place = """
+# MATCH (n:Event {handle: $handle})
+# MATCH (m:Place) {handle: $hlink})
+# MERGE (n)-[r:PLACE]->(m)"""
 
     update_event = """
 match (e:Event{iid:$iid})
